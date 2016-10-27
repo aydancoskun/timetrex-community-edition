@@ -77,6 +77,21 @@ class PayrollExportReport extends TimesheetSummaryReport {
 	protected function _getOptions( $name, $params = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
+			case 'export_columns': //Must pass export_type.
+				if ( $params == 'csv_advanced' ) {
+
+					if ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCompanyObject() ) AND $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
+						$jar = TTNew('JobDetailReport');
+					} else {
+						$jar = TTNew('TimesheetDetailReport');
+					}
+					$jar->setUserObject( $this->getUserObject() );
+
+					$retval = $jar->getOptions('static_columns');
+				} else {
+					$retval = parent::getOptios('static_columns');
+				}
+				break;
 			case 'output_format':
 				$retval = parent::getOptions('default_output_format');
 				break;
@@ -93,6 +108,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 								'surepayroll' 		=> TTi18n::gettext('SurePayroll'),
 								'chris21' 			=> TTi18n::gettext('Chris21'),
 								'csv' 				=> TTi18n::gettext('Generic Excel/CSV'),
+								'csv_advanced' 		=> TTi18n::gettext('Generic Excel/CSV (Advanced)'),
 								//'other' 			=> TTi18n::gettext('-- Other --'),
 								);
 				break;
@@ -430,7 +446,6 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 						$config['sort'][] = array('pay_period_end_date' => 'asc', 'employee_number' => 'asc');
 						break;
-/*
 					case 'csv':
 						//If this needs to be customized, they can just export any regular report. This could probably be removed completely except for the Hour Code mapping...
 						$config['columns'][] = 'full_name';
@@ -448,27 +463,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 						$config['sort'][] = array('full_name' => 'asc', 'employee_number' => 'asc', 'default_branch' => 'asc', 'default_department' => 'asc', 'pay_period' => 'asc');
 						break;
-*/
-					case 'csv':
-						//If this needs to be customized, they can just export any regular report. This could probably be removed completely except for the Hour Code mapping...
-						$config['columns'][] = 'full_name';
-						$config['columns'][] = 'employee_number';
-						$config['columns'][] = 'default_branch';
-						$config['columns'][] = 'default_department';
-						$config['columns'][] = 'pay_period';
-						$config['columns'][] = 'branch_name';
-						$config['columns'][] = 'department_name';
-						$config['columns'] += Misc::trimSortPrefix( $this->getOptions('dynamic_columns') );
-
-						$config['group'][] = 'full_name';
-						$config['group'][] = 'employee_number';
-						$config['group'][] = 'default_branch';
-						$config['group'][] = 'default_department';
-						$config['group'][] = 'pay_period';
-						$config['group'][] = 'branch_name';
-						$config['group'][] = 'department_name';
-
-						$config['sort'][] = array('full_name' => 'asc', 'employee_number' => 'asc', 'default_branch' => 'asc', 'default_department' => 'asc', 'pay_period' => 'asc', 'branch_name' => 'asc', 'department_name' => 'asc');
+					case 'csv_advanced': //This uses the Job Analysis report instead, so handle the config later.
 						break;
 				}
 				Debug::Arr($config, 'Export Type Template: '. $export_type, __FILE__, __LINE__, __METHOD__,10);
@@ -1040,6 +1035,8 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				break;
 
 			case 'csv': //Generic CSV.
+				$file_name = strtolower(trim($setup_data['export_type'])).'_'.date('Y_m_d').'.csv';
+
 				//If this needs to be customized, they can just export any regular report. This could probably be removed completely except for the Hour Code mapping...
 				ksort($setup_data['csv']['columns']);
 				$setup_data['csv']['columns'] = Misc::trimSortPrefix( $setup_data['csv']['columns'] );
@@ -1077,13 +1074,13 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					if ( isset($tmp_hour_codes) ) {
 						foreach($tmp_hour_codes as $hour_code => $hours ) {
 							$tmp_rows[] = array(
-												'employee' => $row['full_name'],
-												'employee_number' => $row['employee_number'],
-												'default_branch' => $row['default_branch'],
-												'default_department' => $row['default_department'],
-												'pay_period' => $row['pay_period']['display'],
-												'branch_name' => $row['branch_name'],
-												'department_name' => $row['department_name'],
+												'employee' => ( isset($row['full_name']) ) ? $row['full_name'] : NULL,
+												'employee_number' => ( isset($row['employee_number']) )? $row['employee_number'] : NULL,
+												'default_branch' => ( isset($row['default_branch']) ) ? $row['default_branch'] : NULL,
+												'default_department' => ( isset($row['default_department']) ) ? $row['default_department'] : NULL,
+												'pay_period' => ( isset($row['pay_period']['display']) ) ? $row['pay_period']['display'] : NULL,
+												'branch_name' => ( isset($row['branch_name']) ) ? $row['branch_name'] : NULL,
+												'department_name' => ( isset($row['department_name']) ) ? $row['department_name'] : NULL,
 												'hour_code' => $hour_code,
 												'hours' => TTDate::getTimeUnit($hours, 20 ),
 												);
@@ -1093,6 +1090,116 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 					$i++;
 				}
+
+				if ( isset( $tmp_rows) ) {
+					$data = Misc::Array2CSV( $tmp_rows, $export_column_map, FALSE, FALSE );
+				}
+				unset($tmp_rows, $export_column_map, $column_id, $column_data, $rows, $row);
+				break;
+			case 'csv_advanced': //Generic CSV.
+				unset($rows); //Ignore any existing timesheet summary data, we will be using our own job data below.
+
+				//If this needs to be customized, they can just export any regular report. This could probably be removed completely except for the Hour Code mapping...
+
+				if ( !isset($setup_data['csv_advanced']['export_columns']) OR ( isset($setup_data['csv_advanced']['export_columns']) AND !is_array($setup_data['csv_advanced']['export_columns']) ) ) {
+					$setup_data['csv_advanced']['export_columns'] = array(
+																			'full_name',
+																			'employee_number',
+																			'default_branch',
+																			'default_department',
+																			'pay_period',
+																			'date_stamp',
+																		  );
+				}
+
+				if ( isset($setup_data['csv_advanced']['export_columns']) AND is_array($setup_data['csv_advanced']['export_columns']) ) {
+					//Debug::Arr($setup_data['csv_advanced']['export_columns'], 'Custom Columns defined: ', __FILE__, __LINE__, __METHOD__,10);
+					$config['columns'] = $config['group'] = $setup_data['csv_advanced']['export_columns'];
+
+					//Force sorting...
+					foreach( $setup_data['csv_advanced']['export_columns'] as $export_column ) {
+						$config['sort'][] = array( $export_column => 'asc' );
+					}
+					
+					$config['columns'] += array_keys( Misc::trimSortPrefix( $this->getOptions('dynamic_columns') ) );
+				}
+				Debug::Arr($config, 'Job Detail Report Config: ', __FILE__, __LINE__, __METHOD__,10);
+
+				//Get job data...
+				if ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCompanyObject() ) AND $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
+					Debug::Text('Using Job Detail Report...', __FILE__, __LINE__, __METHOD__,10);
+					$jar = TTNew('JobDetailReport');
+				} else {
+					Debug::Text('Using TimeSheet Detail Report...', __FILE__, __LINE__, __METHOD__,10);
+					$jar = TTNew('TimesheetDetailReport');
+				}
+				$jar->setAMFMessageID( $this->getAMFMessageID() );
+				$jar->setUserObject( $this->getUserObject() );
+				$jar->setPermissionObject( $this->getPermissionObject() );
+				$jar->setConfig( $config );
+				$jar->setFilterConfig( $this->getFilterConfig() );
+				$jar->setSortConfig( $config['sort'] );
+				$jar->_getData();
+				$jar->_preProcess();
+				$jar->group();
+				$jar->sort();
+
+				$columns = Misc::trimSortPrefix( $jar->getOptions('columns') );
+
+				$rows = $jar->data;
+				//Debug::Arr($rows, 'Raw Rows: ', __FILE__, __LINE__, __METHOD__,10);
+
+				$file_name = strtolower(trim($setup_data['export_type'])).'_'.date('Y_m_d').'.csv';
+
+				//If this needs to be customized, they can just export any regular report. This could probably be removed completely except for the Hour Code mapping...
+				ksort($setup_data['csv_advanced']['columns']);
+				$setup_data['csv_advanced']['columns'] = Misc::trimSortPrefix( $setup_data['csv_advanced']['columns'] );
+
+				foreach( $setup_data['csv_advanced']['export_columns'] as $export_column ) {
+					$export_column_map[$export_column] = '';
+				}
+				$export_column_map['hour_code'] = '';
+				$export_column_map['hours'] = '';
+				
+				$i=0;
+				foreach($rows as $row) {
+					if ( $i == 0 ) {
+						//Include header.
+						foreach( $setup_data['csv_advanced']['export_columns'] as $export_column ) {
+							Debug::Text('Header Row: '. $export_column, __FILE__, __LINE__, __METHOD__,10);
+							$tmp_rows[$i][$export_column] = ( isset($columns[$export_column]) ) ? $columns[$export_column] : NULL;
+						}
+						$tmp_rows[$i]['hour_code'] = 'Hours Code';
+						$tmp_rows[$i]['hours'] = 'Hours';
+						
+						$i++;
+					}
+
+					//Combine all hours from the same code together.
+					foreach( $setup_data['csv_advanced']['columns'] as $column_id => $column_data ) {
+						$hour_code = trim($column_data['hour_code']);
+						if ( isset( $row[$column_id] ) AND $hour_code != '' ) {
+							if ( !isset($tmp_hour_codes[$hour_code]) ) {
+								$tmp_hour_codes[$hour_code] = 0;
+							}
+							$tmp_hour_codes[$hour_code] = bcadd( $tmp_hour_codes[$column_data['hour_code']], $row[$column_id] ); //Use seconds for math here.
+						}
+					}
+
+					if ( isset($tmp_hour_codes) ) {
+						foreach($tmp_hour_codes as $hour_code => $hours ) {
+							foreach( $setup_data['csv_advanced']['export_columns'] as $export_column ) {
+								$tmp_rows[$i][$export_column] = ( isset($row[$export_column]) ) ? ( isset($row[$export_column]['display']) ) ? $row[$export_column]['display'] : $row[$export_column] : NULL;
+								$tmp_rows[$i]['hour_code'] = $hour_code;
+								$tmp_rows[$i]['hours'] = TTDate::getTimeUnit($hours, 20);
+							}
+						}
+						unset($tmp_hour_codes, $hour_code, $hours);
+					}
+
+					$i++;
+				}
+				//Debug::Arr($tmp_rows, 'Tmp Rows: ', __FILE__, __LINE__, __METHOD__,10);
 
 				if ( isset( $tmp_rows) ) {
 					$data = Misc::Array2CSV( $tmp_rows, $export_column_map, FALSE, FALSE );

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10097 $
- * $Id: ExceptionPolicyFactory.class.php 10097 2013-06-03 16:17:24Z ipso $
- * $Date: 2013-06-03 09:17:24 -0700 (Mon, 03 Jun 2013) $
+ * $Revision: 10749 $
+ * $Id: ExceptionPolicyFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
+ * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
  */
 
 /**
@@ -2515,9 +2515,10 @@ class ExceptionPolicyFactory extends Factory {
 						}
 						break;
 					case 'j4': //No Job or Task
-						$add_exception = FALSE;
 						if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE AND $plf->getRecordCount() > 0 ) {
 							foreach ( $plf as $p_obj ) {
+								$add_exception = FALSE;
+
 								//In punches only
 								if ( $p_obj->getStatus() == 10 AND is_object( $p_obj->getPunchControlObject() ) ) {
 									//If no Tasks are setup, ignore checking them.

@@ -206,6 +206,7 @@ if ( $result->isValid() === TRUE ) {
 	print $result; //Show error messages
 }
 
+
 //
 //Get TimeSheet Summary report data in raw PHP native array format. 'csv' and 'pdf' are also valid formats.
 //
@@ -214,4 +215,32 @@ $config = $report_obj->getTemplate( 'by_employee+regular+overtime+premium+absenc
 $result = $report_obj->getTimesheetSummaryReport( $config, 'raw' );
 echo "Report Data: <br>\n";
 print $result;
+
+//
+//Add punch for employee
+//
+$punch_obj = new TimeTrexClientAPI( 'Punch' );
+$punch_data = array(
+					'user_id' => 1023,
+
+					'type_id' => 10, //Normal
+					'status_id' => 20, //In
+
+					'time_stamp' => strtotime('19-Aug-2013 5:50PM'),
+
+					'branch_id' => 296, //Branch
+					'department_id' => 896, //Department
+					'job_id' => 610, //Job
+					'job_item_id' => 9, //Task
+					);
+
+$result = $punch_obj->setPunch( $punch_data );
+if ( $result->isValid() === TRUE ) {
+	echo "Punch added successfully.<br>\n";
+	$insert_id = $result->getResult(); //Get employees new ID on success.
+} else {
+	echo "Punch save failed.<br>\n";
+	print $result; //Show error messages
+}
+
 ?>

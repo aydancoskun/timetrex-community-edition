@@ -58,6 +58,8 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		global $dd;
         Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__,10);
 
+		TTDate::setTimeZone('PST8PDT');
+
 		$dd = new DemoData();
 		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
 		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
@@ -3866,6 +3868,93 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 40 );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (2*3600) );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 3 );
+
+		return TRUE;
+	}
+
+	//Test creating punches in one timezone, then recalculating them in another timezone to make sure they are proper.
+	function testTimeBasedPartialPremiumPolicyF3() {
+		global $dd;
+
+		TTDate::setTimeZone('PST8PDT');
+		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 125 );
+		
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									$policy_ids['premium'],
+									NULL,
+									array($this->user_id) );
+
+		$date_epoch = $this->pay_period_objs[0]->getStartDate()+(86400*6);
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		//Test punching in before the premium start time, and out after the premium end time.
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 5:00AM'),
+								strtotime($date_stamp.' 8:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (15*3600) );
+		//Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (15*3600) );
+		//Premium Time1
+		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
+		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 40 );
+		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (12*3600) );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 3 );
+
+		$udlf = TTNew('UserDateListFactory');
+		$udlf->getByID( $udt_arr[$date_epoch][0]['user_date_id'] );
+		unset($udt_arr);
+
+		$user_date_id = $udlf->getCurrent()->getId();
+
+		TTDate::setTimeZone('EST5EDT');
+		$recalc_result = UserDateTotalFactory::reCalculateDay( $user_date_id, TRUE );
+		TTDate::setTimeZone('PST8PDT');
+		
+		$date_epoch = $this->pay_period_objs[0]->getStartDate()+(86400*6);
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (15*3600) );
+		//Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (15*3600) );
+		//Premium Time1
+		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
+		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 40 );
+		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (12*3600) );
 
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 3 );

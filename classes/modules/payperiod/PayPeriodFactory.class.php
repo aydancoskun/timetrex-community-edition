@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9811 $
- * $Id: PayPeriodFactory.class.php 9811 2013-05-08 20:12:17Z ipso $
- * $Date: 2013-05-08 13:12:17 -0700 (Wed, 08 May 2013) $
+ * $Revision: 10749 $
+ * $Id: PayPeriodFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
+ * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
  */
 
 /**
@@ -594,7 +594,9 @@ class PayPeriodFactory extends Factory {
 	}
 	function getTimeSheetVerifyWindowStartDate() {
 		if ( is_object( $this->getPayPeriodScheduleObject() ) ) {
-			return (int)$this->getEndDate()-( $this->getPayPeriodScheduleObject()->getTimeSheetVerifyBeforeEndDate()*86400 );
+			//Since PP end dates are usually at 11:59:59PM, add one second to the PP end date prior to calculating the timesheet verification window start date,
+			//so we don't confuse people by saying it starts on Aug 22nd with its really Aug 22 @ 11:59:59.
+			return (int)($this->getEndDate()+1)-( $this->getPayPeriodScheduleObject()->getTimeSheetVerifyBeforeEndDate()*86400 );
 		}
 
 		return $this->getEndDate();

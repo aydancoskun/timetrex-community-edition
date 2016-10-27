@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10643 $
- * $Id: PayStubFactory.class.php 10643 2013-08-02 19:06:09Z ipso $
- * $Date: 2013-08-02 12:06:09 -0700 (Fri, 02 Aug 2013) $
+ * $Revision: 10749 $
+ * $Id: PayStubFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
+ * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
  */
 require_once( 'Numbers/Words.php');
 
@@ -362,7 +362,6 @@ class PayStubFactory extends Factory {
 
 			) {
 
-			//$this->data['start_date'] = $epoch;
 			$this->data['start_date'] = TTDate::getDBTimeStamp($epoch, FALSE);
 
 			return TRUE;
@@ -394,6 +393,7 @@ class PayStubFactory extends Factory {
 	}
 	function setEndDate($epoch) {
 		$epoch = trim($epoch);
+		//Debug::Text('Epoch: '. $epoch .' ( '. TTDate::getDate('DATE+TIME', $epoch) .' ) Test: '. TTDate::getDBTimeStamp($epoch, FALSE), __FILE__, __LINE__, __METHOD__,10);
 
 		if 	(	$this->Validator->isDate(		'end_date',
 												$epoch,
@@ -405,7 +405,6 @@ class PayStubFactory extends Factory {
 
 			) {
 
-			//$this->data['end_date'] = $epoch;
 			$this->data['end_date'] = TTDate::getDBTimeStamp($epoch, FALSE);
 
 			return TRUE;
@@ -564,7 +563,7 @@ class PayStubFactory extends Factory {
 	function setTainted($bool) {
 		$this->data['tainted'] = $this->toBool($bool);
 
-		return true;
+		return TRUE;
 	}
 
 	function getTemp() {
@@ -609,7 +608,6 @@ class PayStubFactory extends Factory {
 	}
 
 	function setDefaultDates() {
-		Debug::text(' NOT Advance!!: ', __FILE__, __LINE__, __METHOD__,10);
 		$start_date = $this->getPayPeriodObject()->getStartDate();
 		$end_date = $this->getPayPeriodObject()->getEndDate();
 		$transaction_date = $this->getPayPeriodObject()->getTransactionDate();
@@ -1907,10 +1905,18 @@ class PayStubFactory extends Factory {
 					$function = 'set'.$function;
 					switch( $key ) {
 						case 'start_date':
+							if ( method_exists( $this, $function ) ) {
+								$this->$function( TTDate::getBeginDayEpoch( TTDate::parseDateTime( $data[$key] ) ) );
+							}
+							break;
 						case 'end_date':
+							if ( method_exists( $this, $function ) ) {
+								$this->$function( TTDate::getEndDayEpoch( TTDate::parseDateTime( $data[$key] ) ) );
+							}
+							break;
 						case 'transaction_date':
 							if ( method_exists( $this, $function ) ) {
-								$this->$function( TTDate::parseDateTime( $data[$key] ) );
+								$this->$function( TTDate::getMiddleDayEpoch( TTDate::parseDateTime( $data[$key] ) ) );
 							}
 							break;
 						default:

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10643 $
- * $Id: UserDateTotalFactory.class.php 10643 2013-08-02 19:06:09Z ipso $
- * $Date: 2013-08-02 12:06:09 -0700 (Fri, 02 Aug 2013) $
+ * $Revision: 10749 $
+ * $Id: UserDateTotalFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
+ * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
  */
 
 /**
@@ -1181,7 +1181,6 @@ class UserDateTotalFactory extends Factory {
 							//case we want to include the last day of the week, so we need to add one day to this argument.
 							$first_week_total = $udtlf->getWeekRegularTimeSumByUserIDAndEpochAndStartWeekEpoch( $this->getUserDateObject()->getUser(), TTDate::getEndWeekEpoch( (TTDate::getMiddleDayEpoch($this->getUserDateObject()->getDateStamp())-(86400*7) ), $start_week_day_id)+86400, TTDate::getBeginWeekEpoch( (TTDate::getMiddleDayEpoch($this->getUserDateObject()->getDateStamp())-(86400*7)), $start_week_day_id) );
 							Debug::text(' Week modifiers differ, calculate total time for the first week: '. $first_week_total, __FILE__, __LINE__, __METHOD__, 10);
-
 						} else {
 							UserDateTotalFactory::setEnableCalcFutureWeek(TRUE);
 						}
@@ -1257,12 +1256,12 @@ class UserDateTotalFactory extends Factory {
 							continue;
 						}
 						break;
-					case 150: //2-day Consecutive
-					case 151: //3-day Consecutive
-					case 152: //4-day Consecutive
-					case 153: //5-day Consecutive
-					case 154: //6-day Consecutive
-					case 155: //7-day Consecutive
+					case 150: //2-day/week Consecutive
+					case 151: //3-day/week Consecutive
+					case 152: //4-day/week Consecutive
+					case 153: //5-day/week Consecutive
+					case 154: //6-day/week Consecutive
+					case 155: //7-day/week Consecutive
 						switch ( $otp_obj->getType() ) {
 							case 150:
 								$minimum_days_worked = 2;
@@ -1288,17 +1287,124 @@ class UserDateTotalFactory extends Factory {
 						//We should probably break this out to just a general "consecutive days worked" and add a field to specify any number of days
 						//and a field to specify if its only per week, or any timeframe.
 						//Will probably want to include a flag to consider scheduled days only too.
-						$weekly_days_worked = count( (array)$udtlf->getDaysWorkedByUserIDAndStartDateAndEndDate( $this->getUserDateObject()->getUser(), TTDate::getBeginWeekEpoch($this->getUserDateObject()->getDateStamp(), $start_week_day_id), $this->getUserDateObject()->getDateStamp() ) );
+						$days_worked_arr = (array)$udtlf->getDaysWorkedByUserIDAndStartDateAndEndDate( $this->getUserDateObject()->getUser(), TTDate::getBeginWeekEpoch($this->getUserDateObject()->getDateStamp(), $start_week_day_id), $this->getUserDateObject()->getDateStamp() );
+
+						$weekly_days_worked = count($days_worked_arr);
 						Debug::text(' Weekly Days Worked: '. $weekly_days_worked .' Minimum Required: '. $minimum_days_worked, __FILE__, __LINE__, __METHOD__, 10);
 
-						if ( $weekly_days_worked >= $minimum_days_worked ) {
+						if ( $weekly_days_worked >= $minimum_days_worked AND TTDate::isConsecutiveDays( $days_worked_arr ) == TRUE ) {
 							$trigger_time = $otp_obj->getTriggerTime();
 							Debug::text(' After Days Consecutive... Daily Trigger Time: '. $trigger_time , __FILE__, __LINE__, __METHOD__, 10);
 						} else {
 							Debug::text(' NOT After Days Consecutive Worked...', __FILE__, __LINE__, __METHOD__, 10);
 							continue;
 						}
-						unset($weekly_days_worked, $minimum_days_worked);
+						unset($days_worked_arr, $weekly_days_worked, $minimum_days_worked);
+						break;
+					case 300: //2-day Consecutive
+					case 301: //3-day Consecutive
+					case 302: //4-day Consecutive
+					case 303: //5-day Consecutive
+					case 304: //6-day Consecutive
+					case 305: //7-day Consecutive
+						switch ( $otp_obj->getType() ) {
+							case 300:
+								$minimum_days_worked = 2;
+								break;
+							case 301:
+								$minimum_days_worked = 3;
+								break;
+							case 302:
+								$minimum_days_worked = 4;
+								break;
+							case 303:
+								$minimum_days_worked = 5;
+								break;
+							case 304:
+								$minimum_days_worked = 6;
+								break;
+							case 305:
+								$minimum_days_worked = 7;
+								break;
+						}
+
+						//This does not reset on the week boundary.
+						$days_worked_arr = (array)$udtlf->getDaysWorkedByUserIDAndStartDateAndEndDate( $this->getUserDateObject()->getUser(), $this->getUserDateObject()->getDateStamp()-(86400*$minimum_days_worked), $this->getUserDateObject()->getDateStamp() );
+
+						$weekly_days_worked = count($days_worked_arr);
+						Debug::text(' Weekly Days Worked: '. $weekly_days_worked .' Minimum Required: '. $minimum_days_worked, __FILE__, __LINE__, __METHOD__, 10);
+
+						//Since these can span overtime weeks, we need to calculate the future week as well.
+						UserDateTotalFactory::setEnableCalcFutureWeek(TRUE);
+
+						if ( $weekly_days_worked >= $minimum_days_worked AND TTDate::isConsecutiveDays( $days_worked_arr ) == TRUE ) {
+							$trigger_time = $otp_obj->getTriggerTime();
+							Debug::text(' After Days Consecutive... Daily Trigger Time: '. $trigger_time , __FILE__, __LINE__, __METHOD__, 10);
+						} else {
+							Debug::text(' NOT After Days Consecutive Worked...', __FILE__, __LINE__, __METHOD__, 10);
+							continue;
+						}
+						unset($days_worked_arr, $weekly_days_worked, $minimum_days_worked);
+						break;
+					case 350: //2nd Consecutive Day
+					case 351: //3rd Consecutive Day
+					case 352: //4th Consecutive Day
+					case 353: //5th Consecutive Day
+					case 354: //6th Consecutive Day
+					case 355: //7th Consecutive Day
+						switch ( $otp_obj->getType() ) {
+							case 350:
+								$minimum_days_worked = 2;
+								break;
+							case 351:
+								$minimum_days_worked = 3;
+								break;
+							case 352:
+								$minimum_days_worked = 4;
+								break;
+							case 353:
+								$minimum_days_worked = 5;
+								break;
+							case 354:
+								$minimum_days_worked = 6;
+								break;
+							case 355:
+								$minimum_days_worked = 7;
+								break;
+						}
+
+						$range_start_date = TTDate::getMiddleDayEpoch( $this->getUserDateObject()->getDateStamp() )-(86400*$minimum_days_worked);
+
+						$previous_day_with_overtime_result = $udtlf->getPreviousDayByUserIdAndStartDateAndEndDateAndOverTimePolicyId( $this->getUserDateObject()->getUser(), $range_start_date, $this->getUserDateObject()->getDateStamp(), $otp_obj->getId() );
+						if ( $previous_day_with_overtime_result !== FALSE ) {
+							$previous_day_with_overtime = TTDate::getMiddleDayEpoch( TTDate::strtotime( $previous_day_with_overtime_result ) );
+							Debug::text(' Previous Day with OT: '. TTDate::getDate('DATE', $previous_day_with_overtime ) .' Start Date: '. TTDate::getDate('DATE',  $range_start_date ) .' End Date: '. TTDate::getDate('DATE', $this->getUserDateObject()->getDateStamp() ), __FILE__, __LINE__, __METHOD__, 10);
+						}
+
+						if ( isset( $previous_day_with_overtime ) AND $previous_day_with_overtime >= $range_start_date ) {
+							$range_start_date = TTDate::getMiddleDayEpoch( $previous_day_with_overtime )+86400;
+							Debug::text(' bPrevious Day with OT: '. TTDate::getDate('DATE', $previous_day_with_overtime ) .' Start Date: '. TTDate::getDate('DATE',  $range_start_date ) .' End Date: '. TTDate::getDate('DATE', $this->getUserDateObject()->getDateStamp() ), __FILE__, __LINE__, __METHOD__, 10);
+						}
+						
+						//This does not reset on the week boundary.
+						$days_worked_arr = (array)$udtlf->getDaysWorkedByUserIDAndStartDateAndEndDate( $this->getUserDateObject()->getUser(), $range_start_date, $this->getUserDateObject()->getDateStamp() );
+						sort($days_worked_arr);
+						
+						$weekly_days_worked = count($days_worked_arr);
+						Debug::text(' Weekly Days Worked: '. $weekly_days_worked .' Minimum Required: '. $minimum_days_worked, __FILE__, __LINE__, __METHOD__, 10);
+
+						//Since these can span overtime weeks, we need to calculate the future week as well.
+						UserDateTotalFactory::setEnableCalcFutureWeek(TRUE);
+
+						$days_worked_arr_key = $minimum_days_worked-1;
+						if ( $weekly_days_worked >= $minimum_days_worked AND TTDate::isConsecutiveDays( $days_worked_arr ) == TRUE AND isset($days_worked_arr[$days_worked_arr_key]) AND TTDate::getMiddleDayEpoch( TTDate::strtotime( $days_worked_arr[$days_worked_arr_key] ) ) == TTDate::getMiddleDayEpoch( $this->getUserDateObject()->getDateStamp() ) ) {
+							$trigger_time = $otp_obj->getTriggerTime();
+							Debug::text(' After Days Consecutive... Daily Trigger Time: '. $trigger_time , __FILE__, __LINE__, __METHOD__, 10);
+						} else {
+							Debug::text(' NOT After Days Consecutive Worked...', __FILE__, __LINE__, __METHOD__, 10);
+							continue;
+						}
+						unset($range_start_date, $previous_day_with_overtime, $previous_day_with_overtime, $days_worked_arr, $weekly_days_worked, $minimum_days_worked);
 						break;
 					case 180: //Holiday
 						$hlf = TTnew( 'HolidayListFactory' );
@@ -3604,7 +3710,7 @@ class UserDateTotalFactory extends Factory {
 
 		return TRUE;
 	}
-
+	
 	function calcSystemTotalTime() {
 		global $profiler;
 
@@ -3622,9 +3728,16 @@ class UserDateTotalFactory extends Factory {
 			return FALSE;
 		}
 
-		//Need to set timezone to that of the user we are calculating, otherwise date/time premium policies won't apply properly.
+		
+		//IMPORTANT: Make sure the timezone is set to the users timezone, prior to calculating policies,
+		//as that will affect when date/time premium policies apply
+		//Its also important that the timezone gets set back after calculating multiple punches in a batch as this can prevent other employees
+		//from using the wrong timezone.
+		//FIXME: How do we handle the employee moving between stations that themselves are in different timezones from the users default timezone?
+		//How do we apply time based premium policies in that case?
 		if ( is_object( $this->getUserDateObject() ) AND is_object( $this->getUserDateObject()->getUserObject() ) AND is_object( $this->getUserDateObject()->getUserObject()->getUserPreferenceObject() ) ) {
-			$this->getUserDateObject()->getUserObject()->getUserPreferenceObject()->setTimeZonePreferences();
+			$original_time_zone = TTDate::getTimeZone();
+			TTDate::setTimeZone( $this->getUserDateObject()->getUserObject()->getUserPreferenceObject()->getTimeZone() );
 		}
 
 		//Take the worked hours, and calculate Total,Regular,Overtime,Premium hours from that.
@@ -3858,15 +3971,17 @@ class UserDateTotalFactory extends Factory {
 		}
 		unset($schedule_absence_policy_id);
 
+		/*
+		//This is no longer needed as calcAbsencePolicyTotalTime() is a NO-OP now.
 		//Do this AFTER the UnderTime absence policy is submitted.
 		$recalc_daily_total_time = $this->calcAbsencePolicyTotalTime();
-
 		if ( $recalc_daily_total_time == TRUE ) {
 			//Total up all "worked" hours for the day again, this time include
 			//Paid Absences.
 			$daily_total_time = $this->getDailyTotalTime();
 			Debug::text('ReCalc Daily Total Time for Day: '. $daily_total_time, __FILE__, __LINE__, __METHOD__, 10);
 		}
+		*/
 
 		$profiler->stopTimer( 'UserDateTotal::calcSystemTotalTime() - Part 1');
 
@@ -4073,6 +4188,10 @@ class UserDateTotalFactory extends Factory {
 
 		if ( $this->getEnableCalcException() == TRUE ) {
 			ExceptionPolicyFactory::calcExceptions( $this->getUserDateID(), $this->getEnablePreMatureException() );
+		}
+		
+		if ( isset($original_time_zone) ) {
+			TTDate::setTimeZone( $original_time_zone );
 		}
 
 		return $return_value;

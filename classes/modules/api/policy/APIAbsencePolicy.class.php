@@ -117,9 +117,13 @@ class APIAbsencePolicy extends APIFactory {
                     }
                 }
             }
+			
             if ( isset( $absence_policy_ids ) ) {
                 $data['filter_data']['id'] = $absence_policy_ids;
-            }
+            } else {
+				//Make sure that is no absence policies are assigned to the policy group, we don't display any.
+				$data['filter_data']['id'] = array(0);
+			}
             unset( $data['filter_data']['user_id'] );
         }
 

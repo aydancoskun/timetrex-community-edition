@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10530 $
- * $Id: PunchFactory.class.php 10530 2013-07-23 17:41:24Z ipso $
- * $Date: 2013-07-23 10:41:24 -0700 (Tue, 23 Jul 2013) $
+ * $Revision: 10749 $
+ * $Id: PunchFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
+ * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
  */
 
 /**
@@ -316,11 +316,12 @@ class PunchFactory extends Factory {
 	function setTransfer($bool, $time_stamp = NULL) {
 		//If a timestamp is passed, check for the previous punch, if one does NOT exist, transfer can not be enabled.
 		if ( $bool == TRUE AND $time_stamp != '' ) {
-			if ( !is_object( $this->getPreviousPunchObject( $time_stamp ) ) ) {
-				Debug::Text('Previous punch does not exist, transfer cannot be enabled. EPOCH: '. $time_stamp , __FILE__, __LINE__, __METHOD__,10);
+			$prev_punch_obj = $this->getPreviousPunchObject( $time_stamp );
+			//Make sure we check that the previous punch wasn't an out punch from the last shift.
+			if ( !is_object( $prev_punch_obj ) OR ( is_object( $prev_punch_obj ) AND $prev_punch_obj->getStatus() == 20 ) ) {
+				Debug::Text('Previous punch does not exist, or it was an OUT punch, transfer cannot be enabled. EPOCH: '. $time_stamp , __FILE__, __LINE__, __METHOD__,10);
 				return FALSE;
 			}
-
 		}
 
 		$this->data['transfer'] = $this->toBool($bool);
@@ -973,8 +974,10 @@ class PunchFactory extends Factory {
 		//We need to make sure we get schedules within about a 24hr
 		//window of this punch, because if punch is at 11:55AM and the schedule starts at 12:30AM it won't
 		//be found by a user_date_id.
+		//In cases where an absence shift ends at the exact same time as working shift begins (Absence: 11:30PM to 7:00AM, WORKING: 7:00AM-3:00PM),
+		//order the working shift first so its used instead of the absence shift.
 		$slf = TTnew( 'ScheduleListFactory' );
-		$slf->getByUserIdAndStartDateAndEndDate( $user_id, ($epoch-43200), ($epoch+43200) );
+		$slf->getByUserIdAndStartDateAndEndDate( $user_id, ($epoch-43200), ($epoch+43200), NULL, array( 'b.date_stamp' => 'asc', 'a.status_id' => 'asc' ) );
 		if ( $slf->getRecordCount() > 0 ) {
 			$retval = FALSE;
 			$best_diff = FALSE;

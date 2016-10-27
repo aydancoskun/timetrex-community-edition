@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9590 $
- * $Id: RecurringScheduleTemplateFactory.class.php 9590 2013-04-14 19:15:32Z ipso $
- * $Date: 2013-04-14 12:15:32 -0700 (Sun, 14 Apr 2013) $
+ * $Revision: 10749 $
+ * $Id: RecurringScheduleTemplateFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
+ * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
  */
 
 /**
@@ -509,7 +509,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 			$jlf = TTnew( 'JobListFactory' );
 		}
 
-		if (  $id == NULL
+		if (  $id == NULL OR $id == -1
 				OR
 				$this->Validator->isResultSetWithRows(	'job',
 														$jlf->getByID($id),
@@ -541,7 +541,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 			$jilf = TTnew( 'JobItemListFactory' );
 		}
 
-		if (  $id == NULL
+		if (  $id == NULL OR $id == -1
 				OR
 				$this->Validator->isResultSetWithRows(	'job_item',
 														$jilf->getByID($id),
@@ -816,6 +816,9 @@ class RecurringScheduleTemplateFactory extends Factory {
 															'end_date' => ( defined('TIMETREX_API') ) ? TTDate::getAPIDate('DATE+TIME', $end_time ) : $end_time,
 															'start_time' => ( defined('TIMETREX_API') ) ? TTDate::getAPIDate('TIME', $start_time ) : $start_time,
 															'end_time' => ( defined('TIMETREX_API') ) ? TTDate::getAPIDate('TIME', $end_time ) : $end_time,
+
+															'start_time_stamp' => $start_time,
+															'end_time_stamp' => $end_time,
 
 															//These are no longer used.
 															//'raw_start_time' => TTDate::getDate('DATE+TIME', $start_time ),

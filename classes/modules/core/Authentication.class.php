@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9761 $
- * $Id: Authentication.class.php 9761 2013-05-03 23:06:47Z ipso $
- * $Date: 2013-05-03 16:06:47 -0700 (Fri, 03 May 2013) $
+ * $Revision: 10749 $
+ * $Id: Authentication.class.php 10749 2013-08-26 22:00:42Z ipso $
+ * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
  */
 
 
@@ -244,7 +244,7 @@ class Authentication {
 	}
 
 	private function genSessionID() {
-		return md5( uniqid( dechex( mt_srand() ) ) );
+		return sha1( uniqid( dechex( mt_srand() ) ) );
 	}
 
 	function checkCompanyStatus( $user_name ) {
@@ -515,22 +515,34 @@ class Authentication {
 	private function Read() {
 		$ph = array(
 					'session_id' => $this->getSessionID(),
-					'ip_address' => $this->getIPAddress(),
+					//'ip_address' => $this->getIPAddress(),
 					'updated_date' => ( TTDate::getTime() - $this->getIdle() ),
 					);
 
-
+		//Need to handle IP addresses changing during the session.
+		//When using SSL, don't check for IP address changing at all as we use secure cookies.
+		//When *not* using SSL, always require the same IP address for the session.
+		//However we need to still allow multiple sessions for the same user, using different IPs.
 		$query = 'select session_id,user_id,ip_address,created_date,updated_date from authentication
 					WHERE session_id = ?
-						AND ip_address = ?
 						AND updated_date >= ?
 						';
+		//AND ip_address = ?
 
 		//Debug::text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-
 		$result = $this->db->GetRow($query, $ph);
 
 		if ( count($result) > 0) {
+			if ( $result['ip_address'] != $this->getIPAddress() ) {
+				Debug::text('WARNING: IP Address has changed for existing session... Original IP: '. $result['ip_address'] .' Current IP: '. $this->getIPAddress() .' isSSL: '. (int)$this->isSSL(), __FILE__, __LINE__, __METHOD__, 10);
+				//When using SSL, we don't care if the IP address has changed, as the session should still be secure.
+				//This allows sessions to work across load balancing routers, or between mobile/wifi connections, which can change 100% of the IP address (so close matches are useless anyways)
+				if ( $this->isSSL() != TRUE ) {
+					//When not using SSL there is no 100% method of preventing session hijacking, so just insist that IP addresses match exactly as its as close as we can get.
+					Debug::text('Not using SSL, IP addresses must match exactly...', __FILE__, __LINE__, __METHOD__, 10);
+					return FALSE;
+				}
+			}
 			$this->setSessionID($result['session_id']);
 			$this->setIPAddress($result['ip_address']);
 			$this->setCreatedDate($result['created_date']);
@@ -673,7 +685,7 @@ class Authentication {
 				if this starts to cause problems
 				for users behind load balancing proxies, allow them to choose to
 				bind session IDs to just the first 1-3 quads of their IP address
-				as well as the MD5 of their user-agent string.
+				as well as the SHA1 of their user-agent string.
 				Could also use "behind proxy IP address" if one is supplied.
 			*/
 			try {

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10609 $
- * $Id: TTDate.class.php 10609 2013-07-31 17:29:20Z ipso $
- * $Date: 2013-07-31 10:29:20 -0700 (Wed, 31 Jul 2013) $
+ * $Revision: 10749 $
+ * $Id: TTDate.class.php 10749 2013-08-26 22:00:42Z ipso $
+ * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
  */
 
 /**
@@ -1809,6 +1809,34 @@ class TTDate {
 		}
 
 		return $retval;
+	}
+
+	public static function isConsecutiveDays( $date_array ) {
+		if ( is_array($date_array) AND count($date_array) > 1 ) {
+			sort($date_array);
+
+			$retval = FALSE;
+			
+			$prev_date = FALSE;
+			foreach( $date_array as $date ) {
+				if ( $prev_date != FALSE ) {
+					$date_diff = TTDate::getMiddleDayEpoch( TTDate::strtotime( $date ) ) - TTDate::getMiddleDayEpoch( TTDate::strtotime( $prev_date ) );
+					if ( $date_diff <= 86400 ) {
+						$retval = TRUE;
+					} else {
+						$retval = FALSE;
+						break;
+					}
+				}
+
+				$prev_date = $date;
+			}
+
+			Debug::Text('Days are consecutive: '. count($date_array) .' Retval: '. (int)$retval, __FILE__, __LINE__, __METHOD__,10);
+			return $retval;
+		}
+
+		return FALSE;
 	}
 
 	public static function getTimeLockedDate($time_epoch, $date_epoch) {

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10609 $
- * $Id: ScheduleListFactory.class.php 10609 2013-07-31 17:29:20Z ipso $
- * $Date: 2013-07-31 10:29:20 -0700 (Wed, 31 Jul 2013) $
+ * $Revision: 10749 $
+ * $Id: ScheduleListFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
+ * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
  */
 
 /**
@@ -189,8 +189,10 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
+		$additional_order_fields = array('b.date_stamp');
+
 		if ( $order == NULL ) {
-			$order = array( 'b.date_stamp' => 'asc' );
+			$order = array( 'b.date_stamp' => 'asc', 'a.status_id' => 'asc' );
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;
@@ -216,7 +218,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 						AND ( a.deleted = 0 AND b.deleted = 0 )
 					';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order, $strict );
+		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
 		$this->ExecuteSQL( $query, $ph );
 

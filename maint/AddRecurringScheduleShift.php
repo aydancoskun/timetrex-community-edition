@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10483 $
- * $Id: AddRecurringScheduleShift.php 10483 2013-07-18 17:05:08Z ipso $
- * $Date: 2013-07-18 10:05:08 -0700 (Thu, 18 Jul 2013) $
+ * $Revision: 10749 $
+ * $Id: AddRecurringScheduleShift.php 10749 2013-08-26 22:00:42Z ipso $
+ * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
  */
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
@@ -214,14 +214,18 @@ if ( $clf->getRecordCount() > 0 ) {
 												$sf->setDepartment( $recurring_schedule_shift['department_id'] );
 											}
 
-											if ( isset($recurring_schedule_shift['job_id']) ) {
+											if ( isset( $user_obj ) AND $recurring_schedule_shift['job_id'] == -1 ) {
+												$sf->setJob( $user_obj->getDefaultJob() );
+											} else {
 												$sf->setJob( $recurring_schedule_shift['job_id'] );
 											}
 
-											if ( isset($recurring_schedule_shift['job_item_id']) ) {
+											if ( isset( $user_obj ) AND $recurring_schedule_shift['job_item_id'] == -1 ) {
+												$sf->setJobItem( $user_obj->getDefaultJobItem() );
+											} else {
 												$sf->setJobItem( $recurring_schedule_shift['job_item_id'] );
 											}
-
+											
 											if ( $sf->isValid() ) {
 
 												//Recalculate if its a absence schedule, so the holiday
@@ -328,11 +332,15 @@ if ( $clf->getRecordCount() > 0 ) {
 														}
 
 														if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-															if ( isset($recurring_schedule_shift['job_id']) ) {
+															if ( $recurring_schedule_shift['job_id'] == -1 ) {
+																$pcf->setJob( $user_obj->getDefaultJob() );
+															} else {
 																$pcf->setJob( $recurring_schedule_shift['job_id'] );
 															}
 
-															if ( isset($recurring_schedule_shift['job_item_id']) ) {
+															if ( $recurring_schedule_shift['job_item_id'] == -1 ) {
+																$pcf->setJobItem( $user_obj->getDefaultJobItem() );
+															} else {
 																$pcf->setJobItem( $recurring_schedule_shift['job_item_id'] );
 															}
 														}

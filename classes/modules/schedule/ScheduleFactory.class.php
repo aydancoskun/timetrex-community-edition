@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10468 $
- * $Id: ScheduleFactory.class.php 10468 2013-07-17 15:48:26Z ipso $
- * $Date: 2013-07-17 08:48:26 -0700 (Wed, 17 Jul 2013) $
+ * $Revision: 10749 $
+ * $Id: ScheduleFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
+ * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
  */
 
 /**
@@ -177,6 +177,8 @@ class ScheduleFactory extends Factory {
 										'schedule_policy' => FALSE,
 										'start_date' => FALSE,
 										'end_date' => FALSE,
+										'start_time_stamp' => FALSE,
+										'end_time_stamp' => FALSE,
 										'start_time' => 'StartTime',
 										'end_time' => 'EndTime',
 										'schedule_policy_id' => 'SchedulePolicyID',
@@ -958,6 +960,9 @@ class ScheduleFactory extends Factory {
 													'end_date' => ( defined('TIMETREX_API') ) ? TTDate::getAPIDate('DATE+TIME', $s_obj->getEndTime() ) : $s_obj->getEndTime(),
 													'start_time' => ( defined('TIMETREX_API') ) ? TTDate::getAPIDate('TIME', $s_obj->getStartTime() ) : $s_obj->getStartTime(),
 													'end_time' => ( defined('TIMETREX_API') ) ? TTDate::getAPIDate('TIME', $s_obj->getEndTime() ) : $s_obj->getEndTime(),
+													
+													'start_time_stamp' => $s_obj->getStartTime(),
+													'end_time_stamp' => $s_obj->getEndTime(),
 
 													'total_time' => $s_obj->getTotalTime(),
 
@@ -1974,6 +1979,12 @@ class ScheduleFactory extends Factory {
 							break;
 						case 'end_date':
 							$data[$variable] = TTDate::getAPIDate( 'DATE+TIME', $this->getEndTime() ); //Include both date+time
+							break;
+						case 'start_time_stamp':
+							$data[$variable] = $this->getStartTime(); //Include start date/time in epoch format for sorting...
+							break;
+						case 'end_time_stamp':
+							$data[$variable] = $this->getEndTime(); //Include end date/time in epoch format for sorting...
 							break;
 						case 'start_time':
 						case 'end_time':

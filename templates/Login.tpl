@@ -7,25 +7,26 @@
 <style type="text/css">
 {literal}
 #popUpDiv {
-    background-color: #e5e5e5;
+    background-color: #FFB3B3;
     color: #FFF;
-    height: 30px;
+    height: 41px;
 	padding-top:5px;
     position: absolute;
-	left: 35%;
-	top: -50px;
-    width: 30%;
+	left: 25%;
+	top: 450px;
+    width: 50%;
 	text-align: center;
 	border-style: solid;
 	border-width: 2px;
-	border-color: #779bbe;
-    transition: top 1.5s;
-    -moz-transition: top 1.5s;
-    -webkit-transition: top 1.5s;
-    -o-transition: top 1.5s;
+	border-color: #FF0000;
+	z-index:99;
+    transition: top 3.5s;
+    -moz-transition: top 3.5s;
+    -webkit-transition: top 3.5s;
+    -o-transition: top 3.5s;
 }
 #popUpDiv.visible {
-	top: 5px;
+	top: 1px;
 }
 {/literal}
 </style>
@@ -50,11 +51,9 @@ function bookmarkSite( title, url ) {
 </script>
 </head>
 
-<body onload="document.login.user_name.focus(); {if !isset($config_vars.branding)}document.getElementById('popUpDiv').className += ' visible';{/if}">
+<body onload="document.login.user_name.focus(); document.getElementById('popUpDiv').className += ' visible';">
 
-{if !isset($config_vars.branding)}
-<div id="popUpDiv"><b><span style="font-size: small;">&nbsp;<a href="{if $smarty.server.HTTP_HOST == 'www.timetrex.com' OR $smarty.server.HTTP_HOST == 'timetrex.com'}http{if $smarty.server.HTTPS == TRUE}s{/if}://{$config_vars.other.hostname}/interface/{/if}BetaTest.php{if $user_name != '' AND $password != ''}?user_name={$user_name}&password={$password}{/if}">Try our new {$APPLICATION_NAME} interface!</a>&nbsp;</span></b></div>
-{/if}
+<div id="popUpDiv"><b><span style="font-size: small;">&nbsp;<a style="color: #FF0000; text-decoration: none;" href="{if $smarty.server.HTTP_HOST == 'www.timetrex.com' OR $smarty.server.HTTP_HOST == 'timetrex.com'}http{if $smarty.server.HTTPS == TRUE}s{/if}://{$config_vars.other.hostname}/interface/{/if}{if isset($config_vars.branding)}flex/{else}BetaTest.php{/if}{if $user_name != '' AND $password != ''}?user_name={$user_name}&password={$password}{/if}">WARNING: This legacy interface will be discontinued by January 31st 2014.<br>Please transition to our new {$APPLICATION_NAME} interface as soon as possible by clicking here!</a>&nbsp;</span></b></div>
 
 <div id="container">
 

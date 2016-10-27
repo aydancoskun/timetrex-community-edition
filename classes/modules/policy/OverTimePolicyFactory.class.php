@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: OverTimePolicyFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 10749 $
+ * $Id: OverTimePolicyFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
+ * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
  */
 
 /**
@@ -71,15 +71,31 @@ class OverTimePolicyFactory extends Factory {
 										80 => TTi18n::gettext('Thursday'),
 										90 => TTi18n::gettext('Friday'),
 										100 => TTi18n::gettext('Saturday'),
-										150 => TTi18n::gettext('2 Or More Days Consecutively Worked'),
-										151 => TTi18n::gettext('3 Or More Days Consecutively Worked'),
-										152 => TTi18n::gettext('4 Or More Days Consecutively Worked'),
-										153 => TTi18n::gettext('5 Or More Days Consecutively Worked'),
-										154 => TTi18n::gettext('6 Or More Days Consecutively Worked'),
-										155 => TTi18n::gettext('7 Or More Days Consecutively Worked'),
+
+										150 => TTi18n::gettext('2 Or More Days/Week Consecutively Worked'),
+										151 => TTi18n::gettext('3 Or More Days/Week Consecutively Worked'),
+										152 => TTi18n::gettext('4 Or More Days/Week Consecutively Worked'),
+										153 => TTi18n::gettext('5 Or More Days/Week Consecutively Worked'),
+										154 => TTi18n::gettext('6 Or More Days/Week Consecutively Worked'),
+										155 => TTi18n::gettext('7 Or More Days/Week Consecutively Worked'),
+
 										180 => TTi18n::gettext('Holiday'),
 										200 => TTi18n::gettext('Over Schedule (Daily) / No Schedule'),
-										210 => TTi18n::gettext('Over Schedule (Weekly) / No Schedule')
+										210 => TTi18n::gettext('Over Schedule (Weekly) / No Schedule'),
+
+										300 => TTi18n::gettext('2 Or More Days Consecutively Worked'),
+										301 => TTi18n::gettext('3 Or More Days Consecutively Worked'),
+										302 => TTi18n::gettext('4 Or More Days Consecutively Worked'),
+										303 => TTi18n::gettext('5 Or More Days Consecutively Worked'),
+										304 => TTi18n::gettext('6 Or More Days Consecutively Worked'),
+										305 => TTi18n::gettext('7 Or More Days Consecutively Worked'),
+
+										350 => TTi18n::gettext('2nd Consecutive Day Worked'),
+										351 => TTi18n::gettext('3rd Consecutive Day Worked'),
+										352 => TTi18n::gettext('4th Consecutive Day Worked'),
+										353 => TTi18n::gettext('5th Consecutive Day Worked'),
+										354 => TTi18n::gettext('6th Consecutive Day Worked'),
+										355 => TTi18n::gettext('7th Consecutive Day Worked'),
 									);
 				break;
 			case 'calculation_order':
@@ -94,12 +110,29 @@ class OverTimePolicyFactory extends Factory {
 										80 => 60, //Thursday
 										90 => 70, //Friday
 										100 => 80, //Saturday
-										150 => 86, //After 2-Days Consecutive Worked
-										151 => 85, //After 3-Days Consecutive Worked
-										152 => 84, //After 4-Days Consecutive Worked
-										153 => 83, //After 5-Days Consecutive Worked
-										154 => 82, //After 6-Days Consecutive Worked
-										155 => 81, //After 7-Days Consecutive Worked
+
+										150 => 92, //After 2-Days/Week Consecutive Worked
+										151 => 91, //After 3-Days/Week Consecutive Worked
+										152 => 90, //After 4-Days/Week Consecutive Worked
+										153 => 89, //After 5-Days/Week Consecutive Worked
+										154 => 88, //After 6-Days/Week Consecutive Worked
+										155 => 87, //After 7-Days/Week Consecutive Worked
+
+										300 => 98, //After 2-Days Consecutive Worked
+										301 => 97, //After 3-Days Consecutive Worked
+										302 => 96, //After 4-Days Consecutive Worked
+										303 => 95, //After 5-Days Consecutive Worked
+										304 => 94, //After 6-Days Consecutive Worked
+										305 => 93, //After 7-Days Consecutive Worked
+
+										//Since these are specific to certain days, they should be calculated before above consecutive policies.
+										350 => 86, //2nd Consecutive Day Worked
+										351 => 85, //3rd Consecutive Day Worked
+										352 => 84, //4th Consecutive Day Worked
+										353 => 83, //5th Consecutive Day Worked
+										354 => 82, //6th Consecutive Day Worked
+										355 => 81, //7th Consecutive Day Worked
+
 										180 => 10, //Holiday
 										200 => 100, //Over Schedule (Daily) / No Schedule
 										210 => 210, //Over Schedule (Weekly) / No Schedule

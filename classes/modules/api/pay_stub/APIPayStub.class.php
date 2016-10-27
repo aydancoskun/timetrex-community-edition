@@ -446,12 +446,12 @@ class APIPayStub extends APIFactory {
 						//later on.
 						if ( $pay_stub_obj->getStatus() <= 25
 								AND $pay_stub_obj->getTainted() === FALSE
-								AND $pay_stub_obj->getEndDate() == $pay_period_obj->getEndDate() ) {
-							Debug::text('Pay stub matched advance flag, deleting: '. $pay_stub_obj->getId(), __FILE__, __LINE__, __METHOD__,10);
+								AND TTDate::getMiddleDayEpoch( $pay_stub_obj->getEndDate() ) == TTDate::getMiddleDayEpoch( $pay_period_obj->getEndDate() ) ) {
+							Debug::text('Deleting pay stub: '. $pay_stub_obj->getId(), __FILE__, __LINE__, __METHOD__,10);
 							$pay_stub_obj->setDeleted(TRUE);
 							$pay_stub_obj->Save();
 						} else {
-							Debug::text('Pay stub does not need regenerating, or it is LOCKED!', __FILE__, __LINE__, __METHOD__,10);
+							Debug::text('Pay stub does not need regenerating, or it is LOCKED! ID: '. $pay_stub_obj->getID() .' Status: '. $pay_stub_obj->getStatus() .' Tainted: '. (int)$pay_stub_obj->getTainted() .' Pay Stub End Date: '. $pay_stub_obj->getEndDate() .' Pay Period End Date: '. $pay_period_obj->getEndDate(), __FILE__, __LINE__, __METHOD__,10);
 						}
 					}
 

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10609 $
- * $Id: TTi18n.class.php 10609 2013-07-31 17:29:20Z ipso $
- * $Date: 2013-07-31 10:29:20 -0700 (Wed, 31 Jul 2013) $
+ * $Revision: 10749 $
+ * $Id: TTi18n.class.php 10749 2013-08-26 22:00:42Z ipso $
+ * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
  */
 
 /*
@@ -828,6 +828,7 @@ class TTi18n {
 										'BYR' => 'p.',   //('Belarus')
 										'BZD' => 'BZ$',  //('Belize')
 										'CAD' => '$',    //('Canada')
+										'CDF' => 'F',    //('Congo, Democratic Republic')
 										'CDZ' => 'CDZ',  //('Congo, the Democratic Republic of')
 										'CHF' => '₣',    //('Liechtenstein')('Switzerland')
 										'CLF' => '$',    //('Chile')

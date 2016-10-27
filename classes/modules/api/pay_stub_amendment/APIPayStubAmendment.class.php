@@ -227,6 +227,10 @@ class APIPayStubAmendment extends APIFactory {
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
+				if ( $validate_only == TRUE ) {
+					$lf->validate_only = TRUE;
+				}
+
 				$is_valid = $primary_validator->isValid();
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
 					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);

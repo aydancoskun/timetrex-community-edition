@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10293 $
- * $Id: PremiumPolicyFactory.class.php 10293 2013-06-26 22:06:49Z ipso $
- * $Date: 2013-06-26 15:06:49 -0700 (Wed, 26 Jun 2013) $
+ * $Revision: 10749 $
+ * $Id: PremiumPolicyFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
+ * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
  */
 
 /**
@@ -1092,7 +1092,11 @@ class PremiumPolicyFactory extends Factory {
 				if ( $this->getRate() > $original_hourly_rate ) {
 					$rate = $this->getRate();
 				} else {
-					$rate = 0;
+					//Use the original rate rather than 0, since this is non-relative its likely
+					//that the employee is just getting paid from premium policies, so if they are getting
+					//paid more than the premium policy states, without this they would get paid nothing.
+					//This allows premium policies like "Painting (Regular)" to actually have wages associated with them.
+					$rate = $original_hourly_rate;
 				}
 				break;
 		}
@@ -1796,9 +1800,6 @@ class PremiumPolicyFactory extends Factory {
 
 			$retval = 0;
 			for( $i=($start_time_stamp-86400); $i <= ($end_time_stamp+86400); $i+=86400 ) {
-				//$tmp_start_time_stamp = $i;
-				//$tmp_end_time_stamp = $tmp_start_time_stamp + ($end_time_stamp - $start_time_stamp);
-
 				//Due to DST, we need to make sure we always lock time of day so its the exact same. Without this it can walk by one hour either way.
 				$tmp_start_time_stamp = TTDate::getTimeLockedDate( $this->getStartTime(), $i);
 				$tmp_end_time_stamp = TTDate::getTimeLockedDate( $end_time_stamp, $tmp_start_time_stamp + ($end_time_stamp - $start_time_stamp) ); //Use $end_time_stamp as it can be modified above due to being near midnight

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10417 $
- * $Id: PayStubAmendmentFactory.class.php 10417 2013-07-11 22:21:13Z ipso $
- * $Date: 2013-07-11 15:21:13 -0700 (Thu, 11 Jul 2013) $
+ * $Revision: 10749 $
+ * $Id: PayStubAmendmentFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
+ * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
  */
 require_once( 'Numbers/Words.php');
 
@@ -943,14 +943,14 @@ class PayStubAmendmentFactory extends Factory {
 	}
 
 	function Validate() {
-		if ( $this->getUser() == FALSE AND $this->Validator->hasError('user_id') == FALSE) {
+		if ( $this->validate_only == FALSE AND $this->getUser() == FALSE AND $this->Validator->hasError('user_id') == FALSE) {
 				$this->Validator->isTrue(		'user_id',
 												FALSE,
 												TTi18n::gettext('Invalid Employee'));
 		}
 
 		//Only show this error if it wasn't already triggered earlier.
-		if (  is_object($this->Validator) AND $this->Validator->hasError('pay_stub_entry_name_id') == FALSE AND $this->getPayStubEntryNameId() == FALSE ) {
+		if ( $this->validate_only == FALSE AND is_object($this->Validator) AND $this->Validator->hasError('pay_stub_entry_name_id') == FALSE AND $this->getPayStubEntryNameId() == FALSE ) {
 				$this->Validator->isTrue(		'pay_stub_entry_name_id',
 												FALSE,
 												TTi18n::gettext('Invalid Pay Stub Account'));

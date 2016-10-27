@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10407 $
- * $Id: UserDateTotalListFactory.class.php 10407 2013-07-10 16:19:58Z ipso $
- * $Date: 2013-07-10 09:19:58 -0700 (Wed, 10 Jul 2013) $
+ * $Revision: 10749 $
+ * $Id: UserDateTotalListFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
+ * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
  */
 
 /**
@@ -1426,16 +1426,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						AND a.total_time > 0
 						AND ( a.deleted = 0 AND b.deleted=0 )
 				';
-		/*
-		$total = $this->db->GetOne($query, $ph);
-
-		if ($total === FALSE ) {
-			$total = 0;
-		}
-		Debug::text('Total: '. $total, __FILE__, __LINE__, __METHOD__, 10);
-
-		return $total;
-		*/
+				
 		return $this->db->getCol( $query, $ph );
 	}
 
@@ -1936,6 +1927,52 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
+	}
+
+	function getPreviousDayByUserIdAndStartDateAndEndDateAndOverTimePolicyId($user_id, $start_date, $end_date, $over_time_policy_id, $where = NULL, $order = NULL) {
+		if ( $user_id == '') {
+			return FALSE;
+		}
+
+		if ( $start_date == '') {
+			return FALSE;
+		}
+
+		if ( $end_date == '') {
+			return FALSE;
+		}
+
+		if ( $over_time_policy_id == '') {
+			return FALSE;
+		}
+
+		$ph = array(
+					'user_id' => $user_id,
+					'start_date' => $this->db->BindDate( $start_date ),
+					'end_date' => $this->db->BindDate( $end_date ),
+					'over_time_policy_id' => $over_time_policy_id,
+					);
+
+		$udf = new UserDateFactory();
+
+		$query = '
+					select 	b.date_stamp
+					from	'. $this->getTable() .' as a
+					LEFT JOIN '. $udf->getTable() .' as b ON a.user_date_id = b.id
+					where
+						b.user_id = ?
+						AND b.date_stamp >= ? AND b.date_stamp < ?
+						AND a.over_time_policy_id = ?
+						AND a.deleted = 0
+					ORDER BY b.date_stamp desc
+					LIMIT 1
+				';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$date = $this->db->GetOne($query, $ph);
+
+		return $date;
 	}
 
 	function getByMealPolicyId($meal_policy_id, $where = NULL, $order = NULL) {

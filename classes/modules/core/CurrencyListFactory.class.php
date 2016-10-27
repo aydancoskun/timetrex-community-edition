@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9883 $
- * $Id: CurrencyListFactory.class.php 9883 2013-05-14 22:00:44Z ipso $
- * $Date: 2013-05-14 15:00:44 -0700 (Tue, 14 May 2013) $
+ * $Revision: 10749 $
+ * $Id: CurrencyListFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
+ * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
  */
 
 /**
@@ -331,7 +331,7 @@ class CurrencyListFactory extends CurrencyFactory implements IteratorAggregate {
 		if ( isset($filter_data['iso_code']) AND isset($filter_data['iso_code'][0]) AND !in_array(-1, (array)$filter_data['iso_code']) ) {			
             $query  .=	' AND a.iso_code in ('. $this->getListSQL($filter_data['iso_code'], $ph) .') ';
 		}
-        if ( isset($filter_data['iso_code']) AND trim($filter_data['iso_code']) != '' AND !is_array($filter_data['iso_code']) ) {
+        if ( isset($filter_data['iso_code']) AND !is_array( $filter_data['iso_code'] ) AND trim($filter_data['iso_code']) != '' AND !is_array($filter_data['iso_code']) ) {
 			$ph[] = strtolower(trim($filter_data['iso_code']));
 			$query  .=	' AND lower(a.iso_code) LIKE ?';
 		}

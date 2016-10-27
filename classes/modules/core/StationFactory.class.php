@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10406 $
- * $Id: StationFactory.class.php 10406 2013-07-10 16:19:28Z ipso $
- * $Date: 2013-07-10 09:19:28 -0700 (Wed, 10 Jul 2013) $
+ * $Revision: 10749 $
+ * $Id: StationFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
+ * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
  */
 include_once('Net/IPv4.php');
 
@@ -1281,37 +1281,8 @@ class StationFactory extends Factory {
 
 		return $retarr;
 	}
-/*
-	function getWorkCodeDefinition() {
-		if ( isset($this->data['work_code_definition']) ) {
-			return unserialize( $this->data['work_code_definition'] );
-		}
 
-		return FALSE;
-	}
-	function setWorkCodeDefinition($arr) {
-		if ( $arr == FALSE ) {
-			return TRUE;
-		}
-
-		$arr = Misc::preSetArrayValues( $arr, array('branch', 'department', 'job', 'job_item'), 0);
-
-		if ( is_array( $arr )
-				AND ($arr['branch']+$arr['department']+$arr['job']+$arr['job_item']) == 9 ) {
-			$this->data['work_code_definition'] = serialize( $arr );
-
-			return TRUE;
-		} else {
-			$this->Validator->isTRUE(	'work_code_definition',
-										FALSE,
-										TTi18n::gettext('Incorrect work code field lengths, they must all add up to 9') );
-		}
-
-		return FALSE;
-	}
-*/
-
-	//Update JUST station allowed_date without affecting updated_date, and without creating an EDIT entry in the system_log.
+	//Update JUST station last_poll_date AND last_punch_time_stamp without affecting updated_date, and without creating an EDIT entry in the system_log.
 	function updateLastPollDateAndLastPunchTimeStamp( $id, $last_poll_date = 0, $last_punch_date = 0 ) {
 		if ( $id == '' ) {
 			return FALSE;
@@ -1334,7 +1305,29 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 
-	//Update JUST station allowed_date without affecting updated_date, and without creating an EDIT entry in the system_log.
+	//Update JUST station last_poll_date without affecting updated_date, and without creating an EDIT entry in the system_log.
+	function updateLastPollDate( $id, $last_poll_date = 0 ) {
+		if ( $id == '' ) {
+			return FALSE;
+		}
+
+		$slf = TTnew( 'StationListFactory' );
+		$slf->getById( $id );
+		if ( $slf->getRecordCount() == 1 ) {
+			$ph = array(
+						'last_poll_date' => $last_poll_date,
+						'id' => $id,
+						);
+			$query = 'UPDATE '. $this->getTable() .' set last_poll_date = ? where id = ?';
+			$this->db->Execute($query, $ph);
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	//Update JUST station last_push_date without affecting updated_date, and without creating an EDIT entry in the system_log.
 	function updateLastPushDate( $id, $last_push_date = 0 ) {
 		if ( $id == '' ) {
 			return FALSE;
@@ -1357,7 +1350,7 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 
-	//Update JUST station allowed_date without affecting updated_date, and without creating an EDIT entry in the system_log.
+	//Update JUST station last_partial_push_date without affecting updated_date, and without creating an EDIT entry in the system_log.
 	function updateLastPartialPushDate( $id, $last_partial_push_date = 0 ) {
 		if ( $id == '' ) {
 			return FALSE;
