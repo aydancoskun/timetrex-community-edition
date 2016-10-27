@@ -282,7 +282,7 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 			}
 		}
 
-		$additional_order_fields = array('type_id');
+		$additional_order_fields = array('type_id','in_use');
 
 		$sort_column_aliases = array(
 									 'type' => 'type_id',
@@ -294,11 +294,11 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 			$order = array( 'type_id' => 'asc', 'name' => 'asc');
 			$strict = FALSE;
 		} else {
-			//Always try to order by status first so INACTIVE employees go to the bottom.
+			//Always try to order by type
 			if ( !isset($order['type_id']) ) {
-				$order = Misc::prependArray( array('type_id' => 'asc'), $order );
+				$order['type_id'] = 'asc';
 			}
-			//Always sort by last name,first name after other columns
+			//Always sort by name after other columns
 			if ( !isset($order['name']) ) {
 				$order['name'] = 'asc';
 			}
@@ -308,6 +308,9 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
 
 		$uf = new UserFactory();
+		$pgf = new PolicyGroupFactory();
+		$cgmf = new CompanyGenericMapFactory();
+		$spf = new SchedulePolicyFactory();
 
 		$ph = array(
 					'company_id' => $company_id,
@@ -315,6 +318,15 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 
 		$query = '
 					select 	a.*,
+							(
+								CASE WHEN EXISTS ( select 1 from '. $cgmf->getTable() .' as w, '. $pgf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 160 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0 )
+									THEN 1
+									ELSE
+										CASE WHEN EXISTS ( select 1 from '. $cgmf->getTable() .' as w, '. $spf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 165 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0 )
+										THEN 1 ELSE 0
+										END
+								END
+							) as in_use,
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
 							y.last_name as created_by_last_name,

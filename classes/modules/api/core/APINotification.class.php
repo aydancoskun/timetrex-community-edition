@@ -79,7 +79,7 @@ class APINotification extends APIFactory {
 					}
 
 					$license = new TTLicense();
-					$license_validate = $license->validateLicense( $system_settings['license'] );
+					$license_validate = $license->validateLicense( $system_settings['license'], NULL );
 					$license_message = $license->getFullErrorMessage( $license_validate , TRUE );
 					if ( $license_message != '' ) {
 						$destination_url = 'http://www.timetrex.com/r.php?id=899';

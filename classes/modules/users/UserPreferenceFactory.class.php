@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11018 $
- * $Id: UserPreferenceFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
- * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
+ * $Revision: 11457 $
+ * $Id: UserPreferenceFactory.class.php 11457 2013-11-20 00:40:13Z mikeb $
+ * $Date: 2013-11-19 16:40:13 -0800 (Tue, 19 Nov 2013) $
  */
 
 /**
@@ -1340,6 +1340,7 @@ class UserPreferenceFactory extends Factory {
 										'-1190-start_week_day_display' => TTi18n::gettext('Start Weekday'),
 										//'-1100-enable_email_notification_exception' => TTi18n::gettext('Email Notification Exception'),
 										//'-1110-enable_email_notification_message' => TTi18n::gettext('Email Notification Message'),
+										//'-1110-enable_email_notification_pay_stub' => TTi18n::gettext('Email Notification Pay Stub'),
 										//'-1120-enable_email_notification_home' => TTi18n::gettext('Email Notification Home'),
 
 										'-2000-created_by' => TTi18n::gettext('Created By'),
@@ -1415,6 +1416,7 @@ class UserPreferenceFactory extends Factory {
 
 										'enable_email_notification_exception' => 'EnableEmailNotificationException',
 										'enable_email_notification_message' => 'EnableEmailNotificationMessage',
+										'enable_email_notification_pay_stub' => 'EnableEmailNotificationPayStub',
 										'enable_email_notification_home' => 'EnableEmailNotificationHome',
 
 										//'schedule_icalendar_url' => 'ScheduleIcalendarURL',
@@ -1432,16 +1434,9 @@ class UserPreferenceFactory extends Factory {
 		return $variable_function_map;
 	}
 
-	function getUserObject() {
-		if ( is_object($this->user_obj) ) {
-			return $this->user_obj;
-		} else {
-			$ulf = TTnew( 'UserListFactory' );
-			$this->user_obj = $ulf->getById( $this->getUser() )->getCurrent();
-
-			return $this->user_obj;
-		}
-	}
+    function getUserObject() {
+        return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
+    }
 
 	function getUser() {
 		if ( isset($this->data['user_id']) ) {
@@ -1904,6 +1899,18 @@ class UserPreferenceFactory extends Factory {
 	}
 	function setEnableEmailNotificationMessage($bool) {
 		$this->data['enable_email_notification_message'] = $this->toBool($bool);
+
+		return TRUE;
+	}
+	function getEnableEmailNotificationPayStub() {
+		if ( isset($this->data['enable_email_notification_pay_stub']) ) {
+			return $this->fromBool( $this->data['enable_email_notification_pay_stub'] );
+		}
+
+		return FALSE;
+	}
+	function setEnableEmailNotificationPayStub($bool) {
+		$this->data['enable_email_notification_pay_stub'] = $this->toBool($bool);
 
 		return TRUE;
 	}

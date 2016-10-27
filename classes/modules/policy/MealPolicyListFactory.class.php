@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10065 $
- * $Id: MealPolicyListFactory.class.php 10065 2013-05-30 22:52:46Z ipso $
- * $Date: 2013-05-30 15:52:46 -0700 (Thu, 30 May 2013) $
+ * $Revision: 11545 $
+ * $Id: MealPolicyListFactory.class.php 11545 2013-11-29 02:04:30Z mikeb $
+ * $Date: 2013-11-28 18:04:30 -0800 (Thu, 28 Nov 2013) $
  */
 
 /**
@@ -272,7 +272,7 @@ class MealPolicyListFactory extends MealPolicyFactory implements IteratorAggrega
 			}
 		}
 
-		$additional_order_fields = array('type_id');
+		$additional_order_fields = array('type_id', 'in_use');
 
 		$sort_column_aliases = array(
 									 'type' => 'type_id',
@@ -284,11 +284,11 @@ class MealPolicyListFactory extends MealPolicyFactory implements IteratorAggrega
 			$order = array( 'type_id' => 'asc', 'name' => 'asc');
 			$strict = FALSE;
 		} else {
-			//Always try to order by status first so INACTIVE employees go to the bottom.
+			//Always try to order by type.
 			if ( !isset($order['type_id']) ) {
-				$order = Misc::prependArray( array('type_id' => 'asc'), $order );
+				$order['type_id'] = 'asc';
 			}
-			//Always sort by last name,first name after other columns
+			//Always sort by name after other columns
 			if ( !isset($order['name']) ) {
 				$order['name'] = 'asc';
 			}
@@ -298,6 +298,9 @@ class MealPolicyListFactory extends MealPolicyFactory implements IteratorAggrega
 		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
 
 		$uf = new UserFactory();
+		$pgf = new PolicyGroupFactory();
+		$cgmf = new CompanyGenericMapFactory();
+		$spf = new SchedulePolicyFactory();
 
 		$ph = array(
 					'company_id' => $company_id,
@@ -305,6 +308,15 @@ class MealPolicyListFactory extends MealPolicyFactory implements IteratorAggrega
 
 		$query = '
 					select 	a.*,
+							(
+								CASE WHEN EXISTS ( select 1 from '. $cgmf->getTable() .' as w, '. $pgf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 150 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0 )
+									THEN 1
+									ELSE
+										CASE WHEN EXISTS ( select 1 from '. $spf->getTable() .' as w where w.company_id = a.company_id AND w.meal_policy_id = a.id AND w.deleted = 0 )
+										THEN 1 ELSE 0
+										END
+								END
+							) as in_use,
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
 							y.last_name as created_by_last_name,

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-12-03 12:03-0800\n"
+"POT-Creation-Date: 2013-11-26 16:29-0800\n"
 "PO-Revision-Date: 2007-06-05 14:01-0800\n"
 "Last-Translator: \n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,6 +15,14 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#, fuzzy
+msgid " and "
+msgstr "End"
+
+#, fuzzy
+msgid " expected)"
+msgstr "Selected"
 
 msgid "#"
 msgstr "#"
@@ -224,6 +232,10 @@ msgid "-- Default --"
 msgstr "-- Default --"
 
 #, fuzzy
+msgid "-- Defined By Policy Group --"
+msgstr "Edit Product Group"
+
+#, fuzzy
 msgid "-- Direct Deposit --"
 msgstr "Direct Deposit (EFT)"
 
@@ -233,6 +245,14 @@ msgstr "<Please Choose>"
 
 #, fuzzy
 msgid "-- NONE --"
+msgstr "-- None --"
+
+#, fuzzy
+msgid "-- No Breaks --"
+msgstr "-- None --"
+
+#, fuzzy
+msgid "-- No Meal --"
 msgstr "-- None --"
 
 #, fuzzy
@@ -269,6 +289,9 @@ msgstr "0 Amendments found."
 
 msgid "0.75 for 75 cents/hr"
 msgstr "0.75 for 75 cents/hr"
+
+msgid "1"
+msgstr ""
 
 #, fuzzy
 msgid "1 Hour"
@@ -307,6 +330,9 @@ msgstr "1. License Acceptance"
 
 msgid "1.5 for time and a half"
 msgstr "1.5 for time and a half"
+
+msgid "10"
+msgstr ""
 
 #, fuzzy
 msgid "10 Minutes"
@@ -347,6 +373,9 @@ msgstr ""
 msgid "1st Quarter (This Year)"
 msgstr ""
 
+msgid "2"
+msgstr ""
+
 #, fuzzy
 msgid "2 Hours"
 msgstr "Hours"
@@ -356,6 +385,9 @@ msgid "2 Minutes"
 msgstr "Minutes (135)"
 
 msgid "2 Or More Days Consecutively Worked"
+msgstr ""
+
+msgid "2 Or More Days/Week Consecutively Worked"
 msgstr ""
 
 msgid "2 Weeks"
@@ -386,10 +418,17 @@ msgstr "25Feb2001 (ddmmmyyyy)"
 msgid "2nd"
 msgstr "2nd"
 
+#, fuzzy
+msgid "2nd Consecutive Day Worked"
+msgstr "Effective Days:"
+
 msgid "2nd Quarter (Last Year)"
 msgstr ""
 
 msgid "2nd Quarter (This Year)"
+msgstr ""
+
+msgid "3"
 msgstr ""
 
 #, fuzzy
@@ -397,6 +436,9 @@ msgid "3 Hours"
 msgstr "Hours"
 
 msgid "3 Or More Days Consecutively Worked"
+msgstr ""
+
+msgid "3 Or More Days/Week Consecutively Worked"
 msgstr ""
 
 msgid "3 Weeks"
@@ -412,13 +454,23 @@ msgstr "Minutes (135)"
 msgid "3rd"
 msgstr "3rd"
 
+#, fuzzy
+msgid "3rd Consecutive Day Worked"
+msgstr "First Day Worked:"
+
 msgid "3rd Quarter (Last Year)"
 msgstr ""
 
 msgid "3rd Quarter (This Year)"
 msgstr ""
 
+msgid "4"
+msgstr ""
+
 msgid "4 Or More Days Consecutively Worked"
+msgstr ""
+
+msgid "4 Or More Days/Week Consecutively Worked"
 msgstr ""
 
 msgid "4 Weeks"
@@ -455,10 +507,17 @@ msgstr "Other"
 msgid "4th"
 msgstr "4th"
 
+#, fuzzy
+msgid "4th Consecutive Day Worked"
+msgstr "Effective Days:"
+
 msgid "4th Quarter (Last Year)"
 msgstr ""
 
 msgid "4th Quarter (This Year)"
+msgstr ""
+
+msgid "5"
 msgstr ""
 
 #, fuzzy
@@ -466,6 +525,9 @@ msgid "5 Minutes"
 msgstr "Minutes (135)"
 
 msgid "5 Or More Days Consecutively Worked"
+msgstr ""
+
+msgid "5 Or More Days/Week Consecutively Worked"
 msgstr ""
 
 msgid "5 Weeks"
@@ -478,10 +540,20 @@ msgid "5th"
 msgstr "5th"
 
 #, fuzzy
+msgid "5th Consecutive Day Worked"
+msgstr "Effective Days:"
+
+msgid "6"
+msgstr ""
+
+#, fuzzy
 msgid "6 Hours"
 msgstr "Hours"
 
 msgid "6 Or More Days Consecutively Worked"
+msgstr ""
+
+msgid "6 Or More Days/Week Consecutively Worked"
 msgstr ""
 
 msgid "6 Weeks"
@@ -490,7 +562,17 @@ msgstr "6 Weeks"
 msgid "6. Administrator User"
 msgstr "6. Administrator User"
 
+#, fuzzy
+msgid "6th Consecutive Day Worked"
+msgstr "Effective Days:"
+
+msgid "7"
+msgstr ""
+
 msgid "7 Or More Days Consecutively Worked"
+msgstr ""
+
+msgid "7 Or More Days/Week Consecutively Worked"
 msgstr ""
 
 #, fuzzy
@@ -505,6 +587,13 @@ msgid "72 Hours"
 msgstr "Hours"
 
 #, fuzzy
+msgid "7th Consecutive Day Worked"
+msgstr "Effective Days:"
+
+msgid "8"
+msgstr ""
+
+#, fuzzy
 msgid "8 Weeks"
 msgstr "2 Weeks"
 
@@ -516,6 +605,9 @@ msgstr "8:09 PM GMT"
 
 msgid "8:09 pm"
 msgstr "8:09 pm"
+
+msgid "9"
+msgstr ""
 
 #, fuzzy
 msgid "9 Weeks"
@@ -612,6 +704,10 @@ msgstr ""
 
 msgid "About"
 msgstr "About"
+
+#, fuzzy
+msgid "Above Average"
+msgstr "Advanced Percent"
 
 msgid "Above Table"
 msgstr ""
@@ -731,7 +827,16 @@ msgstr "Absent:"
 msgid "Absent:"
 msgstr "Absent:"
 
+msgid "Academic"
+msgstr ""
+
 msgid "Access from station Allowed"
+msgstr ""
+
+msgid "Accident/Injury"
+msgstr ""
+
+msgid "Accolade"
 msgstr ""
 
 msgid "Accommodation and Food Services"
@@ -813,6 +918,10 @@ msgstr "Accrual Total Minimum"
 msgid "Accrual Type"
 msgstr "Accrual Policy"
 
+#, fuzzy
+msgid "Accrual Type:"
+msgstr "Accrual Policy"
+
 msgid "Accrual account is invalid"
 msgstr "Accrual account is invalid"
 
@@ -852,6 +961,9 @@ msgstr "Employee"
 
 msgid "Accumulated Time"
 msgstr "Accumulated Time"
+
+msgid "Aceh"
+msgstr ""
 
 msgid "Ack Date"
 msgstr "Ack Date"
@@ -1192,6 +1304,13 @@ msgstr "Advanced Percent"
 msgid "Advanced: Fixed"
 msgstr "Advance"
 
+msgid "Affordable Care"
+msgstr ""
+
+#, fuzzy
+msgid "Affordable Care Report"
+msgstr "Job Summary Report"
+
 msgid "Afghanistan"
 msgstr "Afghanistan"
 
@@ -1215,6 +1334,10 @@ msgstr ""
 
 msgid "After:"
 msgstr "After:"
+
+#, fuzzy
+msgid "Age"
+msgstr "Aug"
 
 #, fuzzy
 msgid "Age 65/Blind"
@@ -1324,7 +1447,8 @@ msgstr "Selected Groups"
 msgid "All Groups"
 msgstr "Job Groups"
 
-msgid "All In (incl. Lunch)"
+#, fuzzy
+msgid "All In (incl. Lunch/Break)"
 msgstr "All In (incl. Lunch)"
 
 #, fuzzy
@@ -1335,7 +1459,8 @@ msgstr "Job Groups"
 msgid "All Jobs"
 msgstr "Jobs"
 
-msgid "All Out (incl. Lunch)"
+#, fuzzy
+msgid "All Out (incl. Lunch/Break)"
 msgstr "All Out (incl. Lunch)"
 
 msgid "All Punches"
@@ -1532,6 +1657,16 @@ msgstr "American Samoa"
 msgid "Amount"
 msgstr "Amount"
 
+#, fuzzy
+msgid "Amount Owed"
+msgstr "Amount"
+
+msgid "Amount Owed By Client/Year/Quarter/Month"
+msgstr ""
+
+msgid "Amount Owed By Year/Quarter/Month"
+msgstr ""
+
 msgid "Amount Type:"
 msgstr "Amount Type:"
 
@@ -1630,6 +1765,11 @@ msgstr "Annual Wage Base:"
 msgid "Annually"
 msgstr ""
 
+msgid ""
+"Another Pay Stub Amendment already exists for the same employee, account, "
+"effective date and amount"
+msgstr ""
+
 msgid "Antarctica"
 msgstr "Antarctica"
 
@@ -1655,8 +1795,250 @@ msgstr ""
 msgid "Apayao"
 msgstr ""
 
+msgid "Applicant Education Course"
+msgstr ""
+
+msgid ""
+"Applicant Education Course Information By Job Vacancy/Status/Applicant/"
+"Education"
+msgstr ""
+
+#, fuzzy
+msgid "Applicant Education End Date"
+msgstr "Transaction End Date:"
+
+msgid "Applicant Education Grade/Score"
+msgstr ""
+
+msgid "Applicant Education Graduation Date"
+msgstr ""
+
+msgid "Applicant Education Institute"
+msgstr ""
+
+msgid "Applicant Education Major/Specialization"
+msgstr ""
+
+msgid "Applicant Education Minor"
+msgstr ""
+
+#, fuzzy
+msgid "Applicant Education Start Date"
+msgstr "Transaction Start Date:"
+
+msgid "Applicant History Address 1"
+msgstr ""
+
+msgid "Applicant History Address 2"
+msgstr ""
+
+msgid "Applicant History City"
+msgstr ""
+
+msgid "Applicant History Country"
+msgstr ""
+
+msgid "Applicant History Employ End Date"
+msgstr ""
+
+msgid "Applicant History Employ Start Date"
+msgstr ""
+
+#, fuzzy
+msgid "Applicant History Location End Date"
+msgstr "Transaction End Date:"
+
+#, fuzzy
+msgid "Applicant History Location Start Date"
+msgstr "Transaction Start Date:"
+
+msgid "Applicant History Postal Code"
+msgstr ""
+
+#, fuzzy
+msgid "Applicant History Province/State"
+msgstr "Invalid Province/State"
+
+msgid "Applicant History Title"
+msgstr ""
+
+msgid "Applicant History Wage"
+msgstr ""
+
+msgid "Applicant History Wage Type"
+msgstr ""
+
+msgid "Applicant Information By Job Vacancy/Status"
+msgstr ""
+
+msgid "Applicant Information By Status/Job Vacancy"
+msgstr ""
+
+#, fuzzy
+msgid "Applicant Language"
+msgstr "Language"
+
+msgid "Applicant Language Competency"
+msgstr ""
+
+#, fuzzy
+msgid "Applicant Language Description"
+msgstr "Description"
+
+msgid "Applicant Language Fluency"
+msgstr ""
+
+msgid "Applicant Language Information By Applicant/License/Job Vacancy/Status"
+msgstr ""
+
+msgid "Applicant License Expiry Date"
+msgstr ""
+
+msgid "Applicant License Information By Applicant/License/Job Vacancy/Status"
+msgstr ""
+
+msgid "Applicant License Issued Date"
+msgstr ""
+
+msgid "Applicant License Number"
+msgstr ""
+
+#, fuzzy
+msgid "Applicant License Type"
+msgstr "Incorrect Type"
+
+msgid "Applicant Membership"
+msgstr ""
+
+msgid "Applicant Membership Amount"
+msgstr ""
+
+msgid "Applicant Membership Currency"
+msgstr ""
+
+msgid ""
+"Applicant Membership Information By Applicant/License/Job Vacancy/Status"
+msgstr ""
+
+msgid "Applicant Membership Ownership"
+msgstr ""
+
+msgid "Applicant Membership Renewal Date"
+msgstr ""
+
+msgid "Applicant Membership Start Date"
+msgstr ""
+
+#, fuzzy
+msgid "Applicant Name"
+msgstr "Client Name:"
+
+msgid "Applicant Qualification Skill"
+msgstr ""
+
+msgid ""
+"Applicant Qualification Skill Information By Applicant/Skill/Job Vacancy/"
+"Status"
+msgstr ""
+
+msgid "Applicant Reference Address 1"
+msgstr ""
+
+msgid "Applicant Reference Address 2"
+msgstr ""
+
+msgid "Applicant Reference City"
+msgstr ""
+
+msgid "Applicant Reference Country"
+msgstr ""
+
+msgid "Applicant Reference First Name"
+msgstr ""
+
+msgid "Applicant Reference Home Email"
+msgstr ""
+
+msgid "Applicant Reference Home Phone"
+msgstr ""
+
+msgid "Applicant Reference Known Since"
+msgstr ""
+
+msgid "Applicant Reference Last Name"
+msgstr ""
+
+msgid "Applicant Reference Mobile Phone"
+msgstr ""
+
+#, fuzzy
+msgid "Applicant Reference Postal Code"
+msgstr "City, Province, Postal Code"
+
+#, fuzzy
+msgid "Applicant Reference Province/State"
+msgstr "Invalid Province/State"
+
+msgid "Applicant Reference Type"
+msgstr ""
+
+msgid "Applicant Reference Work Email"
+msgstr ""
+
+msgid "Applicant Reference Work Phone"
+msgstr ""
+
+#, fuzzy
+msgid "Applicant Skill Description"
+msgstr "Description"
+
+msgid "Applicant Skill Experience"
+msgstr ""
+
+msgid "Applicant Skill Expiry Date"
+msgstr ""
+
+msgid "Applicant Skill First Used Date"
+msgstr ""
+
+msgid "Applicant Skill Last Used Date"
+msgstr ""
+
+msgid "Applicant Skill Proficiency"
+msgstr ""
+
+#, fuzzy
+msgid "Applicant Status"
+msgstr "Filing Status:"
+
+#, fuzzy
+msgid "Applicant Summary By Job Title"
+msgstr "Punch Summary"
+
+msgid "Applicant Summary By Job Title/Month"
+msgstr ""
+
+#, fuzzy
+msgid "Applicant Summary By Job Vacancy"
+msgstr "Punch Summary Report"
+
+#, fuzzy
+msgid "Application Priority"
+msgstr "Invalid Priority"
+
+#, fuzzy
+msgid "Application Status"
+msgstr "Filing Status:"
+
+#, fuzzy
+msgid "Application Type"
+msgstr "Station Type"
+
 msgid "Apply Preset"
 msgstr "Apply Preset"
+
+msgid "Apprenticeship"
+msgstr ""
 
 msgid "Apr"
 msgstr "Apr"
@@ -1808,6 +2190,10 @@ msgstr "Edit Employee"
 msgid "Audit By Object"
 msgstr ""
 
+#, fuzzy
+msgid "Audit Records By Object/Action/Employee"
+msgstr "Edit Employee"
+
 msgid "Audit Trail"
 msgstr "Audit Trail"
 
@@ -1874,6 +2260,10 @@ msgid "Authorize"
 msgstr "Authorize"
 
 #, fuzzy
+msgid "Authorize Expense"
+msgstr "Authorize"
+
+#, fuzzy
 msgid "Authorize TimeSheet"
 msgstr "View TimeSheet"
 
@@ -1885,10 +2275,6 @@ msgstr ""
 
 msgid "Auto Detect Meals By"
 msgstr ""
-
-#, fuzzy
-msgid "Auto Pilot"
-msgstr "Auto-Pilot:"
 
 msgid "Auto Update"
 msgstr "Auto Update"
@@ -1912,10 +2298,14 @@ msgstr ""
 msgid "Auto-Pilot:"
 msgstr "Auto-Pilot:"
 
+#, fuzzy
+msgid "Auto-Punch"
+msgstr "Out Punch"
+
 msgid "Auto-submitting in"
 msgstr ""
 
-msgid "Automatic Client Station Setup"
+msgid "Automatic Experience"
 msgstr ""
 
 msgid "Automatic Refresh:"
@@ -1927,8 +2317,44 @@ msgstr ""
 msgid "Automatically created by TimeTrex"
 msgstr ""
 
+msgid "Availability"
+msgstr ""
+
+#, fuzzy
+msgid "Availability is invalid"
+msgstr "Billable Rate is invalid"
+
 msgid "Available Balance:"
 msgstr "Available Balance:"
+
+#, fuzzy
+msgid "Available Days Of Week"
+msgstr "Day Of Week:"
+
+#, fuzzy
+msgid "Available Hours"
+msgstr "Insurable Hours:"
+
+msgid "Available Hours Per Week (Maximum)"
+msgstr ""
+
+msgid "Available Hours Per Week (Minimum)"
+msgstr ""
+
+#, fuzzy
+msgid "Available Start Date"
+msgstr "Job Start Date:"
+
+msgid "Available for Immediate Drug Test"
+msgstr ""
+
+#, fuzzy
+msgid "Available hours per week (maximum) must only be digits"
+msgstr "Employee number must only be digits"
+
+#, fuzzy
+msgid "Available hours per week (minimum) must only be digits"
+msgstr "Employee number must only be digits"
 
 #, fuzzy
 msgid "Avellino"
@@ -1944,6 +2370,10 @@ msgstr "Bad Quantity Rate:"
 #, fuzzy
 msgid "Average Billable Rate"
 msgstr "Billable Rate"
+
+#, fuzzy
+msgid "Average FTEs/Year"
+msgstr "Average Time / Week:"
 
 msgid "Average Time / Week:"
 msgstr "Average Time / Week:"
@@ -1975,6 +2405,9 @@ msgstr ""
 #, fuzzy
 msgid "Back"
 msgstr "Bank"
+
+msgid "Background Check"
+msgstr ""
 
 msgid "Backordered"
 msgstr ""
@@ -2179,6 +2612,10 @@ msgstr "Base Currency:"
 msgid "Base price is invalid"
 msgstr "User is invalid"
 
+#, fuzzy
+msgid "Basic"
+msgstr "Balance"
+
 msgid "Basic Search"
 msgstr "Basic Search"
 
@@ -2200,6 +2637,10 @@ msgstr "Bahamas"
 
 msgid "Bath and North East Somerset"
 msgstr ""
+
+#, fuzzy
+msgid "Bcc Address"
+msgstr "Bcc Address:"
 
 msgid "Bcc Address:"
 msgstr "Bcc Address:"
@@ -2229,6 +2670,10 @@ msgstr "Final Pay Period Ending Date:"
 msgid "Before Pay Period Transaction Date"
 msgstr "Advance Transaction Date:"
 
+#, fuzzy
+msgid "Being Reviewed"
+msgstr "Under Review"
+
 msgid "Belarus"
 msgstr "Belarus"
 
@@ -2243,6 +2688,10 @@ msgstr "Belize"
 
 msgid "Belluno"
 msgstr ""
+
+#, fuzzy
+msgid "Below Average"
+msgstr "Average"
 
 #, fuzzy
 msgid "Below Table"
@@ -2386,6 +2835,9 @@ msgstr ""
 msgid "Birth Date"
 msgstr "Birth Date"
 
+msgid "Birth Date (Anniversary)"
+msgstr ""
+
 msgid "Birth Date:"
 msgstr "Birth Date:"
 
@@ -2419,6 +2871,10 @@ msgstr "Monaco"
 msgid "Bocas del Toro"
 msgstr ""
 
+#, fuzzy
+msgid "Body"
+msgstr "Body:"
+
 msgid "Body:"
 msgstr "Body:"
 
@@ -2443,6 +2899,9 @@ msgid "Bolzano"
 msgstr ""
 
 msgid "Bookmark This Page!"
+msgstr ""
+
+msgid "Boolean"
 msgstr ""
 
 msgid "Bosnia and Herzegovina"
@@ -2506,6 +2965,22 @@ msgid "Box 14 (Other):"
 msgstr ""
 
 #, fuzzy
+msgid "Box 14a"
+msgstr "Box"
+
+#, fuzzy
+msgid "Box 14b"
+msgstr "Box"
+
+#, fuzzy
+msgid "Box 14c"
+msgstr "Box"
+
+#, fuzzy
+msgid "Box 14d"
+msgstr "Box"
+
+#, fuzzy
 msgid "Box Dimensions"
 msgstr "Dimension Unit:"
 
@@ -2526,6 +3001,10 @@ msgstr ""
 
 msgid "Branch"
 msgstr "Branch"
+
+#, fuzzy
+msgid "Branch Code"
+msgstr "Branch:"
 
 msgid "Branch List"
 msgstr "Branch List"
@@ -2652,9 +3131,6 @@ msgstr "Burundi"
 msgid "Bury"
 msgstr ""
 
-msgid "Business"
-msgstr ""
-
 msgid "Business / Employer Identification Number:"
 msgstr "Business / Employer Identification Number:"
 
@@ -2664,6 +3140,10 @@ msgstr "Routing Number:"
 
 msgid "Business Number is too short or too long"
 msgstr "Business Number is too short or too long"
+
+#, fuzzy
+msgid "By Employee"
+msgstr "Employee"
 
 #, fuzzy
 msgid "By Pay Period"
@@ -2750,6 +3230,13 @@ msgstr "Calculate"
 
 msgid "Calculate Accruals Immediately For The Following Dates"
 msgstr ""
+
+msgid "Calculate Custom Column Filters..."
+msgstr ""
+
+#, fuzzy
+msgid "Calculate Custom Columns..."
+msgstr "Schedule Adjustment"
 
 #, fuzzy
 msgid "Calculate PS Adjustment"
@@ -2938,6 +3425,9 @@ msgstr ""
 msgid "Cash"
 msgstr "Cash"
 
+msgid "Cashier Check/Money Order"
+msgstr ""
+
 msgid "Castlereagh"
 msgstr ""
 
@@ -3068,6 +3558,10 @@ msgstr ""
 
 msgid "Chihuahua"
 msgstr ""
+
+#, fuzzy
+msgid "Child"
+msgstr "Chile"
 
 msgid "Chile"
 msgstr "Chile"
@@ -3263,6 +3757,12 @@ msgstr "Clients"
 msgid "Close"
 msgstr "Close"
 
+msgid "Closed (Filled)"
+msgstr ""
+
+msgid "Closed (Not Filled)"
+msgstr ""
+
 #, fuzzy
 msgid "Coahuila"
 msgstr "Croatia"
@@ -3285,6 +3785,9 @@ msgstr "Code is already in use, please enter a different one"
 
 msgid "Code is invalid"
 msgstr "Code is invalid"
+
+msgid "Code is invalid, maximum value exceeded"
+msgstr ""
 
 msgid "Code is too short or too long"
 msgstr "Code is too short or too long"
@@ -3350,6 +3853,10 @@ msgid "Committed"
 msgstr "Committed"
 
 #, fuzzy
+msgid "Community"
+msgstr "Comment"
+
+#, fuzzy
 msgid "Como"
 msgstr "Comoros"
 
@@ -3359,6 +3866,10 @@ msgstr "Comoros"
 msgid "Company"
 msgstr "Company"
 
+#, fuzzy
+msgid "Company Address"
+msgstr "Company Address:"
+
 msgid "Company Address:"
 msgstr "Company Address:"
 
@@ -3367,6 +3878,10 @@ msgstr "Company Administration"
 
 msgid "Company Bank Information"
 msgstr "Company Bank Information"
+
+#, fuzzy
+msgid "Company DBA Name is too short or too long"
+msgstr "Company Name is too short or too long"
 
 msgid "Company Full Name:"
 msgstr "Company Full Name:"
@@ -3388,6 +3903,10 @@ msgid "Company Name:"
 msgstr "Company Name"
 
 #, fuzzy
+msgid "Company Setting - Name"
+msgstr "Company Tax / Deductions"
+
+#, fuzzy
 msgid "Company Settings"
 msgstr "Company Tax / Deductions"
 
@@ -3400,14 +3919,54 @@ msgstr "Company Tax / Deductions"
 msgid "Company Value 1 is too short or too long"
 msgstr "Company Value 1 is too short or too long"
 
+#, fuzzy
+msgid "Company Value 10 is too short or too long"
+msgstr "Company Value 1 is too short or too long"
+
 msgid "Company Value 2 is too short or too long"
 msgstr "Company Value 2 is too short or too long"
+
+#, fuzzy
+msgid "Company Value 3 is too short or too long"
+msgstr "Company Value 1 is too short or too long"
+
+#, fuzzy
+msgid "Company Value 4 is too short or too long"
+msgstr "Company Value 1 is too short or too long"
+
+#, fuzzy
+msgid "Company Value 5 is too short or too long"
+msgstr "Company Value 1 is too short or too long"
+
+#, fuzzy
+msgid "Company Value 6 is too short or too long"
+msgstr "Company Value 1 is too short or too long"
+
+#, fuzzy
+msgid "Company Value 7 is too short or too long"
+msgstr "Company Value 1 is too short or too long"
+
+#, fuzzy
+msgid "Company Value 8 is too short or too long"
+msgstr "Company Value 1 is too short or too long"
+
+#, fuzzy
+msgid "Company Value 9 is too short or too long"
+msgstr "Company Value 1 is too short or too long"
 
 msgid "Company is invalid"
 msgstr "Company is invalid"
 
 msgid "Company:"
 msgstr "Company:"
+
+#, fuzzy
+msgid "Competency"
+msgstr "Completed"
+
+#, fuzzy
+msgid "Competency is invalid"
+msgstr "Company is invalid"
 
 #, fuzzy
 msgid "Complete"
@@ -3445,8 +4004,8 @@ msgstr "Conflicting end date"
 msgid "Conflicting start date"
 msgstr "Conflicting start date"
 
-msgid "Conflicting start time"
-msgstr "Conflicting start time"
+msgid "Conflicting start/end time, schedule already exists for this employee"
+msgstr ""
 
 msgid "Conflicting transaction date"
 msgstr "Conflicting transaction date"
@@ -3494,6 +4053,9 @@ msgstr ""
 msgid "Construction"
 msgstr "CPP Contributions"
 
+msgid "Contact First Name At Company"
+msgstr ""
+
 msgid "Contact Information"
 msgstr "Contact Information"
 
@@ -3516,8 +4078,47 @@ msgstr "Contact Information"
 msgid "Contact Information By Hierarchy/Branch/Department/Employee"
 msgstr "Contact Information"
 
+msgid "Contact Last Name At Company"
+msgstr ""
+
+#, fuzzy
+msgid "Contact Mobile Phone"
+msgstr "Mobile Phone"
+
+#, fuzzy
+msgid "Contact Title"
+msgstr "Contacts"
+
+#, fuzzy
+msgid "Contact Title contains invalid characters"
+msgstr "City contains invalid characters"
+
+#, fuzzy
+msgid "Contact Title is too short or too long"
+msgstr "Code is too short or too long"
+
 msgid "Contact User is invalid"
 msgstr "Contact User is invalid"
+
+#, fuzzy
+msgid "Contact Work Email"
+msgstr "Work Email"
+
+#, fuzzy
+msgid "Contact Work Phone"
+msgstr "Work Phone"
+
+#, fuzzy
+msgid "Contact mobile phone number is invalid"
+msgstr "Mobile phone number is invalid"
+
+#, fuzzy
+msgid "Contact work Email address is invalid"
+msgstr "Work Email address is invalid"
+
+#, fuzzy
+msgid "Contact work phone number is invalid"
+msgstr "Work phone number is invalid"
 
 msgid "Contacts"
 msgstr "Contacts"
@@ -3570,6 +4171,9 @@ msgstr "Colombia"
 msgid "Cornwall"
 msgstr ""
 
+msgid "Corporate"
+msgstr ""
+
 msgid "Corrected"
 msgstr "Corrected"
 
@@ -3610,7 +4214,8 @@ msgstr "Costa Rica"
 msgid "Cotabato"
 msgstr "Contacts"
 
-msgid "Cote D'Ivoire"
+#, fuzzy
+msgid "Cote D`Ivoire"
 msgstr "Cote D'Ivoire"
 
 #, fuzzy
@@ -3626,6 +4231,10 @@ msgstr "Country:"
 #, fuzzy
 msgid "County Rate"
 msgstr "County Rate:"
+
+#, fuzzy
+msgid "Course"
+msgstr "Hours"
 
 #, fuzzy
 msgid "Coventry"
@@ -3683,7 +4292,15 @@ msgstr "Credit Amount"
 msgid "Credit Card"
 msgstr "Credit Card"
 
+#, fuzzy
+msgid "Credit Card - Company"
+msgstr "Credit Card - Manual"
+
 msgid "Credit Card - Manual"
+msgstr "Credit Card - Manual"
+
+#, fuzzy
+msgid "Credit Card - Personal"
 msgstr "Credit Card - Manual"
 
 #, fuzzy
@@ -3708,6 +4325,10 @@ msgstr ""
 
 msgid "Cremona"
 msgstr ""
+
+#, fuzzy
+msgid "Criminal Record"
+msgstr "Employee Record"
 
 #, fuzzy
 msgid "Criteria"
@@ -3749,11 +4370,27 @@ msgstr "Currencies"
 msgid "Currency"
 msgstr "Currency"
 
+#, fuzzy
+msgid "Currency Conversion Rate"
+msgstr "Incorrect Conversion Rate"
+
+#, fuzzy
+msgid "Currency ISO Code"
+msgstr "Currency"
+
 msgid "Currency List"
+msgstr "Currency List"
+
+#, fuzzy
+msgid "Currency Rate"
 msgstr "Currency List"
 
 msgid "Currency already exists"
 msgstr "Currency already exists"
+
+#, fuzzy
+msgid "Currency is not specified"
+msgstr "Address (Line 1):"
 
 msgid "Currency:"
 msgstr "Currency:"
@@ -3763,6 +4400,10 @@ msgstr "Current Balance:"
 
 msgid "Current Currency"
 msgstr "Current Currency"
+
+#, fuzzy
+msgid "Current Employer"
+msgstr "Department Employees"
 
 msgid "Current Exceptions"
 msgstr "Current Exceptions"
@@ -3784,6 +4425,10 @@ msgstr "Current Stock:"
 msgid "Current password is incorrect"
 msgstr "User Name or Password is incorrect"
 
+#, fuzzy
+msgid "Currently Employed"
+msgstr "Employee"
+
 msgid "Cuscatlan"
 msgstr ""
 
@@ -3792,8 +4437,56 @@ msgid "Custom Dates"
 msgstr "Customer ID:"
 
 #, fuzzy
+msgid "Custom Filter"
+msgstr "Customer ID:"
+
+#, fuzzy
+msgid "Custom Formula"
+msgstr "Customer ID:"
+
+#, fuzzy
 msgid "Custom Pay Periods"
 msgstr "Edit Pay Period"
+
+#, fuzzy
+msgid "Custom Variable 1"
+msgstr "Palau"
+
+#, fuzzy
+msgid "Custom Variable 10"
+msgstr "Palau"
+
+#, fuzzy
+msgid "Custom Variable 2"
+msgstr "Palau"
+
+#, fuzzy
+msgid "Custom Variable 3"
+msgstr "Palau"
+
+#, fuzzy
+msgid "Custom Variable 4"
+msgstr "Palau"
+
+#, fuzzy
+msgid "Custom Variable 5"
+msgstr "Palau"
+
+#, fuzzy
+msgid "Custom Variable 6"
+msgstr "Palau"
+
+#, fuzzy
+msgid "Custom Variable 7"
+msgstr "Palau"
+
+#, fuzzy
+msgid "Custom Variable 8"
+msgstr "Palau"
+
+#, fuzzy
+msgid "Custom Variable 9"
+msgstr "Palau"
 
 #, fuzzy
 msgid "Custom frequency data is invalid"
@@ -3802,6 +4495,10 @@ msgstr "Password reset date is invalid"
 #, fuzzy
 msgid "Custom frequency is invalid"
 msgstr "Company is invalid"
+
+#, fuzzy
+msgid "Customer ID"
+msgstr "Customer ID:"
 
 msgid "Customer ID:"
 msgstr "Customer ID:"
@@ -3821,6 +4518,9 @@ msgid "Czech Republic"
 msgstr "Czech Republic"
 
 msgid "D.C."
+msgstr ""
+
+msgid "DBA"
 msgstr ""
 
 msgid "DECLINED"
@@ -4059,6 +4759,10 @@ msgid "Debit Amount"
 msgstr "Debit Amount"
 
 #, fuzzy
+msgid "Debit Card"
+msgstr "Credit Card"
+
+#, fuzzy
 msgid "Debits By Client"
 msgstr "Edit Client"
 
@@ -4135,6 +4839,10 @@ msgstr "Decline"
 msgid "Declined"
 msgstr "Decline"
 
+#, fuzzy
+msgid "Declined Offer"
+msgstr "Decline"
+
 msgid "Deduction"
 msgstr "Deduction"
 
@@ -4167,6 +4875,10 @@ msgstr "Default"
 msgid "Default Branch"
 msgstr "Default Branch"
 
+#, fuzzy
+msgid "Default Branch Code"
+msgstr "Default Branch:"
+
 msgid "Default Branch:"
 msgstr "Default Branch:"
 
@@ -4184,6 +4896,10 @@ msgstr "Default Currency:"
 
 msgid "Default Department"
 msgstr "Default Department"
+
+#, fuzzy
+msgid "Default Department Code"
+msgstr "Default Department:"
 
 msgid "Default Department:"
 msgstr "Default Department:"
@@ -4307,6 +5023,10 @@ msgstr "Department"
 msgid "Department Branch is invalid"
 msgstr "Department Branch is invalid"
 
+#, fuzzy
+msgid "Department Code"
+msgstr "Department:"
+
 msgid "Department Employees"
 msgstr "Department Employees"
 
@@ -4341,6 +5061,10 @@ msgid "Departments Currently Selected, Click the arrow to modify."
 msgstr "Recipients Currently Selected, Click the arrow to modify."
 
 #, fuzzy
+msgid "Dependant"
+msgstr "Dependants:"
+
+#, fuzzy
 msgid "Dependent Allowances"
 msgstr "Dependant Allowances:"
 
@@ -4368,8 +5092,23 @@ msgstr ""
 msgid "Derry"
 msgstr ""
 
+msgid "Describe criminal convictions"
+msgstr ""
+
+#, fuzzy
+msgid "Describe criminal convictions is invalid"
+msgstr "Description is invalid"
+
 msgid "Description"
 msgstr "Description"
+
+#, fuzzy
+msgid "Description (Private)"
+msgstr "Description is invalid"
+
+#, fuzzy
+msgid "Description (Private):"
+msgstr "Description:"
 
 msgid "Description is invalid"
 msgstr "Description is invalid"
@@ -4385,6 +5124,9 @@ msgid "Description:"
 msgstr "Description:"
 
 msgid "Desktop"
+msgstr ""
+
+msgid "Desktop PC"
 msgstr ""
 
 msgid "Detailed"
@@ -4446,11 +5188,18 @@ msgstr "Disable Rounding:"
 msgid "Disable rounding."
 msgstr "Disable Rounding:"
 
+msgid "Disable: Screensaver"
+msgstr ""
+
 msgid "Disabled"
 msgstr "Disabled"
 
 msgid "Disabled - Failed"
 msgstr "Disabled - Failed"
+
+#, fuzzy
+msgid "Discipline"
+msgstr "Decline"
 
 msgid "Display Balance on Pay Stub"
 msgstr ""
@@ -4577,6 +5326,10 @@ msgid "Document List"
 msgstr "Document List"
 
 #, fuzzy
+msgid "Document Management"
+msgstr "Document Attachment List"
+
+#, fuzzy
 msgid "Document Revision"
 msgstr "Document List"
 
@@ -4591,6 +5344,9 @@ msgstr "Document:"
 
 msgid "Documents"
 msgstr "Documents"
+
+msgid "Doing Business As:"
+msgstr ""
 
 msgid "Dominica"
 msgstr "Dominica"
@@ -4639,14 +5395,28 @@ msgstr "Download v%1 Now"
 msgid "Draft"
 msgstr "Draft"
 
+#, fuzzy
+msgid "Driver"
+msgstr "Driver:"
+
 msgid "Driver:"
 msgstr "Driver:"
+
+msgid "Drivers License"
+msgstr ""
+
+msgid "Drug Test"
+msgstr ""
 
 msgid "Dudley"
 msgstr ""
 
 msgid "Due Date"
 msgstr "Due Date"
+
+#, fuzzy
+msgid "Due date should be after start date"
+msgstr "Incorrect start date"
 
 msgid "Dumfries and Galloway"
 msgstr ""
@@ -4703,6 +5473,9 @@ msgstr "EI Premiums"
 
 msgid "ENABLED"
 msgstr "ENABLED"
+
+msgid "ERROR"
+msgstr ""
 
 msgid "ERROR: Employee TimeSheet(s) not available!"
 msgstr "ERROR: Employee TimeSheet(s) not available!"
@@ -4763,6 +5536,9 @@ msgstr ""
 msgid "ERROR: Uploading files is disabled in DEMO mode."
 msgstr ""
 
+msgid "EXPIRED"
+msgstr ""
+
 msgid "Each Day (Split at Midnight)"
 msgstr ""
 
@@ -4772,6 +5548,12 @@ msgstr "Earned Income Credit (EIC) (Line 9):"
 
 msgid "Earning"
 msgstr "Earning"
+
+msgid "Earning Adds, Deduction Subtracts"
+msgstr ""
+
+msgid "Earning Subtracts, Deduction Adds"
+msgstr ""
 
 msgid "Earnings"
 msgstr "Earnings"
@@ -5150,6 +5932,26 @@ msgstr ""
 msgid "Edit permission denied, record does not exist"
 msgstr ""
 
+#, fuzzy
+msgid "Education"
+msgstr "Deduction"
+
+#, fuzzy
+msgid "Education End Date"
+msgstr "Transaction End Date:"
+
+#, fuzzy
+msgid "Education Information By Course/Employee"
+msgstr "Bank Information"
+
+#, fuzzy
+msgid "Education Information By Employee"
+msgstr "Bank Information"
+
+#, fuzzy
+msgid "Education Start Date"
+msgstr "Transaction Start Date:"
+
 msgid "Educational Services"
 msgstr ""
 
@@ -5195,6 +5997,10 @@ msgstr "Effective Days:"
 msgid "Effective Days"
 msgstr "Effective Days:"
 
+#, fuzzy
+msgid "Effective date is invalid"
+msgstr "Hire date is invalid"
+
 msgid "Egypt"
 msgstr "Egypt"
 
@@ -5218,6 +6024,9 @@ msgstr "TimeSheet"
 #, fuzzy
 msgid "Eligibility Criteria"
 msgstr "Employee Title"
+
+msgid "Eligible Hours of Service"
+msgstr ""
 
 msgid "Eligible Retiring Allowance (26)"
 msgstr ""
@@ -5269,6 +6078,10 @@ msgstr "Enable %1 Update Notifications:"
 msgid "Email Notifications"
 msgstr "Enable %1 Update Notifications:"
 
+#, fuzzy
+msgid "Email Pay Stub to"
+msgstr "Employee Pay Stub"
+
 msgid "Email address is invalid"
 msgstr "Email address is invalid"
 
@@ -5283,6 +6096,10 @@ msgstr "Email body is too short or too long"
 
 msgid "Email from address is too short or too long"
 msgstr "Email from address is too short or too long"
+
+#, fuzzy
+msgid "Email sent"
+msgstr "Submit Message"
 
 msgid "Email subject is too short or too long"
 msgstr "Email subject is too short or too long"
@@ -5301,6 +6118,10 @@ msgstr "Over Scheduled Hours"
 #, fuzzy
 msgid "Emailing Report"
 msgstr "Employee Detail Report"
+
+#, fuzzy
+msgid "Emergency Contact"
+msgstr "Other Contact:"
 
 msgid "Employee"
 msgstr "Employee"
@@ -5322,8 +6143,28 @@ msgstr "Employee / Spouse Allowances:"
 msgid "Employee Administration"
 msgstr "Employee Administration"
 
+#, fuzzy
+msgid "Employee Annual Wage"
+msgstr "Edit Employee Wage"
+
+#, fuzzy
+msgid "Employee Average Weekly Hours"
+msgstr "Employee Groups"
+
+#, fuzzy
+msgid "Employee Bank Accounts"
+msgstr "Employee Barcodes"
+
 msgid "Employee Barcodes"
 msgstr "Employee Barcodes"
+
+#, fuzzy
+msgid "Employee Birth Date"
+msgstr "Employee's Hire Date:"
+
+#, fuzzy
+msgid "Employee Branch"
+msgstr "Employee Search"
 
 msgid "Employee CPP (16)"
 msgstr "Employee CPP (16)"
@@ -5333,6 +6174,14 @@ msgstr "Employee CPP (Box: 16):"
 
 msgid "Employee CPP:"
 msgstr "Employee CPP:"
+
+#, fuzzy
+msgid "Employee Contact"
+msgstr "Employee Status"
+
+#, fuzzy
+msgid "Employee Contact "
+msgstr "Employee Status"
 
 #, fuzzy
 msgid "Employee Criteria"
@@ -5347,6 +6196,10 @@ msgstr "Employee Information"
 
 msgid "Employee Default settings is invalid"
 msgstr "Employee Default settings is invalid"
+
+#, fuzzy
+msgid "Employee Department"
+msgstr "Total Employee Deduction:"
 
 msgid "Employee Detail"
 msgstr "Employee Detail"
@@ -5364,8 +6217,32 @@ msgid "Employee EI:"
 msgstr "Employee EI:"
 
 #, fuzzy
+msgid "Employee Education"
+msgstr "Employee Deduction"
+
+#, fuzzy
 msgid "Employee Exclude"
 msgstr "Employee Title"
+
+#, fuzzy
+msgid "Employee Expense"
+msgstr "Employee Title"
+
+#, fuzzy
+msgid "Employee Expense Payment Method"
+msgstr "Client Payment Methods"
+
+#, fuzzy
+msgid "Employee Expense Status"
+msgstr "Employee Status"
+
+#, fuzzy
+msgid "Employee Expenses"
+msgstr "Employee Title"
+
+#, fuzzy
+msgid "Employee First Name"
+msgstr "Employee List"
 
 #, fuzzy
 msgid "Employee Generic Data"
@@ -5383,6 +6260,14 @@ msgstr "Employee Groups"
 #, fuzzy
 msgid "Employee Groups Currently Selected, Click the arrow to modify."
 msgstr "Employees Currently Selected, Click the arrow to modify."
+
+#, fuzzy
+msgid "Employee Hire Date"
+msgstr "Employee's Hire Date:"
+
+#, fuzzy
+msgid "Employee Hourly Rate"
+msgstr "Employee Groups"
 
 #, fuzzy
 msgid "Employee Hours"
@@ -5408,11 +6293,39 @@ msgstr "Employee Information Report"
 msgid "Employee Information Summary"
 msgstr "Employee Information Summary"
 
+#, fuzzy
+msgid "Employee Language"
+msgstr "Edit Employee Wage"
+
+#, fuzzy
+msgid "Employee Last Name"
+msgstr "Employee List"
+
+#, fuzzy
+msgid "Employee Licenses"
+msgstr "Employee List"
+
 msgid "Employee List"
 msgstr "Employee List"
 
+#, fuzzy
+msgid "Employee Memberships"
+msgstr "Employee Number"
+
 msgid "Employee Must Work at Least:"
 msgstr "Employee Must Work at Least:"
+
+#, fuzzy
+msgid "Employee Name"
+msgstr "Employee Number"
+
+#, fuzzy
+msgid "Employee Note"
+msgstr "Employee Title"
+
+#, fuzzy
+msgid "Employee Notes"
+msgstr "Employee Titles"
 
 msgid "Employee Number:"
 msgstr "Employee Number:"
@@ -5444,8 +6357,24 @@ msgstr "Employee Preferences"
 msgid "Employee Preferences"
 msgstr "Employee Preferences"
 
+#, fuzzy
+msgid "Employee Qualifications"
+msgstr "Employee Identification"
+
 msgid "Employee Record"
 msgstr "Employee Record"
+
+#, fuzzy
+msgid "Employee Recruitment"
+msgstr "Employee Record"
+
+#, fuzzy
+msgid "Employee Review"
+msgstr "Employee Title"
+
+#, fuzzy
+msgid "Employee Review KPI"
+msgstr "Employee Title"
 
 msgid "Employee Search"
 msgstr "Employee Search"
@@ -5460,6 +6389,10 @@ msgstr "Employee Signature:"
 
 msgid "Employee Signature:"
 msgstr "Employee Signature:"
+
+#, fuzzy
+msgid "Employee Skills"
+msgstr "Employee Titles"
 
 msgid "Employee Status"
 msgstr "Employee Status"
@@ -5487,6 +6420,10 @@ msgstr "Employee Tax / Deduction List"
 msgid "Employee Tax / Deductions"
 msgstr "Employee Tax / Deductions"
 
+#, fuzzy
+msgid "Employee Termination Date"
+msgstr "Termination Date"
+
 msgid "Employee TimeSheet"
 msgstr "Employee TimeSheet"
 
@@ -5501,6 +6438,10 @@ msgstr "Employee Title:"
 
 msgid "Employee Titles"
 msgstr "Employee Titles"
+
+#, fuzzy
+msgid "Employee View"
+msgstr "Employee Title"
 
 #, fuzzy
 msgid "Employee Wage"
@@ -5522,6 +6463,10 @@ msgstr "Employee must be scheduled"
 
 msgid "Employee is already assigned to this hierarchy"
 msgstr "Employee is already assigned to this hierarchy"
+
+#, fuzzy
+msgid "Employee is invalid"
+msgstr "Selected Employee is invalid"
 
 msgid "Employee is not assigned to a Pay Period Schedule."
 msgstr "Employee is not assigned to a Pay Period Schedule."
@@ -5626,11 +6571,19 @@ msgstr "Employer EI"
 msgid "Employer EI:"
 msgstr "Employer EI:"
 
+#, fuzzy
+msgid "Employer Pay Stub"
+msgstr "Employee Pay Stub"
+
 msgid "Employer State ID Number"
 msgstr "Employer State ID Number"
 
 msgid "Employer Total Contributions"
 msgstr "Employer Total Contributions"
+
+#, fuzzy
+msgid "Employment"
+msgstr "Employee"
 
 #, fuzzy
 msgid "Employment Anniversary"
@@ -5640,8 +6593,24 @@ msgid "Employment Income (Box: 14):"
 msgstr "Employment Income (Box: 14):"
 
 #, fuzzy
+msgid "Employment Information By Applicant"
+msgstr "Employee Identification"
+
+#, fuzzy
+msgid "Employment Information By Applicant/Job Vacancy/Status"
+msgstr "Employee Identification"
+
+#, fuzzy
 msgid "Employment Information By Employee"
 msgstr "Employee Identification"
+
+#, fuzzy
+msgid "Employment Status"
+msgstr "Employee Status"
+
+#, fuzzy
+msgid "Employment Status is invalid"
+msgstr "Employee Default settings is invalid"
 
 msgid "Enable %1 Update Notifications:"
 msgstr "Enable %1 Update Notifications:"
@@ -5668,6 +6637,10 @@ msgstr "No Branch"
 #, fuzzy
 msgid "Enable:"
 msgstr "Enabled"
+
+#, fuzzy
+msgid "Enable: Auto-Login"
+msgstr "Bad Quantity"
 
 #, fuzzy
 msgid "Enable: Bad Quantity"
@@ -5709,6 +6682,10 @@ msgid "Enable: Pre-Punch Message"
 msgstr "Total Punches:"
 
 #, fuzzy
+msgid "Enable: Punch Images"
+msgstr "Total Punches:"
+
+#, fuzzy
 msgid "Enable: Quantity"
 msgstr "Bad Quantity"
 
@@ -5716,8 +6693,29 @@ msgstr "Bad Quantity"
 msgid "Enable: Task"
 msgstr "Enabled"
 
+msgid "Enable: WIFI Detection - Alert"
+msgstr ""
+
+msgid "Enable: WIFI Detection - Punch"
+msgstr ""
+
 msgid "Enabled"
 msgstr "Enabled"
+
+#, fuzzy
+msgid "Enabled (Authenticated)"
+msgstr "Bad Quantity"
+
+#, fuzzy
+msgid "Enabled (Optional)"
+msgstr "Options"
+
+#, fuzzy
+msgid "Enabled (Required)"
+msgstr "Payment Required:"
+
+msgid "Enabled (UnAuthenticated)"
+msgstr ""
 
 msgid "Enabled - LDAP Only"
 msgstr ""
@@ -5731,6 +6729,10 @@ msgstr "End"
 msgid "End Date"
 msgstr "End Date"
 
+#, fuzzy
+msgid "End Date/Time"
+msgstr "Criteria"
+
 msgid "End Date:"
 msgstr "End Date:"
 
@@ -5739,7 +6741,15 @@ msgid "End Time"
 msgstr "End Time:"
 
 #, fuzzy
+msgid "End date not specified"
+msgstr "Address (Line 1):"
+
+#, fuzzy
 msgid "End date occurs before start date"
+msgstr "Incorrect start date"
+
+#, fuzzy
+msgid "End date should be after start date"
 msgstr "Incorrect start date"
 
 msgid "End of Pay Period"
@@ -5757,15 +6767,21 @@ msgstr "Enroll Employees"
 msgid "Enroll Subordinate"
 msgstr "Enroll Subordinate"
 
+msgid "Enterprise"
+msgstr ""
+
+msgid "Entrance Interview"
+msgstr ""
+
+#, fuzzy
+msgid "Entry"
+msgstr "Country"
+
 msgid "Equatorial Guinea"
 msgstr "Equatorial Guinea"
 
 msgid "Eritrea"
 msgstr "Eritrea"
-
-#, fuzzy
-msgid "Error generating report..."
-msgstr "Generating Pay Stubs..."
 
 msgid "Escuintla"
 msgstr ""
@@ -5832,6 +6848,29 @@ msgstr "Estonia"
 msgid "Ethiopia"
 msgstr "Ethiopia"
 
+#, fuzzy
+msgid "Ethnic Group"
+msgstr "Edit Policy Group"
+
+#, fuzzy
+msgid "Ethnic Group is invalid"
+msgstr "Policy Group is invalid"
+
+#, fuzzy
+msgid "Ethnic Group: "
+msgstr "Policy Group:"
+
+#, fuzzy
+msgid "Ethnic group already exists"
+msgstr "Type already exists"
+
+#, fuzzy
+msgid "Ethnic group is too short or too long"
+msgstr "Email body is too short or too long"
+
+msgid "Ethnicity"
+msgstr ""
+
 msgid "Exactly as shown in Quickbooks"
 msgstr ""
 
@@ -5842,6 +6881,12 @@ msgid "Exceeded the maximum number of allowed pages."
 msgstr ""
 
 msgid "Excel (CSV)"
+msgstr ""
+
+msgid "Excel/CSV"
+msgstr ""
+
+msgid "Excellent"
 msgstr ""
 
 msgid "Exception"
@@ -5935,6 +6980,10 @@ msgid "Exclude Clients"
 msgstr "Exclude Clients"
 
 #, fuzzy
+msgid "Exclude Columns"
+msgstr "Exclude Clients"
+
+#, fuzzy
 msgid "Exclude Default Branch"
 msgstr "Default Branch"
 
@@ -5965,6 +7014,22 @@ msgstr "Exclude Pay Stub Account is invalid"
 msgid "Exclude Pay Stub Accounts:"
 msgstr "Exclude Pay Stub Accounts:"
 
+#, fuzzy
+msgid "Exclude Pay Stub Amount"
+msgstr "Exclude Pay Stub Accounts:"
+
+#, fuzzy
+msgid "Exclude Pay Stub Units"
+msgstr "Exclude Pay Stub Accounts:"
+
+#, fuzzy
+msgid "Exclude Pay Stub YTD Amount"
+msgstr "Exclude Pay Stub Accounts:"
+
+#, fuzzy
+msgid "Exclude Pay Stub YTD Units"
+msgstr "Exclude Pay Stub Accounts:"
+
 msgid "Exclude Products"
 msgstr "Exclude Products"
 
@@ -5978,6 +7043,10 @@ msgstr "Exclude Jobs"
 
 msgid "Exclude Tax Policy:"
 msgstr "Exclude Tax Policy:"
+
+#, fuzzy
+msgid "Exclude YTD Adjustments"
+msgstr "Time Adjustment"
 
 msgid "Excluded Pay Stub Accounts"
 msgstr "Excluded Pay Stub Accounts"
@@ -5993,6 +7062,10 @@ msgstr "Exclusivity:"
 #, fuzzy
 msgid "Executing Cron Job"
 msgstr "No Job"
+
+#, fuzzy
+msgid "Executive"
+msgstr "Active"
 
 #, fuzzy
 msgid "Exempt Payments"
@@ -6014,11 +7087,80 @@ msgid "Exemptions"
 msgstr "Exceptions"
 
 #, fuzzy
+msgid "Exit Interview"
+msgstr "Edit Invoice"
+
+#, fuzzy
 msgid "Expected Date of Recall"
 msgstr "Expected Date of Recall:"
 
 msgid "Expected Date of Recall:"
 msgstr "Expected Date of Recall:"
+
+#, fuzzy
+msgid "Expected Wage"
+msgstr "Edit Employee Wage"
+
+#, fuzzy
+msgid "Expected Wage Type"
+msgstr "Wage Type"
+
+msgid "Expense"
+msgstr ""
+
+#, fuzzy
+msgid "Expense Policies"
+msgstr "Exception Policies"
+
+#, fuzzy
+msgid "Expense Policy"
+msgstr "Absence Policy"
+
+msgid "Expense Policy Require Receipt"
+msgstr ""
+
+#, fuzzy
+msgid "Expense Policy Type"
+msgstr "Absence Policy"
+
+#, fuzzy
+msgid "Expense Policy is invalid"
+msgstr "Exception Policy is invalid"
+
+msgid "Expense Reimbursement"
+msgstr ""
+
+#, fuzzy
+msgid "Expense Status"
+msgstr "Employee Status"
+
+#, fuzzy
+msgid "Expense Summary"
+msgstr "Employee Summary"
+
+#, fuzzy
+msgid "Expense Tracking"
+msgstr "Job Tracking"
+
+#, fuzzy
+msgid "Expense policy name already exists"
+msgstr "Branch already exists"
+
+#, fuzzy
+msgid "Expenses by Employee/Policy"
+msgstr "Send to Any Employee"
+
+#, fuzzy
+msgid "Experience"
+msgstr "Experience Rate"
+
+#, fuzzy
+msgid "Experience number must only be digits"
+msgstr "Employee number must only be digits"
+
+#, fuzzy
+msgid "Experienced"
+msgstr "Experience Rate"
 
 #, fuzzy
 msgid "Expire Date:"
@@ -6033,6 +7175,10 @@ msgstr "Expiry Date:"
 
 msgid "Expiry Date:"
 msgstr "Expiry Date:"
+
+#, fuzzy
+msgid "Expiry time stamp is invalid"
+msgstr "Estimate Time is invalid"
 
 msgid "Export"
 msgstr "Export"
@@ -6051,15 +7197,18 @@ msgstr "Export"
 msgid "Ext:"
 msgstr "Ext:"
 
+msgid "External "
+msgstr ""
+
+msgid "External Only"
+msgstr ""
+
 #, fuzzy
 msgid "Extra Value is too long"
 msgstr "Note is too long"
 
 msgid "F"
 msgstr "F"
-
-msgid "FAMIS"
-msgstr ""
 
 msgid "FAQ"
 msgstr "FAQ"
@@ -6084,6 +7233,9 @@ msgstr "Failed"
 
 msgid "Failed:"
 msgstr "Failed:"
+
+msgid "Fair"
+msgstr ""
 
 msgid "Falkirk"
 msgstr ""
@@ -6129,6 +7281,10 @@ msgstr "February"
 
 msgid "FedEx"
 msgstr ""
+
+#, fuzzy
+msgid "Federal"
+msgstr "Nepal"
 
 msgid "Federal Additional Deduction:"
 msgstr "Federal Additional Deduction:"
@@ -6207,6 +7363,12 @@ msgstr "Filing Status:"
 #, fuzzy
 msgid "Filter"
 msgstr "Title"
+
+msgid "Filter (Post-Group)"
+msgstr ""
+
+msgid "Filter (Pre-Group)"
+msgstr ""
 
 #, fuzzy
 msgid "Final Pay Period Ending Date"
@@ -6298,11 +7460,19 @@ msgstr "First Name:"
 msgid "First Shift Must Be At Least"
 msgstr ""
 
+#, fuzzy
+msgid "First Used Date"
+msgstr "Hired Date:"
+
 msgid "First name contains invalid characters"
 msgstr "First name contains invalid characters"
 
 msgid "First name is too short or too long"
 msgstr "First name is too short or too long"
+
+#, fuzzy
+msgid "First used date is invalid"
+msgstr "Hire date is invalid"
 
 #, fuzzy
 msgid "FirstName LastName"
@@ -6325,6 +7495,10 @@ msgstr "Fixed Amount"
 #, fuzzy
 msgid "Flag Day"
 msgstr "Last Day"
+
+#, fuzzy
+msgid "Flat Amount"
+msgstr "Claim Amount:"
 
 #, fuzzy
 msgid "Flat Hourly Rate"
@@ -6355,6 +7529,14 @@ msgstr ""
 msgid "Florida"
 msgstr "Friday"
 
+#, fuzzy
+msgid "Fluency"
+msgstr "Frequency"
+
+#, fuzzy
+msgid "Fluency is invalid"
+msgstr "Value is invalid"
+
 msgid "Foggia"
 msgstr ""
 
@@ -6377,6 +7559,10 @@ msgstr "For more information please click here."
 #, fuzzy
 msgid "Force Time Zone:"
 msgstr "Time Zone:"
+
+#, fuzzy
+msgid "Force closing pay period"
+msgstr "Incorrect pay period type"
 
 msgid "Forgot Your Password?"
 msgstr "Forgot Your Password?"
@@ -6439,6 +7625,16 @@ msgstr "Form data has been saved!"
 msgid "Format"
 msgstr "Form"
 
+msgid "Formula (Post-Group)"
+msgstr ""
+
+msgid "Formula (Pre-Group)"
+msgstr ""
+
+#, fuzzy
+msgid "Formula is too short or too long"
+msgstr "Name is too short or too long"
+
 msgid "Frame data DOES NOT exists:"
 msgstr "Frame data DOES NOT exists:"
 
@@ -6499,6 +7695,10 @@ msgstr "Friday-Thursday"
 msgid "From"
 msgstr "From:"
 
+#, fuzzy
+msgid "From Address"
+msgstr "From Address:"
+
 msgid "From Address:"
 msgstr "From Address:"
 
@@ -6527,8 +7727,27 @@ msgid "Full Name:"
 msgstr "Full Name:"
 
 #, fuzzy
+msgid "Full Time"
+msgstr "Full Name"
+
+#, fuzzy
 msgid "Full Upload Frequency:"
 msgstr "Frequency:"
+
+#, fuzzy
+msgid "Full-Time"
+msgstr "Full Name"
+
+msgid "Full-Time Equivalents (FTE)"
+msgstr ""
+
+#, fuzzy
+msgid "Full-Time Equivilent Detail"
+msgstr "Timesheet Detail"
+
+#, fuzzy
+msgid "Full-Time Equivilent Summary"
+msgstr "Timesheet Summary"
 
 msgid "Functions"
 msgstr "Functions"
@@ -6555,6 +7774,10 @@ msgstr "Gateway Credentials"
 
 msgid "Gauteng"
 msgstr ""
+
+#, fuzzy
+msgid "Gender"
+msgstr "PS Amendment"
 
 msgid "General Ledger Accounts"
 msgstr "General Ledger Accounts"
@@ -6602,6 +7825,10 @@ msgid "Generating Chart..."
 msgstr "Generating Pay Stubs..."
 
 #, fuzzy
+msgid "Generating Invoices..."
+msgstr "Generating Pay Stubs..."
+
+#, fuzzy
 msgid "Generating PDF..."
 msgstr "Generating Pay Stubs..."
 
@@ -6621,6 +7848,9 @@ msgid "Generating TimeSheets..."
 msgstr "Print Timesheet"
 
 msgid "Generic Excel/CSV"
+msgstr ""
+
+msgid "Generic Excel/CSV (Advanced)"
 msgstr ""
 
 msgid "Generic Object Mapping"
@@ -6706,6 +7936,9 @@ msgstr ""
 msgid "Government (Multiple Employees/Page)"
 msgstr ""
 
+msgid "Government ID"
+msgstr ""
+
 #, fuzzy
 msgid "Government/Public Administration"
 msgstr "Overtime Policy Administration"
@@ -6718,6 +7951,17 @@ msgstr "Grace Period:"
 
 msgid "Gracias a Dios"
 msgstr ""
+
+msgid "Grade/Score"
+msgstr ""
+
+#, fuzzy
+msgid "Grade/Score must only be digits"
+msgstr "Employee number must only be digits"
+
+#, fuzzy
+msgid "Graduation Date"
+msgstr "Transaction Date"
 
 msgid "Grams (g)"
 msgstr ""
@@ -6741,6 +7985,10 @@ msgstr "Greenland"
 
 msgid "Grenada"
 msgstr "Grenada"
+
+#, fuzzy
+msgid "Gross Amount"
+msgstr "Credit Amount"
 
 msgid "Gross Pay"
 msgstr "Gross Pay"
@@ -6862,6 +8110,13 @@ msgstr "HIGH"
 
 msgid "HOLD"
 msgstr "HOLD"
+
+msgid "HR Manager"
+msgstr ""
+
+#, fuzzy
+msgid "HR Reports"
+msgstr "Reports"
 
 msgid "Hainaut "
 msgstr ""
@@ -7001,6 +8256,10 @@ msgstr "Edit Subordinate"
 msgid "Hierarchy Superior"
 msgstr "Hierarchy Tree"
 
+#, fuzzy
+msgid "Hierarchy Superiors"
+msgstr "Hierarchy Tree"
+
 msgid "Hierarchy Tree"
 msgstr "Hierarchy Tree"
 
@@ -7028,14 +8287,30 @@ msgstr ""
 msgid "Hire Date"
 msgstr "Hire Date"
 
+#, fuzzy
+msgid "Hire Date (Anniversary)"
+msgstr "Employee Title"
+
 msgid "Hire Date:"
 msgstr "Hire Date:"
 
 msgid "Hire date is invalid"
 msgstr "Hire date is invalid"
 
+msgid ""
+"Hire date must be on or after the employees first wage entry, you may need "
+"to change their wage effective date first"
+msgstr ""
+
+#, fuzzy
+msgid "Hired"
+msgstr "Expired"
+
 msgid "Hired Date:"
 msgstr "Hired Date:"
+
+msgid "Hiring Manager"
+msgstr ""
 
 msgid "Holiday"
 msgstr "Holiday"
@@ -7124,6 +8399,9 @@ msgstr "Honduras"
 msgid "Hong Kong"
 msgstr "Hong Kong"
 
+msgid "Horrible"
+msgstr ""
+
 msgid "Host Name:"
 msgstr "Host Name:"
 
@@ -7182,6 +8460,12 @@ msgstr ""
 #, fuzzy
 msgid "Huila"
 msgstr "Anguilla"
+
+msgid "Human Resources"
+msgstr ""
+
+msgid "Human Resources (HR)"
+msgstr ""
 
 msgid "Hungary"
 msgstr "Hungary"
@@ -7250,6 +8534,30 @@ msgid "Idaho"
 msgstr "India"
 
 msgid "Identification #:"
+msgstr "Identification #:"
+
+#, fuzzy
+msgid "Identification #: "
+msgstr "Identification #:"
+
+#, fuzzy
+msgid "Identification Country"
+msgstr "Identification #:"
+
+#, fuzzy
+msgid "Identification Expires"
+msgstr "Identification #:"
+
+#, fuzzy
+msgid "Identification Number"
+msgstr "Identification #:"
+
+#, fuzzy
+msgid "Identification Province/State"
+msgstr "Invalid Province/State"
+
+#, fuzzy
+msgid "Identification Type"
 msgstr "Identification #:"
 
 msgid ""
@@ -7382,9 +8690,15 @@ msgstr ""
 msgid "In punches cannot occur after an out punch, in the same punch pair"
 msgstr ""
 
+msgid "In punches cannot occur after an out punch, in the same punch pair (a)"
+msgstr ""
+
 msgid ""
 "In punches cannot occur twice in the same punch pair, you may want to make "
 "this an out punch instead"
+msgstr ""
+
+msgid "In-Person Interview"
 msgstr ""
 
 #, fuzzy
@@ -7396,6 +8710,10 @@ msgstr "In/Out:"
 
 msgid "In:"
 msgstr "In:"
+
+#, fuzzy
+msgid "Inactive"
+msgstr "Active"
 
 msgid "Inbox"
 msgstr "Inbox"
@@ -7431,6 +8749,10 @@ msgid "Include Break Punch"
 msgstr "Include Products"
 
 msgid "Include Clients"
+msgstr "Include Clients"
+
+#, fuzzy
+msgid "Include Columns"
 msgstr "Include Clients"
 
 msgid "Include Employees"
@@ -7500,6 +8822,22 @@ msgstr "Include Pay Stub Account is invalid"
 msgid "Include Pay Stub Accounts:"
 msgstr "Include Pay Stub Accounts:"
 
+#, fuzzy
+msgid "Include Pay Stub Amount"
+msgstr "Include Pay Stub Accounts:"
+
+#, fuzzy
+msgid "Include Pay Stub Units"
+msgstr "Include Pay Stub Accounts:"
+
+#, fuzzy
+msgid "Include Pay Stub YTD Amount"
+msgstr "Include Pay Stub Accounts:"
+
+#, fuzzy
+msgid "Include Pay Stub YTD Units"
+msgstr "Include Pay Stub Accounts:"
+
 msgid "Include Products"
 msgstr "Include Products"
 
@@ -7548,6 +8886,10 @@ msgstr "Income Tax (Box: 22):"
 msgid "Incorrect Accrual Rate"
 msgstr "Incorrect Accrual Rate"
 
+#, fuzzy
+msgid "Incorrect Accrual Type"
+msgstr "Incorrect Accrual Rate"
+
 msgid "Incorrect Action"
 msgstr "Incorrect Action"
 
@@ -7568,6 +8910,18 @@ msgstr "Invalid Pay Period"
 #, fuzzy
 msgid "Incorrect Auto-Detect Type"
 msgstr "Incorrect Object Type"
+
+#, fuzzy
+msgid "Incorrect Available Days Of Week"
+msgstr "Incorrect Day Of Week"
+
+#, fuzzy
+msgid "Incorrect Available Hours"
+msgstr "Incorrect value"
+
+#, fuzzy
+msgid "Incorrect Available Start Date"
+msgstr "Incorrect Start time"
 
 msgid "Incorrect Balance"
 msgstr "Incorrect Balance"
@@ -7640,6 +8994,10 @@ msgstr "Incorrect Pay Type"
 msgid "Incorrect Email Notification"
 msgstr "Incorrect Calculation"
 
+#, fuzzy
+msgid "Incorrect End Date"
+msgstr "Incorrect End time"
+
 msgid "Incorrect End time"
 msgstr "Incorrect End time"
 
@@ -7647,11 +9005,23 @@ msgid "Incorrect Exclusivity Option"
 msgstr "Incorrect Exclusivity Option"
 
 #, fuzzy
+msgid "Incorrect Expected Wage"
+msgstr "Incorrect Expiry Date"
+
+#, fuzzy
 msgid "Incorrect Expire Date"
 msgstr "Incorrect Expiry Date"
 
+#, fuzzy
+msgid "Incorrect Format"
+msgstr "Incorrect Month"
+
 msgid "Incorrect Frequency"
 msgstr "Incorrect Frequency"
+
+#, fuzzy
+msgid "Incorrect Gross Amount"
+msgstr "Incorrect Amount"
 
 #, fuzzy
 msgid "Incorrect Group Selection Type"
@@ -7669,6 +9039,18 @@ msgstr "Incorrect Help Entry"
 #, fuzzy
 msgid "Incorrect Hourly Rate"
 msgstr "Incorrect Currency Rate"
+
+#, fuzzy
+msgid "Incorrect Identification Expires"
+msgstr "Incorrect Payment Type"
+
+#, fuzzy
+msgid "Incorrect Identification Number length"
+msgstr "Incorrect Station ID length"
+
+#, fuzzy
+msgid "Incorrect Identification Type"
+msgstr "TimeSheet"
 
 msgid "Incorrect In time"
 msgstr "Incorrect In time"
@@ -7690,6 +9072,10 @@ msgstr "Incorrect Input!"
 
 msgid "Incorrect Interval"
 msgstr "Incorrect Interval"
+
+#, fuzzy
+msgid "Incorrect Interview Date"
+msgstr "Incorrect Invoice date"
 
 msgid "Incorrect Invoice date"
 msgstr "Incorrect Invoice date"
@@ -7739,6 +9125,10 @@ msgid "Incorrect Major Version"
 msgstr "Incorrect Conversion Rate"
 
 #, fuzzy
+msgid "Incorrect Maximum Amount"
+msgstr "Incorrect Maximum Time"
+
+#, fuzzy
 msgid "Incorrect Maximum Punch Time"
 msgstr "Incorrect Maximum Time"
 
@@ -7752,6 +9142,14 @@ msgstr "Incorrect Maximum Time"
 #, fuzzy
 msgid "Incorrect Maximum Time Without Break"
 msgstr "Incorrect Maximum Time"
+
+#, fuzzy
+msgid "Incorrect Maximum Wage"
+msgstr "Incorrect Maximum Time"
+
+#, fuzzy
+msgid "Incorrect Minimum Amount"
+msgstr "Incorrect Minimum Time"
 
 #, fuzzy
 msgid "Incorrect Minimum Break Time"
@@ -7784,6 +9182,10 @@ msgid "Incorrect Minimum Time-Off Between Shifts"
 msgstr "Incorrect Minimum Time"
 
 #, fuzzy
+msgid "Incorrect Minimum Wage"
+msgstr "Incorrect Minimum Time"
+
+#, fuzzy
 msgid "Incorrect Minimum Worked After Period days"
 msgstr "Incorrect Minimum Worked Period days"
 
@@ -7813,6 +9215,14 @@ msgstr "Incorrect Month"
 
 msgid "Incorrect Name"
 msgstr "Incorrect Name"
+
+#, fuzzy
+msgid "Incorrect Net Amount"
+msgstr "Incorrect Amount"
+
+#, fuzzy
+msgid "Incorrect Next Action Date"
+msgstr "Incorrect transaction date"
 
 #, fuzzy
 msgid "Incorrect Number"
@@ -7848,11 +9258,23 @@ msgstr "Incorrect Pay Period Schedule"
 msgid "Incorrect Pay Type"
 msgstr "Incorrect Pay Type"
 
+#, fuzzy
+msgid "Incorrect Payment Method"
+msgstr "Incorrect Payment Type"
+
 msgid "Incorrect Payment Type"
 msgstr "Incorrect Payment Type"
 
 msgid "Incorrect Pivot Day Direction"
 msgstr "Incorrect Pivot Day Direction"
+
+#, fuzzy
+msgid "Incorrect Position Expire Date"
+msgstr "Incorrect Expiry Date"
+
+#, fuzzy
+msgid "Incorrect Position Open Date"
+msgstr "Incorrect start date"
 
 #, fuzzy
 msgid "Incorrect Priority"
@@ -7877,6 +9299,14 @@ msgstr "Incorrect iButton ID length"
 
 msgid "Incorrect Rate"
 msgstr "Incorrect Rate"
+
+#, fuzzy
+msgid "Incorrect Reimburse Amount"
+msgstr "Incorrect Amount"
+
+#, fuzzy
+msgid "Incorrect Require Receipt"
+msgstr "Incorrect Required date"
 
 msgid "Incorrect Required date"
 msgstr "Incorrect Required date"
@@ -7907,6 +9337,10 @@ msgstr "Incorrect Source ID length"
 msgid "Incorrect Special Day"
 msgstr "Incorrect Special Day"
 
+#, fuzzy
+msgid "Incorrect Start Date"
+msgstr "Incorrect Start time"
+
 msgid "Incorrect Start Week Day"
 msgstr "Incorrect Start Week Day"
 
@@ -7936,6 +9370,10 @@ msgstr "Incorrect pay period type"
 #, fuzzy
 msgid "Incorrect Task Selection Type"
 msgstr "Incorrect section"
+
+#, fuzzy
+msgid "Incorrect Terms"
+msgstr "Incorrect Type"
 
 #, fuzzy
 msgid "Incorrect Time Zone"
@@ -8094,6 +9532,10 @@ msgstr "Incorrect default TimeSheet view"
 msgid "Incorrect demerit value"
 msgstr "Incorrect demerit value"
 
+#, fuzzy
+msgid "Incorrect due date"
+msgstr "Incorrect Order date"
+
 msgid "Incorrect effective date"
 msgstr "Incorrect effective date"
 
@@ -8126,8 +9568,16 @@ msgstr "Incorrect frequency day of week"
 msgid "Incorrect frequency month"
 msgstr "Incorrect frequency month"
 
+#, fuzzy
+msgid "Incorrect frequency quarter month"
+msgstr "Incorrect frequency month"
+
 msgid "Incorrect grace value"
 msgstr "Incorrect grace value"
+
+#, fuzzy
+msgid "Incorrect graduation date"
+msgstr "Incorrect transaction date"
 
 msgid "Incorrect iButton ID length"
 msgstr "Incorrect iButton ID length"
@@ -8167,6 +9617,14 @@ msgid "Incorrect last run processing time"
 msgstr "Incorrect payment process date"
 
 #, fuzzy
+msgid "Incorrect license expiry date"
+msgstr "Incorrect Expiry Date"
+
+#, fuzzy
+msgid "Incorrect license issued date"
+msgstr "Incorrect end date"
+
+#, fuzzy
 msgid "Incorrect maximum daily trigger time"
 msgstr "Incorrect Trigger Time"
 
@@ -8199,6 +9657,10 @@ msgstr "Incorrect permission name"
 #, fuzzy
 msgid "Incorrect minimum purchase quantity"
 msgstr "Incorrect bad quantity"
+
+#, fuzzy
+msgid "Incorrect name length"
+msgstr "Incorrect UserName length"
 
 msgid "Incorrect option to enable calendar synchronization"
 msgstr ""
@@ -8233,6 +9695,10 @@ msgstr "Incorrect primary transaction day of month"
 
 msgid "Incorrect quantity"
 msgstr "Incorrect quantity"
+
+#, fuzzy
+msgid "Incorrect rounding decimal places"
+msgstr "Incorrect Credit Card Type"
 
 msgid "Incorrect secondary day of month"
 msgstr "Incorrect secondary day of month"
@@ -8321,6 +9787,14 @@ msgstr ""
 msgid "Incorrect weekly trigger time"
 msgstr "Incorrect Trigger Time"
 
+#, fuzzy
+msgid "Incurred Date"
+msgstr "Incorrect Date"
+
+#, fuzzy
+msgid "Incurred date is invalid"
+msgstr "Hire date is invalid"
+
 msgid "Independence Day"
 msgstr ""
 
@@ -8332,6 +9806,10 @@ msgstr "India"
 
 #, fuzzy
 msgid "Indiana"
+msgstr "India"
+
+#, fuzzy
+msgid "Individual"
 msgstr "India"
 
 msgid "Indonesia"
@@ -8360,13 +9838,33 @@ msgid ""
 msgstr ""
 
 #, fuzzy
+msgid "Institute"
+msgstr "Bank Instituion"
+
+#, fuzzy
+msgid "Institute is invalid"
+msgstr "Date is invalid"
+
+#, fuzzy
 msgid "Institution"
 msgstr "Bank Instituion"
 
 msgid "Institution Number:"
 msgstr "Institution Number:"
 
+msgid "Insufficient access to modify home email for this employee"
+msgstr ""
+
+msgid "Insufficient access to modify passwords for this employee"
+msgstr ""
+
 msgid "Insufficient access to modify permissions for this employee"
+msgstr ""
+
+msgid "Insufficient access to modify status for this employee"
+msgstr ""
+
+msgid "Insufficient access to modify work email for this employee"
 msgstr ""
 
 #, fuzzy
@@ -8397,11 +9895,37 @@ msgstr "Insurable Hours:"
 msgid "Interac"
 msgstr "Interac"
 
+#, fuzzy
+msgid "Intern"
+msgstr "Interac"
+
+#, fuzzy
+msgid "Internal"
+msgstr "Interval"
+
+#, fuzzy
+msgid "Internal Only"
+msgstr "Interval"
+
+msgid "Internal and External"
+msgstr ""
+
 msgid "Interval"
 msgstr "Interval"
 
 msgid "Interval:"
 msgstr "Interval:"
+
+#, fuzzy
+msgid "Interview Date"
+msgstr "Invoice Date"
+
+#, fuzzy
+msgid "Interviewer"
+msgstr "Interval"
+
+msgid "Interviewing Applicants"
+msgstr ""
 
 #, fuzzy
 msgid "Intibuca"
@@ -8410,6 +9934,22 @@ msgstr "India"
 #, fuzzy
 msgid "Invalid"
 msgstr "Invalid"
+
+#, fuzzy
+msgid "Invalid  Grade/Score "
+msgstr "Invalid Order"
+
+#, fuzzy
+msgid "Invalid  Maximum Rating "
+msgstr "Invalid vacation pay"
+
+#, fuzzy
+msgid "Invalid  Minimum Rating"
+msgstr "Invalid insurable earnings"
+
+#, fuzzy
+msgid "Invalid  Minimum Rating "
+msgstr "Invalid insurable earnings"
 
 msgid "Invalid Absence Policy ID"
 msgstr "Invalid Absence Policy ID"
@@ -8420,6 +9960,10 @@ msgstr "Acknowledge Message"
 
 msgid "Invalid Amount"
 msgstr "Invalid Amount"
+
+#, fuzzy
+msgid "Invalid Amount, Must be a numeric value"
+msgstr "Invalid account number length"
 
 msgid "Invalid Amount, calculation is incorrect"
 msgstr "Invalid Amount, calculation is incorrect"
@@ -8470,6 +10014,14 @@ msgid "Invalid Default Department"
 msgstr "Invalid Default Department"
 
 #, fuzzy
+msgid "Invalid Default Job"
+msgstr "Invalid Default Branch"
+
+#, fuzzy
+msgid "Invalid Default Task"
+msgstr "Invalid Default Branch"
+
+#, fuzzy
 msgid "Invalid Department"
 msgstr "Invalid Default Department"
 
@@ -8491,6 +10043,10 @@ msgstr "Invalid Entry Name"
 msgid "Invalid Exception Policy ID"
 msgstr "Invalid Exception Policy ID"
 
+#, fuzzy
+msgid "Invalid Expense"
+msgstr "Invalid Employee"
+
 msgid "Invalid File Name Length"
 msgstr "Invalid File Name Length"
 
@@ -8498,7 +10054,35 @@ msgid "Invalid Hierarchy Control"
 msgstr "Invalid Hierarchy Control"
 
 #, fuzzy
+msgid "Invalid Hiring Manager"
+msgstr "Invalid gender type"
+
+#, fuzzy
+msgid "Invalid Identification Country"
+msgstr "Invalid Country"
+
+#, fuzzy
+msgid "Invalid Identification Province/State"
+msgstr "Invalid Province/State"
+
+#, fuzzy
+msgid "Invalid Interviewer"
+msgstr "Invalid Order"
+
+#, fuzzy
 msgid "Invalid Job"
+msgstr "Invalid"
+
+#, fuzzy
+msgid "Invalid Job Applicant"
+msgstr "Invalid"
+
+#, fuzzy
+msgid "Invalid Job Vacancy"
+msgstr "Invalid"
+
+#, fuzzy
+msgid "Invalid KPI"
 msgstr "Invalid"
 
 #, fuzzy
@@ -8553,11 +10137,12 @@ msgstr "Invalid Pay Stub"
 msgid "Invalid Pay Stub Account"
 msgstr "Invalid Pay Stub Account"
 
+#, fuzzy
+msgid "Invalid Pay Stub Amendment"
+msgstr "Invalid Pay Stub Amendment Id"
+
 msgid "Invalid Pay Stub Amendment Description Length"
 msgstr "Invalid Pay Stub Amendment Description Length"
-
-msgid "Invalid Pay Stub Amendment Id"
-msgstr "Invalid Pay Stub Amendment Id"
 
 msgid "Invalid Pay Stub entry"
 msgstr "Invalid Pay Stub entry"
@@ -8594,7 +10179,15 @@ msgstr "Invalid Punch Control ID"
 msgid "Invalid Punch ID"
 msgstr "Invalid Punch ID"
 
+#, fuzzy
+msgid "Invalid Qualification"
+msgstr "Invalid vacation pay"
+
 msgid "Invalid Rate"
+msgstr "Invalid Rate"
+
+#, fuzzy
+msgid "Invalid Rating"
 msgstr "Invalid Rate"
 
 msgid "Invalid Recurring Pay Stub Amendment ID"
@@ -8602,6 +10195,10 @@ msgstr "Invalid Recurring Pay Stub Amendment ID"
 
 msgid "Invalid Revision Length"
 msgstr "Invalid Revision Length"
+
+#, fuzzy
+msgid "Invalid Sex"
+msgstr "Invalid Rate"
 
 #, fuzzy
 msgid "Invalid Status"
@@ -8612,6 +10209,10 @@ msgstr "Invalid Subject length"
 
 #, fuzzy
 msgid "Invalid Task"
+msgstr "Invalid Rate"
+
+#, fuzzy
+msgid "Invalid Title"
 msgstr "Invalid Rate"
 
 msgid "Invalid Units"
@@ -8656,6 +10257,10 @@ msgstr ""
 
 msgid "Invalid description"
 msgstr "Invalid description"
+
+#, fuzzy
+msgid "Invalid employee"
+msgstr "Invalid Employee"
 
 msgid "Invalid final pay period end date"
 msgstr "Invalid final pay period end date"
@@ -8708,6 +10313,14 @@ msgstr "Invalid Body length"
 
 msgid "Invalid recall date"
 msgstr "Invalid recall date"
+
+#, fuzzy
+msgid "Invalid review control"
+msgstr "Invalid Credit Account"
+
+#, fuzzy
+msgid "Invalid reviewer"
+msgstr "Invalid Order"
 
 msgid "Invalid script"
 msgstr "Invalid script"
@@ -8932,6 +10545,10 @@ msgid "Issue Date:"
 msgstr "Due Date"
 
 #, fuzzy
+msgid "Issued Date"
+msgstr "Due Date"
+
+#, fuzzy
 msgid "Issuing Bank Phone Number"
 msgstr "Card Issuing Banks Phone Number:"
 
@@ -9012,11 +10629,91 @@ msgid "Job Analysis Report"
 msgstr "Job Analysis Report"
 
 #, fuzzy
+msgid "Job Applicant"
+msgstr "Mobile Phone"
+
+#, fuzzy
+msgid "Job Applicant "
+msgstr "Mobile Phone"
+
+#, fuzzy
+msgid "Job Applicant Education"
+msgstr "Mobile Phone"
+
+#, fuzzy
+msgid "Job Applicant Employment"
+msgstr "Mobile Phone"
+
+#, fuzzy
+msgid "Job Applicant Language"
+msgstr "Mobile Phone"
+
+msgid "Job Applicant Languages"
+msgstr ""
+
+#, fuzzy
+msgid "Job Applicant License"
+msgstr "Mobile Phone"
+
+#, fuzzy
+msgid "Job Applicant Licenses"
+msgstr "Mobile Phone"
+
+#, fuzzy
+msgid "Job Applicant Location"
+msgstr "Mobile Phone"
+
+#, fuzzy
+msgid "Job Applicant Location "
+msgstr "Mobile Phone"
+
+msgid "Job Applicant Membership"
+msgstr ""
+
+msgid "Job Applicant Memberships"
+msgstr ""
+
+msgid "Job Applicant Reference"
+msgstr ""
+
+#, fuzzy
+msgid "Job Applicant Sex"
+msgstr "Mobile Phone"
+
+#, fuzzy
+msgid "Job Applicant Skill"
+msgstr "Mobile Phone"
+
+#, fuzzy
+msgid "Job Applicant Status"
+msgstr "Filing Status:"
+
+#, fuzzy
+msgid "Job Application"
+msgstr "Mobile Phone"
+
+#, fuzzy
+msgid "Job Application "
+msgstr "Mobile Phone"
+
+#, fuzzy
+msgid "Job Application Status"
+msgstr "Mobile Phone"
+
+#, fuzzy
+msgid "Job Application Type"
+msgstr "Mobile Phone"
+
+#, fuzzy
 msgid "Job Bad Quantity Rate"
 msgstr "Bad Quantity Rate:"
 
 #, fuzzy
 msgid "Job Barcode"
+msgstr "View Job Barcode"
+
+#, fuzzy
+msgid "Job Barcodes"
 msgstr "View Job Barcode"
 
 #, fuzzy
@@ -9035,6 +10732,10 @@ msgid "Job Completed"
 msgstr "Job Completed"
 
 #, fuzzy
+msgid "Job Costing"
+msgstr "Code"
+
+#, fuzzy
 msgid "Job Department"
 msgstr "No Department"
 
@@ -9045,6 +10746,26 @@ msgstr "Description"
 #, fuzzy
 msgid "Job Detail Report"
 msgstr "Employee Detail Report"
+
+#, fuzzy
+msgid "Job Details"
+msgstr "Employee Detail Report"
+
+#, fuzzy
+msgid "Job Details By Branch"
+msgstr "Total Employee Deduction:"
+
+#, fuzzy
+msgid "Job Details By Branch/Department"
+msgstr "Total Employee Deduction:"
+
+#, fuzzy
+msgid "Job Details By Client"
+msgstr "Edit Client"
+
+#, fuzzy
+msgid "Job Details By Supervisor"
+msgstr "Supervisor Signature:"
 
 msgid "Job End Date:"
 msgstr "Job End Date:"
@@ -9097,6 +10818,10 @@ msgstr "Include Employees"
 #, fuzzy
 msgid "Job Include Task"
 msgstr "Include Jobs"
+
+#, fuzzy
+msgid "Job Information"
+msgstr "PHP Information"
 
 #, fuzzy
 msgid "Job Item"
@@ -9162,8 +10887,33 @@ msgstr "Task Groups"
 msgid "Job Tasks"
 msgstr "Job Tasks"
 
+#, fuzzy
+msgid "Job Title"
+msgstr "Title"
+
 msgid "Job Tracking"
 msgstr "Job Tracking"
+
+#, fuzzy
+msgid "Job Vacancy"
+msgstr "No Branch"
+
+msgid "Job Vacancy Availability"
+msgstr ""
+
+msgid "Job Vacancy Level"
+msgstr ""
+
+#, fuzzy
+msgid "Job Vacancy Status"
+msgstr "Status"
+
+msgid "Job Vacancy Type"
+msgstr ""
+
+#, fuzzy
+msgid "Job Vacancy Wage Type"
+msgstr "Wage Type"
 
 msgid "Job does not exist"
 msgstr "Job does not exist"
@@ -9210,6 +10960,25 @@ msgstr "June"
 msgid "Jutiapa"
 msgstr "Japan"
 
+msgid "KPI"
+msgstr ""
+
+#, fuzzy
+msgid "KPI Group"
+msgstr "Group"
+
+#, fuzzy
+msgid "KPI Notes"
+msgstr "Notes"
+
+#, fuzzy
+msgid "KPI Status"
+msgstr "Status"
+
+#, fuzzy
+msgid "KPI Type"
+msgstr "In Type"
+
 #, fuzzy
 msgid "Kalinga"
 msgstr "Pass"
@@ -9243,6 +11012,20 @@ msgstr "Nepal"
 msgid "Key"
 msgstr "Kenya"
 
+msgid "Key Performance Indicator"
+msgstr ""
+
+msgid "Key Performance Indicators"
+msgstr ""
+
+#, fuzzy
+msgid "Key Words"
+msgstr "Keywords:"
+
+#, fuzzy
+msgid "Key Words is invalid"
+msgstr "Code is invalid"
+
 msgid "Keywords:"
 msgstr "Keywords:"
 
@@ -9252,16 +11035,26 @@ msgstr ""
 msgid "Kingston upon Hull"
 msgstr ""
 
+msgid "Kiosk: Desktop PC"
+msgstr ""
+
+msgid "Kiosk: Mobile App (iOS/Android)"
+msgstr ""
+
 msgid "Kiribati"
 msgstr "Kiribati"
 
 msgid "Kirklees"
 msgstr ""
 
+msgid "Known Since"
+msgstr ""
+
 msgid "Knowsley"
 msgstr ""
 
-msgid "Korea, Democratic People's Republic of"
+#, fuzzy
+msgid "Korea, Democratic People`s Republic of"
 msgstr "Korea, Democratic People's Republic of"
 
 msgid "Korea, Republic of"
@@ -9275,10 +11068,6 @@ msgstr ""
 
 msgid "Kyrgyzstan"
 msgstr "Kyrgyzstan"
-
-#, fuzzy
-msgid "L'Aquila"
-msgstr "Anguilla"
 
 msgid "LBS"
 msgstr "LBS"
@@ -9331,6 +11120,10 @@ msgstr "LOCKED"
 
 msgid "LOW"
 msgstr "LOW"
+
+#, fuzzy
+msgid "L`Aquila"
+msgstr "Anguilla"
 
 msgid "La Guajira"
 msgstr ""
@@ -9394,10 +11187,30 @@ msgstr ""
 msgid "Language"
 msgstr "Language"
 
+msgid "Language Competency"
+msgstr ""
+
+#, fuzzy
+msgid "Language Fluency"
+msgstr "Language"
+
+#, fuzzy
+msgid "Language Information By Employee"
+msgstr "Bank Information"
+
+#, fuzzy
+msgid "Language Information By Language/Employee"
+msgstr "Bank Information"
+
 msgid "Language:"
 msgstr "Language:"
 
-msgid "Lao People's Democratic Republic"
+#, fuzzy
+msgid "Languages"
+msgstr "Language"
+
+#, fuzzy
+msgid "Lao People`s Democratic Republic"
 msgstr "Lao People's Democratic Republic"
 
 msgid "Larne"
@@ -9504,6 +11317,10 @@ msgid "Last Five Years"
 msgstr ""
 
 #, fuzzy
+msgid "Last Login (Days)"
+msgstr "Last Downloaded Date:"
+
+#, fuzzy
 msgid "Last Login Date"
 msgstr "Last Downloaded Date:"
 
@@ -9547,6 +11364,10 @@ msgid "Last Upload"
 msgstr "File Upload"
 
 #, fuzzy
+msgid "Last Used Date"
+msgstr "Last Downloaded Date:"
+
+#, fuzzy
 msgid "Last Week"
 msgstr "Start Weeks on:"
 
@@ -9559,6 +11380,10 @@ msgstr "Last name contains invalid characters"
 
 msgid "Last name is too short or too long"
 msgstr "Last name is too short or too long"
+
+#, fuzzy
+msgid "Last used date is invalid"
+msgstr "Date is invalid"
 
 #, fuzzy
 msgid "LastName, FirstName"
@@ -9595,6 +11420,10 @@ msgstr "Other"
 msgid "Leave blank for no date restriction"
 msgstr "(Leave blank for no end date)"
 
+#, fuzzy
+msgid "Leave reason is invalid"
+msgstr "Parent is invalid"
+
 msgid "Lebanon"
 msgstr "Lebanon"
 
@@ -9624,6 +11453,10 @@ msgstr "Length Of Service Milestones"
 
 #, fuzzy
 msgid "Length Of Service in Days"
+msgstr "Length Of Service"
+
+#, fuzzy
+msgid "Length of Service"
 msgstr "Length Of Service"
 
 msgid "Length of service is invalid"
@@ -9670,8 +11503,40 @@ msgid "Libyan Arab Jamahiriya"
 msgstr "Libyan Arab Jamahiriya"
 
 #, fuzzy
+msgid "License"
+msgstr "Employee List"
+
+#, fuzzy
+msgid "License Expiry Date"
+msgstr "Expiry Date:"
+
+#, fuzzy
 msgid "License Information"
 msgstr "Contact Information"
+
+#, fuzzy
+msgid "License Information By Employee"
+msgstr "Bank Information"
+
+#, fuzzy
+msgid "License Information By License/Employee"
+msgstr "Bank Information"
+
+#, fuzzy
+msgid "License Issued Date"
+msgstr "Incorrect Date"
+
+#, fuzzy
+msgid "License Number"
+msgstr "Routing Number:"
+
+#, fuzzy
+msgid "License Renewals By Employee"
+msgstr "Employee"
+
+#, fuzzy
+msgid "License Type"
+msgstr "Punch Type:"
 
 msgid "License expires in"
 msgstr ""
@@ -9690,6 +11555,18 @@ msgstr "Client Contact Information is invalid or missing"
 #, fuzzy
 msgid "License is invalid for this version"
 msgstr "Client Contact Information is invalid or missing"
+
+#, fuzzy
+msgid "License number is invalid"
+msgstr "Mobile phone number is invalid"
+
+#, fuzzy
+msgid "License number must be digits only"
+msgstr "Invalid transit number, must be digits only"
+
+#, fuzzy
+msgid "Licenses"
+msgstr "Employee List"
 
 msgid "Liechtenstein"
 msgstr "Liechtenstein"
@@ -9739,6 +11616,13 @@ msgstr ""
 #, fuzzy
 msgid "Local File Name"
 msgstr "Invalid Local File Name Length"
+
+#, fuzzy
+msgid "Location Information By Applicant"
+msgstr "Contact Information"
+
+msgid "Location Information By Applicant/Job Vacancy/Status"
+msgstr ""
 
 #, fuzzy
 msgid "Location:"
@@ -9837,6 +11721,83 @@ msgid "Longitude is invalid"
 msgstr "Code is invalid"
 
 #, fuzzy
+msgid "Lookback - End Date"
+msgstr "Job End Date:"
+
+#, fuzzy
+msgid "Lookback - Exclude Pay Stub Amount"
+msgstr "Exclude Pay Stub Accounts:"
+
+#, fuzzy
+msgid "Lookback - Exclude Pay Stub Units"
+msgstr "Exclude Pay Stub Accounts:"
+
+#, fuzzy
+msgid "Lookback - Exclude Pay Stub YTD Amount"
+msgstr "Exclude Pay Stub Accounts:"
+
+#, fuzzy
+msgid "Lookback - Exclude Pay Stub YTD Units"
+msgstr "Exclude Pay Stub Accounts:"
+
+msgid "Lookback - First Pay Stub End Date"
+msgstr ""
+
+msgid "Lookback - First Pay Stub Start Date"
+msgstr ""
+
+#, fuzzy
+msgid "Lookback - First Pay Stub Transaction Date"
+msgstr "Advance Transaction Date:"
+
+#, fuzzy
+msgid "Lookback - Include Pay Stub Amount"
+msgstr "Include Pay Stub Accounts:"
+
+#, fuzzy
+msgid "Lookback - Include Pay Stub Units"
+msgstr "Include Pay Stub Accounts:"
+
+#, fuzzy
+msgid "Lookback - Include Pay Stub YTD Amount"
+msgstr "Include Pay Stub Accounts:"
+
+#, fuzzy
+msgid "Lookback - Include Pay Stub YTD Units"
+msgstr "Include Pay Stub Accounts:"
+
+msgid "Lookback - Last Pay Stub End Date"
+msgstr ""
+
+msgid "Lookback - Last Pay Stub Start Date"
+msgstr ""
+
+#, fuzzy
+msgid "Lookback - Last Pay Stub Transaction Date"
+msgstr "Advance Transaction Date:"
+
+#, fuzzy
+msgid "Lookback - Pay Stub Amount"
+msgstr "Pay Stub Account:"
+
+msgid "Lookback - Pay Stub Units"
+msgstr ""
+
+#, fuzzy
+msgid "Lookback - Pay Stub YTD Amount"
+msgstr "Pay Stub Account:"
+
+msgid "Lookback - Pay Stub YTD Units"
+msgstr ""
+
+#, fuzzy
+msgid "Lookback - Start Date"
+msgstr "Job Start Date:"
+
+msgid "Lookback - Total Pay Stubs"
+msgstr ""
+
+#, fuzzy
 msgid "Los Santos"
 msgstr "Status"
 
@@ -9898,10 +11859,17 @@ msgid "MAIL Enabled:"
 msgstr "Enabled"
 
 #, fuzzy
+msgid "MBSTRING Enabled:"
+msgstr "Enabled"
+
+#, fuzzy
 msgid "MCRYPT Enabled:"
 msgstr "PHP MCRYPT Enabled:"
 
 msgid "MEDIUM"
+msgstr ""
+
+msgid "MIGRATED"
 msgstr ""
 
 #, fuzzy
@@ -9912,6 +11880,9 @@ msgid "MSCD"
 msgstr ""
 
 msgid "MULTIPLE RECORDS SAVED"
+msgstr ""
+
+msgid "MUNIS (VA)"
 msgstr ""
 
 msgid "Macao"
@@ -9951,6 +11922,18 @@ msgid "Maharashtra"
 msgstr ""
 
 #, fuzzy
+msgid "Maiden Name"
+msgstr "Middle Name"
+
+#, fuzzy
+msgid "Maiden name contains invalid characters"
+msgstr "Middle name contains invalid characters"
+
+#, fuzzy
+msgid "Maiden name is too short or too long"
+msgstr "Middle name is too short or too long"
+
+#, fuzzy
 msgid "Maine"
 msgstr "Min"
 
@@ -9960,6 +11943,13 @@ msgstr "7. Maintenance Jobs"
 
 msgid "Maintenance Jobs Last Ran:"
 msgstr "Maintenance Jobs Last Ran:"
+
+msgid "Major/Specialization"
+msgstr ""
+
+#, fuzzy
+msgid "Major/Specialization is invalid"
+msgstr "Station is invalid"
 
 msgid "Make statistics anonymous:"
 msgstr "Make statistics anonymous:"
@@ -9988,6 +11978,10 @@ msgstr "Mali"
 
 msgid "Management of Companies and Enterprises"
 msgstr ""
+
+#, fuzzy
+msgid "Manager"
+msgstr "Manual"
 
 #, fuzzy
 msgid "Managua"
@@ -10160,6 +12154,10 @@ msgid "Max"
 msgstr "Max"
 
 #, fuzzy
+msgid "Maximum Amount"
+msgstr "Claim Amount:"
+
+#, fuzzy
 msgid "Maximum Employee Age:"
 msgstr "Minimum Employed Days:"
 
@@ -10200,6 +12198,14 @@ msgid "Maximum Purchase Quantity:"
 msgstr "Estimate Quantity:"
 
 #, fuzzy
+msgid "Maximum Rating"
+msgstr "Maximum Time:"
+
+#, fuzzy
+msgid "Maximum Rating must only be digits"
+msgstr "Employee number must only be digits"
+
+#, fuzzy
 msgid "Maximum Shift Time"
 msgstr "Maximum Time:"
 
@@ -10227,6 +12233,10 @@ msgid "Maximum Time:"
 msgstr "Maximum Time:"
 
 #, fuzzy
+msgid "Maximum Wage"
+msgstr "Maximum Time:"
+
+#, fuzzy
 msgid "Maximum age must only be digits"
 msgstr "Employee number must only be digits"
 
@@ -10240,6 +12250,9 @@ msgstr "Length of service is invalid"
 
 msgid "May"
 msgstr "May"
+
+msgid "May we contact this person/employer"
+msgstr ""
 
 msgid "Mayotte"
 msgstr "Mayotte"
@@ -10309,6 +12322,38 @@ msgstr ""
 #, fuzzy
 msgid "Meghalaya"
 msgstr "Malaysia"
+
+msgid "Membership"
+msgstr ""
+
+#, fuzzy
+msgid "Membership Amount"
+msgstr "Debit Amount"
+
+#, fuzzy
+msgid "Membership Information By Employee"
+msgstr "Bank Information"
+
+#, fuzzy
+msgid "Membership Information By Membership/Employee"
+msgstr "Employee Identification"
+
+msgid "Membership Ownership"
+msgstr ""
+
+msgid "Membership Renewal Date"
+msgstr ""
+
+#, fuzzy
+msgid "Membership Renewals By Employee"
+msgstr "Employee"
+
+#, fuzzy
+msgid "Membership Start Date"
+msgstr "Job Start Date:"
+
+msgid "Memberships"
+msgstr ""
 
 #, fuzzy
 msgid "Memory Limit:"
@@ -10421,6 +12466,10 @@ msgstr "Min"
 msgid "Minas Gerais"
 msgstr ""
 
+#, fuzzy
+msgid "Minimum Amount"
+msgstr "Claim Amount:"
+
 msgid "Minimum Billable Time:"
 msgstr "Minimum Billable Time:"
 
@@ -10434,6 +12483,14 @@ msgstr "Minimum Employed Days:"
 #, fuzzy
 msgid "Minimum Employee Age:"
 msgstr "Minimum Employed Days:"
+
+#, fuzzy
+msgid "Minimum Hourly Rate"
+msgstr "Annual Hourly Rate:"
+
+#, fuzzy
+msgid "Minimum Hourly Rate (Relative to Wage)"
+msgstr "Hourly Rate"
 
 #, fuzzy
 msgid "Minimum Length Of Service"
@@ -10470,6 +12527,17 @@ msgstr "Estimate Quantity:"
 #, fuzzy
 msgid "Minimum Purchase Quantity:"
 msgstr "Estimate Quantity:"
+
+#, fuzzy
+msgid "Minimum Rating"
+msgstr "Minimum Time"
+
+#, fuzzy
+msgid "Minimum Rating must only be digits"
+msgstr "Employee number must only be digits"
+
+msgid "Minimum Rating should be lesser than Maximum Rating"
+msgstr ""
 
 #, fuzzy
 msgid "Minimum Shift Time"
@@ -10509,6 +12577,14 @@ msgid "Minimum Time:"
 msgstr "Minimum Time:"
 
 #, fuzzy
+msgid "Minimum Wage"
+msgstr "Minimum Time"
+
+#, fuzzy
+msgid "Minimum Wage Type is invalid"
+msgstr "Minimum Time is invalid"
+
+#, fuzzy
 msgid "Minimum age must only be digits"
 msgstr "Employee number must only be digits"
 
@@ -10524,15 +12600,18 @@ msgstr "Length of service is invalid"
 msgid "Minimum price is invalid"
 msgstr "Minimum Time is invalid"
 
-#, fuzzy
-msgid "Minimum/Prevailing Hourly Rate"
-msgstr "Annual Hourly Rate:"
-
 msgid "Mining and Oil and Gas Extraction"
 msgstr ""
 
 msgid "Minnesota"
 msgstr ""
+
+msgid "Minor"
+msgstr ""
+
+#, fuzzy
+msgid "Minor is invalid"
+msgstr "Minute is invalid"
 
 msgid "Minute is invalid"
 msgstr "Minute is invalid"
@@ -10544,6 +12623,12 @@ msgid "Misamis Occidental"
 msgstr ""
 
 msgid "Misamis Oriental"
+msgstr ""
+
+msgid "Miscellaneous"
+msgstr ""
+
+msgid "Missed Check-In"
 msgstr ""
 
 msgid "Missed Punch"
@@ -10755,6 +12840,11 @@ msgstr "NOTE"
 msgid "NOTICE:"
 msgstr "NOTICE:"
 
+msgid ""
+"NOTICE: A new version of %1 available, it is highly recommended that you "
+"upgrade as soon as possible. Click here to download the latest version."
+msgstr ""
+
 #, fuzzy
 msgid ""
 "NOTICE: You have %1 new message(s) waiting, click here to read them now."
@@ -10764,6 +12854,12 @@ msgid ""
 "NOTICE: You have critical severity exceptions pending, click here to view "
 "them now."
 msgstr ""
+
+#, fuzzy
+msgid ""
+"NOTICE: Your instance of %1 has been upgraded to v%2, click here to see "
+"whats new."
+msgstr "You have new mail waiting. Would you like to read it now?"
 
 #, fuzzy
 msgid "Nagaland"
@@ -10781,11 +12877,26 @@ msgstr "Name is already in use"
 msgid "Name is already in use in this year, or within 30 days"
 msgstr "Name is already in use in this year, or within 30 days"
 
+#, fuzzy
+msgid "Name is already taken"
+msgstr "UserName is already taken"
+
 msgid "Name is invalid"
 msgstr "Name is invalid"
 
+#, fuzzy
+msgid "Name is not specified"
+msgstr "Address (Line 1):"
+
+msgid "Name is too long, consider using description instead"
+msgstr ""
+
 msgid "Name is too short or too long"
 msgstr "Name is too short or too long"
+
+#, fuzzy
+msgid "Name not specified"
+msgstr "Address (Line 1):"
 
 msgid "Name:"
 msgstr "Name:"
@@ -10803,6 +12914,10 @@ msgstr ""
 msgid "Narino"
 msgstr "San Marino"
 
+#, fuzzy
+msgid "Native Language"
+msgstr "Language"
+
 msgid "Nauru"
 msgstr "Nauru"
 
@@ -10811,6 +12926,13 @@ msgid "Neath Port Talbot"
 msgstr "Client Contact"
 
 msgid "Nebraska"
+msgstr ""
+
+#, fuzzy
+msgid "Needs Review"
+msgstr "Under Review"
+
+msgid "Negative"
 msgstr ""
 
 msgid "Negros Occidental"
@@ -10825,6 +12947,10 @@ msgstr "Nepal"
 msgid "Net"
 msgstr "Net"
 
+#, fuzzy
+msgid "Net Amount"
+msgstr "Debit Amount"
+
 msgid "Net Pay"
 msgstr "Net Pay"
 
@@ -10838,9 +12964,6 @@ msgstr "Net Pay:"
 msgid "Net Pay: "
 msgstr "Net Pay: $"
 
-msgid "Net Pay: $"
-msgstr "Net Pay: $"
-
 msgid "Net:"
 msgstr "Net:"
 
@@ -10849,6 +12972,10 @@ msgstr "Netherlands"
 
 msgid "Netherlands Antilles"
 msgstr "Netherlands Antilles"
+
+#, fuzzy
+msgid "Neutral"
+msgstr "Australia"
 
 #, fuzzy
 msgid "Nevada"
@@ -10860,6 +12987,14 @@ msgstr "Never"
 #, fuzzy
 msgid "Never on Holidays"
 msgstr "Recurring Holidays"
+
+#, fuzzy
+msgid "New"
+msgstr "Net"
+
+#, fuzzy
+msgid "New Applicant"
+msgstr "Mobile Phone"
 
 msgid "New Brunswick"
 msgstr ""
@@ -10942,12 +13077,110 @@ msgstr ""
 msgid "Next"
 msgstr "Next"
 
+#, fuzzy
+msgid "Next 12 Months"
+msgstr "- Last Day Of Month -"
+
+#, fuzzy
+msgid "Next 14 Days"
+msgstr "Last Day"
+
+#, fuzzy
+msgid "Next 18 Months"
+msgstr "- Last Day Of Month -"
+
+#, fuzzy
+msgid "Next 2 Months"
+msgstr "- Last Day Of Month -"
+
+#, fuzzy
+msgid "Next 2 Weeks"
+msgstr "2 Weeks"
+
+#, fuzzy
+msgid "Next 24 Hours"
+msgstr "Hours"
+
+#, fuzzy
+msgid "Next 24 Months"
+msgstr "- Last Day Of Month -"
+
+#, fuzzy
+msgid "Next 3 Months"
+msgstr "- Last Day Of Month -"
+
+#, fuzzy
+msgid "Next 30 Days"
+msgstr "Last Day"
+
+#, fuzzy
+msgid "Next 45 Days"
+msgstr "Last Day"
+
+#, fuzzy
+msgid "Next 48 Hours"
+msgstr "Hours"
+
+#, fuzzy
+msgid "Next 6 Months"
+msgstr "- Last Day Of Month -"
+
+#, fuzzy
+msgid "Next 60 Days"
+msgstr "Last Day"
+
+#, fuzzy
+msgid "Next 7 Days"
+msgstr "Last Day"
+
+#, fuzzy
+msgid "Next 72 Hours"
+msgstr "Hours"
+
+#, fuzzy
+msgid "Next 9 Months"
+msgstr "- Last Day Of Month -"
+
+#, fuzzy
+msgid "Next 90 Days"
+msgstr "Last Day"
+
+#, fuzzy
+msgid "Next Action Date"
+msgstr "Next Date"
+
 msgid "Next Date"
+msgstr "Next Date"
+
+msgid "Next Five Years"
+msgstr ""
+
+#, fuzzy
+msgid "Next Month"
+msgstr "Per Month"
+
+#, fuzzy
+msgid "Next Quarter"
 msgstr "Next Date"
 
 #, fuzzy
 msgid "Next Schedule Date"
 msgstr "Not Scheduled"
+
+msgid "Next Three Years"
+msgstr ""
+
+#, fuzzy
+msgid "Next Two Years"
+msgstr "New York City"
+
+#, fuzzy
+msgid "Next Week"
+msgstr "Per Week"
+
+#, fuzzy
+msgid "Next Year"
+msgstr "Per Day"
 
 #, fuzzy
 msgid "Next available code"
@@ -11075,8 +13308,15 @@ msgstr "No Task"
 msgid "No Wage History"
 msgstr "No Wage History"
 
+msgid "No billable time recorded for this job"
+msgstr ""
+
 msgid "No columns specified to display on report"
 msgstr ""
+
+#, fuzzy
+msgid "No company specified."
+msgstr "Employee Record"
 
 msgid "No data to export or export format is invalid."
 msgstr ""
@@ -11097,6 +13337,9 @@ msgid ""
 "No hierarchies are defined, therefore there are no authorizations pending."
 msgstr ""
 
+msgid "No jobs to invoice"
+msgstr ""
+
 #, fuzzy
 msgid "No report exists."
 msgstr "Job does not exist"
@@ -11115,6 +13358,9 @@ msgid "No supervisors are assigned to you at this time, please try again later"
 msgstr ""
 
 msgid "No time period defined for this report"
+msgstr ""
+
+msgid "No time recorded for this job..."
 msgstr ""
 
 msgid ""
@@ -11159,6 +13405,14 @@ msgstr "Norfolk Island"
 msgid "Normal"
 msgstr "Normal"
 
+#, fuzzy
+msgid "Normal - In"
+msgstr "Normal"
+
+#, fuzzy
+msgid "Normal - Out"
+msgstr "Break - Out"
+
 msgid "Norte de Santander"
 msgstr ""
 
@@ -11179,6 +13433,10 @@ msgstr "Birth Date"
 
 msgid "North East Lincolnshire"
 msgstr ""
+
+#, fuzzy
+msgid "North Kalimantan"
+msgstr "South Africa"
 
 msgid "North Lanarkshire"
 msgstr ""
@@ -11267,6 +13525,10 @@ msgstr "Note (private):"
 msgid "Note (public):"
 msgstr "Note (public):"
 
+#, fuzzy
+msgid "Note is invalid"
+msgstr "Date is invalid"
+
 msgid "Note is too long"
 msgstr "Note is too long"
 
@@ -11317,6 +13579,9 @@ msgstr "Number"
 
 msgid "Number is too short or too long"
 msgstr "Number is too short or too long"
+
+msgid "Numeric"
+msgstr ""
 
 msgid "Nunavut"
 msgstr ""
@@ -11381,6 +13646,10 @@ msgstr "Oct"
 
 msgid "October"
 msgstr "October"
+
+#, fuzzy
+msgid "Offered Position"
+msgstr "Position:"
 
 msgid "Ogliastra"
 msgstr ""
@@ -11781,6 +14050,9 @@ msgstr "Out of Stock"
 msgid "Out punches cannot occur before an in punch, in the same punch pair"
 msgstr ""
 
+msgid "Out punches cannot occur before an in punch, in the same punch pair (a)"
+msgstr ""
+
 msgid ""
 "Out punches cannot occur twice in the same punch pair, you may want to make "
 "this an in punch instead"
@@ -11788,6 +14060,10 @@ msgstr ""
 
 msgid "Out:"
 msgstr "Out:"
+
+#, fuzzy
+msgid "Output Format is invalid"
+msgstr "Other Contact is invalid"
 
 #, fuzzy
 msgid "Over Daily Scheduled Time"
@@ -11832,6 +14108,10 @@ msgid "Overall Balance To Date"
 msgstr "Overall Total:"
 
 #, fuzzy
+msgid "Overall Rating"
+msgstr "Available Balance:"
+
+#, fuzzy
 msgid "Overall Total"
 msgstr "Overall Total:"
 
@@ -11840,6 +14120,10 @@ msgstr "Overall Total:"
 
 msgid "Overdue"
 msgstr "Overdue"
+
+#, fuzzy
+msgid "Override Login"
+msgstr "Override:"
 
 msgid "Override Password successful from IP Address"
 msgstr ""
@@ -11945,6 +14229,17 @@ msgstr "Overtime"
 msgid "Overwrite Existing Shifts:"
 msgstr "Overwrite Existing Shifts:"
 
+#, fuzzy
+msgid "Overwrite existing shifts."
+msgstr "Overwrite Existing Shifts:"
+
+msgid "Ownership"
+msgstr ""
+
+#, fuzzy
+msgid "Ownership is invalid"
+msgstr "Order is invalid"
+
 msgid "Oxfordshire"
 msgstr ""
 
@@ -11957,15 +14252,17 @@ msgstr "PAID"
 msgid "PC"
 msgstr "PC"
 
-#, fuzzy
-msgid "PC - Client Station"
-msgstr "Filing Status:"
+msgid "PDF"
+msgstr ""
 
 #, fuzzy
 msgid "PEAR Enabled:"
 msgstr "PHP BCMATH Enabled:"
 
 msgid "PENDING"
+msgstr ""
+
+msgid "PENDING ACTIVATION - Automatic KIOSK Setup"
 msgstr ""
 
 msgid "PENDING AUTHORIZATION"
@@ -12081,6 +14378,9 @@ msgstr "Panama"
 msgid "Pangasinan"
 msgstr "Panama"
 
+msgid "Papua"
+msgstr ""
+
 msgid "Papua New Guinea"
 msgstr "Papua New Guinea"
 
@@ -12108,8 +14408,15 @@ msgstr "Parent Company is invalid"
 msgid "Parent Company is invalid"
 msgstr "Parent Company is invalid"
 
+#, fuzzy
+msgid "Parent Expense is invalid"
+msgstr "Client is invalid"
+
 msgid "Parent is invalid"
 msgstr "Parent is invalid"
+
+msgid "Parent/Guardian"
+msgstr ""
 
 msgid "Parent:"
 msgstr "Parent:"
@@ -12129,11 +14436,23 @@ msgstr "Part Number"
 msgid "Part Number:"
 msgstr "Part Number:"
 
+#, fuzzy
+msgid "Part Numbers"
+msgstr "Part Numbers:"
+
 msgid "Part Numbers:"
 msgstr "Part Numbers:"
 
+#, fuzzy
+msgid "Part Time"
+msgstr "Start Time:"
+
 msgid "Part number is too short or too long"
 msgstr "Part number is too short or too long"
+
+#, fuzzy
+msgid "Part-Time"
+msgstr "Start Time:"
 
 #, fuzzy
 msgid "Partial Push Frequency"
@@ -12148,6 +14467,10 @@ msgstr ""
 
 msgid "Pass"
 msgstr "Pass"
+
+#, fuzzy
+msgid "Passport"
+msgstr "Password"
 
 msgid "Password"
 msgstr "Password"
@@ -12238,6 +14561,10 @@ msgstr "Pay + Premium"
 msgid "Pay End Date:"
 msgstr "Pay End Date:"
 
+#, fuzzy
+msgid "Pay End Date: "
+msgstr "Pay End Date:"
+
 msgid "Pay Multiplied By Factor"
 msgstr "Pay Multiplied By Factor"
 
@@ -12316,6 +14643,9 @@ msgstr "Pay Period is invalid!"
 msgid "Pay Period schedule is invalid"
 msgstr "Pay Period schedule is invalid"
 
+msgid "Pay Period that this effective date falls within is currently closed"
+msgstr ""
+
 msgid "Pay Period(s):"
 msgstr "Pay Period(s):"
 
@@ -12326,6 +14656,10 @@ msgid "Pay Periods"
 msgstr "Pay Periods"
 
 msgid "Pay Start Date:"
+msgstr "Pay Start Date:"
+
+#, fuzzy
+msgid "Pay Start Date: "
 msgstr "Pay Start Date:"
 
 msgid "Pay Stub"
@@ -12379,11 +14713,31 @@ msgid "Pay Stub Amendments"
 msgstr "Pay Stub Amendments"
 
 #, fuzzy
+msgid "Pay Stub Amount"
+msgstr "Pay Stub Account:"
+
+#, fuzzy
+msgid "Pay Stub Entry Acount"
+msgstr "Pay Stub Account:"
+
+#, fuzzy
 msgid "Pay Stub Generated by"
 msgstr "Pay Stub Amendment"
 
 msgid "Pay Stub List"
 msgstr "Pay Stub List"
+
+#, fuzzy
+msgid "Pay Stub Note (Public)"
+msgstr "Note (public):"
+
+#, fuzzy
+msgid "Pay Stub Note (Public):"
+msgstr "Note (public):"
+
+#, fuzzy
+msgid "Pay Stub Start Date"
+msgstr "Pay Start Date:"
 
 msgid "Pay Stub Summary"
 msgstr "Pay Stub Summary"
@@ -12391,8 +14745,24 @@ msgstr "Pay Stub Summary"
 msgid "Pay Stub Summary Report"
 msgstr "Pay Stub Summary Report"
 
+#, fuzzy
+msgid "Pay Stub Units"
+msgstr "Pay Stub List"
+
+#, fuzzy
+msgid "Pay Stub YTD Amount"
+msgstr "Pay Stub Account:"
+
+#, fuzzy
+msgid "Pay Stub YTD Units"
+msgstr "Pay Stub List"
+
 msgid "Pay Stub for this employee already exists, skipping..."
 msgstr "Pay Stub for this employee already exists, skipping..."
+
+#, fuzzy
+msgid "Pay Stub waiting in"
+msgstr "Pay Stub List"
 
 msgid "Pay Stubs"
 msgstr "Pay Stubs"
@@ -12400,6 +14770,19 @@ msgstr "Pay Stubs"
 #, fuzzy
 msgid "Pay Type"
 msgstr "Pay Type:"
+
+#, fuzzy
+msgid "Pay period is already closed"
+msgstr "Pay Period is Currently Locked"
+
+msgid ""
+"Pay period prior to %1 is not closed, please close all previous pay periods "
+"and try again..."
+msgstr ""
+
+#, fuzzy
+msgid "Pay stub entry account is invalid"
+msgstr "Pay Stub Account is invalid"
 
 msgid "Pay stub is assigned to a closed pay period"
 msgstr ""
@@ -12418,7 +14801,14 @@ msgstr "Taxble Payroll"
 msgid "Paychex Preview"
 msgstr ""
 
+msgid "Paychex Preview (by Day/Job)"
+msgstr ""
+
 msgid "Payment Date:"
+msgstr "Payment Date:"
+
+#, fuzzy
+msgid "Payment Date: "
 msgstr "Payment Date:"
 
 #, fuzzy
@@ -12439,6 +14829,10 @@ msgstr "Payment Gateway is invalid"
 
 msgid "Payment Gateway:"
 msgstr "Payment Gateway:"
+
+#, fuzzy
+msgid "Payment Information"
+msgstr "Contact Information"
 
 #, fuzzy
 msgid "Payment Information:"
@@ -12469,6 +14863,10 @@ msgstr "Payment Required:"
 #, fuzzy
 msgid "Payment Sent"
 msgstr "Payment Method"
+
+#, fuzzy
+msgid "Payment Signature"
+msgstr "Payment Date:"
 
 #, fuzzy
 msgid "Payment Signature:"
@@ -12524,6 +14922,10 @@ msgstr ""
 msgid "Pending"
 msgstr "Pending"
 
+#, fuzzy
+msgid "Pending Applicants"
+msgstr "Pending Approval"
+
 msgid "Pending Approval"
 msgstr "Pending Approval"
 
@@ -12559,6 +14961,10 @@ msgstr "Pending Requests:"
 #, fuzzy
 msgid "Pending Requests: Schedule Adjustment"
 msgstr "Pending Schedule Amendments"
+
+#, fuzzy
+msgid "Pending Reviews By Employee"
+msgstr "Employee"
 
 #, fuzzy
 msgid "Pending TimeSheets"
@@ -12598,6 +15004,10 @@ msgid "Per Day"
 msgstr "Per Day"
 
 #, fuzzy
+msgid "Per Diem"
+msgstr "Per Week"
+
+#, fuzzy
 msgid "Per Item"
 msgstr "Per Week"
 
@@ -12606,6 +15016,10 @@ msgid "Per Item Quantity"
 msgstr "Quantity"
 
 msgid "Per Month"
+msgstr "Per Month"
+
+#, fuzzy
+msgid "Per Unit"
 msgstr "Per Month"
 
 msgid "Per Week"
@@ -12684,6 +15098,10 @@ msgstr "Permissions"
 msgid "Pernambuco"
 msgstr ""
 
+#, fuzzy
+msgid "Personal"
+msgstr "Professional"
+
 msgid "Perthshire and Kinross"
 msgstr ""
 
@@ -12719,6 +15137,10 @@ msgstr "Phone ID"
 
 msgid "Phone ID:"
 msgstr "Phone ID:"
+
+#, fuzzy
+msgid "Phone Interview"
+msgstr "Phone ID"
 
 msgid "Phone:"
 msgstr "Phone:"
@@ -12830,6 +15252,9 @@ msgstr "Please submit at least one message describing the reason for this %1."
 msgid "Please try again later..."
 msgstr ""
 
+msgid "Please try again later... (b)"
+msgstr ""
+
 #, fuzzy
 msgid "Please upload file again"
 msgstr "File Upload failed"
@@ -12887,6 +15312,9 @@ msgstr ""
 msgid "Poole"
 msgstr ""
 
+msgid "Poor"
+msgstr ""
+
 msgid "Pordenone"
 msgstr ""
 
@@ -12904,7 +15332,33 @@ msgstr ""
 msgid "Portugal"
 msgstr "Portugal"
 
+#, fuzzy
+msgid "Position Accuracy is invalid"
+msgstr "Policy is invalid"
+
+#, fuzzy
+msgid "Position Expire Date"
+msgstr "Expiry Date:"
+
+#, fuzzy
+msgid "Position Open Date"
+msgstr "Transaction End Date:"
+
+msgid "Position expire date should be after position open date"
+msgstr ""
+
 msgid "Position:"
+msgstr "Position:"
+
+msgid "Positions Available"
+msgstr ""
+
+#, fuzzy
+msgid "Positions Available is invalid"
+msgstr "Termination date is invalid"
+
+#, fuzzy
+msgid "Positive"
 msgstr "Position:"
 
 msgid "Post Adjustment"
@@ -13195,6 +15649,13 @@ msgstr "Privileged Database User Name:"
 msgid "Privileged Database User Password:"
 msgstr "Privileged Database User Password:"
 
+msgid "Pro-Rate Denominator"
+msgstr ""
+
+#, fuzzy
+msgid "Pro-Rate Numerator"
+msgstr "Part Number"
+
 #, fuzzy
 msgid "ProRate"
 msgstr "Rate"
@@ -13239,6 +15700,10 @@ msgstr "Lock Description:"
 #, fuzzy
 msgid "Product Edition"
 msgstr "Product Edition:"
+
+#, fuzzy
+msgid "Product Edition Name is invalid"
+msgstr "Product is invalid"
 
 msgid "Product Edition:"
 msgstr "Product Edition:"
@@ -13314,6 +15779,14 @@ msgid "Professional, Scientific and Technical Services"
 msgstr ""
 
 #, fuzzy
+msgid "Proficiency"
+msgstr "Policies"
+
+#, fuzzy
+msgid "Proficiency is invalid"
+msgstr "Percent is invalid"
+
+#, fuzzy
 msgid "Profit %"
 msgstr "Print"
 
@@ -13352,6 +15825,9 @@ msgstr "Provincial Tax Exempt:"
 #, fuzzy
 msgid "Proximity Card"
 msgstr "Credit Card"
+
+msgid "Public"
+msgstr ""
 
 msgid "Public Note is too long"
 msgstr "Public Note is too long"
@@ -13421,6 +15897,17 @@ msgstr "Punch In/Out"
 #, fuzzy
 msgid "Punch List"
 msgstr "Branch List"
+
+#, fuzzy
+msgid "Punch Mode: QRCode"
+msgstr "Branch:"
+
+msgid "Punch Mode: QRCode+Face Detection"
+msgstr ""
+
+#, fuzzy
+msgid "Punch Mode: Quick Punch"
+msgstr "Out Punch"
 
 msgid "Punch Summary"
 msgstr "Punch Summary"
@@ -13594,6 +16081,12 @@ msgstr "Frequency"
 msgid "Putumayo"
 msgstr ""
 
+msgid "QRCodes: Allow MACROs"
+msgstr ""
+
+msgid "QRCodes: Allow Multiple"
+msgstr ""
+
 #, fuzzy
 msgid "QRcode"
 msgstr "Barcode"
@@ -13606,6 +16099,34 @@ msgstr "Qatar"
 
 msgid "Qty"
 msgstr "Qty"
+
+#, fuzzy
+msgid "Qualification"
+msgstr "Verification"
+
+#, fuzzy
+msgid "Qualification Group"
+msgstr "Employee Identification"
+
+#, fuzzy
+msgid "Qualification Summary Report"
+msgstr "Employee Summary"
+
+#, fuzzy
+msgid "Qualification Type"
+msgstr "Station Type"
+
+#, fuzzy
+msgid "Qualification name already exists"
+msgstr "Branch already exists"
+
+#, fuzzy
+msgid "Qualification name is invalid"
+msgstr "Termination date is invalid"
+
+#, fuzzy
+msgid "Qualifications"
+msgstr "Verifications"
 
 msgid "Quantity"
 msgstr "Quantity"
@@ -13638,6 +16159,10 @@ msgstr "Quarter"
 
 msgid "Quarter:"
 msgstr "Quarter:"
+
+#, fuzzy
+msgid "Quarterly"
+msgstr "Quarter"
 
 #, fuzzy
 msgid "Quebec"
@@ -13674,8 +16199,8 @@ msgid "Quick Punch ID"
 msgstr "Out Punch"
 
 #, fuzzy
-msgid "Quick Punch ID is already taken"
-msgstr "iButton ID is already taken"
+msgid "Quick Punch ID is already in use, please try a different one"
+msgstr "Code is already in use, please enter a different one"
 
 #, fuzzy
 msgid "Quick Punch ID must be digits only"
@@ -13748,6 +16273,9 @@ msgstr "READ"
 
 msgid "READY"
 msgstr "READY"
+
+msgid "REIMBURSED"
+msgstr ""
 
 #, fuzzy
 msgid "RFID is already in use, please enter a different one"
@@ -13835,6 +16363,13 @@ msgstr ""
 msgid "Rate:"
 msgstr "Rate:"
 
+msgid "Rating"
+msgstr ""
+
+#, fuzzy
+msgid "Rating must only be digits"
+msgstr "Employee number must only be digits"
+
 msgid "Ravenna"
 msgstr ""
 
@@ -13858,6 +16393,9 @@ msgstr ""
 #, fuzzy
 msgid "Reason"
 msgstr "Reason:"
+
+msgid "Reason for leaving"
+msgstr ""
 
 msgid "Reason:"
 msgstr "Reason:"
@@ -13930,6 +16468,22 @@ msgid "Records"
 msgstr "Keywords:"
 
 #, fuzzy
+msgid "Recruitment"
+msgstr "Department"
+
+#, fuzzy
+msgid "Recruitment Detail Report"
+msgstr "TimeSheet Detail Report"
+
+#, fuzzy
+msgid "Recruitment Reports"
+msgstr "Recent Requests"
+
+#, fuzzy
+msgid "Recruitment Summary Report"
+msgstr "Remittance Summary Report"
+
+#, fuzzy
 msgid "Recurring Holiday"
 msgstr "Recurring Holidays"
 
@@ -13945,6 +16499,10 @@ msgstr "Recurring Holidays:"
 #, fuzzy
 msgid "Recurring PS Amendment"
 msgstr "Recurring PS Amendment:"
+
+#, fuzzy
+msgid "Recurring PS Amendment Employees"
+msgstr "Recurring PS Amendments"
 
 msgid "Recurring PS Amendment is invalid"
 msgstr "Recurring PS Amendment is invalid"
@@ -14000,13 +16558,27 @@ msgid "Redcar and Cleveland"
 msgstr ""
 
 #, fuzzy
+msgid "Reference Information By Applicant"
+msgstr "Contact Information"
+
+msgid "Reference Information By Applicant/Job Vacancy/Status"
+msgstr ""
+
+msgid "Referrer"
+msgstr ""
+
+#, fuzzy
+msgid "Referrer Url is invalid"
+msgstr "Selected Item is invalid"
+
+#, fuzzy
 msgid "Regarding:"
 msgstr "Heading:"
 
 msgid "Reggio di Calabria"
 msgstr ""
 
-msgid "Reggio nell'Emilia"
+msgid "Reggio nell`Emilia"
 msgstr ""
 
 msgid "Region Autonoma Atlantico Norte"
@@ -14025,7 +16597,12 @@ msgstr "Registration Key:"
 msgid "Regular"
 msgstr "Regular"
 
-msgid "Regular Employee"
+#, fuzzy
+msgid "Regular Employee (Manual Entry)"
+msgstr "Regular Employee"
+
+#, fuzzy
+msgid "Regular Employee (Punch In/Out)"
 msgstr "Regular Employee"
 
 msgid "Regular Time"
@@ -14129,6 +16706,17 @@ msgid "Regular Time:"
 msgstr "Regular Time:"
 
 #, fuzzy
+msgid "Reimbursable"
+msgstr "Disabled"
+
+#, fuzzy
+msgid "Reimburse Amount"
+msgstr "Claim Amount:"
+
+msgid "Relative"
+msgstr ""
+
+#, fuzzy
 msgid "Release All Accruals"
 msgstr "Releasing all employee accruals"
 
@@ -14144,6 +16732,17 @@ msgstr "Remittance Summary"
 
 msgid "Remittance Summary Report"
 msgstr "Remittance Summary Report"
+
+msgid "Removing invalid or bouncing email address"
+msgstr ""
+
+#, fuzzy
+msgid "Renewal Date"
+msgstr "Initial Balance"
+
+#, fuzzy
+msgid "Renewal date is invalid"
+msgstr "Hire date is invalid"
 
 msgid "Renfrewshire"
 msgstr ""
@@ -14164,6 +16763,13 @@ msgstr "Nepal"
 #, fuzzy
 msgid "Report"
 msgstr "Reports"
+
+msgid "Report Custom Column"
+msgstr ""
+
+#, fuzzy
+msgid "Report Date"
+msgstr "Script Name:"
 
 msgid "Report Filter Criteria"
 msgstr "Report Filter Criteria"
@@ -14227,6 +16833,10 @@ msgstr "Time Adjustment"
 msgid "Requests"
 msgstr "Requests"
 
+#, fuzzy
+msgid "Require Receipt"
+msgstr "Requires Ack"
+
 msgid "Requires Ack"
 msgstr "Requires Ack"
 
@@ -14264,11 +16874,19 @@ msgid "Retalhuleu"
 msgstr "Recalculate"
 
 #, fuzzy
-msgid "Retrieving Client Data..."
+msgid "Retrieving Branches..."
+msgstr "Import"
+
+#, fuzzy
+msgid "Retrieving Clients..."
 msgstr "Import"
 
 msgid "Retrieving Data..."
 msgstr ""
+
+#, fuzzy
+msgid "Retrieving Departments..."
+msgstr "Import"
 
 #, fuzzy
 msgid "Retrieving Employee Data..."
@@ -14279,15 +16897,23 @@ msgid "Retrieving Job Data..."
 msgstr "Import"
 
 #, fuzzy
+msgid "Retrieving Job Item Data..."
+msgstr "Import"
+
+#, fuzzy
+msgid "Retrieving Jobs..."
+msgstr "Import"
+
+#, fuzzy
 msgid "Retrieving Punch Data..."
 msgstr "Import"
 
 #, fuzzy
-msgid "Retrieving Task Amendment Data..."
+msgid "Retrieving Task Amendments..."
 msgstr "Recurring PS Amendment:"
 
 #, fuzzy
-msgid "Retrieving Task Data..."
+msgid "Retrieving Tasks..."
 msgstr "Import"
 
 msgid "Return Code"
@@ -14295,6 +16921,79 @@ msgstr ""
 
 msgid "Reunion"
 msgstr "Reunion"
+
+#, fuzzy
+msgid "Review"
+msgstr "Under Review"
+
+msgid "Review (Control)"
+msgstr ""
+
+msgid "Review (General)"
+msgstr ""
+
+msgid "Review (Performance)"
+msgstr ""
+
+#, fuzzy
+msgid "Review (Wage)"
+msgstr "Regular Time Wage"
+
+msgid "Review Approved"
+msgstr ""
+
+#, fuzzy
+msgid "Review Information By Employee/KPI"
+msgstr "Bank Information"
+
+#, fuzzy
+msgid "Review Information By KPI/Employee"
+msgstr "Bank Information"
+
+msgid "Review Notes"
+msgstr ""
+
+msgid "Review Severity/Importance"
+msgstr ""
+
+#, fuzzy
+msgid "Review Status"
+msgstr "Invoice Settings"
+
+msgid "Review Summary By Employee/Type/Terms/Severity"
+msgstr ""
+
+msgid "Review Summary By Type/Terms/Severity"
+msgstr ""
+
+msgid "Review Summary By Type/Terms/Severity/Employee"
+msgstr ""
+
+#, fuzzy
+msgid "Review Summary Report"
+msgstr "Remittance Summary Report"
+
+msgid "Review Tags"
+msgstr ""
+
+msgid "Review Terms"
+msgstr ""
+
+#, fuzzy
+msgid "Review Type"
+msgstr "Punch Type:"
+
+#, fuzzy
+msgid "Reviewer Exclude"
+msgstr "Exclude"
+
+#, fuzzy
+msgid "Reviewer Include"
+msgstr "Include"
+
+#, fuzzy
+msgid "Reviewer Name"
+msgstr "Script Name:"
 
 msgid "Revision"
 msgstr "Revision"
@@ -14398,10 +17097,11 @@ msgid "Rotherham"
 msgstr "Other"
 
 #, fuzzy
-msgid "Round Interval Policy"
-msgstr "Round Interval Policy is invalid"
+msgid "Round Decimal Places"
+msgstr "Rounding Policies"
 
-msgid "Round Interval Policy is invalid"
+#, fuzzy
+msgid "Round Interval Policy"
 msgstr "Round Interval Policy is invalid"
 
 #, fuzzy
@@ -14428,6 +17128,10 @@ msgstr "Rounding Policies"
 
 msgid "Rounding Policy List"
 msgstr "Rounding Policy List"
+
+#, fuzzy
+msgid "Rounding Policy is invalid"
+msgstr "Round Interval Policy is invalid"
 
 #, fuzzy
 msgid "Rounding Policy:"
@@ -14478,6 +17182,10 @@ msgstr "SIN is invalid"
 
 msgid "SIN/SSN"
 msgstr "SIN/SSN"
+
+#, fuzzy
+msgid "SIN/SSN is invalid"
+msgstr "SIN is invalid"
 
 #, fuzzy
 msgid "SOAP Enabled:"
@@ -14674,6 +17382,10 @@ msgstr "Earnings"
 msgid "Savona"
 msgstr ""
 
+#, fuzzy
+msgid "Scale Rating"
+msgstr "Actual Rate:"
+
 msgid "Schedule"
 msgstr "Schedule"
 
@@ -14756,6 +17468,10 @@ msgid "Schedule:"
 msgstr "Schedule:"
 
 #, fuzzy
+msgid "Scheduled"
+msgstr "Scheduled:"
+
+#, fuzzy
 msgid "Scheduled (Last Week)"
 msgstr "Scheduled:"
 
@@ -14805,6 +17521,10 @@ msgstr "Scheduled Time"
 msgid "Scheduled:"
 msgstr "Scheduled:"
 
+#, fuzzy
+msgid "Scheduling"
+msgstr "Schedule"
+
 msgid "Schema Version"
 msgstr "Schema Version"
 
@@ -14819,6 +17539,10 @@ msgstr "Script:"
 
 msgid "Search"
 msgstr "Search"
+
+#, fuzzy
+msgid "Seasonal"
+msgstr "Reason:"
 
 #, fuzzy
 msgid "Second Surname"
@@ -15038,10 +17762,6 @@ msgid "Selected User is invalid"
 msgstr "Selected Item is invalid"
 
 #, fuzzy
-msgid "Selected employee is assigned as both a superior and subordinate"
-msgstr "Selected Employee is already assigned to another Pay Period"
-
-#, fuzzy
 msgid "Selected employee is invalid"
 msgstr "Selected Employee is invalid"
 
@@ -15066,6 +17786,10 @@ msgid ""
 "Selected subordinate is invalid or already assigned to another hierarchy "
 "with the same objects "
 msgstr "Selected Employee is already assigned to another Policy Group"
+
+#, fuzzy
+msgid "Selection"
+msgstr "Action"
 
 msgid "Selection Criteria"
 msgstr "Selection Criteria"
@@ -15093,6 +17817,9 @@ msgstr "Send to Subordinate"
 
 msgid "Senegal"
 msgstr "Senegal"
+
+msgid "Senior Exec"
+msgstr ""
 
 msgid "Sent"
 msgstr "Sent"
@@ -15169,6 +17896,9 @@ msgstr "Settings"
 msgid "Severity"
 msgstr "Severity"
 
+msgid "Severity/Importance"
+msgstr ""
+
 #, fuzzy
 msgid "Severity:"
 msgstr "Severity"
@@ -15214,6 +17944,14 @@ msgstr "Edit Schedule"
 #, fuzzy
 msgid "Shift Time"
 msgstr "Maximum Time:"
+
+#, fuzzy
+msgid "Shift is after employees termination date"
+msgstr "Setting employee termination date to:"
+
+#, fuzzy
+msgid "Shift is before employees hire date"
+msgstr "Setting employee termination date to:"
 
 msgid "Ship To"
 msgstr ""
@@ -15308,6 +18046,9 @@ msgstr "Short name is too short or too long"
 msgid "Show Pre-Mature:"
 msgstr "Statuses"
 
+msgid "Show Sub-Expenses"
+msgstr ""
+
 msgid "Show System Time:"
 msgstr "Show System Time:"
 
@@ -15316,6 +18057,10 @@ msgstr "Show:"
 
 msgid "Shropshire"
 msgstr ""
+
+#, fuzzy
+msgid "Sibling"
+msgstr "Billing"
 
 msgid "Sick Pay"
 msgstr ""
@@ -15373,6 +18118,39 @@ msgstr "Head of Household"
 
 msgid "Siquijor"
 msgstr ""
+
+msgid "Skill"
+msgstr ""
+
+#, fuzzy
+msgid "Skill Experience"
+msgstr "Experience Rate"
+
+#, fuzzy
+msgid "Skill Expiry Date"
+msgstr "Expiry Date:"
+
+msgid "Skill First Used Date"
+msgstr ""
+
+#, fuzzy
+msgid "Skill Last Used Date"
+msgstr "Last Downloaded Date:"
+
+msgid "Skill Proficiency"
+msgstr ""
+
+#, fuzzy
+msgid "Skill Renewals By Employee"
+msgstr "Employee"
+
+#, fuzzy
+msgid "Skills Information By Employee"
+msgstr "Bank Information"
+
+#, fuzzy
+msgid "Skills Information By Skill/Employee"
+msgstr "Bank Information"
 
 msgid "Slough"
 msgstr ""
@@ -15462,6 +18240,11 @@ msgid ""
 "company's password policy and must be changed immediately"
 msgstr ""
 
+msgid ""
+"Sorry, your trial period has expired, please contact our sales department to "
+"reactivate your account"
+msgstr ""
+
 msgid "Sorsogon"
 msgstr ""
 
@@ -15478,6 +18261,10 @@ msgstr "Sort By:"
 
 #, fuzzy
 msgid "Sorting Data..."
+msgstr "Import"
+
+#, fuzzy
+msgid "Sorting Form Data..."
 msgstr "Import"
 
 msgid "Source"
@@ -15554,6 +18341,10 @@ msgid "Spain"
 msgstr "Spain"
 
 #, fuzzy
+msgid "Speaking"
+msgstr "Check"
+
+#, fuzzy
 msgid "Special Day"
 msgstr "Special Day:"
 
@@ -15573,6 +18364,9 @@ msgid ""
 msgstr ""
 "Specify which criteria is used for each box in the form. Click arrow to "
 "modify."
+
+msgid "Spouse/Partner"
+msgstr ""
 
 msgid "Sri Lanka"
 msgstr "Sri Lanka"
@@ -15624,6 +18418,10 @@ msgstr "Start / Stop Window:"
 msgid "Start Date"
 msgstr "Start Date"
 
+#, fuzzy
+msgid "Start Date/Time"
+msgstr "Start Date"
+
 msgid "Start Date:"
 msgstr "Start Date:"
 
@@ -15652,6 +18450,14 @@ msgstr "Start Window:"
 
 msgid "Start Window:"
 msgstr "Start Window:"
+
+#, fuzzy
+msgid "Start date is invalid"
+msgstr "Birth date is invalid"
+
+#, fuzzy
+msgid "Start date not specified"
+msgstr "Address (Line 1):"
 
 #, fuzzy
 msgid "Start or End dates are invalid"
@@ -15744,6 +18550,11 @@ msgstr "Station Type"
 msgid "Station is invalid"
 msgstr "Station is invalid"
 
+msgid ""
+"Station licenses have been exceeded, please contact your license provider to "
+"purchase additional ones"
+msgstr ""
+
 msgid "Station:"
 msgstr "Station:"
 
@@ -15789,10 +18600,22 @@ msgstr ""
 msgid "Status can only be changed from Post Adjustment to Closed"
 msgstr ""
 
+#, fuzzy
+msgid "Status is invalid"
+msgstr "Station is invalid"
+
+#, fuzzy
+msgid "Status not specified"
+msgstr "Address (Line 1):"
+
 msgid "Status:"
 msgstr "Status:"
 
 msgid "Statuses"
+msgstr "Statuses"
+
+#, fuzzy
+msgid "Statutaire"
 msgstr "Statuses"
 
 #, fuzzy
@@ -15841,6 +18664,13 @@ msgstr "Strict Schedule:"
 
 msgid "Strict:"
 msgstr "Strict:"
+
+#, fuzzy
+msgid "String"
+msgstr "Strict:"
+
+msgid "Student"
+msgstr ""
 
 msgid "Sub Total defines column that is not being displayed on the report"
 msgstr ""
@@ -16146,6 +18976,14 @@ msgid "Tainted"
 msgstr ""
 
 #, fuzzy
+msgid "Tainted By"
+msgstr "Sort By:"
+
+#, fuzzy
+msgid "Tainted Date"
+msgstr "United States"
+
+#, fuzzy
 msgid "Tainted Punches By Employee"
 msgstr "Employee"
 
@@ -16210,6 +19048,10 @@ msgid "Task Bad Quantity Rate"
 msgstr "Bad Quantity Rate:"
 
 #, fuzzy
+msgid "Task Barcodes"
+msgstr "Job / Task Barcodes"
+
+#, fuzzy
 msgid "Task Billable Rate"
 msgstr "Billable Rate"
 
@@ -16223,6 +19065,10 @@ msgstr "Criteria"
 #, fuzzy
 msgid "Task Description"
 msgstr "Description"
+
+#, fuzzy
+msgid "Task Details"
+msgstr "Payment Method"
 
 #, fuzzy
 msgid "Task Estimate Bad Quantity"
@@ -16254,6 +19100,10 @@ msgstr "Task Groups"
 msgid "Task Groups Currently Selected, Click the arrow to modify."
 msgstr "Employees Currently Selected, Click the arrow to modify."
 
+#, fuzzy
+msgid "Task Information"
+msgstr "Bank Information"
+
 msgid "Task List"
 msgstr "Task List"
 
@@ -16265,8 +19115,20 @@ msgstr "Last Name"
 msgid "Task Note"
 msgstr "Task Code"
 
+#, fuzzy
+msgid "Task Status"
+msgstr "United States"
+
+#, fuzzy
+msgid "Task Summary"
+msgstr "T4 Summary"
+
 msgid "Task already has an amendment for this job"
 msgstr "Task already has an amendment for this job"
+
+#, fuzzy
+msgid "Task does not exist"
+msgstr "Job does not exist"
 
 msgid "Task is invalid"
 msgstr "Task is invalid"
@@ -16337,6 +19199,10 @@ msgstr "Tax Deductions"
 msgid "Tax Engine Version:"
 msgstr "Tax Engine Version:"
 
+#, fuzzy
+msgid "Tax Information"
+msgstr "Bank Information"
+
 msgid "Tax Number:"
 msgstr "Tax Number:"
 
@@ -16373,6 +19239,14 @@ msgstr "Tax Withheld"
 #, fuzzy
 msgid "Tax by Employee"
 msgstr "Enroll Employees"
+
+#, fuzzy
+msgid "Tax(Flat Amount)"
+msgstr "Transaction Report"
+
+#, fuzzy
+msgid "Tax(Percent)"
+msgstr "Percent"
 
 #, fuzzy
 msgid "Taxable Medicare Wages"
@@ -16414,6 +19288,10 @@ msgid "Telford and Wrekin"
 msgstr ""
 
 #, fuzzy
+msgid "Temp/Contract"
+msgstr "Contacts"
+
+#, fuzzy
 msgid "Template"
 msgstr "Template:"
 
@@ -16444,6 +19322,9 @@ msgstr ""
 msgid "Termination date is invalid"
 msgstr "Termination date is invalid"
 
+msgid "Terms"
+msgstr ""
+
 msgid "Terni"
 msgstr ""
 
@@ -16456,6 +19337,9 @@ msgstr "Test Progress Bar..."
 #, fuzzy
 msgid "Texas"
 msgstr "Task"
+
+msgid "Text"
+msgstr ""
 
 msgid "Thailand"
 msgstr "Thailand"
@@ -16480,6 +19364,10 @@ msgstr "There are no Pay Periods past their end date yet."
 msgid "There is already a base currency set"
 msgstr "There is already a base currency set"
 
+#, fuzzy
+msgid "There is already a current employer flagged."
+msgstr "There is already a base currency set"
+
 msgid "There is already a default contact for this type"
 msgstr "There is already a default contact for this type"
 
@@ -16497,6 +19385,13 @@ msgstr ""
 "These notices require your system to periodically send\n"
 "\t\t\t\t\t\tTimeTrex statistics about your installation in order to\n"
 "\t\t\t\t\t\thelp us understand usage patterns and improve the product."
+
+msgid "Thesis"
+msgstr ""
+
+#, fuzzy
+msgid "This KPI is in use"
+msgstr "This overtime policy is in use"
 
 #, fuzzy
 msgid "This Month"
@@ -16522,6 +19417,10 @@ msgid "This Year (Year-To-Date)"
 msgstr ""
 
 msgid "This absence policy is in use"
+msgstr "This absence policy is in use"
+
+#, fuzzy
+msgid "This absence policy is not available for this employee"
 msgstr "This absence policy is in use"
 
 msgid "This accrual policy is in use"
@@ -16614,6 +19513,10 @@ msgid "Time"
 msgstr "Time"
 
 #, fuzzy
+msgid "Time & Attendance"
+msgstr "Attendance"
+
+#, fuzzy
 msgid "Time Clock Configuration"
 msgstr "3. Database Configuration"
 
@@ -16646,6 +19549,14 @@ msgstr ""
 
 msgid "Time Period is set to Custom Pay Period, but no pay period is selected"
 msgstr ""
+
+#, fuzzy
+msgid "Time Since"
+msgstr "Time Zone:"
+
+#, fuzzy
+msgid "Time Unit"
+msgstr "Time Units:"
 
 #, fuzzy
 msgid "Time Unit Format"
@@ -16729,6 +19640,10 @@ msgstr ""
 msgid "TimeSheet"
 msgstr "TimeSheet"
 
+#, fuzzy
+msgid "TimeSheet Detail"
+msgstr "Timesheet Detail"
+
 msgid "TimeSheet Detail Report"
 msgstr "TimeSheet Detail Report"
 
@@ -16739,6 +19654,10 @@ msgstr "TimeSheet"
 #, fuzzy
 msgid "TimeSheet Not Verified"
 msgstr "TimeSheet"
+
+#, fuzzy
+msgid "TimeSheet Summary"
+msgstr "Timesheet Summary"
 
 msgid "TimeSheet Summary Report"
 msgstr "TimeSheet Summary Report"
@@ -16807,8 +19726,16 @@ msgstr "Title"
 msgid "Title already exists"
 msgstr "Title already exists"
 
+#, fuzzy
+msgid "Title contains invalid characters"
+msgstr "City contains invalid characters"
+
 msgid "Title is invalid"
 msgstr "Title is invalid"
+
+#, fuzzy
+msgid "Title is too short or too long"
+msgstr "Note is too short or too long"
 
 msgid "Title:"
 msgstr "Title:"
@@ -16822,12 +19749,26 @@ msgstr ""
 msgid "To"
 msgstr "To"
 
+#, fuzzy
+msgid "To Employee"
+msgstr "Enroll Employees"
+
 msgid ""
 "To Sign-In/Out over the telephone dial <b>1-800-714-5153</b>, press \"<b>8</"
 "b>\" at the menu and follow the prompts."
 msgstr ""
 "To Sign-In/Out over the telephone dial <b>1-800-714-5153</b>, press \"<b>8</"
 "b>\" at the menu and follow the prompts."
+
+msgid ""
+"To better serve our customers your account has been migrated, please contact "
+"customer support immediately."
+msgstr ""
+
+msgid ""
+"To better serve our customers your account has been migrated, please update "
+"your bookmarks to use the following URL from now on: "
+msgstr ""
 
 msgid ""
 "To set different In/Out times for each day of the week, add additional weeks "
@@ -16865,6 +19806,10 @@ msgstr "Tokelau"
 msgid "Tolima"
 msgstr "Total Time"
 
+#, fuzzy
+msgid "Tomorrow"
+msgstr "Comoros"
+
 msgid "Tonga"
 msgstr "Tonga"
 
@@ -16889,8 +19834,16 @@ msgstr "Total"
 msgid "Total Absence Time"
 msgstr "Total Absence Time"
 
+#, fuzzy
+msgid "Total Active (Days)"
+msgstr "Effective Days:"
+
 msgid "Total Actual Cost:"
 msgstr "Total Actual Cost:"
+
+#, fuzzy
+msgid "Total Applications"
+msgstr "Mobile Phone"
 
 msgid "Total Balance"
 msgstr "Total Balance"
@@ -16958,11 +19911,18 @@ msgstr "Total Gross"
 msgid "Total Gross:"
 msgstr "Total Gross:"
 
+msgid "Total Hours of Service"
+msgstr ""
+
 msgid "Total Net Pay:"
 msgstr "Total Net Pay:"
 
 msgid "Total Over Time"
 msgstr "Total Over Time"
+
+#, fuzzy
+msgid "Total Pay Stubs"
+msgstr "Total Payments (Line 1):"
 
 #, fuzzy
 msgid "Total Payments"
@@ -16982,6 +19942,10 @@ msgstr "All Punches"
 #, fuzzy
 msgid "Total Punches:"
 msgstr "All Punches"
+
+#, fuzzy
+msgid "Total Reviews"
+msgstr "Total Time"
 
 #, fuzzy
 msgid "Total Shifts"
@@ -17008,6 +19972,10 @@ msgstr "Regular Time Wage w/Burden"
 #, fuzzy
 msgid "Total Time over:"
 msgstr "Total Time Wage"
+
+#, fuzzy
+msgid "Total Time/Wage by Job/Task Group/Task"
+msgstr "Allowed Employees:"
 
 #, fuzzy
 msgid "Total Weight"
@@ -17137,6 +20105,10 @@ msgstr "Transaction Type"
 msgid "Transaction date is before pay period end date"
 msgstr "Transaction date is before pay period end date"
 
+#, fuzzy
+msgid "Transaction date not specified"
+msgstr "Address (Line 1):"
+
 msgid ""
 "Transaction is invalid or payment processing gateway is not configured "
 "properly"
@@ -17228,9 +20200,13 @@ msgstr "Type Exclusive"
 msgid "Type already exists"
 msgstr "Type already exists"
 
+#, fuzzy
+msgid "Type is invalid"
+msgstr "Table is invalid"
+
 msgid ""
-"Type is only available in %1 Business or Professional Editions, please "
-"contact our sales department for more information"
+"Type is not available in %1 Community Edition, please contact our sales "
+"department for more information"
 msgstr ""
 
 #, fuzzy
@@ -17280,6 +20256,20 @@ msgstr "URL:"
 #, fuzzy
 msgid "US - Advance EIC Formula"
 msgstr "Canada - EI Formula"
+
+msgid "US - Medicare Formula (Employee)"
+msgstr ""
+
+msgid "US - Medicare Formula (Employer)"
+msgstr ""
+
+#, fuzzy
+msgid "US - Social Security Formula (Employee)"
+msgstr "Social Security Tax (4)"
+
+#, fuzzy
+msgid "US - Social Security Formula (Employer)"
+msgstr "Social Security Tax (4)"
 
 #, fuzzy
 msgid "USB Fingerprint"
@@ -17377,6 +20367,15 @@ msgstr ""
 msgid "Unable to change status of your own record"
 msgstr "Unable to change parent to a child of itself"
 
+msgid "Unable to delete expenses after they have been authorized/declined"
+msgstr ""
+
+msgid "Unable to delete pay stubs in closed pay periods"
+msgstr ""
+
+msgid "Unable to delete pay stubs that are marked as PAID"
+msgstr ""
+
 msgid "Unable to delete requests after they have been authorized/declined"
 msgstr ""
 
@@ -17393,6 +20392,10 @@ msgid "Unable to obtain rate when no employee is selected."
 msgstr ""
 
 msgid "Unable to process payment #"
+msgstr "Unable to process payment #"
+
+#, fuzzy
+msgid "Unable to process payment, reason"
 msgstr "Unable to process payment #"
 
 msgid "Unable to remove your own record from a permission group"
@@ -17431,6 +20434,14 @@ msgstr "Unit Cost:"
 
 msgid "Unit Cost:"
 msgstr "Unit Cost:"
+
+#, fuzzy
+msgid "Unit Name"
+msgstr "First Name"
+
+#, fuzzy
+msgid "Unit Name is too short or too long"
+msgstr "Name is too short or too long"
 
 msgid "Unit Price"
 msgstr "Unit Price"
@@ -17490,6 +20501,25 @@ msgstr "Unscheduled Absence"
 msgid "Unspecified"
 msgstr "Verified"
 
+msgid "Unsuitable: Background"
+msgstr ""
+
+msgid "Unsuitable: Drug Test"
+msgstr ""
+
+msgid "Unsuitable: Experience"
+msgstr ""
+
+msgid "Unsuitable: Other"
+msgstr ""
+
+msgid "Unsuitable: Skills"
+msgstr ""
+
+#, fuzzy
+msgid "Unsuitable: Wage"
+msgstr "User Name"
+
 msgid "Unsupported"
 msgstr "Unsupported"
 
@@ -17526,8 +20556,16 @@ msgid "Up To Last Pay Period"
 msgstr "Edit Pay Period"
 
 #, fuzzy
+msgid "Up To Last Quarter"
+msgstr "Quarter"
+
+#, fuzzy
 msgid "Up To Last Week"
 msgstr "Start Weeks on:"
+
+#, fuzzy
+msgid "Up To Last Year"
+msgstr "Last Day"
 
 #, fuzzy
 msgid "Up To This Month"
@@ -17538,7 +20576,15 @@ msgid "Up To This Pay Period"
 msgstr "each Pay Period"
 
 #, fuzzy
+msgid "Up To This Quarter"
+msgstr "Quarter"
+
+#, fuzzy
 msgid "Up To This Week"
+msgstr "1 Week"
+
+#, fuzzy
+msgid "Up To This Year"
 msgstr "1 Week"
 
 msgid "Up To Today"
@@ -17547,21 +20593,6 @@ msgstr ""
 #, fuzzy
 msgid "Up To Yesterday"
 msgstr "Easter Sunday"
-
-#, fuzzy
-msgid "Up to Last Quarter"
-msgstr "Quarter"
-
-#, fuzzy
-msgid "Up to Last Year"
-msgstr "Last Day"
-
-#, fuzzy
-msgid "Up to This Quarter"
-msgstr "Quarter"
-
-msgid "Up to This Year"
-msgstr ""
 
 msgid "Update"
 msgstr "Update"
@@ -17638,14 +20669,40 @@ msgid "User Date Total ID is invalid"
 msgstr "User Date Total ID is invalid"
 
 #, fuzzy
+msgid "User Education"
+msgstr "Deduction"
+
+msgid "User Expense"
+msgstr ""
+
+#, fuzzy
 msgid "User Filter:"
 msgstr "Title"
+
+#, fuzzy
+msgid "User Language"
+msgstr "Language"
+
+#, fuzzy
+msgid "User License"
+msgstr "Employee List"
+
+msgid "User Membership"
+msgstr ""
 
 msgid "User Name"
 msgstr "User Name"
 
 msgid "User Name for"
 msgstr "User Name for"
+
+#, fuzzy
+msgid "User Name is already taken"
+msgstr "UserName is already taken"
+
+#, fuzzy
+msgid "User Name or Key is incorrect."
+msgstr "User Name or Password is incorrect"
 
 msgid "User Name or Password is incorrect"
 msgstr "User Name or Password is incorrect"
@@ -17656,6 +20713,14 @@ msgstr "User Name or Password is incorrect"
 
 msgid "User Name:"
 msgstr "User Name:"
+
+#, fuzzy
+msgid "User Setting - Name"
+msgstr "4. System Settings"
+
+#, fuzzy
+msgid "User Skill"
+msgstr "Title"
 
 #, fuzzy
 msgid "User Value 1 is invalid"
@@ -17942,6 +21007,10 @@ msgstr "Version:"
 msgid "Version:"
 msgstr "Version:"
 
+#, fuzzy
+msgid "Very Good"
+msgstr "Good:"
+
 msgid "Vibo Valentia"
 msgstr ""
 
@@ -17976,6 +21045,10 @@ msgstr "View Job"
 
 msgid "View Message"
 msgstr "View Message"
+
+#, fuzzy
+msgid "View Open Shifts"
+msgstr "View Pay Stubs"
 
 msgid "View Own"
 msgstr "View Own"
@@ -18155,6 +21228,12 @@ msgid ""
 "disruption."
 msgstr ""
 
+msgid ""
+"WARNING: Please click here and enter an email address for your account, this "
+"is required to receive important notices and prevent your account from being "
+"locked out."
+msgstr ""
+
 msgid "WARNING: The credit card on file expires in"
 msgstr ""
 
@@ -18219,8 +21298,22 @@ msgstr "Group:"
 msgid "Wage History"
 msgstr "Wage History"
 
+msgid "Wage Maximum"
+msgstr ""
+
+msgid "Wage Minimum"
+msgstr ""
+
+#, fuzzy
+msgid "Wage Note"
+msgstr "Task Code"
+
 msgid "Wage Type"
 msgstr "Wage Type"
+
+#, fuzzy
+msgid "Wage Type is invalid"
+msgstr "Group is invalid"
 
 msgid "Wage has too many digits"
 msgstr ""
@@ -18281,6 +21374,9 @@ msgstr "Wages, Tips, Other Compensation (Box 1):"
 msgid "Wages, tips and other compensation (Line 2):"
 msgstr "Wages, tips and other compensation (Line 2):"
 
+msgid "Waiting for Administrator approval to activate this device"
+msgstr ""
+
 msgid "Wakefield"
 msgstr ""
 
@@ -18322,6 +21418,10 @@ msgstr "Warning: Not Installed. (GETTEXT extension must be enabled)"
 
 #, fuzzy
 msgid "Warning: Not Installed. (MAIL extension must be enabled)"
+msgstr "Warning: Not Installed. (BCMATH extension must be enabled)"
+
+#, fuzzy
+msgid "Warning: Not Installed. (MBSTRING extension must be enabled)"
 msgstr "Warning: Not Installed. (BCMATH extension must be enabled)"
 
 msgid "Warning: Not Installed. (MCRYPT extension must be enabled)"
@@ -18466,6 +21566,10 @@ msgstr ""
 
 msgid "West Nusa Tenggara"
 msgstr ""
+
+#, fuzzy
+msgid "West Papua"
+msgstr "Western Sahara"
 
 msgid "West Sulawesi"
 msgstr ""
@@ -18747,6 +21851,9 @@ msgstr "Writable Log Directory:"
 msgid "Writable Storage Directory:"
 msgstr "Writable Storage Directory:"
 
+msgid "Writing"
+msgstr ""
+
 #, fuzzy
 msgid "Wyoming"
 msgstr "Working"
@@ -18792,6 +21899,9 @@ msgstr "Year:"
 msgid "Yearly"
 msgstr "Yearly"
 
+msgid "Years experience is too high"
+msgstr ""
+
 msgid "Yemen"
 msgstr "Yemen"
 
@@ -18814,6 +21924,18 @@ msgid "Yes - Previous Business Day"
 msgstr ""
 
 msgid "Yes - Previous Week Day"
+msgstr ""
+
+msgid "Yes(Only Electronic)"
+msgstr ""
+
+msgid "Yes(Only Paper)"
+msgstr ""
+
+msgid "Yes(Paper/Electronic)"
+msgstr ""
+
+msgid "Yes/No"
 msgstr ""
 
 #, fuzzy
@@ -18851,6 +21973,10 @@ msgstr ""
 
 #, fuzzy
 msgid "You have a new message waiting for you in"
+msgstr "You have new mail waiting. Would you like to read it now?"
+
+#, fuzzy
+msgid "You have a new pay stub waiting for you in"
 msgstr "You have new mail waiting. Would you like to read it now?"
 
 msgid "You have already submitted this form! Please wait..."
@@ -18927,13 +22053,24 @@ msgstr "Zimbabwe"
 msgid "[R]"
 msgstr ""
 
+msgid "abs( expression ) - Example: abs( #regular_time# )"
+msgstr ""
+
 #, fuzzy
 msgid "ago"
 msgstr "ago"
 
+msgid "an unexpected error occured"
+msgstr ""
+
 #, fuzzy
 msgid "and"
 msgstr "End"
+
+msgid ""
+"and( expression, expression ) - Example: and( #regular_time# > 40, "
+"#regular_time# < 80)"
+msgstr ""
 
 msgid "at"
 msgstr "at"
@@ -19017,6 +22154,9 @@ msgstr ""
 msgid "database, please wait..."
 msgstr ""
 
+msgid "date( Year, Month, Day, Hour, Minute )"
+msgstr ""
+
 #, fuzzy
 msgid "day"
 msgstr "Sunday"
@@ -19029,6 +22169,40 @@ msgid "days"
 msgstr "Sunday"
 
 #, fuzzy
+msgid "dd-mmm-yy"
+msgstr "25-Feb-01 (dd-mmm-yy)"
+
+#, fuzzy
+msgid "dd-mmm-yyyy"
+msgstr "25-Feb-2001 (dd-mmm-yyyy)"
+
+msgid "ddd, mmm dd yyyy"
+msgstr ""
+
+msgid "ddd, mmmm dd yyyy"
+msgstr ""
+
+msgid "dddd, dd-mmm-yyyy"
+msgstr ""
+
+msgid "dddd, ddmmmyyyy"
+msgstr ""
+
+msgid "dddd, mmmm dd yyyy"
+msgstr ""
+
+#, fuzzy
+msgid "ddmmmyyyy"
+msgstr "25Feb2001 (ddmmmyyyy)"
+
+msgid "division by zero"
+msgstr ""
+
+#, fuzzy
+msgid "eFile"
+msgstr "File"
+
+#, fuzzy
 msgid "eFile Information"
 msgstr "Contact Information"
 
@@ -19038,6 +22212,9 @@ msgstr "each Pay Period"
 #, fuzzy
 msgid "exception for"
 msgstr "Exception History"
+
+msgid "expecting ')'"
+msgstr ""
 
 msgid "experienced a general error, please contact technical support."
 msgstr ""
@@ -19086,11 +22263,20 @@ msgstr "ie:"
 msgid "ie:"
 msgstr "ie:"
 
+msgid "if( expression, then, else ) - Example: if( #regular_time# > 40, 1, 0)"
+msgstr ""
+
+msgid "illegal character '_'"
+msgstr ""
+
 msgid "installed"
 msgstr "installed"
 
 msgid "installer_enabled = TRUE"
 msgstr "installer_enabled = TRUE"
+
+msgid "internal error"
+msgstr ""
 
 #, fuzzy
 msgid "is accurate and correct."
@@ -19100,10 +22286,6 @@ msgstr "is correct."
 msgid "is already assigned as a superior"
 msgstr "Employee is already assigned to this hierarchy"
 
-#, fuzzy
-msgid "is assigned as both a superior and subordinate"
-msgstr "Selected Employee is already assigned to another Pay Period"
-
 msgid ""
 "is currently undergoing maintenance. We're sorry for any inconvenience this "
 "may cause. Please try back later."
@@ -19111,9 +22293,19 @@ msgstr ""
 "is currently undergoing maintenance. We're sorry for any inconvenience this "
 "may cause. Please try back later."
 
+msgid ""
+"is_empty(expression) - Example: if( is_empty(#PA3206#) = 0, #PA3206#, 0) "
+msgstr ""
+
+msgid "ln( expression ) - Example: ln( #regular_time# )"
+msgstr ""
+
 #, fuzzy
 msgid "locked"
 msgstr "Packed"
+
+msgid "log( expression ) - Example: log( #regular_time# )"
+msgstr ""
 
 #, fuzzy
 msgid "magic_quotes_gpc is On. (Please disable it in php.ini)"
@@ -19124,12 +22316,23 @@ msgid "min"
 msgstr "Admin"
 
 #, fuzzy
+msgid "mmm-dd-yy"
+msgstr "Feb-25-01 (mmm-dd-yy)"
+
+#, fuzzy
+msgid "mmm-dd-yyyy"
+msgstr "Feb-25-2001 (mmm-dd-yyyy)"
+
+#, fuzzy
 msgid "modifications are not permitted."
 msgstr "This pay period is currently locked, modifications are not permitted."
 
 #, fuzzy
 msgid "mth"
 msgstr "4th"
+
+msgid "not( expression ) - Example: not( if( #regular_time# > 40, 1, 0) )"
+msgstr ""
 
 msgid ""
 "notices when new versions, or updated %1<b>tax formulas/tables</b>%2 are "
@@ -19157,6 +22360,11 @@ msgstr "or"
 msgid "or more"
 msgstr "On or Before"
 
+msgid ""
+"or( expression, expression ) - Example: or( #regular_time# > 40, "
+"#regular_time# < 80)"
+msgstr ""
+
 #, fuzzy
 msgid "password reset requested at "
 msgstr "Password Reset"
@@ -19175,6 +22383,9 @@ msgstr ""
 msgid "request from"
 msgstr "Request"
 
+msgid "round( expression, precision ) - Example: round( #regular_time#, 2 )"
+msgstr ""
+
 msgid "s"
 msgstr ""
 
@@ -19189,8 +22400,39 @@ msgstr "seconds."
 msgid "seconds."
 msgstr "seconds."
 
+msgid "sqrt( expression ) - Example: sqrt( #regular_time# )"
+msgstr ""
+
+msgid ""
+"string_concat(expression, expression, expression) - Example: string_concat"
+"( #:#, #first_name#, #last_name# )"
+msgstr ""
+
+msgid ""
+"string_contains(expression, expression) - Example: string_contains"
+"( #hierarchy_control_display#, #Request# )"
+msgstr ""
+
+msgid ""
+"string_match(expression, expression) - Example: string_match"
+"( #hierarchy_control_display#, #John Doe# )"
+msgstr ""
+
+msgid ""
+"string_pad(expression, pad_length, pad_string, pad_type ) - Example: "
+"string_pad( #employee_number#, 10, 0, 1 )"
+msgstr ""
+
+msgid ""
+"string_substring(expression, start [,end]) - Example: string_substring"
+"( #middle_name#, 0, 1 )"
+msgstr ""
+
 msgid "then:"
 msgstr "then:"
+
+msgid "time - Get the current time"
+msgstr ""
 
 msgid "to"
 msgstr "to"
@@ -19199,6 +22441,12 @@ msgid "to be reset,"
 msgstr ""
 
 msgid "to help you get started with %1."
+msgstr ""
+
+msgid "unexpected ')'"
+msgstr ""
+
+msgid "unexpected ','"
 msgstr ""
 
 msgid "upgraded"
@@ -19227,6 +22475,36 @@ msgstr "Cyprus"
 msgid "yrs old"
 msgstr "yrs old"
 
+#, fuzzy
+#~ msgid "Auto Pilot"
+#~ msgstr "Auto-Pilot:"
+
+#~ msgid "Conflicting start time"
+#~ msgstr "Conflicting start time"
+
+#, fuzzy
+#~ msgid "Error generating report..."
+#~ msgstr "Generating Pay Stubs..."
+
+#~ msgid "Net Pay: $"
+#~ msgstr "Net Pay: $"
+
+#, fuzzy
+#~ msgid "PC - Client Station"
+#~ msgstr "Filing Status:"
+
+#, fuzzy
+#~ msgid "Quick Punch ID is already taken"
+#~ msgstr "iButton ID is already taken"
+
+#, fuzzy
+#~ msgid "Selected employee is assigned as both a superior and subordinate"
+#~ msgstr "Selected Employee is already assigned to another Pay Period"
+
+#, fuzzy
+#~ msgid "is assigned as both a superior and subordinate"
+#~ msgstr "Selected Employee is already assigned to another Pay Period"
+
 #~ msgid " Recalculating Employee TimeSheet"
 #~ msgstr " Recalculating Employee TimeSheet"
 
@@ -19240,10 +22518,6 @@ msgstr "yrs old"
 #~ msgid ""
 #~ "Pay period missing or employee is not assigned to a pay period schedule"
 #~ msgstr "Employee is not assigned to a Pay Period Schedule."
-
-#, fuzzy
-#~ msgid " and "
-#~ msgstr "End"
 
 #, fuzzy
 #~ msgid "Recurring"
@@ -19338,9 +22612,6 @@ msgstr "yrs old"
 #, fuzzy
 #~ msgid "PIN/Phone ID is already taken"
 #~ msgstr "Phone ID is already taken"
-
-#~ msgid "Birth date is invalid"
-#~ msgstr "Birth date is invalid"
 
 #~ msgid "Discover"
 #~ msgstr "Discover"
@@ -19687,9 +22958,6 @@ msgstr "yrs old"
 #~ msgid "Tentative Credit per State (Part II, Line 3)"
 #~ msgstr "Tentative Credit per State (Part II, Line 3)"
 
-#~ msgid "Experience Rate"
-#~ msgstr "Experience Rate"
-
 #~ msgid "Display W2's"
 #~ msgstr "Display W2's"
 
@@ -19829,13 +23097,6 @@ msgstr "yrs old"
 #~ msgid "Under Scheduled Hours"
 #~ msgstr "Under Scheduled Hours"
 
-#~ msgid "Employee Number"
-#~ msgstr "Employee Number"
-
-#, fuzzy
-#~ msgid "User Deduction"
-#~ msgstr "Deduction"
-
 #, fuzzy
 #~ msgid "User Default Information"
 #~ msgstr "Other Information"
@@ -19843,7 +23104,3 @@ msgstr "yrs old"
 #, fuzzy
 #~ msgid "User Preferences"
 #~ msgstr "Preferences"
-
-#, fuzzy
-#~ msgid "User Wage"
-#~ msgstr "User Name"

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: ExceptionPolicyControlListFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11545 $
+ * $Id: ExceptionPolicyControlListFactory.class.php 11545 2013-11-29 02:04:30Z mikeb $
+ * $Date: 2013-11-28 18:04:30 -0800 (Thu, 28 Nov 2013) $
  */
 
 /**
@@ -149,7 +149,7 @@ class ExceptionPolicyControlListFactory extends ExceptionPolicyControlFactory im
 			}
 		}
 
-		$additional_order_fields = array();
+		$additional_order_fields = array('in_use');
 
 		$sort_column_aliases = array(
 									);
@@ -167,9 +167,10 @@ class ExceptionPolicyControlListFactory extends ExceptionPolicyControlFactory im
 			$strict = TRUE;
 		}
 		//Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
 
 		$uf = new UserFactory();
+		$pgf = new PolicyGroupFactory();
 
 		$ph = array(
 					'company_id' => $company_id,
@@ -177,6 +178,9 @@ class ExceptionPolicyControlListFactory extends ExceptionPolicyControlFactory im
 
 		$query = '
 					select 	a.*,
+							(
+								CASE WHEN EXISTS (select 1 from '. $pgf->getTable() .' as z where z.exception_policy_control_id = a.id and z.deleted = 0 ) THEN 1 ELSE 0 END
+							) as in_use,
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
 							y.last_name as created_by_last_name,

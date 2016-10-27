@@ -1985,6 +1985,206 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	//Test moving shifts from one day to the next when punches are edited.
+	function testPunchEditingShiftDayChangeA() {
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 ); //Day shift starts on.
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$date_epoch2 = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+86400+3600 );
+		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
+
+		//Create just an IN punch.
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 1:30PM'),
+								strtotime($date_stamp.' 2:30PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 20,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+
+		//Just create out punch, 15.5hrs later. Threshold is 16hrs.
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp2.' 12:30AM'), //Normal Out
+								strtotime($date_stamp2.' 2:30AM'), //Normal Out
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
+		//print_r($punch_arr);
+
+		$date_epoch = TTDate::getBeginDayEpoch($date_epoch); //This accounts for DST.
+		$date_epoch2 = TTDate::getBeginDayEpoch($date_epoch2); //This accounts for DST.
+		$this->assertEquals( 2, count($punch_arr[$date_epoch][0]['shift_data']['punches']) );
+		$this->assertEquals( 1, count($punch_arr[$date_epoch][0]['shift_data']['punch_control_ids']) );
+		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
+
+		$this->assertEquals( 2, count($punch_arr[$date_epoch2][1]['shift_data']['punches']) );
+		$this->assertEquals( 1, count($punch_arr[$date_epoch2][1]['shift_data']['punch_control_ids']) );
+		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][1]['date_stamp'] );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
+		//Total Time - Day 1
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( (1*3600), $udt_arr[$date_epoch][0]['total_time'] );
+
+		//Total Time - Day 2
+		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		$this->assertEquals( (2*3600), $udt_arr[$date_epoch2][0]['total_time'] );
+
+		//Edit punch to move out time into next day.
+		$dd->editPunch($punch_arr[$date_epoch][0]['shift_data']['punches'][1]['id'],
+						array(
+								'time_stamp' => strtotime($date_stamp.' 11:30PM'),
+								) );
+
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
+		//print_r($punch_arr);
+
+		//Make sure previous day has no totals, but new day has proper totals.
+		if ( !isset($punch_arr[$date_epoch2]) ) {
+			$this->assertTrue( TRUE );
+		} else {
+			$this->assertTrue( FALSE );
+		}
+
+		if ( isset($punch_arr[$date_epoch]) ) {
+			$this->assertTrue( TRUE );
+		} else {
+			$this->assertTrue( FALSE );
+		}
+		$this->assertEquals( 4, count($punch_arr[$date_epoch][0]['shift_data']['punches']) );
+		$this->assertEquals( 2, count($punch_arr[$date_epoch][0]['shift_data']['punch_control_ids']) );
+		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
+		//Total Time - Day1
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( (12*3600), $udt_arr[$date_epoch][0]['total_time'] );
+
+		return TRUE;
+	}
+
+	//Test moving shifts from one day to the next when punches are edited.
+	function testPunchEditingShiftDayChangeB() {
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 ); //Day shift starts on.
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$date_epoch2 = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+86400+3600 );
+		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
+
+		//Create just an IN punch.
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 1:30PM'),
+								strtotime($date_stamp.' 11:30PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 20,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+
+		//Just create out punch, 15.5hrs later. Threshold is 16hrs.
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp2.' 12:30AM'), //Normal Out
+								strtotime($date_stamp2.' 2:30AM'), //Normal Out
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
+		//print_r($punch_arr);
+
+		$date_epoch = TTDate::getBeginDayEpoch($date_epoch); //This accounts for DST.
+		$date_epoch2 = TTDate::getBeginDayEpoch($date_epoch2); //This accounts for DST.
+		$this->assertEquals( 4, count($punch_arr[$date_epoch][0]['shift_data']['punches']) );
+		$this->assertEquals( 2, count($punch_arr[$date_epoch][0]['shift_data']['punch_control_ids']) );
+		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
+		//Total Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( (12*3600), $udt_arr[$date_epoch][0]['total_time'] );
+
+		//Edit punch to move out time into next day.
+		$dd->editPunch($punch_arr[$date_epoch][0]['shift_data']['punches'][1]['id'],
+						array(
+								'time_stamp' => strtotime($date_stamp.' 2:30PM'),
+								) );
+
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
+		//print_r($punch_arr);
+
+		//Make sure previous day has no totals, but new day has proper totals.
+		if ( isset($punch_arr[$date_epoch2]) ) {
+			$this->assertTrue( TRUE );
+		} else {
+			$this->assertTrue( FALSE );
+		}
+
+		if ( isset($punch_arr[$date_epoch]) ) {
+			$this->assertTrue( TRUE );
+		} else {
+			$this->assertTrue( FALSE );
+		}
+		$this->assertEquals( 2, count($punch_arr[$date_epoch][0]['shift_data']['punches']) );
+		$this->assertEquals( 1, count($punch_arr[$date_epoch][0]['shift_data']['punch_control_ids']) );
+		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
+		//Total Time - Day1
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( (1*3600), $udt_arr[$date_epoch][0]['total_time'] );
+
+		//Total Time - Day2
+		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		$this->assertEquals( (2*3600), $udt_arr[$date_epoch2][0]['total_time'] );
+
+		return TRUE;
+	}
+
 	function testPunchEditingD() {
 		global $dd;
 

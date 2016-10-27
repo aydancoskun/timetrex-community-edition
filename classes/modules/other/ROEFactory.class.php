@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11115 $
- * $Id: ROEFactory.class.php 11115 2013-10-11 18:29:20Z ipso $
- * $Date: 2013-10-11 11:29:20 -0700 (Fri, 11 Oct 2013) $
+ * $Revision: 11363 $
+ * $Id: ROEFactory.class.php 11363 2013-11-07 23:38:12Z mikeb $
+ * $Date: 2013-11-07 15:38:12 -0800 (Thu, 07 Nov 2013) $
  */
 
 /**
@@ -686,8 +686,10 @@ class ROEFactory extends Factory {
 		$setup_data = $this->getSetupData();
 		$insurable_earnings_start_date = $this->getInsurablePayPeriodStartDate( $this->getInsurableEarningsReportPayPeriods() );
 
+		//Don't include YTD adjustments in ROE totals,
+		//As the proper way is to generate ROEs from their old system and ROEs from TimeTrex, and issue both to the employee.
 		$pself = TTnew( 'PayStubEntryListFactory' );
-		$pself->getPayPeriodReportByUserIdAndEntryNameIdAndStartDateAndEndDate( $this->getUser(), $setup_data['insurable_earnings_psea_ids'], $insurable_earnings_start_date, $this->getLastDate(), 0, NULL, array('x.start_date' => 'desc') );
+		$pself->getPayPeriodReportByUserIdAndEntryNameIdAndStartDateAndEndDate( $this->getUser(), $setup_data['insurable_earnings_psea_ids'], $insurable_earnings_start_date, $this->getLastDate(), 0, TRUE, NULL, array('x.start_date' => 'desc') );
 		if ( $pself->getRecordCount() > 0 ) {
 			foreach( $pself as $pse_obj ) {
 				$retarr[$pse_obj->getColumn('pay_period_id')] = array(

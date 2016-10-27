@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9936 $
- * $Id: PermissionControlFactory.class.php 9936 2013-05-20 16:40:47Z ipso $
- * $Date: 2013-05-20 09:40:47 -0700 (Mon, 20 May 2013) $
+ * $Revision: 11414 $
+ * $Id: PermissionControlFactory.class.php 11414 2013-11-15 19:53:13Z mikeb $
+ * $Date: 2013-11-15 11:53:13 -0800 (Fri, 15 Nov 2013) $
  */
 
 /**
@@ -467,6 +467,32 @@ class PermissionControlFactory extends Factory {
 		$profiler->stopTimer( 'setPermission' );
 
 		return TRUE;
+	}
+
+	//Quick way to touch the updated_date, updated_by when adding/removing employees from the UserFactory.
+	function touchUpdatedByAndDate( $permission_control_id = NULL ) {
+		global $current_user;
+
+		if ( is_object($current_user) ) {
+			$user_id = $current_user->getID();
+		} else {
+			return FALSE;
+		}
+
+		$ph = array(
+					'updated_date' => TTDate::getTime(),
+					'updated_by' => $user_id,
+					'id' => ( $permission_control_id == '' ) ? (int)$this->getID() : (int)$permission_control_id,
+					);
+
+		$query = 'update '. $this->getTable() .' set updated_date = ?, updated_by = ? where id = ?';
+
+		try {
+			$this->db->Execute($query, $ph);
+		} catch (Exception $e) {
+			throw new DBError($e);
+		}
+
 	}
 
 	function preSave() {

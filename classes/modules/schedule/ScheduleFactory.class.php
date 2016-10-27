@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11167 $
- * $Id: ScheduleFactory.class.php 11167 2013-10-15 20:29:07Z ipso $
- * $Date: 2013-10-15 13:29:07 -0700 (Tue, 15 Oct 2013) $
+ * $Revision: 11512 $
+ * $Id: ScheduleFactory.class.php 11512 2013-11-26 20:54:04Z mikeb $
+ * $Date: 2013-11-26 12:54:04 -0800 (Tue, 26 Nov 2013) $
  */
 
 /**
@@ -90,7 +90,8 @@ class ScheduleFactory extends Factory {
 										'-1160-branch' => TTi18n::gettext('Branch'),
 										'-1170-department' => TTi18n::gettext('Department'),
 										'-1200-status' => TTi18n::gettext('Status'),
-										'-1210-schedule_policy_id' => TTi18n::gettext('Schedule Policy'),
+										'-1210-schedule_policy' => TTi18n::gettext('Schedule Policy'),
+										'-1212-absence_policy' => TTi18n::gettext('Absence Policy'),
 										'-1215-date_stamp' => TTi18n::gettext('Date'),
 										'-1220-start_time' => TTi18n::gettext('Start Time'),
 										'-1230-end_time' => TTi18n::gettext('End Time'),
@@ -175,8 +176,6 @@ class ScheduleFactory extends Factory {
 										'pay_period_id' => FALSE,
 										'status_id' => 'Status',
 										'status' => FALSE,
-										'schedule_policy_id' => FALSE,
-										'schedule_policy' => FALSE,
 										'start_date' => FALSE,
 										'end_date' => FALSE,
 										'start_time_stamp' => FALSE,
@@ -184,7 +183,9 @@ class ScheduleFactory extends Factory {
 										'start_time' => 'StartTime',
 										'end_time' => 'EndTime',
 										'schedule_policy_id' => 'SchedulePolicyID',
+										'schedule_policy' => FALSE,
 										'absence_policy_id' => 'AbsencePolicyID',
+										'absence_policy' => FALSE,
 										'branch_id' => 'Branch',
 										'branch' => FALSE,
 										'department_id' => 'Department',
@@ -965,6 +966,8 @@ class ScheduleFactory extends Factory {
 
 			$i=0;
 			foreach( $slf as $s_obj ) {
+				if ( (int)$s_obj->getColumn('user_id') == 0 AND ( getTTProductEdition() == TT_PRODUCT_COMMUNITY OR $current_user->getCompanyObject()->getProductEdition() == 10 ) ) { continue; }
+
 				//Debug::text('Schedule ID: '. $s_obj->getId() .' User ID: '. $s_obj->getColumn('user_id') .' Start Time: '. $s_obj->getStartTime(), __FILE__, __LINE__, __METHOD__, 10);
 				if ( $s_obj->getAbsencePolicyID() > 0 ) {
 					$absence_policy_name = $s_obj->getColumn('absence_policy');
@@ -2036,8 +2039,8 @@ class ScheduleFactory extends Factory {
 						case 'default_branch':
 						case 'default_department_id':
 						case 'default_department':
-						case 'schedule_policy_id':
 						case 'schedule_policy':
+						case 'absence_policy':
 						case 'pay_period_id':
 						case 'branch':
 						case 'department':

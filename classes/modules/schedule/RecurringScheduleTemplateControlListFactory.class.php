@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9576 $
- * $Id: RecurringScheduleTemplateControlListFactory.class.php 9576 2013-04-12 20:23:54Z ipso $
- * $Date: 2013-04-12 13:23:54 -0700 (Fri, 12 Apr 2013) $
+ * $Revision: 11545 $
+ * $Id: RecurringScheduleTemplateControlListFactory.class.php 11545 2013-11-29 02:04:30Z mikeb $
+ * $Date: 2013-11-28 18:04:30 -0800 (Thu, 28 Nov 2013) $
  */
 
 /**
@@ -225,7 +225,7 @@ class RecurringScheduleTemplateControlListFactory extends RecurringScheduleTempl
 		}
 
 
-		$additional_order_fields = array();
+		$additional_order_fields = array( 'in_use' );
 		$sort_column_aliases = array(
 
 									 );
@@ -246,6 +246,7 @@ class RecurringScheduleTemplateControlListFactory extends RecurringScheduleTempl
 		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
 
 		$uf = new UserFactory();
+		$rscf = new RecurringScheduleControlFactory();
 
 		$ph = array(
 					'company_id' => $company_id,
@@ -253,6 +254,13 @@ class RecurringScheduleTemplateControlListFactory extends RecurringScheduleTempl
 
 		$query = '
 					select 	a.*,
+							(
+								CASE WHEN EXISTS
+									( select 1 from '. $rscf->getTable() .' as w where w.company_id = a.company_id AND w.recurring_schedule_template_control_id = a.id AND w.deleted = 0 )
+									THEN 1
+									ELSE 0
+								END
+							) as in_use,
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
 							y.last_name as created_by_last_name,

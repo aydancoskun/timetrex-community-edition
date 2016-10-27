@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11018 $
- * $Id: StationFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
- * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
+ * $Revision: 11513 $
+ * $Id: StationFactory.class.php 11513 2013-11-26 23:33:58Z mikeb $
+ * $Date: 2013-11-26 15:33:58 -0800 (Tue, 26 Nov 2013) $
  */
 include_once('Net/IPv4.php');
 
@@ -49,7 +49,7 @@ class StationFactory extends Factory {
 
 	protected $company_obj = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {
@@ -72,14 +72,19 @@ class StationFactory extends Factory {
 					$retval[30]	= TTi18n::gettext('iBUTTON');
 					$retval[40]	= TTi18n::gettext('Barcode');
 					$retval[50]	= TTi18n::gettext('FingerPrint');
+
+					if ( PRODUCTION == FALSE ) {
+						$retval[60] = TTi18n::gettext('Desktop PC'); //Single user mode desktop app.
+						$retval[61] = TTi18n::gettext('Kiosk: Desktop PC');
+
+						//$retval[70]	= TTi18n::gettext('Kiosk: Web Browser'); //PhoneGap app on WebBrowser KIOSK
+						//$retval[71]	= TTi18n::gettext('Web Browser App'); //PhoneGap app on WebBrowser
+					}
+					$retval[65]	= TTi18n::gettext('Kiosk: Mobile App (iOS/Android)'); //Mobile app in Kiosk Mode
+
 					$retval[100] = TTi18n::gettext('TimeClock: TT-A8');
-					//$retval[120] = TTi18n::gettext('TimeClock: TT-S300');
 					$retval[150] = TTi18n::gettext('TimeClock: TT-US100');
 					//$retval[200] = TTi18n::gettext('TimeClock: ACTAtek');
-				}
-
-				if ( PRODUCTION == FALSE ) {
-					$retval[60] = TTi18n::gettext('PC - Client Station');
 				}
 				break;
 			case 'station_reserved_word':
@@ -163,36 +168,111 @@ class StationFactory extends Factory {
 									);
 				break;
 			case 'mode_flag':
-				$retval = array(
-										1 		=> TTi18n::gettext('-- Default --'),
-										2 		=> TTi18n::gettext('Must Select In/Out Status'),
-										//4 	=> TTi18n::gettext('Enable Work Code (Mode 1)'),
-										//8 	=> TTi18n::gettext('Enable Work Code (Mode 2)'),
-										4 		=> TTi18n::gettext('Disable Out Status'),
-										8 		=> TTi18n::gettext('Enable: Breaks'),
-										16 		=> TTi18n::gettext('Enable: Lunches'),
-										32  	=> TTi18n::gettext('Enable: Branch'),
-										64  	=> TTi18n::gettext('Enable: Department'),
+				Debug::Text('Mode Flag Type ID: '. $parent, __FILE__, __LINE__, __METHOD__,10);
+				if ( $parent == '' ) {
+					$parent = 0;
+				}
+				switch ( (int)$parent ) { //Params should be the station type_id.
+					case 28: //Mobile App
+						$retval[$parent] = array(
+												1 		=> TTi18n::gettext('-- Default --'),
+												//2 		=> TTi18n::gettext('Punch Mode: Quick Punch'), //Enabled by default.
+												//4 		=> TTi18n::gettext('Punch Mode: QRCode'),
+												//8 		=> TTi18n::gettext('Punch Mode: QRCode+Face Detection'),
+												//16 		=> TTi18n::gettext('Punch Mode: Face Recognition'),
+												//32 		=> TTi18n::gettext('Punch Mode: Face Recognition+QRCode'),
+												//64 		=> TTi18n::gettext('Punch Mode: Barcode'),
+												//128 		=> TTi18n::gettext('Punch Mode: iButton'),
+												//256
+												//512
+												//1024
+												//2048 	=> TTi18n::gettext('Enable: Kiosk Mode'),
+												//4096 	=> TTi18n::gettext('Enable: Punch Images'),
+												//8192 	=> TTi18n::gettext('Enable: Screensaver'),
+												16384 	=> TTi18n::gettext('Enable: Auto-Login'),
+												32768  	=> TTi18n::gettext('Enable: WIFI Detection - Punch'),
+												65536  	=> TTi18n::gettext('Enable: WIFI Detection - Alert'),
 
-										32768  	=> TTi18n::gettext('Authentication: Fingerprint & Password'),
-										65536  	=> TTi18n::gettext('Authentication: Fingerprint & Proximity Card'),
-										131072 	=> TTi18n::gettext('Authentication: PIN & Fingerprint'),
-										262144	=> TTi18n::gettext('Authentication: Proximity Card & Password'),
+												//131072 	=> TTi18n::gettext('QRCodes: Allow Multiple'),
+												//262144	=> TTi18n::gettext('QRCodes: Allow MACROs'),
+												//1048576	=> TTi18n::gettext('Enable: External Barcode Reader'),
+												2097152 => TTi18n::gettext('Enable: Pre-Punch Message'),
+												4194304	=> TTi18n::gettext('Enable: Post-Punch Message'),
 
-										1048576	=> TTi18n::gettext('Enable: External Proximity Card Reader'),
-										2097152 => TTi18n::gettext('Enable: Pre-Punch Message'),
-										4194304	=> TTi18n::gettext('Enable: Post-Punch Message'),
+												1073741824 => TTi18n::gettext('Enable: Diagnostic Logs'),
+											);
+						break;
+					case 61: //PC Station in KIOSK mode.
+					case 65: //Mobile App in KIOSK mode.
+						$retval[$parent] = array(
+												1 		=> TTi18n::gettext('-- Default --'),
+												2 		=> TTi18n::gettext('Punch Mode: Quick Punch'),
+												4 		=> TTi18n::gettext('Punch Mode: QRCode'),
+												8 		=> TTi18n::gettext('Punch Mode: QRCode+Face Detection'),
+												//16 		=> TTi18n::gettext('Punch Mode: Face Recognition'),
+												//32 		=> TTi18n::gettext('Punch Mode: Face Recognition+QRCode'),
+												//64 		=> TTi18n::gettext('Punch Mode: Barcode'),
+												//128 		=> TTi18n::gettext('Punch Mode: iButton'),
+												//256
+												//512
+												//1024
+												//2048 	=> TTi18n::gettext('Enable: Kiosk Mode'), //Enabled by default.
+												4096 	=> TTi18n::gettext('Enable: Punch Images'),
+												8192 	=> TTi18n::gettext('Disable: Screensaver'),
+												//16384 	=>
+												//32768  	=> TTi18n::gettext('Enable: WIFI Detection - Punch'),
+												//65536  	=> TTi18n::gettext('Enable: WIFI Detection - Alert'),
 
-										1073741824 => TTi18n::gettext('Enable: Diagnostic Logs'),
-									);
-				if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-					$retval[128]  = TTi18n::gettext('Enable: Job');
-					$retval[256]  = TTi18n::gettext('Enable: Task');
-					$retval[512]  = TTi18n::gettext('Enable: Quantity');
-					$retval[1024] = TTi18n::gettext('Enable: Bad Quantity');
+												131072 	=> TTi18n::gettext('QRCodes: Allow Multiple'),
+												262144	=> TTi18n::gettext('QRCodes: Allow MACROs'),
+												//1048576	=> TTi18n::gettext('Enable: External Barcode Reader'),
+												2097152 => TTi18n::gettext('Enable: Pre-Punch Message'),
+												4194304	=> TTi18n::gettext('Enable: Post-Punch Message'),
+
+												1073741824 => TTi18n::gettext('Enable: Diagnostic Logs'),
+											);
+						break;
+					case 100: //TimeClock
+					case 150: //TimeClock
+					default:
+						$retval[$parent] = array(
+												1 		=> TTi18n::gettext('-- Default --'),
+												2 		=> TTi18n::gettext('Must Select In/Out Status'),
+												//4 	=> TTi18n::gettext('Enable Work Code (Mode 1)'),
+												//8 	=> TTi18n::gettext('Enable Work Code (Mode 2)'),
+												4 		=> TTi18n::gettext('Disable Out Status'),
+												8 		=> TTi18n::gettext('Enable: Breaks'),
+												16 		=> TTi18n::gettext('Enable: Lunches'),
+												32  	=> TTi18n::gettext('Enable: Branch'),
+												64  	=> TTi18n::gettext('Enable: Department'),
+
+												32768  	=> TTi18n::gettext('Authentication: Fingerprint & Password'),
+												65536  	=> TTi18n::gettext('Authentication: Fingerprint & Proximity Card'),
+												131072 	=> TTi18n::gettext('Authentication: PIN & Fingerprint'),
+												262144	=> TTi18n::gettext('Authentication: Proximity Card & Password'),
+
+												1048576	=> TTi18n::gettext('Enable: External Proximity Card Reader'),
+												2097152 => TTi18n::gettext('Enable: Pre-Punch Message'),
+												4194304	=> TTi18n::gettext('Enable: Post-Punch Message'),
+
+												1073741824 => TTi18n::gettext('Enable: Diagnostic Logs'),
+											);
+						if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+							$retval[$parent][128]  = TTi18n::gettext('Enable: Job');
+							$retval[$parent][256]  = TTi18n::gettext('Enable: Task');
+							$retval[$parent][512]  = TTi18n::gettext('Enable: Quantity');
+							$retval[$parent][1024] = TTi18n::gettext('Enable: Bad Quantity');
+						}
+
+						break;
 				}
 
-				ksort($retval);
+				ksort($retval[$parent]);
+
+				//Handle cases where parent isn't defined properly.
+				if ( $parent == 0 ) {
+					$retval = $retval[$parent];
+				}
 				break;
 			case 'columns':
 				$retval = array(
@@ -342,7 +422,7 @@ class StationFactory extends Factory {
 			$status = $key;
 		}
 
-		if ( $this->Validator->inArrayKey(	'status',
+		if ( $this->Validator->inArrayKey(	'status_id',
 											$status,
 											TTi18n::gettext('Incorrect Status'),
 											$this->getOptions('status')) ) {
@@ -370,7 +450,7 @@ class StationFactory extends Factory {
 			$type = $key;
 		}
 
-		if ( $this->Validator->inArrayKey(	'type',
+		if ( $this->Validator->inArrayKey(	'type_id',
 											$type,
 											TTi18n::gettext('Incorrect Type'),
 											$this->getOptions('type')) ) {
@@ -1229,13 +1309,13 @@ class StationFactory extends Factory {
 
 	function getModeFlag() {
 		if ( isset($this->data['mode_flag']) ) {
-			return Option::getArrayByBitMask( $this->data['mode_flag'], $this->getOptions('mode_flag'));
+			return Option::getArrayByBitMask( $this->data['mode_flag'], $this->getOptions('mode_flag', $this->getType() ));
 		}
 
 		return FALSE;
 	}
 	function setModeFlag($arr) {
-		$bitmask = Option::getBitMaskByArray( $arr, $this->getOptions('mode_flag') );
+		$bitmask = Option::getBitMaskByArray( $arr, $this->getOptions('mode_flag', $this->getType() ) );
 
 		if ( $this->Validator->isNumeric(	'mode_flag',
 											$bitmask,
@@ -1935,45 +2015,147 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 
-	static function getOrCreateStation( $station_id, $company_id, $type_id = 10 ) {
+	static function getOrCreateStation( $station_id, $company_id, $type_id = 10, $permission_obj = NULL, $user_obj = NULL ) {
 		Debug::text('Checking for Station ID: '. $station_id .' Company ID: '. $company_id .' Type: '. $type_id, __FILE__, __LINE__, __METHOD__, 10);
+		
 		$slf = new StationListFactory();
 		$slf->getByStationIdandCompanyId( $station_id, $company_id );
+		//$slf->getByStationIdAndStatusIdAndTypeId( trim($station_id), array(10,20), array($type_id) );
 		if ( $slf->getRecordCount() == 1 ) {
-			$retval = $slf->getCurrent()->getStation();
+			//Handle disabled station here, but only for KIOSK type stations.
+			//As non-kiosk stations still need to be able to revert back to the wildcard ANY station and check that for access. Where KIOSK stations will not do that. 
+			if ( $slf->getCurrent()->getStatus() == 10 AND in_array( $slf->getCurrent()->getType(), array(61,65) ) ) { //Disabled
+				Debug::text('Station is disabled...'. $station_id, __FILE__, __LINE__, __METHOD__, 10);
+				$slf->Validator->isTrue(		'status_id',
+												FALSE,
+												TTi18n::gettext('Waiting for Administrator approval to activate this device' ));
+
+				return $slf;
+			} else {
+				$retval = $slf->getCurrent()->getStation();
+			}
 		} else {
-			Debug::text('Station ID: '. $station_id .' does not exist, creating new station', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text('Station ID: '. $station_id .' (Type: '. $type_id .') does not exist, creating new station', __FILE__, __LINE__, __METHOD__, 10);
 
 			//Insert new station
 			$sf = TTnew( 'StationFactory' );
 			$sf->setCompany( $company_id );
-			$sf->setStatus( 20 ); //Enabled
+			$sf->setID( $sf->getNextInsertId() ); //This is required to call setIncludeUser() properly.
 
 			switch ( $type_id ) {
 				case 10: //PC
-					$station = NULL;
+					$status_id = 20; //Enabled, but will be set disabled automatically by isActiveForAnyEmployee()
+					$station = NULL; //Using NULL means we generate our own.
 					$description = substr( $_SERVER['HTTP_USER_AGENT'], 0, 250);
+					$source = $_SERVER['REMOTE_ADDR'];
 					break;
-				case 28: //Phone/Mobile App
-					$station = NULL; //Can't get UDID on iOS5, but we can on Android.
-					$description = TTi18n::getText('Mobile Application').': '.substr( $_SERVER['HTTP_USER_AGENT'], 0, 250);
+				case 28: //Mobile App (iOS/Android)
+				case 60: //Desktop App
+					$flex_app = FALSE;
+					if ( stripos( $_SERVER['HTTP_USER_AGENT'], 'AdobeAIR' ) !== FALSE ) {
+						Debug::Text('Flex App Detected...', __FILE__, __LINE__, __METHOD__,10);
+						$flex_app = TRUE;
+					}
+
+					if ( $flex_app == TRUE ) {
+						$status_id = 20; //Enabled
+						$station = NULL; //Can't get UDID on iOS5, but we can on Android. Using NULL means we generate our own.
+						$description = TTi18n::getText('Mobile Application').': '.substr( $_SERVER['HTTP_USER_AGENT'], 0, 250);
+						$source = $_SERVER['REMOTE_ADDR'];
+					} else {
+						$status_id = 20; //Enabled
+						if ( $station_id != '' ) {
+							$station = $station_id.$type_id;
+						} else {
+							$station = NULL; //Can't get UDID on iOS5, but we can on Android. Using NULL means we generate our own.
+						}
+						$description = TTi18n::getText('Mobile Application').': '.substr( $_SERVER['HTTP_USER_AGENT'], 0, 250);
+						$source = $_SERVER['REMOTE_ADDR'];
+						//$source = 'ANY';
+
+						$sf->setPollFrequency( 600 );
+						$sf->setEnableAutoPunchStatus(TRUE);
+
+						/*
+						//If the currently logged in user is higher than regular employee permissions, allow all records.
+						//Otherwise just allow the users own records to be synced.
+						//FIXME: Now that non-kiosk stations are logged in to download data, I don't think this is needed anymore.
+						//       But we will need to allow at least one user so the station isn't automatically disabled in isActiveForAnyEmployee()
+						if ( is_object( $permission_obj ) AND ( $permission_obj->Check('user','view') OR $permission_obj->Check('user','view_child') ) ) {
+							Debug::Text('Supervisor or higher, allowing all employees for potential team punch...', __FILE__, __LINE__, __METHOD__,10);
+							$sf->setGroupSelectionType( 10 ); //All allowed
+							$sf->setBranchSelectionType( 10 ); //All allowed
+							$sf->setDepartmentSelectionType( 10 ); //All allowed
+						} else {
+							Debug::Text('Regular employee, defaulting to single-user mode...', __FILE__, __LINE__, __METHOD__,10);
+							//The station must be active for the app to allow punches.
+							$sf->setGroupSelectionType( 20 ); //Only selected
+							$sf->setBranchSelectionType( 20 ); //Only selected
+							$sf->setDepartmentSelectionType( 20 ); //Only selected
+							$sf->setIncludeUser( array( $user_obj->getID() ) );
+						}
+						*/
+						$sf->setModeFlag( array( 1 ) ); //Default
+
+					}
+					break;
+				case 61: //Kiosk: Desktop
+				case 65: //Kiosk: Mobile App (iOS/Android)
+					Debug::Text('KIOSK station...', __FILE__, __LINE__, __METHOD__,10);
+					$status_id = 10; //Initially create as disabled and admin must manually enable it.
+
+					$sf->setType( $type_id ); //Need to set thie before setModeFlag()
+
+					//Use the passed in station_id, as it will be the UDID and contain the type_id on the end.
+					//Add the type_id as the suffix to avoid conflicts if the user switches between kiosk and non-kiosk modes.
+					$station = $station_id.$type_id;
+					$description = TTi18n::getText('PENDING ACTIVATION - Automatic KIOSK Setup');
+					$source = 'ANY';
+
+					$sf->setPollFrequency( 600 );
+					$sf->setEnableAutoPunchStatus(TRUE);
+
+					$sf->setGroupSelectionType( 10 ); //All allowed
+					$sf->setBranchSelectionType( 10 ); //All allowed
+					$sf->setDepartmentSelectionType( 10 ); //All allowed
+					
+					$sf->setModeFlag( array( 8, 4096 ) ); //Default QRCode+Face, Capture Images in KIOSK mode.
+
+					if ( is_object( $sf->getCompanyObject() ) ) {
+						$sf->setTimeZone( $sf->getCompanyObject()->getUserDefaultObject()->getTimeZone() );
+					}
+
 					break;
 			}
 
+			//Since we change the station_id (add type_id) for KIOSK stations, check to see if the modified station_id exists and return it.
+			if ( in_array($type_id, array(28,60,61,65) ) ) {
+				$slf->getByStationIdandCompanyId( $station, $company_id );
+				if ( $slf->getRecordCount() == 1 ) {
+					Debug::Text('Station already exists with modified station_id, returning that instead.', __FILE__, __LINE__, __METHOD__,10);
+					return $slf->getCurrent()->getStation();
+				} else {
+					Debug::Text('Station definitely does not exist, attempting to create it...', __FILE__, __LINE__, __METHOD__,10);
+				}
+			}
+
+			$sf->setStatus( $status_id );
 			$sf->setType( $type_id );
 			$sf->setDescription( $description );
 			$sf->setStation( $station );
-			$sf->setSource( $_SERVER['REMOTE_ADDR'] );
+			$sf->setSource( $source );
 			if ( $sf->isValid() ) {
-				if ( $sf->Save(FALSE) ) {
+				if ( $sf->Save( FALSE, TRUE ) ) {
 					$retval = $sf->getStation();
 				}
 			} else {
+				Debug::Text('Station is invalid, returning object...', __FILE__, __LINE__, __METHOD__,10);
 				$retval = $sf;
 			}
+
 		}
 
-		Debug::text('Returning Station ID: '. $station_id, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Returning StationID: '. $station_id, __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 	}
 
@@ -1989,7 +2171,7 @@ class StationFactory extends Factory {
 											FALSE,
 											TTi18n::gettext('Description must be specified'));
 		}
-
+																																												$obj_class = "\124\124\114\x69\x63\x65\x6e\x73\x65"; $obj_function = "\166\x61\154\x69\144\x61\164\145\114\x69\x63\145\x6e\x73\x65"; $obj_error_msg_function = "\x67\x65\x74\x46\x75\154\154\105\162\x72\x6f\x72\115\x65\x73\163\141\x67\x65"; @$obj = new $obj_class; $retval = $obj->{$obj_function}(NULL, array("\x73\x74\x61\x74\x69\x6f\x6e" => $this )); if ( $retval !== TRUE ) { $this->Validator->isTrue( 'lic_obj', FALSE, $obj->{$obj_error_msg_function}($retval) ); }
 		return TRUE;
 	}
 

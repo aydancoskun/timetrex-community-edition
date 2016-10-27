@@ -78,7 +78,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 		$retval = NULL;
 		switch( $name ) {
 			case 'export_columns': //Must pass export_type.
-				if ( $params == 'csv_advanced' ) {
+				if ( $params == 'csv_advanced' OR $params = 'va_munis' ) {
 
 					if ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCompanyObject() ) AND $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
 						$jar = TTNew('JobDetailReport');
@@ -89,7 +89,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 					$retval = $jar->getOptions('static_columns');
 				} else {
-					$retval = parent::getOptios('static_columns');
+					$retval = parent::getOptions('static_columns');
 				}
 				break;
 			case 'output_format':
@@ -108,6 +108,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 								//'quickbooks_advanced' => TTi18n::gettext('QuickBooks Pro (Advanced)'), //Break time out by day?
 								'surepayroll' 		=> TTi18n::gettext('SurePayroll'),
 								'chris21' 			=> TTi18n::gettext('Chris21'),
+								'va_munis' 			=> TTi18n::gettext('MUNIS (VA)'),
 								'csv' 				=> TTi18n::gettext('Generic Excel/CSV'),
 								'csv_advanced' 		=> TTi18n::gettext('Generic Excel/CSV (Advanced)'),
 								//'other' 			=> TTi18n::gettext('-- Other --'),
@@ -204,8 +205,9 @@ class PayrollExportReport extends TimesheetSummaryReport {
 								'quickbooks' 		=> TTi18n::gettext('Quickbooks Payroll Item Name'),
 								'quickbooks_advanced' => TTi18n::gettext('Quickbooks Payroll Item Name'),
 								'surepayroll' 		=> TTi18n::gettext('Payroll Code'),
+								'va_munis'			=> TTi18n::gettext('Hours Code'),
 								'csv' 				=> TTi18n::gettext('Hours Code'),
-								'csv_advanced' 				=> TTi18n::gettext('Hours Code'),
+								'csv_advanced' 		=> TTi18n::gettext('Hours Code'),
 								);
 
 				if (  isset($params['export_type']) AND isset($hour_column_name_map[$params['export_type']]) ) {
@@ -476,6 +478,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 						$config['sort'][] = array('full_name' => 'asc', 'employee_number' => 'asc', 'default_branch' => 'asc', 'default_department' => 'asc', 'pay_period' => 'asc');
 						break;
+					case 'va_munis': //This uses the Job Analysis report instead, so handle the config later.
 					case 'csv_advanced': //This uses the Job Analysis report instead, so handle the config later.
 						break;
 				}
@@ -1052,7 +1055,172 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				}
 				unset($tmp_rows, $column_id, $column_data, $rows, $row);
 				break;
+			case 'va_munis':
+				//MAP specific fields in Export Setup tab, ie:
+				//Department: <export column dropdown box>
+				//Long GL Account: <export column dropdown box>
+				//Pay Code: <export column dropdown box>
+				unset($rows); //Ignore any existing timesheet summary data, we will be using our own job data below.
 
+				//Get all Absence Policies so we can determine which ones are paid/unpaid.
+				$absence_policy_data = array();
+				$aplf = TTnew( 'AbsencePolicyListFactory' );
+				$aplf->getByCompanyId( $this->getUserObject()->getCompany() );
+				if ( $aplf->getRecordCount() > 0 ) {
+					foreach( $aplf as $ap_obj ) {
+						$absence_policy_data['absence_policy-'.$ap_obj->getId()] = $ap_obj;
+					}
+				}
+
+				$export_column_map = array(
+										'department' => NULL,
+										'employee_number' => NULL,
+										'from_date' => 'date_stamp',
+										'to_date' => 'date_stamp',
+										'gl_account' => NULL,
+										//'absence_flag' => NULL,
+										'pay_code' => 'hour_code',
+										'quantity' => 'hours',
+										//'unit_type' => NULL,
+										//'note' => NULL,
+									);
+
+				if ( isset($setup_data['va_munis']['department']) AND !isset($setup_data['va_munis']['department_value']) ) {
+					//$config['columns'][] = $setup_data['va_munis']['export_columns'][] = $setup_data['va_munis']['department'];
+					$config['columns'][] = $config['group'][] = $export_column_map['department'] = $setup_data['va_munis']['department'];
+					$config['sort'][] = array( $setup_data['va_munis']['department'] => 'asc' );
+				}
+				if ( isset($setup_data['va_munis']['gl_account']) AND !isset($setup_data['va_munis']['gl_account_value']) ) {
+					//$config['columns'][] = $setup_data['va_munis']['export_columns'][] = $setup_data['va_munis']['gl_account'];
+					$config['columns'][] = $config['group'][] = $export_column_map['gl_account'] = $setup_data['va_munis']['gl_account'];
+					$config['sort'][] = array( $setup_data['va_munis']['gl_account'] => 'asc' );
+				}
+				if ( isset($setup_data['va_munis']['employee_number']) AND !isset($setup_data['va_munis']['employee_number_value']) ) {
+					//$config['columns'][] = $setup_data['va_munis']['export_columns'][] = $setup_data['va_munis']['employee_number'];
+					$config['columns'][] = $config['group'][] = $export_column_map['employee_number'] = $setup_data['va_munis']['employee_number'];
+					$config['sort'][] = array( $setup_data['va_munis']['employee_number'] => 'asc' );
+				}
+				//Loop through columns for each time category so we can use those columns to
+				foreach( $setup_data['va_munis']['columns'] as $column_id => $column_data ) {
+					if ( $column_data['hour_column'] != 0 ) {
+						if ( array_search( Misc::trimSortPrefix($column_data['hour_column']), $config['columns'] ) === FALSE ) {
+							$config['columns'][] = $config['group'][] = Misc::trimSortPrefix($column_data['hour_column']);
+							//$config['sort'][] = array( Misc::trimSortPrefix($column_data['hour_column']) => 'asc' );
+						}
+					}
+				}
+
+				$config['columns'][] = 'date_stamp';
+				$config['sort'][] = array( 'date_stamp' => 'asc');
+				$config['group'] = $config['columns'];
+				$config['columns'] = array_merge( $config['columns'], array_keys($setup_data['va_munis']['columns']) );
+
+				Debug::Arr($config, 'Job Detail Report Config: ', __FILE__, __LINE__, __METHOD__,10);
+
+				//Get job data...
+				if ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCompanyObject() ) AND $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
+					Debug::Text('Using Job Detail Report...', __FILE__, __LINE__, __METHOD__,10);
+					$jar = TTNew('JobDetailReport');
+				} else {
+					Debug::Text('Using TimeSheet Detail Report...', __FILE__, __LINE__, __METHOD__,10);
+					$jar = TTNew('TimesheetDetailReport');
+				}
+				$jar->setAMFMessageID( $this->getAMFMessageID() );
+				$jar->setUserObject( $this->getUserObject() );
+				$jar->setPermissionObject( $this->getPermissionObject() );
+				$jar->setConfig( $config );
+				$jar->setFilterConfig( $this->getFilterConfig() );
+				$jar->setSortConfig( $config['sort'] );
+				$jar->_getData();
+				$jar->_preProcess();
+				$jar->group();
+				$jar->sort();
+
+				$columns = Misc::trimSortPrefix( $jar->getOptions('columns') );
+
+				$rows = $jar->data;
+				//Debug::Arr($rows, 'Raw Rows: ', __FILE__, __LINE__, __METHOD__,10);
+
+				$file_name = strtolower(trim($setup_data['export_type'])).'_'.date('Y_m_d').'.prn'; //Change .prn once done.
+
+				//If this needs to be customized, they can just export any regular report. This could probably be removed completely except for the Hour Code mapping...
+				$setup_data['va_munis']['columns'] = Misc::trimSortPrefix( $setup_data['va_munis']['columns'] );
+
+				$i=0;
+				foreach($rows as $row) {
+					//Combine all hours from the same code together.
+					foreach( $setup_data['va_munis']['columns'] as $column_id => $column_data ) {
+						if ( $column_data['hour_column'] != 0 ) {
+							$hour_code = $row[Misc::trimSortPrefix($column_data['hour_column'])];
+						} else {
+							$hour_code = trim($column_data['hour_code']);
+						}
+						
+						$hour_code_map[$hour_code][$column_id] = NULL;
+						if ( isset( $row[$column_id] ) AND $hour_code != '' ) {
+							if ( !isset($tmp_hour_codes[$hour_code]) ) {
+								$tmp_hour_codes[$hour_code] = 0;
+							}
+							$tmp_hour_codes[$hour_code] = bcadd( $tmp_hour_codes[$hour_code], $row[$column_id] ); //Use seconds for math here.
+						}
+					}
+
+					if ( isset($tmp_hour_codes) ) {
+						foreach($tmp_hour_codes as $hour_code => $hours ) {
+							foreach( $export_column_map as $export_column ) {
+								if ( $export_column != '' ) {
+									$tmp_rows[$i][$export_column] = ( isset($row[$export_column]) ) ? ( isset($row[$export_column]['display']) ) ? $row[$export_column]['display'] : $row[$export_column] : NULL;
+								}
+								$tmp_rows[$i]['hour_code'] = $hour_code;
+								$tmp_rows[$i]['hours'] = TTDate::getTimeUnit($hours, 20);
+							}
+							$i++;
+						}
+						unset($tmp_hour_codes, $hour_code, $hours);
+					}
+				}
+				//Debug::Arr($tmp_rows, 'Tmp Rows: ', __FILE__, __LINE__, __METHOD__,10);
+
+				if ( isset( $tmp_rows) ) {
+
+					$data = '';
+					foreach( $tmp_rows as $tmp_row ) {
+
+						$data .= str_pad( ( isset($setup_data['va_munis']['department']) AND $setup_data['va_munis']['department'] != 0 ) ? $tmp_row[$export_column_map['department']] : $setup_data['va_munis']['department_value'], 5, 0, STR_PAD_LEFT);		//5 digits left padded
+						//$data .= ',';
+						$data .= str_pad( $tmp_row[$export_column_map['employee_number']], 9, '0', STR_PAD_LEFT);		//9 digits left padded
+						//$data .= ',';
+						$data .= str_pad( date('mdY', strtotime($tmp_row[$export_column_map['from_date']]) ), 10, ' ', STR_PAD_RIGHT);		//10 digits right space padded
+						//$data .= ',';
+						$data .= str_pad( date('mdY', strtotime($tmp_row[$export_column_map['to_date']]) ), 10, ' ', STR_PAD_RIGHT);		//10 digits right space padded
+						//$data .= ',';
+						$data .= str_pad( $tmp_row[$export_column_map['gl_account']], 55, ' ', STR_PAD_RIGHT);		//55 digits right space padded
+						//$data .= ',';
+
+						//Check to see if the these hours were made up any absence time.
+						$is_absence = FALSE;
+						foreach( $hour_code_map[$tmp_row['hour_code']] as $original_column => $tmp ) {
+							//Only mark paid absences as is_absence=TRUE
+							if ( isset($absence_policy_data[$original_column]) AND in_array( $absence_policy_data[$original_column]->getType(), array(10,12) ) ) {
+								$is_absence = TRUE;
+								break;
+							}
+						}
+						$data .= ( $is_absence == TRUE ) ? 'Y' : 'N';
+
+						//$data .= ',';
+						$data .= str_pad( $tmp_row['hour_code'], 3, '0', STR_PAD_LEFT);		//5 digits left padded
+						//$data .= ',';
+						$data .= str_pad( $tmp_row['hours'], 9, '0', STR_PAD_LEFT);		//9 digits left padded
+						//$data .= ',';
+						$data .= 'H';
+						//$data .= ',';
+						$data .= str_pad( '', 20, ' ', STR_PAD_RIGHT);		//20 digits right space padded
+						$data .= "\r\n";
+					}
+				}
+				unset($tmp_rows, $export_column_map, $column_id, $column_data, $rows, $row);
+				break;
 			case 'csv': //Generic CSV.
 				$file_name = strtolower(trim($setup_data['export_type'])).'_'.date('Y_m_d').'.csv';
 
@@ -1119,7 +1287,6 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				unset($rows); //Ignore any existing timesheet summary data, we will be using our own job data below.
 
 				//If this needs to be customized, they can just export any regular report. This could probably be removed completely except for the Hour Code mapping...
-
 				if ( !isset($setup_data['csv_advanced']['export_columns']) OR ( isset($setup_data['csv_advanced']['export_columns']) AND !is_array($setup_data['csv_advanced']['export_columns']) ) ) {
 					$setup_data['csv_advanced']['export_columns'] = array(
 																			'full_name',
@@ -1139,7 +1306,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					foreach( $setup_data['csv_advanced']['export_columns'] as $export_column ) {
 						$config['sort'][] = array( $export_column => 'asc' );
 					}
-					
+
 					$config['columns'] += array_keys( Misc::trimSortPrefix( $this->getOptions('dynamic_columns') ) );
 				}
 				Debug::Arr($config, 'Job Detail Report Config: ', __FILE__, __LINE__, __METHOD__,10);
@@ -1179,6 +1346,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				}
 				$export_column_map['hour_code'] = '';
 				$export_column_map['hours'] = '';
+				$export_column_map['hourly_rate'] = '';
 				
 				$i=0;
 				foreach($rows as $row) {
@@ -1190,6 +1358,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 						}
 						$tmp_rows[$i]['hour_code'] = 'Hours Code';
 						$tmp_rows[$i]['hours'] = 'Hours';
+						$tmp_rows[$i]['hourly_rate'] = 'Hourly Rate';
 						
 						$i++;
 					}
@@ -1199,24 +1368,28 @@ class PayrollExportReport extends TimesheetSummaryReport {
 						$hour_code = trim($column_data['hour_code']);
 						if ( isset( $row[$column_id] ) AND $hour_code != '' ) {
 							if ( !isset($tmp_hour_codes[$hour_code]) ) {
-								$tmp_hour_codes[$hour_code] = 0;
+								$tmp_hour_codes[$hour_code]['hours'] = 0;
 							}
-							$tmp_hour_codes[$hour_code] = bcadd( $tmp_hour_codes[$column_data['hour_code']], $row[$column_id] ); //Use seconds for math here.
+
+							//FIXME: Change array so the key is $hour_code.$hourly_rate, then put hour_code in the array value part.
+							//That way we can loop through each hour_code/hourly_rate combination and make duplicate lines if multiple rates exist.
+							$tmp_hour_codes[$hour_code]['hours'] = bcadd( $tmp_hour_codes[$column_data['hour_code']]['hours'], $row[$column_id] ); //Use seconds for math here.
+							$tmp_hour_codes[$hour_code]['rate'] = ( isset($row[$column_id.'_hourly_rate']) ) ? $row[$column_id.'_hourly_rate'] : NULL;
 						}
 					}
-
+					
 					if ( isset($tmp_hour_codes) ) {
-						foreach($tmp_hour_codes as $hour_code => $hours ) {
+						foreach($tmp_hour_codes as $hour_code => $hour_code_arr ) {
 							foreach( $setup_data['csv_advanced']['export_columns'] as $export_column ) {
-								$tmp_rows[$i][$export_column] = ( isset($row[$export_column]) ) ? ( isset($row[$export_column]['display']) ) ? $row[$export_column]['display'] : $row[$export_column] : NULL;
+								$tmp_rows[$i][$export_column] = ( isset($row[$export_column]) ) ? ( is_array($row[$export_column]) AND isset($row[$export_column]['display']) ) ? $row[$export_column]['display'] : $row[$export_column] : NULL;
 								$tmp_rows[$i]['hour_code'] = $hour_code;
-								$tmp_rows[$i]['hours'] = TTDate::getTimeUnit($hours, 20);
+								$tmp_rows[$i]['hours'] = TTDate::getTimeUnit($hour_code_arr['hours'], 20);
+								$tmp_rows[$i]['hourly_rate'] = $hour_code_arr['rate'];
 							}
+							$i++;
 						}
 						unset($tmp_hour_codes, $hour_code, $hours);
 					}
-
-					$i++;
 				}
 				//Debug::Arr($tmp_rows, 'Tmp Rows: ', __FILE__, __LINE__, __METHOD__,10);
 

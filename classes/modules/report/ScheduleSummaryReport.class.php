@@ -816,7 +816,7 @@ class ScheduleSummaryReport extends Report {
 		$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(16) );
 		if ( $new_page == TRUE ) {
 			$this->pdf->Cell(0, $this->_pdf_scaleSize(5), TTi18n::getText('Schedule'), 0, 0, 'C');
-			$this->pdf->Ln( $this->_pdf_fontSize(2) );
+			$this->pdf->Ln( $this->_pdf_scaleSize(7) );
 		}
 
 		$config = $this->getFilterConfig();
@@ -1434,11 +1434,12 @@ class ScheduleSummaryReport extends Report {
 								}
 
 								$this->scheduleFooterWeek( $column_widths );
-								$this->scheduleFooter();
 							}
 
 							$n++;
 						}
+
+						$this->scheduleFooter();
 					} else {
 						$this->scheduleNoData();
 					}

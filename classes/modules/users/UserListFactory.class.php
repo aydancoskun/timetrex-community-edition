@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11018 $
- * $Id: UserListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
- * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
+ * $Revision: 11257 $
+ * $Id: UserListFactory.class.php 11257 2013-10-29 19:59:42Z mikeb $
+ * $Date: 2013-10-29 12:59:42 -0700 (Tue, 29 Oct 2013) $
  */
 
 /**
@@ -1938,7 +1938,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 							a.*,
 							compf.name as company,
 							b.name as default_branch,
+							b.manual_id as default_branch_manual_id,
 							c.name as default_department,
+							c.manual_id as default_department_manual_id,
 							d.name as user_group,
 							e.name as title,
 							f.name as currency,

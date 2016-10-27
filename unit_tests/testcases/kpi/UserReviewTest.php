@@ -317,7 +317,7 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
         $kpi_group_ids[] = $this->createKPIGroup( $this->company_id, 20, 0 );
         $kpi_group_ids[] = $this->createKPIGroup( $this->company_id, 30, 0 );
         
-        $kpi_id = $this->createKPI( $this->company_id, 10, 10, $kpi_group_ids, 10, 100 );
+        $kpi_id = $this->createKPI( $this->company_id, 20, 10, $kpi_group_ids, 10, 100 );
 
         $kpi_arr = $this->getKPIArrayByGroupId( $kpi_group_ids[0] );
 

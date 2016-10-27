@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10530 $
- * $Id: CompanyFactory.class.php 10530 2013-07-23 17:41:24Z ipso $
- * $Date: 2013-07-23 10:41:24 -0700 (Tue, 23 Jul 2013) $
+ * $Revision: 11457 $
+ * $Id: CompanyFactory.class.php 11457 2013-11-20 00:40:13Z mikeb $
+ * $Date: 2013-11-19 16:40:13 -0800 (Tue, 19 Nov 2013) $
  */
 
 /**
@@ -701,6 +701,7 @@ class CompanyFactory extends Factory {
 														),
 										'ID' => array(
 														'00' => '--',
+														'AC' => TTi18n::gettext('Aceh'),
 														'BA' => TTi18n::gettext('Bali'),
 														'BB' => TTi18n::gettext('Bangka-Belitung'),
 														'BT' => TTi18n::gettext('Banten'),
@@ -716,9 +717,11 @@ class CompanyFactory extends Factory {
 														'JK' => TTi18n::gettext('Jakarta'),
 														'LA' => TTi18n::gettext('Lampung'),
 														'MA' => TTi18n::gettext('Maluku'),
+														'KU' => TTi18n::gettext('North Kalimantan'),
 														'MU' => TTi18n::gettext('North Maluku'),
 														'SA' => TTi18n::gettext('North Sulawesi'),
 														'SU' => TTi18n::gettext('North Sumatra'),
+														'PA' => TTi18n::gettext('Papua'),
 														'RI' => TTi18n::gettext('Riau'),
 														'KR' => TTi18n::gettext('Riau Islands'),
 														'SS' => TTi18n::gettext('South Sumatra'),
@@ -728,6 +731,7 @@ class CompanyFactory extends Factory {
 														'JB' => TTi18n::gettext('West Java'),
 														'KB' => TTi18n::gettext('West Kalimantan'),
 														'NB' => TTi18n::gettext('West Nusa Tenggara'),
+														'PB' => TTi18n::gettext('West Papua'),
 														'SR' => TTi18n::gettext('West Sulawesi'),
 														'SB' => TTi18n::gettext('West Sumatra'),
 														'YO' => TTi18n::gettext('Yogyakarta'),
@@ -3230,63 +3234,6 @@ class CompanyFactory extends Factory {
 				$sp->createPresets( $this->getCountry(), $this->getProvince() );
 				$sp->UserDefaults();
 			}
-/*
-			if ( $this->getEnableAddPayStubEntryAccountPreset() == TRUE ) {
-				Debug::text('Adding Pay Stub Entry Account Presets', __FILE__, __LINE__, __METHOD__,9);
-				PayStubEntryAccountFactory::addPresets( $this->getId() );
-			}
-
-			if ( $this->getEnableAddCompanyDeductionPreset() == TRUE ) {
-				Debug::text('Adding Company Deduction Presets', __FILE__, __LINE__, __METHOD__,9);
-				CompanyDeductionFactory::addPresets( $this->getId() );
-			}
-
-			if ( $this->getEnableAddRecurringHolidayPreset() == TRUE ) {
-				Debug::text('Adding Recurring Holiday Presets', __FILE__, __LINE__, __METHOD__,9);
-				RecurringHolidayFactory::addPresets( $this->getId(), $this->getCountry() );
-			}
-
-			if ( $this->getEnableAddUserDefaultPreset() == TRUE ) {
-				//User Default settings, always do this last.
-				$udf = TTnew( 'UserDefaultFactory' );
-				$udf->setCompany( $this->getID() );
-				$udf->setCity( $this->getCity() );
-				$udf->setCountry( $this->getCountry() );
-				$udf->setProvince( $this->getProvince() );
-				$udf->setWorkPhone( $this->getWorkPhone() );
-
-				$udf->setLanguage( 'en' );
-				$udf->setDateFormat( 'd-M-y' );
-				$udf->setTimeFormat( 'g:i A' );
-				$udf->setTimeUnitFormat( 10 );
-				$udf->setItemsPerPage( 25 );
-				$udf->setStartWeekDay( 0 );
-
-				//$udf->setPolicyGroup( $user_data['policy_group_id'] );
-
-				if ( isset($regular_employee_pcf_id) ) {
-					$udf->setPermissionControl( $regular_employee_pcf_id );
-				}
-
-				if ( isset($currency_id) ) {
-					$udf->setCurrency( $currency_id );
-				}
-
-				$upf = TTnew( 'UserPreferenceFactory' );
-				$udf->setTimeZone( $upf->getLocationTimeZone( $this->getCountry(), $this->getProvince(), $this->getWorkPhone() ) );
-				Debug::text('Time Zone: '. $udf->getTimeZone(), __FILE__, __LINE__, __METHOD__,9);
-
-				$udf->setEnableEmailNotificationException( TRUE );
-				$udf->setEnableEmailNotificationMessage( TRUE );
-				$udf->setEnableEmailNotificationHome( TRUE );
-
-				if ( $udf->isValid() ) {
-					Debug::text('Adding User Default settings...', __FILE__, __LINE__, __METHOD__,9);
-
-					$udf->Save();
-				}
-			}
-*/
 		}
 
 		return TRUE;

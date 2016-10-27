@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: RoundIntervalPolicyListFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11545 $
+ * $Id: RoundIntervalPolicyListFactory.class.php 11545 2013-11-29 02:04:30Z mikeb $
+ * $Date: 2013-11-28 18:04:30 -0800 (Thu, 28 Nov 2013) $
  */
 
 /**
@@ -234,7 +234,7 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 			}
 		}
 
-		$additional_order_fields = array('punch_type_id','round_type_id');
+		$additional_order_fields = array('punch_type_id','round_type_id','in_use');
 
 		$sort_column_aliases = array(
 									 'punch_type' => 'punch_type_id',
@@ -247,11 +247,11 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 			$order = array( 'punch_type_id' => 'asc', 'name' => 'asc');
 			$strict = FALSE;
 		} else {
-			//Always try to order by status first so INACTIVE employees go to the bottom.
+			//Always try to order by type first.
 			if ( !isset($order['punch_type_id']) ) {
-				$order = Misc::prependArray( array('punch_type_id' => 'asc'), $order );
+				$order['punch_type_id'] = 'asc';
 			}
-			//Always sort by last name,first name after other columns
+			//Always sort by name after other columns
 			if ( !isset($order['name']) ) {
 				$order['name'] = 'asc';
 			}
@@ -261,6 +261,8 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
 
 		$uf = new UserFactory();
+		$pgf = new PolicyGroupFactory();
+		$cgmf = new CompanyGenericMapFactory();
 
 		$ph = array(
 					'company_id' => $company_id,
@@ -268,6 +270,9 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 
 		$query = '
 					select 	a.*,
+							(
+								CASE WHEN EXISTS ( select 1 from '. $cgmf->getTable() .' as w, '. $pgf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 130 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0 ) THEN 1 ELSE 0 END
+							) as in_use,
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
 							y.last_name as created_by_last_name,

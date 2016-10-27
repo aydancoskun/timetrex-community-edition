@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11018 $
- * $Id: PolicyGroupListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
- * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
+ * $Revision: 11599 $
+ * $Id: PolicyGroupListFactory.class.php 11599 2013-12-04 21:13:42Z mikeb $
+ * $Date: 2013-12-04 13:13:42 -0800 (Wed, 04 Dec 2013) $
  */
 
 /**
@@ -349,7 +349,7 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 			}
 		}
 
-		$additional_order_fields = array( 'total_users' );
+		$additional_order_fields = array();
 
 		$sort_column_aliases = array(
 									 );

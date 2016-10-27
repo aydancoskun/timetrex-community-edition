@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: MealPolicyFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11545 $
+ * $Id: MealPolicyFactory.class.php 11545 2013-11-29 02:04:30Z mikeb $
+ * $Date: 2013-11-28 18:04:30 -0800 (Thu, 28 Nov 2013) $
  */
 
 /**
@@ -80,6 +80,8 @@ class MealPolicyFactory extends Factory {
 										//'-1090-maximum_punch_time' => TTi18n::gettext('Maximum Punch Time'),
 
 										'-1100-include_lunch_punch_time' => TTi18n::gettext('Include Lunch Punch'),
+
+										'-1900-in_use' => TTi18n::gettext('In Use'),
 
 										'-2000-created_by' => TTi18n::gettext('Created By'),
 										'-2010-created_date' => TTi18n::gettext('Created Date'),
@@ -130,6 +132,7 @@ class MealPolicyFactory extends Factory {
 										'minimum_punch_time' => 'MinimumPunchTime',
 										'maximum_punch_time' => 'MaximumPunchTime',
 										'include_lunch_punch_time' => 'IncludeLunchPunchTime',
+										'in_use' => FALSE,
 										'deleted' => 'Deleted',
 										);
 		return $variable_function_map;
@@ -510,6 +513,9 @@ class MealPolicyFactory extends Factory {
 
 					$function = 'get'.$function_stub;
 					switch( $variable ) {
+						case 'in_use':
+							$data[$variable] = $this->getColumn( $variable );
+							break;
 						case 'type':
 						case 'auto_detect_type':
 							$function = 'get'.str_replace('_','',$variable);

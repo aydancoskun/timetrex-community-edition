@@ -35,9 +35,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 4573 $
- * $Id: mklocales.php 4573 2011-04-23 18:37:42Z ipso $
- * $Date: 2011-04-23 11:37:42 -0700 (Sat, 23 Apr 2011) $
+ * $Revision: 11542 $
+ * $Id: mklocales.php 11542 2013-11-28 23:42:32Z mikeb $
+ * $Date: 2013-11-28 15:42:32 -0800 (Thu, 28 Nov 2013) $
  *
  * File Contributed By: Open Source Consulting, S.A.   San Jose, Costa Rica.
  * http://osc.co.cr
@@ -88,7 +88,7 @@ $locales = array(
 // 'hr_HR',
 // 'hu_HU',
 // 'hy_AM',
-// 'id_ID',
+   'id_ID',
 // 'is_IS',
    'it_IT',
 // 'ja_JP',
@@ -124,6 +124,7 @@ $locales = array(
 // 'pl_PL',
 // 'ps_AF',
    'pt_PT',
+   'pt_BR',
 // 'rm_CH',
 // 'rn_BI',
 // 'ro_RO',

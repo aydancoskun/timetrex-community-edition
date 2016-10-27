@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: OtherFieldListFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11465 $
+ * $Id: OtherFieldListFactory.class.php 11465 2013-11-20 18:19:37Z mikeb $
+ * $Date: 2013-11-20 10:19:37 -0800 (Wed, 20 Nov 2013) $
  */
 
 /**
@@ -220,6 +220,64 @@ class OtherFieldListFactory extends OtherFieldFactory implements IteratorAggrega
 		}
 
 		return FALSE;
+	}
+
+	function getByCompanyIDAndTypeAndDateAndValidIDs($company_id, $type_id, $date = NULL, $valid_ids = array(), $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $type_id == '') {
+			return FALSE;
+		}
+
+		if ( $date == '') {
+			$date = 0;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'a.id' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$ph = array(
+					'company_id' => $company_id,
+					'type_id' => $type_id,
+					);
+
+		//Make sure we return distinct rows so there aren't duplicates.
+		$query = '
+					select 	distinct a.*
+					from 	'. $this->getTable() .' as a
+
+					where	a.company_id = ?
+						AND a.type_id = ?
+						AND (
+								1=1
+							';
+
+		if ( isset($date) AND $date > 0 ) {
+			//Append the same date twice for created and updated.
+			$ph[] = (int)$date;
+			$ph[] = (int)$date;
+			$query  .=	' 		AND ( a.created_date >= ? OR a.updated_date >= ? ) ';
+		}
+
+		if ( isset($valid_ids) AND is_array($valid_ids) AND count($valid_ids) > 0 ) {
+			$query  .=	' OR a.id in ('. $this->getListSQL($valid_ids, $ph) .') ';
+		}
+
+		$query .= '	)
+					AND ( a.deleted = 0 )';
+
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		return $this;
 	}
 
 	function getIsModifiedByCompanyIdAndDate($company_id, $date, $where = NULL, $order = NULL) {

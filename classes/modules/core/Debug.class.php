@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11032 $
- * $Id: Debug.class.php 11032 2013-09-26 00:10:14Z ipso $
- * $Date: 2013-09-25 17:10:14 -0700 (Wed, 25 Sep 2013) $
+ * $Revision: 11416 $
+ * $Id: Debug.class.php 11416 2013-11-15 19:53:53Z mikeb $
+ * $Date: 2013-11-15 11:53:53 -0800 (Fri, 15 Nov 2013) $
  */
 
 /**
@@ -246,7 +246,7 @@ class Debug {
 					$class = NULL;
 				}
 
-				if ( is_array($trace_line['args']) ) {
+				if ( isset($trace_line['args']) AND is_array($trace_line['args']) ) {
 					$args = array();
 					foreach( $trace_line['args'] as $arg ) {
 						if ( is_array($arg) ) {
@@ -449,7 +449,7 @@ class Debug {
 				//If using rsyslog, need to set:
 				//$MaxMessageSize 256000 #Above ModuleLoad imtcp
 				openlog( self::getSyslogIdent(), LOG_PID | LOG_NDELAY | LOG_CONS, self::getSyslogFacility( 0 ) );
-				syslog( self::getSyslogPriority( 0 ), $output );
+				syslog( self::getSyslogPriority( 0 ), $output ); //Used to strip_tags output, but that was likely causing problems with SQL queries with >= and <= in them.
 				closelog();
 			} elseif ( is_writable( $config_vars['path']['log'] ) ) {
 				$fp = @fopen( $file_name,'a' );

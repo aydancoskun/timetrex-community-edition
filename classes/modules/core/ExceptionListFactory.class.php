@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11018 $
- * $Id: ExceptionListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
- * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
+ * $Revision: 11491 $
+ * $Id: ExceptionListFactory.class.php 11491 2013-11-25 23:51:42Z mikeb $
+ * $Date: 2013-11-25 15:51:42 -0800 (Mon, 25 Nov 2013) $
  */
 
 /**
@@ -995,13 +995,13 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 							i.severity_id as severity_id,
 							i.type_id as exception_policy_type_id,
 							b.user_id as user_id,
-                            h.start_date as pay_period_start_date,
+							h.start_date as pay_period_start_date,
 							h.end_date as pay_period_end_date,
 							h.transaction_date as pay_period_transaction_date,
 							c.first_name as first_name,
 							c.last_name as last_name,
-                            c.country as country,
-                            c.province as province,
+							c.country as country,
+							c.province as province,
 							c.status_id as user_status_id,
 							c.group_id as group_id,
 							f.name as "group",
@@ -1016,9 +1016,9 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 							bf.name as branch,
 							pcf.department_id as department_id,
 							df.name as department,
-                            pgf.name as policy_group,
-                            pscf.name as permission_group,
-                            ppsf.name as pay_period_schedule,
+							pgf.name as policy_group,
+							pscf.name as permission_group,
+							ppsf.name as pay_period_schedule,
 
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
@@ -1027,11 +1027,8 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
 					from 	'. $this->getTable() .' as a
-						LEFT JOIN '. $pf->getTable() .' as pf ON ( a.punch_id IS NOT NULL AND a.punch_id = pf.id AND pf.deleted = 0)
-						LEFT JOIN '. $pcf->getTable() .' as pcf ON ( ( ( pf.id IS NOT NULL AND pf.punch_control_id = pcf.id ) OR ( a.punch_control_id is NOT NULL AND a.punch_control_id = pcf.id ) ) AND pcf.deleted = 0)
-						LEFT JOIN '. $bf->getTable() .' as bf ON pcf.branch_id = bf.id
-						LEFT JOIN '. $df->getTable() .' as df ON pcf.department_id = df.id
-
+						LEFT JOIN '. $epf->getTable() .' as i ON a.exception_policy_id = i.id
+						LEFT JOIN '. $epcf->getTable() .' as epcf ON epcf.id = i.exception_policy_control_id
 						LEFT JOIN '. $udf->getTable() .' as b ON a.user_date_id = b.id
 						LEFT JOIN '. $uf->getTable() .' as c ON b.user_id = c.id
 						LEFT JOIN '. $bf->getTable() .' as d ON c.default_branch_id = d.id
@@ -1039,17 +1036,18 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 						LEFT JOIN '. $ugf->getTable() .' as f ON c.group_id = f.id
 						LEFT JOIN '. $utf->getTable() .' as g ON c.title_id = g.id
 						LEFT JOIN '. $ppf->getTable() .' as h ON b.pay_period_id = h.id
-                        LEFT JOIN '. $ppsf->getTable() .' as ppsf ON ppsf.id = h.pay_period_schedule_id
-						LEFT JOIN '. $epf->getTable() .' as i ON a.exception_policy_id = i.id
-                        LEFT JOIN '. $epcf->getTable() .' as epcf ON epcf.id = i.exception_policy_control_id
+						LEFT JOIN '. $ppsf->getTable() .' as ppsf ON ppsf.id = h.pay_period_schedule_id
 						LEFT JOIN '. $pguf->getTable() .' as pguf ON b.user_id = pguf.user_id
-                        LEFT JOIN '. $pgf->getTable() .' as pgf ON pguf.policy_group_id = pgf.id
-                        LEFT JOIN '. $puf->getTable() .' as puf ON c.id = puf.user_id
-                        LEFT JOIN '. $pscf->getTable() .' as pscf ON pscf.id = puf.permission_control_id
+						LEFT JOIN '. $pgf->getTable() .' as pgf ON pguf.policy_group_id = pgf.id
+						LEFT JOIN '. $puf->getTable() .' as puf ON c.id = puf.user_id
+						LEFT JOIN '. $pscf->getTable() .' as pscf ON pscf.id = puf.permission_control_id
+						LEFT JOIN '. $pf->getTable() .' as pf ON ( a.punch_id IS NOT NULL AND a.punch_id = pf.id AND pf.deleted = 0)
+						LEFT JOIN '. $pcf->getTable() .' as pcf ON ( ( ( pf.id IS NOT NULL AND pf.punch_control_id = pcf.id ) OR ( a.punch_control_id is NOT NULL AND a.punch_control_id = pcf.id ) ) AND pcf.deleted = 0)
+						LEFT JOIN '. $bf->getTable() .' as bf ON pcf.branch_id = bf.id
+						LEFT JOIN '. $df->getTable() .' as df ON pcf.department_id = df.id
 						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
-					where	c.company_id = ?
-					';
+					where	c.company_id = ? ';
 
 		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
 			$query  .=	' AND c.id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
@@ -1114,9 +1112,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		}
         
         $query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-        
         $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
-        
 
 		//Make sure we accept exception rows assign to pay_period_id = 0 (no pay period), as this can happen when punches exist in the future.
 		$query .= 	'

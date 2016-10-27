@@ -82,6 +82,8 @@ class BreakPolicyFactory extends Factory {
 										'-1100-include_break_punch_time' => TTi18n::gettext('Include Break Punch'),
 										'-1110-include_multiple_breaks' => TTi18n::gettext('Include Multiple Breaks'),
 
+										'-1900-in_use' => TTi18n::gettext('In Use'),
+
 										'-2000-created_by' => TTi18n::gettext('Created By'),
 										'-2010-created_date' => TTi18n::gettext('Created Date'),
 										'-2020-updated_by' => TTi18n::gettext('Updated By'),
@@ -132,6 +134,7 @@ class BreakPolicyFactory extends Factory {
 										'maximum_punch_time' => 'MaximumPunchTime',
 										'include_break_punch_time' => 'IncludeBreakPunchTime',
 										'include_multiple_breaks' => 'IncludeMultipleBreaks',
+										'in_use' => FALSE,
 										'deleted' => 'Deleted',
 										);
 		return $variable_function_map;
@@ -526,6 +529,9 @@ class BreakPolicyFactory extends Factory {
 
 					$function = 'get'.$function_stub;
 					switch( $variable ) {
+						case 'in_use':
+							$data[$variable] = $this->getColumn( $variable );
+							break;
 						case 'type':
 						case 'auto_detect_type':
 							$function = 'get'.str_replace('_','',$variable);

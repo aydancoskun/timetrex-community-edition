@@ -177,8 +177,12 @@ class Group {
 			case 'min':
 				$retarr = min($array);
 				break;
+			case 'min_not_null':
+				$retarr = self::MinNotNull($array);
+				break;
 			case 'maximum':
 			case 'max':
+			case 'max_not_null':
 				$retarr = max($array);
 				break;
 			case 'first':
@@ -198,5 +202,10 @@ class Group {
 
 		return $retarr;
 	}
+
+	static function MinNotNull( $values ) {
+		return @min( array_diff( array_map('intval', $values), array(0) ) ); //If array() OR array(0) is passed in it could cause a PHP warning for min()
+	}
+
 }
 ?>

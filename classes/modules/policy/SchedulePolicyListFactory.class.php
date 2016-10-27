@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9951 $
- * $Id: SchedulePolicyListFactory.class.php 9951 2013-05-21 10:16:48Z ennis $
- * $Date: 2013-05-21 03:16:48 -0700 (Tue, 21 May 2013) $
+ * $Revision: 11512 $
+ * $Id: SchedulePolicyListFactory.class.php 11512 2013-11-26 20:54:04Z mikeb $
+ * $Date: 2013-11-26 12:54:04 -0800 (Tue, 26 Nov 2013) $
  */
 
 /**
@@ -296,5 +296,24 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 		return FALSE;
 	}
 
+	function getArrayByListFactory($lf, $include_blank = TRUE ) {
+		if ( !is_object($lf) ) {
+			return FALSE;
+		}
+
+		if ( $include_blank == TRUE ) {
+			$list[0] = '--';
+		}
+
+		foreach ($lf as $obj) {
+			$list[$obj->getID()] = $obj->getName();
+		}
+
+		if ( isset($list) ) {
+			return $list;
+		}
+
+		return FALSE;
+	}
 }
 ?>

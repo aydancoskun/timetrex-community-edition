@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11018 $
- * $Id: CompanyDeductionFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
- * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
+ * $Revision: 11599 $
+ * $Id: CompanyDeductionFactory.class.php 11599 2013-12-04 21:13:42Z mikeb $
+ * $Date: 2013-12-04 13:13:42 -0800 (Wed, 04 Dec 2013) $
  */
 
 /**
@@ -510,6 +510,8 @@ class CompanyDeductionFactory extends Factory {
 
 										'-1070-calculation_order' => TTi18n::gettext('Calculation Order'),
 
+										'-1100-total_users' => TTi18n::gettext('Employees'),
+
 										'-2000-created_by' => TTi18n::gettext('Created By'),
 										'-2010-created_date' => TTi18n::gettext('Created Date'),
 										'-2020-updated_by' => TTi18n::gettext('Updated By'),
@@ -525,6 +527,7 @@ class CompanyDeductionFactory extends Factory {
 								'type',
 								'name',
 								'calculation',
+								'total_users',
 								);
 				break;
 			case 'unique_columns': //Columns that are unique, and disabled for mass editing.
@@ -634,6 +637,7 @@ class CompanyDeductionFactory extends Factory {
 										'exclude_account_amount_type_id' => 'ExcludeAccountAmountType',
 										'exclude_pay_stub_entry_account' => 'ExcludePayStubEntryAccount',
 										'user' => 'User',
+										'total_users' => 'TotalUsers',
 										'deleted' => 'Deleted',
 										);
 		return $variable_function_map;
@@ -2560,6 +2564,12 @@ class CompanyDeductionFactory extends Factory {
 
 		Debug::text('No IDs to set.', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
+	}
+
+	function getTotalUsers() {
+		$udlf = TTnew( 'UserDeductionListFactory' );
+		$udlf->getByCompanyDeductionId( $this->getId() );
+		return $udlf->getRecordCount();
 	}
 
 	function getExpandedPayStubEntryAccountIDs( $ids ) {

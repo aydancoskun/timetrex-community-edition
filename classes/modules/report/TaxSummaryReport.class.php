@@ -509,7 +509,10 @@ class TaxSummaryReport extends Report {
     			unset($pplf, $pp_obj);
 
                 if ( isset($pay_period_ids) AND isset($filter_data['user_ids']) ) {
-
+						if ( !isset($filter_data['exclude_ytd_adjustment']) ) {
+							$filter_data['exclude_ytd_adjustment'] = FALSE;
+						}
+						
                         $pself = TTnew( 'PayStubEntryListFactory' );
                 		//$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
                         $pself->getDateReportByCompanyIdAndUserIdAndPayPeriodId( $this->getUserObject()->getCompany(), $filter_data['user_ids'], $pay_period_ids, $filter_data['exclude_ytd_adjustment'] );

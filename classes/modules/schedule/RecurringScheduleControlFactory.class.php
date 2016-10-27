@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10132 $
- * $Id: RecurringScheduleControlFactory.class.php 10132 2013-06-06 05:56:44Z ipso $
- * $Date: 2013-06-05 22:56:44 -0700 (Wed, 05 Jun 2013) $
+ * $Revision: 11368 $
+ * $Id: RecurringScheduleControlFactory.class.php 11368 2013-11-08 02:15:50Z mikeb $
+ * $Date: 2013-11-07 18:15:50 -0800 (Thu, 07 Nov 2013) $
  */
 
 /**
@@ -285,7 +285,15 @@ class RecurringScheduleControlFactory extends Factory {
 	}
 	function setUser($ids) {
 		if ( !is_array($ids) ) {
-			$ids = array($ids);
+			global $current_user;
+			if ( (int)$ids == 0 AND ( getTTProductEdition() == TT_PRODUCT_COMMUNITY OR $current_user->getCompanyObject()->getProductEdition() == 10 ) ) {
+				$this->Validator->isTrue(		'user',
+												FALSE,
+												TTi18n::gettext('Please select at least one employee') );
+				return FALSE;
+			} else {
+				$ids = array($ids);
+			}
 		}
 
 		if ( is_array($ids) ) {

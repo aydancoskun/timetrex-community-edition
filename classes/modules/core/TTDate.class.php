@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11115 $
- * $Id: TTDate.class.php 11115 2013-10-11 18:29:20Z ipso $
- * $Date: 2013-10-11 11:29:20 -0700 (Fri, 11 Oct 2013) $
+ * $Revision: 11487 $
+ * $Id: TTDate.class.php 11487 2013-11-25 18:48:47Z mikeb $
+ * $Date: 2013-11-25 10:48:47 -0800 (Mon, 25 Nov 2013) $
  */
 
 /**
@@ -2631,6 +2631,12 @@ class TTDate {
 	}
 
 	public static function getReportDates( $column, $epoch = NULL, $post_processing = TRUE, $user_obj = NULL, $params = NULL ) {
+		//Make sure if epoch is actually NULL that we return a blank array and not todays date.
+		//This is import for things like termination dates that may be NULL when not set.
+		if ( $epoch === NULL ) {
+			return array();
+		}
+		
 	    $column = Misc::trimSortPrefix( $column );
         
 		//Trim off a column_name_prefix, or everything before the "-"

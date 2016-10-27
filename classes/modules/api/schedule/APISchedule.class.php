@@ -67,6 +67,8 @@ class APISchedule extends APIFactory {
 						'end_time' => TTDate::getAPIDate( 'TIME', strtotime( '5:00 PM' ) ),
 						'branch_id' => $this->getCurrentUserObject()->getDefaultBranch(),
 						'department_id' => $this->getCurrentUserObject()->getDefaultDepartment(),
+						'job_id' => $this->getCurrentUserObject()->getDefaultJob(),
+						'job_item_id' => $this->getCurrentUserObject()->getDefaultJobItem(),
 					);
 
 		//If user_id is specified, use their default branch/department.
@@ -78,6 +80,8 @@ class APISchedule extends APIFactory {
 			$data['user_id'] = $user_obj->getID();
 			$data['branch_id'] = $user_obj->getDefaultBranch();
 			$data['department_id'] = $user_obj->getDefaultDepartment();
+			$data['job_id'] = $user_obj->getDefaultJob();
+			$data['job_item_id'] = $user_obj->getDefaultJobItem();
 		}
 		unset($ulf, $user_obj);
 
@@ -180,9 +184,17 @@ class APISchedule extends APIFactory {
 			$data['filter_data']['end_date'] = $schedule_dates['end_date'];
 		}
 
+		//If we don't have permissions to view open shifts, exclude user_id = 0;
+		if ( $this->getPermissionObject()->Check('schedule','view_open') == FALSE ) {
+			$data['filter_data']['exclude_id'] = array(0);
+		}
+
 		$data = $this->initializeFilterAndPager( $data );
 
 		$sf = TTnew( 'ScheduleFactory' );
+
+		if ( DEPLOYMENT_ON_DEMAND == TRUE ) { $sf->setQueryStatementTimeout( 1200000 ); }
+
 		$sf->setAMFMessageID( $this->getAMFMessageID() );
 
 		$retarr = $sf->getScheduleArray( $data['filter_data'], $data['filter_data']['permission_children_ids'] );
@@ -192,7 +204,7 @@ class APISchedule extends APIFactory {
 				foreach( $shifts as $key => $row ) {
 					//Hide wages if the user doesn't have permission to see them.
 					if ( $this->getPermissionObject()->Check('wage','view') == TRUE
-						OR ( $this->getPermissionObject()->Check('wage','view_own') == TRUE AND $this->getPermissionObject()->isOwner( $this->getCurrentUserObject()->getId(), $row['user_id']) == TRUE )
+						OR ( $this->getPermissionObject()->Check('wage','view_own') == TRUE AND $this->getPermissionObject()->isOwner( FALSE, $row['user_id'] ) == TRUE )
 						OR ( $this->getPermissionObject()->Check('wage','view_child') == TRUE AND $this->getPermissionObject()->isChild( $row['user_id'], $data['filter_data']['wage_permission_children_ids']) == TRUE )
 						) {
 					} else {
@@ -260,6 +272,7 @@ class APISchedule extends APIFactory {
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'schedule', 'view' );
 
 		$blf = TTnew( 'ScheduleListFactory' );
+		if ( DEPLOYMENT_ON_DEMAND == TRUE ) { $blf->setQueryStatementTimeout( 60000 ); }
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -306,7 +319,7 @@ class APISchedule extends APIFactory {
 	 * @param array $data schedule data
 	 * @return array
 	 */
-	function setSchedule( $data, $validate_only = FALSE ) {
+	function setSchedule( $data, $validate_only = FALSE, $overwrite = FALSE ) {
 		$validate_only = (bool)$validate_only;
 
 		if ( !is_array($data) ) {
@@ -383,6 +396,26 @@ class APISchedule extends APIFactory {
 
 				$is_valid = $primary_validator->isValid();
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
+
+					if ( $overwrite == TRUE AND isset($row['user_id']) AND isset($row['start_time']) AND isset($row['end_time']) ) {
+						Debug::Text('Overwriting Existing Shifts Enabled...', __FILE__, __LINE__, __METHOD__,10);
+						$slf = TTnew( 'ScheduleListFactory' );
+						$slf->getConflictingByUserIdAndStartDateAndEndDate( $row['user_id'], $row['start_time'], $row['end_time'] );
+						if ( $slf->getRecordCount() > 0 ) {
+							Debug::Text('Found Conflicting Shift!!', __FILE__, __LINE__, __METHOD__,10);
+							foreach( $slf as $s_obj ) {
+								Debug::Text('Deleting Schedule Shift ID: '. $s_obj->getId(), __FILE__, __LINE__, __METHOD__,10);
+								$s_obj->setDeleted(TRUE);
+								if ( $s_obj->isValid() ) {
+									$s_obj->Save();
+								}
+							}
+						} else {
+							Debug::Text('NO Conflicting Shift found...', __FILE__, __LINE__, __METHOD__,10);
+						}
+						unset($slf, $s_obj);
+					}
+
 					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
 
 					//This is important when adding/editing a scheduled shift, without it there can be issues calculating exceptions

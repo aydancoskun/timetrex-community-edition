@@ -34,12 +34,12 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11151 $
- * $Id: global.inc.php 11151 2013-10-14 22:00:30Z ipso $
- * $Date: 2013-10-14 15:00:30 -0700 (Mon, 14 Oct 2013) $
+ * $Revision: 11585 $
+ * $Id: global.inc.php 11585 2013-12-03 21:40:30Z mikeb $
+ * $Date: 2013-12-03 13:40:30 -0800 (Tue, 03 Dec 2013) $
  */
 //PHP v5.1.0 introduced $_SERVER['REQUEST_TIME'], but it doesn't include microseconds until v5.4.0.
-if ( version_compare(PHP_VERSION, '5.4.0', '<') == TRUE ) {
+if ( !isset($_SERVER['REQUEST_TIME_FLOAT']) OR version_compare(PHP_VERSION, '5.4.0', '<') == TRUE ) {
 	$_SERVER['REQUEST_TIME_FLOAT'] = microtime( TRUE );
 }
 
@@ -61,20 +61,28 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '7.1.3' );
-define('APPLICATION_VERSION_DATE', @strtotime('11-Oct-2013') ); //Release date of version.
+define('APPLICATION_VERSION', '7.2.0' );
+define('APPLICATION_VERSION_DATE', @strtotime('04-Dec-2013') ); //Release date of version.
 
 if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') { define('OPERATING_SYSTEM', 'WIN'); } else { define('OPERATING_SYSTEM', 'LINUX'); }
 
 /*
-	Config file inside webroot.
+	Find Config file.
+	Can use the following line in .htaccess or Apache virtual host definition to define a config file outside the document root.
+	SetEnv TT_CONFIG_FILE /etc/timetrex/timetrex.ini.php
+
+	Or from the CLI:
+	export TT_CONFIG_FILE=/etc/timetrex/timetrex.ini.php
 */
-define('CONFIG_FILE', dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'timetrex.ini.php');
+if ( isset($_SERVER['TT_CONFIG_FILE']) AND $_SERVER['TT_CONFIG_FILE'] != '' ) {
+	define('CONFIG_FILE', $_SERVER['TT_CONFIG_FILE'] );
+} else {
+	define('CONFIG_FILE', dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'timetrex.ini.php');
+}
 
 /*
 	Config file outside webroot.
 */
-//define('CONFIG_FILE', '/etc/timetrex.ini.php');
 
 if ( file_exists(CONFIG_FILE) ) {
 	$config_vars = parse_ini_file( CONFIG_FILE, TRUE);
@@ -92,12 +100,8 @@ if ( isset($config_vars['debug']['production']) AND $config_vars['debug']['produ
 } else {
 	define('PRODUCTION', FALSE);
 }
-
-// **REMOVING OR CHANGING THIS APPLICATION NAME AND ORGANIZATION URL IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT**
-( isset($config_vars['branding']['application_name']) AND $config_vars['branding']['application_name'] != '' ) ? define('APPLICATION_NAME', $config_vars['branding']['application_name']) : define('APPLICATION_NAME', (PRODUCTION == FALSE) ? 'TimeTrex-Debug' : 'TimeTrex');
-( isset($config_vars['branding']['organization_name']) AND $config_vars['branding']['organization_name'] != '' ) ? define('ORGANIZATION_NAME', $config_vars['branding']['organization_name']) : define('ORGANIZATION_NAME', 'TimeTrex');
-( isset($config_vars['branding']['organization_url']) AND $config_vars['branding']['organization_url'] != '' ) ? define('ORGANIZATION_URL', $config_vars['branding']['organization_url']) : define('ORGANIZATION_URL', 'www.TimeTrex.com');
-
+																																																		//**REMOVING OR CHANGING THIS APPLICATION NAME AND ORGANIZATION URL IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT**//
+																																																		( isset($config_vars['branding']['application_name']) AND $config_vars['branding']['application_name'] != '' ) ? define('APPLICATION_NAME', $config_vars['branding']['application_name']) : define('APPLICATION_NAME', (PRODUCTION == FALSE) ? 'TimeTrex-Debug' : 'TimeTrex'); ( isset($config_vars['branding']['organization_name']) AND $config_vars['branding']['organization_name'] != '' ) ? define('ORGANIZATION_NAME', $config_vars['branding']['organization_name']) : define('ORGANIZATION_NAME', 'TimeTrex'); ( isset($config_vars['branding']['organization_url']) AND $config_vars['branding']['organization_url'] != '' ) ? define('ORGANIZATION_URL', $config_vars['branding']['organization_url']) : define('ORGANIZATION_URL', 'www.TimeTrex.com');
 if ( isset($config_vars['other']['demo_mode']) AND $config_vars['other']['demo_mode'] == 1 ) {
 	define('DEMO_MODE', TRUE);
 } else {
@@ -360,7 +364,7 @@ function TTsaveRequestMetrics() {
 	} else {
 		$memory_usage = 0;
 	}
-	file_put_contents( $config_vars['other']['request_metrics_log'], ((microtime( TRUE )-$_SERVER['REQUEST_TIME'])*1000).' '. $memory_usage ."\n", FILE_APPEND ); //Write each response in MS to log for tracking performance
+	file_put_contents( $config_vars['other']['request_metrics_log'], ((microtime( TRUE )-$_SERVER['REQUEST_TIME_FLOAT'])*1000).' '. $memory_usage ."\n", FILE_APPEND ); //Write each response in MS to log for tracking performance
 }
 
 //This has to be first, always.

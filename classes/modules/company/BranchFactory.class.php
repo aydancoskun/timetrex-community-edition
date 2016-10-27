@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11018 $
- * $Id: BranchFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
- * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
+ * $Revision: 10787 $
+ * $Id: BranchFactory.class.php 10787 2013-08-30 20:01:40Z ipso $
+ * $Date: 2013-08-30 13:01:40 -0700 (Fri, 30 Aug 2013) $
  */
 
 /**

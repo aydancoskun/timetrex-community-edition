@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11018 $
- * $Id: PunchControlListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
- * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
+ * $Revision: 11492 $
+ * $Id: PunchControlListFactory.class.php 11492 2013-11-25 23:51:59Z mikeb $
+ * $Date: 2013-11-25 15:51:59 -0800 (Mon, 25 Nov 2013) $
  */
 
 /**
@@ -409,7 +409,6 @@ class PunchControlListFactory extends PunchControlFactory implements IteratorAgg
 							b.department_id as department_id,
 							k.name as department,
 							b.job_id as job_id,
-							x.name as job,
 							b.job_item_id as job_item_id,
 							y.name as job_item,
 							b.quantity as quantity,
@@ -447,6 +446,7 @@ class PunchControlListFactory extends PunchControlFactory implements IteratorAgg
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$query .= ',
 						x.name as job_name,
+						x.name as job,
 						x.status_id as job_status_id,
 						x.manual_id as job_manual_id,
 						x.branch_id as job_branch_id,

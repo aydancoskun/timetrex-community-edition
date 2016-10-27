@@ -84,7 +84,6 @@ class APIPunch extends APIFactory {
 			$station_type = $current_station->getType();
 		}
 		unset($slf);
-		$slf = TTnew('ScheduleListFactory');
 
 		Debug::Text('Station ID: '. $station_id .' User ID: '. $user_id .' Epoch: '. $epoch, __FILE__, __LINE__, __METHOD__,10);
 		if ( is_object($current_station) AND $current_station->checkAllowed( $user_id, $station_id, $station_type ) == TRUE ) {
@@ -264,6 +263,8 @@ class APIPunch extends APIFactory {
 						'punch_time' => TTDate::getAPIDate( 'TIME', TTDate::strtotime( '12:00 PM' ) ),
 						'branch_id' => $this->getCurrentUserObject()->getDefaultBranch(),
 						'department_id' => $this->getCurrentUserObject()->getDefaultDepartment(),
+						'job_id' => $this->getCurrentUserObject()->getDefaultJob(),
+						'job_item_id' => $this->getCurrentUserObject()->getDefaultJobItem(),
 					);
 
 		//If user_id is specified, use their default branch/department.
@@ -275,6 +276,8 @@ class APIPunch extends APIFactory {
 			$data['user_id'] = $user_obj->getID();
 			$data['branch_id'] = $user_obj->getDefaultBranch();
 			$data['department_id'] = $user_obj->getDefaultDepartment();
+			$data['job_id'] = $user_obj->getDefaultJob();
+			$data['job_item_id'] = $user_obj->getDefaultJobItem();
 		}
 		unset($ulf, $user_obj);
 
@@ -368,6 +371,7 @@ class APIPunch extends APIFactory {
 		}
 
 		$blf = TTnew( 'PunchListFactory' );
+		if ( DEPLOYMENT_ON_DEMAND == TRUE ) { $blf->setQueryStatementTimeout( 60000 ); }
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {

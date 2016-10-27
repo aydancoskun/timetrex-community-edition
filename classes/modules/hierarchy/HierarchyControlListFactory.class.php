@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11018 $
- * $Id: HierarchyControlListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
- * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
+ * $Revision: 11284 $
+ * $Id: HierarchyControlListFactory.class.php 11284 2013-10-31 18:06:57Z mikeb $
+ * $Date: 2013-10-31 11:06:57 -0700 (Thu, 31 Oct 2013) $
  */
 
 /**
@@ -254,7 +254,7 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 			}
 		}
 
-		$additional_order_fields = array( 'superiors', 'subordinates');
+		$additional_order_fields = array();
 
 		$sort_column_aliases = array();
 

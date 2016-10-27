@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: CompanyDeductionListFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11599 $
+ * $Id: CompanyDeductionListFactory.class.php 11599 2013-12-04 21:13:42Z mikeb $
+ * $Date: 2013-12-04 13:13:42 -0800 (Wed, 04 Dec 2013) $
  */
 
 /**
@@ -474,46 +474,8 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$query .= ( isset($filter_data['province']) ) ? $this->getWhereClauseSQL( 'a.province', $filter_data['province'], 'upper_text_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-        
         $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
         
-/*
-		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query  .=	' AND a.created_by in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
-		}
-		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query  .=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
-		}
-		if ( isset($filter_data['exclude_id']) AND isset($filter_data['exclude_id'][0]) AND !in_array(-1, (array)$filter_data['exclude_id']) ) {
-			$query  .=	' AND a.id not in ('. $this->getListSQL($filter_data['exclude_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['status_id']) AND isset($filter_data['status_id'][0]) AND !in_array(-1, (array)$filter_data['status_id']) ) {
-			$query  .=	' AND a.status_id in ('. $this->getListSQL($filter_data['status_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['type_id']) AND isset($filter_data['type_id'][0]) AND !in_array(-1, (array)$filter_data['type_id']) ) {
-			$query  .=	' AND a.type_id in ('. $this->getListSQL($filter_data['type_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['calculation_id']) AND isset($filter_data['calculation_id'][0]) AND !in_array(-1, (array)$filter_data['calculation_id']) ) {
-			$query  .=	' AND a.calculation_id in ('. $this->getListSQL($filter_data['calculation_id'], $ph) .') ';
-		}
-
-		if ( isset($filter_data['name']) AND trim($filter_data['name']) != '' ) {
-			$ph[] = strtolower(trim($filter_data['name']));
-			$query  .=	' AND lower(a.name) LIKE ?';
-		}
-		if ( isset($filter_data['country']) AND isset($filter_data['country'][0]) AND !in_array(-1, (array)$filter_data['country']) ) {
-			$query  .=	' AND a.country in ('. $this->getListSQL($filter_data['country'], $ph) .') ';
-		}
-		if ( isset($filter_data['province']) AND isset($filter_data['province'][0]) AND !in_array( -1, (array)$filter_data['province']) AND !in_array( '00', (array)$filter_data['province']) ) {
-			$query  .=	' AND a.province in ('. $this->getListSQL($filter_data['province'], $ph) .') ';
-		}
-		if ( isset($filter_data['created_by']) AND isset($filter_data['created_by'][0]) AND !in_array(-1, (array)$filter_data['created_by']) ) {
-			$query  .=	' AND a.created_by in ('. $this->getListSQL($filter_data['created_by'], $ph) .') ';
-		}
-		if ( isset($filter_data['updated_by']) AND isset($filter_data['updated_by'][0]) AND !in_array(-1, (array)$filter_data['updated_by']) ) {
-			$query  .=	' AND a.updated_by in ('. $this->getListSQL($filter_data['updated_by'], $ph) .') ';
-		}
-*/
 		$query .= 	'
 						AND a.deleted = 0
 					';

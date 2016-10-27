@@ -76,12 +76,13 @@ class APIImport extends APIFactory {
 						'-1050-userwage' => TTi18n::getText('Employee Wages'),
 						'-1060-payperiod' => TTi18n::getText('Pay Periods'),
 						'-1100-punch' => TTi18n::getText('Punches'),
+						'-1150-schedule' => TTi18n::getText('Scheduled Shifts'),
 						'-1200-paystubamendment' => TTi18n::getText('Pay Stub Amendments'),
 						'-1300-accrual' => TTi18n::getText('Accruals'),
 					 );
 
 		//Get company data so we know if its professional edition or not.
-		if ( $this->getCurrentCompanyObject()->getProductEdition() == 20 ) {
+		if ( $this->getCurrentCompanyObject()->getProductEdition() >= 20 ) {
 			$retarr += array(
 							'-1500-client' => TTi18n::getText('Clients'),
 							'-1600-job' => TTi18n::getText('Jobs'),

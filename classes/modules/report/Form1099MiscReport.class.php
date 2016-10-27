@@ -476,7 +476,7 @@ class Form1099MiscReport extends Report {
 		//Figure out state/locality wages/taxes.
 		//
 		$cdlf = TTnew( 'CompanyDeductionListFactory' );
-		$cdlf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), 10 );
+		$cdlf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), array(10,20), 10 );
 		if ( $cdlf->getRecordCount() > 0 ) {
 			foreach( $cdlf as $cd_obj ) {
 				$tax_deductions[$cd_obj->getId()] = array(

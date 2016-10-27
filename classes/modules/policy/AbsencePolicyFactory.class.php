@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: AbsencePolicyFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11545 $
+ * $Id: AbsencePolicyFactory.class.php 11545 2013-11-29 02:04:30Z mikeb $
+ * $Date: 2013-11-28 18:04:30 -0800 (Thu, 28 Nov 2013) $
  */
 
 /**
@@ -73,6 +73,8 @@ class AbsencePolicyFactory extends Factory {
 
 										'-1080-accrual_policy' => TTi18n::gettext('Accrual Policy'),
 										'-1090-accrual_rate' => TTi18n::gettext('Accrual Rate'),
+
+										'-1900-in_use' => TTi18n::gettext('In Use'),
 
 										'-2000-created_by' => TTi18n::gettext('Created By'),
 										'-2010-created_date' => TTi18n::gettext('Created Date'),
@@ -118,6 +120,7 @@ class AbsencePolicyFactory extends Factory {
 											'accrual_policy_id' => 'AccrualPolicyID',
 											'accrual_policy' => FALSE,
 											'pay_stub_entry_account_id' => 'PayStubEntryAccountId',
+											'in_use' => FALSE,
 											'deleted' => 'Deleted',
 											);
 			return $variable_function_map;
@@ -455,6 +458,7 @@ class AbsencePolicyFactory extends Factory {
 
 					$function = 'get'.$function_stub;
 					switch( $variable ) {
+						case 'in_use':
 						case 'accrual_policy':
 							$data[$variable] = $this->getColumn( $variable );
 							break;

@@ -858,7 +858,7 @@ class UserSummaryReport extends Report {
 		}
         
 		//Get user wage data for joining.
-		$filter_data['wage_group_id'] = 0; //Use default wage groups only.
+		$filter_data['wage_group_id'] = array(0); //Use default wage groups only.
 		$uwlf = TTnew( 'UserWageListFactory' );
 		$uwlf->getAPILastWageSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Wage Rows: '. $uwlf->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);

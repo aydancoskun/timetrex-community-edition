@@ -28,6 +28,8 @@ if ( isset($_GET['Class']) AND $_GET['Class'] != '' ) {
 	}
 
 	$class_name = TTgetPluginClassName( $class_name );
+} else {
+	$class_name = TTgetPluginClassName( $class_prefix.'Authentication' );
 }
 
 if ( isset($_GET['Method']) AND $_GET['Method'] != '' ) {
@@ -37,7 +39,7 @@ if ( isset($_GET['Method']) AND $_GET['Method'] != '' ) {
 if ( isset($_GET['MessageID']) AND $_GET['MessageID'] != '' ) {
 	$message_id = $_GET['MessageID'];
 } else {
-	$message_id = md5( time() ); //Random message_id
+	$message_id = md5( uniqid() ); //Random message_id
 }
 
 Debug::text('Handling JSON Call To API Factory: '.  $class_name .' Method: '. $method .' Message ID: '. $message_id, __FILE__, __LINE__, __METHOD__, 10);
@@ -135,8 +137,9 @@ if ( isset($_GET['SessionID']) AND $_GET['SessionID'] != '' ) {
 } else {
 	TTi18n::chooseBestLocale(); //Make sure we set the locale as best we can when not logged in
 	Debug::text('Handling UNAUTHENTICATED JSON Call To API Factory: '.  $class_name .' Method: '. $method .' Message ID: '. $message_id, __FILE__, __LINE__, __METHOD__, 10);
-	$class_name = 'APIAuthentication';
-	if ( $class_name != '' AND class_exists( $class_name ) ) {
+
+	$valid_unauthenticated_classes = getUnauthenticatedAPIClasses();
+	if ( $class_name != '' AND in_array( $class_name, $valid_unauthenticated_classes ) AND class_exists( $class_name ) ) {
 		$obj = new $class_name;
 		$obj->setAMFMessageID( $message_id ); //Sets AMF message ID so progress bar continues to work.
 		if ( $method != '' AND method_exists( $obj, $method ) ) {
@@ -148,7 +151,7 @@ if ( isset($_GET['SessionID']) AND $_GET['SessionID'] != '' ) {
 			Debug::text('Method: '. $method .' does not exist!', __FILE__, __LINE__, __METHOD__, 10);
 		}
 	} else {
-		Debug::text('Class: '. $class_name .' does not exist!', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Class: '. $class_name .' does not exist! (unauth)', __FILE__, __LINE__, __METHOD__, 10);
 	}
 }
 

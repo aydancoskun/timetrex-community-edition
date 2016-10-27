@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11115 $
- * $Id: UserFactory.class.php 11115 2013-10-11 18:29:20Z ipso $
- * $Date: 2013-10-11 11:29:20 -0700 (Fri, 11 Oct 2013) $
+ * $Revision: 11487 $
+ * $Id: UserFactory.class.php 11487 2013-11-25 18:48:47Z mikeb $
+ * $Date: 2013-11-25 10:48:47 -0800 (Mon, 25 Nov 2013) $
  */
 
 /**
@@ -102,7 +102,7 @@ class UserFactory extends Factory {
 										'-1090-title' => TTi18n::gettext('Title'),
 										'-1099-user_group' => TTi18n::gettext('Group'), //Update ImportUser class if sort order is changed for this.
                                         '-1100-ethnic_group' => TTi18n::gettext('Ethnicity'),
-										'-1102-default_branch' => TTi18n::gettext('Branch'),                                        
+										'-1102-default_branch' => TTi18n::gettext('Branch'),
 										'-1103-default_department' => TTi18n::gettext('Department'),
                                         '-1104-default_job' => TTi18n::gettext('Job'),
                                         '-1105-default_job_item' => TTi18n::gettext('Task'),
@@ -218,8 +218,10 @@ class UserFactory extends Factory {
 										'title' => FALSE,
 										'default_branch_id' => 'DefaultBranch',
 										'default_branch' => FALSE,
+										'default_branch_manual_id' => FALSE,
 										'default_department_id' => 'DefaultDepartment',
 										'default_department' => FALSE,
+										'default_department_manual_id' => FALSE,
                                         'default_job_id' => 'DefaultJob',
 										'default_job' => FALSE,
 										'default_job_item_id' => 'DefaultJobItem',
@@ -2495,11 +2497,11 @@ class UserFactory extends Factory {
 			$sin = $this->getSIN();
 		}
 		if ( $sin != '' ) {
-			//Grab the first 1, and last 3 digits.
+			//Grab the first 1, and last 4 digits.
 			$first_four = substr( $sin, 0, 1 );
-			$last_four = substr( $sin, -3 );
+			$last_four = substr( $sin, -4 );
 
-			$total = strlen($sin)-4;
+			$total = strlen($sin)-5;
 
 			$retval = $first_four.str_repeat('X', $total).$last_four;
 
@@ -3060,6 +3062,8 @@ class UserFactory extends Factory {
 							Debug::text('Deleteing from Permission Group: '. $pu_obj->getPermissionControl(), __FILE__, __LINE__, __METHOD__, 10);
 							$pu_obj->Delete();
 						}
+
+						$pc_obj->touchUpdatedByAndDate();
 					}
 
 					$add_permission_control = TRUE;
@@ -3078,6 +3082,9 @@ class UserFactory extends Factory {
 				$puf->setUser( $this->getID() );
 
 				if ( $puf->isValid() ) {
+					if ( is_object( $puf->getPermissionControlObject() ) ) {
+						$puf->getPermissionControlObject()->touchUpdatedByAndDate();
+					}
 					$puf->Save();
 
 					//Clear permission class for this employee.
@@ -3292,6 +3299,7 @@ class UserFactory extends Factory {
 				$upf->setStartWeekDay( $udf_obj->getStartWeekDay() );
 				$upf->setEnableEmailNotificationException( $udf_obj->getEnableEmailNotificationException() );
 				$upf->setEnableEmailNotificationMessage( $udf_obj->getEnableEmailNotificationMessage() );
+				$upf->setEnableEmailNotificationPayStub( $udf_obj->getEnableEmailNotificationPayStub() );
 				$upf->setEnableEmailNotificationHome( $udf_obj->getEnableEmailNotificationHome() );
 
 				if ( $upf->isValid() ) {
@@ -3472,7 +3480,9 @@ class UserFactory extends Factory {
 						case 'currency':
 						case 'currency_rate':
 						case 'default_branch':
+						case 'default_branch_manual_id':
 						case 'default_department':
+						case 'default_department_manual_id':
 						case 'default_job':
 						case 'default_job_item':
 						case 'permission_control':
@@ -3551,7 +3561,8 @@ class UserFactory extends Factory {
 							} else {
 								$end_epoch = time();
 							}
-							$data[$variable] = (int)floor( ( ( ( ( ( ( $end_epoch-$this->getHireDate() ) / 60) / 60) / 24 ) / 30 )  / 12 ) );
+							//Staffing agencies may have employees for only a few days, so need to show partial years.
+							$data[$variable] = number_format( ( ( ( ( ( ( $end_epoch-$this->getHireDate() ) / 60) / 60) / 24 ) / 30 )  / 12 ), 2 ); //Years (two decimals)
 							unset($end_epoch);
 							break;
 						default:

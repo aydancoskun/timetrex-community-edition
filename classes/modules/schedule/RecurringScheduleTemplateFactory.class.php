@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11053 $
- * $Id: RecurringScheduleTemplateFactory.class.php 11053 2013-09-27 23:08:52Z ipso $
- * $Date: 2013-09-27 16:08:52 -0700 (Fri, 27 Sep 2013) $
+ * $Revision: 11368 $
+ * $Id: RecurringScheduleTemplateFactory.class.php 11368 2013-11-08 02:15:50Z mikeb $
+ * $Date: 2013-11-07 18:15:50 -0800 (Thu, 07 Nov 2013) $
  */
 
 /**
@@ -608,6 +608,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 	}
 
 	function getShifts( $start_date, $end_date, &$holiday_data = array(), &$branch_options = array(), &$department_options = array(), &$n, &$shifts = array(), &$shifts_index = array(), $open_shift_conflict_index = array(), $permission_children_ids = NULL ) {
+		global $current_user;
 		//Debug::text('Start Date: '. TTDate::getDate('DATE+TIME', $start_date) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 
 		$recurring_schedule_control_start_date = TTDate::strtotime( $this->getColumn('recurring_schedule_control_start_date') );
@@ -664,8 +665,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 					$iso_date_stamp = TTDate::getISODateStamp( PayPeriodScheduleFactory::getShiftAssignedDate( $start_time, $end_time, $this->getColumn('shift_assigned_day_id') ) );
 					//$iso_date_stamp = TTDate::getISODateStamp( $i );
 
-
-					$open_shift_multiplier = ( $this->getColumn('user_id') == 0 ) ? $this->getOpenShiftMultiplier() : 1;
+					$open_shift_multiplier = ( $this->getColumn('user_id') == 0 ) ? ( ( getTTProductEdition() == TT_PRODUCT_COMMUNITY OR $current_user->getCompanyObject()->getProductEdition() == 10 ) ) ? 0 : $this->getOpenShiftMultiplier() : 1;
 					//Debug::text('Open Shift Multiplier: '. $open_shift_multiplier,__FILE__, __LINE__, __METHOD__, 10);
 					for( $x=0; $x < $open_shift_multiplier; $x++ ) {
 						//Check all non-OPEN shifts for conflicts.

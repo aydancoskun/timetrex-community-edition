@@ -52,16 +52,42 @@ class APIStation extends APIFactory {
 	}
 
 	/**
+	 * Returns available Station Type IDs to help determine if KIOSK mode is available or not.
+	 * @return string
+	 */
+	function getAvailableStationTypeIDs() {
+		//Check if the user is a supervisor or not, so we determine if KIOSK mode is available.
+		$retarr = array(28,60); //Single user mode.
+
+		//Check if user is supervisor or not.
+		if ( $this->getPermissionObject()->Check('user','view') OR $this->getPermissionObject()->Check('user','view_child') ) {
+			$sf = TTnew( 'StationFactory' );
+			$station_type_ids = $sf->getOptions('type');
+
+			if ( isset($station_type_ids[61]) ) {
+				$retarr[] = 61; //PC - KIOSK
+			}
+			if ( isset($station_type_ids[65]) ) {
+				$retarr[] = 65; //Tablet - KIOSK
+			}
+		}
+
+		Debug::Arr($retarr, 'Available Station Type IDs: ', __FILE__, __LINE__, __METHOD__,10);
+		return $this->returnHandler( $retarr );
+	}
+
+	/**
 	 * Get or create current PC/Phone station.
 	 * @return string
 	 */
 	function getCurrentStation( $station_id = NULL, $type_id = 10 ) {
-		$retval = StationFactory::getOrCreateStation( $station_id, $this->getCurrentCompanyObject()->getID(), $type_id );
+		$sf = TTNew('StationFactory');
+		$retval = $sf->getOrCreateStation( $station_id, $this->getCurrentCompanyObject()->getID(), $type_id, $this->getPermissionObject(), $this->getCurrentUserObject() );
 
 		if ( is_object($retval) AND isset($retval->Validator) AND $retval->Validator->isValid() == FALSE ) {
 			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $retval->Validator->getErrorsArray(), array('total_records' => 1, 'valid_records' => 0 ) );
 		} else {
-			Debug::text('Returning Station ID: '. $station_id, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text('Returning Station ID: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
 			return $this->returnHandler( $retval );
 		}
 	}

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10749 $
- * $Id: Authentication.class.php 10749 2013-08-26 22:00:42Z ipso $
- * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
+ * $Revision: 11417 $
+ * $Id: Authentication.class.php 11417 2013-11-15 19:54:21Z mikeb $
+ * $Date: 2013-11-15 11:54:21 -0800 (Fri, 15 Nov 2013) $
  */
 
 
@@ -533,7 +533,7 @@ class Authentication {
 		$result = $this->db->GetRow($query, $ph);
 
 		if ( count($result) > 0) {
-			if ( $result['ip_address'] != $this->getIPAddress() ) {
+			if ( PRODUCTION == TRUE AND $result['ip_address'] != $this->getIPAddress() ) {
 				Debug::text('WARNING: IP Address has changed for existing session... Original IP: '. $result['ip_address'] .' Current IP: '. $this->getIPAddress() .' isSSL: '. (int)$this->isSSL(), __FILE__, __LINE__, __METHOD__, 10);
 				//When using SSL, we don't care if the IP address has changed, as the session should still be secure.
 				//This allows sessions to work across load balancing routers, or between mobile/wifi connections, which can change 100% of the IP address (so close matches are useless anyways)

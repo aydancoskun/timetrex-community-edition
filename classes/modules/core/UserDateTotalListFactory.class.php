@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10749 $
- * $Id: UserDateTotalListFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
- * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
+ * $Revision: 11453 $
+ * $Id: UserDateTotalListFactory.class.php 11453 2013-11-19 19:20:51Z mikeb $
+ * $Date: 2013-11-19 11:20:51 -0800 (Tue, 19 Nov 2013) $
  */
 
 /**
@@ -3698,6 +3698,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 																			AND pcf_a.branch_id = a.branch_id
 																			AND pcf_a.department_id = a.department_id
 																			AND pf_a.status_id = 10
+																			AND (pf_a.deleted = 0 AND pcf_a.deleted = 0)
 																		ORDER BY pf_a.time_stamp ASC
 																		LIMIT 1
 																		)
@@ -3710,6 +3711,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 																			AND pcf_a.branch_id = a.branch_id
 																			AND pcf_a.department_id = a.department_id
 																			AND pf_a.status_id = 20
+																			AND (pf_a.deleted = 0 AND pcf_a.deleted = 0)
 																		ORDER BY pf_a.time_stamp DESC
 																		LIMIT 1
 																		)
@@ -3790,8 +3792,6 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 
 		$uf = new UserFactory();
 		$udf = new UserDateFactory();
-		$bf = new BranchFactory();
-		$df = new DepartmentFactory();
 		$ppf_b = new PayPeriodFactory();
 		$uwf = new UserWageFactory();
 		$pcf = new PunchControlFactory();
@@ -3815,8 +3815,8 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 							ppf.end_date as pay_period_end_date,
 							ppf.transaction_date as pay_period_transaction_date,
 							b.date_stamp as date_stamp,
-							bf.name as branch,
-							df.name as department,
+							a.branch_id as branch_id,
+							a.department_id as department_id,
 							a.job_id as job_id,
 							a.job_item_id as job_item_id,
 							a.status_id as status_id,
@@ -3836,9 +3836,6 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 					from	'. $this->getTable() .' as a
 					LEFT JOIN '. $udf->getTable() .' as b ON a.user_date_id = b.id
 					LEFT JOIN '. $uf->getTable() .' as uf ON b.user_id = uf.id
-
-					LEFT JOIN '. $bf->getTable() .' as bf ON a.branch_id = bf.id
-					LEFT JOIN '. $df->getTable() .' as df ON a.department_id = df.id
 
 					LEFT JOIN '. $ppf_b->getTable() .' as ppf ON b.pay_period_id = ppf.id
 
@@ -3909,7 +3906,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		//This isn't needed as it lists every status: AND a.status_id in (10,20,30)
 		$query .= '
 						AND ( a.deleted = 0 AND b.deleted = 0 )
-					group by b.user_id, ppf.id, ppf.start_date, ppf.end_date, ppf.transaction_date, bf.name, df.name, a.job_id, a.job_item_id, b.date_stamp, z.hourly_rate, z.labor_burden_percent, a.status_id, a.type_id, a.over_time_policy_id, a.absence_policy_id, a.premium_policy_id
+					group by b.user_id, ppf.id, ppf.start_date, ppf.end_date, ppf.transaction_date, a.branch_id, a.department_id, a.job_id, a.job_item_id, b.date_stamp, z.hourly_rate, z.labor_burden_percent, a.status_id, a.type_id, a.over_time_policy_id, a.absence_policy_id, a.premium_policy_id
 					';
 
 		$query .= $this->getSortSQL( $order, FALSE );

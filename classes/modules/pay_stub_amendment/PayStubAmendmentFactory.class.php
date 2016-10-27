@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11018 $
- * $Id: PayStubAmendmentFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
- * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
+ * $Revision: 11002 $
+ * $Id: PayStubAmendmentFactory.class.php 11002 2013-09-22 19:10:30Z ipso $
+ * $Date: 2013-09-22 12:10:30 -0700 (Sun, 22 Sep 2013) $
  */
 require_once( 'Numbers/Words.php');
 

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11115 $
- * $Id: PunchFactory.class.php 11115 2013-10-11 18:29:20Z ipso $
- * $Date: 2013-10-11 11:29:20 -0700 (Fri, 11 Oct 2013) $
+ * $Revision: 11418 $
+ * $Id: PunchFactory.class.php 11418 2013-11-15 19:56:08Z mikeb $
+ * $Date: 2013-11-15 11:56:08 -0800 (Fri, 15 Nov 2013) $
  */
 
 /**
@@ -198,6 +198,7 @@ class PunchFactory extends Factory {
 											'other_id5' => FALSE,
 
 											'tainted' => 'Tainted',
+											'has_image' => 'HasImage',
 
 											'deleted' => 'Deleted',
 											);
@@ -210,6 +211,10 @@ class PunchFactory extends Factory {
 
 	function getScheduleObject() {
 		return $this->getGenericObject( 'ScheduleListFactory', $this->getScheduleID(), 'schedule_obj' );
+	}
+
+	function getUserObject() {
+		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
 	}
 
 	function getPreviousPunchObject( $time_stamp ) {
@@ -949,6 +954,31 @@ class PunchFactory extends Factory {
 		return FALSE;
 	}
 
+	function getPositionAccuracy() {
+		if ( isset($this->data['position_accuracy']) ) {
+			return (float)$this->data['position_accuracy'];
+		}
+
+		return FALSE;
+	}
+	function setPositionAccuracy($value) {
+		$value = trim($value);
+
+		//If no position accuracy is sent, leave NULL.
+		if (	$value != ''
+				AND
+				$this->Validator->isNumeric(	'position_accuracy',
+												(int)$value,
+												TTi18n::gettext('Position Accuracy is invalid')
+											) ) {
+			$this->data['position_accuracy'] = number_format( $value, 10 ); //Always use 10 decimal places, this also prevents audit logging 0 vs 0.000000000
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
 	function getScheduleID() {
 		if ( isset($this->tmp_data['schedule_id']) ) {
 			return $this->tmp_data['schedule_id'];
@@ -1522,99 +1552,47 @@ class PunchFactory extends Factory {
 	}
 
 
-	function isImageExists( $company_id = NULL, $punch_id = NULL ) {
-		return file_exists( $this->getImageFileName( $company_id = NULL, $punch_id = NULL ) );
-	}
-	function setImage( $data, $company_id = NULL, $punch_id = NULL ) {
-		if ( $company_id == '' AND is_object( $this->getPunchControlObject() )
-				AND is_object( $this->getPunchControlObject()->getUserDateObject() )
-				AND is_object( $this->getPunchControlObject()->getUserDateObject()->getUserObject() ) ) {
-			$company_id = $this->getPunchControlObject()->getUserDateObject()->getUserObject()->getCompany();
-		}
-
-		if ( $punch_id == '' ) {
-			$punch_id = $this->getID();
-		}
-
-		if ( $company_id == '' ) {
-			return FALSE;
-		}
-
-		if ( $punch_id == '' ) {
-			return FALSE;
-		}
-
-		$this->cleanStoragePath( $company_id, $punch_id );
-
-		$dir = $this->getStoragePath( $company_id, $punch_id );
-		Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__,10);
-		if ( isset($dir) ) {
-			@mkdir($dir, 0700, TRUE);
-
-			return file_put_contents( $this->getImageFileName( $company_id, $punch_id ), $data );
+	function getHasImage() {
+		if ( isset($this->data['has_image']) ) {
+			return $this->fromBool( $this->data['has_image'] );
 		}
 
 		return FALSE;
 	}
-	function getImageFileName( $company_id = NULL, $punch_id = NULL ) {
-		if ( $company_id == '' AND is_object( $this->getPunchControlObject() )
-				AND is_object( $this->getPunchControlObject()->getUserDateObject() )
-				AND is_object( $this->getPunchControlObject()->getUserDateObject()->getUserObject() ) ) {
-			$company_id = $this->getPunchControlObject()->getUserDateObject()->getUserObject()->getCompany();
-		}
-
-		if ( $punch_id == '' ) {
-			$punch_id = $this->getID();
-		}
-
-		if ( $company_id == '' ) {
-			return FALSE;
-		}
-
-		if ( $punch_id == '' ) {
-			return FALSE;
-		}
-
-		//Test for both jpg and png
-		$base_name = $this->getStoragePath( $company_id, $punch_id ) . DIRECTORY_SEPARATOR ;
-		$punch_image_file_name = $base_name . $punch_id . '.png';
-		Debug::Text('Punch Image File Name: '. $punch_image_file_name, __FILE__, __LINE__, __METHOD__,10);
-		return $punch_image_file_name;
-	}
-	function cleanStoragePath( $company_id = NULL, $punch_id = NULL ) {
-		if ( $company_id == '' AND is_object( $this->getPunchControlObject() )
-				AND is_object( $this->getPunchControlObject()->getUserDateObject() )
-				AND is_object( $this->getPunchControlObject()->getUserDateObject()->getUserObject() ) ) {
-			$company_id = $this->getPunchControlObject()->getUserDateObject()->getUserObject()->getCompany();
-		}
-
-		if ( $punch_id == '' ) {
-			$punch_id = $this->getID();
-		}
-
-		if ( $company_id == '' ) {
-			return FALSE;
-		}
-
-		if ( $punch_id == '' ) {
-			return FALSE;
-		}
-
-		$dir = $this->getStoragePath( $company_id, $punch_id ) . DIRECTORY_SEPARATOR;
-
-		if ( $dir != '' ) {
-			if ( $punch_id != '' ) {
-				@unlink( $this->getImageFileName( $company_id, $user_id ) ); //Delete just users photo.
-			}
-		}
+	function setHasImage($bool) {
+		$this->data['has_image'] = $this->toBool($bool);
 
 		return TRUE;
 	}
-	function getStoragePath( $company_id = NULL, $punch_id = NULL ) {
-		if ( $company_id == '' AND is_object( $this->getPunchControlObject() )
-				AND is_object( $this->getPunchControlObject()->getUserDateObject() )
-				AND is_object( $this->getPunchControlObject()->getUserDateObject()->getUserObject() ) ) {
-			$company_id = $this->getPunchControlObject()->getUserDateObject()->getUserObject()->getCompany();
+
+	function isImageExists( $company_id = NULL, $user_id = NULL, $punch_id = NULL ) {
+		if ( $this->getHasImage() AND file_exists( $this->getImageFileName( $company_id, $user_id, $punch_id  ) ) ) {
+			return TRUE;
+		}
+		
+		return FALSE;
+	}
+	function saveImage( $company_id = NULL, $user_id = NULL, $punch_id = NULL ) {
+		$file_name = $this->getImageFileName( $company_id, $user_id, $punch_id );
+		$image_data = $this->getImage();
+		if ( $file_name != '' AND $image_data != '' ) {
+			@mkdir( dirname($file_name), 0700, TRUE);
+			Debug::Text('Saving Image File Name: '. $file_name, __FILE__, __LINE__, __METHOD__,10);
+
+			return file_put_contents( $file_name, $image_data );
+		}
+
+		Debug::Arr($image_data, 'NOT Saving Image File Name: '. $file_name, __FILE__, __LINE__, __METHOD__,10);
+		return FALSE;
+	}
+
+	function getImageFileName( $company_id = NULL, $user_id = NULL, $punch_id = NULL ) {
+		if ( $company_id == '' AND is_object( $this->getUserObject() ) ) {
+			$company_id = $this->getUserObject()->getCompany();
+		}
+
+		if ( $user_id == '' AND $this->getUser() != '' ) {
+			$user_id = $this->getUser();
 		}
 
 		if ( $punch_id == '' ) {
@@ -1622,19 +1600,61 @@ class PunchFactory extends Factory {
 		}
 
 		if ( $company_id == '' ) {
+			Debug::Text('No Company... Company ID: '. $company_id .' User ID: '. $user_id .' Punch ID: '. $punch_id, __FILE__, __LINE__, __METHOD__,10);
+			return FALSE;
+		}
+
+		if ( $user_id == '' ) {
+			Debug::Text('No User... Company ID: '. $company_id .' User ID: '. $user_id .' Punch ID: '. $punch_id, __FILE__, __LINE__, __METHOD__,10);
 			return FALSE;
 		}
 
 		if ( $punch_id == '' ) {
+			Debug::Text('No Punch... Company ID: '. $company_id .' User ID: '. $user_id .' Punch ID: '. $punch_id, __FILE__, __LINE__, __METHOD__,10);
 			return FALSE;
 		}
 
-		$hash = crc32($company_id.$punch_id);
+		$hash = crc32($company_id.$user_id.$punch_id);
 		$hash_dir[0] = substr($hash, 0, 2);
 		$hash_dir[1] = substr($hash, 2, 2);
 		$hash_dir[2] = substr($hash, 4, 2);
 
-		return Environment::getStorageBasePath() . DIRECTORY_SEPARATOR .'punch_images'. DIRECTORY_SEPARATOR . $company_id . DIRECTORY_SEPARATOR . $hash_dir[0] . DIRECTORY_SEPARATOR . $hash_dir[1] . DIRECTORY_SEPARATOR . $hash_dir[2];
+		$base_name = Environment::getStorageBasePath() . DIRECTORY_SEPARATOR .'punch_images'. DIRECTORY_SEPARATOR . $company_id . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . $hash_dir[0] . DIRECTORY_SEPARATOR . $hash_dir[1] . DIRECTORY_SEPARATOR . $hash_dir[2] . DIRECTORY_SEPARATOR;
+
+		$punch_image_file_name = $base_name . $punch_id . '.png';
+		Debug::Text('Punch Image File Name: '. $punch_image_file_name .' Company ID: '. $company_id .' User ID: '. $user_id .' Punch ID: '. $punch_id .' CRC32: '. $hash, __FILE__, __LINE__, __METHOD__,10);
+		return $punch_image_file_name;
+	}
+	function cleanStoragePath( $company_id = NULL, $user_id = NULL, $punch_id = NULL ) {
+		$file_name = $this->getImageFileName( $company_id, $user_id, $punch_id );
+		if ( $file_name != '' ) {
+			Debug::Text('Deleting Image... File Name: '. $file_name, __FILE__, __LINE__, __METHOD__,10);
+			@unlink($file_name);
+		}
+
+		return TRUE;
+	}
+	function getImage( $company_id = NULL, $user_id = NULL, $punch_id = NULL ) {
+		if ( isset($this->tmp_data['image']) AND $this->tmp_data['image'] != '' ) {
+			return $this->tmp_data['image'];
+		} else {
+			$file_name = $this->getImageFileName( $company_id, $user_id, $punch_id );
+			if ( $this->isImageExists() ) {
+				return file_get_contents( $file_name );
+			}
+		}
+
+		return FALSE;
+	}
+	function setImage( $data ) {
+		if ( $data != '' ) {
+			$this->tmp_data['image'] = $data;
+			$this->setHasImage( TRUE );
+			return TRUE;
+		}
+
+		Debug::Text('Not settingg Image data...', __FILE__, __LINE__, __METHOD__,10);
+		return FALSE;
 	}
 
 	function Validate() {
@@ -1720,6 +1740,7 @@ class PunchFactory extends Factory {
 						//$pf->setOriginalTimeStamp( $this->getTimeStamp() ); //set in preSave()
 						$pf->setLongitude( $this->getLongitude() );
 						$pf->setLatitude( $this->getLatitude() );
+						$pf->setPositionAccuracy( $this->getPositionAccuracy() );
 						if ( $pf->isValid() ) {
 							if ( $pf->Save( FALSE ) == TRUE ) {
 								$p_obj->getPunchControlObject()->setEnableCalcTotalTime( TRUE );
@@ -1919,6 +1940,12 @@ class PunchFactory extends Factory {
 				//Something went wrong, rollback the entire transaction.
 				$this->FailTransaction();
 			}
+
+			if ( $this->getHasImage() == TRUE ) {
+				$this->cleanStoragePath();
+			}
+		} else {
+			$this->saveImage();
 		}
 
 		return TRUE;

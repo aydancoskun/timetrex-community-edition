@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11115 $
- * $Id: PermissionFactory.class.php 11115 2013-10-11 18:29:20Z ipso $
- * $Date: 2013-10-11 11:29:20 -0700 (Fri, 11 Oct 2013) $
+ * $Revision: 11283 $
+ * $Id: PermissionFactory.class.php 11283 2013-10-31 16:33:59Z mikeb $
+ * $Date: 2013-10-31 09:33:59 -0700 (Thu, 31 Oct 2013) $
  */
 
 /**
@@ -608,6 +608,7 @@ class PermissionFactory extends Factory {
 																'view_own' => TTi18n::gettext('View Own'),
 																'view_child' => TTi18n::gettext('View Subordinate'),
 																'view' => TTi18n::gettext('View'),
+																'view_open' => TTi18n::gettext('View Open Shifts'),
 																'add' => TTi18n::gettext('Add'),
 																'edit_own' => TTi18n::gettext('Edit Own'),
 																'edit_child' => TTi18n::gettext('Edit Subordinate'),
@@ -1481,13 +1482,17 @@ class PermissionFactory extends Factory {
 		return FALSE;
 	}
 
-	function getPresetPermissions( $preset, $preset_flags = array() ) {
+	function getPresetPermissions( $preset, $preset_flags = array(), $force_system_presets = TRUE ) {
 		$key = Option::getByValue($preset, $this->getOptions('preset') );
 		if ($key !== FALSE) {
 			$preset = $key;
 		}
 
-		$preset_flags[] = 0; //Always add system presets.
+		//Always add system presets when using the Permission wizard, so employees can login and such.
+		//However when upgrading this causes a problem as it resets custom permission groups.
+		if ( $force_system_presets == TRUE ) {
+			$preset_flags[] = 0;
+		}
 		asort($preset_flags);
 
 		Debug::Text('Preset: '. $preset, __FILE__, __LINE__, __METHOD__,10);
@@ -1701,6 +1706,7 @@ class PermissionFactory extends Factory {
 															'schedule' => 	array(
 																				'add' => TRUE,
 																				'view_child' => TRUE,
+																				'view_open' => TRUE,
 																				'edit_child' => TRUE,
 																				'delete_child' => TRUE,
 																				'edit_branch' => TRUE,

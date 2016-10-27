@@ -343,9 +343,9 @@ class TimesheetDetailReport extends Report {
 								if ( strpos($column, '_hourly_rate') !== FALSE ) {
 									$retval[$column] = 'avg';
 								} elseif ( strpos($column, 'min_punch_time_stamp') !== FALSE ) {
-									$retval[$column] = 'min';
+									$retval[$column] = 'min_not_null'; //Need to use the min_not_null otherwise when auto-deduct meal policies exist the IN punch will always be blank.
 								} elseif ( strpos($column, 'max_punch_time_stamp') !== FALSE ) {
-									$retval[$column] = 'max';
+									$retval[$column] = 'max_not_null';
 								} else {
 									$retval[$column] = 'sum';
 								}
@@ -1031,7 +1031,6 @@ class TimesheetDetailReport extends Report {
 			}
 		}
 		//Debug::Arr($this->tmp_data['user_date_total'], 'User Date Total Raw Data: ', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($this->tmp_data['user_date_total'], 'User Date Total Raw Data: ', __FILE__, __LINE__, __METHOD__,10);
 
 		if ( isset($columns['schedule_working']) OR isset($columns['schedule_working_diff']) OR isset($columns['schedule_absence']) ) {
 			$slf = TTnew( 'ScheduleListFactory' );
@@ -1283,30 +1282,18 @@ class TimesheetDetailReport extends Report {
 		$margins = $this->pdf->getMargins();
 		$total_width = $this->pdf->getPageWidth()-$margins['left']-$margins['right'];
 
-		$buffer = ($total_width-200)/10;
-
 		$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(10) );
 		$this->pdf->setFillColor(220,220,220);
 
-		$this->pdf->Cell( $column_widths['line']+$buffer, $line_h, '#', 1, 0, 'C', 1, '', 1 );
-		$this->pdf->Cell( $column_widths['date_stamp']+$buffer, $line_h, TTi18n::gettext('Date'), 1, 0, 'C', 1, '', 1 );
-		$this->pdf->Cell( $column_widths['dow']+$buffer, $line_h, TTi18n::gettext('DoW'), 1, 0, 'C', 1, '', 1 );
-		$this->pdf->Cell( $column_widths['in_punch_time_stamp']+$buffer, $line_h, TTi18n::gettext('In'), 1, 0, 'C', 1, '', 1 );
-		$this->pdf->Cell( $column_widths['out_punch_time_stamp']+$buffer, $line_h, TTi18n::gettext('Out'), 1, 0, 'C', 1, '', 1 );
-		$this->pdf->Cell( $column_widths['worked_time']+$buffer, $line_h, TTi18n::gettext('Worked Time'), 1, 0, 'C', 1, '', 1 );
-		$this->pdf->Cell( $column_widths['regular_time']+$buffer, $line_h, TTi18n::gettext('Regular Time'), 1, 0, 'C', 1, '', 1 );
-		$this->pdf->Cell( $column_widths['over_time']+$buffer, $line_h, TTi18n::gettext('Over Time'), 1, 0, 'C', 1, '', 1 );
-		$this->pdf->Cell( $column_widths['absence_time']+$buffer, $line_h, TTi18n::gettext('Absence Time'), 1, 0, 'C', 1, '', 1 );
-
-		//$this->pdf->MultiCell( $column_widths['line']+$buffer, $line_h, '#' , 1, 'C', 1, 0);
-		//$this->pdf->MultiCell( $column_widths['date_stamp']+$buffer, $line_h, TTi18n::gettext('Date') , 1, 'C', 1, 0);
-		//$this->pdf->MultiCell( $column_widths['dow']+$buffer, $line_h, TTi18n::gettext('DoW') , 1, 'C', 1, 0);
-		//$this->pdf->MultiCell( $column_widths['in_punch_time_stamp']+$buffer, $line_h, TTi18n::gettext('In') , 1, 'C', 1, 0);
-		//$this->pdf->MultiCell( $column_widths['out_punch_time_stamp']+$buffer, $line_h, TTi18n::gettext('Out') , 1, 'C', 1, 0);
-		//$this->pdf->MultiCell( $column_widths['worked_time']+$buffer, $line_h, TTi18n::gettext('Worked Time') , 1, 'C', 1, 0, '','', TRUE, 1 );
-		//$this->pdf->MultiCell( $column_widths['regular_time']+$buffer, $line_h, TTi18n::gettext('Regular Time') , 1, 'C', 1, 0, '','', TRUE, 1 );
-		//$this->pdf->MultiCell( $column_widths['over_time']+$buffer, $line_h, TTi18n::gettext('Over Time') , 1, 'C', 1, 0);
-		//$this->pdf->MultiCell( $column_widths['absence_time']+$buffer, $line_h, TTi18n::gettext('Absence Time') , 1, 'C', 1, 0);
+		$this->pdf->Cell( $column_widths['line'], $line_h, '#', 1, 0, 'C', 1, '', 1 );
+		$this->pdf->Cell( $column_widths['date_stamp'], $line_h, TTi18n::gettext('Date'), 1, 0, 'C', 1, '', 1 );
+		$this->pdf->Cell( $column_widths['dow'], $line_h, TTi18n::gettext('DoW'), 1, 0, 'C', 1, '', 1 );
+		$this->pdf->Cell( $column_widths['in_punch_time_stamp'], $line_h, TTi18n::gettext('In'), 1, 0, 'C', 1, '', 1 );
+		$this->pdf->Cell( $column_widths['out_punch_time_stamp'], $line_h, TTi18n::gettext('Out'), 1, 0, 'C', 1, '', 1 );
+		$this->pdf->Cell( $column_widths['worked_time'], $line_h, TTi18n::gettext('Worked Time'), 1, 0, 'C', 1, '', 1 );
+		$this->pdf->Cell( $column_widths['regular_time'], $line_h, TTi18n::gettext('Regular Time'), 1, 0, 'C', 1, '', 1 );
+		$this->pdf->Cell( $column_widths['over_time'], $line_h, TTi18n::gettext('Over Time'), 1, 0, 'C', 1, '', 1 );
+		$this->pdf->Cell( $column_widths['absence_time'], $line_h, TTi18n::gettext('Absence Time'), 1, 0, 'C', 1, '', 1 );
 		$this->pdf->Ln();
 
 		return TRUE;
@@ -1315,8 +1302,6 @@ class TimesheetDetailReport extends Report {
 	function timesheetDayRow( $format, $columns, $column_widths, $user_data, $data, $prev_data ) {
 		$margins = $this->pdf->getMargins();
 		$total_width = $this->pdf->getPageWidth()-$margins['left']-$margins['right'];
-
-		$buffer = ($total_width-200)/10;
 
 		//Handle page break.
 		$page_break_height = 25;
@@ -1356,7 +1341,7 @@ class TimesheetDetailReport extends Report {
 		}
 
 		if ( $data['time_stamp'] !== '' ) {
-			$default_line_h = $this->_pdf_scaleSize(4);
+			$default_line_h = $this->_pdf_scaleSize(5);
 			$line_h = $default_line_h;
 
 			$total_rows_arr = array();
@@ -1392,9 +1377,9 @@ class TimesheetDetailReport extends Report {
 			$line_h = ( $format == 'pdf_timesheet_detail' ) ? $default_line_h*$max_rows : $default_line_h;
 
 			$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(9) );
-			$this->pdf->Cell( $column_widths['line']+$buffer, $line_h, $this->counter_x , 1, 0, 'C', 1);
-			$this->pdf->Cell( $column_widths['date_stamp']+$buffer, $line_h, TTDate::getDate('DATE', $data['time_stamp'] ), 1, 0, 'C', 1);
-			$this->pdf->Cell( $column_widths['dow']+$buffer, $line_h, date('D', $data['time_stamp']) , 1, 0, 'C', 1);
+			$this->pdf->Cell( $column_widths['line'], $line_h, $this->counter_x , 1, 0, 'C', 1);
+			$this->pdf->Cell( $column_widths['date_stamp'], $line_h, TTDate::getDate('DATE', $data['time_stamp'] ), 1, 0, 'C', 1);
+			$this->pdf->Cell( $column_widths['dow'], $line_h, date('D', $data['time_stamp']) , 1, 0, 'C', 1);
 
 			$pre_punch_x = $this->pdf->getX();
 			$pre_punch_y = $this->pdf->getY();
@@ -1418,8 +1403,8 @@ class TimesheetDetailReport extends Report {
 						$this->pdf->setXY( $pre_punch_x, $punch_y+$default_line_h);
 					}
 
-					$this->pdf->Cell( $column_widths['in_punch_time_stamp']+$buffer, $line_h/$total_punch_rows, TTDate::getDate('TIME', $punch_data[10]['time_stamp'] ) .' '. $punch_data[10]['type_code'], 1, 0, 'C', 1);
-					$this->pdf->Cell( $column_widths['out_punch_time_stamp']+$buffer, $line_h/$total_punch_rows, TTDate::getDate('TIME', $punch_data[20]['time_stamp'] ) .' '. $punch_data[20]['type_code'], 1, 0, 'C', 1);
+					$this->pdf->Cell( $column_widths['in_punch_time_stamp'], $line_h/$total_punch_rows, TTDate::getDate('TIME', $punch_data[10]['time_stamp'] ) .' '. $punch_data[10]['type_code'], 1, 0, 'C', 1);
+					$this->pdf->Cell( $column_widths['out_punch_time_stamp'], $line_h/$total_punch_rows, TTDate::getDate('TIME', $punch_data[20]['time_stamp'] ) .' '. $punch_data[20]['type_code'], 1, 0, 'C', 1);
 
 					$punch_x = $this->pdf->getX();
 					$punch_y = $this->pdf->getY();
@@ -1431,12 +1416,12 @@ class TimesheetDetailReport extends Report {
 
 				$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(9) );
 			} else {
-				$this->pdf->Cell( $column_widths['in_punch_time_stamp']+$buffer, $line_h, TTDate::getDate('TIME', $data['min_punch_time_stamp'] ), 1, 0, 'C', 1);
-				$this->pdf->Cell( $column_widths['out_punch_time_stamp']+$buffer, $line_h, TTDate::getDate('TIME', $data['max_punch_time_stamp'] ), 1, 0, 'C', 1);
+				$this->pdf->Cell( $column_widths['in_punch_time_stamp'], $line_h, TTDate::getDate('TIME', $data['min_punch_time_stamp'] ), 1, 0, 'C', 1);
+				$this->pdf->Cell( $column_widths['out_punch_time_stamp'], $line_h, TTDate::getDate('TIME', $data['max_punch_time_stamp'] ), 1, 0, 'C', 1);
 			}
 
-			$this->pdf->Cell( $column_widths['worked_time']+$buffer , $line_h, TTDate::getTimeUnit( $data['worked_time'] ) , 1, 0, 'C', 1);
-			$this->pdf->Cell( $column_widths['regular_time']+$buffer, $line_h, TTDate::getTimeUnit( $data['regular_time'] ), 1, 0, 'C', 1);
+			$this->pdf->Cell( $column_widths['worked_time'] , $line_h, TTDate::getTimeUnit( $data['worked_time'] ) , 1, 0, 'C', 1);
+			$this->pdf->Cell( $column_widths['regular_time'], $line_h, TTDate::getTimeUnit( $data['regular_time'] ), 1, 0, 'C', 1);
 
 			if ( $format == 'pdf_timesheet_detail' ) {
 				if ( $data['over_time'] > 0 AND isset($data['categorized_time']['over_time_policy']) ) {
@@ -1446,15 +1431,15 @@ class TimesheetDetailReport extends Report {
 					//Count how many absence policy rows there are.
 					$over_time_policy_total_rows = count($data['categorized_time']['over_time_policy']);
 					foreach( $data['categorized_time']['over_time_policy'] as $policy_column => $value ) {
-						$this->pdf->Cell( $column_widths['over_time']+$buffer, $line_h/$total_over_time_rows, $columns[$policy_column].': '.TTDate::getTimeUnit( $data[$policy_column] ), 1, 0, 'C', 1);
+						$this->pdf->Cell( $column_widths['over_time'], $line_h/$total_over_time_rows, $columns[$policy_column].': '.TTDate::getTimeUnit( $data[$policy_column] ), 1, 0, 'C', 1);
 						$this->pdf->setXY( $pre_over_time_x, $this->pdf->getY()+($line_h/$total_over_time_rows) );
 
 						$over_time_x = $this->pdf->getX();
 					}
-					$this->pdf->setXY( $over_time_x+$column_widths['over_time']+$buffer, $pre_punch_y);
+					$this->pdf->setXY( $over_time_x+$column_widths['over_time'], $pre_punch_y);
 					$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(9) );
 				} else {
-					$this->pdf->Cell( $column_widths['over_time']+$buffer, $line_h, TTDate::getTimeUnit( $data['over_time'] ), 1, 0, 'C', 1);
+					$this->pdf->Cell( $column_widths['over_time'], $line_h, TTDate::getTimeUnit( $data['over_time'] ), 1, 0, 'C', 1);
 				}
 
 				if ( $data['absence_time'] > 0 AND isset($data['categorized_time']['absence_policy']) ) {
@@ -1464,18 +1449,18 @@ class TimesheetDetailReport extends Report {
 					//Count how many absence policy rows there are.
 					$absence_policy_total_rows = count($data['categorized_time']['absence_policy']);
 					foreach( $data['categorized_time']['absence_policy'] as $policy_column => $value ) {
-						$this->pdf->Cell( $column_widths['absence_time']+$buffer, $line_h/$total_absence_rows, $columns[$policy_column].': '.TTDate::getTimeUnit( $data[$policy_column] ), 1, 0, 'C', 1);
+						$this->pdf->Cell( $column_widths['absence_time'], $line_h/$total_absence_rows, $columns[$policy_column].': '.TTDate::getTimeUnit( $data[$policy_column] ), 1, 0, 'C', 1);
 						$this->pdf->setXY( $pre_absence_time_x, $this->pdf->getY()+($line_h/$total_absence_rows));
 					}
 
 					$this->pdf->setY( $this->pdf->getY()-($line_h/$total_absence_rows));
 					$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(9) );
 				} else {
-					$this->pdf->Cell( $column_widths['absence_time']+$buffer, $line_h, TTDate::getTimeUnit( $data['absence_time'] ), 1, 0, 'C', 1);
+					$this->pdf->Cell( $column_widths['absence_time'], $line_h, TTDate::getTimeUnit( $data['absence_time'] ), 1, 0, 'C', 1);
 				}
 			} else {
-				$this->pdf->Cell( $column_widths['over_time']+$buffer, $line_h, TTDate::getTimeUnit( $data['over_time'] ), 1, 0, 'C', 1);
-				$this->pdf->Cell( $column_widths['absence_time']+$buffer, $line_h, TTDate::getTimeUnit( $data['absence_time'] ), 1, 0, 'C', 1);
+				$this->pdf->Cell( $column_widths['over_time'], $line_h, TTDate::getTimeUnit( $data['over_time'] ), 1, 0, 'C', 1);
+				$this->pdf->Cell( $column_widths['absence_time'], $line_h, TTDate::getTimeUnit( $data['absence_time'] ), 1, 0, 'C', 1);
 			}
 			$this->pdf->Ln( $line_h );
 
@@ -1515,18 +1500,16 @@ class TimesheetDetailReport extends Report {
 		$margins = $this->pdf->getMargins();
 		$total_width = $this->pdf->getPageWidth()-$margins['left']-$margins['right'];
 
-		$buffer = ($total_width-200)/10;
-
 		$line_h = $this->_pdf_scaleSize(6);
 
 		//Show Week Total.
-		$total_cell_width = $column_widths['line']+$column_widths['date_stamp']+$column_widths['dow']+$column_widths['in_punch_time_stamp']+$column_widths['out_punch_time_stamp']+($buffer*5);
+		$total_cell_width = $column_widths['line']+$column_widths['date_stamp']+$column_widths['dow']+$column_widths['in_punch_time_stamp']+$column_widths['out_punch_time_stamp'];
 		$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(9) );
 		$this->pdf->Cell( $total_cell_width, $line_h, TTi18n::gettext('Week Total').': ', 0, 0, 'R', 0);
-		$this->pdf->Cell( $column_widths['worked_time']+$buffer, $line_h, TTDate::getTimeUnit( $week_totals['worked_time'] ) , 0, 0, 'C', 0);
-		$this->pdf->Cell( $column_widths['regular_time']+$buffer, $line_h, TTDate::getTimeUnit( $week_totals['regular_time'] ), 0, 0, 'C', 0);
-		$this->pdf->Cell( $column_widths['over_time']+$buffer, $line_h, TTDate::getTimeUnit( $week_totals['over_time'] ), 0, 0, 'C', 0);
-		$this->pdf->Cell( $column_widths['absence_time']+$buffer, $line_h, TTDate::getTimeUnit( $week_totals['absence_time'] ), 0, 0, 'C', 0);
+		$this->pdf->Cell( $column_widths['worked_time'], $line_h, TTDate::getTimeUnit( $week_totals['worked_time'] ) , 0, 0, 'C', 0);
+		$this->pdf->Cell( $column_widths['regular_time'], $line_h, TTDate::getTimeUnit( $week_totals['regular_time'] ), 0, 0, 'C', 0);
+		$this->pdf->Cell( $column_widths['over_time'], $line_h, TTDate::getTimeUnit( $week_totals['over_time'] ), 0, 0, 'C', 0);
+		$this->pdf->Cell( $column_widths['absence_time'], $line_h, TTDate::getTimeUnit( $week_totals['absence_time'] ), 0, 0, 'C', 0);
 		$this->pdf->Ln();
 
 		$this->counter_x=0; //Reset to 0, as the counter increases to 1 immediately after.
@@ -1539,18 +1522,16 @@ class TimesheetDetailReport extends Report {
 		$margins = $this->pdf->getMargins();
 		$total_width = $this->pdf->getPageWidth()-$margins['left']-$margins['right'];
 
-		$buffer = ($total_width-200)/10;
-
 		$line_h = $this->_pdf_scaleSize(6);
 
-		$total_cell_width = $column_widths['line']+$column_widths['date_stamp']+$column_widths['dow']+$column_widths['in_punch_time_stamp']+($buffer*4);
+		$total_cell_width = $column_widths['line']+$column_widths['date_stamp']+$column_widths['dow']+$column_widths['in_punch_time_stamp'];
 		$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(9) );
 		$this->pdf->Cell( $total_cell_width, $line_h, '' , 0, 0, 'R', 0);
-		$this->pdf->Cell( $column_widths['out_punch_time_stamp']+$buffer, $line_h, TTi18n::gettext('Overall Total').': ', 'T', 0, 'R', 0);
-		$this->pdf->Cell( $column_widths['worked_time']+$buffer, $line_h, TTDate::getTimeUnit( $totals['worked_time'] ) , 'T', 0, 'C', 0);
-		$this->pdf->Cell( $column_widths['regular_time']+$buffer, $line_h, TTDate::getTimeUnit( $totals['regular_time'] ), 'T', 0, 'C', 0);
-		$this->pdf->Cell( $column_widths['over_time']+$buffer, $line_h, TTDate::getTimeUnit( $totals['over_time'] ), 'T', 0, 'C', 0);
-		$this->pdf->Cell( $column_widths['absence_time']+$buffer, $line_h, TTDate::getTimeUnit( $totals['absence_time'] ), 'T', 0, 'C', 0);
+		$this->pdf->Cell( $column_widths['out_punch_time_stamp'], $line_h, TTi18n::gettext('Overall Total').': ', 'T', 0, 'R', 0);
+		$this->pdf->Cell( $column_widths['worked_time'], $line_h, TTDate::getTimeUnit( $totals['worked_time'] ) , 'T', 0, 'C', 0);
+		$this->pdf->Cell( $column_widths['regular_time'], $line_h, TTDate::getTimeUnit( $totals['regular_time'] ), 'T', 0, 'C', 0);
+		$this->pdf->Cell( $column_widths['over_time'], $line_h, TTDate::getTimeUnit( $totals['over_time'] ), 'T', 0, 'C', 0);
+		$this->pdf->Cell( $column_widths['absence_time'], $line_h, TTDate::getTimeUnit( $totals['absence_time'] ), 'T', 0, 'C', 0);
 		$this->pdf->Ln();
 
 		return TRUE;
@@ -1589,37 +1570,34 @@ class TimesheetDetailReport extends Report {
 		$margins = $this->pdf->getMargins();
 		$total_width = $this->pdf->getPageWidth()-$margins['left']-$margins['right'];
 
-		$buffer = ($total_width-200)/4;
-
 		$line_h = $this->_pdf_scaleSize(6);
 
 		//Signature lines
 		$this->pdf->MultiCell($total_width,5, TTi18n::gettext('By signing this timesheet I hereby certify that the above time accurately and fully reflects the time that').' '. $user_data['first_name'] .' '. $user_data['last_name'] .' '.TTi18n::gettext('worked during the designated period.'), $border, 'L');
 		$this->pdf->Ln( $line_h );
 
-		$this->pdf->Cell(40+$buffer, $line_h, TTi18n::gettext('Employee Signature').':', $border, 0, 'L');
-		$this->pdf->Cell(60+$buffer, $line_h, '_____________________________' , $border, 0, 'C');
-		$this->pdf->Cell(40+$buffer, $line_h, TTi18n::gettext('Supervisor Signature').':', $border, 0, 'R');
-		$this->pdf->Cell(60+$buffer, $line_h, '_____________________________' , $border, 0, 'C');
+		$this->pdf->Cell(40, $line_h, TTi18n::gettext('Employee Signature').':', $border, 0, 'L');
+		$this->pdf->Cell(60, $line_h, '_____________________________' , $border, 0, 'C');
+		$this->pdf->Cell(40, $line_h, TTi18n::gettext('Supervisor Signature').':', $border, 0, 'R');
+		$this->pdf->Cell(60, $line_h, '_____________________________' , $border, 0, 'C');
 
 		$this->pdf->Ln(  $line_h );
-		$this->pdf->Cell(40+$buffer, $line_h, '', $border, 0, 'R');
-		$this->pdf->Cell(60+$buffer, $line_h, $user_data['first_name'] .' '. $user_data['last_name'] , $border, 0, 'C');
+		$this->pdf->Cell(40, $line_h, '', $border, 0, 'R');
+		$this->pdf->Cell(60, $line_h, $user_data['first_name'] .' '. $user_data['last_name'] , $border, 0, 'C');
 
 		$this->pdf->Ln(  $line_h );
-		$this->pdf->Cell(140+($buffer*3), $line_h, '', $border, 0, 'R');
-		$this->pdf->Cell(60+$buffer, $line_h, '_____________________________' , $border, 0, 'C');
+		$this->pdf->Cell(140, $line_h, '', $border, 0, 'R');
+		$this->pdf->Cell(60, $line_h, '_____________________________' , $border, 0, 'C');
 
 		$this->pdf->Ln(  $line_h );
-		$this->pdf->Cell(140+($buffer*3), $line_h, '', $border, 0, 'R');
-		$this->pdf->Cell(60+$buffer, $line_h, TTi18n::gettext('(print name)'), $border, 0, 'C');
+		$this->pdf->Cell(140, $line_h, '', $border, 0, 'R');
+		$this->pdf->Cell(60, $line_h, TTi18n::gettext('(print name)'), $border, 0, 'C');
 
-		if ( isset($data['verified_time_sheet_date']) AND $data['verified_time_sheet_date'] != FALSE ) {
+		if ( isset($data['verified_time_sheet']) AND $data['verified_time_sheet_user_verified'] == TRUE AND $data['verified_time_sheet_user_verified_date'] != '' ) {
 			$this->pdf->Ln( $line_h );
 			$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(10) );
-			$this->pdf->Cell(200+$buffer, $line_h, TTi18n::gettext('TimeSheet electronically signed by').' '. $user_data['first_name'] .' '. $user_data['last_name'] .' '. TTi18n::gettext('on') .' '. TTDate::getDate('DATE+TIME', $data['verified_time_sheet_date'] ), $border, 0, 'C');
+			$this->pdf->Cell(200, $line_h, TTi18n::gettext('TimeSheet electronically signed by').' '. $user_data['first_name'] .' '. $user_data['last_name'] .' '. TTi18n::gettext('on') .' '. TTDate::getDate('DATE+TIME', $data['verified_time_sheet_user_verified_date'] ), $border, 0, 'C');
 		}
-
 
 		return TRUE;
 	}
@@ -1663,7 +1641,7 @@ class TimesheetDetailReport extends Report {
 	function timesheetHandleDayGaps( $start_date, $end_date, $format, $columns, $column_widths, $user_data, $data, $prev_data ) {
 		//Debug::Text('FOUND GAP IN DAYS!', __FILE__, __LINE__, __METHOD__,10);
 		$blank_row_data = FALSE;
-		for( $d=TTDate::getBeginDayEpoch($start_date); $d < $end_date; $d+=86400) {
+		for( $d=TTDate::getMiddleDayEpoch($start_date); $d < $end_date; $d+=86400) {
 			if ( $this->_pdf_checkMaximumPageLimit() == FALSE ) {
 				Debug::Text('Exceeded maximum page count...', __FILE__, __LINE__, __METHOD__,10);
 				//Exceeded maximum pages, stop processing.
@@ -1706,7 +1684,7 @@ class TimesheetDetailReport extends Report {
 									);
 
 			//Don't increase max_i if the last day is a gap. However if there are gaps in the middle of the pay period will cause a problem?
-			if ( $d != TTDate::getBeginDayEpoch($end_date) ) {
+			if ( $d != TTDate::getMiddleDayEpoch($end_date) ) {
 				$this->max_i++;
 			}
 			$this->timesheetDayRow( $format, $columns, $column_widths, $user_data, $blank_row_data, $prev_data ); //Prev data is actually the current data for a blank row.
@@ -1744,11 +1722,12 @@ class TimesheetDetailReport extends Report {
 
 		//Debug::Arr($this->form_data, 'Form Data: ', __FILE__, __LINE__, __METHOD__,10);
 		if ( isset($this->form_data) AND count($this->form_data) > 0 ) {
+			//Start displaying dates/times here. Start with header.
 			//Make sure we sort the form data for printable timesheets.
 			$this->form_data['user_date_total'] = Sort::arrayMultiSort( $this->form_data['user_date_total'], $this->getSortConfig() );
 
 			//Get pay period schedule data for each pay period.
-			$this->pdf = new TTPDF( $this->config['other']['page_orientation'], 'mm', $this->config['other']['page_format'], $this->getUserObject()->getCompanyObject()->getEncoding() );
+			$this->pdf = new TTPDF( 'P', 'mm', 'Letter', $this->getUserObject()->getCompanyObject()->getEncoding() );
 
 			$this->pdf->SetAuthor( APPLICATION_NAME );
 			$this->pdf->SetTitle( $this->title );
@@ -1760,6 +1739,9 @@ class TimesheetDetailReport extends Report {
 			$this->pdf->SetAutoPageBreak(FALSE);
 
 			$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(10) );
+
+			$margins = $this->pdf->getMargins();
+			$total_width = $this->pdf->getPageWidth()-$margins['left']-$margins['right'];
 
 			//Debug::Arr($this->form_data, 'zabUser Raw Data: ', __FILE__, __LINE__, __METHOD__,10);
 
@@ -1795,23 +1777,23 @@ class TimesheetDetailReport extends Report {
 				}
 
 				if ( isset($user_data['first_name']) AND isset($user_data['last_name']) AND isset($user_data['employee_number']) ) {
-					$this->pdf->AddPage( $this->config['other']['page_orientation'], 'Letter' );
+					$this->pdf->AddPage( 'P', 'Letter' );
 
 					$this->timesheetHeader( $user_data );
 
-					//Start displaying dates/times here. Start with header.
+					//Use percentages so it properly scales to landscape mode.
 					$column_widths = array(
-										'line' => 5,
-										'date_stamp' => 20,
-										'dow' => 10,
-										'in_punch_time_stamp' => 20,
-										'out_punch_time_stamp' => 20,
-										'worked_time' => 20,
-										'regular_time' => 20,
-										'over_time' => 40.6,
-										'absence_time' => 45,
+										'line' => $total_width*0.025, //Was: 5
+										'date_stamp' => $total_width*0.10, //Was: 20
+										'dow' => $total_width*0.05, //Was: 10
+										'in_punch_time_stamp' => $total_width*0.10, //Was: 20
+										'out_punch_time_stamp' => $total_width*0.10, //Was: 20
+										'worked_time' => $total_width*0.10, //Was: 20
+										'regular_time' => $total_width*0.10, //Was: 20
+										'over_time' => $total_width*0.20, //Was: 40.6
+										'absence_time' => $total_width*0.225, //Was: 45
 										);
-
+					
 					if ( isset($user_data['data']) AND is_array($user_data['data']) ) {
 						$user_data['data'] = Sort::arrayMultiSort( $user_data['data'],  array( 'time_stamp' => SORT_ASC ) );
 
@@ -1839,11 +1821,11 @@ class TimesheetDetailReport extends Report {
 								$data['start_week_day'] = $this->form_data['pay_period'][$data['pay_period_id']]['start_week_day'];
 
 								$row_date_gap = ($prev_data !== FALSE ) ? (TTDate::getMiddleDayEpoch($data['time_stamp'])-TTDate::getMiddleDayEpoch($prev_data['time_stamp'])) : 0; //Take into account DST by using mid-day epochs.
-								//Debug::Text('Row Gap: '. $row_date_gap, __FILE__, __LINE__, __METHOD__,10);
-								if ( $prev_data !== FALSE AND $row_date_gap > (86400) ) {
+								Debug::Text('Row Gap: '. $row_date_gap, __FILE__, __LINE__, __METHOD__,10);
+								if ( $prev_data !== FALSE AND $row_date_gap > (86400-7200) ) {
 									//Handle gaps between individual days with hours.
-									$prev_data = $this->timesheetHandleDayGaps( $prev_data['time_stamp']+86400, $data['time_stamp'], $format, $columns, $column_widths, $user_data, $data, $prev_data);
-								} elseif ( $this->counter_i == 1 AND (TTDate::getMiddleDayEpoch($data['time_stamp'])-TTDate::getMiddleDayEpoch($data['pay_period_start_date'])) >= 86400 ) {
+									$prev_data = $this->timesheetHandleDayGaps( TTDate::getMiddleDayEpoch($prev_data['time_stamp'])+86400, $data['time_stamp'], $format, $columns, $column_widths, $user_data, $data, $prev_data);
+								} elseif ( $this->counter_i == 1 AND (TTDate::getMiddleDayEpoch($data['time_stamp'])-TTDate::getMiddleDayEpoch($data['pay_period_start_date'])) >= (86400-7200) ) {
 									//Always fill gaps between the pay period start date and the date with time, even if not filtering by pay period.
 									//Handle gaps before the first date with hours is displayed, only when filtering by pay period though.
 									$prev_data = $this->timesheetHandleDayGaps( $data['pay_period_start_date'], $data['time_stamp'], $format, $columns, $column_widths, $user_data, $data, $prev_data );
@@ -1868,7 +1850,7 @@ class TimesheetDetailReport extends Report {
 						if ( isset($data['pay_period_end_date']) AND (TTDate::getMiddleDayEpoch($data['pay_period_end_date'])-TTDate::getMiddleDayEpoch($data['time_stamp'])) >= 86400 ) {
 							//Handle gaps between the last day with hours and the end of the pay period.
 							//Always fill gaps between the pay period end date and the current date with time, even if not filtering by pay period.
-							$this->timesheetHandleDayGaps( $data['time_stamp']+86400, $data['pay_period_end_date'], $format, $columns, $column_widths, $user_data, $data, $prev_data );
+							$this->timesheetHandleDayGaps( TTDate::getMiddleDayEpoch($data['time_stamp'])+86400, $data['pay_period_end_date'], $format, $columns, $column_widths, $user_data, $data, $prev_data );
 						}
 
 						if ( isset($this->timesheet_totals) AND is_array($this->timesheet_totals) ) {

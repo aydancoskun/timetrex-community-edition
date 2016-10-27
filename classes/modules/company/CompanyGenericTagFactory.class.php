@@ -111,6 +111,9 @@ class CompanyGenericTagFactory extends Factory {
 
 										900 => 'product',
 										910 => 'invoice',
+										920 => 'invoice_transaction',
+
+										930 => 'expense',
 
                                         950 => 'job_application',
 									);

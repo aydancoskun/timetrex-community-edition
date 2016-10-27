@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11018 $
- * $Id: PunchControlFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
- * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
+ * $Revision: 11468 $
+ * $Id: PunchControlFactory.class.php 11468 2013-11-20 21:56:56Z mikeb $
+ * $Date: 2013-11-20 13:56:56 -0800 (Wed, 20 Nov 2013) $
  */
 
 /**
@@ -1286,10 +1286,12 @@ class PunchControlFactory extends Factory {
 					$this->old_user_date_ids[] = $user_date_id;
 					$this->old_user_date_ids[] = $this->getOldUserDateID();
 
+					$processed_punch_control_ids = array();
 					foreach( $shift_data['punch_control_ids'] as $punch_control_id ) {
 						$pclf = TTnew( 'PunchControlListFactory' );
 						$pclf->getById( $punch_control_id );
 						if ( $pclf->getRecordCount() == 1 ) {
+							$processed_punch_control_ids[] = $punch_control_id;
 							$pc_obj = $pclf->getCurrent();
 							if ( $pc_obj->getUserDateID() != $user_date_id ) {
 								Debug::Text(' Saving Punch Control ID: '. $punch_control_id .' with new User Date Total ID: '. $user_date_id , __FILE__, __LINE__, __METHOD__,10);
@@ -1303,7 +1305,46 @@ class PunchControlFactory extends Factory {
 							}
 						}
 					}
+					unset($pclf, $pc_obj );
 					//Debug::Arr($this->old_user_date_ids, 'aOld User Date IDs: ', __FILE__, __LINE__, __METHOD__,10);
+
+					//Handle cases where shift times change enough to cause shifts spanning midnight to be reassigned to different days.
+					//For example the punches may look like this:
+					// Nov 12th 1:00PM
+					// Nov 12th 11:30PM
+					// Nov 13th 12:30AM
+					// Nov 13th 2:00AM
+					//Then the Nov12th 11:30PM punch is modified to be say 2PM, the Nov 13th 12:30AM punch should then be moved to 13th rather than combined with the 12th.
+					if ( count($processed_punch_control_ids) > 0 ) {
+						$plf = TTNew('PunchListFactory');
+						$plf->getByUserDateIdAndNotPunchControlId( $user_date_id, $processed_punch_control_ids );
+						if ( $plf->getRecordCount() > 0 ) {
+							foreach( $plf as $p_obj ) {
+								if ( !in_array( $p_obj->getPunchControlID(), $processed_punch_control_ids ) ) {
+									Debug::Text('Punches from other shifts exist on this day still... Punch ID: '. $p_obj->getID(), __FILE__, __LINE__, __METHOD__,10);
+
+									$src_punch_control_obj = $p_obj->getPunchControlObject();
+									$src_punch_control_obj->setPunchObject( $p_obj );
+									if ( $src_punch_control_obj->isValid() == TRUE ) {
+										//We need to calculate new total time for the day and exceptions because we are never guaranteed that the gaps will be filled immediately after
+										//in the case of a drag & drop or something.
+										$src_punch_control_obj->setEnableStrictJobValidation( TRUE );
+										$src_punch_control_obj->setEnableCalcUserDateID( FALSE );
+										$src_punch_control_obj->setEnableCalcTotalTime( TRUE );
+										$src_punch_control_obj->setEnableCalcSystemTotalTime( TRUE );
+										$src_punch_control_obj->setEnableCalcWeeklySystemTotalTime( TRUE );
+										$src_punch_control_obj->setEnableCalcUserDateTotal( TRUE );
+										$src_punch_control_obj->setEnableCalcException( TRUE );
+										if ( $src_punch_control_obj->isValid() == TRUE ) {
+											$src_punch_control_obj->Save();
+											$processed_punch_control_ids[] = $src_punch_control_obj->getID();
+										}
+									}
+								}
+							}
+						}
+						unset($plf, $src_punch_control_obj, $p_obj );
+					}
 
 					return TRUE;
 				} else {
@@ -1426,10 +1467,12 @@ class PunchControlFactory extends Factory {
 					//OR
 					//( $action == 0 AND $src_punch_id != $dst_punch_id AND $src_punch_date == $dst_date ) //Since we have dst_status_id, we don't need to force-move punches even though the user selected copy.
 				) { //Move
-				Debug::text('Deleting original punch...: '. $src_punch_id, __FILE__, __LINE__, __METHOD__,10);
+				Debug::text('Deleting original punch ID: '. $src_punch_id .' User Date: '. TTDate::getDate('DATE', $src_punch_control_obj->getUserDateObject()->getDateStamp() ) .' ID: '. $src_punch_control_obj->getUserDateObject()->getID(), __FILE__, __LINE__, __METHOD__,10);
 
 				$src_punch_obj->setUser( $src_punch_control_obj->getUserDateObject()->getUser() );
 				$src_punch_obj->setDeleted(TRUE);
+
+				$punch_image_data = $src_punch_obj->getImage();
 
 				//These aren't doing anything because they aren't acting on the PunchControl object?
 				$src_punch_obj->setEnableCalcTotalTime( TRUE );
@@ -1438,6 +1481,9 @@ class PunchControlFactory extends Factory {
 				$src_punch_obj->setEnableCalcUserDateTotal( TRUE );
 				$src_punch_obj->setEnableCalcException( TRUE );
 				$src_punch_obj->Save(FALSE); //Keep object around for later.
+
+				//Because punches can switch days, make sure we recalculate the original punch day.
+				//UserDateTotalFactory::reCalculateDay( $src_punch_control_obj->getUserDateObject()->getID(), TRUE, TRUE, TRUE, TRUE );
 			} else {
 				Debug::text('NOT Deleting original punch, either in copy mode or condition is not met...', __FILE__, __LINE__, __METHOD__,10);
 			}
@@ -1463,7 +1509,17 @@ class PunchControlFactory extends Factory {
 					if ( $dst_status_id != '' ) {
 						$src_punch_obj->setStatus( $dst_status_id ); //Change the status to fit in the proper place.
 					}
-					$src_punch_obj->setStation( NULL ); //When drag&drop copying punches, clear the station.
+
+					//When drag&drop copying punches, clear some fields that shouldn't be copied.
+					if ( $action == 0 ) { //Copy
+						$src_punch_obj->setStation( NULL );
+						$src_punch_obj->setHasImage( FALSE );
+						$src_punch_obj->setLongitude( 0 );
+						$src_punch_obj->setLatitude( 0 );
+					} elseif ( isset($punch_image_data) AND $punch_image_data != '' ) {
+						$src_punch_obj->setImage( $punch_image_data );
+					}
+
 					if ( $src_punch_obj->isValid() == TRUE ) {
 						$insert_id = $src_punch_obj->Save( FALSE );
 
@@ -1558,7 +1614,16 @@ class PunchControlFactory extends Factory {
 					$punch_obj->setActualTimeStamp( $new_time_stamp );
 					$punch_obj->setOriginalTimeStamp( $new_time_stamp );
 
-					$src_punch_obj->setStation( NULL ); //When drag&drop copying punches, clear the station.
+					//When drag&drop copying punches, clear some fields that shouldn't be copied.
+					if ( $action == 0 ) { //Copy
+						$src_punch_obj->setStation( NULL );
+						$src_punch_obj->setHasImage( FALSE );
+						$src_punch_obj->setLongitude( 0 );
+						$src_punch_obj->setLatitude( 0 );
+					} elseif ( isset($punch_image_data) AND $punch_image_data != '' ) {
+						$src_punch_obj->setImage( $punch_image_data );
+					}
+					
 					//Need to take into account copying a Out punch and inserting it BEFORE another Out punch in a punch pair.
 					//In this case a split needs to occur, and the status needs to stay the same.
 					//Status also needs to stay the same when overwriting an existing punch.

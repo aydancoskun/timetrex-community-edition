@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11151 $
- * $Id: Environment.class.php 11151 2013-10-14 22:00:30Z ipso $
- * $Date: 2013-10-14 15:00:30 -0700 (Mon, 14 Oct 2013) $
+ * $Revision: 11142 $
+ * $Id: Environment.class.php 11142 2013-10-14 19:53:23Z ipso $
+ * $Date: 2013-10-14 12:53:23 -0700 (Mon, 14 Oct 2013) $
  */
 
 /**

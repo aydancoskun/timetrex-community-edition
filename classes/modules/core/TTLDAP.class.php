@@ -198,8 +198,11 @@ class TTLDAP {
 		return FALSE;
 	}
 
+	//Bind authentication is when a specific bind User/Password is *not* specified,
+	//so we try to initially bind as the username trying to login instead.
+	//However when bind username/password is specified, we can still attempt to bind as the username trying to login after a filter query is run.
 	function isBindAuthentication() {
-		if ( $this->getBindUserName() != '' AND $this->getBindPassword() != '' ) {
+		if ( $this->getBindUserName() == '' ) { //Don't check password, as anonymous binding doesn't have one specified.
 			return TRUE;
 		}
 
@@ -270,8 +273,13 @@ class TTLDAP {
 							$connection_result = $ldap->Connect( $this->getHost(), $this->getBindDN( $user_name ), $password, $this->getBaseDN() );
 						}
 					} else {
-						Debug::Text('LDAP BindUser Authentication Mode...', __FILE__, __LINE__, __METHOD__,10);
-						$connection_result = $ldap->Connect( $this->getHost(), $this->getBindUserName(), $this->getBindPassword(), $this->getBaseDN() );
+						if ( strtolower( $this->getBindUserName() ) == 'anonymous' ) {
+							Debug::Text('LDAP Anonymous Bind Authentication Mode...', __FILE__, __LINE__, __METHOD__,10);
+							$connection_result = $ldap->Connect( $this->getHost(), '', '', $this->getBaseDN() );
+						} else {
+							Debug::Text('LDAP BindUser Authentication Mode...', __FILE__, __LINE__, __METHOD__,10);
+							$connection_result = $ldap->Connect( $this->getHost(), $this->getBindUserName(), $this->getBindPassword(), $this->getBaseDN() );
+						}
 					}
 					Debug::Text('LDAP Connection Result: '. (int)$connection_result, __FILE__, __LINE__, __METHOD__,10);
 				}
@@ -313,8 +321,14 @@ class TTLDAP {
 										//to rebind with the discovered bindAttribute to test the password for cases where it may include a fully qualified domain.
 										//This should avoid the need to suffix the user_name with '@mydomain.com'
 										if ( isset($ldap_data[$this->getBindAttribute()]) AND $ldap_data[$this->getBindAttribute()] != '' ) {
-											//$retval = $ldap->Connect( $this->getHost(), $ldap_data[$this->getBindAttribute()], $password, $this->getBaseDN() );
-											$retval = $ldap->Connect( $this->getHost(), $this->getBindDN( $ldap_data[$this->getBindAttribute()] ), $password, $this->getBaseDN() );
+											try {
+												Debug::Text('aLDAP post-search Bind Authentication Mode...', __FILE__, __LINE__, __METHOD__,10);
+												//Attempt to connect with the raw post-search filter data first, if that fails, try with a full BindDN
+												$retval = $ldap->Connect( $this->getHost(), $ldap_data[$this->getBindAttribute()], $password, $this->getBaseDN() );
+											} catch ( exception $e ) {
+												Debug::Text('bLDAP post-search Bind Authentication Mode...', __FILE__, __LINE__, __METHOD__,10);
+												$retval = $ldap->Connect( $this->getHost(), $this->getBindDN( $ldap_data[$this->getBindAttribute()] ), $password, $this->getBaseDN() );
+											}
 											Debug::Text('LDAP post-search bind connection result: '. (int)$retval, __FILE__, __LINE__, __METHOD__,10);
 										} else {
 											Debug::Text('BindAttribute not found in users LDAP record...', __FILE__, __LINE__, __METHOD__,10);

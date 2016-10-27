@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 4104 $
- * $Id: PermissionUserFactory.class.php 4104 2011-01-04 19:04:05Z ipso $
- * $Date: 2011-01-04 11:04:05 -0800 (Tue, 04 Jan 2011) $
+ * $Revision: 11414 $
+ * $Id: PermissionUserFactory.class.php 11414 2013-11-15 19:53:13Z mikeb $
+ * $Date: 2013-11-15 11:53:13 -0800 (Fri, 15 Nov 2013) $
  */
 
 /**
@@ -47,6 +47,15 @@ class PermissionUserFactory extends Factory {
 	protected $pk_sequence_name = 'permission_user_id_seq'; //PK Sequence name
 
 	var $user_obj = NULL;
+	var $permission_control_obj = NULL;
+
+    function getPermissionControlObject() {
+        return $this->getGenericObject( 'PermissionControlListFactory', $this->getPermissionControl(), 'permission_control_obj' );
+    }
+
+    function getUserObject() {
+        return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
+    }
 
 	function getPermissionControl() {
 		return $this->data['permission_control_id'];
@@ -70,20 +79,6 @@ class PermissionUserFactory extends Factory {
 		return FALSE;
 	}
 
-	function getUserObject() {
-		if ( is_object($this->user_obj) ) {
-			return $this->user_obj;
-		} else {
-			$ulf = TTnew( 'UserListFactory' );
-			$ulf->getById( $this->getUser() );
-			if ( $ulf->getRecordCount() == 1 ) {
-				$this->user_obj = $ulf->getCurrent();
-				return $this->user_obj;
-			}
-
-			return FALSE;
-		}
-	}
 	function isUniqueUser($id) {
 		$pclf = TTnew( 'PermissionControlListFactory' );
 

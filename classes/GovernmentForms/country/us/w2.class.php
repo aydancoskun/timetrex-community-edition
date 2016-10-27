@@ -1117,7 +1117,8 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 			$retval = $this->padLine( $this->_compileRA() );
 			$retval .= $this->padLine( $this->_compileRE() );
 
-			$total = new stdClass();
+			$total = Misc::preSetArrayValues( new stdClass(), array('total','l1','l2','l3','l4','l5','l6','l7','l10','l12d','l12e','l12f','l12g','l12h','l12w','l12aa','l12bb','l12dd'), 0 );
+
 			$i=0;
 			foreach( $records as $w2_data ) {
 				$this->arrayToObject( $w2_data ); //Convert record array to object

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11018 $
- * $Id: PremiumPolicyListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
- * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
+ * $Revision: 11545 $
+ * $Id: PremiumPolicyListFactory.class.php 11545 2013-11-29 02:04:30Z mikeb $
+ * $Date: 2013-11-28 18:04:30 -0800 (Thu, 28 Nov 2013) $
  */
 
 /**
@@ -259,7 +259,7 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 			}
 		}
 
-		$additional_order_fields = array('type_id');
+		$additional_order_fields = array('type_id', 'in_use');
 
 		$sort_column_aliases = array(
 									 'type' => 'type_id',
@@ -271,11 +271,11 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 			$order = array( 'type_id' => 'asc', 'name' => 'asc');
 			$strict = FALSE;
 		} else {
-			//Always try to order by status first so INACTIVE employees go to the bottom.
+			//Always try to order by type.
 			if ( !isset($order['type_id']) ) {
-				$order = Misc::prependArray( array('type_id' => 'asc'), $order );
+				$order['type_id'] = 'asc';
 			}
-			//Always sort by last name,first name after other columns
+			//Always sort by name after other columns
 			if ( !isset($order['name']) ) {
 				$order['name'] = 'asc';
 			}
@@ -285,6 +285,9 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
 
 		$uf = new UserFactory();
+		$pgf = new PolicyGroupFactory();
+		$cgmf = new CompanyGenericMapFactory();
+		$spf = new SchedulePolicyFactory();
 
 		$ph = array(
 					'company_id' => $company_id,
@@ -292,6 +295,15 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 
 		$query = '
 					select 	a.*,
+							(
+								CASE WHEN EXISTS ( select 1 from '. $cgmf->getTable() .' as w, '. $pgf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 120 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0 )
+									THEN 1
+									ELSE
+										CASE WHEN EXISTS ( select 1 from '. $cgmf->getTable() .' as w, '. $spf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 125 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0 )
+										THEN 1 ELSE 0
+										END
+								END
+							) as in_use,
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
 							y.last_name as created_by_last_name,

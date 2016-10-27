@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11053 $
- * $Id: UserDateTotalFactory.class.php 11053 2013-09-27 23:08:52Z ipso $
- * $Date: 2013-09-27 16:08:52 -0700 (Fri, 27 Sep 2013) $
+ * $Revision: 11310 $
+ * $Id: UserDateTotalFactory.class.php 11310 2013-11-04 23:50:40Z mikeb $
+ * $Date: 2013-11-04 15:50:40 -0800 (Mon, 04 Nov 2013) $
  */
 
 /**
@@ -1170,7 +1170,8 @@ class UserDateTotalFactory extends Factory {
 						//FIXME: Set flag that tells smartRecalculate to calculate the next week or not.
 						$week_modifier = 0; //0=Even, 1=Odd
 						if ( is_object( $this->getUserDateObject()->getPayPeriodObject() ) ) {
-							$week_modifier = TTDate::getWeek($this->getUserDateObject()->getPayPeriodObject()->getStartDate(), $start_week_day_id) % 2;
+							$week_modifier = TTDate::getWeek( TTDate::getMiddleDayEpoch( $this->getUserDateObject()->getPayPeriodObject()->getStartDate() ), $start_week_day_id) % 2; //Due to DST, use getMiddleDayEpoch()
+							//Debug::text(' Pay Period Start Date: '. $this->getUserDateObject()->getPayPeriodObject()->getStartDate() .' Start Week Day: '. $start_week_day_id, __FILE__, __LINE__, __METHOD__, 10);
 						}
 						$current_week_modifier = TTDate::getWeek( $this->getUserDateObject()->getDateStamp(), $start_week_day_id ) % 2;
 						Debug::text(' Current Week: '. $current_week_modifier .' Week Modifier: '. $week_modifier, __FILE__, __LINE__, __METHOD__, 10);

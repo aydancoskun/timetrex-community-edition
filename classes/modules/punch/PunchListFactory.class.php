@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11115 $
- * $Id: PunchListFactory.class.php 11115 2013-10-11 18:29:20Z ipso $
- * $Date: 2013-10-11 11:29:20 -0700 (Fri, 11 Oct 2013) $
+ * $Revision: 11468 $
+ * $Id: PunchListFactory.class.php 11468 2013-11-20 21:56:56Z mikeb $
+ * $Date: 2013-11-20 13:56:56 -0800 (Wed, 20 Nov 2013) $
  */
 
 /**
@@ -437,6 +437,35 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 					where	a.punch_control_id = b.id
 						AND	b.user_date_id = ?
 						AND a.id != ?
+						AND ( a.deleted = 0 AND b.deleted=0 )
+					ORDER BY a.time_stamp asc, a.status_id desc, a.punch_control_id asc
+					';
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getByUserDateIdAndNotPunchControlId($user_date_id, $punch_control_id, $order = NULL) {
+		if ( $user_date_id == '') {
+			return FALSE;
+		}
+
+		$uf = new UserFactory();
+		$pcf = new PunchControlFactory();
+
+		$ph = array(
+					'user_date_id' => $user_date_id,
+					);
+
+		$query = '
+					select 	a.*
+					from 	'. $this->getTable() .' as a,
+							'. $pcf->getTable() .' as b
+					where	a.punch_control_id = b.id
+						AND	b.user_date_id = ?
+						AND a.punch_control_id not in ('. $this->getListSQL($punch_control_id, $ph) .')
 						AND ( a.deleted = 0 AND b.deleted=0 )
 					ORDER BY a.time_stamp asc, a.status_id desc, a.punch_control_id asc
 					';
@@ -2354,6 +2383,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 							a.longitude,
 							a.latitude,
 							a.transfer,
+							a.has_image,
 
 							a.created_by as created_by,
 							a.created_date as created_date,

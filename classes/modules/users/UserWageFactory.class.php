@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11018 $
- * $Id: UserWageFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
- * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
+ * $Revision: 11413 $
+ * $Id: UserWageFactory.class.php 11413 2013-11-15 19:49:41Z mikeb $
+ * $Date: 2013-11-15 11:49:41 -0800 (Fri, 15 Nov 2013) $
  */
 
 /**
@@ -146,21 +146,10 @@ class UserWageFactory extends Factory {
 			return $variable_function_map;
 	}
 
-	function getUserObject() {
-		if ( is_object($this->user_obj) ) {
-			return $this->user_obj;
-		} else {
-			$ulf = TTnew( 'UserListFactory' );
-			$ulf->getById( $this->getUser() );
-			if ( $ulf->getRecordCount() == 1 ) {
-				$this->user_obj = $ulf->getCurrent();
-				return $this->user_obj;
-			}
-
-			return FALSE;
-		}
-	}
-
+    function getUserObject() {
+        return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
+    }
+	
 	function getWageGroupObject() {
 		if ( is_object($this->wage_group_obj) ) {
 			return $this->wage_group_obj;

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11053 $
- * $Id: RecurringScheduleTemplateListFactory.class.php 11053 2013-09-27 23:08:52Z ipso $
- * $Date: 2013-09-27 16:08:52 -0700 (Fri, 27 Sep 2013) $
+ * $Revision: 11051 $
+ * $Id: RecurringScheduleTemplateListFactory.class.php 11051 2013-09-27 22:05:40Z ipso $
+ * $Date: 2013-09-27 15:05:40 -0700 (Fri, 27 Sep 2013) $
  */
 
 /**

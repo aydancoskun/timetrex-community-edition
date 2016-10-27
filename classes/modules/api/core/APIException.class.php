@@ -104,6 +104,7 @@ class APIException extends APIFactory {
 		}
 
 		$blf = TTnew( 'ExceptionListFactory' );
+		if ( DEPLOYMENT_ON_DEMAND == TRUE ) { $blf->setQueryStatementTimeout( 60000 ); }
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {

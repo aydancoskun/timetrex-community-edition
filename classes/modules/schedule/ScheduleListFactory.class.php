@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11115 $
- * $Id: ScheduleListFactory.class.php 11115 2013-10-11 18:29:20Z ipso $
- * $Date: 2013-10-11 11:29:20 -0700 (Fri, 11 Oct 2013) $
+ * $Revision: 11512 $
+ * $Id: ScheduleListFactory.class.php 11512 2013-11-26 20:54:04Z mikeb $
+ * $Date: 2013-11-26 12:54:04 -0800 (Tue, 26 Nov 2013) $
  */
 
 /**
@@ -1189,7 +1189,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 			}
 		}
 
-		$additional_order_fields = array('schedule_policy_id', 'schedule_policy', 'first_name', 'last_name', 'user_status_id', 'group_id', 'group', 'title_id', 'title', 'default_branch_id', 'default_branch', 'default_department_id', 'default_department', 'total_time', 'date_stamp', 'pay_period_id', );
+		$additional_order_fields = array('schedule_policy_id', 'schedule_policy', 'absence_policy', 'first_name', 'last_name', 'user_status_id', 'group_id', 'group', 'title_id', 'title', 'default_branch_id', 'default_branch', 'default_department_id', 'default_department', 'total_time', 'date_stamp', 'pay_period_id', );
 
 		$sort_column_aliases = array(
 									 'first_name' => 'd.first_name',
@@ -1302,6 +1302,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 							a.note as note,
 
 							i.name as schedule_policy,
+							apf.name as absence_policy,
 
 							c.user_id as user_id,
 							c.date_stamp as date_stamp,
@@ -1358,6 +1359,8 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 
 							LEFT JOIN '. $bf->getTable() .' as j ON ( a.branch_id = j.id AND j.deleted = 0)
 							LEFT JOIN '. $df->getTable() .' as k ON ( a.department_id = k.id AND k.deleted = 0)
+
+							LEFT JOIN '. $apf->getTable() .' as apf ON a.absence_policy_id = apf.id
 
 							LEFT JOIN '. $uwf->getTable() .' as m ON m.id = (select m.id
 																		from '. $uwf->getTable() .' as m
@@ -1420,6 +1423,10 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		if ( isset($filter_data['schedule_policy_id']) AND isset($filter_data['schedule_policy_id'][0]) AND !in_array(-1, (array)$filter_data['schedule_policy_id']) ) {
 			$query  .=	' AND a.schedule_policy_id in ('. $this->getListSQL($filter_data['schedule_policy_id'], $ph) .') ';
 		}
+		if ( isset($filter_data['absence_policy_id']) AND isset($filter_data['absence_policy_id'][0]) AND !in_array(-1, (array)$filter_data['absence_policy_id']) ) {
+			$query  .=	' AND a.absence_policy_id in ('. $this->getListSQL($filter_data['absence_policy_id'], $ph) .') ';
+		}
+
 		if ( isset($filter_data['pay_period_id']) AND isset($filter_data['pay_period_id'][0]) AND !in_array(-1, (array)$filter_data['pay_period_id']) ) {
 			$query .= 	' AND c.pay_period_id in ('. $this->getListSQL($filter_data['pay_period_id'], $ph) .') ';
 		}

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11115 $
- * $Id: PayStubEntryListFactory.class.php 11115 2013-10-11 18:29:20Z ipso $
- * $Date: 2013-10-11 11:29:20 -0700 (Fri, 11 Oct 2013) $
+ * $Revision: 11363 $
+ * $Id: PayStubEntryListFactory.class.php 11363 2013-11-07 23:38:12Z mikeb $
+ * $Date: 2013-11-07 15:38:12 -0800 (Thu, 07 Nov 2013) $
  */
 
 /**
@@ -1267,7 +1267,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		return $this;
 	}
 
-	function getPayPeriodReportByUserIdAndEntryNameIdAndStartDateAndEndDate($id, $entry_name_id, $start_date = NULL, $end_date = NULL, $exclude_id = NULL, $where = NULL, $order = NULL) {
+	function getPayPeriodReportByUserIdAndEntryNameIdAndStartDateAndEndDate($id, $entry_name_id, $start_date = NULL, $end_date = NULL, $exclude_id = NULL, $exclude_ytd_adjustment = FALSE, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -1283,7 +1283,8 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		if ( $end_date == '') {
 			$end_date = TTDate::getTime();
 		}
-
+		
+		$psaf = new PayStubAmendmentFactory();
 		$ppf = new PayPeriodFactory();
 		$ppsuf = new PayPeriodScheduleUserFactory();
 		$psf = new PayStubFactory();
@@ -1296,7 +1297,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 					'user_id' => $id,
 					'exclude_id' => (int)$exclude_id,
 					);
-
+		
 		//Include pay periods with no pay stubs for ROEs.
 		//If the company has multiple pay period schedules, this will include pay periods from all schedules, even if the employee was never assigned
 		//to a different one. Therefore only include pay periods that have at least one user_date entry assigned to it.
@@ -1313,18 +1314,24 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 						LEFT JOIN 	(
 										select 	b.user_id as user_id,
 												b.pay_period_id as pay_period_id,
-												sum(amount) as amount,
-												sum(units) as units
-										from	'. $this->getTable() .' as a,
-												'. $psf->getTable() .' as b,
-												'. $ppf->getTable() .' as c
-										where	a.pay_stub_id = b.id
-											AND b.pay_period_id = c.id
-											AND c.start_date >= ?
+												sum(a.amount) as amount,
+												sum(a.units) as units
+										from	'. $this->getTable() .' as a
+												LEFT JOIN '. $psf->getTable() .' as b ON ( a.pay_stub_id = b.id )
+												LEFT JOIN '. $ppf->getTable() .' as c ON ( b.pay_period_id = c.id )
+												LEFT JOIN '. $psaf->getTable() .' as d ON a.pay_stub_amendment_id = d.id
+										where
+											c.start_date >= ?
 											AND c.start_date < ?
 											AND b.user_id = ?
 											AND a.id != ?
-											AND	a.pay_stub_entry_name_id in ('. $this->getListSQL($entry_name_id, $ph) .')
+											AND	a.pay_stub_entry_name_id in ('. $this->getListSQL($entry_name_id, $ph) .') ';
+
+		if ( isset($exclude_ytd_adjustment) AND (bool)$exclude_ytd_adjustment == TRUE ) {
+			$query .= ' AND ( d.ytd_adjustment is NULL OR d.ytd_adjustment = 0 )';
+		}
+
+		$query .= '
 											AND ( a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0 )
 										group by b.user_id,b.pay_period_id
 									) as tmp ON y.id = tmp.user_id AND x.id = tmp.pay_period_id ';
@@ -1342,6 +1349,8 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, FALSE );
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__,10);
 
 		$this->ExecuteSQL( $query, $ph );
 

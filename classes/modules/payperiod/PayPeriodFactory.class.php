@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11053 $
- * $Id: PayPeriodFactory.class.php 11053 2013-09-27 23:08:52Z ipso $
- * $Date: 2013-09-27 16:08:52 -0700 (Fri, 27 Sep 2013) $
+ * $Revision: 11219 $
+ * $Id: PayPeriodFactory.class.php 11219 2013-10-22 16:18:05Z mikeb $
+ * $Date: 2013-10-22 09:18:05 -0700 (Tue, 22 Oct 2013) $
  */
 
 /**
@@ -359,7 +359,6 @@ class PayPeriodFactory extends Factory {
 
 			) {
 
-			//$this->data['start_date'] = $epoch;
 			$this->data['start_date'] = $epoch;
 
 			return TRUE;

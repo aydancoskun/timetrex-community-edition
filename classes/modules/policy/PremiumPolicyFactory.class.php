@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11018 $
- * $Id: PremiumPolicyFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
- * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
+ * $Revision: 11545 $
+ * $Id: PremiumPolicyFactory.class.php 11545 2013-11-29 02:04:30Z mikeb $
+ * $Date: 2013-11-28 18:04:30 -0800 (Thu, 28 Nov 2013) $
  */
 
 /**
@@ -134,6 +134,8 @@ class PremiumPolicyFactory extends Factory {
 										'-1040-rate' => TTi18n::gettext('Rate'),
 										'-1050-accrual_rate' => TTi18n::gettext('Accrual Rate'),
 
+										'-1900-in_use' => TTi18n::gettext('In Use'),
+
 										'-2000-created_by' => TTi18n::gettext('Created By'),
 										'-2010-created_date' => TTi18n::gettext('Created Date'),
 										'-2020-updated_by' => TTi18n::gettext('Updated By'),
@@ -228,6 +230,7 @@ class PremiumPolicyFactory extends Factory {
 										'job_item' => 'JobItem',
 										'job_item_selection_type_id' => 'JobItemSelectionType',
 										'job_item_selection_type' => FALSE,
+										'in_use' => FALSE,
 										'deleted' => 'Deleted',
 										);
 		return $variable_function_map;
@@ -1792,7 +1795,7 @@ class PremiumPolicyFactory extends Factory {
 			//Check if end timestamp is before start, if it is, move end timestamp to next day.
 			if ( $end_time_stamp < $start_time_stamp ) {
 				Debug::text(' Moving End TimeStamp to next day.', __FILE__, __LINE__, __METHOD__, 10);
-				$end_time_stamp = TTDate::getTimeLockedDate( $this->getEndTime(), $end_time_stamp + 86400);
+				$end_time_stamp = TTDate::getTimeLockedDate( $this->getEndTime(), TTDate::getMiddleDayEpoch($end_time_stamp)+86400 ); //Due to DST, jump ahead 1.5 days, then jump back to the time locked date.
 			}
 
 			//Handle the last second of the day, so punches that span midnight like 11:00PM to 6:00AM get a full 1 hour for the time before midnight, rather than 59mins and 59secs.
@@ -1802,7 +1805,7 @@ class PremiumPolicyFactory extends Factory {
 			}
 
 			$retval = 0;
-			for( $i=($start_time_stamp-86400); $i <= ($end_time_stamp+86400); $i+=86400 ) {
+			for( $i=(TTDate::getMiddleDayEpoch($start_time_stamp)-86400); $i <= (TTDate::getMiddleDayEpoch($end_time_stamp)+86400); $i+=86400 ) {
 				//Due to DST, we need to make sure we always lock time of day so its the exact same. Without this it can walk by one hour either way.
 				$tmp_start_time_stamp = TTDate::getTimeLockedDate( $this->getStartTime(), $i);
 				$tmp_end_time_stamp = TTDate::getTimeLockedDate( $end_time_stamp, $tmp_start_time_stamp + ($end_time_stamp - $start_time_stamp) ); //Use $end_time_stamp as it can be modified above due to being near midnight
@@ -1823,14 +1826,14 @@ class PremiumPolicyFactory extends Factory {
 	function isActiveTime( $in_epoch, $out_epoch, $user_id ) {
 		Debug::text(' Checking for Active Time with: In: '. TTDate::getDate('DATE+TIME', $in_epoch) .' Out: '. TTDate::getDate('DATE+TIME', $out_epoch), __FILE__, __LINE__, __METHOD__, 10);
 
-		Debug::text(' Raw Start TimeStamp('.$this->getStartTime(TRUE).'): '. TTDate::getDate('DATE+TIME', $this->getStartTime() ) .' Raw End TimeStamp: '. TTDate::getDate('DATE+TIME', $this->getEndTime() )  , __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text(' PP Raw Start TimeStamp('.$this->getStartTime(TRUE).'): '. TTDate::getDate('DATE+TIME', $this->getStartTime() ) .' Raw End TimeStamp: '. TTDate::getDate('DATE+TIME', $this->getEndTime() )  , __FILE__, __LINE__, __METHOD__, 10);
 		$start_time_stamp = TTDate::getTimeLockedDate( $this->getStartTime(), $in_epoch); //Base the end time on day of the in_epoch.
 		$end_time_stamp = TTDate::getTimeLockedDate( $this->getEndTime(), $in_epoch); //Base the end time on day of the in_epoch.
 
 		//Check if end timestamp is before start, if it is, move end timestamp to next day.
 		if ( $end_time_stamp < $start_time_stamp ) {
 			Debug::text(' Moving End TimeStamp to next day.', __FILE__, __LINE__, __METHOD__, 10);
-			$end_time_stamp = TTDate::getTimeLockedDate( $this->getEndTime(), $end_time_stamp + 86400);
+			$end_time_stamp = TTDate::getTimeLockedDate( $this->getEndTime(), TTDate::getMiddleDayEpoch($end_time_stamp)+86400 ); //Due to DST, jump ahead 1.5 days, then jump back to the time locked date.
 		}
 
 		Debug::text(' Start TimeStamp: '. TTDate::getDate('DATE+TIME', $start_time_stamp) .' End TimeStamp: '. TTDate::getDate('DATE+TIME', $end_time_stamp)  , __FILE__, __LINE__, __METHOD__, 10);
@@ -1842,7 +1845,7 @@ class PremiumPolicyFactory extends Factory {
 		} else {
 			//If the premium policy start/end time spans midnight, there could be multiple windows to check
 			//where the premium policy applies, make sure we check all windows.
-			for( $i=($start_time_stamp-86400); $i <= ($end_time_stamp+86400); $i+=86400 ) {
+			for( $i=(TTDate::getMiddleDayEpoch($start_time_stamp)-86400); $i <= (TTDate::getMiddleDayEpoch($end_time_stamp)+86400); $i+=86400 ) {
 				$tmp_start_time_stamp = TTDate::getTimeLockedDate( $this->getStartTime(), $i);
 				$tmp_end_time_stamp = TTDate::getTimeLockedDate( $this->getEndTime(), $tmp_start_time_stamp + ($end_time_stamp - $start_time_stamp) );
 
@@ -1860,10 +1863,11 @@ class PremiumPolicyFactory extends Factory {
 						//When IncludeHolidayType != 10 this trigger here.
 						Debug::text(' No Start/End Date/Time!', __FILE__, __LINE__, __METHOD__, 10);
 						return TRUE;
+					} else {
+						//Debug::text(' No match...', __FILE__, __LINE__, __METHOD__, 10);
 					}
-
 				} else {
-					Debug::text(' Not Active on this day: '. TTDate::getDate('DATE+TIME', $i), __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text(' Not Active on this day: Start: '. TTDate::getDate('DATE+TIME', $tmp_start_time_stamp) .' End: '. TTDate::getDate('DATE+TIME', $tmp_end_time_stamp), __FILE__, __LINE__, __METHOD__, 10);
 				}
 			}
 		}
@@ -2054,6 +2058,9 @@ class PremiumPolicyFactory extends Factory {
 
 					$function = 'get'.$function_stub;
 					switch( $variable ) {
+						case 'in_use':
+							$data[$variable] = $this->getColumn( $variable );
+							break;
 						case 'type':
 						case 'pay_type':
 						case 'branch_selection_type':

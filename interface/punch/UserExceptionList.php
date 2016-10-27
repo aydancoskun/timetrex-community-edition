@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11121 $
- * $Id: UserExceptionList.php 11121 2013-10-12 04:36:49Z ipso $
- * $Date: 2013-10-11 21:36:49 -0700 (Fri, 11 Oct 2013) $
+ * $Revision: 11119 $
+ * $Id: UserExceptionList.php 11119 2013-10-12 04:35:03Z ipso $
+ * $Date: 2013-10-11 21:35:03 -0700 (Fri, 11 Oct 2013) $
  */
 require_once('../../includes/global.inc.php');
 require_once(Environment::getBasePath() .'includes/Interface.inc.php');

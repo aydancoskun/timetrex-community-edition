@@ -84,9 +84,10 @@ class InstallSchema_1058A extends InstallSchema_Base {
 								   foreach( $preset_options as $preset => $preset_name  ) {
 									   // preset: 10, 18, 20, 30, 40
 									   if ( $level == $preset_level_options[$preset] ) {
-										   $permission_arr = $pf->getPresetPermissions( $preset, array(70, 75, 80) ); //Module: Human Resources
-										   //Debug::Arr( $permission_arr, ' New Permissions: ', __FILE__, __LINE__, __METHOD__,10);
-										   $pc_obj->setPermission($permission_arr, $old_permission_arr);
+											//This automatically includes system presets (user, reports, etc...) so it can override customers custom permissions
+											$permission_arr = $pf->getPresetPermissions( $preset, array(70, 75, 80) ); //Module: Human Resources.
+											//Debug::Arr( $permission_arr, ' New Permissions: ', __FILE__, __LINE__, __METHOD__,10);
+											$pc_obj->setPermission($permission_arr, $old_permission_arr);
 									   }
 								   }
 								}

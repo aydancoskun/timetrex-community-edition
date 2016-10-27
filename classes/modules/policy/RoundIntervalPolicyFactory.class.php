@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11115 $
- * $Id: RoundIntervalPolicyFactory.class.php 11115 2013-10-11 18:29:20Z ipso $
- * $Date: 2013-10-11 11:29:20 -0700 (Fri, 11 Oct 2013) $
+ * $Revision: 11545 $
+ * $Id: RoundIntervalPolicyFactory.class.php 11545 2013-11-29 02:04:30Z mikeb $
+ * $Date: 2013-11-28 18:04:30 -0800 (Thu, 28 Nov 2013) $
  */
 
 /**
@@ -96,6 +96,8 @@ class RoundIntervalPolicyFactory extends Factory {
 										'-1030-name' => TTi18n::gettext('Name'),
 										'-1030-round_interval' => TTi18n::gettext('Interval'),
 
+										'-1900-in_use' => TTi18n::gettext('In Use'),
+
 										'-2000-created_by' => TTi18n::gettext('Created By'),
 										'-2010-created_date' => TTi18n::gettext('Created Date'),
 										'-2020-updated_by' => TTi18n::gettext('Updated By'),
@@ -141,6 +143,7 @@ class RoundIntervalPolicyFactory extends Factory {
 										'round_interval' => 'Interval',
 										'grace' => 'Grace',
 										'strict' => 'Strict',
+										'in_use' => FALSE,
 										'deleted' => 'Deleted',
 										);
 		return $variable_function_map;
@@ -429,6 +432,9 @@ class RoundIntervalPolicyFactory extends Factory {
 
 					$function = 'get'.$function_stub;
 					switch( $variable ) {
+						case 'in_use':
+							$data[$variable] = $this->getColumn( $variable );
+							break;
 						case 'punch_type':
 						case 'round_type':
 							$function = 'get'.str_replace('_', '', $variable);

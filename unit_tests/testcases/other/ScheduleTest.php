@@ -630,7 +630,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getBeginWeekEpoch( time() ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginWeekEpoch( time() )+86400; //Use current year
+		$date_epoch2 = TTDate::getBeginWeekEpoch( time() )+(86400*1.5); //Use current year, handle DST.
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 

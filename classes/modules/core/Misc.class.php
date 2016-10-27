@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11167 $
- * $Id: Misc.class.php 11167 2013-10-15 20:29:07Z ipso $
- * $Date: 2013-10-15 13:29:07 -0700 (Tue, 15 Oct 2013) $
+ * $Revision: 11439 $
+ * $Id: Misc.class.php 11439 2013-11-18 23:58:26Z mikeb $
+ * $Date: 2013-11-18 15:58:26 -0800 (Mon, 18 Nov 2013) $
  */
 
 /**
@@ -1023,14 +1023,20 @@ class Misc {
 	//have to have so many isset() checks throughout the code.
 	static function preSetArrayValues( $arr, $keys, $preset_value = NULL ) {
 		foreach( $keys as $key ) {
-			if ( !isset($arr[$key]) ) {
-				$arr[$key] = $preset_value;
+			if ( is_object( $arr ) ) {
+				if ( !isset($arr->$key) ) {
+					$arr->$key = $preset_value;
+				}
+			} else {
+				if ( !isset($arr[$key]) ) {
+					$arr[$key] = $preset_value;
+				}
 			}
 		}
 
 		return $arr;
 	}
-
+	
 	static function parseCSV($file, $head = FALSE, $first_column = FALSE, $delim="," , $len = 9216, $max_lines = NULL ) {
 		if ( !file_exists($file) ) {
 			Debug::text('Files does not exist: '. $file, __FILE__, __LINE__, __METHOD__, 10);

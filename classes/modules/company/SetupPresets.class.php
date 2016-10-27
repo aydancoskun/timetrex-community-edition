@@ -4530,12 +4530,12 @@ class SetupPresets extends Factory {
 													array(
 														'company_id' => $this->getCompany(),
 														'name' => strtoupper($province) .' - Day After Thanksgiving Day',
-														'type_id' => 20,
+														'type_id' => 30,
 														'special_day' => 0,
-														//'pivot_day_direction_id' => 30,
-														'week_interval' => 4,
+														'pivot_day_direction_id' => 40,
+														//'week_interval' => 4,
 														'day_of_week' => 5,
-														//'day_of_month' => 24,
+														'day_of_month' => 23,
 														'month_int' => 11,
 														'always_week_day_id' => 3, //Closest
 													)
@@ -6330,6 +6330,7 @@ class SetupPresets extends Factory {
 
 			$udf->setEnableEmailNotificationException( TRUE );
 			$udf->setEnableEmailNotificationMessage( TRUE );
+			$udf->setEnableEmailNotificationPayStub( TRUE );
 			$udf->setEnableEmailNotificationHome( TRUE );
 
 			if ( $udf->isValid() ) {

@@ -69,12 +69,12 @@ class LockFile {
 	}
 
 	function create() {
-		return touch( $this->getFileName() );
+		return @touch( $this->getFileName() );
 	}
 
 	function delete() {
 		if ( file_exists( $this->getFileName() ) ) {
-			return unlink( $this->getFileName() );
+			return @unlink( $this->getFileName() );
 		}
 
 		Debug::text(' Failed deleting lock file: '. $this->file_name, __FILE__, __LINE__, __METHOD__, 10);

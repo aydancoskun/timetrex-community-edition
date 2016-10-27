@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10749 $
- * $Id: TTi18n.class.php 10749 2013-08-26 22:00:42Z ipso $
- * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
+ * $Revision: 11542 $
+ * $Id: TTi18n.class.php 11542 2013-11-28 23:42:32Z mikeb $
+ * $Date: 2013-11-28 15:42:32 -0800 (Thu, 28 Nov 2013) $
  */
 
 /*
@@ -248,7 +248,7 @@ class TTi18n {
 		}
 
 		if ( $valid_locale != '' ) {
-			Debug::Text('Found valid locale: '. $valid_locale,  __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Found valid locale: '. $valid_locale,  __FILE__, __LINE__, __METHOD__,11);
 
 			return $valid_locale;
 		}
@@ -290,7 +290,7 @@ class TTi18n {
 			$retarr = $locale_arr;
 		}
 
-		Debug::Text('Array of Locales to try in order for "'.$locale_arg.'": '. self::getLocaleArrayAsString( $retarr ), __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Array of Locales to try in order for "'.$locale_arg.'": '. self::getLocaleArrayAsString( $retarr ), __FILE__, __LINE__, __METHOD__,11);
 
 		return $retarr;
 	}
@@ -325,7 +325,7 @@ class TTi18n {
 			$locale = self::getLocale();
 		}
 
-		Debug::Text('Locale: '. $locale, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Locale: '. $locale, __FILE__, __LINE__, __METHOD__,11);
 
 		$language = substr( $locale, 0, 2);
 		$language_arr = self::getLanguageArray();
@@ -354,20 +354,20 @@ class TTi18n {
 		return self::$locale;
 	}
 	static public function setLocale( $locale_arg = NULL, $category = LC_ALL ) {
-		Debug::Text('Generated/Passed In Locale: '. $locale_arg, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Generated/Passed In Locale: '. $locale_arg, __FILE__, __LINE__, __METHOD__,11);
 		$locale = self::tryLocale( self::generateLocale( $locale_arg ) );
 
-		Debug::Text('Attempting to set Locale(s) to: '. $locale .' Category: '. $category .' Current Locale: '. self::getLocale() , __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Attempting to set Locale(s) to: '. $locale .' Category: '. $category .' Current Locale: '. self::getLocale() , __FILE__, __LINE__, __METHOD__,11);
 
 		//In order to validate Windows locales with tryLocale() we have to always force the locale to be set, otherwise
 		//if tryLocale() doesn't get it right on the first try, the locale is reverted to something that may not work.
 		if ( $locale != self::getLocale() ) {
 			if ( in_array( $category, array( LC_ALL, LC_MONETARY, LC_NUMERIC ) ) ) {
-				Debug::Text('Setting currency/numeric Locale to: '. $locale, __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Setting currency/numeric Locale to: '. $locale, __FILE__, __LINE__, __METHOD__,11);
 				//if ( self::getLocaleHandler()->setLocale( $locale, $category ) != $locale ) {
 				//Setting the locale in Windows can cause the locale names to not match at all, so check for FALSE
 				if ( self::getLocaleHandler()->setLocale( $locale, $category ) == FALSE ) {
-					Debug::Text('Failed setting currency/numeric locale: '. $locale, __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Failed setting currency/numeric locale: '. $locale, __FILE__, __LINE__, __METHOD__,11);
 				}
 			}
 
@@ -376,7 +376,7 @@ class TTi18n {
 				// to avoid having to maintain lots of mostly duplicate translation files
 				// for each lang/country combination.
 				$normal_locale = self::_normalizeLocale( $locale );
-				Debug::Text('Setting translator to normalized locale: '. $normal_locale, __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Setting translator to normalized locale: '. $normal_locale, __FILE__, __LINE__, __METHOD__,11);
 				if ( self::getTranslationHandler()->setLang( $normal_locale ) === FALSE ) {
 					//Fall back on non-normalized locale
 					Debug::Text('Failed setting translator normalized locale: '. $normal_locale .' Falling back to: '. $locale, __FILE__, __LINE__, __METHOD__,10);
@@ -441,7 +441,7 @@ class TTi18n {
 	 * @author Dan Libby <dan@osc.co.cr>
      */
    static public function chooseBestLocale( $user_locale_pref = NULL) {
-		Debug::text('Choosing Best Locale...',  __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Choosing Best Locale...',  __FILE__, __LINE__, __METHOD__,11);
 
 		$success = FALSE;
 		$category = LC_ALL; //LC_MESSAGES isn't defined on Windows.
@@ -449,17 +449,17 @@ class TTi18n {
 		// First, we'll check if 'ttlang' url param (override) is specified.
 		//Check cookie first, as we want GET/POST to override the cookie, incase of form errors on Login page etc...
 		if ( TTi18n::getLocaleCookie() != FALSE ) {
-			Debug::text('Using Language from cookie: ' . TTi18n::getLocaleCookie(),  __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Using Language from cookie: ' . TTi18n::getLocaleCookie(),  __FILE__, __LINE__, __METHOD__,11);
 			$success = TTi18n::setLocale( TTi18n::getLocaleCookie(), $category );
 		}
 
 		if ( isset( $_GET['language'] ) AND $_GET['language'] != '' ) {
-			Debug::text('Using Language from _GET: ' . $_GET['language'],  __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Using Language from _GET: ' . $_GET['language'],  __FILE__, __LINE__, __METHOD__,11);
 			$success = self::setLocale( $_GET['language'] );
 		}
 
 		if ( isset( $_POST['language'] ) AND $_POST['language'] != '' ) {
-			Debug::text('Using Language from _POST: ' . $_POST['language'],  __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Using Language from _POST: ' . $_POST['language'],  __FILE__, __LINE__, __METHOD__,11);
 			$success = self::setLocale( $_POST['language'] );
 		}
 
@@ -469,13 +469,13 @@ class TTi18n {
 			  // Could be an array of preferred locales.
 			  if ( is_array( $user_locale_pref ) ) {
 				 foreach( $user_locale_pref as $locale ) {
-					  Debug::text('aSetting Locale: ' . $user_locale_pref,  __FILE__, __LINE__, __METHOD__,10);
+					  Debug::text('aSetting Locale: ' . $user_locale_pref,  __FILE__, __LINE__, __METHOD__,11);
 					  if ( $success == self::setLocale( $locale, $category ) ) {
 						 break;
 					  }
 				 }
 			  } else {
-				  Debug::text('bSetting Locale: ' . $user_locale_pref,  __FILE__, __LINE__, __METHOD__,10);
+				  Debug::text('bSetting Locale: ' . $user_locale_pref,  __FILE__, __LINE__, __METHOD__,11);
 				  // or a single locale
 				 $success = self::setLocale( $user_locale_pref, $category );
 			  }
@@ -495,7 +495,7 @@ class TTi18n {
 					}
 				}
 
-				Debug::text('cSetting Locale: ' . $locale,  __FILE__, __LINE__, __METHOD__,10);
+				Debug::text('cSetting Locale: ' . $locale,  __FILE__, __LINE__, __METHOD__,11);
 				if ( $success == self::setLocale( $locale, $category ) ) {
 					break;
 				}
@@ -507,7 +507,7 @@ class TTi18n {
 
 			//Use system locale if its set from timetrex.ini.php
 			if ( isset($config_vars['other']['system_locale']) AND $config_vars['other']['system_locale'] != '' ) {
-				Debug::text('Using system locale from .ini: ' . $config_vars['other']['system_locale'],  __FILE__, __LINE__, __METHOD__,10);
+				Debug::text('Using system locale from .ini: ' . $config_vars['other']['system_locale'],  __FILE__, __LINE__, __METHOD__,11);
 				$success = self::setLocale( $config_vars['other']['system_locale'], $category );
 			}
 		}
@@ -537,8 +537,8 @@ class TTi18n {
 		//asort($retarr);
 
 		// Return supported languages only.
-		$supported_langs = array( 'en', 'es', 'fr', 'de', 'it', 'pt', 'da', 'zh' );
-		$beta_langs = array( 'es','fr','de','it','pt', 'da', 'zh' );
+		$supported_langs = array( 'en', 'da', 'de', 'es', 'id', 'it', 'fr', 'pt', 'zh' );
+		$beta_langs = array( 'da', 'de', 'es', 'id', 'it', 'fr', 'pt', 'zh' );
 
 		$retarr2 = array();
 		foreach( $supported_langs as $language ) {
@@ -664,6 +664,7 @@ class TTi18n {
 								'pl' => 'pl_PL',	// Polish	Poland
 								'ps' => 'ps_AF',	// Pashto	Afghanistan
 								'pt' => 'pt_PT',	// Portuguese	Portugal
+								'pt_BR' => 'pt_BR',	// Portuguese	Brazilian
 								'rm' => 'rm_CH',	// Rhaeto-Roman	Switzerland
 								'rn' => 'rn_BI',	// Kirundi	Burundi
 								'ro' => 'ro_RO',	// Romanian	Romania

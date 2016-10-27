@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11018 $
- * $Id: PayStubEntryAccountListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
- * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
+ * $Revision: 10849 $
+ * $Id: PayStubEntryAccountListFactory.class.php 10849 2013-09-06 15:36:13Z ipso $
+ * $Date: 2013-09-06 08:36:13 -0700 (Fri, 06 Sep 2013) $
  */
 
 /**

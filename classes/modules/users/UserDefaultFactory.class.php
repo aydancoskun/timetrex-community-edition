@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9804 $
- * $Id: UserDefaultFactory.class.php 9804 2013-05-08 15:59:47Z ipso $
- * $Date: 2013-05-08 08:59:47 -0700 (Wed, 08 May 2013) $
+ * $Revision: 11457 $
+ * $Id: UserDefaultFactory.class.php 11457 2013-11-20 00:40:13Z mikeb $
+ * $Date: 2013-11-19 16:40:13 -0800 (Tue, 19 Nov 2013) $
  */
 
 /**
@@ -79,6 +79,7 @@ class UserDefaultFactory extends Factory {
 											'start_week_day' => 'StartWeekDay',
 											'enable_email_notification_exception' => 'EnableEmailNotificationException',
 											'enable_email_notification_message' => 'EnableEmailNotificationMessage',
+											'enable_email_notification_pay_stub' => 'EnableEmailNotificationPayStub',
 											'enable_email_notification_home' => 'EnableEmailNotificationHome',
 											'company_deduction' => 'CompanyDeduction',
 											'deleted' => 'Deleted',
@@ -790,6 +791,14 @@ class UserDefaultFactory extends Factory {
 	}
 	function setEnableEmailNotificationMessage($bool) {
 		$this->data['enable_email_notification_message'] = $this->toBool($bool);
+
+		return TRUE;
+	}
+	function getEnableEmailNotificationPayStub() {
+		return $this->fromBool( $this->data['enable_email_notification_pay_stub'] );
+	}
+	function setEnableEmailNotificationPayStub($bool) {
+		$this->data['enable_email_notification_pay_stub'] = $this->toBool($bool);
 
 		return TRUE;
 	}

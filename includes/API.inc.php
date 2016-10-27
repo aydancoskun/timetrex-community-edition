@@ -40,6 +40,11 @@
  */
 define('TIMETREX_API', TRUE );
 
+//Returns valid classes when unauthenticated.
+function getUnauthenticatedAPIClasses() {
+	return array('APIAuthentication','APIClientStationUnAuthenticated', 'APIAuthenticationPlugin', 'APIClientStationUnAuthenticatedPlugin');
+}
+
 //Returns session ID from _COOKIE, _POST, then _GET.
 function getSessionID() {
     if ( isset($_COOKIE['SessionID']) AND $_COOKIE['SessionID'] != '' ) {

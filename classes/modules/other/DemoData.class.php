@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11018 $
- * $Id: DemoData.class.php 11018 2013-09-24 23:39:40Z ipso $
- * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
+ * $Revision: 11383 $
+ * $Id: DemoData.class.php 11383 2013-11-12 00:12:08Z mikeb $
+ * $Date: 2013-11-11 16:12:08 -0800 (Mon, 11 Nov 2013) $
  */
 
 
@@ -1383,22 +1383,28 @@ class DemoData {
 			case 10: //Vacation
 				$apf->setName( 'PTO/Vacation' );
 				$apf->setType( 10 ); //Paid
+				$apf->setRate( 1.0 );
 				$apf->setAccrualPolicyID( $accrual_policy_id );
 				$apf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 50, 'Vacation Accrual Release') );
+				$apf->setAccrualRate( 1.0 );
 
 				break;
 			case 20: //Bank Time
 				$apf->setName( 'Bank Time' );
 				$apf->setType( 20 ); //Not Paid
+				$apf->setRate( 1.0 );
 				$apf->setAccrualPolicyID( $accrual_policy_id );
 				$apf->setPayStubEntryAccountID( 0 );
+				$apf->setAccrualRate( 1.0 );
 
 				break;
 			case 30: //Sick Time
 				$apf->setName( 'Sick Time' );
 				$apf->setType( 20 ); //Not Paid
+				$apf->setRate( 1.0 );
 				$apf->setAccrualPolicyID( $accrual_policy_id );
 				$apf->setPayStubEntryAccountID( 0 );
+				$apf->setAccrualRate( 1.0 );
 
 				break;
 		}
@@ -4071,6 +4077,7 @@ class DemoData {
 				$jif->setBillableRate( '80.00' );
 				$jif->setMinimumTime( 3600 );
 				$jif->setGroup( $group_id );
+				$jif->setProduct( $product_id );
 
 				break;
 			case 20: //Sanding
@@ -4085,6 +4092,7 @@ class DemoData {
 				$jif->setBillableRate( '15.25' );
 				$jif->setMinimumTime( (3600*2) );
 				$jif->setGroup( $group_id );
+				$jif->setProduct( $product_id );
 
 				break;
 			case 30: //Painting
@@ -4099,6 +4107,7 @@ class DemoData {
 				$jif->setBillableRate( '25.50' );
 				$jif->setMinimumTime( (3600*1) );
 				$jif->setGroup( $group_id );
+				$jif->setProduct( $product_id );
 
 				break;
 			case 40: //Landscaping
@@ -4113,6 +4122,7 @@ class DemoData {
 				$jif->setBillableRate( '33' );
 				$jif->setMinimumTime( (3600*1) );
 				$jif->setGroup( $group_id );
+				$jif->setProduct( $product_id );
 
 				break;
 			case 50:
@@ -4127,6 +4137,7 @@ class DemoData {
 				$jif->setBillableRate( '15' );
 				$jif->setMinimumTime( (3600*1) );
 				$jif->setGroup( $group_id );
+				$jif->setProduct( $product_id );
 
 				break;
 			case 60:
@@ -4141,6 +4152,7 @@ class DemoData {
 				$jif->setBillableRate( '45' );
 				$jif->setMinimumTime( (3600*1) );
 				$jif->setGroup( $group_id );
+				$jif->setProduct( $product_id );
 
 				break;
 			case 70:
@@ -4155,9 +4167,9 @@ class DemoData {
 				$jif->setBillableRate( '50' );
 				$jif->setMinimumTime( (3600*1) );
 				$jif->setGroup( $group_id );
+				$jif->setProduct( $product_id );
 
 				break;
-
 		}
 
 		if ( $jif->isValid() ) {
@@ -4714,9 +4726,9 @@ class DemoData {
             case 60:
                 $pf->setType( 20 );
                 $pf->setGroup( $group_ids[1] );
-				$pf->setPartNumber('installation');
-                $pf->setName('Installation');
-                $pf->setDescription('Installation');
+				$pf->setPartNumber('framing');
+                $pf->setName('Framing');
+                $pf->setDescription('Framing');
                 $pf->setDescriptionLocked(FALSE);
                 $pf->setUPC('');
                 $pf->setUnitCost(0);
@@ -4725,7 +4737,71 @@ class DemoData {
                 $pf->setMaximumPurchaseQuantity( 0 );
                 $pf->setPriceLocked(FALSE);
                 $pf->setUnitPriceType( 10 );
-                $pf->setUnitPrice('10');
+                $pf->setUnitPrice( 19.75 );
+                break;
+            case 62:
+                $pf->setType( 20 );
+                $pf->setGroup( $group_ids[1] );
+				$pf->setPartNumber('sanding');
+                $pf->setName('Sanding');
+                $pf->setDescription('Sanding');
+                $pf->setDescriptionLocked(FALSE);
+                $pf->setUPC('');
+                $pf->setUnitCost(0);
+                $pf->setQuantity(7000);
+                $pf->setMinimumPurchaseQuantity( 0 );
+                $pf->setMaximumPurchaseQuantity( 0 );
+                $pf->setPriceLocked(FALSE);
+                $pf->setUnitPriceType( 10 );
+                $pf->setUnitPrice( 20.00 );
+                break;
+            case 64:
+                $pf->setType( 20 );
+                $pf->setGroup( $group_ids[1] );
+				$pf->setPartNumber('painting');
+                $pf->setName('Painting');
+                $pf->setDescription('Painting');
+                $pf->setDescriptionLocked(FALSE);
+                $pf->setUPC('');
+                $pf->setUnitCost(0);
+                $pf->setQuantity(7000);
+                $pf->setMinimumPurchaseQuantity( 0 );
+                $pf->setMaximumPurchaseQuantity( 0 );
+                $pf->setPriceLocked(FALSE);
+                $pf->setUnitPriceType( 10 );
+                $pf->setUnitPrice( 22.00 );
+                break;
+            case 66:
+                $pf->setType( 20 );
+                $pf->setGroup( $group_ids[1] );
+				$pf->setPartNumber('landscaping');
+                $pf->setName('Landscaping');
+                $pf->setDescription('Landscaping');
+                $pf->setDescriptionLocked(FALSE);
+                $pf->setUPC('');
+                $pf->setUnitCost(0);
+                $pf->setQuantity(7000);
+                $pf->setMinimumPurchaseQuantity( 0 );
+                $pf->setMaximumPurchaseQuantity( 0 );
+                $pf->setPriceLocked(FALSE);
+                $pf->setUnitPriceType( 10 );
+                $pf->setUnitPrice( 25.00 );
+                break;
+            case 69:
+                $pf->setType( 20 );
+                $pf->setGroup( $group_ids[1] );
+				$pf->setPartNumber('misc');
+                $pf->setName('Miscellaneous');
+                $pf->setDescription('Miscellaneous');
+                $pf->setDescriptionLocked(FALSE);
+                $pf->setUPC('');
+                $pf->setUnitCost(0);
+                $pf->setQuantity(7000);
+                $pf->setMinimumPurchaseQuantity( 0 );
+                $pf->setMaximumPurchaseQuantity( 0 );
+                $pf->setPriceLocked(FALSE);
+                $pf->setUnitPriceType( 10 );
+                $pf->setUnitPrice( 10.00 );
                 break;
             // Product Tax
             case 70:
@@ -4880,6 +4956,8 @@ class DemoData {
 				$jf->setBranch( $branch_id );
 				$jf->setDepartment( $department_id );
 
+				$jf->setClient( $client_id );
+
 				//$jf->setNote( $data['note'] );
 
 				break;
@@ -4900,6 +4978,8 @@ class DemoData {
 				$jf->setGroup( $job_group_id );
 				$jf->setBranch( $branch_id );
 				$jf->setDepartment( $department_id );
+
+				$jf->setClient( $client_id );
 				break;
 			case 12:
 				$jf->setManualID( 12 );
@@ -4918,6 +4998,8 @@ class DemoData {
 				$jf->setGroup( $job_group_id );
 				$jf->setBranch( $branch_id );
 				$jf->setDepartment( $department_id );
+
+				$jf->setClient( $client_id );
 				break;
 			case 13:
 				$jf->setManualID( 13 );
@@ -4936,6 +5018,8 @@ class DemoData {
 				$jf->setGroup( $job_group_id );
 				$jf->setBranch( $branch_id );
 				$jf->setDepartment( $department_id );
+
+				$jf->setClient( $client_id );
 				break;
 			case 14:
 				$jf->setManualID( 14 );
@@ -4954,6 +5038,8 @@ class DemoData {
 				$jf->setGroup( $job_group_id );
 				$jf->setBranch( $branch_id );
 				$jf->setDepartment( $department_id );
+
+				$jf->setClient( $client_id );
 				break;
 			case 15:
 				$jf->setManualID( 15 );
@@ -4971,6 +5057,8 @@ class DemoData {
 				$jf->setMinimumTime( (3600*100) );
 				$jf->setBranch( $branch_id );
 				$jf->setDepartment( $department_id );
+
+				$jf->setClient( $client_id );
 				break;
 			case 16:
 				$jf->setManualID( 16 );
@@ -4989,6 +5077,8 @@ class DemoData {
 				$jf->setGroup( $job_group_id );
 				$jf->setBranch( $branch_id );
 				$jf->setDepartment( $department_id );
+
+				$jf->setClient( $client_id );
 				break;
 			case 17:
 				$jf->setManualID( 17 );
@@ -5007,6 +5097,8 @@ class DemoData {
 				$jf->setGroup( $job_group_id );
 				$jf->setBranch( $branch_id );
 				$jf->setDepartment( $department_id );
+
+				$jf->setClient( $client_id );
 				break;
 			case 18:
 				$jf->setManualID( 18 );
@@ -5025,6 +5117,8 @@ class DemoData {
 				$jf->setGroup( $job_group_id );
 				$jf->setBranch( $branch_id );
 				$jf->setDepartment( $department_id );
+
+				$jf->setClient( $client_id );
 				break;
 			case 19:
 				$jf->setManualID( 19 );
@@ -5043,6 +5137,8 @@ class DemoData {
 				$jf->setGroup( $job_group_id );
 				$jf->setBranch( $branch_id );
 				$jf->setDepartment( $department_id );
+
+				$jf->setClient( $client_id );
 				break;
 			case 20:
 				$jf->setManualID( 20 );
@@ -5063,6 +5159,7 @@ class DemoData {
 				$jf->setDepartment( $department_id );
 				//$jf->setNote( $data['note'] );
 
+				$jf->setClient( $client_id );
 				break;
 			case 21:
 				$jf->setManualID( 21 );
@@ -5083,6 +5180,7 @@ class DemoData {
 				$jf->setDepartment( $department_id );
 				//$jf->setNote( $data['note'] );
 
+				$jf->setClient( $client_id );
 				break;
 			case 22:
 				$jf->setManualID( 22 );
@@ -5103,6 +5201,7 @@ class DemoData {
 				$jf->setDepartment( $department_id );
 				//$jf->setNote( $data['note'] );
 
+				$jf->setClient( $client_id );
 				break;
 			case 23:
 				$jf->setManualID( 23 );
@@ -5123,6 +5222,7 @@ class DemoData {
 				$jf->setDepartment( $department_id );
 				//$jf->setNote( $data['note'] );
 
+				$jf->setClient( $client_id );
 				break;
 			case 24:
 				$jf->setManualID( 24 );
@@ -5143,6 +5243,7 @@ class DemoData {
 				$jf->setDepartment( $department_id );
 				//$jf->setNote( $data['note'] );
 
+				$jf->setClient( $client_id );
 				break;
 			case 25:
 				$jf->setManualID( 25 );
@@ -5163,8 +5264,8 @@ class DemoData {
 				$jf->setDepartment( $department_id );
 				//$jf->setNote( $data['note'] );
 
+				$jf->setClient( $client_id );
 				break;
-
 		}
 
 		if ( $jf->isValid() ) {
@@ -6191,6 +6292,10 @@ class DemoData {
 				$product_ids[10][] = $this->createProduct( $company_id, $product_group_ids, 40, $currency_ids[0] );
 				$product_ids[10][] = $this->createProduct( $company_id, $product_group_ids, 50, $currency_ids[0] );
 				$product_ids[20][] = $this->createProduct( $company_id, $product_group_ids, 60, $currency_ids[0] );
+				$product_ids[20][] = $this->createProduct( $company_id, $product_group_ids, 62, $currency_ids[0] );
+				$product_ids[20][] = $this->createProduct( $company_id, $product_group_ids, 64, $currency_ids[0] );
+				$product_ids[20][] = $this->createProduct( $company_id, $product_group_ids, 66, $currency_ids[0] );
+				$product_ids[20][] = $this->createProduct( $company_id, $product_group_ids, 69, $currency_ids[0] );
 				$product_ids[30][] = $this->createProduct( $company_id, $product_group_ids, 70, $currency_ids[0] );
 				$product_ids[40][] = $this->createProduct( $company_id, $product_group_ids, 80, $currency_ids[0] );
 				$product_ids[50][] = $this->createProduct( $company_id, $product_group_ids, 90, $currency_ids[0] );
@@ -6240,14 +6345,14 @@ class DemoData {
 				$task_group_ids[] = $this->createTaskGroup( $company_id, 60, $task_group_ids[3] );
 
 				//Job Tasks
-				$default_task_id = $this->createTask( $company_id, 10, $task_group_ids[2] );
-				$task_ids[] = $this->createTask( $company_id, 20, $task_group_ids[1] );
-				$task_ids[] = $this->createTask( $company_id, 30, $task_group_ids[1] );
-				$task_ids[] = $this->createTask( $company_id, 40, $task_group_ids[2] );
+				$default_task_id = $this->createTask( $company_id, 10, $task_group_ids[2], $product_ids[20][0] );
+				$task_ids[] = $this->createTask( $company_id, 20, $task_group_ids[1], $product_ids[20][1] );
+				$task_ids[] = $this->createTask( $company_id, 30, $task_group_ids[1], $product_ids[20][2] );
+				$task_ids[] = $this->createTask( $company_id, 40, $task_group_ids[2], $product_ids[20][3] );
 
-				$task_ids[] = $this->createTask( $company_id, 50, $task_group_ids[4] );
-				$task_ids[] = $this->createTask( $company_id, 60, $task_group_ids[4] );
-				$task_ids[] = $this->createTask( $company_id, 70, $task_group_ids[5] );
+				$task_ids[] = $this->createTask( $company_id, 50, $task_group_ids[4], $product_ids[20][4] );
+				$task_ids[] = $this->createTask( $company_id, 60, $task_group_ids[4], $product_ids[20][4] );
+				$task_ids[] = $this->createTask( $company_id, 70, $task_group_ids[5], $product_ids[20][4] );
 
 				//Job Groups
 				$job_group_ids[] = $this->createJobGroup( $company_id, 10, 0 );
@@ -6258,23 +6363,23 @@ class DemoData {
 				$job_group_ids[] = $this->createJobGroup( $company_id, 60, $job_group_ids[3] );
 
 				//Jobs
-				$job_ids[] = $this->createJob( $company_id, 10, $default_task_id, $job_group_ids[1], $branch_ids[0], $department_ids[0] );
-				$job_ids[] = $this->createJob( $company_id, 11, $default_task_id, $job_group_ids[1], $branch_ids[0], $department_ids[0] );
-				$job_ids[] = $this->createJob( $company_id, 12, $default_task_id, $job_group_ids[1], $branch_ids[0], $department_ids[0] );
-				$job_ids[] = $this->createJob( $company_id, 13, $default_task_id, $job_group_ids[1], $branch_ids[0], $department_ids[0] );
-				$job_ids[] = $this->createJob( $company_id, 14, $default_task_id, $job_group_ids[1], $branch_ids[0], $department_ids[0] );
-				$job_ids[] = $this->createJob( $company_id, 15, $default_task_id, $job_group_ids[2], $branch_ids[1], $department_ids[1] );
-				$job_ids[] = $this->createJob( $company_id, 16, $default_task_id, $job_group_ids[2], $branch_ids[1], $department_ids[1] );
-				$job_ids[] = $this->createJob( $company_id, 17, $default_task_id, $job_group_ids[2], $branch_ids[1], $department_ids[1] );
-				$job_ids[] = $this->createJob( $company_id, 18, $default_task_id, $job_group_ids[2], $branch_ids[1], $department_ids[1] );
-				$job_ids[] = $this->createJob( $company_id, 19, $default_task_id, $job_group_ids[2], $branch_ids[1], $department_ids[1] );
+				$job_ids[] = $this->createJob( $company_id, 10, $default_task_id, $job_group_ids[1], $branch_ids[0], $department_ids[0], $client_ids[0] );
+				$job_ids[] = $this->createJob( $company_id, 11, $default_task_id, $job_group_ids[1], $branch_ids[0], $department_ids[0], $client_ids[1] );
+				$job_ids[] = $this->createJob( $company_id, 12, $default_task_id, $job_group_ids[1], $branch_ids[0], $department_ids[0], $client_ids[2] );
+				$job_ids[] = $this->createJob( $company_id, 13, $default_task_id, $job_group_ids[1], $branch_ids[0], $department_ids[0], $client_ids[3] );
+				$job_ids[] = $this->createJob( $company_id, 14, $default_task_id, $job_group_ids[1], $branch_ids[0], $department_ids[0], $client_ids[4] );
+				$job_ids[] = $this->createJob( $company_id, 15, $default_task_id, $job_group_ids[2], $branch_ids[1], $department_ids[1], $client_ids[5] );
+				$job_ids[] = $this->createJob( $company_id, 16, $default_task_id, $job_group_ids[2], $branch_ids[1], $department_ids[1], $client_ids[6] );
+				$job_ids[] = $this->createJob( $company_id, 17, $default_task_id, $job_group_ids[2], $branch_ids[1], $department_ids[1], $client_ids[7] );
+				$job_ids[] = $this->createJob( $company_id, 18, $default_task_id, $job_group_ids[2], $branch_ids[1], $department_ids[1], $client_ids[0] );
+				$job_ids[] = $this->createJob( $company_id, 19, $default_task_id, $job_group_ids[2], $branch_ids[1], $department_ids[1], $client_ids[1] );
 
-				$job_ids[] = $this->createJob( $company_id, 20, $default_task_id, $job_group_ids[4], $branch_ids[0], $department_ids[0] );
-				$job_ids[] = $this->createJob( $company_id, 21, $default_task_id, $job_group_ids[4], $branch_ids[0], $department_ids[0] );
-				$job_ids[] = $this->createJob( $company_id, 22, $default_task_id, $job_group_ids[4], $branch_ids[0], $department_ids[0] );
-				$job_ids[] = $this->createJob( $company_id, 23, $default_task_id, $job_group_ids[5], $branch_ids[1], $department_ids[1] );
-				$job_ids[] = $this->createJob( $company_id, 24, $default_task_id, $job_group_ids[5], $branch_ids[1], $department_ids[1] );
-				$job_ids[] = $this->createJob( $company_id, 25, $default_task_id, $job_group_ids[5], $branch_ids[1], $department_ids[1] );
+				$job_ids[] = $this->createJob( $company_id, 20, $default_task_id, $job_group_ids[4], $branch_ids[0], $department_ids[0], $client_ids[2] );
+				$job_ids[] = $this->createJob( $company_id, 21, $default_task_id, $job_group_ids[4], $branch_ids[0], $department_ids[0], $client_ids[3] );
+				$job_ids[] = $this->createJob( $company_id, 22, $default_task_id, $job_group_ids[4], $branch_ids[0], $department_ids[0], $client_ids[4] );
+				$job_ids[] = $this->createJob( $company_id, 23, $default_task_id, $job_group_ids[5], $branch_ids[1], $department_ids[1], $client_ids[5] );
+				$job_ids[] = $this->createJob( $company_id, 24, $default_task_id, $job_group_ids[5], $branch_ids[1], $department_ids[1], $client_ids[6] );
+				$job_ids[] = $this->createJob( $company_id, 25, $default_task_id, $job_group_ids[5], $branch_ids[1], $department_ids[1], $client_ids[7] );
 
 			} else {
 				$task_ids[] = 0;
@@ -6553,8 +6658,9 @@ class DemoData {
 			foreach( $user_ids as $user_id ) {
 				//Pick random jobs/tasks that are used for the entire date range.
 				//So one employee isn't punching into 15 jobs.
-				$user_random_job_ids = array_rand($job_ids, 2 );
-				$user_random_task_ids = array_rand($job_ids, 3 );
+				srand ((float) microtime() * 10000000); 
+				$user_random_job_ids = array_flip( array_rand($job_ids, 2 ) );
+				$user_random_task_ids = array_flip( array_rand($task_ids, 3 ) );
 
 				//Create punches starting 6 weeks ago, up to the end of the week.
 				//$start_date = $punch_date = ($current_epoch-(86400*42));

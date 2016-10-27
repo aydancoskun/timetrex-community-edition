@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: OtherFieldFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11465 $
+ * $Id: OtherFieldFactory.class.php 11465 2013-11-20 18:19:37Z mikeb $
+ * $Date: 2013-11-20 10:19:37 -0800 (Wed, 20 Nov 2013) $
  */
 
 /**
@@ -74,11 +74,11 @@ class OtherFieldFactory extends Factory {
 			case 'columns':
 				$retval = array(
 										'-1010-type' => TTi18n::gettext('Type'),
-										'-1020-other_id1' => TTi18n::gettext('Other ID1'),
-										'-1020-other_id2' => TTi18n::gettext('Other ID2'),
-										'-1020-other_id3' => TTi18n::gettext('Other ID3'),
-										'-1020-other_id4' => TTi18n::gettext('Other ID4'),
-										'-1020-other_id5' => TTi18n::gettext('Other ID5'),
+										'-1021-other_id1' => TTi18n::gettext('Other ID1'),
+										'-1022-other_id2' => TTi18n::gettext('Other ID2'),
+										'-1023-other_id3' => TTi18n::gettext('Other ID3'),
+										'-1024-other_id4' => TTi18n::gettext('Other ID4'),
+										'-1025-other_id5' => TTi18n::gettext('Other ID5'),
 
 										'-2000-created_by' => TTi18n::gettext('Created By'),
 										'-2010-created_date' => TTi18n::gettext('Created Date'),

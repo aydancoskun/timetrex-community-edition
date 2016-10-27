@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11018 $
- * $Id: HierarchyControlFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
- * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
+ * $Revision: 10990 $
+ * $Id: HierarchyControlFactory.class.php 10990 2013-09-21 21:03:04Z ipso $
+ * $Date: 2013-09-21 14:03:04 -0700 (Sat, 21 Sep 2013) $
  */
 
 /**

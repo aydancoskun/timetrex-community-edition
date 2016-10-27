@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: AccrualPolicyFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11545 $
+ * $Id: AccrualPolicyFactory.class.php 11545 2013-11-29 02:04:30Z mikeb $
+ * $Date: 2013-11-28 18:04:30 -0800 (Thu, 28 Nov 2013) $
  */
 
 /**
@@ -72,6 +72,8 @@ class AccrualPolicyFactory extends Factory {
 				$retval = array(
 										'-1010-type' => TTi18n::gettext('Type'),
 										'-1030-name' => TTi18n::gettext('Name'),
+
+										'-1900-in_use' => TTi18n::gettext('In Use'),
 
 										'-2000-created_by' => TTi18n::gettext('Created By'),
 										'-2010-created_date' => TTi18n::gettext('Created Date'),
@@ -124,6 +126,7 @@ class AccrualPolicyFactory extends Factory {
 											'milestone_rollover_month' => 'MilestoneRolloverMonth',
 											'milestone_rollover_day_of_month' => 'MilestoneRolloverDayOfMonth',
 											'minimum_employed_days' => 'MinimumEmployedDays',
+											'in_use' => FALSE,
 											'deleted' => 'Deleted',
 											);
 			return $variable_function_map;
@@ -1168,6 +1171,9 @@ class AccrualPolicyFactory extends Factory {
 
 					$function = 'get'.$function_stub;
 					switch( $variable ) {
+						case 'in_use':
+							$data[$variable] = $this->getColumn( $variable );
+							break;
 						case 'type':
 							$function = 'get'.$variable;
 							if ( method_exists( $this, $function ) ) {

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11018 $
- * $Id: Factory.class.php 11018 2013-09-24 23:39:40Z ipso $
- * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
+ * $Revision: 11568 $
+ * $Id: Factory.class.php 11568 2013-12-02 16:57:13Z mikeb $
+ * $Date: 2013-12-02 08:57:13 -0800 (Mon, 02 Dec 2013) $
  */
 
 /**
@@ -634,7 +634,7 @@ abstract class Factory {
 		if ( $parent == NULL OR $parent == '') {
 			return $this->_getFactoryOptions( $name );
 		} else {
-			$retval = $this->_getFactoryOptions( $name );
+			$retval = $this->_getFactoryOptions( $name, $parent );
 			if ( isset($retval[$parent]) ){
 				return $retval[$parent];
 			}
@@ -642,7 +642,7 @@ abstract class Factory {
 
 		return FALSE;
 	}
-	protected function _getFactoryOptions( $name ) {
+	protected function _getFactoryOptions( $name, $parent = NULL ) {
 		return FALSE;
 	}
 
@@ -813,7 +813,8 @@ abstract class Factory {
 
 						$operations[] = $column .' '. $operator[0] .' '. $date;
 					} else {
-
+						//FIXME: Need to handle date filters without any operators better.
+						//for example JobListFactory and JobSummaryReport and the time period is specified.
 						$date1 = TTDate::getBeginDayEpoch( $date );
 						$date2 = TTDate::getEndDayEpoch( $date );
 						if ( $format == 'timestamp' )  {

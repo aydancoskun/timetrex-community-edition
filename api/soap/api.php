@@ -51,6 +51,25 @@ Debug::setEnableTidy(FALSE);
 Debug::setVerbosity(10);
 
 $class_prefix = 'API';
+$class_name = FALSE;
+
+//Class name is case sensitive!
+//Get proper class name early, as we need to allow
+if ( isset($_GET['Class']) AND $_GET['Class'] != '' ) {
+	$class_name = $_GET['Class'];
+
+	//If API wasn't already put on the class, add it manually.
+	if ( strtolower( substr( $class_name, 0, 3 ) ) != 'api' ) {
+		$class_name = $class_prefix.$class_name;
+	}
+
+	$class_name = TTgetPluginClassName( $class_name );
+} else {
+	$class_name = TTgetPluginClassName( $class_prefix.'Authentication' );
+}
+
+//$class_factory = ( isset($_GET['Class']) AND $_GET['Class'] != '' ) ? $_GET['Class'] : 'Authentication'; //Default to APIAuthentication class if none is specified.
+//$class_name = TTgetPluginClassName( $class_prefix.$class_factory );
 
 $soap_server = new SoapServer( NULL, array('uri' => "urn:api") );
 if ( isset($_GET['SessionID']) AND $_GET['SessionID'] != '' ) {
@@ -58,12 +77,8 @@ if ( isset($_GET['SessionID']) AND $_GET['SessionID'] != '' ) {
 
 	Debug::text('SOAP Session ID: '. $_GET['SessionID'] .' Source IP: '. $_SERVER['REMOTE_ADDR'], __FILE__, __LINE__, __METHOD__, 10);
 	if ( $authentication->Check( $_GET['SessionID'] ) === TRUE ) {
-		//Class name is case sensitive!
-		$class_factory = ( isset($_GET['Class']) AND $_GET['Class'] != '' ) ? $_GET['Class'] : 'Authentication'; //Default to APIAuthentication class if none is specified.
-		$class_name = TTgetPluginClassName( $class_prefix.$class_factory );
-
-		Debug::text('SOAP Class Factory: '. $class_factory, __FILE__, __LINE__, __METHOD__, 10);
-		if ( $class_factory != '' AND class_exists($class_name) ) {
+		Debug::text('SOAP Class Factory: '. $class_name, __FILE__, __LINE__, __METHOD__, 10);
+		if ( $class_name != '' AND class_exists($class_name) ) {
 			$current_user = $authentication->getObject();
 
 			if ( is_object( $current_user ) ) {
@@ -119,8 +134,13 @@ if ( isset($_GET['SessionID']) AND $_GET['SessionID'] != '' ) {
 	TTi18n::chooseBestLocale(); //Make sure we set the locale as best we can when not logged in
 
 	Debug::text('SOAP UnAuthenticated!', __FILE__, __LINE__, __METHOD__, 10);
-	$soap_server->setClass('APIAuthentication');
-	$soap_server->handle(); //PHP appears to exit in this function if there is an error.
+	$valid_unauthenticated_classes = getUnauthenticatedAPIClasses();
+	if ( $class_name != '' AND in_array( $class_name, $valid_unauthenticated_classes ) AND class_exists( $class_name ) ) {
+		$soap_server->setClass( $class_name );
+		$soap_server->handle(); //PHP appears to exit in this function if there is an error.
+	} else {
+		Debug::text('Class: '. $class_name .' does not exist! (unauth)', __FILE__, __LINE__, __METHOD__, 10);
+	}
 }
 
 Debug::text('Server Response Time: '. ((float)microtime(TRUE)-$_SERVER['REQUEST_TIME']), __FILE__, __LINE__, __METHOD__, 10);

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11167 $
- * $Id: PayStubFactory.class.php 11167 2013-10-15 20:29:07Z ipso $
- * $Date: 2013-10-15 13:29:07 -0700 (Tue, 15 Oct 2013) $
+ * $Revision: 11458 $
+ * $Id: PayStubFactory.class.php 11458 2013-11-20 00:41:29Z mikeb $
+ * $Date: 2013-11-19 16:41:29 -0800 (Tue, 19 Nov 2013) $
  */
 require_once( 'Numbers/Words.php');
 
@@ -1049,6 +1049,14 @@ class PayStubFactory extends Factory {
 			$this->reCalculateYTD();
 		}
 
+		//Make sure we only email pay stubs that are marked PAID.
+		//Do we want to avoid email pay stubs if they are making adjustments after the transaction date? Or maybe just in closed pay periods?
+		if ( $this->getStatus() == 40 ) { //Paid
+			$this->emailPayStub();
+		} else {
+			Debug::Text('Pay Stub is not marked paid, not emailing...', __FILE__, __LINE__, __METHOD__,10);
+		}
+
 		return TRUE;
 	}
 
@@ -1915,6 +1923,137 @@ class PayStubFactory extends Factory {
 		return FALSE;
 	}
 
+	function getEmailMessageAddresses() {
+		$uplf = TTnew( 'UserPreferenceListFactory' );
+		$uplf->getByUserId( $this->getUser() );
+		if ( $uplf->getRecordCount() > 0 ) {
+			foreach( $uplf as $up_obj ) {
+				if ( $up_obj->getEnableEmailNotificationPayStub() == TRUE AND $up_obj->getUserObject()->getStatus() == 10 ) {
+					if ( $up_obj->getUserObject()->getWorkEmail() != '' ) {
+						$retarr[] = $up_obj->getUserObject()->getWorkEmail();
+					}
+
+					if ( $up_obj->getEnableEmailNotificationHome() AND $up_obj->getUserObject()->getHomeEmail() != '' ) {
+						$retarr[] = $up_obj->getUserObject()->getHomeEmail();
+					}
+				}
+			}
+
+			if ( isset($retarr) ) {
+				Debug::Arr($retarr, 'Recipient Email Addresses: ', __FILE__, __LINE__, __METHOD__,10);
+				return array_unique($retarr);
+			}
+		}
+
+		return FALSE;
+	}
+
+	function emailPayStub() {
+		Debug::Text('emailPayStub: ', __FILE__, __LINE__, __METHOD__,10);
+
+		$email_to_arr = $this->getEmailMessageAddresses();
+		if ( $email_to_arr == FALSE ) {
+			return FALSE;
+		}
+
+		$from = $reply_to = 'DoNotReply@'. Misc::getHostName( FALSE );
+		Debug::Text('From: '. $from, __FILE__, __LINE__, __METHOD__,10);
+
+		$to = array_shift( $email_to_arr );
+		Debug::Text('To: '. $to, __FILE__, __LINE__, __METHOD__,10);
+		if ( is_array($email_to_arr) AND count($email_to_arr) > 0 ) {
+			$bcc = implode(',', $email_to_arr);
+		} else {
+			$bcc = NULL;
+		}
+		Debug::Text('Bcc: '. $bcc, __FILE__, __LINE__, __METHOD__,10);
+
+		$u_obj = $this->getUserObject();
+		
+		//Define subject/body variables here.
+		$search_arr = array(
+							'#employee_first_name#',
+							'#employee_last_name#',
+							'#employee_default_branch#',
+							'#employee_default_department#',
+							'#employee_group#',
+							'#employee_title#',
+							'#company_name#',
+							'#link#',
+							'#pay_stub_start_date#', //8
+							'#pay_stub_end_date#',
+							'#pay_stub_transaction_date#',
+							);
+
+		$replace_arr = array(
+							$u_obj->getFirstName(),
+							$u_obj->getLastName(),
+							( is_object( $u_obj->getDefaultBranchObject() ) ) ? $u_obj->getDefaultBranchObject()->getName() : NULL,
+							( is_object( $u_obj->getDefaultDepartmentObject() ) ) ? $u_obj->getDefaultDepartmentObject()->getName() : NULL,
+							( is_object( $u_obj->getGroupObject() ) ) ? $u_obj->getGroupObject()->getName() : NULL,
+							( is_object( $u_obj->getTitleObject() ) ) ? $u_obj->getTitleObject()->getName() : NULL,
+							( is_object( $u_obj->getCompanyObject() ) ) ? $u_obj->getCompanyObject()->getName() : NULL,
+							NULL,
+							TTDate::getDate('DATE', $this->getStartDate() ),
+							TTDate::getDate('DATE', $this->getEndDate() ),
+							TTDate::getDate('DATE', $this->getTransactionDate() ),
+							);
+
+		$email_subject = TTi18n::gettext('Pay Stub waiting in').' '. APPLICATION_NAME;
+
+		$email_body = TTi18n::gettext('You have a new pay stub waiting for you in').' '. APPLICATION_NAME."\n";
+
+		$email_body .= "\n";
+
+		$email_body .= ( $replace_arr[8] != '' ) ? TTi18n::gettext('Pay Stub Start Date').': #pay_stub_start_date# ' : NULL;
+		$email_body .= ( $replace_arr[9] != '' ) ? TTi18n::gettext('End Date').': #pay_stub_end_date# ' : NULL;
+		$email_body .= ( $replace_arr[10] != '' ) ? TTi18n::gettext('Transaction Date').': #pay_stub_transaction_date#' : NULL;
+
+		$email_body .= "\n\n";
+
+		$email_body .= ( $replace_arr[2] != '' ) ? TTi18n::gettext('Default Branch').': #employee_default_branch#'."\n" : NULL;
+		$email_body .= ( $replace_arr[3] != '' ) ? TTi18n::gettext('Default Department').': #employee_default_department#'."\n" : NULL;
+		$email_body .= ( $replace_arr[4] != '' ) ? TTi18n::gettext('Group').': #employee_group#'."\n" : NULL;
+		$email_body .= ( $replace_arr[5] != '' ) ? TTi18n::gettext('Title').': #employee_title#'."\n" : NULL;
+
+		$email_body .= "\n";
+
+		$email_body .= TTi18n::gettext('Link:').' <a href="http://'. Misc::getHostName().Environment::getDefaultInterfaceBaseURL().'">'.APPLICATION_NAME.' '. TTi18n::gettext('Login') .'</a>';
+
+		$email_body .= ( $replace_arr[6] != '' ) ? "\n\n\n".TTi18n::gettext('Company').': #company_name#'."\n" : NULL; //Always put at the end
+
+		$subject = str_replace( $search_arr, $replace_arr, $email_subject );
+		Debug::Text('Subject: '. $subject, __FILE__, __LINE__, __METHOD__,10);
+
+		$headers = array(
+							'From'    => $from,
+							'Subject' => $subject,
+							'Bcc'	  => $bcc,
+							'Reply-To' => $to,
+							'Return-Path' => $to,
+							'Errors-To' => $to,
+						 );
+
+		$body = '<pre>'.str_replace( $search_arr, $replace_arr, $email_body ).'</pre>';
+		Debug::Text('Body: '. $body, __FILE__, __LINE__, __METHOD__,10);
+
+		$mail = new TTMail();
+		$mail->setTo( $to );
+		$mail->setHeaders( $headers );
+
+		@$mail->getMIMEObject()->setHTMLBody($body);
+
+		$mail->setBody( $mail->getMIMEObject()->get( $mail->default_mime_config ) );
+		$retval = $mail->Send();
+
+		if ( $retval == TRUE ) {
+			TTLog::addEntry( $this->getId(), 500,  TTi18n::getText('Email Pay Stub to').': '. $to .' Bcc: '. $headers['Bcc'], NULL, $this->getTable() );
+			return TRUE;
+		}
+
+		return TRUE; //Always return true
+	}
+
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -2543,6 +2682,7 @@ class PayStubFactory extends Factory {
 				//Line
 				$pdf->setLineWidth( 1 );
 				$pdf->Line( Misc::AdjustXY(0, $adjust_x), Misc::AdjustXY(17, $adjust_y), Misc::AdjustXY(185, $adjust_y), Misc::AdjustXY(17, $adjust_y) );
+				$pdf->setLineWidth( 0 );
 
 				$pdf->SetFont('','B',14);
 				$pdf->setXY( Misc::AdjustXY(0, $adjust_x), Misc::AdjustXY(19, $adjust_y) );
@@ -3117,6 +3257,81 @@ class PayStubFactory extends Factory {
 				}
 				unset($x, $pay_stub_entry_descriptions, $pay_stub_entry_description);
 
+
+				//
+				// Tax information.
+				//
+				$block_adjust_y = 211;
+				$pdf->SetFont('','',6);
+				$pdf->setXY( Misc::AdjustXY(0, $adjust_x), Misc::AdjustXY($block_adjust_y+3, $adjust_y) );
+
+				$udlf = TTnew( 'UserDeductionListFactory' );
+				$udlf->getByCompanyIdAndUserId( $user_obj->getCompany(), $user_obj->getID() );
+				$udlf->getAPISearchByCompanyIdAndArrayCriteria( $user_obj->getCompany(), array('status_id' => 10, 'user_id' => $user_obj->getID(), 'calculation_id' => array(100,200) ) );
+				if ( $udlf->getRecordCount() > 0 ) {
+					$pdf->setLineWidth( 0.10 );
+
+					$max_tax_info_rows = $udlf->getRecordCount()/2;
+
+					$left_total_rows = 0;
+					$right_total_rows = 0;
+					foreach( $udlf as $ud_obj ) {
+						if ( $ud_obj->getCompanyDeductionObject()->getCalculation() == 100 ) { //Federal
+							$left_total_rows++;
+						} elseif ( $ud_obj->getCompanyDeductionObject()->getCalculation() == 200 ) { //Province/State
+							$right_total_rows++;
+						}
+					}
+
+					$left_block_adjust_y = $right_block_adjust_y = $block_adjust_y;
+					
+					Debug::Text('Tax Info Rows: Left: '. $left_total_rows .' Right: '. $right_total_rows, __FILE__, __LINE__, __METHOD__,10);
+					if ( $left_total_rows < $right_total_rows ) {
+						for( $i=0; $i < ($right_total_rows-$left_total_rows); $i++ ) {
+							$pdf->setXY( Misc::AdjustXY(0, $adjust_x), Misc::AdjustXY($left_block_adjust_y, $adjust_y) );
+							$pdf->Cell(87.5, 3, '', 1, 0, 'C', FALSE, '', 1);
+							$left_block_adjust_y = $left_block_adjust_y - 3;
+						}
+					} elseif ( $right_total_rows < $left_total_rows ) {
+						for( $i=0; $i < ($left_total_rows-$right_total_rows); $i++ ) {
+							$pdf->setXY( Misc::AdjustXY(87.5, $adjust_x), Misc::AdjustXY($right_block_adjust_y, $adjust_y) );
+							$pdf->Cell(87.5, 3, '', 1, 0, 'C', FALSE, '', 1);
+							$right_block_adjust_y = $right_block_adjust_y - 3;
+						}
+					}
+
+					foreach( $udlf as $ud_obj ) {
+						if ( $ud_obj->getCompanyDeductionObject()->getCalculation() == 100 ) { //Federal
+							$pdf->setXY( Misc::AdjustXY(0, $adjust_x), Misc::AdjustXY($left_block_adjust_y, $adjust_y) );
+							$pdf->Cell(87.5, 3, $ud_obj->getDescription(), 1, 0, 'C', FALSE, '', 1);
+							$left_block_adjust_y = $left_block_adjust_y - 3;
+						}
+					}
+
+					foreach( $udlf as $ud_obj ) {
+						if ( $ud_obj->getCompanyDeductionObject()->getCalculation() == 200 ) { //Province/State
+							$pdf->setXY( Misc::AdjustXY(87.5, $adjust_x), Misc::AdjustXY($right_block_adjust_y, $adjust_y) );
+							$pdf->Cell(87.5, 3, $ud_obj->getDescription(), 1, 0, 'C', FALSE, '', 1);
+							$right_block_adjust_y = $right_block_adjust_y - 3;
+						}
+					}
+
+					$block_adjust_y = $left_block_adjust_y;
+
+					$pdf->SetFont('','B',6);
+					$pdf->setXY( Misc::AdjustXY(0, $adjust_x), Misc::AdjustXY($block_adjust_y, $adjust_y) );
+					$pdf->Cell(87.5, 3, TTi18n::gettext('Federal'), 1, 0, 'C', FALSE, '', 1);
+
+					$pdf->SetFont('','B',6);
+					$pdf->setXY( Misc::AdjustXY(87.5, $adjust_x), Misc::AdjustXY($block_adjust_y, $adjust_y) );
+					$pdf->Cell(87.5, 3, TTi18n::gettext('Province/State'), 1, 0, 'C', FALSE, '', 1);
+
+					$pdf->SetFont('','B',6);
+					$pdf->setXY( Misc::AdjustXY(0, $adjust_x), Misc::AdjustXY($block_adjust_y-3, $adjust_y) );
+					$pdf->Cell(175, 3, TTi18n::gettext('Tax Information'), 1, 0, 'C', FALSE, '', 1);
+				}
+				unset( $udlf, $ud_obj, $left_block_adjust_y, $right_block_adjust_y, $left_total_rows, $right_total_rows );
+
 				//
 				// Pay Stub Footer
 				//
@@ -3125,6 +3340,7 @@ class PayStubFactory extends Factory {
 				//Line
 				$pdf->setLineWidth( 1 );
 				$pdf->Line( Misc::AdjustXY(0, $adjust_x), Misc::AdjustXY($block_adjust_y, $adjust_y), Misc::AdjustXY(185, $adjust_y), Misc::AdjustXY($block_adjust_y, $adjust_y) );
+				$pdf->setLineWidth( 0 );
 
 				//Non Negotiable
 				$pdf->SetFont('','B',14);
@@ -3162,14 +3378,37 @@ class PayStubFactory extends Factory {
 				}
 
 				$pdf->SetFont('','B',12);
-				$pdf->setXY( Misc::AdjustXY(75, $adjust_x), Misc::AdjustXY($block_adjust_y+17, $adjust_y) );
+				$pdf->setXY( Misc::AdjustXY(75, $adjust_x), Misc::AdjustXY($block_adjust_y+9, $adjust_y) );
 				$pdf->Cell(100, 5, $net_pay_label.': '. $pay_stub_obj->getCurrencyObject()->getSymbol() . $net_pay_amount . ' ' . $pay_stub_obj->getCurrencyObject()->getISOCode(), $border, 1, 'R', FALSE, '', 1);
+
+				//Display additional employee information on the pay stub such as job title, SIN, hire date.
+				$block_adjust_y = $block_adjust_y + 12;
+
+				$pdf->SetFont('','',8);
+				if ( $user_obj->getTitle() > 0 AND is_object( $user_obj->getTitleObject() ) ) {
+					$block_adjust_y = $block_adjust_y + 4;
+					$pdf->setXY( Misc::AdjustXY(75, $adjust_x), Misc::AdjustXY($block_adjust_y, $adjust_y) );
+					$pdf->Cell(100, 4, TTi18n::gettext('Title').': '. $user_obj->getTitleObject()->getName(), $border, 1, 'R', FALSE, '', 1);
+				}
+				if ( $user_obj->getHireDate() != '' ) {
+					$block_adjust_y = $block_adjust_y + 4;
+					$pdf->setXY( Misc::AdjustXY(75, $adjust_x), Misc::AdjustXY($block_adjust_y, $adjust_y) );
+					$pdf->Cell(100, 4, TTi18n::gettext('Hire Date').': '. TTDate::getDate('DATE', $user_obj->getHireDate() ), $border, 1, 'R', FALSE, '', 1);
+				}
+				if ( $user_obj->getSIN() != '' ) {
+					$block_adjust_y = $block_adjust_y + 4;
+					$pdf->setXY( Misc::AdjustXY(75, $adjust_x), Misc::AdjustXY($block_adjust_y, $adjust_y) );
+					$pdf->Cell(100, 4, TTi18n::gettext('SIN / SSN').': '. $user_obj->getSecureSIN(), $border, 1, 'R', FALSE, '', 1);
+				}
+
 
 				if ( $pay_stub_obj->getTainted() == TRUE ) {
 					$tainted_flag = 'T';
 				} else {
 					$tainted_flag = '';
 				}
+
+				$block_adjust_y = 215;
 				$pdf->SetFont('','',8);
 				$pdf->setXY( Misc::AdjustXY(125, $adjust_x), Misc::AdjustXY($block_adjust_y+30, $adjust_y) );
 				$pdf->Cell(50, 5, TTi18n::gettext('Identification #:').' '. str_pad($pay_stub_obj->getId(),12,0, STR_PAD_LEFT).$tainted_flag, $border, 1, 'R', FALSE, '', 1);
@@ -3178,6 +3417,7 @@ class PayStubFactory extends Factory {
 				//Line
 				$pdf->setLineWidth( 1 );
 				$pdf->Line( Misc::AdjustXY(0, $adjust_x), Misc::AdjustXY($block_adjust_y+35, $adjust_y), Misc::AdjustXY(185, $adjust_y), Misc::AdjustXY($block_adjust_y+35, $adjust_y) );
+				$pdf->setLineWidth( 0 );
 
 				$pdf->SetFont('','', 6);
 				$pdf->setXY( Misc::AdjustXY(0, $adjust_x), Misc::AdjustXY($block_adjust_y+38, $adjust_y) );

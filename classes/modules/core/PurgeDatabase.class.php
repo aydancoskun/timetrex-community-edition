@@ -788,10 +788,16 @@ class PurgeDatabase {
 						case 'punch_control':
 						case 'user_date_total':
 						case 'schedule':
-						case 'exception':
 						case 'request':
 							//Delete punch_control/user_date rows from deleted users, or deleted companies
 							$query[] = 'delete from '. $table .' as a USING user_date as c, users as d, company as e WHERE a.user_date_id = c.id AND c.user_id = d.id AND d.company_id = e.id AND ( a.deleted = 1 OR c.deleted = 1 OR d.deleted = 1 OR e.deleted = 1 ) AND ( a.updated_date <= '. (time()-(86400*($expire_days))) .' AND d.updated_date <= '. (time()-(86400*($expire_days))) .' AND e.updated_date <= '. (time()-(86400*($expire_days))) .')';
+							break;
+						case 'exception':
+							//Delete exception rows from deleted users, or deleted companies
+							$query[] = 'delete from '. $table .' as a USING user_date as c, users as d, company as e WHERE a.user_date_id = c.id AND c.user_id = d.id AND d.company_id = e.id AND ( a.deleted = 1 OR c.deleted = 1 OR d.deleted = 1 OR e.deleted = 1 ) AND ( a.updated_date <= '. (time()-(86400*($expire_days))) .' AND d.updated_date <= '. (time()-(86400*($expire_days))) .' AND e.updated_date <= '. (time()-(86400*($expire_days))) .')';
+
+							//Delete exception rows from terminated users after they have been terminated for 3x the regular expire length.
+							$query[] = 'delete from '. $table .' as a USING user_date as c, users as d, company as e WHERE a.user_date_id = c.id AND c.user_id = d.id AND d.company_id = e.id AND ( d.status_id = 20 ) AND ( a.updated_date <= '. (time()-(86400*($expire_days*3))) .' AND d.updated_date <= '. (time()-(86400*($expire_days*3))) .' AND e.updated_date <= '. (time()-(86400*($expire_days*3))) .')';
 							break;
 						case 'user_date':
 						case 'user_identification':

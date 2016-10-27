@@ -243,6 +243,7 @@ abstract class APIFactory {
 	//       In order to do this we need to always return a special data structure that includes this information.
 	//		 static function returnHandler( $retval = TRUE, $args = array( 'code' => FALSE, 'description' => FALSE, 'details' = FALSE, 'validator_stats' => FALSE, 'user_generic_status_batch_id' => FALSE ) ) {
 	//		 The above will require too many changes, just add two more variables at the end, as it will only really be used by API->get*() functions.
+	//FIXME: Use a requestHandler() to handle all input requests, so we can parse out things like validate_only, ignore_warning (for user acknowledgable warnings) and handling all parameter parsing in a central place.
 	//		 static function returnHandler( $retval = TRUE, $code = FALSE, $description = FALSE, $details = FALSE, $validator_stats = FALSE, $user_generic_status_batch_id = FALSE, $request = FALSE, $pager = FALSE ) {
 	function returnHandler( $retval = TRUE, $code = FALSE, $description = FALSE, $details = FALSE, $validator_stats = FALSE, $user_generic_status_batch_id = FALSE, $request_data = FALSE ) {
 		if ( $this->getProtocolVersion() == 1 ) {
@@ -314,7 +315,7 @@ abstract class APIFactory {
 																	),
 											'user_generic_status_batch_id' => $user_generic_status_batch_id,
 											//Allows the API to modify the original request data to send back to the UI for notifying the user.
-											//We would like to implement validation on none set*() calls as well perhaps?
+											//We would like to implement validation on non-set*() calls as well perhaps?
 											'request' => $request_data,
 											'pager' => $this->getPagerData(),
 											'details' =>  $details,

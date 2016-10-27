@@ -581,15 +581,19 @@ class GeneralLedgerSummaryReport extends Report {
 
 						$debit_accounts = explode(',', $psea_arr[$pse_obj->getPayStubEntryNameId()]['debit_account'] );
 						foreach( $debit_accounts as $debit_account ) {
-							//$debit_account = replaceGLAccountVariables( $debit_account, $replace_arr);
 							//Debug::Text('Debit Entry: Account: '. $debit_account .' Amount: '. $pse_obj->getAmount() , __FILE__, __LINE__, __METHOD__,10);
 							//Allow negative amounts, but skip any $0 entries
-							if ( $pse_obj->getAmount() != 0 ) {
+							//FIXME: Why *did* we allow negative amounts, as they can't be exported to journal entries as negative,
+							//so this makes the report and journal entries not match. This is especially important for handling
+							//vacation accruals.
+							if ( $pse_obj->getAmount() > 0 ) {
 								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][] = array(
-													'account' => $debit_account,
+													'account' => trim($debit_account),
 													'debit_amount' => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( $pse_obj->getAmount(), $pse_obj->getColumn('currency_rate'), $currency_convert_to_base ), FALSE ),
 													'credit_amount' => NULL,
 													);
+							} elseif ( $pse_obj->getAmount() < 0 )  {
+								Debug::Text('Skipping 0 or negative debit amount: '. $pse_obj->getAmount() .' Debit Account: '. $debit_account .' User ID: '. $user_id, __FILE__, __LINE__, __METHOD__,10);
 							}
 						}
 						unset($debit_accounts, $debit_account);
@@ -601,14 +605,15 @@ class GeneralLedgerSummaryReport extends Report {
 						//Debug::Text('Combined Credit Accounts: '. count($credit_accounts) , __FILE__, __LINE__, __METHOD__,10);
 						$credit_accounts = explode(',', $psea_arr[$pse_obj->getPayStubEntryNameId()]['credit_account'] );
 						foreach( $credit_accounts as $credit_account) {
-							//$credit_account = replaceGLAccountVariables( $credit_account, $replace_arr);
 							//Allow negative amounts, but skip any $0 entries
-							if ( $pse_obj->getAmount() != 0 ) {
+							if ( $pse_obj->getAmount() > 0 ) {
 								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][] = array(
-													'account' => $credit_account,
+													'account' => trim($credit_account),
 													'debit_amount' => NULL,
 													'credit_amount' => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( $pse_obj->getAmount(), $pse_obj->getColumn('currency_rate'), $currency_convert_to_base ), FALSE ),
 													);
+							} elseif ( $pse_obj->getAmount() < 0 )  {
+								Debug::Text('Skipping negative credit amount: '. $pse_obj->getAmount() .' Credit Account: '. $credit_account .' User ID: '. $user_id, __FILE__, __LINE__, __METHOD__,10);
 							}
 						}
 						unset($credit_accounts, $credit_account);
@@ -973,6 +978,7 @@ class GeneralLedgerSummaryReport extends Report {
 		if ( is_array($this->form_data) ) {
 			//Need to group the exported data so the number of journal entries can be reduced.
 			$this->form_data = Group::GroupBy( $this->form_data, $this->formatGroupConfig() );
+			$this->form_data = Sort::arrayMultiSort( $this->form_data, $this->getSortConfig() );
 
 			$gle = new GeneralLedgerExport();
 			$gle->setFileFormat( $format );
@@ -985,7 +991,6 @@ class GeneralLedgerSummaryReport extends Report {
 					$comment = array();
 					foreach( $this->formatGroupConfig() as $group_column => $group_agg ) {
 						if ( is_int( $group_agg ) AND isset($row[$group_column]) AND $group_column != 'account' ) {
-
 							if ( is_array($row[$group_column]) AND isset($row[$group_column]['display']) ) {
 								$comment[] = $row[$group_column]['display'];
 								$group_key .= crc32( $row[$group_column]['display'] );
@@ -999,7 +1004,7 @@ class GeneralLedgerSummaryReport extends Report {
 					}
 					unset($group_column, $group_agg);
 				}
-				//Debug::Arr($row, 'GL Export Row: Group Key: '. $group_key , __FILE__, __LINE__, __METHOD__,10);
+				//Debug::Arr($row, 'GL Export Row: Group Key: "'. $group_key .'" Prev Group Key: "'. $prev_group_key .'"' , __FILE__, __LINE__, __METHOD__,10);
 
 				if ( $prev_group_key === NULL OR $prev_group_key != $group_key ) {
 					if ( $i > 0 ) {

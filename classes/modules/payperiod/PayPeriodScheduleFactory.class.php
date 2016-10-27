@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11018 $
- * $Id: PayPeriodScheduleFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
- * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
+ * $Revision: 11219 $
+ * $Id: PayPeriodScheduleFactory.class.php 11219 2013-10-22 16:18:05Z mikeb $
+ * $Date: 2013-10-22 09:18:05 -0700 (Tue, 22 Oct 2013) $
  */
 
 /**
@@ -1000,6 +1000,8 @@ class PayPeriodScheduleFactory extends Factory {
 		$last_pay_period_end_date = TTDate::getEndDayEpoch( $last_pay_period_end_date - (86400/2) );
 		Debug::text('bLast Pay Period End Date: '. TTDate::getDate('DATE+TIME', $last_pay_period_end_date) .' ('.$last_pay_period_end_date .')', __FILE__, __LINE__, __METHOD__, 10);
 
+		/*
+		//This function isn't support currently, so skip it.
 		if ( $this->getDayStartTime() != 0 ) {
 			Debug::text('Daily Start Time is set, adjusting Last Pay Period End Date by: '. TTDate::getHours( $this->getDayStartTime() ), __FILE__, __LINE__, __METHOD__, 10);
 			//Next adjust last_pay_period_end_date (which becomes the start date) to DayStartTime because then there could be a gap if they
@@ -1007,6 +1009,7 @@ class PayPeriodScheduleFactory extends Factory {
 			$last_pay_period_end_date = TTDate::getTimeLockedDate( TTDate::getBeginDayEpoch($last_pay_period_end_date) + $this->getDayStartTime(), $last_pay_period_end_date);
 			Debug::text('cLast Pay Period End Date: '. TTDate::getDate('DATE+TIME', $last_pay_period_end_date) .' ('.$last_pay_period_end_date .')', __FILE__, __LINE__, __METHOD__, 10);
 		}
+		*/
 
 		$insert_pay_period = 1; //deprecate primary pay periods.
 		switch ( $this->getType() ) {
@@ -1972,6 +1975,8 @@ class PayPeriodScheduleFactory extends Factory {
 		if ( $this->isNew() == TRUE ) {
 			$this->setCreateInitialPayPeriods( TRUE );
 		}
+
+		$this->setDayStartTime( 0 ); //Since this isn't support, force DayStartTime to midnight always.
 
 		if ( $this->getShiftAssignedDay() == FALSE ) {
 			$this->setShiftAssignedDay( 10 ); //Day shifts start on

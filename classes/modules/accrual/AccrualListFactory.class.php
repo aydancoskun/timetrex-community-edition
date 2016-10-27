@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11018 $
- * $Id: AccrualListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
- * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
+ * $Revision: 10788 $
+ * $Id: AccrualListFactory.class.php 10788 2013-08-30 23:55:26Z ipso $
+ * $Date: 2013-08-30 16:55:26 -0700 (Fri, 30 Aug 2013) $
  */
 
 /**

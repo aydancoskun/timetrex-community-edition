@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11018 $
- * $Id: StationExcludeUserListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
- * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
+ * $Revision: 11513 $
+ * $Id: StationExcludeUserListFactory.class.php 11513 2013-11-26 23:33:58Z mikeb $
+ * $Date: 2013-11-26 15:33:58 -0800 (Tue, 26 Nov 2013) $
  */
 
 /**
@@ -115,12 +115,14 @@ class StationExcludeUserListFactory extends StationExcludeUserFactory implements
 					'id' => $id,
 					);
 
+		//When adding a new station, since we can set data in child tables
+		//we need to return data even if no station record exists yet, but never if the station record is deleted.
 		$query = '
 					select 	a.*
-					from	'. $this->getTable() .' as a,
-							'. $sf->getTable() .' as b
-					where	b.id = a.station_id
-						AND a.station_id = ?
+					from	'. $this->getTable() .' as a
+							LEFT JOIN '. $sf->getTable() .' as b ON ( b.id = a.station_id )
+					where	a.station_id = ?
+						AND ( b.deleted is NULL OR b.deleted = 0 )
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -129,7 +131,7 @@ class StationExcludeUserListFactory extends StationExcludeUserFactory implements
 
 		return $this;
 	}
-
+	
 	function getByStationIdArray($id) {
 		$siulf = new StationExcludeUserListFactory();
 

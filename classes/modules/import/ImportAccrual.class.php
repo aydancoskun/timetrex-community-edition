@@ -71,7 +71,6 @@ class ImportAccrual extends Import {
 								);
 				break;
 			case 'parse_hint':
-			case 'parse_hint':
 				$upf = TTnew('UserPreferenceFactory');
 
 				$retval = array(

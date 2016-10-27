@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: UserDeductionListFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11599 $
+ * $Id: UserDeductionListFactory.class.php 11599 2013-12-04 21:13:42Z mikeb $
+ * $Date: 2013-12-04 13:13:42 -0800 (Wed, 04 Dec 2013) $
  */
 
 /**
@@ -118,6 +118,34 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 						AND b.company_id = ?
 						AND a.id = ?
 						AND a.deleted = 0
+					';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getByCompanyDeductionId($deduction_id, $where = NULL, $order = NULL) {
+		if ( $deduction_id == '') {
+			return FALSE;
+		}
+
+		$uf = new UserFactory();
+
+		$ph = array(
+					'deduction_id' => $deduction_id,
+					);
+
+		$query = '
+					select 	a.*
+					from	'. $this->getTable() .' as a,
+							'. $uf->getTable() .' as b
+					where
+						a.user_id = b.id
+						AND a.company_deduction_id = ?
+						AND ( a.deleted = 0 AND b.deleted = 0 )
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -444,38 +472,16 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
 
+		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'cdf.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'cdf.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
+
 		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['company_deduction_id']) ) ? $this->getWhereClauseSQL( 'a.company_deduction_id', $filter_data['company_deduction_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['calculation_id']) ) ? $this->getWhereClauseSQL( 'cdf.calculation_id', $filter_data['calculation_id'], 'numeric_list', $ph ) : NULL;
 
         $query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-        
         $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
         
-
-/*
-		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query  .=	' AND a.user_id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
-		}
-		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query  .=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
-		}
-		if ( isset($filter_data['exclude_id']) AND isset($filter_data['exclude_id'][0]) AND !in_array(-1, (array)$filter_data['exclude_id']) ) {
-			$query  .=	' AND a.id not in ('. $this->getListSQL($filter_data['exclude_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['user_id']) AND isset($filter_data['user_id'][0]) AND !in_array(-1, (array)$filter_data['user_id']) ) {
-			$query  .=	' AND a.user_id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['company_deduction_id']) AND isset($filter_data['company_deduction_id'][0]) AND !in_array(-1, (array)$filter_data['company_deduction_id']) ) {
-			$query  .=	' AND a.company_deduction_id in ('. $this->getListSQL($filter_data['company_deduction_id'], $ph) .') ';
-		}
-
-		if ( isset($filter_data['created_by']) AND isset($filter_data['created_by'][0]) AND !in_array(-1, (array)$filter_data['created_by']) ) {
-			$query  .=	' AND a.created_by in ('. $this->getListSQL($filter_data['created_by'], $ph) .') ';
-		}
-		if ( isset($filter_data['updated_by']) AND isset($filter_data['updated_by'][0]) AND !in_array(-1, (array)$filter_data['updated_by']) ) {
-			$query  .=	' AND a.updated_by in ('. $this->getListSQL($filter_data['updated_by'], $ph) .') ';
-		}
-*/
 		$query .= 	'
 						AND a.deleted = 0
 					';

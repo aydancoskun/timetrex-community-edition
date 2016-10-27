@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9851 $
- * $Id: send_file.php 9851 2013-05-10 20:43:50Z ipso $
- * $Date: 2013-05-10 13:43:50 -0700 (Fri, 10 May 2013) $
+ * $Revision: 11377 $
+ * $Id: send_file.php 11377 2013-11-08 23:06:49Z mikeb $
+ * $Date: 2013-11-08 15:06:49 -0800 (Fri, 08 Nov 2013) $
  */
 require_once('../includes/global.inc.php');
 
@@ -149,6 +149,19 @@ switch ($object_type) {
 		$uf = TTnew( 'UserFactory' );
 		$file_name = $uf->getPhotoFileName( $current_company->getId(), $object_id );
 		Debug::Text('File Name: '. $file_name, __FILE__, __LINE__, __METHOD__,10);
+		if ( $file_name != '' AND file_exists($file_name) ) {
+			$params['file'] = $file_name;
+			$params['ContentType'] = 'image/'. strtolower( pathinfo($file_name, PATHINFO_EXTENSION) );
+			$params['ContentDisposition'] = array( HTTP_DOWNLOAD_INLINE, $file_name );
+			$params['cache'] = TRUE;
+		}
+		break;
+	case 'punch_image':
+		Debug::Text('Punch Image...', __FILE__, __LINE__, __METHOD__,10);
+
+		$pf = TTnew( 'PunchFactory' );
+		$file_name = $pf->getImageFileName( $current_company->getId(), $parent_id, $object_id );
+		Debug::Text('File Name: '. $file_name .' Company ID: '. $current_company->getId() .' User ID: '. $parent_id, __FILE__, __LINE__, __METHOD__,10);
 		if ( $file_name != '' AND file_exists($file_name) ) {
 			$params['file'] = $file_name;
 			$params['ContentType'] = 'image/'. strtolower( pathinfo($file_name, PATHINFO_EXTENSION) );

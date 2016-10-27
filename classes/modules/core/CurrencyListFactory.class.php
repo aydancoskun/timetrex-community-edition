@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10749 $
- * $Id: CurrencyListFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
- * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
+ * $Revision: 10695 $
+ * $Id: CurrencyListFactory.class.php 10695 2013-08-16 04:36:19Z ennis $
+ * $Date: 2013-08-15 21:36:19 -0700 (Thu, 15 Aug 2013) $
  */
 
 /**
