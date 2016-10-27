@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12174 $
- * $Id: UserDeductionFactory.class.php 12174 2014-01-29 20:57:47Z mikeb $
- * $Date: 2014-01-29 12:57:47 -0800 (Wed, 29 Jan 2014) $
+ * $Revision: 12528 $
+ * $Id: UserDeductionFactory.class.php 12528 2014-03-03 23:20:02Z mikeb $
+ * $Date: 2014-03-03 15:20:02 -0800 (Mon, 03 Mar 2014) $
  */
 
 /**
@@ -1360,21 +1360,22 @@ class UserDeductionFactory extends Factory {
 				}
 
 				$pd_obj->setGrossPayPeriodIncome( $amount );
-
+				
 				switch ( $cd_obj->getCalculation() ) {
 					case 82: //US - Medicare - Employee
 						$pd_obj->setMedicareFilingStatus( $user_value1 );
-						$pd_obj->setYearToDateGrossIncome( $cd_obj->getCalculationYTDAmount( $pay_stub_obj ) );
-
+						$pd_obj->setYearToDateGrossIncome( $cd_obj->getCalculationYTDAmount( $pay_stub_obj ) ); //Make sure YTD amount is specified for all calculation types.
 						$retval = $pd_obj->getEmployeeMedicare();
 						break;
 					case 83: //US - Medicare - Employer
 						$retval = $pd_obj->getEmployerMedicare();
 						break;
 					case 84: //US - Social Security - Employee
+						$pd_obj->setYearToDateSocialSecurityContribution( $cd_obj->getPayStubEntryAccountYTDAmount( $pay_stub_obj ) );
 						$retval = $pd_obj->getEmployeeSocialSecurity();
 						break;
 					case 85: //US - Social Security - Employer
+						$pd_obj->setYearToDateSocialSecurityContribution( $cd_obj->getPayStubEntryAccountYTDAmount( $pay_stub_obj ) );
 						$retval = $pd_obj->getEmployerSocialSecurity();
 						break;
 				}
@@ -1397,12 +1398,15 @@ class UserDeductionFactory extends Factory {
 				if ( $this->getPayStubEntryAccountLinkObject()->getEmployeeCPP() != '' ) {
 					Debug::Text('Found Employee CPP account link!: ', __FILE__, __LINE__, __METHOD__, 10);
 
+					$pd_obj->setYearToDateCPPContribution( $cd_obj->getPayStubEntryAccountYTDAmount( $pay_stub_obj ) );
+					/*
 					$previous_ytd_cpp_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'previous', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeCPP() );
 					$current_ytd_cpp_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'current', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeCPP() );
 					Debug::text('YTD CPP Contribution: Previous Amount: '. $previous_ytd_cpp_arr['ytd_amount'] .' Current Amount: '. $current_ytd_cpp_arr['amount'], __FILE__, __LINE__, __METHOD__, 10);
 
 					$pd_obj->setYearToDateCPPContribution( bcadd($previous_ytd_cpp_arr['ytd_amount'], $current_ytd_cpp_arr['ytd_amount'] ) );
 					unset($previous_ytd_cpp_arr, $current_ytd_cpp_arr);
+					*/
 				}
 
 				$pd_obj->setGrossPayPeriodIncome( $amount );
@@ -1431,12 +1435,15 @@ class UserDeductionFactory extends Factory {
 				if ( $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() != '' ) {
 					Debug::Text('Found Employee EI account link!: ', __FILE__, __LINE__, __METHOD__, 10);
 
+					$pd_obj->setYearToDateEIContribution(  $cd_obj->getPayStubEntryAccountYTDAmount( $pay_stub_obj ) );
+					/*
 					$previous_ytd_ei_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'previous', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() );
 					$current_ytd_ei_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'current', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() );
 					Debug::text('YTD EI Contribution: Previous Amount: '. $previous_ytd_ei_arr['ytd_amount'] .' Current Amount: '. $current_ytd_ei_arr['amount'], __FILE__, __LINE__, __METHOD__, 10);
 
 					$pd_obj->setYearToDateEIContribution( bcadd($previous_ytd_ei_arr['ytd_amount'], $current_ytd_ei_arr['ytd_amount'] ) );
 					unset($previous_ytd_ei_arr, $current_ytd_ei_arr);
+					*/
 				}
 
 				$pd_obj->setGrossPayPeriodIncome( $amount );

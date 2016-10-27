@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12453 $
- * $Id: Install.class.php 12453 2014-02-25 16:10:34Z mikeb $
- * $Date: 2014-02-25 08:10:34 -0800 (Tue, 25 Feb 2014) $
+ * $Revision: 12528 $
+ * $Id: Install.class.php 12528 2014-03-03 23:20:02Z mikeb $
+ * $Date: 2014-03-03 15:20:02 -0800 (Mon, 03 Mar 2014) $
  */
 
 /**
@@ -250,13 +250,13 @@ class Install {
 				$section['database'] = preg_replace('/^type\s*=.*/im', 'type = '. trim($config_vars['type']), $section['database']);
 			}
 			if ( isset($config_vars['database_name']) AND $config_vars['database_name'] != '' ) {
-				$section['database'] = preg_replace('/^database_name\s*=.*/im', 'database_name = '. trim($config_vars['database_name']), $section['database']);
+				$section['database'] = preg_replace('/^database_name\s*=.*/im', 'database_name = "'. trim($config_vars['database_name']) .'"', $section['database']);
 			}
 			if ( isset($config_vars['user']) AND $config_vars['user'] != '') {
-				$section['database'] = preg_replace('/^user\s*=.*/im', 'user = '. trim($config_vars['user']), $section['database']);
+				$section['database'] = preg_replace('/^user\s*=.*/im', 'user = "'. trim($config_vars['user']) .'"', $section['database']);
 			}
 			if ( isset($config_vars['password']) AND $config_vars['password'] != '' ) {
-				$section['database'] = preg_replace('/^password\s*=.*/im', 'password = '. trim($config_vars['password']), $section['database']);
+				$section['database'] = preg_replace('/^password\s*=.*/im', 'password = "'. trim($config_vars['password']) .'"', $section['database']);
 			}
 			$contents = str_replace( $section[0], $section['database'], $contents );
 			unset($section);
@@ -1007,8 +1007,8 @@ class Install {
 	function checkPHPCLIRequirements() {
 		if ( $this->checkPHPCLIBinary() === 0 ) {
 			$command = $this->getPHPCLIRequirementsCommand();
-			system( $command, $exit_code );
-			Debug::Arr($exit_code, 'PHP CLI Requirements Command: '. $command .' Output: ', __FILE__, __LINE__, __METHOD__, 10);
+			exec( $command, $output, $exit_code );
+			Debug::Arr($output, 'PHP CLI Requirements Command: '. $command .' Output: ', __FILE__, __LINE__, __METHOD__, 10);
 			if ( $exit_code == 0 ) {
 				return 0;
 			}
@@ -1354,7 +1354,6 @@ class Install {
 				$retarr[$this->checkPHPCLIBinary()]++;
 			}
 			if ( is_array($exclude_check) AND in_array('php_cli_requirements', $exclude_check) == FALSE	) {
-				Debug::Arr($exclude_check, 'zzzRetArr: ', __FILE__, __LINE__, __METHOD__, 9);
 				$retarr[$this->checkPHPCLIRequirements()]++;
 			}
 			$retarr[$this->checkWritableConfigFile()]++;
@@ -1457,7 +1456,6 @@ class Install {
 				}
 			}
 			if ( is_array($exclude_check) AND in_array('php_cli_requirements', $exclude_check) == FALSE ) {
-				Debug::Arr($exclude_check, 'zzz2RetArr: ', __FILE__, __LINE__, __METHOD__, 9);
 				if ( $fail_all == TRUE OR $this->checkPHPCLIRequirements() != 0 ) {
 					$retarr[] = 'PHPCLIReq';
 				}

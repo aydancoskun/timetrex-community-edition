@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11942 $
- * $Id: CompanyDeductionFactory.class.php 11942 2014-01-09 00:50:10Z mikeb $
- * $Date: 2014-01-08 16:50:10 -0800 (Wed, 08 Jan 2014) $
+ * $Revision: 12528 $
+ * $Id: CompanyDeductionFactory.class.php 12528 2014-03-03 23:20:02Z mikeb $
+ * $Date: 2014-03-03 15:20:02 -0800 (Mon, 03 Mar 2014) $
  */
 
 /**
@@ -2800,6 +2800,25 @@ class CompanyDeductionFactory extends Factory {
 
 		$amount = bcsub( $include, $exclude);
 
+		if ( $amount < 0 ) {
+			$amount = 0;
+		}
+
+		Debug::text('Amount: '. $amount, __FILE__, __LINE__, __METHOD__, 10);
+
+		return $amount;
+	}
+
+	function getPayStubEntryAccountYTDAmount( $pay_stub_obj ) {
+		if ( !is_object($pay_stub_obj) ) {
+			return FALSE;
+		}
+
+		//Use current YTD amount because if we only include previous pay stub YTD amounts we won't include YTD adjustment PS amendments on the current PS.
+		$previous_amount = $this->getPayStubEntryAmountSum( $pay_stub_obj, array( $this->getPayStubEntryAccount() ), 'previous+ytd_adjustment', 'ytd_amount' );
+		$current_amount = $this->getPayStubEntryAmountSum( $pay_stub_obj, array( $this->getPayStubEntryAccount() ), 'current', 'amount' );
+
+		$amount = bcadd( $previous_amount, $current_amount);
 		if ( $amount < 0 ) {
 			$amount = 0;
 		}

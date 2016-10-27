@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12453 $
- * $Id: global.inc.php 12453 2014-02-25 16:10:34Z mikeb $
- * $Date: 2014-02-25 08:10:34 -0800 (Tue, 25 Feb 2014) $
+ * $Revision: 12549 $
+ * $Id: global.inc.php 12549 2014-03-04 22:08:12Z mikeb $
+ * $Date: 2014-03-04 14:08:12 -0800 (Tue, 04 Mar 2014) $
  */
 //PHP v5.1.0 introduced $_SERVER['REQUEST_TIME'], but it doesn't include microseconds until v5.4.0.
 if ( !isset($_SERVER['REQUEST_TIME_FLOAT']) OR version_compare(PHP_VERSION, '5.4.0', '<') == TRUE ) {
@@ -61,8 +61,8 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '7.3.1' );
-define('APPLICATION_VERSION_DATE', @strtotime('27-Feb-2014') ); // Release date of version.
+define('APPLICATION_VERSION', '7.3.2' );
+define('APPLICATION_VERSION_DATE', @strtotime('03-Mar-2014') ); // Release date of version.
 
 if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') { define('OPERATING_SYSTEM', 'WIN'); } else { define('OPERATING_SYSTEM', 'LINUX'); }
 
@@ -88,11 +88,11 @@ if ( file_exists(CONFIG_FILE) ) {
 	$config_vars = parse_ini_file( CONFIG_FILE, TRUE);
 	if ( $config_vars === FALSE ) {
 		echo "Config file (". CONFIG_FILE .") contains a syntax error! If your passwords contain special characters you need to wrap them in double quotes, ie:<br>\n password = \"test!1!me\"\n";
-		exit;
+		exit(1);
 	}
 } else {
-	echo "Config file (". CONFIG_FILE .") does not exist!\n";
-	exit;
+	echo "Config file (". CONFIG_FILE .") does not exist or is not readable!\n";
+	exit(1);
 }
 
 if ( isset($config_vars['debug']['production']) AND $config_vars['debug']['production'] == 1 ) {
@@ -201,7 +201,7 @@ if ( isset($_SERVER['HTTP_AUTHORIZATION']) AND stripos( php_sapi_name(), 'cgi' )
 	//</IfModule>
 	//Or this instead:
 	//SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
-	list($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) = explode(':', base64_decode( substr( $_SERVER['HTTP_AUTHORIZATION'], 6) ) );
+	list($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) = array_pad( explode(':', base64_decode( substr( $_SERVER['HTTP_AUTHORIZATION'], 6) ) ), 2, NULL);
 }
 
 
@@ -417,7 +417,7 @@ if ( function_exists('bcscale') ) {
 }
 
 //Make sure we are using SSL if required.
-if ( $config_vars['other']['force_ssl'] == 1 AND Misc::isSSL() == FALSE AND isset( $_SERVER['HTTP_HOST'] ) AND isset( $_SERVER['REQUEST_URI'] ) AND !isset( $disable_https ) AND !isset( $enable_wap ) AND php_sapi_name() != 'cli' ) {
+if ( $config_vars['other']['force_ssl'] == 1 AND Misc::isSSL( TRUE ) == FALSE AND isset( $_SERVER['HTTP_HOST'] ) AND isset( $_SERVER['REQUEST_URI'] ) AND !isset( $disable_https ) AND !isset( $enable_wap ) AND php_sapi_name() != 'cli' ) {
 	Redirect::Page( 'https://'. $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'] );
 	exit;
 }

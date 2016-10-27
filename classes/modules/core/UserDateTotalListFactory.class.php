@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11925 $
- * $Id: UserDateTotalListFactory.class.php 11925 2014-01-08 00:13:44Z mikeb $
- * $Date: 2014-01-07 16:13:44 -0800 (Tue, 07 Jan 2014) $
+ * $Revision: 12528 $
+ * $Id: UserDateTotalListFactory.class.php 12528 2014-03-03 23:20:02Z mikeb $
+ * $Date: 2014-03-03 15:20:02 -0800 (Mon, 03 Mar 2014) $
  */
 
 /**
@@ -3889,10 +3889,12 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$query .= ( isset($filter_data['job_group_id']) ) ? $this->getWhereClauseSQL( 'jf.group_id', $filter_data['job_group_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['include_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['include_job_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['exclude_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['exclude_job_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['job_tag']) ) ? $this->getWhereClauseSQL( 'jf.id', array( 'company_id' => $company_id, 'object_type_id' => 600, 'tag' => $filter_data['job_tag'] ), 'tag', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['job_item_group_id']) ) ? $this->getWhereClauseSQL( 'jif.group_id', $filter_data['job_item_group_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['include_job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['include_job_item_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['exclude_job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['exclude_job_item_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['job_item_tag']) ) ? $this->getWhereClauseSQL( 'jif.id', array( 'company_id' => $company_id, 'object_type_id' => 610, 'tag' => $filter_data['job_item_tag'] ), 'tag', $ph ) : NULL;
 
 		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
 			$ph[] = $this->db->BindDate($filter_data['start_date']);

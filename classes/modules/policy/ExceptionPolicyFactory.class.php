@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11956 $
- * $Id: ExceptionPolicyFactory.class.php 11956 2014-01-10 01:07:15Z mikeb $
- * $Date: 2014-01-09 17:07:15 -0800 (Thu, 09 Jan 2014) $
+ * $Revision: 12549 $
+ * $Id: ExceptionPolicyFactory.class.php 12549 2014-03-04 22:08:12Z mikeb $
+ * $Date: 2014-03-04 14:08:12 -0800 (Tue, 04 Mar 2014) $
  */
 
 /**
@@ -1598,21 +1598,27 @@ class ExceptionPolicyFactory extends Factory {
 						unset($prev_punch_obj, $prev_punch_time_stamp, $x);
 						break;
 					case 'd1': //No Branch or Department
-						$add_exception = FALSE;
 						foreach ( $plf as $p_obj ) {
+							$add_exception = FALSE;
+
 							//In punches only
 							if ( $p_obj->getStatus() == 10 AND is_object( $p_obj->getPunchControlObject() ) ) {
-								//If no Tasks are setup, ignore checking them.
+								//If no Branches are setup, ignore checking them.
 								if ( $p_obj->getPunchControlObject()->getBranch() == ''
 										OR $p_obj->getPunchControlObject()->getBranch() == 0
 										OR $p_obj->getPunchControlObject()->getBranch() == FALSE  ) {
-									$add_exception = TRUE;
+									//Make sure at least one task exists before triggering exception.
+									$blf = TTNew('BranchListFactory');
+									$blf->getByCompanyID( $user_date_obj->getUserObject()->getCompany(), 1 ); //Limit to just 1 record.
+									if ( $blf->getRecordCount() > 0 ) {
+										$add_exception = TRUE;
+									}
 								}
 
+								//If no Departments are setup, ignore checking them.
 								if ( $p_obj->getPunchControlObject()->getDepartment() == ''
 										OR $p_obj->getPunchControlObject()->getDepartment() == 0
 										OR $p_obj->getPunchControlObject()->getDepartment() == FALSE ) {
-
 									//Make sure at least one task exists before triggering exception.
 									$dlf = TTNew('DepartmentListFactory');
 									$dlf->getByCompanyID( $user_date_obj->getUserObject()->getCompany(), 1 ); //Limit to just 1 record.
@@ -2519,7 +2525,12 @@ class ExceptionPolicyFactory extends Factory {
 									if ( $p_obj->getPunchControlObject()->getJob() == ''
 											OR $p_obj->getPunchControlObject()->getJob() == 0
 											OR $p_obj->getPunchControlObject()->getJob() == FALSE  ) {
-										$add_exception = TRUE;
+										//Make sure at least one task exists before triggering exception.
+										$jlf = TTNew('JobListFactory');
+										$jlf->getByCompanyID( $user_date_obj->getUserObject()->getCompany(), 1 ); //Limit to just 1 record.
+										if ( $jlf->getRecordCount() > 0 ) {
+											$add_exception = TRUE;
+										}
 									}
 
 									if ( $p_obj->getPunchControlObject()->getJobItem() == ''

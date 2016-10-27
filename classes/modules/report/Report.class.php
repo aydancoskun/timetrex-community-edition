@@ -1474,7 +1474,7 @@ class Report {
 
 		// Loop over the all currency columns to match with the report data to convert the currency columns in data to base currency in company if they do exist.
 		foreach( $this->data as $key => $row ) {
-			foreach( $currency_format_columns as $currency_column ) {
+			foreach( $currency_format_columns as $currency_column => $currency_column_value ) {
 				//We must have the currency_rate here to do the proper conversions.
 				//For reports that don't use currency_rate columns (like timesheet summary/detail) they need to create the currency_rate to always be the same as the employees default currency.
 				if ( isset( $row[$currency_column] ) AND isset( $row['currency_rate'] ) AND $row['currency_rate'] !== 1 ) {

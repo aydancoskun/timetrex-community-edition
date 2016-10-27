@@ -59,12 +59,13 @@ if ( $name == '' ) {
 }
 
 if ( $expires == '' ) {
-	$expires = time()+7776000;
+	$expires = ( time() + 7776000 );
 }
 
-setcookie( $name, $value, $expires, '/', NULL, $authentication->isSSL() );
+setcookie( $name, $value, $expires, '/', NULL, Misc::isSSL( TRUE ) );
 
 if ( $redirect != '' ) {
 	Redirect::Page( $redirect );
 }
+Debug::writeToLog();
 ?>

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11984 $
- * $Id: RecurringScheduleTemplateFactory.class.php 11984 2014-01-13 18:27:11Z mikeb $
- * $Date: 2014-01-13 10:27:11 -0800 (Mon, 13 Jan 2014) $
+ * $Revision: 12528 $
+ * $Id: RecurringScheduleTemplateFactory.class.php 12528 2014-03-03 23:20:02Z mikeb $
+ * $Date: 2014-03-03 15:20:02 -0800 (Mon, 03 Mar 2014) $
  */
 
 /**
@@ -938,6 +938,10 @@ class RecurringScheduleTemplateFactory extends Factory {
 	}
 
 	function preSave() {
+		if ( $this->getWeek() == '' ) {
+			$this->setWeek(1);
+		}
+		
 		if ( $this->getEndTime() < $this->getStartTime() ) {
 			Debug::Text('EndTime spans midnight boundary! Increase by 24hrs ', __FILE__, __LINE__, __METHOD__, 10);
 			$this->setEndTime( $this->getEndTime() + 86400 ); //End time spans midnight, add 24hrs.

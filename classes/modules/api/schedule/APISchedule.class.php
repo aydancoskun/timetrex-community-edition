@@ -611,9 +611,12 @@ class APISchedule extends APIFactory {
 		$sf = TTnew( 'ScheduleFactory' );
 
 		//Prefix the current date to the template, this avoids issues with parsing 24hr clock only, ie: 0600
-		$date_epoch = time();
-		$sf->setStartTime( TTDate::parseDateTime( TTDate::getDate('DATE', $date_epoch ).' '. $start) );
-		$sf->setEndTime( TTDate::parseDateTime( TTDate::getDate('DATE', $date_epoch ).' '. $end) );
+		//Flex was only sending the times before, so the above worked, but if date is being sent too then it fails.
+		//$date_epoch = time();
+		//$sf->setStartTime( TTDate::parseDateTime( TTDate::getDate('DATE', $date_epoch ).' '. $start) );
+		//$sf->setEndTime( TTDate::parseDateTime( TTDate::getDate('DATE', $date_epoch ).' '. $end) );
+		$sf->setStartTime( TTDate::parseDateTime( $start ) );
+		$sf->setEndTime( TTDate::parseDateTime( $end ) );
 
 		$sf->setSchedulePolicyId( $schedule_policy_id );
 		$sf->preSave();

@@ -822,7 +822,7 @@ class ScheduleSummaryReport extends Report {
 		$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(16) );
 		if ( $new_page == TRUE ) {
 			$this->pdf->Cell(0, $this->_pdf_scaleSize(5), TTi18n::getText('Schedule'), 0, 0, 'C');
-			$this->pdf->Ln( $this->_pdf_scaleSize(7) );
+			$this->pdf->Ln( $this->_pdf_scaleSize(2) );
 		}
 
 		$config = $this->getFilterConfig();
@@ -850,7 +850,7 @@ class ScheduleSummaryReport extends Report {
 			$label[] = TTi18n::getText('Employee').': '. $user;
 		}
 
-		//Debug::Arr($label, 'Label: Branch: '. $branch .' Department: '. $department, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($label, 'Label: Branch: '. $branch .' Department: '. $department .' New Page: '. (int)$new_page, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( count($label) > 0 ) {
 			if ( $new_page == FALSE ) {
@@ -1366,6 +1366,7 @@ class ScheduleSummaryReport extends Report {
 						$this->pdf->AddPage( $this->config['other']['page_orientation'], 'Letter' );
 
 						$n = 0;
+						$x = 0;
 						ksort($this->form_data['schedule_by_branch']);
 						foreach( $this->form_data['schedule_by_branch'] as $branch => $level_2 ) {
 							ksort($level_2);
@@ -1379,7 +1380,7 @@ class ScheduleSummaryReport extends Report {
 									}
 									$page_break = TRUE;
 								} else {
-									$page_break = ( $n == 0 ) ? TRUE : $this->scheduleCheckPageBreak( 30, TRUE );
+									$page_break = ( $x == 0 ) ? TRUE : $this->scheduleCheckPageBreak( 30, TRUE );
 								}
 
 								$this->scheduleHeader( $branch, $department, NULL, $page_break );
@@ -1436,6 +1437,8 @@ class ScheduleSummaryReport extends Report {
 								}
 
 								$this->scheduleFooterWeek( $column_widths );
+
+								$x++;
 							}
 
 							$n++;

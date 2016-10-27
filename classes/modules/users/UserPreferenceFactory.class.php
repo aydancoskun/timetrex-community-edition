@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11942 $
- * $Id: UserPreferenceFactory.class.php 11942 2014-01-09 00:50:10Z mikeb $
- * $Date: 2014-01-08 16:50:10 -0800 (Wed, 08 Jan 2014) $
+ * $Revision: 12528 $
+ * $Id: UserPreferenceFactory.class.php 12528 2014-03-03 23:20:02Z mikeb $
+ * $Date: 2014-03-03 15:20:02 -0800 (Mon, 03 Mar 2014) $
  */
 
 /**
@@ -173,8 +173,8 @@ class UserPreferenceFactory extends Factory {
 											'l, F d Y'	=> TTi18n::gettext('dddd, mmmm dd yyyy'),
 											'D, F d Y'	=> TTi18n::gettext('ddd, mmmm dd yyyy'),
 											'D, M d Y'	=> TTi18n::gettext('ddd, mmm dd yyyy'),
-											'D, d-M-Y'	=> TTi18n::gettext('dddd, dd-mmm-yyyy'),
-											'D, dMY'	=> TTi18n::gettext('dddd, ddmmmyyyy')
+											'D, d-M-Y'	=> TTi18n::gettext('ddd, dd-mmm-yyyy'),
+											'D, dMY'	=> TTi18n::gettext('ddd, ddmmmyyyy')
 									);
 				
 				break;
