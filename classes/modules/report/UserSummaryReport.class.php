@@ -75,7 +75,7 @@ class UserSummaryReport extends Report {
 				$retval = array(
 										//Static Columns - Aggregate functions can't be used on these.
 										'-1000-template' => TTi18n::gettext('Template'),
-										//'-1010-time_period' => TTi18n::gettext('Time Period'),
+										'-1010-time_period' => TTi18n::gettext('Time Period'), //Employed within this start/end date.
 
 										'-2010-user_status_id' => TTi18n::gettext('Employee Status'),
 										'-2020-user_group_id' => TTi18n::gettext('Employee Group'),
@@ -93,6 +93,9 @@ class UserSummaryReport extends Report {
 										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
 										'-5030-sort' => TTi18n::gettext('Sort By'),
 								);
+				break;
+			case 'time_period':
+				$retval = TTDate::getTimePeriodOptions();
 				break;
 			case 'date_columns':
 				$retval = array_merge(
@@ -175,8 +178,6 @@ class UserSummaryReport extends Report {
 										'-1080-user_group' => TTi18n::gettext('Group'),
 										'-1090-default_branch' => TTi18n::gettext('Branch'), //abbreviate for space
 										'-1100-default_department' => TTi18n::gettext('Department'), //abbreviate for space
-										'-1120-default_job' => TTi18n::gettext('Job'), //abbreviate for space
-										'-1150-default_job_item' => TTi18n::gettext('Task'), //abbreviate for space
 										'-1190-ethnic_group' => TTi18n::gettext('Ethnicity'),
 
 										'-1200-permission_control' => TTi18n::gettext('Permission Group'),
@@ -228,8 +229,13 @@ class UserSummaryReport extends Report {
 
 										'-2205-created_by' => TTi18n::gettext('Created By'),
 										'-2215-updated_by' => TTi18n::gettext('Updated By'),
-
 								);
+
+				if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+					$retval['-1120-default_job'] = TTi18n::gettext('Job');
+					$retval['-1125-default_job_item'] = TTi18n::gettext('Task');
+				}
+
 				$retval = array_merge( $retval, (array)$this->getOptions('date_columns'), (array)$this->getOptions('custom_columns'), (array)$this->getOptions('report_static_custom_column')  );
 				ksort($retval);
 				break;
@@ -810,6 +816,14 @@ class UserSummaryReport extends Report {
 		//Debug::Text(' Permission Children: '. count($permission_children_ids) .' Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($permission_children_ids, 'Permission Children: '. count($permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($wage_permission_children_ids, 'Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
+
+		//Rename start/end_date to employed_start/end_date, this prevents other reports like JobDetail from sending the start/end to the UserListFactory which may cause no records to be returned.
+		if ( isset($filter_data['start_date']) ) {
+			$filter_data['employed_start_date'] = $filter_data['start_date'];
+		}
+		if ( isset($filter_data['end_date']) ) {
+			$filter_data['employed_end_date'] = $filter_data['end_date'];
+		}
 
 		//Always include date columns, because 'hire-date_stamp' is not recognized by the UserFactory. This greatly slows down the report though.
 		$columns['effective_date'] = $columns['hire_date'] = $columns['termination_date'] = $columns['birth_date'] = $columns['created_date'] = $columns['updated_date'] = TRUE;

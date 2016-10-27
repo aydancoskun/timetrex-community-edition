@@ -603,6 +603,16 @@ var PermissionManager = (function() {
 					result = true;
 				}
 				break;
+			case 'ROE':
+				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
+					result = false;
+				} else if ( ( PermissionManager.validate( permission_section, 'view' ) ||
+					PermissionManager.validate( permission_section, 'view_own' ) ||
+					PermissionManager.validate( permission_section, 'view_child' ) ) &&
+					countryPermissionValidate( 'CA' ) ) {
+					result = true;
+				}
+				break;
 			default :
 
 				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
@@ -690,7 +700,6 @@ var PermissionManager = (function() {
 			case 'Schedule':
 				permission_section = 'schedule';
 				break;
-			case 'UserDefault':
 			case 'TimeSheet':
 			case 'UserDateTotalParent':
 			case 'UserDateTotal':
@@ -753,7 +762,7 @@ var PermissionManager = (function() {
 				break;
 			case 'Employee':
 			case 'EmployeeBankAccount':
-
+			case 'UserDefault':
 			case 'UserTitle':
 			case 'UserGroup':
 			case 'EthnicGroup':
@@ -777,7 +786,6 @@ var PermissionManager = (function() {
 				break;
 			case 'LoginUserExpense':
 			case 'UserExpense':
-
 				permission_section = 'user_expense';
 				break;
 			case 'UserSkill':
@@ -858,7 +866,9 @@ var PermissionManager = (function() {
 			case 'CompanyTaxDeduction':
 				permission_section = 'company_tax_deduction';
 				break;
-
+			case 'UserTaxDeduction':
+				permission_section = 'user_tax_deduction';
+				break;
 			case 'Request':
 				permission_section = 'request';
 				break;

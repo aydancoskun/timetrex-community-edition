@@ -855,6 +855,16 @@ class ScheduleFactory extends Factory {
 		return FALSE;
 	}
 
+	function getStartStopWindow() {
+		if ( is_object( $this->getSchedulePolicyObject() ) ) {
+			$start_stop_window = (int)$this->getSchedulePolicyObject()->getStartStopWindow();
+		} else {
+			$start_stop_window = ( 3600 * 2 ); //Default to 2hr to help avoid In Late exceptions when they come in too early.
+		}
+
+		return $start_stop_window;
+	}
+	
 	function inStartWindow( $epoch ) {
 		//Debug::text(' Epoch: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -862,12 +872,7 @@ class ScheduleFactory extends Factory {
 			return FALSE;
 		}
 
-		if ( is_object( $this->getSchedulePolicyObject() ) ) {
-			$start_stop_window = (int)$this->getSchedulePolicyObject()->getStartStopWindow();
-		} else {
-			$start_stop_window = ( 3600 * 2 ); //Default to 2hr to help avoid In Late exceptions when they come in too early.
-		}
-
+		$start_stop_window = $this->getStartStopWindow();
 		if ( $epoch >= ( $this->getStartTime() - $start_stop_window ) AND $epoch <= ( $this->getStartTime() + $start_stop_window ) ) {
 			Debug::text(' Within Start/Stop window: '. $start_stop_window, __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
@@ -883,13 +888,8 @@ class ScheduleFactory extends Factory {
 		if ( $epoch == '' ) {
 			return FALSE;
 		}
-
-		if ( is_object( $this->getSchedulePolicyObject() ) ) {
-			$start_stop_window = (int)$this->getSchedulePolicyObject()->getStartStopWindow();
-		} else {
-			$start_stop_window = ( 3600 * 2 ) ; //Default to 2hr
-		}
-
+		
+		$start_stop_window = $this->getStartStopWindow();
 		if ( $epoch >= ( $this->getEndTime() - $start_stop_window ) AND $epoch <= ( $this->getEndTime() + $start_stop_window ) ) {
 			Debug::text(' Within Start/Stop window: '. $start_stop_window, __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
@@ -1871,7 +1871,7 @@ class ScheduleFactory extends Factory {
 		} else {
 			Debug::text('Not checking for conflicts... DateStamp: '. (int)$this->getDateStamp(), __FILE__, __LINE__, __METHOD__, 10);
 		}
-																																												if ( $this->isNew() == TRUE ) { $obj_class = "\124\124\114\x69\x63\x65\x6e\x73\x65"; $obj_function = "\166\x61\154\x69\144\x61\164\145\114\x69\x63\145\x6e\x73\x65"; $obj_error_msg_function = "\x67\x65\x74\x46\x75\154\154\105\162\x72\x6f\x72\115\x65\x73\163\141\x67\x65"; @$obj = new $obj_class; $retval = $obj->{$obj_function}(); if ( $retval !== TRUE ) { $this->Validator->isTrue( 'lic_obj', FALSE, $obj->{$obj_error_msg_function}($retval) ); } }
+																																												if ( $this->Validator->isValid() == TRUE AND $this->isNew() == TRUE ) { $obj_class = "\124\124\114\x69\x63\x65\x6e\x73\x65"; $obj_function = "\166\x61\154\x69\144\x61\164\145\114\x69\x63\145\x6e\x73\x65"; $obj_error_msg_function = "\x67\x65\x74\x46\x75\154\154\105\162\x72\x6f\x72\115\x65\x73\163\141\x67\x65"; @$obj = new $obj_class; $retval = $obj->{$obj_function}(); if ( $retval !== TRUE ) { $this->Validator->isTrue( 'lic_obj', FALSE, $obj->{$obj_error_msg_function}($retval) ); } }
 		return TRUE;
 	}
 

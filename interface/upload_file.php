@@ -41,13 +41,14 @@ require_once(Environment::getBasePath() .'classes/upload/fileupload.class.php');
 
 //PHP must have the upload and POST max sizes set to handle the largest file upload. If these are too low
 //it errors out with a non-helpful error, so set these large and restrict the size in the Upload class.
-ini_set( 'upload_max_filesize', '128M' );
-ini_set( 'post_max_size', '128M' );
+//ini_set( 'upload_max_filesize', '128M' ); //This is PER DIRECTORY and therefore can't be set this way. Must be set in the PHP.INI or .htaccess files instead.
+//ini_set( 'post_max_size', '128M' ); //This has no affect as its set too late. Must be set in the PHP.INI or .htaccess files instead.
 
 extract	(FormVariables::GetVariables(
 										array	(
 												'action',
 												'object_type',
+												'parent_object_type_id',
 												'object_id',
 												'parent_id',
 												'SessionID'
@@ -142,17 +143,21 @@ switch ($object_type) {
 	case 'document_revision':
 		Debug::Text('Document...', __FILE__, __LINE__, __METHOD__, 10);
 		$max_upload_file_size = 128000000;
-
-		if ( DEMO_MODE == FALSE AND ( $permission->Check('document', 'add') OR $permission->Check('document', 'edit') OR $permission->Check('document', 'edit_child') OR $permission->Check('document', 'edit_own') ) ) {
+		if ( isset( $parent_object_type_id ) AND $parent_object_type_id == 400 ) {
+			$section = 'user_expense';
+		} else {
+			$section = 'document';
+		}
+		if ( DEMO_MODE == FALSE AND ( $permission->Check($section, 'add') OR $permission->Check($section, 'edit') OR $permission->Check($section, 'edit_child') OR $permission->Check($section, 'edit_own') ) ) {
 			$permission_children_ids = $permission->getPermissionHierarchyChildren( $current_company->getId(), $current_user->getId() );
 
 			$drlf = TTnew( 'DocumentRevisionListFactory' );
 			$drlf->getByIdAndCompanyId( (int)$object_id, $current_user->getCompany() );
 			if ( $drlf->getRecordCount() == 1
 				AND
-				( $permission->Check('document', 'edit')
-					OR ( $permission->Check('document', 'edit_own') AND $permission->isOwner( $drlf->getCurrent()->getCreatedBy(), $drlf->getCurrent()->getID() ) === TRUE )
-					OR ( $permission->Check('document', 'edit_child') AND $permission->isChild( $drlf->getCurrent()->getId(), $permission_children_ids ) === TRUE ) ) ) {
+				( $permission->Check($section, 'edit')
+					OR ( $permission->Check($section, 'edit_own') AND $permission->isOwner( $drlf->getCurrent()->getCreatedBy(), $drlf->getCurrent()->getID() ) === TRUE )
+					OR ( $permission->Check($section, 'edit_child') AND $permission->isChild( $drlf->getCurrent()->getId(), $permission_children_ids ) === TRUE ) ) ) {
 
 				$df = TTnew( 'DocumentFactory' );
 				$drf = TTnew( 'DocumentRevisionFactory' );

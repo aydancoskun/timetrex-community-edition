@@ -33,7 +33,11 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		this._super( 'initialize' );
 		this.edit_view_tpl = 'CompanyTaxDeductionEditView.html';
-		this.permission_id = 'company_tax_deduction';
+		if ( this.sub_view_mode ) {
+			this.permission_id = 'user_tax_deduction';
+		} else {
+			this.permission_id = 'company_tax_deduction';
+		}
 		this.viewId = 'CompanyTaxDeduction';
 		this.script_name = 'CompanyTaxDeductionView';
 		this.table_name_key = 'company_deduction';
@@ -201,14 +205,11 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 	saveInsideEditorData: function( callBack ) {
 		var $this = this;
-
 		if ( !this.current_edit_record || !this.current_edit_record.id ) {
 			if ( Global.isSet( callBack ) ) {
 				callBack();
 			}
-
 		}
-
 		var data = this.employee_setting_grid.getGridParam( 'data' );
 		var columns = this.employee_setting_grid.getGridParam( 'colModel' );
 
@@ -432,7 +433,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		this.is_add = false;
 		LocalCacheData.current_doing_context_action = 'save';
 		if ( this.is_mass_editing ) {
-
 			var check_fields = {};
 			for ( var key in this.edit_view_ui_dic ) {
 				var widget = this.edit_view_ui_dic[key];
@@ -443,7 +443,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					}
 				}
 			}
-
 			record = [];
 			$.each( this.mass_edit_record_ids, function( index, value ) {
 				var common_record = Global.clone( check_fields );
@@ -454,28 +453,114 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		} else {
 			record = this.current_edit_record;
 		}
-
 		record = this.uniformVariable( record );
-
-		if ( !this.sub_view_mode || this.current_edit_record.id ) {
+		if ( !this.sub_view_mode ) {
 			this.api['set' + this.api.key_name]( record, {
 				onResult: function( result ) {
-
 					$this.onSaveResult( result );
-
 				}
 			} );
-
 		} else {
-			this.user_deduction_api.setUserDeduction( record, {
+			if ( !this.current_edit_record.id ) {
+				this.user_deduction_api.setUserDeduction( record, {
+					onResult: function( result ) {
+						$this.onSaveResult( result );
+					}
+				} );
+			} else {
+				$this.saveInsideEditorData( function() {
+					$this.refresh_id = $this.current_edit_record.id; // as add
+					$this.search();
+					$this.current_edit_record = null;
+					$this.removeEditView();
+				} );
+			}
+		}
+
+	},
+
+	onSaveAndContinue: function() {
+		var $this = this;
+		this.is_add = false;
+		LocalCacheData.current_doing_context_action = 'save_and_continue';
+		var record = this.current_edit_record;
+		record = this.uniformVariable( record );
+		if ( !this.sub_view_mode ) {
+			this.api['set' + this.api.key_name]( record, {
 				onResult: function( result ) {
-
-					$this.onSaveResult( result );
-
+					$this.onSaveAndContinueResult( result );
 				}
+			} );
+		} else {
+			// Only edit record can go here
+			$this.saveInsideEditorData( function() {
+				$this.refresh_id = $this.current_edit_record.id;
+				$this.search( false );
+				$this.onEditClick( $this.refresh_id, true );
 			} );
 		}
 
+
+	},
+
+	onSaveAndNextClick: function() {
+		var $this = this;
+		this.is_add = false;
+		var record = this.current_edit_record;
+		LocalCacheData.current_doing_context_action = 'save_and_next';
+		record = this.uniformVariable( record );
+
+		if ( !this.sub_view_mode ) {
+			this.api['set' + this.api.key_name]( record, {
+				onResult: function( result ) {
+					$this.onSaveAndNextResult( result );
+				}
+			} );
+		} else {
+			// Only edit record can go here
+			$this.saveInsideEditorData( function() {
+				$this.refresh_id = $this.current_edit_record.id;
+				$this.onRightArrowClick();
+				$this.search( false );
+			} );
+		}
+
+
+	},
+
+	//Make sure this.current_edit_record is updated before validate
+	validate: function() {
+		var $this = this;
+		var record = {};
+		if ( this.is_mass_editing ) {
+			for ( var key in this.edit_view_ui_dic ) {
+				if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
+					continue;
+				}
+				var widget = this.edit_view_ui_dic[key];
+				if ( Global.isSet( widget.isChecked ) ) {
+					if ( widget.isChecked() && widget.getEnabled() ) {
+						record[key] = widget.getValue();
+					}
+				}
+			}
+		} else {
+			record = this.current_edit_record;
+		}
+		record = this.uniformVariable( record );
+		if ( !this.sub_view_mode ) {
+			this.api['validate' + this.api.key_name]( record, {
+				onResult: function( result ) {
+					$this.validateResult( result );
+				}
+			} );
+		} else {
+			this.user_deduction_api.validateUserDeduction( record, {
+				onResult: function( result ) {
+					$this.validateResult( result );
+				}
+			} );
+		}
 	},
 
 	uniformVariable: function( record ) {
@@ -501,39 +586,24 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		if ( result.isValid() ) {
 			var result_data = result.getResult();
 
-			if ( this.sub_view_mode ) {
-
-				if ( result_data === true ) {
-					$this.refresh_id = $this.current_edit_record.id; // as add
-					$this.saveInsideEditorData( function() {
-
-						$this.search();
-						$this.onSaveDone( result );
-						$this.current_edit_record = null;
-						$this.removeEditView();
-
-					} );
-				} else if ( result_data > 0 ) { // as new
-					$this.search();
-					$this.onSaveDone( result );
-					$this.current_edit_record = null;
-					$this.removeEditView();
-				}
-
-			} else {
+			if ( !this.sub_view_mode ) {
 				if ( result_data === true ) {
 					$this.refresh_id = $this.current_edit_record.id; // as add
 				} else if ( result_data > 0 ) { // as new
 					$this.refresh_id = result_data;
 				}
-
 				$this.saveInsideEditorData( function() {
-
 					$this.search();
 					$this.onSaveDone( result );
 					$this.current_edit_record = null;
 					$this.removeEditView();
 				} );
+			} else {
+				$this.refresh_id = null;
+				$this.search();
+				$this.onSaveDone( result );
+				$this.current_edit_record = null;
+				$this.removeEditView();
 			}
 
 		} else {
@@ -549,18 +619,16 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			var result_data = result.getResult();
 			if ( result_data === true ) {
 				$this.refresh_id = $this.current_edit_record.id;
-
 			} else if ( result_data > 0 ) { // as new
 				$this.refresh_id = result_data;
 			}
-
-			$this.saveInsideEditorData( function() {
-				$this.search( false );
-				$this.onEditClick( $this.refresh_id, true );
-
-				$this.onSaveAndContinueDone( result );
-
-			} );
+			if ( !this.sub_view_mode ) {
+				$this.saveInsideEditorData( function() {
+					$this.search( false );
+					$this.onEditClick( $this.refresh_id, true );
+					$this.onSaveAndContinueDone( result );
+				} );
+			}
 
 		} else {
 			$this.setErrorTips( result );
@@ -684,7 +752,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			var result_data = result.getResult();
 			if ( result_data === true ) {
 				$this.refresh_id = $this.current_edit_record.id;
-
 			} else if ( result_data > 0 ) {
 				$this.refresh_id = result_data;
 			}
@@ -693,7 +760,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				$this.onRightArrowClick();
 				$this.search( false );
 				$this.onSaveAndNextDone( result );
-
 			} );
 
 		} else {
@@ -867,7 +933,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			case 'country':
 				var widget = this.edit_view_ui_dic['province'];
 				var widget_2 = this.edit_view_ui_dic['district'];
-				this.eSetProvince( c_value );
 				widget.setValue( null );
 				widget_2.setValue( null );
 				this.current_edit_record.province = false;
@@ -894,6 +959,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		}
 
 		if ( key === 'country' ) {
+			this.onCountryChange();
 			return;
 		}
 		if ( !doNotValidate ) {
@@ -948,6 +1014,11 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 	},
 
 	onLengthOfServiceChange: function() {
+
+		if ( this.sub_view_mode ) {
+			return;
+		}
+
 		if ( this.current_edit_record['minimum_length_of_service_unit_id'] === 50 || this.current_edit_record['maximum_length_of_service_unit_id'] === 50 ) {
 			this.edit_view_form_item_dic['length_of_service_contributing_pay_code_policy_id'].css( 'display', 'block' );
 		} else {
@@ -3520,26 +3591,26 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		form_item_input.TComboBox( {field: 'df_14', set_empty: true} );
 		this.addEditFieldToColumn( 'df_14', form_item_input, tab_tax_deductions_column1, '', null, true );
 
-		//Pay Stub Account
+		if ( !this.sub_view_mode ) {
+			//Pay Stub Account
 
-		var default_args = {};
-		default_args.filter_data = {};
-		default_args.filter_data.type_id = [10, 20, 30, 50, 80];
+			var default_args = {};
+			default_args.filter_data = {};
+			default_args.filter_data.type_id = [10, 20, 30, 50, 80];
 
-		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
-			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
-			show_search_inputs: true,
-			set_empty: true,
-			field: 'pay_stub_entry_account_id'
+			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+			form_item_input.AComboBox( {
+				api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+				allow_multiple_selection: false,
+				layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+				show_search_inputs: true,
+				set_empty: true,
+				field: 'pay_stub_entry_account_id'
 
-		} );
-
-		form_item_input.setDefaultArgs( default_args );
-
-		this.addEditFieldToColumn( $.i18n._( 'Pay Stub Account' ), form_item_input, tab_tax_deductions_column1 );
+			} );
+			form_item_input.setDefaultArgs( default_args );
+			this.addEditFieldToColumn( $.i18n._( 'Pay Stub Account' ), form_item_input, tab_tax_deductions_column1 );
+		}
 
 		// Calculation Order
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -3558,22 +3629,22 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		v_box.append( form_item );
 		v_box.append( "<div class='clear-both-div'></div>" );
 
-		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		if ( !this.sub_view_mode ) {
+			var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
-		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
-			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
-			show_search_inputs: true,
-			set_empty: true,
-			field: 'include_pay_stub_entry_account'
-		} );
+			form_item_input_1.AComboBox( {
+				api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+				allow_multiple_selection: true,
+				layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+				show_search_inputs: true,
+				set_empty: true,
+				field: 'include_pay_stub_entry_account'
+			} );
+			form_item = this.putInputToInsideFormItem( form_item_input_1, $.i18n._( 'Selection' ) );
+			v_box.append( form_item );
+			this.addEditFieldToColumn( $.i18n._( 'Include Pay Stub Accounts' ), [form_item_input, form_item_input_1], tab_tax_deductions_column1, null, v_box, false, true );
 
-		form_item = this.putInputToInsideFormItem( form_item_input_1, $.i18n._( 'Selection' ) );
-
-		v_box.append( form_item );
-
-		this.addEditFieldToColumn( $.i18n._( 'Include Pay Stub Accounts' ), [form_item_input, form_item_input_1], tab_tax_deductions_column1, null, v_box, false, true );
+		}
 
 		// Exclude Pay Stub Accounts
 		v_box = $( "<div class='v-box'></div>" );
@@ -3586,36 +3657,35 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		v_box.append( form_item );
 		v_box.append( "<div class='clear-both-div'></div>" );
+		if ( !this.sub_view_mode ) {
+			form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+			form_item_input_1.AComboBox( {
+				api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+				allow_multiple_selection: true,
+				layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+				show_search_inputs: true,
+				set_empty: true,
+				field: 'exclude_pay_stub_entry_account'
+			} );
 
-		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+			form_item = this.putInputToInsideFormItem( form_item_input_1, $.i18n._( 'Selection' ) );
+			v_box.append( form_item );
+			this.addEditFieldToColumn( $.i18n._( 'Exclude Pay Stub Accounts' ), [form_item_input, form_item_input_1], tab_tax_deductions_column1, null, v_box, false, true );
+		}
 
-		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
-			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
-			show_search_inputs: true,
-			set_empty: true,
-			field: 'exclude_pay_stub_entry_account'
-		} );
-
-		form_item = this.putInputToInsideFormItem( form_item_input_1, $.i18n._( 'Selection' ) );
-
-		v_box.append( form_item );
-
-		this.addEditFieldToColumn( $.i18n._( 'Exclude Pay Stub Accounts' ), [form_item_input, form_item_input_1], tab_tax_deductions_column1, null, v_box, false, true );
-
-		// employees
-		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
-			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.USER,
-			show_search_inputs: true,
-			set_empty: true,
-			field: 'user'
-		} );
-		this.addEditFieldToColumn( $.i18n._( 'Employees' ), form_item_input, tab_tax_deductions_column1, '' );
-
+		if ( !this.sub_view_mode ) {
+			// employees
+			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+			form_item_input.AComboBox( {
+				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				allow_multiple_selection: true,
+				layout_name: ALayoutIDs.USER,
+				show_search_inputs: true,
+				set_empty: true,
+				field: 'user'
+			} );
+			this.addEditFieldToColumn( $.i18n._( 'Employees' ), form_item_input, tab_tax_deductions_column1, '' );
+		}
 		// Tab1  start
 
 		var tab_eligibility = this.edit_view_tab.find( '#tab_eligibility' );
@@ -3713,20 +3783,20 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		widgetContainer.append( widget_combo_box );
 
 		this.addEditFieldToColumn( $.i18n._( 'Maximum Length Of Service' ), [form_item_input, widget_combo_box], tab_eligibility_column1, '', widgetContainer );
-
-		//Length of Service contributing pay codes.
-		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIContributingPayCodePolicy' )),
-			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.CONTRIBUTING_PAY_CODE_POLICY,
-			show_search_inputs: true,
-			set_empty: true,
-			set_default: true,
-			field: 'length_of_service_contributing_pay_code_policy_id'
-		} );
-		this.addEditFieldToColumn( $.i18n._( 'Length Of Service Hours Based On' ), form_item_input, tab_eligibility_column1, '', null, true );
-
+		if ( !this.sub_view_mode ) {
+			//Length of Service contributing pay codes.
+			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+			form_item_input.AComboBox( {
+				api_class: (APIFactory.getAPIClass( 'APIContributingPayCodePolicy' )),
+				allow_multiple_selection: false,
+				layout_name: ALayoutIDs.CONTRIBUTING_PAY_CODE_POLICY,
+				show_search_inputs: true,
+				set_empty: true,
+				set_default: true,
+				field: 'length_of_service_contributing_pay_code_policy_id'
+			} );
+			this.addEditFieldToColumn( $.i18n._( 'Length Of Service Hours Based On' ), form_item_input, tab_eligibility_column1, '', null, true );
+		}
 		// Minimum Employee Age
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'minimum_user_age', width: 30} );

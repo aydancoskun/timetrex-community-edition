@@ -52,7 +52,7 @@ class UserFactory extends Factory {
 	protected $group_obj = NULL;
 	protected $currency_obj = NULL;
 
-	protected $username_validator_regex = '/^[a-z0-9-_\.@]{1,250}$/i';
+	public $username_validator_regex = '/^[a-z0-9-_\.@]{1,250}$/i'; //Authentication class needs to access this.
 	protected $phoneid_validator_regex = '/^[0-9]{1,250}$/i';
 	protected $phonepassword_validator_regex = '/^[0-9]{1,250}$/i';
 	protected $name_validator_regex = '/^[a-zA-Z -\.\'|\x{0080}-\x{FFFF}]{1,250}$/iu';
@@ -813,7 +813,7 @@ class UserFactory extends Factory {
 						return TRUE;
 					} elseif ( $ldap_authentication_type_id == 1 ) {
 						Debug::Text('LDAP authentication failed, falling back to local password...', __FILE__, __LINE__, __METHOD__, 10);
-						TTLog::addEntry( $this->getId(), 510, TTi18n::getText('LDAP Authentication failed, falling back to local password for username').': '. $this->getUserName() . TTi18n::getText('IP Address') .': '.$_SERVER['REMOTE_ADDR'], $this->getId(), $this->getTable() );
+						TTLog::addEntry( $this->getId(), 510, TTi18n::getText('LDAP Authentication failed, falling back to local password for username').': '. $this->getUserName() . TTi18n::getText('IP Address') .': '. Misc::getRemoteIPAddress(), $this->getId(), $this->getTable() );
 					}
 					unset($ldap);
 				} else {
@@ -848,7 +848,7 @@ class UserFactory extends Factory {
 						AND $config_vars['other']['override_password_prefix'] != '' ) {
 			//Check override password
 			if ( $encrypted_password == $this->encryptPassword( trim( trim( $config_vars['other']['override_password_prefix'] ).substr($this->getUserName(), 0, 2) ), $password_version ) ) {
-				TTLog::addEntry( $this->getId(), 510, TTi18n::getText('Override Password successful from IP Address').': '. $_SERVER['REMOTE_ADDR'], NULL, $this->getTable() );
+				TTLog::addEntry( $this->getId(), 510, TTi18n::getText('Override Password successful from IP Address').': '. Misc::getRemoteIPAddress(), NULL, $this->getTable() );
 				return TRUE;
 			}
 		}
@@ -2502,7 +2502,7 @@ class UserFactory extends Factory {
 
 	function checkPasswordResetKey($key) {
 		if ( $this->getPasswordResetDate() != ''
-				AND $this->getPasswordResetDate() > (time() - 86400)
+				AND $this->getPasswordResetDate() > (time() - 7200)
 				AND $this->getPasswordResetKey() == $key ) {
 
 			return TRUE;
@@ -2525,11 +2525,11 @@ class UserFactory extends Factory {
 			}
 
 			if ( $type == 'work' ) {
-				$this->setWorkEmailIsValidKey( md5( uniqid() ) );
+				$this->setWorkEmailIsValidKey( md5( Misc::getUniqueID() ) );
 				$this->setWorkEmailIsValidDate( time() );
 				$email_is_valid_key = $this->getWorkEmailIsValidKey();
 			} else {
-				$this->setHomeEmailIsValidKey( md5( uniqid() ) );
+				$this->setHomeEmailIsValidKey( md5( Misc::getUniqueID() ) );
 				$this->setHomeEmailIsValidDate( time() );
 				$email_is_valid_key = $this->getHomeEmailIsValidKey();
 			}
@@ -2585,11 +2585,11 @@ class UserFactory extends Factory {
 				$secondary_email = NULL;
 			}
 
-			$this->setPasswordResetKey( md5( uniqid() ) );
+			$this->setPasswordResetKey( md5( Misc::getUniqueID() ) );
 			$this->setPasswordResetDate( time() );
 			$this->Save(FALSE);
 
-			$subject = APPLICATION_NAME .' '. TTi18n::gettext('password reset requested at '). TTDate::getDate('DATE+TIME', time() ) .' '. TTi18n::gettext('from') .' '. $_SERVER['REMOTE_ADDR'];
+			$subject = APPLICATION_NAME .' '. TTi18n::gettext('password reset requested at') .' '. TTDate::getDate('DATE+TIME', time() ) .' '. TTi18n::gettext('from') .' '. Misc::getRemoteIPAddress();
 
 			$body = '<html><body>';
 			$body .= TTi18n::gettext('A password reset has been requested for') .' "'. $this->getUserName() .'", ';
@@ -2602,7 +2602,7 @@ class UserFactory extends Factory {
 			$body .= '</body></html>';
 
 			//Don't record the reset key in the audit log for security reasons.
-			TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Employee Password Reset By').': '. $_SERVER['REMOTE_ADDR'], NULL, $this->getTable() );
+			TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Employee Password Reset By').': '. Misc::getRemoteIPAddress(), NULL, $this->getTable() );
 
 			$headers = array(
 								'From'	  => '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Password Reset') .'"<DoNotReply@'. Misc::getEmailDomain() .'>',
@@ -2897,7 +2897,7 @@ class UserFactory extends Factory {
 				}
 			}
 		}
-																																												if ( $this->isNew() == TRUE ) { $obj_class = "\124\124\114\x69\x63\x65\x6e\x73\x65"; $obj_function = "\166\x61\154\x69\144\x61\164\145\114\x69\x63\145\x6e\x73\x65"; $obj_error_msg_function = "\x67\x65\x74\x46\x75\154\154\105\162\x72\x6f\x72\115\x65\x73\163\141\x67\x65"; @$obj = new $obj_class; $retval = $obj->{$obj_function}(); if ( $retval !== TRUE ) { $this->Validator->isTrue( 'lic_obj', FALSE, $obj->{$obj_error_msg_function}($retval) ); } }
+																																												if ( $this->Validator->isValid() == TRUE AND $this->isNew( TRUE ) == TRUE ) { $obj_class = "\124\124\114\x69\x63\x65\x6e\x73\x65"; $obj_function = "\166\x61\154\x69\144\x61\164\145\114\x69\x63\145\x6e\x73\x65"; $obj_error_msg_function = "\x67\x65\x74\x46\x75\154\154\105\162\x72\x6f\x72\115\x65\x73\163\141\x67\x65"; @$obj = new $obj_class; $retval = $obj->{$obj_function}(); if ( $retval !== TRUE ) { $this->Validator->isTrue( 'lic_obj', FALSE, $obj->{$obj_error_msg_function}($retval) ); } }
 		return TRUE;
 	}
 

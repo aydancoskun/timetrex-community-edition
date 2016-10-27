@@ -57,8 +57,8 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '8.0.0' );
-define('APPLICATION_VERSION_DATE', @strtotime('30-Jan-2015') ); // Release date of version.
+define('APPLICATION_VERSION', '8.0.9' );
+define('APPLICATION_VERSION_DATE', @strtotime('10-Jul-2015') ); // Release date of version.
 
 if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'WIN' ) { define('OPERATING_SYSTEM', 'WIN' ); } else { define('OPERATING_SYSTEM', 'LINUX' ); }
 
@@ -384,24 +384,7 @@ function forceCacheHeaders( $file_name = NULL, $mtime = NULL, $etag = NULL ) {
 
 define('TT_PRODUCT_COMMUNITY', 10 ); define('TT_PRODUCT_PROFESSIONAL', 15 ); define('TT_PRODUCT_CORPORATE', 20 ); define('TT_PRODUCT_ENTERPRISE', 25 );
 function getTTProductEdition() { global $TT_PRODUCT_EDITION; if ( isset($TT_PRODUCT_EDITION) AND $TT_PRODUCT_EDITION > 0 ) { return $TT_PRODUCT_EDITION; } elseif ( file_exists( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'expense'. DIRECTORY_SEPARATOR .'UserExpenseFactory.class.php') ) { return TT_PRODUCT_ENTERPRISE; } elseif ( file_exists( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'job'. DIRECTORY_SEPARATOR .'JobFactory.class.php') ) { return TT_PRODUCT_CORPORATE; } elseif ( file_exists( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'time_clock'. DIRECTORY_SEPARATOR .'TimeClock.class.php') ) { return TT_PRODUCT_PROFESSIONAL; } return TT_PRODUCT_COMMUNITY; }
-function getTTProductEditionName() {
-	switch( getTTProductEdition() ) {
-		case 15:
-			$retval = 'Professional';
-			break;
-		case 20:
-			$retval = 'Corporate';
-			break;
-		case 25:
-			$retval = 'Enterprise';
-			break;
-		default:
-			$retval = 'Community';
-			break;
-	}
-
-	return $retval;
-}
+function getTTProductEditionName() { switch( getTTProductEdition() ) { case 15: $retval = 'Professional'; break; case 20: $retval = 'Corporate'; break; case 25: $retval = 'Enterprise'; break; default: $retval = 'Community'; break; } return $retval; }
 
 function TTsaveRequestMetrics() {
 	global $config_vars;
@@ -451,9 +434,13 @@ if ( PHP_SAPI != 'cli' AND isset($config_vars['other']['request_metrics_log']) A
 }
 set_error_handler( array('Debug','ErrorHandler') );
 
-if ( isset($_SERVER['REQUEST_URI']) AND isset($_SERVER['REMOTE_ADDR']) ) {
-	Debug::Text('URI: '. $_SERVER['REQUEST_URI'] .' IP Address: '. $_SERVER['REMOTE_ADDR'], __FILE__, __LINE__, __METHOD__, 10);
+if ( isset($_SERVER['REQUEST_URI']) ) {
+	Debug::Text('URI: '. $_SERVER['REQUEST_URI'] .' IP Address: '. Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10);
 }
+if ( isset($_SERVER['HTTP_USER_AGENT']) ) {
+	Debug::Text('USER-AGENT: '. $_SERVER['HTTP_USER_AGENT'], __FILE__, __LINE__, __METHOD__, 10);
+}
+
 //Supress PHP errors on this, mainly if $config_vars['database'] is not set.
 @Debug::Text('Version: '. APPLICATION_VERSION .' Edition: '. getTTProductEdition() .' Production: '. (int)PRODUCTION .' Database: Type: '. $config_vars['database']['type']  .' Name: '. $config_vars['database']['database_name'] .' Config: '. CONFIG_FILE .' Demo Mode: '. (int)DEMO_MODE, __FILE__, __LINE__, __METHOD__, 10);
 

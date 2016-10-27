@@ -878,6 +878,24 @@ class DemoData {
 		return FALSE;
 	}
 
+	function createTaxForms( $company_id, $user_id ) {
+		$sp = TTNew('SetupPresets');
+		$sp->setCompany( $company_id );
+		$sp->setUser( $user_id );
+
+		$retval = $sp->TaxForms();
+		$retval = $sp->TaxForms( 'us' );
+		$retval = $sp->TaxForms( 'us', 'ny' );
+		if ( $retval == TRUE ) {
+			Debug::Text('Created TaxForm data!', __FILE__, __LINE__, __METHOD__, 10);
+			return TRUE;
+		}
+
+		Debug::Text('Failed Creating Tax Form for Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
+
+		return FALSE;
+	}
+
 	function createPayStubAccountLink( $company_id ) {
 		$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
 		$pseallf->getByCompanyId( $company_id );
@@ -1281,6 +1299,26 @@ class DemoData {
 				//$pcf->setAccrualRate( 1.0 );
 				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
 				break;
+			case 101:
+				$pcf->setName( 'Regular Time (B)' );
+				$pcf->setCode( 'REG' );
+				$pcf->setType( 10 ); //Paid
+				//$pcf->setRate( 1.0 );
+				//$pcf->setAccrualPolicyID( $accrual_policy_id );
+				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Regular Time') );
+				//$pcf->setAccrualRate( 1.0 );
+				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
+				break;
+			case 102:
+				$pcf->setName( 'Regular Time (C)' );
+				$pcf->setCode( 'REG' );
+				$pcf->setType( 10 ); //Paid
+				//$pcf->setRate( 1.0 );
+				//$pcf->setAccrualPolicyID( $accrual_policy_id );
+				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Regular Time') );
+				//$pcf->setAccrualRate( 1.0 );
+				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
+				break;
 			case 190:
 				$pcf->setName( 'Lunch Time' );
 				$pcf->setCode( 'LNH' );
@@ -1416,14 +1454,14 @@ class DemoData {
 				$pfpf->setPayType( 10 ); //Pay Multiplied By Factor
 				$pfpf->setRate( 1.0 );
 				$pfpf->setAccrualPolicyAccount( $accrual_policy_account_id );
-				$pfpf->setAccrualRate( 1.0 );
+				$pfpf->setAccrualRate( -1.0 );
 				break;
 			case 130:
 				$pfpf->setName( 'Sick Time' );
 				$pfpf->setPayType( 10 ); //Pay Multiplied By Factor
 				$pfpf->setRate( 1.0 );
 				$pfpf->setAccrualPolicyAccount( $accrual_policy_account_id );
-				$pfpf->setAccrualRate( 1.0 );
+				$pfpf->setAccrualRate( -1.0 );
 				break;
 			case 200:
 				$pfpf->setName( 'OverTime (1.5x)' );
@@ -6286,6 +6324,29 @@ class DemoData {
 		return FALSE;
 	}
 
+	function deleteAbsence( $id ) {
+		$udtlf = TTnew( 'UserDateTotalListFactory' );
+		$udtlf->getById( $id );
+		if ( $udtlf->getRecordCount() > 0 ) {
+			Debug::Text('Deleting UDT ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+			foreach($udtlf as $udt_obj) {
+				$udt_obj->setDeleted(TRUE);
+				$udt_obj->setEnableTimeSheetVerificationCheck(TRUE); //Unverify timesheet if its already verified.
+				$udt_obj->setEnableCalcSystemTotalTime( TRUE );
+				$udt_obj->setEnableCalcWeeklySystemTotalTime( TRUE );
+				$udt_obj->setEnableCalcException( TRUE );
+				if ( $udt_obj->isValid() ) {
+					$udt_obj->Save();
+				}
+			}
+			Debug::Text('Deleting UDT ID: '. $id .' Done...', __FILE__, __LINE__, __METHOD__, 10);
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
 	function createPunchPair( $user_id, $in_time_stamp, $out_time_stamp, $data = NULL, $calc_total_time = TRUE ) {
 		$fail_transaction = FALSE;
 
@@ -6740,6 +6801,9 @@ class DemoData {
 
 			$policy_ids['exception_1'] = $this->createExceptionPolicy( $company_id );
 
+			//Create tax forms after absence policies and pay stub accounts
+			$this->createTaxForms( $company_id, $current_user->getId() );
+
 			$hierarchy_user_ids = $user_ids;
 
 			$root_user_id = array_pop( $hierarchy_user_ids );
@@ -6995,7 +7059,6 @@ class DemoData {
 			$kpi_group_ids[] = $this->createKPIGroup( $company_id, 50, 0 );
 
 
-
 			$kpi_all_ids[]['10'] = $this->createKPI( $company_id, 10, 10, array(-1) );
 			$kpi_all_ids[]['10'] = $this->createKPI( $company_id, 20, 10, array(-1) );
 			$kpi_all_ids[]['20'] = $this->createKPI( $company_id, 30, 20, array(-1) );
@@ -7003,8 +7066,6 @@ class DemoData {
 			$kpi_group1_ids[]['10'] = $this->createKPI( $company_id, 50, 10, array($kpi_group_ids[0]) );
 			$kpi_group2_ids[]['30'] = $this->createKPI( $company_id, 60, 30, array($kpi_group_ids[1]) );
 			$kpi_group2_ids[]['30'] = $this->createKPI( $company_id, 70, 30, array($kpi_group_ids[1]) );
-
-
 
 			foreach( $user_ids as $code => $user_id ) {
 				$reviewer_user_ids = $user_ids;

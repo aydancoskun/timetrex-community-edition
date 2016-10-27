@@ -1546,7 +1546,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 					';
 
 		$query .= $this->getSortSQL( $order, FALSE );
-		$this->ExecuteSQL( $query, $ph );
+		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -1904,6 +1904,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$sort_column_aliases = array(
 									'status' => 'a.status_id',
 									'type' => 'a.type_id',
+									'group' => 'd.group_id',
 									'first_name' => 'd.first_name',
 									'last_name' => 'd.last_name',
 									'date_stamp' => 'b.date_stamp',

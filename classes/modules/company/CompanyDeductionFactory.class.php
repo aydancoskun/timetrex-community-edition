@@ -375,8 +375,8 @@ class CompanyDeductionFactory extends Factory {
 				break;
 			case 'state_al_filing_status':
 				$retval = array(
-														10 => TTi18n::gettext('Status "S" Claiming $1500'),
-														20 => TTi18n::gettext('Status "M" Claiming $3000'),
+														10 => TTi18n::gettext('Status "S": Claiming $1500'),
+														20 => TTi18n::gettext('Status "M": Claiming $3000'),
 														30 => TTi18n::gettext('Status "0"'),
 														40 => TTi18n::gettext('Head of Household'),
 														50 => TTi18n::gettext('Status "MS"')
@@ -529,7 +529,15 @@ class CompanyDeductionFactory extends Factory {
 							);
 				break;
 			case 'list_columns':
-				$retval = Misc::arrayIntersectByKey( $this->getOptions('default_display_columns'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
+				//Don't show the total_users column here, as its primarily used for Edit Employee -> Tax tab.
+				$list_columns = array(
+								'status',
+								'type',
+								'name',
+								'calculation',
+								);
+
+				$retval = Misc::arrayIntersectByKey( $list_columns, Misc::trimSortPrefix( $this->getOptions('columns') ) );
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
 				$retval = array(
@@ -1364,11 +1372,11 @@ class CompanyDeductionFactory extends Factory {
 				OR ( $this->getMaximumLengthOfServiceUnit() == 50 AND $this->getMaximumLengthOfService() > 0 ) ) {
 			//Hour based length of service, get users hours up until this period.
 			$worked_time = TTDate::getHours( $this->getWorkedTimeByUserIdAndEndDate( $u_obj->getId(), $u_obj->getHireDate(), $epoch ) );
-			Debug::Text('&nbsp;&nbsp;Worked Time: '. $worked_time .'hrs', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text('  Worked Time: '. $worked_time .'hrs', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		$employed_days = TTDate::getDays( ($epoch - $u_obj->getHireDate()) );
-		Debug::Text('&nbsp;&nbsp;Employed Days: '. $employed_days, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('  Employed Days: '. $employed_days, __FILE__, __LINE__, __METHOD__, 10);
 
 		$minimum_length_of_service_result = FALSE;
 		$maximum_length_of_service_result = FALSE;
@@ -1386,7 +1394,7 @@ class CompanyDeductionFactory extends Factory {
 			$maximum_length_of_service_result = TRUE;
 		}
 
-		Debug::Text('&nbsp;&nbsp; Min Result: '. (int)$minimum_length_of_service_result .' Max Result: '. (int)$maximum_length_of_service_result, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('   Min Result: '. (int)$minimum_length_of_service_result .' Max Result: '. (int)$maximum_length_of_service_result, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $minimum_length_of_service_result == TRUE AND $maximum_length_of_service_result == TRUE ) {
 			return TRUE;
@@ -1644,7 +1652,7 @@ class CompanyDeductionFactory extends Factory {
 												$value,
 												TTi18n::gettext('Company Value 1 is too short or too long'),
 												1,
-												1000) ) {
+												4096) ) { //This is the Custom Formula, some of them need to be quite long.
 
 			$this->data['company_value1'] = $value;
 
@@ -2987,7 +2995,7 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 
-	function getObjectAsArray( $include_columns = NULL ) {
+	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE, $include_user_id = FALSE ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
@@ -3018,6 +3026,10 @@ class CompanyDeductionFactory extends Factory {
 
 				}
 			}
+			//When using the Edit Employee -> Tax tab, API::getCompanyDeduction() is called with include_user_id filter,
+			//Since we only return the company deduction records, we have to pass this in separately so we can determine
+			//if a child is assigned to a company deduction record.
+			$this->getPermissionColumns( $data, $include_user_id, $this->getCreatedBy(), $permission_children_ids, $include_columns );
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
 		}
 

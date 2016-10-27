@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: timetrex\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-30 09:26-0800\n"
+"POT-Creation-Date: 2015-06-03 08:08-0700\n"
 "PO-Revision-Date: 2013-05-16 15:15+0000\n"
 "Last-Translator: jose alexandre <alexandreomedio@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <franciscoferreiraluz@yahoo.com.au>\n"
@@ -41,6 +41,9 @@ msgid "%1 database has not been initialized yet, please run the installer again 
 msgstr ""
 
 msgid "%1 database query has timed-out, if you were trying to run a report it may be too large, please narrow your search criteria and try again."
+msgstr ""
+
+msgid "%1 entry for amount: %2 is invalid"
 msgstr ""
 
 msgid "%1 experienced a general error, please contact technical support."
@@ -506,6 +509,9 @@ msgstr "ATIVO"
 msgid "ADP"
 msgstr ""
 
+msgid "ADP Hours"
+msgstr "PDA Horas"
+
 msgid "ADP Hours Code"
 msgstr "Código do PDA Horas"
 
@@ -629,6 +635,9 @@ msgstr ""
 msgid "Absence<br>Policies"
 msgstr ""
 
+msgid "Absences"
+msgstr ""
+
 msgid "Absense Policy"
 msgstr "Política para Faltas"
 
@@ -636,6 +645,9 @@ msgid "Absent"
 msgstr ""
 
 msgid "Academic"
+msgstr ""
+
+msgid "Accero"
 msgstr ""
 
 msgid "Access from station Allowed"
@@ -652,6 +664,9 @@ msgstr ""
 
 msgid "Account"
 msgstr "Conta"
+
+msgid "Account Name"
+msgstr ""
 
 msgid "Account Number"
 msgstr ""
@@ -707,6 +722,9 @@ msgstr "A política Accrual é inválida"
 msgid "Accrual Rate"
 msgstr "Accrual Rate"
 
+msgid "Accrual Rate Modifier"
+msgstr ""
+
 msgid "Accrual Rate/Hour"
 msgstr ""
 
@@ -724,6 +742,9 @@ msgstr ""
 
 msgid "Accrual Total Maximum"
 msgstr "Máximo total Accrual"
+
+msgid "Accrual Total Maximum Modifier"
+msgstr ""
 
 msgid "Accrual Total Maximum Time"
 msgstr ""
@@ -1001,12 +1022,6 @@ msgstr ""
 msgid "Administrator<br>Guide"
 msgstr ""
 
-msgid "Advance end date is set"
-msgstr "A data avançada da extremidade é ajustada"
-
-msgid "Advance transaction date is set"
-msgstr "A data avançada da transação é ajustada"
-
 msgid "Advanced"
 msgstr "Avançado"
 
@@ -1170,9 +1185,6 @@ msgid "All Punches"
 msgstr "Todos os perfuradores"
 
 msgid "All Saint Day"
-msgstr ""
-
-msgid "All Saints Day"
 msgstr ""
 
 msgid "All System Requirements have been met successfully"
@@ -1364,6 +1376,9 @@ msgstr ""
 msgid "Amended"
 msgstr ""
 
+msgid "Amendment"
+msgstr ""
+
 msgid "America Online"
 msgstr ""
 
@@ -1463,6 +1478,9 @@ msgstr ""
 msgid "Annual Maximum Rollover"
 msgstr ""
 
+msgid "Annual Maximum Rollover Modifier"
+msgstr ""
+
 msgid "Annual Pay Periods"
 msgstr ""
 
@@ -1470,6 +1488,9 @@ msgid "Annual Wage Base/Maximum Earnings"
 msgstr "Base Salarial Anual/Lucro Máximo"
 
 msgid "Annually"
+msgstr ""
+
+msgid "Annuities (Box 24)"
 msgstr ""
 
 msgid "Another Pay Stub Amendment already exists for the same employee, account, effective date and amount"
@@ -2144,9 +2165,6 @@ msgstr ""
 msgid "Bank Accounts"
 msgstr ""
 
-msgid "Bank Day"
-msgstr ""
-
 msgid "Bank Information"
 msgstr "Informação do banco"
 
@@ -2807,6 +2825,9 @@ msgstr "Cambodia"
 msgid "Cambridgeshire"
 msgstr ""
 
+msgid "Camera"
+msgstr ""
+
 msgid "Cameroon"
 msgstr "República dos Camarões"
 
@@ -3056,6 +3077,9 @@ msgstr ""
 msgid "Chontales"
 msgstr ""
 
+msgid "Choose Layout"
+msgstr ""
+
 msgid "Choose image file to upload"
 msgstr ""
 
@@ -3072,9 +3096,6 @@ msgid "Chris21"
 msgstr ""
 
 msgid "Christ Church"
-msgstr ""
-
-msgid "Christmas"
 msgstr ""
 
 msgid "Christmas Day"
@@ -3260,8 +3281,11 @@ msgstr ""
 msgid "Colorado"
 msgstr ""
 
-msgid "Columbus Day"
+msgid "Column Name"
 msgstr ""
+
+msgid "Columns"
+msgstr "Colunas"
 
 msgid "Columns:"
 msgstr "Colunas:"
@@ -3428,8 +3452,14 @@ msgstr "Confirmado"
 msgid "Conflicting end date"
 msgstr "Data opondo da extremidade"
 
+msgid "Conflicting end date, does not match pay period"
+msgstr ""
+
 msgid "Conflicting start date"
 msgstr "Data opondo do começo"
+
+msgid "Conflicting start date, does not match pay period"
+msgstr ""
 
 msgid "Conflicting start/end time, schedule already exists for this employee"
 msgstr ""
@@ -4115,6 +4145,9 @@ msgstr "Conta de Débito"
 msgid "Debit Card"
 msgstr ""
 
+msgid "Debit: %1 Credit: %2"
+msgstr ""
+
 msgid "Debits By Client"
 msgstr ""
 
@@ -4187,9 +4220,6 @@ msgstr ""
 msgid "Deduction"
 msgstr "Dedução"
 
-msgid "Deduction is already assigned to employee"
-msgstr "A dedução é atribuída já ao empregado"
-
 msgid "Deduction is invalid"
 msgstr "A dedução é inválida"
 
@@ -4251,6 +4281,9 @@ msgid "Default Task is invalid"
 msgstr ""
 
 msgid "Default Transfer On"
+msgstr ""
+
+msgid "Default Value"
 msgstr ""
 
 msgid "Default settings for this company already exist"
@@ -4334,6 +4367,9 @@ msgstr "A filial do departamento é inválida"
 msgid "Department Code"
 msgstr ""
 
+msgid "Department Override Code"
+msgstr ""
+
 msgid "Department Selection Type"
 msgstr ""
 
@@ -4394,6 +4430,9 @@ msgstr "Descrição"
 msgid "Description (Private)"
 msgstr ""
 
+msgid "Description Locked"
+msgstr ""
+
 msgid "Description is invalid"
 msgstr "A descrição é inválida"
 
@@ -4410,6 +4449,9 @@ msgid "Desktop"
 msgstr ""
 
 msgid "Desktop PC"
+msgstr ""
+
+msgid "Destination Pay Stub Account"
 msgstr ""
 
 msgid "Detailed"
@@ -4473,6 +4515,12 @@ msgid "Disabled - Failed"
 msgstr "Disabled - falhado"
 
 msgid "Discipline"
+msgstr ""
+
+msgid "Disk Space"
+msgstr ""
+
+msgid "Disk Space:"
 msgstr ""
 
 msgid "Display"
@@ -4694,10 +4742,22 @@ msgstr ""
 msgid "ERROR: Invalid Absence Policy"
 msgstr ""
 
+msgid "ERROR: Journal entries do not balance"
+msgstr ""
+
 msgid "ERROR: NO INVOICE SETTINGS DEFINED, UNABLE TO GENERATE INVOICE"
 msgstr ""
 
+msgid "ERROR: No data matches criteria."
+msgstr ""
+
+msgid "ERROR: No data to export..."
+msgstr ""
+
 msgid "ERROR: Operation cannot be completed."
+msgstr ""
+
+msgid "ERROR: Please try again later or narrow your search criteria to decrease the size of your report"
 msgstr ""
 
 msgid "ERROR: UnAssigned Regular Time"
@@ -4722,9 +4782,6 @@ msgid "Each Day (Split at Midnight)"
 msgstr ""
 
 msgid "Earned Income Credit (EIC)"
-msgstr ""
-
-msgid "Earned Income Credit (EIC) (Line 9)"
 msgstr ""
 
 msgid "Earning"
@@ -5135,9 +5192,6 @@ msgstr ""
 msgid "Employee Contact"
 msgstr ""
 
-msgid "Employee Contact "
-msgstr ""
-
 msgid "Employee Contacts"
 msgstr ""
 
@@ -5222,7 +5276,13 @@ msgstr ""
 msgid "Employee Last Name"
 msgstr ""
 
+msgid "Employee License"
+msgstr ""
+
 msgid "Employee Licenses"
+msgstr ""
+
+msgid "Employee Membership"
 msgstr ""
 
 msgid "Employee Memberships"
@@ -5282,6 +5342,9 @@ msgstr ""
 msgid "Employee Review KPI"
 msgstr ""
 
+msgid "Employee Sequence"
+msgstr ""
+
 msgid "Employee Settings"
 msgstr "Configurações do Empregado"
 
@@ -5290,6 +5353,9 @@ msgstr ""
 
 msgid "Employee Signature:"
 msgstr "Assinatura do empregado:"
+
+msgid "Employee Skill"
+msgstr ""
 
 msgid "Employee Skills"
 msgstr ""
@@ -5328,6 +5394,9 @@ msgid "Employee Wage Effective Date"
 msgstr ""
 
 msgid "Employee Wages"
+msgstr ""
+
+msgid "Employee already has a pay stub for this Pay Period"
 msgstr ""
 
 msgid "Employee already has a wage entry on this date for the same wage group. Try using a different date instead."
@@ -5375,10 +5444,10 @@ msgstr ""
 msgid "Employee(s)"
 msgstr ""
 
-msgid "Employee/Employer CPP Accounts"
+msgid "Employee/Employer CPP"
 msgstr ""
 
-msgid "Employee/Employer EI Accounts"
+msgid "Employee/Employer EI"
 msgstr ""
 
 msgid "Employee:"
@@ -6008,6 +6077,9 @@ msgstr ""
 msgid "Federal Income Tax Withheld (Box 4)"
 msgstr ""
 
+msgid "Federal/Provincial Income Tax"
+msgstr ""
+
 msgid "Fees for Services (Box: 48)"
 msgstr ""
 
@@ -6101,9 +6173,6 @@ msgstr ""
 msgid "Firmware Update Succeeded!"
 msgstr ""
 
-msgid "First Cry of Independence"
-msgstr ""
-
 msgid "First Day Worked"
 msgstr ""
 
@@ -6147,9 +6216,6 @@ msgid "Fixed Amount (Range Bracket)"
 msgstr ""
 
 msgid "Fixed Amount (w/Target)"
-msgstr ""
-
-msgid "Flag Day"
 msgstr ""
 
 msgid "Flat Amount"
@@ -6521,15 +6587,6 @@ msgstr "Bom"
 msgid "Good Friday"
 msgstr "Sexta-feira boa"
 
-msgid "Good Saturday"
-msgstr ""
-
-msgid "Good Thursday"
-msgstr ""
-
-msgid "Good Wednesday"
-msgstr ""
-
 msgid "Good:"
 msgstr "Bom:"
 
@@ -6731,6 +6788,9 @@ msgstr ""
 msgid "Handling fee is invalid"
 msgstr "Taxa de Manuseio Inválida"
 
+msgid "Hardware ID"
+msgstr ""
+
 msgid "Hartlepool"
 msgstr ""
 
@@ -6923,6 +6983,9 @@ msgstr ""
 msgid "Hour Based"
 msgstr "Hora Baseada"
 
+msgid "Hour Type"
+msgstr ""
+
 msgid "Hour is invalid"
 msgstr "A hora é inválida"
 
@@ -7052,7 +7115,7 @@ msgstr ""
 msgid "If you did request the password for"
 msgstr ""
 
-msgid "If you wish to see more pages, please go to the report \"Setup\" tab to increase this setting and run the report again."
+msgid "If you wish to see more pages, please go to the report 'Setup' tab to increase this setting and run the report again."
 msgstr ""
 
 msgid "Ifugao"
@@ -7319,7 +7382,7 @@ msgstr ""
 msgid "Income Tax (Line 3)"
 msgstr ""
 
-msgid "Income Tax Accounts"
+msgid "Income Tax Deducted (Box 22)"
 msgstr ""
 
 msgid "Incorrect Accrual Rate"
@@ -7862,12 +7925,6 @@ msgstr "Selo de tempo real incorreto"
 msgid "Incorrect actual total time"
 msgstr "Tempo total real incorreto"
 
-msgid "Incorrect advance end date"
-msgstr "Data avançada incorreta da extremidade"
-
-msgid "Incorrect advance transaction date"
-msgstr "Data avançada incorreta da transação"
-
 msgid "Incorrect allowed date"
 msgstr ""
 
@@ -8157,9 +8214,6 @@ msgid "Incurred date is invalid"
 msgstr ""
 
 msgid "Independence Day"
-msgstr ""
-
-msgid "Independence Day CR"
 msgstr ""
 
 msgid "India"
@@ -8462,7 +8516,7 @@ msgstr "Topo inválido do pagamento"
 msgid "Invalid Pay Stub Account"
 msgstr "Cliente inválido do topo do pagamento"
 
-msgid "Invalid Pay Stub Amendment"
+msgid "Invalid Pay Stub Accounts"
 msgstr ""
 
 msgid "Invalid Pay Stub Amendment Description Length"
@@ -8656,9 +8710,6 @@ msgstr "Comprimento inválido do número de trânsito"
 
 msgid "Invalid transit number, must be digits only"
 msgstr "O número de trânsito inválido, deve ser dígitos somente"
-
-msgid "Invalid unique User and/or Pay Period"
-msgstr "Período original inválido do usuário e/ou do pagamento"
 
 msgid "Invalid vacation pay"
 msgstr "Pagamento inválido das férias"
@@ -9596,6 +9647,9 @@ msgstr ""
 msgid "Length of Service Date"
 msgstr ""
 
+msgid "Length of Service Modifier"
+msgstr ""
+
 msgid "Length of service is invalid"
 msgstr "O comprimento do serviço é inválido"
 
@@ -9738,9 +9792,6 @@ msgid "Lock"
 msgstr "Bloquiar"
 
 msgid "Lock Description"
-msgstr ""
-
-msgid "Lock Description "
 msgstr ""
 
 msgid "Lock Price"
@@ -10172,9 +10223,6 @@ msgstr "Consoles de Marshall"
 msgid "Martinique"
 msgstr "Martinica"
 
-msgid "Martyr`s Day"
-msgstr ""
-
 msgid "Maryland"
 msgstr ""
 
@@ -10442,10 +10490,28 @@ msgstr ""
 msgid "Midlothian"
 msgstr ""
 
+msgid "Migrate PS Accounts"
+msgstr ""
+
 msgid "Migrate Pay Codes"
 msgstr ""
 
+msgid "Migrate<br>PS Accounts "
+msgstr ""
+
 msgid "Migrate<br>Pay Codes"
+msgstr ""
+
+msgid "Migrated YTD Amount from"
+msgstr ""
+
+msgid "Migrated YTD Amount from other account"
+msgstr ""
+
+msgid "Migrated YTD Amount to"
+msgstr ""
+
+msgid "Migrated YTD Amount to other account"
 msgstr ""
 
 msgid "Milan"
@@ -10847,6 +10913,9 @@ msgstr ""
 msgid "Name is invalid"
 msgstr "O nome é inválido"
 
+msgid "Name is not specified"
+msgstr ""
+
 msgid "Name is too long, consider using description instead"
 msgstr ""
 
@@ -11222,6 +11291,9 @@ msgstr "Nenhum"
 msgid "Nonemployee Compensation (7)"
 msgstr ""
 
+msgid "Nonemployee compensation (Box 7)"
+msgstr ""
+
 msgid "Nonqualified Plans (11)"
 msgstr ""
 
@@ -11336,6 +11408,9 @@ msgstr ""
 msgid "Not Verified"
 msgstr "Não verificado"
 
+msgid "Not enough disk space available, please free up disk space and try again."
+msgstr ""
+
 msgid "Not generating final pay stub!"
 msgstr "Não gerando o topo final do pagamento!"
 
@@ -11425,6 +11500,9 @@ msgstr "APROVAÇÃO"
 
 msgid "OPEN"
 msgstr "ABERTO"
+
+msgid "OPENING BALANCE"
+msgstr ""
 
 msgid "OVERDUE"
 msgstr ""
@@ -11553,6 +11631,12 @@ msgid "Open"
 msgstr "Aberto"
 
 msgid "Open Shift Multiplier"
+msgstr ""
+
+msgid "Opening Balance (YTD)"
+msgstr ""
+
+msgid "Opening Balance Pay Stubs must not come after any other pay stub for this employee"
 msgstr ""
 
 msgid "Optional"
@@ -11834,6 +11918,9 @@ msgstr ""
 msgid "Overall Total"
 msgstr ""
 
+msgid "Overall Totals"
+msgstr ""
+
 msgid "Overdue"
 msgstr "Overdue"
 
@@ -12068,6 +12155,9 @@ msgstr ""
 msgid "Parma"
 msgstr ""
 
+msgid "Parse Hint"
+msgstr ""
+
 msgid "Parsing import data..."
 msgstr ""
 
@@ -12125,7 +12215,7 @@ msgstr ""
 msgid "Password Reset"
 msgstr "Restauração da senha"
 
-msgid "Password Reset requested at "
+msgid "Password Reset requested at"
 msgstr ""
 
 msgid "Password Updated"
@@ -12320,6 +12410,9 @@ msgstr "Emenda do topo do pagamento"
 msgid "Pay Stub Amendment - Employee"
 msgstr ""
 
+msgid "Pay Stub Amendment effective date is after employees pay stub end date or termination date"
+msgstr ""
+
 msgid "Pay Stub Amendments"
 msgstr "Pagar emendas do topo"
 
@@ -12377,9 +12470,6 @@ msgstr "Holerites"
 msgid "Pay Type"
 msgstr "Tipo de pagamento"
 
-msgid "Pay period is already closed"
-msgstr ""
-
 msgid "Pay period prior to %1 is not closed, please close all previous pay periods and try again..."
 msgstr ""
 
@@ -12387,9 +12477,6 @@ msgid "Pay period schedules are critical to the operation of"
 msgstr ""
 
 msgid "Pay stub entry account is invalid"
-msgstr ""
-
-msgid "Pay stub is assigned to a closed pay period"
 msgstr ""
 
 msgid "Pay<br>Codes"
@@ -12601,9 +12688,6 @@ msgstr ""
 msgid "Permission Group is invalid"
 msgstr ""
 
-msgid "Permission Group: "
-msgstr ""
-
 msgid "Permission Groups"
 msgstr "Grupos de Permissão"
 
@@ -12777,9 +12861,6 @@ msgstr ""
 msgid "Please try again later..."
 msgstr ""
 
-msgid "Please try again later... (b)"
-msgstr ""
-
 msgid "Please upload file again"
 msgstr ""
 
@@ -12868,6 +12949,9 @@ msgid "Positions Available is invalid"
 msgstr ""
 
 msgid "Positive"
+msgstr ""
+
+msgid "Possible corruption detected, please contact support department (crv)"
 msgstr ""
 
 msgid "Post Adjustment"
@@ -13007,9 +13091,6 @@ msgstr ""
 
 msgid "Primary account is too short or too long"
 msgstr "Conta Primária é muito longa ou muito curta"
-
-msgid "Primer Grito de Independencia de la Villa de los Santos"
-msgstr ""
 
 msgid "Prince Edward Island"
 msgstr ""
@@ -13863,6 +13944,9 @@ msgstr ""
 msgid "Remote Version"
 msgstr ""
 
+msgid "Removed invalid or bouncing email address"
+msgstr ""
+
 msgid "Renewal Date"
 msgstr ""
 
@@ -14088,9 +14172,6 @@ msgstr "Revisão"
 msgid "Revisions"
 msgstr "Revisões"
 
-msgid "Revolution Day"
-msgstr ""
-
 msgid "Rhode Island"
 msgstr ""
 
@@ -14202,6 +14283,9 @@ msgstr ""
 msgid "Row"
 msgstr ""
 
+msgid "Rows Per Page"
+msgstr ""
+
 msgid "Rows Per page"
 msgstr ""
 
@@ -14247,9 +14331,6 @@ msgstr "SIN/SSN"
 msgid "SIN/SSN is invalid"
 msgstr ""
 
-msgid "SNonemployee compensation (Box 7)"
-msgstr ""
-
 msgid "SOAP Enabled"
 msgstr ""
 
@@ -14273,6 +14354,9 @@ msgstr "Safe Mode Desativado:"
 
 msgid "Safe Mode is On. (Please disable it in php.ini)"
 msgstr "A modalidade segura é sobre. (A incapacitar por favor em php.ini)"
+
+msgid "Sage 300 (Accpac)"
+msgstr ""
 
 msgid "Saint Helena"
 msgstr "Saint Helena"
@@ -14325,13 +14409,13 @@ msgstr ""
 msgid "Samoa"
 msgstr "Samoa"
 
+msgid "Sample Row"
+msgstr ""
+
 msgid "San Andres y Providencia"
 msgstr ""
 
 msgid "San Blas"
-msgstr ""
-
-msgid "San Jacinto Battle"
 msgstr ""
 
 msgid "San Jose"
@@ -14350,9 +14434,6 @@ msgid "San Miguel"
 msgstr ""
 
 msgid "San Salvador"
-msgstr ""
-
-msgid "San Salvador Party"
 msgstr ""
 
 msgid "San Vicente"
@@ -14419,6 +14500,9 @@ msgid "Save Setup"
 msgstr ""
 
 msgid "Save TimeSheet State"
+msgstr ""
+
+msgid "Save and Close"
 msgstr ""
 
 msgid "Save as New"
@@ -14803,10 +14887,10 @@ msgstr ""
 msgid "Selected employee is invalid, or already assigned to another permission group"
 msgstr ""
 
-msgid "Selected subordinate is invalid or already assigned to another hierarchy with the same object. User ID: "
+msgid "Selected subordinate is invalid or already assigned to another hierarchy with the same object. User ID: %1"
 msgstr ""
 
-msgid "Selected subordinate is invalid or already assigned to another hierarchy with the same objects "
+msgid "Selected subordinate is invalid or already assigned to another hierarchy with the same objects"
 msgstr ""
 
 msgid "Selection"
@@ -14856,9 +14940,6 @@ msgstr "Emitido"
 
 msgid "Sep"
 msgstr "Setembro"
-
-msgid "Separation Day from Colombia"
-msgstr ""
 
 msgid "September"
 msgstr "Setembro"
@@ -14972,6 +15053,9 @@ msgid "Shift is after employees termination date"
 msgstr ""
 
 msgid "Shift is before employees hire date"
+msgstr ""
+
+msgid "Shifts"
 msgstr ""
 
 msgid "Shifts Scheduled Absent"
@@ -15235,6 +15319,9 @@ msgstr "Fonte"
 msgid "Source Object"
 msgstr ""
 
+msgid "Source Pay Stub Account(s)"
+msgstr ""
+
 msgid "SourceIP"
 msgstr ""
 
@@ -15454,14 +15541,14 @@ msgstr "Status “D”"
 msgid "Status \"F\""
 msgstr "Status “F”"
 
-msgid "Status \"M\" Claiming $3000"
-msgstr "Status “M” que reivindica $3000"
+msgid "Status \"M\": Claiming $3000"
+msgstr ""
 
 msgid "Status \"MS\""
 msgstr "Status “ms”"
 
-msgid "Status \"S\" Claiming $1500"
-msgstr "Status “S” que reivindica $1500"
+msgid "Status \"S\": Claiming $1500"
+msgstr ""
 
 msgid "Status By"
 msgstr ""
@@ -16000,6 +16087,12 @@ msgstr ""
 msgid "Tax/Deduction Rate"
 msgstr ""
 
+msgid "Tax/Deduction is already assigned to employee"
+msgstr ""
+
+msgid "Tax/Deduction is invalid"
+msgstr ""
+
 msgid "Tax<br>Reports"
 msgstr ""
 
@@ -16217,6 +16310,9 @@ msgid "This will delete all attendance data assigned to this pay period. Are you
 msgstr ""
 
 msgid "This will import employee attendance data from other pay periods into this pay period.Are you sure you wish to continue?"
+msgstr ""
+
+msgid "This wizard will automatically create Pay Stub Amendments to migrate Year-To-Date amounts from one Pay Stub Account to another as of a specific effective date."
 msgstr ""
 
 msgid "This wizard will migrate data associated with one pay code to another pay code without recalculating timesheets or otherwise affecting employees time or wages. "
@@ -16729,6 +16825,9 @@ msgstr "Total:"
 msgid "Totaling Data..."
 msgstr ""
 
+msgid "Totals"
+msgstr "Totais"
+
 msgid "Totals by Branch"
 msgstr ""
 
@@ -16891,6 +16990,9 @@ msgstr "Datilografar o Exclusive"
 msgid "Type already exists"
 msgstr "Datilografar existe já"
 
+msgid "Type cannot be modified when Pay Stub Account is in use"
+msgstr ""
+
 msgid "Type is invalid"
 msgstr ""
 
@@ -16994,6 +17096,9 @@ msgstr ""
 msgid "Unable to change status of your own record"
 msgstr ""
 
+msgid "Unable to create pay stubs in a closed pay period"
+msgstr ""
+
 msgid "Unable to delete expenses after they have been authorized/declined"
 msgstr ""
 
@@ -17022,6 +17127,9 @@ msgid "Unable to generate pay stub(s), employee(s) may not be assigned to a pay 
 msgstr ""
 
 msgid "Unable to modify Pay Stub Amendment that is currently be used by a Pay Stub marked PAID"
+msgstr ""
+
+msgid "Unable to modify pay stubs assigned to a closed pay period"
 msgstr ""
 
 msgid "Unable to process payment #"
@@ -17261,22 +17369,10 @@ msgstr ""
 msgid "User Date Total ID is invalid"
 msgstr "O total ID da data do usuário é inválido"
 
-msgid "User Education"
-msgstr ""
-
 msgid "User Expense"
 msgstr ""
 
 msgid "User Filter"
-msgstr ""
-
-msgid "User Language"
-msgstr ""
-
-msgid "User License"
-msgstr ""
-
-msgid "User Membership"
 msgstr ""
 
 msgid "User Name"
@@ -17304,9 +17400,6 @@ msgid "User Name:"
 msgstr "CPF:"
 
 msgid "User Setting - Name"
-msgstr ""
-
-msgid "User Skill"
 msgstr ""
 
 msgid "User Value 1 is invalid"
@@ -17407,6 +17500,9 @@ msgstr ""
 
 msgid "VISA"
 msgstr "VISA"
+
+msgid "VOID"
+msgstr ""
 
 msgid "Vacation Pay (Box 17A)"
 msgstr ""
@@ -17531,7 +17627,19 @@ msgstr ""
 msgid "Verification Window Ends"
 msgstr ""
 
+msgid "Verification Window Ends is too large"
+msgstr ""
+
+msgid "Verification Window Ends is too small"
+msgstr ""
+
 msgid "Verification Window Starts"
+msgstr ""
+
+msgid "Verification Window Starts is too large"
+msgstr ""
+
+msgid "Verification Window Starts is too small"
 msgstr ""
 
 msgid "Verification Windows Ends"
@@ -17859,6 +17967,9 @@ msgstr "Atenção: Não instalado. (extensão SimpleXML deve estar ativada)"
 msgid "Warning: Not Installed. (ZIP extension must be enabled)"
 msgstr ""
 
+msgid "Warning: Not enough disk space available, please free up disk space and try again."
+msgstr ""
+
 msgid "Warning: Not writable"
 msgstr "Aviso: Nao writable"
 
@@ -18069,6 +18180,9 @@ msgstr ""
 msgid "Wisconsin"
 msgstr ""
 
+msgid "Wizard data is not correct on step 2 or step 3, please open wizard and try again"
+msgstr ""
+
 msgid "Wk Total"
 msgstr ""
 
@@ -18268,9 +18382,6 @@ msgid "Year (Ending)"
 msgstr ""
 
 msgid "Year (Starting)"
-msgstr ""
-
-msgid "Year to Date (YTD) Adjustment"
 msgstr ""
 
 msgid "Year(s)"
@@ -18513,9 +18624,6 @@ msgstr ""
 msgid "by Quarter"
 msgstr ""
 
-msgid "by Regular Time policies"
-msgstr ""
-
 msgid "by Title"
 msgstr ""
 
@@ -18529,6 +18637,9 @@ msgid "by break policies"
 msgstr ""
 
 msgid "by contributing shift policies"
+msgstr ""
+
+msgid "by employee timesheets"
 msgstr ""
 
 msgid "by meal policies"
@@ -18547,6 +18658,9 @@ msgid "by regular time policies"
 msgstr ""
 
 msgid "click here"
+msgstr ""
+
+msgid "click to search"
 msgstr ""
 
 msgid "configuration file"
@@ -18580,30 +18694,6 @@ msgid "days"
 msgstr "dias"
 
 msgid "days after end of pay period"
-msgstr ""
-
-msgid "dd-mmm-yy"
-msgstr ""
-
-msgid "dd-mmm-yyyy"
-msgstr ""
-
-msgid "ddd, dd-mmm-yyyy"
-msgstr ""
-
-msgid "ddd, ddmmmyyyy"
-msgstr ""
-
-msgid "ddd, mmm dd yyyy"
-msgstr ""
-
-msgid "ddd, mmmm dd yyyy"
-msgstr ""
-
-msgid "dddd, mmmm dd yyyy"
-msgstr ""
-
-msgid "ddmmmyyyy"
 msgstr ""
 
 msgid "description"
@@ -18786,12 +18876,6 @@ msgstr ""
 msgid "minute( #time_stamp# )"
 msgstr ""
 
-msgid "mmm-dd-yy"
-msgstr ""
-
-msgid "mmm-dd-yyyy"
-msgstr ""
-
 msgid "month( #time_stamp# )"
 msgstr ""
 
@@ -18825,7 +18909,7 @@ msgstr "ou mais"
 msgid "or( expression, expression ) - Example: or( #regular_time# > 40, #regular_time# < 80)"
 msgstr ""
 
-msgid "password reset requested at "
+msgid "password reset requested at"
 msgstr ""
 
 msgid "permission preset to each administrator employee in"
@@ -19083,9 +19167,6 @@ msgstr ""
 #~ msgid ">Employer Contributions"
 #~ msgstr "Contribuicoes do Colaborador"
 
-#~ msgid "ADP Hours"
-#~ msgstr "PDA Horas"
-
 #~ msgid "Absence Policy List"
 #~ msgstr "Lista da política da ausência"
 
@@ -19205,6 +19286,12 @@ msgstr ""
 
 #~ msgid "Advance Transaction Date:"
 #~ msgstr "Data avançada da transação:"
+
+#~ msgid "Advance end date is set"
+#~ msgstr "A data avançada da extremidade é ajustada"
+
+#~ msgid "Advance transaction date is set"
+#~ msgstr "A data avançada da transação é ajustada"
 
 #~ msgid "After First Punch"
 #~ msgstr "Após Primeira Perfuração"
@@ -19491,9 +19578,6 @@ msgstr ""
 #~ msgid "Code:"
 #~ msgstr "Código:"
 
-#~ msgid "Columns"
-#~ msgstr "Colunas"
-
 #~ msgid "Commands"
 #~ msgstr "Comandos"
 
@@ -19637,6 +19721,9 @@ msgstr ""
 
 #~ msgid "Debit Amount"
 #~ msgstr "Uma quantidade do débito"
+
+#~ msgid "Deduction is already assigned to employee"
+#~ msgstr "A dedução é atribuída já ao empregado"
 
 #~ msgid "Deductions:"
 #~ msgstr "Deduções:"
@@ -20538,6 +20625,12 @@ msgstr ""
 #~ msgid "Income Tax Deducted (Box: 22):"
 #~ msgstr "Deduções (Caixa 22):"
 
+#~ msgid "Incorrect advance end date"
+#~ msgstr "Data avançada incorreta da extremidade"
+
+#~ msgid "Incorrect advance transaction date"
+#~ msgstr "Data avançada incorreta da transação"
+
 #~ msgid "Incorrect iButton ID length"
 #~ msgstr "Comprimento incorreto do ID do iButton"
 
@@ -20570,6 +20663,9 @@ msgstr ""
 
 #~ msgid "Invalid User Date ID"
 #~ msgstr "Data inválida ID do usuário"
+
+#~ msgid "Invalid unique User and/or Pay Period"
+#~ msgstr "Período original inválido do usuário e/ou do pagamento"
 
 #~ msgid "Invoice #:"
 #~ msgstr "Invoice #:"
@@ -21663,6 +21759,12 @@ msgstr ""
 #~ msgid "Station:"
 #~ msgstr "Estação:"
 
+#~ msgid "Status \"M\" Claiming $3000"
+#~ msgstr "Status “M” que reivindica $3000"
+
+#~ msgid "Status \"S\" Claiming $1500"
+#~ msgstr "Status “S” que reivindica $1500"
+
 #~ msgid "Status:"
 #~ msgstr "Status:"
 
@@ -21893,9 +21995,6 @@ msgstr ""
 
 #~ msgid "Total Punches:"
 #~ msgstr "Perfuradores totais:"
-
-#~ msgid "Totals"
-#~ msgstr "Totais"
 
 #~ msgid "Tracking Number:"
 #~ msgstr "Seguindo o número:"

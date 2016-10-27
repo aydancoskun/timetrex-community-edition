@@ -92,6 +92,8 @@ class Report {
 												)
 							);
 
+	protected $maximum_memory_limit = FALSE;
+
 	protected $tmp_data = NULL;
 	public $data = NULL;
 	protected $total_row = NULL;
@@ -305,23 +307,38 @@ class Report {
 	function setExecutionMemoryLimit( $str = FALSE ) {
 		if ( $str === FALSE ) {
 			$str = $this->config['other']['maximum_memory_limit'];
+
+			global $config_vars;
 			if ( isset($config_vars['other']['report_maximum_memory_limit']) AND $config_vars['other']['report_maximum_memory_limit'] != '' ) {
 				$str = $config_vars['other']['report_maximum_memory_limit'];
 			}
 		}
 
 		$memory_limit = Misc::getBytesFromSize( $str );
-		$available_memory = Misc::getSystemMemoryInfo( 'free+cached' );
+		$available_memory = Misc::getSystemMemoryInfo();
 		if ( $available_memory < $memory_limit ) {
 			Debug::Text('Available memory is less than maximum, reducing to: '. $available_memory .' Max Memory: '. $memory_limit, __FILE__, __LINE__, __METHOD__, 10);
 			$memory_limit = $available_memory;
 		}
+		$this->maximum_memory_limit = $memory_limit;
+		Debug::Text('Setting hard memory limit to: '. $available_memory .' Soft Limit: '. $memory_limit .' Based on: '. $str, __FILE__, __LINE__, __METHOD__, 10);
+
 		ini_set('memory_limit', $available_memory );
 		return TRUE;
 	}
 
 	function isSystemLoadValid() {
-		return Misc::isSystemLoadValid();
+		//Check system load and memory usage.
+		if ( $this->maximum_memory_limit > 0 AND memory_get_usage() > $this->maximum_memory_limit ) {
+			Debug::Text('Exceeded memory limit: '. $this->maximum_memory_limit .' Current Usage: '. memory_get_usage(), __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		}
+
+		if ( Misc::isSystemLoadValid() == FALSE ) {
+			return FALSE;
+		}
+		
+		return TRUE;
 	}
 
 	//Object of the user generating the report, we use this to base permission checks on, etc...
@@ -899,6 +916,7 @@ class Report {
 	}
 
 	//Uses UserReportData class to save the form config for the entire company.
+	// NOTE: This is duplicated in SetupPresets class. If you change it here, change it there too.
 	function setCompanyFormConfig( $data = NULL ) {
 		if ( $this->checkPermissions() == FALSE ) {
 			Debug::Text('Invalid permissions!', __FILE__, __LINE__, __METHOD__, 10);
@@ -974,7 +992,7 @@ class Report {
 	function setOtherConfig( $data ) {
 		if ( is_array($data) ) {
 			if ( !isset($data['default_font']) OR ( isset($data['default_font']) AND $data['default_font'] == '' ) ) {
-				$data['default_font'] = TTi18n::getPDFDefaultFont();
+				$data['default_font'] = TTi18n::getPDFDefaultFont( NULL, $this->getUserObject()->getCompanyObject()->getEncoding() );
 			}
 			Debug::Text('Report default font: '. $data['default_font'], __FILE__, __LINE__, __METHOD__, 10);
 			
@@ -1981,11 +1999,16 @@ class Report {
 		Debug::Arr( Debug::profileTimers( $this->profiler ), ' Profile Timers: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr( $retval, ' Report Data...', __FILE__, __LINE__, __METHOD__, 10);
 		if ( $format != 'raw' AND $format != 'efile_xml' AND ( !is_array($retval) OR !isset($retval['file_name']) OR !isset($retval['mime_type']) ) ) {
-			return array(
-						'data' => $retval,
-						'file_name' => $this->getFileName(),
-						'mime_type' => $this->getFileMimeType(),
-						);
+			if ( is_array($retval) AND isset($retval['api_retval']) ) {
+				//Passthru validation errors.
+				return $retval;
+			} else {
+				return array(
+							'data' => $retval,
+							'file_name' => $this->getFileName(),
+							'mime_type' => $this->getFileMimeType(),
+							);
+			}
 		} else {
 			return $retval; //Array with file_name and mime_types
 		}
@@ -2403,7 +2426,7 @@ class Report {
 		$this->pdf->Ln();
 		$this->pdf->setTextColor( 0, 0, 0 );
 		$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(8) );
-		$this->pdf->Cell( $this->pdf->getPageWidth(), $this->_pdf_fontSize(6), TTi18n::getText('If you wish to see more pages, please go to the report "Setup" tab to increase this setting and run the report again.'), 0, 0, 'C', 0, '', 1);
+		$this->pdf->Cell( $this->pdf->getPageWidth(), $this->_pdf_fontSize(6), TTi18n::getText('If you wish to see more pages, please go to the report \'Setup\' tab to increase this setting and run the report again.'), 0, 0, 'C', 0, '', 1);
 		$this->pdf->Ln(100);
 
 		return TRUE;
