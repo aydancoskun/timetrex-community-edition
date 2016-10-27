@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2095 $
- * $Id: Sort.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
- */
+
 
 /**
  * @package Modules\Report
@@ -90,7 +86,7 @@ class AccrualBalanceSummaryReport extends Report {
 										'-2070-default_department_id' => TTi18n::gettext('Default Department'),
 										'-2100-custom_filter' => TTi18n::gettext('Custom Filter'),
 
-										'-3000-accrual_policy_id' => TTi18n::gettext('Accrual Policy'),
+										'-3000-accrual_policy_account_id' => TTi18n::gettext('Accrual Account'),
 										'-3050-accrual_type_id' => TTi18n::gettext('Accrual Type'),
 										'-3080-accrual_policy_type_id' => TTi18n::gettext('Accrual Policy Type'),
 
@@ -182,11 +178,12 @@ class AccrualBalanceSummaryReport extends Report {
 										'-1110-currency' => TTi18n::gettext('Currency'),
 										'-1112-current_currency' => TTi18n::gettext('Current Currency'),
 
-										'-1120-accrual_policy' => TTi18n::gettext('Accrual Policy'),
-										'-1140-type' => TTi18n::gettext('Accrual Type'),
+										'-1120-accrual_policy_account' => TTi18n::gettext('Accrual Account'),
+										'-1130-type' => TTi18n::gettext('Accrual Type'),
 										//'-1160-date_stamp' => TTi18n::gettext('Date'), //Date stamp is combination of time_stamp and user_date.date_stamp columns.
 
-										'-1200-accrual_policy_type' => TTi18n::gettext('Accrual Policy Type'),
+										'-1150-accrual_policy' => TTi18n::gettext('Accrual Policy'),
+										'-1160-accrual_policy_type' => TTi18n::gettext('Accrual Policy Type'),
 								);
 
 				$retval = array_merge( $retval, (array)$this->getOptions('date_columns'), (array)$this->getOptions('custom_columns'), (array)$this->getOptions('report_static_custom_column') );
@@ -195,7 +192,11 @@ class AccrualBalanceSummaryReport extends Report {
 			case 'dynamic_columns':
 				$retval = array(
 										//Dynamic - Aggregate functions can be used
+										'-2020-positive_amount' => TTi18n::gettext('Time Accrued'),
+										'-2022-negative_amount' => TTi18n::gettext('Time Taken'),
+
 										'-2050-amount' => TTi18n::gettext('Accrual Time'),
+										//'-2120-running_total_amount' => TTi18n::gettext('Running Total'), //Need to handle this in an aggregate?
 
 										'-2635-hourly_rate' => TTi18n::gettext('Hourly Rate'),
 										'-2640-accrual_wage' => TTi18n::gettext('Accrual Wage'),
@@ -238,13 +239,13 @@ class AccrualBalanceSummaryReport extends Report {
 				break;
 			case 'templates':
 				$retval = array(
-										'-1250-by_policy+accrual' => TTi18n::gettext('Accruals By Policy'),
+										'-1250-by_policy+accrual' => TTi18n::gettext('Accruals By Account'),
 										'-1260-by_type+accrual' => TTi18n::gettext('Accruals By Type'),
 										'-1270-by_type_by_employee+accrual' => TTi18n::gettext('Accruals By Type/Employee'),
-										'-1275-by_policy_by_employee+accrual' => TTi18n::gettext('Accruals By Policy/Employee'),
-										'-1280-by_policy_by_type_by_employee+accrual' => TTi18n::gettext('Accruals By Policy/Type/Employee'),
-										'-1290-by_employee_by_date+accrual' => TTi18n::gettext('Accruals By Policy/Type/Employee/Date'),
-										'-1300-by_date+accrual' => TTi18n::gettext('Accruals By Policy/Type/Date'),
+										'-1275-by_policy_by_employee+accrual' => TTi18n::gettext('Accruals By Account/Employee'),
+										'-1280-by_policy_by_type_by_employee+accrual' => TTi18n::gettext('Accruals By Account/Type/Employee'),
+										'-1290-by_employee_by_date+accrual' => TTi18n::gettext('Accruals By Account/Type/Employee/Date'),
+										'-1300-by_date+accrual' => TTi18n::gettext('Accruals By Account/Type/Date'),
 
 										'-1320-overall_balance_to_date' => TTi18n::gettext('Overall Balance To Date'),
 										'-1350-overall_balance' => TTi18n::gettext('Overall Balance'),
@@ -258,18 +259,18 @@ class AccrualBalanceSummaryReport extends Report {
 
 					switch( $template ) {
 						case 'by_policy+accrual':
-							$retval['columns'][] = 'accrual_policy';
+							$retval['columns'][] = 'accrual_policy_account';
 
 							$retval['columns'][] = 'type';
 							$retval['columns'][] = 'amount';
 
-							$retval['group'][] = 'accrual_policy';
-							$retval['sort'][] = array('accrual_policy' => 'asc');
+							$retval['group'][] = 'accrual_policy_account';
+							$retval['sort'][] = array('accrual_policy_account' => 'asc');
 							break;
 						case 'by_type+accrual':
 							$retval['columns'][] = 'type';
 
-							$retval['columns'][] = 'accrual_policy';
+							$retval['columns'][] = 'accrual_policy_account';
 							$retval['columns'][] = 'amount';
 
 							$retval['group'][] = 'type';
@@ -281,7 +282,7 @@ class AccrualBalanceSummaryReport extends Report {
 							$retval['columns'][] = 'first_name';
 							$retval['columns'][] = 'last_name';
 
-							$retval['columns'][] = 'accrual_policy';
+							$retval['columns'][] = 'accrual_policy_account';
 							$retval['columns'][] = 'amount';
 
 							$retval['group'][] = 'type';
@@ -295,63 +296,63 @@ class AccrualBalanceSummaryReport extends Report {
 							$retval['sort'][] = array('first_name' => 'asc');
 							break;
 						case 'by_policy_by_employee+accrual':
-							$retval['columns'][] = 'accrual_policy';
+							$retval['columns'][] = 'accrual_policy_account';
 							$retval['columns'][] = 'first_name';
 							$retval['columns'][] = 'last_name';
 
 							$retval['columns'][] = 'amount';
 
-							$retval['group'][] = 'accrual_policy';
+							$retval['group'][] = 'accrual_policy_account';
 							$retval['group'][] = 'last_name';
 							$retval['group'][] = 'first_name';
 
-							$retval['sub_total'][] = 'accrual_policy';
+							$retval['sub_total'][] = 'accrual_policy_account';
 
-							$retval['sort'][] = array('accrual_policy' => 'asc');
+							$retval['sort'][] = array('accrual_policy_account' => 'asc');
 							$retval['sort'][] = array('last_name' => 'asc');
 							$retval['sort'][] = array('first_name' => 'asc');
 							break;
 						case 'by_policy_by_type_by_employee+accrual':
-							$retval['columns'][] = 'accrual_policy';
+							$retval['columns'][] = 'accrual_policy_account';
 							$retval['columns'][] = 'type';
 							$retval['columns'][] = 'first_name';
 							$retval['columns'][] = 'last_name';
 
 							$retval['columns'][] = 'amount';
 
-							$retval['group'][] = 'accrual_policy';
+							$retval['group'][] = 'accrual_policy_account';
 							$retval['group'][] = 'type';
 							$retval['group'][] = 'last_name';
 							$retval['group'][] = 'first_name';
 
-							$retval['sub_total'][] = 'accrual_policy';
+							$retval['sub_total'][] = 'accrual_policy_account';
 							$retval['sub_total'][] = 'type';
 
-							$retval['sort'][] = array('accrual_policy' => 'asc');
+							$retval['sort'][] = array('accrual_policy_account' => 'asc');
 							$retval['sort'][] = array('type' => 'asc');
 							$retval['sort'][] = array('last_name' => 'asc');
 							$retval['sort'][] = array('first_name' => 'asc');
 							break;
 						case 'by_date+accrual':
-							$retval['columns'][] = 'accrual_policy';
+							$retval['columns'][] = 'accrual_policy_account';
 							$retval['columns'][] = 'type';
 							$retval['columns'][] = 'date_stamp';
 
 							$retval['columns'][] = 'amount';
 
-							$retval['group'][] = 'accrual_policy';
+							$retval['group'][] = 'accrual_policy_account';
 							$retval['group'][] = 'type';
 							$retval['group'][] = 'date_stamp';
 
-							$retval['sub_total'][] = 'accrual_policy';
+							$retval['sub_total'][] = 'accrual_policy_account';
 							$retval['sub_total'][] = 'type';
 
-							$retval['sort'][] = array('accrual_policy' => 'asc');
+							$retval['sort'][] = array('accrual_policy_account' => 'asc');
 							$retval['sort'][] = array('type' => 'asc');
 							$retval['sort'][] = array('date_stamp' => 'asc');
 							break;
 						case 'by_employee_by_date+accrual':
-							$retval['columns'][] = 'accrual_policy';
+							$retval['columns'][] = 'accrual_policy_account';
 							$retval['columns'][] = 'type';
 							$retval['columns'][] = 'first_name';
 							$retval['columns'][] = 'last_name';
@@ -359,7 +360,7 @@ class AccrualBalanceSummaryReport extends Report {
 
 							$retval['columns'][] = 'amount';
 
-							$retval['group'][] = 'accrual_policy';
+							$retval['group'][] = 'accrual_policy_account';
 							$retval['group'][] = 'type';
 							$retval['group'][] = 'first_name';
 							$retval['group'][] = 'last_name';
@@ -367,7 +368,7 @@ class AccrualBalanceSummaryReport extends Report {
 
 							$retval['sub_total'][] = 'type';
 
-							$retval['sort'][] = array('accrual_policy' => 'asc');
+							$retval['sort'][] = array('accrual_policy_account' => 'asc');
 							$retval['sort'][] = array('type' => 'asc');
 							$retval['sort'][] = array('last_name' => 'asc');
 							$retval['sort'][] = array('first_name' => 'asc');
@@ -378,11 +379,11 @@ class AccrualBalanceSummaryReport extends Report {
 
 							$retval['columns'][] = 'full_name';
 
-							$retval['columns'][] = 'accrual_policy';
+							$retval['columns'][] = 'accrual_policy_account';
 							$retval['columns'][] = 'amount';
 
 							$retval['group'][] = 'full_name';
-							$retval['group'][] = 'accrual_policy';
+							$retval['group'][] = 'accrual_policy_account';
 
 							$retval['sub_total'][] = 'full_name';
 
@@ -393,11 +394,11 @@ class AccrualBalanceSummaryReport extends Report {
 
 							$retval['columns'][] = 'full_name';
 
-							$retval['columns'][] = 'accrual_policy';
+							$retval['columns'][] = 'accrual_policy_account';
 							$retval['columns'][] = 'amount';
 
 							$retval['group'][] = 'full_name';
-							$retval['group'][] = 'accrual_policy';
+							$retval['group'][] = 'accrual_policy_account';
 
 							$retval['sub_total'][] = 'full_name';
 
@@ -555,10 +556,21 @@ class AccrualBalanceSummaryReport extends Report {
 		}
 		foreach ( $alf as $key => $a_obj ) {
 			if ( $accrual_permission_children_ids === TRUE OR in_array( $a_obj->getUser(), $accrual_permission_children_ids) ) {
-				$this->tmp_data['accrual'][$a_obj->getUser()][$a_obj->getAccrualPolicyID()][] = (array)$a_obj->getObjectAsArray( $columns );
+				$tmp_data = (array)$a_obj->getObjectAsArray( $columns );
+				if ( isset($tmp_data['amount']) ) {
+					if ( $tmp_data['amount'] < 0 ) {
+						$tmp_data['negative_amount'] = $tmp_data['amount'];
+					} else {
+						$tmp_data['positive_amount'] = $tmp_data['amount'];
+					}
+				}
+				$this->tmp_data['accrual'][$a_obj->getUser()][$a_obj->getAccrualPolicyAccount()][] = $tmp_data;
+
 			}
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
+		unset($tmp_data);
+
 		//Debug::Arr($this->tmp_data['accrual'], 'TMP Accrual Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		return TRUE;
@@ -572,14 +584,13 @@ class AccrualBalanceSummaryReport extends Report {
 			if ( isset( $this->tmp_data['accrual'] ) ) {
 				foreach( $this->tmp_data['accrual'] as $user_id => $level_2 ) {
 					if ( isset($this->tmp_data['user'][$user_id]) ) {
-						foreach( $level_2 as $accrual_policy_id => $rows ) {
+						foreach( $level_2 as $accrual_policy_account_id => $rows ) {
 							foreach( $rows as $row ) {
 								if ( isset( $row['date_stamp'] ) ) {
 									$date_columns = TTDate::getReportDates( NULL, TTDate::strtotime($row['date_stamp']), FALSE, $this->getUserObject() );
 								} else {
 									$date_columns = array();
 								}								
-
 
 								if ( !isset($this->tmp_data['user_wage'][$user_id]) ) {
 									$this->tmp_data['user_wage'][$user_id] = array();
@@ -591,7 +602,8 @@ class AccrualBalanceSummaryReport extends Report {
 									$this->tmp_data['user_wage'][$user_id]['accrual_wage'] = NULL;
 								}
 
-								$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $this->tmp_data['accrual'][$user_id][$accrual_policy_id], $date_columns, $this->tmp_data['user_wage'][$user_id] );
+								//Merge $row after user_wage so user_wage.type column isn't passed through.
+								$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $this->tmp_data['user_wage'][$user_id], $row, $date_columns );
 							}
 						}
 					}

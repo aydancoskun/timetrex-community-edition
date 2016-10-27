@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 13966 $
- * $Id: UserPreferenceListFactory.class.php 13966 2014-08-01 18:25:20Z mikeb $
- * $Date: 2014-08-01 11:25:20 -0700 (Fri, 01 Aug 2014) $
- */
+
 
 /**
  * @package Modules\Users

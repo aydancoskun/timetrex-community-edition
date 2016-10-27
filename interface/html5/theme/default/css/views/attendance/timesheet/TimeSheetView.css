@@ -5,10 +5,9 @@
 .time-sheet-view .control-bar {
     float: left;
     left: 50%;
-    margin-left: -350px;
+    margin-left: -450px;
     position: relative;
-    /*margin-bottom: 5px;*/
-    width: 700px;
+    width: 900px;
     text-align: center;
 }
 
@@ -40,7 +39,6 @@
 .time-sheet-view .employee-nav-div {
     float: left;
     margin-top: 3px;
-    min-width: 320px;
 
 }
 
@@ -65,7 +63,7 @@
 }
 
 .time-sheet-view .employee-nav-div .navigation-widget-div {
-    display: inline;
+    float: left;
 
 }
 
@@ -84,6 +82,33 @@
     text-align: center;
     cursor: default;
     position: relative;
+    height: 100%;
+    width: 100%;
+    margin-left: -2px;
+    padding-right: 2px;
+}
+
+.time-sheet-view .top-line-span {
+    border-top: 2px solid #333333;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    padding-top: 3px;
+}
+
+.time-sheet-view .top-line {
+    border-top: 2px solid #333333;
+
+}
+
+.time-sheet-view .punch-content-div span {
+    display: inline-block;
+    margin-top: 4px;
+
+}
+
+.time-sheet-view .top-line span {
+    margin-top: 3px;
 }
 
 .time-sheet-view .punch-time {
@@ -94,11 +119,21 @@
 
 }
 
+.time-sheet-view .absence-override {
+    color: red;
+}
+
 .time-sheet-view .request {
     float: left;
     width: 100%;
     font-weight: bold;
 
+}
+
+.time-sheet-view .total {
+    float: left;
+    width: 100%;
+    font-weight: bold;
 }
 
 .time-sheet-view .punch-exceptions {
@@ -206,6 +241,19 @@
     height: 25px;
     line-height: 25px;
     text-align: center;
+    border-right: 1px solid #FFFFFF;
+}
+
+.time-sheet-view .timesheet-warning-title-bar {
+    background: red;
+    color: #FFFFFF;
+    line-height: 25px;
+    text-align: center;
+}
+
+.time-sheet-view .timesheet-warning-title-bar span {
+    display: block;
+    font-weight: bold;
 }
 
 .time-sheet-view .grid-expend-btn {

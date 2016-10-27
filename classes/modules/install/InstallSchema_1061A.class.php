@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 1246 $
- * $Id: InstallSchema_1001B.class.php 1246 2007-09-14 23:47:42Z ipso $
- * $Date: 2007-09-14 16:47:42 -0700 (Fri, 14 Sep 2007) $
- */
+
 
 /**
  * @package Modules\Install
@@ -66,7 +62,7 @@ class InstallSchema_1061A extends InstallSchema_Base {
 						foreach( $pclf as $pc_obj ) {
 							Debug::text('Permission Group: '. $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
 							$plf = TTnew( 'PermissionListFactory' );
-							$plf->getByCompanyIdAndPermissionControlIdAndSectionAndName( $c_obj->getId(), $pc_obj->getId(), 'schedule', array('view'));
+							$plf->getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue( $c_obj->getId(), $pc_obj->getId(), 'schedule', 'view', 1 );
 							if ( $plf->getRecordCount() > 0 ) {
 								Debug::text('Found permission group with schedule, view enabled: '. $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9);
 								$pc_obj->setPermission(

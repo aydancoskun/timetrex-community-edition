@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14156 $
- * $Id: BankAccountFactory.class.php 14156 2014-08-19 18:55:48Z mikeb $
- * $Date: 2014-08-19 11:55:48 -0700 (Tue, 19 Aug 2014) $
- */
+
 
 /**
  * @package Modules\Users

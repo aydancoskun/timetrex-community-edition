@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2710 $
- * $Id: CronJobFactory.class.php 2710 2009-08-07 22:46:58Z ipso $
- * $Date: 2009-08-07 15:46:58 -0700 (Fri, 07 Aug 2009) $
- */
+
 
 /**
  * @package Modules\Cron

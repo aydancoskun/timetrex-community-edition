@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 15603 $
- * $Id: global.inc.php 15603 2014-12-30 00:31:47Z mikeb $
- * $Date: 2014-12-29 16:31:47 -0800 (Mon, 29 Dec 2014) $
- */
+
 //PHP v5.1.0 introduced $_SERVER['REQUEST_TIME'], but it doesn't include microseconds until v5.4.0.
 if ( !isset($_SERVER['REQUEST_TIME_FLOAT']) OR version_compare(PHP_VERSION, '5.4.0', '<') == TRUE ) {
 	$_SERVER['REQUEST_TIME_FLOAT'] = microtime( TRUE );
@@ -61,8 +57,8 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '7.4.8' );
-define('APPLICATION_VERSION_DATE', @strtotime('30-Dec-2014') ); // Release date of version.
+define('APPLICATION_VERSION', '8.0.0' );
+define('APPLICATION_VERSION_DATE', @strtotime('30-Jan-2015') ); // Release date of version.
 
 if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'WIN' ) { define('OPERATING_SYSTEM', 'WIN' ); } else { define('OPERATING_SYSTEM', 'LINUX' ); }
 
@@ -481,7 +477,7 @@ if ( PRODUCTION == TRUE ) {
 	$origin_url = '*';
 }
 header('Access-Control-Allow-Origin: '. $origin_url );
-header('Access-Control-Allow-Headers: Content-Type' );
+header('Access-Control-Allow-Headers: Content-Type, REQUEST_URI_FRAGMENT' );
 unset($origin_url);
 
 require_once('Database.inc.php');

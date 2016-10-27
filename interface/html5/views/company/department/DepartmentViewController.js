@@ -33,10 +33,11 @@ DepartmentViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'Department' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_department': $.i18n._( 'Department' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
+
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
@@ -51,39 +52,41 @@ DepartmentViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_department = this.edit_view_tab.find( '#tab_department' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_department_column1 = tab_department.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_department_column1 );
 
 		//Status
 
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {field: 'status_id'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_department_column1, '' );
 
 		//Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab0_column1 );
+		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_department_column1 );
+		form_item_input.parent().width( '45%' );
+
 
 		// Code
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'manual_id', width: 65} );
-		this.addEditFieldToColumn( $.i18n._( 'Code' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Code' ), form_item_input, tab_department_column1 );
 
 		//Tags
 		form_item_input = Global.loadWidgetByName( FormItemType.TAG_INPUT );
 
 		form_item_input.TTagInput( {field: 'tag', object_type_id: 120} );
-		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_department_column1, '' );
 
 	},
 
@@ -302,9 +305,9 @@ DepartmentViewController = BaseViewController.extend( {
 
 	},
 
-	onContentMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function( context_btn, menu_name ) {
 
-		this._super( 'onContentMenuClick', context_btn, menu_name );
+		this._super( 'onContextMenuClick', context_btn, menu_name );
 
 		var id;
 

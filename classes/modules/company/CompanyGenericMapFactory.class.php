@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2095 $
- * $Id: PolicyGroupAccrualPolicyFactory.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
- */
+
 
 /**
  * @package Modules\Policy
@@ -53,9 +49,17 @@ class CompanyGenericMapFactory extends Factory {
 			case 'object_type':
 				$retval = array(
 										//Policy Group mapping
+										90 => 'contributing_pay_code_policy',
+
+										100 => 'policy_group_regular_time_policy',
+										105 => 'schedule_policy_include_regular_policy', //Mapping regular policies to schedule policies.
+										106 => 'schedule_policy_exclude_regular_policy', //Mapping regular policies to schedule policies.
 										110 => 'policy_group_over_time_policy',
+										115 => 'schedule_policy_include_over_time_policy', //Mapping regular policies to schedule policies.
+										116 => 'schedule_policy_exclude_over_time_policy', //Mapping regular policies to schedule policies.
 										120 => 'policy_group_premium_policy',
-										125 => 'schedule_policy_premium_policy', //Mapping premium policies to schedule policies.
+										125 => 'schedule_policy_include_premium_policy', //Mapping premium policies to schedule policies.
+										126 => 'schedule_policy_exclude_premium_policy', //Mapping premium policies to schedule policies.
 										130 => 'policy_group_round_interval_policy',
 										140 => 'policy_group_accrual_policy',
 										150 => 'policy_group_meal_policy',
@@ -85,6 +89,33 @@ class CompanyGenericMapFactory extends Factory {
 										550 => 'premium_policy_job_item',
 										560 => 'premium_policy_job_item_group',
 */
+
+										//Regular Policy mapping
+										581 => 'regular_time_policy_branch',
+										582 => 'regular_time_policy_department',
+										583 => 'regular_time_policy_job',
+										584 => 'regular_time_policy_job_group',
+										585 => 'regular_time_policy_job_item',
+										586 => 'regular_time_policy_job_item_group',
+
+										//Overtime Policy mapping
+										591 => 'over_time_policy_branch',
+										592 => 'over_time_policy_department',
+										593 => 'over_time_policy_job',
+										594 => 'over_time_policy_job_group',
+										595 => 'over_time_policy_job_item',
+										596 => 'over_time_policy_job_item_group',
+
+										//Contributing Shift Policy mapping
+										610 => 'contributing_shift_policy_branch',
+										620 => 'contributing_shift_policy_department',
+										630 => 'contributing_shift_policy_job',
+										640 => 'contributing_shift_policy_job_group',
+										650 => 'contributing_shift_policy_job_item',
+										660 => 'contributing_shift_policy_job_item_group',
+										690 => 'contributing_shift_policy_holiday_policy',
+
+
 										//Job user mapping
 										1010 => 'job_user_branch',
 										1020 => 'job_user_department',
@@ -171,8 +202,6 @@ class CompanyGenericMapFactory extends Factory {
 	function setObjectID($id) {
 		$id = trim($id);
 
-		//$pglf = TTnew( 'PolicyGroupListFactory' );
-
 		if ( $this->Validator->isNumeric(	'object_id',
 										$id,
 										TTi18n::gettext('Object ID is invalid')
@@ -194,8 +223,6 @@ class CompanyGenericMapFactory extends Factory {
 	}
 	function setMapID($id) {
 		$id = trim($id);
-
-		//$pglf = TTnew( 'PolicyGroupListFactory' );
 
 		if ( $this->Validator->isNumeric(	'map_id',
 										$id,
@@ -231,7 +258,6 @@ class CompanyGenericMapFactory extends Factory {
 		if ( !is_array($ids) AND is_numeric( $ids ) ) {
 			$ids = array($ids);
 		}
-
 		//Debug::Arr($ids, 'Object Type ID: '. $object_type_id .' Object ID: '. $object_id .' IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_array($ids) ) {
 			$ids = array_unique( $ids ); //Make sure the IDs are unique to help avoid duplicates.
@@ -243,23 +269,23 @@ class CompanyGenericMapFactory extends Factory {
 				$cgmlf->getByCompanyIDAndObjectTypeAndObjectID( $company_id, $object_type_id, $object_id );
 				foreach ($cgmlf as $obj) {
 					$id = $obj->getMapID();
-					Debug::text('Object Type ID: '. $object_type_id .' Object ID: '. $obj->getObjectID() .' ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+					//Debug::text('Object Type ID: '. $object_type_id .' Object ID: '. $obj->getObjectID() .' ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
 					//Delete objects that are not selected
 					//Also check for duplicate IDs and delete them too.
 					if ( !in_array($id, $ids) OR in_array( $id, $tmp_ids ) ) {
-						Debug::text('Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+						//Debug::text('Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 						$obj->Delete();
 					} else {
 						//Save ID's that need to be updated.
-						Debug::text('NOT Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+						//Debug::text('NOT Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 						$tmp_ids[] = $id;
 					}
 				}
 				unset($id, $obj);
 			}
 			foreach ($ids as $id) {
-				if ( isset($ids) AND ( $relaxed_range == TRUE OR ( $relaxed_range == FALSE AND ( $id == -1 OR $id > 0 ) ) ) AND !in_array($id, $tmp_ids) ) {
+				if ( $id !== FALSE AND ( $relaxed_range == TRUE OR ( $relaxed_range == FALSE AND ( $id == -1 OR $id > 0 ) ) ) AND !in_array($id, $tmp_ids) ) {
 					$cgmf = TTnew( 'CompanyGenericMapFactory' );
 					$cgmf->setCompany( $company_id );
 					$cgmf->setObjectType( $object_type_id );
@@ -268,11 +294,20 @@ class CompanyGenericMapFactory extends Factory {
 					$cgmf->Save();
 				}
 			}
+
+			$cgmlf->removeCache( md5( $company_id . serialize( $object_type_id ) . serialize( $object_id ) ) );
+
 			return TRUE;
 		}
 
 		Debug::text('No objects to map.', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
+	}
+
+	function postSave() {
+		$this->removeCache( md5( $this->getCompany() . serialize( $this->getObjectType() ) . serialize( $this->getId() ) ) );
+
+		return TRUE;
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.

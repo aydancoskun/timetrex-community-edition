@@ -18,10 +18,10 @@ CREATE TABLE permission_user (
 	user_id integer NOT NULL
 );
 
---Rename current permission table.
+--Rename current permission table;
 alter table "permission" rename to "permission_old";
 
---Create totally new permission table.
+--Create totally new permission table;
 CREATE TABLE permission (
 	id serial NOT NULL,
 	permission_control_id integer NOT NULL,

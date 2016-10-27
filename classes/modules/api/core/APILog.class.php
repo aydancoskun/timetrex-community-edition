@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2196 $
- * $Id: APILog.class.php 2196 2008-10-14 16:08:54Z ipso $
- * $Date: 2008-10-14 09:08:54 -0700 (Tue, 14 Oct 2008) $
- */
+
 
 /**
  * @package API\Core
@@ -85,7 +81,7 @@ class APILog extends APIFactory {
 				if ( isset($table_name_permission_map[$filter_table_name]) ) {
 					foreach( $table_name_permission_map[$filter_table_name] as $permission_section ) {
 						if ( !( $this->getPermissionObject()->Check( $permission_section, 'enabled')
-							 AND ( $this->getPermissionObject()->Check( $permission_section, 'edit')
+								AND ( $this->getPermissionObject()->Check( $permission_section, 'edit')
 									OR $this->getPermissionObject()->Check( $permission_section, 'edit_child')
 								) ) ) {
 							Debug::Text('Skipping table name due to permissions: '. $filter_table_name .' Permission Section: '. $permission_section .' Key: '. $key, __FILE__, __LINE__, __METHOD__, 10);

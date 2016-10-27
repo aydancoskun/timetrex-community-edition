@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 5335 $
- * $Id: KPIListFactory.class.php 5335 2011-10-18 00:32:47Z ipso $
- * $Date: 2011-10-18 08:32:47 +0800 (Tue, 18 Oct 2011) $
- */
+
 
 /**
  * @package Modules\KPI
@@ -133,6 +129,8 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		$query .= $this->getSortSQL( $order );
 
 		$this->ExecuteSQL($query, $ph);
+
+		return $this;
 	}
 
 	function getByCompanyIDAndGroupID($company_id, $id, $where = NULL, $order = NULL) {

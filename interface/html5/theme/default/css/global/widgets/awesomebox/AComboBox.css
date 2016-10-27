@@ -1,15 +1,116 @@
 .a-combobox {
-    background: url("../../../../images/combobox_up.png") no-repeat scroll 0 0 transparent;
-    float: left;
+
+    display: inline-block;
     height: 24px;
-    width: 162px;
+    min-width: 192px;
     cursor: pointer;
     text-align: left;
+    margin-right: 3px;
+    font-size: 0px;
 
 }
 
-.a-error-tip {
-    background: url("../../../../images/combobox_error.png") no-repeat scroll 0 0 transparent !important;
+.a-combobox:hover .a-combobox-left-bg {
+    background: url("../../../../images/combobox_up_left_down.png") no-repeat scroll 0 0 transparent;
+    height: 24px;
+    width: 7px;
+    display: inline-block;
+}
+
+.a-combobox:hover .a-combobox-mid-bg {
+    background: url("../../../../images/combobox_up_middle_down.png") repeat-x scroll 0 0 transparent;
+    height: 24px;
+    display: inline-block;
+}
+
+.a-combobox:hover .clickable-space {
+    display: inline-block;
+    width: 23px;
+    height: 24px;
+    background: url("../../../../images/combobox_up_right_down.png") no-repeat scroll 0 0 transparent;
+
+}
+
+.a-combobox .a-combobox-left-bg {
+    background: url("../../../../images/combobox_up_left.png") no-repeat scroll 0 0 transparent;
+    height: 24px;
+    width: 7px;
+    display: inline-block;
+}
+
+.a-combobox .a-combobox-mid-bg {
+    background: url("../../../../images/combobox_up_middle.png") repeat-x scroll 0 0 transparent;
+    height: 24px;
+    display: inline-block;
+}
+
+.a-combobox .clickable-space {
+    display: inline-block;
+    width: 23px;
+    height: 24px;
+    background: url("../../../../images/combobox_up_right.png") no-repeat scroll 0 0 transparent;
+}
+
+.a-error-tip .a-combobox-left-bg {
+    background: url("../../../../images/combobox_up_left_error.png") no-repeat scroll 0 0 transparent;
+    height: 24px;
+    width: 7px;
+    display: inline-block;
+}
+
+.a-error-tip .a-combobox-mid-bg {
+    background: url("../../../../images/combobox_up_middle_error.png") repeat-x scroll 0 0 transparent;
+    height: 24px;
+    display: inline-block;
+}
+
+.a-error-tip .clickable-space {
+    display: inline-block;
+    width: 23px;
+    height: 24px;
+    background: url("../../../../images/combobox_up_right_error.png") no-repeat scroll 0 0 transparent;
+
+}
+
+.a-combobox-readonly .a-combobox-left-bg {
+    background: none;
+    height: 24px;
+    width: 7px;
+    display: inline-block;
+}
+
+.a-combobox-readonly .a-combobox-mid-bg {
+    background: none;
+    height: 24px;
+    display: inline-block;
+}
+
+.a-combobox-readonly .clickable-space {
+    display: inline-block;
+    width: 23px;
+    height: 24px;
+    background: none;
+
+}
+
+.a-combobox-readonly:hover .a-combobox-left-bg {
+    background: none;
+    height: 24px;
+    width: 7px;
+    display: inline-block;
+}
+
+.a-combobox-readonly:hover .a-combobox-mid-bg {
+    background: none;
+    height: 24px;
+    display: inline-block;
+}
+
+.a-combobox-readonly:hover .clickable-space {
+    display: inline-block;
+    width: 23px;
+    height: 24px;
+    background: none;
 
 }
 
@@ -27,44 +128,29 @@
     opacity: 0;
 }
 
-.a-combobox:hover {
-    background: url("../../../../images/combobox_down.png") no-repeat scroll 0 0 transparent;
-    float: left;
-    height: 24px;
-    width: 162px;
-    cursor: pointer;
-
-}
-
 .a-combobox-readonly:hover {
     background: none;
     cursor: default;
 }
 
-.a-combobox .clickable-space {
-    display: block;
-    float: left;
-    width: 30px;
+.a-combobox .a-combobox-label {
+    color: #362B36;
     height: 24px;
+    font-size: 12px;
+    line-height: 24px;
+    min-width: 132px;
+    overflow: hidden;
+    position: relative;
+    display: inline-block;
+    word-wrap: break-word;
+    word-break: break-all;
+    padding-right: 3px;
+    max-width: 200px;
 
 }
 
-.a-combobox .a-combobox-label {
-    color: #362B36;
-    cursor: pointer;
-    display: block;
-    height: 21px;
-    font-size: 12px;
-    left: 7px;
-    line-height: 23px;
-    width: 132px;
-    overflow: hidden;
-    position: relative;
-    top: 1px;
-    float: left;
-    word-wrap: break-word;
-    word-break: break-all;
-
+.a-combobox-label-hide .a-combobox-label {
+    display: none;
 }
 
 .focus {
@@ -75,7 +161,7 @@
 }
 
 .a-combobox .edit-columnIcon-div {
-    float: left;
+    display: inline-block;
     margin-left: 3px;
     margin-top: 5px;
     width: 20px;

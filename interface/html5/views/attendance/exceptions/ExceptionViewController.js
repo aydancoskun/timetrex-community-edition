@@ -21,8 +21,8 @@ ExceptionViewController = BaseViewController.extend( {
 
 	},
 
-	onContentMenuClick: function( context_btn, menu_name ) {
-		this._super( 'onContentMenuClick', context_btn, menu_name );
+	onContextMenuClick: function( context_btn, menu_name ) {
+		this._super( 'onContextMenuClick', context_btn, menu_name );
 
 		if ( Global.isSet( menu_name ) ) {
 			var id = menu_name;
@@ -50,6 +50,11 @@ ExceptionViewController = BaseViewController.extend( {
 	},
 
 	setDefaultMenu: function( doNotSetFocus ) {
+
+        //Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+        if (!this.context_menu_array) {
+            return;
+        }
 
 		if ( !Global.isSet( doNotSetFocus ) || !doNotSetFocus ) {
 			this.selectContextMenu();
@@ -668,6 +673,10 @@ ExceptionViewController = BaseViewController.extend( {
 	setGridCellBackGround: function() {
 
 		var data = this.grid.getGridParam( 'data' );
+		//Error: TypeError: data is undefined in https://ondemand1.timetrex.com/interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
+		if ( !data ) {
+			return;
+		}
 
 		var len = data.length;
 

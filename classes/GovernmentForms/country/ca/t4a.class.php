@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2286 $
- * $Id: CA.class.php 2286 2008-12-12 23:12:41Z ipso $
- * $Date: 2008-12-12 15:12:41 -0800 (Fri, 12 Dec 2008) $
- */
+
 
 include_once( 'CA.class.php' );
 
@@ -156,6 +152,7 @@ class GovernmentForms_CA_T4A extends GovernmentForms_CA {
 																'type' => 'B' )
 									),
 								'payroll_account_number' => array(
+										'function' => array('filterPayrollAccountNumber', 'drawNormal' ),
 										'coordinates' => array(
 															'x' => 50,
 															'y' => 95,
@@ -580,22 +577,6 @@ class GovernmentForms_CA_T4A extends GovernmentForms_CA {
 		} else {
 			return $template_schema;
 		}
-	}
-
-	function filterMiddleName( $value ) {
-		//Return just initial
-		$value = substr( $value, 0, 1);
-		return $value;
-	}
-	function filterAddress( $value ) {
-		//Combine company address for multicell display.
-		$retarr[] = $this->address1;
-		if ( $this->address2 != '' ) {
-			$retarr[] = $this->address2;
-		}
-		$retarr[] = $this->city. ', '.$this->province . ' ' . $this->postal_code;
-
-		return implode("\n", $retarr );
 	}
 	
 	function _outputXML() {

@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 15602 $
- * $Id: ROEFactory.class.php 15602 2014-12-30 00:31:02Z mikeb $
- * $Date: 2014-12-29 16:31:02 -0800 (Mon, 29 Dec 2014) $
- */
+
 
 /**
  * @package Modules\Other
@@ -48,6 +44,7 @@ class ROEFactory extends Factory {
 
 	var $user_obj = NULL;
 	var $pay_stub_entry_account_link_obj = NULL;
+	var $initial_pay_period_earnings = NULL;
 	var $pay_period_earnings = NULL;
 
 	function _getFactoryOptions( $name ) {
@@ -549,7 +546,11 @@ class ROEFactory extends Factory {
 			Debug::Text('Pay Period: Start Date: '. TTDate::getDate('DATE+TIME', $pay_period->getStartDate() ) .' End Date: '. TTDate::getDate('DATE+TIME', $pay_period->getEndDate() ), __FILE__, __LINE__, __METHOD__, 10);
 
 			if ( $this->getFirstDate() <= $pay_period->getEndDate() AND $this->getLastDate() >= $pay_period->getStartDate() ) {
-				Debug::Text($i. '.	Including Pay Period...', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text($i. '.	Including Pay Period ID: '. $pay_period->getID(), __FILE__, __LINE__, __METHOD__, 10);
+
+				//Need to find pay periods with no earnings, so add pay periods with no earnings first, then overwrite them with earnings later.
+				$this->initial_pay_period_earnings[$pay_period->getID()] = array( 'amount' => FALSE, 'units' => FALSE );
+
 				//If there aren't enough pay periods yet, use what we have...
 				$start_date = $pay_period->getStartDate();
 
@@ -562,6 +563,7 @@ class ROEFactory extends Factory {
 		}
 
 		Debug::Text('Pay Period Report Start Date: '. TTDate::getDate('DATE+TIME', $start_date), __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($this->pay_period_earnings, 'Initilized Pay Period Earnings Array...', __FILE__, __LINE__, __METHOD__, 10);
 
 		return $start_date;
 	}
@@ -638,7 +640,7 @@ class ROEFactory extends Factory {
 		$plf->getLastPunchByUserId( $user_id );
 		if ( $plf->getRecordCount() > 0 ) {
 			$punch_obj = $plf->getCurrent();
-			$last_date = $punch_obj->getPunchControlObject()->getUserDateObject()->getDateStamp();
+			$last_date = $punch_obj->getPunchControlObject()->getDateStamp();
 		} else {
 			$last_date = TTDate::getTime();
 		}
@@ -700,25 +702,30 @@ class ROEFactory extends Factory {
 		$setup_data = $this->getSetupData();
 		$insurable_earnings_start_date = $this->getInsurablePayPeriodStartDate( $this->getInsurableEarningsReportPayPeriods( $line ) );
 
+		$pay_periods_with_earnings = 0;
+
 		//Don't include YTD adjustments in ROE totals,
 		//As the proper way is to generate ROEs from their old system and ROEs from TimeTrex, and issue both to the employee.
 		$pself = TTnew( 'PayStubEntryListFactory' );
 		$pself->getPayPeriodReportByUserIdAndEntryNameIdAndStartDateAndEndDate( $this->getUser(), $setup_data['insurable_earnings_psea_ids'], $insurable_earnings_start_date, $this->getLastDate(), 0, TRUE, NULL, array('x.start_date' => 'desc') );
 		if ( $pself->getRecordCount() > 0 ) {
+			$this->pay_period_earnings = $this->initial_pay_period_earnings;
 			foreach( $pself as $pse_obj ) {
-				$retarr[$pse_obj->getColumn('pay_period_id')] = array(
+				$this->pay_period_earnings[$pse_obj->getColumn('pay_period_id')] = array(
 																		//'pay_period_start_date' => $pse_obj->getColumn('pay_period_start_date'),
 																		'amount' => $pse_obj->getColumn('amount'),
 																		'units' => $pse_obj->getColumn('units'),
 																	);
+				$pay_periods_with_earnings++;
 			}
 		}
 
-		if ( isset($retarr) ) {
-			Debug::Arr($retarr, 'Pay Period Earnings: ', __FILE__, __LINE__, __METHOD__, 10);
-			$this->pay_period_earnings = $retarr;
+		if ( $pay_periods_with_earnings > 0 ) {
+			Debug::Arr($this->pay_period_earnings, 'Pay Period Earnings: ', __FILE__, __LINE__, __METHOD__, 10);
 			return $this->pay_period_earnings;
 		}
+
+		Debug::Text(' No Pay Period Earnings...', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 	}
@@ -851,7 +858,18 @@ class ROEFactory extends Factory {
 		//Note, this includes the current pay stub we just generated
 		Debug::Text('Total Insurable Earnings: '. $total_earnings, __FILE__, __LINE__, __METHOD__, 10);
 
-		UserGenericStatusFactory::queueGenericStatus( $this->getUserObject()->getFullName(TRUE).' - '. TTi18n::gettext('Record of Employment'), 30, TTi18n::gettext('Insurable Hours:').' '. $total_hours .' '. TTi18n::gettext('Insurable Earnings:').' '. $total_earnings, NULL );
+		$user_generic_status_id = 30;
+		if ( $total_hours == 0 AND $total_earnings != 0 ) {
+			$user_generic_status_id = 20;
+		}
+		UserGenericStatusFactory::queueGenericStatus( $this->getUserObject()->getFullName(TRUE).' - '. TTi18n::gettext('Record of Employment'), $user_generic_status_id, TTi18n::gettext('Insurable Hours').': '. $total_hours, NULL );
+
+		$user_generic_status_id = 30;
+		if ( $total_earnings == 0 AND $total_hours != 0 ) {
+			$user_generic_status_id = 20;
+		}
+		UserGenericStatusFactory::queueGenericStatus( $this->getUserObject()->getFullName(TRUE).' - '. TTi18n::gettext('Record of Employment'), $user_generic_status_id, TTi18n::gettext('Insurable Earnings').': $'. $total_earnings, NULL );
+
 
 		//ReSave these
 		if ( $this->getId() != '' ) {

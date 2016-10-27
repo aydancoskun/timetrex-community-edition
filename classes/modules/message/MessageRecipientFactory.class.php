@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 3351 $
- * $Id: MessageFactory.class.php 3351 2010-02-18 17:22:09Z ipso $
- * $Date: 2010-02-18 09:22:09 -0800 (Thu, 18 Feb 2010) $
- */
+
 
 /**
  * @package Modules\Message

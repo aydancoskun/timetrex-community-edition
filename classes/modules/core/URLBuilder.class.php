@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 11795 $
- * $Id: URLBuilder.class.php 11795 2013-12-24 21:08:04Z mikeb $
- * $Date: 2013-12-24 13:08:04 -0800 (Tue, 24 Dec 2013) $
- */
+
 
 /**
  * @package Core

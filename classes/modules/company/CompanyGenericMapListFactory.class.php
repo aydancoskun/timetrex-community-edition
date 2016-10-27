@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2095 $
- * $Id: PolicyGroupAccrualPolicyListFactory.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
- */
+
 
 /**
  * @package Modules\Policy
@@ -138,19 +134,27 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 			return FALSE;
 		}
 
-		$ph = array( 'company_id' => $company_id);
+		$cache_id = md5( $company_id . serialize($object_type_id) . serialize($id) );
+		//Debug::Text('Cache ID: '. $cache_id .' Company ID: '. $company_id .' Object Type: '. $object_type_id .' ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+		
+		$this->rs = $this->getCache( $cache_id );
+		if ( $this->rs === FALSE ) {
+			$ph = array( 'company_id' => $company_id);
 
-		$query = '
-					select	a.*
-					from	'. $this->getTable() .' as a
-					where	a.company_id = ?
-						AND a.object_type_id in ('. $this->getListSQL($object_type_id, $ph) .')
-						AND a.object_id in ('. $this->getListSQL($id, $ph) .')
-					';
-		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+			$query = '
+						select	a.*
+						from	'. $this->getTable() .' as a
+						where	a.company_id = ?
+							AND a.object_type_id in ('. $this->getListSQL($object_type_id, $ph) .')
+							AND a.object_id in ('. $this->getListSQL($id, $ph) .')
+						';
+			$query .= $this->getWhereSQL( $where );
+			$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+			$this->ExecuteSQL( $query, $ph );
+
+			$this->saveCache($this->rs, $cache_id );
+		}
 
 		return $this;
 	}
@@ -309,8 +313,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 	
 	static function getArrayByCompanyIDAndObjectTypeIDAndObjectID( $company_id, $object_type_id, $object_id ) {
 		$cgmlf = new CompanyGenericMapListFactory();
-		$lf = $cgmlf->getByCompanyIDAndObjectTypeAndObjectID( $company_id, $object_type_id, $object_id );
-		return $cgmlf->getArrayByListFactory( $lf );
+		return $cgmlf->getArrayByListFactory( $cgmlf->getByCompanyIDAndObjectTypeAndObjectID( $company_id, $object_type_id, $object_id ) );
 	}
 }
 ?>

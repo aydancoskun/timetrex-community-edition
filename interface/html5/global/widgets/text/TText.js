@@ -26,7 +26,6 @@
 		};
 
 		this.setValue = function( val ) {
-
 			if ( !val ) {
 				val = '';
 			}

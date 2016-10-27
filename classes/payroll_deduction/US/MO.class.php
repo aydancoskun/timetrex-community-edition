@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 11817 $
- * $Id: MO.class.php 11817 2013-12-27 16:51:49Z mikeb $
- * $Date: 2013-12-27 08:51:49 -0800 (Fri, 27 Dec 2013) $
- */
+
 
 /**
  * @package PayrollDeduction\US

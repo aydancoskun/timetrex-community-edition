@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2095 $
- * $Id: PolicyGroupUserFactory.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
- */
+
 
 /**
  * @package Modules\Hierarchy
@@ -161,7 +157,7 @@ class HierarchyUserFactory extends Factory {
 				AND
 				$this->Validator->isNotResultSetWithRows(	'user',
 															$hllf->getByHierarchyControlIdAndUserId( $this->getHierarchyControl(), $id ),
-															TTi18n::gettext('Selected employee is assigned as both a superior and subordinate')
+															TTi18n::gettext('Selected Employee is assigned as both a superior and subordinate')
 															)
 */
 				AND	$this->Validator->isTrue(		'user',

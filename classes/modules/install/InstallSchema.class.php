@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 15612 $
- * $Id: InstallSchema.class.php 15612 2014-12-30 16:12:10Z mikeb $
- * $Date: 2014-12-30 08:12:10 -0800 (Tue, 30 Dec 2014) $
- */
+
 
 /**
  * @package Modules\Install

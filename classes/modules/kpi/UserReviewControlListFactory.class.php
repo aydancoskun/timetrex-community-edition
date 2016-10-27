@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 5369 $
- * $Id: UserReviewControlListFactory.class.php 5369 2011-10-21 19:37:24Z ipso $
- * $Date: 2011-10-22 03:37:24 +0800 (Sat, 22 Oct 2011) $
- */
+
 
 /**
  * @package Modules\KPI
@@ -136,10 +132,18 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 		return $this;
 	}
 
-	function getByCompanyId( $company_id, $where = NULL, $order = NULL) {
+	function getByCompanyId( $company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
+
+		if ( $order == NULL ) {
+			$order = array( 'a.due_date' => 'desc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
 		$uf = new UserFactory();
 
 		$ph = array(
@@ -152,10 +156,11 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 						LEFT JOIN  '. $uf->getTable() .' as u ON ( a.user_id = u.id AND u.deleted = 0 )
 					where	u.company_id = ?
 						AND a.deleted = 0';
-		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL($query, $ph);
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

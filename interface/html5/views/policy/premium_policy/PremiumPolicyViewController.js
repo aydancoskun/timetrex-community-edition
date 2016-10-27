@@ -1,7 +1,7 @@
 PremiumPolicyViewController = BaseViewController.extend( {
 	el: '#premium_policy_view_container',
 	type_array: null,
-	pay_type_array: null,
+	//pay_type_array: null,
 	include_holiday_type_array: null,
 
 	branch_selection_type_array: null,
@@ -41,7 +41,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		this.buildContextMenu();
 
 		this.initData();
-		this.setSelectRibbonMenuIfNecessary( 'PremiumPolicy' );
+		this.setSelectRibbonMenuIfNecessary();
 
 	},
 
@@ -83,21 +83,15 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		var tab_2_label = this.edit_view.find( 'a[ref=tab2]' );
-		var tab_3_label = this.edit_view.find( 'a[ref=tab3]' );
-		var tab_4_label = this.edit_view.find( 'a[ref=tab4]' );
-		var tab_5_label = this.edit_view.find( 'a[ref=tab5]' );
-		var tab_6_label = this.edit_view.find( 'a[ref=tab6]' );
-
-		tab_0_label.text( $.i18n._( 'Premium Policy' ) );
-		tab_1_label.text( $.i18n._( 'Date/Time Criteria' ) );
-		tab_2_label.text( $.i18n._( 'Differential Criteria' ) );
-		tab_3_label.text( $.i18n._( 'Meal/Break Criteria' ) );
-		tab_4_label.text( $.i18n._( 'CallBack Criteria' ) );
-		tab_5_label.text( $.i18n._( 'Minimum Shift Time Criteria' ) );
-		tab_6_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_premium_policy': $.i18n._( 'Premium Policy' ),
+			'tab_date_criteria': $.i18n._( 'Date/Time Criteria' ),
+			'tab_differential_criteria': $.i18n._( 'Differential Criteria' ),
+			'tab_meal_criteria': $.i18n._( 'Meal/Break Criteria' ),
+			'tab_callback_criteria': $.i18n._( 'CallBack Criteria' ),
+			'tab_minimum_shift_time_criteria': $.i18n._( 'Minimum Shift Time Criteria' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIPremiumPolicy' )),
@@ -112,31 +106,40 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_premium_policy = this.edit_view_tab.find( '#tab_premium_policy' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_premium_policy_column1 = tab_premium_policy.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_premium_policy_column1 );
 
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: 150} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab0_column1, '' );
+		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_premium_policy_column1, '' );
+
+		form_item_input.parent().width( '45%' );
+
+		// Description
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
+		form_item_input.TTextArea( { field: 'description', width: '100%' } );
+		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_premium_policy_column1, '', null, null, true );
+
+		form_item_input.parent().width( '45%' );
 
 		//Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'type_id', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_premium_policy_column1 );
 
 		//Hours/Pay Criteria
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( {label: $.i18n._( 'Hours/Pay Criteria' )} );
-		this.addEditFieldToColumn( null, form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( null, form_item_input, tab_premium_policy_column1 );
 
 		//Minimum Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -147,7 +150,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Minimum Time' ), form_item_input, tab0_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Minimum Time' ), form_item_input, tab_premium_policy_column1, '', widgetContainer );
 
 		//Maximum Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -158,94 +161,63 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Maximum Time' ), form_item_input, tab0_column1, '', widgetContainer );
-
-		//Include Meal Policy in Calculation
-		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'include_meal_policy'} );
-		this.addEditFieldToColumn( $.i18n._( 'Include Meal Policy in Calculation' ), form_item_input, tab0_column1 );
-
-		//Include Break Policy in Calculation
-		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'include_break_policy'} );
-		this.addEditFieldToColumn( $.i18n._( 'Include Break Policy in Calculation' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Maximum Time' ), form_item_input, tab_premium_policy_column1, '', widgetContainer );
 
 		//Include Partial Punches
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( {field: 'include_partial_punch'} );
-		this.addEditFieldToColumn( $.i18n._( 'Include Partial Punches' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Include Partial Punches' ), form_item_input, tab_premium_policy_column1, '', null, true );
 
-		//Pay Type
-		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-
-		form_item_input.TComboBox( {field: 'pay_type_id', set_empty: false} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.pay_type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Pay Type' ), form_item_input, tab0_column1 );
-
-		// Premium
-		// Hourly Rate
-		//Rate
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'rate', width: 65} );
-
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> (" + $.i18n._( 'ie' ) + ': ' + $.i18n._( '1.5 for time and a half' ) + ")</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Rate' ), form_item_input, tab0_column1, '', widgetContainer, true );
-
-		//Wage Group
+		// Contributing Shift
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIWageGroup' )),
+			api_class: (APIFactory.getAPIClass( 'APIContributingShiftPolicy' )),
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.WAGE_GROUP,
+			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
+			show_search_inputs: true,
+			set_empty: true,
+			set_default: true,
+			field: 'contributing_shift_policy_id'
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Contributing Shift Policy' ), form_item_input, tab_premium_policy_column1 );
+
+		//Pay Code
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APIPayCode' )),
+			allow_multiple_selection: false,
+			layout_name: ALayoutIDs.PAY_CODE,
 			show_search_inputs: true,
 			set_default: true,
-			field: 'wage_group_id'
+			set_empty: true,
+			field: 'pay_code_id'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Wage Group' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Pay Code' ), form_item_input, tab_premium_policy_column1 );
 
-		//Pay Stub Account
+		//Pay Formula Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+			api_class: (APIFactory.getAPIClass( 'APIPayFormulaPolicy' )),
 			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+			layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'pay_stub_entry_account_id'
+			field: 'pay_formula_policy_id',
+			custom_first_label: $.i18n._( '-- Defined By Pay Code --' ),
+			added_items: [
+				{value: 0, label: $.i18n._( '-- Defined By Pay Code --' )}
+			]
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Pay Stub Account' ), form_item_input, tab0_column1 );
-
-		// Accrual Policy
-		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIAccrualPolicy' )),
-			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ACCRUAL_POLICY,
-			show_search_inputs: true,
-			set_empty: true,
-			field: 'accrual_policy_id'
-		} );
-		this.addEditFieldToColumn( $.i18n._( 'Accrual Policy' ), form_item_input, tab0_column1, '' );
-
-		// Accrual Rate
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'accrual_rate'} );
-		this.addEditFieldToColumn( $.i18n._( 'Accrual Rate' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Pay Formula Policy' ), form_item_input, tab_premium_policy_column1 );
 
 		//Tab 1 start
+		var tab_date_criteria = this.edit_view_tab.find( '#tab_date_criteria' );
 
-		var tab1 = this.edit_view_tab.find( '#tab1' );
-
-		var tab1_column1 = tab1.find( '.first-column' );
+		var tab_date_criteria_column1 = tab_date_criteria.find( '.first-column' );
 
 		this.edit_view_tabs[1] = [];
 
-		this.edit_view_tabs[1].push( tab1_column1 );
+		this.edit_view_tabs[1].push( tab_date_criteria_column1 );
 
 		// Start Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
@@ -258,7 +230,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab1_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_date_criteria_column1, '', widgetContainer );
 
 		// End Date
 
@@ -271,7 +243,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab1_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab_date_criteria_column1, '', widgetContainer );
 
 		// Start Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -282,7 +254,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Start Time' ), form_item_input, tab1_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Start Time' ), form_item_input, tab_date_criteria_column1, '', widgetContainer );
 
 		// End Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -293,7 +265,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'End Time' ), form_item_input, tab1_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'End Time' ), form_item_input, tab_date_criteria_column1, '', widgetContainer );
 
 		// Daily Time
 
@@ -317,7 +289,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		widgetContainer.append( form_item_maximum_daily_trigger_time_input );
 		widgetContainer.append( label_3 );
 
-		this.addEditFieldToColumn( $.i18n._( 'Daily Time' ), [form_item_daily_trigger_time_input, form_item_maximum_daily_trigger_time_input], tab1_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Daily Time' ), [form_item_daily_trigger_time_input, form_item_maximum_daily_trigger_time_input], tab_date_criteria_column1, '', widgetContainer );
 
 		// Weekly Time
 		var form_item_weekly_trigger_time_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -338,7 +310,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		widgetContainer.append( form_item_maximum_weekly_trigger_time_input );
 		widgetContainer.append( label_3 );
 
-		this.addEditFieldToColumn( $.i18n._( 'Weekly Time' ), [form_item_weekly_trigger_time_input, form_item_maximum_weekly_trigger_time_input], tab1_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Weekly Time' ), [form_item_weekly_trigger_time_input, form_item_maximum_weekly_trigger_time_input], tab_date_criteria_column1, '', widgetContainer );
 
 		// Effective Days
 		var form_item_sun_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
@@ -388,7 +360,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		widgetContainer.append( fri );
 		widgetContainer.append( sat );
 
-		this.addEditFieldToColumn( $.i18n._( 'Effective Days' ), [form_item_sun_checkbox, form_item_mon_checkbox, form_item_tue_checkbox, form_item_wed_checkbox, form_item_thu_checkbox, form_item_fri_checkbox, form_item_sat_checkbox], tab1_column1, '', widgetContainer, false, true );
+		this.addEditFieldToColumn( $.i18n._( 'Effective Days' ), [form_item_sun_checkbox, form_item_mon_checkbox, form_item_tue_checkbox, form_item_wed_checkbox, form_item_thu_checkbox, form_item_fri_checkbox, form_item_sat_checkbox], tab_date_criteria_column1, '', widgetContainer, false, true );
 
 		// Holidays
 
@@ -396,17 +368,17 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		form_item_input.TComboBox( {field: 'include_holiday_type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.include_holiday_type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Holidays' ), form_item_input, tab1_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Holidays' ), form_item_input, tab_date_criteria_column1, '' );
 
 		// Tab2 start
 
-		var tab2 = this.edit_view_tab.find( '#tab2' );
+		var tab_differential_criteria = this.edit_view_tab.find( '#tab_differential_criteria' );
 
-		var tab2_column1 = tab2.find( '.first-column' );
+		var tab_differential_criteria_column1 = tab_differential_criteria.find( '.first-column' );
 
 		this.edit_view_tabs[2] = [];
 
-		this.edit_view_tabs[2].push( tab2_column1 );
+		this.edit_view_tabs[2].push( tab_differential_criteria_column1 );
 
 		// Branches
 		var v_box = $( "<div class='v-box'></div>" );
@@ -446,7 +418,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		v_box.append( form_item );
 
-		this.addEditFieldToColumn( $.i18n._( 'Branches' ), [form_item_input, form_item_input_1, form_item_input_2], tab2_column1, '', v_box, false, true );
+		this.addEditFieldToColumn( $.i18n._( 'Branches' ), [form_item_input, form_item_input_1, form_item_input_2], tab_differential_criteria_column1, '', v_box, false, true );
 
 		// Departments
 
@@ -487,7 +459,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		v_box.append( form_item );
 
-		this.addEditFieldToColumn( $.i18n._( 'Departments' ), [form_item_input, form_item_input_1, form_item_input_2], tab2_column1, '', v_box, false, true );
+		this.addEditFieldToColumn( $.i18n._( 'Departments' ), [form_item_input, form_item_input_1, form_item_input_2], tab_differential_criteria_column1, '', v_box, false, true );
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 			// Job Groups
@@ -521,7 +493,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 			v_box.append( form_item );
 
-			this.addEditFieldToColumn( $.i18n._( 'Job Groups' ), [form_item_input, form_item_input_1], tab2_column1, '', v_box, false, true );
+			this.addEditFieldToColumn( $.i18n._( 'Job Groups' ), [form_item_input, form_item_input_1], tab_differential_criteria_column1, '', v_box, false, true );
 
 			// Jobs
 			v_box = $( "<div class='v-box'></div>" );
@@ -552,7 +524,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 			v_box.append( form_item );
 
-			this.addEditFieldToColumn( $.i18n._( 'Jobs' ), [form_item_input, form_item_input_1], tab2_column1, '', v_box, false, true );
+			this.addEditFieldToColumn( $.i18n._( 'Jobs' ), [form_item_input, form_item_input_1], tab_differential_criteria_column1, '', v_box, false, true );
 
 			// Task Groups
 
@@ -585,7 +557,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 			v_box.append( form_item );
 
-			this.addEditFieldToColumn( $.i18n._( 'Task Groups' ), [form_item_input, form_item_input_1], tab2_column1, '', v_box, false, true );
+			this.addEditFieldToColumn( $.i18n._( 'Task Groups' ), [form_item_input, form_item_input_1], tab_differential_criteria_column1, '', v_box, false, true );
 
 			// Tasks
 
@@ -617,18 +589,18 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 			v_box.append( form_item );
 
-			this.addEditFieldToColumn( $.i18n._( 'Tasks' ), [form_item_input, form_item_input_1], tab2_column1, '', v_box, false, true );
+			this.addEditFieldToColumn( $.i18n._( 'Tasks' ), [form_item_input, form_item_input_1], tab_differential_criteria_column1, '', v_box, false, true );
 		}
 
 		// Tab3 start
 
-		var tab3 = this.edit_view_tab.find( '#tab3' );
+		var tab_meal_criteria = this.edit_view_tab.find( '#tab_meal_criteria' );
 
-		var tab3_column1 = tab3.find( '.first-column' );
+		var tab_meal_criteria_column1 = tab_meal_criteria.find( '.first-column' );
 
 		this.edit_view_tabs[3] = [];
 
-		this.edit_view_tabs[3].push( tab3_column1 );
+		this.edit_view_tabs[3].push( tab_meal_criteria_column1 );
 
 		// Active After Daily Hours
 		// daily_trigger_time
@@ -640,7 +612,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Active After Daily Hours' ), form_item_input, tab3_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Active After Daily Hours' ), form_item_input, tab_meal_criteria_column1, '', widgetContainer );
 
 		// Maximum Time Without A Break
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -651,7 +623,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Maximum Time Without A Break' ), form_item_input, tab3_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Maximum Time Without A Break' ), form_item_input, tab_meal_criteria_column1, '', widgetContainer );
 
 		// Minimum Time Recognized As Break
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -662,17 +634,17 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Minimum Time Recognized As Break' ), form_item_input, tab3_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Minimum Time Recognized As Break' ), form_item_input, tab_meal_criteria_column1, '', widgetContainer );
 
 		// Tab4 start
 
-		var tab4 = this.edit_view_tab.find( '#tab4' );
+		var tab_callback_criteria = this.edit_view_tab.find( '#tab_callback_criteria' );
 
-		var tab4_column1 = tab4.find( '.first-column' );
+		var tab_callback_criteria_column1 = tab_callback_criteria.find( '.first-column' );
 
 		this.edit_view_tabs[4] = [];
 
-		this.edit_view_tabs[4].push( tab4_column1 );
+		this.edit_view_tabs[4].push( tab_callback_criteria_column1 );
 
 		// Minimum Time Between Shifts
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -683,7 +655,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Minimum Time Between Shifts' ), form_item_input, tab4_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Minimum Time Between Shifts' ), form_item_input, tab_callback_criteria_column1, '', widgetContainer );
 
 		//First Shift Must Be At Least
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -694,17 +666,17 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'First Shift Must Be At Least' ), form_item_input, tab4_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'First Shift Must Be At Least' ), form_item_input, tab_callback_criteria_column1, '', widgetContainer );
 
 		// Tab5 start
 
-		var tab5 = this.edit_view_tab.find( '#tab5' );
+		var tab_minimum_shift_time_criteria = this.edit_view_tab.find( '#tab_minimum_shift_time_criteria' );
 
-		var tab5_column1 = tab5.find( '.first-column' );
+		var tab_minimum_shift_time_criteria_column1 = tab_minimum_shift_time_criteria.find( '.first-column' );
 
 		this.edit_view_tabs[5] = [];
 
-		this.edit_view_tabs[5].push( tab5_column1 );
+		this.edit_view_tabs[5].push( tab_minimum_shift_time_criteria_column1 );
 
 		// Minimum Shift Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -715,7 +687,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Minimum Shift Time' ), form_item_input, tab5_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Minimum Shift Time' ), form_item_input, tab_minimum_shift_time_criteria_column1, '', widgetContainer );
 
 		// Minimum Time-Off Between Shifts
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -726,11 +698,22 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Minimum Time-Off Between Shifts' ), form_item_input, tab5_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Minimum Time-Off Between Shifts' ), form_item_input, tab_minimum_shift_time_criteria_column1, '', widgetContainer );
 
 	},
 
 	setCurrentEditRecordData: function() {
+
+		// When mass editing, these fields may not be the common data, so their value will be undefined, so this will cause their change event cannot work properly.
+		this.setDefaultData( {
+			'branch_selection_type_id': 10,
+			'department_selection_type_id': 10,
+			'job_group_selection_type_id': 10,
+			'job_selection_type_id': 10,
+			'job_item_group_selection_type_id': 10,
+			'job_item_selection_type_id': 10,
+			'type_id': 10
+		} );
 
 		for ( var key in this.current_edit_record ) {
 			var widget = this.edit_view_ui_dic[key];
@@ -752,6 +735,38 @@ PremiumPolicyViewController = BaseViewController.extend( {
 							widget.setValue( this.current_edit_record[key] );
 						}
 						break;
+					case 'pay_type_id':
+						widget.setValue( this.current_edit_record[key] );
+						this.onPayTypeChange();
+						break;
+					case 'branch_selection_type_id':
+						widget.setValue( this.current_edit_record[key] );
+						this.onBranchSelectionTypeChange();
+						break;
+					case 'department_selection_type_id':
+						widget.setValue( this.current_edit_record[key] );
+						this.onDepartmentSelectionTypeChange();
+						break;
+					case 'job_group_selection_type_id':
+						widget.setValue( this.current_edit_record[key] );
+						this.onJobGroupSelectionTypeChange();
+						break;
+					case 'job_selection_type_id':
+						widget.setValue( this.current_edit_record[key] );
+						this.onJobSelectionTypeChange();
+						break;
+					case 'job_item_group_selection_type_id':
+						widget.setValue( this.current_edit_record[key] );
+						this.onJobItemGroupSelectionTypeChange();
+						break;
+					case 'job_item_selection_type_id':
+						widget.setValue( this.current_edit_record[key] );
+						this.onJobItemSelectionTypeChange();
+						break;
+					case 'type_id':
+						widget.setValue( this.current_edit_record[key] );
+						this.onTypeChange();
+						break;
 					default:
 						widget.setValue( this.current_edit_record[key] );
 						break;
@@ -762,21 +777,6 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		this.collectUIDataToCurrentEditRecord();
 
 		this.setEditViewDataDone();
-	},
-
-	setEditViewDataDone: function() {
-
-		this._super( 'setEditViewDataDone' );
-
-		this.onTypeChange();
-		this.onPayTypeChange();
-		this.onBranchSelectionTypeChange();
-		this.onDepartmentSelectionTypeChange();
-
-		this.onJobGroupSelectionTypeChange();
-		this.onJobSelectionTypeChange();
-		this.onJobItemGroupSelectionTypeChange();
-		this.onJobItemSelectionTypeChange();
 	},
 
 	onBranchSelectionTypeChange: function() {
@@ -838,7 +838,6 @@ PremiumPolicyViewController = BaseViewController.extend( {
 	},
 
 	onPayTypeChange: function() {
-
 		if ( this.current_edit_record['pay_type_id'] === 10 || this.current_edit_record['pay_type_id'] === 42 ) {
 			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Rate' ) + ": " );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '1.5 for time and a half' ) + ')' );
@@ -854,26 +853,10 @@ PremiumPolicyViewController = BaseViewController.extend( {
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '10.00/hr' ) + ')' );
 			this.edit_view_form_item_dic['wage_group_id'].css( 'display', 'block' );
 		}
+
+		this.editFieldResize();
 	},
 
-	setTabStatus: function() {
-
-		if ( this.is_mass_editing ) {
-			$( this.edit_view_tab.find( 'ul li' )[6] ).hide();
-			this.edit_view_tab.tabs( 'select', 0 );
-		} else {
-			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li' )[6] ).show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li' )[6] ).hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
-		}
-
-		this.editFieldResize( 0 );
-
-	},
 
 	onTypeChange: function() {
 
@@ -941,12 +924,8 @@ PremiumPolicyViewController = BaseViewController.extend( {
 			$( this.edit_view_tab.find( 'ul li' )[5] ).hide();
 		}
 
-		if ( this.current_edit_record.accrual_policy_id ) {
-			this.edit_view_form_item_dic['accrual_rate'].css( 'display', 'block' );
+		this.editFieldResize();
 
-		} else {
-			this.edit_view_form_item_dic['accrual_rate'].css( 'display', 'none' );
-		}
 	},
 	/* jshint ignore:start */
 	onFormItemChange: function( target, doNotValidate ) {
@@ -1032,10 +1011,10 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		}
 		if ( this.edit_view_tab_selected_index === 6 ) {
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab6' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab6' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_audit' );
 			} else {
-				this.edit_view_tab.find( '#tab6' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		} else {
@@ -1049,10 +1028,10 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 6 ) {
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab6' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab6' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_audit' );
 			} else {
-				this.edit_view_tab.find( '#tab6' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		}

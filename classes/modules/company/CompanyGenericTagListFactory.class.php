@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 4265 $
- * $Id: BranchListFactory.class.php 4265 2011-02-18 00:49:20Z ipso $
- * $Date: 2011-02-17 16:49:20 -0800 (Thu, 17 Feb 2011) $
- */
+
 
 /**
  * @package Modules\Company
@@ -165,7 +161,7 @@ class CompanyGenericTagListFactory extends CompanyGenericTagFactory implements I
 
 		return $this;
 	}
-
+/*
 	function getByCompanyIdAndObjectTypeAndName($company_id, $object_type_id, $name, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
@@ -194,7 +190,7 @@ class CompanyGenericTagListFactory extends CompanyGenericTagFactory implements I
 
 		return $this;
 	}
-
+*/
 	function getByIdAndCompanyId($id, $company_id, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;

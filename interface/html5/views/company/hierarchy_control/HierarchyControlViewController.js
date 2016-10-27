@@ -39,10 +39,11 @@ HierarchyControlViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'Hierarchy' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_hierarchy': $.i18n._( 'Hierarchy' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
+
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIHierarchyControl' )),
@@ -57,26 +58,30 @@ HierarchyControlViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_hierarchy = this.edit_view_tab.find( '#tab_hierarchy' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_hierarchy_column1 = tab_hierarchy.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_hierarchy_column1 );
 
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab0_column1, '' );
+		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_hierarchy_column1, '' );
+
+		form_item_input.parent().width( '45%' );
 
 		// Description
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'description', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab0_column1 );
+		form_item_input.TTextInput( {field: 'description', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_hierarchy_column1 );
+
+		form_item_input.parent().width( '45%' );
 
 		// Objects
 
@@ -91,7 +96,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 			field: 'object_type'
 		} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.object_type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Objects' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Objects' ), form_item_input, tab_hierarchy_column1 );
 
 		// Subordinates
 
@@ -105,11 +110,11 @@ HierarchyControlViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'user'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Subordinates' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Subordinates' ), form_item_input, tab_hierarchy_column1, '' );
 
 		//Inside editor
 
-		var inside_editor_div = tab0.find( '.inside-editor-div' );
+		var inside_editor_div = tab_hierarchy.find( '.inside-editor-div' );
 		var args = { level: $.i18n._( 'Level' ),
 			superiors: $.i18n._( 'Superiors' )
 		};
@@ -214,6 +219,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			width: 132,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
 			set_empty: true,

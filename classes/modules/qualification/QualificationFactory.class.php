@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 5229 $
- * $Id: QualificationFactory.class.php 5229 2011-09-20 17:52:53Z ipso $
- * $Date: 2011-09-21 01:52:53 +0800 (Wed, 21 Sep 2011) $
- */
+
 
 /**
  * @package Modules\Qualification

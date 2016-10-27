@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 11925 $
- * $Id: SchedulePolicyListFactory.class.php 11925 2014-01-08 00:13:44Z mikeb $
- * $Date: 2014-01-07 16:13:44 -0800 (Tue, 07 Jan 2014) $
- */
+
 
 /**
  * @package Modules\Policy
@@ -95,15 +91,15 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 		}
 
 		$ph = array(
-					'id' => $id,
 					'company_id' => $company_id,
 					);
 
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
-					where	id = ?
-						AND company_id = ?
+					where
+						company_id = ?
+						AND	id in ('. $this->getListSQL($id, $ph) .')
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -138,6 +134,8 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
 	}
 
 	function getMaximumStartStopWindowByCompanyIdAndRecurringScheduleControlID($company_id, $id, $where = NULL, $order = NULL) {
@@ -193,7 +191,7 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 			}
 		}
 
-		$additional_order_fields = array('b.name');
+		$additional_order_fields = array();
 
 		$sort_column_aliases = array();
 
@@ -207,17 +205,12 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 			if ( !isset($order['name']) ) {
 				$order['name'] = 'asc';
 			}
-			if ( isset($order['meal_policy']) ) {
-				$order['b.name'] = $order['meal_policy'];
-				unset($order['meal_policy']);
-			}
 			$strict = TRUE;
 		}
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$uf = new UserFactory();
-		$mpf = new MealPolicyFactory();
 		$apf = new AbsencePolicyFactory();
 
 		$ph = array(
@@ -226,7 +219,6 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 
 		$query = '
 					select	a.*,
-							b.name as meal_policy,
 							c.name as absence_policy,
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
@@ -235,7 +227,6 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
 					from	'. $this->getTable() .' as a
-						LEFT JOIN '. $mpf->getTable() .' as b ON a.meal_policy_id = b.id
 						LEFT JOIN '. $apf->getTable() .' as c ON a.absence_policy_id = c.id
 						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
@@ -248,7 +239,7 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['meal_policy_id']) ) ? $this->getWhereClauseSQL( 'a.meal_policy_id', $filter_data['meal_policy_id'], 'numeric_list', $ph ) : NULL;
+		//$query .= ( isset($filter_data['meal_policy_id']) ) ? $this->getWhereClauseSQL( 'a.meal_policy_id', $filter_data['meal_policy_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['absence_policy_id']) ) ? $this->getWhereClauseSQL( 'a.absence_policy_id', $filter_data['absence_policy_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;

@@ -165,3 +165,6 @@
     padding-left: 0px;
 }
 
+.schedule-view .schedule-drag-over {
+    background: #de5a5a;
+}

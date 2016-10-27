@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2196 $
- * $Id: APIBranch.class.php 2196 2008-10-14 16:08:54Z ipso $
- * $Date: 2008-10-14 09:08:54 -0700 (Tue, 14 Oct 2008) $
- */
+
 
 /**
  * @package API\Report
@@ -48,17 +44,11 @@ class APIReport extends APIFactory {
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
-		//$company_obj = $this->getCurrentCompanyObject();
-		//$user_obj = $this->getCurrentUserObject();
+		$report_obj = TTNew( $this->main_class ); //Allow plugins to work with reports.
+		$report_obj->setUserObject( $this->getCurrentUserObject() );
+		$report_obj->setPermissionObject( $this->getPermissionObject() );
 
-		//if ( isset($this->main_class) AND class_exists( $this->main_class, TRUE ) == TRUE ) {
-			//$report_obj = new $this->main_class;
-			$report_obj = TTNew( $this->main_class ); //Allow plugins to work with reports.
-			$report_obj->setUserObject( $this->getCurrentUserObject() );
-			$report_obj->setPermissionObject( $this->getPermissionObject() );
-
-			$this->setMainClassObject( $report_obj );
-		//}
+		$this->setMainClassObject( $report_obj );
 
 		return TRUE;
 	}
@@ -67,14 +57,14 @@ class APIReport extends APIFactory {
 		return $this->getMainClassObject();
 	}
 
-	function getTemplate( $name ) {
+	function getTemplate( $name = FALSE ) {
 		return $this->returnHandler( $this->getReportObject()->getTemplate( $name ) );
 	}
 
 	function getConfig() {
 		return $this->returnHandler( $this->getReportObject()->getConfig() );
 	}
-	function setConfig( $data ) {
+	function setConfig( $data = FALSE ) {
 		return $this->returnHandler( $this->getReportObject()->setConfig( $data ) );
 	}
 
@@ -85,7 +75,7 @@ class APIReport extends APIFactory {
 		return $this->returnHandler( $this->getReportObject()->getChartConfig() );
 	}
 
-	function setCompanyFormConfig( $data ) {
+	function setCompanyFormConfig( $data = FALSE ) {
 		if ( $this->getReportObject()->checkPermissions() == TRUE ) {
 			return $this->returnHandler( $this->getReportObject()->setCompanyFormConfig( $data ) );
 		}
@@ -100,7 +90,7 @@ class APIReport extends APIFactory {
 		return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('PERMISSION DENIED') );
 	}
 
-	function validateReport( $config, $format = 'pdf' ) {
+	function validateReport( $config = FALSE, $format = 'pdf' ) {
 		$this->getReportObject()->setConfig( $config ); //Set config first, so checkPermissions can check/modify data in the config for Printing timesheets for regular employees.
 		if ( $this->getReportObject()->checkPermissions() == TRUE ) {
 			$validation_obj = $this->getReportObject()->validateConfig( $format );
@@ -113,7 +103,7 @@ class APIReport extends APIFactory {
 	}
 
 	//Use JSON API to download PDF files.
-	function getReport( $config, $format = 'pdf' ) {
+	function getReport( $config = FALSE, $format = 'pdf' ) {
 		if ( Misc::isSystemLoadValid() == FALSE ) {
 			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('Please try again later...') );
 		}

@@ -122,6 +122,16 @@ progress::-moz-progress-bar {
 
 }
 
+.grid-outline {
+    border: 1px solid #c7c7c7;
+    margin-bottom: 3px;
+    margin-top: 3px;
+    padding: 3px;
+    position: relative;
+    z-index: 1;
+    border-radius: 5px;
+}
+
 .inside-grid {
     float: left;
     display: none;
@@ -144,6 +154,26 @@ progress::-moz-progress-bar {
 }
 
 .save-and-continue-div .save-and-continue-button-div {
+
+}
+
+ .hierarchy-div {
+    /*background: none repeat scroll 0 0 #EAEAEA;*/
+    height: 90%;
+    position: absolute;
+    text-align: center;
+    width: 97%;
+    top: 40px;
+
+}
+
+.hierarchy-div .message {
+    display: block;
+    font-weight: bold;
+    margin-top: 50px;
+}
+
+.hierarchy-div .save-and-continue-button-div {
 
 }
 
@@ -258,10 +288,10 @@ progress::-moz-progress-bar {
 }
 
 .top-container .login-information-div {
-    left: 70px;
+    padding-left: 70px;
     position: relative;
     top: -102px;
-    width: 400px;
+    width: 77%;
 }
 
 .top-container .login-information-div .login-information {
@@ -270,11 +300,11 @@ progress::-moz-progress-bar {
 }
 
 .bottom-container {
-    bottom: 5px;
+    bottom: 31px;
     display: block;
     height: 28px;
     left: 20px;
-    position: absolute;
+    position: relative;
     float: left;
 }
 
@@ -400,7 +430,6 @@ progress::-moz-progress-bar {
 
 .t-text-area {
     width: 200px;
-    min-height: 70px;
     margin-bottom: 5px;
 
 }
@@ -564,6 +593,29 @@ progress::-moz-progress-bar {
 
 }
 
+.edit-view .tab-label-wrap {
+    overflow: hidden;
+    margin-bottom: -4px;
+
+}
+
+.edit-view .label-wrap {
+    display: inline-block;
+    overflow: hidden;
+}
+
+.edit-view .btn-wrap {
+    display: inline-block;
+    margin-left: 15px;
+}
+
+.edit-view .tab-arrow {
+    position: relative;
+    top: -5px;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
 .edit-view .close-icon {
     cursor: pointer;
     font-size: 0px;
@@ -612,8 +664,12 @@ progress::-moz-progress-bar {
     float: left;
     height: 31px;
     margin-right: 10px;
-    width: 160px;
+    /*width: 160px;*/
 
+}
+
+.edit-view .edit-view-form-item-div .edit-view-form-item-sub-label-div .edit-view-form-item-label {
+    min-width: 1px;
 }
 
 .edit-view .edit-view-form-item-div .edit-view-form-item-label-div-first-row {
@@ -695,9 +751,9 @@ progress::-moz-progress-bar {
 
 }
 
-.first-sub-view .sub-grid-view-div, .second-sub-view .sub-grid-view-div, .third-sub-view .sub-grid-view-div, .forth-sub-view .sub-grid-view-div, .fifth-sub-view .sub-grid-view-div {
-    height: 200px;
-}
+/*.first-sub-view .sub-grid-view-div, .second-sub-view .sub-grid-view-div, .third-sub-view .sub-grid-view-div, .forth-sub-view .sub-grid-view-div, .fifth-sub-view .sub-grid-view-div {*/
+/*height: 200px;*/
+/*}*/
 
 .edit-view .edit-view-tab-bar .sub-grid-view-div {
     overflow: auto;
@@ -827,7 +883,7 @@ progress::-moz-progress-bar {
 }
 
 .edit-view .navigation-div .navigation-widget-div {
-    display: inline;
+   float: left;
 
 }
 
@@ -1373,6 +1429,10 @@ progress::-moz-progress-bar {
     background: #fff000 !important;
 }
 
+.user-data-total-override {
+    color: red !important;
+}
+
 .cbox {
     height: 100%;
     width: 17px;
@@ -1599,4 +1659,49 @@ progress::-moz-progress-bar {
 
 .bolder-request td {
     font-weight: bold !important;
+}
+
+.audit-info {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    height: 30px;
+    line-height: 30px;
+    width: 100%;
+    display: none;
+}
+
+.audit-info .label-div {
+    height: 30px;
+    float: left;
+    margin-right: 10px;
+    border-right: 2px solid #ae0000;
+    background: none repeat scroll 0 0 #375a7c;
+}
+
+.audit-info .label-div .label {
+    color: #ffffff;
+    float: right;
+    margin-left: 5px;
+    min-width: 135px;
+    padding-right: 7px;
+    text-align: right;
+}
+
+.audit-info .info {
+    height: 30px;
+    float: left;
+}
+
+.audit-info .left {
+    float: left;
+    width: 48%;
+    height: 30px;
+    border: 1px solid #aaaaaa;
+}
+
+.audit-info .right {
+    float: right;
+    width: 48%;
+    height: 30px;
+    border: 1px solid #aaaaaa;
 }

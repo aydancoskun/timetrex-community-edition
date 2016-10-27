@@ -190,7 +190,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 	},
 
 	onSavedLayoutChange: function( value ) {
-
+		
 		var grid = this.stepsWidgetDic[this.current_step].import_data;
 
 		var len = this.saved_layout_array.length;
@@ -233,6 +233,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 		for ( var i = 0; i < grid_data.length; i++ ) {
 			var item = grid_data[i];
+			item.row_1 = '';
 			for ( var j = 0; j < this.import_data.length; j++ ) {
 				var import_data = this.import_data[j];
 				if ( item.field === import_data.field ) {
@@ -570,6 +571,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 					var example_label = current_step_ui.example_label;
 					example_label.text( $.i18n._( 'Download example' ) + ' ' + combo_box.getLabel() + ' ' + $.i18n._( 'CSV file' ) )
+					$this.setButtonsStatus(); // set button enabled or disabled
 				}} );
 				break;
 			case 3:
@@ -587,6 +589,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 					$this.setSavedMappingOptions( $this.saved_layout_array, current_step_data.saved_mapping );
 
+					$this.setButtonsStatus(); // set button enabled or disabled
 					return;
 				}
 
@@ -639,6 +642,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 							$this.bindGridRenderEvents( grid );
 
 							$this.getSavedMapping();
+							$this.setButtonsStatus(); // set button enabled or disabled
 
 						}} );
 					}} );
@@ -667,6 +671,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 					}
 
 					$this.content_div.append( div );
+					$this.setButtonsStatus(); // set button enabled or disabled
 
 				}} );
 				break;
@@ -676,6 +681,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 				this.api_import.import( import_data, import_options, true, {onResult: function( result ) {
 
+					if($this.current_step != 5){
+						return;
+					}
 					if ( result.isValid() ) {
 						var label = $this.getLabel();
 						label.text( $.i18n._( 'Data verification successful' ) );
@@ -691,6 +699,8 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 					}
 
+					$this.setButtonsStatus(); // set button enabled or disabled
+
 				}} );
 				break;
 			case 6:
@@ -698,6 +708,10 @@ ImportCSVWizardController = BaseWizardController.extend( {
 				import_options = this.stepsDataDic[4];
 
 				this.api_import.import( import_data, import_options, false, {onResult: function( result ) {
+
+					if($this.current_step != 6){
+						return;
+					}
 					if ( result.isValid() ) {
 						var label = $this.getLabel();
 						label.text( $.i18n._( 'Import successful' ) );
@@ -706,6 +720,8 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 					} else {
 						var data_grid_error_source = $this.createErrorSource( result.getDetails() );
+
+
 						$this.showErrorGrid( $.i18n._( 'Import failed due to the following reasons:' ),
 							data_grid_error_source,
 							$.i18n._( 'Invalid records have been skipped, all other records have been imported successfully.' ),
@@ -713,14 +729,18 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 					}
 
+					$this.setButtonsStatus(); // set button enabled or disabled
 				}} );
+				break;
+			default:
+				$this.setButtonsStatus(); // set button enabled or disabled
+				break;
 
 		}
 
 	},
 
 	showErrorGrid: function( top_des, data_grid_error_source, bottom_des, records_details ) {
-
 		var label = $( "<span class='top-des clear-both-div'></span>" );
 		label.text( top_des );
 
@@ -771,6 +791,12 @@ ImportCSVWizardController = BaseWizardController.extend( {
 	},
 
 	createErrorSource: function( error_array ) {
+
+		//Error: Uncaught TypeError: Cannot read property 'import_data' of undefined in https://ondemand3.timetrex.com/interface/html5/#!m=TimeSheet&date=00070609&user_id=14372 line 773
+		if ( !this.stepsDataDic || !this.stepsDataDic[3] ) {
+			return;
+		}
+
 		var import_data = this.stepsDataDic[3].import_data;
 		var result = [];
 		var error_row = {};
@@ -791,7 +817,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 					if ( import_key === error_key ) {
 						error_row = {};
-						error_row.rowIndex = key + 1;
+						error_row.rowIndex = parseInt( key ) + 1; //Make sure we are adding to an integer.
 						error_row.row = import_data[import_key].map_column_name;
 						error_row.column = import_data[import_key].field_name;
 						error_row.message = error_info[error_key][0];
@@ -813,10 +839,6 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 			}
 		}
-
-//		for ( var i = 0; i < error_array.length; i++ ) {
-//
-//		}
 
 		return result;
 	},
@@ -1013,11 +1035,25 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		$( this.el ).remove();
 	},
 
+	initCurrentStep: function() {
+
+		var $this = this;
+		$this.progress_label.text( 'Step ' + $this.current_step + ' of ' + $this.steps );
+		$this.progress.attr( 'max', $this.steps );
+		$this.progress.val( $this.current_step );
+
+		$this.buildCurrentStepUI();
+		$this.buildCurrentStepData();
+		$this.setCurrentStepValues();
+
+	},
+
 	onNextClick: function() {
 		var $this = this;
 		this.saveCurrentStep();
 		var current_step_data = this.stepsDataDic[this.current_step];
-
+		Global.setWidgetEnabled( this.back_btn, false );
+		Global.setWidgetEnabled( this.next_btn, false );
 		if ( this.current_step === 2 ) {
 
 			if ( !current_step_data.file_uploader ) {
@@ -1029,6 +1065,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 				if ( upload_file_result.toLowerCase() !== 'true' ) {
 					TAlertManager.showAlert( upload_file_result );
+					$this.setButtonsStatus(); // set button enabled or disabled
 					return;
 				}
 
@@ -1036,9 +1073,11 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 				$this.stepsDataDic[$this.current_step] = null;
 				$this.initCurrentStep();
+
 			}} );
 
 		} else {
+
 			this.current_step = this.current_step + 1;
 			this.initCurrentStep();
 		}

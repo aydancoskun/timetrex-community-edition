@@ -1,7 +1,7 @@
 alter table "user_preference" add column language varchar(5);
 alter table "user_default" add column language varchar(5);
 
---Make MySQL use Double for numeric columns.
+--Make MySQL use Double for numeric columns;
 CREATE TABLE currency (
 	id serial NOT NULL,
 	company_id integer NOT NULL,

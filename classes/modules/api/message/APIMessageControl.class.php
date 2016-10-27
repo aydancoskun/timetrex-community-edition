@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2196 $
- * $Id: APIMessageControl.class.php 2196 2008-10-14 16:08:54Z ipso $
- * $Date: 2008-10-14 09:08:54 -0700 (Tue, 14 Oct 2008) $
- */
+
 
 /**
  * @package API\Message
@@ -297,7 +293,11 @@ class APIMessageControl extends APIFactory {
 					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('message', 'add'), TTi18n::gettext('Add permission denied') );
 					
 					//Security check, make sure any data passed as to_user_id is within the list of users available.
-					$row['to_user_id'] = Misc::arrayColumn( $this->stripReturnHandler( $this->getUser( array( 'filter_data' => array( 'id' => $row['to_user_id'] ), 'filter_columns' => array( 'id' => TRUE ) ), TRUE ) ), 'id' );
+					if ( !isset($row['to_user_id']) OR is_array($row['to_user_id']) AND count($row['to_user_id']) == 0 ) {
+						$row['to_user_id'] = FALSE;
+					}
+					$row['to_user_id'] = Misc::arrayColumn( $this->stripReturnHandler( $this->getUser( array( 'filter_data' => array( 'id' => (array)$row['to_user_id'] ), 'filter_columns' => array( 'id' => TRUE ) ), TRUE ) ), 'id' );
+					//$row['to_user_id'] = FALSE; //This prevents a message_sender record from being created, and therefore message can't viewed.
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 

@@ -35,10 +35,6 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 924 $
- * $Id: notify_translator.php 924 2007-06-05 21:02:29Z ipso $
- * $Date: 2007-06-05 14:02:29 -0700 (Tue, 05 Jun 2007) $
- *
  * File Contributed By: Open Source Consulting, S.A.   San Jose, Costa Rica.
  * http://osc.co.cr
  */

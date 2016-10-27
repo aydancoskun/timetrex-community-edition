@@ -50,23 +50,23 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 		if ( this.is_mass_editing ) {
 
-			$( this.edit_view_tab.find( 'ul li' )[1] ).hide();
-			$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
+			$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
+			$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
 			this.edit_view_tab.tabs( 'select', 0 );
 
 		} else {
 
 			if ( this.subDocumentValidate() ) {
-				$( this.edit_view_tab.find( 'ul li' )[1] ).show();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().show();
 			} else {
-				$( this.edit_view_tab.find( 'ul li' )[1] ).hide();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
 				this.edit_view_tab.tabs( 'select', 0 );
 			}
 
 			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li' )[2] ).show();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().show();
 			} else {
-				$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
 				this.edit_view_tab.tabs( 'select', 0 );
 			}
 
@@ -81,12 +81,12 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		var tab_2_label = this.edit_view.find( 'a[ref=tab2]' );
-		tab_0_label.text( $.i18n._( 'Recurring Template' ) );
-		tab_1_label.text( $.i18n._( 'Attachments' ) );
-		tab_2_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_recurring_template': $.i18n._( 'Recurring Template' ),
+			'tab_attachment': $.i18n._( 'Attachments' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
+
 
 		var form_item_input;
 
@@ -113,29 +113,33 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_recurring_template = this.edit_view_tab.find( '#tab_recurring_template' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_recurring_template_column1 = tab_recurring_template.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_recurring_template_column1 );
 
 		//Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab0_column1, '' );
+		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_recurring_template_column1, '' );
+
+		form_item_input.parent().width( '45%' );
 
 		// Description
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'description', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab0_column1 );
+		form_item_input.TTextInput( {field: 'description', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_recurring_template_column1 );
+
+		form_item_input.parent().width( '45%' );
 
 		//Inside editor
 
-		var inside_editor_div = tab0.find( '.inside-editor-div' );
+		var inside_editor_div = tab_recurring_template.find( '.inside-editor-div' );
 
 		var args = {
 			week: $.i18n._( 'Week' ),
@@ -278,6 +282,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 			form_item_input.AComboBox( {
 				api_class: (APIFactory.getAPIClass( 'APIAbsencePolicy' )),
+				width: 132,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.ABSENCES_POLICY,
 				show_search_inputs: true,
@@ -412,6 +417,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 			form_item_input.AComboBox( {
 				api_class: (APIFactory.getAPIClass( 'APISchedulePolicy' )),
+				width: 132,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.SCHEDULE_POLICY,
 				show_search_inputs: true,
@@ -443,6 +449,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 			form_item_input.AComboBox( {
 				api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+				width: 132,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.BRANCH,
 				show_search_inputs: true,
@@ -468,6 +475,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 			form_item_input.AComboBox( {
 				api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+				width: 132,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.DEPARTMENT,
 				show_search_inputs: true,
@@ -500,6 +508,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 				form_item_input.AComboBox( {
 					api_class: (APIFactory.getAPIClass( 'APIJob' )),
+					width: 132,
 					allow_multiple_selection: false,
 					layout_name: ALayoutIDs.JOB,
 					show_search_inputs: true,
@@ -524,6 +533,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 				form_item_input.AComboBox( {
 					api_class: (APIFactory.getAPIClass( 'APIJobItem' )),
+					width: 132,
 					allow_multiple_selection: false,
 					layout_name: ALayoutIDs.JOB_ITEM,
 					show_search_inputs: true,
@@ -937,20 +947,20 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 		if ( this.edit_view_tab_selected_index === 1 ) {
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.initSubDocumentView();
 			} else {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 
 		} else if ( this.edit_view_tab_selected_index === 2 ) {
 
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab2' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_audit' );
 			} else {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		} else {
@@ -963,18 +973,18 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 1 ) {
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.initSubDocumentView();
 			} else {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 2 ) {
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab2' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_audit' );
 			} else {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		}
@@ -993,8 +1003,8 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 		}
 
 		Global.loadScriptAsync( 'views/document/DocumentViewController.js', function() {
-			var tab1 = $this.edit_view_tab.find( '#tab1' );
-			var firstColumn = tab1.find( '.first-column-sub-view' );
+			var tab_attachment = $this.edit_view_tab.find( '#tab_attachment' );
+			var firstColumn = tab_attachment.find( '.first-column-sub-view' );
 			Global.trackView( 'Sub' + 'Document' + 'View' );
 			DocumentViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
 
@@ -1170,7 +1180,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 	},
 
-	onContentMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function( context_btn, menu_name ) {
 		if ( Global.isSet( menu_name ) ) {
 			var id = menu_name;
 		} else {
@@ -1278,6 +1288,11 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 	},
 
 	setDefaultMenu: function( doNotSetFocus ) {
+
+        //Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+        if (!this.context_menu_array) {
+            return;
+        }
 
 		if ( !Global.isSet( doNotSetFocus ) || !doNotSetFocus ) {
 			this.selectContextMenu();

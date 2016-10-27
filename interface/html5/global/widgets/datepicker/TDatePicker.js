@@ -137,6 +137,11 @@
 
 		this.setValue = function( val ) {
 
+			//Error: Uncaught TypeError: Cannot read property 'val' of undefined in https://ondemand1.timetrex.com/interface/html5/global/widgets/datepicker/TDatePicker.js?v=8.0.0-20141230-130626 line 144 
+			if ( !date_picker_input ) {
+				return;
+			}
+
 			if ( !val ) {
 				val = '';
 			}
@@ -220,7 +225,8 @@
 			var close_text = $.i18n._( 'Close' );
 
 			if ( mode === 'date' ) {
-				date_picker_input = date_picker_input.datepicker( {showTime: false,
+				date_picker_input = date_picker_input.datepicker( {
+					showTime: false,
 					dateFormat: format,
 					showHour: false,
 					showMinute: false,
@@ -255,7 +261,8 @@
 				} );
 
 			} else {
-				date_picker_input = date_picker_input.datetimepicker( {showTime: false,
+				date_picker_input = date_picker_input.datetimepicker( {
+					showTime: false,
 					showHour: false,
 					showMinute: false,
 					changeMonth: true,
@@ -357,8 +364,6 @@
 
 	};
 
-	$.fn.TDatePicker.defaults = {
-
-	};
+	$.fn.TDatePicker.defaults = {};
 
 })( jQuery );

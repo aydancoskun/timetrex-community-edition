@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 13203 $
- * $Id: ExceptionPolicyListFactory.class.php 13203 2014-05-16 15:32:47Z mikeb $
- * $Date: 2014-05-16 08:32:47 -0700 (Fri, 16 May 2014) $
- */
+
 
 /**
  * @package Modules\Policy
@@ -166,6 +162,8 @@ class ExceptionPolicyListFactory extends ExceptionPolicyFactory implements Itera
 		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
 	}
 
 	function getByPolicyGroupUserIdAndTypeAndActive($user_id, $type_id, $active = TRUE, $where = NULL, $order = NULL) {
@@ -324,11 +322,6 @@ class ExceptionPolicyListFactory extends ExceptionPolicyFactory implements Itera
 
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['exception_policy_control_id']) ) ? $this->getWhereClauseSQL( 'a.exception_policy_control_id', $filter_data['exception_policy_control_id'], 'numeric_list', $ph ) : NULL;
-		/*
-		if ( isset($filter_data['type_id']) AND isset($filter_data['type_id'][0]) AND !in_array(-1, (array)$filter_data['type_id']) ) {
-			$query	.=	' AND a.type_id in ('. $this->getListSQL($filter_data['type_id'], $ph) .') ';
-		}
-		*/
 
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;

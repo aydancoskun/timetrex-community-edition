@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 12635 $
- * $Id: CalculatePayStub.class.php 12635 2014-03-14 17:03:35Z mikeb $
- * $Date: 2014-03-14 10:03:35 -0700 (Fri, 14 Mar 2014) $
- */
+
 
 /**
  * @package Core
@@ -500,13 +496,12 @@ class CalculatePayStub extends PayStubFactory {
 		$pay_stub->loadPreviousPayStub();
 
 		$user_date_total_arr = $this->getWageObject()->getUserDateTotalArray();
-
 		if ( isset($user_date_total_arr['entries']) AND is_array( $user_date_total_arr['entries'] ) ) {
 			foreach( $user_date_total_arr['entries'] as $udt_arr ) {
 				//Allow negative amounts so flat rate premium policies can reduce an employees wage if need be.
 				if ( $udt_arr['amount'] != 0 ) {
 					Debug::text('Adding Pay Stub Entry: '. $udt_arr['pay_stub_entry'] .' Amount: '. $udt_arr['amount'], __FILE__, __LINE__, __METHOD__, 10);
-					$pay_stub->addEntry( $udt_arr['pay_stub_entry'], $udt_arr['amount'], TTDate::getHours( $udt_arr['total_time'] ), $udt_arr['rate'] );
+					$pay_stub->addEntry( $udt_arr['pay_stub_entry'], $udt_arr['amount'], TTDate::getHours( $udt_arr['total_time'] ), $udt_arr['rate'], $udt_arr['description'] );
 				} else {
 					Debug::text('NOT Adding ($0 amount) Pay Stub Entry: '. $udt_arr['pay_stub_entry'] .' Amount: '. $udt_arr['amount'], __FILE__, __LINE__, __METHOD__, 10);
 				}
@@ -515,6 +510,7 @@ class CalculatePayStub extends PayStubFactory {
 			//No Earnings, CHECK FOR PS AMENDMENTS next for earnings.
 			Debug::text('NO TimeSheet EARNINGS ON PAY STUB... Checking for PS amendments', __FILE__, __LINE__, __METHOD__, 10);
 		}
+		unset($user_date_total_arr);
 
 		//Get all PS amendments and Tax / Deductions so we can determine the proper order to calculate them in.
 		$psalf = TTnew( 'PayStubAmendmentListFactory' );

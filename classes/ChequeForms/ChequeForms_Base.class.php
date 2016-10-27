@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2286 $
- * $Id: CA.class.php 2286 2008-12-12 23:12:41Z ipso $
- * $Date: 2008-12-12 15:12:41 -0800 (Fri, 12 Dec 2008) $
- */
+
 
 /**
  * @package ChequeForms
@@ -110,6 +106,28 @@ class ChequeForms_Base {
 		return FALSE;
 	}
 
+	function getDisplayDateFormat() {
+		$formats = array(
+						'd/m/Y' => 'd  /   m  /  y        ',
+						'm/d/Y' => 'm  /   d  /  y        ',
+						);
+
+		if ( isset($formats[$this->getDateFormat()]) ) {
+			return $formats[$this->getDateFormat()];
+		}
+
+		return FALSE;
+	}
+	function getDateFormat() {
+        if ( isset( $this->country ) AND strtolower($this->country) == 'ca' ) {
+			$date_format = 'd/m/Y';
+		} else {
+			$date_format = 'm/d/Y';
+		}
+
+		return $date_format;
+	}
+
     /*
     *
     *
@@ -163,14 +181,7 @@ class ChequeForms_Base {
     // Format date as the country
 
     function filterDate( $epoch ) {
-        if ( isset( $this->country ) AND $this->country == 'CA' ) {
-			$date_format = 'd/m/Y';
-		} else {
-			$date_format = 'm/d/Y';
-		}
-
-        return date( $date_format, $epoch );
-
+		return date( $this->getDateFormat(), $epoch );
     }
     function filterAddress( $value ) {
 		if ( isset( $this->address1 ) ) {

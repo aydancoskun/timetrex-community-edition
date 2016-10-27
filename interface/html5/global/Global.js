@@ -85,27 +85,30 @@ Global.sendErrorReport = function() {
 	}
 
 	if ( Global.isCanvasSupported() && ie > 9 ) {
-		html2canvas( [ document.body ], {
+		html2canvas( [document.body], {
 			onrendered: function( canvas ) {
 
 				var image_string = canvas.toDataURL().split( ',' )[1];
-				api_authentication.sendErrorReport( error, image_string, {onResult: function( result ) {
+				api_authentication.sendErrorReport( error, image_string, {
+					onResult: function( result ) {
+						if ( APIGlobal.pre_login_data.production === true && result.getResult() != APIGlobal.pre_login_data.application_build ) {
+							TAlertManager.showAlert( $.i18n._( 'Your web browser is caching incorrect data, please press the refresh button on your web browser or log out, clear your web browsers cache and try logging in again.' ) + '<br><br>' + $.i18n._( 'Local Version' ) + ':  ' + result.getResult() + '<br>' + $.i18n._( 'Remote Version' ) + ': ' + APIGlobal.pre_login_data.application_build, '', function() {
+								window.location.reload( true );
+							} );
+						}
 
-					if ( APIGlobal.pre_login_data.production === true && result.getResult() != APIGlobal.pre_login_data.application_build ) {
-						TAlertManager.showAlert( $.i18n._( 'Your web browser is caching incorrect data, please press the refresh button on your web browser or log out, clear your web browsers cache and try logging in again.' ) + '<br><br>' + $.i18n._( 'Local Version' ) + ':  ' + result.getResult() + '<br>' + $.i18n._( 'Remote Version' ) + ': ' + APIGlobal.pre_login_data.application_build, '', function() {
-							window.location.reload( true );
-						} );
 					}
-
-				}} );
+				} );
 
 			}
 		} );
 	} else {
 
-		api_authentication.sendErrorReport( error, '', {onResult: function( result ) {
+		api_authentication.sendErrorReport( error, '', {
+			onResult: function( result ) {
 
-		}} );
+			}
+		} );
 	}
 }
 
@@ -130,6 +133,8 @@ Global.initStaticStrings = function() {
 	Global.no_result_message = $.i18n._( 'No Results Found' );
 
 	Global.save_and_continue_message = $.i18n._( 'Please save this record before modifying any related data' );
+
+	Global.no_hierarchy_message = $.i18n._( 'No Hierarchies Defined' );
 
 	Global.modify_alert_message = $.i18n._( 'You have modified data without saving, are you sure you want to continue and lose your changes' );
 
@@ -175,16 +180,25 @@ Global.setupPing = function() {
 			return;
 		}
 
-		api.isLoggedIn( false, {onResult: function( result ) {
-			var res_data = result.getResult();
+		//Error: Uncaught TypeError: undefined is not a function in https://ondemand2001.timetrex.com/interface/html5/global/Global.js?v=8.0.0-20141230-124906 line 182
+		if ( !api || (typeof api.isLoggedIn) !== 'function' ) {
+			return;
+		}
 
-			if ( res_data !== true ) {
-				api.ping( {onResult: function() {
+		api.isLoggedIn( false, {
+			onResult: function( result ) {
+				var res_data = result.getResult();
 
-				}} );
+				if ( res_data !== true ) {
+					api.ping( {
+						onResult: function() {
+
+						}
+					} );
+				}
+
 			}
-
-		}} );
+		} );
 	}
 };
 
@@ -290,6 +304,12 @@ Global.strToDateTime = function( date_string ) {
 //	if ( date_string.indexOf( '12:' ) >= 0 && date_string.indexOf( 'PM' ) > 0 ) {
 //		date_string = date_string.replace( 'PM', 'AM' );
 //	}
+
+	//Error: TypeError: Global.strToDateTime(...) is null in https://ondemand3.timetrex.com/interface/html5/framework/jquery.min.js?v=8.0.0-20141117-153515 line 4862
+	if ( !date_string ) {
+		return null;
+	}
+
 	if ( LocalCacheData.loginUserPreference.time_format === 'G:i T' || LocalCacheData.loginUserPreference.time_format === 'g:i A T' ) {
 		var date_str_array = date_string.split( ' ' );
 		date_str_array.pop();
@@ -329,82 +349,94 @@ Global.updateUserPreference = function( callBack, message ) {
 		ProgressBar.changeProgressBarMessage( message );
 	}
 
-	current_user_aou.getCurrentUserPreference( {onResult: function( result ) {
-		var result_data = result.getResult();
-		LocalCacheData.loginUserPreference = result_data;
-		date_api.getTimeZoneOffset( {onResult: function( timeZoneRes ) {
+	current_user_aou.getCurrentUserPreference( {
+		onResult: function( result ) {
+			var result_data = result.getResult();
+			LocalCacheData.loginUserPreference = result_data;
+			date_api.getTimeZoneOffset( {
+				onResult: function( timeZoneRes ) {
 
-			date_api.getHours( timeZoneRes.getResult(), {onResult: function( hoursRes ) {
-				var hoursResultData = hoursRes.getResult();
+					date_api.getHours( timeZoneRes.getResult(), {
+						onResult: function( hoursRes ) {
+							var hoursResultData = hoursRes.getResult();
 
-				//Flex way, Need this in js? Let's see
-				if ( hoursResultData.indexOf( '-' ) > -1 ) {
-					hoursResultData = hoursResultData.replace( '-', '+' );
-				} else {
-					hoursResultData = hoursResultData.replace( '+', '-' );
-				}
+							//Flex way, Need this in js? Let's see
+							if ( hoursResultData.indexOf( '-' ) > -1 ) {
+								hoursResultData = hoursResultData.replace( '-', '+' );
+							} else {
+								hoursResultData = hoursResultData.replace( '+', '-' );
+							}
 
-				LocalCacheData.loginUserPreference.time_zone_offset = hoursResultData;
+							LocalCacheData.loginUserPreference.time_zone_offset = hoursResultData;
 
-				user_preference_api.getOptions( 'jquery_date_format', {onResult: function( jsDateFormatRes ) {
+							user_preference_api.getOptions( 'jquery_date_format', {
+								onResult: function( jsDateFormatRes ) {
 
-					var jsDateFormatResultData = jsDateFormatRes.getResult();
+									var jsDateFormatResultData = jsDateFormatRes.getResult();
 
-					//For moment date parser
-					LocalCacheData.loginUserPreference.js_date_format = {'D, F d Y': 'ddd, MMMM DD YYYY',
-						'D, M d Y': 'ddd, MMM DD YYYY',
-						'D, d-M-Y': 'ddd, DD-MMM-YYYY',
-						'D, dMY': 'ddd, DDMMMYYYY',
-						'M-d-Y': 'MMM-DD-YYYY',
-						'M-d-y': 'MMM-DD-YY',
-						'Y-m-d': 'YYYY-MM-DD',
-						'd-M-Y': 'DD-MMM-YYYY',
-						'd-M-y': 'DD-MMM-YY',
-						'd-m-Y': 'DD-MM-YYYY',
-						'd-m-y': 'DD-MM-YY',
-						'd/m/Y': 'DD/MM/YYYY',
-						'd/m/y': 'DD/MM/YY',
-						'dMY': 'DDMMMYYYY',
-						'l, F d Y': 'dddd, MMMM DD YYYY',
-						'm-d-Y': 'MM-DD-YYYY',
-						'm-d-y': 'MM-DD-YY',
-						'm/d/Y': 'MM/DD/YYYY',
-						'm/d/y': 'MM/DD/YY'};
+									//For moment date parser
+									LocalCacheData.loginUserPreference.js_date_format = {
+										'D, F d Y': 'ddd, MMMM DD YYYY',
+										'D, M d Y': 'ddd, MMM DD YYYY',
+										'D, d-M-Y': 'ddd, DD-MMM-YYYY',
+										'D, dMY': 'ddd, DDMMMYYYY',
+										'M-d-Y': 'MMM-DD-YYYY',
+										'M-d-y': 'MMM-DD-YY',
+										'Y-m-d': 'YYYY-MM-DD',
+										'd-M-Y': 'DD-MMM-YYYY',
+										'd-M-y': 'DD-MMM-YY',
+										'd-m-Y': 'DD-MM-YYYY',
+										'd-m-y': 'DD-MM-YY',
+										'd/m/Y': 'DD/MM/YYYY',
+										'd/m/y': 'DD/MM/YY',
+										'dMY': 'DDMMMYYYY',
+										'l, F d Y': 'dddd, MMMM DD YYYY',
+										'm-d-Y': 'MM-DD-YYYY',
+										'm-d-y': 'MM-DD-YY',
+										'm/d/Y': 'MM/DD/YYYY',
+										'm/d/y': 'MM/DD/YY'
+									};
 
-					var date_format = LocalCacheData.loginUserPreference.date_format;
+									var date_format = LocalCacheData.loginUserPreference.date_format;
 
-					if ( !date_format ) {
-						date_format = 'DD-MMM-YY';
-					}
+									if ( !date_format ) {
+										date_format = 'DD-MMM-YY';
+									}
 
-					LocalCacheData.loginUserPreference.date_format = LocalCacheData.loginUserPreference.js_date_format[date_format];
+									LocalCacheData.loginUserPreference.date_format = LocalCacheData.loginUserPreference.js_date_format[date_format];
 
-					//For date picker
-					LocalCacheData.loginUserPreference.js_date_format_1 = jsDateFormatResultData;
+									//For date picker
+									LocalCacheData.loginUserPreference.js_date_format_1 = jsDateFormatResultData;
 
-					LocalCacheData.loginUserPreference.date_format_1 = LocalCacheData.loginUserPreference.js_date_format_1[date_format];
+									LocalCacheData.loginUserPreference.date_format_1 = LocalCacheData.loginUserPreference.js_date_format_1[date_format];
 
-					user_preference_api.getOptions( 'js_time_format', {onResult: function( jsTimeFormatRes ) {
+									user_preference_api.getOptions( 'js_time_format', {
+										onResult: function( jsTimeFormatRes ) {
 
-						var jsTimeFormatResultData = jsTimeFormatRes.getResult();
+											var jsTimeFormatResultData = jsTimeFormatRes.getResult();
 
-						LocalCacheData.loginUserPreference.js_time_format = jsTimeFormatResultData;
+											LocalCacheData.loginUserPreference.js_time_format = jsTimeFormatResultData;
 
-						LocalCacheData.setLoginUserPreference( LocalCacheData.loginUserPreference );
+											LocalCacheData.setLoginUserPreference( LocalCacheData.loginUserPreference );
 
-						if ( callBack ) {
-							callBack();
+											if ( callBack ) {
+												callBack();
+											}
+
+										}
+									} );
+
+								}
+							} );
+
 						}
+					} );
 
-					}} );
+				}
+			} );
 
-				}} );
-
-			}} );
-
-		}} );
-
-	}} );
+		}
+	} );
 };
 
 Global.secondToHHMMSS = function( sec_num, force_time_unit ) {
@@ -461,10 +493,17 @@ Global.secondToHHMMSS = function( sec_num, force_time_unit ) {
 			hours = hours.toFixed( 3 );
 			time = hours;
 			break;
+		case '23':
+			hours = hours.toFixed( 4 );
+			time = hours;
+			break;
 		case '30':
 			minutes = (hours * 60) + minutes;
 			minutes = minutes.toFixed( 0 );
 			time = minutes;
+			break;
+		case '40':
+			time = sec_num;
 			break;
 	}
 
@@ -568,6 +607,9 @@ Global.getScriptNameByAPI = function( api_class ) {
 		case 'APIJobItem':
 			script_name = 'JobItemView';
 			break;
+		case 'APIJobItemAmendment':
+			script_name = 'JobItemAmendment';
+			break;
 		case 'APIPunch':
 			script_name = 'PunchesView';
 			break;
@@ -589,6 +631,9 @@ Global.getScriptNameByAPI = function( api_class ) {
 			break;
 		case 'APICurrency':
 			script_name = 'CurrencyView';
+			break;
+		case 'APICurrencyRate':
+			script_name = 'CurrencyRate';
 			break;
 		case 'APIHierarchyControl':
 			script_name = 'HierarchyControlView';
@@ -728,6 +773,9 @@ Global.getScriptNameByAPI = function( api_class ) {
 		case 'APIPayStub':
 			script_name = 'PayStubView';
 			break;
+		case 'APIPayStubEntry':
+			script_name = 'PayStubEntryView';
+			break;
 		case 'APIPayStubAmendment':
 			script_name = 'PayStubAmendmentView';
 			break;
@@ -740,8 +788,14 @@ Global.getScriptNameByAPI = function( api_class ) {
 		case 'APIAbsencePolicy':
 			script_name = 'AbsencePolicyView';
 			break;
+		case 'APIAccrualPolicyAccount':
+			script_name = 'AccrualPolicyAccountView';
+			break;
 		case 'APIAccrualPolicy':
 			script_name = 'AccrualPolicyView';
+			break;
+		case 'APIAccrualPolicyUserModifier':
+			script_name = 'AccrualPolicyUserModifierView';
 			break;
 		case 'APIBreakPolicy':
 			script_name = 'BreakPolicyView';
@@ -771,7 +825,7 @@ Global.getScriptNameByAPI = function( api_class ) {
 			script_name = 'PremiumPolicyView';
 			break;
 		case 'APIRecurringHoliday':
-			script_name = 'recurringHolidayView';
+			script_name = 'RecurringHolidayView';
 			break;
 		case 'APIRoundIntervalPolicy':
 			script_name = 'RoundIntervalPolicyView';
@@ -781,6 +835,9 @@ Global.getScriptNameByAPI = function( api_class ) {
 			break;
 		case 'APIUserReportData':
 			script_name = 'UserReportDataView';
+			break;
+		case 'APIInstall':
+			script_name = 'InstallView';
 			break;
 
 	}
@@ -814,7 +871,12 @@ Global.buildColumnArray = function( array ) {
 	var id = 1000;
 	for ( var key in array ) {
 
-		var column = {label: array[key], value: key.replace( /^-[0-9]{3,4}-/i, '' ), orderValue: key.substring( 1, 5 ), id: id};
+		var column = {
+			label: array[key],
+			value: key.replace( /^-[0-9]{3,4}-/i, '' ),
+			orderValue: key.substring( 1, 5 ),
+			id: id
+		};
 		columns.push( column );
 		id = id + 1;
 	}
@@ -866,10 +928,14 @@ Global.getParentIdByTreeRecord = function( array, selectId ) {
 };
 
 Global.addFirstItemToArray = function( array, firstItemType ) {
-	if ( firstItemType === 'any' ) {
-		array.unshift( {label: Global.any_item, value: '-1', fullValue: '-1', orderValue: ''} );
-	} else if ( firstItemType === 'empty' ) {
-		array.unshift( {label: Global.empty_item, value: '0', fullValue: '0', orderValue: ''} );
+
+	//Error: Unable to get property 'unshift' of undefined or null reference in https://villa.timetrex.com/interface/html5/global/Global.js?v=8.0.0-20141230-153942 line 903 
+	if ( array ) {
+		if ( firstItemType === 'any' ) {
+			array.unshift( {label: Global.any_item, value: '-1', fullValue: '-1', orderValue: ''} );
+		} else if ( firstItemType === 'empty' ) {
+			array.unshift( {label: Global.empty_item, value: '0', fullValue: '0', orderValue: ''} );
+		}
 	}
 
 	return array;
@@ -920,7 +986,7 @@ Global.convertToNumberIfPossible = function( val ) {
 	//if value is number convert to number type
 	var reg = new RegExp( '^[0-9]*$' );
 
-	if ( reg.test( val ) ) {
+	if ( reg.test( val ) && val !== '00' ) {
 		val = parseFloat( val )
 	}
 
@@ -1014,8 +1080,13 @@ Global.loadScriptAsync = function( path, onResult ) {
 		onResult();
 		return;
 	}
+	var realPath = path + '?v=' + APIGlobal.pre_login_data.application_build
 
-	jQuery.getScript( path + '?v=' + APIGlobal.pre_login_data.application_build, function() {
+	if ( Global.url_offset ) {
+		realPath = Global.url_offset + realPath;
+	}
+
+	jQuery.getScript( realPath, function() {
 		LocalCacheData.loadedScriptNames[path] = true;
 
 		onResult();
@@ -1023,13 +1094,22 @@ Global.loadScriptAsync = function( path, onResult ) {
 };
 
 Global.getRealImagePath = function( path ) {
+
 	var realPath = 'theme/' + Global.theme + '/' + path;
+
+	if ( Global.url_offset ) {
+		realPath = Global.url_offset + realPath;
+	}
 
 	return realPath;
 };
 
 Global.getRibbonIconRealPath = function( icon ) {
 	var realPath = 'theme/' + Global.theme + '/css/global/widgets/ribbon/icons/' + icon;
+
+	if ( Global.url_offset ) {
+		realPath = Global.url_offset + realPath;
+	}
 
 	return realPath;
 };
@@ -1043,11 +1123,16 @@ Global.loadLanguage = function( name ) {
 		ProgressBar.removeProgressBar();
 		return LocalCacheData.getI18nDic();
 	}
+	var realPath = '../locale/' + name + '/LC_MESSAGES/messages.json' + '?v=' + APIGlobal.pre_login_data.application_build;
+
+	if ( Global.url_offset ) {
+		realPath = Global.url_offset + realPath;
+	}
 
 	jQuery.ajax( {
 		async: false,
 		type: 'GET',
-		url: '../locale/' + name + '/LC_MESSAGES/messages.json' + '?v=' + APIGlobal.pre_login_data.application_build,
+		url: realPath,
 		data: null,
 		success: function( result ) {
 			successflag = true;
@@ -1063,7 +1148,7 @@ Global.loadLanguage = function( name ) {
 		LocalCacheData.setI18nDic( {} );
 	}
 
-	return(successflag);
+	return (successflag);
 }
 
 Global.checkProperProductEdition = function( edition_id ) {
@@ -1094,10 +1179,16 @@ Global.loadScript = function( scriptPath ) {
 
 	var successflag = false;
 
+	var realPath = scriptPath + '?v=' + APIGlobal.pre_login_data.application_build
+
+	if ( Global.url_offset ) {
+		realPath = Global.url_offset + realPath;
+	}
+
 	jQuery.ajax( {
 		async: false,
 		type: 'GET',
-		url: scriptPath + '?v=' + APIGlobal.pre_login_data.application_build,
+		url: realPath,
 		data: null,
 		success: function() {
 			successflag = true;
@@ -1107,7 +1198,7 @@ Global.loadScript = function( scriptPath ) {
 
 	LocalCacheData.loadedScriptNames[scriptPath] = true;
 
-	return(successflag);
+	return (successflag);
 };
 
 Global.clone = function( obj ) {
@@ -1129,16 +1220,26 @@ Global.getFuncName = function( _callee ) {
 	var _text = _callee.toString();
 	var _scriptArr = document.scripts;
 	for ( var i = 0; i < _scriptArr.length; i++ ) {
-		var _start = _scriptArr[ i].text.indexOf( _text );
+		var _start = _scriptArr[i].text.indexOf( _text );
 		if ( _start !== -1 ) {
 			if ( /^function\s*\(.*\).*\r\n/.test( _text ) ) {
-				var _tempArr = _scriptArr[ i].text.substr( 0, _start ).split( '\r\n' );
+				var _tempArr = _scriptArr[i].text.substr( 0, _start ).split( '\r\n' );
 				return _tempArr[_tempArr.length - 1].replace( /(var)|(\s*)/g, '' ).replace( /=/g, '' );
 			} else {
 				return _text.match( /^function\s*([^\(]+).*\r\n/ )[1];
 			}
 		}
 	}
+};
+
+Global.concatArraysUniqueWithSort = function( thisArray, otherArray ) {
+	var newArray = thisArray.concat( otherArray ).sort( function( a, b ) {
+		return a > b ? 1 : a < b ? -1 : 0;
+	} );
+
+	return newArray.filter( function( item, index ) {
+		return newArray.indexOf( item ) === index;
+	} );
 };
 
 Global.addCss = function( path ) {
@@ -1150,6 +1251,10 @@ Global.addCss = function( path ) {
 	LocalCacheData.loadedScriptNames[path] = true;
 
 	var realPath = 'theme/' + Global.theme + '/css/' + path;
+
+	if ( Global.url_offset ) {
+		realPath = Global.url_offset + realPath;
+	}
 
 	var style = $( "link[href='" + realPath + '?v=' + APIGlobal.pre_login_data.application_build + "']" );
 
@@ -1235,17 +1340,51 @@ Global.convertColumnsTojGridFormat = function( columns, layout_name, setWidthCal
 		total_width = total_width + text_width;
 
 		if ( view_column_data.label === '' ) {
-			column_info = {name: view_column_data.value, index: view_column_data.value, label: view_column_data.label, key: true, width: 100, sortable: false, hidden: true, title: false};
+			column_info = {
+				name: view_column_data.value,
+				index: view_column_data.value,
+				label: view_column_data.label,
+				key: true,
+				width: 100,
+				sortable: false,
+				hidden: true,
+				title: false
+			};
 		} else if ( layout_name === ALayoutIDs.SORT_COLUMN ) {
 
 			if ( view_column_data.value === 'sort' ) {
-				column_info = {name: view_column_data.value, index: view_column_data.value, label: view_column_data.label, width: 100, sortable: false, formatter: 'select', editable: true, title: false, edittype: 'select', editoptions: {value: 'asc:ASC;desc:DESC'}};
+				column_info = {
+					name: view_column_data.value,
+					index: view_column_data.value,
+					label: view_column_data.label,
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: 'asc:ASC;desc:DESC'}
+				};
 			} else {
-				column_info = {name: view_column_data.value, index: view_column_data.value, label: view_column_data.label, width: 100, sortable: false, title: false};
+				column_info = {
+					name: view_column_data.value,
+					index: view_column_data.value,
+					label: view_column_data.label,
+					width: 100,
+					sortable: false,
+					title: false
+				};
 			}
 
 		} else {
-			column_info = {name: view_column_data.value, index: view_column_data.value, label: view_column_data.label, width: 100, sortable: false, title: false};
+			column_info = {
+				name: view_column_data.value,
+				index: view_column_data.value,
+				label: view_column_data.label,
+				width: 100,
+				sortable: false,
+				title: false
+			};
 		}
 
 		column_info_array.push( column_info );
@@ -1397,11 +1536,17 @@ Global.loadWidget = function( url ) {
 		return (LocalCacheData.loadedWidgetCache[url]);
 	}
 
+	var realPath = url + '?v=' + APIGlobal.pre_login_data.application_build;
+
+	if ( Global.url_offset ) {
+		realPath = Global.url_offset + realPath;
+	}
+
 	ProgressBar.showProgressBar();
 	var responseData = $.ajax( {
 		async: false,
 		type: 'GET',
-		url: url + '?v=' + APIGlobal.pre_login_data.application_build,
+		url: realPath,
 		data: null,
 		success: function() {
 			successflag = true;
@@ -1412,12 +1557,17 @@ Global.loadWidget = function( url ) {
 
 	LocalCacheData.loadedWidgetCache[url] = responseData.responseText;
 
-	return(responseData.responseText);
+	return (responseData.responseText);
 
 };
 
 Global.removeCss = function( path ) {
 	var realPath = 'theme/' + Global.theme + '/css/' + path;
+
+	if ( Global.url_offset ) {
+		realPath = Global.url_offset + realPath;
+	}
+
 	$( "link[href='' + realPath + '?v=' + APIGlobal.pre_login_data.application_build + '']" ).remove();
 };
 
@@ -1426,7 +1576,16 @@ Global.removeCss = function( path ) {
 Global.getViewPathByViewId = function( viewId ) {
 	var path;
 	switch ( viewId ) {
-
+		case 'PortalJobVacancy':
+			path = 'views/portal/hr/recruitment/';
+			break;
+		case 'PortalLogin':
+			path = 'views/portal/login/';
+			break;
+		case 'UserDateTotalParent':
+		case 'UserDateTotal':
+			path = 'views/attendance/timesheet/';
+			break;
 		case 'Product':
 			path = 'views/invoice/products/';
 			break;
@@ -1499,6 +1658,9 @@ Global.getViewPathByViewId = function( viewId ) {
 		case 'JobItem':
 			path = 'views/attendance/job_item/';
 			break;
+		case 'JobItemAmendment':
+			path = 'views/attendance/job_item_amendment/';
+			break;
 		case 'UserTitle':
 			path = 'views/employees/user_title/';
 			break;
@@ -1551,6 +1713,7 @@ Global.getViewPathByViewId = function( viewId ) {
 			path = 'views/company/ethnic_group/';
 			break;
 		case 'Currency':
+		case 'CurrencyRate':
 			path = 'views/company/currency/';
 			break;
 		case 'PermissionControl':
@@ -1614,6 +1777,18 @@ Global.getViewPathByViewId = function( viewId ) {
 		case 'PolicyGroup':
 			path = 'views/policy/policy_group/';
 			break;
+		case 'PayCode':
+			path = 'views/policy/pay_code/';
+			break;
+		case 'PayFormulaPolicy':
+			path = 'views/policy/pay_formula_policy/';
+			break;
+		case 'ContributingPayCodePolicy':
+			path = 'views/policy/contributing_pay_code_policy/';
+			break;
+		case 'ContributingShiftPolicy':
+			path = 'views/policy/contributing_shift_policy/';
+			break;
 		case 'RoundIntervalPolicy':
 			path = 'views/policy/round_interval_policy/';
 			break;
@@ -1622,6 +1797,9 @@ Global.getViewPathByViewId = function( viewId ) {
 			break;
 		case 'BreakPolicy':
 			path = 'views/policy/break_policy/';
+			break;
+		case 'RegularTimePolicy':
+			path = 'views/policy/regular_time_policy/';
 			break;
 		case 'ExpensePolicy':
 			path = 'views/policy/expense_policy/';
@@ -1652,6 +1830,8 @@ Global.getViewPathByViewId = function( viewId ) {
 			path = 'views/policy/schedule_policy/';
 			break;
 		case 'AccrualPolicy':
+		case 'AccrualPolicyAccount':
+		case 'AccrualPolicyUserModifier':
 			path = 'views/policy/accrual_policy/';
 			break;
 		case 'DocumentRevision':
@@ -1853,6 +2033,12 @@ Global.getViewPathByViewId = function( viewId ) {
 		case 'ShareReportWizard':
 			path = 'views/wizard/share_report/';
 			break;
+		case 'PayCodeWizard':
+			path = 'views/wizard/pay_code/';
+			break;
+		case 'InstallWizard':
+			path = 'views/wizard/install/';
+			break;
 	}
 
 	return path;
@@ -1887,11 +2073,17 @@ Global.loadViewSource = function( viewId, fileName, onResult, sync ) {
 
 Global.loadPageSync = function( url ) {
 
+	var realPath = url + '?v=' + APIGlobal.pre_login_data.application_build;
+
+	if ( Global.url_offset ) {
+		realPath = Global.url_offset + realPath;
+	}
+
 	ProgressBar.showProgressBar();
 	var responseData = $.ajax( {
 		async: false,
 		type: 'GET',
-		url: url + '?v=' + APIGlobal.pre_login_data.application_build,
+		url: realPath,
 		data: null,
 		success: function() {
 			successflag = true;
@@ -1900,17 +2092,23 @@ Global.loadPageSync = function( url ) {
 
 	ProgressBar.removeProgressBar();
 
-	return(responseData.responseText);
+	return (responseData.responseText);
 
 };
 
 Global.loadPage = function( url, onResult ) {
 
+	var realPath = url + '?v=' + APIGlobal.pre_login_data.application_build;
+
+	if ( Global.url_offset ) {
+		realPath = Global.url_offset + realPath;
+	}
+
 	ProgressBar.showProgressBar();
 	$.ajax( {
 		async: true,
 		type: 'GET',
-		url: url + '?v=' + APIGlobal.pre_login_data.application_build,
+		url: realPath,
 		data: null,
 		success: function( result ) {
 			ProgressBar.removeProgressBar();
@@ -2132,6 +2330,7 @@ Global.formatGridData = function( grid_data, key_name ) {
 				case 'immediate_drug_test':
 				case 'is_current_employer':
 				case 'is_contact_available':
+				case 'enable_pay_stub_balance_display':
 				case 'ytd_adjustment':
 				case 'authorized':
 				case 'is_reimbursable':
@@ -2145,13 +2344,29 @@ Global.formatGridData = function( grid_data, key_name ) {
 						grid_data[i][key] = $.i18n._( 'No' );
 					}
 					break;
-				case 'in_use':
+				case 'override':
+					if ( grid_data[i][key] === true ) {
+						grid_data[i][key] = $.i18n._( 'Yes' );
+						grid_data[i]['is_override'] = true;
+					} else if ( grid_data[i][key] === false ) {
+						grid_data[i][key] = $.i18n._( 'No' );
+						grid_data[i]['is_override'] = false;
+					}
+					break;
 				case 'is_scheduled':
-
 					if ( grid_data[i][key] === '1' ) {
 						grid_data[i][key] = $.i18n._( 'Yes' );
 					} else if ( grid_data[i][key] === '0' ) {
 						grid_data[i][key] = $.i18n._( 'No' );
+					}
+					break;
+				case 'in_use':
+					if ( grid_data[i][key] === '1' ) {
+						grid_data[i][key] = $.i18n._( 'Yes' );
+						grid_data[i]['is_in_use'] = true;
+					} else if ( grid_data[i][key] === '0' ) {
+						grid_data[i][key] = $.i18n._( 'No' );
+						grid_data[i]['is_in_use'] = false;
 					}
 					break;
 				default:
@@ -2556,7 +2771,7 @@ Global.log = function( val ) {
 	if ( typeof console !== "undefined" && typeof (console.log) !== "undefined" ) {
 		console.log( val );
 	}
-}
+};
 
 Global.setAnalyticDimensions = function( user_name, company_name ) {
 	if ( APIGlobal.pre_login_data.analytics_enabled === true ) {

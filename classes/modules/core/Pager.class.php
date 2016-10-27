@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 13536 $
- * $Id: Pager.class.php 13536 2014-06-27 15:05:31Z mikeb $
- * $Date: 2014-06-27 08:05:31 -0700 (Fri, 27 Jun 2014) $
- */
+
 
 /**
  * @package Core

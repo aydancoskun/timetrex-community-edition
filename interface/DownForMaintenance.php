@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 1902 $
- * $Id: DownForMaintenance.php 1902 2008-06-06 17:27:56Z ipso $
- * $Date: 2008-06-06 10:27:56 -0700 (Fri, 06 Jun 2008) $
- */
+
 $disable_database_connection = TRUE;
 require_once('../includes/global.inc.php');
 

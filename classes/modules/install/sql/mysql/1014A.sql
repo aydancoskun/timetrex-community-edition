@@ -90,7 +90,7 @@ CREATE TABLE premium_policy_department (
 	PRIMARY KEY(id)
 ) Engine=InnoDB;
 
-alter table premium_policy change rate rate decimal(9,4);
+alter table premium_policy change rate rate numeric(9,4);
 alter table premium_policy change accrual_rate accrual_rate numeric(9,4);
 alter table over_time_policy change rate rate numeric(9,4);
 alter table over_time_policy change accrual_rate accrual_rate numeric(9,4);

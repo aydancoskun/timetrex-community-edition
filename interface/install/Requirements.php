@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 13078 $
- * $Id: Requirements.php 13078 2014-04-30 20:09:20Z mikeb $
- * $Date: 2014-04-30 13:09:20 -0700 (Wed, 30 Apr 2014) $
- */
+
 @ini_set('display_errors', TRUE );
 
 $disable_database_connection = TRUE;

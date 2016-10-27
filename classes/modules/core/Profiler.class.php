@@ -1,9 +1,5 @@
 <?php
-/*
- * $Revision: 11811 $
- * $Id: Profiler.class.php 11811 2013-12-26 23:56:23Z mikeb $
- * $Date: 2013-12-26 15:56:23 -0800 (Thu, 26 Dec 2013) $
- */
+
 /********************************************************************************\
  * Copyright (C) Carl Taylor (cjtaylor@adepteo.com)								*
  * Copyright (C) Torben Nehmer (torben@nehmer.net) for Code Cleanup				*

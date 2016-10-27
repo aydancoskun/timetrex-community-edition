@@ -53,7 +53,6 @@ LoginViewController = BaseViewController.extend( {
 
 	events: {
 		'click #quick_punch': 'onQuickPunchClick',
-		'click #legacy_interface': 'onLegacyInterfaceClick',
 		'click #login_btn': 'onLoginBtnClick',
 		'click #forgot_password': 'forgotPasswordClick',
 		'click #appTypeLogo': 'onAppTypeClick',
@@ -63,10 +62,6 @@ LoginViewController = BaseViewController.extend( {
 
 	onAppTypeClick: function() {
 		window.open( "http://" + LocalCacheData.loginData.organization_url );
-	},
-
-	onLegacyInterfaceClick: function() {
-		window.open( ServiceCaller.rootURL + LocalCacheData.loginData.base_url + 'flex/?force=1' );
 	},
 
 	onQuickPunchClick: function() {
@@ -84,9 +79,11 @@ LoginViewController = BaseViewController.extend( {
 			return;
 		}
 		//Async call
-		this.authentication_api.login( user_name, password, {onResult: function( e ) {
-			$this.onLoginSuccess( e )
-		}, delegate: this} );
+		this.authentication_api.login( user_name, password, {
+			onResult: function( e ) {
+				$this.onLoginSuccess( e )
+			}, delegate: this
+		} );
 
 	},
 
@@ -123,7 +120,10 @@ LoginViewController = BaseViewController.extend( {
 			$.cookie( 'SessionID', null, {expires: 30, path: LocalCacheData.cookie_path} );
 
 			if ( e.getDetails()[0].hasOwnProperty( 'password' ) ) {
-				IndexViewController.openWizard( 'ResetPasswordWizard', {user_name: user_name.val(), message: e.getDetailsAsString()}, function() {
+				IndexViewController.openWizard( 'ResetPasswordWizard', {
+					user_name: user_name.val(),
+					message: e.getDetailsAsString()
+				}, function() {
 					TAlertManager.showAlert( $.i18n._( 'Password has been changed successfully, you may now login' ), 'Error', function() {
 						password.focus();
 					} );
@@ -177,17 +177,19 @@ LoginViewController = BaseViewController.extend( {
 		filter.filter_columns = {};
 		filter.filter_columns.symbol = true;
 
-		e.get( 'delegate' ).currency_api.getCurrency( filter, {onResult: function( e1 ) {
+		e.get( 'delegate' ).currency_api.getCurrency( filter, {
+			onResult: function( e1 ) {
 
-			var result = e1.getResult();
+				var result = e1.getResult();
 
-			if ( Global.isArrayAndHasItems( result ) && result[0].symbol ) {
-				LocalCacheData.setCurrentCurrencySymbol( result[0].symbol )
-			} else {
-				LocalCacheData.setCurrentCurrencySymbol( '$' );
-			}
+				if ( Global.isArrayAndHasItems( result ) && result[0].symbol ) {
+					LocalCacheData.setCurrentCurrencySymbol( result[0].symbol )
+				} else {
+					LocalCacheData.setCurrentCurrencySymbol( '$' );
+				}
 
-		}, delegate: e.get( 'delegate' )} );
+			}, delegate: e.get( 'delegate' )
+		} );
 
 		e.get( 'delegate' ).updateUserPreference();
 
@@ -211,100 +213,118 @@ LoginViewController = BaseViewController.extend( {
 		if ( result.date_format ) {
 			next( result );
 		} else {
-			login_view_this.user_preference_api.getUserPreferenceDefaultData( {onResult: function( userPD ) {
-				next( userPD.getResult() );
-			}} );
+			login_view_this.user_preference_api.getUserPreferenceDefaultData( {
+				onResult: function( userPD ) {
+					next( userPD.getResult() );
+				}
+			} );
 
 		}
 
 		function next( nextResult ) {
 			LocalCacheData.loginUserPreference = nextResult;
 
-			login_view_this.date_api.getTimeZoneOffset( {onResult: function( timeZoneRes ) {
-				login_view_this.date_api.getHours( timeZoneRes.getResult(), {onResult: function( hoursRes ) {
-					var hoursResultData = hoursRes.getResult();
+			login_view_this.date_api.getTimeZoneOffset( {
+				onResult: function( timeZoneRes ) {
+					login_view_this.date_api.getHours( timeZoneRes.getResult(), {
+						onResult: function( hoursRes ) {
+							var hoursResultData = hoursRes.getResult();
 
-					//Flex way, Need this in js? Let's see
-					if ( hoursResultData.indexOf( '-' ) > -1 ) {
-						hoursResultData = hoursResultData.replace( '-', '+' )
-					} else {
-						hoursResultData = hoursResultData.replace( '+', '-' )
-					}
+							//Flex way, Need this in js? Let's see
+							if ( hoursResultData.indexOf( '-' ) > -1 ) {
+								hoursResultData = hoursResultData.replace( '-', '+' )
+							} else {
+								hoursResultData = hoursResultData.replace( '+', '-' )
+							}
 
-					LocalCacheData.loginUserPreference.time_zone_offset = hoursResultData;
+							LocalCacheData.loginUserPreference.time_zone_offset = hoursResultData;
 
-					login_view_this.user_preference_api.getOptions( 'jquery_date_format', {onResult: function( jsDateFormatRes ) {
+							login_view_this.user_preference_api.getOptions( 'jquery_date_format', {
+								onResult: function( jsDateFormatRes ) {
 
-						var jsDateFormatResultData = jsDateFormatRes.getResult();
+									var jsDateFormatResultData = jsDateFormatRes.getResult();
 
-						//For moment date parser
-						LocalCacheData.loginUserPreference.js_date_format = {'D, F d Y': 'ddd, MMMM DD YYYY',
-							'D, M d Y': 'ddd, MMM DD YYYY',
-							'D, d-M-Y': 'ddd, DD-MMM-YYYY',
-							'D, dMY': 'ddd, DDMMMYYYY',
-							'M-d-Y': 'MMM-DD-YYYY',
-							'M-d-y': 'MMM-DD-YY',
-							'Y-m-d': 'YYYY-MM-DD',
-							'd-M-Y': 'DD-MMM-YYYY',
-							'd-M-y': 'DD-MMM-YY',
-							'd-m-Y': 'DD-MM-YYYY',
-							'd-m-y': 'DD-MM-YY',
-							'd/m/Y': 'DD/MM/YYYY',
-							'd/m/y': 'DD/MM/YY',
-							'dMY': 'DDMMMYYYY',
-							'l, F d Y': 'dddd, MMMM DD YYYY',
-							'm-d-Y': 'MM-DD-YYYY',
-							'm-d-y': 'MM-DD-YY',
-							'm/d/Y': 'MM/DD/YYYY',
-							'm/d/y': 'MM/DD/YY'};
+									//For moment date parser
+									LocalCacheData.loginUserPreference.js_date_format = {
+										'D, F d Y': 'ddd, MMMM DD YYYY',
+										'D, M d Y': 'ddd, MMM DD YYYY',
+										'D, d-M-Y': 'ddd, DD-MMM-YYYY',
+										'D, dMY': 'ddd, DDMMMYYYY',
+										'M-d-Y': 'MMM-DD-YYYY',
+										'M-d-y': 'MMM-DD-YY',
+										'Y-m-d': 'YYYY-MM-DD',
+										'd-M-Y': 'DD-MMM-YYYY',
+										'd-M-y': 'DD-MMM-YY',
+										'd-m-Y': 'DD-MM-YYYY',
+										'd-m-y': 'DD-MM-YY',
+										'd/m/Y': 'DD/MM/YYYY',
+										'd/m/y': 'DD/MM/YY',
+										'dMY': 'DDMMMYYYY',
+										'l, F d Y': 'dddd, MMMM DD YYYY',
+										'm-d-Y': 'MM-DD-YYYY',
+										'm-d-y': 'MM-DD-YY',
+										'm/d/Y': 'MM/DD/YYYY',
+										'm/d/y': 'MM/DD/YY'
+									};
 
-						var date_format = LocalCacheData.loginUserPreference.date_format;
+									var date_format = LocalCacheData.loginUserPreference.date_format;
 
-						LocalCacheData.loginUserPreference.date_format = LocalCacheData.loginUserPreference.js_date_format[date_format];
+									LocalCacheData.loginUserPreference.date_format = LocalCacheData.loginUserPreference.js_date_format[date_format];
 
-						//For date picker
-						LocalCacheData.loginUserPreference.js_date_format_1 = jsDateFormatResultData;
+									//For date picker
+									LocalCacheData.loginUserPreference.js_date_format_1 = jsDateFormatResultData;
 
-						LocalCacheData.loginUserPreference.date_format_1 = LocalCacheData.loginUserPreference.js_date_format_1[date_format];
+									LocalCacheData.loginUserPreference.date_format_1 = LocalCacheData.loginUserPreference.js_date_format_1[date_format];
 
-						login_view_this.user_preference_api.getOptions( 'js_time_format', {onResult: function( jsTimeFormatRes ) {
+									login_view_this.user_preference_api.getOptions( 'js_time_format', {
+										onResult: function( jsTimeFormatRes ) {
 
-							var jsTimeFormatResultData = jsTimeFormatRes.getResult();
+											var jsTimeFormatResultData = jsTimeFormatRes.getResult();
 
-							LocalCacheData.loginUserPreference.js_time_format = jsTimeFormatResultData;
+											LocalCacheData.loginUserPreference.js_time_format = jsTimeFormatResultData;
 
-							LocalCacheData.setLoginUserPreference( LocalCacheData.loginUserPreference );
+											LocalCacheData.setLoginUserPreference( LocalCacheData.loginUserPreference );
 
-							login_view_this.permission_api.getPermission( {onResult: function( permissionRes ) {
-								LocalCacheData.setPermissionData( permissionRes.getResult() );
+											login_view_this.permission_api.getPermission( {
+												onResult: function( permissionRes ) {
+													LocalCacheData.setPermissionData( permissionRes.getResult() );
 
-								login_view_this.permission_api.getUniqueCountry( {onResult: function( country_result ) {
-									LocalCacheData.setUniqueCountryArray( country_result.getResult() );
-									login_view_this.authentication_api.getCurrentCompany( {onResult: function( current_company_result ) {
+													login_view_this.permission_api.getUniqueCountry( {
+														onResult: function( country_result ) {
+															LocalCacheData.setUniqueCountryArray( country_result.getResult() );
+															login_view_this.authentication_api.getCurrentCompany( {
+																onResult: function( current_company_result ) {
 
-										var com_result = current_company_result.getResult();
-										if ( com_result.is_setup_complete === '1' || com_result.is_setup_complete === 1 ) {
-											com_result.is_setup_complete = true;
-										} else {
-											com_result.is_setup_complete = false;
+																	var com_result = current_company_result.getResult();
+																	if ( com_result.is_setup_complete === '1' || com_result.is_setup_complete === 1 ) {
+																		com_result.is_setup_complete = true;
+																	} else {
+																		com_result.is_setup_complete = false;
+																	}
+
+																	LocalCacheData.setCurrentCompany( com_result );
+																	login_view_this.goToView();
+
+																}
+															} );
+
+														}
+													} );
+
+												}
+											} );
+
 										}
+									} );
 
-										LocalCacheData.setCurrentCompany( com_result );
-										login_view_this.goToView();
+								}
+							} );
 
-									}} );
+						}
+					} );
 
-								}} );
-
-							}} );
-
-						}} );
-
-					}} );
-
-				}} );
-
-			}} );
+				}
+			} );
 
 //			  var jsTimeFormatRes = e.get('delegate').user_preference_api.getOptions('js_time_format',{async:false});
 
@@ -343,7 +363,11 @@ LoginViewController = BaseViewController.extend( {
 
 		if ( target_view && !$.cookie( 'PreviousSessionID' ) ) {
 			TopMenuManager.goToView( target_view );
-			$.cookie( 'PreviousSessionType', null, {expires: 30, path: LocalCacheData.cookie_path, domain: Global.getHost()} );
+			$.cookie( 'PreviousSessionType', null, {
+				expires: 30,
+				path: LocalCacheData.cookie_path,
+				domain: Global.getHost()
+			} );
 		} else {
 
 			if ( PermissionManager.checkTopLevelPermission( 'TimeSheet' ) ) {
@@ -403,7 +427,7 @@ LoginViewController = BaseViewController.extend( {
 			}
 		} );
 
-		$( '#accordion' ).accordion( { header: 'h3' } );
+		$( '#accordion' ).accordion( {header: 'h3'} );
 		$( "#versionNumber" ).html( "v" + APIGlobal.pre_login_data.application_build );
 
 		$( '#appTypeLogo' ).css( 'opacity', 0 );
@@ -411,16 +435,22 @@ LoginViewController = BaseViewController.extend( {
 		//community edition
 		var is_seo = false;
 
+		var url = 'theme/' + Global.theme;
+
+		if ( Global.url_offset ) {
+			url = Global.url_offset + url;
+		}
+
 		if ( LocalCacheData.productEditionId > 10 && LocalCacheData.appType === true ) {
-			$( '#appTypeLogo' ).attr( 'src', 'theme/' + Global.theme + '/css/views/login/images/od.png' );
+			$( '#appTypeLogo' ).attr( 'src', url + '/css/views/login/images/od.png' );
 		} else if ( LocalCacheData.productEditionId === 15 ) {
-			$( '#appTypeLogo' ).attr( 'src', 'theme/' + Global.theme + '/css/views/login/images/beo.png' );
+			$( '#appTypeLogo' ).attr( 'src', url + '/css/views/login/images/beo.png' );
 		} else if ( LocalCacheData.productEditionId === 20 ) {
-			$( '#appTypeLogo' ).attr( 'src', 'theme/' + Global.theme + '/css/views/login/images/peo.png' );
+			$( '#appTypeLogo' ).attr( 'src', url + '/css/views/login/images/peo.png' );
 		} else if ( LocalCacheData.productEditionId === 25 ) {
-			$( '#appTypeLogo' ).attr( 'src', 'theme/' + Global.theme + '/css/views/login/images/eeo.png' );
+			$( '#appTypeLogo' ).attr( 'src', url + '/css/views/login/images/eeo.png' );
 		} else {
-			$( '#appTypeLogo' ).attr( 'src', 'theme/' + Global.theme + '/css/views/login/images/seo.png' );
+			$( '#appTypeLogo' ).attr( 'src', url + '/css/views/login/images/seo.png' );
 			is_seo = true;
 		}
 
@@ -516,7 +546,10 @@ LoginViewController = BaseViewController.extend( {
 		this.lan_selector.setValue( LocalCacheData.getLoginData().language );
 
 		this.lan_selector.bind( 'formItemChange', function() {
-			$.cookie( 'language', $this.lan_selector.getValue(), {expires: 10000, path: LocalCacheData.loginData.base_url} );
+			$.cookie( 'language', $this.lan_selector.getValue(), {
+				expires: 10000,
+				path: LocalCacheData.loginData.base_url
+			} );
 
 			LocalCacheData.setI18nDic( null );
 
@@ -563,14 +596,15 @@ LoginViewController.loadView = function() {
 
 	Global.loadViewSource( 'Login', 'LoginView.html', function( result ) {
 
-		var args = { secure_login: $.i18n._( 'Secure Login' ),
-			legacy_interface: $.i18n._( 'Legacy Interface' ),
+		var args = {
+			secure_login: $.i18n._( 'Secure Login' ),
 			user_name: $.i18n._( 'User Name' ),
 			password: $.i18n._( 'Password' ),
 			forgot_your_password: $.i18n._( 'Forgot Your Password' ),
 			quick_punch: $.i18n._( 'Quick Punch' ),
 			login: $.i18n._( 'Login' ),
-			language: $.i18n._( 'Language' )};
+			language: $.i18n._( 'Language' )
+		};
 		var template = _.template( result, args );
 		Global.contentContainer().html( template );
 

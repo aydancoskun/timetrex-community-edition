@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14800 $
- * $Id: PayStubEntryAccountFactory.class.php 14800 2014-10-16 19:27:31Z mikeb $
- * $Date: 2014-10-16 12:27:31 -0700 (Thu, 16 Oct 2014) $
- */
+
 
 /**
  * @package Modules\PayStub
@@ -98,6 +94,8 @@ class PayStubEntryAccountFactory extends Factory {
 										'-1150-debit_account' => TTi18n::gettext('Debit Account'),
 										'-1150-credit_account' => TTi18n::gettext('Credit Account'),
 
+										'-1900-in_use' => TTi18n::gettext('In Use'),
+
 										'-2000-created_by' => TTi18n::gettext('Created By'),
 										'-2010-created_date' => TTi18n::gettext('Created Date'),
 										'-2020-updated_by' => TTi18n::gettext('Updated By'),
@@ -146,6 +144,7 @@ class PayStubEntryAccountFactory extends Factory {
 											'credit_account' => 'CreditAccount',
 											'accrual_pay_stub_entry_account_id' => 'Accrual',
 											'accrual_type_id' => 'AccrualType',
+											'in_use' => FALSE,
 											'deleted' => 'Deleted',
 											);
 			return $variable_function_map;
@@ -1126,6 +1125,9 @@ class PayStubEntryAccountFactory extends Factory {
 
 					$function = 'get'.$function_stub;
 					switch( $variable ) {
+						case 'in_use':
+							$data[$variable] = $this->getColumn( $variable );
+							break;
 						case 'status':
 						case 'type':
 						case 'accrual_type':

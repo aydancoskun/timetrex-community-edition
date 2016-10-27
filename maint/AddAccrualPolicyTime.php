@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 417 $
- * $Id: AddRecurringHoliday.php 417 2006-12-06 22:58:53Z ipso $
- * $Date: 2006-12-06 14:58:53 -0800 (Wed, 06 Dec 2006) $
- */
+
 /*
  * Adds time to employee accruals based on calendar milestones
  * This file should run once a day.

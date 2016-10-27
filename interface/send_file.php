@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14180 $
- * $Id: send_file.php 14180 2014-08-21 02:41:06Z mikeb $
- * $Date: 2014-08-20 19:41:06 -0700 (Wed, 20 Aug 2014) $
- */
+
 require_once('../includes/global.inc.php');
 
 require_once('PEAR.php');

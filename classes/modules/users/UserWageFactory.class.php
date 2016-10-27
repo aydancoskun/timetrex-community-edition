@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 13873 $
- * $Id: UserWageFactory.class.php 13873 2014-07-25 20:14:51Z mikeb $
- * $Date: 2014-07-25 13:14:51 -0700 (Fri, 25 Jul 2014) $
- */
+
 
 /**
  * @package Modules\Users
@@ -647,11 +643,46 @@ class UserWageFactory extends Factory {
 
 		Debug::text('Salary: '. $salary .' Total Pay Period Days: '. $total_pay_period_days .' Wage Effective Days: '. $total_wage_effective_days, __FILE__, __LINE__, __METHOD__, 10);
 
-		//$pro_rate_salary = $salary * ($total_wage_effective_days / $total_pay_period_days);
 		$pro_rate_salary = bcmul( $salary, bcdiv($total_wage_effective_days, $total_pay_period_days) );
 
 		Debug::text('Pro Rate Salary: '. $pro_rate_salary, __FILE__, __LINE__, __METHOD__, 10);
 		return $pro_rate_salary;
+	}
+
+	static function proRateSalaryDates( $wage_effective_date, $prev_wage_effective_date, $pp_start_date, $pp_end_date, $termination_date ) {
+		$prev_wage_effective_date = (int)$prev_wage_effective_date;
+
+		if ( $wage_effective_date < $pp_start_date ) {
+			$wage_effective_date = $pp_start_date;
+		}
+
+		$total_pay_period_days = ceil( TTDate::getDayDifference( $pp_start_date, $pp_end_date) );
+
+		if ( $prev_wage_effective_date == 0 ) {
+			//ProRate salary to termination date if its in the middle of a pay period.
+			if ( $termination_date != '' AND $termination_date > 0 AND $termination_date < $pp_end_date ) {
+				//Debug::text(' Setting PP end date to Termination Date: '. TTDate::GetDate('DATE', $termination_date), __FILE__, __LINE__, __METHOD__, 10);
+				$pp_end_date = $termination_date;
+			}
+			$total_wage_effective_days = ceil( TTDate::getDayDifference( $wage_effective_date, $pp_end_date) );
+
+			//Debug::text(' Using Pay Period End Date: '. TTDate::GetDate('DATE', $pp_end_date), __FILE__, __LINE__, __METHOD__, 10);
+			$retarr['start_date'] = $wage_effective_date;
+			$retarr['end_date'] = $pp_end_date;
+		} else {
+			$total_wage_effective_days = ceil( TTDate::getDayDifference( $wage_effective_date, $prev_wage_effective_date ) );
+
+			//Debug::text(' Using Prev Effective Date: '. TTDate::GetDate('DATE', $prev_wage_effective_date ), __FILE__, __LINE__, __METHOD__, 10);
+			$retarr['start_date'] = $wage_effective_date;
+			$retarr['end_date'] = $prev_wage_effective_date;
+		}
+
+		if ( $retarr['start_date'] > $pp_start_date OR $retarr['end_date'] < $pp_end_date ) {
+			$retarr['percent'] = Misc::removeTrailingZeros( round( bcmul( bcdiv($total_wage_effective_days, $total_pay_period_days), 100), 2), 0 );
+			return $retarr;
+		}
+
+		return FALSE;
 	}
 
 	static function getWageFromArray( $date, $wage_arr ) {
@@ -718,6 +749,22 @@ class UserWageFactory extends Factory {
 			$this->Validator->isTRUE(	'user',
 										FALSE,
 										TTi18n::gettext('No employee specified') );
+		}
+
+		if ( $this->getType() != 10 ) { //Salary
+			//Make sure they won't put 0 or 1hr for the weekly time, as that is almost certainly wrong.
+			if ( $this->getWeeklyTime() <= 3601 ) {
+				$this->Validator->isTRUE(	'weekly_time',
+											FALSE,
+											TTi18n::gettext('Average Time / Week is invalid') );
+			}
+
+			//Make sure the weekly total time is within reason and hourly rates aren't 1000+/hr.
+			if ( $this->getHourlyRate() > 1000 ) {
+				$this->Validator->isTRUE(	'hourly_rate',
+											FALSE,
+											TTi18n::gettext('Annual Hourly Rate is too high') );
+			}
 		}
 
 		if ( $this->getDeleted() == FALSE ) {

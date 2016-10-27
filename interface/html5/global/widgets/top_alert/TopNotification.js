@@ -140,6 +140,11 @@
 
 			data = arg;
 
+			//Error: TypeError: undefined is not an object (evaluating 'el.width') in https://ondemand2001.timetrex.com/interface/html5/global/widgets/top_alert/TopNotification.js?v=7.4.6-20141027-085016 line 143
+			if ( !el ) {
+				return;
+			}
+
 			el.width( '100%' );
 			bottom_button.attr( 'class', 'bottom-btn up-btn' );
 

@@ -12,6 +12,7 @@
 		var close_btn = null;
 
 		var mass_edit_mode = false;
+
 		var check_box = null;
 
 		var enabled = true;
@@ -117,7 +118,7 @@
 
 			value = value.substring( 0, value.length - 1 );
 
-			return    value;
+			return value;
 		};
 
 		this.setValue = function( val ) {
@@ -208,6 +209,11 @@
 						var value = $( $$this ).attr( 'value' );
 						var current_div = tag_span_dic[value];
 						var new_value = '';
+
+						//Error: Unable to get property 'removeClass' of undefined or null reference in https://ondemand1.timetrex.com/interface/html5/global/widgets/tag_input/TTagInput.js?v=8.0.0-20150126-192326 line 214
+						if ( !current_div ) {
+							return;
+						}
 
 						if ( value.indexOf( '-' ) === 0 ) {
 							new_value = value.substr( 1 );
@@ -369,6 +375,12 @@
 				}
 			} );
 
+			$( this ).contextmenu( function( e ) {
+				e.preventDefault();
+				e.stopImmediatePropagation();
+
+			} );
+
 			$( this ).mouseout( function() {
 				$this.hideErrorTip();
 			} );
@@ -404,19 +416,21 @@
 				args.filter_data = {};
 				args.filter_data.object_type_id = [object_type_id];
 				args.filter_data.name = add_tag_input.val();
-				api_tag.getCompanyGenericTag( args, {onResult: function( result ) {
+				api_tag.getCompanyGenericTag( args, {
+					onResult: function( result ) {
 
-					var result_data = result.getResult();
-					var final_result = [];
+						var result_data = result.getResult();
+						var final_result = [];
 
-					for ( var i = 0; i < result_data.length; i++ ) {
-						final_result.push( result_data[i].name );
+						for ( var i = 0; i < result_data.length; i++ ) {
+							final_result.push( result_data[i].name );
+						}
+
+						add_tag_input.autocomplete( "option", "source", final_result );
+						add_tag_input.autocomplete( 'search', args.filter_data.name );
+
 					}
-
-					add_tag_input.autocomplete( "option", "source", final_result );
-					add_tag_input.autocomplete( 'search', args.filter_data.name );
-
-				}} );
+				} );
 
 				return false;
 
@@ -460,8 +474,6 @@
 
 	};
 
-	$.fn.TTagInput.defaults = {
-
-	};
+	$.fn.TTagInput.defaults = {};
 
 })( jQuery );

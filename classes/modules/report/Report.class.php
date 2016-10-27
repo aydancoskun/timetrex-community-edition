@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2095 $
- * $Id: Sort.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
- */
+
 
 /**
  * @package Modules\Report
@@ -239,6 +235,41 @@ class Report {
 										'-1020-csv' => TTi18n::gettext('Excel/CSV'),
 							);
 				break;
+			case 'paycode_columns':
+				//Common code for getting report columns based on pay codes.
+				$retval = array();
+
+				if ( $params == '' ) {
+					$params = 3;
+				}
+
+				//Collect absence policies so we know which pay codes need the 'absence_taken' prefix.
+				$absence_pay_codes = array();
+				$aplf = TTNew('AbsencePolicyListFactory');
+				$aplf->getByCompanyId( $this->getUserObject()->getCompany() );
+				if ( $aplf->getRecordCount() > 0 ) {
+					foreach( $aplf as $ap_obj ) {
+						$absence_pay_codes[$ap_obj->getPayCode()] = TRUE;
+					}
+				}
+				unset($aplf, $ap_obj);
+
+				$pclf = TTnew( 'PayCodeListFactory' );
+				$pclf->getByCompanyId( $this->getUserObject()->getCompany() );
+				if ( $pclf->getRecordCount() > 0 ) {
+					foreach( $pclf as $pc_obj ) {
+						$retval['-'. $params .'190-pay_code-'.$pc_obj->getId().'_time'] = $pc_obj->getName();
+						if ( isset($absence_pay_codes[$pc_obj->getId()]) ) {
+							$retval['-'. $params .'195-absence_taken_pay_code-'.$pc_obj->getId().'_time'] = $pc_obj->getName() .' ('. TTi18n::getText('Taken') .')';
+						}
+						$retval['-'. $params .'290-pay_code-'.$pc_obj->getId().'_wage'] = $pc_obj->getName() .' - '. TTi18n::getText('Wage');
+						$retval['-'. $params .'390-pay_code-'.$pc_obj->getId().'_hourly_rate'] = $pc_obj->getName() .' - '. TTi18n::getText('Hourly Rate');
+						$retval['-'. $params .'490-pay_code-'.$pc_obj->getId().'_wage_with_burden'] = $pc_obj->getName() .' - '. TTi18n::getText('Wage w/Burden');
+						$retval['-'. $params .'590-pay_code-'.$pc_obj->getId().'_hourly_rate_with_burden'] = $pc_obj->getName() .' - '. TTi18n::getText('Hourly Rate w/Burden');
+					}
+				}
+				unset($pclf, $pc_obj);
+				break;
 		}
 
 		return $retval;
@@ -249,30 +280,36 @@ class Report {
 
 		$this->profiler = $profiler;
 
-		$maximum_execution_limit = $this->config['other']['maximum_execution_limit'];
-		if ( isset($config_vars['other']['report_maximum_execution_limit']) AND $config_vars['other']['report_maximum_execution_limit'] != '' ) {
-			$maximum_execution_limit = $config_vars['other']['report_maximum_execution_limit'];
-		}
-		$maximum_memory_limit = $this->config['other']['maximum_memory_limit'];
-		if ( isset($config_vars['other']['report_maximum_memory_limit']) AND $config_vars['other']['report_maximum_memory_limit'] != '' ) {
-			$maximum_memory_limit = $config_vars['other']['report_maximum_memory_limit'];
-		}
 		//Debug::Text(' Memory Usage: Current: '. memory_get_usage() .' Peak: '. memory_get_peak_usage() .' Limits: Execution: '. $maximum_execution_limit .' Memory: '. $maximum_memory_limit, __FILE__, __LINE__, __METHOD__, 10);
 
-		$this->setExecutionTimeLimit( $maximum_execution_limit );
-		$this->setExecutionMemoryLimit( $maximum_memory_limit );
+		//Don't set Execution/Memory limits here, as that may affect schema upgrade scripts that need to read report data.
+		//Only set them when actually executing the report data in Output();
 
 		return TRUE;
 	}
 
 	//Defines the max execution timelimit for PHP
-	function setExecutionTimeLimit( $int ) {
+	function setExecutionTimeLimit( $int = FALSE ) {
+		if ( $int === FALSE ) {
+			$int = $this->config['other']['maximum_execution_limit'];
+			if ( isset($config_vars['other']['report_maximum_execution_limit']) AND $config_vars['other']['report_maximum_execution_limit'] != '' ) {
+				$int = $config_vars['other']['report_maximum_execution_limit'];
+			}
+		}
+
 		ini_set( 'max_execution_time', $int );
 		return TRUE;
 	}
 
 	//Defines the max execution memory limit for PHP
-	function setExecutionMemoryLimit( $str ) {
+	function setExecutionMemoryLimit( $str = FALSE ) {
+		if ( $str === FALSE ) {
+			$str = $this->config['other']['maximum_memory_limit'];
+			if ( isset($config_vars['other']['report_maximum_memory_limit']) AND $config_vars['other']['report_maximum_memory_limit'] != '' ) {
+				$str = $config_vars['other']['report_maximum_memory_limit'];
+			}
+		}
+
 		$memory_limit = Misc::getBytesFromSize( $str );
 		$available_memory = Misc::getSystemMemoryInfo( 'free+cached' );
 		if ( $available_memory < $memory_limit ) {
@@ -478,9 +515,11 @@ class Report {
 	}
 
 	function getTemplate( $name ) {
-		$config = $this->getOptions('template_config', array('template' => $name) );
-		if ( is_array($config) ) {
-			return $config;
+		if ( !empty($name) ) {
+			$config = $this->getOptions('template_config', array('template' => $name) );
+			if ( is_array($config) ) {
+				return $config;
+			}
 		}
 
 		return FALSE;
@@ -1521,7 +1560,7 @@ class Report {
 			foreach( $currency_format_columns as $currency_column => $currency_column_value ) {
 				//We must have the currency_rate here to do the proper conversions.
 				//For reports that don't use currency_rate columns (like timesheet summary/detail) they need to create the currency_rate to always be the same as the employees default currency.
-				if ( isset( $row[$currency_column] ) AND isset( $row['currency_rate'] ) AND $row['currency_rate'] !== 1 ) {
+				if ( isset( $row[$currency_column] ) AND isset( $row['currency_rate'] ) AND $row['currency_rate'] !== 1 AND $row['currency_rate'] != 0 ) {
 					$this->data[$key][$currency_column] = $base_currency_obj->getBaseCurrencyAmount( $row[$currency_column], $row['currency_rate'], $currency_convert_to_base );
 				}
 			}
@@ -1824,6 +1863,11 @@ class Report {
 			return FALSE;
 		}
 
+		//Set these only when calling getOutput() rather than in the constructor so schema upgrades that need to read report settings but not actually
+		//execute the report are not affected.
+		$this->setExecutionTimeLimit();
+		$this->setExecutionMemoryLimit();
+
 		$this->start_time = microtime(TRUE);
 
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), 2, NULL, TTi18n::getText('Querying Database...') ); //Iterations need to be 2, otherwise progress bar is not created.
@@ -2020,13 +2064,18 @@ class Report {
 
 		if ( is_array($output) AND isset($output['data']) AND $output['data'] != ''
 				AND is_object( $this->getUserObject() )
-				AND ( $this->getUserObject()->getHomeEmail() != FALSE OR $this->getUserObject()->getWorkEmail() != FALSE ) ) {
+				AND (
+						( $this->getUserObject()->getWorkEmail() != '' AND $this->getUserObject()->getWorkEmailIsValid() == TRUE )
+						OR
+						( $this->getUserObject()->getHomeEmail() != '' AND $this->getUserObject()->getHomeEmailIsValid() == TRUE )
+					)
+			) {
 
-			if ( $this->getUserObject()->getWorkEmail() != FALSE ) {
+			if ( $this->getUserObject()->getWorkEmail() != '' AND $this->getUserObject()->getWorkEmailIsValid() == TRUE ) {
 				$primary_email = $this->getUserObject()->getWorkEmail();
 
 				$secondary_email = NULL;
-				if ( is_object( $report_schedule_obj ) AND $report_schedule_obj->getEnableHomeEmail() == TRUE AND $this->getUserObject()->getHomeEmail() != FALSE ) {
+				if ( is_object( $report_schedule_obj ) AND $report_schedule_obj->getEnableHomeEmail() == TRUE AND $this->getUserObject()->getHomeEmail() != '' AND $this->getUserObject()->getHomeEmailIsValid() == TRUE ) {
 					$secondary_email .= $this->getUserObject()->getHomeEmail();
 				}
 

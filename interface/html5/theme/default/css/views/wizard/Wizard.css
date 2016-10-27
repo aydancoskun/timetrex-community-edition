@@ -1,3 +1,28 @@
+.install-wizard {
+    background-color: #f8f8f8;
+    border-bottom: 2px solid #355f87;
+    border-top: 30px solid #355f87;;
+    border-left: 2px solid #355f87;;
+    border-right: 2px solid #355f87;;
+    position: absolute;
+    width: 90%;
+    height: 90%;
+    top: 20px;
+    margin: 0;
+    font-size: 12px;
+    text-align: center;
+    z-index: 50;
+    border-radius: 20px;
+    -moz-box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
+    -webkit-box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
+    box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
+    /* For IE 8 */
+    -ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000')";
+    /* For IE 5.5 - 7 */
+    filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000');
+
+}
+
 .wizard {
     background-color: #f8f8f8;
     border-bottom: 2px solid #355f87;
@@ -33,9 +58,20 @@
     width: 100%;
 }
 
+.install-wizard .bottom-actions {
+    border-top: 1px solid #999999;
+    padding-top: 20px;
+    margin-top: 10px;
+    height: 35px;
+}
+
 .wizard .move-buttons-div {
     left: 470px;
     position: absolute;
+}
+
+.install-wizard .move-buttons-div {
+
 }
 
 .wizard .confirm-buttons-div {
@@ -43,7 +79,16 @@
     right: 10px;
 }
 
-.wizard .back-btn {
+.install-wizard .confirm-buttons-div {
+    text-align: right;
+    width: 100px;
+    float: right;
+    position: relative;
+    top: -35px;
+    right: 10px;
+}
+
+.wizard .back-btn, .install-wizard .back-btn {
     background-image: url("../../global/widgets/ribbon/icons/back-35x35.png");
     background-color: transparent;
     background-position: 0px 0px;
@@ -54,7 +99,7 @@
     padding: 0px;
 }
 
-.wizard .forward-btn {
+.wizard .forward-btn, .install-wizard .forward-btn {
     background-image: url("../../global/widgets/ribbon/icons/next-35x35.png");
     background-color: transparent;
     background-position: 0px 0px;
@@ -65,7 +110,7 @@
     padding: 0px;
 }
 
-.wizard .done-btn {
+.wizard .done-btn, .install-wizard .done-btn {
     background-image: url("../../global/widgets/ribbon/icons/done-35x35.png");
     background-color: transparent;
     background-position: 0px 0px;
@@ -76,7 +121,7 @@
     padding: 0px;
 }
 
-.wizard .close-btn {
+.wizard .close-btn, .install-wizard .close-btn {
     background-image: url("../../global/widgets/ribbon/icons/close_misc-35x35.png");
     background-color: transparent;
     background-position: 0px 0px;
@@ -87,7 +132,7 @@
     padding: 0px;
 }
 
-.wizard .title {
+.wizard .title, .install-wizard .title {
     color: #FFFFFF;
     font-size: 12px;
     left: 15px;
@@ -95,14 +140,22 @@
     top: -22px;
 }
 
-.wizard .title-1-div {
+.install-wizard .progress-bar {
+     border-bottom: 1px solid #999999;
+     position: relative;
+     /*top: 10px;*/
+     width: 100%;
+     padding-top: 10px;
+}
+
+.wizard .title-1-div, .install-wizard .title-1-div {
     margin-bottom: 5px;
     margin-left: 15px;
     text-align: left;
     float: left;
 }
 
-.wizard .title-1 {
+.wizard .title-1, .install-wizard .title-1 {
     display: block;
     float: left;
     font-size: 22px;
@@ -123,6 +176,111 @@
     height: 35px;
     width: 97%;
     background-color: #eaeaea;
+}
+
+.install-wizard .edit-view-form-item-div {
+    border-bottom: 1px solid #c7c7c7;
+    float: left;
+    width: 100%;
+}
+
+.install-wizard .requirements .second-column .edit-view-form-item-div {
+    display: none;
+}
+
+
+.install-wizard .edit-view-form-item-div .edit-view-form-item-label-div {
+    background: none repeat scroll 0 0 #375a7c;
+    border-right: 2px solid #ae0000;
+    float: left;
+    height: 31px;
+    margin-right: 10px;
+}
+
+.install-wizard .edit-view-form-item-div .edit-view-form-item-label-div-first-row {
+    border-top-left-radius: 5px;
+}
+
+.install-wizard .requirements, .install-wizard .databaseConfig, .install-wizard .systemSettings, .install-wizard .company, .install-wizard .user {
+    width: 96%;
+    margin: 0 auto;
+}
+
+.install-wizard .requirements .s-header, .install-wizard .requirements .s-body, .install-wizard .requirements .s-label, .install-wizard .requirements .s-require  {
+    width: 100%;
+    clear: both;
+}
+
+.install-wizard .requirements .s-require {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+
+.install-wizard .requirements .s-require .all-ok {
+    background: none repeat scroll 0 0 #ffffff;
+    float: left;
+    height: 60px;
+    line-height: 60px;
+    width: 100%;
+    color: #375a7c;
+    font-weight: bold;
+}
+
+.install-wizard .license, .install-wizard .databaseConfig,
+.install-wizard .user, .install-wizard .company,
+.install-wizard .systemSettings
+{
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.install-wizard .edit-view-form-item-label-div {
+    width: 49%;
+}
+
+/*.install-wizard .requirements .edit-view-form-item-label-div {*/
+    /*width: 400px;*/
+/*}*/
+
+.install-wizard .first-column {
+    /*border: 1px solid #C7C7C7;*/
+    border-radius: 5px 5px 5px 5px;
+    /*float: left;*/
+    /*width: 48%;*/
+    /*margin-bottom: 5px;*/
+}
+
+.install-wizard .fifth-column {
+    margin-top: 10px;
+}
+
+.install-wizard .edit-view-form-item-div .edit-view-form-item-label {
+    color: #ffffff;
+    float: right;
+    margin-left: 5px;
+    margin-top: 5px;
+    min-width: 135px;
+    padding-right: 7px;
+    text-align: right;
+}
+
+.install-wizard .edit-view-form-item-div .edit-view-form-item-input-div {
+    float: left;
+    margin-right: 5px;
+    margin-top: 4px;
+    width: 49%;
+    height: 100%;
+    text-align: left;
+}
+
+.install-wizard .edit-view-form-item-div .edit-view-form-item-input-div span.custom-t-text {
+    display: inline-block;
+    float: left;
+    width: 100%;
+    height: 100%;
+    text-align: left;
+    word-break: break-all;
 }
 
 progress::-webkit-progress-bar {
@@ -159,7 +317,7 @@ progress::-moz-progress-bar {
     top: -25px;
 }
 
-.wizard .logo {
+.wizard .logo, .install-wizard .logo {
     background: url("../../global/widgets/ribbon/icons/wizard2-35x35.png");
     width: 35px;
     height: 35px;
@@ -173,12 +331,59 @@ progress::-moz-progress-bar {
     width: 100%;
 }
 
-.wizard .wizard-label {
+.install-wizard .content {
+    /*height: 453px;*/
+}
+
+.wizard .install-content {
+    top: 70px;
+}
+
+.install-wizard .install-content {
+    /*position: relative;*/
+    /*top: 10px;*/
+}
+
+.install-wizard .install-content .dataWarning {
+    background-color: #FFFF00;
+    color: #000;
+    text-align: center;
+    padding: 5px;
+}
+
+.install-wizard .install-content .dataError {
+    background-color: #FF0000;
+    color: #000;
+    text-align: center;
+    /*padding: 5px;*/
+}
+
+.install-wizard .content-handle-btn {
+    /*margin-top: 30px;*/
+    /*margin-bottom: 10px;*/
+    height: 50px;
+    padding-top: 30px;
+}
+
+.wizard .wizard-label, .install-wizard .wizard-label {
     font-weight: bold;
     display: block;
     margin-bottom: 15px;
     margin-top: 10px;
     clear: both;
+}
+
+.wizard .step-title .wizard-label, .wizard .step-tip {
+    font-weight: normal;
+}
+
+.install-wizard .step-title .wizard-label, .install-wizard .step-tip {
+    font-weight: normal;
+}
+
+.wizard .wizard-label p, .install-wizard .wizard-label p {
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 .wizard .wizard-acombobox-div {
@@ -249,3 +454,59 @@ progress::-moz-progress-bar {
     width: 400;
     height: 300;
 }
+
+
+
+
+.wizard-content {
+    display: none;
+}
+
+
+.content .wizard-content {
+    display: block;
+    margin: 0 auto;
+    width: 50%;
+    height: 100%;
+    padding-top: 10px;
+}
+
+.wizard-content .wizard-item {
+    width: 100%;
+    height: 30px;
+    line-height: 30px;
+}
+
+.wizard-content .wizard-item .wizard-item-label {
+    float: left;
+    width: 40%;
+}
+
+
+.wizard-content .wizard-item .wizard-item-label span {
+    float: right;
+    margin-left: 5px;
+    margin-right: 7px;
+    text-align: right;
+}
+
+
+.wizard-content .wizard-item .wizard-item-widget {
+    float: left;
+    width: 60%;
+    text-align: left;
+    height: 26px;
+    line-height: 26px;
+    padding-top: 4px;
+
+}
+
+
+.wizard .progress-bar {
+    border-bottom: 1px solid #999999;
+    position: absolute;
+    top: 10px;
+    width: 100%;
+}
+
+

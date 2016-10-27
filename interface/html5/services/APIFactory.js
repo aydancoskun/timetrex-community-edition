@@ -5,6 +5,7 @@ var APIFactory = (function() {
 	var api_path_map = {
 
 		'APICurrency': 'services/core/APICurrency',
+		'APICurrencyRate': 'services/core/APICurrencyRate',
 		'APIUserPreference': 'services/users/APIUserPreference',
 		'APIDate': 'services/APIDate',
 		'APIPermission': 'services/core/APIPermission',
@@ -33,6 +34,7 @@ var APIFactory = (function() {
 		'APIJob': 'services/job/APIJob',
 		'APIJobGroup': 'services/job/APIJobGroup',
 		'APIJobItem': 'services/job_item/APIJobItem',
+		'APIJobItemAmendment': 'services/job_item_amendment/APIJobItemAmendment',
 		'APIJobItemGroup': 'services/job_item/APIJobItemGroup',
 		'APIUserContact': 'services/users/APIUserContact',
 		'APIEthnicGroup': 'services/users/APIEthnicGroup',
@@ -62,6 +64,7 @@ var APIFactory = (function() {
 		'APIOtherField': 'services/core/APIOtherField',
 		'APIStation': 'services/company/APIStation',
 		'APIPayStub': 'services/payroll/APIPayStub',
+		'APIPayStubEntry': 'services/payroll/APIPayStubEntry',
 		'APIPayStubAmendment': 'services/payroll/APIPayStubAmendment',
 		'APIRecurringPayStubAmendment': 'services/payroll/APIRecurringPayStubAmendment',
 		'APIPayStubEntryAccount': 'services/payroll/APIPayStubEntryAccount',
@@ -69,8 +72,15 @@ var APIFactory = (function() {
 		'APIUserExpense': 'services/payroll/APIUserExpense',
 		'APIMealPolicy': 'services/policy/APIMealPolicy',
 		'APIBreakPolicy': 'services/policy/APIBreakPolicy',
+		'APIPayCode': 'services/policy/APIPayCode',
+		'APIPayFormulaPolicy': 'services/policy/APIPayFormulaPolicy',
+		'APIContributingPayCodePolicy': 'services/policy/APIContributingPayCodePolicy',
+		'APIContributingShiftPolicy': 'services/policy/APIContributingShiftPolicy',
+		'APIRegularTimePolicy': 'services/policy/APIRegularTimePolicy',
 		'APIOvertimePolicy': 'services/policy/APIOvertimePolicy',
+		'APIAccrualPolicyAccount': 'services/policy/APIAccrualPolicyAccount',
 		'APIAccrualPolicy': 'services/policy/APIAccrualPolicy',
+		'APIAccrualPolicyUserModifier': 'services/policy/APIAccrualPolicyUserModifier',
 		'APIRecurringHoliday': 'services/policy/APIRecurringHoliday',
 		'APIHolidayPolicy': 'services/policy/APIHolidayPolicy',
 		'APIHoliday': 'services/policy/APIHoliday',
@@ -158,7 +168,8 @@ var APIFactory = (function() {
 		'APIDocumentAttachment': 'services/document/APIDocumentAttachment',
 		'APINotification': 'services/core/APINotification',
 		'APIMisc': 'services/core/APIMisc',
-		'APICompanyGenericTag': 'services/company/APICompanyGenericTag'
+		'APICompanyGenericTag': 'services/company/APICompanyGenericTag',
+		'APIInstall': 'services/install/APIInstall'
 
 
 	};

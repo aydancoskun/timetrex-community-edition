@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 6681 $
- * $Id: EthnicGroupFactory.class.php 6681 2012-04-25 04:08:29Z ipso $
- * $Date: 2012-04-25 12:08:29 +0800 (Wed, 25 Apr 2012) $
- */
+
 
 /**
  * @package Modules\Users

@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2095 $
- * $Id: Sort.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
- */
+
 
 /**
  * @package Modules\Report
@@ -115,82 +111,31 @@ class PayrollExportReport extends TimesheetSummaryReport {
 								);
 				break;
 			case 'export_policy':
-				$static_columns = array();
-
-				$columns = array(					'-0010-regular_time' => TTi18n::gettext('Regular Time'),
-													);
-
-				$columns = Misc::prependArray( $static_columns, $columns);
-
-				//Get all Overtime policies.
-				$otplf = TTnew( 'OverTimePolicyListFactory' );
-				$otplf->getByCompanyId( $this->getUserObject()->getCompany() );
-				if ( $otplf->getRecordCount() > 0 ) {
-					foreach ($otplf as $otp_obj ) {
-						$otp_columns['-0020-over_time_policy-'.$otp_obj->getId()] = TTi18n::gettext('Overtime').': '.$otp_obj->getName();
+				$retval = array();
+				$pclf = TTnew( 'PayCodeListFactory' );
+				$pclf->getByCompanyId( $this->getUserObject()->getCompany() );
+				if ( $pclf->getRecordCount() > 0 ) {
+					foreach( $pclf as $pc_obj ) {
+						//Collect PAID pay codes so we can create PAID TIME columns.
+						$retval['-3190-pay_code-'.$pc_obj->getId()] = $pc_obj->getName();
 					}
-
-					$columns = array_merge( $columns, $otp_columns);
 				}
-
-				//Get all Premium policies.
-				$pplf = TTnew( 'PremiumPolicyListFactory' );
-				$pplf->getByCompanyId( $this->getUserObject()->getCompany() );
-				if ( $pplf->getRecordCount() > 0 ) {
-					foreach ($pplf as $pp_obj ) {
-						$pp_columns['-0030-premium_policy-'.$pp_obj->getId()] = TTi18n::gettext('Premium').': '.$pp_obj->getName();
-					}
-
-					$columns = array_merge( $columns, $pp_columns);
-				}
-
-
-				//Get all Absence Policies.
-				$aplf = TTnew( 'AbsencePolicyListFactory' );
-				$aplf->getByCompanyId( $this->getUserObject()->getCompany() );
-				if ( $aplf->getRecordCount() > 0 ) {
-					foreach ($aplf as $ap_obj ) {
-						$ap_columns['-0040-absence_policy-'.$ap_obj->getId()] = TTi18n::gettext('Absence').': '.$ap_obj->getName();
-					}
-
-					$columns = array_merge( $columns, $ap_columns);
-				}
-
-				$retval = $columns;
 				break;
 			case 'default_hour_codes':
 				$export_type = $this->getOptions('export_type');
-				$export_policy = Misc::trimSortPrefix( $this->getOptions('export_policy') );
 
-				foreach( $export_type as $type => $name ) {
-					switch( strtolower($type) ) {
-						case 'paychex_online':
-							foreach( $export_policy as $id => $name ) {
-								if ( strpos( $id, 'regular') !== FALSE ) {
-									$retval[$type]['columns'][$id]['hour_code'] = 'Regular';
-								} elseif ( strpos( $id, 'over_time') !== FALSE ) {
-									$retval[$type]['columns'][$id]['hour_code'] = 'Overtime';
-								} elseif ( strpos( $id, 'absence') !== FALSE ) {
-									$retval[$type]['columns'][$id]['hour_code'] = 'Absence';
-								}
-							}
-
-							break;
-						default:
+				$retval = array();
+				$pclf = TTnew( 'PayCodeListFactory' );
+				$pclf->getByCompanyId( $this->getUserObject()->getCompany() );
+				if ( $pclf->getRecordCount() > 0 ) {
+					foreach( $pclf as $pc_obj ) {
+						foreach( $export_type as $type => $name ) {
 							if ( $type === 0 ) {
 								continue;
 							}
 
-							foreach( $export_policy as $id => $name ) {
-								if ( strpos( $id, 'regular') !== FALSE ) {
-									$retval[$type]['columns'][$id]['hour_code'] = 'REG';
-								} elseif ( strpos( $id, 'over_time') !== FALSE ) {
-									$retval[$type]['columns'][$id]['hour_code'] = 'OT';
-								} elseif ( strpos( $id, 'absence') !== FALSE ) {
-									$retval[$type]['columns'][$id]['hour_code'] = 'ABS';
-								}
-							}
-						break;
+							$retval[$type]['columns']['pay_code-'.$pc_obj->getId()]['hour_code'] = $pc_obj->getCode();
+						}
 					}
 				}
 				break;
@@ -572,8 +517,8 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 					foreach( $setup_data['adp']['columns'] as $column_id => $column_data ) {
 						$column_data = Misc::trimSortPrefix( $column_data, TRUE );
-						Debug::Text('ADP Column ID: '. $column_id .' Hour Column: '. $column_data['hour_column'] .' Code: '. $column_data['hour_code'], __FILE__, __LINE__, __METHOD__, 10);
-						if ( isset( $row[$column_id] ) AND $column_data['hour_column'] != '0' ) {
+						if ( isset( $row[$column_id.'_time'] ) AND $column_data['hour_column'] != '0' ) {
+							Debug::Text('ADP Column ID: '. $column_id .' Hour Column: '. $column_data['hour_column'] .' Code: '. $column_data['hour_code'], __FILE__, __LINE__, __METHOD__, 10);
 							foreach( $export_column_map as $export_column_id => $export_column_name ) {
 								Debug::Arr($row, 'Row: Column ID: '. $column_id .' Export Column ID: '. $export_column_id .' Name: '. $export_column_name, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -581,9 +526,9 @@ class PayrollExportReport extends TimesheetSummaryReport {
 										AND !in_array( $export_column_id, array('company_code', 'batch_id', 'temp_dept', 'employee_number')) ) {
 									if ( (int)substr( $export_column_id, 0, 1 ) > 0 ) {
 										$tmp_row[$column_data['hour_column'].'_code'] = $column_data['hour_code'];
-										$tmp_row[$column_data['hour_column'].'_amount'] = TTDate::getTimeUnit( $row[$column_id], 20 );
+										$tmp_row[$column_data['hour_column'].'_amount'] = TTDate::getTimeUnit( $row[$column_id.'_time'], 20 );
 									} else {
-										$tmp_row[$export_column_id] = TTDate::getTimeUnit( $row[$column_id], 20 );
+										$tmp_row[$export_column_id] = TTDate::getTimeUnit( $row[$column_id.'_time'], 20 );
 									}
 
 									//Break out every column onto its own row, that way its easier to handle multiple columns of the same type.
@@ -657,10 +602,10 @@ class PayrollExportReport extends TimesheetSummaryReport {
 						if ( isset($static_export_data_map[$column_id]) ) {
 							//Copy over static config values like company code/batch_id.
 							$tmp_rows[$i][$column_id] = $static_export_data_map[$column_id];
-						} elseif( isset($row[$column_id]) ) {
+						} elseif( isset($row[$column_id.'_time']) ) {
 							if ( isset($static_export_column_map[$column_id]) ) {
 								//Copy over employee_number. (File #)
-								$tmp_rows[$i][$column_id] = $row[$column_id];
+								$tmp_rows[$i][$column_id] = $row[$column_id.'_time'];
 							}
 						}
 					}
@@ -670,8 +615,8 @@ class PayrollExportReport extends TimesheetSummaryReport {
 							$tmp_rows[$i][$column_name] = 0;
 						}
 
-						if ( isset($row[$column_id]) ) {
-							$tmp_rows[$i][$column_name] += $row[$column_id];
+						if ( isset($row[$column_id.'_time']) ) {
+							$tmp_rows[$i][$column_name] += $row[$column_id.'_time'];
 						}
 						$tmp_rows[$i][$column_name.'_code']	 = $column_name;
 					}
@@ -741,7 +686,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$data = NULL;
 				foreach($rows as $row) {
 					foreach( $setup_data['paychex_preview_advanced_job']['columns'] as $column_id => $column_data ) {
-						if ( isset( $row[$column_id] ) AND trim($column_data['hour_code']) != '' ) {
+						if ( isset( $row[$column_id.'_time'] ) AND trim($column_data['hour_code']) != '' ) {
 							$data .= str_pad($row['employee_number'], 6, ' ', STR_PAD_LEFT);
 							$data .= str_pad('', 31, ' ', STR_PAD_LEFT); //Blank space.
 							if ( isset($setup_data['paychex_preview_advanced_job']['job_columns']) AND is_array($setup_data['paychex_preview_advanced_job']['job_columns']) ) {
@@ -767,7 +712,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 							} else {
 								$data .= str_pad( '', 9, 0, STR_PAD_LEFT); //Override rate
 							}
-							$data .= str_pad( TTDate::getTimeUnit( $row[$column_id], 20 ), 8, 0, STR_PAD_LEFT);
+							$data .= str_pad( TTDate::getTimeUnit( $row[$column_id.'_time'], 20 ), 8, 0, STR_PAD_LEFT);
 
 							//Break out time by day.
 							$data .= str_pad( TTDate::getYear($row['time_stamp']), 4, 0, STR_PAD_LEFT); //Year, based on time_stamp epoch column
@@ -808,10 +753,10 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$data = NULL;
 				foreach($rows as $row) {
 					foreach( $setup_data['paychex_preview']['columns'] as $column_id => $column_data ) {
-						if ( isset( $row[$column_id] ) AND trim($column_data['hour_code']) != '' ) {
+						if ( isset( $row[$column_id.'_time'] ) AND trim($column_data['hour_code']) != '' ) {
 							$data .= str_pad($row['employee_number'], 6, ' ', STR_PAD_LEFT);
 							$data .= str_pad('E'. str_pad( trim($column_data['hour_code']), 2, ' ', STR_PAD_RIGHT), 47, ' ', STR_PAD_LEFT);
-							$data .= str_pad( str_pad( TTDate::getTimeUnit( $row[$column_id], 20 ), 8, 0, STR_PAD_LEFT), 17, ' ', STR_PAD_LEFT)."\n";
+							$data .= str_pad( str_pad( TTDate::getTimeUnit( $row[$column_id.'_time'], 20 ), 8, 0, STR_PAD_LEFT), 17, ' ', STR_PAD_LEFT)."\n";
 						}
 					}
 				}
@@ -847,11 +792,11 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					//Combine all hours from the same code together.
 					foreach( $setup_data['paychex_online']['columns'] as $column_id => $column_data ) {
 						$hour_code = trim($column_data['hour_code']);
-						if ( isset( $row[$column_id] ) AND $hour_code != '' ) {
+						if ( isset( $row[$column_id.'_time'] ) AND $hour_code != '' ) {
 							if ( !isset($tmp_hour_codes[$hour_code]) ) {
 								$tmp_hour_codes[$hour_code] = 0;
 							}
-							$tmp_hour_codes[$hour_code] = bcadd( $tmp_hour_codes[$column_data['hour_code']], $row[$column_id] ); //Use seconds for math here.
+							$tmp_hour_codes[$hour_code] = bcadd( $tmp_hour_codes[$column_data['hour_code']], $row[$column_id.'_time'] ); //Use seconds for math here.
 						}
 					}
 
@@ -879,12 +824,12 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$export_column_map = array('employee_number' => '', 'transaction_code' => '', 'hour_code' => '', 'hours' => '');
 				foreach($rows as $row) {
 					foreach( $setup_data['millenium']['columns'] as $column_id => $column_data ) {
-						if ( isset( $row[$column_id] ) AND trim($column_data['hour_code']) != '' ) {
+						if ( isset( $row[$column_id.'_time'] ) AND trim($column_data['hour_code']) != '' ) {
 							$tmp_rows[] = array(
 												'employee_number' => $row['employee_number'],
 												'transaction_code' => 'E',
 												'hour_code' => trim($column_data['hour_code']),
-												'hours' => TTDate::getTimeUnit( $row[$column_id], 20 )
+												'hours' => TTDate::getTimeUnit( $row[$column_id.'_time'], 20 )
 												);
 						}
 					}
@@ -910,14 +855,14 @@ class PayrollExportReport extends TimesheetSummaryReport {
 											'hour_code' => '', 'value' => '', 'distribution' => '', 'rate' => '', 'premium' => '', 'day' => '', 'pay_period' => '');
 				foreach($rows as $row) {
 					foreach( $setup_data['ceridian_insync']['columns'] as $column_id => $column_data ) {
-						if ( isset( $row[$column_id] ) AND trim($column_data['hour_code']) != '' ) {
+						if ( isset( $row[$column_id.'_time'] ) AND trim($column_data['hour_code']) != '' ) {
 							$tmp_rows[] = array(
 												'employer_number' => $setup_data['ceridian_insync']['employer_number'], //Employer No./Payroll Number
 												'import_type_id' => 'COSTING', //This can change, must be configurable.
 												'employee_number' => str_pad( $row['employee_number'], 9, '0', STR_PAD_LEFT),
 												'check_type' => 'REG',
 												'hour_code' => trim($column_data['hour_code']),
-												'value' => TTDate::getTimeUnit( $row[$column_id], 20 ),
+												'value' => TTDate::getTimeUnit( $row[$column_id.'_time'], 20 ),
 												'distribution' => NULL,
 												'rate' => NULL, //This overrides whats in ceridian and seems to cause problems.
 												//'rate' => ( isset($row[$column_id.'_hourly_rate']) ) ? $row[$column_id.'_hourly_rate'] : NULL,
@@ -958,7 +903,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 				foreach($rows as $row) {
 					foreach( $setup_data['quickbooks']['columns'] as $column_id => $column_data ) {
-						if ( isset( $row[$column_id] ) AND trim($column_data['hour_code']) != '' ) {
+						if ( isset( $row[$column_id.'_time'] ) AND trim($column_data['hour_code']) != '' ) {
 							//Make sure employee name is in format: LastName, FirstName MiddleInitial
 							$tmp_employee_name = $row['last_name'].', '. $row['first_name'];
 							if ( isset($row['middle_name']) AND strlen($row['middle_name']) > 0 ) {
@@ -978,7 +923,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 								$job = $row[$setup_data['quickbooks']['job']];
 							}
 
-							$data .= "TIMEACT\t". date('n/j/y', $row['pay_period_end_date'])."\t". $job ."\t". $tmp_employee_name ."\t". $item ."\t". trim($column_data['hour_code']) ."\t".  TTDate::getTimeUnit( $row[$column_id], 10 ) ."\t". $proj ."\t\tY\t0\n";
+							$data .= "TIMEACT\t". date('n/j/y', $row['pay_period_end_date'])."\t". $job ."\t". $tmp_employee_name ."\t". $item ."\t". trim($column_data['hour_code']) ."\t".  TTDate::getTimeUnit( $row[$column_id.'_time'], 10 ) ."\t". $proj ."\t\tY\t0\n";
 							unset($tmp_employee_name);
 						}
 					}
@@ -1007,7 +952,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				foreach($rows as $row) {
 					foreach( $setup_data['surepayroll']['columns'] as $column_id => $column_data ) {
 
-						if ( isset( $row[$column_id] ) AND trim($column_data['hour_code']) != '' ) {
+						if ( isset( $row[$column_id.'_time'] ) AND trim($column_data['hour_code']) != '' ) {
 							//Debug::Arr($column_data, 'Output2', __FILE__, __LINE__, __METHOD__, 10);
 							$tmp_rows[] = array(
 												'pay_period_end_date' => date('m/d/Y', $row['pay_period_end_date']),
@@ -1015,7 +960,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 												'last_name' => $row['last_name'],
 												'first_name' => $row['first_name'],
 												'hour_code' => trim($column_data['hour_code']),
-												'value' => TTDate::getTimeUnit( $row[$column_id], 20 ),
+												'value' => TTDate::getTimeUnit( $row[$column_id.'_time'], 20 ),
 												);
 						}
 					}
@@ -1038,7 +983,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				foreach($rows as $row) {
 					foreach( $setup_data['chris21']['columns'] as $column_id => $column_data ) {
 
-						if ( isset( $row[$column_id] ) AND trim($column_data['hour_code']) != '' ) {
+						if ( isset( $row[$column_id.'_time'] ) AND trim($column_data['hour_code']) != '' ) {
 							//Debug::Arr($column_data, 'Output2: ID: '. $column_id, __FILE__, __LINE__, __METHOD__, 10);
 							$data .= str_repeat(' ', 8);															//8 digits Blank
 							$data .= str_pad( substr( $row['employee_number'], 0, 7), 7, ' ', STR_PAD_RIGHT);		//7 digits
@@ -1048,7 +993,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 							$data .= str_pad( substr( trim($column_data['hour_code']), 0, 4), 4, ' ', STR_PAD_RIGHT);//4 digits
 							$data .= '0000';																		//4 digits HOURS field, always be 0, use SIGNED_HOURS instead.
 							$data .= str_repeat(' ', 4);															//CC_CODE: 4 digits Blank
-							$data .= str_pad( str_replace('.', '', TTDate::getTimeUnit( $row[$column_id], 20 ) ), 6, 0, STR_PAD_LEFT).'+'; //SIGNED_HOURS: Hours without decimal padded to 6 digits, with '+' on the end.
+							$data .= str_pad( str_replace('.', '', TTDate::getTimeUnit( $row[$column_id.'_time'], 20 ) ), 6, 0, STR_PAD_LEFT).'+'; //SIGNED_HOURS: Hours without decimal padded to 6 digits, with '+' on the end.
 							//$data .= '+000000000';																	//Filler: Redefintion of SIGNED_HOURS.
 							$data .= '000000000';																	//RATE: 9 chars
 							$data .= str_repeat(' ', 20);															//ACCT_NO: 20 chars
@@ -1165,11 +1110,11 @@ class PayrollExportReport extends TimesheetSummaryReport {
 						}
 						
 						$hour_code_map[$hour_code][$column_id] = NULL;
-						if ( isset( $row[$column_id] ) AND $hour_code != '' ) {
+						if ( isset( $row[$column_id.'_time'] ) AND $hour_code != '' ) {
 							if ( !isset($tmp_hour_codes[$hour_code]) ) {
 								$tmp_hour_codes[$hour_code] = 0;
 							}
-							$tmp_hour_codes[$hour_code] = bcadd( $tmp_hour_codes[$hour_code], $row[$column_id] ); //Use seconds for math here.
+							$tmp_hour_codes[$hour_code] = bcadd( $tmp_hour_codes[$hour_code], $row[$column_id.'_time'] ); //Use seconds for math here.
 						}
 					}
 
@@ -1258,12 +1203,12 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 					//Combine all hours from the same code together.
 					foreach( $setup_data['csv']['columns'] as $column_id => $column_data ) {
-						$hour_code = trim($column_data['hour_code']);
-						if ( isset( $row[$column_id] ) AND $hour_code != '' ) {
+						$hour_code = ( isset($column_data['hour_code']) ) ? trim($column_data['hour_code']) : '';
+						if ( isset( $row[$column_id.'_time'] ) AND $hour_code != '' ) {
 							if ( !isset($tmp_hour_codes[$hour_code]) ) {
 								$tmp_hour_codes[$hour_code] = 0;
 							}
-							$tmp_hour_codes[$hour_code] = bcadd( $tmp_hour_codes[$column_data['hour_code']], $row[$column_id] ); //Use seconds for math here.
+							$tmp_hour_codes[$hour_code] = bcadd( $tmp_hour_codes[$column_data['hour_code']], $row[$column_id.'_time'] ); //Use seconds for math here.
 						}
 					}
 
@@ -1380,14 +1325,14 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					//Combine all hours from the same code together.
 					foreach( $setup_data['csv_advanced']['columns'] as $column_id => $column_data ) {
 						$hour_code = trim($column_data['hour_code']);
-						if ( isset( $row[$column_id] ) AND $hour_code != '' ) {
+						if ( isset( $row[$column_id.'_time'] ) AND $hour_code != '' ) {
 							if ( !isset($tmp_hour_codes[$hour_code]) ) {
 								$tmp_hour_codes[$hour_code]['hours'] = 0;
 							}
 
 							//FIXME: Change array so the key is $hour_code.$hourly_rate, then put hour_code in the array value part.
 							//That way we can loop through each hour_code/hourly_rate combination and make duplicate lines if multiple rates exist.
-							$tmp_hour_codes[$hour_code]['hours'] = bcadd( $tmp_hour_codes[$column_data['hour_code']]['hours'], $row[$column_id] ); //Use seconds for math here.
+							$tmp_hour_codes[$hour_code]['hours'] = bcadd( $tmp_hour_codes[$column_data['hour_code']]['hours'], $row[$column_id.'_time'] ); //Use seconds for math here.
 							$tmp_hour_codes[$hour_code]['rate'] = ( isset($row[$column_id.'_hourly_rate']) ) ? $row[$column_id.'_hourly_rate'] : NULL;
 						}
 					}

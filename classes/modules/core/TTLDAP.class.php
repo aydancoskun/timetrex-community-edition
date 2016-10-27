@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2564 $
- * $Id: Option.class.php 2564 2009-05-22 22:15:39Z ipso $
- * $Date: 2009-05-22 15:15:39 -0700 (Fri, 22 May 2009) $
- */
+
 
 /**
  * @package Core

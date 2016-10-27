@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 1378 $
- * $Id: UserWageFactory.class.php 1378 2007-11-02 22:09:17Z ipso $
- * $Date: 2007-11-02 15:09:17 -0700 (Fri, 02 Nov 2007) $
- */
+
 
 
 /**
@@ -86,7 +82,11 @@ class UserIdentificationFactory extends Factory {
 	}
 
 	function getUser() {
-		return (int)$this->data['user_id'];
+		if ( isset($this->data['user_id']) ) {
+			return (int)$this->data['user_id'];
+		}
+		
+		return FALSE;
 	}
 	function setUser($id) {
 		$id = trim($id);

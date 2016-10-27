@@ -615,7 +615,6 @@
 
 				if ( longest_words ) {
 					var width_test = $( '<span id="width_test" />' );
-//					width_test.css( 'font-family', "'Lucida Grande', 'Lucida Sans', Arial, sans-serif" );
 					width_test.css( 'font-size', '11' );
 					width_test.css( 'font-weight', 'normal' );
 					$( 'body' ).append( width_test );
@@ -816,7 +815,7 @@
 			} else {
 
 				if ( new_height != default_height ) {
-					a_dropdown_this.parent().css( 'top', (top_offset - new_height - 100) );
+					a_dropdown_this.parent().css( 'top', (top_offset - new_height - 125) );
 				} else {
 					a_dropdown_this.parent().css( 'top', (top_offset - new_height - 125) );
 				}
@@ -868,6 +867,7 @@
 					height: default_height,
 					colNames: [],
 					rowNum: 10000,
+					keep_scroll_place: true,
 					ondblClickRow: a_dropdown_this.onUnSelectGridDoubleClick,
 					colModel: val,
 					multiselect: allow_multiple_selection,
@@ -981,6 +981,7 @@
 				multiselect: true,
 				multiboxonly: true,
 				viewrecords: true,
+				keep_scroll_place: true,
 				editurl: 'clientArray',
 				resizeStop: function() {
 					a_dropdown_this.resizeSelectSearchInputs();
@@ -1010,6 +1011,7 @@
 
 			var search_div = $( this ).find( '.select-grid-search-div' );
 			var first_column_width = 0;
+			var search_input_array = [];
 			for ( var i = 0; i < len; i++ ) {
 				var header = select_grid_header_array[i];
 
@@ -1027,7 +1029,7 @@
 				search_input.ASearchInput( {column_model: header.getColumnModel()} ); //Make it as ASearchInout Widget;
 
 				search_div.append( search_input );
-
+				search_input_array.push( search_input );
 				//Set cached seach_input data back, usually in navigation_mode
 				if ( select_grid_search_map ) {
 					search_input.setFilter( select_grid_search_map );
@@ -1058,6 +1060,22 @@
 				} )
 
 			}
+
+			var close_btn = $( '<button class="close-btn"></button>' );
+			search_div.append( close_btn );
+			close_btn.click( function() {
+
+				select_grid_search_map = {};
+				parent_a_combo_box.setCachedSelectGridSearchInputsFilter( select_grid_search_map );
+				parent_a_combo_box.onADropDownSearch();
+
+				for ( var i = 0; i < search_input_array.length; i++ ) {
+
+					var s_i = search_input_array[i];
+					s_i.clearValue();
+				}
+
+			} );
 		}
 
 		this.resizeUnSelectSearchInputs = function() {
@@ -1094,12 +1112,12 @@
 				}
 			}
 
-			//grid header row
+//			//grid header row
 			unselect_grid.parent().parent().parent().find( '.ui-jqgrid-hdiv' ).css( 'width', unselect_grid.width() + 18 );
 			unselect_grid.parent().parent().parent().parent().css( 'width', unselect_grid.width() + 18 );
 			unselect_grid.parent().parent().parent().css( 'width', unselect_grid.width() + 18 );
 			unselect_grid.parent().parent().css( 'width', unselect_grid.width() + 18 );
-			unselect_grid_search_div.css( 'width', unselect_grid.width() + 10 );
+			unselect_grid_search_div.css( 'width', unselect_grid.width() + 15 );
 
 		}
 
@@ -1130,7 +1148,7 @@
 			select_grid.parent().parent().parent().parent().css( 'width', select_grid.width() + 18 );
 			select_grid.parent().parent().parent().css( 'width', select_grid.width() + 18 );
 			select_grid.parent().parent().css( 'width', select_grid.width() + 18 );
-			select_grid_search_div.css( 'width', select_grid.width() + 10 );
+			select_grid_search_div.css( 'width', select_grid.width() + 15 );
 
 		}
 
@@ -1139,6 +1157,7 @@
 
 			var search_div = $( this ).find( '.unselect-grid-search-div' );
 			var first_column_width = 0;
+			var search_input_array = [];
 			for ( var i = 0; i < len; i++ ) {
 				var header = unselect_grid_header_array[i];
 
@@ -1146,7 +1165,7 @@
 					first_column_width = header.getWidth();
 					continue;
 				} else if ( allow_multiple_selection && i === 1 ) {
-					var search_input = $( "<input type='text' class='search-input'>" );
+					var search_input = $( "<input type='text' class='search-input unselect-grid-search-input'>" );
 					search_input.css( 'width', header.getWidth() + first_column_width );
 				} else {
 					search_input = $( "<input type='text' class='search-input'>" );
@@ -1156,6 +1175,7 @@
 				search_input.ASearchInput( {column_model: header.getColumnModel()} ); //Make it as ASearchInout Widget;
 
 				search_div.append( search_input );
+				search_input_array.push( search_input );
 
 				//Set cached seach_input data back, unsualy in navigation_mode
 				if ( unselect_grid_search_map ) {
@@ -1182,6 +1202,23 @@
 				} )
 
 			}
+
+			var close_btn = $( '<button class="close-btn"></button>' );
+			search_div.append( close_btn );
+			close_btn.click( function() {
+
+				unselect_grid_search_map = {};
+				parent_a_combo_box.setCachedSearchInputsFilter( unselect_grid_search_map );
+				parent_a_combo_box.onADropDownSearch( 'unselect_grid' );
+
+				for ( var i = 0; i < search_input_array.length; i++ ) {
+
+					var s_i = search_input_array[i];
+					s_i.clearValue();
+				}
+
+			} );
+
 		}
 
 		//Set select item when not allow multiple selection
@@ -1204,16 +1241,17 @@
 		//Remove select items form allColumn array
 		this.setSelectGridData = function( val, searchResult ) {
 
-			if ( !val ) {
-				val = [];
-			}
-
 			if ( parent_a_combo_box && parent_a_combo_box.getAPI() ) {
 				val = Global.formatGridData( val, parent_a_combo_box.getAPI().key_name );
 			}
 
 			if ( Object.prototype.toString.call( static_source_data ) !== '[object Array]' || static_source_data.length < 1 ) {
 				static_source_data = [];
+			}
+
+			//Uncaught TypeError: Cannot read property 'length' of undefined
+			if ( !val ) {
+				val = [];
 			}
 
 			var all_columns = static_source_data.slice(); //Copy from Static data
@@ -1666,12 +1704,19 @@
 
 					select_grid.closest( '.ui-jqgrid-bdiv' ).scrollTop( scroll_position );
 				} else if ( event.originalEvent.dataTransfer.getData( 'Text' ) === 'un_select_grid' ) {
-					target_row_index = $this.rowIndex - 1;
-					var grid_selected_id_array = unselect_grid.jqGrid( 'getGridParam', 'selarrrow' );
-					var grid_selected_length = grid_selected_id_array.length;
-					if ( grid_selected_length > 0 ) {
-						a_dropdown_this.moveItems( true, grid_selected_id_array, target_row_index, $( $this ).attr( 'id' ) );
+
+					if ( !tree_mode ) {
+						target_row_index = $this.rowIndex - 1;
+						var grid_selected_id_array = unselect_grid.jqGrid( 'getGridParam', 'selarrrow' );
+						var grid_selected_length = grid_selected_id_array.length;
+						if ( grid_selected_length > 0 ) {
+							a_dropdown_this.moveItems( true, grid_selected_id_array, target_row_index, $( $this ).attr( 'id' ) );
+						}
+					} else {
+						var selectRow = unselect_grid.jqGrid( 'getGridParam', 'selrow' );
+						a_dropdown_this.moveItems( true, [selectRow] );
 					}
+
 				}
 
 			} );
@@ -1738,10 +1783,15 @@
 
 				var remain_count = unselect_grid.getGridParam( 'data' ).length;
 
-				end = (remain_count + start);
+				if ( remain_count === 0 ) {
+					end = 0;
+					start = 0;
+				} else {
+					end = (remain_count + start);
+					if ( start === 1 ) {
+						end = end - 1;
 
-				if ( start === 1 ) {
-					end = end - 1;
+					}
 				}
 
 				if ( totalRows ) {
@@ -1759,7 +1809,10 @@
 
 				total_display_span.text( $.i18n._( 'Displaying' ) + ' ' + totalInfo + ' ' + $.i18n._( 'Selected' ) + ': ' + selected_count );
 
-			} else {
+			}
+			else {
+
+				if ( end === 0 ) start = 0;
 				if ( totalRows ) {
 
 					//If there is manually added item
@@ -1810,8 +1863,6 @@
 
 		//Move items between 2 grids
 		this.moveItems = function( left_to_right, array, index, target_row_id ) {
-
-//			var len = array.length;
 			var added_items = [];
 			var removed_items = [];
 
@@ -1836,7 +1887,13 @@
 			if ( !Global.isSet( source_data[0].id ) ) {
 
 			} else {
-				for ( i = 0; i < array.length; i++ ) {
+				var last_item_index = null; //for drag order fixing when drag to empty space
+
+				if ( !Global.isSet( index ) ) {
+					array = array.reverse();
+				}
+
+				for ( var i = array.length - 1; i >= 0; i-- ) {
 					var selected_item_id = array[i];
 
 					for ( var j = 0; j < source_data.length; j++ ) {
@@ -1846,7 +1903,7 @@
 
 							if ( !tree_mode || !left_to_right ) { //Don't remove item from list if tree mode
 								source_grid.jqGrid( 'delRowData', selected_item_id );
-								i = i - 1;
+								i = i + 1;
 							}
 
 							if ( !tree_mode || left_to_right ) {
@@ -1854,8 +1911,8 @@
 									//Make sure only one item can be add to right when tree mode
 									var target_data_len = target_data.length;
 									var find = false;
-									for ( var i = 0; i < target_data_len; i++ ) {
-										var existed_item = target_data[i];
+									for ( var y = 0; y < target_data_len; y++ ) {
+										var existed_item = target_data[y];
 										if ( existed_item[key] === select_item[key] ) {
 											find = true;
 											break
@@ -1885,13 +1942,16 @@
 										target_grid.addRowData( selected_item_id, select_item, 'after', target_row_id );
 										target_data.splice( target_data.length - 1, 1 );
 										target_data.splice( index + 1, 0, select_item );
+
 									} else if ( index === -1 ) { // add to first row
 										target_grid.addRowData( selected_item_id, select_item, 'first' );
 										target_data.splice( target_data.length - 1, 1 );
 										target_data.unshift( select_item );
 									} else {
+
 										target_grid.addRowData( selected_item_id, select_item );
 										target_data[target_data.length - 1] = select_item; //
+
 									}
 
 								}
@@ -1905,6 +1965,7 @@
 
 			if ( !tree_mode ) {
 				if ( left_to_right ) {
+					target_grid.trigger( 'reloadGrid' );
 					a_dropdown_this.setGridColumnsWidth( select_grid );
 					a_dropdown_this.resizeSelectSearchInputs();
 				}
@@ -2350,13 +2411,30 @@
 
 			//Move all records from target grid to another
 			function cleanAllInGrid( target, left_to_right ) {
-				selectAllInGrid( target );
 
+				var finalArray = [];
 				if ( left_to_right ) {
-					right_arrow.trigger( 'click' );
+					var source_grid = unselect_grid;
+					var target_grid = select_grid;
+					var source_data = unselect_grid.getGridParam( 'data' );
+					var target_data = select_grid.getGridParam( 'data' );
 				} else {
-					left_arrow.trigger( 'click' );
+					source_grid = select_grid;
+					target_grid = unselect_grid;
+					source_data = select_grid.getGridParam( 'data' );
+					target_data = unselect_grid.getGridParam( 'data' );
 				}
+
+				finalArray = target_data.concat( source_data );
+
+				target_grid.clearGridData();
+				target_grid.setGridParam( {data: finalArray} );
+				target_grid.trigger( 'reloadGrid' );
+
+				source_grid.clearGridData();
+				source_grid.trigger( 'reloadGrid' );
+
+				a_dropdown_this.setTotalDisplaySpan();
 
 			}
 
@@ -2366,8 +2444,7 @@
 
 	};
 
-	$.fn.ADropDown.defaults = {
+	$.fn.ADropDown.defaults = {};
 
-	};
-
-})( jQuery );
+})
+( jQuery );

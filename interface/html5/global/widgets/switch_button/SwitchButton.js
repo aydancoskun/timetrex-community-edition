@@ -27,10 +27,15 @@
 		}
 
 		this.getValue = function() {
-			return    btn.hasClass( 'selected' ) ? true : false;
+			return btn.hasClass( 'selected' ) ? true : false;
 		}
 
 		this.setValue = function( val ) {
+
+			//Error: TypeError: btn is null in https://ondemand1.timetrex.com/interface/html5/global/widgets/switch_button/SwitchButton.js?v=8.0.0-20141230-130626 line 35 
+			if ( !btn ) {
+				return;
+			}
 
 			btn.removeClass( 'selected' );
 
@@ -74,9 +79,7 @@
 
 	};
 
-	$.fn.SwitchButton.defaults = {
-
-	};
+	$.fn.SwitchButton.defaults = {};
 
 })( jQuery );
 

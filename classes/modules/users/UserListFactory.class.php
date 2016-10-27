@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 15145 $
- * $Id: UserListFactory.class.php 15145 2014-11-13 22:42:19Z mikeb $
- * $Date: 2014-11-13 14:42:19 -0800 (Thu, 13 Nov 2014) $
- */
+
 
 /**
  * @package Modules\Users
@@ -295,6 +291,30 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	function getByEmailIsValidKey( $key ) {
+		$key = trim($key);
+
+		if ( $this->Validator->isRegEx('email', $key, NULL, '/^[a-z0-9]{32}$/i' ) == FALSE ) {
+			return FALSE;
+		}
+
+		$ph = array(
+					'key1' => $key,
+					'key2' => $key,
+					);
+
+		$query = '
+					select	*
+					from	'. $this->getTable() .'
+					where
+						( work_email_is_valid_key = ? OR home_email_is_valid_key = ? )
+						AND deleted = 0';
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
 	function getByPasswordResetKey( $key ) {
 		$key = trim($key);
 
@@ -525,64 +545,6 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND group_id = ?
-						AND deleted = 0';
-
-		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
-
-		$this->ExecuteSQL( $query, $ph );
-
-		return $this;
-	}
-
-	function getByCompanyIDAndIButtonId($company_id, $id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
-		}
-
-		if ( $id == '') {
-			return FALSE;
-		}
-
-		$ph = array(
-					'company_id' => $company_id,
-					'id' => $id,
-					);
-
-		$query = '
-					select	*
-					from	'. $this->getTable() .'
-					where	company_id = ?
-						AND ibutton_id = ?
-						AND deleted = 0';
-
-		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
-
-		$this->ExecuteSQL( $query, $ph );
-
-		return $this;
-	}
-
-	function getByCompanyIDAndRFId($company_id, $id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
-		}
-
-		if ( $id == '') {
-			return FALSE;
-		}
-
-		$ph = array(
-					'company_id' => $company_id,
-					'id' => $id,
-					);
-
-		$query = '
-					select	*
-					from	'. $this->getTable() .'
-					where	company_id = ?
-						AND rf_id = ?
 						AND deleted = 0';
 
 		$query .= $this->getWhereSQL( $where );

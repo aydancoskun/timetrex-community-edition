@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2095 $
- * $Id: Sort.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
- */
+
 
 /**
  * @package Modules\Report
@@ -119,7 +115,7 @@ class Form1099MiscReport extends Report {
 								);
 				break;
 			case 'time_period':
-				$retval = TTDate::getTimePeriodOptions();
+				$retval = TTDate::getTimePeriodOptions( FALSE ); //Exclude Pay Period options.
 				break;
 			case 'date_columns':
 				//$retval = TTDate::getReportDateOptions( NULL, TTi18n::getText('Date'), 13, TRUE );
@@ -728,7 +724,7 @@ class Form1099MiscReport extends Report {
 			$mime_type = 'applications/octet-stream'; //Force file to download.
 		} else {
 			$output_format = 'PDF';
-			$file_name = $this->file_name;
+			$file_name = $this->file_name.'.pdf';
 			$mime_type = $this->file_mime_type;
 		}
 

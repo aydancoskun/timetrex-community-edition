@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14408 $
- * $Id: RecurringScheduleTemplateFactory.class.php 14408 2014-09-12 19:02:59Z mikeb $
- * $Date: 2014-09-12 12:02:59 -0700 (Fri, 12 Sep 2014) $
- */
+
 
 /**
  * @package Modules\Schedule
@@ -47,6 +43,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 	protected $pk_sequence_name = 'recurring_schedule_template_id_seq'; //PK Sequence name
 
 	protected $schedule_policy_obj = NULL;
+	protected $recurring_schedule_template_control_obj = NULL;
 
 	function _getFactoryOptions( $name ) {
 
@@ -148,19 +145,13 @@ class RecurringScheduleTemplateFactory extends Factory {
 		return $variable_function_map;
 	}
 
-	function getSchedulePolicyObject() {
-		if ( is_object($this->schedule_policy_obj) ) {
-			return $this->schedule_policy_obj;
-		} else {
-			$splf = TTnew( 'SchedulePolicyListFactory' );
-			$splf->getById( $this->getSchedulePolicyID() );
-			if ( $splf->getRecordCount() > 0 ) {
-				$this->schedule_policy_obj = $splf->getCurrent();
-				return $this->schedule_policy_obj;
-			}
+	function getRecurringScheduleTemplateControlObject() {
+		return $this->getGenericObject( 'RecurringScheduleTemplateControlListFactory', $this->getRecurringScheduleTemplateControl(), 'recurring_schedule_template_control_obj' );
+	}
 
-			return FALSE;
-		}
+
+	function getSchedulePolicyObject() {
+		return $this->getGenericObject( 'SchedulePolicyListFactory', $this->getSchedulePolicyID(), 'schedule_policy_obj' );
 	}
 
 	function getRecurringScheduleTemplateControl() {
@@ -385,6 +376,9 @@ class RecurringScheduleTemplateFactory extends Factory {
 
 	function getTotalTime() {
 		$sf = TTnew( 'ScheduleFactory' );
+
+		//This helps calculate the schedule total time based on schedule policy or policy groups.
+		$sf->setCompany( $this->getRecurringScheduleTemplateControlObject()->getCompany() );
 		$sf->setStartTime( $this->getStartTime() );
 		$sf->setEndTime( $this->getEndTime() );
 		if ( $this->getSchedulePolicyObject() != FALSE ) {
@@ -626,8 +620,8 @@ class RecurringScheduleTemplateFactory extends Factory {
 		$start_date_week = TTDate::getBeginWeekEpoch( $recurring_schedule_control_start_date, 0 ); //Start week on Sunday to match Recurring Schedule.
 		//Debug::text('Week of Start Date: '. $start_date_week, __FILE__, __LINE__, __METHOD__, 10);
 
-		$apf = TTnew( 'AbsencePolicyFactory' );
-		$absence_policy_paid_type_options = $apf->getOptions('paid_type');
+		$pcf = TTnew( 'PayCodeFactory' );
+		$absence_policy_paid_type_options = $pcf->getOptions('paid_type');
 
 		for ( $i = $start_date; $i <= $end_date; $i += (86400 + 43200) ) {
 			//Handle DST by adding 12hrs to the date to get the mid-day epoch, then forcing it back to the beginning of the day.

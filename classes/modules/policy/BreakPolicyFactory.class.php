@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2534 $
- * $Id: BreakPolicyFactory.class.php 2534 2009-05-13 00:02:20Z ipso $
- * $Date: 2009-05-12 17:02:20 -0700 (Tue, 12 May 2009) $
- */
+
 
 /**
  * @package Modules\Policy
@@ -47,6 +43,7 @@ class BreakPolicyFactory extends Factory {
 	protected $pk_sequence_name = 'break_policy_id_seq'; //PK Sequence name
 
 	protected $company_obj = NULL;
+	protected $pay_code_obj = NULL;
 
 
 	function _getFactoryOptions( $name ) {
@@ -70,6 +67,8 @@ class BreakPolicyFactory extends Factory {
 				$retval = array(
 										'-1010-type' => TTi18n::gettext('Type'),
 										'-1020-name' => TTi18n::gettext('Name'),
+										'-1025-description' => TTi18n::gettext('Description'),
+
 										'-1030-amount' => TTi18n::gettext('Break Time'),
 										'-1040-trigger_time' => TTi18n::gettext('Active After'),
 
@@ -96,6 +95,7 @@ class BreakPolicyFactory extends Factory {
 			case 'default_display_columns': //Columns that are displayed by default.
 				$retval = array(
 								'name',
+								'description',
 								'type',
 								'amount',
 								'updated_date',
@@ -124,6 +124,7 @@ class BreakPolicyFactory extends Factory {
 										'type_id' => 'Type',
 										'type' => FALSE,
 										'name' => 'Name',
+										'description' => 'Description',
 										'trigger_time' => 'TriggerTime',
 										'amount' => 'Amount',
 										'auto_detect_type_id' => 'AutoDetectType',
@@ -134,6 +135,12 @@ class BreakPolicyFactory extends Factory {
 										'maximum_punch_time' => 'MaximumPunchTime',
 										'include_break_punch_time' => 'IncludeBreakPunchTime',
 										'include_multiple_breaks' => 'IncludeMultipleBreaks',
+
+										'pay_code_id' => 'PayCode',
+										'pay_code' => FALSE,
+										'pay_formula_policy_id' => 'PayFormulaPolicy',
+										'pay_formula_policy' => FALSE,
+
 										'in_use' => FALSE,
 										'deleted' => 'Deleted',
 										);
@@ -141,14 +148,11 @@ class BreakPolicyFactory extends Factory {
 	}
 
 	function getCompanyObject() {
-		if ( is_object($this->company_obj) ) {
-			return $this->company_obj;
-		} else {
-			$clf = TTnew( 'CompanyListFactory' );
-			$this->company_obj = $clf->getById( $this->getCompany() )->getCurrent();
+		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
+	}
 
-			return $this->company_obj;
-		}
+	function getPayCodeObject() {
+		return $this->getGenericObject( 'PayCodeListFactory', $this->getPayCode(), 'pay_code_obj' );
 	}
 
 	function getCompany() {
@@ -245,6 +249,30 @@ class BreakPolicyFactory extends Factory {
 						) {
 
 			$this->data['name'] = $name;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getDescription() {
+		if ( isset($this->data['description']) ) {
+			return $this->data['description'];
+		}
+
+		return FALSE;
+	}
+	function setDescription($description) {
+		$description = trim($description);
+
+		if (	$description == ''
+				OR $this->Validator->isLength(	'description',
+												$description,
+												TTi18n::gettext('Description is invalid'),
+												1, 250) ) {
+
+			$this->data['description'] = $description;
 
 			return TRUE;
 		}
@@ -466,16 +494,80 @@ class BreakPolicyFactory extends Factory {
 		return TRUE;
 	}
 
-	function Validate() {
-		if ( $this->getDeleted() == TRUE ) {
-			//Check to make sure there are no hours using this break policy.
-			$udtlf = TTnew( 'UserDateTotalListFactory' );
-			$udtlf->getByBreakPolicyId( $this->getId() );
-			if ( $udtlf->getRecordCount() > 0 ) {
-				$this->Validator->isTRUE(	'in_use',
-											FALSE,
-											TTi18n::gettext('This break policy is in use'));
+	function getPayCode() {
+		if ( isset($this->data['pay_code_id']) ) {
+			return (int)$this->data['pay_code_id'];
+		}
 
+		return FALSE;
+	}
+	function setPayCode($id) {
+		$id = trim($id);
+
+		if ( $id == '' OR empty($id) ) {
+			$id = 0;
+		}
+
+		$pclf = TTnew( 'PayCodeListFactory' );
+
+		if (	$id == 0
+				OR
+				$this->Validator->isResultSetWithRows(	'pay_code_id',
+														$pclf->getById($id),
+														TTi18n::gettext('Invalid Pay Code')
+														) ) {
+			$this->data['pay_code_id'] = $id;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getPayFormulaPolicy() {
+		if ( isset($this->data['pay_formula_policy_id']) ) {
+			return (int)$this->data['pay_formula_policy_id'];
+		}
+
+		return FALSE;
+	}
+	function setPayFormulaPolicy($id) {
+		$id = trim($id);
+
+		if ( $id == '' OR empty($id) ) {
+			$id = 0;
+		}
+
+		$pfplf = TTnew( 'PayFormulaPolicyListFactory' );
+
+		if ( $id == 0
+				OR
+				$this->Validator->isResultSetWithRows(	'pay_formula_policy_id',
+													$pfplf->getByID($id),
+													TTi18n::gettext('Pay Formula Policy is invalid')
+													) ) {
+
+			$this->data['pay_formula_policy_id'] = $id;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function Validate() {
+		if ( $this->getDeleted() != TRUE ) {
+			if ( $this->getPayCode() == 0 ) {
+				$this->Validator->isTRUE(	'pay_code_id',
+											FALSE,
+											TTi18n::gettext('Please choose a Pay Code') );
+			}
+
+			//Make sure Pay Formula Policy is defined somewhere.
+			if ( $this->getPayFormulaPolicy() == 0 AND $this->getPayCode() > 0 AND ( !is_object( $this->getPayCodeObject() ) OR ( is_object( $this->getPayCodeObject() ) AND $this->getPayCodeObject()->getPayFormulaPolicy() == 0 ) ) ) {
+					$this->Validator->isTRUE(	'pay_formula_policy_id',
+												FALSE,
+												TTi18n::gettext('Selected Pay Code does not have a Pay Formula Policy defined'));
 			}
 		}
 

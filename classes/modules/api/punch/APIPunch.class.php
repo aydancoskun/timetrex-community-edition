@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2196 $
- * $Id: APIPunch.class.php 2196 2008-10-14 16:08:54Z ipso $
- * $Date: 2008-10-14 09:08:54 -0700 (Tue, 14 Oct 2008) $
- */
+
 
 /*
 
@@ -461,8 +457,8 @@ class APIPunch extends APIFactory {
 							OR
 								(
 								$this->getPermissionObject()->Check('punch', 'edit')
-									OR ( $this->getPermissionObject()->Check('punch', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getPunchControlObject()->getUserDateObject()->getUser() ) === TRUE )
-									OR ( $this->getPermissionObject()->Check('punch', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getPunchControlObject()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('punch', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getPunchControlObject()->getUser() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('punch', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getPunchControlObject()->getUser(), $permission_children_ids ) === TRUE )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -539,9 +535,11 @@ class APIPunch extends APIFactory {
 								//This is important when adding/editing a punch, without it there can be issues calculating exceptions
 								//because if a specific punch was modified that caused the day to change, smartReCalculate
 								//may only be able to recalculate a single day, instead of both.
-								$old_user_date_id = ( is_object( $lf->getPunchControlObject() ) ) ? $lf->getPunchControlObject()->getUserDateID() : 0;
-								if ( $old_user_date_id != 0 ) {
-									$pcf->setUserDateID( $old_user_date_id );
+								//$pcf->setUser( $row['user_id'] ); //Set from PunchObject.
+								$old_date_stamp = ( is_object( $lf->getPunchControlObject() ) ) ? $lf->getPunchControlObject()->getDateStamp() : 0;
+								if ( $old_date_stamp != 0 ) {
+									Debug::Text('Setting old date stamp to: '. TTDate::getDate('DATE', $old_date_stamp ), __FILE__, __LINE__, __METHOD__, 10);
+									$pcf->setOldDateStamp( $old_date_stamp );
 								}
 
 								$pcf->setObjectFromArray( $row );
@@ -649,8 +647,8 @@ class APIPunch extends APIFactory {
 						//Object exists, check edit permissions
 						//NOTE: Make sure we pass the user the punch is assigned too for proper delete_child permissions to work correctly.
 						if ( $this->getPermissionObject()->Check('punch', 'delete')
-								OR ( $this->getPermissionObject()->Check('punch', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getPunchControlObject()->getUserDateObject()->getUser() ) === TRUE )
-								OR ( $this->getPermissionObject()->Check('punch', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getPunchControlObject()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )) {
+								OR ( $this->getPermissionObject()->Check('punch', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getPunchControlObject()->getUser() ) === TRUE )
+								OR ( $this->getPermissionObject()->Check('punch', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getPunchControlObject()->getUser(), $permission_children_ids ) === TRUE )) {
 							Debug::Text('Record Exists, deleting record: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
@@ -671,7 +669,7 @@ class APIPunch extends APIFactory {
 					Debug::Text('Attempting to delete record...', __FILE__, __LINE__, __METHOD__, 10);
 					Debug::Arr($lf->data, 'Current Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-					$lf->setUser( $lf->getPunchControlObject()->getUserDateObject()->getUser() );
+					$lf->setUser( $lf->getPunchControlObject()->getUser() );
 					$lf->setDeleted(TRUE);
 
 					$is_valid = $lf->isValid();

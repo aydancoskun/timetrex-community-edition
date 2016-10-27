@@ -27,10 +27,13 @@ WageGroupViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'Secondary Wage Group' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_secondary_wage_group': $.i18n._( 'Secondary Wage Group' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
+
+
+
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIWageGroup' )),
@@ -46,19 +49,21 @@ WageGroupViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_secondary_wage_group = this.edit_view_tab.find( '#tab_secondary_wage_group' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_secondary_wage_group_column1 = tab_secondary_wage_group.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_secondary_wage_group_column1 );
 
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: 359} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab0_column1, 'first_last' );
+		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_secondary_wage_group_column1, 'first_last' );
+
+		form_item_input.parent().width( '45%' );
 
 	},
 

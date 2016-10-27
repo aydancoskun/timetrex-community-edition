@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2196 $
- * $Id: APIAbsencePolicy.class.php 2196 2008-10-14 16:08:54Z ipso $
- * $Date: 2008-10-14 09:08:54 -0700 (Tue, 14 Oct 2008) $
- */
+
 
 /**
  * @package API\Policy
@@ -473,10 +469,26 @@ class APIAbsencePolicy extends APIFactory {
 		$aplf->getByIdAndCompanyId( $absence_policy_id, $this->getCurrentCompanyObject()->getId() );
 		if ( $aplf->getRecordCount() > 0 ) {
 			$ap_obj = $aplf->getCurrent();
-			if ( $ap_obj->getAccrualPolicyID() != '' ) {
+
+			$pfp_obj = $ap_obj->getPayFormulaPolicyObject();
+			if ( is_object($pfp_obj) AND $pfp_obj->getAccrualPolicyAccount() != '' ) {
 				$acplf = new AccrualPolicyListFactory();
-				$acplf->getById( $ap_obj->getAccrualPolicyID() );
+				//$acplf->getById( $pfp_obj->getAccrualPolicy() );
+				$acplf->getByCompanyIdAndAccrualPolicyAccount( $this->getCurrentCompanyObject()->getId(), $pfp_obj->getAccrualPolicyAccount() );
 				if ( $acplf->getRecordCount() > 0 ) {
+					$ulf = TTnew( 'UserListFactory' );
+					$ulf->getByIDAndCompanyID( $user_id, $this->getCurrentCompanyObject()->getId() );
+					if ( $ulf->getRecordCount() == 1 ) {
+						$u_obj = $ulf->getCurrent();
+
+						$retval = FALSE;
+						foreach( $acplf as $acp_obj ) {
+							$retval = $acp_obj->getAccrualBalanceWithProjection( $u_obj, $epoch, $amount, $previous_amount, $retval );
+						}
+
+						return $this->returnHandler( $retval );
+					}
+					/*
 					$acp_obj = $acplf->getCurrent();
 
 					$ulf = TTnew( 'UserListFactory' );
@@ -486,12 +498,14 @@ class APIAbsencePolicy extends APIFactory {
 
 						return $this->returnHandler( $acp_obj->getAccrualBalanceWithProjection( $u_obj, $epoch, $amount, $previous_amount ) );
 					}
+					*/
 				}
 			}
 		}
 
+		Debug::Text('No projections to return...', __FILE__, __LINE__, __METHOD__, 10);
+
 		return $this->returnHandler( FALSE );
 	}
-
 }
 ?>

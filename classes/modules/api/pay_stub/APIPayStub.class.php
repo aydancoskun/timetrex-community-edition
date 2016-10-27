@@ -33,15 +33,12 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2196 $
- * $Id: APIPayStub.class.php 2196 2008-10-14 16:08:54Z ipso $
- * $Date: 2008-10-14 09:08:54 -0700 (Tue, 14 Oct 2008) $
- */
+
 
 /**
  * @package API\PayStub
  */
+
 class APIPayStub extends APIFactory {
 	protected $main_class = 'PayStubFactory';
 
@@ -51,6 +48,28 @@ class APIPayStub extends APIFactory {
 		return TRUE;
 	}
 
+	/**
+	 * Get default paystub_entry_account data for creating new paystub_entry_accountes.
+	 * @return array
+	 */
+	function getPayStubDefaultData() {
+		$company_obj = $this->getCurrentCompanyObject();
+		$user_obj = $this->getCurrentUserObject();
+
+		Debug::Text('Getting pay stub entry default data...', __FILE__, __LINE__, __METHOD__, 10);
+
+		$data = array(
+			'company_id' => $company_obj->getId(),
+			'user_id' => $user_obj->getId(),
+			'currency_id' => $user_obj->getCurrency(),
+			'start_date' => TTDate::getDate('DATE', time() ),
+			'end_date' => TTDate::getDate('DATE', time() ),
+			'transaction_date' => TTDate::getDate('DATE', time() ),
+		);
+
+		return $this->returnHandler( $data );
+	}
+	
 	/**
 	 * Get pay_stub data for one or more pay_stubes.
 	 * @param array $data filter data
@@ -231,6 +250,10 @@ class APIPayStub extends APIFactory {
 				} else {
 					//Adding new object, check ADD permissions.
 					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('pay_stub', 'add'), TTi18n::gettext('Add permission denied') );
+
+					//Because this class has sub-classes that depend on it, when adding a new record we need to make sure the ID is set first,
+					//so the sub-classes can depend on it. We also need to call Save( TRUE, TRUE ) to force a lookup on isNew()
+					$row['id'] = $lf->getNextInsertId();					
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -238,10 +261,106 @@ class APIPayStub extends APIFactory {
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
 					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
 
+					if ( $lf->isNew() == TRUE
+							AND isset($row['user_id']) AND isset($row['start_date']) AND isset($row['end_date'])
+							AND ( !isset($row['pay_period_id']) OR $row['pay_period_id'] == 0 ) ) {
+						$pplf = TTNew('PayPeriodListFactory');
+						//$pplf->getByUserIdAndStartDateAndEndDate( $row['user_id'], TTDate::parseDateTime( $row['start_date'] ), TTDate::parseDateTime( $row['end_date'] ) );
+						$pplf->getByUserIdAndEndDate( $row['user_id'], TTDate::parseDateTime( $row['end_date'] ) );
+						if ( $pplf->getRecordCount() == 1 ) {
+							$row['pay_period_id'] = $pplf->getCurrent()->getId();
+							Debug::Text('  Determing PayPeriod ID: '. $row['pay_period_id'], __FILE__, __LINE__, __METHOD__, 10);
+						} else {
+							Debug::Text('  Unable to determe PayPeriod ID...: '. $pplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+						}
+					} else {
+						Debug::Text('  NOT Determing PayPeriod ID...', __FILE__, __LINE__, __METHOD__, 10);
+					}
+
 					$lf->setObjectFromArray( $row );
 
-					//Force Company ID to current company.
-					//$lf->setCompany( $this->getCurrentCompanyObject()->getId() );
+					if ( ( isset($row['entries']) AND is_array($row['entries']) AND count($row['entries']) > 0 ) ) {
+						Debug::Text(' Found modified entries!', __FILE__, __LINE__, __METHOD__,10);
+
+						//Load previous pay stub
+						$lf->loadPreviousPayStub();
+
+						//Delete all entries, so they can be re-added.
+						//$lf->deleteEntries( TRUE );
+
+						//When editing pay stubs we can't re-process linked accruals.
+						$lf->setEnableLinkedAccruals( FALSE );
+
+						foreach($row['entries'] as $pay_stub_entry ) {
+							if ( 	(
+										( isset($pay_stub_entry['id']) AND $pay_stub_entry['id'] > 0 )
+										OR
+										( isset($pay_stub_entry['pay_stub_entry_name_id']) AND $pay_stub_entry['pay_stub_entry_name_id'] > 0 )
+									)
+									AND
+									(
+										!isset($pay_stub_entry['type'])
+										OR
+										( isset($pay_stub_entry['type']) AND $pay_stub_entry['type'] != 40 )
+									)
+									AND isset($pay_stub_entry['amount'])
+								) {
+								Debug::Text('Pay Stub Entry ID: '. $pay_stub_entry['id'] .' Amount: '. $pay_stub_entry['amount'], __FILE__, __LINE__, __METHOD__,10);
+
+								if ( $pay_stub_entry['id'] > 0 ) {
+									$pself = TTnew( 'PayStubEntryListFactory' );
+									$pself->getById( $pay_stub_entry['id'] );
+									if ( $pself->getRecordCount() > 0 ) {
+										$pay_stub_entry_obj = $pself->getCurrent();
+									}
+								}
+
+								if ( !isset($pay_stub_entry_obj) ) {
+									$pay_stub_entry_obj = TTnew( 'PayStubEntryListFactory' );
+									$pay_stub_entry_obj->setPayStub( $pay_stub_entry['id'] );
+									$pay_stub_entry_obj->setPayStubEntryNameId( $pay_stub_entry['pay_stub_entry_name_id'] );
+								}
+
+								if ( !isset($pay_stub_entry['units']) OR $pay_stub_entry['units'] == '' ) {
+									$pay_stub_entry['units'] = 0;
+								}
+								if ( !isset($pay_stub_entry['rate']) OR $pay_stub_entry['rate'] == '' ) {
+									$pay_stub_entry['rate'] = 0;
+								}
+								if ( !isset($pay_stub_entry['description']) OR $pay_stub_entry['description'] == '' ) {
+									$pay_stub_entry['description'] = NULL;
+								}
+								if ( !isset($pay_stub_entry['pay_stub_amendment_id']) OR $pay_stub_entry['pay_stub_amendment_id'] == '' ) {
+									$pay_stub_entry['pay_stub_amendment_id'] = NULL;
+								}
+								if ( !isset($pay_stub_entry['user_expense_id']) OR $pay_stub_entry['user_expense_id'] == '' ) {
+									$pay_stub_entry['user_expense_id'] = NULL;
+								}
+
+								$ytd_adjustment = FALSE;
+								if ( $pay_stub_entry['pay_stub_amendment_id'] > 0 ) {
+									$psamlf = TTNew('PayStubAmendmentListFactory');
+									$psamlf->getByIdAndCompanyId( (int)$pay_stub_entry['pay_stub_amendment_id'], $this->getCurrentCompanyObject()->getId() );
+									if ( $psamlf->getRecordCount() > 0 ) {
+										$ytd_adjustment = $psamlf->getCurrent()->getYTDAdjustment();
+									}
+									Debug::Text(' Pay Stub Amendment Id: '. $pay_stub_entry['pay_stub_amendment_id'] .' YTD Adjusment: '. (int)$ytd_adjustment, __FILE__, __LINE__, __METHOD__,10);
+								}
+
+								$lf->addEntry( $pay_stub_entry_obj->getPayStubEntryNameId(), $pay_stub_entry['amount'], $pay_stub_entry['units'], $pay_stub_entry['rate'], $pay_stub_entry['description'], $pay_stub_entry['pay_stub_amendment_id'], NULL, NULL, $ytd_adjustment );
+							} else {
+								Debug::Text(' Skipping Total Entry. ', __FILE__, __LINE__, __METHOD__,10);
+							}
+							unset($pay_stub_entry_obj);
+						}
+						unset($pay_stub_entry_id, $pay_stub_entry);
+
+						$lf->setEnableCalcYTD( TRUE );
+						$lf->setEnableProcessEntries( TRUE );
+						$lf->processEntries();
+					} else {
+						Debug::Text(' Skipping ALL Entries... ', __FILE__, __LINE__, __METHOD__,10);
+					}
 
 					if ( $validate_only == TRUE ) {
 						$lf->validate_only = TRUE;
@@ -253,7 +372,7 @@ class APIPayStub extends APIFactory {
 						if ( $validate_only == TRUE ) {
 							$save_result[$key] = TRUE;
 						} else {
-							$save_result[$key] = $lf->Save();
+							$save_result[$key] = $lf->Save( TRUE, TRUE );
 						}
 						$validator_stats['valid_records']++;
 					}

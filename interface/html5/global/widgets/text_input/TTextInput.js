@@ -25,6 +25,8 @@
 
 		var validate_timer = null;
 
+		var no_validate_timer = null;
+
 		var password_style = false;
 
 		var disable_keyup_event = false; //set to not send change event when mouseup
@@ -231,7 +233,7 @@
 				api_date = new (APIFactory.getAPIClass( 'APIDate' ))();
 			}
 
-			if ( o.width > 0 ) {
+			if ( o.width && ( o.width > 0 || o.width.indexOf( '%' ) > 0) ) {
 				$this.width( o.width );
 			}
 
@@ -254,6 +256,11 @@
 				if ( e.keyCode !== 9 && validate_timer ) {
 					clearTimeout( validate_timer );
 					validate_timer = null;
+				}
+
+				if ( e.keyCode !== 9 && no_validate_timer ) {
+					clearTimeout( no_validate_timer );
+					no_validate_timer = null;
 				}
 
 				if ( hasKeyEvent ) {
@@ -288,7 +295,8 @@
 
 				}, validate_sec );
 
-				setTimeout( function() {
+				//TO make sure the value is set to currentEditRecord when user typing it, but not trigger validate
+				no_validate_timer = setTimeout( function() {
 					if ( check_box ) {
 						check_box.attr( 'checked', 'true' )
 					}
@@ -307,7 +315,7 @@
 						}
 					}
 
-				}, 250 )
+				}, 300 )
 
 			} );
 

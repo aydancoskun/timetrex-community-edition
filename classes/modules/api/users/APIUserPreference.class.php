@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2196 $
- * $Id: APIUserPreference.class.php 2196 2008-10-14 16:08:54Z ipso $
- * $Date: 2008-10-14 09:08:54 -0700 (Tue, 14 Oct 2008) $
- */
+
 
 /**
  * @package API\Users
@@ -79,6 +75,9 @@ class APIUserPreference extends APIFactory {
 							'enable_email_notification_exception' => $udf_obj->getEnableEmailNotificationException(),
 							'enable_email_notification_message' => $udf_obj->getEnableEmailNotificationMessage(),
 							'enable_email_notification_home' => $udf_obj->getEnableEmailNotificationHome(),
+							'enable_email_notification_pay_stub' => $udf_obj->getEnableEmailNotificationPayStub(),
+							'enable_auto_context_menu' => TRUE,
+							'enable_save_timesheet_state' => TRUE,
 						);
 		} else {
 			$data = array(
@@ -89,6 +88,9 @@ class APIUserPreference extends APIFactory {
 							'enable_email_notification_exception' => TRUE,
 							'enable_email_notification_message' => TRUE,
 							'enable_email_notification_home' => FALSE,
+							'enable_email_notification_pay_stub' => TRUE,
+							'enable_auto_context_menu' => TRUE,
+							'enable_save_timesheet_state' => TRUE,
 						);
 		}
 
@@ -197,7 +199,7 @@ class APIUserPreference extends APIFactory {
 									OR ( $this->getPermissionObject()->Check('user_preference', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
 								) ) {
 
-							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Row Exists, getting current data: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
@@ -208,8 +210,11 @@ class APIUserPreference extends APIFactory {
 						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Edit permission denied, record does not exist') );
 					}
 				} else {
-					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('user', 'add'), TTi18n::gettext('Add permission denied') );
+					//Always allow the currently logged in user to create preferences in case the record isn't there.
+					if ( !( isset($row['user_id']) AND $row['user_id'] == $this->getCurrentUserObject()->getId() ) ) {
+						//Adding new object, check ADD permissions.
+						$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('user', 'add'), TTi18n::gettext('Add permission denied') );
+					}
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 

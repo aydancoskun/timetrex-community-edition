@@ -131,7 +131,6 @@
 			field = o.field;
 
 			$( this ).change( function() {
-
 				if ( check_box ) {
 					check_box.attr( 'checked', 'true' );
 				}

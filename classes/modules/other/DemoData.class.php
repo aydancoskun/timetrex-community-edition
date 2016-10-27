@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 12991 $
- * $Id: DemoData.class.php 12991 2014-04-22 20:34:24Z mikeb $
- * $Date: 2014-04-22 13:34:24 -0700 (Tue, 22 Apr 2014) $
- */
+
 
 
 /**
@@ -995,7 +991,36 @@ class DemoData {
 
 	}
 
-	function createAccrualPolicy( $company_id, $type ) {
+	function createAccrualPolicyAccount( $company_id, $type ) {
+		$apaf = TTnew( 'AccrualPolicyAccountFactory' );
+
+		$apaf->setCompany( $company_id );
+
+		switch ( $type ) {
+			case 10: //Bank Time
+				$apaf->setName( 'Bank Time' );
+				break;
+			case 20: //Calendar Based: Vacation/PTO
+				$apaf->setName( 'Personal Time Off (PTO)/Vacation' );
+				break;
+			case 30: //Calendar Based: Vacation/PTO
+				$apaf->setName( 'Sick Time' );
+				break;
+		}
+
+		if ( $apaf->isValid() ) {
+			$insert_id = $apaf->Save();
+			Debug::Text('Accrual Policy Account ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+
+			return $insert_id;
+		}
+
+		Debug::Text('Failed Creating Accrual Policy Account!', __FILE__, __LINE__, __METHOD__, 10);
+
+		return FALSE;
+	}
+
+	function createAccrualPolicy( $company_id, $type, $accrual_policy_account_id ) {
 		$apf = TTnew( 'AccrualPolicyFactory' );
 
 		$apf->setCompany( $company_id );
@@ -1004,6 +1029,7 @@ class DemoData {
 			case 10: //Bank Time
 				$apf->setName( 'Bank Time' );
 				$apf->setType( 10 );
+				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
 				break;
 			case 20: //Calendar Based: Vacation/PTO
 				$apf->setName( 'Personal Time Off (PTO)/Vacation' );
@@ -1014,6 +1040,7 @@ class DemoData {
 				$apf->setMilestoneRolloverHireDate( TRUE );
 
 				$apf->setMinimumEmployedDays( 30 );
+				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
 				break;
 			case 30: //Calendar Based: Vacation/PTO
 				$apf->setName( 'Sick Time' );
@@ -1024,6 +1051,7 @@ class DemoData {
 				$apf->setMilestoneRolloverHireDate( TRUE );
 
 				$apf->setMinimumEmployedDays( 30 );
+				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
 				break;
 		}
 
@@ -1238,8 +1266,355 @@ class DemoData {
 
 	}
 
+	function createPayCode( $company_id, $type, $pay_formula_policy_id = 0 ) {
+		$pcf = TTnew( 'PayCodeFactory' );
+		$pcf->setCompany( $company_id );
 
-	function createOverTimePolicy( $company_id, $type, $accrual_policy_id = NULL ) {
+		switch ( $type ) {
+			case 100:
+				$pcf->setName( 'Regular Time' );
+				$pcf->setCode( 'REG' );
+				$pcf->setType( 10 ); //Paid
+				//$pcf->setRate( 1.0 );
+				//$pcf->setAccrualPolicyID( $accrual_policy_id );
+				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Regular Time') );
+				//$pcf->setAccrualRate( 1.0 );
+				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
+				break;
+			case 190:
+				$pcf->setName( 'Lunch Time' );
+				$pcf->setCode( 'LNH' );
+				$pcf->setType( 10 ); //Paid
+				//$pcf->setRate( 1.0 );
+				//$pcf->setAccrualPolicyID( $accrual_policy_id );
+				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Regular Time') );
+				//$pcf->setAccrualRate( 1.0 );
+				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
+				break;
+			case 192:
+				$pcf->setName( 'Break Time' );
+				$pcf->setCode( 'BRK' );
+				$pcf->setType( 10 ); //Paid
+				//$pcf->setRate( 1.0 );
+				//$pcf->setAccrualPolicyID( $accrual_policy_id );
+				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Regular Time') );
+				//$pcf->setAccrualRate( 1.0 );
+				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
+				break;
+			case 200:
+				$pcf->setName( 'Overtime Time (1.5x)' );
+				$pcf->setCode( 'OT15' );
+				$pcf->setType( 10 ); //Paid
+				//$pcf->setRate( 1.5 );
+				//$pcf->setAccrualPolicyID( $accrual_policy_id );
+				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Over Time 1') );
+				//$pcf->setAccrualRate( 1.0 );
+				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
+				break;
+			case 210:
+				$pcf->setName( 'Overtime Time (2.0x)' );
+				$pcf->setCode( 'OT20' );
+				$pcf->setType( 10 ); //Paid
+				//$pcf->setRate( 1.5 );
+				//$pcf->setAccrualPolicyID( $accrual_policy_id );
+				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Over Time 2') );
+				//$pcf->setAccrualRate( 1.0 );
+				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
+				break;
+			case 300:
+				$pcf->setName( 'Premium 1' );
+				$pcf->setCode( 'PRE1' );
+				$pcf->setType( 10 ); //Paid
+				//$pcf->setRate( 1.5 );
+				//$pcf->setAccrualPolicyID( $accrual_policy_id );
+				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Premium 1') );
+				//$pcf->setAccrualRate( 1.0 );
+				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
+				break;
+			case 310:
+				$pcf->setName( 'Premium 2' );
+				$pcf->setCode( 'PRE2' );
+				$pcf->setType( 10 ); //Paid
+				//$pcf->setRate( 1.5 );
+				//$pcf->setAccrualPolicyID( $accrual_policy_id );
+				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Premium 2') );
+				//$pcf->setAccrualRate( 1.0 );
+				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
+				break;
+			case 900:
+				$pcf->setName( 'PTO/Vacation' );
+				$pcf->setCode( 'PTO' );
+				$pcf->setType( 10 ); //Paid
+				//$pcf->setRate( 1.0 );
+				//$pcf->setAccrualPolicyID( $accrual_policy_id );
+				$pcf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Vacation Accrual Release') );
+				//$pcf->setAccrualRate( 1.0 );
+				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
+				break;
+			case 910:
+				$pcf->setName( 'Bank Time' );
+				$pcf->setCode( 'BANK' );
+				$pcf->setType( 20 ); //Not Paid
+				//$pcf->setRate( 1.0 );
+				//$pcf->setAccrualPolicyID( $accrual_policy_id );
+				$pcf->setPayStubEntryAccountID( 0 );
+				//$pcf->setAccrualRate( 1.0 );
+				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
+				break;
+			case 920:
+				$pcf->setName( 'Sick Time' );
+				$pcf->setCode( 'SICK' );
+				$pcf->setType( 20 ); //Not Paid
+				//$pcf->setRate( 1.0 );
+				//$pcf->setAccrualPolicyID( $accrual_policy_id );
+				$pcf->setPayStubEntryAccountID( 0 );
+				//$pcf->setAccrualRate( 1.0 );
+				$pcf->setPayFormulaPolicy( $pay_formula_policy_id );
+				break;
+		}
+
+		if ( $pcf->isValid() ) {
+			$insert_id = $pcf->Save();
+			Debug::Text('Pay Code ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+
+			return $insert_id;
+		}
+
+		Debug::Text('Failed Creating Pay Code!', __FILE__, __LINE__, __METHOD__, 10);
+
+		return FALSE;
+	}
+
+	function createPayFormulaPolicy( $company_id, $type, $accrual_policy_account_id = 0 ) {
+		$pfpf = TTnew( 'PayFormulaPolicyFactory' );
+		$pfpf->setCompany( $company_id );
+
+		switch ( $type ) {
+			case 10:
+				$pfpf->setName( 'None ($0)' );
+				$pfpf->setPayType( 10 ); //Pay Multiplied By Factor
+				$pfpf->setRate( 0 );
+				$pfpf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				$pfpf->setAccrualRate( 0 );
+				break;
+			case 100:
+				$pfpf->setName( 'Regular' );
+				$pfpf->setPayType( 10 ); //Pay Multiplied By Factor
+				$pfpf->setRate( 1.0 );
+				$pfpf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				$pfpf->setAccrualRate( 1.0 );
+				break;
+			case 110:
+				$pfpf->setName( 'Bank Time' );
+				$pfpf->setPayType( 10 ); //Pay Multiplied By Factor
+				$pfpf->setRate( 1.0 );
+				$pfpf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				$pfpf->setAccrualRate( 1.0 );
+				break;
+			case 120:
+				$pfpf->setName( 'Vacation Time' );
+				$pfpf->setPayType( 10 ); //Pay Multiplied By Factor
+				$pfpf->setRate( 1.0 );
+				$pfpf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				$pfpf->setAccrualRate( 1.0 );
+				break;
+			case 130:
+				$pfpf->setName( 'Sick Time' );
+				$pfpf->setPayType( 10 ); //Pay Multiplied By Factor
+				$pfpf->setRate( 1.0 );
+				$pfpf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				$pfpf->setAccrualRate( 1.0 );
+				break;
+			case 200:
+				$pfpf->setName( 'OverTime (1.5x)' );
+				$pfpf->setPayType( 10 ); //Pay Multiplied By Factor
+				$pfpf->setRate( 1.5 );
+				$pfpf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				$pfpf->setAccrualRate( 1.0 );
+				break;
+			case 210:
+				$pfpf->setName( 'OverTime (2.0x)' );
+				$pfpf->setPayType( 10 ); //Pay Multiplied By Factor
+				$pfpf->setRate( 2.0 );
+				$pfpf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				$pfpf->setAccrualRate( 1.0 );
+				break;
+			case 300:
+				$pfpf->setName( 'Premium 1' );
+				$pfpf->setPayType( 32 ); //Flat Hourly Rate
+				$pfpf->setRate( 1.33 );
+				$pfpf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				$pfpf->setAccrualRate( 1.0 );
+				break;
+			case 310:
+				$pfpf->setName( 'Premium 2' );
+				$pfpf->setPayType( 10 ); //Pay Multiplied By Factor
+				$pfpf->setRate( 0.50 );
+				$pfpf->setWageGroup( $this->user_wage_groups[0] );
+				$pfpf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				$pfpf->setAccrualRate( 1.0 );
+				break;
+		}
+
+		if ( $pfpf->isValid() ) {
+			$insert_id = $pfpf->Save();
+			Debug::Text('Pay Formula Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+
+			return $insert_id;
+		}
+
+		Debug::Text('Failed Creating Pay Formula Policy!', __FILE__, __LINE__, __METHOD__, 10);
+
+		return FALSE;
+	}
+
+	function createContributingPayCodePolicy( $company_id, $type, $pay_code_ids = 0 ) {
+		$ctpf = TTnew( 'ContributingPayCodePolicyFactory' );
+		$ctpf->setId( $ctpf->getNextInsertId() ); //Make sure we can define the pay codes before calling isValid()
+		$ctpf->setCompany( $company_id );
+
+		switch ( $type ) {
+			case 10:
+				$ctpf->setName( 'Regular Time' );
+				break;
+			case 12:
+				$ctpf->setName( 'Regular Time + Meal/Break' );
+				break;
+			case 14:
+				$ctpf->setName( 'Regular Time + Meal/Break + Absences' );
+				break;
+			case 20:
+				$ctpf->setName( 'Regular Time + OverTime + Meal/Break' );
+				break;
+			case 90:
+				$ctpf->setName( 'Absences' );
+				break;
+			case 99:
+				$ctpf->setName( 'All Time' );
+				break;
+		}
+
+		$ctpf->setPayCode( $pay_code_ids ); //Make sure we can define the pay codes before calling isValid()
+
+		if ( $ctpf->isValid() ) {
+			$insert_id = $ctpf->Save( FALSE, TRUE );
+			Debug::Text('Contributing Pay Code Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+
+			return $insert_id;
+		}
+
+		Debug::Text('Failed Creating Contributing Pay Code Policy: '. $ctpf->getName(), __FILE__, __LINE__, __METHOD__, 10);
+
+		return FALSE;
+	}
+
+	function createContributingShiftPolicy( $company_id, $type, $contributing_pay_code_policy_id ) {
+		$cspf = TTnew( 'ContributingShiftPolicyFactory' );
+		$cspf->setCompany( $company_id );
+
+		switch ( $type ) {
+			case 10:
+				$cspf->setName('Regular Shifts');
+				$cspf->setContributingPayCodePolicy( $contributing_pay_code_policy_id );
+
+				$cspf->setMon( TRUE );
+				$cspf->setTue( TRUE );
+				$cspf->setWed( TRUE );
+				$cspf->setThu( TRUE );
+				$cspf->setFri( TRUE );
+				$cspf->setSat( TRUE );
+				$cspf->setSun( TRUE );
+
+				$cspf->setIncludeHolidayType(10); //Have no effect
+				break;
+			case 20:
+				$cspf->setName('Regular Shifts + Meal/Break');
+				$cspf->setContributingPayCodePolicy( $contributing_pay_code_policy_id );
+
+				$cspf->setMon( TRUE );
+				$cspf->setTue( TRUE );
+				$cspf->setWed( TRUE );
+				$cspf->setThu( TRUE );
+				$cspf->setFri( TRUE );
+				$cspf->setSat( TRUE );
+				$cspf->setSun( TRUE );
+
+				$cspf->setIncludeHolidayType(10); //Have no effect
+				break;
+			case 30:
+				$cspf->setName('Regular+Overtime');
+				$cspf->setContributingPayCodePolicy( $contributing_pay_code_policy_id );
+
+				$cspf->setMon( TRUE );
+				$cspf->setTue( TRUE );
+				$cspf->setWed( TRUE );
+				$cspf->setThu( TRUE );
+				$cspf->setFri( TRUE );
+				$cspf->setSat( TRUE );
+				$cspf->setSun( TRUE );
+
+				$cspf->setIncludeHolidayType(10); //Have no effect
+				break;
+			case 40:
+				$cspf->setName('Regular+Overtime+Absence');
+				$cspf->setContributingPayCodePolicy( $contributing_pay_code_policy_id );
+
+				$cspf->setMon( TRUE );
+				$cspf->setTue( TRUE );
+				$cspf->setWed( TRUE );
+				$cspf->setThu( TRUE );
+				$cspf->setFri( TRUE );
+				$cspf->setSat( TRUE );
+				$cspf->setSun( TRUE );
+
+				$cspf->setIncludeHolidayType(10); //Have no effect
+				break;
+		}
+
+		if ( $cspf->isValid() ) {
+			$insert_id = $cspf->Save();
+			Debug::Text('Contributing Shift Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+
+			return $insert_id;
+		}
+
+		Debug::Text('Failed Creating Contributing Shift Policy!', __FILE__, __LINE__, __METHOD__, 10);
+
+		return FALSE;
+	}
+
+	function createRegularTimePolicy( $company_id, $type, $contributing_shift_policy_id = 0, $pay_code_id = 0 ) {
+		$rtpf = TTnew( 'RegularTimePolicyFactory' );
+		$rtpf->setCompany( $company_id );
+
+		switch ( $type ) {
+			case 10:
+				$rtpf->setName( 'Regular Time' );
+				$rtpf->setContributingShiftPolicy( $contributing_shift_policy_id );
+				$rtpf->setPayCode( $pay_code_id );
+				$rtpf->setCalculationOrder( 9999 );
+				break;
+			case 20:
+				$rtpf->setName( 'Regular Time (2)' );
+				$rtpf->setContributingShiftPolicy( $contributing_shift_policy_id );
+				$rtpf->setPayCode( $pay_code_id );
+				$rtpf->setCalculationOrder( 9999 );
+				break;
+		}
+
+		if ( $rtpf->isValid() ) {
+			$insert_id = $rtpf->Save();
+			Debug::Text('Regular Time Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+
+			return $insert_id;
+		}
+
+		Debug::Text('Failed Creating Regular Policy!', __FILE__, __LINE__, __METHOD__, 10);
+
+		return FALSE;
+	}
+
+	function createOverTimePolicy( $company_id, $type, $contributing_shift_policy_id = 0, $pay_code_id = 0 ) {
 		$otpf = TTnew( 'OverTimePolicyFactory' );
 		$otpf->setCompany( $company_id );
 
@@ -1248,22 +1623,38 @@ class DemoData {
 				$otpf->setName( 'OverTime (>8hrs)' );
 				$otpf->setType( 10 );
 				$otpf->setTriggerTime( (3600 * 8) );
-				$otpf->setRate( '1.5' );
-				$otpf->setPayStubEntryAccountId( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Over Time 1') );
+				$otpf->setContributingShiftPolicy( $contributing_shift_policy_id );
+				$otpf->setPayCode( $pay_code_id );
+				//$otpf->setRate( '1.5' );
+				//$otpf->setPayStubEntryAccountId( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Over Time 1') );
 
-				$otpf->setAccrualPolicyId( 0 );
-				$otpf->setAccrualRate( 0 );
-
+				//$otpf->setAccrualPolicyId( 0 );
+				//$otpf->setAccrualRate( 0 );
 				break;
 			case 20:
 				$otpf->setName( 'Daily (>10hrs)' );
 				$otpf->setType( 10 );
 				$otpf->setTriggerTime( (3600 * 10) );
-				$otpf->setRate( '1.0' );
-				$otpf->setPayStubEntryAccountId( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Over Time 2') );
+				$otpf->setContributingShiftPolicy( $contributing_shift_policy_id );
+				$otpf->setPayCode( $pay_code_id );
+				//$otpf->setRate( '1.0' );
+				//$otpf->setPayStubEntryAccountId( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Over Time 2') );
 
-				$otpf->setAccrualPolicyId( $accrual_policy_id );
-				$otpf->setAccrualRate( '1.0' );
+				//$otpf->setAccrualPolicyId( $accrual_policy_id );
+				//$otpf->setAccrualRate( '1.0' );
+				break;
+			case 30:
+				$otpf->setName( 'Weekly (>40hrs)' );
+				$otpf->setType( 20 );
+				$otpf->setTriggerTime( (3600 * 40) );
+				$otpf->setContributingShiftPolicy( $contributing_shift_policy_id );
+				$otpf->setPayCode( $pay_code_id );
+				//$otpf->setRate( '1.0' );
+				//$otpf->setPayStubEntryAccountId( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Over Time 2') );
+
+				//$otpf->setAccrualPolicyId( $accrual_policy_id );
+				//$otpf->setAccrualRate( '1.0' );
+				break;
 		}
 
 		if ( $otpf->isValid() ) {
@@ -1278,7 +1669,7 @@ class DemoData {
 		return FALSE;
 	}
 
-	function createPremiumPolicy( $company_id, $type ) {
+	function createPremiumPolicy( $company_id, $type, $contributing_shift_policy_id = 0, $pay_code_id = 0 ) {
 		$ppf = TTnew( 'PremiumPolicyFactory' );
 		$ppf->setCompany( $company_id );
 
@@ -1286,7 +1677,6 @@ class DemoData {
 			case 10: //Simple weekend premium
 				$ppf->setName( 'Weekend' );
 				$ppf->setType( 10 );
-				$ppf->setPayType( 20 );
 
 				$ppf->setStartDate( '' );
 				$ppf->setEndDate( '' );
@@ -1296,22 +1686,21 @@ class DemoData {
 
 				$ppf->setMon( FALSE );
 				$ppf->setTue( FALSE );
-
 				$ppf->setWed( FALSE );
 				$ppf->setThu( FALSE );
 				$ppf->setFri( FALSE );
-
 				$ppf->setSat( TRUE );
 				$ppf->setSun( TRUE );
 
-				$ppf->setRate( '1.33' ); //$1.33 per hour
-				$ppf->setPayStubEntryAccountId( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Premium 1') );
+				$ppf->setContributingShiftPolicy( $contributing_shift_policy_id );
+				$ppf->setPayCode( $pay_code_id );
+				//$ppf->setRate( '1.33' ); //$1.33 per hour
+				//$ppf->setPayStubEntryAccountId( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Premium 1') );
 
 				break;
 			case 20: //Simple evening premium
 				$ppf->setName( 'Evening' );
 				$ppf->setType( 10 );
-				$ppf->setPayType( 10 ); //Pay multiplied by factor
 
 				$ppf->setIncludePartialPunch( TRUE );
 
@@ -1323,17 +1712,17 @@ class DemoData {
 
 				$ppf->setMon( FALSE );
 				$ppf->setTue( FALSE );
-
 				$ppf->setWed( FALSE );
 				$ppf->setThu( FALSE );
 				$ppf->setFri( TRUE );
-
 				$ppf->setSat( FALSE );
 				$ppf->setSun( FALSE );
 
-				$ppf->setWageGroup( $this->user_wage_groups[0] );
-				$ppf->setRate( '1.50' );
-				$ppf->setPayStubEntryAccountId( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Premium 2') );
+				$ppf->setContributingShiftPolicy( $contributing_shift_policy_id );
+				$ppf->setPayCode( $pay_code_id );
+				//$ppf->setWageGroup( $this->user_wage_groups[0] );
+				//$ppf->setRate( '1.50' );
+				//$ppf->setPayStubEntryAccountId( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Premium 2') );
 
 				break;
 		}
@@ -1350,36 +1739,39 @@ class DemoData {
 		return FALSE;
 	}
 
-	function createAbsencePolicy( $company_id, $type, $accrual_policy_id = 0) {
+	function createAbsencePolicy( $company_id, $type, $pay_code_id = 0) {
 		$apf = TTnew( 'AbsencePolicyFactory' );
 		$apf->setCompany( $company_id );
 
 		switch ( $type ) {
 			case 10: //Vacation
 				$apf->setName( 'PTO/Vacation' );
-				$apf->setType( 10 ); //Paid
-				$apf->setRate( 1.0 );
-				$apf->setAccrualPolicyID( $accrual_policy_id );
-				$apf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 50, 'Vacation Accrual Release') );
-				$apf->setAccrualRate( 1.0 );
+				$apf->setPayCode( $pay_code_id );
+				//$apf->setType( 10 ); //Paid
+				//$apf->setRate( 1.0 );
+				//$apf->setAccrualPolicyID( $accrual_policy_id );
+				//$apf->setPayStubEntryAccountID( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 50, 'Vacation Accrual Release') );
+				//$apf->setAccrualRate( 1.0 );
 
 				break;
 			case 20: //Bank Time
 				$apf->setName( 'Bank Time' );
-				$apf->setType( 20 ); //Not Paid
-				$apf->setRate( 1.0 );
-				$apf->setAccrualPolicyID( $accrual_policy_id );
-				$apf->setPayStubEntryAccountID( 0 );
-				$apf->setAccrualRate( 1.0 );
+				$apf->setPayCode( $pay_code_id );
+				//$apf->setType( 20 ); //Not Paid
+				//$apf->setRate( 1.0 );
+				//$apf->setAccrualPolicyID( $accrual_policy_id );
+				//$apf->setPayStubEntryAccountID( 0 );
+				//$apf->setAccrualRate( 1.0 );
 
 				break;
 			case 30: //Sick Time
 				$apf->setName( 'Sick Time' );
-				$apf->setType( 20 ); //Not Paid
-				$apf->setRate( 1.0 );
-				$apf->setAccrualPolicyID( $accrual_policy_id );
-				$apf->setPayStubEntryAccountID( 0 );
-				$apf->setAccrualRate( 1.0 );
+				$apf->setPayCode( $pay_code_id );
+				//$apf->setType( 20 ); //Not Paid
+				//$apf->setRate( 1.0 );
+				//$apf->setAccrualPolicyID( $accrual_policy_id );
+				//$apf->setPayStubEntryAccountID( 0 );
+				//$apf->setAccrualRate( 1.0 );
 
 				break;
 		}
@@ -1424,13 +1816,14 @@ class DemoData {
 
 		$spf->setCompany( $company_id );
 		$spf->setName( 'One Hour Lunch' );
-		$spf->setMealPolicyID( $meal_policy_id );
-		$spf->setOverTimePolicyID( 0 );
 		$spf->setAbsencePolicyID( 0 );
 		$spf->setStartStopWindow( 1800 );
 
 		if ( $spf->isValid() ) {
-			$insert_id = $spf->Save();
+			$insert_id = $spf->Save(FALSE);
+
+			$spf->setMealPolicy( $meal_policy_id );
+
 			Debug::Text('Schedule Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			return $insert_id;
@@ -1657,7 +2050,7 @@ class DemoData {
 		return FALSE;
 	}
 
-	function createPolicyGroup( $company_id, $meal_policy_ids = NULL, $exception_policy_id = NULL, $holiday_policy_ids = NULL, $over_time_policy_ids = NULL, $premium_policy_ids = NULL, $rounding_policy_ids = NULL, $user_ids = NULL, $break_policy_ids = NULL, $accrual_policy_ids = NULL, $expense_policy_ids = NULL, $absence_policy_ids = NULL ) {
+	function createPolicyGroup( $company_id, $meal_policy_ids = NULL, $exception_policy_id = NULL, $holiday_policy_ids = NULL, $over_time_policy_ids = NULL, $premium_policy_ids = NULL, $rounding_policy_ids = NULL, $user_ids = NULL, $break_policy_ids = NULL, $accrual_policy_ids = NULL, $expense_policy_ids = NULL, $absence_policy_ids = NULL, $regular_policy_ids = NULL ) {
 		$pgf = TTnew( 'PolicyGroupFactory' );
 
 		$pgf->StartTransaction();
@@ -1671,6 +2064,12 @@ class DemoData {
 
 		if ( $pgf->isValid() ) {
 			$insert_id = $pgf->Save(FALSE);
+
+			if ( is_array($regular_policy_ids) ) {
+				$pgf->setRegularTimePolicy( $regular_policy_ids );
+			} else {
+				$pgf->setRegularTimePolicy( array() );
+			}
 
 			if ( is_array($meal_policy_ids) ) {
 				$pgf->setMealPolicy( $meal_policy_ids );
@@ -2640,7 +3039,7 @@ class DemoData {
 
 	function createUser( $company_id, $type, $policy_group_id = 0, $default_branch_id = 0, $default_department_id = 0, $default_currency_id = 0, $user_group_id = 0, $user_title_id = 0, $ethnic_group_ids = NULL) {
 		$uf = TTnew( 'UserFactory' );
-
+		$uf->setId( $uf->getNextInsertId() ); //Because password encryption requires the user_id, we need to get it first when creating a new employee.
 		$uf->setCompany( $company_id );
 		$uf->setStatus( 10 );
 		//$uf->setPolicyGroup( 0 );
@@ -3456,7 +3855,7 @@ class DemoData {
 		}
 
 		if ( $uf->isValid() ) {
-			$insert_id = $uf->Save();
+			$insert_id = $uf->Save( TRUE, TRUE );
 			Debug::Text('User ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			$this->createUserPreference( $insert_id );
@@ -3894,6 +4293,7 @@ class DemoData {
 		$uwf->setType( 10 );
 		$uwf->setWage(	$rate );
 		//$uwf->setWeeklyTime( TTDate::parseTimeUnit( $wage_data['weekly_time'] ) );
+		$uwf->setLaborBurdenPercent( 13.5 );
 		$uwf->setEffectiveDate( $effective_date );
 
 		if ( $uwf->isValid() ) {
@@ -4018,7 +4418,8 @@ class DemoData {
 		$date_stamp = TTDate::parseDateTime($date_stamp); //Make sure date_stamp is always an integer.
 
 		$rf = TTnew( 'RequestFactory' );
-		$rf->setUserDate( $user_id, $date_stamp );
+		$rf->setUser( $user_id );
+		$rf->setDateStamp( $date_stamp );
 
 		switch( $type ) {
 			case 10:
@@ -5682,13 +6083,12 @@ class DemoData {
 	}
 
 	function deletePunch( $id ) {
-
 		$plf = TTnew( 'PunchListFactory' );
 		$plf->getById( $id );
 		if ( $plf->getRecordCount() > 0 ) {
 			Debug::Text('Deleting Punch ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 			foreach($plf as $p_obj) {
-				$p_obj->setUser( $p_obj->getPunchControlObject()->getUserDateObject()->getUser() );
+				$p_obj->setUser( $p_obj->getPunchControlObject()->getUser() );
 				$p_obj->setDeleted(TRUE);
 				$p_obj->setEnableCalcTotalTime( TRUE );
 				$p_obj->setEnableCalcSystemTotalTime( TRUE );
@@ -5836,6 +6236,56 @@ class DemoData {
 		return $retval;
 	}
 
+	function createAbsence( $user_id, $date_stamp, $total_time, $absence_policy_id ) {
+		$udtf = TTnew( 'UserDateTotalFactory' );
+
+		$udtf->StartTransaction();
+
+		$aplf = TTnew('AbsencePolicyListFactory');
+		$aplf->getById( $absence_policy_id );
+		if ( $aplf->getRecordCount() == 1 ) {
+			$pay_code_id = $aplf->getCurrent()->getPayCode();
+			
+			$udtf->setUser( $user_id );
+			$udtf->setDateStamp( $date_stamp );
+			$udtf->setObjectType( 50 ); //Absence Time (Taken)
+			$udtf->setSourceObject( (int)$absence_policy_id );
+			$udtf->setPayCode( $pay_code_id );
+
+			$udtf->setBranch( (int)0 );
+			$udtf->setDepartment( (int)0 );
+			$udtf->setJob( (int)0 );
+			$udtf->setJobItem( (int)0 );
+
+			$udtf->setQuantity( 0 );
+			$udtf->setBadQuantity( 0 );
+			$udtf->setTotalTime( $total_time );
+
+			$udtf->setOverride( TRUE );
+
+			$udtf->setEnableTimeSheetVerificationCheck(TRUE); //Unverify timesheet if its already verified.
+			$udtf->setEnableCalcSystemTotalTime( TRUE );
+			$udtf->setEnableCalcWeeklySystemTotalTime( TRUE );
+			$udtf->setEnableCalcException( TRUE );
+
+			if ( $udtf->isValid() ) {
+				$retval = $udtf->Save();
+
+				$udtf->CommitTransaction();
+
+				return $retval;
+			}
+			
+			Debug::Text(' Failed creating Absence...', __FILE__, __LINE__, __METHOD__, 10);
+		} else {
+			Debug::Text(' Failed creating Absence, Absence policy does not exist...', __FILE__, __LINE__, __METHOD__, 10);
+		}
+
+		$udtf->FailTransaction();
+
+		return FALSE;
+	}
+
 	function createPunchPair( $user_id, $in_time_stamp, $out_time_stamp, $data = NULL, $calc_total_time = TRUE ) {
 		$fail_transaction = FALSE;
 
@@ -5931,7 +6381,7 @@ class DemoData {
 			if ( isset($data['bad_quantity']) ) {
 				$pcf->setBadQuantity( $data['bad_quantity'] );
 			}
-
+			
 			$pcf->setEnableCalcUserDateID( TRUE );
 			$pcf->setEnableCalcTotalTime( $calc_total_time );
 			$pcf->setEnableCalcSystemTotalTime( $calc_total_time );
@@ -5940,7 +6390,15 @@ class DemoData {
 			$pcf->setEnableCalcException( $calc_total_time );
 
 			if ( $pcf->isValid() == TRUE ) {
-				$punch_control_id = $pcf->Save(TRUE, TRUE); //Force lookup
+				$punch_control_id = $pcf->Save(FALSE, TRUE); //Force lookup
+
+				if ( isset($pf_in) AND is_object($pf_in) AND isset($pf_out) AND is_object( $pf_out ) ) {
+					Debug::Text(' Using Out Punch Object to save PunchControl for the 2nd time. TimeStamp: '. $pf_out->getTimeStamp(), __FILE__, __LINE__, __METHOD__, 10);
+					$pcf->setPunchObject( $pf_out );
+					if ( $pcf->isValid() == TRUE ) {
+						$punch_control_id = $pcf->Save(FALSE, TRUE); //Force lookup
+					}
+				}
 
 				if ( $fail_transaction == FALSE ) {
 					Debug::Text('Punch Control ID: '. $punch_control_id, __FILE__, __LINE__, __METHOD__, 10);
@@ -5958,12 +6416,12 @@ class DemoData {
 		return FALSE;
 	}
 
-	function createAccrualBalance( $user_id, $accrual_policy_id, $type = 30) {
+	function createAccrualBalance( $user_id, $accrual_policy_account_id, $type = 30) {
 		$af = TTnew( 'AccrualFactory' );
 
 		$af->setUser( $user_id );
 		$af->setType( $type ); //Awarded
-		$af->setAccrualPolicyID( $accrual_policy_id );
+		$af->setAccrualPolicyAccount( $accrual_policy_account_id );
 		$af->setAmount( rand((3600 * 8), (3600 * 24))  );
 		$af->setTimeStamp( time() - (86400 * 3) );
 		$af->setEnableCalcBalance( TRUE );
@@ -6212,12 +6670,49 @@ class DemoData {
 			$policy_ids['round'][] = $this->createRoundingPolicy( $company_id, 10 ); //In
 			$policy_ids['round'][] = $this->createRoundingPolicy( $company_id, 20 ); //Out
 
-			$policy_ids['accrual'][] = $this->createAccrualPolicy( $company_id, 10 ); //Bank Time
-			$policy_ids['accrual'][] = $this->createAccrualPolicy( $company_id, 20 ); //Vacaction
-			$policy_ids['accrual'][] = $this->createAccrualPolicy( $company_id, 30 ); //Sick
+			$policy_ids['accrual_account'][] = $this->createAccrualPolicyAccount( $company_id, 10 ); //Bank Time
+			$policy_ids['accrual_account'][] = $this->createAccrualPolicyAccount( $company_id, 20 ); //Vacaction
+			$policy_ids['accrual_account'][] = $this->createAccrualPolicyAccount( $company_id, 30 ); //Sick
 
-			$policy_ids['overtime'][] = $this->createOverTimePolicy( $company_id, 10 );
-			$policy_ids['overtime'][] = $this->createOverTimePolicy( $company_id, 20, $policy_ids['accrual'][0] );
+			$policy_ids['accrual'][] = $this->createAccrualPolicy( $company_id, 10, $policy_ids['accrual_account'][0] ); //Bank Time
+			$policy_ids['accrual'][] = $this->createAccrualPolicy( $company_id, 20, $policy_ids['accrual_account'][1] ); //Vacaction
+			$policy_ids['accrual'][] = $this->createAccrualPolicy( $company_id, 30, $policy_ids['accrual_account'][2] ); //Sick
+
+			$policy_ids['pay_formula_policy'][100] = $this->createPayFormulaPolicy( $company_id, 100 ); //Regular
+			$policy_ids['pay_formula_policy'][110] = $this->createPayFormulaPolicy( $company_id, 110, $policy_ids['accrual_account'][1] ); //Vacation
+			$policy_ids['pay_formula_policy'][120] = $this->createPayFormulaPolicy( $company_id, 120, $policy_ids['accrual_account'][0] ); //Bank
+			$policy_ids['pay_formula_policy'][130] = $this->createPayFormulaPolicy( $company_id, 130, $policy_ids['accrual_account'][2] ); //Sick
+			$policy_ids['pay_formula_policy'][200] = $this->createPayFormulaPolicy( $company_id, 200 ); //OT1.5
+			$policy_ids['pay_formula_policy'][210] = $this->createPayFormulaPolicy( $company_id, 210, $policy_ids['accrual_account'][0] ); //OT2.0
+			$policy_ids['pay_formula_policy'][300] = $this->createPayFormulaPolicy( $company_id, 300 ); //Prem1
+			$policy_ids['pay_formula_policy'][310] = $this->createPayFormulaPolicy( $company_id, 310 ); //Prem2
+
+			$policy_ids['pay_code'][100] = $this->createPayCode( $company_id, 100, $policy_ids['pay_formula_policy'][100] ); //Regular
+			$policy_ids['pay_code'][190] = $this->createPayCode( $company_id, 190, $policy_ids['pay_formula_policy'][100] ); //Lunch
+			$policy_ids['pay_code'][192] = $this->createPayCode( $company_id, 192, $policy_ids['pay_formula_policy'][100] ); //Break
+			$policy_ids['pay_code'][200] = $this->createPayCode( $company_id, 200, $policy_ids['pay_formula_policy'][200] ); //OT1
+			$policy_ids['pay_code'][210] = $this->createPayCode( $company_id, 210, $policy_ids['pay_formula_policy'][210] ); //OT2
+			$policy_ids['pay_code'][300] = $this->createPayCode( $company_id, 300, $policy_ids['pay_formula_policy'][300] ); //Prem1
+			$policy_ids['pay_code'][310] = $this->createPayCode( $company_id, 310, $policy_ids['pay_formula_policy'][310] ); //Prem2
+			$policy_ids['pay_code'][900] = $this->createPayCode( $company_id, 900, $policy_ids['pay_formula_policy'][110] ); //Vacation
+			$policy_ids['pay_code'][910] = $this->createPayCode( $company_id, 910, $policy_ids['pay_formula_policy'][120] ); //Bank
+			$policy_ids['pay_code'][920] = $this->createPayCode( $company_id, 920, $policy_ids['pay_formula_policy'][130] ); //Sick
+
+			$policy_ids['contributing_pay_code_policy'][10] = $this->createContributingPayCodePolicy( $company_id, 10, array( $policy_ids['pay_code'][100] ) ); //Regular
+			$policy_ids['contributing_pay_code_policy'][12] = $this->createContributingPayCodePolicy( $company_id, 12, array( $policy_ids['pay_code'][100], $policy_ids['pay_code'][190], $policy_ids['pay_code'][192] ) ); //Regular+Meal/Break
+			$policy_ids['contributing_pay_code_policy'][14] = $this->createContributingPayCodePolicy( $company_id, 14, array( $policy_ids['pay_code'][100], $policy_ids['pay_code'][190], $policy_ids['pay_code'][192], $policy_ids['pay_code'][900] ) ); //Regular+Meal/Break+Absence
+			$policy_ids['contributing_pay_code_policy'][20] = $this->createContributingPayCodePolicy( $company_id, 20, array( $policy_ids['pay_code'][100], $policy_ids['pay_code'][200], $policy_ids['pay_code'][210], $policy_ids['pay_code'][190], $policy_ids['pay_code'][192] ) ); //Regular+OT+Meal/Break
+			$policy_ids['contributing_pay_code_policy'][90] = $this->createContributingPayCodePolicy( $company_id, 90, array( $policy_ids['pay_code'][900] ) ); //Absence
+			$policy_ids['contributing_pay_code_policy'][99] = $this->createContributingPayCodePolicy( $company_id, 99, $policy_ids['pay_code'] ); //All Time
+
+			$policy_ids['contributing_shift_policy'][10] = $this->createContributingShiftPolicy( $company_id, 10, $policy_ids['contributing_pay_code_policy'][14] ); //Regular
+			$policy_ids['contributing_shift_policy'][20] = $this->createContributingShiftPolicy( $company_id, 20, $policy_ids['contributing_pay_code_policy'][20] ); //Regular+OT+Meal/Break
+
+			$policy_ids['regular'][] = $this->createRegularTimePolicy( $company_id, 10, $policy_ids['contributing_shift_policy'][10], $policy_ids['pay_code'][100] );
+
+			$policy_ids['overtime'][] = $this->createOverTimePolicy( $company_id, 10, $policy_ids['contributing_shift_policy'][10], $policy_ids['pay_code'][200] );
+			$policy_ids['overtime'][] = $this->createOverTimePolicy( $company_id, 20, $policy_ids['contributing_shift_policy'][10], $policy_ids['pay_code'][210] );
+			$policy_ids['overtime'][] = $this->createOverTimePolicy( $company_id, 30, $policy_ids['contributing_shift_policy'][10], $policy_ids['pay_code'][200] );
 
 			if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
 				$policy_ids['expense'][] = $this->createExpensePolicy( $company_id, 100 ); // Tax(Percent) - HST
@@ -6232,11 +6727,12 @@ class DemoData {
 				$policy_ids['expense'] = array();
 			}
 
-			$policy_ids['premium'][] = $this->createPremiumPolicy( $company_id, 10 );
+			$policy_ids['premium'][] = $this->createPremiumPolicy( $company_id, 10, $policy_ids['contributing_shift_policy'][10], $policy_ids['pay_code'][300] );
+			$policy_ids['premium'][] = $this->createPremiumPolicy( $company_id, 20, $policy_ids['contributing_shift_policy'][10], $policy_ids['pay_code'][310] );
 
-			$policy_ids['absence'][] = $this->createAbsencePolicy( $company_id, 10, $policy_ids['accrual'][1] );
-			$policy_ids['absence'][] = $this->createAbsencePolicy( $company_id, 20, $policy_ids['accrual'][0] );
-			$policy_ids['absence'][] = $this->createAbsencePolicy( $company_id, 30, $policy_ids['accrual'][2] );
+			$policy_ids['absence'][] = $this->createAbsencePolicy( $company_id, 10, $policy_ids['pay_code'][900] ); //Vacation
+			$policy_ids['absence'][] = $this->createAbsencePolicy( $company_id, 20, $policy_ids['pay_code'][910] ); //Bank
+			$policy_ids['absence'][] = $this->createAbsencePolicy( $company_id, 30, $policy_ids['pay_code'][920] ); //Sick
 
 			$policy_ids['meal_1'] = $this->createMealPolicy( $company_id );
 
@@ -6280,7 +6776,9 @@ class DemoData {
 										NULL,
 										NULL,
 										$policy_ids['expense'],
-										$policy_ids['absence'] );
+										$policy_ids['absence'],
+										$policy_ids['regular']
+										);
 
 			if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 				//Client Groups
@@ -6458,10 +6956,10 @@ class DemoData {
 
 			//Create Accrual balances
 			foreach( $user_ids as $user_id ) {
-				foreach( $policy_ids['accrual'] as $accrual_policy_id ) {
-					$this->createAccrualBalance( $user_id, $accrual_policy_id );
+				foreach( $policy_ids['accrual_account'] as $accrual_policy_account_id ) {
+					$this->createAccrualBalance( $user_id, $accrual_policy_account_id );
 				}
-				unset($accrual_policy_id);
+				unset($accrual_policy_account_id);
 			}
 
 

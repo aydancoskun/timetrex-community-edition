@@ -29,6 +29,7 @@ require.config( {
 		'ALayoutIDs': 'global/widgets/awesomebox/ALayoutIDs',
 		'ColumnEditor': 'global/widgets/column_editor/ColumnEditor',
 		'SaveAndContinueBox': 'global/widgets/message_box/SaveAndContinueBox',
+		'NoHierarchyBox': 'global/widgets/message_box/NoHierarchyBox',
 		'NoResultBox': 'global/widgets/message_box/NoResultBox',
 		'SeparatedBox': 'global/widgets/separated_box/SeparatedBox',
 		'TTextInput': 'global/widgets/text_input/TTextInput',
@@ -130,6 +131,7 @@ require( [
 		'ALayoutIDs',
 		'ColumnEditor',
 		'SaveAndContinueBox',
+		'NoHierarchyBox',
 		'NoResultBox',
 		'SeparatedBox',
 		'TTextInput',
@@ -425,6 +427,8 @@ require( [
 				if ( script === true ) {
 					cUrl = LocalURL.url();
 				}
+
+				need_load_pre_login_data = true;
 			}
 
 			cUrl = getRelatedURL( cUrl );
@@ -441,7 +445,6 @@ require( [
 			} else {
 				need_load_pre_login_data = false;
 			}
-
 			if ( !loginData.hasOwnProperty( 'api_base_url' ) ) {
 				api_authentication.getPreLoginData( null, {onResult: function( e ) {
 
@@ -544,4 +547,3 @@ require( [
 
 	// some code here
 } );
-

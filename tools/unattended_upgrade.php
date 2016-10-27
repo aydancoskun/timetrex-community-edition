@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 1246 $
- * $Id: fix_client_balance.php 1246 2007-09-14 23:47:42Z ipso $
- * $Date: 2007-09-14 16:47:42 -0700 (Fri, 14 Sep 2007) $
- */
+
 
 //This must go above include for global.inc.php
 if ( in_array('--config', $argv) ) {

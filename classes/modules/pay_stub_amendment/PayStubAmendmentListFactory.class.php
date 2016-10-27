@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14800 $
- * $Id: PayStubAmendmentListFactory.class.php 14800 2014-10-16 19:27:31Z mikeb $
- * $Date: 2014-10-16 12:27:31 -0700 (Thu, 16 Oct 2014) $
- */
+
 
 /**
  * @package Modules\PayStubAmendment

@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 12069 $
- * $Id: RecurringScheduleTemplateControlListFactory.class.php 12069 2014-01-20 18:48:05Z mikeb $
- * $Date: 2014-01-20 10:48:05 -0800 (Mon, 20 Jan 2014) $
- */
+
 
 /**
  * @package Modules\Schedule

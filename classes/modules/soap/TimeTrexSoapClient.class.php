@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 13257 $
- * $Id: TimeTrexSoapClient.class.php 13257 2014-05-23 21:07:35Z mikeb $
- * $Date: 2014-05-23 14:07:35 -0700 (Fri, 23 May 2014) $
- */
+
 
 /**
  * @package Modules\SOAP
@@ -118,6 +114,7 @@ class TimeTrexSoapClient {
 					foreach( $clf as $c_obj ) {
 						$company_data = array(
 												'system_version' => APPLICATION_VERSION,
+												'application_version_date' => APPLICATION_VERSION_DATE,
 												'registration_key' => $this->getLocalRegistrationKey(),
 												'product_edition_id' => $c_obj->getProductEdition(),
 												'product_edition_available' => getTTProductEdition(),
@@ -499,10 +496,35 @@ class TimeTrexSoapClient {
 				$company_data['province'] = $c_obj->getProvince();
 				$company_data['postal_code'] = $c_obj->getPostalCode();
 
+				//Get Last user login date.
 				$ulf = TTnew('UserListFactory');
 				$ulf->getByCompanyId( $company_id, 1, NULL, array( 'last_login_date' => 'is not null' ), array( 'last_login_date' => 'desc' ) );
 				if ( $ulf->getRecordCount() == 1 ) {
 					$company_data['last_login_date'] = $ulf->getCurrent()->getLastLoginDate();
+				}
+				//Get Last Punch Date (before today). Use PunchControl table only as its much faster.
+				$plf = TTnew('PunchControlListFactory');
+				$plf->getByCompanyId( $company_id, 1, NULL, array( array('date_stamp' => ">= '". $plf->db->BindTimeStamp( TTDate::getBeginDayEpoch( time() - (86400 * 30) ) )."'") , array( 'date_stamp' => "<= '". $plf->db->BindTimeStamp( TTDate::getEndDayEpoch( time() ) )."'" ) ), array( 'date_stamp' => 'desc' ) );
+				if ( $plf->getRecordCount() == 1 ) {
+					$company_data['last_punch_date'] = $plf->getCurrent()->getDateStamp();
+				}
+				//Get Last Schedule Date (before today)
+				$slf = TTnew('ScheduleListFactory');
+				$slf->getByCompanyId( $company_id, 1, NULL, array( array('date_stamp' => ">= '". $slf->db->BindTimeStamp( TTDate::getBeginDayEpoch( time() - (86400 * 30) ) )."'") , array( 'date_stamp' => "<= '". $slf->db->BindTimeStamp( TTDate::getEndDayEpoch( time() ) )."'" ) ), array( 'date_stamp' => 'desc' ) );
+				if ( $slf->getRecordCount() == 1 ) {
+					$company_data['last_schedule_date'] = $slf->getCurrent()->getStartTime();
+				}
+				//Get Last Pay Stub Date (before today)
+				$pslf = TTnew('PayStubListFactory');
+				$pslf->getByCompanyId( $company_id, 1, NULL, array( array('a.start_date' => ">= '". $pslf->db->BindTimeStamp( TTDate::getBeginDayEpoch( time() - (86400 * 30) ) )."'") , array( 'a.start_date' => "<= '". $pslf->db->BindTimeStamp( TTDate::getEndDayEpoch( time() ) )."'" ) ), array( 'a.start_date' => 'desc' ) );
+				if ( $pslf->getRecordCount() == 1 ) {
+					$company_data['last_pay_stub_date'] = $pslf->getCurrent()->getEndDate();
+				}
+				//Get Last Review Date (before today)
+				$rclf = TTnew('UserReviewControlListFactory');
+				$rclf->getByCompanyId( $company_id, 1, NULL, array( array('a.created_date' => ">= ". TTDate::getBeginDayEpoch( time() - (86400 * 30) ) ) , array( 'a.created_date' => "<= ". TTDate::getEndDayEpoch( time() )  ) ), array( 'a.created_date' => 'desc' ) );
+				if ( $rclf->getRecordCount() == 1 ) {
+					$company_data['last_user_review_date'] = $rclf->getCurrent()->getCreatedDate();
 				}
 
 				Debug::Text('Sent Company Data...', __FILE__, __LINE__, __METHOD__, 10);
@@ -656,6 +678,17 @@ class TimeTrexSoapClient {
 	//
 	// Email relay through SOAP
 	//
+	function validateEmail( $email ) {
+		global $config_vars;
+
+		$company_data = $this->getPrimaryCompanyData();
+		if ( is_array( $company_data ) AND $email != '' ) {
+			return $this->getSoapObject()->validateEmail( $email, $company_data );
+		}
+
+		return FALSE;
+	}
+
 	function sendEmail( $to, $headers, $body ) {
 		global $config_vars;
 

@@ -60,10 +60,11 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'Recurring Schedule' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_recurring_schedule': $.i18n._( 'Recurring Schedule' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
+
 
 		var form_item_input;
 		var widgetContainer;
@@ -82,13 +83,13 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_recurring_schedule = this.edit_view_tab.find( '#tab_recurring_schedule' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_recurring_schedule_column1 = tab_recurring_schedule.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_recurring_schedule_column1 );
 
 		// Template
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -101,13 +102,13 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'recurring_schedule_template_control_id'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Template' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Template' ), form_item_input, tab_recurring_schedule_column1, '' );
 
 		// Start Week
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'start_week', width: 37} );
-		this.addEditFieldToColumn( $.i18n._( 'Start Week' ), form_item_input, tab0_column1 );
+		form_item_input.TTextInput( {field: 'start_week', width: 40} );
+		this.addEditFieldToColumn( $.i18n._( 'Start Week' ), form_item_input, tab_recurring_schedule_column1 );
 
 		// Start Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
@@ -119,7 +120,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab0_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_recurring_schedule_column1, '', widgetContainer );
 
 		// End Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
@@ -131,7 +132,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab0_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab_recurring_schedule_column1, '', widgetContainer );
 
 		// Auto-Punch
 
@@ -144,7 +145,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 
-		this.addEditFieldToColumn( $.i18n._( 'Auto-Punch' ), form_item_input, tab0_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Auto-Punch' ), form_item_input, tab_recurring_schedule_column1, '', widgetContainer );
 
 		// Employees
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -191,7 +192,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 			form_item_input.setDefaultArgs( default_args );
 		}
 
-		this.addEditFieldToColumn( $.i18n._( 'Employees' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Employees' ), form_item_input, tab_recurring_schedule_column1, '', null, true );
 
 	},
 
@@ -491,7 +492,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 	},
 
-	onContentMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function( context_btn, menu_name ) {
 		if ( Global.isSet( menu_name ) ) {
 			var id = menu_name;
 		} else {
@@ -987,6 +988,11 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 	},
 
 	setDefaultMenu: function( doNotSetFocus ) {
+
+        //Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+        if (!this.context_menu_array) {
+            return;
+        }
 
 		if ( !Global.isSet( doNotSetFocus ) || !doNotSetFocus ) {
 			this.selectContextMenu();

@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 12334 $
- * $Id: RecurringHolidayFactory.class.php 12334 2014-02-14 00:52:54Z mikeb $
- * $Date: 2014-02-13 16:52:54 -0800 (Thu, 13 Feb 2014) $
- */
+
 
 /**
  * @package Modules\Holiday
@@ -58,6 +54,7 @@ class RecurringHolidayFactory extends Factory {
 										0 => TTi18n::gettext('N/A'),
 										1 => TTi18n::gettext('Good Friday'),
 										5 => TTi18n::gettext('Easter Sunday'),
+										6 => TTi18n::gettext('Easter Monday'),
 									);
 				break;
 
@@ -138,6 +135,7 @@ class RecurringHolidayFactory extends Factory {
 										'company_id' => 'Company',
 										'special_day' => 'SpecialDay',
 										'type_id' => 'Type',
+										'type' => FALSE,
 										'pivot_day_direction_id' => 'PivotDayDirection',
 										'name' => 'Name',
 										'week_interval' => 'WeekInterval',
@@ -440,7 +438,7 @@ class RecurringHolidayFactory extends Factory {
 			$epoch = TTDate::getTime();
 		}
 
-		if ( $this->getSpecialDay() == 1 OR $this->getSpecialDay() == 5) {
+		if ( $this->getSpecialDay() == 1 OR $this->getSpecialDay() == 5 OR $this->getSpecialDay() == 6 ) {
 			Debug::text('Easter Sunday Date...', __FILE__, __LINE__, __METHOD__, 10);
 
 			//Use easter_days() instead, as easter_date returns incorrect values for some timezones/years (2010 and US/Eastern on Windows)
@@ -459,6 +457,9 @@ class RecurringHolidayFactory extends Factory {
 				Debug::text('Good Friday Date...', __FILE__, __LINE__, __METHOD__, 10);
 				//$holiday_epoch = mktime(12, 0, 0, date('n', $easter_epoch), date('j', $easter_epoch) - 2, date('Y', $easter_epoch));
 				$holiday_epoch = ( $easter_epoch - ( 2 * 86400 ) );
+			} elseif ( $this->getSpecialDay() == 6 ) {
+				Debug::text('Easter Monday Date...', __FILE__, __LINE__, __METHOD__, 10);
+				$holiday_epoch = ( $easter_epoch + 86400 );
 			} else {
 				$holiday_epoch = $easter_epoch;
 			}
@@ -1752,6 +1753,7 @@ class RecurringHolidayFactory extends Factory {
 
 					$function = 'get'.$function_stub;
 					switch( $variable ) {
+						case 'type':
 						case 'status':
 							$function = 'get'.$variable;
 							if ( method_exists( $this, $function ) ) {

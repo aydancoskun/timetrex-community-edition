@@ -155,7 +155,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 		// Don't do anything in this sub class
 	},
 	/* jshint ignore:start */
-	onContentMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function( context_btn, menu_name ) {
 		var id;
 		if ( Global.isSet( menu_name ) ) {
 			id = menu_name;
@@ -220,7 +220,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 		//Export Format
 
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'export_type', set_empty: false } );
+		form_item_input.TComboBox( {field: 'export_type', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.export_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Export Format' ), form_item_input, tab3_column1, '' );
 
@@ -237,48 +237,54 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 		ProgressBar.showOverlay(); //End when set grid data complete
 
-		this.api.getOptions( 'export_policy', {onResult: function( result ) {
-			$this.export_policy_array = result.getResult();
+		this.api.getOptions( 'export_policy', {
+			noCache: true, onResult: function( result ) {
+				$this.export_policy_array = result.getResult();
 
-			switch ( type ) {
-				case 'adp':
-					$this.api.getOptions( 'adp_hour_column_options', {onResult: function( result ) {
+				switch ( type ) {
+					case 'adp':
+						$this.api.getOptions( 'adp_hour_column_options', {
+							onResult: function( result ) {
 
+								$this.buildAdditionalInputBox( type );
+								$this.buildGrid( type, result.getResult() );
+
+							}
+						} );
+						break;
+					case 'va_munis':
+						$this.api.getOptions( 'export_columns', true, {
+							onResult: function( result ) {
+
+								var result_data = result.getResult();
+
+								if ( !result_data.hasOwnProperty( '0' ) ) {
+									result_data[0] = '-- Custom --';
+								}
+
+								$this.buildAdditionalInputBox( type );
+								$this.buildGrid( type, result_data );
+
+							}
+						} );
+						break;
+					case 'ceridian_insync':
+					case 'paychex_preview_advanced_job':
+					case 'paychex_preview':
+					case 'quickbooks':
+					case 'quickbooks_advanced':
+					case 'csv':
+					case 'csv_advanced':
 						$this.buildAdditionalInputBox( type );
-						$this.buildGrid( type, result.getResult() );
+						$this.buildGrid( type );
+						break;
+					default:
+						$this.buildGrid( type );
+						break;
+				}
 
-					}} );
-					break;
-				case 'va_munis':
-					$this.api.getOptions( 'export_columns', true, {onResult: function( result ) {
-
-						var result_data = result.getResult();
-
-						if ( !result_data.hasOwnProperty( '0' ) ) {
-							result_data[0] = '-- Custom --';
-						}
-
-						$this.buildAdditionalInputBox( type );
-						$this.buildGrid( type, result_data );
-
-					}} );
-					break;
-				case 'ceridian_insync':
-				case 'paychex_preview_advanced_job':
-				case 'paychex_preview':
-				case 'quickbooks':
-				case 'quickbooks_advanced':
-				case 'csv':
-				case 'csv_advanced':
-					$this.buildAdditionalInputBox( type );
-					$this.buildGrid( type );
-					break;
-				default:
-					$this.buildGrid( type );
-					break;
 			}
-
-		}} );
+		} );
 
 	},
 	/* jshint ignore:start */
@@ -290,7 +296,14 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 		var column_info_array = [];
 		var column_options_string = '';
 
-		var column_info = {name: 'column_id', index: 'column_id', label: 'Hours', width: 100, sortable: false, title: false};
+		var column_info = {
+			name: 'column_id',
+			index: 'column_id',
+			label: 'Hours',
+			width: 100,
+			sortable: false,
+			title: false
+		};
 		column_info_array.push( column_info );
 
 		var hour_code_label = '';
@@ -310,8 +323,18 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				}
 
-				column_info = {name: 'hour_column', index: 'hour_column', label: 'ADP Hours', width: 100, sortable: false,
-					formatter: 'select', editable: true, title: false, edittype: 'select', editoptions: {value: column_options_string}};
+				column_info = {
+					name: 'hour_column',
+					index: 'hour_column',
+					label: 'ADP Hours',
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
 				column_info_array.push( column_info );
 
 				hour_code_label = 'ADP Hours Code';
@@ -354,8 +377,18 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				}
 
-				column_info = {name: 'hour_column', index: 'hour_column', label: 'Columns', width: 100, sortable: false,
-					formatter: 'select', editable: true, title: false, edittype: 'select', editoptions: {value: column_options_string}};
+				column_info = {
+					name: 'hour_column',
+					index: 'hour_column',
+					label: 'Columns',
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
 				column_info_array.push( column_info );
 
 				hour_code_label = 'Hours Code';
@@ -367,8 +400,10 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 		}
 
-		column_info = {name: 'hour_code', index: 'hour_code', label: hour_code_label, width: 100, sortable: false, title: false,
-			editable: true, edittype: 'text'};
+		column_info = {
+			name: 'hour_code', index: 'hour_code', label: hour_code_label, width: 100, sortable: false, title: false,
+			editable: true, edittype: 'text'
+		};
 		column_info_array.push( column_info );
 
 		if ( !this.export_grid ) {
@@ -443,23 +478,30 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 		var len = grid_data.length;
 		var grid_source = [];
 
-		if ( this.export_setup_data.export_columns && this.export_setup_data.export_columns[type] ) {
-			export_columns = this.export_setup_data.export_columns[type].columns;
-			doNext( export_columns );
-			$this.setExportGridSize();
-		} else {
-			this.api.getOptions( 'default_hour_codes', {onResult: function( result ) {
-				var res_data = result.getResult();
+		this.api.getOptions( 'default_hour_codes', {
+			noCache: true,
+			onResult: function( result ) {
 
+				var res_data = result.getResult();
+				var default_columns = [];
 				if ( res_data[type] && res_data[type].columns ) {
-					doNext( res_data[type].columns );
+					default_columns = res_data[type].columns;
+				}
+
+				if ( $this.export_setup_data.export_columns && $this.export_setup_data.export_columns[type] ) {
+					export_columns = $this.export_setup_data.export_columns[type].columns;
+					doNext( export_columns, default_columns );
+				} else {
+					if ( res_data[type] && res_data[type].columns ) {
+						doNext( default_columns );
+					}
 				}
 
 				$this.setExportGridSize();
-			}} );
-		}
+			}
+		} );
 
-		function doNext( export_columns ) {
+		function doNext( export_columns, default_columns ) {
 			var hour_code;
 			var hour_column;
 			for ( var i = 0; i < len; i++ ) {
@@ -467,10 +509,19 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				var column_id = row.label;
 
 				var export_column_value = export_columns[row.value];
-				if ( export_column_value ) {
-					hour_column = export_column_value.hour_column;
-					hour_code = export_column_value.hour_code;
+
+				if ( !export_column_value ) {
+
+					if ( default_columns ) {
+						export_column_value = default_columns[row.value]
+					} else {
+						export_column_value = {};
+					}
+
 				}
+
+				hour_column = export_column_value.hour_column;
+				hour_code = export_column_value.hour_code;
 
 				switch ( type ) {
 					case 'adp':
@@ -480,7 +531,13 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 							hour_column = '0';
 						}
 
-						var row_data = {id: i + 200, column_id: column_id, hour_column: hour_column, hour_code: hour_code, column_id_key: row.value};
+						var row_data = {
+							id: i + 200,
+							column_id: column_id,
+							hour_column: hour_column,
+							hour_code: hour_code,
+							column_id_key: row.value
+						};
 						break;
 					default:
 						row_data = {id: i + 200, column_id: column_id, hour_code: hour_code, column_id_key: row.value};
@@ -536,9 +593,10 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 			this.setEditMenu();
 		} else if ( ui.index === 2 ) {
 			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column' ).css( 'display', 'block' );
+				this.edit_view_tab.find( '#tab_chart' ).find( '.first-column' ).css( 'display', 'block' );
+				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 			} else {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_chart' ).find( '.first-column' ).css( 'display', 'none' );
 				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
 				this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 			}
@@ -549,6 +607,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 		} else if ( ui.index === 4 ) {
 			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
 				this.edit_view_tab.find( '#tab4' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 				this.initSubCustomColumnView();
 			} else {
 				this.edit_view_tab.find( '#tab4' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
@@ -608,16 +667,18 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				} );
 
-				$this.api.getOptions( 'adp_company_code_options', {onResult: function( result ) {
+				$this.api.getOptions( 'adp_company_code_options', {
+					onResult: function( result ) {
 
-					var result_data = result.getResult();
+						var result_data = result.getResult();
 
-					form_item_input.setSourceData( Global.buildRecordArray( result_data ) );
+						form_item_input.setSourceData( Global.buildRecordArray( result_data ) );
 
-					form_item_input.setValue( $this.export_setup_data[code] );
-					form_item_input.trigger( 'formItemChange', [form_item_input, true] );
+						form_item_input.setValue( $this.export_setup_data[code] );
+						form_item_input.trigger( 'formItemChange', [form_item_input, true] );
 
-				}} );
+					}
+				} );
 
 				$this.export_setup_ui_dic[code] = $this.edit_view_form_item_dic[code];
 				delete $this.edit_view_form_item_dic[code];
@@ -647,12 +708,14 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 					}
 				} );
 
-				$this.api.getOptions( 'adp_batch_options', {onResult: function( result ) {
-					var result_data = result.getResult();
-					form_item_input1.setSourceData( Global.buildRecordArray( result_data ) );
-					form_item_input1.setValue( $this.export_setup_data[code1] );
-					form_item_input1.trigger( 'formItemChange', [form_item_input1, true] );
-				}} );
+				$this.api.getOptions( 'adp_batch_options', {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						form_item_input1.setSourceData( Global.buildRecordArray( result_data ) );
+						form_item_input1.setValue( $this.export_setup_data[code1] );
+						form_item_input1.trigger( 'formItemChange', [form_item_input1, true] );
+					}
+				} );
 
 				$this.export_setup_ui_dic[code1] = $this.edit_view_form_item_dic[code1];
 				delete $this.edit_view_form_item_dic[code1];
@@ -683,12 +746,14 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				} );
 
-				$this.api.getOptions( 'adp_temp_dept_options', {onResult: function( result ) {
-					var result_data = result.getResult();
-					form_item_input2.setSourceData( Global.buildRecordArray( result_data ) );
-					form_item_input2.setValue( $this.export_setup_data[code2] );
-					form_item_input2.trigger( 'formItemChange', [form_item_input2, true] );
-				}} );
+				$this.api.getOptions( 'adp_temp_dept_options', {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						form_item_input2.setSourceData( Global.buildRecordArray( result_data ) );
+						form_item_input2.setValue( $this.export_setup_data[code2] );
+						form_item_input2.trigger( 'formItemChange', [form_item_input2, true] );
+					}
+				} );
 
 				$this.export_setup_ui_dic[code2] = $this.edit_view_form_item_dic[code2];
 				delete $this.edit_view_form_item_dic[code2];
@@ -719,18 +784,20 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 					}
 				} );
 
-				$this.api.getOptions( 'export_columns', {onResult: function( result ) {
-					var result_data = result.getResult();
+				$this.api.getOptions( 'export_columns', {
+					onResult: function( result ) {
+						var result_data = result.getResult();
 
-					if ( !result_data.hasOwnProperty( '0' ) ) {
-						result_data[0] = '-- Custom --';
+						if ( !result_data.hasOwnProperty( '0' ) ) {
+							result_data[0] = '-- Custom --';
+						}
+						form_item_input.setSourceData( Global.buildRecordArray( result_data ) );
+
+						form_item_input.setValue( $this.export_setup_data[code] );
+						form_item_input.trigger( 'formItemChange', [form_item_input, true] );
+
 					}
-					form_item_input.setSourceData( Global.buildRecordArray( result_data ) );
-
-					form_item_input.setValue( $this.export_setup_data[code] );
-					form_item_input.trigger( 'formItemChange', [form_item_input, true] );
-
-				}} );
+				} );
 
 				$this.export_setup_ui_dic[code] = $this.edit_view_form_item_dic[code];
 				delete $this.edit_view_form_item_dic[code];
@@ -760,15 +827,17 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 					}
 				} );
 
-				$this.api.getOptions( 'export_columns', {onResult: function( result ) {
-					var result_data = result.getResult();
-					if ( !result_data.hasOwnProperty( '0' ) ) {
-						result_data[0] = '-- Custom --';
+				$this.api.getOptions( 'export_columns', {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						if ( !result_data.hasOwnProperty( '0' ) ) {
+							result_data[0] = '-- Custom --';
+						}
+						form_item_input1.setSourceData( Global.buildRecordArray( result_data ) );
+						form_item_input1.setValue( $this.export_setup_data[code1] );
+						form_item_input1.trigger( 'formItemChange', [form_item_input1, true] );
 					}
-					form_item_input1.setSourceData( Global.buildRecordArray( result_data ) );
-					form_item_input1.setValue( $this.export_setup_data[code1] );
-					form_item_input1.trigger( 'formItemChange', [form_item_input1, true] );
-				}} );
+				} );
 
 				$this.export_setup_ui_dic[code1] = $this.edit_view_form_item_dic[code1];
 				delete $this.edit_view_form_item_dic[code1];
@@ -799,17 +868,19 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				} );
 
-				$this.api.getOptions( 'export_columns', {onResult: function( result ) {
-					var result_data = result.getResult();
+				$this.api.getOptions( 'export_columns', {
+					onResult: function( result ) {
+						var result_data = result.getResult();
 
-					if ( !result_data.hasOwnProperty( '0' ) ) {
-						result_data[0] = '-- Custom --';
+						if ( !result_data.hasOwnProperty( '0' ) ) {
+							result_data[0] = '-- Custom --';
+						}
+
+						form_item_input2.setSourceData( Global.buildRecordArray( result_data ) );
+						form_item_input2.setValue( $this.export_setup_data[code2] );
+						form_item_input2.trigger( 'formItemChange', [form_item_input2, true] );
 					}
-
-					form_item_input2.setSourceData( Global.buildRecordArray( result_data ) );
-					form_item_input2.setValue( $this.export_setup_data[code2] );
-					form_item_input2.trigger( 'formItemChange', [form_item_input2, true] );
-				}} );
+				} );
 
 				$this.export_setup_ui_dic[code2] = $this.edit_view_form_item_dic[code2];
 				delete $this.edit_view_form_item_dic[code2];
@@ -861,11 +932,13 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				this.addEditFieldToColumn( $.i18n._( 'Job' ), form_item_input1, tab3_column1, '', null, true );
 
-				new (APIFactory.getAPIClass( 'APIJobDetailReport' ))().getOptions( 'static_columns', {onResult: function( result ) {
-					var result_data = result.getResult();
-					form_item_input1.setSourceData( Global.buildRecordArray( result_data ) );
-					form_item_input1.setValue( $this.export_setup_data[code1] );
-				}} );
+				new (APIFactory.getAPIClass( 'APIJobDetailReport' ))().getOptions( 'static_columns', {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						form_item_input1.setSourceData( Global.buildRecordArray( result_data ) );
+						form_item_input1.setValue( $this.export_setup_data[code1] );
+					}
+				} );
 
 				$this.export_setup_ui_dic[code1] = $this.edit_view_form_item_dic[code1];
 				delete $this.edit_view_form_item_dic[code1];
@@ -880,11 +953,13 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				this.addEditFieldToColumn( $.i18n._( 'State' ), form_item_input2, tab3_column1, '', null, true );
 
-				new (APIFactory.getAPIClass( 'APIJobDetailReport' ))().getOptions( 'static_columns', {onResult: function( result ) {
-					var result_data = result.getResult();
-					form_item_input2.setSourceData( Global.buildRecordArray( result_data ) );
-					form_item_input2.setValue( $this.export_setup_data[code2] );
-				}} );
+				new (APIFactory.getAPIClass( 'APIJobDetailReport' ))().getOptions( 'static_columns', {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						form_item_input2.setSourceData( Global.buildRecordArray( result_data ) );
+						form_item_input2.setValue( $this.export_setup_data[code2] );
+					}
+				} );
 
 				$this.export_setup_ui_dic[code2] = $this.edit_view_form_item_dic[code2];
 				delete $this.edit_view_form_item_dic[code2];
@@ -938,11 +1013,13 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				this.addEditFieldToColumn( $.i18n._( 'Map PROJ Field To' ), form_item_input1, tab3_column1, '', null, true );
 
-				this.api.getOptions( 'quickbooks_proj_options', {onResult: function( result ) {
-					var result_data = result.getResult();
-					form_item_input1.setSourceData( Global.buildRecordArray( result_data ) );
-					form_item_input1.setValue( $this.export_setup_data[code1] );
-				}} );
+				this.api.getOptions( 'quickbooks_proj_options', {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						form_item_input1.setSourceData( Global.buildRecordArray( result_data ) );
+						form_item_input1.setValue( $this.export_setup_data[code1] );
+					}
+				} );
 
 				$this.export_setup_ui_dic[code1] = $this.edit_view_form_item_dic[code1];
 				delete $this.edit_view_form_item_dic[code1];
@@ -956,11 +1033,13 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				this.addEditFieldToColumn( $.i18n._( 'Map ITEM Field To' ), form_item_input2, tab3_column1, '', null, true );
 
-				this.api.getOptions( 'quickbooks_proj_options', {onResult: function( result ) {
-					var result_data = result.getResult();
-					form_item_input2.setSourceData( Global.buildRecordArray( result_data ) );
-					form_item_input2.setValue( $this.export_setup_data[code2] );
-				}} );
+				this.api.getOptions( 'quickbooks_proj_options', {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						form_item_input2.setSourceData( Global.buildRecordArray( result_data ) );
+						form_item_input2.setValue( $this.export_setup_data[code2] );
+					}
+				} );
 
 				$this.export_setup_ui_dic[code2] = $this.edit_view_form_item_dic[code2];
 				delete $this.edit_view_form_item_dic[code2];
@@ -974,11 +1053,13 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				this.addEditFieldToColumn( $.i18n._( 'Map JOB Field To' ), form_item_input3, tab3_column1, '', null, true );
 
-				this.api.getOptions( 'quickbooks_proj_options', {onResult: function( result ) {
-					var result_data = result.getResult();
-					form_item_input3.setSourceData( Global.buildRecordArray( result_data ) );
-					form_item_input3.setValue( $this.export_setup_data[code3] );
-				}} );
+				this.api.getOptions( 'quickbooks_proj_options', {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						form_item_input3.setSourceData( Global.buildRecordArray( result_data ) );
+						form_item_input3.setValue( $this.export_setup_data[code3] );
+					}
+				} );
 
 				$this.export_setup_ui_dic[code3] = $this.edit_view_form_item_dic[code3];
 				delete $this.edit_view_form_item_dic[code3];
@@ -998,11 +1079,13 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				this.addEditFieldToColumn( $.i18n._( 'Export Columns' ), form_item_input, tab3_column1, '', null, true );
 
-				this.api.getOptions( 'export_columns', 'csv_advanced', {onResult: function( result ) {
-					var result_data = result.getResult();
-					form_item_input.setSourceData( Global.buildRecordArray( result_data ) );
-					form_item_input.setValue( $this.export_setup_data[code] );
-				}} );
+				this.api.getOptions( 'export_columns', 'csv_advanced', {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						form_item_input.setSourceData( Global.buildRecordArray( result_data ) );
+						form_item_input.setValue( $this.export_setup_data[code] );
+					}
+				} );
 
 				$this.export_setup_ui_dic[code] = $this.edit_view_form_item_dic[code];
 				delete $this.edit_view_form_item_dic[code];
@@ -1028,6 +1111,11 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 		for ( var key in this.export_setup_ui_dic ) {
 			var html_item = this.export_setup_ui_dic[key];
 			html_item.remove();
+		}
+
+		//Error: Unable to get property 'find' of undefined or null reference in https://ondemand3.timetrex.com/interface/html5/ line 1033
+		if ( !this.edit_view_tab ) {
+			return;
 		}
 
 		var tab3 = this.edit_view_tab.find( '#tab3' );

@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 12331 $
- * $Id: RoundIntervalPolicyListFactory.class.php 12331 2014-02-13 18:57:19Z mikeb $
- * $Date: 2014-02-13 10:57:19 -0800 (Thu, 13 Feb 2014) $
- */
+
 
 /**
  * @package Modules\Policy
@@ -145,6 +141,8 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
 	}
 
 	function getByCompanyIdArray($company_id, $include_blank = TRUE) {

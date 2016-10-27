@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 11811 $
- * $Id: Environment.class.php 11811 2013-12-26 23:56:23Z mikeb $
- * $Date: 2013-12-26 15:56:23 -0800 (Thu, 26 Dec 2013) $
- */
+
 
 /**
  * @package Core
@@ -60,7 +56,10 @@ class Environment {
 		global $config_vars;
 
 		if ( isset($config_vars['path']['base_url']) ) {
-			return $config_vars['path']['base_url']. '/'; //Don't use directory separator here
+			if ( substr( $config_vars['path']['base_url'], -1) != '/' ) {
+				return $config_vars['path']['base_url']. '/'; //Don't use directory separator here
+			}
+			return $config_vars['path']['base_url'];
 		}
 
 		return '/';
@@ -69,14 +68,7 @@ class Environment {
 	//Due to how the legacy interface is handled, we need to use the this function to determine the URL to redirect too,
 	//as the base_url needs to be /interface most of the time, for images and such to load properly.
 	static function getDefaultInterfaceBaseURL() {
-		global $config_vars;
-
-		$retval = self::getBaseURL();
-		if ( isset($config_vars['other']['default_interface']) AND strtolower($config_vars['other']['default_interface']) != 'html' ) {
-			$retval .= strtolower($config_vars['other']['default_interface']) . '/';
-		}
-
-		return $retval;
+		return self::getBaseURL();
 	}
 
 	//Returns the BASE_URL for the API functions.

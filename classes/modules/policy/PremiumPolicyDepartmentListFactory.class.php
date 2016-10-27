@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 11811 $
- * $Id: PremiumPolicyDepartmentListFactory.class.php 11811 2013-12-26 23:56:23Z mikeb $
- * $Date: 2013-12-26 15:56:23 -0800 (Thu, 26 Dec 2013) $
- */
+
 
 /**
  * @package Modules\Policy
@@ -83,22 +79,28 @@ class PremiumPolicyDepartmentListFactory extends PremiumPolicyDepartmentFactory 
 			return FALSE;
 		}
 
-		$ppf = new PremiumPolicyFactory();
+		$cache_id = 'premium_policy-'. $company_id;
+		$this->rs = $this->getCache( $cache_id );
+		if ( $this->rs === FALSE ) {
+			$ppf = new PremiumPolicyFactory();
 
-		$ph = array(
-					'company_id' => $company_id
-					);
+			$ph = array(
+						'company_id' => $company_id
+						);
 
-		$query = '
-					select	a.*
-					from	'. $this->getTable() .' as a
-					LEFT JOIN '. $ppf->getTable() .' as ppf ON a.premium_policy_id = ppf.id
-					where	ppf.company_id = ?
-						AND ( ppf.deleted = 0 )';
-		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+			$query = '
+						select	a.*
+						from	'. $this->getTable() .' as a
+						LEFT JOIN '. $ppf->getTable() .' as ppf ON a.premium_policy_id = ppf.id
+						where	ppf.company_id = ?
+							AND ( ppf.deleted = 0 )';
+			$query .= $this->getWhereSQL( $where );
+			$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph );
+			$this->ExecuteSQL( $query, $ph );
+
+			$this->saveCache($this->rs, $cache_id);
+		}
 
 		return $this;
 	}

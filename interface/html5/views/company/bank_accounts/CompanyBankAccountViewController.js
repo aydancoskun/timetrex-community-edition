@@ -230,28 +230,28 @@ CompanyBankAccountViewController = BaseViewController.extend( {
 		this._super( 'buildEditViewUI' );
 
 		var $this = this;
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
 
-		tab_0_label.text( $.i18n._( 'Bank Account' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_bank_account': $.i18n._( 'Bank Account' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_bank_account = this.edit_view_tab.find( '#tab_bank_account' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
-		var tab0_column2 = tab0.find( '.second-column' );
+		var tab_bank_account_column1 = tab_bank_account.find( '.first-column' );
+		var tab_bank_account_column2 = tab_bank_account.find( '.second-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
-		this.edit_view_tabs[0].push( tab0_column2 );
+		this.edit_view_tabs[0].push( tab_bank_account_column1 );
+		this.edit_view_tabs[0].push( tab_bank_account_column2 );
 
 		// Company
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'company_name'} );
-		this.addEditFieldToColumn( $.i18n._( 'Company' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Company' ), form_item_input, tab_bank_account_column1, '' );
 
 		// the case country is US
 		// Account Type
@@ -259,29 +259,29 @@ CompanyBankAccountViewController = BaseViewController.extend( {
 
 		form_item_input.TComboBox( {field: 'institution1'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.ach_transaction_type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Account Type' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Account Type' ), form_item_input, tab_bank_account_column1, '', null, true );
 
 		// the case country is CA
 		// Institution Number
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT_NO_AUTO );
-		form_item_input.TTextInput( {field: 'institution2', width: 150} );
-		this.addEditFieldToColumn( $.i18n._( 'Institution Number' ), form_item_input, tab0_column1, '', null, true );
+		form_item_input.TTextInput( {field: 'institution2', width: 30} );
+		this.addEditFieldToColumn( $.i18n._( 'Institution Number' ), form_item_input, tab_bank_account_column1, '', null, true );
 
 		// Routing Number( US ), Bank Transit( CA )
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT_NO_AUTO );
-		form_item_input.TTextInput( {field: 'transit', width: 150} );
-		this.addEditFieldToColumn( $.i18n._( 'Routing Number' ), form_item_input, tab0_column1, '', null, true );
+		form_item_input.TTextInput( {field: 'transit', width: 100} );
+		this.addEditFieldToColumn( $.i18n._( 'Routing Number' ), form_item_input, tab_bank_account_column1, '', null, true );
 
 		// Account Number
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT_NO_AUTO );
-		form_item_input.TTextInput( {field: 'account', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'Account Number' ), form_item_input, tab0_column1, '' );
+		form_item_input.TTextInput( {field: 'account', width: 120} );
+		this.addEditFieldToColumn( $.i18n._( 'Account Number' ), form_item_input, tab_bank_account_column1, '' );
 
 	},
 
 	setBankAccount: function() {
-		var tab0 = this.edit_view_tab.find( '#tab0' );
-		var tab0_column2 = tab0.find( '.second-column' );
+		var tab_bank_account = this.edit_view_tab.find( '#tab_bank_account' );
+		var tab_bank_account_column2 = tab_bank_account.find( '.second-column' );
 		var $this = this;
 
 		if ( LocalCacheData.getCurrentCompany().country === 'CA' ) {
@@ -290,7 +290,7 @@ CompanyBankAccountViewController = BaseViewController.extend( {
 
 			$this.edit_view_form_item_dic['transit'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Bank Transit' ) + ': ' );
 
-			tab0_column2.html( "<img src = " + ServiceCaller.rootURL + LocalCacheData.getLoginData().base_url + "images/check_zoom_sm_canadian.jpg" + " />" );
+			tab_bank_account_column2.html( "<img src = " + ServiceCaller.rootURL + LocalCacheData.getLoginData().base_url + "images/check_zoom_sm_canadian.jpg" + " />" );
 
 		} else if ( LocalCacheData.getCurrentCompany().country === 'US' ) {
 
@@ -299,11 +299,11 @@ CompanyBankAccountViewController = BaseViewController.extend( {
 
 			$this.edit_view_form_item_dic['transit'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Routing Number' ) + ': ' );
 
-			tab0_column2.html( "<img src = " + ServiceCaller.rootURL + LocalCacheData.getLoginData().base_url + "images/check_zoom_sm_us.jpg" + " />" );
+			tab_bank_account_column2.html( "<img src = " + ServiceCaller.rootURL + LocalCacheData.getLoginData().base_url + "images/check_zoom_sm_us.jpg" + " />" );
 
 		}
 
-		tab0_column2.css( 'border', 'none' );
+		tab_bank_account_column2.css( 'border', 'none' );
 	}
 
 

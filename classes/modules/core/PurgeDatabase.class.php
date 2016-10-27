@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 5035 $
- * $Id: Misc.class.php 5035 2011-07-25 23:57:01Z ipso $
- * $Date: 2011-07-25 16:57:01 -0700 (Mon, 25 Jul 2011) $
- */
+
 
 class PurgeDatabase {
 	static $parent_table_column_map = array(
@@ -57,11 +53,15 @@ class PurgeDatabase {
 														),
 										'accrual_balance' => array(
 														'users',
-														'accrual_policy'
+														//'accrual_policy'
+														'accrual_policy_account'
 														),
 										'accrual_policy' => array(
 														'company'
 														),
+										'accrual_policy_account' => array(
+														'company',
+														),																														
 										'accrual_policy_milestone' => array(
 														'accrual_policy'
 														),
@@ -112,6 +112,12 @@ class PurgeDatabase {
 										'company_user_count' => array(
 														'company'
 														),
+										'contributing_pay_code_policy' => array(
+														'company',
+														),
+										'contributing_shift_policy' => array(
+														'company',
+														),
 										'currency' => array(
 														'company'
 														),
@@ -139,7 +145,7 @@ class PurgeDatabase {
 														),
 										'exception' => array(
 														'exception_policy',
-														'user_date',
+														'users',
 														'punch',
 														'punch_control'
 														),
@@ -306,6 +312,12 @@ class PurgeDatabase {
 										'over_time_policy' => array(
 														'company',
 														),
+										'pay_code' => array(
+														'company',
+														),
+										'pay_formula_policy' => array(
+														'company',
+														),
 										'pay_period' => array(
 														'company',
 														'pay_period_schedule'
@@ -403,7 +415,7 @@ class PurgeDatabase {
 														'punch_control',
 														),
 										'punch_control' => array(
-														'user_date',
+														'users',
 														),
 										'recurring_holiday' => array(
 														'company'
@@ -428,11 +440,14 @@ class PurgeDatabase {
 														'recurring_schedule_control',
 														'users'
 														),
+										'regular_time_policy' => array(
+														'company',
+														),
 										'report_schedule' => array(
 														'user_report_data'
 														),
 										'request' => array(
-														'user_date'
+														'users',
 														),
 										'roe' => array(
 														'users'
@@ -441,7 +456,7 @@ class PurgeDatabase {
 														'company'
 														),
 										'schedule' => array(
-														'user_date',
+														'users',
 														),
 										'schedule_policy' => array(
 														'company',
@@ -493,11 +508,8 @@ class PurgeDatabase {
 										'tax_policy_object' => array(
 														'tax_policy'
 														),
-										'user_date' => array(
-														'users',
-														),
 										'user_date_total' => array(
-														'user_date',
+														'users',
 														),
 										'user_deduction' => array(
 														'users',
@@ -563,7 +575,6 @@ class PurgeDatabase {
 								'punch_control' => 60, //punch_control must come before user_date
 								'user_date_total' => 60, //user_date_total must come before user_date
 								'schedule' => 60, //schedule must come before user_date
-								'user_date' => 60,
 								'company' => 120,
 								'company_deduction' => 120,
 								'company_deduction_pay_stub_entry_account' => 120,
@@ -578,6 +589,7 @@ class PurgeDatabase {
 								'accrual_balance' => 45, //Doesnt have updated_date column
 								'accrual_policy' => 45,
 								'accrual_policy_milestone' => 45,
+								'accrual_policy_account' => 90,
 								'authorizations' => 45, //Must go before requests.
 								'bank_account' => 45,
 								'branch' => 45,
@@ -585,6 +597,8 @@ class PurgeDatabase {
 								'wage_group' => 45,
 								'cron' => 45,
 								'currency' => 120,
+								'contributing_pay_code_policy' => 45,
+								'contributing_shift_policy' => 45,
 								'department' => 45,
 								'department_branch' => 45,
 								'department_branch_user' => 45,
@@ -604,6 +618,8 @@ class PurgeDatabase {
 								'message_control' => 45,
 								'other_field' => 45,
 								'over_time_policy' => 45,
+								'pay_code' => 90,
+								'pay_formula_policy' => 90,
 								'pay_period' => 45,
 								'pay_period_schedule' => 45,
 								'pay_period_schedule_user' => 45,
@@ -628,6 +644,7 @@ class PurgeDatabase {
 								'recurring_schedule_template' => 45,
 								'recurring_schedule_template_control' => 45,
 								'recurring_schedule_user' => 45,
+								'regular_time_policy' => 45,
 								'request' => 45,
 								'roe' => 45,
 								'round_interval_policy' => 45,
@@ -836,23 +853,22 @@ class PurgeDatabase {
 							break;
 						case 'punch':
 							//Delete punch rows from deleted users, or deleted companies
-							$query[] = 'delete from '. $table .' as a USING punch_control as b, user_date as c, users as d, company as e WHERE a.punch_control_id = b.id AND b.user_date_id = c.id AND c.user_id = d.id AND d.company_id = e.id AND ( a.deleted = 1 OR b.deleted = 1 OR c.deleted = 1 OR d.deleted = 1 OR e.deleted = 1 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND d.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
+							$query[] = 'delete from '. $table .' as a USING punch_control as b, users as d, company as e WHERE a.punch_control_id = b.id AND b.user_id = d.id AND d.company_id = e.id AND ( a.deleted = 1 OR b.deleted = 1 OR d.deleted = 1 OR e.deleted = 1 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND d.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
 							break;
 						case 'punch_control':
 						case 'user_date_total':
 						case 'schedule':
 						case 'request':
 							//Delete punch_control/user_date rows from deleted users, or deleted companies
-							$query[] = 'delete from '. $table .' as a USING user_date as c, users as d, company as e WHERE a.user_date_id = c.id AND c.user_id = d.id AND d.company_id = e.id AND ( a.deleted = 1 OR c.deleted = 1 OR d.deleted = 1 OR e.deleted = 1 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND d.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
+							$query[] = 'delete from '. $table .' as a USING users as d, company as e WHERE a.user_id = d.id AND d.company_id = e.id AND ( a.deleted = 1 OR d.deleted = 1 OR e.deleted = 1 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND d.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
 							break;
 						case 'exception':
 							//Delete exception rows from deleted users, or deleted companies
-							$query[] = 'delete from '. $table .' as a USING user_date as c, users as d, company as e WHERE a.user_date_id = c.id AND c.user_id = d.id AND d.company_id = e.id AND ( a.deleted = 1 OR c.deleted = 1 OR d.deleted = 1 OR e.deleted = 1 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND d.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
+							$query[] = 'delete from '. $table .' as a USING users as d, company as e WHERE a.user_id = d.id AND d.company_id = e.id AND ( a.deleted = 1 OR d.deleted = 1 OR e.deleted = 1 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND d.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
 
 							//Delete exception rows from terminated users after they have been terminated for 3x the regular expire length.
-							$query[] = 'delete from '. $table .' as a USING user_date as c, users as d, company as e WHERE a.user_date_id = c.id AND c.user_id = d.id AND d.company_id = e.id AND ( d.status_id = 20 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days * 3))) .' AND d.updated_date <= '. (time() - (86400 * ($expire_days * 3))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days * 3))) .')';
+							$query[] = 'delete from '. $table .' as a USING users as d, company as e WHERE a.user_id = d.id AND d.company_id = e.id AND ( d.status_id = 20 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days * 3))) .' AND d.updated_date <= '. (time() - (86400 * ($expire_days * 3))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days * 3))) .')';
 							break;
-						case 'user_date':
 						case 'user_identification':
 						case 'user_generic_data':
 						case 'pay_period_time_sheet_verify':
@@ -1011,6 +1027,7 @@ class PurgeDatabase {
 					if ( isset($query) AND is_array($query) ) {
 						$i = 0;
 						foreach( $query as $q ) {
+							//echo "Query: ". $q ."\n"; //Help with debugging SQL syntax errors.
 							$db->Execute( $q );
 							Debug::Text('Query: '. $q, __FILE__, __LINE__, __METHOD__, 10);
 							Debug::Text('Table found for purging: '. $table .'('.$i.') Expire Days: '. $expire_days .' Purged Rows: '. $db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);

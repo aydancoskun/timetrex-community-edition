@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 13741 $
- * $Id: FormVariables.class.php 13741 2014-07-17 01:09:01Z mikeb $
- * $Date: 2014-07-16 18:09:01 -0700 (Wed, 16 Jul 2014) $
- */
+
 
 /**
  * @package Core

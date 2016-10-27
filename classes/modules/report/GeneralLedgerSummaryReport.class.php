@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2095 $
- * $Id: Sort.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
- */
+
 
 /**
  * @package Modules\Report
@@ -524,14 +520,31 @@ class GeneralLedgerSummaryReport extends Report {
 					$job_id = $udt_obj->getColumn('job_id');
 					$job_item_id = $udt_obj->getColumn('job_item');
 
-					$status_id = $udt_obj->getColumn('status_id');
-					$type_id = $udt_obj->getColumn('type_id');
+					$time_columns = $udt_obj->getTimeCategory( FALSE, $columns  ); //Exclude 'total' as its not used in reports anyways, and causes problems when grouping by branch/default branch.
+					foreach( $time_columns as $column ) {
+						//Debug::Text('bColumn: '. $column .' Total Time: '. $udt_obj->getColumn('total_time') .' Object Type ID: '. $udt_obj->getColumn('object_type_id') .' Rate: '. $udt_obj->getColumn( 'hourly_rate' ), __FILE__, __LINE__, __METHOD__, 10);
 
-					$column = $udt_obj->getTimeCategory();
+						if ( ( $column == 'worked' OR $column == 'absence' ) AND $udt_obj->getColumn('total_time') != 0 ) {
+							if ( isset($this->tmp_data['user_date_total'][$user_id][$pay_period_id][$branch_id][$department_id][$job_id][$job_item_id]) ) {
+								$this->tmp_data['user_date_total'][$user_id][$pay_period_id][$branch_id][$department_id][$job_id][$job_item_id] += $udt_obj->getColumn('total_time');
+							} else {
+								$this->tmp_data['user_date_total'][$user_id][$pay_period_id][$branch_id][$department_id][$job_id][$job_item_id] = $udt_obj->getColumn('total_time');
+							}
 
+							if ( isset($this->tmp_data['pay_period_total'][$user_id][$pay_period_id]) ) {
+								$this->tmp_data['pay_period_total'][$user_id][$pay_period_id] += $udt_obj->getColumn('total_time');
+							} else {
+								$this->tmp_data['pay_period_total'][$user_id][$pay_period_id] = $udt_obj->getColumn('total_time');
+							}
+						}
+					}
+
+
+/*
+ *					$column = $udt_obj->getTimeCategory();
 					//Or just worked and paid absence time.
 					//Worked time include auto-deduct lunches/breaks though, so we have to exclude those as they can throw off the percentages.
-					if ( ( $type_id == 100 OR $type_id == 110 ) OR ( $column != 'worked_time' AND strpos( $column, 'absence_policy' ) === FALSE ) ) {
+					//if ( ( $type_id == 100 OR $type_id == 110 ) OR ( $column != 'worked' AND strpos( $column, 'absence' ) === FALSE ) ) {
 						$column = NULL;
 					}
 
@@ -551,7 +564,7 @@ class GeneralLedgerSummaryReport extends Report {
 						}
 
 					}
-
+*/
 					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 				}
 			}

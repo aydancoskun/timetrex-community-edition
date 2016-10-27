@@ -267,7 +267,7 @@ PayStubSummaryReportViewController = ReportBaseViewController.extend( {
 		widget.setValue( value.status_id );
 	},
 
-	onContentMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function( context_btn, menu_name ) {
 		if ( Global.isSet( menu_name ) ) {
 			var id = menu_name;
 		} else {

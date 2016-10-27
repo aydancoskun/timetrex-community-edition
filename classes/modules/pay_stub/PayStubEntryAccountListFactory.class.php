@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14800 $
- * $Id: PayStubEntryAccountListFactory.class.php 14800 2014-10-16 19:27:31Z mikeb $
- * $Date: 2014-10-16 12:27:31 -0700 (Thu, 16 Oct 2014) $
- */
+
 
 /**
  * @package Modules\PayStub
@@ -399,6 +395,9 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$uf = new UserFactory();
+		$pcf = new PayCodeFactory();
+		$cdf = new CompanyDeductionFactory();
+		$cdpseaf = new CompanyDeductionPayStubEntryAccountFactory();
 
 		$ph = array(
 					'company_id' => $company_id,
@@ -406,12 +405,34 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 
 		$query = '
 					select	a.*,
+							_ADODB_COUNT
+							(
+								CASE WHEN a.type_id = 40 THEN 1
+								ELSE
+									CASE WHEN EXISTS
+										( select 1 from '. $pcf->getTable() .' as x where x.pay_stub_entry_account_id = a.id and x.deleted = 0)
+									THEN 1
+									ELSE
+										CASE WHEN EXISTS
+											( select 1 from '. $cdf->getTable() .' as x where x.pay_stub_entry_account_id = a.id and x.deleted = 0)
+										THEN 1
+										ELSE
+											CASE WHEN EXISTS
+												( select 1 from '. $cdpseaf->getTable() .' as x where x.pay_stub_entry_account_id = a.id)
+											THEN 1
+											ELSE 0
+											END
+										END
+									END
+								END
+							) as in_use,
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
 							y.last_name as created_by_last_name,
 							z.first_name as updated_by_first_name,
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
+							_ADODB_COUNT
 					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )

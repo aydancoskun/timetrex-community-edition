@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 15602 $
- * $Id: StationFactory.class.php 15602 2014-12-30 00:31:02Z mikeb $
- * $Date: 2014-12-29 16:31:02 -0800 (Mon, 29 Dec 2014) $
- */
+
 include_once('Net/IPv4.php');
 
 /**
@@ -50,6 +46,9 @@ class StationFactory extends Factory {
 	protected $company_obj = NULL;
 
 	function _getFactoryOptions( $name, $parent = NULL ) {
+
+		//Attempt to get the edition of the currently logged in users company, so we can better tailor the columns to them.
+		$product_edition_id = Misc::getCurrentCompanyProductEdition();
 
 		$retval = NULL;
 		switch( $name ) {
@@ -64,7 +63,7 @@ class StationFactory extends Factory {
 											10	=> TTi18n::gettext('PC'),
 									);
 
-				if ( getTTProductEdition() >= 15 ) {
+				if ( $product_edition_id >= 15 ) {
 					$retval[20]	= TTi18n::gettext('PHONE');
 					$retval[25]	= TTi18n::gettext('WirelessWeb (WAP)');
 					$retval[26]	= TTi18n::gettext('Mobile Web Browser'); //Controls mobile device web browser from quick punch.
@@ -257,7 +256,7 @@ class StationFactory extends Factory {
 
 												1073741824 => TTi18n::gettext('Enable: Diagnostic Logs'),
 											);
-						if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+						if ( $product_edition_id >= TT_PRODUCT_CORPORATE ) {
 							$retval[$parent][128]  = TTi18n::gettext('Enable: Job');
 							$retval[$parent][256]  = TTi18n::gettext('Enable: Task');
 							$retval[$parent][512]  = TTi18n::gettext('Enable: Quantity');

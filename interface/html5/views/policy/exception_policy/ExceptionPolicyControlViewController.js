@@ -42,10 +42,12 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'Exception Policy' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+
+		this.setTabLabels( {
+			'tab_exception_policy': $.i18n._( 'Exception Policy' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
+
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIExceptionPolicyControl' )),
@@ -60,23 +62,32 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_exception_policy = this.edit_view_tab.find( '#tab_exception_policy' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_exception_policy_column1 = tab_exception_policy.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_exception_policy_column1 );
 
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab0_column1, 'first_last' );
+		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_exception_policy_column1, 'first_last' );
+
+		form_item_input.parent().width( '45%' );
+
+		// Description
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
+		form_item_input.TTextArea( { field: 'description', width: '100%' } );
+		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_exception_policy_column1, '', null, null, true );
+
+		form_item_input.parent().width( '45%' );
 
 		//Inside editor
 
-		var inside_editor_div = tab0.find( '.inside-editor-div' );
+		var inside_editor_div = tab_exception_policy.find( '.inside-editor-div' );
 		var args = { active: $.i18n._( 'Active' ),
 			code: $.i18n._( 'Code' ),
 			name: $.i18n._( 'Name' ),

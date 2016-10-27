@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2095 $
- * $Id: Sort.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
- */
+
 
 /**
  * @package Modules\Report
@@ -771,16 +767,16 @@ class PunchSummaryReport extends Report {
 			foreach ( $plf as $key => $p_obj ) {
 				$pay_period_ids[$p_obj->getColumn('pay_period_id')] = TRUE;
 
-				if ( !isset($this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]) ) {
+				if ( !isset($this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]) ) {
 					$hourly_rate = 0;
-					if ( $wage_permission_children_ids === TRUE OR in_array( $p_obj->getColumn('user_id'), $wage_permission_children_ids) ) {
+					if ( $wage_permission_children_ids === TRUE OR in_array( $p_obj->getUser(), $wage_permission_children_ids) ) {
 						$hourly_rate = $p_obj->getColumn( 'hourly_rate' );
 					}
 
 					$actual_time_diff = ( (int)$p_obj->getColumn('actual_total_time') - (int)$p_obj->getColumn('total_time') );
 
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')] = array(
-						'user_id' => $p_obj->getColumn('user_id'),
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')] = array(
+						'user_id' => $p_obj->getUser(),
 						'user_group' => $p_obj->getColumn('group'),
 						'branch' => $p_obj->getColumn('branch'),
 						'department' => $p_obj->getColumn('department'),
@@ -845,50 +841,50 @@ class PunchSummaryReport extends Report {
 				}
 
 				if ( $p_obj->getColumn('status_id') == 10 ) {
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['in_time_stamp'] = TTDate::strtotime( $p_obj->getColumn('punch_time_stamp') );
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['in_type'] = Option::getByKey($p_obj->getColumn('type_id'), $punch_type_options, NULL );
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['in_actual_time_stamp'] = TTDate::strtotime( $p_obj->getColumn('punch_actual_time_stamp') );
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['in_time_stamp'] = TTDate::strtotime( $p_obj->getColumn('punch_time_stamp') );
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['in_type'] = Option::getByKey($p_obj->getColumn('type_id'), $punch_type_options, NULL );
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['in_actual_time_stamp'] = TTDate::strtotime( $p_obj->getColumn('punch_actual_time_stamp') );
 
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['in_station_type'] = Option::getByKey($p_obj->getColumn('station_type_id'), $station_type_options, '--' );
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['in_station_station_id'] = $p_obj->getColumn('station_station_id');
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['in_station_source']	= $p_obj->getColumn('station_source');
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['in_station_description'] = $p_obj->getColumn('station_description');
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['in_station_type'] = Option::getByKey($p_obj->getColumn('station_type_id'), $station_type_options, '--' );
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['in_station_station_id'] = $p_obj->getColumn('station_station_id');
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['in_station_source']	= $p_obj->getColumn('station_source');
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['in_station_description'] = $p_obj->getColumn('station_description');
 
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['in_created_date'] = TTDate::strtotime( $p_obj->getColumn('punch_created_date') );
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['in_created_by'] = Misc::getFullName( $p_obj->getColumn('punch_created_by_first_name'), $p_obj->getColumn('punch_created_by_middle_name'), $p_obj->getColumn('punch_created_by_last_name'), FALSE, FALSE );
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['in_updated_date'] = TTDate::strtotime( $p_obj->getColumn('punch_updated_date') );
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['in_updated_by'] = Misc::getFullName( $p_obj->getColumn('punch_updated_by_first_name'), $p_obj->getColumn('punch_updated_by_middle_name'), $p_obj->getColumn('punch_updated_by_last_name'), FALSE, FALSE );
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['in_created_date'] = TTDate::strtotime( $p_obj->getColumn('punch_created_date') );
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['in_created_by'] = Misc::getFullName( $p_obj->getColumn('punch_created_by_first_name'), $p_obj->getColumn('punch_created_by_middle_name'), $p_obj->getColumn('punch_created_by_last_name'), FALSE, FALSE );
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['in_updated_date'] = TTDate::strtotime( $p_obj->getColumn('punch_updated_date') );
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['in_updated_by'] = Misc::getFullName( $p_obj->getColumn('punch_updated_by_first_name'), $p_obj->getColumn('punch_updated_by_middle_name'), $p_obj->getColumn('punch_updated_by_last_name'), FALSE, FALSE );
 
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['total_punch']++;
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['total_punch']++;
 				} else {
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['out_time_stamp'] = TTDate::strtotime( $p_obj->getColumn('punch_time_stamp') );
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['out_type'] = Option::getByKey($p_obj->getColumn('type_id'), $punch_type_options, NULL );
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['out_actual_time_stamp'] = TTDate::strtotime( $p_obj->getColumn('punch_actual_time_stamp') );
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['out_time_stamp'] = TTDate::strtotime( $p_obj->getColumn('punch_time_stamp') );
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['out_type'] = Option::getByKey($p_obj->getColumn('type_id'), $punch_type_options, NULL );
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['out_actual_time_stamp'] = TTDate::strtotime( $p_obj->getColumn('punch_actual_time_stamp') );
 
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['out_station_type'] = Option::getByKey($p_obj->getColumn('station_type_id'), $station_type_options, '--' );
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['out_station_station_id'] = $p_obj->getColumn('station_station_id');
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['out_station_source']	 = $p_obj->getColumn('station_source');
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['out_station_description'] = $p_obj->getColumn('station_description');
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['out_station_type'] = Option::getByKey($p_obj->getColumn('station_type_id'), $station_type_options, '--' );
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['out_station_station_id'] = $p_obj->getColumn('station_station_id');
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['out_station_source']	 = $p_obj->getColumn('station_source');
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['out_station_description'] = $p_obj->getColumn('station_description');
 
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['out_created_date'] = TTDate::strtotime( $p_obj->getColumn('punch_created_date') );
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['out_created_by'] = Misc::getFullName( $p_obj->getColumn('punch_created_by_first_name'), $p_obj->getColumn('punch_created_by_middle_name'), $p_obj->getColumn('punch_created_by_last_name'), FALSE, FALSE );
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['out_updated_date'] = TTDate::strtotime( $p_obj->getColumn('punch_updated_date') );
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['out_updated_by'] = Misc::getFullName( $p_obj->getColumn('punch_updated_by_first_name'), $p_obj->getColumn('punch_updated_by_middle_name'), $p_obj->getColumn('punch_updated_by_last_name'), FALSE, FALSE );
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['out_created_date'] = TTDate::strtotime( $p_obj->getColumn('punch_created_date') );
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['out_created_by'] = Misc::getFullName( $p_obj->getColumn('punch_created_by_first_name'), $p_obj->getColumn('punch_created_by_middle_name'), $p_obj->getColumn('punch_created_by_last_name'), FALSE, FALSE );
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['out_updated_date'] = TTDate::strtotime( $p_obj->getColumn('punch_updated_date') );
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['out_updated_by'] = Misc::getFullName( $p_obj->getColumn('punch_updated_by_first_name'), $p_obj->getColumn('punch_updated_by_middle_name'), $p_obj->getColumn('punch_updated_by_last_name'), FALSE, FALSE );
 
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['total_punch']++;
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['total_punch']++;
 				}
 
 				if ( $p_obj->getTainted() == TRUE ) {
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['tainted'] = 1;
-					$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['total_tainted_punch']++;
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['tainted'] = 1;
+					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['total_tainted_punch']++;
 
-					if ( $this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['tainted_status'] !== NULL ) {
-						$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['tainted_status'] = TTi18n::getText('Both (In&Out)');
+					if ( $this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['tainted_status'] !== NULL ) {
+						$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['tainted_status'] = TTi18n::getText('Both (In&Out)');
 					} else {
 						if ( $p_obj->getColumn('status_id') == 10 ) {
-							$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['tainted_status'] = TTi18n::getText('In');
+							$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['tainted_status'] = TTi18n::getText('In');
 						} else {
-							$this->tmp_data['punch'][$p_obj->getColumn('user_id')][$p_obj->getColumn('punch_control_id')]['tainted_status'] = TTi18n::getText('Out');
+							$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['tainted_status'] = TTi18n::getText('Out');
 						}
 					}
 				}

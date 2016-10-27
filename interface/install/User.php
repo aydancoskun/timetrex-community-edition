@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 5428 $
- * $Id: User.php 5428 2011-10-31 18:13:21Z ipso $
- * $Date: 2011-10-31 11:13:21 -0700 (Mon, 31 Oct 2011) $
- */
+
 require_once('../../includes/global.inc.php');
 
 $authenticate=FALSE;
@@ -76,6 +72,7 @@ switch ($action) {
 		Debug::Text('Submit!', __FILE__, __LINE__, __METHOD__,10);
 
 		$uf->StartTransaction();
+		$uf->setId( $uf->getNextInsertId() ); //Because password encryption requires the user_id, we need to get it first when creating a new employee.
 		$uf->setCompany( $user_data['company_id'] );
 		$uf->setStatus( 10 );
 		$uf->setUserName($user_data['user_name']);
@@ -119,7 +116,7 @@ switch ($action) {
 		}
 
 		if ( $uf->isValid() ) {
-			$user_id = $uf->Save();
+			$user_id = $uf->Save( TRUE, TRUE );
 
 			//Assign this user as admin/support/billing contact for now.
 			$clf = TTnew( 'CompanyListFactory' );

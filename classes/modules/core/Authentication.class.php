@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14408 $
- * $Id: Authentication.class.php 14408 2014-09-12 19:02:59Z mikeb $
- * $Date: 2014-09-12 12:02:59 -0700 (Fri, 12 Sep 2014) $
- */
+
 
 
 /**
@@ -273,6 +269,25 @@ class Authentication {
 		return FALSE;
 	}
 
+	//Checks just the username, used in conjunction with HTTP Authentication/SSO.
+	function checkUsername($user_name ) {
+		//Use UserFactory to set name.
+		$ulf = TTnew( 'UserListFactory' );
+
+		$ulf->getByUserNameAndStatus( $user_name, 10 ); //Active
+		foreach ($ulf as $user) {
+			if ( strtolower( $user->getUsername() ) == strtolower(trim($user_name)) ) {
+				$this->setObject( $user->getID() );
+
+				return TRUE;
+			} else {
+				return FALSE;
+			}
+		}
+
+		return FALSE;
+	}
+
 	function checkPassword($user_name, $password) {
 		//Use UserFactory to set name.
 		$ulf = TTnew( 'UserListFactory' );
@@ -322,22 +337,7 @@ class Authentication {
 				}
 			}
 		}
-/*
-		//Use UserFactory to set name.
-		$ulf = TTnew( 'UserListFactory' );
 
-		$ulf->getByIButtonIdAndStatus($id, 10 );
-
-		foreach ($ulf as $user) {
-			if ( $user->checkIButton($id) ) {
-				$this->setObject( $user->getID() );
-
-				return TRUE;
-			} else {
-				return FALSE;
-			}
-		}
-*/
 		return FALSE;
 	}
 
@@ -397,16 +397,6 @@ class Authentication {
 
 		return FALSE;
 	}
-
-	/*
-	function isSSL() {
-		if ( isset($_SERVER['HTTPS']) AND ( $_SERVER['HTTPS'] == 'on' OR $_SERVER['HTTPS'] == 1 ) ) {
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-	*/
 
 	private function setCookie() {
 		if ( $this->getSessionID() ) {
@@ -560,6 +550,50 @@ class Authentication {
 
 		return FALSE;
 	}
+	
+	function getHTTPAuthenticationUsername() {
+		$user_name = FALSE;
+		if ( isset($_SERVER['PHP_AUTH_USER']) AND $_SERVER['PHP_AUTH_USER'] != '' ) {
+			$user_name = $_SERVER['PHP_AUTH_USER'];
+		} elseif ( isset($_SERVER['REMOTE_USER']) AND $_SERVER['REMOTE_USER'] != '' ) {
+			$user_name = $_SERVER['REMOTE_USER'];
+		}
+
+		return $user_name;
+	}
+
+	function HTTPAuthenticationHeader() {
+		global $config_vars;
+		if ( isset($config_vars['other']['enable_http_authentication']) AND $config_vars['other']['enable_http_authentication'] == 1
+				AND isset($config_vars['other']['enable_http_authentication_prompt']) AND $config_vars['other']['enable_http_authentication_prompt'] == 1 ) {
+			header('WWW-Authenticate: Basic realm="'. APPLICATION_NAME .'"');
+			header('HTTP/1.0 401 Unauthorized');
+			echo TTi18n::getText('ERROR: A valid username/password is required to access this application. Press refresh in your web browser to try again.');
+			Debug::writeToLog();
+			exit;
+		}
+	}
+	
+	//Allow web server to handle authentication with Basic Auth/LDAP/SSO/AD, etc...
+	function loginHTTPAuthentication() {
+		$user_name = self::getHTTPAuthenticationUsername();
+		
+		global $config_vars;
+		if ( isset($config_vars['other']['enable_http_authentication']) AND $config_vars['other']['enable_http_authentication'] == 1 AND $user_name != '' ) {
+			//Debug::Arr($_SERVER, 'Server vars: ', __FILE__, __LINE__, __METHOD__, 10);
+			if ( isset($_SERVER['PHP_AUTH_PW']) AND $_SERVER['PHP_AUTH_PW'] != '' ) {
+				Debug::Text('Handling HTTPAuthentication with password.', __FILE__, __LINE__, __METHOD__, 10);
+				return $this->Login( $user_name, $_SERVER['PHP_AUTH_PW'], 'USER_NAME' );
+			} else {
+				Debug::Text('Handling HTTPAuthentication without password.', __FILE__, __LINE__, __METHOD__, 10);
+				return $this->Login( $user_name, 'HTTP_AUTH', 'HTTP_AUTH' );
+			}
+		} elseif( $user_name != '' )  {
+			Debug::Text('HTTPAuthentication is passing username: '. $user_name .' however enable_http_authentication is not enabled.', __FILE__, __LINE__, __METHOD__, 10);
+		}
+
+		return FALSE;
+	}
 
 	function Login($user_name, $password, $type = 'USER_NAME') {
 		//DO NOT lowercase username, because iButton values are case sensitive.
@@ -604,6 +638,13 @@ class Authentication {
 
 				//$password_result = $this->checkClientPC( $user_name );
 				$password_result = $this->checkBarcode($user_name, $password);
+			} elseif (strtolower($type) == 'http_auth') {
+				if ( $this->checkCompanyStatus( $user_name ) == 10 ) { //Active
+					//Lowercase regular user_names here only.
+					$password_result = $this->checkUsername( $user_name );
+				} else {
+					$password_result = FALSE; //No company by that user name.
+				}
 			} else {
 				return FALSE;
 			}

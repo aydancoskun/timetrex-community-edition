@@ -76,7 +76,7 @@ AboutViewController = BaseViewController.extend( {
 
 	},
 
-	onContentMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function( context_btn, menu_name ) {
 		var id;
 
 		var $this = this;
@@ -307,8 +307,8 @@ AboutViewController = BaseViewController.extend( {
 		}
 
 		if ( Global.isSet( this.current_edit_record['user_counts'] ) && this.current_edit_record['user_counts'].length > 0 ) {
-			var tab0 = this.edit_view_tab.find( '#tab0' );
-			var tab0_column1 = tab0.find( '.first-column' );
+			var tab_about = this.edit_view_tab.find( '#tab_about' );
+			var tab_about_column1 = tab_about.find( '.first-column' );
 
 			for ( var key in this.current_edit_record['user_counts'] ) {
 
@@ -318,7 +318,7 @@ AboutViewController = BaseViewController.extend( {
 				form_item_input.TText( {field: 'active_' + key  } );
 				form_item_input.setValue( item['max_active_users'] + ' / ' + item['max_inactive_users'] );
 
-				this.addEditFieldToColumn( $.i18n._( item['label'] ), form_item_input, tab0_column1, '', null, true );
+				this.addEditFieldToColumn( $.i18n._( item['label'] ), form_item_input, tab_about_column1, '', null, true );
 
 				this.employeeActive.push( form_item_input );
 
@@ -333,61 +333,62 @@ AboutViewController = BaseViewController.extend( {
 		var $this = this;
 		this._super( 'buildEditViewUI' );
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		tab_0_label.text( $.i18n._( 'About' ) );
+		this.setTabLabels( {
+			'tab_about': $.i18n._( 'About' )
+		} );
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_about = this.edit_view_tab.find( '#tab_about' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_about_column1 = tab_about.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_about_column1 );
 
 		var form_item_input = $( "<div class='tblDataWarning'></div>" );
-		this.addEditFieldToColumn( null, form_item_input, tab0_column1, '', null, true, false, 'notice' );
+		this.addEditFieldToColumn( null, form_item_input, tab_about_column1, '', null, true, false, 'notice' );
 
 		// separate box
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( {label: $.i18n._( 'System Information' )} );
-		this.addEditFieldToColumn( null, form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( null, form_item_input, tab_about_column1 );
 
 		// Product Edition
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'product_edition' } );
-		this.addEditFieldToColumn( $.i18n._( 'Product Edition' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Product Edition' ), form_item_input, tab_about_column1 );
 
 		// Version
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'system_version' } );
-		this.addEditFieldToColumn( $.i18n._( 'Version' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Version' ), form_item_input, tab_about_column1 );
 
 		// Tax Engine Version
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'tax_engine_version' } );
-		this.addEditFieldToColumn( $.i18n._( 'Tax Engine Version' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Tax Engine Version' ), form_item_input, tab_about_column1 );
 
 		// Tax Data Version
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'tax_data_version' } );
-		this.addEditFieldToColumn( $.i18n._( 'Tax Data Version' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Tax Data Version' ), form_item_input, tab_about_column1 );
 
 		// Registration Key
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'registration_key' } );
-		this.addEditFieldToColumn( $.i18n._( 'Registration Key' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Registration Key' ), form_item_input, tab_about_column1 );
 
 		// Maintenance Jobs Last Ran
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'cron' } );
-		this.addEditFieldToColumn( $.i18n._( 'Maintenance Jobs Last Ran' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Maintenance Jobs Last Ran' ), form_item_input, tab_about_column1 );
 
 		// separate box
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( {label: $.i18n._( 'License Information' )} );
-		this.addEditFieldToColumn( null, form_item_input, tab0_column1, '', null, true, false, 'license_info' );
+		this.addEditFieldToColumn( null, form_item_input, tab_about_column1, '', null, true, false, 'license_info' );
 
 		// Upload License
 		form_item_input = Global.loadWidgetByName( FormItemType.FILE_BROWSER );
@@ -401,62 +402,62 @@ AboutViewController = BaseViewController.extend( {
 			}
 		} );
 
-		this.addEditFieldToColumn( $.i18n._( 'Upload License' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Upload License' ), form_item_input, tab_about_column1, '', null, true );
 
 		// Product
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'product_name' } );
-		this.addEditFieldToColumn( $.i18n._( 'Product' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Product' ), form_item_input, tab_about_column1, '', null, true );
 
 		// Company
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'organization_name' } );
-		this.addEditFieldToColumn( $.i18n._( 'Company' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Company' ), form_item_input, tab_about_column1, '', null, true );
 
 		// Version
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: '_version' } );
-		this.addEditFieldToColumn( $.i18n._( 'Version' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Version' ), form_item_input, tab_about_column1, '', null, true );
 
 		// Active Employee Licenses
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'active_employee_licenses' } );
-		this.addEditFieldToColumn( $.i18n._( 'Active Employee Licenses' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Active Employee Licenses' ), form_item_input, tab_about_column1, '', null, true );
 
 		// Issue Date
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'issue_date' } );
-		this.addEditFieldToColumn( $.i18n._( 'Issue Date' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Issue Date' ), form_item_input, tab_about_column1, '', null, true );
 
 		// Expire Date
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'expire_date_display' } );
-		this.addEditFieldToColumn( $.i18n._( 'Expire Date' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Expire Date' ), form_item_input, tab_about_column1, '', null, true );
 
 		// Schema Version
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( {label: $.i18n._( 'Schema Version' )} );
-		this.addEditFieldToColumn( null, form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( null, form_item_input, tab_about_column1 );
 
 		// Group A
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'schema_version_group_A' } );
-		this.addEditFieldToColumn( $.i18n._( 'Group A' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Group A' ), form_item_input, tab_about_column1 );
 
 		// Group B
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'schema_version_group_B' } );
-		this.addEditFieldToColumn( $.i18n._( 'Group B' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Group B' ), form_item_input, tab_about_column1 );
 
 		// Group T
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'schema_version_group_T' } );
-		this.addEditFieldToColumn( $.i18n._( 'Group T' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Group T' ), form_item_input, tab_about_column1 );
 
 		// Separated Box
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( {label: $.i18n._( 'Employees (Active / InActive)' )} );
-		this.addEditFieldToColumn( null, form_item_input, tab0_column1, '', null, true, false, 'user_active_inactive' );
+		this.addEditFieldToColumn( null, form_item_input, tab_about_column1, '', null, true, false, 'user_active_inactive' );
 
 	},
 

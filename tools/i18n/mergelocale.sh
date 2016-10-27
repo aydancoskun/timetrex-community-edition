@@ -2,10 +2,6 @@
 
 ##$License$##
 ##
-# $Revision: 13772 $
-# $Id: mergelocale.sh 13772 2014-07-18 16:19:20Z mikeb $
-# $Date: 2014-07-18 09:19:20 -0700 (Fri, 18 Jul 2014) $
-#
 # File Contributed By: Open Source Consulting, S.A.   San Jose, Costa Rica.
 # http://osc.co.cr
 ##
@@ -37,3 +33,5 @@ fi
 
 #Convert to .JSON file
 php ../../tools/i18n/po2json.php -i $lc/LC_MESSAGES/messages.po -o $lc/LC_MESSAGES/messages.json -n i18n_dictionary
+
+rm -f $lc/LC_MESSAGES/messages.po~

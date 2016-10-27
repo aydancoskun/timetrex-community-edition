@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 9128 $
- * $Id: Login.php 9128 2013-02-15 19:36:46Z ipso $
- * $Date: 2013-02-15 11:36:46 -0800 (Fri, 15 Feb 2013) $
- */
+
 require_once('../includes/global.inc.php');
 
 /*

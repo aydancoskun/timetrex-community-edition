@@ -146,8 +146,8 @@ CompanyViewController = BaseViewController.extend( {
 	},
 
 	setTabStatus: function() {
- 
-		$( this.edit_view_tab.find( 'ul li' )[0] ).show();
+
+		$( this.edit_view_tab.find( 'ul li a[ref="tab_company"]' ) ).parent().show();
 
 		this.editFieldResize( 0 );
 
@@ -164,18 +164,19 @@ CompanyViewController = BaseViewController.extend( {
 		if ( this.edit_view_tab_selected_index === 3 ) {
 
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab3' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab3' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_audit' );
 			} else {
-				this.edit_view_tab.find( '#tab3' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 
 		} else if ( this.edit_view_tab_selected_index == 1 ) {
 			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column' ).css( 'display', 'block' );
+				this.edit_view_tab.find( '#tab_password_policy' ).find( '.first-column' ).css( 'display', 'block' );
+				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 			} else {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_password_policy' ).find( '.first-column' ).css( 'display', 'none' );
 				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
 				this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 			}
@@ -363,9 +364,9 @@ CompanyViewController = BaseViewController.extend( {
 //		var error_list = details[0];
 //		var key;
 //
-//		var tab0 = this.edit_view_tab.find( '#tab0' );
-//		var tab1 = this.edit_view_tab.find( '#tab1' );
-//		var tab2 = this.edit_view_tab.find( '#tab2' );
+//		var tab_company = this.edit_view_tab.find( '#tab_company' );
+//		var tab_password_policy = this.edit_view_tab.find( '#tab_password_policy' );
+//		var tab_ldap = this.edit_view_tab.find( '#tab_ldap' );
 //
 //		var found_in_current_tab = false;
 //
@@ -402,13 +403,13 @@ CompanyViewController = BaseViewController.extend( {
 //				}
 //
 //				var widget = this.edit_view_error_ui_dic[key];
-//				if ( tab0.has( widget ).length > 0 ) {
+//				if ( tab_company.has( widget ).length > 0 ) {
 //					this.edit_view_tab.tabs( 'select', 0 );
 //
-//				} else if ( tab1.has( widget ).length > 0 ) {
+//				} else if ( tab_password_policy.has( widget ).length > 0 ) {
 //					this.edit_view_tab.tabs( 'select', 1 );
 //
-//				} else if ( tab2.has( widget ).length > 0 ) {
+//				} else if ( tab_ldap.has( widget ).length > 0 ) {
 //					this.edit_view_tab.tabs( 'select', 2 );
 //
 //				}
@@ -425,10 +426,10 @@ CompanyViewController = BaseViewController.extend( {
 
 		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 3 ) {
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab3' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab3' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_audit' );
 			} else {
-				this.edit_view_tab.find( '#tab3' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		}
@@ -454,7 +455,7 @@ CompanyViewController = BaseViewController.extend( {
 		}
 	},
 
-	eSetProvince: function( val ) {
+	eSetProvince: function( val, refresh ) {
 		var $this = this;
 		var province_widget = $this.edit_view_ui_dic['province'];
 
@@ -469,6 +470,11 @@ CompanyViewController = BaseViewController.extend( {
 				}
 
 				$this.e_province_array = Global.buildRecordArray( res );
+				if ( refresh && $this.e_province_array.length > 0 ) {
+					$this.current_edit_record.province = $this.e_province_array[0].value;
+					province_widget.setValue( $this.current_edit_record.province );
+				}
+
 				province_widget.setSourceData( $this.e_province_array );
 
 			}} );
@@ -479,47 +485,50 @@ CompanyViewController = BaseViewController.extend( {
 		var $this = this;
 		this._super( 'buildEditViewUI' );
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		var tab_2_label = this.edit_view.find( 'a[ref=tab2]' );
-		var tab_3_label = this.edit_view.find( 'a[ref=tab3]' );
-		tab_0_label.text( $.i18n._( 'Company' ) );
-		tab_1_label.text( $.i18n._( 'Password Policy' ) );
-		tab_2_label.text( $.i18n._( 'LDAP Authentication' ) );
-		tab_3_label.text( $.i18n._( 'Audit' ) );
+
+		this.setTabLabels( {
+			'tab_company': $.i18n._( 'Company' ),
+			'tab_password_policy': $.i18n._( 'Password Policy' ),
+			'tab_ldap': $.i18n._( 'LDAP Authentication' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
+
+
 
 //		  this.edit_view_tab.css( 'width', '1000' );
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_company = this.edit_view_tab.find( '#tab_company' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
-		var tab0_column2 = tab0.find( '.second-column' );
+		var tab_company_column1 = tab_company.find( '.first-column' );
+		var tab_company_column2 = tab_company.find( '.second-column' );
 
 		var form_item_input;
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
-		this.edit_view_tabs[0].push( tab0_column2 );
+		this.edit_view_tabs[0].push( tab_company_column1 );
+		this.edit_view_tabs[0].push( tab_company_column2 );
 
 		// Product Edition
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'product_edition_id'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.product_edition_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Product Edition' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Product Edition' ), form_item_input, tab_company_column1, '' );
 
 		// Full Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'name', width: 240} );
-		this.addEditFieldToColumn( $.i18n._( 'Full Name' ), form_item_input, tab0_column1 );
+		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Full Name' ), form_item_input, tab_company_column1 );
+
+		form_item_input.parent().width( '45%' );
 
 		// Short Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'short_name', width: 128} );
-		this.addEditFieldToColumn( $.i18n._( 'Short Name' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Short Name' ), form_item_input, tab_company_column1 );
 
 		// Industry
 
@@ -527,67 +536,69 @@ CompanyViewController = BaseViewController.extend( {
 
 		form_item_input.TComboBox( {field: 'industry_id'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.industry_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Industry' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Industry' ), form_item_input, tab_company_column1 );
 
 		// Business/Employer ID Number
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'business_number', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Business/Employer ID Number' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Business/Employer ID Number' ), form_item_input, tab_company_column1 );
 
 		// Address (Line 1)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'address1', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Address (Line 1)' ), form_item_input, tab0_column1 );
+		form_item_input.TTextInput( {field: 'address1', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Address (Line 1)' ), form_item_input, tab_company_column1 );
+		form_item_input.parent().width( '45%' );
 
 		// Address (Line 2)
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'address2', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Address (Line 2)' ), form_item_input, tab0_column1 );
+		form_item_input.TTextInput( {field: 'address2', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Address (Line 2)' ), form_item_input, tab_company_column1 );
 
+		form_item_input.parent().width( '45%' );
 		//City
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'city', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'City' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'City' ), form_item_input, tab_company_column1 );
 
 		//Country
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'country', set_empty: true} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.country_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab_company_column1 );
 
 		form_item_input.change( $.proxy( function() {
 			var selectVal = this.edit_view_ui_dic['country'].getValue();
-			this.eSetProvince( selectVal );
+			this.eSetProvince( selectVal, true );
 
-		}, this ) )
+		}, this ) );
 
 		//Province / State
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'province', set_empty: true} );
+		form_item_input.TComboBox( {field: 'province'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
-		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab_company_column1 );
 
 		//City
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'postal_code', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Postal/ZIP Code' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Postal/ZIP Code' ), form_item_input, tab_company_column1, '' );
 
 		// Phone
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'work_phone', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Phone' ), form_item_input, tab0_column2, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Phone' ), form_item_input, tab_company_column2, '' );
 
 		// Fax
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'fax_phone', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Fax' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Fax' ), form_item_input, tab_company_column2 );
 
 		// Administrative Contact
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -600,7 +611,7 @@ CompanyViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'admin_contact'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Administrative Contact' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Administrative Contact' ), form_item_input, tab_company_column2 );
 
 		// billing contact
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -613,7 +624,7 @@ CompanyViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'billing_contact'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Billing Contact' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Billing Contact' ), form_item_input, tab_company_column2 );
 		// Primary Support contact
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
@@ -625,36 +636,36 @@ CompanyViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'support_contact'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Primary Support contact' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Primary Support contact' ), form_item_input, tab_company_column2 );
 
 		//Direct Deposit (EFT)
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( {label: $.i18n._( 'Direct Deposit (EFT)' )} );
-		this.addEditFieldToColumn( null, form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( null, form_item_input, tab_company_column2 );
 
 		// Originator ID / Immediate Origin
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'originator_id', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Originator ID / Immediate Origin' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Originator ID / Immediate Origin' ), form_item_input, tab_company_column2 );
 
 		// Data Center / Immediate Destination
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'data_center_id', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Data Center / Immediate Destination' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Data Center / Immediate Destination' ), form_item_input, tab_company_column2 );
 
 		// Company Settings
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( {label: $.i18n._( 'Company Settings' )} );
-		this.addEditFieldToColumn( null, form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( null, form_item_input, tab_company_column2 );
 
 		// Data Center / Immediate Destination
 //		form_item_input = Global.loadWidgetByName( FormItemType.IMAGE_BROWSER );
 //
 //		this.file_browser = form_item_input.TImageBrowser( {field: ''} );
 //
-//		this.addEditFieldToColumn( $.i18n._( 'Logo' ), form_item_input, tab0_column2, '', null, false, true );
+//		this.addEditFieldToColumn( $.i18n._( 'Logo' ), form_item_input, tab_company_column2, '', null, false, true );
 
 		// Logo
 
@@ -692,29 +703,29 @@ CompanyViewController = BaseViewController.extend( {
 			}} );
 		}
 
-		this.addEditFieldToColumn( $.i18n._( 'Photo' ), this.file_browser, tab0_column2, '', null, false, true );
+		this.addEditFieldToColumn( $.i18n._( 'Photo' ), this.file_browser, tab_company_column2, '', null, false, true );
 
 		// Enable Second Surname
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( {field: 'enable_second_last_name'} );
-		this.addEditFieldToColumn( $.i18n._( 'Enable Second Surname' ), form_item_input, tab0_column2, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Enable Second Surname' ), form_item_input, tab_company_column2, '' );
 
 		//Tab 1 start
 
-		var tab1 = this.edit_view_tab.find( '#tab1' );
+		var tab_password_policy = this.edit_view_tab.find( '#tab_password_policy' );
 
-		var tab1_column1 = tab1.find( '.first-column' );
+		var tab_password_policy_column1 = tab_password_policy.find( '.first-column' );
 
 		this.edit_view_tabs[1] = [];
 
-		this.edit_view_tabs[1].push( tab1_column1 );
+		this.edit_view_tabs[1].push( tab_password_policy_column1 );
 
 		// Password Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'password_policy_type_id'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.password_policy_type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Password Policy' ), form_item_input, tab1_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Password Policy' ), form_item_input, tab_password_policy_column1, '' );
 
 		// Minimum Permission Level
 
@@ -722,7 +733,7 @@ CompanyViewController = BaseViewController.extend( {
 
 		form_item_input.TComboBox( {field: 'password_minimum_permission_level'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.password_minimum_permission_level_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Minimum Permission Level' ), form_item_input, tab1_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Minimum Permission Level' ), form_item_input, tab_password_policy_column1 );
 
 		// Minimum Strength
 
@@ -730,13 +741,13 @@ CompanyViewController = BaseViewController.extend( {
 
 		form_item_input.TComboBox( {field: 'password_minimum_strength'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.password_minimum_strength_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Minimum Strength' ), form_item_input, tab1_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Minimum Strength' ), form_item_input, tab_password_policy_column1 );
 
 		// Minimum Length
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'password_minimum_length', width: 30} );
-		this.addEditFieldToColumn( $.i18n._( 'Minimum Length' ), form_item_input, tab1_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Minimum Length' ), form_item_input, tab_password_policy_column1 );
 
 		// Minimum Age
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -748,7 +759,7 @@ CompanyViewController = BaseViewController.extend( {
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 
-		this.addEditFieldToColumn( $.i18n._( 'Minimum Age' ), form_item_input, tab1_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Minimum Age' ), form_item_input, tab_password_policy_column1, '', widgetContainer );
 
 		// Maximum Age
 
@@ -761,17 +772,17 @@ CompanyViewController = BaseViewController.extend( {
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 
-		this.addEditFieldToColumn( $.i18n._( 'Maximum Age' ), form_item_input, tab1_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Maximum Age' ), form_item_input, tab_password_policy_column1, '', widgetContainer );
 
 		//Tab 1 start
 
-		var tab2 = this.edit_view_tab.find( '#tab2' );
+		var tab_ldap = this.edit_view_tab.find( '#tab_ldap' );
 
-		var tab2_column1 = tab2.find( '.first-column' );
+		var tab_ldap_column1 = tab_ldap.find( '.first-column' );
 
 		this.edit_view_tabs[2] = [];
 
-		this.edit_view_tabs[2].push( tab2_column1 );
+		this.edit_view_tabs[2].push( tab_ldap_column1 );
 
 		//
 		// LDAP Authentication
@@ -780,7 +791,7 @@ CompanyViewController = BaseViewController.extend( {
 
 		form_item_input.TComboBox( {field: 'ldap_authentication_type_id'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.ldap_authentication_type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'LDAP Authentication' ), form_item_input, tab2_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'LDAP Authentication' ), form_item_input, tab_ldap_column1 );
 
 		// Server
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -791,7 +802,7 @@ CompanyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Server' ), form_item_input, tab2_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Server' ), form_item_input, tab_ldap_column1, '', widgetContainer, true );
 
 		// Port
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -802,7 +813,7 @@ CompanyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Port' ), form_item_input, tab2_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Port' ), form_item_input, tab_ldap_column1, '', widgetContainer, true );
 
 		// Bind User Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -813,13 +824,13 @@ CompanyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Bind User Name' ), form_item_input, tab2_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Bind User Name' ), form_item_input, tab_ldap_column1, '', widgetContainer, true );
 
 		// Bind Password
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'ldap_bind_password'} );
-		this.addEditFieldToColumn( $.i18n._( 'Bind Password' ), form_item_input, tab2_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Bind Password' ), form_item_input, tab_ldap_column1, '', null, true );
 
 		// Base DN
 
@@ -831,7 +842,7 @@ CompanyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Base DN' ), form_item_input, tab2_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Base DN' ), form_item_input, tab_ldap_column1, '', widgetContainer, true );
 
 		// Bind Attribute
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -842,7 +853,7 @@ CompanyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Bind Attribute' ), form_item_input, tab2_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Bind Attribute' ), form_item_input, tab_ldap_column1, '', widgetContainer, true );
 
 		// User Filter
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -853,7 +864,7 @@ CompanyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'User Filter' ), form_item_input, tab2_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'User Filter' ), form_item_input, tab_ldap_column1, '', widgetContainer, true );
 
 		// Login Attribute
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -864,7 +875,7 @@ CompanyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Login Attribute' ), form_item_input, tab2_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Login Attribute' ), form_item_input, tab_ldap_column1, '', widgetContainer, true );
 
 	},
 
@@ -889,6 +900,8 @@ CompanyViewController = BaseViewController.extend( {
 			this.edit_view_form_item_dic['ldap_user_filter'].css( 'display', 'block' );
 			this.edit_view_form_item_dic['ldap_login_attribute'].css( 'display', 'block' );
 		}
+
+		this.editFieldResize();
 	}
 
 

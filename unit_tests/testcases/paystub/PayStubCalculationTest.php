@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 13470 $
- * $Id: PayStubCalculationTest.php 13470 2014-06-25 01:25:10Z mikeb $
- * $Date: 2014-06-24 18:25:10 -0700 (Tue, 24 Jun 2014) $
- */
+
 require_once('PHPUnit/Framework/TestCase.php');
 
 class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
@@ -82,23 +78,58 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		$this->getAllPayPeriods();
 
 		//Create policies
-		$policy_ids['overtime'][] = $dd->createOverTimePolicy( $this->company_id, 10 );
-		//$policy_ids['overtime'][] = $dd->createOverTimePolicy( $this->company_id, 20, $policy_ids['accrual'][0] );
-		$policy_ids['overtime'][] = $dd->createOverTimePolicy( $this->company_id, 20 );
+		$this->policy_ids['pay_formula_policy'][100] = $dd->createPayFormulaPolicy( $this->company_id, 100 ); //Regular
+		$this->policy_ids['pay_formula_policy'][110] = $dd->createPayFormulaPolicy( $this->company_id, 110 ); //Vacation
+		$this->policy_ids['pay_formula_policy'][120] = $dd->createPayFormulaPolicy( $this->company_id, 120 ); //Bank
+		$this->policy_ids['pay_formula_policy'][130] = $dd->createPayFormulaPolicy( $this->company_id, 130 ); //Sick
+		$this->policy_ids['pay_formula_policy'][200] = $dd->createPayFormulaPolicy( $this->company_id, 200 ); //OT1.5
+		$this->policy_ids['pay_formula_policy'][210] = $dd->createPayFormulaPolicy( $this->company_id, 210 ); //OT2.0
+		$this->policy_ids['pay_formula_policy'][300] = $dd->createPayFormulaPolicy( $this->company_id, 300 ); //Prem1
+		$this->policy_ids['pay_formula_policy'][310] = $dd->createPayFormulaPolicy( $this->company_id, 310 ); //Prem2
 
-		$policy_ids['premium'][] = $dd->createPremiumPolicy( $this->company_id, 10 );
-		$policy_ids['premium'][] = $dd->createPremiumPolicy( $this->company_id, 20 );
+		$this->policy_ids['pay_code'][100] = $dd->createPayCode( $this->company_id, 100, $this->policy_ids['pay_formula_policy'][100] ); //Regular
+		$this->policy_ids['pay_code'][190] = $dd->createPayCode( $this->company_id, 190, $this->policy_ids['pay_formula_policy'][100] ); //Lunch
+		$this->policy_ids['pay_code'][192] = $dd->createPayCode( $this->company_id, 192, $this->policy_ids['pay_formula_policy'][100] ); //Break
+		$this->policy_ids['pay_code'][200] = $dd->createPayCode( $this->company_id, 200, $this->policy_ids['pay_formula_policy'][200] ); //OT1
+		$this->policy_ids['pay_code'][210] = $dd->createPayCode( $this->company_id, 210, $this->policy_ids['pay_formula_policy'][210] ); //OT2
+		$this->policy_ids['pay_code'][300] = $dd->createPayCode( $this->company_id, 300, $this->policy_ids['pay_formula_policy'][300] ); //Prem1
+		$this->policy_ids['pay_code'][310] = $dd->createPayCode( $this->company_id, 310, $this->policy_ids['pay_formula_policy'][310] ); //Prem2
+		$this->policy_ids['pay_code'][900] = $dd->createPayCode( $this->company_id, 900, $this->policy_ids['pay_formula_policy'][110] ); //Vacation
+		$this->policy_ids['pay_code'][910] = $dd->createPayCode( $this->company_id, 910, $this->policy_ids['pay_formula_policy'][120] ); //Bank
+		$this->policy_ids['pay_code'][920] = $dd->createPayCode( $this->company_id, 920, $this->policy_ids['pay_formula_policy'][130] ); //Sick
 
-		//Create Policy Group
+		$this->policy_ids['contributing_pay_code_policy'][10] = $dd->createContributingPayCodePolicy( $this->company_id, 10, array( $this->policy_ids['pay_code'][100] ) ); //Regular
+		$this->policy_ids['contributing_pay_code_policy'][12] = $dd->createContributingPayCodePolicy( $this->company_id, 12, array( $this->policy_ids['pay_code'][100], $this->policy_ids['pay_code'][190], $this->policy_ids['pay_code'][192] ) ); //Regular+Meal/Break
+		$this->policy_ids['contributing_pay_code_policy'][14] = $dd->createContributingPayCodePolicy( $this->company_id, 14, array( $this->policy_ids['pay_code'][100], $this->policy_ids['pay_code'][190], $this->policy_ids['pay_code'][192], $this->policy_ids['pay_code'][900] ) ); //Regular+Meal/Break+Absence
+		$this->policy_ids['contributing_pay_code_policy'][20] = $dd->createContributingPayCodePolicy( $this->company_id, 20, array( $this->policy_ids['pay_code'][100], $this->policy_ids['pay_code'][200], $this->policy_ids['pay_code'][210], $this->policy_ids['pay_code'][190], $this->policy_ids['pay_code'][192] ) ); //Regular+OT+Meal/Break
+		$this->policy_ids['contributing_pay_code_policy'][90] = $dd->createContributingPayCodePolicy( $this->company_id, 90, array( $this->policy_ids['pay_code'][900] ) ); //Absence
+		$this->policy_ids['contributing_pay_code_policy'][99] = $dd->createContributingPayCodePolicy( $this->company_id, 99, $this->policy_ids['pay_code'] ); //All Time
+
+		$this->policy_ids['contributing_shift_policy'][12] = $dd->createContributingShiftPolicy( $this->company_id, 10, $this->policy_ids['contributing_pay_code_policy'][12] ); //Regular+Meal/Break
+		$this->policy_ids['contributing_shift_policy'][20] = $dd->createContributingShiftPolicy( $this->company_id, 20, $this->policy_ids['contributing_pay_code_policy'][20] ); //Regular+OT+Meal/Break
+
+		$this->policy_ids['regular'][] = $dd->createRegularTimePolicy( $this->company_id, 10, $this->policy_ids['contributing_shift_policy'][12], $this->policy_ids['pay_code'][100] );
+
+		$this->policy_ids['overtime'][] = $dd->createOverTimePolicy( $this->company_id, 10, $this->policy_ids['contributing_shift_policy'][12], $this->policy_ids['pay_code'][200] );
+		$this->policy_ids['overtime'][] = $dd->createOverTimePolicy( $this->company_id, 20, $this->policy_ids['contributing_shift_policy'][12], $this->policy_ids['pay_code'][210] );
+
+		$this->policy_ids['premium'][] = $dd->createPremiumPolicy( $this->company_id, 10, $this->policy_ids['contributing_shift_policy'][20], $this->policy_ids['pay_code'][300] );
+		$this->policy_ids['premium'][] = $dd->createPremiumPolicy( $this->company_id, 20, $this->policy_ids['contributing_shift_policy'][20], $this->policy_ids['pay_code'][310] );
+
 		$dd->createPolicyGroup( 	$this->company_id,
-									NULL,
-									NULL,
-									NULL,
-									$policy_ids['overtime'],
-									$policy_ids['premium'],
-									NULL,
-									array($this->user_id) );
-
+									NULL, //Meal
+									NULL, //Exception
+									NULL, //Holiday
+									$this->policy_ids['overtime'], //OT
+									$this->policy_ids['premium'], //Premium
+									NULL, //Round
+									array($this->user_id), //Users
+									NULL, //Break
+									NULL, //Accrual
+									NULL, //Expense
+									NULL, //Absence
+									$this->policy_ids['regular'] //Regular
+									);
 
 		$this->createPunchData();
 
@@ -573,13 +604,12 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createPayPeriods() {
-		$max_pay_periods = 29;
+		$max_pay_periods = 5;
 
 		$ppslf = new PayPeriodScheduleListFactory();
 		$ppslf->getById( $this->pay_period_schedule_id );
 		if ( $ppslf->getRecordCount() > 0 ) {
 			$pps_obj = $ppslf->getCurrent();
-
 
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
@@ -589,9 +619,8 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 				}
 
 				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date) , __FILE__, __LINE__, __METHOD__,10);
-
-
-				$pps_obj->createNextPayPeriod( $end_date , (86400*360) );
+				
+				$pps_obj->createNextPayPeriod( $end_date , (86400*3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
 
 		}
@@ -1008,9 +1037,6 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 							'employer_medicare' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Medicare'),
 							'employer_fica' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Social Security (FICA)'),
 							'vacation_accrual' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 50, 'Vacation Accrual'),
-                            //'test_custom_formula' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'Other2'),
-                            //'test_custom_formula_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'Custom1'),
-                            //'test_custom_formula_2' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'Custom2'),
 							);
 
 		$pay_stub_id = $this->getPayStub();
@@ -1085,16 +1111,6 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $pse_arr[$pse_accounts['cpp']][0]['ytd_amount'], '0.00' );
 		$this->assertEquals( $pse_arr[$pse_accounts['cpp']][1]['amount'], '10.70' );
 		$this->assertEquals( $pse_arr[$pse_accounts['cpp']][1]['ytd_amount'], '1910.70' );
-
-		//Custom formula deductions.
-        //$this->assertEquals( $pse_arr[$pse_accounts['test_custom_formula']][0]['amount'], '5.50' );
-		//$this->assertEquals( $pse_arr[$pse_accounts['test_custom_formula']][0]['ytd_amount'], '5.500' );
-
-        //$this->assertEquals( $pse_arr[$pse_accounts['test_custom_formula_1']][0]['amount'], '12.51' );
-		//$this->assertEquals( $pse_arr[$pse_accounts['test_custom_formula_1']][0]['ytd_amount'], '12.51' );
-
-        //$this->assertEquals( $pse_arr[$pse_accounts['test_custom_formula_2']][0]['amount'], '35.40' );
-		//$this->assertEquals( $pse_arr[$pse_accounts['test_custom_formula_2']][0]['ytd_amount'], '35.40' );
 
 		if ( $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] >= 600
 				AND $pse_arr[$pse_accounts['federal_income_tax']][0]['amount'] <= 800

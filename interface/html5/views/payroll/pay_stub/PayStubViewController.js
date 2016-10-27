@@ -13,25 +13,28 @@ PayStubViewController = BaseViewController.extend( {
 	user_group_api: null,
 	company_api: null,
 
+	pay_stub_entry_api: null,
+
+	include_entries: true,
+
 	initialize: function() {
 		this._super( 'initialize' );
 		this.edit_view_tpl = 'PayStubEditView.html';
 		this.permission_id = 'pay_stub';
 		this.viewId = 'PayStub';
 		this.script_name = 'PayStubView';
+		this.table_name_key = 'pay_stub';
 		this.context_menu_name = $.i18n._( 'Pay Stub' );
 		this.navigation_label = $.i18n._( 'Pay Stubs' ) + ':';
 		this.api = new (APIFactory.getAPIClass( 'APIPayStub' ))();
 		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
+		this.pay_stub_entry_api = new (APIFactory.getAPIClass( 'APIPayStubEntry' ))();
 		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
 		this.company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.add] = true; //Hide some context menus
 		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true; //Hide some context menus
-		this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true; //Hide some context menus
 		this.invisible_context_menu_dic[ContextMenuIconName.save_and_new] = true; //Hide some context menus
 		this.invisible_context_menu_dic[ContextMenuIconName.save_and_copy] = true; //Hide some context menus
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_continue] = true; //Hide some context menus
 
 		this.initPermission();
 		this.render();
@@ -313,9 +316,15 @@ PayStubViewController = BaseViewController.extend( {
 			permission: true
 		} );
 
-		var export_cheque_result = new (APIFactory.getAPIClass( 'APIPayStub' ))().getOptions( 'export_cheque', {async: false} ).getResult();
+		var export_cheque_result = new (APIFactory.getAPIClass( 'APIPayStub' ))().getOptions( 'export_cheque', {async: false} );
 
-		export_cheque_result = Global.buildRecordArray( export_cheque_result );
+		//Error: Uncaught TypeError: Cannot read property 'getResult' of undefined in https://ondemand1.timetrex.com/interface/html5/#!m=PayStub line 317
+		if ( export_cheque_result ) {
+			export_cheque_result = export_cheque_result.getResult();
+			export_cheque_result = Global.buildRecordArray( export_cheque_result );
+		} else {
+			export_cheque_result = [];
+		}
 
 		for ( var i = 0; i < export_cheque_result.length; i++ ) {
 			var item = export_cheque_result[i];
@@ -425,6 +434,12 @@ PayStubViewController = BaseViewController.extend( {
 	},
 
 	setDefaultMenu: function( doNotSetFocus ) {
+
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+		if ( !this.context_menu_array ) {
+			return;
+		}
+
 		if ( !Global.isSet( doNotSetFocus ) || !doNotSetFocus ) {
 			this.selectContextMenu();
 		}
@@ -445,6 +460,9 @@ PayStubViewController = BaseViewController.extend( {
 			context_btn.removeClass( 'disable-image' );
 
 			switch ( id ) {
+				case ContextMenuIconName.add:
+					this.setDefaultMenuAddIcon( context_btn, grid_selected_length );
+					break;
 				case ContextMenuIconName.view:
 					//View icon should be displayed separate from Employee Pay Stub/Employer Pay Stub icons.
 					this.setDefaultMenuViewIcon( context_btn, grid_selected_length );
@@ -464,8 +482,14 @@ PayStubViewController = BaseViewController.extend( {
 				case ContextMenuIconName.save:
 					this.setDefaultMenuSaveIcon( context_btn, grid_selected_length );
 					break;
+				case ContextMenuIconName.copy_as_new:
+					this.setDefaultMenuCopyAsNewIcon( context_btn, grid_selected_length );
+					break;
 				case ContextMenuIconName.save_and_next:
 					this.setDefaultMenuSaveAndNextIcon( context_btn, grid_selected_length );
+					break;
+				case ContextMenuIconName.save_and_continue:
+					this.setDefaultMenuSaveAndContinueIcon( context_btn, grid_selected_length );
 					break;
 				case ContextMenuIconName.cancel:
 					this.setDefaultMenuCancelIcon( context_btn, grid_selected_length );
@@ -699,7 +723,17 @@ PayStubViewController = BaseViewController.extend( {
 		}
 	},
 
+	removeInsideEditorCover: function() {
+		if ( this.cover && this.cover.length > 0 ) {
+			this.cover.remove();
+		}
+		this.cover = null;
+
+	},
+
 	setCurrentEditRecordData: function() {
+		this.include_entries = true;
+
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
 			var widget = this.edit_view_ui_dic[key];
@@ -712,6 +746,12 @@ PayStubViewController = BaseViewController.extend( {
 					case 'full_name':
 						widget.setValue( this.current_edit_record['first_name'] + ' ' + this.current_edit_record['last_name'] );
 						break;
+					case 'status_id':
+						if ( this.current_edit_record[key] == 40 ) {
+							this.include_entries = false;
+						}
+						widget.setValue( this.current_edit_record[key] );
+						break;
 					default:
 						widget.setValue( this.current_edit_record[key] );
 						break;
@@ -723,6 +763,923 @@ PayStubViewController = BaseViewController.extend( {
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
 
+	},
+
+	setEditViewDataDone: function() {
+		this._super( 'setEditViewDataDone' );
+		this.initInsideEditorData();
+	},
+
+	initInsideEditorData: function() {
+		var $this = this;
+		var args = {};
+		args.filter_data = {};
+
+		if ( ( !this.current_edit_record || !this.current_edit_record.id ) && !this.copied_record_id ) {
+			$this.editor.removeAllRows( true );
+			$this.pay_stub_entry_api['get' + this.pay_stub_entry_api.key_name + 'DefaultData']( args, {onResult: function( res ) {
+				if ( !$this.edit_view ) {
+					return;
+				}
+				var data = res.getResult();
+				$this.editor.setValue( data );
+
+			}} );
+
+		} else {
+
+			args.filter_data.pay_stub_id = this.current_edit_record.id ? this.current_edit_record.id : this.copied_record_id;
+			this.copied_record_id = '';
+			$this.pay_stub_entry_api['get' + $this.pay_stub_entry_api.key_name]( args, {onResult: function( res ) {
+				if ( !$this.edit_view ) {
+					return;
+				}
+				var data = res.getResult();
+				$this.editor.setValue( data );
+
+			}} );
+
+		}
+
+	},
+
+	insideEditorSetValue: function( val ) {
+		var length = _.size( val );
+		var pay_stub_status_id = this.parent_controller['current_edit_record']['status_id'];
+		var is_add = false;
+
+		if ( !this.parent_controller['current_edit_record']['id'] ) {
+			is_add = true;
+		}
+		this.removeAllRows( true );
+		this.removeCover();
+
+		// set value
+		if ( length > 0 ) {
+			var render = this.getRender(); //get render, should be a table
+			for ( var key in val ) {
+				var args = null, item = val[key];
+				var headerRow = Global.loadWidget( 'views/payroll/pay_stub/PayStubEntryViewInsideEditorThreeColumnHeader.html' );
+				if ( key == '10' ) {
+					headerRow = Global.loadWidget( 'views/payroll/pay_stub/PayStubEntryViewInsideEditorFiveColumnHeader.html' );
+					args = {
+						col1: $.i18n._( 'Earnings' ),
+						col2: $.i18n._( 'Rate' ),
+						col3: $.i18n._( 'Hrs/Units' ),
+						col4: $.i18n._( 'Amount' ),
+						col5: $.i18n._( 'YTD Amount' )
+					};
+				} else if ( key == '20' ) {
+					args = {
+						col1: $.i18n._( 'Deductions' ),
+						col2: $.i18n._( 'Amount' ),
+						col3: $.i18n._( 'YTD Amount' )
+					};
+				} else if ( key == '30' ) {
+					args = {
+						col1: $.i18n._( 'Employer Contributions' ),
+						col2: $.i18n._( 'Amount' ),
+						col3: $.i18n._( 'YTD Amount' )
+					};
+				} else if ( key == '50' ) {
+					args = {
+						col1: $.i18n._( 'Accrual' ),
+						col2: $.i18n._( 'Amount' ),
+						col3: $.i18n._( 'Balance' )
+					};
+				}
+
+				if ( args ) {
+					$( render ).append( _.template( headerRow, args ) );
+					this.rows_widgets_array.push( true );
+
+					for ( var i = 0; i < item.length; i++ ) {
+						if ( Global.isSet( item[i] ) ) {
+							var row = item[i];
+							this.addRow( row );
+						}
+					}
+
+					$( render ).append( '<tr><td colspan="7"><br></td></tr>' );
+					this.rows_widgets_array.push( true );
+
+					// add net pay total line after total deducation.
+					if ( key == '20' && Global.isSet(val['40']) ) {
+
+						var netPay = val['40'];
+						for ( var i = 0; i < netPay.length; i++ ) {
+							if ( Global.isSet( netPay[i] ) ) {
+								var row = netPay[i];
+								this.addRow( row );
+							}
+						}
+
+						$( render ).append( '<tr><td colspan="7"><br></td></tr>' );
+						this.rows_widgets_array.push( true );
+					}
+
+				}
+
+			}
+
+		}
+		// set the cover
+		if ( length > 0 && !is_add && pay_stub_status_id == 25 ) {
+
+			this.cover = Global.loadWidgetByName( WidgetNamesDic.NO_RESULT_BOX );
+			this.cover.NoResultBox( {
+				related_view_controller: this,
+				message: $.i18n._( 'Click the Edit icon below to override pay stub amounts' ),
+				is_edit: true
+			} );
+
+			this.cover.css( {width: this.width(), height: this.height()} );
+
+			this.parent().append( this.cover )
+
+		}
+
+	},
+
+	insideEditorAddRow: function( data, index ) {
+
+		var $this = this;
+		var pay_stub_status_id = this.parent_controller['current_edit_record']['status_id'];
+		var pay_stub_amendment_id = 0, user_expense_id = 0;
+		var is_add = false;
+
+		if ( !this.parent_controller['current_edit_record']['id'] ) {
+			is_add = true;
+		}
+
+		if ( !data ) {
+			$this.addRow( {}, index );
+		} else {
+			if ( typeof index != 'undefined' ) {
+				data['tmp_type'] = data['tmp_type'] ? data['tmp_type'] : this.rows_widgets_array[index].ytd_amount.attr( 'tmp_type' );
+			}
+
+			if ( !isNaN( parseFloat( data['pay_stub_amendment_id'] ) ) && parseFloat( data['pay_stub_amendment_id'] ) > 0 ) {
+				pay_stub_amendment_id = data['pay_stub_amendment_id']
+			}
+
+			if ( !isNaN( parseFloat( data['user_expense_id'] ) ) && parseFloat( data['user_expense_id'] ) > 0 ) {
+				user_expense_id = data['user_expense_id'];
+			}
+			var render = this.getRender(); //get render, should be a table
+			var widgets = {}; //Save each row's widgets
+			var row; //Get Row render
+
+			var args = { filter_data: {} };
+
+			// Pay Stub Account
+			var form_item_name_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+			form_item_name_input.AComboBox( {
+				api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+				width: 132,
+				allow_multiple_selection: false,
+				layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+				show_search_inputs: true,
+				set_empty: true,
+				field: 'pay_stub_entry_name_id'
+			} );
+
+			var form_item_name_text = Global.loadWidgetByName( FormItemType.TEXT );
+			form_item_name_text.TText( {field: 'name'} );
+			form_item_name_text.setValue( data.name ? ( data['type_id'] != 40 ? "  " + data.name : data.name  ) : '' );
+
+			var form_item_rate_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+			form_item_rate_input.TTextInput( {field: 'rate', width: 60, hasKeyEvent: true} );
+			form_item_rate_input.setValue( data.rate );
+			form_item_rate_input.attr( 'editable', true );
+			form_item_rate_input.unbind( 'formItemKeyUp' ).bind( 'formItemKeyUp', function( e, target ) {
+				$this.onFormItemKeyUp( target );
+			} );
+
+			form_item_rate_input.unbind( 'formItemKeyDown' ).bind( 'formItemKeyDown', function( e, target ) {
+				$this.onFormItemKeyDown( target );
+			} );
+
+			form_item_rate_input.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
+				$this.onFormItemChange( target );
+			} );
+
+			var form_item_rate_text = Global.loadWidgetByName( FormItemType.TEXT );
+			form_item_rate_text.TText( {field: 'rate'} );
+			form_item_rate_text.setValue( data.rate );
+
+			var form_item_units_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+			form_item_units_input.TTextInput( {field: 'units', width: 60, hasKeyEvent: true} );
+			form_item_units_input.setValue( data.units );
+			form_item_units_input.attr( 'editable', true );
+			form_item_units_input.unbind( 'formItemKeyUp' ).bind( 'formItemKeyUp', function( e, target ) {
+				$this.onFormItemKeyUp( target );
+			} );
+
+			form_item_units_input.unbind( 'formItemKeyDown' ).bind( 'formItemKeyDown', function( e, target ) {
+				$this.onFormItemKeyDown( target );
+			} );
+			form_item_units_input.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
+				$this.onFormItemChange( target );
+			} );
+
+			var form_item_units_text = Global.loadWidgetByName( FormItemType.TEXT );
+			form_item_units_text.TText( {field: 'units'} );
+			form_item_units_text.setValue( data.units );
+
+			var form_item_amount_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+			form_item_amount_input.TTextInput( {field: 'amount', width: 60} );
+			form_item_amount_input.setValue( data.amount );
+			form_item_amount_input.attr( 'editable', true );
+			form_item_amount_input.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
+				$this.onFormItemChange( target );
+			} );
+
+			var form_item_amount_text = Global.loadWidgetByName( FormItemType.TEXT );
+			form_item_amount_text.TText( {field: 'amount'} );
+			form_item_amount_text.setValue( data.amount );
+
+//			var form_item_ytd_amount_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+//			form_item_ytd_amount_input.TTextInput( {field: 'ytd_amount', width: 60} );
+//			form_item_ytd_amount_input.setValue( data.ytd_amount ? data.ytd_amount : '0.0000' );
+//			form_item_ytd_amount_input.attr( 'editable', true );
+//			form_item_ytd_amount_input.attr({
+//				'pay_stub_entry_id': (data.id && this.parent_controller.current_edit_record.id) ? data.id : '',
+//				'tmp_type': data.tmp_type,
+//				'type_id': data['type_id'],
+//				'pay_stub_amendment_id': data['pay_stub_amendment_id'] ? data['pay_stub_amendment_id'] : '',
+//				'user_expense_id': data['user_expense_id'] ? data['user_expense_id'] : ''
+//			});
+
+			var form_item_ytd_amount_text = Global.loadWidgetByName( FormItemType.TEXT );
+			form_item_ytd_amount_text.TText( {field: 'ytd_amount'} );
+			form_item_ytd_amount_text.setValue( data.ytd_amount );
+			form_item_ytd_amount_text.attr( {
+				'pay_stub_entry_id': (data.id && this.parent_controller.current_edit_record.id) ? data.id : '',
+				'tmp_type': data.tmp_type,
+				'type_id': data['type_id'],
+				'original_amount': data['amount'] ? data['amount'] : '0.00',
+				'original_ytd_amount': data['ytd_amount'] ? data['ytd_amount'] : '0.00',
+				'pay_stub_entry_name_id': data['pay_stub_entry_name_id'] ? data['pay_stub_entry_name_id'] : null
+			} );
+
+			if ( pay_stub_amendment_id > 0 ) {
+				form_item_ytd_amount_text.attr( 'pay_stub_amendment_id', pay_stub_amendment_id );
+			}
+
+			if ( user_expense_id > 0 ) {
+				form_item_ytd_amount_text.attr( 'user_expense_id', user_expense_id );
+			}
+
+			if ( parseInt( data['ytd_amount'] ) > 0 ) {
+
+			} else if ( pay_stub_status_id == 40 ) {
+				form_item_ytd_amount_text.text( '-' );
+			}
+
+			if ( parseInt( data.rate ) > 0 ) {
+				form_item_amount_input.setReadOnly( true );
+			} else if ( pay_stub_status_id == 40 ) {
+				form_item_rate_text.text( '-' );
+			}
+
+			if (  parseInt( data.units ) > 0 ) {
+				form_item_amount_input.setReadOnly( true );
+			} else if ( pay_stub_status_id == 40 ) {
+				form_item_units_text.text( '-' );
+			}
+
+			if ( data['tmp_type'] == '10' ) {
+				row = $( Global.loadWidget( 'views/payroll/pay_stub/PayStubEntryViewInsideEditorFiveColumnRow.html' ) );
+				// name
+				if ( Global.isSet( index ) || is_add ) {
+
+					if (  data['type_id'] == 40  ) {
+						form_item_name_text.css( 'font-weight', 'bold' );
+						widgets[form_item_name_text.getField()] = form_item_name_text;
+						row.children().eq( 0 ).append( form_item_name_text );
+
+					} else {
+						args['filter_data']['type_id'] = [10];
+						form_item_name_input.setDefaultArgs( args );
+						widgets[form_item_name_input.getField()] = form_item_name_input;
+						row.children().eq( 0 ).append( form_item_name_input );
+					}
+
+				} else {
+					if ( data['type_id'] == 40 ) {
+						form_item_name_text.css( 'font-weight', 'bold' );
+					}
+					widgets[form_item_name_text.getField()] = form_item_name_text;
+					row.children().eq( 0 ).append( form_item_name_text );
+				}
+
+				// rate
+				if ( data['type_id'] == 10 ) {
+					if ( pay_stub_status_id == 25 ) {
+						if ( pay_stub_amendment_id > 0 || user_expense_id > 0 ) {
+							form_item_rate_input.setReadOnly( true );
+						}
+						widgets[form_item_rate_input.getField()] = form_item_rate_input;
+						row.children().eq( 1 ).append( form_item_rate_input );
+
+					} else {
+						widgets[form_item_rate_text.getField()] = form_item_rate_text;
+						row.children().eq( 1 ).append( form_item_rate_text );
+					}
+				} else {
+					if ( Global.isSet( index ) || is_add ) {
+						if ( data['type_id'] == 40 ) {
+
+						} else {
+							widgets[form_item_rate_input.getField()] = form_item_rate_input;
+							row.children().eq( 1 ).append( form_item_rate_input );
+						}
+					}
+				}
+
+				// units
+				if ( data['type_id'] == 10 ) {
+					if ( pay_stub_status_id == 25 ) {
+						if ( pay_stub_amendment_id > 0 || user_expense_id > 0 ) {
+							form_item_units_input.setReadOnly( true );
+						}
+						widgets[form_item_units_input.getField()] = form_item_units_input;
+						row.children().eq( 2 ).append( form_item_units_input );
+					} else {
+						widgets[form_item_units_text.getField()] = form_item_units_text;
+						row.children().eq( 2 ).append( form_item_units_text );
+					}
+				} else {
+					if ( Global.isSet( index ) || is_add ) {
+
+						if ( data['type_id'] == 40 ) {
+							form_item_units_text.css( 'font-weight', 'bold' );
+							widgets[form_item_units_text.getField()] = form_item_units_text;
+							row.children().eq( 2 ).append( form_item_units_text );
+						} else {
+							widgets[form_item_units_input.getField()] = form_item_units_input;
+							row.children().eq( 2 ).append( form_item_units_input );
+						}
+					} else {
+						form_item_units_text.css( 'font-weight', 'bold' );
+						widgets[form_item_units_text.getField()] = form_item_units_text;
+						row.children().eq( 2 ).append( form_item_units_text );
+					}
+				}
+
+				// amount
+				if ( data['type_id'] == 10 ) {
+					if ( pay_stub_status_id == 25 ) {
+						if ( pay_stub_amendment_id > 0 || user_expense_id > 0 ) {
+							form_item_amount_input.setReadOnly( true );
+						}
+						widgets[form_item_amount_input.getField()] = form_item_amount_input;
+						row.children().eq( 3 ).append( form_item_amount_input );
+					} else {
+						widgets[form_item_amount_text.getField()] = form_item_amount_text;
+						row.children().eq( 3 ).append( form_item_amount_text );
+
+					}
+				} else {
+					if ( Global.isSet( index ) || is_add ) {
+
+						if ( data['type_id'] == 40 ) {
+							form_item_amount_text.css( 'font-weight', 'bold' );
+							widgets[form_item_amount_text.getField()] = form_item_amount_text;
+							row.children().eq( 3 ).append( form_item_amount_text );
+						} else {
+							widgets[form_item_amount_input.getField()] = form_item_amount_input;
+							row.children().eq( 3 ).append( form_item_amount_input );
+						}
+
+					} else {
+						form_item_amount_text.css( 'font-weight', 'bold' );
+						widgets[form_item_amount_text.getField()] = form_item_amount_text;
+						row.children().eq( 3 ).append( form_item_amount_text );
+					}
+				}
+
+				// Ytd amount
+				if ( data['type_id'] == 40 ) {
+					form_item_ytd_amount_text.css( 'font-weight', 'bold' );
+				}
+				if ( Global.isSet( index ) || is_add ) {
+					form_item_ytd_amount_text.text( '-' );
+				}
+				widgets[form_item_ytd_amount_text.getField()] = form_item_ytd_amount_text;
+				row.children().eq( 4 ).append( form_item_ytd_amount_text );
+
+			} else if ( data['tmp_type'] == 20 ) {
+
+				row = $( Global.loadWidget( 'views/payroll/pay_stub/PayStubEntryViewInsideEditorThreeColumnRow.html' ) );
+				// name
+
+				if ( Global.isSet( index ) || is_add ) {
+
+
+					if ( data['type_id'] == 40 ) {
+						form_item_name_text.css( 'font-weight', 'bold' );
+						widgets[form_item_name_text.getField()] = form_item_name_text;
+						row.children().eq( 0 ).append( form_item_name_text );
+					} else {
+						args['filter_data']['type_id'] = [20];
+						form_item_name_input.setDefaultArgs( args );
+						widgets[form_item_name_input.getField()] = form_item_name_input;
+						row.children().eq( 0 ).append( form_item_name_input );
+					}
+
+				} else {
+					if ( data['type_id'] == 40 ) {
+						form_item_name_text.css( 'font-weight', 'bold' );
+					}
+					widgets[form_item_name_text.getField()] = form_item_name_text;
+					row.children().eq( 0 ).append( form_item_name_text );
+
+				}
+
+				// amount
+				if ( data['type_id'] == 20 ) {
+					if ( pay_stub_status_id == 25 ) {
+						if ( pay_stub_amendment_id > 0 || user_expense_id > 0 ) {
+							form_item_amount_input.setReadOnly( true );
+						}
+
+						widgets[form_item_amount_input.getField()] = form_item_amount_input;
+						row.children().eq( 1 ).append( form_item_amount_input );
+					} else {
+						widgets[form_item_amount_text.getField()] = form_item_amount_text;
+						row.children().eq( 1 ).append( form_item_amount_text );
+					}
+				} else {
+					if ( Global.isSet( index ) || is_add ) {
+
+
+						if ( data['type_id'] == 40 ) {
+							form_item_amount_text.css( 'font-weight', 'bold' );
+							widgets[form_item_amount_text.getField()] = form_item_amount_text;
+							row.children().eq( 1 ).append( form_item_amount_text );
+						} else {
+							widgets[form_item_amount_input.getField()] = form_item_amount_input;
+							row.children().eq( 1 ).append( form_item_amount_input );
+						}
+ 					} else {
+						form_item_amount_text.css( 'font-weight', 'bold' );
+						widgets[form_item_amount_text.getField()] = form_item_amount_text;
+						row.children().eq( 1 ).append( form_item_amount_text );
+					}
+				}
+
+				// Ytd amount
+				if ( data['type_id'] == 40 ) {
+					form_item_ytd_amount_text.css( 'font-weight', 'bold' );
+				}
+				if ( Global.isSet( index ) || is_add ) {
+					form_item_ytd_amount_text.text( '-' );
+				}
+				widgets[form_item_ytd_amount_text.getField()] = form_item_ytd_amount_text;
+				row.children().eq( 2 ).append( form_item_ytd_amount_text );
+
+			} else if ( data['tmp_type'] == 30 ) {
+
+				row = $( Global.loadWidget( 'views/payroll/pay_stub/PayStubEntryViewInsideEditorThreeColumnRow.html' ) );
+				// name
+
+				if ( Global.isSet( index ) || is_add ) {
+
+
+					if ( data['type_id'] == 40 ) {
+						form_item_name_text.css( 'font-weight', 'bold' );
+						widgets[form_item_name_text.getField()] = form_item_name_text;
+						row.children().eq( 0 ).append( form_item_name_text );
+					} else {
+						args['filter_data']['type_id'] = [30];
+						form_item_name_input.setDefaultArgs( args );
+						widgets[form_item_name_input.getField()] = form_item_name_input;
+						row.children().eq( 0 ).append( form_item_name_input );
+					}
+
+				} else {
+					if ( data['type_id'] == 40 ) {
+						form_item_name_text.css( 'font-weight', 'bold' );
+					}
+					widgets[form_item_name_text.getField()] = form_item_name_text;
+					row.children().eq( 0 ).append( form_item_name_text );
+
+				}
+
+				// amount
+				if ( data['type_id'] == 30 ) {
+					if ( pay_stub_status_id == 25 ) {
+						if ( pay_stub_amendment_id > 0 || user_expense_id > 0 ) {
+
+							form_item_amount_input.setReadOnly( true )
+						}
+						widgets[form_item_amount_input.getField()] = form_item_amount_input;
+						row.children().eq( 1 ).append( form_item_amount_input );
+					} else {
+						widgets[form_item_amount_text.getField()] = form_item_amount_text;
+						row.children().eq( 1 ).append( form_item_amount_text );
+					}
+				} else {
+					if ( Global.isSet( index ) || is_add ) {
+
+
+						if ( data['type_id'] == 40 ) {
+							form_item_amount_text.css( 'font-weight', 'bold' );
+							widgets[form_item_amount_text.getField()] = form_item_amount_text;
+							row.children().eq( 1 ).append( form_item_amount_text );
+						} else {
+							widgets[form_item_amount_input.getField()] = form_item_amount_input;
+							row.children().eq( 1 ).append( form_item_amount_input );
+						}
+
+					} else {
+						if ( data['type_id'] == 40 ) {
+							form_item_amount_text.css( 'font-weight', 'bold' );
+						}
+						widgets[form_item_amount_text.getField()] = form_item_amount_text;
+						row.children().eq( 1 ).append( form_item_amount_text );
+					}
+				}
+
+				// Ytd amount
+				if ( data['type_id'] == 40 ) {
+					form_item_ytd_amount_text.css( 'font-weight', 'bold' );
+				}
+				if ( Global.isSet( index ) || is_add ) {
+					form_item_ytd_amount_text.text( '-' );
+				}
+				widgets[form_item_ytd_amount_text.getField()] = form_item_ytd_amount_text;
+				row.children().eq( 2 ).append( form_item_ytd_amount_text );
+
+			} else if ( data['tmp_type'] == 40 ) {
+
+				row = $( Global.loadWidget( 'views/payroll/pay_stub/PayStubEntryViewInsideEditorThreeColumnRow.html' ) );
+//				row.removeClass('tblDataWhite').addClass( 'tblHeader' );
+				// name
+				if ( data['type_id'] == 40 ) {
+					form_item_name_text.css( 'font-weight', 'bold' );
+				}
+				widgets[form_item_name_text.getField()] = form_item_name_text;
+				row.children().eq( 0 ).append( form_item_name_text );
+
+				// amount
+				form_item_amount_text.css( 'font-weight', 'bold' );
+				widgets[form_item_amount_text.getField()] = form_item_amount_text;
+				row.children().eq( 1 ).append( form_item_amount_text );
+
+				// Ytd amount
+				if ( data['type_id'] == 40 ) {
+					form_item_ytd_amount_text.css( 'font-weight', 'bold' );
+				}
+
+				widgets[form_item_ytd_amount_text.getField()] = form_item_ytd_amount_text;
+				row.children().eq( 2 ).append( form_item_ytd_amount_text );
+
+			} else if ( data['tmp_type'] == 50 ) {
+
+				row = $( Global.loadWidget( 'views/payroll/pay_stub/PayStubEntryViewInsideEditorThreeColumnRow.html' ) );
+				// name
+
+				if ( Global.isSet( index ) || is_add ) {
+
+
+					if ( data['type_id'] == 40 ) {
+						form_item_name_text.css( 'font-weight', 'bold' );
+						widgets[form_item_name_text.getField()] = form_item_name_text;
+						row.children().eq( 0 ).append( form_item_name_text );
+					} else {
+						args['filter_data']['type_id'] = [50];
+						form_item_name_input.setDefaultArgs( args );
+						widgets[form_item_name_input.getField()] = form_item_name_input;
+						row.children().eq( 0 ).append( form_item_name_input );
+					}
+
+				} else {
+					if ( data['type_id'] == 40 ) {
+						form_item_name_text.css( 'font-weight', 'bold' );
+					}
+					widgets[form_item_name_text.getField()] = form_item_name_text;
+					row.children().eq( 0 ).append( form_item_name_text );
+				}
+
+				// amount
+				if ( data['type_id'] == 50 ) {
+					if ( pay_stub_status_id == 25 ) {
+						if ( pay_stub_amendment_id > 0 || user_expense_id > 0 ) {
+							form_item_amount_input.setReadOnly( true );
+						}
+						widgets[form_item_amount_input.getField()] = form_item_amount_input;
+						row.children().eq( 1 ).append( form_item_amount_input );
+					} else {
+						widgets[form_item_amount_text.getField()] = form_item_amount_text;
+						row.children().eq( 1 ).append( form_item_amount_text );
+					}
+				} else {
+					if ( Global.isSet( index ) || is_add ) {
+
+
+						if ( data['type_id'] == 40 ) {
+							form_item_amount_text.css( 'font-weight', 'bold' );
+							widgets[form_item_amount_text.getField()] = form_item_amount_text;
+							row.children().eq( 1 ).append( form_item_amount_text );
+						} else {
+							widgets[form_item_amount_input.getField()] = form_item_amount_input;
+							row.children().eq( 1 ).append( form_item_amount_input );
+						}
+
+					} else {
+						form_item_amount_text.css( 'font-weight', 'bold' );
+						widgets[form_item_amount_text.getField()] = form_item_amount_text;
+						row.children().eq( 1 ).append( form_item_amount_text );
+					}
+				}
+
+				// Ytd amount
+				if ( data['type_id'] == 40 ) {
+					form_item_ytd_amount_text.css( 'font-weight', 'bold' );
+				}
+				if ( Global.isSet( index ) || is_add ) {
+					form_item_ytd_amount_text.text( '-' );
+				}
+				widgets[form_item_ytd_amount_text.getField()] = form_item_ytd_amount_text;
+				row.children().eq( 2 ).append( form_item_ytd_amount_text );
+
+			}
+			//Build row widgets
+
+			if ( pay_stub_amendment_id > 0 || user_expense_id > 0 ) {
+				row.children().last().find( '.minus-icon ' ).hide();
+			}
+
+			if ( data['type_id'] == 40 ) {
+
+				if ( data['tmp_type'] == 40 ) {
+					widgets['net_pay_row'] = true;
+				} else {
+					widgets['total_row'] = true;
+				}
+				row.children().last().empty();
+			}
+
+			if ( typeof index != 'undefined' ) {
+				row.insertAfter( $( render ).find( 'tr' ).eq( index ) );
+				this.rows_widgets_array.splice( (index + 1 ), 0, widgets );
+
+			} else {
+				$( render ).append( row );
+				this.rows_widgets_array.push( widgets );
+			}
+
+			if ( pay_stub_status_id == 25 ) {
+				this.addIconsEvent( row ); //Bind event to add and minus icon
+			} else {
+				row.children().last().empty();
+			}
+
+		}
+
+	},
+
+	insideEditorRemoveRow: function( row ) {
+		var index = row[0].rowIndex;
+		var remove_id = this.rows_widgets_array[index].ytd_amount.attr( 'pay_stub_entry_id' );
+		var tmp_type = this.rows_widgets_array[index].ytd_amount.attr( 'tmp_type' );
+		if ( remove_id > 0 ) {
+			this.delete_ids.push( remove_id );
+		}
+		row.remove();
+		if ( this.rows_widgets_array[index - 1] === true && ( this.rows_widgets_array[index + 1]['total_row'] === true || this.rows_widgets_array[index + 1] === true ) ) {
+			this.addRow( {id: '', tmp_type: tmp_type}, index - 1 );
+			this.rows_widgets_array.splice( index + 1, 1 );
+		} else {
+
+			this.rows_widgets_array.splice( index, 1 );
+		}
+
+		this.calcTotal();
+	},
+
+
+	onSaveClick: function() {
+		var $this = this;
+		var record;
+//		this.is_add = false;
+		LocalCacheData.current_doing_context_action = 'save';
+		if ( this.is_mass_editing ) {
+
+			var check_fields = {};
+			for ( var key in this.edit_view_ui_dic ) {
+				var widget = this.edit_view_ui_dic[key];
+
+				if ( Global.isSet( widget.isChecked ) ) {
+					if ( widget.isChecked() ) {
+						check_fields[key] = this.current_edit_record[key];
+					}
+				}
+			}
+
+			record = [];
+			$.each( this.mass_edit_record_ids, function( index, value ) {
+				var common_record = Global.clone( check_fields );
+				common_record.id = value;
+				common_record = $this.uniformVariable( common_record );
+				record.push( common_record );
+
+			} );
+		} else {
+			record = this.current_edit_record;
+			record = this.uniformVariable( record );
+		}
+
+		if ( this.include_entries ) {
+			var entries = $this.saveInsideEditorData();
+			if ( entries.length > 0 ) {
+				record['entries'] = entries;
+			}
+		}
+
+		this.api['set' + this.api.key_name]( record, {onResult: function( result ) {
+
+			$this.onSaveResult( result );
+
+		}} );
+	},
+
+//	onSaveResult: function( result ) {
+//		var $this = this;
+//		if ( result.isValid() ) {
+//			var result_data = result.getResult();
+//			if ( result_data === true ) {
+//				$this.refresh_id = $this.current_edit_record.id;
+//			} else if ( result_data > 0 ) {
+//				$this.refresh_id = result_data
+//			}
+//
+//			$this.saveInsideEditorData( function() {
+//				$this.search();
+//				$this.onSaveDone( result );
+//				$this.current_edit_record = null;
+//				$this.removeEditView();
+//			} );
+//
+//		} else {
+//			$this.setErrorTips( result );
+//			$this.setErrorMenu();
+//		}
+//	},
+
+
+	onSaveAndContinue: function() {
+		var $this = this;
+		this.is_add = false;
+		LocalCacheData.current_doing_context_action = 'save_and_continue';
+		var record = this.current_edit_record;
+		record = this.uniformVariable( record );
+		if ( this.include_entries ) {
+			var entries = $this.saveInsideEditorData();
+			if ( entries.length > 0 ) {
+				record['entries'] = entries;
+			}
+		}
+
+		this.api['set' + this.api.key_name]( record, {onResult: function( result ) {
+			$this.onSaveAndContinueResult( result );
+
+		}} );
+	},
+
+//	onSaveAndContinueResult: function( result ) {
+//		var $this = this;
+//		if ( result.isValid() ) {
+//			var result_data = result.getResult();
+//			if ( result_data === true ) {
+//				$this.refresh_id = $this.current_edit_record.id;
+//
+//			} else if ( result_data > 0 ) { // as new
+//				$this.refresh_id = result_data
+//			}
+//
+//			$this.saveInsideEditorData( function() {
+//				$this.search( false );
+//				$this.onEditClick( $this.refresh_id, true );
+//
+//				$this.onSaveAndContinueDone( result );
+//
+//			} );
+//
+//		} else {
+//			$this.setErrorTips( result );
+//			$this.setErrorMenu();
+//		}
+//	},
+
+	saveInsideEditorData: function( callBack ) {
+		var $this = this;
+		var data = this.editor.getValue( $this.current_edit_record.id ? $this.current_edit_record.id : '' );
+
+		if ( data.length > 0 ) {
+
+			var remove_ids = $this.editor.delete_ids;
+
+			if ( remove_ids.length > 0 ) {
+				this.pay_stub_entry_api.deletePayStubEntry( remove_ids, {onResult: function( res ) {
+					$this.editor.delete_ids = [];
+				}} )
+			}
+
+//			this.pay_stub_entry_api.setPayStubEntry( data, {onResult: function( res ) {
+//				var res_data = res.getResult();
+//				if ( res_data ) {
+//					if ( Global.isSet( callBack ) ) {
+//						callBack();
+//					}
+//				} else {
+//					$this.setErrorTips( res );
+//					$this.setErrorMenu();
+//				}
+//
+//
+//			}} )
+
+
+		} else {
+
+			if ( Global.isSet( callBack ) ) {
+				callBack();
+			}
+		}
+
+		return data;
+
+	},
+
+	insideEditorGetValue: function( current_edit_item_id ) {
+		var len = this.rows_widgets_array.length;
+		var result = [];
+
+		if ( this.cover && this.cover.length > 0 ) {
+			return result;
+		}
+
+		for ( var i = 0; i < len; i++ ) {
+			var row = this.rows_widgets_array[i];
+			var data = {};
+
+			if ( row === true ) {
+				continue;
+			}
+
+//			var pay_stub_amendment_id = row['ytd_amount'].attr( 'pay_stub_amendment_id' );
+//			var user_expense_id = row['ytd_amount'].attr( 'user_expense_id' );
+//
+//			if (  pay_stub_amendment_id > 0 || user_expense_id > 0  ) {
+//				continue;
+//			}
+
+			data['id'] = row['ytd_amount'].attr( 'pay_stub_entry_id' );
+
+			if ( row['ytd_amount'].attr( 'type_id' ) ) {
+				data['type'] = row['ytd_amount'].attr( 'type_id' );
+			}
+
+			if ( Global.isSet( row['rate'] )
+				&& row['rate'].attr( 'editable' ) ) {
+				data['rate'] = row['rate'].getValue();
+			}
+			if ( Global.isSet( row['units'] )
+				&& row['units'].attr( 'editable' ) ) {
+				data['units'] = row['units'].getValue();
+			}
+			if ( Global.isSet( row['amount'] )
+				&& row['amount'].attr( 'editable' ) ) {
+				data['amount'] = row['amount'].getValue();
+			}
+			if ( Global.isSet( row['ytd_amount'] )
+				&& row['ytd_amount'].attr( 'editable' ) ) {
+				data['ytd_amount'] = row['ytd_amount'].getValue();
+			}
+
+			if ( Global.isSet( row['pay_stub_entry_name_id'] ) ) {
+				data['pay_stub_entry_name_id'] = row['pay_stub_entry_name_id'].getValue();
+			} else {
+				data['pay_stub_entry_name_id'] = row['ytd_amount'].attr( 'pay_stub_entry_name_id' );
+			}
+
+			if ( Global.isSet( row['pay_stub_amendment_id'] ) ) {
+				data['pay_stub_amendment_id'] = row['ytd_amount'].attr( 'pay_stub_amendment_id' );
+			}
+
+			if ( Global.isSet( row['user_expense_id'] ) ) {
+				data['user_expense_id'] = row['ytd_amount'].attr( 'user_expense_id' );
+			}
+
+			data['pay_stub_id'] = current_edit_item_id;
+			result.push( data );
+		}
+
+		return result;
 	},
 
 	getFilterColumnsFromDisplayColumns: function() {
@@ -758,15 +1715,21 @@ PayStubViewController = BaseViewController.extend( {
 		this.setMassEditingFieldsWhenFormChange( target );
 
 		var key = target.getField();
+		var c_value = target.getValue();
 
 		switch ( key ) {
+			case 'status_id':
+				if ( c_value == 40 ) {
+					this.include_entries = false;
+				}
+				break;
 			case 'country':
 				var widget = this.edit_view_ui_dic['province'];
 				widget.setValue( null );
 				break;
 		}
 
-		this.current_edit_record[key] = target.getValue();
+		this.current_edit_record[key] = c_value;
 		if ( key === 'country' ) {
 			return;
 		}
@@ -819,7 +1782,7 @@ PayStubViewController = BaseViewController.extend( {
 			}} );
 		}
 	},
-	eSetProvince: function( val ) {
+	eSetProvince: function( val, refresh ) {
 		var $this = this;
 		var province_widget = $this.edit_view_ui_dic['province'];
 
@@ -834,10 +1797,56 @@ PayStubViewController = BaseViewController.extend( {
 				}
 
 				$this.e_province_array = Global.buildRecordArray( res );
+				if ( refresh && $this.e_province_array.length > 0 ) {
+					$this.current_edit_record.province = $this.e_province_array[0].value;
+					province_widget.setValue( $this.current_edit_record.province );
+				}
 				province_widget.setSourceData( $this.e_province_array );
 
 			}} );
 		}
+	},
+
+
+	validate: function() {
+		var $this = this;
+
+		var record = {};
+
+		if ( this.is_mass_editing ) {
+			for ( var key in this.edit_view_ui_dic ) {
+
+				if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
+					continue;
+				}
+
+				var widget = this.edit_view_ui_dic[key];
+
+				if ( Global.isSet( widget.isChecked ) ) {
+					if ( widget.isChecked() && widget.getEnabled() ) {
+						record[key] = widget.getValue();
+					}
+
+				}
+			}
+
+		} else {
+			record = this.current_edit_record;
+		}
+
+		record = this.uniformVariable( record );
+
+		if ( this.include_entries ) {
+			var entries = $this.saveInsideEditorData();
+			if ( entries.length > 0 ) {
+				record['entries'] = entries;
+			}
+		}
+
+		this.api['validate' + this.api.key_name]( record, {onResult: function( result ) {
+			$this.validateResult( result );
+
+		}} );
 	},
 
 	buildEditViewUI: function() {
@@ -846,8 +1855,15 @@ PayStubViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		tab_0_label.text( $.i18n._( 'Pay Stub' ) );
+		this.setTabLabels( {
+			'tab_pay_stub': $.i18n._( 'Pay Stub' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
+
+//		var tab_0_label = this.edit_view.find( 'a[ref=tab_pay_stub]' );
+//		var tab_1_label = this.edit_view.find( 'a[ref=tab_audit]' );
+//		tab_0_label.text( $.i18n._( 'Pay Stub' ) );
+//		tab_1_label.text( $.i18n._( 'Audit' ) );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIPayStub' )),
@@ -862,29 +1878,42 @@ PayStubViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_pay_stub = this.edit_view_tab.find( '#tab_pay_stub' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_pay_stub_column1 = tab_pay_stub.find( '.first-column' );
+		var tab_pay_stub_column2 = tab_pay_stub.find( '.second-column' );
 
 		var form_item_input;
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_pay_stub_column1 );
 
 		// Employee
-		if ( !Global.isSet( this.is_mass_editing ) || Global.isFalseOrNull( this.is_mass_editing ) ) {
+		if ( this.is_add ) {
+			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+
+			form_item_input.AComboBox( {
+				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				allow_multiple_selection: false,
+				layout_name: ALayoutIDs.USER,
+				show_search_inputs: true,
+				set_empty: false,
+				field: 'user_id'
+			} );
+			this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_pay_stub_column1 );
+		} else if ( !Global.isSet( this.is_mass_editing ) || Global.isFalseOrNull( this.is_mass_editing ) ) {
 
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 			form_item_input.TText( {field: 'full_name'} );
-			this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab0_column1, '' );
+			this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_pay_stub_column1, '' );
 		}
 
 		// Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {field: 'status_id', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.filtered_status_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_pay_stub_column1 );
 
 		// Currency
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -897,26 +1926,159 @@ PayStubViewController = BaseViewController.extend( {
 			set_empty: false,
 			field: 'currency_id'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Currency' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Currency' ), form_item_input, tab_pay_stub_column1 );
 
 		// Pay Start Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
 		form_item_input.TDatePicker( {field: 'start_date'} );
-		this.addEditFieldToColumn( $.i18n._( 'Pay Start Date' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Pay Start Date' ), form_item_input, tab_pay_stub_column2 );
 
 		// Pay End Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
 		form_item_input.TDatePicker( {field: 'end_date'} );
-		this.addEditFieldToColumn( $.i18n._( 'Pay End Date' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Pay End Date' ), form_item_input, tab_pay_stub_column2 );
 
 		// Payment Date
 
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
 		form_item_input.TDatePicker( {field: 'transaction_date'} );
-		this.addEditFieldToColumn( $.i18n._( 'Payment Date' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Payment Date' ), form_item_input, tab_pay_stub_column2, '' );
+
+		//Inside editor
+
+		var inside_editor_div = tab_pay_stub.find( '.inside-editor-div' );
+
+		this.editor = Global.loadWidgetByName( FormItemType.INSIDE_EDITOR );
+
+		this.editor.InsideEditor( {
+			addRow: this.insideEditorAddRow,
+			removeRow: this.insideEditorRemoveRow,
+			getValue: this.insideEditorGetValue,
+			setValue: this.insideEditorSetValue,
+			parent_controller: this,
+			api: this.pay_stub_entry_api,
+			render: 'views/payroll/pay_stub/PayStubEntryViewInsideEditorRender.html',
+			render_args: {},
+			row_render: 'views/payroll/pay_stub/PayStubEntryViewInsideEditorRow.html'
+
+		} );
+
+		this.editor.removeCover = this.removeInsideEditorCover;
+		this.editor.onEditClick = this.removeInsideEditorCover;
+		this.editor.onFormItemKeyUp = function( target ) {
+			var index = target.parent().parent().index();
+			var $this = this;
+			var widget_rate = $this.rows_widgets_array[index]['rate'];
+			var widget_units = $this.rows_widgets_array[index]['units'];
+			var widget_amount = $this.rows_widgets_array[index]['amount'];
+
+			if ( target.getValue().length === 0 ) {
+				widget_amount.setReadOnly( false );
+			}
+			if ( widget_rate.getValue().length > 0 || widget_units.getValue().length > 0 ) {
+				widget_amount.setReadOnly( true );
+			}
+
+			if ( widget_rate.getValue().length > 0 && widget_units.getValue().length > 0 ) {
+				widget_amount.setValue( ( parseFloat( widget_rate.getValue() ) * parseFloat( widget_units.getValue() ) ).toFixed( 2 ) );
+				this.onFormItemChange( widget_amount, true );
+			} else {
+				widget_amount.setValue( '0.00' );
+				this.onFormItemChange( widget_amount, true );
+			}
+		};
+		this.editor.onFormItemKeyDown = function( target ) {
+			var index = target.parent().parent().index();
+			var $this = this;
+			var widget = $this.rows_widgets_array[index]['amount'];
+			var widget_rate = $this.rows_widgets_array[index]['rate'];
+			var widget_units = $this.rows_widgets_array[index]['units'];
+			if ( widget_rate.getValue().length > 0 && widget_units.getValue().length > 0 ) {
+
+			} else {
+				widget.setValue( '0.00' );
+				this.onFormItemChange( widget, true );
+			}
+
+			widget.setReadOnly( true );
+		};
+		this.editor.onFormItemChange = function( target, doNotValidate ) {
+			var key = target.getField();
+			var c_value = parseFloat( target.getValue() ? target.getValue() : 0 ); // new value
+			var index = target.parent().parent().index();
+
+			if ( key == 'amount' ) {
+				var original_ytd_amount = parseFloat( this.rows_widgets_array[index]['ytd_amount'].attr( 'original_ytd_amount' ) );
+				var original_amount = parseFloat( this.rows_widgets_array[index]['ytd_amount'].attr( 'original_amount' ) );
+				var new_ytd_amount = (original_ytd_amount - original_amount + c_value).toFixed( 4 );
+				this.rows_widgets_array[index]['ytd_amount'].setValue( new_ytd_amount > 0 ? new_ytd_amount : '-' );
+				this.rows_widgets_array[index]['ytd_amount'].attr( 'original_ytd_amount', new_ytd_amount );
+				this.rows_widgets_array[index]['ytd_amount'].attr( 'original_amount', c_value );
+			}
+
+			if ( doNotValidate ) {
+
+			} else {
+				this.parent_controller.validate();
+			}
+
+			this.calcTotal();
+		};
+
+		this.editor.calcTotal = function() {
+			var total_units = 0, total_amount = 0, total_ytd_amount = 0;
+			var net_pay_amount = 0;
+			var net_pay_ytd_amount = 0;
+
+			for ( var i = 0; i < this.rows_widgets_array.length; i++ ) {
+				var row = this.rows_widgets_array[i];
+				if ( row === true ) {
+					total_units = 0;
+					total_amount = 0;
+					total_ytd_amount = 0;
+					continue;
+				}
+
+				if ( row['total_row'] === true ) {
+					if ( Global.isSet( row['units'] ) ) {
+						row['units'].setValue( total_units.toFixed( 4 ) );
+					}
+					row['amount'].setValue( total_amount.toFixed( 4 ) );
+					row['ytd_amount'].setValue( total_ytd_amount.toFixed( 4 ) );
+
+					if ( net_pay_amount > 0 ) {
+						net_pay_amount = net_pay_amount - total_amount;
+					} else {
+						net_pay_amount = total_amount;
+					}
+
+					if ( net_pay_ytd_amount > 0 ) {
+						net_pay_ytd_amount = net_pay_ytd_amount - total_ytd_amount;
+					} else {
+						net_pay_ytd_amount = total_ytd_amount;
+					}
+
+					continue;
+				}
+
+				if ( row['net_pay_row'] === true ) {
+					row['amount'].setValue( net_pay_amount.toFixed( 4 ) );
+					row['ytd_amount'].setValue( net_pay_ytd_amount.toFixed( 4 ) );
+					continue;
+				}
+
+				total_units = parseFloat( total_units ) + ( Global.isSet( row['units'] ) ? ( isNaN( parseFloat( row['units'].getValue() ) ) ? 0 : parseFloat( row['units'].getValue() ) ) : 0 );
+				total_amount = parseFloat( total_amount ) + ( isNaN( parseFloat( row['amount'].getValue() ) ) ? 0 : parseFloat( row['amount'].getValue() ) );
+				total_ytd_amount = parseFloat( total_ytd_amount ) + ( isNaN( parseFloat( row['ytd_amount'].getValue() ) ) ? 0 : parseFloat( row['ytd_amount'].getValue() ) );
+
+			}
+
+		};
+
+		inside_editor_div.append( this.editor );
 
 	},
 
@@ -1049,7 +2211,7 @@ PayStubViewController = BaseViewController.extend( {
 		];
 	},
 
-	onContentMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function( context_btn, menu_name ) {
 		var id;
 		if ( Global.isSet( menu_name ) ) {
 			id = menu_name;
@@ -1064,9 +2226,17 @@ PayStubViewController = BaseViewController.extend( {
 		}
 
 		switch ( id ) {
+			case ContextMenuIconName.add:
+				ProgressBar.showOverlay();
+				this.onAddClick();
+				break;
 			case ContextMenuIconName.save:
 				ProgressBar.showOverlay();
 				this.onSaveClick();
+				break;
+			case ContextMenuIconName.save_and_continue:
+				ProgressBar.showOverlay();
+				this.onSaveAndContinue();
 				break;
 			case ContextMenuIconName.save_and_next:
 				ProgressBar.showOverlay();
@@ -1087,6 +2257,10 @@ PayStubViewController = BaseViewController.extend( {
 			case ContextMenuIconName.delete_and_next:
 				ProgressBar.showOverlay();
 				this.onDeleteAndNextClick();
+				break;
+			case ContextMenuIconName.copy_as_new:
+				ProgressBar.showOverlay();
+				this.onCopyAsNewClick();
 				break;
 			case ContextMenuIconName.cancel:
 				this.onCancelClick();

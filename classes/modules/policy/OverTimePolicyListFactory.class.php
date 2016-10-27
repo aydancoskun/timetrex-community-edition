@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 12069 $
- * $Id: OverTimePolicyListFactory.class.php 12069 2014-01-20 18:48:05Z mikeb $
- * $Date: 2014-01-20 10:48:05 -0800 (Mon, 20 Jan 2014) $
- */
+
 
 /**
  * @package Modules\Policy
@@ -118,7 +114,7 @@ class OverTimePolicyListFactory extends OverTimePolicyFactory implements Iterato
 
 		return $this;
 	}
-
+	
 	function getByCompanyId($id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
@@ -152,8 +148,113 @@ class OverTimePolicyListFactory extends OverTimePolicyFactory implements Iterato
 		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
 	}
 
+	function getByCompanyIdAndPayCodeId( $company_id, $id, $limit = NULL, $where = NULL, $order = NULL) {
+		if ( $id == '') {
+			return FALSE;
+		}
+
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'name' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$ph = array(
+					'company_id' => $company_id,
+					);
+
+		$query = '
+					select	*
+					from	'. $this->getTable() .'
+					where
+						company_id = ?
+						AND pay_code_id in ('. $this->getListSQL($id, $ph) .')
+						AND deleted = 0';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph, $limit );
+
+		return $this;
+	}
+
+	function getByCompanyIdAndPayFormulaPolicyId($id, $pay_formula_policy_id, $where = NULL, $order = NULL) {
+		if ( $id == '') {
+			return FALSE;
+		}
+
+		if ( $pay_formula_policy_id == '') {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'a.name' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$ph = array(
+					'id' => $id,
+					);
+
+		$query = '
+					select	*
+					from	'. $this->getTable() .' as a
+					where	company_id = ?
+						AND pay_formula_policy_id in ('. $this->getListSQL($pay_formula_policy_id, $ph) .')
+						AND deleted = 0';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getByCompanyIdAndContributingShiftPolicyId($id, $contributing_shift_policy_id, $where = NULL, $order = NULL) {
+		if ( $id == '') {
+			return FALSE;
+		}
+
+		if ( $contributing_shift_policy_id == '') {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'a.name' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$ph = array(
+					'id' => $id,
+					);
+
+		$query = '
+					select	*
+					from	'. $this->getTable() .' as a
+					where	company_id = ?
+						AND contributing_shift_policy_id in ('. $this->getListSQL($contributing_shift_policy_id, $ph) .')
+						AND deleted = 0';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+	
 	function getByPolicyGroupUserId($user_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
@@ -217,11 +318,11 @@ class OverTimePolicyListFactory extends OverTimePolicyFactory implements Iterato
 
 		$ph = array(
 					'user_id' => $user_id,
-					'id' => $id,
 					);
 
 		$query = '
-					select	d.*
+					select	d.*,
+							1 as is_policy_group
 					from	'. $pguf->getTable() .' as a,
 							'. $pgf->getTable() .' as b,
 							'. $cgmf->getTable() .' as c,
@@ -232,11 +333,12 @@ class OverTimePolicyListFactory extends OverTimePolicyFactory implements Iterato
 						AND a.user_id = ?
 						AND ( b.deleted = 0 AND d.deleted = 0 )
 					UNION
-					select	e.*
+					select	e.*,
+							0 as is_policy_group
 					from
 							'. $otpf->getTable() .' as e
 					where
-							e.id = ?
+							e.id in ('. $this->getListSQL($id, $ph) .')
 							AND e.deleted = 0
 						';
 
@@ -325,9 +427,11 @@ class OverTimePolicyListFactory extends OverTimePolicyFactory implements Iterato
 
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
+		$query .= ( isset($filter_data['description']) ) ? $this->getWhereClauseSQL( 'a.description', $filter_data['description'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['pay_stub_entry_account_id']) ) ? $this->getWhereClauseSQL( 'a.pay_stub_entry_account_id', $filter_data['pay_stub_entry_account_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['accrual_policy_id']) ) ? $this->getWhereClauseSQL( 'a.accrual_policy_id', $filter_data['accrual_policy_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['contributing_shift_policy_id']) ) ? $this->getWhereClauseSQL( 'a.contributing_shift_policy_id', $filter_data['contributing_shift_policy_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['pay_code_id']) ) ? $this->getWhereClauseSQL( 'a.pay_code_id', $filter_data['pay_code_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['pay_formula_policy_id']) ) ? $this->getWhereClauseSQL( 'a.pay_formula_policy_id', $filter_data['pay_formula_policy_id'], 'numeric_list', $ph ) : NULL;
 					
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;

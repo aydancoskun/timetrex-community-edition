@@ -33,20 +33,12 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14496 $
- * $Id: index.php 14496 2014-09-23 19:59:47Z mikeb $
- * $Date: 2014-09-23 12:59:47 -0700 (Tue, 23 Sep 2014) $
- */
+
 require_once('../includes/global.inc.php');
 $form_vars = FormVariables::GetVariables( array('desktop') );
 if ( array_key_exists( 'desktop', $form_vars ) AND $form_vars['desktop'] != 1 ) { //isset() won't work here as 'desktop' key can be NULL
 	unset($form_vars['desktop']);
 }
 
-if ( isset($config_vars['other']['default_interface']) AND strtolower($config_vars['other']['default_interface']) == 'flex' ) {
-	Redirect::Page( URLBuilder::getURL( $form_vars, Environment::GetBaseURL().'flex/') );
-} else {
-	Redirect::Page( URLBuilder::getURL( $form_vars, Environment::GetBaseURL().'html5/') );
-}
+Redirect::Page( URLBuilder::getURL( $form_vars, Environment::GetBaseURL().'html5/') );
 ?>

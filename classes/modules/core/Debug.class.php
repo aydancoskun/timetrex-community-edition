@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 12675 $
- * $Id: Debug.class.php 12675 2014-03-18 17:26:09Z mikeb $
- * $Date: 2014-03-18 10:26:09 -0700 (Tue, 18 Mar 2014) $
- */
+
 
 /**
  * @package Core
@@ -191,8 +187,7 @@ class Debug {
 		}
 
 		//If text is too long, split it into an array.
-		$text_arr = self::splitInput( $text, 'DEBUG [L'. str_pad( $line, 4, 0, STR_PAD_LEFT) .'] ['. self::getExecutionTime() .'ms]:'. "\t" .'<b>'. $method .'()</b>: ', "<br>\n" );
-		//$text_arr[] = 'DEBUG [L'. $line .'] ['. self::getExecutionTime() .'ms]:'. "\t" .'<b>'. $method .'()</b>: '. $text ."<br>\n";
+		$text_arr = self::splitInput( $text, 'DEBUG [L'. str_pad( $line, 4, 0, STR_PAD_LEFT) .'] ['. self::getExecutionTime() .'ms]:'. "\t" .''. $method .'(): ', "\n" );
 
 		if ( self::$buffer_output == TRUE ) {
 			foreach( $text_arr as $text_line ) {
@@ -297,12 +292,9 @@ class Debug {
 			$method = "[Function]";
 		}
 
-		$text_arr[] = 'DEBUG [L'. str_pad( $line, 4, 0, STR_PAD_LEFT) .'] ['. self::getExecutionTime() .'ms] Array: <b>'. $method .'()</b>: '. $text ."\n<pre>";
+		$text_arr[] = 'DEBUG [L'. str_pad( $line, 4, 0, STR_PAD_LEFT) .'] ['. self::getExecutionTime() .'ms] Array: '. $method .'(): '. $text ."\n";
 		$text_arr = array_merge( $text_arr, self::splitInput( self::varDump($array), NULL, "\n" ) );
-		$text_arr[] = "</pre><br>\n";
-
-		//$output = 'DEBUG [L'. $line .'] ['. self::getExecutionTime() .'ms] Array: <b>'. $method .'()</b>: '. $text ."\n";
-		//$output .= "<pre>\n". self::varDump($array) ."</pre><br>\n";
+		$text_arr[] = "\n";
 
 		if (self::$buffer_output == TRUE) {
 			foreach( $text_arr as $text_line ) {
@@ -378,7 +370,7 @@ class Debug {
 				global $amf_message_id;
 				if ( $amf_message_id != '' ) {
 					$progress_bar = new ProgressBar();
-					$progress_bar->start( $amf_message_id, 2, 1, TTi18n::getText('ERROR: Operation cannot be completed.') );
+					$progress_bar->error( $amf_message_id, TTi18n::getText('ERROR: Operation cannot be completed.') );
 					unset($progress_bar);
 				}
 			}
@@ -476,12 +468,12 @@ class Debug {
 			}
 
 			if (strlen($output) > 0) {
-				echo "<br>\n<b>Debug Buffer</b><br>\n";
-				echo "============================================================================<br>\n";
-				echo "Memory Usage: ". $memory_usage ." Buffer Size: ". self::$buffer_size."<br>\n";
-				echo "----------------------------------------------------------------------------<br>\n";
+				echo "\nDebug Buffer\n";
+				echo "============================================================================\n";
+				echo "Memory Usage: ". $memory_usage ." Buffer Size: ". self::$buffer_size."\n";
+				echo "----------------------------------------------------------------------------\n";
 				echo $output;
-				echo "============================================================================<br>\n";
+				echo "============================================================================\n";
 			}
 
 			return TRUE;
@@ -512,10 +504,10 @@ class Debug {
 	static function DisplayTidyErrors() {
 		if ( self::$enable_tidy == TRUE
 				AND ( tidy_error_count(self::$tidy_obj) > 0 OR tidy_warning_count(self::$tidy_obj) > 0 ) ) {
-			echo "<br>\n<b>Tidy Output</b><br><pre>\n";
-			echo "============================================================================<br>\n";
+			echo "\nTidy Output<\n";
+			echo "============================================================================\n";
 			echo htmlentities( self::$tidy_obj->errorBuffer );
-			echo "============================================================================<br></pre>\n";
+			echo "============================================================================\n";
 		}
 	}
 
@@ -523,10 +515,10 @@ class Debug {
 		//When buffer exceeds maximum size, write it to the log and clear it.
 		//This will affect displaying large buffers though, but otherwise we may run out of memory.
 		if ( self::$buffer_size >= self::$max_buffer_size ) {
-			self::$debug_buffer[] = array(1, 'DEBUG [L'. $line .'] ['. self::getExecutionTime() .'ms]:'. "\t" .'<b>'. $method .'()</b>: Maximum debug buffer size of: '. self::$max_buffer_size .' reached. Writing out buffer before continuing... Buffer ID: '. self::$buffer_id .'<br>'."\n" );
+			self::$debug_buffer[] = array(1, 'DEBUG [L'. $line .'] ['. self::getExecutionTime() .'ms]:'. "\t" .''. $method .'(): Maximum debug buffer size of: '. self::$max_buffer_size .' reached. Writing out buffer before continuing... Buffer ID: '. self::$buffer_id ."\n" );
 			self::writeToLog();
 			self::clearBuffer();
-			self::$debug_buffer[] = array(1, 'DEBUG [L'. $line .'] ['. self::getExecutionTime() .'ms]:'. "\t" .'<b>'. $method .'()</b>: Continuing debug output from Buffer ID: '. self::$buffer_id .'<br>'."\n" );
+			self::$debug_buffer[] = array(1, 'DEBUG [L'. $line .'] ['. self::getExecutionTime() .'ms]:'. "\t" .''. $method .'(): Continuing debug output from Buffer ID: '. self::$buffer_id ."\n" );
 
 			return TRUE;
 		}

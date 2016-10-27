@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14040 $
- * $Id: CLI.inc.php 14040 2014-08-08 16:02:58Z mikeb $
- * $Date: 2014-08-08 09:02:58 -0700 (Fri, 08 Aug 2014) $
- */
+
 //Allow both CLI and CGI PHP binaries to call maint scripts.
 if ( PHP_SAPI != 'cli' AND PHP_SAPI != 'cgi' AND PHP_SAPI != 'cgi-fcgi') {
 	echo "This script can only be called from the Command Line.\n";

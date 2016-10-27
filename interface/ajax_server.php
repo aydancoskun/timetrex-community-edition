@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14568 $
- * $Id: ajax_server.php 14568 2014-09-26 16:32:15Z mikeb $
- * $Date: 2014-09-26 09:32:15 -0700 (Fri, 26 Sep 2014) $
- */
+
 
 require_once('../includes/global.inc.php');
 if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == 1)

@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14797 $
- * $Id: PolicyGroupFactory.class.php 14797 2014-10-16 19:00:06Z mikeb $
- * $Date: 2014-10-16 12:00:06 -0700 (Thu, 16 Oct 2014) $
- */
+
 
 /**
  * @package Modules\Policy
@@ -55,6 +51,7 @@ class PolicyGroupFactory extends Factory {
 			case 'columns':
 				$retval = array(
 										'-1000-name' => TTi18n::gettext('Name'),
+										'-1010-description' => TTi18n::gettext('Description'),
 										'-1100-total_users' => TTi18n::gettext('Employees'),
 
 										'-2000-created_by' => TTi18n::gettext('Created By'),
@@ -69,6 +66,7 @@ class PolicyGroupFactory extends Factory {
 			case 'default_display_columns': //Columns that are displayed by default.
 				$retval = array(
 								'name',
+								'description',
 								'total_users',
 								'updated_date',
 								'updated_by',
@@ -90,8 +88,10 @@ class PolicyGroupFactory extends Factory {
 										'id' => 'ID',
 										'company_id' => 'Company',
 										'name' => 'Name',
+										'description' => 'Description',
 										'user' => 'User',
 										'total_users' => 'TotalUsers',
+										'regular_time_policy' => 'RegularTimePolicy',
 										'over_time_policy' => 'OverTimePolicy',
 										'round_interval_policy' => 'RoundIntervalPolicy',
 										'premium_policy' => 'PremiumPolicy',
@@ -108,14 +108,7 @@ class PolicyGroupFactory extends Factory {
 	}
 
 	function getCompanyObject() {
-		if ( is_object($this->company_obj) ) {
-			return $this->company_obj;
-		} else {
-			$clf = TTnew( 'CompanyListFactory' );
-			$this->company_obj = $clf->getById( $this->getCompany() )->getCurrent();
-
-			return $this->company_obj;
-		}
+		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
 	}
 
 	function getCompany() {
@@ -184,6 +177,30 @@ class PolicyGroupFactory extends Factory {
 						) {
 
 			$this->data['name'] = $name;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getDescription() {
+		if ( isset($this->data['description']) ) {
+			return $this->data['description'];
+		}
+
+		return FALSE;
+	}
+	function setDescription($description) {
+		$description = trim($description);
+
+		if (	$description == ''
+				OR $this->Validator->isLength(	'description',
+												$description,
+												TTi18n::gettext('Description is invalid'),
+												1, 250) ) {
+
+			$this->data['description'] = $description;
 
 			return TRUE;
 		}
@@ -263,6 +280,14 @@ class PolicyGroupFactory extends Factory {
 	function getTotalUsers() {
 		$pgulf = TTnew( 'PolicyGroupUserListFactory' );
 		return $pgulf->getTotalByPolicyGroupId( $this->getId() );
+	}
+
+	function getRegularTimePolicy() {
+		return CompanyGenericMapListFactory::getArrayByCompanyIDAndObjectTypeIDAndObjectID( $this->getCompany(), 100, $this->getID() );
+	}
+	function setRegularTimePolicy($ids) {
+		Debug::text('Setting Regular Time Policy IDs : ', __FILE__, __LINE__, __METHOD__, 10);
+		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 100, $this->getID(), $ids );
 	}
 
 	function getOverTimePolicy() {

@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 12069 $
- * $Id: HolidayPolicyListFactory.class.php 12069 2014-01-20 18:48:05Z mikeb $
- * $Date: 2014-01-20 10:48:05 -0800 (Mon, 20 Jan 2014) $
- */
+
 
 /**
  * @package Modules\Policy
@@ -137,6 +133,8 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
 	}
 
 	function getByPolicyGroupUserId($user_id, $where = NULL, $order = NULL) {
@@ -160,7 +158,7 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 					);
 
 		$query = '
-					select	c.*
+					select	distinct d.*
 					from	'. $pguf->getTable() .' as a,
 							'. $pgf->getTable() .' as b,
 							'. $cgmf->getTable() .' as c,
@@ -176,6 +174,66 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 
 		$this->ExecuteSQL( $query, $ph );
 
+		return $this;
+	}
+
+	function getByPolicyGroupCompanyIdAndUserIdOrAssignedToContributingShiftPolicy( $company_id, $user_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $user_id == '') {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			//$order = array( 'c.type_id' => 'asc', 'c.trigger_time' => 'desc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$pgf = new PolicyGroupFactory();
+		$pguf = new PolicyGroupUserFactory();
+		$cgmf = new CompanyGenericMapFactory();
+		$cspf = new ContributingShiftPolicyFactory();
+
+		$ph = array(
+					'company_id' => $company_id,
+					'user_id' => $user_id,
+					);
+
+		//ContributingShiftPolicy holidays must come first as policy group ones overwrite them.
+		$query = '
+					select distinct d.*, 0 as assigned_to_policy_group
+					from
+							'. $cgmf->getTable() .' as c,
+							'. $cspf->getTable() .' as b,
+							'. $this->getTable() .' as d
+					where
+						( b.id = c.object_id AND c.company_id = b.company_id AND c.object_type_id = 690)
+						AND c.map_id = d.id
+						AND b.company_id = ?
+						AND ( b.deleted = 0 AND d.deleted = 0 )
+					UNION ALL
+					select	distinct d.*, 1 as assigned_to_policy_group
+					from	'. $pguf->getTable() .' as a,
+							'. $pgf->getTable() .' as b,
+							'. $cgmf->getTable() .' as c,
+							'. $this->getTable() .' as d
+					where	a.policy_group_id = b.id
+						AND ( b.id = c.object_id AND c.company_id = b.company_id AND c.object_type_id = 180)
+						AND c.map_id = d.id
+						AND a.user_id = ?
+						AND ( b.deleted = 0 AND d.deleted = 0 )
+
+						';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 		return $this;
 	}
 
@@ -249,6 +307,10 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
+		$query .= ( isset($filter_data['description']) ) ? $this->getWhereClauseSQL( 'a.description', $filter_data['description'], 'text', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['contributing_shift_policy_id']) ) ? $this->getWhereClauseSQL( 'a.contributing_shift_policy_id', $filter_data['contributing_shift_policy_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['eligible_contributing_shift_policy_id']) ) ? $this->getWhereClauseSQL( 'a.eligible_contributing_shift_policy_id', $filter_data['eligible_contributing_shift_policy_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;

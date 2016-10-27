@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 15602 $
- * $Id: Wage.class.php 15602 2014-12-30 00:31:02Z mikeb $
- * $Date: 2014-12-29 16:31:02 -0800 (Mon, 29 Dec 2014) $
- */
+
 
 /**
  * @package Core
@@ -99,21 +95,6 @@ class Wage {
 			if ( $lf->getRecordCount() == 1 ) {
 				$this->user_obj = $lf->getCurrent();
 				return $this->user_obj;
-			}
-
-			return FALSE;
-		}
-	}
-
-	function getUserWageObject( $user_wage_id ) {
-		if ( isset($this->user_wage_obj[$user_wage_id]) AND is_object($this->user_wage_obj[$user_wage_id]) AND $user_wage_id == $this->user_wage_obj[$user_wage_id]->getID() ) {
-			return $this->user_wage_obj[$user_wage_id];
-		} else {
-			$lf = TTnew( 'UserWageListFactory' );
-			$lf->getByID( $user_wage_id );
-			if ( $lf->getRecordCount() == 1 ) {
-				$this->user_wage_obj[$user_wage_id] = $lf->getCurrent();
-				return $this->user_wage_obj[$user_wage_id];
 			}
 
 			return FALSE;
@@ -212,14 +193,6 @@ class Wage {
 		return $due_date;
 	}
 
-	function getHourlyRate( $user_wage_id ) {
-		if ( is_object($this->getUserWageObject( $user_wage_id ) ) ) {
-			return $this->getUserWageObject( $user_wage_id )->getHourlyRate( FALSE, FALSE, $this->getPayPeriodObject()->getStartDate() );
-		}
-
-		return 0;
-	}
-
 	function getWage($seconds, $rate ) {
 		if ( $seconds == '' OR empty($seconds) ) {
 			return 0;
@@ -232,9 +205,9 @@ class Wage {
 		return bcmul( TTDate::getHours( $seconds ), $rate );
 	}
 
-	function getMaximumPayPeriodWage( $user_wage_id ) {
-		Debug::text('Absolute Maximum Pay Period NO Advance: User Wage ID: '. $user_wage_id .'	Annual Wage: '. $this->getUserWageObject( $user_wage_id )->getAnnualWage() .' Annual Pay Periods: '. $this->getPayPeriodScheduleObject()->getAnnualPayPeriods(), __FILE__, __LINE__, __METHOD__, 10);
-		$maximum_pay_period_wage = bcdiv( $this->getUserWageObject( $user_wage_id )->getAnnualWage(), $this->getPayPeriodScheduleObject()->getAnnualPayPeriods() );
+	function getMaximumPayPeriodWage( $user_wage_obj ) {
+		Debug::text('Absolute Maximum Pay Period NO Advance: User Wage ID: '. $user_wage_obj->getId() .' Annual Wage: '. $user_wage_obj->getAnnualWage() .' Annual Pay Periods: '. $this->getPayPeriodScheduleObject()->getAnnualPayPeriods(), __FILE__, __LINE__, __METHOD__, 10);
+		$maximum_pay_period_wage = bcdiv( $user_wage_obj->getAnnualWage(), $this->getPayPeriodScheduleObject()->getAnnualPayPeriods() );
 		Debug::text('Absolute Maximum Pay Period Wage: '. $maximum_pay_period_wage, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $maximum_pay_period_wage;
@@ -346,140 +319,99 @@ class Wage {
 		$prev_wage_effective_date = 0;
 		if ( $udtlf->getRecordCount() > 0 ) {
 			foreach( $udtlf as $udt_obj ) {
-				Debug::text('User Total Row... Type: '. $udt_obj->getType() .' OverTime Policy ID: '. $udt_obj->getOverTimePolicyID() .' User Wage ID: '. $udt_obj->getColumn('user_wage_id'), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text('User Total Row... Object Type: '. $udt_obj->getObjectType() .' PayCode ID: '. $udt_obj->getPayCode() .' Amount: '. $udt_obj->getTotalTimeAmount() .' Hourly Rate: '. $udt_obj->getColumn('hourly_rate') .' Pay Code Type: '. $udt_obj->getColumn('pay_code_type_id') .' User Wage ID: '. $udt_obj->getColumn('user_wage_id'), __FILE__, __LINE__, __METHOD__, 10);
 
-				if ( $udt_obj->getStatus() == 10 AND $udt_obj->getType() == 20 ) { //Regular Time
-					Debug::text('User Total Row... Regular Time: '. $udt_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10);
+				if ( $udt_obj->getColumn('pay_code_type_id') == 10 ) { //Paid
+					if ( $udt_obj->getObjectType() == 25 ) { //Absence
+						Debug::text('User Total Row... Absence Time: '. $udt_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10);
 
-					//Check if they are a salary user...
-					//Use WORKED time to calculate regular time. Not just regular time.
-					if ( is_object($this->getUserWageObject( $udt_obj->getColumn('user_wage_id') ))
-							AND $this->getUserWageObject( $udt_obj->getColumn('user_wage_id') )->getType() != 10 ) {
-						//Salary
-						Debug::text('Strict Salary Wage: Reduce Regular Pay By: Dock Time: '. $dock_absence_time .' and Paid Absence: '. $paid_absence_time, __FILE__, __LINE__, __METHOD__, 10);
+						if ( is_object( $udt_obj->getPayCodeObject() )
+								AND ( $udt_obj->getPayCodeObject()->getType() == 10 OR $udt_obj->getPayCodeObject()->getType() == 12 )
+								AND $udt_obj->getPayCodeObject()->getPayStubEntryAccountID() != '') { //Paid
+							Debug::text('Paid Absence Time: '. $udt_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10);
 
-						$calculate_salary = TRUE;
+							$pay_stub_entry = (int)$udt_obj->getPayCodeObject()->getPayStubEntryAccountID();
+							$total_time = $udt_obj->getTotalTime();
+							$rate = $udt_obj->getColumn('hourly_rate');
+							$amount = $udt_obj->getTotalTimeAmount();
 
-						if ( !isset($salary_regular_time[$udt_obj->getColumn('user_wage_id')]) ) {
-							$salary_regular_time[$udt_obj->getColumn('user_wage_id')] = 0;
+							//Debug::text('Paid Absence Info: '. $udt_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10);
+							Debug::text('cPay Stub Entry Account ID: '. $pay_stub_entry .' Amount: '. $amount .' Rate: '. $rate, __FILE__, __LINE__, __METHOD__, 10);
+
+							$paid_absence_time = bcadd($paid_absence_time, $udt_obj->getTotalTime() );
+							$paid_absence_amount = bcadd( $paid_absence_amount, $amount);
+
+							//Make sure we add the amount below. Incase there are two or more
+							//entries for a paid absence in the same user_wage_id on one pay stub.
+							if ( !isset($paid_absence_amount_arr[$udt_obj->getColumn('user_wage_id')]) ) {
+								$paid_absence_amount_arr[$udt_obj->getColumn('user_wage_id')] = 0;
+							}
+							$paid_absence_amount_arr[$udt_obj->getColumn('user_wage_id')] = bcadd($paid_absence_amount_arr[$udt_obj->getColumn('user_wage_id')], $amount );
+
+							//Some paid absences are over and above employees salary, so we need to track them separately.
+							//So we only reduce the salary of the amount of regular paid absences, not "Paid (Above Salary)" absences.
+							if ( !isset($reduce_salary_absence_amount_arr[$udt_obj->getColumn('user_wage_id')]) ) {
+								$reduce_salary_absence_amount_arr[$udt_obj->getColumn('user_wage_id')] = 0;
+							}
+							if ( $udt_obj->getColumn('pay_code_type_id') == 10 ) {
+								$reduce_salary_absence_amount_arr[$udt_obj->getColumn('user_wage_id')] = bcadd($reduce_salary_absence_amount_arr[$udt_obj->getColumn('user_wage_id')], $amount );
+							}
 						}
-						$salary_regular_time[$udt_obj->getColumn('user_wage_id')] += $udt_obj->getTotalTime();
-
-						/*
-						if ( isset($dock_absence_amount_arr[$udt_obj->getColumn('user_wage_id')]) ) {
-								$dock_absence_wage = $dock_absence_amount_arr[$udt_obj->getColumn('user_wage_id')];
-						} else {
-								$dock_absence_wage = 0;
-						}
-						if ( isset($reduce_salary_absence_amount_arr[$udt_obj->getColumn('user_wage_id')]) ) {
-								$paid_absence_wage = $reduce_salary_absence_amount_arr[$udt_obj->getColumn('user_wage_id')];
-						} else {
-								$paid_absence_wage = 0;
-						}
-						Debug::text('Wage ID: '. $udt_obj->getColumn('user_wage_id') .' Dock Absence Wage: '. $dock_absence_wage .' Paid Absence Wage: '. $paid_absence_wage, __FILE__, __LINE__, __METHOD__, 10);
-
-						$maximum_wage_salary = UserWageFactory::proRateSalary( $this->getMaximumPayPeriodWage( $udt_obj->getColumn('user_wage_id') ), $this->getUserWageObject( $udt_obj->getColumn('user_wage_id') )->getEffectiveDate(), $prev_wage_effective_date, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate(), $this->getUserObject()->getTerminationDate() );
-
-						$prev_wage_effective_date = $this->getUserWageObject( $udt_obj->getColumn('user_wage_id') )->getEffectiveDate();
-
-						$amount = bcsub( $maximum_wage_salary, bcadd( $dock_absence_wage, $paid_absence_wage ) );
-						$total_time = $udt_obj->getTotalTime(); //Dont minus dock/paid absence time. Because its already not included.
-						$rate = NULL;
-						$pay_stub_entry = $this->getPayStubEntryAccountLinkObject()->getRegularTime();
-
-						unset($dock_absence_wage, $paid_absence_wage);
-						*/
 					} else {
-						//Hourly
-						Debug::text('Hourly or Hourly + Bonus Wage', __FILE__, __LINE__, __METHOD__, 10);
-						$pay_stub_entry = $this->getPayStubEntryAccountLinkObject()->getRegularTime();
-						$total_time = $udt_obj->getTotalTime();
-						$rate = $this->getHourlyRate( $udt_obj->getColumn('user_wage_id') );
-						$amount = $this->getWage( $udt_obj->getTotalTime(), $rate );
-						Debug::text('aPay Stub Entry Account ID: '. $pay_stub_entry .' Amount: '. $amount, __FILE__, __LINE__, __METHOD__, 10);
-					}
-				} elseif ( $udt_obj->getStatus() == 10 AND $udt_obj->getType() == 30 ) { //Overtime
-					Debug::text('User Total Row... Overtime Time: '. $udt_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10);
+						//Check if they are a salary user...
+						//Use WORKED time to calculate regular time. Not just regular time.
+						//user_wage_id is only needed for default wages, so it doesn't take into account pay formulas at all.
+						if ( $udt_obj->getColumn('user_wage_type_id') > 10 ) { //Salaried
+							//Salary
+							Debug::text('Strict Salary Wage: Reduce Regular Pay By: Dock Time: '. $dock_absence_time .' and Paid Absence: '. $paid_absence_time, __FILE__, __LINE__, __METHOD__, 10);
 
-					//Get overtime policy info. Allow negative rates so they withdraw from pay stub accounts.
-					if ( $udt_obj->getOverTimePolicyObject()->getRate() != 0 ) {
-						Debug::text('Paid Overtime Time Policy... Rate: '. $udt_obj->getOverTimePolicyObject()->getRate(), __FILE__, __LINE__, __METHOD__, 10);
-						$pay_stub_entry = $udt_obj->getOverTimePolicyObject()->getPayStubEntryAccountId();
+							$calculate_salary = TRUE;
+
+							if ( !isset($salary_regular_time[$udt_obj->getColumn('user_wage_id')]) ) {
+								$salary_regular_time[$udt_obj->getColumn('user_wage_id')] = 0;
+							}
+
+							//Only include regular time units in salary calculation.
+							if ( $udt_obj->getObjectType() == 20 ) { //Regular Time
+								$salary_regular_time[$udt_obj->getColumn('user_wage_id')] += $udt_obj->getTotalTime();
+							}
+						} else {
+							//Hourly
+							Debug::text('Hourly Wage', __FILE__, __LINE__, __METHOD__, 10);
+							$pay_stub_entry = $udt_obj->getPayCodeObject()->getPayStubEntryAccountId();
+							$total_time = $udt_obj->getTotalTime();
+							$rate = $udt_obj->getColumn('hourly_rate');
+							$amount = $udt_obj->getTotalTimeAmount();
+							Debug::text('aPay Stub Entry Account ID: '. $pay_stub_entry .' Amount: '. $amount, __FILE__, __LINE__, __METHOD__, 10);
+						}
+					}
+				} elseif ( $udt_obj->getColumn('pay_code_type_id') == 12 ) { //Paid Above
+					//This is typically but not always overtime/premium time.
+					if ( is_object( $udt_obj->getPayCodeObject() ) AND $udt_obj->getColumn('hourly_rate') != 0 ) {
+						Debug::text('Paid (Above Salary) Time... Rate: '. $udt_obj->getColumn('hourly_rate'), __FILE__, __LINE__, __METHOD__, 10);
+						$pay_stub_entry = $udt_obj->getPayCodeObject()->getPayStubEntryAccountId();
 						$total_time = $udt_obj->getTotalTime();
-						$rate = bcmul( $this->getHourlyRate( $udt_obj->getColumn('over_time_policy_wage_id') ), $udt_obj->getOverTimePolicyObject()->getRate() );
-						$amount = $this->getWage( $udt_obj->getTotalTime(), $rate );
+						$rate = $udt_obj->getColumn('hourly_rate');
+						$amount = $udt_obj->getTotalTimeAmount();
 						Debug::text('bPay Stub Entry Account ID: '. $pay_stub_entry .' Amount: '. $amount .' Rate: '. $rate, __FILE__, __LINE__, __METHOD__, 10);
 					} else {
-						Debug::text('NOT Paid Overtime Time Policy: ', __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('  NOT Paid Time Policy: ', __FILE__, __LINE__, __METHOD__, 10);
 					}
+				} elseif ( $udt_obj->getColumn('pay_code_type_id') == 30 ) { //Dock
+					$dock_absence_time = bcadd( $dock_absence_time, $udt_obj->getTotalTime() );
+					$rate = $udt_obj->getColumn('hourly_rate');
+					$amount = $this->getWage( $udt_obj->getTotalTime(), $rate );
+					$dock_absence_amount = bcadd( $dock_absence_amount, $amount );
 
-				} elseif ( $udt_obj->getStatus() == 30 AND $udt_obj->getType() == 10) { //Absence
-					Debug::text('User Total Row... Absence Time: '. $udt_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10);
-
-					if ( is_object( $udt_obj->getAbsencePolicyObject() )
-							AND ( $udt_obj->getAbsencePolicyObject()->getType() == 10 OR $udt_obj->getAbsencePolicyObject()->getType() == 12 )
-							AND $udt_obj->getAbsencePolicyObject()->getPayStubEntryAccountID() != '') { //Paid
-						Debug::text('Paid Absence Time: '. $udt_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10);
-
-						$pay_stub_entry = (int)$udt_obj->getAbsencePolicyObject()->getPayStubEntryAccountID();
-						$total_time = $udt_obj->getTotalTime();
-						$rate = bcmul( $this->getHourlyRate( $udt_obj->getColumn('absence_policy_wage_id') ), $udt_obj->getAbsencePolicyObject()->getRate() );
-						$amount = $this->getWage( $udt_obj->getTotalTime(), $rate );
-
-						//Debug::text('Paid Absence Info: '. $udt_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10);
-						Debug::text('cPay Stub Entry Account ID: '. $pay_stub_entry .' Amount: '. $amount .' Rate: '. $rate, __FILE__, __LINE__, __METHOD__, 10);
-
-						$paid_absence_time = bcadd($paid_absence_time, $udt_obj->getTotalTime() );
-						$paid_absence_amount = bcadd( $paid_absence_amount, $amount);
-
-						//Make sure we add the amount below. Incase there are two or more
-						//entries for a paid absence in the same user_wage_id on one pay stub.
-						if ( !isset($paid_absence_amount_arr[$udt_obj->getColumn('absence_policy_wage_id')]) ) {
-							$paid_absence_amount_arr[$udt_obj->getColumn('absence_policy_wage_id')] = 0;
-						}
-						$paid_absence_amount_arr[$udt_obj->getColumn('absence_policy_wage_id')] = bcadd($paid_absence_amount_arr[$udt_obj->getColumn('absence_policy_wage_id')], $amount );
-
-						//Some paid absences are over and above employees salary, so we need to track them separately.
-						//So we only reduce the salary of the amount of regular paid absences, not "Paid (Above Salary)" absences.
-						if ( !isset($reduce_salary_absence_amount_arr[$udt_obj->getColumn('absence_policy_wage_id')]) ) {
-							$reduce_salary_absence_amount_arr[$udt_obj->getColumn('absence_policy_wage_id')] = 0;
-						}
-						if ( $udt_obj->getAbsencePolicyObject()->getType() == 10 ) {
-							$reduce_salary_absence_amount_arr[$udt_obj->getColumn('absence_policy_wage_id')] = bcadd($reduce_salary_absence_amount_arr[$udt_obj->getColumn('absence_policy_wage_id')], $amount );
-						}
-
-					} elseif ( is_object($udt_obj->getAbsencePolicyObject()) AND $udt_obj->getAbsencePolicyObject()->getType() == 30 ) {
-						$dock_absence_time = bcadd( $dock_absence_time, $udt_obj->getTotalTime() );
-						$rate = bcmul( $this->getHourlyRate( $udt_obj->getColumn('absence_policy_wage_id') ), $udt_obj->getAbsencePolicyObject()->getRate() );
-						$amount = $this->getWage( $udt_obj->getTotalTime(), $rate );
-						//$amount = $this->getWage( $udt_obj->getTotalTime(), $this->getHourlyRate( $udt_obj->getColumn('absence_policy_wage_id') ) );
-						$dock_absence_amount = bcadd( $dock_absence_amount, $amount );
-
-						//Make sure we account for multiple dock absence policies, for the same wage entry in the same pay period.
-						if ( isset($dock_absence_amount_arr[$udt_obj->getColumn('absence_policy_wage_id')]) ) {
-							$dock_absence_amount_arr[$udt_obj->getColumn('absence_policy_wage_id')] += $amount;
-						} else {
-							$dock_absence_amount_arr[$udt_obj->getColumn('absence_policy_wage_id')] = $amount;
-						}
-						Debug::text('DOCK Absence Time.. Adding: '. $udt_obj->getTotalTime() .' Total: '. $dock_absence_time .' Rate: '. $rate, __FILE__, __LINE__, __METHOD__, 10);
-						unset($rate);
-					}
-				} elseif (	$udt_obj->getStatus() == 10 AND $udt_obj->getType() == 40 ) { //Premium
-					Debug::text('User Total Row... Premium Time: '. $udt_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10);
-
-					//Get premium policy info.
-					if ( is_object( $udt_obj->getPremiumPolicyObject() ) AND $udt_obj->getPremiumPolicyObject()->getRate() != 0 ) {
-						Debug::text('Paid Premium Time Policy... Rate: '. $udt_obj->getPremiumPolicyObject()->getRate(), __FILE__, __LINE__, __METHOD__, 10);
-
-						$rate = $udt_obj->getPremiumPolicyObject()->getHourlyRate( $this->getHourlyRate( $udt_obj->getColumn('premium_policy_wage_id') ) );
-						$pay_stub_entry = $udt_obj->getPremiumPolicyObject()->getPayStubEntryAccountId();
-						$total_time = $udt_obj->getTotalTime();
-						$amount = $this->getWage( $udt_obj->getTotalTime(), $rate );
-						Debug::text('dPay Stub Entry Account ID: '. $pay_stub_entry .' Amount: '. $amount .' Rate: '. $rate, __FILE__, __LINE__, __METHOD__, 10);
+					//Make sure we account for multiple dock absence policies, for the same wage entry in the same pay period.
+					if ( isset($dock_absence_amount_arr[$udt_obj->getColumn('user_wage_id')]) ) {
+						$dock_absence_amount_arr[$udt_obj->getColumn('user_wage_id')] += $amount;
 					} else {
-						Debug::text('NOT Paid Premium Time Policy: ', __FILE__, __LINE__, __METHOD__, 10);
+						$dock_absence_amount_arr[$udt_obj->getColumn('user_wage_id')] = $amount;
 					}
 
+					Debug::text('DOCK Absence Time.. Adding: '. $udt_obj->getTotalTime() .' Total: '. $dock_absence_time .' Rate: '. $rate, __FILE__, __LINE__, __METHOD__, 10);
+					unset($rate);
 				}
 
 				if ( isset($pay_stub_entry) AND $pay_stub_entry != '' ) {
@@ -488,7 +420,8 @@ class Wage {
 													'pay_stub_entry' => $pay_stub_entry,
 													'total_time' => $total_time,
 													'amount' => $amount,
-													'rate' => $rate
+													'rate' => $rate,
+													'description' => NULL,
 												);
 				}
 				unset($pay_stub_entry, $amount, $total_time, $rate);
@@ -503,25 +436,24 @@ class Wage {
 
 				//Get all wages that apply in this period so we can determine pro-rating for salaries.
 				$uwlf = TTNew('UserWageListFactory');
-				$uwlf->getByUserIdAndStartDateAndEndDate( $this->getUser(), $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() );
+				$uwlf->getDefaultWageGroupByUserIdAndStartDateAndEndDate( $this->getUser(), $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() );
 				if ( $uwlf->getRecordCount() > 0 ) {
 					foreach( $uwlf as $uw_obj ) {
+						$description = NULL;
 						if ( $uw_obj->getType() != 10 ) {
 							if ( isset($dock_absence_amount_arr[$uw_obj->getID()]) ) {
-								$dock_absence_wage = $dock_absence_amount_arr[$uw_obj->getID()];
+								$dock_absence_wage = abs( $dock_absence_amount_arr[$uw_obj->getID()] ); //Make sure the dock absence wage is always a positive, since we subtract is below.
 							} else {
 								$dock_absence_wage = 0;
 							}
 							if ( isset($reduce_salary_absence_amount_arr[$uw_obj->getID()]) ) {
-								$paid_absence_wage = $reduce_salary_absence_amount_arr[$uw_obj->getID()];
+								$paid_absence_wage = abs( $reduce_salary_absence_amount_arr[$uw_obj->getID()] ); //Make sure the dock absence wage is always a positive, since we subtract is below.
 							} else {
 								$paid_absence_wage = 0;
 							}
 							Debug::text('Wage ID: '. $uw_obj->getID() .' Dock Absence Wage: '. $dock_absence_wage .' Paid Absence Wage: '. $paid_absence_wage, __FILE__, __LINE__, __METHOD__, 10);
 
-							$maximum_wage_salary = UserWageFactory::proRateSalary( $this->getMaximumPayPeriodWage( $uw_obj->getID() ), $this->getUserWageObject( $uw_obj->getID() )->getEffectiveDate(), $prev_wage_effective_date, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate(), $this->getUserObject()->getTerminationDate() );
-
-							$prev_wage_effective_date = $this->getUserWageObject( $uw_obj->getID() )->getEffectiveDate();
+							$maximum_wage_salary = UserWageFactory::proRateSalary( $this->getMaximumPayPeriodWage( $uw_obj ), $uw_obj->getEffectiveDate(), $prev_wage_effective_date, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate(), $this->getUserObject()->getTerminationDate() );
 
 							$amount = bcsub( $maximum_wage_salary, bcadd( $dock_absence_wage, $paid_absence_wage ) );
 							//Include time if we have it, otherwise use 0.
@@ -529,16 +461,25 @@ class Wage {
 							$rate = NULL;
 							$pay_stub_entry = $this->getPayStubEntryAccountLinkObject()->getRegularTime();
 							unset($dock_absence_wage, $paid_absence_wage);
+							
+							$salary_dates = UserWageFactory::proRateSalaryDates( $uw_obj->getEffectiveDate(), $prev_wage_effective_date, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate(), $this->getUserObject()->getTerminationDate() );
+							if ( is_array($salary_dates) ) {
+								$description = TTi18n::getText('Prorate Salary:').' '. TTDate::getDate('DATE', $salary_dates['start_date'] ) .' - '. TTDate::getDate('DATE', $salary_dates['end_date'] ) .' ('. $salary_dates['percent'].'%)';
+							}
 
 							if ( isset($pay_stub_entry) AND $pay_stub_entry != '' ) {
-								Debug::text('zPay Stub Entry Account ID: '. $pay_stub_entry .' Amount: '. $amount, __FILE__, __LINE__, __METHOD__, 10);
+								Debug::text('  Pay Stub Entry Account ID: '. $pay_stub_entry .' Amount: '. $amount, __FILE__, __LINE__, __METHOD__, 10);
 								$ret_arr['entries'][] = array(	'user_wage_id' => $udt_obj->getColumn('user_wage_id'),
 																'pay_stub_entry' => $pay_stub_entry,
 																'total_time' => $total_time,
 																'amount' => $amount,
-																'rate' => $rate
+																'rate' => $rate,
+																'description' => $description,
 															);
 							}
+
+							$prev_wage_effective_date = $uw_obj->getEffectiveDate();
+
 							unset($pay_stub_entry, $amount, $total_time, $rate);
 						}
 					}

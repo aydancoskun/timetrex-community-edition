@@ -102,19 +102,25 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'state_wv_filing_status' );
 		this.initDropDownOption( 'state_filing_status' );
 
-		this.company_api.getOptions( 'district', {onResult: function( res ) {
-			res = res.getResult();
-			$this.district_array = res;
-		}} );
+		this.company_api.getOptions( 'district', {
+			onResult: function( res ) {
+				res = res.getResult();
+				$this.district_array = res;
+			}
+		} );
 
-		this.date_api.getMonthOfYearArray( false, {onResult: function( res ) {
-			res = res.getResult();
-			$this.month_of_year_array = Global.buildRecordArray( res );
-		}} );
-		this.date_api.getDayOfMonthArray( {onResult: function( res ) {
-			res = res.getResult();
-			$this.day_of_month_array = Global.buildRecordArray( res );
-		}} );
+		this.date_api.getMonthOfYearArray( false, {
+			onResult: function( res ) {
+				res = res.getResult();
+				$this.month_of_year_array = Global.buildRecordArray( res );
+			}
+		} );
+		this.date_api.getDayOfMonthArray( {
+			onResult: function( res ) {
+				res = res.getResult();
+				$this.day_of_month_array = Global.buildRecordArray( res );
+			}
+		} );
 
 	},
 
@@ -143,31 +149,31 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		if ( this.edit_view_tab_selected_index === 3 ) {
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab3' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.initSubDocumentView();
 			} else {
-				this.edit_view_tab.find( '#tab3' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 
 		} else if ( this.edit_view_tab_selected_index === 4 ) {
 
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab4' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab4' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_audit' );
 			} else {
-				this.edit_view_tab.find( '#tab4' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 
 		} else if ( this.edit_view_tab_selected_index === 2 ) {
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.edit_view_tab.find( '#tab_employee_setting' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.setEmployeeGridSize();
 				this.buildContextMenu( true );
 				this.setEditMenu();
 			} else {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_employee_setting' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 
@@ -216,15 +222,17 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			}
 		}
 
-		this.user_deduction_api.setUserDeduction( data, {onResult: function() {
-			if ( Global.isSet( callBack ) ) {
-				callBack();
+		this.user_deduction_api.setUserDeduction( data, {
+			onResult: function() {
+				if ( Global.isSet( callBack ) ) {
+					callBack();
+				}
 			}
-		}} );
+		} );
 
 	},
 	/* jshint ignore:start */
-	onContentMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function( context_btn, menu_name ) {
 		var id;
 		if ( Global.isSet( menu_name ) ) {
 			id = menu_name;
@@ -323,10 +331,12 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				if ( result ) {
 
 					ProgressBar.showOverlay();
-					$this.api['delete' + $this.api.key_name]( remove_ids, {onResult: function( result ) {
-						$this.onDeleteAndNextResult( result, remove_ids );
+					$this.api['delete' + $this.api.key_name]( remove_ids, {
+						onResult: function( result ) {
+							$this.onDeleteAndNextResult( result, remove_ids );
 
-					}} );
+						}
+					} );
 
 				} else {
 					ProgressBar.closeOverlay();
@@ -339,10 +349,12 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				if ( result ) {
 
 					ProgressBar.showOverlay();
-					$this.user_deduction_api.deleteUserDeduction( remove_ids, {onResult: function( result ) {
-						$this.onDeleteAndNextResult( result, remove_ids );
+					$this.user_deduction_api.deleteUserDeduction( remove_ids, {
+						onResult: function( result ) {
+							$this.onDeleteAndNextResult( result, remove_ids );
 
-					}} );
+						}
+					} );
 
 				} else {
 					ProgressBar.closeOverlay();
@@ -368,9 +380,11 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				}
 				if ( result ) {
 					ProgressBar.showOverlay();
-					$this.api['delete' + $this.api.key_name]( remove_ids, {onResult: function( result ) {
-						$this.onDeleteResult( result, remove_ids );
-					}} );
+					$this.api['delete' + $this.api.key_name]( remove_ids, {
+						onResult: function( result ) {
+							$this.onDeleteResult( result, remove_ids );
+						}
+					} );
 
 				} else {
 					ProgressBar.closeOverlay();
@@ -396,9 +410,11 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 				if ( result ) {
 					ProgressBar.showOverlay();
-					$this.user_deduction_api.deleteUserDeduction( remove_ids, {onResult: function( result ) {
-						$this.onDeleteResult( result, remove_ids );
-					}} );
+					$this.user_deduction_api.deleteUserDeduction( remove_ids, {
+						onResult: function( result ) {
+							$this.onDeleteResult( result, remove_ids );
+						}
+					} );
 
 				} else {
 					ProgressBar.closeOverlay();
@@ -442,18 +458,22 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		record = this.uniformVariable( record );
 
 		if ( !this.sub_view_mode || this.current_edit_record.id ) {
-			this.api['set' + this.api.key_name]( record, {onResult: function( result ) {
+			this.api['set' + this.api.key_name]( record, {
+				onResult: function( result ) {
 
-				$this.onSaveResult( result );
+					$this.onSaveResult( result );
 
-			}} );
+				}
+			} );
 
 		} else {
-			this.user_deduction_api.setUserDeduction( record, {onResult: function( result ) {
+			this.user_deduction_api.setUserDeduction( record, {
+				onResult: function( result ) {
 
-				$this.onSaveResult( result );
+					$this.onSaveResult( result );
 
-			}} );
+				}
+			} );
 		}
 
 	},
@@ -629,11 +649,13 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			filter.filter_data = {};
 			filter.filter_data.id = [selectedId];
 
-			this.api['get' + this.api.key_name]( filter, {onResult: function( result ) {
+			this.api['get' + this.api.key_name]( filter, {
+				onResult: function( result ) {
 
-				$this.onCopyAsNewResult( result );
+					$this.onCopyAsNewResult( result );
 
-			}} );
+				}
+			} );
 		}
 
 	},
@@ -693,8 +715,8 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		}
 
 		Global.loadScriptAsync( 'views/document/DocumentViewController.js', function() {
-			var tab1 = $this.edit_view_tab.find( '#tab3' );
-			var firstColumn = tab1.find( '.first-column-sub-view' );
+			var tab_eligibility = $this.edit_view_tab.find( '#tab_attachment' );
+			var firstColumn = tab_eligibility.find( '.first-column-sub-view' );
 			Global.trackView( 'Sub' + 'Document' + 'View' );
 			DocumentViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
 
@@ -721,24 +743,24 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		this.hideSubViewTabs();
 
 		if ( !this.sub_view_mode ) {
-			$( this.edit_view_tab.find( 'ul li' )[0] ).show();
+			$( this.edit_view_tab.find( 'ul li a[ref="tab_tax_deductions"]' ) ).parent().show();
 		}
 
 		if ( this.is_mass_editing || this.sub_view_mode ) {
 
 			if ( this.is_mass_editing ) {
-				$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
-				$( this.edit_view_tab.find( 'ul li' )[3] ).hide();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_employee_setting"]' ) ).parent().hide();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
 				this.edit_view_tab.tabs( 'select', 0 );
 			}
 
 			if ( this.sub_view_mode ) {
 
 				if ( this.current_edit_record.id ) {
-					$( this.edit_view_tab.find( 'ul li' )[2] ).show();
+					$( this.edit_view_tab.find( 'ul li a[ref="tab_employee_setting"]' ) ).parent().show();
 					this.edit_view_tab.tabs( 'select', 2 );
 				} else {
-					$( this.edit_view_tab.find( 'ul li' )[5] ).show();
+					$( this.edit_view_tab.find( 'ul li a[ref="tab5"]' ) ).parent().show();
 					this.edit_view_tab.tabs( 'select', 5 );
 				}
 
@@ -746,18 +768,18 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		} else {
 
-			$( this.edit_view_tab.find( 'ul li' )[2] ).show();
+			$( this.edit_view_tab.find( 'ul li a[ref="tab_employee_setting"]' ) ).parent().show();
 			if ( this.subDocumentValidate() ) {
-				$( this.edit_view_tab.find( 'ul li' )[3] ).show();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().show();
 			} else {
-				$( this.edit_view_tab.find( 'ul li' )[3] ).hide();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
 				this.edit_view_tab.tabs( 'select', 0 );
 			}
 
 			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li' )[4] ).show();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().show();
 			} else {
-				$( this.edit_view_tab.find( 'ul li' )[4] ).hide();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
 				this.edit_view_tab.tabs( 'select', 0 );
 			}
 
@@ -771,15 +793,15 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 2 ) {
 			if ( !this.current_edit_record || !this.current_edit_record.id ) {
 
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_employee_setting' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 3 ) {
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab3' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab3' );
+				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_attachment' );
 			} else {
-				this.edit_view_tab.find( '#tab3' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		}
@@ -793,19 +815,21 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		} else {
 
-			this.company_api.getOptions( 'province', val, {onResult: function( res ) {
-				res = res.getResult();
-				if ( !res ) {
-					res = [];
+			this.company_api.getOptions( 'province', val, {
+				onResult: function( res ) {
+					res = res.getResult();
+					if ( !res ) {
+						res = [];
+					}
+
+					$this.province_array = Global.buildRecordArray( res );
+
 				}
-
-				$this.province_array = Global.buildRecordArray( res );
-
-			}} );
+			} );
 		}
 	},
 
-	eSetProvince: function( val ) {
+	eSetProvince: function( val, refresh ) {
 
 		var $this = this;
 		var province_widget = $this.edit_view_ui_dic['province'];
@@ -814,17 +838,19 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			$this.e_province_array = [];
 			province_widget.setSourceData( [] );
 		} else {
-			this.company_api.getOptions( 'province', val, {onResult: function( res ) {
-				res = res.getResult();
-				if ( !res ) {
-					res = [];
+			this.company_api.getOptions( 'province', val, {
+				onResult: function( res ) {
+					res = res.getResult();
+					if ( !res ) {
+						res = [];
+					}
+
+					$this.e_province_array = Global.buildRecordArray( res );
+					province_widget.setSourceData( $this.e_province_array );
+					$this.setProvinceVisibility();
+
 				}
-
-				$this.e_province_array = Global.buildRecordArray( res );
-				province_widget.setSourceData( $this.e_province_array );
-				$this.setProvinceVisibility();
-
-			}} );
+			} );
 		}
 	},
 
@@ -844,6 +870,8 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				this.eSetProvince( c_value );
 				widget.setValue( null );
 				widget_2.setValue( null );
+				this.current_edit_record.province = false;
+				this.current_edit_record.district = false;
 				this.setDynamicFields( null, true );
 				break;
 			case 'province':
@@ -857,6 +885,10 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				break;
 			case 'apply_frequency_id':
 				this.onApplyFrequencyChange();
+				break;
+			case 'minimum_length_of_service_unit_id':
+			case 'maximum_length_of_service_unit_id':
+				this.onLengthOfServiceChange();
 				break;
 
 		}
@@ -906,6 +938,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		this.setDynamicFields( function() {
 			$this.collectUIDataToCurrentEditRecord();
+			$this.onLengthOfServiceChange();
 			$this.setEditViewDataDone();
 		} );
 
@@ -914,13 +947,25 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		}
 	},
 
+	onLengthOfServiceChange: function() {
+		if ( this.current_edit_record['minimum_length_of_service_unit_id'] === 50 || this.current_edit_record['maximum_length_of_service_unit_id'] === 50 ) {
+			this.edit_view_form_item_dic['length_of_service_contributing_pay_code_policy_id'].css( 'display', 'block' );
+		} else {
+			this.edit_view_form_item_dic['length_of_service_contributing_pay_code_policy_id'].css( 'display', 'none' );
+		}
+
+		this.editFieldResize();
+	},
+
 	initCompanyTaxDeductionData: function() {
 
 		var $this = this;
-		this.api.getCompanyDeduction( null, true, {onResult: function( result ) {
-			var result_data = result.getResult();
-			$this.edit_view_ui_dic.company_tax_deduction_ids.setUnselectedGridData( result_data );
-		}} );
+		this.api.getCompanyDeduction( null, true, {
+			onResult: function( result ) {
+				var result_data = result.getResult();
+				$this.edit_view_ui_dic.company_tax_deduction_ids.setUnselectedGridData( result_data );
+			}
+		} );
 	},
 
 	setEditViewDataDone: function() {
@@ -955,6 +1000,10 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 	hideAllDynamicFields: function( keepC, keepP ) {
 
+		if ( !this.edit_view ) {
+			return;
+		}
+
 		if ( !keepC ) {
 			this.show_c = false;
 			this.edit_view_form_item_dic.country.hide();
@@ -982,14 +1031,20 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		this.edit_view_form_item_dic.df_12.hide();
 		this.edit_view_form_item_dic.df_14.hide();
 
-		if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( !( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) ) {
 			this.edit_view_form_item_dic.df_100.hide();
 		}
 
 	},
 
 	initEmployeeSetting: function() {
+
 		var $this = this;
+
+		if ( !$this.edit_view ) {
+			return;
+		}
+
 		if ( !this.current_edit_record || !this.current_edit_record.id ) {
 			$this.employee_setting_result = [];
 			$this.buildEmployeeSettingGrid();
@@ -1004,10 +1059,17 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			args.filter_data.user_id = this.parent_value;
 		}
 
-		this.user_deduction_api.getUserDeduction( args, true, {onResult: function( result ) {
-			$this.employee_setting_result = result.getResult();
-			$this.buildEmployeeSettingGrid();
-		}} );
+		this.user_deduction_api.getUserDeduction( args, true, {
+			onResult: function( result ) {
+
+				if ( !$this.edit_view ) {
+					return;
+				}
+
+				$this.employee_setting_result = result.getResult();
+				$this.buildEmployeeSettingGrid();
+			}
+		} );
 
 	},
 	/* jshint ignore:start */
@@ -1019,154 +1081,433 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		var column_options_string = '';
 		var columnOptions = [];
 
-		var column_info = {name: 'user_name', index: 'user_name', label: $.i18n._( 'Employees' ), width: 100, sortable: false, title: false};
+		var column_info = {
+			name: 'user_name',
+			index: 'user_name',
+			label: $.i18n._( 'Employees' ),
+			width: 100,
+			sortable: false,
+			title: false
+		};
 		column_info_array.push( column_info );
 
 		switch ( this.final_c_id ) {
 			case '10':
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Percent' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Percent' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case '15':
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Percent' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Percent' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Annual Wage Base/Maximum Earnings' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Annual Wage Base/Maximum Earnings' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value3', index: 'user_value3', label: $.i18n._( 'Annual Deduction Amount' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value3',
+					index: 'user_value3',
+					label: $.i18n._( 'Annual Deduction Amount' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case '17':
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Percent' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Percent' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Annual Amount Greater Than' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Annual Amount Greater Than' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value3', index: 'user_value3', label: $.i18n._( 'Annual Amount Less Than' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value3',
+					index: 'user_value3',
+					label: $.i18n._( 'Annual Amount Less Than' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value4', index: 'user_value4', label: $.i18n._( 'Annual Deduction Amount' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value4',
+					index: 'user_value4',
+					label: $.i18n._( 'Annual Deduction Amount' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value5', index: 'user_value5', label: $.i18n._( 'Annual Fixed Amount' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value5',
+					index: 'user_value5',
+					label: $.i18n._( 'Annual Fixed Amount' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
 				break;
 			case '18':
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Percent' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Percent' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Annual Wage Base/Maximum Earnings' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Annual Wage Base/Maximum Earnings' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value3', index: 'user_value3', label: $.i18n._( 'Annual Exempt Amount' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value3',
+					index: 'user_value3',
+					label: $.i18n._( 'Annual Exempt Amount' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case '19':
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Percent' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Percent' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Annual Amount Greater Than' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Annual Amount Greater Than' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value3', index: 'user_value3', label: $.i18n._( 'Annual Amount Less Than' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value3',
+					index: 'user_value3',
+					label: $.i18n._( 'Annual Amount Less Than' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value4', index: 'user_value4', label: $.i18n._( 'Annual Deduction Amount' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value4',
+					index: 'user_value4',
+					label: $.i18n._( 'Annual Deduction Amount' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value5', index: 'user_value5', label: $.i18n._( 'Annual Fixed Amount' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value5',
+					index: 'user_value5',
+					label: $.i18n._( 'Annual Fixed Amount' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case '20':
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Amount' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Amount' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case '30':
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Amount' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Amount' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Annual Amount Greater Than' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Annual Amount Greater Than' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value3', index: 'user_value3', label: $.i18n._( 'Annual Amount Less Than' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value3',
+					index: 'user_value3',
+					label: $.i18n._( 'Annual Amount Less Than' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value4', index: 'user_value4', label: $.i18n._( 'Annual Deduction Amount' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value4',
+					index: 'user_value4',
+					label: $.i18n._( 'Annual Deduction Amount' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case '52':
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Amount' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Amount' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Target Balance/Limit' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Target Balance/Limit' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case '69':
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Value1' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Value1' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Value2' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Value2' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value3', index: 'user_value3', label: $.i18n._( 'Value3' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value3',
+					index: 'user_value3',
+					label: $.i18n._( 'Value3' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value4', index: 'user_value4', label: $.i18n._( 'Value4' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value4',
+					index: 'user_value4',
+					label: $.i18n._( 'Value4' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value5', index: 'user_value5', label: $.i18n._( 'Value5' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value5',
+					index: 'user_value5',
+					label: $.i18n._( 'Value5' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value6', index: 'user_value6', label: $.i18n._( 'Value6' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value6',
+					index: 'user_value6',
+					label: $.i18n._( 'Value6' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value7', index: 'user_value7', label: $.i18n._( 'Value7' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value7',
+					index: 'user_value7',
+					label: $.i18n._( 'Value7' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value8', index: 'user_value8', label: $.i18n._( 'Value8' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value8',
+					index: 'user_value8',
+					label: $.i18n._( 'Value8' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value9', index: 'user_value9', label: $.i18n._( 'Value9' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value9',
+					index: 'user_value9',
+					label: $.i18n._( 'Value9' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value10', index: 'user_value10', label: $.i18n._( 'Value10' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value10',
+					index: 'user_value10',
+					label: $.i18n._( 'Value10' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case '80':
@@ -1183,13 +1524,31 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 				}
 
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Filing Status' ), width: 100, sortable: false,
-					formatter: 'select', editable: true, title: false, edittype: 'select', editoptions: {value: column_options_string}};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Filing Status' ),
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
 				column_info_array.push( column_info );
 				break;
 			case "100-CA":
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Claim Amount' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Claim Amount' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "100-US":
@@ -1205,12 +1564,30 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 				}
 
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Filing Status' ), width: 100, sortable: false,
-					formatter: 'select', editable: true, title: false, edittype: 'select', editoptions: {value: column_options_string}};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Filing Status' ),
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Allowances' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Allowances' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "100-CR":
@@ -1226,22 +1603,56 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 				}
 
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Filing Status' ), width: 100, sortable: false,
-					formatter: 'select', editable: true, title: false, edittype: 'select', editoptions: {value: column_options_string}};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Filing Status' ),
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Allowances' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Allowances' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "200-CA":
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Claim Amount' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Claim Amount' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "200-US-AZ":
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Percent' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Percent' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "200-US-AL":
@@ -1257,12 +1668,30 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 				}
 
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Filing Status' ), width: 100, sortable: false,
-					formatter: 'select', editable: true, title: false, edittype: 'select', editoptions: {value: column_options_string}};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Filing Status' ),
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Dependents' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Dependents' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "200-US-CT":
@@ -1278,8 +1707,18 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 				}
 
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Filing Status' ), width: 100, sortable: false,
-					formatter: 'select', editable: true, title: false, edittype: 'select', editoptions: {value: column_options_string}};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Filing Status' ),
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
 				column_info_array.push( column_info );
 				break;
 			case "200-US-DC":
@@ -1295,12 +1734,30 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 				}
 
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Filing Status' ), width: 100, sortable: false,
-					formatter: 'select', editable: true, title: false, edittype: 'select', editoptions: {value: column_options_string}};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Filing Status' ),
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Allowances' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Allowances' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "200-US-DE":
@@ -1316,12 +1773,30 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 				}
 
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Filing Status' ), width: 100, sortable: false,
-					formatter: 'select', editable: true, title: false, edittype: 'select', editoptions: {value: column_options_string}};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Filing Status' ),
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Allowances' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Allowances' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "200-US-NJ":
@@ -1337,12 +1812,30 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 				}
 
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Filing Status' ), width: 100, sortable: false,
-					formatter: 'select', editable: true, title: false, edittype: 'select', editoptions: {value: column_options_string}};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Filing Status' ),
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Allowances' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Allowances' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "200-US-NC":
@@ -1358,12 +1851,30 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 				}
 
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Filing Status' ), width: 100, sortable: false,
-					formatter: 'select', editable: true, title: false, edittype: 'select', editoptions: {value: column_options_string}};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Filing Status' ),
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Allowances' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Allowances' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "200-US-MA":
@@ -1379,12 +1890,30 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 				}
 
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Filing Status' ), width: 100, sortable: false,
-					formatter: 'select', editable: true, title: false, edittype: 'select', editoptions: {value: column_options_string}};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Filing Status' ),
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Allowances' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Allowances' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "200-US-MD":
@@ -1400,16 +1929,42 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 				}
 
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Filing Status' ), width: 100, sortable: false,
-					formatter: 'select', editable: true, title: false, edittype: 'select', editoptions: {value: column_options_string}};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Filing Status' ),
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Allowances' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Allowances' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value3', index: 'user_value3', label: $.i18n._( 'Country Rate' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value3',
+					index: 'user_value3',
+					label: $.i18n._( 'Country Rate' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "200-US-OK":
@@ -1425,12 +1980,30 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 				}
 
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Filing Status' ), width: 100, sortable: false,
-					formatter: 'select', editable: true, title: false, edittype: 'select', editoptions: {value: column_options_string}};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Filing Status' ),
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Allowances' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Allowances' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "200-US-GA":
@@ -1446,48 +2019,130 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 				}
 
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Filing Status' ), width: 100, sortable: false,
-					formatter: 'select', editable: true, title: false, edittype: 'select', editoptions: {value: column_options_string}};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Filing Status' ),
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Employee / Spouse Allowances' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Employee / Spouse Allowances' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value3', index: 'user_value3', label: $.i18n._( 'Dependent Allowances' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value3',
+					index: 'user_value3',
+					label: $.i18n._( 'Dependent Allowances' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "200-US-IL":
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'IL-W-4 Line 1' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'IL-W-4 Line 1' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'IL-W-4 Line 2' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'IL-W-4 Line 2' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "200-US-OH":
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Allowances' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Allowances' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "200-US-VA":
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Allowances' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Allowances' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Age 65/Blind' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Age 65/Blind' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "200-US-IN":
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Allowances' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Allowances' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Dependents' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Dependents' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "200-US-LA":
@@ -1503,16 +2158,42 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 				}
 
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Filing Status' ), width: 100, sortable: false,
-					formatter: 'select', editable: true, title: false, edittype: 'select', editoptions: {value: column_options_string}};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Filing Status' ),
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Exemptions' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Exemptions' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value3', index: 'user_value3', label: $.i18n._( 'Dependents' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value3',
+					index: 'user_value3',
+					label: $.i18n._( 'Dependents' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "200-US-ME":
@@ -1528,12 +2209,30 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 				}
 
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Filing Status' ), width: 100, sortable: false,
-					formatter: 'select', editable: true, title: false, edittype: 'select', editoptions: {value: column_options_string}};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Filing Status' ),
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Allowances' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Allowances' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "200-US-WI":
@@ -1549,12 +2248,30 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 				}
 
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Filing Status' ), width: 100, sortable: false,
-					formatter: 'select', editable: true, title: false, edittype: 'select', editoptions: {value: column_options_string}};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Filing Status' ),
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Allowances' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Allowances' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "200-US-WV":
@@ -1570,12 +2287,30 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 				}
 
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Filing Status' ), width: 100, sortable: false,
-					formatter: 'select', editable: true, title: false, edittype: 'select', editoptions: {value: column_options_string}};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Filing Status' ),
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Allowances' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Allowances' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "200-US":
@@ -1592,51 +2327,141 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 				}
 
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Filing Status' ), width: 100, sortable: false,
-					formatter: 'select', editable: true, title: false, edittype: 'select', editoptions: {value: column_options_string}};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Filing Status' ),
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Allowances' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Allowances' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "300-US-IN":
-				column_info = {name: 'user_value5', index: 'user_value5', label: $.i18n._( 'District / County Name' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value5',
+					index: 'user_value5',
+					label: $.i18n._( 'District / County Name' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'Allowances' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Allowances' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Dependents' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Dependents' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value3', index: 'user_value3', label: $.i18n._( 'County Rate' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value3',
+					index: 'user_value3',
+					label: $.i18n._( 'County Rate' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "300-US-MD":
-				column_info = {name: 'user_value5', index: 'user_value5', label: $.i18n._( 'District / County Name' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value5',
+					index: 'user_value5',
+					label: $.i18n._( 'District / County Name' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'Allowances' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Allowances' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'County Rate' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'County Rate' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 			case "300-US-PERCENT":
-				column_info = {name: 'user_value1', index: 'user_value1', label: $.i18n._( 'District / County Name' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'District / County Name' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'user_value2', index: 'user_value2', label: $.i18n._( 'District / County Rate' ), width: 100, sortable: false, title: false,
-					editable: true, edittype: 'text'};
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'District / County Rate' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
 				column_info_array.push( column_info );
 				break;
 
@@ -1657,7 +2482,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				viewrecords: true,
 				editurl: 'clientArray',
 				onSelectRow: function( id ) {
-					if ( id ) {
+					if ( id && !$this.is_viewing ) {
 
 						if ( $this.select_grid_last_row ) {
 							$this.employee_setting_grid.jqGrid( 'saveRow', $this.select_grid_last_row );
@@ -1688,11 +2513,12 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				viewrecords: true,
 				editurl: 'clientArray',
 				onSelectRow: function( id ) {
-					if ( id ) {
+					if ( id && !$this.is_viewing ) {
 
 						if ( $this.select_grid_last_row ) {
 							$this.employee_setting_grid.jqGrid( 'saveRow', $this.select_grid_last_row );
 						}
+
 						$this.employee_setting_grid.jqGrid( 'editRow', id, true );
 						$this.select_grid_last_row = id;
 					}
@@ -1765,9 +2591,9 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			return;
 		}
 
-		var tab2 = this.edit_view.find( '#tab2_content_div' );
-		this.employee_setting_grid.setGridWidth( tab2.width() );
-		this.employee_setting_grid.setGridHeight( tab2.height() );
+		var tab_employee_setting = this.edit_view.find( '#tab_employee_setting_content_div' );
+		this.employee_setting_grid.setGridWidth( tab_employee_setting.width() );
+		this.employee_setting_grid.setGridHeight( tab_employee_setting.height() );
 
 	},
 
@@ -1782,7 +2608,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 	},
 
 	setProvinceVisibility: function() {
-		if ( this.show_c && this.e_province_array && this.e_province_array.length > 1 ) {
+		if ( this.show_p && this.e_province_array && this.e_province_array.length > 1 ) {
 			this.edit_view_form_item_dic.province.show();
 		} else {
 			this.edit_view_form_item_dic.province.hide();
@@ -1810,50 +2636,56 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		if ( !countryOrP ) {
 			this.hideAllDynamicFields();
-			this.api.isCountryCalculationID( c_id, {onResult: function( result_1 ) {
-				var res_data_1 = result_1.getResult();
+			this.api.isCountryCalculationID( c_id, {
+				onResult: function( result_1 ) {
+					var res_data_1 = result_1.getResult();
 
-				if ( res_data_1 === true ) {
-					$this.show_c = true;
-					$this.setCountryVisibility();
-					$this.api.isProvinceCalculationID( c_id, {onResult: function( result_2 ) {
-						var res_data_2 = result_2.getResult();
-						if ( res_data_2 === true ) {
-							$this.show_p = true;
-
-							if ( $this.current_edit_record.country ) {
-								$this.eSetProvince( $this.current_edit_record.country );
-							}
-
-							$this.api.isDistrictCalculationID( c_id, {onResult: function( result_3 ) {
-								var res_data_3 = result_3.getResult();
-
-								if ( res_data_3 === true ) {
-									$this.show_dc = true;
+					if ( res_data_1 === true ) {
+						$this.show_c = true;
+						$this.setCountryVisibility();
+						$this.api.isProvinceCalculationID( c_id, {
+							onResult: function( result_2 ) {
+								var res_data_2 = result_2.getResult();
+								if ( res_data_2 === true ) {
+									$this.show_p = true;
 
 									if ( $this.current_edit_record.country ) {
-										$this.setDistrict( $this.current_edit_record.country );
+										$this.eSetProvince( $this.current_edit_record.country );
 									}
 
+									$this.api.isDistrictCalculationID( c_id, {
+										onResult: function( result_3 ) {
+											var res_data_3 = result_3.getResult();
+
+											if ( res_data_3 === true ) {
+												$this.show_dc = true;
+
+												if ( $this.current_edit_record.country ) {
+													$this.setDistrict( $this.current_edit_record.country );
+												}
+
+											}
+
+											$this.api.getCombinedCalculationID( c_id, $this.current_edit_record.country, $this.current_edit_record.province, {onResult: getCaResult} );
+
+										}
+									} );
+
+								} else {
+									$this.api.getCombinedCalculationID( c_id, $this.current_edit_record.country, '', {onResult: getCaResult} );
 								}
 
-								$this.api.getCombinedCalculationID( c_id, $this.current_edit_record.country, $this.current_edit_record.province, {onResult: getCaResult} );
+							}
+						} );
 
-							}} );
+					} else {
+						$this.hideAllDynamicFields();
 
-						} else {
-							$this.api.getCombinedCalculationID( c_id, $this.current_edit_record.country, '', {onResult: getCaResult} );
-						}
+						$this.api.getCombinedCalculationID( c_id, '', '', {onResult: getCaResult} );
+					}
 
-					}} );
-
-				} else {
-					$this.hideAllDynamicFields();
-
-					$this.api.getCombinedCalculationID( c_id, '', '', {onResult: getCaResult} );
 				}
-
-			}} );
+			} );
 		} else {
 			if ( !this.show_p ) {
 				$this.hideAllDynamicFields( true, false );
@@ -1865,6 +2697,11 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		}
 
 		function getCaResult( result ) {
+
+			if ( !$this.edit_view ) {
+				return;
+			}
+
 			var result_data = result.getResult();
 			$this.final_c_id = result_data;
 
@@ -2452,6 +3289,8 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			this.edit_view_ui_dic['apply_frequency_day_of_month'].parent().parent().css( 'display', 'block' );
 			this.edit_view_ui_dic['apply_frequency_quarter_month'].parent().parent().css( 'display', 'none' );
 		}
+
+		this.editFieldResize();
 	},
 
 	onCalculationChange: function() {
@@ -2464,21 +3303,16 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		var tab_2_label = this.edit_view.find( 'a[ref=tab2]' );
-		var tab_3_label = this.edit_view.find( 'a[ref=tab3]' );
-		var tab_4_label = this.edit_view.find( 'a[ref=tab4]' );
-		var tab_5_label = this.edit_view.find( 'a[ref=tab5]' );
+		this.setTabLabels( {
+			'tab_tax_deductions': $.i18n._( 'Tax / Deductions' ),
+			'tab_eligibility': $.i18n._( 'Eligibility' ),
+			'tab_employee_setting': $.i18n._( 'Employee Settings' ),
+			'tab_attachment': $.i18n._( 'Attachments' ),
+			'tab_audit': $.i18n._( 'Audit' ),
+			'tab5': $.i18n._( 'Taxes / Deductions' )
+		} );
 
 		this.edit_view.children().eq( 0 ).css( 'min-width', 1170 );
-
-		tab_0_label.text( $.i18n._( 'Tax / Deductions' ) );
-		tab_1_label.text( $.i18n._( 'Eligibility' ) );
-		tab_2_label.text( $.i18n._( 'Employee Settings' ) );
-		tab_3_label.text( $.i18n._( 'Attachments' ) );
-		tab_4_label.text( $.i18n._( 'Audit' ) );
-		tab_5_label.text( $.i18n._( 'Taxes / Deductions' ) );
 
 		this.navigation.AComboBox( {
 			id: this.script_name + '_navigation',
@@ -2493,64 +3327,66 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_tax_deductions = this.edit_view_tab.find( '#tab_tax_deductions' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_tax_deductions_column1 = tab_tax_deductions.find( '.first-column' );
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_tax_deductions_column1 );
 
 		// Status
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'status_id', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_tax_deductions_column1, '' );
 
 		// Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'type_id', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_tax_deductions_column1 );
 
 		//Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'name', width: 300} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab0_column1 );
+		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_tax_deductions_column1 );
+
+		form_item_input.parent().width( '45%' );
 
 		//Pay Stub Note (Public)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'pay_stub_entry_description', width: 300} );
-		this.addEditFieldToColumn( $.i18n._( 'Pay Stub Note (Public)' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Pay Stub Note (Public)' ), form_item_input, tab_tax_deductions_column1 );
 
 		//Calculation
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'calculation_id', set_empty: false, width: 400} );
 		form_item_input.setSourceData( $this.calculation_array );
-		this.addEditFieldToColumn( $.i18n._( 'Calculation' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Calculation' ), form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		// Country
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'country', set_empty: true} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.country_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		// Province
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'province', set_empty: true} );
+		form_item_input.TComboBox( {field: 'province'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
-		this.addEditFieldToColumn( $.i18n._( 'Province' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Province' ), form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		// District
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'district', set_empty: true} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
-		this.addEditFieldToColumn( $.i18n._( 'District' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'District' ), form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		// Dynamic Field 0
 
@@ -2562,100 +3398,104 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( 'df_0', form_item_input, tab0_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( 'df_0', form_item_input, tab_tax_deductions_column1, '', widgetContainer, true );
 
 		//  Dynamic Field 1
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'df_1'} );
-		this.addEditFieldToColumn( 'df_1', form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( 'df_1', form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		//  Dynamic Field 2
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'df_2'} );
-		this.addEditFieldToColumn( 'df_2', form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( 'df_2', form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		//  Dynamic Field 3
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'df_3'} );
-		this.addEditFieldToColumn( 'df_3', form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( 'df_3', form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		//  Dynamic Field 4
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'df_4'} );
-		this.addEditFieldToColumn( 'df_4', form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( 'df_4', form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		//  Dynamic Field 5
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'df_5'} );
-		this.addEditFieldToColumn( 'df_5', form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( 'df_5', form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		//  Dynamic Field 6
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'df_6'} );
-		this.addEditFieldToColumn( 'df_6', form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( 'df_6', form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		//  Dynamic Field 7
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'df_7'} );
-		this.addEditFieldToColumn( 'df_7', form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( 'df_7', form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		//  Dynamic Field 8
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'df_8'} );
-		this.addEditFieldToColumn( 'df_8', form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( 'df_8', form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		//  Dynamic Field 9
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'df_9'} );
-		this.addEditFieldToColumn( 'df_9', form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( 'df_9', form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		//  Dynamic Field 10
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'df_10'} );
-		this.addEditFieldToColumn( 'df_10', form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( 'df_10', form_item_input, tab_tax_deductions_column1, '', null, true );
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) ) {
 			Global.loadScript( 'global/widgets/formula_builder/FormulaBuilder.js' );
 
 			// Dynamic Field 11
 			form_item_input = Global.loadWidgetByName( FormItemType.FORMULA_BUILDER );
-			form_item_input.FormulaBuilder( {field: 'df_11', onFormulaBtnClick: function() {
+			form_item_input.FormulaBuilder( {
+				field: 'df_11', onFormulaBtnClick: function() {
 
-				var custom_column_api = new (APIFactory.getAPIClass( 'APIReportCustomColumn' ))();
+					var custom_column_api = new (APIFactory.getAPIClass( 'APIReportCustomColumn' ))();
 
-				custom_column_api.getOptions( 'formula_functions', {onResult: function( fun_result ) {
-					var fun_res_data = fun_result.getResult();
+					custom_column_api.getOptions( 'formula_functions', {
+						onResult: function( fun_result ) {
+							var fun_res_data = fun_result.getResult();
 
-					$this.api.getOptions( 'formula_variables', {onResult: onColumnsResult} );
+							$this.api.getOptions( 'formula_variables', {onResult: onColumnsResult} );
 
-					function onColumnsResult( col_result ) {
-						var col_res_data = col_result.getResult();
+							function onColumnsResult( col_result ) {
+								var col_res_data = col_result.getResult();
 
-						var default_args = {};
-						default_args.functions = Global.buildRecordArray( fun_res_data );
-						default_args.variables = Global.buildRecordArray( col_res_data );
-						default_args.formula = $this.current_edit_record.company_value1;
-						default_args.current_edit_record = Global.clone( $this.current_edit_record );
-						default_args.api = $this.api;
+								var default_args = {};
+								default_args.functions = Global.buildRecordArray( fun_res_data );
+								default_args.variables = Global.buildRecordArray( col_res_data );
+								default_args.formula = $this.current_edit_record.company_value1;
+								default_args.current_edit_record = Global.clone( $this.current_edit_record );
+								default_args.api = $this.api;
 
-						IndexViewController.openWizard( 'FormulaBuilderWizard', default_args, function( val ) {
-							$this.current_edit_record.company_value1 = val;
-							$this.edit_view_ui_dic.df_11.setValue( val );
-						} );
-					}
+								IndexViewController.openWizard( 'FormulaBuilderWizard', default_args, function( val ) {
+									$this.current_edit_record.company_value1 = val;
+									$this.edit_view_ui_dic.df_11.setValue( val );
+								} );
+							}
 
-				}} );
-			}} );
-			this.addEditFieldToColumn( 'df_11', form_item_input, tab0_column1, '', null, true );
+						}
+					} );
+				}
+			} );
+			this.addEditFieldToColumn( 'df_11', form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		} else {
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 			form_item_input.TTextInput( {field: 'df_11'} );
-			this.addEditFieldToColumn( 'df_11', form_item_input, tab0_column1, '', null, true );
+			this.addEditFieldToColumn( 'df_11', form_item_input, tab_tax_deductions_column1, '', null, true );
 
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 			form_item_input.TText( {field: 'df_100'} );
-			this.addEditFieldToColumn( 'Warning', form_item_input, tab0_column1, '', null, true );
+			this.addEditFieldToColumn( 'Warning', form_item_input, tab_tax_deductions_column1, '', null, true );
 		}
 
 		//Dynamic Field 12,13
@@ -2673,12 +3513,12 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		widgetContainer.append( label );
 		widgetContainer.append( widget_combo_box );
 
-		this.addEditFieldToColumn( 'df_12', [form_item_input, widget_combo_box], tab0_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( 'df_12', [form_item_input, widget_combo_box], tab_tax_deductions_column1, '', widgetContainer, true );
 
 		//Dynamic Field 14
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {field: 'df_14', set_empty: true} );
-		this.addEditFieldToColumn( 'df_14', form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( 'df_14', form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		//Pay Stub Account
 
@@ -2699,12 +3539,12 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		form_item_input.setDefaultArgs( default_args );
 
-		this.addEditFieldToColumn( $.i18n._( 'Pay Stub Account' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Pay Stub Account' ), form_item_input, tab_tax_deductions_column1 );
 
 		// Calculation Order
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'calculation_order', width: 30} );
-		this.addEditFieldToColumn( $.i18n._( 'Calculation Order' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Calculation Order' ), form_item_input, tab_tax_deductions_column1 );
 
 		// Include Pay Stub Accounts
 		var v_box = $( "<div class='v-box'></div>" );
@@ -2733,7 +3573,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		v_box.append( form_item );
 
-		this.addEditFieldToColumn( $.i18n._( 'Include Pay Stub Accounts' ), [form_item_input, form_item_input_1], tab0_column1, null, v_box, false, true );
+		this.addEditFieldToColumn( $.i18n._( 'Include Pay Stub Accounts' ), [form_item_input, form_item_input_1], tab_tax_deductions_column1, null, v_box, false, true );
 
 		// Exclude Pay Stub Accounts
 		v_box = $( "<div class='v-box'></div>" );
@@ -2762,7 +3602,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		v_box.append( form_item );
 
-		this.addEditFieldToColumn( $.i18n._( 'Exclude Pay Stub Accounts' ), [form_item_input, form_item_input_1], tab0_column1, null, v_box, false, true );
+		this.addEditFieldToColumn( $.i18n._( 'Exclude Pay Stub Accounts' ), [form_item_input, form_item_input_1], tab_tax_deductions_column1, null, v_box, false, true );
 
 		// employees
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -2774,45 +3614,45 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'user'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Employees' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Employees' ), form_item_input, tab_tax_deductions_column1, '' );
 
 		// Tab1  start
 
-		var tab1 = this.edit_view_tab.find( '#tab1' );
+		var tab_eligibility = this.edit_view_tab.find( '#tab_eligibility' );
 
-		var tab1_column1 = tab1.find( '.first-column' );
+		var tab_eligibility_column1 = tab_eligibility.find( '.first-column' );
 
 		this.edit_view_tabs[1] = [];
 
-		this.edit_view_tabs[1].push( tab1_column1 );
+		this.edit_view_tabs[1].push( tab_eligibility_column1 );
 
 		// Apply Frequency
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'apply_frequency_id', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.apply_frequency_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Apply Frequency' ), form_item_input, tab1_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Apply Frequency' ), form_item_input, tab_eligibility_column1, '' );
 
 		// Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'apply_frequency_month', set_empty: false } );
+		form_item_input.TComboBox( {field: 'apply_frequency_month', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.month_of_year_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Month' ), form_item_input, tab1_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Month' ), form_item_input, tab_eligibility_column1, '', null, true );
 
 		// Day of Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'apply_frequency_day_of_month', set_empty: false } );
+		form_item_input.TComboBox( {field: 'apply_frequency_day_of_month', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.day_of_month_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Day of Month' ), form_item_input, tab1_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Day of Month' ), form_item_input, tab_eligibility_column1, '', null, true );
 
 		// Month of Quarter
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'apply_frequency_quarter_month', set_empty: false } );
+		form_item_input.TComboBox( {field: 'apply_frequency_quarter_month', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.month_of_quarter_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Month of Quarter' ), form_item_input, tab1_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Month of Quarter' ), form_item_input, tab_eligibility_column1, '', null, true );
 
 		// Start Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
@@ -2824,7 +3664,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab1_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_eligibility_column1, '', widgetContainer );
 
 		// End Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
@@ -2836,12 +3676,12 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab1_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab_eligibility_column1, '', widgetContainer );
 
 		// Minimum Length Of Service
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'minimum_length_of_service', width: 40} );
+		form_item_input.TTextInput( {field: 'minimum_length_of_service', width: 30} );
 
 		widgetContainer = $( "<div class='widget-h-box'></div>" );
 		label = $( "<span class='widget-right-label'> " + $.i18n._( ' ' ) + " </span>" );
@@ -2854,12 +3694,12 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		widgetContainer.append( label );
 		widgetContainer.append( widget_combo_box );
 
-		this.addEditFieldToColumn( $.i18n._( 'Minimum Length Of Service' ), [form_item_input, widget_combo_box], tab1_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Minimum Length Of Service' ), [form_item_input, widget_combo_box], tab_eligibility_column1, '', widgetContainer );
 
 		// Maximum Length Of Service
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'maximum_length_of_service', width: 40} );
+		form_item_input.TTextInput( {field: 'maximum_length_of_service', width: 30} );
 
 		widgetContainer = $( "<div class='widget-h-box'></div>" );
 		label = $( "<span class='widget-right-label'> " + $.i18n._( ' ' ) + " </span>" );
@@ -2872,29 +3712,42 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		widgetContainer.append( label );
 		widgetContainer.append( widget_combo_box );
 
-		this.addEditFieldToColumn( $.i18n._( 'Maximum Length Of Service' ), [form_item_input, widget_combo_box], tab1_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Maximum Length Of Service' ), [form_item_input, widget_combo_box], tab_eligibility_column1, '', widgetContainer );
+
+		//Length of Service contributing pay codes.
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APIContributingPayCodePolicy' )),
+			allow_multiple_selection: false,
+			layout_name: ALayoutIDs.CONTRIBUTING_PAY_CODE_POLICY,
+			show_search_inputs: true,
+			set_empty: true,
+			set_default: true,
+			field: 'length_of_service_contributing_pay_code_policy_id'
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Length Of Service Hours Based On' ), form_item_input, tab_eligibility_column1, '', null, true );
 
 		// Minimum Employee Age
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'minimum_user_age', width: 40} );
+		form_item_input.TTextInput( {field: 'minimum_user_age', width: 30} );
 
 		widgetContainer = $( "<div class='widget-h-box'></div>" );
 		label = $( "<span class='widget-right-label'>" + $.i18n._( 'years' ) + "</span>" );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Minimum Employee Age' ), form_item_input, tab1_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Minimum Employee Age' ), form_item_input, tab_eligibility_column1, '', widgetContainer );
 
 		// Maximum Employee Age
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'maximum_user_age', width: 40} );
+		form_item_input.TTextInput( {field: 'maximum_user_age', width: 30} );
 
 		widgetContainer = $( "<div class='widget-h-box'></div>" );
 		label = $( "<span class='widget-right-label'>" + $.i18n._( 'years' ) + "</span>" );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Maximum Employee Age' ), form_item_input, tab1_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Maximum Employee Age' ), form_item_input, tab_eligibility_column1, '', widgetContainer );
 
 		//Tab 5
 
@@ -2966,37 +3819,45 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 
 		this.search_fields = [
-			new SearchField( {label: $.i18n._( 'Status' ),
+			new SearchField( {
+				label: $.i18n._( 'Status' ),
 				in_column: 1,
 				field: 'status_id',
 				multiple: true,
 				basic_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Type' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Type' ),
 				in_column: 1,
 				field: 'type_id',
 				multiple: true,
 				basic_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-
-			new SearchField( {label: $.i18n._( 'Calculation' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
-				field: 'calculation_id',
-				multiple: true,
-				basic_search: true,
-				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-
-			new SearchField( {label: $.i18n._( 'Name' ),
-				in_column: 2,
 				field: 'name',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Created By' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+
+			new SearchField( {
+				label: $.i18n._( 'Calculation' ),
+				in_column: 2,
+				field: 'calculation_id',
+				multiple: true,
+				basic_search: true,
+				layout_name: ALayoutIDs.OPTION_COLUMN,
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -3004,8 +3865,10 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				script_name: 'EmployeeView',
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -3013,12 +3876,12 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				script_name: 'EmployeeView',
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 
 		];
 
 	}
-
 
 } );
 
@@ -3026,7 +3889,7 @@ CompanyTaxDeductionViewController.loadSubView = function( container, beforeViewL
 
 	Global.loadViewSource( 'CompanyTaxDeduction', 'SubCompanyTaxDeductionView.html', function( result ) {
 
-		var args = { };
+		var args = {};
 		var template = _.template( result, args );
 
 		if ( Global.isSet( beforeViewLoadedFun ) ) {

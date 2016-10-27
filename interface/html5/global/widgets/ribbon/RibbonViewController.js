@@ -128,7 +128,7 @@ RibbonViewController = Backbone.View.extend( {
 						if ( ribbon_sub_menu.get( 'items' ).length > 0 ) {
 							sub_menu_ui_nodes.append( sub_menu_ui_node );
 							sub_menu_ui_node.children().eq( 0 ).addClass( 'ribbon-sub-menu-nav-icon' );
-							$this.subMenuNavMap[ ribbon_sub_menu.get( 'id' )] = ribbon_sub_menu;
+							$this.subMenuNavMap[ribbon_sub_menu.get( 'id' )] = ribbon_sub_menu;
 
 							sub_menu_ui_node.click( function( e ) {
 								var id = $( $( this ).find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
@@ -216,38 +216,17 @@ RibbonViewController = Backbone.View.extend( {
 			$( '#leftLogo' ).attr( 'src', Global.getRealImagePath( 'css/global/widgets/ribbon/images/logo.png' ) );
 		}
 
-		$( '#rightLogo' ).hide();
+//		$( '#rightLogo' ).load( function() {
+//
+//		} );
 
 		$( '#rightLogo' ).attr( 'src', ServiceCaller.companyLogo + '&t=' + new Date().getTime() );
-
-		$( '#rightLogo' ).load( function() {
-
-			var ratio = 42 / $( this ).height();
-
-			if ( $( this ).height() > 42 ) {
-				$( this ).css( 'height', 42 );
-
-				if ( $( this ).width > 177 ) {
-					$( this ).css( 'width', 177 );
-				}
-			}
-
-			if ( $( this ).width > 177 ) {
-				$( this ).css( 'width', 177 );
-			}
-
-//			$( this ).animate( {
-//				opacity: 1
-//			}, 100 );
-
-			$( '#rightLogo' ).show();
-		} );
 
 	},
 
 	setSelectMenu: function( name ) {
 
-		$( this.el ).tabs( { selected: name } );
+		$( this.el ).tabs( {selected: name} );
 		TopMenuManager.selected_menu_id = name;
 	},
 
@@ -276,6 +255,9 @@ RibbonViewController = Backbone.View.extend( {
 			case 'Logout':
 				this.doLogout();
 				break;
+			case 'PortalLogout':
+				this.doPortalLogout();
+				break;
 			case 'AdminGuide':
 				var url = 'http://www.timetrex.com/h.php?id=admin_guide&v=' + LocalCacheData.getLoginData().application_version;
 				window.open( url, '_blank' );
@@ -292,7 +274,7 @@ RibbonViewController = Backbone.View.extend( {
 
 				if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
 					url = 'mailto:support@timetrex.com?subject=Company: ' + LocalCacheData.getCurrentCompany().name + '&body=Company: ' + LocalCacheData.getCurrentCompany().name + '  ' +
-						'Registration Key: ' + LocalCacheData.getLoginData().registration_key;
+					'Registration Key: ' + LocalCacheData.getLoginData().registration_key;
 				} else {
 					url = 'http://www.timetrex.com/r.php?id=29';
 				}
@@ -355,16 +337,33 @@ RibbonViewController = Backbone.View.extend( {
 
 	},
 
+	doPortalLogout: function() {
+		var current_user_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
+
+		current_user_api.Logout( {
+			onResult: function( result ) {
+
+				$.cookie( 'SessionID', null, {expires: 30, path: LocalCacheData.cookie_path} );
+				LocalCacheData.current_open_view_id = ''; //#1528  -  Logout icon not working.
+				TopMenuManager.goToView( 'PortalLogin' );
+
+			}
+		} )
+	},
+
 	doLogout: function() {
 
 		var current_user_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
 
-		current_user_api.Logout( {onResult: function( result ) {
+		current_user_api.Logout( {
+			onResult: function( result ) {
 
-			$.cookie( 'SessionID', null, {expires: 30, path: LocalCacheData.cookie_path} );
-			TopMenuManager.goToView( 'Login' );
+				$.cookie( 'SessionID', null, {expires: 30, path: LocalCacheData.cookie_path} );
+				LocalCacheData.current_open_view_id = ''; //#1528  -  Logout icon not working.
+				TopMenuManager.goToView( 'Login' );
 
-		}} )
+			}
+		} )
 	}
 
 } );

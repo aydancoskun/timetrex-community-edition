@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2095 $
- * $Id: PayrollDeduction.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
- */
+
 
 /**
  * @package GovernmentForms
@@ -61,7 +57,7 @@ class GovernmentForms {
 		}
 		if ( $province != '' ) {
 			$class_name .= '_' . strtoupper( $province );
-			$class_directory .=  DIRECTORY_SEPARATOR . strtolower($province);
+			$class_directory .= DIRECTORY_SEPARATOR . strtolower($province);
 		}
 		if ( $district != '' ) {
 			$class_name .= '_' . strtoupper( $district );
@@ -112,10 +108,15 @@ class GovernmentForms {
 			} else {
 				Debug::Text('Schema is NOT valid!', __FILE__, __LINE__, __METHOD__, 10);
 
+				$error_msg = '';
 				$errors = libxml_get_errors();
+				$i = 1;
 				foreach ( $errors as $error ) {
 					Debug::Text('XML Error (Line: '. $error->line.'): '. $error->message, __FILE__, __LINE__, __METHOD__, 10);
+					$error_msg .= $i .': '. $error->message ."<br>\n";
+					$i++;
 				}
+				unset($errors, $error);
 				
 				return array(
 								'api_retval' => FALSE,
@@ -123,10 +124,9 @@ class GovernmentForms {
 								//'api_pager'
 								'api_details' => array(
 												'code' => 'VALIDATION',
-												'description' => $error->message,
+												'description' => $error_msg,
 												)
 								);				
-				//return FALSE;
 			}
 		} else {
 			Debug::Text('DomDocument not available!', __FILE__, __LINE__, __METHOD__, 10);

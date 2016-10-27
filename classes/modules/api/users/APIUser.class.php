@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2196 $
- * $Id: APIUser.class.php 2196 2008-10-14 16:08:54Z ipso $
- * $Date: 2008-10-14 09:08:54 -0700 (Tue, 14 Oct 2008) $
- */
+
 
 /**
  * @package API\Users
@@ -293,6 +289,9 @@ class APIUser extends APIFactory {
 				} else {
 					//Adding new object, check ADD permissions.
 					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('user', 'add'), TTi18n::gettext('Add permission denied') );
+
+					//Because password encryption requires the user_id, we need to get it first when creating a new employee.
+					$row['id'] = $lf->getNextInsertId();
 				}
 
 				//When doing a mass edit of employees, user name is never specified, so we need to avoid this validation issue.
@@ -402,7 +401,7 @@ class APIUser extends APIFactory {
 						if ( $validate_only == TRUE ) {
 							$save_result[$key] = TRUE;
 						} else {
-							$save_result[$key] = $lf->Save();
+							$save_result[$key] = $lf->Save( TRUE, TRUE );
 						}
 						$validator_stats['valid_records']++;
 					}
@@ -628,19 +627,14 @@ class APIUser extends APIFactory {
 						}
 
 						if ( $new_password != '' OR $new_password2 != ''  ) {
-							if ( $new_password == $new_password2 ) {
+							if ( $new_password === $new_password2 ) {
 								$uf->setPhonePassword($new_password);
 							} else {
 								$uf->Validator->isTrue(	'password',
 														FALSE,
 														TTi18n::gettext('Passwords don\'t match') );
 							}
-						} else {
-							$uf->Validator->isTrue(	'password',
-													FALSE,
-													TTi18n::gettext('Passwords don\'t match') );
 						}
-
 						break;
 					case 'web':
 						if ( $this->getPermissionObject()->Check('user', 'edit_own_password') == FALSE ) {
@@ -664,17 +658,13 @@ class APIUser extends APIFactory {
 						}
 
 						if ( $new_password != '' OR $new_password2 != ''  ) {
-							if ( $new_password == $new_password2 ) {
+							if ( $new_password === $new_password2 ) {
 								$uf->setPassword($new_password);
 							} else {
 								$uf->Validator->isTrue(	'password',
 														FALSE,
 														TTi18n::gettext('Passwords don\'t match') );
 							}
-						} else {
-							$uf->Validator->isTrue(	'password',
-													FALSE,
-													TTi18n::gettext('Passwords don\'t match') );
 						}
 						break;
 				}

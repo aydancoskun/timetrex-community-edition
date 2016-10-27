@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14958 $
- * $Id: SystemSettings.php 14958 2014-10-28 14:00:49Z mikeb $
- * $Date: 2014-10-28 07:00:49 -0700 (Tue, 28 Oct 2014) $
- */
+
 require_once('../../includes/global.inc.php');
 
 $authenticate = FALSE;

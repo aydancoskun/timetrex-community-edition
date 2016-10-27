@@ -67,6 +67,11 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 		var data = this.grid.getGridParam( 'data' );
 
+		//Error: TypeError: data is undefined in https://ondemand1.timetrex.com/interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
+		if ( !data ) {
+			return;
+		}
+
 		var len = data.length;
 
 		for ( var i = 0; i < len; i++ ) {
@@ -241,6 +246,11 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 	setDefaultMenu: function( doNotSetFocus ) {
 
+        //Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+        if (!this.context_menu_array) {
+            return;
+        }
+
 		if ( !Global.isSet( doNotSetFocus ) || !doNotSetFocus ) {
 			this.selectContextMenu();
 		}
@@ -386,7 +396,7 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 		}
 	},
 
-	onContentMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function( context_btn, menu_name ) {
 
 		context_btn = $( context_btn );
 
@@ -624,6 +634,12 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 	onAuthorizationClick: function() {
 		var $this = this;
+
+		//Error: TypeError: $this.current_edit_record is null in https://ondemand1.timetrex.com/interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 629
+		if ( !$this.current_edit_record ) {
+			return;
+		}
+
 		var filter = {};
 		filter.authorized = true;
 		filter.object_id = $this.current_edit_record.id;
@@ -988,40 +1004,43 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 		this._super( 'buildEditViewUI' );
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
+		this.setTabLabels( {
+			'tab_request': $.i18n._( 'Message' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
 
-		tab_0_label.text( $.i18n._( 'Message' ) );
-		tab_1_label.css( 'display', 'none' );
+		var tab_audit_label = this.edit_view.find( 'a[ref=tab_audit]' );
+
+		tab_audit_label.css( 'display', 'none' );
 
 		this.navigation = null;
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_request = this.edit_view_tab.find( '#tab_request' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_request_column1 = tab_request.find( '.first-column' );
 
-		var tab0_column2 = tab0.find( '.second-column' );
+		var tab_request_column2 = tab_request.find( '.second-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_request_column1 );
 
 		// Subject
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'subject', width: 359} );
-		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_request_column1, '' );
 
 		// Body
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 
 		form_item_input.TTextArea( {field: 'body', width: 600, height: 400} );
 
-		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab0_column1, '', null, null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_request_column1, '', null, null, true );
 
-		tab0_column2.css( 'display', 'none' );
+		tab_request_column2.css( 'display', 'none' );
 
 	},
 
@@ -1031,10 +1050,10 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'Request' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_request': $.i18n._( 'Request' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIRequest' )),
@@ -1049,30 +1068,30 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 		//Tab 0 first column start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_request = this.edit_view_tab.find( '#tab_request' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_request_column1 = tab_request.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_request_column1 );
 
 		// Employee
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'full_name'} );
-		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_request_column1, '' );
 
 		// Date
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'date_stamp'} );
-		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_request_column1 );
 
 		// Type
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'type'} );
-		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_request_column1, '' );
 
-		var separate_box = tab0.find( '.grid-title' );
+		var separate_box = tab_request.find( '.grid-title' );
 
 		// Authorization History
 
@@ -1080,9 +1099,9 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 		form_item_input.SeparatedBox( {label: $.i18n._( 'Authorization History' )} );
 		this.addEditFieldToColumn( null, form_item_input, separate_box );
 
-		// tab0 first column end
+		// tab_request first column end
 
-		separate_box = tab0.find( '.separate' ).css( 'display', 'none' );
+		separate_box = tab_request.find( '.separate' ).css( 'display', 'none' );
 
 		// Messages
 
@@ -1092,28 +1111,28 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 		// Tab 0 second column start
 
-		var tab0_column2 = tab0.find( '.second-column' );
+		var tab_request_column2 = tab_request.find( '.second-column' );
 
-		this.edit_view_tabs[0].push( tab0_column2 );
+		this.edit_view_tabs[0].push( tab_request_column2 );
 
 		// From
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'from'} );
-		this.addEditFieldToColumn( $.i18n._( 'From' ), form_item_input, tab0_column2, '' );
+		this.addEditFieldToColumn( $.i18n._( 'From' ), form_item_input, tab_request_column2, '' );
 
 		// Subject
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'subject'} );
-		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_request_column2 );
 
 		// Body
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'body', width: 600, height: 400} );
-		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab0_column2, '', null, null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_request_column2, '', null, null, true );
 
 		// Tab 0 second column end
 
-		tab0_column2.css( 'display', 'none' );
+		tab_request_column2.css( 'display', 'none' );
 
 	},
 
@@ -1547,7 +1566,7 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 					$this.edit_view_ui_dic['subject'].setValue( currentItem.subject );
 					$this.edit_view_ui_dic['body'].setValue( currentItem.body );
 
-					var cloneMessageControl = $( $this.edit_view_tab.find( '#tab0' ).find( '.edit-view-tab' ).find( '.second-column' ) ).clone();
+					var cloneMessageControl = $( $this.edit_view_tab.find( '#tab_request' ).find( '.edit-view-tab' ).find( '.second-column' ) ).clone();
 
 					cloneMessageControl.css( 'display', 'block' ).appendTo( container );
 				}
@@ -1558,8 +1577,8 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 					}} );
 				}
 
-				$this.edit_view_tab.find( '#tab0' ).find( '.edit-view-tab' ).find( '.second-column' ).remove();
-				$this.edit_view_tab.find( '#tab0' ).find( '.edit-view-tab' ).append( container.html() );
+				$this.edit_view_tab.find( '#tab_request' ).find( '.edit-view-tab' ).find( '.second-column' ).remove();
+				$this.edit_view_tab.find( '#tab_request' ).find( '.edit-view-tab' ).append( container.html() );
 			} else {
 
 				$( $this.edit_view.find( '.separate' ) ).css( 'display', 'none' );

@@ -18,11 +18,20 @@ TopMenuManager.goToView = function( subMenuId, force_refresh ) {
 
 	}
 
-//	if ( subMenuId !== TopMenuManager.selected_sub_menu_id ) {
-//		TopMenuManager.selected_sub_menu_id = subMenuId;
-//		TopMenuManager.selected_menu_id = TopMenuManager.menus_quick_map[subMenuId];
-//
-//	}
+	if ( window.location.href === Global.getBaseURL() + '#!m=' + subMenuId && force_refresh ) {
+		IndexViewController.instance.router.reloadView( subMenuId );
+	} else {
+		window.location = Global.getBaseURL() + '#!m=' + subMenuId;
+
+	}
+
+};
+
+TopMenuManager.goToPortalView = function( subMenuId, force_refresh ) {
+	if ( !TopMenuManager.ribbon_menus ) {
+		TopMenuManager.initPortalRibbonMenu();
+
+	}
 
 	if ( window.location.href === Global.getBaseURL() + '#!m=' + subMenuId && force_refresh ) {
 		IndexViewController.instance.router.reloadView( subMenuId );
@@ -44,22 +53,219 @@ TopMenuManager.initRibbonMenu = function() {
 	}
 };
 
+TopMenuManager.initPortalRibbonMenu = function() {
+	if ( !TopMenuManager.ribbon_menus ) {
+
+		//when login and refresh, will go into this place, do session check here
+		TopMenuManager.buildPortalRibbonMenuModels();
+		Global.setupPing();
+
+	}
+};
+
+TopMenuManager.buildPortalRibbonMenuModels = function() {
+
+	var permission = PermissionManager.getPermissionData();
+	//HR Menu
+	var hr_menu = new RibbonMenu( {
+		label: $.i18n._( 'HR' ),
+		id: 'hr_menu',
+		sub_menu_groups: []
+	} );
+
+	//reviews group
+	var reviewsSubMenuGroup = new RibbonSubMenuGroup( {
+		label: $.i18n._( 'Reviews' ),
+		id: 'reviewsGroup',
+		ribbon_menu: hr_menu,
+		sub_menus: []
+	} );
+
+	//reviews Group Sub Menu
+	var user_review_control = new RibbonSubMenu( {
+		label: $.i18n._( 'Reviews' ),
+		id: 'UserReviewControl',
+		group: reviewsSubMenuGroup,
+		icon: 'reviews-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'UserReviewControl' ),
+		permission: permission.user_review
+	} );
+
+	var kpi = new RibbonSubMenu( {
+		label: $.i18n._( 'KPI' ),
+		id: 'KPI',
+		group: reviewsSubMenuGroup,
+		icon: 'KPI-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'KPI' ),
+		permission: permission.kpi
+	} );
+
+	var kpi_group = new RibbonSubMenu( {
+		label: $.i18n._( 'KPI<br>Groups' ),
+		id: 'KPIGroup',
+		group: reviewsSubMenuGroup,
+		icon: 'KPI_groups-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'KPIGroup' ),
+		permission: permission.kpi
+	} );
+
+	//Qualifications group
+	var qualificationSubMenuGroup = new RibbonSubMenuGroup( {
+		label: $.i18n._( 'Qualifications' ),
+		id: 'qualificationGroup',
+		ribbon_menu: hr_menu,
+		sub_menus: []
+	} );
+
+	var qualification = new RibbonSubMenu( {
+		label: $.i18n._( 'Qualifications' ),
+		id: 'Qualification',
+		group: qualificationSubMenuGroup,
+		icon: 'qualifications.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'Qualification' ),
+		permission: permission.qualification
+	} );
+
+	var qualification_group = new RibbonSubMenu( {
+		label: $.i18n._( 'Qualification<br>Groups' ),
+		id: 'QualificationGroup',
+		group: qualificationSubMenuGroup,
+		icon: 'qualification_groups-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'QualificationGroup' ),
+		permission: permission.qualification
+	} );
+
+	var user_skill = new RibbonSubMenu( {
+		label: $.i18n._( 'Skills' ),
+		id: 'UserSkill',
+		group: qualificationSubMenuGroup,
+		icon: 'skill-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'UserSkill' ),
+		permission: permission.user_skill
+	} );
+
+	var user_education = new RibbonSubMenu( {
+		label: $.i18n._( 'Education' ),
+		id: 'UserEducation',
+		group: qualificationSubMenuGroup,
+		icon: 'education-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'UserEducation' ),
+		permission: permission.user_education
+	} );
+
+	var user_membership = new RibbonSubMenu( {
+		label: $.i18n._( 'Memberships' ),
+		id: 'UserMembership',
+		group: qualificationSubMenuGroup,
+		icon: 'memberships.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'UserMembership' ),
+		permission: permission.user_membership
+	} );
+
+	var user_license = new RibbonSubMenu( {
+		label: $.i18n._( 'Licenses' ),
+		id: 'UserLicense',
+		group: qualificationSubMenuGroup,
+		icon: 'license-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'UserLicense' ),
+		permission: permission.user_license
+	} );
+
+	var user_language = new RibbonSubMenu( {
+		label: $.i18n._( 'Languages' ),
+		id: 'UserLanguage',
+		group: qualificationSubMenuGroup,
+		icon: 'languages-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'UserLanguage' ),
+		permission: permission.user_language
+	} );
+
+	// Recruitment group
+	var recruitmentSubMenuGroup = new RibbonSubMenuGroup( {
+		label: $.i18n._( 'Recruitment' ),
+		id: 'recruitmentGroup',
+		ribbon_menu: hr_menu,
+		sub_menus: []
+	} );
+
+	var job_vacancy = new RibbonSubMenu( {
+		label: $.i18n._( 'Job<br>Vacancies' ),
+		id: 'PortalJobVacancy',
+		group: recruitmentSubMenuGroup,
+		icon: 'job_vacancies-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'JobVacancy' ),
+		permission: permission.job_vacancy
+	} );
+
+	var job_applicant = new RibbonSubMenu( {
+		label: $.i18n._( 'Job<br>Applicants' ),
+		id: 'JobApplicant',
+		group: recruitmentSubMenuGroup,
+		icon: 'job_applicant-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'JobApplicant' ),
+		permission: permission.job_applicant
+	} );
+
+	var job_application = new RibbonSubMenu( {
+		label: $.i18n._( 'Job<br>Applications' ),
+		id: 'JobApplication',
+		group: recruitmentSubMenuGroup,
+		icon: 'jobapplications-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'JobApplication' ),
+		permission: permission.job_application
+	} );
+
+	//My Account group
+
+	var my_account_menu = new RibbonMenu( {
+		label: $.i18n._( 'My Account' ),
+		id: 'myAccountMenu',
+		sub_menu_groups: []
+	} );
+
+	var logoutGroup = new RibbonSubMenuGroup( {
+		label: $.i18n._( 'Logout' ),
+		id: 'logoutGroup',
+		ribbon_menu: my_account_menu,
+		sub_menus: []
+	} );
+
+	var logout = new RibbonSubMenu( {
+		label: $.i18n._( 'Logout' ),
+		id: 'PortalLogout',
+		group: logoutGroup,
+		icon: 'logout-35x35.png',
+		permission_result: true,
+		permission: true
+	} );
+
+	TopMenuManager.ribbon_menus = [hr_menu, my_account_menu];
+
+}
+
 TopMenuManager.buildRibbonMenuModels = function() {
 
 	var permission = PermissionManager.getPermissionData();
+
+	//Error: TypeError: null is not an object (evaluating 'permission.punch') in https://ondemand1.timetrex.com/interface/html5/global/TopMenuManager.js?v=8.0.0-20141230-130626 line 280
+	if ( !permission ) {
+		permission = {};
+	}
 
 	//Attendance Menu
 	var attendance_menu = new RibbonMenu( {
 		label: $.i18n._( 'Attendance' ),
 		id: 'attendance_menu',
-		sub_menu_groups: []} );
+		sub_menu_groups: []
+	} );
 
 	//Attendance group
 	var attendanceSubMenuGroup = new RibbonSubMenuGroup( {
 		label: $.i18n._( 'Attendance' ),
 		id: 'attendanceGroup',
 		ribbon_menu: attendance_menu,
-		sub_menus: []} );
+		sub_menus: []
+	} );
 
 	//Attendance Group Sub Menu
 	var inout = new RibbonSubMenu( {
@@ -68,14 +274,16 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: attendanceSubMenuGroup,
 		icon: 'clock_in_out-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'InOut' ),
-		permission: permission.punch} );
+		permission: permission.punch
+	} );
 	var timesheet = new RibbonSubMenu( {
 		label: $.i18n._( 'TimeSheet' ),
 		id: 'TimeSheet',
 		group: attendanceSubMenuGroup,
 		icon: 'timesheet-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'TimeSheet' ),
-		permission: permission.punch} );
+		permission: permission.punch
+	} );
 
 	var punches = new RibbonSubMenu( {
 		label: $.i18n._( 'Punches' ),
@@ -83,7 +291,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: attendanceSubMenuGroup,
 		icon: 'punches-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'Punches' ),
-		permission: permission.punch} );
+		permission: permission.punch
+	} );
 
 	var exceptions = new RibbonSubMenu( {
 		label: $.i18n._( 'Exceptions' ),
@@ -91,7 +300,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: attendanceSubMenuGroup,
 		icon: 'exceptions-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'Exception' ),
-		permission: permission.punch} );
+		permission: permission.punch
+	} );
 
 	var accrual_balance = new RibbonSubMenu( {
 		label: $.i18n._( 'Accrual<br>Balances' ),
@@ -99,7 +309,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: attendanceSubMenuGroup,
 		icon: 'accrual_balance-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'AccrualBalance' ),
-		permission: permission.accrual} );
+		permission: permission.accrual
+	} );
 
 	var accrual = new RibbonSubMenu( {
 		label: $.i18n._( 'Accruals' ),
@@ -107,14 +318,16 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: attendanceSubMenuGroup,
 		icon: 'accrual-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'Accrual' ),
-		permission: permission.accrual} );
+		permission: permission.accrual
+	} );
 
 	//Schedule group
 	var scheduleSubMenuGroup = new RibbonSubMenuGroup( {
 		label: $.i18n._( 'Schedule' ),
 		id: 'scheduleGroup',
 		ribbon_menu: attendance_menu,
-		sub_menus: []} );
+		sub_menus: []
+	} );
 
 	var schedule = new RibbonSubMenu( {
 		label: $.i18n._( 'Schedules' ),
@@ -122,7 +335,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: scheduleSubMenuGroup,
 		icon: 'schedule-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'Schedule' ),
-		permission: permission.schedule} );
+		permission: permission.schedule
+	} );
 
 	var schedule_shift = new RibbonSubMenu( {
 		label: $.i18n._( 'Scheduled<br>Shifts' ),
@@ -130,7 +344,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: scheduleSubMenuGroup,
 		icon: 'scheduled_shifts-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'ScheduleShift' ),
-		permission: permission.schedule} );
+		permission: permission.schedule
+	} );
 
 	var recurring_schedule_control = new RibbonSubMenu( {
 		label: $.i18n._( 'Recurring<br>Schedules' ),
@@ -138,7 +353,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: scheduleSubMenuGroup,
 		icon: 'recurring_schedule-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'RecurringScheduleControl' ),
-		permission: permission.recurring_schedule} );
+		permission: permission.recurring_schedule
+	} );
 
 	var recurring_schedule_template_control = new RibbonSubMenu( {
 		label: $.i18n._( 'Recurring<br>Templates' ),
@@ -146,7 +362,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: scheduleSubMenuGroup,
 		icon: 'recurring_template-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'RecurringScheduleTemplateControl' ),
-		permission: permission.recurring_schedule_template} );
+		permission: permission.recurring_schedule_template
+	} );
 
 	//Job Trancking group
 	var jobTrackingSubMenuGroup = new RibbonSubMenuGroup( {
@@ -241,7 +458,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: employeeSubMenuGroup,
 		icon: 'wages-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'Wage' ),
-		permission: permission.wage} );
+		permission: permission.wage
+	} );
 
 	var bank_account = new RibbonSubMenu( {
 		label: $.i18n._( 'Bank<br>Accounts' ),
@@ -304,19 +522,22 @@ TopMenuManager.buildRibbonMenuModels = function() {
 	var company_menu = new RibbonMenu( {
 		label: $.i18n._( 'Company' ),
 		id: 'company_menu',
-		sub_menu_groups: []} );
+		sub_menu_groups: []
+	} );
 
 	var companySubMenuGroup = new RibbonSubMenuGroup( {
 		label: $.i18n._( 'Company' ),
 		id: 'companyGroup',
 		ribbon_menu: company_menu,
-		sub_menus: []} );
+		sub_menus: []
+	} );
 
 	var companySubMenuOtherGroup = new RibbonSubMenuGroup( {
 		label: $.i18n._( 'Other' ),
 		id: 'companyOtherGroup',
 		ribbon_menu: company_menu,
-		sub_menus: []} );
+		sub_menus: []
+	} );
 
 	var companies = new RibbonSubMenu( {
 		label: $.i18n._( 'Companies' ),
@@ -324,7 +545,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: companySubMenuGroup,
 		icon: 'companies-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'Companies' ),
-		permission: permission.company} );
+		permission: permission.company
+	} );
 
 	var company = new RibbonSubMenu( {
 		label: $.i18n._( 'Company<br>Information' ),
@@ -332,7 +554,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: companySubMenuGroup,
 		icon: 'company_information-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'Company' ),
-		permission: permission.company} );
+		permission: permission.company
+	} );
 
 	var pay_period_schedule = new RibbonSubMenu( {
 		label: $.i18n._( 'Pay Period<br>Schedules' ),
@@ -340,7 +563,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: companySubMenuGroup,
 		icon: 'pay_period_schedules-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'PayPeriodSchedule' ),
-		permission: permission.pay_period_schedule} );
+		permission: permission.pay_period_schedule
+	} );
 
 	var branch = new RibbonSubMenu( {
 		label: $.i18n._( 'Branches' ),
@@ -444,21 +668,24 @@ TopMenuManager.buildRibbonMenuModels = function() {
 	var payroll_menu = new RibbonMenu( {
 		label: $.i18n._( 'Payroll' ),
 		id: 'payroll_menu',
-		sub_menu_groups: []} );
+		sub_menu_groups: []
+	} );
 
 	var payrollSubMenuGroup = new RibbonSubMenuGroup( {
 		label: $.i18n._( 'Payroll' ),
 		id: 'payrollGroup',
 		ribbon_menu: payroll_menu,
-		sub_menus: []} );
+		sub_menus: []
+	} );
 
 	var process_payroll = new RibbonSubMenu( {
 		label: $.i18n._( 'Process<br>Payroll' ),
 		id: 'ProcessPayrollWizard',
 		group: payrollSubMenuGroup,
 		icon: Icons.process_payroll,
-		permission_result: PermissionManager.checkTopLevelPermission( 'PayPeriodSchedule' ),
-		permission: permission.pay_period_schedule} );
+		permission_result: PermissionManager.checkTopLevelPermission( 'PayrollProcessWizard' ),
+		permission: permission.pay_stub
+	} );
 
 	var pay_stub = new RibbonSubMenu( {
 		label: $.i18n._( 'Pay<br>Stubs' ),
@@ -466,7 +693,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: payrollSubMenuGroup,
 		icon: 'pay_stubs-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'PayStub' ),
-		permission: permission.pay_stub} );
+		permission: permission.pay_stub
+	} );
 
 	var pay_periods = new RibbonSubMenu( {
 		label: $.i18n._( 'Pay<br>Periods' ),
@@ -474,7 +702,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: payrollSubMenuGroup,
 		icon: 'pay_periods-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'PayPeriods' ),
-		permission: permission.pay_period_schedule} );
+		permission: permission.pay_period_schedule
+	} );
 
 	var pay_stub_amendment = new RibbonSubMenu( {
 		label: $.i18n._( 'Pay Stub<br>Amendments' ),
@@ -482,7 +711,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: payrollSubMenuGroup,
 		icon: 'pay_stub_amendments-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'PayStubAmendment' ),
-		permission: permission.pay_stub_amendment} );
+		permission: permission.pay_stub_amendment
+	} );
 
 	var recurring_pay_stub_amendment = new RibbonSubMenu( {
 		label: $.i18n._( 'Recurring PS<br>Amendments' ),
@@ -490,7 +720,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: payrollSubMenuGroup,
 		icon: 'recurring_pay_stub_amendments-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'RecurringPayStubAmendment' ),
-		permission: permission.pay_stub_amendment} );
+		permission: permission.pay_stub_amendment
+	} );
 
 	var pay_period_schedule_1 = new RibbonSubMenu( {
 		label: $.i18n._( 'Pay Period<br>Schedules' ),
@@ -498,7 +729,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: payrollSubMenuGroup,
 		icon: 'pay_period_schedules-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'PayPeriodSchedule' ),
-		permission: permission.pay_period_schedule} );
+		permission: permission.pay_period_schedule
+	} );
 
 	var pay_stub_entry_account = new RibbonSubMenu( {
 		label: $.i18n._( 'Pay Stub<br>Accounts' ),
@@ -506,7 +738,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: payrollSubMenuGroup,
 		icon: 'pay_stubs_accounts-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'PayStubEntryAccount' ),
-		permission: permission.pay_stub_account} );
+		permission: permission.pay_stub_account
+	} );
 
 	var company_tax_deduction = new RibbonSubMenu( {
 		label: $.i18n._( 'Taxes &<br>Deductions' ),
@@ -514,7 +747,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: payrollSubMenuGroup,
 		icon: 'taxes_deductions-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'CompanyTaxDeduction' ),
-		permission: permission.company_tax_deduction} );
+		permission: permission.company_tax_deduction
+	} );
 
 	var user_expense = new RibbonSubMenu( {
 		label: $.i18n._( 'Expenses' ),
@@ -522,28 +756,91 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: payrollSubMenuGroup,
 		icon: 'expenses-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'UserExpense' ),
-		permission: permission.user_expense} );
-
-	// Policy Group
+		permission: permission.user_expense
+	} );
 
 	var policy_menu = new RibbonMenu( {
 		label: $.i18n._( 'Policy' ),
 		id: 'policy_menu',
-		sub_menu_groups: []} );
+		sub_menu_groups: []
+	} );
+
+	var policyBuildingBlocksSubMenuGroup = new RibbonSubMenuGroup( {
+		label: $.i18n._( 'Policy Building Blocks' ),
+		id: 'policyBuildingBlocks',
+		ribbon_menu: policy_menu,
+		sub_menus: []
+	} );
+
+	var policy_group = new RibbonSubMenu( {
+		label: $.i18n._( 'Policy<br>Groups' ),
+		id: 'PolicyGroup',
+		group: policyBuildingBlocksSubMenuGroup,
+		icon: 'policy_groups-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'PolicyGroup' ),
+		permission: permission.policy_group
+	} );
+
+	var policy_group = new RibbonSubMenu( {
+		label: $.i18n._( 'Pay<br>Codes' ),
+		id: 'PayCode',
+		group: policyBuildingBlocksSubMenuGroup,
+		icon: 'pay_code-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'PayCode' ),
+		permission: permission.pay_code
+	} );
+
+	var policy_group = new RibbonSubMenu( {
+		label: $.i18n._( 'Pay<br>Formulas' ),
+		id: 'PayFormulaPolicy',
+		group: policyBuildingBlocksSubMenuGroup,
+		icon: 'pay_formula_policy-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'PayFormulaPolicy' ),
+		permission: permission.pay_formula_policy
+	} );
+
+	var policy_group = new RibbonSubMenu( {
+		label: $.i18n._( 'Contributing<br>Pay Codes' ),
+		id: 'ContributingPayCodePolicy',
+		group: policyBuildingBlocksSubMenuGroup,
+		icon: 'contributing_policies-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'ContributingPayCodePolicy' ),
+		permission: permission.contributing_pay_code_policy
+	} );
+
+	var policy_group = new RibbonSubMenu( {
+		label: $.i18n._( 'Contributing<br>Shifts' ),
+		id: 'ContributingShiftPolicy',
+		group: policyBuildingBlocksSubMenuGroup,
+		icon: 'contributing_shift_policy-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'ContributingShiftPolicy' ),
+		permission: permission.contributing_shift_policy
+	} );
+
+	var accrual_policy_account = new RibbonSubMenu( {
+		label: $.i18n._( 'Accrual<br>Accounts' ),
+		id: 'AccrualPolicyAccount',
+		group: policyBuildingBlocksSubMenuGroup,
+		icon: 'accrual_accounts-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'AccrualPolicy' ),
+		permission: permission.accrual_policy
+	} );
+
+	var recurring_holiday = new RibbonSubMenu( {
+		label: $.i18n._( 'Recurring<br>Holidays' ),
+		id: 'RecurringHoliday',
+		group: policyBuildingBlocksSubMenuGroup,
+		icon: 'recurring_holidays-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'RecurringHoliday' ),
+		permission: permission.holiday_policy
+	} );
 
 	var policySubMenuGroup = new RibbonSubMenuGroup( {
 		label: $.i18n._( 'Policy' ),
 		id: 'policyGroup',
 		ribbon_menu: policy_menu,
-		sub_menus: []} );
-
-	var policy_group = new RibbonSubMenu( {
-		label: $.i18n._( 'Policy<br>Groups' ),
-		id: 'PolicyGroup',
-		group: policySubMenuGroup,
-		icon: 'policy_groups-35x35.png',
-		permission_result: PermissionManager.checkTopLevelPermission( 'PolicyGroup' ),
-		permission: permission.policy_group} );
+		sub_menus: []
+	} );
 
 	var schedule_policy = new RibbonSubMenu( {
 		label: $.i18n._( 'Schedule<br>Policies' ),
@@ -551,7 +848,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: policySubMenuGroup,
 		icon: 'schedule_policies-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'SchedulePolicy' ),
-		permission: permission.schedule_policy} );
+		permission: permission.schedule_policy
+	} );
 
 	var round_interval_policy = new RibbonSubMenu( {
 		label: $.i18n._( 'Rounding<br>Policies' ),
@@ -559,7 +857,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: policySubMenuGroup,
 		icon: 'rounding_policies-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'RoundIntervalPolicy' ),
-		permission: permission.round_policy} );
+		permission: permission.round_policy
+	} );
 
 	var meal_policy = new RibbonSubMenu( {
 		label: $.i18n._( 'Meal<br>Policies' ),
@@ -567,7 +866,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: policySubMenuGroup,
 		icon: 'meal_policies-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'MealPolicy' ),
-		permission: permission.meal_policy} );
+		permission: permission.meal_policy
+	} );
 
 	var break_policy = new RibbonSubMenu( {
 		label: $.i18n._( 'Break<br>Policies' ),
@@ -575,7 +875,17 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: policySubMenuGroup,
 		icon: 'break_policies-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'BreakPolicy' ),
-		permission: permission.break_policy} );
+		permission: permission.break_policy
+	} );
+
+	var policy_group = new RibbonSubMenu( {
+		label: $.i18n._( 'Regular Time<br> Policies' ),
+		id: 'RegularTimePolicy',
+		group: policySubMenuGroup,
+		icon: 'regular_time_policies-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'RegularTimePolicy' ),
+		permission: permission.regular_time_policy
+	} );
 
 	var overtime_policy = new RibbonSubMenu( {
 		label: $.i18n._( 'Overtime<br>Policies' ),
@@ -583,7 +893,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: policySubMenuGroup,
 		icon: 'overtime_policies-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'OvertimePolicy' ),
-		permission: permission.over_time_policy} );
+		permission: permission.over_time_policy
+	} );
 
 	var premium_policy = new RibbonSubMenu( {
 		label: $.i18n._( 'Premium<br>Policies' ),
@@ -591,7 +902,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: policySubMenuGroup,
 		icon: 'premium_policies-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'PremiumPolicy' ),
-		permission: permission.premium_policy} );
+		permission: permission.premium_policy
+	} );
 
 	var exception_policy = new RibbonSubMenu( {
 		label: $.i18n._( 'Exception<br>Policies' ),
@@ -599,7 +911,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: policySubMenuGroup,
 		icon: 'exceptions_policies-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'ExceptionPolicyControl' ),
-		permission: permission.exception_policy} );
+		permission: permission.exception_policy
+	} );
 
 	var accrual_policy = new RibbonSubMenu( {
 		label: $.i18n._( 'Accrual<br>Policies' ),
@@ -607,7 +920,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: policySubMenuGroup,
 		icon: 'accrual_policies-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'AccrualPolicy' ),
-		permission: permission.accrual_policy} );
+		permission: permission.accrual_policy
+	} );
 
 	var absence_policy = new RibbonSubMenu( {
 		label: $.i18n._( 'Absence<br>Policies' ),
@@ -615,7 +929,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: policySubMenuGroup,
 		icon: 'absence_policies-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'AbsencePolicy' ),
-		permission: permission.absence_policy} );
+		permission: permission.absence_policy
+	} );
 
 	var expense_policy = new RibbonSubMenu( {
 		label: $.i18n._( 'Expense<br>Policies' ),
@@ -623,7 +938,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: policySubMenuGroup,
 		icon: 'expense_policies-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'ExpensePolicy' ),
-		permission: permission.expense_policy} );
+		permission: permission.expense_policy
+	} );
 
 	var holiday_policy = new RibbonSubMenu( {
 		label: $.i18n._( 'Holiday<br>Policies' ),
@@ -631,45 +947,43 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: policySubMenuGroup,
 		icon: 'holiday_policies-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'HolidayPolicy' ),
-		permission: permission.holiday_policy} );
-
-	var recurring_holiday = new RibbonSubMenu( {
-		label: $.i18n._( 'Recurring<br>Holidays' ),
-		id: 'RecurringHoliday',
-		group: policySubMenuGroup,
-		icon: 'recurring_holidays-35x35.png',
-		permission_result: PermissionManager.checkTopLevelPermission( 'RecurringHoliday' ),
-		permission: permission.holiday_policy} );
+		permission: permission.holiday_policy
+	} );
 
 	// Invoice group
 	var invoice_menu = new RibbonMenu( {
 		label: $.i18n._( 'Invoice' ),
 		id: 'invoiceMenu',
-		sub_menu_groups: []} );
+		sub_menu_groups: []
+	} );
 
 	var invoiceGroup = new RibbonSubMenuGroup( {
 		label: $.i18n._( 'Invoice' ),
 		id: 'invoiceGroup',
 		ribbon_menu: invoice_menu,
-		sub_menus: []} );
+		sub_menus: []
+	} );
 
 	var groups = new RibbonSubMenuGroup( {
 		label: $.i18n._( 'Groups' ),
 		id: 'groups',
 		ribbon_menu: invoice_menu,
-		sub_menus: []} );
+		sub_menus: []
+	} );
 
 	var invoice_policies = new RibbonSubMenuGroup( {
 		label: $.i18n._( 'Policies' ),
 		id: 'invoicePolicies',
 		ribbon_menu: invoice_menu,
-		sub_menus: []} );
+		sub_menus: []
+	} );
 
 	var invoice_settings = new RibbonSubMenuGroup( {
 		label: $.i18n._( 'Settings' ),
 		id: 'invoiceSettings',
 		ribbon_menu: invoice_menu,
-		sub_menus: []} );
+		sub_menus: []
+	} );
 
 	var client = new RibbonSubMenu( {
 		label: $.i18n._( 'Clients' ),
@@ -677,7 +991,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: invoiceGroup,
 		icon: 'clients-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'Client' ),
-		permission: permission.client} );
+		permission: permission.client
+	} );
 
 	var client_contact = new RibbonSubMenu( {
 		label: $.i18n._( 'Client<br>Contacts' ),
@@ -685,7 +1000,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: invoiceGroup,
 		icon: 'clients_contacts-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'ClientContact' ),
-		permission: permission.client} );
+		permission: permission.client
+	} );
 
 	var invoice = new RibbonSubMenu( {
 		label: $.i18n._( 'Invoices' ),
@@ -693,7 +1009,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: invoiceGroup,
 		icon: 'invoices-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'Invoice' ),
-		permission: permission.invoice} );
+		permission: permission.invoice
+	} );
 
 	var invoice_transaction = new RibbonSubMenu( {
 		label: $.i18n._( 'Transactions' ),
@@ -701,7 +1018,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: invoiceGroup,
 		icon: 'transactions-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'InvoiceTransaction' ),
-		permission: permission.transaction} );
+		permission: permission.transaction
+	} );
 
 	var client_payment = new RibbonSubMenu( {
 		label: $.i18n._( 'Payment<br>Methods' ),
@@ -709,7 +1027,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: invoiceGroup,
 		icon: 'payment_methods-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'ClientPayment' ),
-		permission: permission.client_payment} );
+		permission: permission.client_payment
+	} );
 
 	var products = new RibbonSubMenu( {
 		label: $.i18n._( 'Products' ),
@@ -717,7 +1036,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: invoiceGroup,
 		icon: 'products-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'Product' ),
-		permission: permission.product} );
+		permission: permission.product
+	} );
 
 	var district = new RibbonSubMenu( {
 		label: $.i18n._( 'District' ),
@@ -725,7 +1045,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: invoiceGroup,
 		icon: 'district-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'InvoiceDistrict' ),
-		permission: permission.client} );
+		permission: permission.client
+	} );
 
 	var client_group = new RibbonSubMenu( {
 		label: $.i18n._( 'Client' ),
@@ -733,7 +1054,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: groups,
 		icon: 'client_groups-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'Client' ),
-		permission: permission.client_payment} );
+		permission: permission.client_payment
+	} );
 
 	var product_group = new RibbonSubMenu( {
 		label: $.i18n._( 'Product' ),
@@ -741,7 +1063,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: groups,
 		icon: 'product_groups-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'Product' ),
-		permission: permission.client_payment} );
+		permission: permission.client_payment
+	} );
 
 	var tax_policy = new RibbonSubMenu( {
 		label: $.i18n._( 'Tax' ),
@@ -749,7 +1072,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: invoice_policies,
 		icon: 'tax_policies-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'TaxPolicy' ),
-		permission: permission.client_payment} );
+		permission: permission.client_payment
+	} );
 
 	var shipping_policy = new RibbonSubMenu( {
 		label: $.i18n._( 'Shipping' ),
@@ -757,7 +1081,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: invoice_policies,
 		icon: 'shipping_policies-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'ShippingPolicy' ),
-		permission: permission.client_payment} );
+		permission: permission.client_payment
+	} );
 
 	var area_policy = new RibbonSubMenu( {
 		label: $.i18n._( 'Area' ),
@@ -765,7 +1090,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: invoice_policies,
 		icon: 'area_policies-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'AreaPolicy' ),
-		permission: permission.client_payment} );
+		permission: permission.client_payment
+	} );
 
 	var payment_gateway = new RibbonSubMenu( {
 		label: $.i18n._( 'Payment<br>Gateway' ),
@@ -773,7 +1099,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: invoice_settings,
 		icon: 'payment_gateway_settings-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'PaymentGateway' ),
-		permission: permission.client_payment} );
+		permission: permission.client_payment
+	} );
 
 	var settings = new RibbonSubMenu( {
 		label: $.i18n._( 'Settings' ),
@@ -781,20 +1108,23 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: invoice_settings,
 		icon: 'settings-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'InvoiceConfig' ),
-		permission: permission.client_payment} );
+		permission: permission.client_payment
+	} );
 
 	//HR Menu
 	var hr_menu = new RibbonMenu( {
 		label: $.i18n._( 'HR' ),
 		id: 'hr_menu',
-		sub_menu_groups: []} );
+		sub_menu_groups: []
+	} );
 
 	//reviews group
 	var reviewsSubMenuGroup = new RibbonSubMenuGroup( {
 		label: $.i18n._( 'Reviews' ),
 		id: 'reviewsGroup',
 		ribbon_menu: hr_menu,
-		sub_menus: []} );
+		sub_menus: []
+	} );
 
 	//reviews Group Sub Menu
 	var user_review_control = new RibbonSubMenu( {
@@ -803,7 +1133,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: reviewsSubMenuGroup,
 		icon: 'reviews-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'UserReviewControl' ),
-		permission: permission.user_review} );
+		permission: permission.user_review
+	} );
 
 	var kpi = new RibbonSubMenu( {
 		label: $.i18n._( 'KPI' ),
@@ -811,7 +1142,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: reviewsSubMenuGroup,
 		icon: 'KPI-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'KPI' ),
-		permission: permission.kpi} );
+		permission: permission.kpi
+	} );
 
 	var kpi_group = new RibbonSubMenu( {
 		label: $.i18n._( 'KPI<br>Groups' ),
@@ -819,14 +1151,16 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: reviewsSubMenuGroup,
 		icon: 'KPI_groups-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'KPIGroup' ),
-		permission: permission.kpi} );
+		permission: permission.kpi
+	} );
 
 	//Qualifications group
 	var qualificationSubMenuGroup = new RibbonSubMenuGroup( {
 		label: $.i18n._( 'Qualifications' ),
 		id: 'qualificationGroup',
 		ribbon_menu: hr_menu,
-		sub_menus: []} );
+		sub_menus: []
+	} );
 
 	var qualification = new RibbonSubMenu( {
 		label: $.i18n._( 'Qualifications' ),
@@ -834,7 +1168,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: qualificationSubMenuGroup,
 		icon: 'qualifications.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'Qualification' ),
-		permission: permission.qualification} );
+		permission: permission.qualification
+	} );
 
 	var qualification_group = new RibbonSubMenu( {
 		label: $.i18n._( 'Qualification<br>Groups' ),
@@ -842,7 +1177,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: qualificationSubMenuGroup,
 		icon: 'qualification_groups-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'QualificationGroup' ),
-		permission: permission.qualification} );
+		permission: permission.qualification
+	} );
 
 	var user_skill = new RibbonSubMenu( {
 		label: $.i18n._( 'Skills' ),
@@ -850,7 +1186,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: qualificationSubMenuGroup,
 		icon: 'skill-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'UserSkill' ),
-		permission: permission.user_skill} );
+		permission: permission.user_skill
+	} );
 
 	var user_education = new RibbonSubMenu( {
 		label: $.i18n._( 'Education' ),
@@ -858,7 +1195,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: qualificationSubMenuGroup,
 		icon: 'education-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'UserEducation' ),
-		permission: permission.user_education} );
+		permission: permission.user_education
+	} );
 
 	var user_membership = new RibbonSubMenu( {
 		label: $.i18n._( 'Memberships' ),
@@ -866,7 +1204,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: qualificationSubMenuGroup,
 		icon: 'memberships.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'UserMembership' ),
-		permission: permission.user_membership} );
+		permission: permission.user_membership
+	} );
 
 	var user_license = new RibbonSubMenu( {
 		label: $.i18n._( 'Licenses' ),
@@ -874,7 +1213,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: qualificationSubMenuGroup,
 		icon: 'license-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'UserLicense' ),
-		permission: permission.user_license} );
+		permission: permission.user_license
+	} );
 
 	var user_language = new RibbonSubMenu( {
 		label: $.i18n._( 'Languages' ),
@@ -882,14 +1222,16 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: qualificationSubMenuGroup,
 		icon: 'languages-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'UserLanguage' ),
-		permission: permission.user_language} );
+		permission: permission.user_language
+	} );
 
 	// Recruitment group
 	var recruitmentSubMenuGroup = new RibbonSubMenuGroup( {
 		label: $.i18n._( 'Recruitment' ),
 		id: 'recruitmentGroup',
 		ribbon_menu: hr_menu,
-		sub_menus: []} );
+		sub_menus: []
+	} );
 
 	var job_vacancy = new RibbonSubMenu( {
 		label: $.i18n._( 'Job<br>Vacancies' ),
@@ -897,7 +1239,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: recruitmentSubMenuGroup,
 		icon: 'job_vacancies-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'JobVacancy' ),
-		permission: permission.job_vacancy} );
+		permission: permission.job_vacancy
+	} );
 
 	var job_applicant = new RibbonSubMenu( {
 		label: $.i18n._( 'Job<br>Applicants' ),
@@ -905,7 +1248,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: recruitmentSubMenuGroup,
 		icon: 'job_applicant-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'JobApplicant' ),
-		permission: permission.job_applicant} );
+		permission: permission.job_applicant
+	} );
 
 	var job_application = new RibbonSubMenu( {
 		label: $.i18n._( 'Job<br>Applications' ),
@@ -913,44 +1257,51 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: recruitmentSubMenuGroup,
 		icon: 'jobapplications-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'JobApplication' ),
-		permission: permission.job_application} );
+		permission: permission.job_application
+	} );
 
 	//My Account group
 
 	var my_account_menu = new RibbonMenu( {
 		label: $.i18n._( 'My Account' ),
 		id: 'myAccountMenu',
-		sub_menu_groups: []} );
+		sub_menu_groups: []
+	} );
 
 	var myAccountGroup = new RibbonSubMenuGroup( {
 		label: $.i18n._( 'MyAccount' ),
 		id: 'myAccountGroup',
 		ribbon_menu: my_account_menu,
-		sub_menus: []} );
+		sub_menus: []
+	} );
 
 	var authorization = new RibbonSubMenuGroup( {
 		label: $.i18n._( 'Authorization' ),
 		id: 'myAccountGroup',
 		ribbon_menu: my_account_menu,
-		sub_menus: []} );
+		sub_menus: []
+	} );
 
 	var documentsGroup = new RibbonSubMenuGroup( {
 		label: $.i18n._( 'Documents' ),
 		id: 'documentsGroup',
 		ribbon_menu: my_account_menu,
-		sub_menus: []} );
+		sub_menus: []
+	} );
 
 	var securityGroup = new RibbonSubMenuGroup( {
 		label: $.i18n._( 'Security' ),
 		id: 'securityGroup',
 		ribbon_menu: my_account_menu,
-		sub_menus: []} );
+		sub_menus: []
+	} );
 
 	var logoutGroup = new RibbonSubMenuGroup( {
 		label: $.i18n._( 'Logout' ),
 		id: 'logoutGroup',
 		ribbon_menu: my_account_menu,
-		sub_menus: []} );
+		sub_menus: []
+	} );
 
 	var logout = new RibbonSubMenu( {
 		label: $.i18n._( 'Logout' ),
@@ -958,7 +1309,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: logoutGroup,
 		icon: 'logout-35x35.png',
 		permission_result: true,
-		permission: true} );
+		permission: true
+	} );
 
 	var document = new RibbonSubMenu( {
 		label: $.i18n._( 'Documents' ),
@@ -966,7 +1318,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: documentsGroup,
 		icon: 'documents-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'Document' ),
-		permission: permission.document} );
+		permission: permission.document
+	} );
 
 	var document_group = new RibbonSubMenu( {
 		label: $.i18n._( 'Document<br>Groups' ),
@@ -974,7 +1327,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: documentsGroup,
 		icon: 'document_groups-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'DocumentGroup' ),
-		permission: permission.document} );
+		permission: permission.document
+	} );
 
 	var request = new RibbonSubMenu( {
 		label: $.i18n._( 'Requests' ),
@@ -982,7 +1336,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: myAccountGroup,
 		icon: 'requests-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'Request' ),
-		permission: permission.request} );
+		permission: permission.request
+	} );
 
 	var message_control = new RibbonSubMenu( {
 		label: $.i18n._( 'Messages' ),
@@ -990,7 +1345,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: myAccountGroup,
 		icon: 'messages-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'MessageControl' ),
-		permission: permission.message} );
+		permission: permission.message
+	} );
 
 	var login_user_contact = new RibbonSubMenu( {
 		label: $.i18n._( 'Contact<br>Information' ),
@@ -998,7 +1354,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: myAccountGroup,
 		icon: 'contact_information-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'LoginUserContact' ),
-		permission: permission.user} );
+		permission: permission.user
+	} );
 
 	var login_user_bank_account = new RibbonSubMenu( {
 		label: $.i18n._( 'Bank<br>Information' ),
@@ -1006,7 +1363,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: myAccountGroup,
 		icon: 'bank_accounts-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'LoginUserBankAccount' ),
-		permission: permission.user} );
+		permission: permission.user
+	} );
 
 	var login_user_preference = new RibbonSubMenu( {
 		label: $.i18n._( 'Preferences' ),
@@ -1014,7 +1372,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: myAccountGroup,
 		icon: 'preferences-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'LoginUserPreference' ),
-		permission: permission.user_preference} );
+		permission: permission.user_preference
+	} );
 
 	var login_user_expense = new RibbonSubMenu( {
 		label: $.i18n._( 'Expenses' ),
@@ -1022,7 +1381,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: myAccountGroup,
 		icon: 'expenses-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'LoginUserExpense' ),
-		permission: permission.user_expense} );
+		permission: permission.user_expense
+	} );
 
 	var request_authorization = new RibbonSubMenu( {
 		label: $.i18n._( 'Request<br>Authorization' ),
@@ -1030,7 +1390,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: authorization,
 		icon: 'authorize_request-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'RequestAuthorization' ),
-		permission: permission.request} );
+		permission: permission.request
+	} );
 
 	var pay_period_time_sheet_verify = new RibbonSubMenu( {
 		label: $.i18n._( 'TimeSheet<br>Authorization' ),
@@ -1038,7 +1399,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: authorization,
 		icon: 'authorize_timesheet-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'RequestAuthorization' ),
-		permission: permission.punch} );
+		permission: permission.punch
+	} );
 
 	var expense_authorization = new RibbonSubMenu( {
 		label: $.i18n._( 'Expense<br>Authorizations' ),
@@ -1046,7 +1408,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: authorization,
 		icon: 'approved_expense-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'ExpenseAuthorization' ),
-		permission: permission.user_expense} );
+		permission: permission.user_expense
+	} );
 
 	var change_password = new RibbonSubMenu( {
 		label: $.i18n._( 'Passwords' ),
@@ -1054,20 +1417,23 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: securityGroup,
 		icon: 'passwords-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'ChangePassword' ),
-		permission: permission.user} );
+		permission: permission.user
+	} );
 
 	//Help group
 	var help_menu = new RibbonMenu( {
 		label: $.i18n._( 'Help' ),
 		id: 'helpMenu',
 		sub_menu_groups: [],
-		permission_result: PermissionManager.helpMenuValidate()} );
+		permission_result: PermissionManager.helpMenuValidate()
+	} );
 
 	var help_group = new RibbonSubMenuGroup( {
 		label: $.i18n._( 'Help' ),
 		id: 'helpGroup',
 		ribbon_menu: help_menu,
-		sub_menus: []} );
+		sub_menus: []
+	} );
 
 	var admin_guide = new RibbonSubMenu( {
 		label: $.i18n._( 'Administrator<br>Guide' ),
@@ -1075,7 +1441,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: help_group,
 		icon: 'administration_guide_manual-35x35.png',
 		permission_result: true,
-		permission: true} );
+		permission: true
+	} );
 
 	var faqs = new RibbonSubMenu( {
 		label: $.i18n._( 'FAQs' ),
@@ -1083,7 +1450,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: help_group,
 		icon: 'faq-35x35.png',
 		permission_result: true,
-		permission: true} );
+		permission: true
+	} );
 
 	var email_help = new RibbonSubMenu( {
 		label: $.i18n._( 'Email Help' ),
@@ -1091,7 +1459,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: help_group,
 		icon: 'emailhelp-35x35.png',
 		permission_result: true,
-		permission: true} );
+		permission: true
+	} );
 
 	var whats_new = new RibbonSubMenu( {
 		label: $.i18n._( "What's New" ),
@@ -1099,7 +1468,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: help_group,
 		icon: 'whats_new-35x35.png',
 		permission_result: true,
-		permission: true} );
+		permission: true
+	} );
 
 	var about = new RibbonSubMenu( {
 		label: $.i18n._( 'About' ),
@@ -1107,20 +1477,23 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: help_group,
 		icon: 'about-35x35.png',
 		permission_result: true,
-		permission: true} );
+		permission: true
+	} );
 
 	//Reports
 
 	var report_menu = new RibbonMenu( {
 		label: $.i18n._( 'Report' ),
 		id: 'reportMenu',
-		sub_menu_groups: []} );
+		sub_menu_groups: []
+	} );
 
 	var report_group = new RibbonSubMenuGroup( {
 		label: $.i18n._( 'Reports' ),
 		id: 'reportGroup',
 		ribbon_menu: report_menu,
-		sub_menus: []} );
+		sub_menus: []
+	} );
 
 	var employee_report = new RibbonSubMenu( {
 		label: $.i18n._( 'Employee<br>Reports' ),
@@ -1130,7 +1503,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		type: RibbonSubMenuType.NAVIGATION,
 		items: [],
 		permission_result: true,
-		permission: true} );
+		permission: true
+	} );
 
 	if ( PermissionManager.checkTopLevelPermission( 'ActiveShiftReport' ) ) {
 		var whos_in_summary = new RibbonSubMenuNavItem( {
@@ -1164,7 +1538,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		type: RibbonSubMenuType.NAVIGATION,
 		items: [],
 		permission_result: true,
-		permission: true} );
+		permission: true
+	} );
 
 	if ( PermissionManager.checkTopLevelPermission( 'ScheduleSummaryReport' ) ) {
 		var schedule_summary = new RibbonSubMenuNavItem( {
@@ -1222,7 +1597,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		type: RibbonSubMenuType.NAVIGATION,
 		items: [],
 		permission_result: true,
-		permission: true} );
+		permission: true
+	} );
 
 	if ( PermissionManager.checkTopLevelPermission( 'PayStubSummaryReport' ) ) {
 		var pay_stub_summary = new RibbonSubMenuNavItem( {
@@ -1264,7 +1640,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		type: RibbonSubMenuType.NAVIGATION,
 		items: [],
 		permission_result: true,
-		permission: true} );
+		permission: true
+	} );
 
 	if ( PermissionManager.checkTopLevelPermission( 'JobSummaryReport' ) ) {
 		var job_summary = new RibbonSubMenuNavItem( {
@@ -1306,7 +1683,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		type: RibbonSubMenuType.NAVIGATION,
 		items: [],
 		permission_result: true,
-		permission: true} );
+		permission: true
+	} );
 
 	if ( PermissionManager.checkTopLevelPermission( 'InvoiceTransactionSummaryReport' ) ) {
 		var invoice_transaction_summary = new RibbonSubMenuNavItem( {
@@ -1324,7 +1702,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		type: RibbonSubMenuType.NAVIGATION,
 		items: [],
 		permission_result: true,
-		permission: true} );
+		permission: true
+	} );
 
 	if ( PermissionManager.checkTopLevelPermission( 'RemittanceSummaryReport' ) ) {
 		var remittance_summary = new RibbonSubMenuNavItem( {
@@ -1406,7 +1785,8 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		type: RibbonSubMenuType.NAVIGATION,
 		items: [],
 		permission_result: true,
-		permission: true} );
+		permission: true
+	} );
 
 	if ( PermissionManager.checkTopLevelPermission( 'UserQualificationReport' ) ) {
 		var qualification_summary = new RibbonSubMenuNavItem( {
@@ -1446,8 +1826,9 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: report_group,
 		icon: 'saved_reports-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'SavedReport' ),
-		permission: permission.report} );
+		permission: permission.report
+	} );
 
-	TopMenuManager.ribbon_menus = [ attendance_menu, employee_menu, company_menu, payroll_menu, policy_menu, invoice_menu, hr_menu, report_menu, my_account_menu, help_menu  ];
+	TopMenuManager.ribbon_menus = [attendance_menu, employee_menu, company_menu, payroll_menu, policy_menu, invoice_menu, hr_menu, report_menu, my_account_menu, help_menu];
 
 };

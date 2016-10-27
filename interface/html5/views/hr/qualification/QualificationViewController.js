@@ -46,33 +46,30 @@ QualificationViewController = BaseViewController.extend( {
 	},
 
 	setTabStatus: function() {
-
+		//Handle most cases that one tab and on audit tab
 		if ( this.is_mass_editing ) {
 
-			$( this.edit_view_tab.find( 'ul li' )[1] ).hide();
-			$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
+			$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
+			$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
 			this.edit_view_tab.tabs( 'select', 0 );
 
 		} else {
-
 			if ( this.subDocumentValidate() ) {
-				$( this.edit_view_tab.find( 'ul li' )[1] ).show();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().show();
 			} else {
-				$( this.edit_view_tab.find( 'ul li' )[1] ).hide();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
 				this.edit_view_tab.tabs( 'select', 0 );
 			}
-
 			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li' )[2] ).show();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().show();
 			} else {
-				$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
 				this.edit_view_tab.tabs( 'select', 0 );
 			}
 
 		}
 
 		this.editFieldResize( 0 );
-
 	},
 
 	buildEditViewUI: function() {
@@ -81,12 +78,11 @@ QualificationViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		var tab_2_label = this.edit_view.find( 'a[ref=tab2]' );
-		tab_0_label.text( $.i18n._( 'Qualification' ) );
-		tab_1_label.text( $.i18n._( 'Attachments' ) );
-		tab_2_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_qualification': $.i18n._( 'Qualification' ),
+			'tab_attachment': $.i18n._( 'Attachments' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIQualification' )),
@@ -101,25 +97,27 @@ QualificationViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_qualification = this.edit_view_tab.find( '#tab_qualification' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_qualification_column1 = tab_qualification.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_qualification_column1 );
 
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: 359} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab0_column1, '' );
+		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_qualification_column1, '' );
+
+		form_item_input.parent().width( '45%' );
 
 		//Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {field: 'type_id'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_qualification_column1 );
 
 		//Group
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -132,18 +130,20 @@ QualificationViewController = BaseViewController.extend( {
 			field: 'group_id'
 		} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.qualification_group_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Qualification Group' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Qualification Group' ), form_item_input, tab_qualification_column1 );
 
 		// Description
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
-		form_item_input.TTextArea( { field: 'description' } );
-		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab0_column1, '', null, null, true );
+		form_item_input.TTextArea( { field: 'description', width: '100%' } );
+		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_qualification_column1, '', null, null, true );
+
+		form_item_input.parent().width( '45%' );
 
 		//Tags
 		form_item_input = Global.loadWidgetByName( FormItemType.TAG_INPUT );
 
 		form_item_input.TTagInput( {field: 'tag', object_type_id: 250} );
-		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab0_column1, '', null, null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_qualification_column1, '', null, null, true );
 
 	},
 
@@ -219,20 +219,20 @@ QualificationViewController = BaseViewController.extend( {
 
 		if ( this.edit_view_tab_selected_index === 1 ) {
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.initSubDocumentView();
 			} else {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 
 		} else if ( this.edit_view_tab_selected_index === 2 ) {
 
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab2' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_audit' );
 			} else {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		} else {
@@ -245,18 +245,18 @@ QualificationViewController = BaseViewController.extend( {
 
 		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 1 ) {
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.initSubDocumentView();
 			} else {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 2 ) {
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab2' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_audit' );
 			} else {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		}
@@ -282,8 +282,8 @@ QualificationViewController = BaseViewController.extend( {
 		}
 
 		Global.loadScriptAsync( 'views/document/DocumentViewController.js', function() {
-			var tab1 = $this.edit_view_tab.find( '#tab1' );
-			var firstColumn = tab1.find( '.first-column-sub-view' );
+			var tab_attachment = $this.edit_view_tab.find( '#tab_attachment' );
+			var firstColumn = tab_attachment.find( '.first-column-sub-view' );
 			Global.trackView( 'Sub' + 'Document' + 'View' );
 			DocumentViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
 

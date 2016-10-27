@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2331 $
- * $Id: send_file.php 2331 2009-01-13 00:16:13Z ipso $
- * $Date: 2009-01-12 16:16:13 -0800 (Mon, 12 Jan 2009) $
- */
+
 require_once('../includes/global.inc.php');
 $skip_message_check = TRUE;
 require_once(Environment::getBasePath() .'includes/Interface.inc.php');
@@ -485,8 +481,28 @@ switch ($object_type) {
 						//mime_content_type is being deprecated in PHP, and it doesn't work properly on Windows. So if its not available just accept any file type.
 						$mime_type = ( function_exists('mime_content_type') ) ? mime_content_type( $dir.'/'.$upload_file_arr['name'] ) : FALSE;
 						if ( $mime_type === FALSE OR in_array( $mime_type, $valid_mime_types ) ) {
-							Debug::Text('Upload Success: '. $upload_result, __FILE__, __LINE__, __METHOD__, 10);
-							$success = $upload_result .' '. TTi18n::gettext('Successfully Uploaded');
+
+							$max_file_line_count = 0;
+							if ( DEPLOYMENT_ON_DEMAND == TRUE ) {
+								switch ( strtolower($object_id) ) {
+									case 'apiimportpunch':
+										$max_file_line_count = ( $current_company->getProductEdition() == 10 ) ? 500 : 2500; //Importing punches can be quite slow, so reduce this significantly.
+										break;
+									default:
+										$max_file_line_count = ( $current_company->getProductEdition() == 10 ) ? 100 : 10000;
+										break;
+								}
+							}
+
+							$file_name = $import->getStoragePath(). DIRECTORY_SEPARATOR . $upload_file_arr['name'];
+							$file_line_count = Misc::countLinesInFile( $file_name );
+							Debug::Text('Upload Success: '. $upload_result .' Full Path: '. $file_name .' Line Count: '. $file_line_count .' Max Lines: '. $max_file_line_count, __FILE__, __LINE__, __METHOD__, 10);
+
+							if ( $max_file_line_count > 0 AND $file_line_count > $max_file_line_count ) {
+								$error = TTi18n::gettext('Import file exceeds the maximum number of allowed lines (%1), please reduce the number of lines and try again.', $max_file_line_count );
+							} else {
+								$success = $upload_result .' '. TTi18n::gettext('Successfully Uploaded');
+							}
 						} else {
 							$error = TTi18n::gettext('ERROR: Uploaded file is not a properly formatted CSV file compatible with importing. You uploaded a file of type'). ': '. $mime_type;
 						}

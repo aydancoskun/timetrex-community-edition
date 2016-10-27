@@ -97,6 +97,8 @@
 
 		var navigation_mode = false;
 
+		var args_from_saved_layout = null;
+
 		var default_args = null;
 		//Use this in Navigation Mode, Keep search filter when open. Don't clean it in onClose if navigation_mode
 		// Now we di this in both navigation and normal (2014/6/7)
@@ -161,47 +163,47 @@
 
 		this.getHeaderWidth = function() {
 			return total_header_width;
-		}
+		};
 
 		this.setKey = function( val ) {
 			key = val;
-		}
+		};
 
 		this.getDisplayColumns = function() {
 			return display_columns;
-		}
+		};
 
 		this.getLayout = function() {
 
 			return ALayoutCache.layout_dic[layout_name];
-		}
+		};
 
 		this.getAPI = function() {
 			return api;
-		}
+		};
 
 		this.getScriptName = function() {
 
 			script_name = Global.getScriptNameByAPI( api_class );
 
 			return script_name;
-		}
+		};
 
 		this.setCachedSortFilter = function( val ) {
 			cached_sort_filter = val;
-		}
+		};
 
 		this.setCachedSelectedGridSortFilter = function( val ) {
 			cached_selected_grid_sort_filter = val;
-		}
+		};
 
 		this.setCachedSearchInputsFilter = function( val ) {
 			cached_search_inputs_filter = val;
-		}
+		};
 
 		this.setCachedSelectGridSearchInputsFilter = function( val ) {
 			cached_select_grid_search_inputs_filter = val;
-		}
+		};
 
 		this.setAllowMultipleSelection = function( val ) {
 			allow_multiple_selection = val;
@@ -218,17 +220,22 @@
 				}
 			}
 
-		}
+		};
 
 		this.getEnabled = function() {
 			return enabled;
-		}
+		};
 
 		this.setEnabled = function( val ) {
 			enabled = val;
 			var edit_icon_div = $( this ).find( '.edit-columnIcon-div' );
 			if ( val === false || val === '' ) {
 				$this.addClass( 'a-combobox-readonly' );
+
+				if ( check_box ) {
+					check_box.hide();
+					$this.addClass( 'a-combobox-label-hide' );
+				}
 
 				if ( $this.shouldInitColumns() ) { //Sort Selector in search panel
 
@@ -237,17 +244,23 @@
 
 			} else {
 				$this.removeClass( 'a-combobox-readonly' );
+
+				if ( check_box ) {
+					check_box.show();
+					$this.removeClass( 'a-combobox-label-hide' );
+				}
+
 				if ( $this.shouldInitColumns() ) { //Sort Selector in search panel
 
-					edit_icon_div.css( 'display', 'block' );
+					edit_icon_div.css( 'display', 'inline-block' );
 				}
 			}
 
-		}
+		};
 
 		this.setCheckBox = function( val ) {
 			check_box.attr( 'checked', val );
-		}
+		};
 
 		this.isChecked = function() {
 			if ( check_box ) {
@@ -257,7 +270,7 @@
 			}
 
 			return false;
-		}
+		};
 
 		this.setMassEditMode = function( val ) {
 			mass_edit_mode = val;
@@ -277,7 +290,7 @@
 				}
 			}
 
-		}
+		};
 
 		this.getItemByIndex = function( index ) {
 			var target_source_data;
@@ -301,7 +314,7 @@
 			result = target_source_data[index];
 			return result;
 
-		}
+		};
 
 		this.getSelectIndex = function() {
 
@@ -331,7 +344,7 @@
 			}
 
 			return 0;
-		}
+		};
 
 		this.setErrorStyle = function( errStr, show ) {
 			$( this ).addClass( 'a-error-tip' );
@@ -573,26 +586,27 @@
 					filter = this.customSearchFilter( filter );
 				}
 
-				api['get' + custom_key_name]( filter, {onResult: function( result ) {
-					var result_data = result.getResult();
+				api['get' + custom_key_name]( filter, {
+					onResult: function( result ) {
+						var result_data = result.getResult();
 
-					if ( result_data && result_data.length > 0 ) {
+						if ( result_data && result_data.length > 0 ) {
 
-						var value;
-						if ( allow_multiple_selection ) {
-							value = result_data;
-							$this.setValue( result_data );
-						} else {
-							value = result_data[0];
-							$this.setValue( result_data[0] );
+							var value;
+							if ( allow_multiple_selection ) {
+								value = result_data;
+								$this.setValue( result_data );
+							} else {
+								value = result_data[0];
+								$this.setValue( result_data[0] );
+							}
+
 						}
 
+						if ( setRealValueCallBack ) {
+							setRealValueCallBack( value );
+						}
 					}
-
-					if ( setRealValueCallBack ) {
-						setRealValueCallBack( value );
-					}
-				}
 
 				} );
 			} else {
@@ -631,6 +645,13 @@
 			column_filter.manual_id = true;
 			column_filter.default_item_id = true;
 			column_filter.accrual_policy_id = true;
+
+			if ( api && api.className === 'APIUser' ) {
+				column_filter.pay_period_schedule_id = true;
+				column_filter.policy_group_id = true;
+				column_filter.hire_date = true;
+				column_filter.termination_date = true;
+			}
 
 			$.each( display_columns, function( key, item ) {
 				column_filter[item.name] = true;
@@ -730,7 +751,7 @@
 				}
 			}
 
-		}
+		};
 
 		this.getRealSelectItemsFromSourceData = function() {
 			var len = source_data.length;
@@ -752,100 +773,59 @@
 			}
 
 			return res;
-		},
+		};
 
-			this.setLabel = function() {
-				var last_value;
+		this.setLabel = function() {
+			var last_value;
 
-				if ( allow_multiple_selection ) {
+			if ( allow_multiple_selection ) {
 
-					if ( !select_items ) {
-						this.setEmptyLabel();
-						return;
-					}
+				if ( !select_items ) {
+					this.setEmptyLabel();
+					return;
+				}
 
-					var len = select_items.length;
-					if ( len === 1 ) {
+				var len = select_items.length;
+				if ( len === 1 ) {
 
-						var display_column_len = display_columns.length;
+					var display_column_len = display_columns.length;
 
-						var is_first_visible_column = true;
-						for ( y = 0; y < display_column_len; y++ ) {
-
-							if ( display_columns[y].hidden === true ) { //Hidden field for jGgrid, usually is id
-								continue;
-							}
-
-							if ( layout_name === ALayoutIDs.SORT_COLUMN && select_items[0][display_columns[y].name] === undefined ) {
-
-								var item = select_items[0];
-
-								for ( var key in item ) {
-									var c_value = key + ' | ' + item[key];
-								}
-
-								//When sort field has source data, use proper label shown on the dropdown.
-								if ( source_data ) {
-									for ( var i = 0; i < source_data.length; i++ ) {
-										var column = source_data[i];
-
-										if ( column.value === key ) {
-											var c_value = column.label + ' | ' + item[key];
-										}
-									}
-								}
-
-								label_span.text( c_value );
-								break;
-
-							} else {
-								var c_value = select_items[0][display_columns[y].name];
-							}
-
-							if ( is_first_visible_column ) {
-								last_value = c_value;
-								if ( c_value || $.type( c_value ) === 'number' ) {
-									label_span.text( c_value );
-								}
-								is_first_visible_column = false;
-							} else {
-								if ( last_value && c_value ) {
-									label_span.text( label_span.text() + ' | ' );
-								}
-								if ( c_value ) {
-									last_value = c_value;
-									label_span.text( label_span.text() + c_value );
-								}
-							}
-
-						}
-
-					} else {
-						label_span.text( len + ' ' + $.i18n._( 'items selected' ) );
-					}
-
-				} else {
-
-					if ( !select_item ) {
-						this.setEmptyLabel()
-						return;
-					}
-
-					display_column_len = display_columns.length;
-
-					is_first_visible_column = true;
-
-					for ( var y = 0; y < display_column_len; y++ ) {
+					var is_first_visible_column = true;
+					for ( y = 0; y < display_column_len; y++ ) {
 
 						if ( display_columns[y].hidden === true ) { //Hidden field for jGgrid, usually is id
 							continue;
 						}
 
-						c_value = select_item[display_columns[y].name];
+						if ( layout_name === ALayoutIDs.SORT_COLUMN && select_items[0][display_columns[y].name] === undefined ) {
+
+							var item = select_items[0];
+
+							for ( var key in item ) {
+								var c_value = key + ' | ' + item[key];
+							}
+
+							//When sort field has source data, use proper label shown on the dropdown.
+							if ( source_data ) {
+								for ( var i = 0; i < source_data.length; i++ ) {
+									var column = source_data[i];
+
+									if ( column.value === key ) {
+										var c_value = column.label + ' | ' + item[key];
+									}
+								}
+							}
+
+							label_span.text( c_value );
+							break;
+
+						} else {
+							var c_value = select_items[0][display_columns[y].name];
+						}
 
 						if ( is_first_visible_column ) {
 							last_value = c_value;
-							if ( c_value ) {
+							if ( c_value || $.type( c_value ) === 'number' ) {
 								label_span.text( c_value );
 							}
 							is_first_visible_column = false;
@@ -860,9 +840,50 @@
 						}
 
 					}
+
+				} else {
+					label_span.text( len + ' ' + $.i18n._( 'items selected' ) );
 				}
 
+			} else {
+
+				if ( !select_item ) {
+					this.setEmptyLabel()
+					return;
+				}
+
+				display_column_len = display_columns.length;
+
+				is_first_visible_column = true;
+
+				for ( var y = 0; y < display_column_len; y++ ) {
+
+					if ( display_columns[y].hidden === true ) { //Hidden field for jGgrid, usually is id
+						continue;
+					}
+
+					c_value = select_item[display_columns[y].name];
+
+					if ( is_first_visible_column ) {
+						last_value = c_value;
+						if ( c_value ) {
+							label_span.text( c_value );
+						}
+						is_first_visible_column = false;
+					} else {
+						if ( last_value && c_value ) {
+							label_span.text( label_span.text() + ' | ' );
+						}
+						if ( c_value ) {
+							last_value = c_value;
+							label_span.text( label_span.text() + c_value );
+						}
+					}
+
+				}
 			}
+
+		};
 
 		this.setEmptyLabel = function() {
 			if ( set_any ) {
@@ -891,7 +912,7 @@
 				label_span.text( custom_first_label );
 			}
 
-		}
+		};
 
 		this.onColumnSettingSaveFromLayout = function( layout ) {
 			var filter = {};
@@ -907,13 +928,15 @@
 				filter.id = ALayoutCache.layout_dic[layout_name].id;
 			}
 
-			user_generic_api.setUserGenericData( filter, {onResult: function( res ) {
-				ALayoutCache.layout_dic[layout_name] = null;
-				$this.initColumns();
-				source_data = null; //Reload source data if column changed
+			user_generic_api.setUserGenericData( filter, {
+				onResult: function( res ) {
+					ALayoutCache.layout_dic[layout_name] = null;
+					$this.initColumns();
+					source_data = null; //Reload source data if column changed
 
-			}} );
-		}
+				}
+			} );
+		};
 
 		this.onColumnSettingSave = function( seletedColumns, rowsPerPageNumber, layout_id, filter_data ) {
 
@@ -931,25 +954,41 @@
 			var len = seletedColumns.length;
 
 			for ( var i = 0; i < len; i++ ) {
-				var column_in_JSON = {label: seletedColumns[i].label, value: seletedColumns[i].value, orderValue: seletedColumns[i].orderValue};
+				var column_in_JSON = {
+					label: seletedColumns[i].label,
+					value: seletedColumns[i].value,
+					orderValue: seletedColumns[i].orderValue
+				};
 				select_columns_in_JSON.push( column_in_JSON );
 			}
 
-			filter.data = {display_columns: select_columns_in_JSON, row_per_page: rowsPerPageNumber, layout_id: layout_id, filter_data: filter_data};
+			filter.data = {
+				display_columns: select_columns_in_JSON,
+				row_per_page: rowsPerPageNumber,
+				layout_id: layout_id,
+				filter_data: filter_data
+			};
 
-			user_generic_api.setUserGenericData( filter, {onResult: function( res ) {
-				ALayoutCache.layout_dic[layout_name] = null;
-				$this.initColumns();
-				source_data = null; //Reload source data if column changed
+			user_generic_api.setUserGenericData( filter, {
+				onResult: function( res ) {
+					ALayoutCache.layout_dic[layout_name] = null;
+					$this.initColumns();
+					source_data = null; //Reload source data if column changed
 
-			}} );
+				}
+			} );
 
-		}
+		};
 
 		//Set columns, display columns will be used when open AwesomeBox. If no layout saved. Display columns are the default ones set in this.each
 		this.initColumns = function() {
 
 			user_generic_api = new (APIFactory.getAPIClass( 'APIUserGenericData' ))();
+
+			//Error: TypeError: 'undefined' is not a function (evaluating 'user_generic_api.getUserGenericData') in https://ondemand2001.timetrex.com/interface/html5/global/widgets/awesomebox/AComboBox.js?v=8.0.0-20141117-095711 line 1044
+			if ( !user_generic_api || !user_generic_api.getUserGenericData || typeof(user_generic_api.getUserGenericData) !== 'function' ) {
+				return;
+			}
 
 			if ( Global.isSet( ALayoutCache.layout_dic[layout_name] ) ) {
 
@@ -1014,7 +1053,6 @@
 					}
 					row_per_page = 0;
 				}
-
 				if ( init_data_immediately ) {
 					$this.initSourceData();
 				}
@@ -1023,119 +1061,136 @@
 			} else {
 				var filter = {};
 				filter.filter_data = {script: ALayoutIDs.AWESOMEBOX_COLUMNS, name: layout_name};
-				user_generic_api.getUserGenericData( filter, {onResult: function( res ) {
+				user_generic_api.getUserGenericData( filter, {
+					onResult: function( res ) {
 
-					var resData = res.getResult();
-					//Set this here so Column setting dialog can get correct display columns before open Awesomebox
-					if ( resData && resData.length > 0 ) {
+						var resData = res.getResult();
+						//Set this here so Column setting dialog can get correct display columns before open Awesomebox
+						if ( resData && resData.length > 0 ) {
 
-						var data = resData[0].data;
+							var data = resData[0].data;
 
-						//if saved layout is saved view layout. get it
-						if ( data.type === ALayoutType.saved_layout ) {
+							//if saved layout is saved view layout. get it
+							if ( data.type === ALayoutType.saved_layout ) {
 
-							var columns_result_data = api.getOptions( column_option_key, {async: false} ).getResult();
-							all_columns = Global.buildColumnArray( columns_result_data );
+								var columns_result_data = api.getOptions( column_option_key, {async: false} ).getResult();
+								all_columns = Global.buildColumnArray( columns_result_data );
 
-							var saved_layout_result = user_generic_api.getUserGenericData( {filter_data: {id: data.layout_id, deleted: false}}, {async: false} ).getResult();
+								var saved_layout_result = user_generic_api.getUserGenericData( {
+									filter_data: {
+										id: data.layout_id,
+										deleted: false
+									}
+								}, {async: false} ).getResult();
 
-							if ( saved_layout_result && saved_layout_result.length > 0 ) {
-								var saved_layout = saved_layout_result.slice()[0];
-								var new_data = saved_layout.data;
-								new_data.display_columns = $this.buildDisplayColumns( new_data.display_columns );
-								new_data.filter_data = Global.convertLayoutFilterToAPIFilter( saved_layout );
-								resData[0].data.display_columns = new_data.display_columns;
-								resData[0].data.filter_data = new_data.filter_data;
+								if ( saved_layout_result && saved_layout_result.length > 0 ) {
+									var saved_layout = saved_layout_result.slice()[0];
+									var new_data = saved_layout.data;
+									new_data.display_columns = $this.buildDisplayColumns( new_data.display_columns );
+									new_data.filter_data = Global.convertLayoutFilterToAPIFilter( saved_layout );
+									resData[0].data.display_columns = new_data.display_columns;
+									resData[0].data.filter_data = new_data.filter_data;
 
-								data = resData[0].data;
-							} else {
-								data.filter_data = []; // if saved layou is deleted.
-							}
-
-						}
-
-						ALayoutCache.layout_dic[layout_name] = resData[0];
-
-						ALayoutCache.layout_dic[$this.getScriptName()] = layout_name; // bind current view name to layout name;
-
-						if ( Global.isSet( data.type ) && data.type === ALayoutType.saved_layout ) {
-
-							display_columns = data.display_columns;
-							if ( display_columns.length > 0 ) {
-								if ( possible_display_columns ) {
-									display_columns = filterBaseOnPossibleColumns( display_columns );
+									data = resData[0].data;
+								} else {
+									data.filter_data = []; // if saved layou is deleted.
 								}
 
-								display_columns = Global.convertColumnsTojGridFormat( display_columns, layout_name, function( width ) {
-									total_header_width = width;
-								} );
-							} else if ( list_view_default_columns ) {
-								display_columns = list_view_default_columns;
-								display_columns = filterBaseOnPossibleColumns( display_columns );
-								display_columns = Global.convertColumnsTojGridFormat( display_columns, layout_name, function( width ) {
-									total_header_width = width;
-								} );
 							}
 
-							if ( !navigation_mode && !set_default_args_manually ) {
-								default_args = {};
-								default_args.filter_data = data.filter_data;
-								default_args.filter_sort = data.filter_sort;
-							}
+							ALayoutCache.layout_dic[layout_name] = resData[0];
 
+							ALayoutCache.layout_dic[$this.getScriptName()] = layout_name; // bind current view name to layout name;
+
+							if ( Global.isSet( data.type ) && data.type === ALayoutType.saved_layout ) {
+
+								display_columns = data.display_columns;
+								if ( display_columns.length > 0 ) {
+									if ( possible_display_columns ) {
+										display_columns = filterBaseOnPossibleColumns( display_columns );
+									}
+
+									display_columns = Global.convertColumnsTojGridFormat( display_columns, layout_name, function( width ) {
+										total_header_width = width;
+									} );
+								} else if ( list_view_default_columns ) {
+									display_columns = list_view_default_columns;
+									display_columns = filterBaseOnPossibleColumns( display_columns );
+									display_columns = Global.convertColumnsTojGridFormat( display_columns, layout_name, function( width ) {
+										total_header_width = width;
+									} );
+								}
+
+//							if ( !navigation_mode && !set_default_args_manually ) {
+//								default_args = {};
+//								default_args.filter_data = data.filter_data;
+//								default_args.filter_sort = data.filter_sort;
+//							}
+
+								args_from_saved_layout = {};
+								args_from_saved_layout.filter_data = data.filter_data;
+								args_from_saved_layout.filter_sort = data.filter_sort;
+
+							} else {
+
+								display_columns = data.display_columns;
+
+								//Happen when save no columns in column setting for navigation mode
+								if ( display_columns.length > 0 ) {
+									if ( possible_display_columns ) {
+										display_columns = filterBaseOnPossibleColumns( display_columns );
+									}
+
+									display_columns = Global.convertColumnsTojGridFormat( display_columns, layout_name, function( width ) {
+										total_header_width = width;
+									} );
+								} else if ( list_view_default_columns ) {
+									display_columns = list_view_default_columns;
+									display_columns = filterBaseOnPossibleColumns( display_columns );
+									display_columns = Global.convertColumnsTojGridFormat( display_columns, layout_name, function( width ) {
+										total_header_width = width;
+									} );
+								}
+
+								row_per_page = data.row_per_page;
+								args_from_saved_layout = null;
+//							if ( !navigation_mode && !set_default_args_manually ) {
+//								default_args = null;
+//							}
+							}
 						} else {
 
-							display_columns = data.display_columns;
 
-							//Happen when save no columns in column setting for navigation mode
-							if ( display_columns.length > 0 ) {
-								if ( possible_display_columns ) {
-									display_columns = filterBaseOnPossibleColumns( display_columns );
-								}
-
-								display_columns = Global.convertColumnsTojGridFormat( display_columns, layout_name, function( width ) {
-									total_header_width = width;
-								} );
-							} else if ( list_view_default_columns ) {
+							//If set possible columns, use it
+							if ( list_view_default_columns ) {
 								display_columns = list_view_default_columns;
 								display_columns = filterBaseOnPossibleColumns( display_columns );
 								display_columns = Global.convertColumnsTojGridFormat( display_columns, layout_name, function( width ) {
 									total_header_width = width;
 								} );
 							}
+							ALayoutCache.layout_dic[layout_name] = false;
+							row_per_page = 0;
 
-							row_per_page = data.row_per_page;
-							if ( !navigation_mode && !set_default_args_manually ) {
-								default_args = null;
-							}
 						}
-					} else {
 
-
-						//If set possible columns, use it
-						if ( list_view_default_columns ) {
-							display_columns = list_view_default_columns;
-							display_columns = filterBaseOnPossibleColumns( display_columns );
-							display_columns = Global.convertColumnsTojGridFormat( display_columns, layout_name, function( width ) {
-								total_header_width = width;
-							} );
+						if ( init_data_immediately ) {
+							$this.initSourceData();
 						}
-						ALayoutCache.layout_dic[layout_name] = false;
-						row_per_page = 0;
 
 					}
-
-					if ( init_data_immediately ) {
-						$this.initSourceData();
-					}
-
-				}} );
+				} );
 
 			}
 
-		}
+		};
 
 		var filterBaseOnPossibleColumns = function( display_columns ) {
+
+			//Error: Unable to get property 'length' of undefined or null reference in https://villa.timetrex.com/interface/html5/global/widgets/awesomebox/AComboBox.js?v=8.0.0-20141230-125406 line 1169
+			if ( !possible_display_columns ) {
+				return display_columns;
+			}
 
 			var len = possible_display_columns.length;
 
@@ -1164,11 +1219,29 @@
 
 			return result;
 
-		}
+		};
 
 		this.getId = function() {
 			return id;
-		}
+		};
+
+		//update source data to new saved item, happens in timesheet view, edit employee
+		this.updateSelectItem = function( new_item ) {
+			select_item = new_item;
+			if ( source_data ) {
+
+				for ( var i = 0; i < source_data.length; i++ ) {
+					var content = source_data[i];
+					if ( content.id === new_item.id ) {
+						source_data[i] = new_item;
+
+						return;
+					}
+				}
+
+			}
+
+		};
 
 		this.onClose = function() {
 
@@ -1206,7 +1279,7 @@
 				dontOpen = false;
 			}, 100 );
 
-		}
+		};
 
 		//set next or last item when key down, call from main.js
 		this.selectNextItem = function( e ) {
@@ -1341,7 +1414,7 @@
 
 			}
 
-		}
+		};
 
 		this.gridScrollTop = function() {
 
@@ -1372,7 +1445,7 @@
 
 		this.getIsMouseOver = function() {
 			return is_mouse_over;
-		}
+		};
 
 		this.onShowAll = function( isShowAll ) {
 
@@ -1380,30 +1453,33 @@
 
 			var args = this.buildUnSelectGridFilter();
 
-			api['get' + custom_key_name]( args, {onResult: function( result ) {
+			api['get' + custom_key_name]( args, {
+				onResult: function( result ) {
 
-				var result_data = result.getResult();
+					var result_data = result.getResult();
 
-				if ( !result_data ) {
-					result_data = [];
+					if ( !result_data ) {
+						result_data = [];
+					}
+
+					pager_data = result.getPagerData();
+					source_data = result_data;
+
+					if ( Global.isSet( api ) ) {
+						source_data = Global.formatGridData( source_data, api.key_name );
+					}
+
+					a_dropdown.setUnselectedGridData( source_data );
+					a_dropdown.setSelectGridData( a_dropdown.getSelectItems() );
+					a_dropdown.setPagerData( pager_data );
+
 				}
-
-				pager_data = result.getPagerData();
-				source_data = result_data;
-
-				if ( Global.isSet( api ) ) {
-					source_data = Global.formatGridData( source_data, api.key_name );
-				}
-
-				a_dropdown.setUnselectedGridData( source_data );
-				a_dropdown.setSelectGridData( a_dropdown.getSelectItems() );
-				a_dropdown.setPagerData( pager_data );
-
-			}} );
-		}
+			} );
+		};
 
 		this.buildUnSelectGridFilter = function() {
 			var args = {};
+			args.filter_data = {};
 			args.filter_columns = $this.getColumnFilter();
 			args.filter_items_per_page = row_per_page;
 
@@ -1412,6 +1488,28 @@
 				args.filter_data = Global.clone( a_dropdown.getUnSelectGridMap() );
 				args.filter_sort = Global.clone( a_dropdown.getUnSelectGridSortMap() );
 			}
+
+			if ( args_from_saved_layout ) {
+				if ( Global.isSet( args_from_saved_layout.filter_data ) ) {
+					for ( var key in args_from_saved_layout.filter_data ) {
+						if ( !args.filter_data.hasOwnProperty( key ) ) {
+							args.filter_data[key] = args_from_saved_layout.filter_data[key];
+						}
+
+					}
+				}
+
+				if ( Global.isSet( args_from_saved_layout.permission_section ) ) {
+					args.permission_section = args_from_saved_layout.permission_section;
+				}
+
+				//Do not override sort condition
+				if ( Global.isSet( args_from_saved_layout.filter_sort ) && !args.filter_sort ) {
+
+					args.filter_sort = args_from_saved_layout.filter_sort;
+				}
+			}
+
 			//default_args is set when navigation mode usually. To keep search filter same as list view grid
 			//. In BaseController, setEditViewData function
 			if ( default_args ) {
@@ -1447,7 +1545,7 @@
 			}
 
 			return args;
-		}
+		};
 
 		this.buildSelectGridFilter = function() {
 			var args = {};
@@ -1458,7 +1556,7 @@
 			args.second_parameter = true; //Always set true because we want alwasy set all data out in select grid
 
 			return args;
-		}
+		};
 
 		this.onADropDownSearch = function( targetName, page_action ) {
 
@@ -1498,106 +1596,110 @@
 					}
 				}
 
-				api['get' + custom_key_name]( args, {onResult: function( result ) {
+				api['get' + custom_key_name]( args, {
+					onResult: function( result ) {
 
-					var focused_element = $( ':focus' );
+						var focused_element = $( ':focus' );
 
-					var result_data = result.getResult();
+						var result_data = result.getResult();
 
-					if ( !Global.isArray( result_data ) ) {
-						result_data = [];
-					}
+						if ( !Global.isArray( result_data ) ) {
+							result_data = [];
+						}
 
 //					if ( $this.customSearchResultHandler ) {
 //						result_data = $this.customSearchResultHandler( result_data )
 //					}
 
-					//set this outside, to add more data to source_data
-					if ( addition_source_function ) {
+						//set this outside, to add more data to source_data
+						if ( addition_source_function ) {
 
-						result_data = addition_source_function( $this, result_data );
+							result_data = addition_source_function( $this, result_data );
+						}
+
+						if ( LocalCacheData.paging_type === 0 && page_action === 'next' ) {
+							var current_data = a_dropdown.getUnSelectGridData();
+							result_data = current_data.concat( result_data );
+
+						}
+
+						if ( navigation_mode ) {
+							source_data = result_data;
+							pager_data = result.getPagerData();
+						} else {
+							unselect_grid_search_result = result_data;
+						}
+
+						if ( $.type( result_data ) != 'array' ) {
+							result_data = [];
+						}
+
+						if ( !allow_multiple_selection ) {
+							$this.createFirstItem( result_data );
+						}
+
+						result_data = Global.formatGridData( result_data, api.key_name );
+
+						a_dropdown.setUnselectedGridData( result_data );
+
+						if ( allow_multiple_selection ) {
+							a_dropdown.setSelectGridData( a_dropdown.getSelectItems(), true );
+						} else {
+							a_dropdown.setSelectItem( a_dropdown.getSelectItem() );
+						}
+
+						a_dropdown.setPagerData( result.getPagerData() );
+
+						if ( result_data.length < 1 ) {
+							a_dropdown.showNoResultCover( 'unselect_grid' );
+						} else {
+							a_dropdown.removeNoResultCover( 'unselect_grid' );
+						}
+
+						a_dropdown.getUnSelectGrid().show();
+
+						if ( focused_element.length ) {
+							focused_element.focus();
+						}
+
 					}
-
-					if ( LocalCacheData.paging_type === 0 && page_action === 'next' ) {
-						var current_data = a_dropdown.getUnSelectGridData();
-						result_data = current_data.concat( result_data );
-
-					}
-
-					if ( navigation_mode ) {
-						source_data = result_data;
-						pager_data = result.getPagerData();
-					} else {
-						unselect_grid_search_result = result_data;
-					}
-
-					if ( $.type( result_data ) != 'array' ) {
-						result_data = [];
-					}
-
-					if ( !allow_multiple_selection ) {
-						$this.createFirstItem( result_data );
-					}
-
-					result_data = Global.formatGridData( result_data, api.key_name );
-
-					a_dropdown.setUnselectedGridData( result_data );
-
-					if ( allow_multiple_selection ) {
-						a_dropdown.setSelectGridData( a_dropdown.getSelectItems(), true );
-					} else {
-						a_dropdown.setSelectItem( a_dropdown.getSelectItem() );
-					}
-
-					a_dropdown.setPagerData( result.getPagerData() );
-
-					if ( result_data.length < 1 ) {
-						a_dropdown.showNoResultCover( 'unselect_grid' );
-					} else {
-						a_dropdown.removeNoResultCover( 'unselect_grid' );
-					}
-
-					a_dropdown.getUnSelectGrid().show();
-
-					if ( focused_element.length ) {
-						focused_element.focus();
-					}
-
-				}} );
+				} );
 
 			} else {
 				args = this.buildSelectGridFilter();
 
-				api['get' + custom_key_name]( args, {onResult: function( result ) {
-					var result_data = result.getResult();
-					var focused_element = $( ':focus' );
+				api['get' + custom_key_name]( args, {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						var focused_element = $( ':focus' );
 
-					if ( $.type( result_data ) != 'array' ) {
-						result_data = [];
+						if ( $.type( result_data ) != 'array' ) {
+							result_data = [];
+						}
+
+						result_data = Global.formatGridData( result_data, api.key_name );
+
+						a_dropdown.setSelectGridSearchResult( result_data ); //set as search result
+
+						if ( result_data.length < 1 ) {
+							a_dropdown.showNoResultCover( 'select_grid' );
+						} else {
+							a_dropdown.removeNoResultCover( 'select_grid' );
+						}
+
+						a_dropdown.setSelectGridDragAble();
+
+						a_dropdown.getSelectGrid().show();
+
+						if ( focused_element.length > 0 ) {
+							focused_element.focus();
+						}
+
 					}
-
-					result_data = Global.formatGridData( result_data, api.key_name );
-
-					a_dropdown.setSelectGridSearchResult( result_data ); //set as search result
-
-					if ( result_data.length < 1 ) {
-						a_dropdown.showNoResultCover( 'select_grid' );
-					} else {
-						a_dropdown.removeNoResultCover( 'select_grid' );
-					}
-
-					a_dropdown.setSelectGridDragAble();
-
-					a_dropdown.getSelectGrid().show();
-
-					if ( focused_element.length > 0 ) {
-						focused_element.focus();
-					}
-
-				}} );
+				} );
 			}
 
-		}
+		};
 
 		this.buildDisplayColumns = function( api_display_columns ) {
 			var len = all_columns.length;
@@ -1612,7 +1714,7 @@
 				}
 			}
 			return display_columns;
-		}
+		};
 
 		this.buildDisplayColumnsForEditor = function() {
 			var len = all_columns.length;
@@ -1663,7 +1765,7 @@
 			} else {
 				return this.getFirstItem();
 			}
-		}
+		};
 
 		this.getFirstItem = function() {
 			var first_item = {};
@@ -1703,7 +1805,7 @@
 			} );
 
 			return first_item;
-		}
+		};
 
 		this.createFirstItem = function( target_data ) {
 
@@ -1814,7 +1916,7 @@
 		this.setDisPlayColumns = function( val ) {
 
 			display_columns = Global.convertColumnsTojGridFormat( val, layout_name );
-		}
+		};
 
 		//Only these columns can be shown no matter
 		this.setPossibleDisplayColumns = function( val, default_columns ) {
@@ -1829,30 +1931,32 @@
 			if ( layout_name !== ALayoutIDs.OPTION_COLUMN && //Simple options
 				layout_name !== ALayoutIDs.TREE_COLUMN && //Tree Mode
 				layout_name !== ALayoutIDs.SORT_COLUMN &&
-				layout_name !== ALayoutIDs.TIMESHEET ) {
+				layout_name !== ALayoutIDs.TIMESHEET &&
+				layout_name !== ALayoutIDs.ABSENCE ) {
 				this.initColumns();
 			}
 
-		}
+		};
 
 		this.setRowPerPage = function( val ) {
 			row_per_page = val;
-		}
+		};
 
 		this.setPagerData = function( val ) {
 			pager_data = val;
-		}
+		};
 
 		this.shouldInitColumns = function() {
 			if ( layout_name === ALayoutIDs.OPTION_COLUMN || //Simple options
 				layout_name === ALayoutIDs.TREE_COLUMN || //Tree Mode
 				layout_name === ALayoutIDs.SORT_COLUMN ||
-				layout_name === ALayoutIDs.TIMESHEET ) {
+				layout_name === ALayoutIDs.TIMESHEET ||
+				layout_name === ALayoutIDs.ABSENCE ) {
 				return false;
 			}
 
 			return true;
-		}
+		};
 
 		this.createItem = function( val, label ) {
 			var item = {};
@@ -1870,25 +1974,27 @@
 
 			return item;
 
-		}
+		};
 
 		this.initSourceData = function() {
 			var args = $this.buildUnSelectGridFilter();
-			api['get' + custom_key_name]( args, {onResult: function( result ) {
-				var result_data = result.getResult();
-				if ( !Global.isArray( result_data ) ) {
-					result_data = [];
+			api['get' + custom_key_name]( args, {
+				onResult: function( result ) {
+					var result_data = result.getResult();
+					if ( !Global.isArray( result_data ) ) {
+						result_data = [];
+					}
+					source_data = result_data;
+					pager_data = result.getPagerData();
+
+					$this.trigger( 'initSourceComplete', [$this] );
+
 				}
-				source_data = result_data;
-				pager_data = result.getPagerData();
-
-				$this.trigger( 'initSourceComplete', [$this] );
-
-			}} );
+			} );
 
 			//only do this once
 			init_data_immediately = false;
-		}
+		};
 
 		this.addHideIdColumn = function( display_columns ) {
 			var id_column = {name: 'id', index: 'id', label: '', width: 0, hidden: true};
@@ -1896,7 +2002,7 @@
 			display_columns.push( id_column );
 
 			return display_columns;
-		}
+		};
 
 		var buildSortBySelectColumns = function( array ) {
 			var sort_by_array = array;
@@ -1923,7 +2029,7 @@
 
 			return sort_by_select_columns;
 
-		}
+		};
 
 		//For multiple items like .xxx could contains a few widgets.
 		this.each( function() {
@@ -1961,6 +2067,15 @@
 
 			if ( o.navigation_mode ) {
 				navigation_mode = o.navigation_mode;
+				$( this ).children().eq( 1 ).css( 'max-width', 132 );
+			}
+
+			if ( o.search_panel_model ) {
+				$( this ).children().eq( 1 ).css( 'max-width', 132 );
+			}
+
+			if ( o.width ) {
+				$( this ).children().eq( 1 ).css( 'max-width', o.width );
 			}
 
 			if ( o.api_class ) {
@@ -2100,8 +2215,8 @@
 
 			if ( $this.shouldInitColumns() ) { //Sort Selector in search panel
 
-				$( this ).css( 'width', '190px' );
-				edit_icon_div.css( 'display', 'block' );
+				$( this ).css( 'min-width', '194px' );
+				edit_icon_div.css( 'display', 'inline-block' );
 				edit_icon.attr( 'src', Global.getRealImagePath( 'images/edit.png' ) );
 
 				//OPen Column editor
@@ -2112,27 +2227,29 @@
 					if ( !enabled ) {
 						return;
 					}
-					api.getOptions( column_option_key, {onResult: function( columns_result ) {
+					api.getOptions( column_option_key, {
+						onResult: function( columns_result ) {
 
-						column_editor = Global.loadWidget( 'global/widgets/column_editor/ColumnEditor.html' );
-						column_editor = $( column_editor );
+							column_editor = Global.loadWidget( 'global/widgets/column_editor/ColumnEditor.html' );
+							column_editor = $( column_editor );
 
-						column_editor = column_editor.ColumnEditor( {parent_awesome_box: $this} );
+							column_editor = column_editor.ColumnEditor( {parent_awesome_box: $this} );
 
-						var columns_result_data = columns_result.getResult();
-						all_columns = Global.buildColumnArray( columns_result_data );
-						display_columns_in_columnEditor = $this.buildDisplayColumnsForEditor();
+							var columns_result_data = columns_result.getResult();
+							all_columns = Global.buildColumnArray( columns_result_data );
+							display_columns_in_columnEditor = $this.buildDisplayColumnsForEditor();
 
-						//Open Column Editor;
-						column_editor.show();
+							//Open Column Editor;
+							column_editor.show();
 
-					}} );
+						}
+					} );
 
 				} );
 
 			} else {
 				do_not_get_real_data = true; // For Simple OPTIONS mode
-				$( this ).css( 'width', '169px' );
+				$( this ).css( 'min-width', '169px' );
 				edit_icon_div.css( 'display', 'none' );
 			}
 
@@ -2210,7 +2327,8 @@
 				}
 
 				//Create ADropDown
-				a_dropdown = a_dropdown.ADropDown( {display_show_all: display_show_all,
+				a_dropdown = a_dropdown.ADropDown( {
+					display_show_all: display_show_all,
 					allow_drag_to_order: allow_drag_to_order,
 					allow_multiple_selection: allow_multiple_selection,
 					show_all: show_all,
@@ -2222,7 +2340,8 @@
 					select_grid_search_input_filter: cached_select_grid_search_inputs_filter,
 					default_sort_filter: cached_sort_filter,
 					default_select_grid_sort_filter: cached_selected_grid_sort_filter,
-					tree_mode: tree_mode} );
+					tree_mode: tree_mode
+				} );
 
 				a_dropdown_div = $( "<div id='" + id + "a_dropdown_div' class='a-dropdown-div'></div>" );
 
@@ -2319,90 +2438,100 @@
 				if ( !source_data ) {
 					var args = $this.buildUnSelectGridFilter();
 
-					api['get' + custom_key_name]( args, {onResult: function( result ) {
+					//Error: TypeError: api is null in https://ondemand1.timetrex.com/interface/html5/global/widgets/awesomebox/AComboBox.js?v=8.0.0-20141117-112033 line 2364
+					if ( !api ) {
+						return;
+					}
 
-						var result_data = result.getResult();
+					api['get' + custom_key_name]( args, {
+						onResult: function( result ) {
 
-						if ( !Global.isArray( result_data ) ) {
-							result_data = [];
-						}
+							var result_data = result.getResult();
 
-						source_data = result_data;
-
-						//set this outside, to add more data to source_data
-						if ( addition_source_function ) {
-
-							source_data = addition_source_function( $this, source_data );
-						}
-
-						navigation_mode_source_data_before_open = null;
-
-						if ( Global.isSet( api ) ) {
-							source_data = Global.formatGridData( source_data, api.key_name );
-						}
-
-						if ( allow_multiple_selection ) {
-
-							if ( set_all ) {
-								$this.createFirstItem();
+							if ( !Global.isArray( result_data ) ) {
+								result_data = [];
 							}
 
-							// for select items which only contains ids, like all awesomeboxes in edit view
-							if ( get_real_data_when_open ) {
-								get_real_data_when_open = false;
-								var args = {};
-								args.filter_data = {id: select_items};
-								args.filter_columns = $this.getColumnFilter();
-								args.filter_items_per_page = 10000;
-								var local_data = false;
+							source_data = result_data;
 
-								//if select items contains data like 0, for example Employee in Recurring Schedule edit view
-								if ( select_items.length > 0 && select_items[0] == 0 ) {
-									local_data = $this.getLocalSelectItem( select_items[0] );
+							//set this outside, to add more data to source_data
+							if ( addition_source_function ) {
+
+								source_data = addition_source_function( $this, source_data );
+							}
+
+							navigation_mode_source_data_before_open = null;
+
+							if ( Global.isSet( api ) ) {
+								source_data = Global.formatGridData( source_data, api.key_name );
+							}
+
+							if ( allow_multiple_selection ) {
+
+								if ( set_all ) {
+									$this.createFirstItem();
 								}
 
-								api['get' + custom_key_name]( args, {onResult: function( result ) {
-									select_items = result.getResult();
+								// for select items which only contains ids, like all awesomeboxes in edit view
+								if ( get_real_data_when_open ) {
+									get_real_data_when_open = false;
+									var args = {};
+									args.filter_data = {id: select_items};
+									args.filter_columns = $this.getColumnFilter();
+									args.filter_items_per_page = 10000;
+									var local_data = false;
 
-									a_dropdown.setUnselectedGridData( source_data );
-
-									if ( local_data ) {
-										select_items.unshift( local_data );
+									//Error: TypeError: null is not an object (evaluating 'select_items.length') in https://ondemand2001.timetrex.com/interface/html5/global/widgets/awesomebox/AComboBox.js?v=8.0.0-20141230-113526 line 2441
+									//if select items contains data like 0, for example Employee in Recurring Schedule edit view
+									if ( select_items && select_items.length > 0 && select_items[0] == 0 ) {
+										local_data = $this.getLocalSelectItem( select_items[0] );
 									}
 
+									api['get' + custom_key_name]( args, {
+										onResult: function( result ) {
+											select_items = result.getResult();
+
+											a_dropdown.setUnselectedGridData( source_data );
+
+											if ( local_data ) {
+												select_items.unshift( local_data );
+											}
+
 //									a_dropdown.setSelectGridData( select_items ); //set Selected Data after set sourceData
-									setADropDownSelectValues( select_items );
-								}} );
-							} else {
-								a_dropdown.setUnselectedGridData( source_data );
+											setADropDownSelectValues( select_items );
+										}
+									} );
+								} else {
+									a_dropdown.setUnselectedGridData( source_data );
 //								a_dropdown.setSelectGridData( select_items ); //set Selected Data after set sourceData
-								setADropDownSelectValues( select_items );
+									setADropDownSelectValues( select_items );
+								}
+							} else {
+
+								if ( set_empty || set_any || set_default || set_open || set_special_empty ) {
+									$this.createFirstItem();
+								}
+
+								a_dropdown.setUnselectedGridData( source_data );
+
+								a_dropdown.setSelectItem( select_item );
 							}
-						} else {
 
-							if ( set_empty || set_any || set_default || set_open || set_special_empty ) {
-								$this.createFirstItem();
+							pager_data = result.getPagerData();
+							a_dropdown.setPagerData( pager_data );
+
+							if ( !Global.isEmpty( cached_search_inputs_filter ) || !Global.isEmpty( cached_sort_filter ) ) {
+								a_dropdown.getUnSelectGrid().hide();
+								$this.onADropDownSearch( 'unselect_grid' );
 							}
 
-							a_dropdown.setUnselectedGridData( source_data );
+							if ( !Global.isEmpty( cached_select_grid_search_inputs_filter ) || !Global.isEmpty( cached_selected_grid_sort_filter ) ) {
+								a_dropdown.getSelectGrid().hide();
+								$this.onADropDownSearch( 'select_grid' );
+							}
 
-							a_dropdown.setSelectItem( select_item );
 						}
-
-						pager_data = result.getPagerData();
-						a_dropdown.setPagerData( pager_data );
-
-						if ( !Global.isEmpty( cached_search_inputs_filter ) || !Global.isEmpty( cached_sort_filter ) ) {
-							a_dropdown.getUnSelectGrid().hide();
-							$this.onADropDownSearch( 'unselect_grid' );
-						}
-
-						if ( !Global.isEmpty( cached_select_grid_search_inputs_filter ) || !Global.isEmpty( cached_selected_grid_sort_filter ) ) {
-							a_dropdown.getSelectGrid().hide();
-							$this.onADropDownSearch( 'select_grid' );
-						}
-
-					}} );
+					} );
 				} else { //Use cache if already loaded data before
 
 					if ( Global.isSet( api ) ) {
@@ -2428,20 +2557,22 @@
 								local_data = $this.getLocalSelectItem( select_items[0] );
 							}
 
-							api['get' + custom_key_name]( args, {onResult: function( result ) {
-								select_items = result.getResult();
+							api['get' + custom_key_name]( args, {
+								onResult: function( result ) {
+									select_items = result.getResult();
 
-								a_dropdown.setUnselectedGridData( source_data );
+									a_dropdown.setUnselectedGridData( source_data );
 
-								if ( local_data ) {
-									select_items.unshift( local_data );
-								}
+									if ( local_data ) {
+										select_items.unshift( local_data );
+									}
 
-								a_dropdown.setUnselectedGridData( source_data );
+									a_dropdown.setUnselectedGridData( source_data );
 //								a_dropdown.setSelectGridData( select_items ); //set Selected Data after set sourceData
-								setADropDownSelectValues( select_items );
+									setADropDownSelectValues( select_items );
 
-							}} );
+								}
+							} );
 						} else {
 							a_dropdown.setUnselectedGridData( source_data );
 //							a_dropdown.setSelectGridData( select_items );
@@ -2475,8 +2606,6 @@
 
 	};
 
-	$.fn.AComboBox.defaults = {
-
-	};
+	$.fn.AComboBox.defaults = {};
 
 })( jQuery );

@@ -16,7 +16,7 @@ RecurringHolidayViewController = BaseViewController.extend( {
 		this.edit_view_tpl = 'RecurringHolidayEditView.html';
 		this.permission_id = 'holiday_policy';
 		this.viewId = 'RecurringHoliday';
-		this.script_name = 'recurringHolidayView';
+		this.script_name = 'RecurringHolidayView';
 		this.table_name_key = 'recurring_holiday';
 		this.context_menu_name = $.i18n._( 'Recurring Holiday' );
 		this.navigation_label = $.i18n._( 'Recurring Holiday' ) + ':';
@@ -58,10 +58,11 @@ RecurringHolidayViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'Recurring Holiday' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_recurring_holiday': $.i18n._( 'Recurring Holiday' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
+
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIRecurringHoliday' )),
@@ -77,75 +78,77 @@ RecurringHolidayViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_recurring_holiday = this.edit_view_tab.find( '#tab_recurring_holiday' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_recurring_holiday_column1 = tab_recurring_holiday.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_recurring_holiday_column1 );
 
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: 359} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab0_column1, '' );
+		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_recurring_holiday_column1, '' );
+
+		form_item_input.parent().width( '45%' );
 
 		// Special Day
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'special_day'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.special_day_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Special Day' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Special Day' ), form_item_input, tab_recurring_holiday_column1 );
 
 		// Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'type_id', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_recurring_holiday_column1, '', null, true );
 
 		// Week Interval
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'week_interval'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.week_interval_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Week Interval' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Week Interval' ), form_item_input, tab_recurring_holiday_column1, '', null, true );
 
 		// Day of the week
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'day_of_week'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $.extend( {}, $this.day_of_week_array ) ) );
-		this.addEditFieldToColumn( $.i18n._( 'Day of the week' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Day of the week' ), form_item_input, tab_recurring_holiday_column1, '', null, true );
 
 		// Pivot Day Direction
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'pivot_day_direction_id'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.pivot_day_direction_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Pivot Day Direction' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Pivot Day Direction' ), form_item_input, tab_recurring_holiday_column1, '', null, true );
 
 		// Day of the Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'day_of_month'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.day_of_month_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Day of the Month' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Day of the Month' ), form_item_input, tab_recurring_holiday_column1, '', null, true );
 
 		// Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'month_int'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.month_of_year_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Month' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Month' ), form_item_input, tab_recurring_holiday_column1, '', null, true );
 
 		// Always On Week Day
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'always_week_day_id'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.always_week_day_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Always On Week Day' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Always On Week Day' ), form_item_input, tab_recurring_holiday_column1, '' );
 
 	},
 
@@ -201,6 +204,8 @@ RecurringHolidayViewController = BaseViewController.extend( {
 
 		}
 
+		this.editFieldResize();
+
 	},
 
 	onTypeChange: function() {
@@ -228,6 +233,9 @@ RecurringHolidayViewController = BaseViewController.extend( {
 				this.edit_view_form_item_dic['month_int'].css( 'display', 'block' );
 			}
 		}
+
+
+		this.editFieldResize();
 	},
 
 	buildSearchFields: function() {

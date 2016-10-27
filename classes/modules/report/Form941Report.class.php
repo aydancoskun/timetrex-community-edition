@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2095 $
- * $Id: Sort.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
- */
+
 
 /**
  * @package Modules\Report
@@ -118,7 +114,7 @@ class Form941Report extends Report {
 								);
 				break;
 			case 'time_period':
-				$retval = TTDate::getTimePeriodOptions();
+				$retval = TTDate::getTimePeriodOptions( FALSE ); //Exclude Pay Period options.
 				break;
 			case 'date_columns':
 				$retval = TTDate::getReportDateOptions( NULL, TTi18n::getText('Date'), 13, TRUE );
@@ -591,13 +587,13 @@ class Form941Report extends Report {
 						$quarter_month = TTDate::getYearQuarterMonthNumber( $date_stamp );
 						//Debug::Text('Quarter Month: '. $quarter_month .' Epoch: '. TTDate::getDate('DATE', $date_stamp), __FILE__, __LINE__, __METHOD__, 10);
 
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['wages']					= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['wages']['include_pay_stub_entry_account'], $form_data['wages']['exclude_pay_stub_entry_account'] );
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income_tax']				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['income_tax']['include_pay_stub_entry_account'], $form_data['income_tax']['exclude_pay_stub_entry_account'] );
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['wages']					= ( isset($form_data['wages']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['wages']['include_pay_stub_entry_account'], $form_data['wages']['exclude_pay_stub_entry_account'] ) : 0;
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income_tax']				= ( isset($form_data['income_tax']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['income_tax']['include_pay_stub_entry_account'], $form_data['income_tax']['exclude_pay_stub_entry_account'] ) : 0;
 
 						//Because employees can be excluded from Social Security/Medicare, only include wage amounts if the SS tax is not 0.
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax']	= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_tax']['include_pay_stub_entry_account'], $form_data['social_security_tax']['exclude_pay_stub_entry_account'] );
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax']	= ( isset($form_data['social_security_tax']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_tax']['include_pay_stub_entry_account'], $form_data['social_security_tax']['exclude_pay_stub_entry_account'] ) : 0;
 						if ( ( isset($form_data['social_security_tax']['include_pay_stub_entry_account']) AND !is_array($form_data['social_security_tax']['include_pay_stub_entry_account']) ) OR $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'] != 0 ) {
-							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_wages']['include_pay_stub_entry_account'], $form_data['social_security_wages']['exclude_pay_stub_entry_account'] );
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] = ( isset($form_data['social_security_wages']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_wages']['include_pay_stub_entry_account'], $form_data['social_security_wages']['exclude_pay_stub_entry_account'] ) : 0;
 						} else {
 							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] = 0;
 						}
@@ -608,8 +604,8 @@ class Form941Report extends Report {
 						}
 						if ( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'] < $social_security_wage_limit ) {
 							if ( ( isset($form_data['social_security_tax']['include_pay_stub_entry_account']) AND !is_array($form_data['social_security_tax']['include_pay_stub_entry_account']) ) OR $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'] != 0 ) {
-								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages']	= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_wages']['include_pay_stub_entry_account'], $form_data['social_security_wages']['exclude_pay_stub_entry_account'] );
-								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tips']	= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_tips']['include_pay_stub_entry_account'], $form_data['social_security_tips']['exclude_pay_stub_entry_account'] );
+								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages']	= ( isset($form_data['social_security_wages']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_wages']['include_pay_stub_entry_account'], $form_data['social_security_wages']['exclude_pay_stub_entry_account'] ) : 0;
+								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tips']	= ( isset($form_data['social_security_tips']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_tips']['include_pay_stub_entry_account'], $form_data['social_security_tips']['exclude_pay_stub_entry_account'] ) : 0;
 							} else {
 								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tips'] = 0;
 							}
@@ -626,9 +622,9 @@ class Form941Report extends Report {
 							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tips'] = 0;
 						}
 
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['medicare_tax']['include_pay_stub_entry_account'], $form_data['medicare_tax']['exclude_pay_stub_entry_account'] );
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax'] = ( isset($form_data['medicare_tax']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['medicare_tax']['include_pay_stub_entry_account'], $form_data['medicare_tax']['exclude_pay_stub_entry_account'] ) : 0;
 						if ( ( isset($form_data['medicare_tax']['include_pay_stub_entry_account']) AND !is_array($form_data['medicare_tax']['include_pay_stub_entry_account']) ) OR $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax'] != 0 ) {
-							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['medicare_wages']['include_pay_stub_entry_account'], $form_data['medicare_wages']['exclude_pay_stub_entry_account'] );
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'] = ( isset($form_data['medicare_wages']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['medicare_wages']['include_pay_stub_entry_account'], $form_data['medicare_wages']['exclude_pay_stub_entry_account'] ) : 0;
 						} else {
 							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'] = 0;
 						}
@@ -650,8 +646,8 @@ class Form941Report extends Report {
 						}
 						//Debug::Text('User ID: '. $user_id .' DateStamp: '. $date_stamp .' YTD Medicare Additional Wages: '. $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] .' This Pay Stub: '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'], __FILE__, __LINE__, __METHOD__, 10);
 
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['sick_wages']				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['sick_wages']['include_pay_stub_entry_account'], $form_data['sick_wages']['exclude_pay_stub_entry_account'] );
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['eic']						= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['eic']['include_pay_stub_entry_account'], $form_data['eic']['exclude_pay_stub_entry_account'] );
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['sick_wages']				= ( isset($form_data['sick_wages']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['sick_wages']['include_pay_stub_entry_account'], $form_data['sick_wages']['exclude_pay_stub_entry_account'] ) : 0;
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['eic']						= ( isset($form_data['eic']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['eic']['include_pay_stub_entry_account'], $form_data['eic']['exclude_pay_stub_entry_account'] ) : 0;
 
 						//Separate data used for reporting, grouping, sorting, from data specific used for the Form.
 						if ( !isset($this->form_data['pay_period'][$quarter_month][$date_stamp]) ) {
@@ -873,7 +869,7 @@ class Form941Report extends Report {
 			$mime_type = 'applications/octet-stream'; //Force file to download.
 		} else {
 			$output_format = 'PDF';
-			$file_name = $this->file_name;
+			$file_name = $this->file_name.'.pdf';
 			$mime_type = $this->file_mime_type;
 		}
 

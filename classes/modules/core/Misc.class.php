@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 15145 $
- * $Id: Misc.class.php 15145 2014-11-13 22:42:19Z mikeb $
- * $Date: 2014-11-13 14:42:19 -0800 (Thu, 13 Nov 2014) $
- */
+
 
 /**
  * @package Core
@@ -88,7 +84,7 @@ class Misc {
 
 	//This function totals arrays where the data wanting to be totaled is deep in a multi-dimentional array.
 	//Usually a row array just before its passed to smarty.
-	static function ArrayAssocSum($array, $element = NULL, $decimals = NULL) {
+	static function ArrayAssocSum($array, $element = NULL, $decimals = NULL, $include_non_numeric = FALSE ) {
 		if ( !is_array($array) ) {
 			return FALSE;
 		}
@@ -110,10 +106,13 @@ class Misc {
 					if ( !isset($totals[$sum_key]) ) {
 						$totals[$sum_key] = 0;
 					}
-					if ( !is_numeric( $sum_value )) {
-						$sum_value = 0;
+					if ( !is_numeric( $sum_value ) ) {
+						if ( $include_non_numeric == TRUE AND $sum_value != '' ) {
+							$totals[$sum_key] = $sum_value;
+						}
+					} else {
+						$totals[$sum_key] += $sum_value;
 					}
-					$totals[$sum_key] += $sum_value;
 					//Debug::text(' Sum: '. $totals[$sum_key] .' Key: '. $sum_key .' This Value: '. $sum_value, __FILE__, __LINE__, __METHOD__, 10);
 				}
 			}
@@ -122,10 +121,8 @@ class Misc {
 		//format totals
 		if ( $decimals !== NULL ) {
 			foreach($totals as $retarr_key => $retarr_value) {
-				//echo "Key: $retarr_key Value: $retarr_value<br>\n";
 				//Debug::text(' Number Formatting: '. $retarr_value, __FILE__, __LINE__, __METHOD__, 10);
 				$retarr[$retarr_key] = number_format($retarr_value, $decimals, '.', '');
-				//$retarr[$retarr_key] = round( $retarr_value, $decimals );
 			}
 		} else {
 			return $totals;
@@ -588,6 +585,10 @@ class Misc {
 	//This function helps sending binary data to the client for saving/viewing as a file.
 	static function APIFileDownload($file_name, $type, $data) {
 		if ( $file_name == '' OR $data == '' ) {
+			return FALSE;
+		}
+
+		if ( is_array($data) ) {
 			return FALSE;
 		}
 
@@ -1172,6 +1173,23 @@ class Misc {
 		return FALSE;
 	}
 
+	static function countLinesInFile( $file ) {
+		ini_set('auto_detect_line_endings', TRUE); //PHP can have problems detecting MAC line endings in some case, this should help solve that.
+
+		$line_count = 0;
+		$handle = fopen($file, 'r');
+		while( !feof($handle) ) {
+			$line = fgets($handle, 4096);
+			$line_count = ( $line_count + substr_count( $line, "\n" ) );
+		}
+
+		fclose($handle);
+
+		ini_set('auto_detect_line_endings', FALSE);
+
+		return $line_count;
+	}
+
 	static function parseCSV($file, $head = FALSE, $first_column = FALSE, $delim=',', $len = 9216, $max_lines = NULL ) {
 		if ( !file_exists($file) ) {
 			Debug::text('Files does not exist: '. $file, __FILE__, __LINE__, __METHOD__, 10);
@@ -1190,7 +1208,7 @@ class Misc {
 		ini_set('auto_detect_line_endings', TRUE); //PHP can have problems detecting MAC line endings in some case, this should help solve that.
 
 		$return = FALSE;
-		$handle = fopen($file, "r");
+		$handle = fopen($file, 'r');
 		if ( $head !== FALSE ) {
 			if ( $first_column !== FALSE ) {
 				while ( ($header = fgetcsv($handle, $len, $delim) ) !== FALSE) {
@@ -1411,6 +1429,56 @@ class Misc {
 		return $domain;
 	}
 
+	//Checks if the domain the user is seeing in their browser matches the configured domain that should be used.
+	//If not we can then do a redirect.
+	static function checkValidDomain() {
+		global $config_vars;
+
+		if ( PRODUCTION == TRUE AND isset($config_vars['other']['enable_csrf_validation']) AND $config_vars['other']['enable_csrf_validation'] == TRUE ) {
+			//Use HTTP_HOST rather than getHostName() as the same site can be referenced with multiple different host names
+			//Especially considering on-site installs that default to 'localhost'
+			//If deployment ondemand is set, then we assume SERVER_NAME is correct and revert to using that instead of HTTP_HOST which has potential to be forged.
+			//Apache's UseCanonicalName On configuration directive can help ensure the SERVER_NAME is always correct and not masked.
+			if ( DEPLOYMENT_ON_DEMAND == FALSE AND isset( $_SERVER['HTTP_HOST'] ) ) {
+				$host_name = $_SERVER['HTTP_HOST'];
+			} elseif ( isset( $_SERVER['SERVER_NAME'] ) ) {
+				$host_name = $_SERVER['SERVER_NAME'];
+			} elseif ( isset( $_SERVER['HOSTNAME'] ) ) {
+				$host_name = $_SERVER['HOSTNAME'];
+			} else {
+				$host_name = '';
+			}
+
+			global $config_vars;
+			if ( isset($config_vars['other']['hostname']) AND $config_vars['other']['hostname'] != '' ) {
+				$search_result = strpos( $config_vars['other']['hostname'], $host_name );
+				if ( $search_result === FALSE OR (int)$search_result >= 8 ) { //Check to see if .ini hostname is found within SERVER_NAME in less than the first 8 chars, so we ignore https://.
+					$redirect_url = Misc::getURLProtocol() .'://'. Misc::getHostName() . Environment::getDefaultInterfaceBaseURL();
+					Debug::Text( 'Web Server Hostname: '. $host_name .' does not match .ini specified hostname: '. $config_vars['other']['hostname'] .' Redirect: '. $redirect_url, __FILE__, __LINE__, __METHOD__, 10);
+
+					$rl = TTNew('RateLimit');
+					$rl->setID( 'authentication_'.$_SERVER['REMOTE_ADDR'] );
+					$rl->setAllowedCalls( 5 );
+					$rl->setTimeFrame( 60 ); //1 minute
+
+					sleep(1); //Help prevent fast redirect loops.
+					if ( $rl->check() == FALSE ) {
+						Debug::Text('ERROR: Excessive redirects... sending to down for maintenance page to stop the loop: '. $_SERVER['REMOTE_ADDR'] .' for up to 1 minutes...', __FILE__, __LINE__, __METHOD__, 10);
+						Redirect::Page( URLBuilder::getURL( array('exception' => 'domain_redirect_loop' ), Environment::getBaseURL().'DownForMaintenance.php') );
+					} else {
+						Redirect::Page( URLBuilder::getURL( NULL, $redirect_url ) );
+					}
+				}
+				//else {
+				//	Debug::Text( 'Domain matches!', __FILE__, __LINE__, __METHOD__, 10);
+				//}
+
+			}
+		}
+
+		return TRUE;
+	}
+
 	//Checks refer to help mitigate CSRF attacks.
 	static function checkValidReferer( $referer = FALSE ) {
 		global $config_vars;
@@ -1437,6 +1505,7 @@ class Misc {
 			//Use HTTP_HOST rather than getHostName() as the same site can be referenced with multiple different host names
 			//Especially considering on-site installs that default to 'localhost'
 			//If deployment ondemand is set, then we assume SERVER_NAME is correct and revert to using that instead of HTTP_HOST which has potential to be forged.
+			//Apache's UseCanonicalName On configuration directive can help ensure the SERVER_NAME is always correct and not masked.
 			if ( DEPLOYMENT_ON_DEMAND == FALSE AND isset( $_SERVER['HTTP_HOST'] ) ) {
 				$host_name = $_SERVER['HTTP_HOST'];
 			} elseif ( isset( $_SERVER['SERVER_NAME'] ) ) {
@@ -1995,7 +2064,7 @@ class Misc {
 		}
 
 		//check if password is not all upper case
-		if ( strtoupper($password) == $password ) {
+		if ( strtoupper($password) != $password ) {
 			$strength++;
 		}
 
@@ -2004,7 +2073,7 @@ class Misc {
 			$strength++;
 		}
 
-		//check if lenth is 16-35 chars
+		//check if length is 16-35 chars
 		if ( $length >= 10 && $length <= 15 ) {
 			$strength += 2;
 		}
@@ -2034,6 +2103,19 @@ class Misc {
 		return $strength;
 	}
 
+	static function getCurrentCompanyProductEdition() {
+		//Attempt to get the edition of the currently logged in users company, so we can better tailor the columns to them.
+		$product_edition_id = getTTProductEdition();
+		if ( $product_edition_id >= TT_PRODUCT_PROFESSIONAL ) {
+			global $current_company;
+			if ( isset($current_company) AND is_object($current_company) ) {
+				$product_edition_id = $current_company->getProductEdition();
+			}
+		}
+
+		return $product_edition_id;
+	}
+
 	static function redirectMobileBrowser() {
 		extract( FormVariables::GetVariables( array('desktop') ) );
 		if ( !isset($desktop) ) {
@@ -2041,12 +2123,8 @@ class Misc {
 		}
 		if ( getTTProductEdition() != TT_PRODUCT_COMMUNITY AND $desktop != 1 ) {
 			$browser = self::detectMobileBrowser();
-			if ( $browser == 'ios' ) {
-				Redirect::Page( URLBuilder::getURL( NULL, Environment::getBaseURL().'/iphone/punch/punch.php' ) );
-			} elseif ( $browser == 'html5' OR $browser == 'android'	 ) {
+			if ( $browser == 'ios' OR $browser == 'html5' OR $browser == 'android' ) {
 				Redirect::Page( URLBuilder::getURL( NULL, Environment::getBaseURL().'/quick_punch/QuickPunchLogin.php' ) );
-			} elseif ( $browser == 'wap' ) {
-				Redirect::Page( URLBuilder::getURL( NULL, Environment::getBaseURL().'/wap/WAPPunch.php' ) );
 			}
 		} else {
 			Debug::Text('Desktop browser override: '. (int)$desktop, __FILE__, __LINE__, __METHOD__, 10);
@@ -2382,7 +2460,7 @@ class Misc {
 		return TRUE; //Isnt an image, don't bother processing...
 	}
 
-	static function formatAddress( $name, $address1 = FALSE, $address2 = FALSE, $city = FALSE, $province = FALSE, $postal_code = FALSE ) {
+	static function formatAddress( $name, $address1 = FALSE, $address2 = FALSE, $city = FALSE, $province = FALSE, $postal_code = FALSE, $country = FALSE ) {
 		if ( $name != '' ) {
 			$retarr[] = $name;
 		}
@@ -2395,6 +2473,9 @@ class Misc {
 		}
 
 		if ( $city != '' ) {
+			if ( $province != '' ) {
+				$city .= ',';
+			}
 			$city_arr[] = $city;
 		}
 		if ( $province != '' ) {
@@ -2406,6 +2487,10 @@ class Misc {
 
 		if ( is_array($city_arr) ) {
 			$retarr[] = implode(' ', $city_arr);
+		}
+
+		if ( $country != '' ) {
+			$retarr[] = $country;
 		}
 		
 		return implode("\n", $retarr );

@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14568 $
- * $Id: AJAX_Server.class.php 14568 2014-09-26 16:32:15Z mikeb $
- * $Date: 2014-09-26 09:32:15 -0700 (Fri, 26 Sep 2014) $
- */
+
 
 /**
  * @package Core

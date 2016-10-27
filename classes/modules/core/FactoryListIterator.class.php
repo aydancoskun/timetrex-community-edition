@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 11809 $
- * $Id: FactoryListIterator.class.php 11809 2013-12-26 19:03:25Z mikeb $
- * $Date: 2013-12-26 11:03:25 -0800 (Thu, 26 Dec 2013) $
- */
+
 
 /**
  * @package Core

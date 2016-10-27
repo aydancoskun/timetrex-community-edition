@@ -739,6 +739,7 @@
             }
 
             var p = $.extend( true, {
+	            keep_scroll_place:false, //Kevin add
                 url: "",
                 height: 150,
                 page: 1,
@@ -4003,13 +4004,16 @@
                     }
 
                     cr = 0;
-                    if ( hs ) {
+
+                    if ( hs || $t.p.keep_scroll_place) {
                         if ( nwidth - gw - (initwidth + brd * vc) !== scw ) {
                             cr = nwidth - gw - (initwidth + brd * vc) - scw;
                         }
                     } else if ( Math.abs( nwidth - gw - (initwidth + brd * vc) ) !== 1 ) {
                         cr = nwidth - gw - (initwidth + brd * vc);
                     }
+
+
                     $t.p.colModel[lvc].width += cr;
                     $t.p.tblwidth = initwidth + cr + brd * vc + gw;
                     if ( $t.p.tblwidth > nwidth ) {
@@ -4279,7 +4283,12 @@
                 $t.p.reccount = 0;
                 $t.p.data = [];
                 $t.p._index = {};
-                $t.updatepager( true, false );
+
+                //Error: TypeError: $t.updatepager is not a function in https://ondemand2001.timetrex.com/interface/html5/framework/widgets/jqgrid/jquery.jqGrid.src.js?v=7.4.6-20141027-085016 line 4282
+                if($t.updatepager && typeof($t.updatepager) === 'function'){
+                    $t.updatepager( true, false );
+                }
+
             } );
         },
         getInd: function( rowid, rc ) {

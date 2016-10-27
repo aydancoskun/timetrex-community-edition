@@ -53,33 +53,36 @@ ALayoutCache.buildDefaultColumns = function() {
 	default_columns[ALayoutIDs.OPTION_COLUMN] = [
 		{label: 'Name', value: 'label'}
 	];
+	default_columns[ALayoutIDs.ABSENCE] = [
+		{label: 'Name', value: 'name'},
+		{label: 'Date', value: 'date_stamp'}
+	];
 	default_columns[ALayoutIDs.TIMESHEET] = [
-		{label: 'First Name', value: 'first_name'},
-		{label: 'Last Name', value: 'last_name'},
 		{label: 'Time', value: 'punch_time'},
 		{label: 'In/Out', value: 'status'},
 		{label: 'Punch Type', value: 'type'}
+
 	];
 	default_columns[ALayoutIDs.USER] = [
-		{label: 'First Name', value: 'first_name'} ,
+		{label: 'First Name', value: 'first_name'},
 		{label: 'Last Name', value: 'last_name'},
 		{label: 'Status', value: 'status'}
 	];
 
 	default_columns[ALayoutIDs.MESSAGE_USER] = [
-		{label: 'First Name', value: 'first_name'} ,
+		{label: 'First Name', value: 'first_name'},
 		{label: 'Last Name', value: 'last_name'},
 		{label: 'Status', value: 'status'}
 	];
 
 	default_columns[ALayoutIDs.USER_CONTACT] = [
-		{label: 'First Name', value: 'first_name'} ,
+		{label: 'First Name', value: 'first_name'},
 		{label: 'Last Name', value: 'last_name'}
 	];
 	default_columns[ALayoutIDs.WAGE] = [
-		{label: 'First Name', value: 'first_name'} ,
-		{label: 'Last Name', value: 'last_name'} ,
-		{label: 'Type', value: 'type'} ,
+		{label: 'First Name', value: 'first_name'},
+		{label: 'Last Name', value: 'last_name'},
+		{label: 'Type', value: 'type'},
 		{label: 'Wage', value: 'wage'}
 	];
 	default_columns[ALayoutIDs.LOG] = [
@@ -93,16 +96,16 @@ ALayoutCache.buildDefaultColumns = function() {
 		{label: 'Account Name', value: 'account'}
 	];
 	default_columns[ALayoutIDs.TREE_COLUMN] = [
-		{label: '', value: 'id'} ,
+		{label: '', value: 'id'},
 		{label: 'Name', value: 'name'}
 	];
 
 	default_columns[ALayoutIDs.SORT_COLUMN] = [
-		{label: 'Column Name', value: 'label'} ,
+		{label: 'Column Name', value: 'label'},
 		{label: 'Sort', value: 'sort'}
 	];
 	default_columns[ALayoutIDs.PAY_PERIOD] = [
-		{label: 'Start Date', value: 'start_date'} ,
+		{label: 'Start Date', value: 'start_date'},
 		{label: 'End Date', value: 'end_date'},
 		{label: 'Pay Period Schedule', value: 'pay_period_schedule'}
 

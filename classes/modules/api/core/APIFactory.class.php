@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 266 $
- * $Id: Factory.class.php 266 2006-10-18 16:39:30Z ipso $
- * $Date: 2006-10-18 09:39:30 -0700 (Wed, 18 Oct 2006) $
- */
+
 
 /**
  * @package API\Core
@@ -292,7 +288,7 @@ abstract class APIFactory {
 
 				//Handle progress bar here, make sure they are stopped and if an error occurs display the error.
 				if ( $retval === FALSE ) {
-					$this->getProgressBarObject()->start( $this->getAMFMessageID(), 9999, 9999, $description );
+					$this->getProgressBarObject()->error( $this->getAMFMessageID(), $description );
 				} else {
 					$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 				}

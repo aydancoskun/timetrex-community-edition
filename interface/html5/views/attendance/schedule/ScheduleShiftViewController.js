@@ -90,10 +90,11 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'Schedule' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_schedule': $.i18n._( 'Schedule' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
+
 
 		var form_item_input;
 		var widgetContainer;
@@ -112,13 +113,13 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_schedule = this.edit_view_tab.find( '#tab_schedule' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_schedule_column1 = tab_schedule.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_schedule_column1 );
 
 		// Employee
 		// Employees
@@ -143,14 +144,14 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		var default_args = {};
 		default_args.permission_section = 'schedule';
 		form_item_input.setDefaultArgs( default_args );
-		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_schedule_column1, '' );
 
 		// Status
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {field: 'status_id'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.schedule_status_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_schedule_column1 );
 
 		// Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
@@ -162,7 +163,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab0_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_schedule_column1, '', widgetContainer );
 
 		// In
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -174,7 +175,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'In' ), form_item_input, tab0_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'In' ), form_item_input, tab_schedule_column1, '', widgetContainer );
 
 		// Out
 
@@ -187,12 +188,12 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Out' ), form_item_input, tab0_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Out' ), form_item_input, tab_schedule_column1, '', widgetContainer );
 
 		// Total
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'total_time'} );
-		this.addEditFieldToColumn( $.i18n._( 'Total' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Total' ), form_item_input, tab_schedule_column1 );
 
 		// Schedule Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -205,7 +206,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'schedule_policy_id'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Schedule Policy' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Schedule Policy' ), form_item_input, tab_schedule_column1 );
 
 		//Absence Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -223,7 +224,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			return $this.setAbsencePolicyFilter( filter );
 		};
 
-		this.addEditFieldToColumn( $.i18n._( 'Absence Policy' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Absence Policy' ), form_item_input, tab_schedule_column1, '', null, true );
 
 		// Available Balance
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
@@ -239,7 +240,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		widgetContainer.append( icon );
 		widgetContainer.append( balance_content );
 
-		this.addEditFieldToColumn( $.i18n._( 'Available Balance' ), form_item_input, tab0_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Available Balance' ), form_item_input, tab_schedule_column1, '', widgetContainer, true );
 
 		// Branch
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -252,7 +253,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'branch_id'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Branch' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Branch' ), form_item_input, tab_schedule_column1 );
 
 		// Department
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -265,7 +266,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'department_id'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Department' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Department' ), form_item_input, tab_schedule_column1 );
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 			//Job
@@ -292,7 +293,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 			widgetContainer.append( job_coder );
 			widgetContainer.append( form_item_input );
-			this.addEditFieldToColumn( $.i18n._( 'Job' ), [form_item_input, job_coder], tab0_column1, '', widgetContainer );
+			this.addEditFieldToColumn( $.i18n._( 'Job' ), [form_item_input, job_coder], tab_schedule_column1, '', widgetContainer );
 
 			// Task
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -318,14 +319,15 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 			widgetContainer.append( job_item_coder );
 			widgetContainer.append( form_item_input );
-			this.addEditFieldToColumn( $.i18n._( 'Task' ), [form_item_input, job_item_coder], tab0_column1, '', widgetContainer );
+			this.addEditFieldToColumn( $.i18n._( 'Task' ), [form_item_input, job_item_coder], tab_schedule_column1, '', widgetContainer );
 
 		}
 
 		//Note
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
-		form_item_input.TTextArea( {field: 'note'} );
-		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab0_column1, '', null, null, true );
+		form_item_input.TTextArea( {field: 'note', width: '100%' } );
+		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_schedule_column1, '', null, null, true );
+		form_item_input.parent().width( '45%' );
 
 	},
 
@@ -720,6 +722,10 @@ ScheduleShiftViewController = BaseViewController.extend( {
 	},
 
 	setCurrentEditRecordData: function() {
+		// When mass editing, these fields may not be the common data, so their value will be undefined, so this will cause their change event cannot work properly.
+		this.setDefaultData( {
+			'status_id': 10
+		} );
 
 		if ( this.current_edit_record.id || this.is_mass_editing ) {
 			this.edit_view_ui_dic.user_id.setAllowMultipleSelection( false );
@@ -774,7 +780,8 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		var startTime = ( this.current_edit_record['date_stamp'] ) ? this.current_edit_record['date_stamp'] + ' ' + this.current_edit_record['start_time'] : ( (this.current_edit_record['start_time']) ? this.current_edit_record['start_time'] : ''  );
 		var endTime = ( this.current_edit_record['date_stamp'] ) ? this.current_edit_record['date_stamp'] + ' ' + this.current_edit_record['end_time'] : ( (this.current_edit_record['end_time']) ? this.current_edit_record['end_time'] : '' );
 		var schedulePolicyId = ( this.current_edit_record['schedule_policy_id'] ) ? this.current_edit_record['schedule_policy_id'] : '';
-		this.total_time = this.api.getScheduleTotalTime( startTime, endTime, schedulePolicyId, {async: false} ).getResult();
+		var user_id = this.current_edit_record.user_id;
+		this.total_time = this.api.getScheduleTotalTime( startTime, endTime, schedulePolicyId, user_id, {async: false} ).getResult();
 		var total_time = Global.secondToHHMMSS( this.total_time );
 
 		this.edit_view_ui_dic['total_time'].setValue( total_time );
@@ -798,6 +805,8 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		} else if ( this.current_edit_record['status_id'] === 20 ) {
 			this.edit_view_form_item_dic['absence_policy_id'].css( 'display', 'block' );
 		}
+
+		this.editFieldResize();
 
 	}
 

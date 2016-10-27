@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14408 $
- * $Id: PolicyGroupListFactory.class.php 14408 2014-09-12 19:02:59Z mikeb $
- * $Date: 2014-09-12 12:02:59 -0700 (Fri, 12 Sep 2014) $
- */
+
 
 /**
  * @package Modules\Policy
@@ -135,6 +131,8 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 		$query .= $this->getSortSQL( $order );
 
 		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
 	}
 
 	function getByCompanyIdAndUserId($company_id, $user_ids, $where = NULL, $order = NULL) {
@@ -174,6 +172,8 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 		$query .= $this->getSortSQL( $order );
 
 		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
 	}
 
 	function getByCompanyId($id, $where = NULL, $order = NULL) {
@@ -201,6 +201,8 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 		$query .= $this->getSortSQL( $order );
 
 		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
 	}
 
 	function getSearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {

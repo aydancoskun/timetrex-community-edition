@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2408 $
- * $Id: MessageListFactory.class.php 2408 2009-02-04 01:03:51Z ipso $
- * $Date: 2009-02-03 17:03:51 -0800 (Tue, 03 Feb 2009) $
- */
+
 
 /**
  * @package Modules\Message
@@ -372,6 +368,9 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		$uf = new UserFactory();
 
 		$ph = array(
+					//'user_id' => $user_id,
+					//'user_id_b' => $user_id,
+					//'user_id_c' => $user_id,
 					'company_id' => $company_id,
 					'object_type_id' => $object_type_id,
 					'object_id' => $object_id,
@@ -383,17 +382,26 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		//The sub-selects are required so we attempt to return message_ids that were sent to the user currently viewing the messages, that way we can mark them as read.
 		//	without this we are unable to mark messages as read, because we are returning essentially random message_recipient id's.
 		//	Because PostgreSQL/MySQL don't come with first() aggregate functions, this is pretty much the fastest way to work around it.
+		//  NOTE: Need to list all columns in "a." table otherwise MySQL gets a duplicate column error.
 		$query = '
-					SELECT
-							_ADODB_COUNT
-							a.*,
-							( SELECT xx.id FROM message_recipient as zz LEFT JOIN message_sender as xx ON zz.message_sender_id = xx.id WHERE xx.message_control_id = a.id ORDER BY zz.user_id = '. (int)$user_id .' DESC LIMIT 1 ) as id,
-							( SELECT zz.status_id FROM message_recipient as zz LEFT JOIN message_sender as xx ON zz.message_sender_id = xx.id WHERE xx.message_control_id = a.id ORDER BY zz.user_id = '. (int)$user_id .' DESC LIMIT 1 ) as status_id,
+					SELECT	a.object_type_id,
+							a.object_id,
+							a.require_ack,
+							a.priority_id,
+							a.subject,
+							a.body,
+							(SELECT xx.id FROM message_recipient as zz LEFT JOIN message_sender as xx ON zz.message_sender_id = xx.id where xx.message_control_id = a.id ORDER BY zz.user_id = '. (int)$user_id .' DESC LIMIT 1 ) as id,
+							(SELECT zz.status_id FROM message_recipient as zz LEFT JOIN message_sender as xx ON zz.message_sender_id = xx.id where xx.message_control_id = a.id ORDER BY zz.user_id = '. (int)$user_id .' DESC LIMIT 1 ) as status_id,
 							b.user_id as from_user_id,
 							bb.first_name as from_first_name,
 							bb.middle_name as from_middle_name,
-							bb.last_name as from_last_name
-							_ADODB_COUNT
+							bb.last_name as from_last_name,
+							a.created_date,
+							a.created_by,
+							a.updated_date,
+							a.updated_by,
+							a.deleted_date,
+							a.deleted
 					FROM '. $this->getTable() .' as a
 						LEFT JOIN ( select message_control_id, min(a.id) as message_sender_id from '. $msf->getTable() .' as a group by a.message_control_id ) as z ON a.id = z.message_control_id
 						LEFT JOIN '. $msf->getTable() .'	as b ON b.id = z.message_sender_id
@@ -472,13 +480,24 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		//Make sure we don't display duplicate messages when it was sent to multiple superiors.
 		//Include messages even if sender/recipeints have deleted theirs.
 		$query = '
-					SELECT	a.*,
+					SELECT	a.object_type_id,
+							a.object_id,
+							a.require_ack,
+							a.priority_id,
+							a.subject,
+							a.body,
 							b.id as id,
 							c.status_id as status_id,
 							b.user_id as from_user_id,
 							bb.first_name as from_first_name,
 							bb.middle_name as from_middle_name,
-							bb.last_name as from_last_name
+							bb.last_name as from_last_name,
+							a.created_date,
+							a.created_by,
+							a.updated_date,
+							a.updated_by,
+							a.deleted_date,
+							a.deleted
 					FROM '. $this->getTable() .' as a
 						LEFT JOIN ( select message_control_id, min(a.id) as message_sender_id from '. $msf->getTable() .' as a group by a.message_control_id ) as z ON a.id = z.message_control_id
 						LEFT JOIN '. $msf->getTable() .'	as b ON b.id = z.message_sender_id

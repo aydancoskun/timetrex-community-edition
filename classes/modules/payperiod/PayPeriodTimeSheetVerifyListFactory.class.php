@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 15145 $
- * $Id: PayPeriodTimeSheetVerifyListFactory.class.php 15145 2014-11-13 22:42:19Z mikeb $
- * $Date: 2014-11-13 14:42:19 -0800 (Thu, 13 Nov 2014) $
- */
+
 
 /**
  * @package Modules\PayPeriod
@@ -315,7 +311,6 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 
 		$af = new AuthorizationFactory();
 		$ppf = new PayPeriodFactory();
-		//$udf = new UserDateFactory();
 		$huf = new HierarchyUserFactory();
 
 		$ph = array(

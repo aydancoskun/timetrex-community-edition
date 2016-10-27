@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2095 $
- * $Id: Sort.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
- */
+
 
 /**
  * @package Modules\Report
@@ -244,6 +240,9 @@ class RemittanceSummaryReport extends Report {
 				break;
 			case 'template_config':
 				$template = strtolower( Misc::trimSortPrefix( $params['template'] ) );
+
+				$retval['columns'] = array();
+				
 				if ( isset($template) AND $template != '' ) {
 					switch( $template ) {
 						case 'default':

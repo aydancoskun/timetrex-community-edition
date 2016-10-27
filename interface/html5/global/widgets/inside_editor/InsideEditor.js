@@ -66,13 +66,23 @@
 			last_tr.find( 'td' ).addClass( 'no-line' )
 		};
 
-		this.removeAllRows = function() {
+		this.removeAllRows = function( include_header ) {
 
 			var table = this.find( '.inside-editor-render' );
 			var trs = table.find( 'tr' );
-			while ( table.find( 'tr' ).length > 1 ) {
-				$( table.find( 'tr' )[1] ).remove();
+
+			if ( include_header ) {
+				table.find( 'tr' ).each( function() {
+					$(this ).remove();
+				} )
+
+			} else {
+				while ( table.find( 'tr' ).length > 1 ) {
+					$( table.find( 'tr' )[1] ).remove();
+				}
 			}
+
+
 
 			this.rows_widgets_array = [];
 		};

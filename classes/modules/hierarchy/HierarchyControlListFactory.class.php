@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 11925 $
- * $Id: HierarchyControlListFactory.class.php 11925 2014-01-08 00:13:44Z mikeb $
- * $Date: 2014-01-07 16:13:44 -0800 (Tue, 07 Jan 2014) $
- */
+
 
 /**
  * @package Modules\Hierarchy
@@ -306,37 +302,12 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
 
-		//$query .= ( isset($filter_data['document_id']) ) ? $this->getWhereClauseSQL( 'a.document_id', $filter_data['document_id'], 'numeric_list', $ph ) : NULL;
-
-		//$query .= ( isset($filter_data['revision']) ) ? $this->getWhereClauseSQL( 'a.revision', $filter_data['revision'], 'text', $ph ) : NULL;
-
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['description']) ) ? $this->getWhereClauseSQL( 'a.description', $filter_data['description'], 'text', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['object_type']) ) ? $this->getWhereClauseSQL( 'hotf.object_type_id', $filter_data['object_type'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['superior_user_id']) ) ? $this->getWhereClauseSQL( 'hlf.user_id', $filter_data['superior_user_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'huf.user_id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
-
-/*
-		if ( isset($filter_data['name']) AND !is_array($filter_data['name']) AND trim($filter_data['name']) != '' ) {
-			$ph[] = strtolower(trim($filter_data['name']));
-			$query	.=	' AND lower(a.name) LIKE ?';
-		}
-		if ( isset($filter_data['description']) AND !is_array($filter_data['description']) AND trim($filter_data['description']) != '' ) {
-			$ph[] = strtolower(trim($filter_data['description']));
-			$query	.=	' AND lower(a.description) LIKE ?';
-		}
-
-		if ( isset($filter_data['object_type']) AND isset($filter_data['object_type'][0]) AND !in_array(-1, (array)$filter_data['object_type']) ) {
-			$query	.=	' AND hotf.object_type_id in ('. $this->getListSQL($filter_data['object_type'], $ph) .') ';
-		}
-		if ( isset($filter_data['superior_user_id']) AND isset($filter_data['superior_user_id'][0]) AND !in_array(-1, (array)$filter_data['superior_user_id']) ) {
-			$query	.=	' AND hlf.user_id in ('. $this->getListSQL($filter_data['superior_user_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['user_id']) AND isset($filter_data['user_id'][0]) AND !in_array(-1, (array)$filter_data['user_id']) ) {
-			$query	.=	' AND huf.user_id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
-		}
-*/
 
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;

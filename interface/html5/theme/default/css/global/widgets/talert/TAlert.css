@@ -6,11 +6,11 @@
     border-left: 20px solid #355f87;;
     border-right: 20px solid #355f87;;
     position: absolute;
-    top: 50%;
+    top: 40%;
     left: 50%;
     margin: -130px 0 0 -130px;
     height: auto;
-    min-height: 100px;
+   
     width: 260px;
     font-size: 12px;
     text-align: center;
@@ -26,6 +26,12 @@
     /* For IE 5.5 - 7 */
     filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000');
 
+}
+
+.t-alert .content-div{
+    min-height: 100px;
+    max-height: 200px;
+    overflow: auto;
 }
 
 .t-alert .title {

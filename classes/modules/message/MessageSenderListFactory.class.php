@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2408 $
- * $Id: MessageListFactory.class.php 2408 2009-02-04 01:03:51Z ipso $
- * $Date: 2009-02-03 17:03:51 -0800 (Tue, 03 Feb 2009) $
- */
+
 
 /**
  * @package Modules\Message
@@ -158,35 +154,6 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 							c.company_id = ?
 							AND b.id in ('. $this->getListSQL($id, $ph) .')
 							AND ( b.deleted = 0 )
-					';
-		$this->ExecuteSQL( $query, $ph );
-
-		return $this;
-	}
-
-	function getByCompanyIdAndMessageControlId($company_id, $id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
-		}
-
-		if ( $id == '') {
-			return FALSE;
-		}
-
-		$uf = new UserFactory();
-
-		$ph = array(
-					'company_id' => $company_id,
-					);
-
-		$query = '
-					SELECT a.*
-					FROM '. $this->getTable() .' as a
-						LEFT JOIN '. $uf->getTable() .' as b ON a.user_id = b.id
-					WHERE
-							b.company_id = ?
-							AND a.message_control_id in ('. $this->getListSQL($id, $ph) .')
-							AND a.deleted = 0
 					';
 		$this->ExecuteSQL( $query, $ph );
 

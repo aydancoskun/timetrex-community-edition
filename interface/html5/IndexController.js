@@ -1,5 +1,4 @@
 var ApplicationRouter = Backbone.Router.extend( {
-
 	controller: null,
 
 	routes: {
@@ -55,6 +54,18 @@ var ApplicationRouter = Backbone.Router.extend( {
 			view_id = 'Login';
 		}
 
+		LocalCacheData.fullUrlParameterStr = viewName;
+
+		LocalCacheData.all_url_args = args;
+
+		if ( view_id == 'Install' ) {
+			IndexViewController.openWizard( 'InstallWizard', null, function() {
+				// need to link to the login interface.
+			} );
+
+			return;
+		}
+
 		var reg = new RegExp( '^[0-9]*$' );
 
 		if ( reg.test( args.id ) ) {
@@ -65,8 +76,6 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 		action = args.a;
 
-		LocalCacheData.all_url_args = args;
-
 		if ( LocalCacheData.current_open_view_id === view_id ) {
 
 			if ( LocalCacheData.current_open_primary_controller ) {
@@ -74,8 +83,11 @@ var ApplicationRouter = Backbone.Router.extend( {
 				if ( action ) {
 					switch ( action ) {
 						case 'edit':
+
+							//Error: Unable to get property 'id' of undefined or null reference in https://villa.timetrex.com/interface/html5/IndexController.js?v=8.0.0-20141230-125406 line 87
 							if ( !LocalCacheData.current_open_primary_controller.edit_view ||
-								(LocalCacheData.current_open_primary_controller.current_edit_record.id != edit_id) ) {
+								(LocalCacheData.current_open_primary_controller.current_edit_record &&
+								LocalCacheData.current_open_primary_controller.current_edit_record.id != edit_id) ) {
 
 								//Makes ure when doing copy_as_new, don't open this
 								if ( LocalCacheData.current_doing_context_action === 'edit' ) {
@@ -162,6 +174,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 			Global.setURLToBrowser( Global.getBaseURL() + '#!m=Login' );
 			return;
 		} else if ( view_id !== 'Login' && Global.isSet( view_id ) ) {
+
 			if ( !TopMenuManager.ribbon_menus ) {
 				TopMenuManager.initRibbonMenu();
 				TopMenuManager.selected_sub_menu_id = view_id;
@@ -343,7 +356,10 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 		Global.loadScript( 'global/widgets/ribbon/RibbonViewController.js' );
 
-		RibbonViewController.loadView();
+		//Error: ReferenceError: Can't find variable: RibbonViewController in https://ondemand1.timetrex.com/interface/html5/IndexController.js?v=8.0.0-20141117-091433 line 346
+		if ( Global.isSet( RibbonViewController ) ) {
+			RibbonViewController.loadView();
+		}
 
 	},
 
@@ -359,7 +375,6 @@ var ApplicationRouter = Backbone.Router.extend( {
 			}
 		}
 	}
-
 
 } );
 
@@ -428,7 +443,6 @@ IndexViewController.goToViewByViewLabel = function( view_label ) {
 };
 
 IndexViewController.openWizard = function( wizardName, defaultData, callBack ) {
-
 	BaseWizardController.default_data = defaultData;
 	BaseWizardController.call_back = callBack;
 	switch ( wizardName ) {
@@ -526,17 +540,24 @@ IndexViewController.setNotificationBar = function( target ) {
 
 	var api = new (APIFactory.getAPIClass( 'APINotification' ))();
 
-	api.getNotification( target, {onResult: function( result ) {
-		var result_data = result.getResult();
+	//Error: TypeError: api.getNotification is not a function in https://ondemand2001.timetrex.com/interface/html5/IndexController.js?v=8.0.0-20141117-095711 line 529
+	if ( !api || !api.getNotification || typeof(api.getNotification) !== 'function' ) {
+		return;
+	}
 
-		if ( !LocalCacheData.notification_bar ) {
-			var notification_box_tpl = $( Global.loadWidgetByName( WidgetNamesDic.NOTIFICATION_BAR ) );
-			LocalCacheData.notification_bar = notification_box_tpl.TopNotification();
+	api.getNotification( target, {
+		onResult: function( result ) {
+			var result_data = result.getResult();
+
+			if ( !LocalCacheData.notification_bar ) {
+				var notification_box_tpl = $( Global.loadWidgetByName( WidgetNamesDic.NOTIFICATION_BAR ) );
+				LocalCacheData.notification_bar = notification_box_tpl.TopNotification();
+			}
+
+			LocalCacheData.notification_bar.show( result_data );
+
 		}
-
-		LocalCacheData.notification_bar.show( result_data );
-
-	}} );
+	} );
 
 };
 

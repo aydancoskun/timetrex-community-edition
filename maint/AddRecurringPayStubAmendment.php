@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14280 $
- * $Id: AddRecurringPayStubAmendment.php 14280 2014-08-29 16:43:40Z mikeb $
- * $Date: 2014-08-29 09:43:40 -0700 (Fri, 29 Aug 2014) $
- */
+
 /*
  * Adds all recurring PS amendments
  * This file should be run once a day.

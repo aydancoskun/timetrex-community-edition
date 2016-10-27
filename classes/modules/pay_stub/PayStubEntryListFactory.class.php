@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14958 $
- * $Id: PayStubEntryListFactory.class.php 14958 2014-10-28 14:00:49Z mikeb $
- * $Date: 2014-10-28 07:00:49 -0700 (Tue, 28 Oct 2014) $
- */
+
 
 /**
  * @package Modules\PayStub
@@ -103,6 +99,90 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
+	}
+
+
+	function getByIdAndCompanyId( $id, $company_id, $where = NULL, $order = NULL) {
+
+		if ( $id == '' ) {
+			return FALSE;
+		}
+
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$uf = new UserFactory();
+		$psf = new PayStubFactory();
+
+		$ph = array(
+			'id' => $id,
+			'company_id' => $company_id,
+		);
+
+		$query = '
+					SELECT a.*
+					FROM '. $this->getTable() .' as a
+						LEFT JOIN '. $psf->getTable() .' as psf ON a.pay_stub_id = psf.id
+						LEFT JOIN '. $uf->getTable() .' as uf ON psf.user_id = uf.id
+					WHERE
+							a.id = ?
+							AND
+							uf.company_id = ?
+							AND ( a.deleted = 0 AND psf.deleted = 0 AND uf.deleted = 0)
+					';
+
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getByIdAndPayStubIdAndCompanyId( $id, $pay_stub_id, $company_id, $where = NULL, $order = NULL ) {
+		if ( $id == '' ) {
+			return FALSE;
+		}
+
+		if ( $pay_stub_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$uf = new UserFactory();
+		$psf = new PayStubFactory();
+
+		$ph = array(
+			'id' => $id,
+			'pay_stub_id' => $pay_stub_id,
+			'company_id' => $company_id,
+		);
+
+
+		$query = '
+					SELECT a.*
+					FROM '. $this->getTable() .' as a
+						LEFT JOIN '. $psf->getTable() .' as psf ON a.pay_stub_id = psf.id
+						LEFT JOIN '. $uf->getTable() .' as uf ON psf.user_id = uf.id
+					WHERE
+							a.id = ? AND a.pay_stub_id = ?
+							AND
+							uf.company_id = ?
+							AND ( a.deleted = 0 AND psf.deleted = 0 AND uf.deleted = 0)
+					';
+
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+
+
 	}
 
 	function getByPayStubId($id, $where = NULL, $order = NULL) {
@@ -268,6 +348,8 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		return $this;
 	}
 
+
+
 	function getAmountSumByPayStubIdAndEntryNameID($id, $entry_name_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
@@ -349,6 +431,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 
 		return $this;
 	}
+
 
 	function getYTDAmountSumByUserIdAndTypeIdAndDate($id, $type_id, $date = NULL, $exclude_id = NULL, $where = NULL, $order = NULL) {
 		if ( $id == '') {
@@ -1297,7 +1380,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		$ppsuf = new PayPeriodScheduleUserFactory();
 		$psf = new PayStubFactory();
 		$uf = new UserFactory();
-		$udf = new UserDateFactory();
+		$udtf = new UserDateTotalFactory();
 
 		$ph = array(
 					'start_date' => $this->db->BindTimeStamp( $start_date ),
@@ -1352,7 +1435,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 					where y.id = ?
 						AND x.start_date >= ?
 						AND x.start_date < ?
-						AND EXISTS (select 1 from '. $udf->getTable() .' as ud WHERE x.id = ud.pay_period_id AND y.id = ud.user_id )
+						AND EXISTS (select 1 from '. $udtf->getTable() .' as ud WHERE x.id = ud.pay_period_id AND y.id = ud.user_id )
 						AND x.deleted = 0
 				';
 
@@ -1420,6 +1503,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 
 		return $this;
 	}
+
 
 	function getReportByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
@@ -1507,10 +1591,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 							b.end_date as pay_stub_end_date,
 							b.transaction_date as pay_stub_transaction_date,
 							b.currency_id as currency_id,
-							b.currency_rate as currency_rate,
-							a.pay_stub_entry_name_id as pay_stub_entry_name_id,
-							a.amount as amount,
-							a.ytd_amount as ytd_amount
+							b.currency_rate as currency_rate
 					from	(
 							select aa.pay_stub_id as pay_stub_id,
 								aa.pay_stub_entry_name_id as pay_stub_entry_name_id,
@@ -1657,12 +1738,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 							b.end_date as pay_stub_end_date,
 							b.transaction_date as pay_stub_transaction_date,
 							b.currency_id as currency_id,
-							b.currency_rate as currency_rate,
-							a.pay_stub_entry_name_id as pay_stub_entry_name_id,
-							a.rate as rate,
-							a.units as units,
-							a.amount as amount,
-							a.ytd_amount as ytd_amount
+							b.currency_rate as currency_rate
 					from	(
 							select aa.pay_stub_id as pay_stub_id,
 								aa.pay_stub_entry_name_id as pay_stub_entry_name_id,
@@ -1894,6 +1970,61 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 
 		return $this;
 	}
+
+	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$strict = TRUE;
+		if ( $order == NULL ) {
+			$strict = FALSE;
+
+			$order = array( 'b.ps_order' => 'asc', 'abs(a.ytd_amount)' => 'asc', 'a.id' => 'asc' );
+		}
+
+		$uf = new UserFactory();
+		$psf = new PayStubFactory();
+		$psealf = new PayStubEntryAccountListFactory();
+		$psalf = new PayStubAmendmentListFactory();
+
+		$ph = array(
+			'company_id' => $company_id,
+		);
+
+		$query = '
+					select	a.*,
+							b.type_id,
+							b.name
+					FROM	'. $this->getTable() .' as a
+						LEFT JOIN '. $psealf->getTable() .' as b ON ( a.pay_stub_entry_name_id = b.id AND b.deleted = 0 )
+						LEFT JOIN '. $psalf->getTable() .' as c ON ( a.pay_stub_amendment_id = c.id AND c.deleted = 0 )
+						LEFT JOIN '. $psf->getTable() .' as d ON ( a.pay_stub_id = d.id AND d.deleted = 0 )
+						LEFT JOIN '. $uf->getTable() .' as uf ON ( d.user_id = uf.id AND uf.deleted = 0 )
+					where	uf.company_id = ?';
+
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['pay_stub_id']) ) ? $this->getWhereClauseSQL( 'a.pay_stub_id', $filter_data['pay_stub_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['pay_stub_entry_name_id']) ) ? $this->getWhereClauseSQL( 'b.id', $filter_data['pay_stub_entry_name_id'], 'numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'b.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'b.name', $filter_data['name'], 'text', $ph ) : NULL;
+		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'd.pay_period_id', $filter_data['pay_period_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'd.user_id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
+
+		$query .=	' AND a.deleted = 0 ';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		return $this;
+	}
+
 
 }
 ?>

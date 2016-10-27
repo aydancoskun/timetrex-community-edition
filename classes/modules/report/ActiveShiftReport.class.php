@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2095 $
- * $Id: Sort.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
- */
+
 
 /**
  * @package Modules\Report
@@ -642,13 +638,13 @@ class ActiveShiftReport extends Report {
 		Debug::Text(' Active Shift Rows: '. $plf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $plf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $plf as $key => $p_obj ) {
-			$this->tmp_data['punch'][$p_obj->getColumn('user_id')] = (array)$p_obj->getObjectAsArray( $this->getColumnDataConfig() );
+			$this->tmp_data['punch'][$p_obj->getUser()] = (array)$p_obj->getObjectAsArray( $this->getColumnDataConfig() );
 			if ( $p_obj->getStatus() == 10 ) {
-				$this->tmp_data['punch'][$p_obj->getColumn('user_id')]['_bgcolor'] = array(225, 255, 225);
-				//$this->tmp_data['punch'][$p_obj->getColumn('user_id')]['_fontcolor'] = array(25, 225, 25); //Green
+				$this->tmp_data['punch'][$p_obj->getUser()]['_bgcolor'] = array(225, 255, 225);
+				//$this->tmp_data['punch'][$p_obj->getUser()]['_fontcolor'] = array(25, 225, 25); //Green
 			} else {
-				$this->tmp_data['punch'][$p_obj->getColumn('user_id')]['_bgcolor'] = array(255, 225, 225);
-				//$this->tmp_data['punch'][$p_obj->getColumn('user_id')]['_fontcolor'] = array(225, 25, 25); //Red
+				$this->tmp_data['punch'][$p_obj->getUser()]['_bgcolor'] = array(255, 225, 225);
+				//$this->tmp_data['punch'][$p_obj->getUser()]['_fontcolor'] = array(225, 25, 25); //Red
 			}
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}

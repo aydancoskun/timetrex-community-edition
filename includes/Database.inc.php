@@ -34,11 +34,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 13548 $
- * $Id: Database.inc.php 13548 2014-06-30 15:32:39Z mikeb $
- * $Date: 2014-06-30 08:32:39 -0700 (Mon, 30 Jun 2014) $
- */
+
 require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'adodb'. DIRECTORY_SEPARATOR .'adodb.inc.php');
 require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'adodb'. DIRECTORY_SEPARATOR .'adodb-exceptions.inc.php');
 
@@ -72,7 +68,15 @@ if ( !isset($disable_database_connection) ) {
 			)
 			*/
 			if ( Debug::getVerbosity() == 11 ) {
-				$db->debug = TRUE;
+				$ADODB_OUTP = 'ADODBDebug';
+				function ADODBDebug( $msg, $newline = TRUE ) {
+					Debug::Text( html_entity_decode( strip_tags( $msg ) ), __FILE__, __LINE__, __METHOD__, 11);
+					return TRUE;
+				}
+
+				//Use 1 instead of TRUE, so it only outputs some debugging and not things like backtraces for every cache read/write.
+				//Set to 99 to get all debug output.
+				$db->debug = 1;
 			}
 
 			//Make sure when inserting times we always include the timezone.

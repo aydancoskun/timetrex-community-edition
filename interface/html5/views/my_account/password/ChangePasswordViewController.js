@@ -125,18 +125,18 @@ ChangePasswordViewController = BaseViewController.extend( {
 		if ( this.showPassword ) {
 //			this.edit_view_tab.tabs( 'select', 0 );
 			this.editFieldResize( 0 );
-			$( this.edit_view_tab.find( 'ul li' )[0] ).show();
+			$( this.edit_view_tab.find( 'ul li a[ref="tab_web_password"]' ) ).parent().show();
 
 		} else {
-			$( this.edit_view_tab.find( 'ul li' )[0] ).hide();
+			$( this.edit_view_tab.find( 'ul li a[ref="tab_web_password"]' ) ).parent().hide();
 		}
 
 		if ( this.showPhonePassword ) {
 			this.edit_view_tab.tabs( 'select', 1 );
 			this.editFieldResize( 1 );
-			$( this.edit_view_tab.find( 'ul li' )[1] ).show();
+			$( this.edit_view_tab.find( 'ul li a[ref="tab_quick_punch_password"]' ) ).parent().show();
 		} else {
-			$( this.edit_view_tab.find( 'ul li' )[1] ).hide();
+			$( this.edit_view_tab.find( 'ul li a[ref="tab_quick_punch_password"]' ) ).parent().hide();
 		}
 
 		if ( this.showPassword ) {
@@ -287,70 +287,70 @@ ChangePasswordViewController = BaseViewController.extend( {
 		var $this = this;
 		this._super( 'buildEditViewUI' );
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'Web Password' ) );
-		tab_1_label.text( $.i18n._( 'Quick Punch Password' ) );
+		this.setTabLabels( {
+			'tab_web_password': $.i18n._( 'Web Password' ),
+			'tab_quick_punch_password': $.i18n._( 'Quick Punch Password' )
+		} );
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_web_password = this.edit_view_tab.find( '#tab_web_password' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_web_password_column1 = tab_web_password.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_web_password_column1 );
 
 		// User Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'user_name'} );
-		this.addEditFieldToColumn( $.i18n._( 'User Name' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'User Name' ), form_item_input, tab_web_password_column1, '' );
 
 		// Current Password
 		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
 		form_item_input.TPasswordInput( {field: 'web.current_password', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'Current Password' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Current Password' ), form_item_input, tab_web_password_column1 );
 
 		// New Password
 		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
 		form_item_input.TPasswordInput( {field: 'web.password', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'New Password' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'New Password' ), form_item_input, tab_web_password_column1 );
 
 		// New Password(confirm)
 		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
 		form_item_input.TPasswordInput( {field: 'web.password2', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'New Password(confirm)' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'New Password(confirm)' ), form_item_input, tab_web_password_column1, '' );
 
 		//Tab 1 start
 
-		var tab1 = this.edit_view_tab.find( '#tab1' );
+		var tab_quick_punch_password = this.edit_view_tab.find( '#tab_quick_punch_password' );
 
-		var tab1_column1 = tab1.find( '.first-column' );
+		var tab_quick_punch_password_column1 = tab_quick_punch_password.find( '.first-column' );
 
 		this.edit_view_tabs[1] = [];
 
-		this.edit_view_tabs[1].push( tab1_column1 );
+		this.edit_view_tabs[1].push( tab_quick_punch_password_column1 );
 
 		// Quick Punch ID
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'phone_id'} );
-		this.addEditFieldToColumn( $.i18n._( 'Quick Punch ID' ), form_item_input, tab1_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Quick Punch ID' ), form_item_input, tab_quick_punch_password_column1, '' );
 
 		// Current Password
 		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
 		form_item_input.TPasswordInput( {field: 'phone.current_password', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'Current Password' ), form_item_input, tab1_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Current Password' ), form_item_input, tab_quick_punch_password_column1 );
 
 		// New Password
 		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
 		form_item_input.TPasswordInput( {field: 'phone.password', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'New Password' ), form_item_input, tab1_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'New Password' ), form_item_input, tab_quick_punch_password_column1 );
 
 		// New Password(confirm)
 		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
 		form_item_input.TPasswordInput( {field: 'phone.password2', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'New Password(confirm)' ), form_item_input, tab1_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'New Password(confirm)' ), form_item_input, tab_quick_punch_password_column1, '' );
 
 	}
 

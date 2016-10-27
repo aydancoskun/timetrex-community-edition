@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2095 $
- * $Id: PolicyGroupAccrualPolicyFactory.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
- */
+
 
 /**
  * @package Modules\Policy
@@ -142,12 +138,11 @@ class CompanyGenericTagMapFactory extends Factory {
 	}
 
 	static function setTags( $company_id, $object_type_id, $object_id, $tags ) {
-		Debug::text('Setting Tags: Company: '. $company_id .' Object Type: '. $object_type_id .' Object: '. $object_type_id .' Tags: '. $tags, __FILE__, __LINE__, __METHOD__, 10);
-
 		if ( $object_id > 0 ) {
 			//Parse tags
 			$parsed_tags = CompanyGenericTagFactory::parseTags( $tags );
 			if ( is_array($parsed_tags) ) {
+				Debug::text('Setting Tags: Company: '. $company_id .' Object Type: '. $object_type_id .' Object: '. $object_type_id .' Tags: '. $tags, __FILE__, __LINE__, __METHOD__, 10);
 
 				$existing_tags = CompanyGenericTagFactory::getOrCreateTags( $company_id, $object_type_id, $parsed_tags );
 				$existing_tag_ids = array_values( (array)$existing_tags );

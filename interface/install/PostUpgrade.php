@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 9755 $
- * $Id: PostUpgrade.php 9755 2013-05-03 20:34:30Z ipso $
- * $Date: 2013-05-03 13:34:30 -0700 (Fri, 03 May 2013) $
- */
+
 require_once('../../includes/global.inc.php');
 
 $authenticate=FALSE;

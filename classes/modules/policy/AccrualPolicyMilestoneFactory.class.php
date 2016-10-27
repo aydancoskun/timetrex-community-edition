@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 12860 $
- * $Id: AccrualPolicyMilestoneFactory.class.php 12860 2014-04-04 19:38:27Z mikeb $
- * $Date: 2014-04-04 12:38:27 -0700 (Fri, 04 Apr 2014) $
- */
+
 
 /**
  * @package Modules\Policy

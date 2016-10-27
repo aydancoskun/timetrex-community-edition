@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2196 $
- * $Id: APIAccrualPolicy.class.php 2196 2008-10-14 16:08:54Z ipso $
- * $Date: 2008-10-14 09:08:54 -0700 (Tue, 14 Oct 2008) $
- */
+
 
 /**
  * @package API\Policy
@@ -78,7 +74,7 @@ class APIAccrualPolicy extends APIFactory {
 
 		$data = array(
 						'company_id' => $company_obj->getId(),
-						'type_id' => 10,
+						'type_id' => 20,
 						'minimum_employed_days' => 0,
 					);
 
@@ -427,6 +423,11 @@ class APIAccrualPolicy extends APIFactory {
 			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
+		if ( Misc::isSystemLoadValid() == FALSE ) { //Check system load before anything starts.
+			Debug::Text('ERROR: System load exceeded, preventing new recalculation processes from starting...', __FILE__, __LINE__, __METHOD__, 10);
+			return $this->returnHandler( FALSE );
+		}
+
 		$report_obj = TTNew('Report');
 		$date_arr = $report_obj->convertTimePeriodToStartEndDate( $time_period_arr, NULL, TRUE ); //Force start/end dates even if pay periods selected.
 		Debug::Arr($date_arr, 'Date Arr', __FILE__, __LINE__, __METHOD__, 10);
@@ -440,12 +441,22 @@ class APIAccrualPolicy extends APIFactory {
 				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $aplf->getRecordCount(), NULL, TTi18n::getText('ReCalculating...') );
 
 				foreach( $aplf as $ap_obj ) {
+					if ( Misc::isSystemLoadValid() == FALSE ) { //Check system load as the user could ask to calculate decades worth at a time.
+						Debug::Text('ERROR: System load exceeded, stopping recalculation... (a)', __FILE__, __LINE__, __METHOD__, 10);
+						break;
+					}
+
 					$aplf->StartTransaction();
 
 					TTLog::addEntry( $this->getCurrentUserObject()->getId(), 500, 'Recalculate Accrual Policy: '. $ap_obj->getName() .' Start Date: '. TTDate::getDate('DATE', $date_arr['start_date'] ) .' End Date: '. TTDate::getDate('DATE', $date_arr['end_date'] ) .' Total Days: '. round( $total_days ), $this->getCurrentUserObject()->getId(), $ap_obj->getTable() );
 
 					$x = 0;
 					for( $i = $date_arr['start_date']; $i < $date_arr['end_date']; $i += (86400) ) {
+						if ( ( $x % 100 ) == 0 AND Misc::isSystemLoadValid() == FALSE ) { //Check system load as the user could ask to calculate decades worth at a time.
+							Debug::Text('ERROR: System load exceeded, stopping recalculation... (b)', __FILE__, __LINE__, __METHOD__, 10);
+							break;
+						}
+
 						//$i = TTDate::getBeginDayEpoch( $i ); //This causes infinite loops during DST transitions.
 						Debug::Text('Recalculating Accruals for Date: '. TTDate::getDate('DATE+TIME', TTDate::getBeginDayEpoch( $i ) ), __FILE__, __LINE__, __METHOD__, 10);
 						$ap_obj->addAccrualPolicyTime( TTDate::getBeginDayEpoch( $i ), 79200, $user_ids ); //Use default offset.

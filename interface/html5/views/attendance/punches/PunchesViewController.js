@@ -242,10 +242,11 @@ PunchesViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'Punch' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_punch': $.i18n._( 'Punch' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
+
 
 		var form_item_input;
 		var widgetContainer;
@@ -264,13 +265,13 @@ PunchesViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_punch = this.edit_view_tab.find( '#tab_punch' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_punch_column1 = tab_punch.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_punch_column1 );
 
 		// Employee
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -287,7 +288,7 @@ PunchesViewController = BaseViewController.extend( {
 		var default_args = {};
 		default_args.permission_section = 'punch';
 		form_item_input.setDefaultArgs( default_args );
-		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_punch_column1, '', null, true );
 
 		// Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -298,7 +299,7 @@ PunchesViewController = BaseViewController.extend( {
 		this.actual_time_label = $( "<span class='widget-right-label'></span>" );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( this.actual_time_label );
-		this.addEditFieldToColumn( $.i18n._( 'Time' ), form_item_input, tab0_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Time' ), form_item_input, tab_punch_column1, '', widgetContainer );
 
 		//Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
@@ -310,7 +311,7 @@ PunchesViewController = BaseViewController.extend( {
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 
-		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab0_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_punch_column1, '', widgetContainer, true );
 
 		//Mass Add Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
@@ -323,7 +324,7 @@ PunchesViewController = BaseViewController.extend( {
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 
-		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab0_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_punch_column1, '', widgetContainer, true );
 
 		// Punch
 
@@ -342,13 +343,13 @@ PunchesViewController = BaseViewController.extend( {
 		widgetContainer.append( label );
 		widgetContainer.append( check_box );
 
-		this.addEditFieldToColumn( $.i18n._( 'Punch Type' ), [form_item_input, check_box], tab0_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Punch Type' ), [form_item_input, check_box], tab_punch_column1, '', widgetContainer, true );
 
 		// In/Out
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {field: 'status_id'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'In/Out' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'In/Out' ), form_item_input, tab_punch_column1 );
 
 		// Branch
 
@@ -362,7 +363,7 @@ PunchesViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'branch_id'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Branch' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Branch' ), form_item_input, tab_punch_column1, '', null, true );
 
 		if ( !this.show_branch_ui ) {
 			this.edit_view_form_item_dic.branch_id.hide();
@@ -380,7 +381,7 @@ PunchesViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'department_id'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Department' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Department' ), form_item_input, tab_punch_column1, '', null, true );
 
 		if ( !this.show_department_ui ) {
 			this.edit_view_form_item_dic.department_id.hide();
@@ -412,7 +413,7 @@ PunchesViewController = BaseViewController.extend( {
 
 			widgetContainer.append( job_coder );
 			widgetContainer.append( form_item_input );
-			this.addEditFieldToColumn( $.i18n._( 'Job' ), [form_item_input, job_coder], tab0_column1, '', widgetContainer, true );
+			this.addEditFieldToColumn( $.i18n._( 'Job' ), [form_item_input, job_coder], tab_punch_column1, '', widgetContainer, true );
 
 			if ( !this.show_job_ui ) {
 				this.edit_view_form_item_dic.job_id.hide();
@@ -442,7 +443,7 @@ PunchesViewController = BaseViewController.extend( {
 
 			widgetContainer.append( job_item_coder );
 			widgetContainer.append( form_item_input );
-			this.addEditFieldToColumn( $.i18n._( 'Task' ), [form_item_input, job_item_coder], tab0_column1, '', widgetContainer, true );
+			this.addEditFieldToColumn( $.i18n._( 'Task' ), [form_item_input, job_item_coder], tab_punch_column1, '', widgetContainer, true );
 
 			if ( !this.show_job_item_ui ) {
 				this.edit_view_form_item_dic.job_item_id.hide();
@@ -472,7 +473,7 @@ PunchesViewController = BaseViewController.extend( {
 			widgetContainer.append( bad_label );
 			widgetContainer.append( bad );
 
-			this.addEditFieldToColumn( $.i18n._( 'Quantity' ), [good, bad], tab0_column1, '', widgetContainer, true );
+			this.addEditFieldToColumn( $.i18n._( 'Quantity' ), [good, bad], tab_punch_column1, '', widgetContainer, true );
 
 			if ( !this.show_bad_quantity_ui && !this.show_good_quantity_ui ) {
 				this.edit_view_form_item_dic.quantity.hide();
@@ -492,9 +493,11 @@ PunchesViewController = BaseViewController.extend( {
 		//Note
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 
-		form_item_input.TTextArea( {field: 'note'} );
+		form_item_input.TTextArea( {field: 'note', width: '100%' } );
 
-		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab0_column1, '', null, true, true );
+		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_punch_column1, '', null, true, true );
+
+		form_item_input.parent().width( '45%' );
 
 		if ( !this.show_note_ui ) {
 			this.edit_view_form_item_dic.note.hide();
@@ -504,7 +507,7 @@ PunchesViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'station_id'} );
 		form_item_input.css( 'cursor', 'pointer' );
-		this.addEditFieldToColumn( $.i18n._( 'Station' ), form_item_input, tab0_column1, '', null, true, true );
+		this.addEditFieldToColumn( $.i18n._( 'Station' ), form_item_input, tab_punch_column1, '', null, true, true );
 
 		form_item_input.click( function() {
 			if ( $this.current_edit_record.station_id && $this.show_station_ui ) {
@@ -520,7 +523,7 @@ PunchesViewController = BaseViewController.extend( {
 		//Punch Image
 		form_item_input = Global.loadWidgetByName( FormItemType.IMAGE );
 		form_item_input.TImage( {field: 'punch_image'} );
-		this.addEditFieldToColumn( $.i18n._( 'Image' ), form_item_input, tab0_column1, '', null, true, true );
+		this.addEditFieldToColumn( $.i18n._( 'Image' ), form_item_input, tab_punch_column1, '', null, true, true );
 
 		if ( this.is_mass_editing ) {
 			this.edit_view_form_item_dic.punch_image.hide();
@@ -726,6 +729,7 @@ PunchesViewController = BaseViewController.extend( {
 						break;
 					case 'country': //popular case
 						this.eSetProvince( this.current_edit_record[key] );
+
 						widget.setValue( this.current_edit_record[key] );
 						break;
 					case 'enable_email_notification_message':
@@ -886,8 +890,8 @@ PunchesViewController = BaseViewController.extend( {
 
 		var form_item_input;
 		var $this = this;
-		var tab0 = this.edit_view_tab.find( '#tab0' );
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_punch = this.edit_view_tab.find( '#tab_punch' );
+		var tab_punch_column1 = tab_punch.find( '.first-column' );
 
 		if ( $this.edit_view_ui_dic[field] ) {
 			form_item_input = $this.edit_view_ui_dic[field];
@@ -896,7 +900,7 @@ PunchesViewController = BaseViewController.extend( {
 		} else {
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 			form_item_input.TTextInput( {field: field} );
-			var input_div = $this.addEditFieldToColumn( label, form_item_input, tab0_column1 );
+			var input_div = $this.addEditFieldToColumn( label, form_item_input, tab_punch_column1 );
 
 			input_div.insertBefore( this.edit_view_form_item_dic['note'] );
 
@@ -1282,7 +1286,7 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	onContentMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function( context_btn, menu_name ) {
 		if ( Global.isSet( menu_name ) ) {
 			var id = menu_name;
 		} else {
@@ -1361,6 +1365,13 @@ PunchesViewController = BaseViewController.extend( {
 	},
 
 	setDefaultMenu: function( doNotSetFocus ) {
+
+
+        //Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+        if (!this.context_menu_array) {
+            return;
+        }
+
 		if ( !Global.isSet( doNotSetFocus ) || !doNotSetFocus ) {
 			this.selectContextMenu();
 		}

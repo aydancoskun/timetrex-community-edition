@@ -318,16 +318,16 @@
 		var show = function() {
 			ranger_picker = $( Global.loadWidget( 'global/widgets/datepicker/TRangePicker.html' ) );
 
-			var tab_0_label = ranger_picker.find( 'a[ref=tab0]' );
-			var tab_1_label = ranger_picker.find( 'a[ref=tab1]' );
+			var tab_0_label = ranger_picker.find( 'a[ref=tab_range]' );
+			var tab_1_label = ranger_picker.find( 'a[ref=tab_date]' );
 			tab_0_label.text( $.i18n._( 'Range' ) );
 			tab_1_label.text( $.i18n._( 'Dates' ) );
 
-			range_start_picker = ranger_picker.find( '#tab0_content_div' ).find( '.start-picker' );
-			range_end_picker = ranger_picker.find( '#tab0_content_div' ).find( '.end-picker' );
+			range_start_picker = ranger_picker.find( '#tab_range_content_div' ).find( '.start-picker' );
+			range_end_picker = ranger_picker.find( '#tab_range_content_div' ).find( '.end-picker' );
 
-			var start_picker_label = ranger_picker.find( '#tab0_content_div' ).find( '.start-picker-label' );
-			var end_picker_label = ranger_picker.find( '#tab0_content_div' ).find( '.end-picker-label' );
+			var start_picker_label = ranger_picker.find( '#tab_range_content_div' ).find( '.start-picker-label' );
+			var end_picker_label = ranger_picker.find( '#tab_range_content_div' ).find( '.end-picker-label' );
 
 			start_picker_label.text( $.i18n._( 'Start' ) + ':' );
 			end_picker_label.text( $.i18n._( 'End' ) + ':' );
@@ -406,9 +406,9 @@
 
 			//Add render in tab 1
 
-			var tab1 = ranger_picker.find( '#tab1' );
+			var tab_date = ranger_picker.find( '#tab_date' );
 
-			var inside_editor_div = tab1.find( '.inside-editor-div' );
+			var inside_editor_div = tab_date.find( '.inside-editor-div' );
 			var args = { start_date_stamp: $.i18n._( 'Date' )
 			};
 

@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2095 $
- * $Id: Sort.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
- */
+
 
 /**
  * @package Modules\Report
@@ -440,7 +436,7 @@ class ExceptionReport extends Report {
 		Debug::Text(' Exception Rows: '.$elf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $elf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $elf as $key => $e_obj ) {
-			$user_id = $e_obj->getColumn('user_id');
+			$user_id = $e_obj->getUser();
 			$this->tmp_data['exception'][$user_id][$e_obj->getID()] = (array)$e_obj->getObjectAsArray( array_merge( array( 'date_stamp' => TRUE ), $columns) );
 			$this->tmp_data['exception'][$user_id][$e_obj->getID()]['total_exception'] = 1;
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );

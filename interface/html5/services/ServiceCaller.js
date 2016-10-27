@@ -83,13 +83,15 @@ var ServiceCaller = Backbone.Model.extend( {
 			form_data.attr( 'enctype', 'multipart/form-data' );
 
 			ProgressBar.changeProgressBarMessage( 'File Uploading' );
-			form_data.ajaxForm().ajaxSubmit( {success: function( result ) {
-				ProgressBar.removeProgressBar();
-				if ( responseObj.onResult ) {
-					responseObj.onResult( result );
-				}
+			form_data.ajaxForm().ajaxSubmit( {
+				success: function( result ) {
+					ProgressBar.removeProgressBar();
+					if ( responseObj.onResult ) {
+						responseObj.onResult( result );
+					}
 
-			}} );
+				}
+			} );
 			return;
 		}
 
@@ -104,7 +106,6 @@ var ServiceCaller = Backbone.Model.extend( {
 //				}
 //
 //				function progressHandlingFunction() {
-//					debugger
 //				}
 //
 //				return myXhr;
@@ -182,11 +183,19 @@ var ServiceCaller = Backbone.Model.extend( {
 			url = url + '&MessageID=' + message_id;
 		}
 
+		if ( !apiArgs ) {
+			apiArgs = {};
+
+		}
+
 		if ( ie <= 8 ) {
 			apiArgs = {json: $.toJSON( apiArgs )};
 		} else {
 			apiArgs = {json: JSON.stringify( apiArgs )};
 		}
+
+		//#1568  -  Add "fragment" to POST variables in API calls so the server can get it...
+		//apiArgs.REQUEST_URI_FRAGMENT = LocalCacheData.fullUrlParameterStr;
 
 		var api_called_date = new Date();
 		var api_stack = {
@@ -203,7 +212,7 @@ var ServiceCaller = Backbone.Model.extend( {
 			LocalCacheData.api_stack.unshift( api_stack );
 		}
 
-		if ( function_name !== 'Login' && function_name !== 'getPreLoginData' ) {
+		if ( className !== 'APIProgressBar' && function_name !== 'Login' && function_name !== 'getPreLoginData' ) {
 			ProgressBar.showProgressBar( message_id );
 		}
 
@@ -211,6 +220,9 @@ var ServiceCaller = Backbone.Model.extend( {
 			{
 				dataType: 'JSON',
 				data: apiArgs,
+				headers: {
+					"REQUEST_URI_FRAGMENT": LocalCacheData.fullUrlParameterStr
+				},
 				type: 'POST',
 				async: async,
 				url: url,
@@ -219,8 +231,9 @@ var ServiceCaller = Backbone.Model.extend( {
 					if ( !Global.isSet( result ) ) {
 						result = true;
 					}
-
-					ProgressBar.removeProgressBar( message_id );
+					if ( className !== 'APIProgressBar' && function_name !== 'Login' && function_name !== 'getPreLoginData' ) {
+						ProgressBar.removeProgressBar( message_id );
+					}
 
 					switch ( function_name ) {
 						case 'getOptions':
@@ -258,7 +271,10 @@ var ServiceCaller = Backbone.Model.extend( {
 
 				error: function( error ) { //Server exceptions
 
-					ProgressBar.removeProgressBar( message_id );
+					if ( className !== 'APIProgressBar' && function_name !== 'Login' && function_name !== 'getPreLoginData' ) {
+						ProgressBar.removeProgressBar( message_id );
+					}
+
 					if ( ServiceCaller.cancelAllError ) {
 						return;
 					}
@@ -299,7 +315,6 @@ var ServiceCaller = Backbone.Model.extend( {
 
 				}
 
-
 			}
 		);
 
@@ -309,17 +324,18 @@ var ServiceCaller = Backbone.Model.extend( {
 
 ServiceCaller.getURLWithSessionId = function( rest_url ) {
 
-	if ( !$.cookie( 'SessionID' ) ) {
+	//Error: Object doesn't support property or method 'cookie' in https://ondemand2001.timetrex.com/interface/html5/services/ServiceCaller.js?v=8.0.0-20150126-192230 line 326
+	if ( $ && $.cookie && !$.cookie( 'SessionID' ) ) {
 		LocalCacheData.setSessionID( '' );
 	}
 
-	if ( $.cookie( 'js_debug' ) ) {
+	if ( $ && $.cookie && $.cookie( 'js_debug' ) ) {
 		return ServiceCaller.baseUrl + '?SessionID=' + LocalCacheData.getSessionID() + '&' + rest_url;
 	} else {
 		return ServiceCaller.baseUrl + '?' + rest_url;
 	}
 
-}
+};
 
 ServiceCaller.hosts = null;
 

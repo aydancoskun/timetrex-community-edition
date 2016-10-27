@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 11758 $
- * $Id: DC.class.php 11758 2013-12-20 20:07:32Z mikeb $
- * $Date: 2013-12-20 12:07:32 -0800 (Fri, 20 Dec 2013) $
- */
+
 
 
 /*

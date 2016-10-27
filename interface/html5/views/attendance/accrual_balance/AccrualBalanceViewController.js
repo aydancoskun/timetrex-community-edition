@@ -77,10 +77,10 @@ AccrualBalanceViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'Accruals' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_accrual': $.i18n._( 'Accrual' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIAccrualBalance' )),
@@ -113,11 +113,11 @@ AccrualBalanceViewController = BaseViewController.extend( {
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX} ),
 
-			new SearchField( {label: $.i18n._( 'Accrual Policy' ),
+			new SearchField( {label: $.i18n._( 'Accrual Account' ),
 				in_column: 1,
-				field: 'accrual_policy_id',
-				layout_name: ALayoutIDs.ACCRUAL_POLICY,
-				api_class: (APIFactory.getAPIClass( 'APIAccrualPolicy' )),
+				field: 'accrual_policy_account_id',
+				layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
+				api_class: (APIFactory.getAPIClass( 'APIAccrualPolicyAccount' )),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -166,7 +166,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		column_filter.first_name = true;
 		column_filter.last_name = true;
 		column_filter.user_id = true;
-		column_filter.accrual_policy_id = true;
+		column_filter.accrual_policy_account_id = true;
 
 		if ( display_columns ) {
 			var len = display_columns.length;
@@ -182,7 +182,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 
 	__createRowId: function( data ) {
 		for ( var i = 0; i < data.length; i++ ) {
-			data[i].id = data[i]['user_id'] + '_' + data[i]['accrual_policy_id'];
+			data[i].id = data[i]['user_id'] + '_' + data[i]['accrual_policy_account_id'];
 		}
 
 		return data;
@@ -195,6 +195,10 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		}
 
 		return data;
+	},
+
+	setDefaultMenuAddIcon: function( context_btn, grid_selected_length, pId ) {
+		this.setDefaultMenuEditIcon( context_btn, grid_selected_length, pId );
 	},
 
 	onAddClick: function() {
@@ -222,7 +226,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		filter.filter_data = {};
 		if ( selected_item ) {
 			filter.filter_data.user_id = selected_item.user_id;
-			filter.filter_data.accrual_policy_id = selected_item.accrual_policy_id;
+			filter.filter_data.accrual_policy_account_id = selected_item.accrual_policy_account_id;
 		}
 
 		this.api['get' + this.api.key_name]( filter, {onResult: function( result ) {
@@ -273,14 +277,13 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		if ( Global.isSet( view_id ) ) {
 			var filter_data = view_id.toString().split( '_' );
 			filter.filter_data.user_id = filter_data[0];
-			filter.filter_data.accrual_policy_id = filter_data[1];
+			filter.filter_data.accrual_policy_account_id = filter_data[1];
 		} else {
 			filter.filter_data.user_id = selected_item.user_id;
-			filter.filter_data.accrual_policy_id = selected_item.accrual_policy_id;
+			filter.filter_data.accrual_policy_account_id = selected_item.accrual_policy_account_id;
 		}
 
 		this.api['get' + this.api.key_name]( filter, {onResult: function( result ) {
-
 			var result_data = result.getResult();
 
 			if ( !result_data ) {
@@ -346,19 +349,19 @@ AccrualBalanceViewController = BaseViewController.extend( {
 
 		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 0 ) {
 			if ( this.current_edit_record ) {
-				this.edit_view_tab.find( '#tab0' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.edit_view_tab.find( '#tab_accrual' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.initSubAccrualView();
 			} else {
-				this.edit_view_tab.find( '#tab0' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_accrual' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 1 ) {
 
 			if ( this.current_edit_record ) {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab1' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_audit' );
 			} else {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		}
@@ -375,25 +378,38 @@ AccrualBalanceViewController = BaseViewController.extend( {
 
 		if ( this.edit_view_tab_selected_index === 0 ) {
 			if ( this.current_edit_record ) {
-				this.edit_view_tab.find( '#tab0' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.edit_view_tab.find( '#tab_accrual' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.initSubAccrualView();
 			} else {
-				this.edit_view_tab.find( '#tab0' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_accrual' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 
 		} else if ( this.edit_view_tab_selected_index === 1 ) {
 			if ( this.current_edit_record ) {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab1' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_audit' );
 			} else {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		} else {
 			this.buildContextMenu( true );
 			this.setEditMenu();
 		}
+	},
+
+	showNoResultCover: function( show_new_btn ) {
+		this.removeNoResultCover();
+		this.no_result_box = Global.loadWidgetByName( WidgetNamesDic.NO_RESULT_BOX );
+		this.no_result_box.NoResultBox( {related_view_controller: this, is_new: false} );
+		this.no_result_box.attr( 'id', this.ui_id + '_no_result_box' );
+
+		var grid_div = $( this.el ).find( '.grid-div' );
+
+		grid_div.append( this.no_result_box );
+
+		this.initRightClickMenu( RightClickMenuType.NORESULTBOX );
 	},
 
 	initSubAccrualView: function() {
@@ -409,8 +425,8 @@ AccrualBalanceViewController = BaseViewController.extend( {
 
 		Global.loadScriptAsync( 'views/attendance/accrual/AccrualViewController.js', function() {
 
-			var tab0 = $this.edit_view_tab.find( '#tab0' );
-			var firstColumn = tab0.find( '.first-column-sub-view' );
+			var tab_accrual = $this.edit_view_tab.find( '#tab_accrual' );
+			var firstColumn = tab_accrual.find( '.first-column-sub-view' );
 			Global.trackView( 'Sub' + 'Accrual' + 'View' );
 			AccrualViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
 

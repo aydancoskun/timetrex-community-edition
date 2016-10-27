@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14797 $
- * $Id: Factory.class.php 14797 2014-10-16 19:00:06Z mikeb $
- * $Date: 2014-10-16 12:00:06 -0700 (Thu, 16 Oct 2014) $
- */
+
 
 /**
  * @package Core
@@ -120,14 +116,31 @@ abstract class Factory {
 		}
 	}
 
+	//Generic function to return and cache CompanyGenericMap data, this greatly improves performance of CalculatePolicy when many policies exist.
+	function getCompanyGenericMapData( $company_id, $object_type_id, $id, $variable ) {
+		$tmp = &$this->$variable; //Works around a PHP issues where $this->$variable[$id] cause a fatal error on unknown string offset
+		if ( $id > 0 AND isset($tmp[$id]) ) {
+			return $tmp[$id];
+		} else {
+			$tmp[$id] = CompanyGenericMapListFactory::getArrayByCompanyIDAndObjectTypeIDAndObjectID( $company_id, $object_type_id, $id );
+			return $tmp[$id];
+		}
+	}
+
 	/*
 	 * Cache functions
 	 */
-	function getCache($cache_id) {
+	function getCache($cache_id, $group_id = NULL ) {
 		if ( is_object($this->cache) ) {
-			$retval = $this->cache->get($cache_id, $this->getTable(TRUE) );
+			if ( $group_id == NULL ) {
+				$group_id = $this->getTable(TRUE);
+			}
+
+			$retval = $this->cache->get( $cache_id, $group_id );
 			if ( is_object($retval) AND get_class( $retval ) == 'PEAR_Error' ) {
 				Debug::Arr($retval, 'WARNING: Unable to read cache file, likely due to permissions or locking! Cache ID: '. $cache_id .' Table: '. $this->getTable(TRUE) .' File: '. $this->cache->_file, __FILE__, __LINE__, __METHOD__, 10);
+			} elseif ( is_string( $retval ) AND strpos( $retval, '====' ) === 0 ) { //Detect ADODB serialized record set so it can be properly unserialized.
+				return $this->unserializeRS( $retval );
 			} else {
 				return $retval;
 			}
@@ -135,10 +148,18 @@ abstract class Factory {
 
 		return FALSE;
 	}
-	function saveCache($data, $cache_id) {
+	function saveCache($data, $cache_id, $group_id = NULL ) {
 		//Cache_ID can't have ':' in it, otherwise it fails on Windows.
 		if ( is_object($this->cache) ) {
-			$retval = $this->cache->save( $data, $cache_id, $this->getTable(TRUE) );
+			if ( $group_id == NULL ) {
+				$group_id = $this->getTable(TRUE);
+			}
+
+			//Check to ADODB record set, then serialize properly. We only need to do special serializing when there are more than one record.
+			if ( is_object( $data ) AND strpos( get_class( $data ), 'ADORecordSet_' ) === 0 AND $data->RecordCount() > 1 ) {
+				$data = $this->serializeRS( $data );
+			}
+			$retval = $this->cache->save( $data, $cache_id, $group_id );
 			if ( $retval === FALSE ) {
 				//Due to locking, its common that cache files may fail writing once in a while.
 				Debug::text('WARNING: Unable to write cache file, likely due to permissions or locking! Cache ID: '. $cache_id .' Table: '. $this->getTable(TRUE) .' File: '. $this->cache->_file, __FILE__, __LINE__, __METHOD__, 10);
@@ -149,6 +170,7 @@ abstract class Factory {
 		return FALSE;
 	}
 	function removeCache($cache_id = NULL, $group_id = NULL ) {
+		//See ContributingPayCodePolicyFactory() ->getPayCode() for comments on a bug with caching...
 		Debug::text('Attempting to remove cache: '. $cache_id, __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_object($this->cache) ) {
 			if ( $group_id == '' ) {
@@ -156,7 +178,7 @@ abstract class Factory {
 			}
 			if ( $cache_id != '' ) {
 				Debug::text('Removing cache: '. $cache_id .' Group Id: '. $group_id, __FILE__, __LINE__, __METHOD__, 10);
-				return $this->cache->remove($cache_id, $group_id );
+				return $this->cache->remove( $cache_id, $group_id );
 			} elseif ( $group_id != '' ) {
 				Debug::text('Removing cache group: '. $group_id, __FILE__, __LINE__, __METHOD__, 10);
 				return $this->cache->clean( $group_id );
@@ -173,9 +195,25 @@ abstract class Factory {
 		return FALSE;
 	}
 
+	//Serialize ADODB recordset.
+	function serializeRS( $rs ) {
+		global $ADODB_INCLUDED_CSV;
+		if ( empty($ADODB_INCLUDED_CSV) ) {
+			include_once(ADODB_DIR.'/adodb-csvlib.inc.php');
+		}
+
+		return _rs2serialize( $rs, FALSE, $rs->sql );
+	}
+
+	//UnSerialize ADODB recordset.
+	function unserializeRS( $rs ) {
+		$rs = explode("\n", $rs);
+		unset($rs[0]);
+		$rs = join("\n", $rs);
+		return unserialize( $rs );
+	}
 
 	function getTable($strip_quotes = FALSE) {
-
 		if ( isset($this->table) ) {
 			if ( $strip_quotes == TRUE ) {
 				return str_replace('"', '', $this->table );
@@ -234,10 +272,11 @@ abstract class Factory {
 	}
 
 	function fromBool($value) {
-		$value = strtolower(trim($value));
-
-		//if ($value == 't') {
-		if ($value == 1 OR $value == 't' ) {
+		if ( $value == 1 ) {
+			return TRUE;
+		} elseif ( $value == 0 ) {
+			return FALSE;
+		} elseif ( strtolower( trim( $value ) ) == 't' ) {
 			return TRUE;
 		} else {
 			return FALSE;
@@ -879,8 +918,8 @@ abstract class Factory {
 							$date1 = '\''.$this->db->bindTimeStamp( $date1 ).'\'';
 							$date2 = '\''.$this->db->bindTimeStamp( $date2 ).'\'';
 						} elseif ( $format == 'datestamp' ) {
-							$date1 = '\''.$this->db->bindDateStamp( $date1 ).'\'';
-							$date2 = '\''.$this->db->bindDateStamp( $date2 ).'\'';
+							$date1 = '\''.$this->db->bindDate( $date1 ).'\'';
+							$date2 = '\''.$this->db->bindDate( $date2 ).'\'';
 						}
 
 						//Debug::text(' No operator specified... Using a 24hr period', __FILE__, __LINE__, __METHOD__, 10);
@@ -1110,26 +1149,69 @@ abstract class Factory {
 					$retval = '';
 				}
 				break;
-			case 'start_date': //Uses EPOCH values only, used for integer datatype columns
+			case 'date_stamp': //Input epoch values, but convert bind to datestamp for datastamp datatypes.
+				if ( !is_array($args) ) {
+					$args = (array)$args;
+				}
+				if ( isset($args) AND isset($args[0]) AND !in_array( -1, $args) ) {
+					foreach( $args as $tmp_arg ) {
+						$converted_args[] = $this->db->bindDate( (int)$tmp_arg );
+					}
+
+					if ( $query_stub == '' AND !is_array($columns) ) {
+						$query_stub = $columns .' IN (?)';
+					}
+					$retval = str_replace('?', $this->getListSQL($converted_args, $ph ), $query_stub );
+				}
+				break;
+			case 'start_datestamp': //Uses EPOCH values only, used for date/timestamp datatype columns
+			case 'end_datestamp': //Uses EPOCH values only, used for date/timestamp datatype columns
 				if ( !is_array($args) ) { //Can't check isset() on a NULL value.
 					if ( $query_stub == '' AND !is_array($columns) ) {
 						$args = $this->castInteger( $this->Validator->stripNonNumeric( $args ), 'int' );
 						if ( is_numeric( $args ) ) {
-							$ph[] = $args;
-							$query_stub = $columns .' >= ?';
+							$ph[] = $this->db->bindDate( $args );
+							if ( strtolower($type) == 'start_datestamp' ) {
+								$query_stub = $columns .' >= ?';
+							} else {
+								$query_stub = $columns .' <= ?';
+							}
 						}
 					}
 
 					$retval = $query_stub;
 				}
 				break;
+			case 'start_timestamp': //Uses EPOCH values only, used for date/timestamp datatype columns
+			case 'end_timestamp': //Uses EPOCH values only, used for date/timestamp datatype columns
+				if ( !is_array($args) ) { //Can't check isset() on a NULL value.
+					if ( $query_stub == '' AND !is_array($columns) ) {
+						$args = $this->castInteger( $this->Validator->stripNonNumeric( $args ), 'int' );
+						if ( is_numeric( $args ) ) {
+							$ph[] = $this->db->bindTimeStamp( $args );
+							if ( strtolower($type) == 'start_timestamp' ) {
+								$query_stub = $columns .' >= ?';
+							} else {
+								$query_stub = $columns .' <= ?';
+							}
+						}
+					}
+
+					$retval = $query_stub;
+				}
+				break;
+			case 'start_date': //Uses EPOCH values only, used for integer datatype columns
 			case 'end_date':
 				if ( !is_array($args) ) { //Can't check isset() on a NULL value.
 					if ( $query_stub == '' AND !is_array($columns) ) {
 						$args = $this->castInteger( $this->Validator->stripNonNumeric( $args ), 'int' );
 						if ( is_numeric( $args ) ) {
 							$ph[] = $args;
-							$query_stub = $columns .' <= ?';
+							if ( strtolower($type) == 'start_date' ) {
+								$query_stub = $columns .' >= ?';
+							} else {
+								$query_stub = $columns .' <= ?';
+							}
 						}
 					}
 
@@ -1241,26 +1323,39 @@ abstract class Factory {
 		//Make this a multi-dimensional array, the first entry
 		//is the WHERE clauses with '?' for placeholders, the second is
 		//the array to replace the placeholders with.
-		if (is_array($array) ) {
+		if ( is_array($array) ) {
 			$rs = $this->getEmptyRecordSet();
 			$fields = $this->getRecordSetColumnList($rs);
 
 			foreach ($array as $orig_column => $expression) {
-				$orig_column = trim($orig_column);
-				$column = $this->parseColumnName( $orig_column );
+				if ( is_array( $expression ) ) { //Handle nested arrays, so we the same column can be specified multiple times.
+					foreach ($expression as $orig_column => $expression) {
+						$orig_column = trim($orig_column);
+						$column = $this->parseColumnName( $orig_column );
+						$expression = trim($expression);
 
-				$expression = trim($expression);
+						if ( in_array($column, $fields) ) {
+							$sql_chunks[] = $orig_column .' '. $expression;
+						}
+					}
+				} else {
+					$orig_column = trim($orig_column);
+					$column = $this->parseColumnName( $orig_column );
+					$expression = trim($expression);
 
-				if ( in_array($column, $fields) ) {
-					$sql_chunks[] = $orig_column.' '.$expression;
+					if ( in_array($column, $fields) ) {
+						$sql_chunks[] = $orig_column .' '. $expression;
+					}
 				}
 			}
 
 			if ( isset($sql_chunks) ) {
-				$sql = $this->db->escape( implode(' AND ', $sql_chunks) );
+				//Don't escape this, as prevents quotes from being used in cases where they are required link bindTimeStamp
+				//$sql = $this->db->escape( implode(' AND ', $sql_chunks) );
+				$sql = implode(' AND ', $sql_chunks);
 
 				if ($append_where == TRUE) {
-					return ' where '.$sql;
+					return ' WHERE '.$sql;
 				} else {
 					return ' AND '.$sql;
 				}
@@ -1667,7 +1762,7 @@ abstract class Factory {
 				if ( $insert_id === 0 ) { //Sometimes with MYSQL the _seq tables might not be initialized properly and cause insert_id=0.
 					throw new DBError('ERROR: Insert ID returned as 0, sequence likely not setup correctly.');
 				} else {
-					Debug::text('Insert ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 9);
+					Debug::text('Insert ID: '. $insert_id .' Table: '. $this->getTable(), __FILE__, __LINE__, __METHOD__, 9);
 					$this->setId($insert_id);
 				}
 			}

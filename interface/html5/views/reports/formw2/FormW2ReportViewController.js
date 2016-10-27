@@ -185,7 +185,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 	},
 
-	onContentMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function( context_btn, menu_name ) {
 
 		var id;
 		if ( Global.isSet( menu_name ) ) {
@@ -220,7 +220,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 				this.onSaveSetup();
 				break;
 			case ContextMenuIconName.e_file: //All report view
-				this.onViewClick( 'efile_xml' );
+				this.onViewClick( 'efile' );
 				break;
 		}
 	},
@@ -1046,20 +1046,24 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		//Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name'} );
+		form_item_input.TTextInput( {field: 'name', width: '100%'} );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab3_column1 );
+		form_item_input.parent().width( '45%' );
 
 		//Company Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'company_name'} );
+		form_item_input.TTextInput( {field: 'company_name', width: '100%'} );
 		this.addEditFieldToColumn( $.i18n._( 'Company Name' ), form_item_input, tab3_column1 );
+
+		form_item_input.parent().width( '45%' );
 
 		//Address 1
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'address1'} );
+		form_item_input.TTextInput( {field: 'address1', width: '100%'} );
 		this.addEditFieldToColumn( $.i18n._( 'Address 1' ), form_item_input, tab3_column1 );
+		form_item_input.parent().width( '45%' );
 
 		//City
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );

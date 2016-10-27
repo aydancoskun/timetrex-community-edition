@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2095 $
- * $Id: Sort.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
- */
+
 
 /**
  * @package Modules\Report
@@ -686,14 +682,14 @@ class ScheduleSummaryReport extends Report {
 			if ( $slf->getRecordCount() > 0 ) {
 				foreach ( $slf as $key => $s_obj ) {
 					$hourly_rate = 0;
-					if ( $wage_permission_children_ids === TRUE OR in_array( $s_obj->getColumn('user_id'), $wage_permission_children_ids) ) {
+					if ( $wage_permission_children_ids === TRUE OR in_array( $s_obj->getUser(), $wage_permission_children_ids) ) {
 						$hourly_rate = $s_obj->getColumn( 'user_wage_hourly_rate' );
 					}
 
-					$date_stamp_epoch = TTDate::strtotime( $s_obj->getColumn('date_stamp') );
+					$date_stamp_epoch = $s_obj->getDateStamp();
 
 					$shift_arr = array(
-						'user_id' => $s_obj->getColumn('user_id'),
+						'user_id' => $s_obj->getUser(),
 						'status_id' => $s_obj->getColumn('status_id'),
 						'group' => $s_obj->getColumn('group'),
 						'default_branch' => $s_obj->getColumn('default_branch'),
@@ -748,7 +744,7 @@ class ScheduleSummaryReport extends Report {
 						);
 					unset($hourly_rate);
 
-					$this->tmp_data['schedule'][$s_obj->getColumn('user_id')][] = $shift_arr;
+					$this->tmp_data['schedule'][$s_obj->getUser()][] = $shift_arr;
 
 					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 				}

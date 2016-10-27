@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 8160 $
- * $Id: api.php 8160 2006-05-31 23:33:54Z root $
- * $Date: 2006-05-31 16:33:54 -0700 (Wed, 31 May 2006) $
- */
+
 define('TIMETREX_SOAP_API', TRUE );
 
 //Add timetrex.ini.php setting to enable/disable the API. Make an entire [API] section.

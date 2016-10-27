@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 15145 $
- * $Id: AuthorizationListFactory.class.php 15145 2014-11-13 22:42:19Z mikeb $
- * $Date: 2014-11-13 14:42:19 -0800 (Thu, 13 Nov 2014) $
- */
+
 
 /**
  * @package Core
@@ -247,7 +243,6 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 
 		$uf = new UserFactory();
 		$rf = new RequestFactory();
-		$udf = new UserDateFactory();
 		$pptsvf = new PayPeriodTimeSheetVerifyListFactory();
 
 		if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
@@ -260,7 +255,7 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 
 		$query = '
 					select	a.*,
-							CASE WHEN a.object_type_id = 90 THEN pptsvf.user_id ELSE ud.user_id END as user_id,
+							CASE WHEN a.object_type_id = 90 THEN pptsvf.user_id ELSE rf.user_id END as user_id,
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
 							y.last_name as created_by_last_name,
@@ -269,7 +264,6 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 							z.last_name as updated_by_last_name
 					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $rf->getTable() .' as rf ON ( a.object_type_id in (1010, 1020, 1030, 1040, 1100) AND a.object_id = rf.id )
-						LEFT JOIN '. $udf->getTable() .' as ud ON ( rf.user_date_id = ud.id )
 						LEFT JOIN '. $pptsvf->getTable() .' as pptsvf ON ( a.object_type_id = 90 AND a.object_id = pptsvf.id ) ';
 
 		if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
@@ -282,7 +276,7 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 
 		$user_id_column = 'a.created_by';
 		if ( isset($filter_data['object_type_id']) AND in_array( $filter_data['object_type_id'], array(1010, 1020, 1030, 1040, 1100) ) ) { //Requests
-			$user_id_column = 'ud.user_id';
+			$user_id_column = 'rf.user_id';
 		} elseif ( isset($filter_data['object_type_id']) AND in_array( $filter_data['object_type_id'], array(90) ) ) { //TimeSheet
 			$user_id_column = 'pptsvf.user_id';
 		} elseif ( isset($filter_data['object_type_id']) AND in_array( $filter_data['object_type_id'], array(200) ) ) { //Expense

@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2490 $
- * $Id: SharedMemory.class.php 2490 2009-04-24 22:13:40Z ipso $
- * $Date: 2009-04-24 15:13:40 -0700 (Fri, 24 Apr 2009) $
- */
+
 
 /**
  * @package Core
@@ -67,6 +63,31 @@ class ProgressBar {
 	function getDefaultKey() {
 		return $this->default_key;
 	}
+	
+	function error( $key, $msg = NULL ) {
+		Debug::text('error: \''. $key .' Key: '. $key .'('.microtime(TRUE).') Message: '. $msg, __FILE__, __LINE__, __METHOD__, 9);
+
+		if ( $key == '' ) {
+			$key = $this->getDefaultKey();
+			if ( $key == '' ) {
+				return FALSE;
+			}
+		}
+
+		if (  $msg == '' ) {
+			$msg = TTi18n::getText('Processing...');
+		}
+
+		$epoch = microtime(TRUE);
+
+		$progress_bar_arr = $this->obj->get( $this->key_prefix.$key );
+		$progress_bar_arr['status_id'] = 9999;
+		$progress_bar_arr['message'] = $msg;
+
+		$this->obj->set( $this->key_prefix.$key, $progress_bar_arr );
+
+		return TRUE;
+	}
 
 	function start( $key, $total_iterations = 100, $update_iteration = NULL, $msg = NULL ) {
 		Debug::text('start: \''. $key .'\' Iterations: '. $total_iterations .' Update Iterations: '. $update_iteration .' Key: '. $key .'('.microtime(TRUE).') Message: '. $msg, __FILE__, __LINE__, __METHOD__, 9);
@@ -95,6 +116,7 @@ class ProgressBar {
 		$epoch = microtime(TRUE);
 
 		$progress_bar_arr = array(
+					'status_id' => 10,
 					'start_time' => $epoch,
 					'current_iteration' => 0,
 					'total_iterations' => $total_iterations,

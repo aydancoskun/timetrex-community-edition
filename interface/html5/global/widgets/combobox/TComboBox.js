@@ -30,15 +30,15 @@
 
 		this.setValueKey = function( val ) {
 			valueKey = val;
-		}
+		};
 
 		this.setLabelKey = function( val ) {
 			labelKey = val;
-		}
+		};
 
 		this.getEnabled = function() {
 			return enabled;
-		}
+		};
 
 		this.setEnabled = function( val ) {
 			enabled = val;
@@ -51,24 +51,24 @@
 				$this.removeClass( 't-select-readonly' );
 			}
 
-		}
+		};
 
 		this.setCheckBox = function( val ) {
-			check_box.attr( 'checked', val )
-		}
+			check_box.attr( 'checked', val );
+		};
 
 		this.isChecked = function() {
 			if ( check_box ) {
 				if ( check_box.attr( 'checked' ) ) {
-					return true
+					return true;
 				}
 			}
 
 			return false;
-		}
+		};
 
 		this.setMassEditMode = function( val ) {
-			mass_edit_mode = val
+			mass_edit_mode = val;
 
 			if ( mass_edit_mode ) {
 				check_box = $( " <input type='checkbox' class='mass-edit-checkbox' />" );
@@ -84,7 +84,7 @@
 				}
 			}
 
-		}
+		};
 
 		this.setErrorStyle = function( errStr, show ) {
 			$( this ).addClass( 'error-tip' );
@@ -99,14 +99,14 @@
 		this.showErrorTip = function( sec ) {
 
 			if ( !Global.isSet( sec ) ) {
-				sec = 2
+				sec = 2;
 			}
 
 			if ( !error_tip_box ) {
 				error_tip_box = Global.loadWidgetByName( WidgetNamesDic.ERROR_TOOLTIP );
-				error_tip_box = error_tip_box.ErrorTipBox()
+				error_tip_box = error_tip_box.ErrorTipBox();
 			}
-			error_tip_box.show( this, error_string, sec )
+			error_tip_box.show( this, error_string, sec );
 		};
 
 		this.hideErrorTip = function() {
@@ -115,20 +115,20 @@
 				error_tip_box.remove();
 			}
 
-		}
+		};
 
 		this.clearErrorStyle = function() {
 			$( this ).removeClass( 'error-tip' );
 			error_string = '';
-		}
+		};
 
 		this.setField = function( val ) {
 			field = val;
-		}
+		};
 
 		this.getField = function() {
 			return field;
-		}
+		};
 
 		this.getLabel = function() {
 
@@ -139,77 +139,86 @@
 			var value = $( this ).children( 'option:selected' ).text();
 
 			return value;
-		}
+		};
 
 		this.getValue = function() {
 
 			if ( !source_data || (set_empty && source_data.length === 1) || (set_any && source_data.length === 1) ) {
 				return select_value;
 			}
+
 			//if value is number convert to number type
 			var value = $( this ).children( 'option:selected' ).attr( 'value' );
 
 			var reg = new RegExp( '^[0-9]*$' );
 
 			if ( reg.test( value ) ) {
-				value = parseFloat( value )
+				value = parseFloat( value );
 			}
 
-			if ( value == '-1' ) {
+			if ( value === -1 || value === '-1' ) {
 				value = -1;
 			}
 
 			return value;
-		}
+		};
 
 		this.setValue = function( val ) {
 
 			select_value = val;
 
-			if ( !source_data || (set_empty && source_data.length === 1) || (set_any && source_data.length === 1) ) {
+			if ( !source_data || source_data.length < 1 || (set_empty && source_data.length === 1) || (set_any && source_data.length === 1) ) {
 				set_select_item_when_set_source_data = true;
 				return;
 			}
 
-			if ( !val ) {
+			//When no value == undefined or null or default false
+			if ( !Global.isSet( val ) || val === false ) {
 				if ( set_empty ) {
 					val = '0';
 				} else if ( set_any ) {
 					val = '-1';
+				} else {
+					//If no empty value, default to select first item
+					if ( source_data && source_data.length > 0 ) {
+						this.setValue( source_data[0][valueKey] );
+						return;
+					}
+
 				}
 			}
 
 			$( $( this ).find( 'option' ) ).removeAttr( 'selected' );
 
-			$( $( this ).find( 'option' ) ).filter(function() {
+			$( $( this ).find( 'option' ) ).filter( function() {
 
 				if ( val === null || val === undefined ) {
-					return false
+					return false;
 				}
-				return    $( this ).attr( 'value' ) === val.toString();
+				return $( this ).attr( 'value' ) === val.toString();
 			} ).prop( 'selected', true ).attr( 'selected', true );
 
 		};
 
+		/* jshint ignore:start */
 		this.setSourceData = function( val ) {
 
 			$( this ).empty();
 
 			if ( !Global.isSet( val ) || val.length < 1 ) {
 				if ( set_empty ) {
-					val = Global.addFirstItemToArray( val, 'empty' )
+					val = Global.addFirstItemToArray( val, 'empty' );
 				} else if ( set_any ) {
 					val = Global.addFirstItemToArray( val, 'any' );
 				}
 			} else {
 				if ( set_empty ) {
-
-					if ( val && val.length > 0 && val[0].value !== '0' ) {
-						val = Global.addFirstItemToArray( val, 'empty' )
+					if ( val && val.length > 0 && (val[0].value !== '0' && val[0].value !== 0) ) {
+						val = Global.addFirstItemToArray( val, 'empty' );
 					}
 
 				} else if ( set_any ) {
-					if ( val && val.length > 0 && val[0].value !== '-1' ) {
+					if ( val && val.length > 0 && (val[0].value !== '-1' && val[0].value !== -1) ) {
 						val = Global.addFirstItemToArray( val, 'any' );
 					}
 
@@ -225,8 +234,8 @@
 					$( this ).append( '<option value="' + item[valueKey] + '">' + item[labelKey] + '</option>' );
 				}
 			} else {
-				for ( i in val ) {
-					$( this ).append( '<option value="' + i + '">' + val[i] + '</option>' );
+				for ( var j in val ) {
+					$( this ).append( '<option value="' + j + '">' + val[j] + '</option>' );
 				}
 			}
 
@@ -234,7 +243,8 @@
 				this.setValue( select_value );
 			}
 
-		}
+		};
+		/* jshint ignore:end */
 
 		this.each( function() {
 
@@ -261,11 +271,11 @@
 				}
 
 				if ( check_box ) {
-					check_box.attr( 'checked', 'true' )
+					check_box.attr( 'checked', 'true' );
 				}
 
 				$this.trigger( 'formItemChange', [$this] );
-			} )
+			} );
 
 			$( this ).click( function() {
 				if ( !enabled ) {
@@ -305,8 +315,6 @@
 
 	};
 
-	$.fn.TComboBox.defaults = {
-
-	};
+	$.fn.TComboBox.defaults = {};
 
 })( jQuery );

@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14280 $
- * $Id: ExceptionFactory.class.php 14280 2014-08-29 16:43:40Z mikeb $
- * $Date: 2014-08-29 09:43:40 -0700 (Fri, 29 Aug 2014) $
- */
+
 
 /**
  * @package Core
@@ -46,7 +42,7 @@ class ExceptionFactory extends Factory {
 	protected $table = 'exception';
 	protected $pk_sequence_name = 'exception_id_seq'; //PK Sequence name
 
-	protected $user_date_obj = NULL;
+	protected $user_obj = NULL;
 	protected $exception_policy_obj = NULL;
 
 	function _getFactoryOptions( $name ) {
@@ -128,7 +124,6 @@ class ExceptionFactory extends Factory {
 	function _getVariableToFunctionMap( $data ) {
 			$variable_function_map = array(
 											'id' => 'ID',
-											'user_date_id' => 'UserDateID',
 											'date_stamp' => FALSE,
 											'pay_period_start_date' => FALSE,
 											'pay_period_end_date' => FALSE,
@@ -179,47 +174,101 @@ class ExceptionFactory extends Factory {
 			return $variable_function_map;
 	}
 
-	function getUserDateObject() {
-		if ( is_object($this->user_date_obj) ) {
-			return $this->user_date_obj;
-		} else {
-			$udlf = TTnew( 'UserDateListFactory' );
-			$this->user_date_obj = $udlf->getById( $this->getUserDateID() )->getCurrent();
-
-			return $this->user_date_obj;
-		}
+	function getUserObject() {
+		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
 	}
 
 	function getExceptionPolicyObject() {
-		if ( is_object($this->exception_policy_obj) ) {
-			return $this->exception_policy_obj;
-		} else {
-			$eplf = TTnew( 'ExceptionPolicyListFactory' );
-			$this->exception_policy_obj = $eplf->getById( $this->getExceptionPolicyID() )->getCurrent();
-
-			return $this->exception_policy_obj;
+		return $this->getGenericObject( 'ExceptionPolicyListFactory', $this->getExceptionPolicyID(), 'exception_policy_obj' );
+	}
+	
+	function getUser() {
+		if ( isset($this->data['user_id']) ) {
+			return (int)$this->data['user_id'];
 		}
 	}
+	function setUser($id) {
+		$id = trim($id);
 
-	function getUserDateID() {
-		if ( isset($this->data['user_date_id']) ) {
-			return (int)$this->data['user_date_id'];
+		$ulf = TTnew( 'UserListFactory' );
+
+		//Need to be able to support user_id=0 for open shifts. But this can cause problems with importing punches with user_id=0.
+		if ( $this->Validator->isResultSetWithRows(	'user',
+															$ulf->getByID($id),
+															TTi18n::gettext('Invalid User')
+															) ) {
+			$this->data['user_id'] = $id;
+
+			return TRUE;
 		}
 
 		return FALSE;
 	}
-	function setUserDateID($id = NULL) {
+
+	function getPayPeriod() {
+		if ( isset($this->data['pay_period_id']) ) {
+			return (int)$this->data['pay_period_id'];
+		}
+
+		return FALSE;
+	}
+	function setPayPeriod($id = NULL) {
 		$id = trim($id);
 
-		$udlf = TTnew( 'UserDateListFactory' );
+		if ( $id == NULL ) {
+			$id = (int)PayPeriodListFactory::findPayPeriod( $this->getUser(), $this->getDateStamp() );
+		}
 
-		if (  $this->Validator->isResultSetWithRows(	'user_date',
-														$udlf->getByID($id),
-														TTi18n::gettext('Invalid User Date ID')
+		$pplf = TTnew( 'PayPeriodListFactory' );
+
+		//Allow NULL pay period, incase its an absence or something in the future.
+		//Cron will fill in the pay period later.
+		if (
+				$id == 0
+				OR
+				$this->Validator->isResultSetWithRows(	'pay_period',
+														$pplf->getByID($id),
+														TTi18n::gettext('Invalid Pay Period')
 														) ) {
-			$this->data['user_date_id'] = $id;
+			$this->data['pay_period_id'] = $id;
 
 			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getDateStamp( $raw = FALSE ) {
+		if ( isset($this->data['date_stamp']) ) {
+			if ( $raw === TRUE ) {
+				return $this->data['date_stamp'];
+			} else {
+				return TTDate::strtotime( $this->data['date_stamp'] );
+			}
+		}
+
+		return FALSE;
+	}
+	function setDateStamp($epoch) {
+		$epoch = trim($epoch);
+
+		if	(	$this->Validator->isDate(		'date_stamp',
+												$epoch,
+												TTi18n::gettext('Incorrect date'))
+			) {
+
+			if	( $epoch > 0 ) {
+				$this->data['date_stamp'] = $epoch;
+
+				$this->setPayPeriod(); //Force pay period to be set as soon as the date is.
+				return TRUE;
+			} else {
+				$this->Validator->isTRUE(		'date_stamp',
+												FALSE,
+												TTi18n::gettext('Incorrect date'));
+			}
+
+
 		}
 
 		return FALSE;
@@ -424,7 +473,7 @@ class ExceptionFactory extends Factory {
 			//Make sure exception policy email notifications are enabled.
 			if ( $ep_obj->getEmailNotification() > 0 ) {
 				if ( !is_object($u_obj) ) {
-					$u_obj = $this->getUserDateObject()->getUserObject();
+					$u_obj = $this->getUserObject();
 				}
 
 				//Make sure user email notifications are enabled and user is *not* terminated.
@@ -433,10 +482,10 @@ class ExceptionFactory extends Factory {
 						AND $u_obj->getUserPreferenceObject()->getEnableEmailNotificationException() == TRUE
 						AND $u_obj->getStatus() == 10 ) {
 					Debug::Text(' Emailing exception to user!', __FILE__, __LINE__, __METHOD__, 10);
-					if ( $u_obj->getWorkEmail() != '' ) {
+					if ( $u_obj->getWorkEmail() != '' AND $u_obj->getWorkEmailIsValid() == TRUE ) {
 						$retarr[] = $u_obj->getWorkEmail();
 					}
-					if ( $u_obj->getUserPreferenceObject()->getEnableEmailNotificationHome() == TRUE AND $u_obj->getHomeEmail() != '' ) {
+					if ( $u_obj->getUserPreferenceObject()->getEnableEmailNotificationHome() == TRUE AND $u_obj->getHomeEmail() != '' AND $u_obj->getHomeEmailIsValid() == TRUE ) {
 						$retarr[] = $u_obj->getHomeEmail();
 					}
 				} else {
@@ -498,12 +547,12 @@ class ExceptionFactory extends Factory {
 			To address, CC address (home email) and Bcc (supervisor) address?
 
 	*/
-	function emailException( $u_obj, $user_date_obj, $punch_obj = NULL, $schedule_obj = NULL, $ep_obj = NULL ) {
+	function emailException( $u_obj, $date_stamp, $punch_obj = NULL, $schedule_obj = NULL, $ep_obj = NULL ) {
 		if ( !is_object( $u_obj ) ) {
 			return FALSE;
 		}
 
-		if ( !is_object( $user_date_obj ) ) {
+		if ( $date_stamp == '' ) {
 			return FALSE;
 		}
 
@@ -559,7 +608,7 @@ class ExceptionFactory extends Factory {
 							$ep_obj->getType(),
 							Option::getByKey( $ep_obj->getType(), $ep_obj->getOptions('type') ),
 							Option::getByKey( $ep_obj->getSeverity(), $ep_obj->getOptions('severity') ),
-							TTDate::getDate('DATE', $user_date_obj->getDateStamp() ),
+							TTDate::getDate('DATE', $date_stamp ),
 							( is_object( $u_obj->getCompanyObject() ) ) ? $u_obj->getCompanyObject()->getName() : NULL,
 							NULL,
 							( is_object( $schedule_obj ) ) ? TTDate::getDate('TIME', $schedule_obj->getStartTime() ) : NULL,
@@ -629,10 +678,26 @@ class ExceptionFactory extends Factory {
 	}
 
 	function Validate() {
+		if ( $this->getUser() == FALSE ) {
+			$this->Validator->isTRUE(	'user_id',
+										FALSE,
+										TTi18n::gettext('Employee is invalid') );
+		}
+
+		if ( $this->getDeleted() == FALSE AND $this->getDateStamp() == FALSE ) {
+			$this->Validator->isTRUE(	'date_stamp',
+										FALSE,
+										TTi18n::gettext('Date/Time is incorrect, or pay period does not exist for this date. Please create a pay period schedule and assign this employee to it if you have not done so already') );
+		}
+
 		return TRUE;
 	}
 
 	function preSave() {
+		if ( $this->getPayPeriod() == FALSE ) {
+			$this->setPayPeriod();
+		}
+
 		return TRUE;
 	}
 
@@ -720,7 +785,7 @@ class ExceptionFactory extends Factory {
 							}
 							break;
 						case 'date_stamp':
-							$data[$variable] = TTDate::getAPIDate( 'DATE', TTDate::strtotime( $this->getColumn( 'date_stamp' ) ) );
+							$data[$variable] = TTDate::getAPIDate( 'DATE', $this->getDateStamp() );
 							break;
 						case 'pay_period_start_date':
 							$data[$variable] = TTDate::getAPIDate( 'DATE', TTDate::strtotime( $this->getColumn( 'pay_period_start_date' ) ) );

@@ -9,6 +9,13 @@ var APIPayStub = ServiceCaller.extend( {
 
 	},
 
+
+	getPayStubDefaultData: function() {
+
+		return this.argumentsHandler( this.className, 'getPayStubDefaultData', arguments );
+
+	},
+
 	getPayStub: function() {
 
 		return this.argumentsHandler( this.className, 'getPayStub', arguments );

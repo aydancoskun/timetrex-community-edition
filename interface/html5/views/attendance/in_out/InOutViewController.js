@@ -595,8 +595,8 @@ InOutViewController = BaseViewController.extend( {
 
 		var form_item_input;
 		var $this = this;
-		var tab0 = this.edit_view_tab.find( '#tab0' );
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_punch = this.edit_view_tab.find( '#tab_punch' );
+		var tab_punch_column1 = tab_punch.find( '.first-column' );
 
 		if ( $this.edit_view_ui_dic[field] ) {
 			form_item_input = $this.edit_view_ui_dic[field];
@@ -605,7 +605,7 @@ InOutViewController = BaseViewController.extend( {
 		} else {
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 			form_item_input.TTextInput( {field: field} );
-			var input_div = $this.addEditFieldToColumn( label, form_item_input, tab0_column1 );
+			var input_div = $this.addEditFieldToColumn( label, form_item_input, tab_punch_column1 );
 
 			input_div.insertBefore( this.edit_view_form_item_dic['note'] );
 
@@ -626,20 +626,21 @@ InOutViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'Punch' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_punch': $.i18n._( 'Punch' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
+
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_punch = this.edit_view_tab.find( '#tab_punch' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_punch_column1 = tab_punch.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_punch_column1 );
 
 		var form_item_input;
 		var widgetContainer;
@@ -650,14 +651,14 @@ InOutViewController = BaseViewController.extend( {
 
 		form_item_input.TText( {
 			field: 'user_id_readonly'} );
-		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_punch_column1, '' );
 
 		// Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'punch_time'} );
 
-		this.addEditFieldToColumn( $.i18n._( 'Time' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Time' ), form_item_input, tab_punch_column1 );
 
 		// Date
 //		  punch_date, punch_dates
@@ -665,14 +666,14 @@ InOutViewController = BaseViewController.extend( {
 
 		form_item_input.TDatePicker( {field: 'punch_date'} );
 
-		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_punch_column1 );
 
 		//Transfer
 
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( {field: 'transfer'} );
 
-		this.addEditFieldToColumn( $.i18n._( 'Transfer' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Transfer' ), form_item_input, tab_punch_column1, '', null, true );
 
 		if ( !this.show_transfer_ui ) {
 			this.edit_view_form_item_dic.transfer.hide();
@@ -684,14 +685,14 @@ InOutViewController = BaseViewController.extend( {
 		form_item_input.TComboBox( {field: 'type_id'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
 
-		this.addEditFieldToColumn( $.i18n._( 'Punch Type' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Punch Type' ), form_item_input, tab_punch_column1 );
 
 		// In/Out
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {field: 'status_id'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'In/Out' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'In/Out' ), form_item_input, tab_punch_column1 );
 
 		// Branch
 
@@ -704,7 +705,7 @@ InOutViewController = BaseViewController.extend( {
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'branch_id'} );
-		this.addEditFieldToColumn( $.i18n._( 'Branch' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Branch' ), form_item_input, tab_punch_column1, '', null, true );
 
 		if ( !this.show_branch_ui ) {
 			this.edit_view_form_item_dic.branch_id.hide();
@@ -721,7 +722,7 @@ InOutViewController = BaseViewController.extend( {
 			show_search_inputs: true,
 			set_empty: true,
 			field: 'department_id'} );
-		this.addEditFieldToColumn( $.i18n._( 'Department' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Department' ), form_item_input, tab_punch_column1, '', null, true );
 
 		if ( !this.show_department_ui ) {
 			this.edit_view_form_item_dic.department_id.hide();
@@ -754,7 +755,7 @@ InOutViewController = BaseViewController.extend( {
 
 			widgetContainer.append( job_coder );
 			widgetContainer.append( form_item_input );
-			this.addEditFieldToColumn( $.i18n._( 'Job' ), [form_item_input, job_coder], tab0_column1, '', widgetContainer, true );
+			this.addEditFieldToColumn( $.i18n._( 'Job' ), [form_item_input, job_coder], tab_punch_column1, '', widgetContainer, true );
 
 			if ( !this.show_job_ui ) {
 				this.edit_view_form_item_dic.job_id.hide();
@@ -783,7 +784,7 @@ InOutViewController = BaseViewController.extend( {
 
 			widgetContainer.append( job_item_coder );
 			widgetContainer.append( form_item_input );
-			this.addEditFieldToColumn( $.i18n._( 'Task' ), [form_item_input, job_item_coder], tab0_column1, '', widgetContainer, true );
+			this.addEditFieldToColumn( $.i18n._( 'Task' ), [form_item_input, job_item_coder], tab_punch_column1, '', widgetContainer, true );
 
 			if ( !this.show_job_item_ui ) {
 				this.edit_view_form_item_dic.job_item_id.hide();
@@ -814,7 +815,7 @@ InOutViewController = BaseViewController.extend( {
 			widgetContainer.append( bad_label );
 			widgetContainer.append( bad );
 
-			this.addEditFieldToColumn( $.i18n._( 'Quantity' ), [good, bad], tab0_column1, '', widgetContainer, true );
+			this.addEditFieldToColumn( $.i18n._( 'Quantity' ), [good, bad], tab_punch_column1, '', widgetContainer, true );
 
 			if ( !this.show_bad_quantity_ui && !this.show_good_quantity_ui ) {
 				this.edit_view_form_item_dic.quantity.hide();
@@ -835,9 +836,11 @@ InOutViewController = BaseViewController.extend( {
 		//Note
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 
-		form_item_input.TTextArea( {field: 'note'} );
+		form_item_input.TTextArea( {field: 'note', width: '100%' } );
 
-		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab0_column1, '', null, true, true );
+		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_punch_column1, '', null, true, true );
+
+		form_item_input.parent().width( '45%' );
 
 		if ( !this.show_node_ui ) {
 			this.edit_view_form_item_dic.note.hide();
@@ -896,12 +899,14 @@ InOutViewController = BaseViewController.extend( {
 			}
 		}
 
-		if ( PermissionManager.validate( "punch", 'edit_transfer' ) && PermissionManager.validate( "punch", 'default_transfer' ) ) {
-			this.edit_view_ui_dic['transfer'].setValue( true );
-			this.current_edit_record.transfer = true;
-		} else {
-			this.edit_view_ui_dic['transfer'].setValue( this.current_edit_record['transfer'] );
-		}
+		//The API will return if transfer should be enabled/disabled by default.
+		this.edit_view_ui_dic['transfer'].setValue( this.current_edit_record['transfer'] );
+		//if ( PermissionManager.validate( 'punch', 'edit_transfer' ) && PermissionManager.validate( 'punch', 'default_transfer' ) ) {
+		//	this.edit_view_ui_dic['transfer'].setValue( true );
+		//	this.current_edit_record['transfer'] = true;
+		//} else {
+		//	this.edit_view_ui_dic['transfer'].setValue( this.current_edit_record['transfer'] );
+		//}
 
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();

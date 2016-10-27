@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 11811 $
- * $Id: PermissionListFactory.class.php 11811 2013-12-26 23:56:23Z mikeb $
- * $Date: 2013-12-26 15:56:23 -0800 (Thu, 26 Dec 2013) $
- */
+
 
 /**
  * @package Core
@@ -170,6 +166,52 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 						AND b.company_id = ?
 						AND a.permission_control_id = ?
 						AND a.section = ?
+						AND a.name in ('. $this->getListSQL($name, $ph) .')
+						AND ( a.deleted = 0 AND b.deleted = 0)';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getByCompanyIdAndPermissionControlIdAndSectionAndNameAndValue($company_id, $permission_control_id, $section, $name, $value, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $permission_control_id == '') {
+			return FALSE;
+		}
+
+		if ( $section == '') {
+			return FALSE;
+		}
+
+		if ( $name == '') {
+			return FALSE;
+		}
+
+		$ph = array(
+					'company_id' => $company_id,
+					'permission_control_id' => $permission_control_id,
+					'section' => $section,
+					'value' => (int)$value,
+					//'name' => $name, //Allow a list of names.
+					);
+
+		$pcf = new PermissionControlFactory();
+
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a,
+							'. $pcf->getTable() .' as b
+					where	b.id = a.permission_control_id
+						AND b.company_id = ?
+						AND a.permission_control_id = ?
+						AND a.section = ?
+						AND a.value = ?
 						AND a.name in ('. $this->getListSQL($name, $ph) .')
 						AND ( a.deleted = 0 AND b.deleted = 0)';
 		$query .= $this->getWhereSQL( $where );

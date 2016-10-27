@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 12331 $
- * $Id: RoundIntervalPolicyFactory.class.php 12331 2014-02-13 18:57:19Z mikeb $
- * $Date: 2014-02-13 10:57:19 -0800 (Thu, 13 Feb 2014) $
- */
+
 
 /**
  * @package Modules\Policy
@@ -100,7 +96,9 @@ class RoundIntervalPolicyFactory extends Factory {
 										'-1010-punch_type' => TTi18n::gettext('Punch Type'),
 										'-1020-round_type' => TTi18n::gettext('Round Type'),
 										'-1030-name' => TTi18n::gettext('Name'),
-										'-1030-round_interval' => TTi18n::gettext('Interval'),
+										'-1035-description' => TTi18n::gettext('Description'),
+
+										'-1040-round_interval' => TTi18n::gettext('Interval'),
 
 										'-1900-in_use' => TTi18n::gettext('In Use'),
 
@@ -115,9 +113,10 @@ class RoundIntervalPolicyFactory extends Factory {
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
 				$retval = array(
+								'name',
+								'description',
 								'punch_type',
 								'round_type',
-								'name',
 								'updated_date',
 								'updated_by',
 								);
@@ -142,6 +141,7 @@ class RoundIntervalPolicyFactory extends Factory {
 										'id' => 'ID',
 										'company_id' => 'Company',
 										'name' => 'Name',
+										'description' => 'Description',
 										'round_type_id' => 'RoundType',
 										'round_type' => FALSE,
 										'punch_type_id' => 'PunchType',
@@ -163,14 +163,7 @@ class RoundIntervalPolicyFactory extends Factory {
 	}
 
 	function getCompanyObject() {
-		if ( is_object($this->company_obj) ) {
-			return $this->company_obj;
-		} else {
-			$clf = TTnew( 'CompanyListFactory' );
-			$this->company_obj = $clf->getById( $this->getCompany() )->getCurrent();
-
-			return $this->company_obj;
-		}
+		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
 	}
 
 	function getCompany() {
@@ -275,6 +268,30 @@ class RoundIntervalPolicyFactory extends Factory {
 						) {
 
 			$this->data['name'] = $name;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getDescription() {
+		if ( isset($this->data['description']) ) {
+			return $this->data['description'];
+		}
+
+		return FALSE;
+	}
+	function setDescription($description) {
+		$description = trim($description);
+
+		if (	$description == ''
+				OR $this->Validator->isLength(	'description',
+												$description,
+												TTi18n::gettext('Description is invalid'),
+												1, 250) ) {
+
+			$this->data['description'] = $description;
 
 			return TRUE;
 		}

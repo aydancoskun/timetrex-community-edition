@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 13501 $
- * $Id: DateTimeTest.php 13501 2014-06-26 16:59:38Z mikeb $
- * $Date: 2014-06-26 09:59:38 -0700 (Thu, 26 Jun 2014) $
- */
+
 require_once('PHPUnit/Extensions/SeleniumTestCase.php');
 
 /**

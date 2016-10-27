@@ -530,10 +530,11 @@ PermissionControlViewController = BaseViewController.extend( {
 
 		this.edit_view.children().eq( 0 ).css( 'min-width', 1170 );
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'Permission Group' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_permission_group': $.i18n._( 'Permission Group' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
+
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIPermissionControl' )),
@@ -548,32 +549,36 @@ PermissionControlViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_permission_group = this.edit_view_tab.find( '#tab_permission_group' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_permission_group_column1 = tab_permission_group.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_permission_group_column1 );
 
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab0_column1, '' );
+		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_permission_group_column1, '' );
+
+		form_item_input.parent().width( '45%' );
 
 		// Description
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'description', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab0_column1 );
+		form_item_input.TTextInput( {field: 'description', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_permission_group_column1 );
+
+		form_item_input.parent().width( '45%' );
 
 		// Level
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {field: 'level'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.level_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Level' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Level' ), form_item_input, tab_permission_group_column1 );
 
 		//Employee
 
@@ -586,7 +591,7 @@ PermissionControlViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'user'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Employees' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Employees' ), form_item_input, tab_permission_group_column1, '' );
 
 		//Permissions
 
@@ -604,7 +609,7 @@ PermissionControlViewController = BaseViewController.extend( {
 			display_close_btn: false
 		} );
 
-		this.addEditFieldToColumn( $.i18n._( 'Permissions' ), form_item_input, tab0_column1, '', null, true, true );
+		this.addEditFieldToColumn( $.i18n._( 'Permissions' ), form_item_input, tab_permission_group_column1, '', null, true, true );
 
 		form_item_input.setColumns( display_columns );
 		form_item_input.setUnselectedGridData( this.permission_array );

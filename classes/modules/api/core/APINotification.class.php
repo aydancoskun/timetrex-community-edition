@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2196 $
- * $Id: APINotification.class.php 2196 2008-10-14 16:08:54Z ipso $
- * $Date: 2008-10-14 09:08:54 -0700 (Tue, 14 Oct 2008) $
- */
+
 
 /**
  * @package API\Core
@@ -103,6 +99,16 @@ class APINotification extends APIFactory {
 						}
 					}
 					unset($license, $license_validate, $license_message, $destination);
+				}
+
+				//Database schema still in sync.
+				if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY AND isset($system_settings['schema_version_group_B']) ) {
+					$retarr[] = array(
+										'delay' => -1, //0= Show until clicked, -1 = Show until next getNotifications call.
+										'bg_color' => '#FF0000', //Red
+										'message' => TTi18n::getText('WARNING: %1 database schema is out of sync with edition and likely corrupt. Please contact your %1 administrator immediately.', APPLICATION_NAME ),
+										'destination' => NULL,
+										);
 				}
 
 				//System Requirements not being met.

@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 11925 $
- * $Id: CompanyDeductionListFactory.class.php 11925 2014-01-08 00:13:44Z mikeb $
- * $Date: 2014-01-07 16:13:44 -0800 (Tue, 07 Jan 2014) $
- */
+
 
 /**
  * @package Modules\Company
@@ -310,6 +306,52 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 						AND type_id in ('. $this->getListSQL($type_id, $ph) .')
 						AND deleted = 0
 					ORDER BY calculation_order ASC';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getByCompanyIDAndUserIdAndCalculationIdAndPayStubEntryAccountID( $company_id, $user_id, $calculation_id, $pse_account_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $user_id == '') {
+			return FALSE;
+		}
+
+		if ( $calculation_id == '') {
+			return FALSE;
+		}
+
+		if ( $pse_account_id == '') {
+			return FALSE;
+		}
+
+		$udf = new UserDeductionFactory();
+
+		$ph = array(
+					'company_id' => $company_id,
+					'user_id' => $user_id,
+					'calculation_id' => $calculation_id
+					);
+
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a,
+							'. $udf->getTable() .' as b
+					where
+						a.company_id = ?
+						AND a.id = b.company_deduction_id
+						AND b.user_id = ?
+						AND a.calculation_id = ?
+						AND a.pay_stub_entry_account_id in ('. $this->getListSQL($pse_account_id, $ph) .')
+						AND ( a.deleted = 0 AND b.deleted = 0 )
+					ORDER BY calculation_order
+					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 

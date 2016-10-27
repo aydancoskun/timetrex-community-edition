@@ -984,6 +984,10 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 		this.stepsDataDic[this.current_step] = {};
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
+		//Error: TypeError: current_step_ui is undefined in https://ondemand1.timetrex.com/interface/html5/framework/jquery.min.js?v=8.0.0-20150126-115958 line 2 > eval line 989
+		if(!current_step_ui){
+			return;
+		}
 		switch ( this.current_step ) {
 			case 1:
 				current_step_data.pay_period_id = current_step_ui.pay_period_id.getValue();

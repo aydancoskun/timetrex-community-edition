@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 15602 $
- * $Id: PayPeriodScheduleFactory.class.php 15602 2014-12-30 00:31:02Z mikeb $
- * $Date: 2014-12-29 16:31:02 -0800 (Mon, 29 Dec 2014) $
- */
+
 
 /**
  * @package Modules\PayPeriod
@@ -1190,7 +1186,7 @@ class PayPeriodScheduleFactory extends Factory {
 		return TRUE;
 	}
 
-	function createNextPayPeriod($end_date = NULL, $offset = NULL) {
+	function createNextPayPeriod($end_date = NULL, $offset = NULL, $enable_import_data = TRUE ) {
 		if ( $end_date == NULL OR $end_date == '' ) {
 			$end_date = NULL;
 		}
@@ -1229,7 +1225,7 @@ class PayPeriodScheduleFactory extends Factory {
 			$ppf->setTransactionDate( $this->getNextTransactionDate() );
 
 			$ppf->setPrimary( $this->getNextPrimary() );
-			$ppf->setEnableImportData( TRUE ); //Import punches when creating new pay periods.
+			$ppf->setEnableImportData( $enable_import_data ); //Import punches when creating new pay periods.
 			if ( $ppf->isValid() ) {
 				$new_pay_period_id = $ppf->Save();
 				Debug::text('New Pay Period ID: '. $new_pay_period_id, __FILE__, __LINE__, __METHOD__, 10);
@@ -1440,7 +1436,7 @@ class PayPeriodScheduleFactory extends Factory {
 
 		$max = 4;
 
-		$start_date = TTDate::parseDateTime( $start_date );
+		$start_date = TTDate::getMiddleDayEpoch( TTDate::parseDateTime( $start_date ) ); //Handle DST by using middle day epoch.
 
 		switch ( $type_id ) {
 			case 5: //Manual
@@ -1652,15 +1648,15 @@ class PayPeriodScheduleFactory extends Factory {
 
 	//Returns shift data according to the pay period schedule criteria for use
 	//in determining which day punches belong to.
-	function getShiftData( $user_date_id = NULL, $user_id = NULL, $epoch = NULL, $filter = NULL, $tmp_punch_control_obj = NULL, $maximum_shift_time = NULL, $new_shift_trigger_time = NULL, $plf = NULL ) {
+	function getShiftData( $date_stamp = NULL, $user_id = NULL, $epoch = NULL, $filter = NULL, $tmp_punch_control_obj = NULL, $maximum_shift_time = NULL, $new_shift_trigger_time = NULL, $plf = NULL ) {
 		global $profiler;
 		$profiler->startTimer( 'PayPeriodScheduleFactory::getShiftData()' );
 
-		if ( is_numeric($user_date_id) AND $user_date_id > 0 ) {
-			$user_id = $epoch = NULL;
+		if ( is_numeric($date_stamp) AND $date_stamp > 0 ) {
+			$epoch = NULL;
 		}
 
-		if ( $user_date_id == '' AND $user_id == '' AND $epoch == '' ) {
+		if ( $date_stamp == '' AND $user_id == '' AND $epoch == '' ) {
 			return FALSE;
 		}
 
@@ -1675,8 +1671,8 @@ class PayPeriodScheduleFactory extends Factory {
 
 		if ( !is_object( $plf ) ) {
 			$plf = TTnew( 'PunchListFactory' );
-			if ( $user_date_id != '' ) {
-				$plf->getByUserDateId( $user_date_id );
+			if ( $date_stamp != '' ) {
+				$plf->getByUserIdAndDateStamp( $user_id, $date_stamp );
 			} else {
 				//Get punches by time stamp.
 				$punch_control_id = 0;
@@ -1696,12 +1692,11 @@ class PayPeriodScheduleFactory extends Factory {
 			}
 		}
 
-
-		Debug::text('Punch Rows: '. $plf->getRecordCount() .' UserID: '. $user_id .' Date: '. TTDate::getDate('DATE+TIME', $epoch) .'('.$epoch.') MaximumShiftTime: '. $maximum_shift_time .' Filter: '. $filter, __FILE__, __LINE__, __METHOD__, 10);
-
+		Debug::text('Punch Rows: '. $plf->getRecordCount() .' UserID: '. $user_id .' Date: '. TTDate::getDate('DATE+TIME', $epoch) .'('.$epoch.') MaximumShiftTime: '. $maximum_shift_time .' NewShiftTrigger: '. $new_shift_trigger_time .' Filter: '. $filter, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $plf->getRecordCount() > 0 ) {
 			$shift = 0;
 			$i = 0;
+			$x = 0;
 			$nearest_shift_id = 0;
 			$nearest_punch_difference = FALSE;
 			$prev_punch_obj = FALSE;
@@ -1716,7 +1711,8 @@ class PayPeriodScheduleFactory extends Factory {
 				}
 
 				if ( isset($prev_punch_arr) AND $p_obj->getTimeStamp() > $prev_punch_arr['time_stamp'] ) {
-					$shift_data[$shift]['previous_punch_key'] = ( $i - 1 );
+					//Make sure $x resets itself after each shift.
+					$shift_data[$shift]['previous_punch_key'] = ( $x - 1 );
 					if ( $shift_data[$shift]['previous_punch_key'] < 0 ) {
 						$shift_data[$shift]['previous_punch_key'] = NULL;
 					}
@@ -1740,7 +1736,7 @@ class PayPeriodScheduleFactory extends Factory {
 				//punches in a pair, the remaining punch is ignored and causing punches to jump around between days in some cases.
 				if ( $i > 0 AND isset($shift_data[$shift]['last_out'])
 						AND ( $p_obj->getStatus() == 10 OR $p_obj->getStatus() == $prev_punch_arr['status_id'] )) {
-					Debug::text('Checking for new shift... This Control ID: '.$p_obj->getPunchControlID() .' Last Out Control ID: '. $shift_data[$shift]['last_out']['punch_control_id'] .' Last Out Time: '. TTDate::getDate('DATE+TIME', $shift_data[$shift]['last_out']['time_stamp']), __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text('Checking for new shift... This Control ID: '. $p_obj->getPunchControlID() .' Last Out Control ID: '. $shift_data[$shift]['last_out']['punch_control_id'] .' Last Out Time: '. TTDate::getDate('DATE+TIME', $shift_data[$shift]['last_out']['time_stamp']), __FILE__, __LINE__, __METHOD__, 10);
 					//Assume that if two punches are assigned to the same punch_control_id are the same shift, even if the time between
 					//them exceeds the new_shift_trigger_time. This helps fix the bug where you could add a In punch then add a Out
 					//punch BEFORE the In punch as long as it was more than the Maximum Shift Time before the In Punch.
@@ -1757,7 +1753,11 @@ class PayPeriodScheduleFactory extends Factory {
 					//	Or do we not split the shift at all when this occurs? Currently we don't split at all.
 					if ( $p_obj->getPunchControlID() != $shift_data[$shift]['last_out']['punch_control_id']
 							AND (
-									( $p_obj->getTimeStamp() - $shift_data[$shift]['last_out']['time_stamp'] ) >= $new_shift_trigger_time
+									(
+										$p_obj->getType() == 10
+										AND $p_obj->getTimeStamp() != $shift_data[$shift]['last_out']['time_stamp'] //Don't allow transfer punches to cause a new shift to start.
+										AND ( $p_obj->getTimeStamp() - $shift_data[$shift]['last_out']['time_stamp'] ) >= $new_shift_trigger_time
+									)
 									OR
 									(
 										$this->getShiftAssignedDay() == 40
@@ -1768,7 +1768,9 @@ class PayPeriodScheduleFactory extends Factory {
 									)
 								)
 							) {
+						Debug::Text('	 New shift because of normal punches... Punch Time: '. $p_obj->getTimeStamp() .' Last Out: '. $shift_data[$shift]['last_out']['time_stamp'] .' New Shift: '. $new_shift_trigger_time .' ShiftAssignedType: '. $this->getShiftAssignedDay(), __FILE__, __LINE__, __METHOD__, 10);
 						$shift++;
+						$x = 0;
 					}
 				} elseif ( $i > 0
 							AND isset($prev_punch_arr['time_stamp'])
@@ -1776,6 +1778,7 @@ class PayPeriodScheduleFactory extends Factory {
 							AND abs( ( $prev_punch_arr['time_stamp'] - $p_obj->getTimeStamp() ) ) > $maximum_shift_time ) {
 					//Debug::text('	 New shift because two punch_control records exist and punch timestamp exceed maximum shift time.', __FILE__, __LINE__, __METHOD__, 10);
 					$shift++;
+					$x = 0;
 				}
 
 				if ( !isset($shift_data[$shift]['total_time']) ) {
@@ -1790,7 +1793,7 @@ class PayPeriodScheduleFactory extends Factory {
 				//Determine which shift is closest to the given epoch.
 				$punch_difference_from_epoch = abs( ( $epoch - $p_obj->getTimeStamp() ) );
 				if ( $nearest_punch_difference === FALSE OR $punch_difference_from_epoch <= $nearest_punch_difference ) {
-					Debug::text('Nearest Shift Determined to be: '. $shift .' Nearest Punch Diff: '. (int)$nearest_punch_difference .' Punch Diff: '. $punch_difference_from_epoch, __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text('Nearest Shift Determined to be: '. $shift .' Nearest Punch Diff: '. (int)$nearest_punch_difference .' Punch Diff: '. $punch_difference_from_epoch .' Epoch: '. TTDate::getDate('DATE+TIME', $epoch ) .' Current Punch: '. TTDate::getDate('DATE+TIME', $p_obj->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 
 					//If two punches have the same timestamp, use the shift that matches the passed punch control object, which is usually the one we are currently editing...
 					//This is for splitting shifts at exactly midnight.
@@ -1805,7 +1808,8 @@ class PayPeriodScheduleFactory extends Factory {
 				$punch_arr = array(
 									'id' => $p_obj->getId(),
 									'punch_control_id' => $p_obj->getPunchControlId(),
-									'user_date_id' => $punch_control_obj->getUserDateID(),
+									'user_id' => $punch_control_obj->getUser(),
+									'date_stamp' => $punch_control_obj->getDateStamp(),
 									'time_stamp' => $p_obj->getTimeStamp(),
 									'status_id' => $p_obj->getStatus(),
 									'type_id' => $p_obj->getType(),
@@ -1813,8 +1817,8 @@ class PayPeriodScheduleFactory extends Factory {
 
 				$shift_data[$shift]['punches'][] = $punch_arr;
 				$shift_data[$shift]['punch_control_ids'][] = $p_obj->getPunchControlId();
-				if ( $punch_control_obj->getUserDateID() != FALSE ) {
-					$shift_data[$shift]['user_date_ids'][] = $punch_control_obj->getUserDateID();
+				if ( $punch_control_obj->getDateStamp() != FALSE ) {
+					$shift_data[$shift]['date_stamps'][] = $punch_control_obj->getDateStamp();
 				}
 
 				if ( !isset($shift_data[$shift]['span_midnight']) ) {
@@ -1854,8 +1858,13 @@ class PayPeriodScheduleFactory extends Factory {
 					}
 				}
 
+				//Keep instead of last punch for each shift so we can easily get to it.
+				end( $shift_data[$shift]['punches'] );
+				$shift_data[$shift]['last_punch_key'] = key( $shift_data[$shift]['punches'] );
+
 				$prev_punch_arr = $punch_arr;
 				$i++;
+				$x++;
 			}
 
 			//Debug::Arr($shift_data, 'aShift Data:', __FILE__, __LINE__, __METHOD__, 10);
@@ -1869,8 +1878,8 @@ class PayPeriodScheduleFactory extends Factory {
 					$shift_data[$tmp_shift_key]['day_with_most_time'] = key($shift_data[$tmp_shift_key]['total_time_per_day']);
 
 					$shift_data[$tmp_shift_key]['punch_control_ids'] = array_unique( $shift_data[$tmp_shift_key]['punch_control_ids'] );
-					if ( isset($shift_data[$tmp_shift_key]['user_date_ids']) ) {
-						$shift_data[$tmp_shift_key]['user_date_ids'] = array_unique( $shift_data[$tmp_shift_key]['user_date_ids'] );
+					if ( isset($shift_data[$tmp_shift_key]['date_stamps']) ) {
+						$shift_data[$tmp_shift_key]['date_stamps'] = array_unique( $shift_data[$tmp_shift_key]['date_stamps'] );
 					}
 				}
 				unset($tmp_shift_key, $tmp_shift_data);
@@ -1903,12 +1912,21 @@ class PayPeriodScheduleFactory extends Factory {
 						list( $first_in, $last_out ) = array( $last_out, $first_in );
 					}
 
-					if ( TTDate::isTimeOverLap($epoch, $epoch, ($first_in - $new_shift_trigger_time), ($last_out + $new_shift_trigger_time) ) == FALSE ) {
-						Debug::Text('Nearest shift is outside the new shift trigger time... Epoch: '. $epoch .' First In: '. $first_in .' Last Out: '. $last_out .' New Shift Trigger: '. $new_shift_trigger_time, __FILE__, __LINE__, __METHOD__, 10);
-
+					//Only check overlap if the last punch in the shift is an OUT punch (shift has ended basically), and the first/last punches don't match.
+					//Only check against NORMAL OUT punches though, that way if new_shift_trigger_time=0, if the employee goes for lunch it thinks they are starting a new shift.
+					//However meal policies based on Punch Time, the last punch is always a Normal Out, so if new_shift_trigger_time=0 it will never detect lunches properly.
+					//  Switch this back to checking if the shift spans midnight for new shifts to be triggered.
+					if ( $first_in != $last_out
+							AND ( isset($shift_data['punches'][$shift_data['last_punch_key']]) AND $shift_data['punches'][$shift_data['last_punch_key']]['status_id'] == 20 AND $shift_data['punches'][$shift_data['last_punch_key']]['type_id'] == 10 )
+							AND TTDate::doesRangeSpanMidnight( $shift_data['punches'][$shift_data['last_punch_key']]['time_stamp'], $epoch ) == TRUE
+							AND TTDate::isTimeOverLap($epoch, $epoch, ($first_in - $new_shift_trigger_time), ($last_out + $new_shift_trigger_time) ) == FALSE
+							) {
+						Debug::Text('Nearest shift is outside the new shift trigger time... Epoch: '. TTDate::getDate('DATE+TIME', $epoch ) .' First In: '. TTDate::getDate('DATE+TIME', $first_in ) .' Last Out: '. TTDate::getDate('DATE+TIME', $last_out ) .' New Shift Trigger: '. $new_shift_trigger_time .' Prev Punch Key: '. $shift_data['previous_punch_key'], __FILE__, __LINE__, __METHOD__, 10);
 						return FALSE;
 					}
 					unset($first_in, $last_out);
+				} else {
+					Debug::Text('ERROR: invalid filter used: '. $filter, __FILE__, __LINE__, __METHOD__, 10);
 				}
 
 				$profiler->stopTimer( 'PayPeriodScheduleFactory::getShiftData()' );
@@ -1920,6 +1938,7 @@ class PayPeriodScheduleFactory extends Factory {
 
 		$profiler->stopTimer( 'PayPeriodScheduleFactory::getShiftData()' );
 
+		Debug::Text('No Shift Data returned...', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
 

@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 8160 $
- * $Id: api.php 8160 2006-05-31 23:33:54Z root $
- * $Date: 2006-05-31 16:33:54 -0700 (Wed, 31 May 2006) $
- */
+
 define('TIMETREX_JSON_API', TRUE );
 
 //Add timetrex.ini.php setting to enable/disable the API. Make an entire [API] section.
@@ -85,7 +81,9 @@ function unauthenticatedInvokeService( $class_name, $method, $arguments, $messag
 	$valid_unauthenticated_classes = getUnauthenticatedAPIClasses();
 	if ( $class_name != '' AND in_array( $class_name, $valid_unauthenticated_classes ) AND class_exists( $class_name ) ) {
 		$obj = new $class_name;
-		$obj->setAMFMessageID( $message_id ); //Sets AMF message ID so progress bar continues to work.
+		if ( method_exists( $obj, 'setAMFMessageID') ) {
+			$obj->setAMFMessageID( $message_id ); //Sets AMF message ID so progress bar continues to work.
+		}
 		if ( $method != '' AND method_exists( $obj, $method ) ) {
 			$retval = call_user_func_array( array($obj, $method), (array)$arguments );
 			//If the function returns anything else, encode into JSON and return it.
@@ -260,7 +258,7 @@ unset($argument_size);
 
 $api_auth = TTNew('APIAuthentication'); //Used to handle error cases and display error messages.
 $session_id = getSessionID();
-if ( $session_id != '' AND !in_array( strtolower($method), array('isloggedin', 'ping' ) ) ) { //When interface calls PING() on a regular basis we need to skip this check and pass it to APIAuthentication immediately to avoid updating the session time.
+if ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == '' AND $session_id != '' AND !in_array( strtolower($method), array('isloggedin', 'ping' ) ) ) { //When interface calls PING() on a regular basis we need to skip this check and pass it to APIAuthentication immediately to avoid updating the session time.
 	$authentication = new Authentication();
 
 	Debug::text('Session ID: '. $session_id .' Source IP: '. $_SERVER['REMOTE_ADDR'], __FILE__, __LINE__, __METHOD__, 10);

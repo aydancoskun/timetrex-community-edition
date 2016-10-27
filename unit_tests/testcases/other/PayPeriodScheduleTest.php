@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 15602 $
- * $Id: PayPeriodScheduleTest.php 15602 2014-12-30 00:31:02Z mikeb $
- * $Date: 2014-12-29 16:31:02 -0800 (Mon, 29 Dec 2014) $
- */
+
 require_once('PHPUnit/Framework/TestCase.php');
 
 /**

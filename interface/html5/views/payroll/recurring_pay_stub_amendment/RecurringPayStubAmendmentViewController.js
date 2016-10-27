@@ -89,6 +89,8 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 			this.edit_view_form_item_dic['units'].css( 'display', 'none' );
 			this.edit_view_form_item_dic['amount'].css( 'display', 'none' );
 		}
+
+		this.editFieldResize();
 	},
 
 	onFormItemKeyUp: function( target ) {
@@ -125,6 +127,12 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 	},
 	/* jshint ignore:end */
 	setCurrentEditRecordData: function() {
+
+		// When mass editing, these fields may not be the common data, so their value will be undefined, so this will cause their change event cannot work properly.
+		this.setDefaultData( {
+			'type_id': 10
+		} );
+
 		//Set current edit record data to all widgets
 		var widget;
 
@@ -160,10 +168,11 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		var $this = this;
 		var allow_multiple_selection = false;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'Recurring PS Amendment' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_recurring_ps_amendment': $.i18n._( 'Recurring PS Amendment' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
+
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIRecurringPayStubAmendment' )),
@@ -178,33 +187,37 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_recurring_ps_amendment = this.edit_view_tab.find( '#tab_recurring_ps_amendment' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_recurring_ps_amendment_column1 = tab_recurring_ps_amendment.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_recurring_ps_amendment_column1 );
 
 		// Status
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'status_id', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.filtered_status_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_recurring_ps_amendment_column1, '' );
 
 		// Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab0_column1 );
+		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_recurring_ps_amendment_column1 );
+
+		form_item_input.parent().width( '45%' );
 
 		// Description
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'description', width: 359} );
-		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab0_column1 );
+		form_item_input.TTextInput( {field: 'description', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_recurring_ps_amendment_column1 );
+
+		form_item_input.parent().width( '45%' );
 
 		// Frequency
 
@@ -212,19 +225,19 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 
 		form_item_input.TComboBox( {field: 'frequency_id', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.frequency_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Frequency' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Frequency' ), form_item_input, tab_recurring_ps_amendment_column1 );
 
 		// Start Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
 		form_item_input.TDatePicker( {field: 'start_date'} );
-		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_recurring_ps_amendment_column1 );
 
 		// End Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
 		form_item_input.TDatePicker( {field: 'end_date'} );
-		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab_recurring_ps_amendment_column1 );
 
 		// Employee(s)
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -239,12 +252,12 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		var default_args = {};
 		default_args.permission_section = 'recurring_ps_amendment';
 		form_item_input.setDefaultArgs( default_args );
-		this.addEditFieldToColumn( $.i18n._( 'Employee(s)' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Employee(s)' ), form_item_input, tab_recurring_ps_amendment_column1 );
 
 		// Pay Stub Amendment
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( {label: $.i18n._( 'Pay Stub Amendment' )} );
-		this.addEditFieldToColumn( null, form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( null, form_item_input, tab_recurring_ps_amendment_column1 );
 
 		// Pay Stub Account
 		var args = {};
@@ -262,13 +275,13 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 			field: 'pay_stub_entry_name_id'
 		} );
 		form_item_input.setDefaultArgs( args );
-		this.addEditFieldToColumn( $.i18n._( 'Pay Stub Account' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Pay Stub Account' ), form_item_input, tab_recurring_ps_amendment_column1 );
 
 		// Amount Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {field: 'type_id', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Amount Type' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Amount Type' ), form_item_input, tab_recurring_ps_amendment_column1 );
 
 		// Fixed
 
@@ -276,20 +289,20 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'rate', width: 149, hasKeyEvent: true} );
-		this.addEditFieldToColumn( $.i18n._( 'Rate' ), form_item_input, tab0_column1, '', null, true, null, null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Rate' ), form_item_input, tab_recurring_ps_amendment_column1, '', null, true, null, null, true );
 
 		// Units
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'units', width: 149, hasKeyEvent: true} );
-		this.addEditFieldToColumn( $.i18n._( 'Units' ), form_item_input, tab0_column1, '', null, true, null, null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Units' ), form_item_input, tab_recurring_ps_amendment_column1, '', null, true, null, null, true );
 
 		// Amount
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'amount', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Amount' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Amount' ), form_item_input, tab_recurring_ps_amendment_column1, '', null, true );
 
 		// Percent
 
@@ -297,7 +310,7 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'percent_amount', width: 79} );
-		this.addEditFieldToColumn( $.i18n._( 'Percent' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Percent' ), form_item_input, tab_recurring_ps_amendment_column1, '', null, true );
 
 		args = {};
 		filter_data = {};
@@ -316,13 +329,13 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		} );
 
 		form_item_input.setDefaultArgs( args );
-		this.addEditFieldToColumn( $.i18n._( 'Percent of' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Percent of' ), form_item_input, tab_recurring_ps_amendment_column1, '', null, true );
 
 		// Pay Stub Note (Public)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'ps_amendment_description', width: 359} );
-		this.addEditFieldToColumn( $.i18n._( 'Pay Stub Note (Public)' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Pay Stub Note (Public)' ), form_item_input, tab_recurring_ps_amendment_column1, '' );
 
 	},
 

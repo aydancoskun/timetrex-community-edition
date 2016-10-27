@@ -67,6 +67,8 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 			this.edit_view_form_item_dic['accrual_pay_stub_entry_account_id'].css( 'display', 'block' );
 			this.onAccrualPayStubEntryAccountChange();
 		}
+
+		this.editFieldResize();
 	},
 	onAccrualPayStubEntryAccountChange: function() {
 		if ( this.current_edit_record.accrual_pay_stub_entry_account_id > 0 ) {
@@ -74,6 +76,8 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 		} else {
 			this.edit_view_form_item_dic['accrual_type_id'].css( 'display', 'none' );
 		}
+
+		this.editFieldResize();
 	},
 
 	buildEditViewUI: function() {
@@ -82,10 +86,10 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'Pay Stub Account' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_pay_stub_account': $.i18n._( 'Pay Stub Account' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
@@ -101,40 +105,42 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_pay_stub_account = this.edit_view_tab.find( '#tab_pay_stub_account' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_pay_stub_account_column1 = tab_pay_stub_account.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_pay_stub_account_column1 );
 
 		//Status
 
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {field: 'status_id', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_pay_stub_account_column1, '' );
 
 		//Type
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {field: 'type_id', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_pay_stub_account_column1 );
 
 		//Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: 359} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab0_column1 );
+		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_pay_stub_account_column1 );
+
+		form_item_input.parent().width( '45%' );
 
 		//Order
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'ps_order', width: 359} );
-		this.addEditFieldToColumn( $.i18n._( 'Order' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Order' ), form_item_input, tab_pay_stub_account_column1 );
 
 		//Accrual
 
@@ -155,26 +161,26 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 		} );
 
 		form_item_input.setDefaultArgs( args );
-		this.addEditFieldToColumn( $.i18n._( 'Accrual' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Accrual' ), form_item_input, tab_pay_stub_account_column1, '', null, true );
 		// Accrual Type
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {field: 'accrual_type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.accrual_type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Accrual Type' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Accrual Type' ), form_item_input, tab_pay_stub_account_column1, '', null, true );
 
 		// Debit Account
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'debit_account', width: 359} );
-		this.addEditFieldToColumn( $.i18n._( 'Debit Account' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Debit Account' ), form_item_input, tab_pay_stub_account_column1 );
 
 		// Credit Account
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'credit_account', width: 359} );
-		this.addEditFieldToColumn( $.i18n._( 'Credit Account' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Credit Account' ), form_item_input, tab_pay_stub_account_column1, '' );
 
 	},
 

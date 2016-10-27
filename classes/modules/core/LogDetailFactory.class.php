@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 3106 $
- * $Id: LogFactory.class.php 3106 2009-11-20 20:01:46Z ipso $
- * $Date: 2009-11-20 12:01:46 -0800 (Fri, 20 Nov 2009) $
- */
+
 
 /**
  * @package Core
@@ -195,24 +191,6 @@ class LogDetailFactory extends Factory {
 					$tmp_class = new $class;
 					$tmp_class->setObjectFromArray( $object->old_data );
 					$old_data = $tmp_class->data;
-
-					//If user_date_id changed, we need to display the differences for it. (user/date)
-					//For example: if a schedule shift is assigned to a new user, just the user_date_id is modified
-					if ( ( isset($new_data['user_date_id']) AND isset($old_data['user_date_id']) AND $new_data['user_date_id'] != $old_data['user_date_id'] )
-							OR ( isset($new_data['user_date_id']) AND !isset($old_data['user_date_id']) )
-							OR ( !isset($new_data['user_date_id']) AND isset($old_data['user_date_id']) ) ) {
-						Debug::Text('User Date ID changed...', __FILE__, __LINE__, __METHOD__, 10);
-						if ( method_exists( $object, 'getUserDateObject' ) AND is_object( $object->getUserDateObject() ) ) {
-							$new_data['user_id'] = $object->getUserDateObject()->getUser();
-							$new_data['pay_period_id'] = $object->getUserDateObject()->getPayPeriod();
-							$new_data['date_stamp'] = $object->getUserDateObject()->getDateStamp();
-						}
-						if ( method_exists( $tmp_class, 'getUserDateObject' ) AND is_object( $tmp_class->getUserDateObject() ) ) {
-							$old_data['user_id'] = $tmp_class->getUserDateObject()->getUser();
-							$old_data['pay_period_id'] = $tmp_class->getUserDateObject()->getPayPeriod();
-							$old_data['date_stamp'] = $tmp_class->getUserDateObject()->getDateStamp();
-						}
-					}
 					unset($tmp_class);
 				} else {
 					$old_data = $object->old_data;

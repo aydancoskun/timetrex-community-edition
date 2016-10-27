@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 13825 $
- * $Id: Interface.inc.php 13825 2014-07-23 16:44:25Z mikeb $
- * $Date: 2014-07-23 09:44:25 -0700 (Wed, 23 Jul 2014) $
- */
+
 //Help prevent XSS or frame clickjacking.
 Header('X-XSS-Protection: 1; mode=block');
 Header('X-Frame-Options: SAMEORIGIN');

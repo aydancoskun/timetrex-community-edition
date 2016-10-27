@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2286 $
- * $Id: CA.class.php 2286 2008-12-12 23:12:41Z ipso $
- * $Date: 2008-12-12 15:12:41 -0800 (Fri, 12 Dec 2008) $
- */
+
 
 include_once( 'CA.class.php' );
 
@@ -552,17 +548,6 @@ class GovernmentForms_CA_T4ASum extends GovernmentForms_CA {
 		return array( substr($value, 0, 3), substr($value, 3, 3), substr($value, 6, 4) );
 	}
 
-	function filterCompanyAddress( $value ) {
-		//Combine company address for multicell display.
-		$retarr[] = $this->company_address1;
-		if ( $this->company_address2 != '' ) {
-			$retarr[] = $this->company_address2;
-		}
-		$retarr[] = $this->company_city. ', '.$this->company_province . ' ' . $this->company_postal_code;
-
-		return implode("\n", $retarr );
-	}
-
 	function calcL82Diff( $value, $schema ) {
 		//Subtotal: 22 - 82
 		$this->l82_diff = $this->l22 - $this->l82;
@@ -585,7 +570,7 @@ class GovernmentForms_CA_T4ASum extends GovernmentForms_CA {
 
 		$xml->Return->T4A->addChild('T4ASummary');
 
-		$xml->Return->T4A->T4ASummary->addChild('bn', $this->payroll_account_number );
+		$xml->Return->T4A->T4ASummary->addChild('bn', $this->formatPayrollAccountNumber( $this->payroll_account_number ) );
 		$xml->Return->T4A->T4ASummary->addChild('tx_yr', $this->year );
 		$xml->Return->T4A->T4ASummary->addChild('slp_cnt', $this->l88 );
 		$xml->Return->T4A->T4ASummary->addChild('rpt_tcd', $this->getStatus() ); //Report Type Code: O = Originals, A = Amendment, C = Cancel

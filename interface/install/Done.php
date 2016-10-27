@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14797 $
- * $Id: Done.php 14797 2014-10-16 19:00:06Z mikeb $
- * $Date: 2014-10-16 12:00:06 -0700 (Thu, 16 Oct 2014) $
- */
+
 require_once('../../includes/global.inc.php');
 
 $authenticate = FALSE;
@@ -131,6 +127,7 @@ switch ($action) {
 }
 
 $cache->clean(); //Clear all cache.
+$install_obj->cleanOrphanFiles();
 
 $handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'done'), 'pre_install.php'), "r");
 @fclose($handle);

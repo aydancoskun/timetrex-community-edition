@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 15179 $
- * $Id: PayPeriodListFactory.class.php 15179 2014-11-17 16:48:55Z mikeb $
- * $Date: 2014-11-17 08:48:55 -0800 (Mon, 17 Nov 2014) $
- */
+
 
 /**
  * @package Modules\PayPeriod
@@ -514,6 +510,13 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 			return FALSE;
 		}
 
+		if ( $order == NULL ) {
+			$order = array( 'a.start_date' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
 		$ppsuf = new PayPeriodScheduleUserFactory();
 		$ppsf = new PayPeriodScheduleFactory();
 
@@ -600,7 +603,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 
 		return $this;
 	}
-	
+
 	//Gets all pay periods that start or end between the two dates. Ideal for finding all pay periods that affect a given week.
 	function getByUserIdAndOverlapStartDateAndEndDate($user_id, $start_date, $end_date, $where = NULL, $order = NULL) {
 		if ( $user_id == '' ) {
@@ -1515,6 +1518,28 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
+	}
+
+	static function findPayPeriod( $user_id, $date_stamp ) {
+		if ( $date_stamp > 0 AND $user_id > 0 ) {
+			//FIXME: With MySQL since it doesn't handle timezones very well I think we need to
+			//get the timezone of the payperiod schedule for this user, and set the timezone to that
+			//before we go searching for a pay period, otherwise the wrong payperiod might be returned.
+			//This might happen when the MySQL server is in one timezone (ie: CST) and the pay period
+			//schedule is set to another timezone (ie: PST)
+			//This could severely slow down a lot of operations though, so make this specific to MySQL only.
+			$pplf = TTnew( 'PayPeriodListFactory' );
+			$pplf->getByUserIdAndEndDate( $user_id, $date_stamp );
+			if ( $pplf->getRecordCount() == 1 ) {
+				$pay_period_id = $pplf->getCurrent()->getID();
+				//Debug::Text('Pay Period Id: '. $pay_period_id, __FILE__, __LINE__, __METHOD__, 10);
+				return $pay_period_id;
+			}
+		}
+
+		Debug::Text('Unable to find pay period for User ID: '. $user_id .' Date Stamp: '. $date_stamp, __FILE__, __LINE__, __METHOD__, 10);
+
+		return FALSE;
 	}
 
 }

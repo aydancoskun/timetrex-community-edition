@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 8201 $
- * $Id: TimeTrexClientAPI.php 8201 2006-07-07 23:40:12Z root $
- * $Date: 2006-07-07 16:40:12 -0700 (Fri, 07 Jul 2006) $
- */
+
 
 /**
  * @package API\TimeTrexClientAPI

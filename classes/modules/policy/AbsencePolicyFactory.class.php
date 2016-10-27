@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 11942 $
- * $Id: AbsencePolicyFactory.class.php 11942 2014-01-09 00:50:10Z mikeb $
- * $Date: 2014-01-08 16:50:10 -0800 (Wed, 08 Jan 2014) $
- */
+
 
 /**
  * @package Modules\Policy
@@ -47,12 +43,14 @@ class AbsencePolicyFactory extends Factory {
 	protected $pk_sequence_name = 'absence_policy_id_seq'; //PK Sequence name
 
 	protected $company_obj = NULL;
-
+	protected $pay_code_obj = NULL;
+	protected $pay_formula_policy_obj = NULL;
 
 	function _getFactoryOptions( $name ) {
 
 		$retval = NULL;
 		switch( $name ) {
+/*
 			case 'type':
 				$retval = array(
 										10 => TTi18n::gettext('Paid'),
@@ -64,15 +62,11 @@ class AbsencePolicyFactory extends Factory {
 			case 'paid_type': //Types that are considered paid.
 				$retval = array(10, 12);
 				break;
+*/
 			case 'columns':
 				$retval = array(
-										'-1010-type' => TTi18n::gettext('Type'),
 										'-1020-name' => TTi18n::gettext('Name'),
-
-										'-1030-rate' => TTi18n::gettext('Rate'),
-
-										'-1080-accrual_policy' => TTi18n::gettext('Accrual Policy'),
-										'-1090-accrual_rate' => TTi18n::gettext('Accrual Rate'),
+										'-1025-description' => TTi18n::gettext('Description'),
 
 										'-1900-in_use' => TTi18n::gettext('In Use'),
 
@@ -87,8 +81,8 @@ class AbsencePolicyFactory extends Factory {
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
 				$retval = array(
-								'type',
 								'name',
+								'description',
 								'updated_date',
 								'updated_by',
 								);
@@ -111,15 +105,18 @@ class AbsencePolicyFactory extends Factory {
 			$variable_function_map = array(
 											'id' => 'ID',
 											'company_id' => 'Company',
-											'type_id' => 'Type',
-											'type' => FALSE,
+											//'type_id' => 'Type',
+											//'type' => FALSE,
 											'name' => 'Name',
-											'rate' => 'Rate',
-											'wage_group_id' => 'WageGroup',
-											'accrual_rate' => 'AccrualRate',
-											'accrual_policy_id' => 'AccrualPolicyID',
-											'accrual_policy' => FALSE,
+											'description' => 'Description',
+
+											'pay_code_id' => 'PayCode',
+											'pay_code' => FALSE,
+											'pay_formula_policy_id' => 'PayFormulaPolicy',
+											'pay_formula_policy' => FALSE,
+
 											'pay_stub_entry_account_id' => 'PayStubEntryAccountId',
+											
 											'in_use' => FALSE,
 											'deleted' => 'Deleted',
 											);
@@ -127,14 +124,24 @@ class AbsencePolicyFactory extends Factory {
 	}
 
 	function getCompanyObject() {
-		if ( is_object($this->company_obj) ) {
-			return $this->company_obj;
-		} else {
-			$clf = TTnew( 'CompanyListFactory' );
-			$this->company_obj = $clf->getById( $this->getCompany() )->getCurrent();
+		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
+	}
 
-			return $this->company_obj;
+	function getPayCodeObject() {
+		return $this->getGenericObject( 'PayCodeListFactory', $this->getPayCode(), 'pay_code_obj' );
+	}
+
+	function getPayFormulaPolicyObject( $id = FALSE ) {
+		if ( $id == FALSE ) {
+			$id = $this->getPayFormulaPolicy();
+			if ( $id == 0 ) {
+				$pc_obj = $this->getPayCodeObject();
+				if ( is_object( $pc_obj ) ) {
+					$id = $pc_obj->getPayFormulaPolicy();
+				}
+			}
 		}
+		return $this->getGenericObject( 'PayFormulaPolicyListFactory', $id, 'pay_formula_policy_obj' );
 	}
 
 	function getCompany() {
@@ -162,7 +169,7 @@ class AbsencePolicyFactory extends Factory {
 
 		return FALSE;
 	}
-
+/*
 	function isPaid() {
 		if ( in_array( $this->getType(), $this->getOptions('paid_type') ) ) {
 			return TRUE;
@@ -196,7 +203,7 @@ class AbsencePolicyFactory extends Factory {
 
 		return FALSE;
 	}
-
+*/
 	function isUniqueName($name) {
 		$ph = array(
 					'company_id' => $this->getCompany(),
@@ -244,35 +251,23 @@ class AbsencePolicyFactory extends Factory {
 		return FALSE;
 	}
 
-	function getHourlyRate( $hourly_rate ) {
-		if ( $this->getType() == 20 ) { //Unpaid
-			$rate = 0;
-		} elseif( $this->getType() == 30 ) { //Dock
-			$rate = ( $this->getRate() * -1 );
-		} else {
-			$rate = $this->getRate();
-		}
-		return bcmul( $hourly_rate, $rate );
-	}
-
-	function getRate() {
-		if ( isset($this->data['rate']) ) {
-			return $this->data['rate'];
+	function getDescription() {
+		if ( isset($this->data['description']) ) {
+			return $this->data['description'];
 		}
 
 		return FALSE;
 	}
-	function setRate($int) {
-		$int = trim($int);
+	function setDescription($description) {
+		$description = trim($description);
 
-		if	( empty($int) ) {
-			$int = 0;
-		}
+		if (	$description == ''
+				OR $this->Validator->isLength(	'description',
+												$description,
+												TTi18n::gettext('Description is invalid'),
+												1, 250) ) {
 
-		if	(	$this->Validator->isFloat(		'rate',
-												$int,
-												TTi18n::gettext('Incorrect Rate')) ) {
-			$this->data['rate'] = $int;
+			$this->data['description'] = $description;
 
 			return TRUE;
 		}
@@ -280,114 +275,58 @@ class AbsencePolicyFactory extends Factory {
 		return FALSE;
 	}
 
-	function getWageGroup() {
-		if ( isset($this->data['wage_group_id']) ) {
-			return (int)$this->data['wage_group_id'];
+	function getPayCode() {
+		if ( isset($this->data['pay_code_id']) ) {
+			return (int)$this->data['pay_code_id'];
 		}
 
 		return FALSE;
 	}
-	function setWageGroup($id) {
+	function setPayCode($id) {
+		if ( $id == '' OR empty($id) ) {
+			$id = 0;
+		}
+
+		$pclf = TTnew( 'PayCodeListFactory' );
+
+		if (	$id == 0
+				OR
+				$this->Validator->isResultSetWithRows(	'pay_code_id',
+														$pclf->getById($id),
+														TTi18n::gettext('Invalid Pay Code')
+														) ) {
+			$this->data['pay_code_id'] = $id;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getPayFormulaPolicy() {
+		if ( isset($this->data['pay_formula_policy_id']) ) {
+			return (int)$this->data['pay_formula_policy_id'];
+		}
+
+		return FALSE;
+	}
+	function setPayFormulaPolicy($id) {
 		$id = trim($id);
 
-		$wglf = TTnew( 'WageGroupListFactory' );
+		if ( $id == '' OR empty($id) ) {
+			$id = 0;
+		}
+
+		$pfplf = TTnew( 'PayFormulaPolicyListFactory' );
 
 		if ( $id == 0
 				OR
-				$this->Validator->isResultSetWithRows(	'wage_group',
-													$wglf->getByID($id),
-													TTi18n::gettext('Wage Group is invalid')
+				$this->Validator->isResultSetWithRows(	'pay_formula_policy_id',
+													$pfplf->getByID($id),
+													TTi18n::gettext('Pay Formula Policy is invalid')
 													) ) {
 
-			$this->data['wage_group_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getAccrualRate() {
-		if ( isset($this->data['accrual_rate']) ) {
-			return $this->data['accrual_rate'];
-		}
-
-		return FALSE;
-	}
-	function setAccrualRate($int) {
-		$int = trim($int);
-
-		if	( empty($int) ) {
-			$int = 0;
-		}
-
-		if	(	$this->Validator->isFloat(		'accrual_rate',
-												$int,
-												TTi18n::gettext('Incorrect Accrual Rate')) ) {
-			$this->data['accrual_rate'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getAccrualPolicyID() {
-		if ( isset($this->data['accrual_policy_id']) ) {
-			return (int)$this->data['accrual_policy_id'];
-		}
-
-		return FALSE;
-	}
-	function setAccrualPolicyID($id) {
-		$id = trim($id);
-
-		if ( $id == '' OR empty($id) ) {
-			$id = NULL;
-		}
-
-		$aplf = TTnew( 'AccrualPolicyListFactory' );
-
-		if ( $id == NULL
-				OR
-				$this->Validator->isResultSetWithRows(	'accrual_policy',
-													$aplf->getByID($id),
-													TTi18n::gettext('Accrual Policy is invalid')
-													) ) {
-
-			$this->data['accrual_policy_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getPayStubEntryAccountId() {
-		if ( isset($this->data['pay_stub_entry_account_id']) ) {
-			return (int)$this->data['pay_stub_entry_account_id'];
-		}
-
-		return FALSE;
-	}
-	function setPayStubEntryAccountId($id) {
-		$id = trim($id);
-
-		Debug::text('Entry Account ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-
-		if ( $id == '' OR empty($id) ) {
-			$id = NULL;
-		}
-
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-
-		if (	$id == NULL
-				OR
-				$this->Validator->isResultSetWithRows(	'pay_stub_entry_account_id',
-														$psealf->getById($id),
-														TTi18n::gettext('Invalid Pay Stub Account')
-														) ) {
-			$this->data['pay_stub_entry_account_id'] = $id;
+			$this->data['pay_formula_policy_id'] = $id;
 
 			return TRUE;
 		}
@@ -396,15 +335,18 @@ class AbsencePolicyFactory extends Factory {
 	}
 
 	function Validate() {
-		if ( $this->getDeleted() == TRUE ) {
-			//Check to make sure there are no hours using this OT policy.
-			$udtlf = TTnew( 'UserDateTotalListFactory' );
-			$udtlf->getByAbsencePolicyId( $this->getId() );
-			if ( $udtlf->getRecordCount() > 0 ) {
-				$this->Validator->isTRUE(	'in_use',
+		if ( $this->getDeleted() != TRUE ) {
+			if ( $this->getPayCode() == 0 ) {
+				$this->Validator->isTRUE(	'pay_code_id',
 											FALSE,
-											TTi18n::gettext('This absence policy is in use'));
+											TTi18n::gettext('Please choose a Pay Code') );
+			}
 
+			//Make sure Pay Formula Policy is defined somewhere.
+			if ( $this->getPayFormulaPolicy() == 0 AND $this->getPayCode() > 0 AND ( !is_object( $this->getPayCodeObject() ) OR ( is_object( $this->getPayCodeObject() ) AND $this->getPayCodeObject()->getPayFormulaPolicy() == 0 ) ) ) {
+					$this->Validator->isTRUE(	'pay_formula_policy_id',
+												FALSE,
+												TTi18n::gettext('Selected Pay Code does not have a Pay Formula Policy defined'));
 			}
 		}
 
@@ -412,10 +354,6 @@ class AbsencePolicyFactory extends Factory {
 	}
 
 	function preSave() {
-		if ( $this->getWageGroup() === FALSE ) {
-			$this->setWageGroup( 0 );
-		}
-
 		return TRUE;
 	}
 

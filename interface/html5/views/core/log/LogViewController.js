@@ -19,6 +19,7 @@ LogViewController = BaseViewController.extend( {
 		'wage_group': ['wage_group'],
 		'ethnic_group': ['ethnic_group'],
 		'currency': ['currency'],
+		'currency_rate': ['currency_rate'],
 		'permission_control': ['permission_control', 'permission_user'],
 		'other_field': ['other_field'],
 		'station': ['station', 'station_user_group', 'station_branch', 'station_department', 'station_include_user', 'station_exclude_user'],
@@ -50,10 +51,12 @@ LogViewController = BaseViewController.extend( {
 		'invoice': ['invoice'],
 		'job': ['job', 'job_exclude_job_item', 'job_exclude_user', 'job_include_job_item', 'job_include_user', 'job_job_item_group', 'job_user_branch', 'job_user_group', 'job_user_department'],
 		'client_group': ['client_group'],
+		'product_group': ['product_group'],
 		'job_item': ['job_item'],
 		'job_group': ['job_group'],
 		'job_item_group': ['job_item_group'],
 		'report_schedule': ['report_schedule'],
+		'accrual_policy_account': ['accrual_policy_account'],
 		'accrual': ['accrual'],
 		'accrual_balance': ['accrual_balance'],
 		'schedule': ['schedule'],
@@ -90,7 +93,16 @@ LogViewController = BaseViewController.extend( {
 		'user_review_control': ['user_review_control', 'user_review'],
 		'roe': ['roe'],
 		'expense_policy': ['expense_policy'],
-		'user_report_data': ['user_report_data']
+		'user_report_data': ['user_report_data'],
+		'regular_time_policy': ['regular_time_policy'],
+		'pay_code': ['pay_code'],
+		'pay_formula_policy': ['pay_formula_policy'],
+		'contributing_pay_code_policy': ['contributing_pay_code_policy'],
+		'contributing_shift_policy': ['contributing_shift_policy'],
+		'accrual_policy_user_modifier': ['accrual_policy_user_modifier'],
+		'job_item_amendment': ['job_item_amendment'],
+		'user_date_total': ['user_date_total'],
+		'pay_stub': ['pay_stub', 'pay_stub_entry']
 	},
 	log_detail_grid: null,
 	log_detail_script_name: null,
@@ -123,8 +135,10 @@ LogViewController = BaseViewController.extend( {
 
 	buildEditViewUI: function() {
 		this._super( 'buildEditViewUI' );
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		tab_0_label.text( $.i18n._( 'Audit Details' ) );
+
+		this.setTabLabels( {
+			'tab_audit_details': $.i18n._( 'Audit Details' )
+		} );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APILog' )),
@@ -137,23 +151,23 @@ LogViewController = BaseViewController.extend( {
 
 		this.setNavigation();
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
-		var tab0_column1 = tab0.find( '.first-row' );
-		// tab0 column1
+		var tab_audit_details = this.edit_view_tab.find( '#tab_audit_details' );
+		var tab_audit_details_column1 = tab_audit_details.find( '.first-row' );
+		// tab_audit_details column1
 
 		// Date
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {
 			field: 'date'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_audit_details_column1, '' );
 
 		// Action
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {
 			field: 'action'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Action' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Action' ), form_item_input, tab_audit_details_column1 );
 
 		// Employee
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
@@ -161,17 +175,235 @@ LogViewController = BaseViewController.extend( {
 		form_item_input.TText( {
 			field: 'user_name'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_audit_details_column1 );
 
 		// Description
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {
 			field: 'description'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_audit_details_column1, '' );
 
 		// set the log details information.
 		this.initLogDetailsView();
+
+	},
+
+	search: function( set_default_menu, page_action, page_number, callBack ) {
+
+		if ( !Global.isSet( set_default_menu ) ) {
+			set_default_menu = true;
+		}
+
+		var $this = this;
+		var filter = {};
+		filter.filter_data = {};
+		filter.filter_sort = {};
+		filter.filter_columns = this.getFilterColumnsFromDisplayColumns();
+		filter.filter_items_per_page = 0; // Default to 0 to load user preference defined
+
+		if ( this.pager_data ) {
+
+			if ( LocalCacheData.paging_type === 0 ) {
+				if ( page_action === 'next' ) {
+					filter.filter_page = this.pager_data.next_page;
+				} else {
+					filter.filter_page = 1;
+				}
+			} else {
+
+				switch ( page_action ) {
+					case 'next':
+						filter.filter_page = this.pager_data.next_page;
+						break;
+					case 'last':
+						filter.filter_page = this.pager_data.previous_page;
+						break;
+					case 'start':
+						filter.filter_page = 1;
+						break;
+					case 'end':
+						filter.filter_page = this.pager_data.last_page_number;
+						break;
+					case 'go_to':
+						filter.filter_page = page_number;
+						break;
+					default:
+						filter.filter_page = this.pager_data.current_page;
+						break;
+				}
+
+			}
+
+		} else {
+			filter.filter_page = 1;
+		}
+
+		if ( this.sub_view_mode && this.parent_key ) {
+			this.select_layout.data.filter_data[this.parent_key] = this.parent_value;
+		}
+
+		//If sub view controller set custom filters, get it
+		if ( Global.isSet( this.getSubViewFilter ) ) {
+
+			this.select_layout.data.filter_data = this.getSubViewFilter( this.select_layout.data.filter_data );
+
+		}
+
+		//select_layout will not be null, it's set in setSelectLayout function
+		filter.filter_data = Global.convertLayoutFilterToAPIFilter( this.select_layout );
+		filter.filter_sort = this.select_layout.data.filter_sort;
+
+		if ( this.refresh_id > 0 ) {
+			filter.filter_data = {};
+			filter.filter_data.id = [this.refresh_id];
+
+			this.last_select_ids = filter.filter_data.id;
+
+		} else {
+			this.last_select_ids = this.getGridSelectIdArray();
+		}
+
+		this.api['get' + this.api.key_name]( filter, {onResult: function( result ) {
+			var result_data = result.getResult();
+			var len;
+
+			if ( !Global.isArray( result_data ) ) {
+				$this.showNoResultCover()
+			} else {
+				$this.removeNoResultCover();
+				if ( Global.isSet( $this.__createRowId ) ) {
+					result_data = $this.__createRowId( result_data );
+				}
+
+				result_data = Global.formatGridData( result_data, $this.api.key_name );
+
+				len = result_data.length;
+
+				$this.setAuditInfo();
+			}
+			if ( $this.refresh_id > 0 ) {
+				$this.refresh_id = null;
+				var grid_source_data = $this.grid.getGridParam( 'data' );
+				len = grid_source_data.length;
+
+				if ( $.type( grid_source_data ) !== 'array' ) {
+					grid_source_data = [];
+				}
+
+				var found = false;
+				var new_record = result_data[0];
+
+				//Error: Uncaught TypeError: Cannot read property 'id' of undefined in https://ondemand1.timetrex.com/interface/html5/views/BaseViewController.js?v=7.4.3-20140924-084605 line 4851
+				if ( new_record ) {
+					for ( var i = 0; i < len; i++ ) {
+						var record = grid_source_data[i];
+
+						//Fixed === issue. The id set by jQGrid is string type.
+						if ( !isNaN( parseInt( record.id ) ) ) {
+							record.id = parseInt( record.id );
+						}
+
+						if ( record.id == new_record.id ) {
+							$this.grid.setRowData( new_record.id, new_record );
+							found = true;
+							break
+						}
+					}
+
+					if ( !found ) {
+//						$this.grid.addRowData( new_record.id, new_record, 0 );
+						$this.grid.clearGridData();
+						$this.grid.setGridParam( {data: grid_source_data.concat( new_record )} );
+
+						if ( $this.sub_view_mode && Global.isSet( $this.resizeSubGridHeight ) ) {
+							len = Global.isSet( len ) ? len : 0;
+							$this.resizeSubGridHeight( len + 1 );
+						}
+
+						$this.grid.trigger( 'reloadGrid' );
+					}
+				}
+
+			} else {
+				//Set Page data to widget, next show display info when setDefault Menu
+				$this.pager_data = result.getPagerData();
+
+				//CLick to show more mode no need this step
+				if ( LocalCacheData.paging_type !== 0 ) {
+					$this.paging_widget.setPagerData( $this.pager_data );
+					$this.paging_widget_2.setPagerData( $this.pager_data );
+				}
+
+				if ( LocalCacheData.paging_type === 0 && page_action === 'next' ) {
+					var current_data = $this.grid.getGridParam( 'data' );
+					result_data = current_data.concat( result_data );
+				}
+				$this.grid.clearGridData();
+				$this.grid.setGridParam( {data: result_data} );
+
+				if ( $this.sub_view_mode && Global.isSet( $this.resizeSubGridHeight ) ) {
+					$this.resizeSubGridHeight( len );
+				}
+
+				$this.grid.trigger( 'reloadGrid' );
+				$this.reSelectLastSelectItems();
+
+			}
+
+			$this.setGridCellBackGround(); //Set cell background for some views
+
+			ProgressBar.closeOverlay(); //Add this in initData
+
+			if ( set_default_menu ) {
+				$this.setDefaultMenu( true );
+			}
+
+			if ( LocalCacheData.paging_type === 0 ) {
+				if ( !$this.pager_data || $this.pager_data.is_last_page ) {
+					$this.paging_widget.css( 'display', 'none' );
+				} else {
+					$this.paging_widget.css( 'display', 'block' );
+				}
+			}
+
+			if ( callBack ) {
+				callBack( result );
+			}
+
+			// when call this from save and new result, we don't call auto open, because this will call onAddClick twice
+			if ( set_default_menu ) {
+				$this.autoOpenEditViewIfNecessary();
+			}
+
+			$this.searchDone();
+
+		}} );
+
+	},
+
+	setAuditInfo: function() {
+		var updated_info = null;
+		var created_info = null;
+
+		if ( Global.isSet( this.parent_edit_record['updated_date'] ) && Global.isFalseOrNull( this.parent_edit_record['updated_date'] ) === false ) {
+			updated_info = this.parent_edit_record['updated_date'] + ' ';
+		}
+		if ( Global.isSet( this.parent_edit_record['updated_by'] ) && Global.isFalseOrNull( this.parent_edit_record['updated_by'] ) === false ) {
+			updated_info = updated_info + $.i18n._( 'by' ) + ' ' + this.parent_edit_record['updated_by'] + ' ';
+		}
+		if ( Global.isSet( this.parent_edit_record['created_date'] ) && Global.isFalseOrNull( this.parent_edit_record['created_date'] ) === false ) {
+			created_info = this.parent_edit_record['created_date'] + ' ';
+		}
+		if ( Global.isSet( this.parent_edit_record['created_by'] ) && Global.isFalseOrNull( this.parent_edit_record['created_by'] ) === false ) {
+			created_info = created_info + $.i18n._( 'by' ) + ' ' + this.parent_edit_record['created_by'] + ' ';
+		}
+
+		if ( updated_info || created_info ) {
+			this.noticeDiv.find( '.left > .info' ).text( updated_info ? updated_info : '' );
+			this.noticeDiv.find( '.right > .info' ).text( created_info ? created_info : '' );
+			this.noticeDiv.show();
+		}
 
 	},
 
@@ -226,9 +458,10 @@ LogViewController = BaseViewController.extend( {
 	initEditViewData: function() {
 		this._super( 'initEditViewData' );
 		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-			this.edit_view_tab.find( '#tab0' ).find( '.detail-grid-row' ).css( 'display', 'block' );
+			this.edit_view_tab.find( '#tab_audit_details' ).find( '.detail-grid-row' ).css( 'display', 'block' );
+			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 		} else {
-			this.edit_view_tab.find( '#tab0' ).find( '.detail-grid-row' ).css( 'display', 'none' );
+			this.edit_view_tab.find( '#tab_audit_details' ).find( '.detail-grid-row' ).css( 'display', 'none' );
 			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
 			this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 		}
@@ -292,10 +525,10 @@ LogViewController = BaseViewController.extend( {
 			return;
 		}
 
-		var tab0 = this.edit_view.find( '#tab0_content_div' );
+		var tab_audit_details = this.edit_view.find( '#tab_audit_details_content_div' );
 		var first_row = this.edit_view.find( '.first-row' );
-		this.log_detail_grid.setGridWidth( tab0.width() );
-		this.log_detail_grid.setGridHeight( tab0.height() - first_row.height() );
+		this.log_detail_grid.setGridWidth( tab_audit_details.width() );
+		this.log_detail_grid.setGridHeight( tab_audit_details.height() - first_row.height() );
 
 	},
 
@@ -412,6 +645,11 @@ LogViewController = BaseViewController.extend( {
 
 	setDefaultMenu: function() {
 
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+		if ( !this.context_menu_array ) {
+			return;
+		}
+
 		this.selectContextMenu();
 		this.setTotalDisplaySpan();
 
@@ -442,7 +680,7 @@ LogViewController = BaseViewController.extend( {
 
 	},
 
-	onContentMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function( context_btn, menu_name ) {
 
 		var id;
 		if ( Global.isSet( menu_name ) ) {
@@ -538,7 +776,11 @@ LogViewController.loadSubView = function( container, beforeViewLoadedFun, afterV
 
 	Global.loadViewSource( 'Log', 'SubLogView.html', function( result ) {
 
-		var args = {};
+		var args = {
+			updated: $.i18n._( 'Updated' ),
+			created: $.i18n._( 'Created' )
+		};
+
 		var template = _.template( result, args );
 
 		if ( Global.isSet( beforeViewLoadedFun ) ) {

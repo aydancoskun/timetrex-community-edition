@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 12 $
- * $Id: SoapClientTimeout.class.php 12 2006-08-10 18:43:12Z ipso $
- * $Date: 2006-08-10 11:43:12 -0700 (Thu, 10 Aug 2006) $
- */
+
 
 //This class extends the built-in PHP SoapClient class to use CURL with proper timeout periods.
 class SoapClientTimeout extends SoapClient {

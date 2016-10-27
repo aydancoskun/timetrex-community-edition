@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 13470 $
- * $Id: PayStubTest.php 13470 2014-06-25 01:25:10Z mikeb $
- * $Date: 2014-06-24 18:25:10 -0700 (Tue, 24 Jun 2014) $
- */
+
 require_once('PHPUnit/Framework/TestCase.php');
 
 class PayStubTest extends PHPUnit_Framework_TestCase {
@@ -161,8 +157,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date) , __FILE__, __LINE__, __METHOD__,10);
 
-
-				$pps_obj->createNextPayPeriod( $end_date , (86400*360) );
+				$pps_obj->createNextPayPeriod( $end_date , (86400*3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
 
 		}

@@ -1,6 +1,6 @@
-ALTER TABLE income_tax_rate_us change income income decimal(18,4);
-ALTER TABLE income_tax_rate_us change rate rate decimal(18,4);
-ALTER TABLE income_tax_rate_us change constant constant decimal(18,4);
+ALTER TABLE income_tax_rate_us change income income numeric(18,4);
+ALTER TABLE income_tax_rate_us change rate rate numeric(18,4);
+ALTER TABLE income_tax_rate_us change constant constant numeric(18,4);
 
 INSERT INTO income_tax_rate_us VALUES (DEFAULT, 'US', 'CO', NULL, 1357027200, 10, 2200, 0, 0);
 INSERT INTO income_tax_rate_us VALUES (DEFAULT, 'US', 'CO', NULL, 1357027200, 10, 2200, 4.63, 0);

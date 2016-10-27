@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14797 $
- * $Id: UserWageListFactory.class.php 14797 2014-10-16 19:00:06Z mikeb $
- * $Date: 2014-10-16 12:00:06 -0700 (Thu, 16 Oct 2014) $
- */
+
 
 /**
  * @package Modules\Users
@@ -397,7 +393,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByUserIdAndStartDateAndEndDate($user_id, $start_date = FALSE, $end_date = FALSE) {
+	function getDefaultWageGroupByUserIdAndStartDateAndEndDate($user_id, $start_date = FALSE, $end_date = FALSE) {
 		if ( $user_id == '' ) {
 			return FALSE;
 		}
@@ -418,7 +414,6 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 					'end_date1' => $this->db->BindTimeStamp( $end_date ),
 					'user_id2' => $user_id,
 					'start_date2' => $this->db->BindTimeStamp( $start_date ),
-
 					);
 
 		$query = '
@@ -454,6 +449,58 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	function getByUserIdAndStartDateAndEndDate($user_id, $start_date = FALSE, $end_date = FALSE) {
+		if ( $user_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $start_date == '' ) {
+			$start_date = 0;
+		}
+
+		if ( $end_date == '' ) {
+			$end_date = TTDate::getTime();
+		}
+
+		$uf = new UserFactory();
+
+		$ph = array(
+					'user_id1' => $user_id,
+					'start_date1' => $this->db->BindTimeStamp( $start_date ),
+					'end_date1' => $this->db->BindTimeStamp( $end_date ),
+					'user_id2' => $user_id,
+					'start_date2' => $this->db->BindTimeStamp( $start_date ),
+					);
+
+		$query = '
+					(
+					select b.*
+					from	'. $uf->getTable() .' as a,
+							'. $this->getTable() .' as b
+					where	a.id = b.user_id
+						AND	b.user_id = ?
+						AND b.effective_date >= ?
+						AND b.effective_date <= ?
+						AND (a.deleted = 0 AND b.deleted=0)
+					)
+					UNION
+					(
+						select	d.*
+						from	'. $uf->getTable() .' as c,
+								'. $this->getTable() .' as d
+						where	c.id = d.user_id
+							AND	d.user_id = ?
+							AND d.effective_date <= ?
+							AND (c.deleted = 0 AND d.deleted=0)
+						ORDER BY d.effective_date desc
+					)
+					ORDER BY wage_group_id, effective_date desc
+					';
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
 	function getByUserIdAndCompanyIdAndStartDateAndEndDate($user_id, $company_id, $start_date = FALSE, $end_date = FALSE) {
 		if ( $user_id == '' ) {
 			return FALSE;
@@ -524,7 +571,7 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 
 	function getArrayByUserIdAndStartDateAndEndDate($user_id, $start_date = FALSE, $end_date = FALSE) {
 		$uwlf = new UserWageListFactory();
-		$uwlf->getByUserIdAndStartDateAndEndDate($user_id, $start_date, $end_date);
+		$uwlf->getDefaultWageGroupByUserIdAndStartDateAndEndDate($user_id, $start_date, $end_date);
 
 		foreach ($uwlf as $uw_obj) {
 			$list[$uw_obj->getEffectiveDate()] = array(

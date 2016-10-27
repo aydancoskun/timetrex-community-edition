@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 13507 $
- * $Id: UserPreferenceFactory.class.php 13507 2014-06-26 20:17:20Z mikeb $
- * $Date: 2014-06-26 13:17:20 -0700 (Thu, 26 Jun 2014) $
- */
+
 
 /**
  * @package Modules\Users
@@ -241,7 +237,9 @@ class UserPreferenceFactory extends Factory {
 											12	=> TTi18n::gettext('hh:mm:ss (2:15:59)'),
 											20	=> TTi18n::gettext('Hours (2.25)'),
 											22	=> TTi18n::gettext('Hours (2.141)'),
-											30	=> TTi18n::gettext('Minutes (135)')
+											23	=> TTi18n::gettext('Hours (2.3587)'),
+											30	=> TTi18n::gettext('Minutes (135)'),
+											40  => TTi18n::gettext('Seconds (3600)'),
 									);
 				break;
 

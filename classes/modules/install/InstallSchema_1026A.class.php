@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 1246 $
- * $Id: InstallSchema_1001B.class.php 1246 2007-09-14 23:47:42Z ipso $
- * $Date: 2007-09-14 16:47:42 -0700 (Fri, 14 Sep 2007) $
- */
+
 
 /**
  * @package Modules\Install
@@ -91,29 +87,31 @@ class InstallSchema_1026A extends InstallSchema_Base {
 				if ( $ulf->getRecordCount() > 0 ) {
 					foreach( $ulf as $u_obj ) {
 						Debug::text('  User: '. $u_obj->getUserName(), __FILE__, __LINE__, __METHOD__, 9);
-						if ( $u_obj->getIButtonID() != '' ) {
+						//if ( $u_obj->getIButtonID() != '' ) {
+						if ( $u_obj->getColumn('ibutton_id') != '' ) {
 							Debug::text('	 Converting iButton...', __FILE__, __LINE__, __METHOD__, 9);
 							$uif = TTnew( 'UserIdentificationFactory' );
 							$uif->setUser( $u_obj->getId() );
 							$uif->setType( 10 ); //10=iButton
 							$uif->setNumber( 0 );
-							$uif->setValue( $u_obj->getIButtonID() );
+							$uif->setValue( $u_obj->getColumn('ibutton_id') );
 							if ( $uif->isValid() == TRUE ) {
 								$uif->Save();
-								$u_obj->getIButtonID( '' );
+								//$u_obj->setIButtonID( '' );
 							}
 						}
 
-						if ( $u_obj->getRFID() != '' ) {
+						//if ( $u_obj->getRFID() != '' ) {
+						if ( $u_obj->getColumn('rf_id') ) {
 							Debug::text('	 Converting RFID...', __FILE__, __LINE__, __METHOD__, 9);
 							$uif = TTnew( 'UserIdentificationFactory' );
 							$uif->setUser( $u_obj->getId() );
 							$uif->setType( 40 ); //40=Proximity
 							$uif->setNumber( 0 );
-							$uif->setValue( $u_obj->getRFID() );
+							$uif->setValue( $u_obj->getColumn('rf_id') );
 							if ( $uif->isValid() == TRUE ) {
 								$uif->Save();
-								$u_obj->getRFID( '' );
+								//$u_obj->setRFID( '' );
 							}
 						}
 
@@ -131,22 +129,22 @@ class InstallSchema_1026A extends InstallSchema_Base {
 
 						if ( $griaule_stations > 0 ) {
 							for ($t = 1; $t <= $max_templates; $t++ ) {
-								$set_fingerprint_function = 'setFingerPrint'. $t;
+								//$set_fingerprint_function = 'setFingerPrint'. $t;
 								$get_fingerprint_function = 'getFingerPrint'. $t;
 
 								//Griaule fingerprint templates start with: "p/8B"
-								if ( $u_obj->$get_fingerprint_function() != ''
-										AND substr($u_obj->$get_fingerprint_function(), 0, 4) == 'p/8B' ) {
+								//if ( $u_obj->$get_fingerprint_function() != '' AND substr($u_obj->$get_fingerprint_function(), 0, 4) == 'p/8B' ) {
+								if ( $u_obj->getColumn( $get_fingerprint_function ) != '' AND substr( $u_obj->getColumn( $get_fingerprint_function ), 0, 4) == 'p/8B' ) {
 									Debug::text('	 Converting Griaule FingerPrint: '. $t, __FILE__, __LINE__, __METHOD__, 9);
 
 									$uif = TTnew( 'UserIdentificationFactory' );
 									$uif->setUser( $u_obj->getId() );
 									$uif->setType( 20 ); //20=Griaule, 100=ZK
 									$uif->setNumber( ($t * 10) );
-									$uif->setValue( $u_obj->$get_fingerprint_function() );
+									$uif->setValue( $u_obj->getColumn( $get_fingerprint_function ) );
 									if ( $uif->isValid() == TRUE ) {
 										$uif->Save();
-										$u_obj->$set_fingerprint_function( '' );
+										//$u_obj->$set_fingerprint_function( '' );
 									}
 								}
 							}
@@ -154,21 +152,21 @@ class InstallSchema_1026A extends InstallSchema_Base {
 
 						if ( $zk_stations > 0 ) {
 							for ($t = 1; $t <= $max_templates; $t++ ) {
-								$set_fingerprint_function = 'setFingerPrint'. $t;
+								//$set_fingerprint_function = 'setFingerPrint'. $t;
 								$get_fingerprint_function = 'getFingerPrint'. $t;
 
 								//ZK fingerprint templates start with: "oco"
-								if ( $u_obj->$get_fingerprint_function() != ''
-										AND substr($u_obj->$get_fingerprint_function(), 0, 3) == 'oco' ) {
+								//if ( $u_obj->$get_fingerprint_function() != '' AND substr($u_obj->$get_fingerprint_function(), 0, 3) == 'oco' ) {
+								if ( $u_obj->getColumn( $get_fingerprint_function ) != '' AND substr( $u_obj->getColumn( $get_fingerprint_function ), 0, 3) == 'oco' ) {
 									Debug::text('	 Converting ZK FingerPrint: '. $t, __FILE__, __LINE__, __METHOD__, 9);
 									$uif = TTnew( 'UserIdentificationFactory' );
 									$uif->setUser( $u_obj->getId() );
 									$uif->setType( 100 ); //20=Griaule, 100=ZK
 									$uif->setNumber( $t );
-									$uif->setValue( $u_obj->$get_fingerprint_function() );
+									$uif->setValue( $u_obj->getColumn( $get_fingerprint_function ) );
 									if ( $uif->isValid() == TRUE ) {
 										$uif->Save();
-										$u_obj->$set_fingerprint_function( '' );
+										//$u_obj->$set_fingerprint_function( '' );
 									}
 								}
 							}

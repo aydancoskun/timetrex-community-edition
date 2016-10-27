@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2196 $
- * $Id: APIPremiumPolicy.class.php 2196 2008-10-14 16:08:54Z ipso $
- * $Date: 2008-10-14 09:08:54 -0700 (Tue, 14 Oct 2008) $
- */
+
 
 /**
  * @package API\Policy
@@ -78,13 +74,18 @@ class APIPremiumPolicy extends APIFactory {
 
 		$data = array(
 						'company_id' => $company_obj->getId(),
+						'type_id' => 10,
 
 						'include_holiday_type_id' => 10,
-						'rate' => '1.00',
-						'accrual_rate' => '1.00',
 						'include_partial_punch' => TRUE,
 						'include_meal_policy' => TRUE,
 						'include_break_policy' => TRUE,
+						'branch_selection_type_id' => 10,
+						'department_selection_type_id' => 10,
+						'job_group_selection_type_id' => 10,
+						'job_selection_type_id' => 10,
+						'job_item_group_selection_type_id' => 10,
+						'job_item_selection_type_id' => 10,
 						'sun' => TRUE,
 						'mon' => TRUE,
 						'tue' => TRUE,
@@ -219,6 +220,10 @@ class APIPremiumPolicy extends APIFactory {
 					$row['company_id'] = $this->getCurrentCompanyObject()->getId();
 
 					$lf->setObjectFromArray( $row, $validate_only );
+
+					if ( $validate_only == TRUE ) {
+						$lf->validate_only = TRUE;
+					}
 
 					$is_valid = $lf->isValid();
 					if ( $is_valid == TRUE ) {

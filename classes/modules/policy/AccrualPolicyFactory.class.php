@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14958 $
- * $Id: AccrualPolicyFactory.class.php 14958 2014-10-28 14:00:49Z mikeb $
- * $Date: 2014-10-28 07:00:49 -0700 (Tue, 28 Oct 2014) $
- */
+
 
 /**
  * @package Modules\Policy
@@ -48,9 +44,10 @@ class AccrualPolicyFactory extends Factory {
 
 	protected $company_obj = NULL;
 	protected $milestone_objs = NULL;
+	protected $contributing_shift_policy_obj = NULL;
+	protected $length_of_service_contributing_pay_code_policy_obj = NULL;
 
 	function _getFactoryOptions( $name ) {
-
 		$retval = NULL;
 		switch( $name ) {
 			case 'type':
@@ -72,6 +69,8 @@ class AccrualPolicyFactory extends Factory {
 				$retval = array(
 										'-1010-type' => TTi18n::gettext('Type'),
 										'-1030-name' => TTi18n::gettext('Name'),
+										'-1035-description' => TTi18n::gettext('Description'),
+
 
 										'-1900-in_use' => TTi18n::gettext('In Use'),
 
@@ -88,6 +87,7 @@ class AccrualPolicyFactory extends Factory {
 				$retval = array(
 								'type',
 								'name',
+								'description',
 								'updated_date',
 								'updated_by',
 								);
@@ -112,7 +112,14 @@ class AccrualPolicyFactory extends Factory {
 											'company_id' => 'Company',
 											'type_id' => 'Type',
 											'type' => FALSE,
+											'accrual_policy_account_id' => 'AccrualPolicyAccount',
+											'accrual_policy_account' => FALSE,
+											'contributing_shift_policy_id' => 'ContributingShiftPolicy',
+											'contributing_shift_policy' => FALSE,
+											'length_of_service_contributing_pay_code_policy_id' => 'LengthOfServiceContributingPayCodePolicy',
+											'length_of_service_contributing_pay_code_policy' => FALSE,
 											'name' => 'Name',
+											'description' => 'Description',
 											'enable_pay_stub_balance_display' => 'EnablePayStubBalanceDisplay',
 											'minimum_time' => 'MinimumTime',
 											'maximum_time' => 'MaximumTime',
@@ -133,14 +140,15 @@ class AccrualPolicyFactory extends Factory {
 	}
 
 	function getCompanyObject() {
-		if ( is_object($this->company_obj) ) {
-			return $this->company_obj;
-		} else {
-			$clf = TTnew( 'CompanyListFactory' );
-			$this->company_obj = $clf->getById( $this->getCompany() )->getCurrent();
+		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
+	}
 
-			return $this->company_obj;
-		}
+	function getContributingShiftPolicyObject() {
+		return $this->getGenericObject( 'ContributingShiftPolicyListFactory', $this->getContributingShiftPolicy(), 'contributing_shift_policy_obj' );
+	}
+
+	function getLengthOfServiceContributingPayCodePolicyObject() {
+		return $this->getGenericObject( 'ContributingPayCodePolicyListFactory', $this->getLengthOfServiceContributingPayCodePolicy(), 'length_of_service_contributing_pay_code_policy_obj' );
 	}
 
 	function getCompany() {
@@ -197,6 +205,89 @@ class AccrualPolicyFactory extends Factory {
 		return FALSE;
 	}
 
+
+	function getAccrualPolicyAccount() {
+		if ( isset($this->data['accrual_policy_account_id']) ) {
+			return (int)$this->data['accrual_policy_account_id'];
+		}
+
+		return FALSE;
+	}
+	function setAccrualPolicyAccount($id) {
+		$id = trim($id);
+
+		$apaplf = TTnew( 'AccrualPolicyAccountListFactory' );
+
+		if (
+				$this->Validator->isResultSetWithRows(	'accrual_policy_account_id',
+													$apaplf->getByID($id),
+													TTi18n::gettext('Accrual Account is invalid')
+													) ) {
+
+			$this->data['accrual_policy_account_id'] = $id;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	//This is the contributing shifts used for Hour Based accrual policies.
+	function getContributingShiftPolicy() {
+		if ( isset($this->data['contributing_shift_policy_id']) ) {
+			return (int)$this->data['contributing_shift_policy_id'];
+		}
+
+		return FALSE;
+	}
+	function setContributingShiftPolicy($id) {
+		$id = trim($id);
+
+		$csplf = TTnew( 'ContributingShiftPolicyListFactory' );
+
+		if (	$id == 0
+				OR
+				$this->Validator->isResultSetWithRows(	'contributing_shift_policy_id',
+													$csplf->getByID($id),
+													TTi18n::gettext('Contributing Shift Policy is invalid')
+													) ) {
+
+			$this->data['contributing_shift_policy_id'] = $id;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	//This is strictly used to determine milestones with active after X hours.
+	function getLengthOfServiceContributingPayCodePolicy() {
+		if ( isset($this->data['length_of_service_contributing_pay_code_policy_id']) ) {
+			return (int)$this->data['length_of_service_contributing_pay_code_policy_id'];
+		}
+
+		return FALSE;
+	}
+	function setLengthOfServiceContributingPayCodePolicy($id) {
+		$id = trim($id);
+
+		$csplf = TTnew( 'ContributingPayCodePolicyListFactory' );
+
+		if (	$id == 0
+				OR
+				$this->Validator->isResultSetWithRows(	'length_of_service_contributing_pay_code_policy_id',
+													$csplf->getByID($id),
+													TTi18n::gettext('Contributing Pay Code Policy is invalid')
+													) ) {
+
+			$this->data['length_of_service_contributing_pay_code_policy_id'] = $id;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
 	function isUniqueName($name) {
 		$ph = array(
 					'company_id' => $this->getCompany(),
@@ -237,6 +328,30 @@ class AccrualPolicyFactory extends Factory {
 						) {
 
 			$this->data['name'] = $name;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getDescription() {
+		if ( isset($this->data['description']) ) {
+			return $this->data['description'];
+		}
+
+		return FALSE;
+	}
+	function setDescription($description) {
+		$description = trim($description);
+
+		if (	$description == ''
+				OR $this->Validator->isLength(	'description',
+												$description,
+												TTi18n::gettext('Description is invalid'),
+												1, 250) ) {
+
+			$this->data['description'] = $description;
 
 			return TRUE;
 		}
@@ -499,9 +614,14 @@ class AccrualPolicyFactory extends Factory {
 		return FALSE;
 	}
 
-	function getMilestoneRolloverDate( $user_hire_date = NULL ) {
+	function getMilestoneRolloverDate( $user_hire_date = NULL, $modifier_obj = NULL ) {
 		if ( $user_hire_date == '' ) {
 			return FALSE;
+		}
+
+		if ( is_object($modifier_obj) AND method_exists( $modifier_obj, 'getLengthOfServiceDate' ) AND $modifier_obj->getLengthOfServiceDate() != '' ) {
+			Debug::Text('Using Modifier LengthOfService Date: '. TTDate::getDate('DATE+TIME', $modifier_obj->getLengthOfServiceDate() ) .' Hire Date: '. TTDate::getDate('DATE+TIME', $user_hire_date), __FILE__, __LINE__, __METHOD__, 10);
+			$user_hire_date = $modifier_obj->getLengthOfServiceDate();
 		}
 
 		if ( $this->getMilestoneRolloverHireDate() == TRUE ) {
@@ -642,15 +762,60 @@ class AccrualPolicyFactory extends Factory {
 			return FALSE;
 		}
 
-		$udtlf = TTnew( 'UserDateTotalListFactory' );
-		$retval = $udtlf->getWorkedTimeSumByUserIDAndStartDateAndEndDate( $user_id, $start_date, $end_date );
+		$retval = 0;
+
+		$pay_code_policy_obj = $this->getLengthOfServiceContributingPayCodePolicyObject();
+		if ( is_object( $pay_code_policy_obj ) ) {
+			$udtlf = TTnew( 'UserDateTotalListFactory' );
+			$retval = $udtlf->getTotalTimeSumByUserIDAndPayCodeIDAndStartDateAndEndDate( $user_id, $pay_code_policy_obj->getPayCode(), $start_date, $end_date );
+		}
 
 		Debug::Text('Worked Seconds: '. (int)$retval .' Before: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 
 		return $retval;
 	}
 
-	function getActiveMilestoneObject( $u_obj, $epoch = NULL ) {
+	//Determine if any milestones have an hour based length of service.
+	function isHourBasedLengthOfService() {
+		//Cache milestones to speed up getting projected balances.
+		if ( !isset($this->milestone_objs[$this->getID()]) ) {
+			$this->milestone_objs[$this->getID()] = TTnew( 'AccrualPolicyMilestoneListFactory' );
+			$this->milestone_objs[$this->getID()]->getByAccrualPolicyId($this->getId(), NULL, array('length_of_service_days' => 'desc' ) );
+		}
+		Debug::Text('  Total Accrual Policy MileStones: '. (int)$this->milestone_objs[$this->getID()]->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		if ( $this->milestone_objs[$this->getID()]->getRecordCount() > 0 ) {
+			foreach( $this->milestone_objs[$this->getID()] as $apm_obj ) {
+				if ( $apm_obj->getLengthOfServiceUnit() == 50 AND $apm_obj->getLengthOfService() > 0 ) {
+					Debug::Text('  MileStone is in Hours...', __FILE__, __LINE__, __METHOD__, 10);
+					return TRUE;
+				}
+			}
+		}
+
+		Debug::Text('  No HourBased length of service MileStones...', __FILE__, __LINE__, __METHOD__, 10);
+		return FALSE;
+	}
+
+	function getAccrualPolicyUserModifierObject( $u_obj ) {
+		if ( !is_object( $u_obj ) ) {
+			return FALSE;
+		}
+
+		if ( getTTProductEdition() > 10 ) {
+			$apumlf = TTNew('AccrualPolicyUserModifierListFactory');
+			$apumlf->getByUserIdAndAccrualPolicyId( $u_obj->getId(), $this->getId() );
+			if ( $apumlf->getRecordCount() == 1 ) {
+				$apum_obj = $apumlf->getCurrent();
+				Debug::Text('  Found Accrual Policy User Modifier: Length of Service: '. $apum_obj->getLengthOfServiceDate() .' Accrual Rate: '. $apum_obj->getAccrualRateModifier(), __FILE__, __LINE__, __METHOD__, 10);
+
+				return $apum_obj;
+			}
+		}
+
+		return FALSE;
+	}
+
+	function getActiveMilestoneObject( $u_obj, $epoch = NULL, $worked_time = 0, $modifier_obj = FALSE ) {
 		if ( !is_object( $u_obj ) ) {
 			return FALSE;
 		}
@@ -661,6 +826,10 @@ class AccrualPolicyFactory extends Factory {
 
 		$milestone_obj = FALSE;
 
+		if ( !is_object( $modifier_obj ) ) {
+			$modifier_obj = $this->getAccrualPolicyUserModifierObject( $u_obj );
+		}
+
 		//Cache milestones to speed up getting projected balances.
 		if ( !isset($this->milestone_objs[$this->getID()]) ) {
 			$this->milestone_objs[$this->getID()] = TTnew( 'AccrualPolicyMilestoneListFactory' );
@@ -669,16 +838,19 @@ class AccrualPolicyFactory extends Factory {
 		Debug::Text('  Total Accrual Policy MileStones: '. (int)$this->milestone_objs[$this->getID()]->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $this->milestone_objs[$this->getID()]->getRecordCount() > 0 ) {
 			$worked_time = NULL;
-			//$length_of_service_days = NULL;
 			$milestone_rollover_date = NULL;
 
 			foreach( $this->milestone_objs[$this->getID()] as $apm_obj ) {
+				if ( is_object($modifier_obj) ) {
+					$apm_obj = $modifier_obj->getAccrualPolicyMilestoneObjectAfterModifier( $apm_obj );
+				}
+				
 				if ( $apm_obj->getLengthOfServiceUnit() == 50 AND $apm_obj->getLengthOfService() > 0 ) {
 					Debug::Text('  MileStone is in Hours...', __FILE__, __LINE__, __METHOD__, 10);
 					//Hour based
 					if ( $worked_time == NULL ) {
 						//Get users worked time.
-						$worked_time = TTDate::getHours( $this->getWorkedTimeByUserIdAndEndDate( $u_obj->getId(), $u_obj->getHireDate(), $epoch ) );
+						$worked_time = TTDate::getHours( $this->getWorkedTimeByUserIdAndEndDate( $u_obj->getId(), $apm_obj->getLengthOfService(), $epoch ) );
 						Debug::Text('  Worked Time: '. $worked_time .'hrs', __FILE__, __LINE__, __METHOD__, 10);
 					}
 
@@ -692,14 +864,7 @@ class AccrualPolicyFactory extends Factory {
 				} else {
 					Debug::Text('  MileStone is in Days...', __FILE__, __LINE__, __METHOD__, 10);
 					//Calendar based
-					//if ( $length_of_service_days == NULL ) {
-					//	$length_of_service_days = TTDate::getDays( ($epoch - $this->getMilestoneRolloverDate( $u_obj->getHireDate() )) );
-					//	if ( $length_of_service_days < 0 ) {
-					//		$length_of_service_days = 0;
-					//	}
-					//	Debug::Text('  Length of Service Days: '. $length_of_service_days, __FILE__, __LINE__, __METHOD__, 10);
-					//}
-					$milestone_rollover_date = $apm_obj->getLengthOfServiceDate( $this->getMilestoneRolloverDate( $u_obj->getHireDate() ) );
+					$milestone_rollover_date = $apm_obj->getLengthOfServiceDate( $this->getMilestoneRolloverDate( $u_obj->getHireDate(), $modifier_obj ) );
 
 					//When a milestone first rolls-over, the Maximum rollover won't apply in many cases as it uses the new milestone rollover
 					//at that time which often has a higher rollover amount. This only happens the first time the milestone rolls-over.
@@ -721,18 +886,18 @@ class AccrualPolicyFactory extends Factory {
 		return $milestone_obj;
 	}
 
-	function getCurrentAccrualBalance( $user_id, $accrual_policy_id = NULL ) {
+	function getCurrentAccrualBalance( $user_id, $accrual_policy_account_id = NULL ) {
 		if ( $user_id == '' ) {
 			return FALSE;
 		}
 
-		if ( $accrual_policy_id == '' ) {
-			$accrual_policy_id = $this->getId();
+		if ( $accrual_policy_account_id == '' ) {
+			$accrual_policy_account_id = $this->getAccrualPolicyAccount();
 		}
 
 		//Check min/max times of accrual policy.
 		$ablf = TTnew( 'AccrualBalanceListFactory' );
-		$ablf->getByUserIdAndAccrualPolicyId( $user_id, $accrual_policy_id );
+		$ablf->getByUserIdAndAccrualPolicyAccount( $user_id, $accrual_policy_account_id );
 		if ( $ablf->getRecordCount() > 0 ) {
 			$accrual_balance = $ablf->getCurrent()->getBalance();
 		} else {
@@ -816,7 +981,7 @@ class AccrualPolicyFactory extends Factory {
 
 	//$current_amount is the amount of time currently being entered.
 	//$previous_amount is the old amount that is currently be edited.
-	function getAccrualBalanceWithProjection( $u_obj, $epoch, $current_time, $previous_time = 0 ) {
+	function getAccrualBalanceWithProjection( $u_obj, $epoch, $current_time, $previous_time = 0, $other_policy_balance_arr = FALSE ) {
 		// Available Balance:			   10hrs
 		// Current Time:					8hrs
 		// Remaining Balance:				2hrs
@@ -824,9 +989,18 @@ class AccrualPolicyFactory extends Factory {
 		// Projected Balance by 01-Jul-12: 15hrs
 		// Projected Remaining Balance:		7hrs
 
+		//Now that multiple Accrual Policies can deposit to the same account, we need to loop through all accrual policies that affect
+		//any given account and add the projected balances together.
+		$other_policy_projected_balance = 0;
+		if ( is_array($other_policy_balance_arr) AND isset($other_policy_balance_arr['projected_balance']) ) {
+			$other_policy_projected_balance = $other_policy_balance_arr['projected_balance'];
+			Debug::Text('Other Policy Projected Balance: '. TTDate::getHours( $other_policy_projected_balance ), __FILE__, __LINE__, __METHOD__, 10);
+
+		}
+
 		//Previous time is time already taken into account in the balance, so add that back in here.
-		$available_balance = ( $previous_time + $this->getCurrentAccrualBalance( $u_obj->getID(), $this->getId() ) );
-		$projected_accrual = ( $available_balance + $this->getProjectedAccrualAmount( $u_obj, time(), $epoch ) );
+		$available_balance = ( $previous_time + $this->getCurrentAccrualBalance( $u_obj->getID(), $this->getAccrualPolicyAccount() ) );
+		$projected_accrual = ( ( $available_balance + $this->getProjectedAccrualAmount( $u_obj, time(), $epoch ) ) + $other_policy_projected_balance );
 
 		$retarr = array(
 						'available_balance' => $available_balance,
@@ -858,7 +1032,7 @@ class AccrualPolicyFactory extends Factory {
 		if ( $ppslf->getRecordCount() > 0 ) {
 			$pps_obj = $ppslf->getCurrent();
 
-			$accrual_balance = $this->getCurrentAccrualBalance( $u_obj->getID(), $this->getId() );
+			$accrual_balance = $this->getCurrentAccrualBalance( $u_obj->getID(), $this->getAccrualPolicyAccount() );
 
 			$pay_period_arr = array();
 			if ( $this->getApplyFrequency() == 10 ) {
@@ -883,7 +1057,7 @@ class AccrualPolicyFactory extends Factory {
 
 		Debug::Text('User: '. $u_obj->getFullName() .' Status: '. $u_obj->getStatus() .' Epoch: '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__, 10);
 		//Make sure only active employees accrue time *after* their hire date.
-		//Will this negative affect Employees who may be on leave?
+		//Will this negatively affect Employees who may be on leave?
 		if ( $u_obj->getStatus() == 10
 				AND $epoch >= $u_obj->getHireDate()
 				AND ( $this->getMinimumEmployedDays() == 0
@@ -934,9 +1108,6 @@ class AccrualPolicyFactory extends Factory {
 			}
 
 			if ( $in_apply_rollover_window == TRUE AND ( isset($milestone_obj) AND is_object( $milestone_obj ) ) ) {
-				//Have accrual balance passed in for optimization
-				//$accrual_balance = $this->getCurrentAccrualBalance( $u_obj->getID(), $this->getId() );
-
 				//Handle maximum rollover adjustments before continuing.
 				if ( $accrual_balance > $milestone_obj->getRolloverTime() ) {
 					$rollover_accrual_adjustment = bcsub( $milestone_obj->getRolloverTime(), $accrual_balance, 0);
@@ -946,7 +1117,7 @@ class AccrualPolicyFactory extends Factory {
 					//Ignore rollover adjustment is another adjustment of any amount has been made on the same day.
 					$alf = TTnew( 'AccrualListFactory' );
 					if ( $update_records == TRUE ) {
-						$alf->getByCompanyIdAndUserIdAndAccrualPolicyIDAndTypeIDAndTimeStamp( $u_obj->getCompany(), $u_obj->getID(), $this->getId(), 60, TTDate::getMiddleDayEpoch( $epoch ) );
+						$alf->getByCompanyIdAndUserIdAndAccrualPolicyAccountAndTypeIDAndTimeStamp( $u_obj->getCompany(), $u_obj->getID(), $this->getAccrualPolicyAccount(), 60, TTDate::getMiddleDayEpoch( $epoch ) );
 					}
 					if ( $alf->getRecordCount() == 0 ) {
 						//Get effective date, try to use the current milestone rollover date to make things more clear.
@@ -961,7 +1132,8 @@ class AccrualPolicyFactory extends Factory {
 							$af = TTnew( 'AccrualFactory' );
 							$af->setUser( $u_obj->getID() );
 							$af->setType( 60 ); //Rollover Adjustment
-							$af->setAccrualPolicyID( $this->getId() );
+							$af->setAccrualPolicyAccount( $this->getAccrualPolicyAccount() );
+							$af->setAccrualPolicy( $this->getId() );
 							$af->setAmount( $rollover_accrual_adjustment );
 							$af->setTimeStamp( TTDate::getMiddleDayEpoch( $current_milestone_rollover_date ) );
 							$af->setEnableCalcBalance( TRUE );
@@ -992,8 +1164,6 @@ class AccrualPolicyFactory extends Factory {
 					Debug::Text('  Found Matching Milestone, Accrual Rate: (ID: '. $milestone_obj->getId() .') '. $milestone_obj->getAccrualRate() .'/year', __FILE__, __LINE__, __METHOD__, 10);
 
 					//Make sure we get updated balance after rollover adjustment was made.
-					//Have accrual balance passed in for optimization
-					//$accrual_balance = $this->getCurrentAccrualBalance( $u_obj->getID(), $this->getId() );
 					if ( $accrual_balance < $milestone_obj->getMaximumTime() ) {
 						$accrual_amount = $this->calcAccrualAmount( $milestone_obj, 0, $annual_pay_periods);
 
@@ -1009,7 +1179,7 @@ class AccrualPolicyFactory extends Factory {
 							//Check to make sure there isn't an identical entry already made.
 							$alf = TTnew( 'AccrualListFactory' );
 							if ( $update_records == TRUE ) {
-								$alf->getByCompanyIdAndUserIdAndAccrualPolicyIDAndTimeStampAndAmount( $u_obj->getCompany(), $u_obj->getID(), $this->getId(), TTDate::getMiddleDayEpoch( $epoch ), $accrual_amount );
+								$alf->getByCompanyIdAndUserIdAndAccrualPolicyAccountAndTimeStampAndAmount( $u_obj->getCompany(), $u_obj->getID(), $this->getAccrualPolicyAccount(), TTDate::getMiddleDayEpoch( $epoch ), $accrual_amount );
 							}
 							if ( $alf->getRecordCount() == 0 ) {
 								if ( $update_records == TRUE ) {
@@ -1018,7 +1188,8 @@ class AccrualPolicyFactory extends Factory {
 									$af = TTnew( 'AccrualFactory' );
 									$af->setUser( $u_obj->getID() );
 									$af->setType( 75 ); //Accrual Policy
-									$af->setAccrualPolicyID( $this->getId() );
+									$af->setAccrualPolicyAccount( $this->getAccrualPolicyAccount() );
+									$af->setAccrualPolicy( $this->getId() );
 									$af->setAmount( $accrual_amount );
 									$af->setTimeStamp( TTDate::getMiddleDayEpoch( $epoch ) );
 									$af->setEnableCalcBalance( TRUE );
@@ -1091,6 +1262,12 @@ class AccrualPolicyFactory extends Factory {
 						if ( $ulf->getRecordCount() == 1 ) {
 							$u_obj = $ulf->getCurrent();
 
+							//This is an optimization to detect inactive employees sooner.
+							if ( $u_obj->getStatus() != 10 ) {
+								Debug::Text('  Employee is not active, skipping...', __FILE__, __LINE__, __METHOD__, 10);
+								continue;
+							}
+
 							//Switch to users timezone so rollover adjustments are handled on the proper date.
 							$user_obj_prefs = $u_obj->getUserPreferenceObject();
 							if ( is_object( $user_obj_prefs ) ) {
@@ -1100,12 +1277,22 @@ class AccrualPolicyFactory extends Factory {
 								TTDate::setTimeZone();
 							}
 
+							//Optmization to make sure we can quickly skip days outside the employment period.
+							if ( $u_obj->getHireDate() != '' AND TTDate::getBeginDayEpoch( $epoch ) < TTDate::getBeginDayEpoch( $u_obj->getHireDate() ) ) {
+								Debug::Text('  Before employees hire date, skipping...', __FILE__, __LINE__, __METHOD__, 10);
+								continue;
+							}
+							if ( $u_obj->getTerminationDate() != '' AND TTDate::getBeginDayEpoch( $epoch ) > TTDate::getBeginDayEpoch( $u_obj->getTerminationDate() ) ) {
+								Debug::Text('  After employees termination date, skipping...', __FILE__, __LINE__, __METHOD__, 10);
+								continue;
+							}
+
 							$ppslf = TTNew('PayPeriodScheduleListFactory');
 							$ppslf->getByCompanyIdAndUserId( $u_obj->getCompany(), $u_obj->getId() );
 							if ( $ppslf->getRecordCount() > 0 ) {
 								$pps_obj = $ppslf->getCurrent();
 
-								$accrual_balance = $this->getCurrentAccrualBalance( $u_obj->getID(), $this->getId() );
+								$accrual_balance = $this->getCurrentAccrualBalance( $u_obj->getID(), $this->getAccrualPolicyAccount() );
 
 								$pay_period_arr = array();
 								if ( $this->getApplyFrequency() == 10 ) {
@@ -1131,7 +1318,7 @@ class AccrualPolicyFactory extends Factory {
 		if ( $this->getDeleted() == TRUE ) {
 			//Check to make sure there are no hours using this accrual policy.
 			$alf = TTnew( 'AccrualListFactory' );
-			$alf->getByAccrualPolicyId( $this->getId() );
+			$alf->getByAccrualPolicyAccount( $this->getId() );
 			if ( $alf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
 											FALSE,

@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2196 $
- * $Id: APIHolidayPolicy.class.php 2196 2008-10-14 16:08:54Z ipso $
- * $Date: 2008-10-14 09:08:54 -0700 (Tue, 14 Oct 2008) $
- */
+
 
 /**
  * @package API\Policy
@@ -79,6 +75,7 @@ class APIHolidayPolicy extends APIFactory {
 		$data = array(
 						'company_id' => $company_obj->getId(),
 						'type_id' => 10,
+						'default_schedule_status_id' => 20, //Absent
 						'minimum_employed_days' => 0,
 						'minimum_worked_days' => 0,
 						'minimum_worked_period_days' => 0,
@@ -87,8 +84,6 @@ class APIHolidayPolicy extends APIFactory {
 						'average_time_days' => 0,
 						'worked_scheduled_days' => 0,
 						'worked_after_scheduled_days' => 0,
-
-
 					);
 
 		return $this->returnHandler( $data );

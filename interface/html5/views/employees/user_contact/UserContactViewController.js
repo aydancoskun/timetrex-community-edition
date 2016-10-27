@@ -68,6 +68,11 @@ UserContactViewController = BaseViewController.extend( {
 		}
 
 		this.current_edit_record[key] = target.getValue();
+
+		if ( key === 'country' ) {
+			return;
+		}
+
 		if ( !doNotValidate ) {
 			this.validate();
 		}
@@ -88,21 +93,21 @@ UserContactViewController = BaseViewController.extend( {
 		//Handle most cases that one tab and on audit tab
 		if ( this.is_mass_editing ) {
 
-			$( this.edit_view_tab.find( 'ul li' )[1] ).hide();
-			$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
+			$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
+			$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
 			this.edit_view_tab.tabs( 'select', 0 );
 
 		} else {
 			if ( this.subDocumentValidate() ) {
-				$( this.edit_view_tab.find( 'ul li' )[1] ).show();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().show();
 			} else {
-				$( this.edit_view_tab.find( 'ul li' )[1] ).hide();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
 				this.edit_view_tab.tabs( 'select', 0 );
 			}
 			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li' )[2] ).show();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().show();
 			} else {
-				$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
 				this.edit_view_tab.tabs( 'select', 0 );
 			}
 
@@ -115,13 +120,14 @@ UserContactViewController = BaseViewController.extend( {
 		this._super( 'buildEditViewUI' );
 
 		var $this = this;
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		var tab_2_label = this.edit_view.find( 'a[ref=tab2]' );
 
-		tab_0_label.text( $.i18n._( 'Employee Contact' ) );
-		tab_1_label.text( $.i18n._( 'Attachment' ) );
-		tab_2_label.text( $.i18n._( 'Audit' ) );
+
+		this.setTabLabels( {
+			'tab_employee_contact': $.i18n._( 'Employee Contact' ),
+			'tab_attachment': $.i18n._( 'Attachment' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
+
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIUserContact' )),
@@ -134,16 +140,16 @@ UserContactViewController = BaseViewController.extend( {
 
 		this.setNavigation();
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
-		var tab0_column1 = tab0.find( '.first-column' );
-		var tab0_column2 = tab0.find( '.second-column' );
+		var tab_employee_contact = this.edit_view_tab.find( '#tab_employee_contact' );
+		var tab_employee_contact_column1 = tab_employee_contact.find( '.first-column' );
+		var tab_employee_contact_column2 = tab_employee_contact.find( '.second-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
-		this.edit_view_tabs[0].push( tab0_column2 );
+		this.edit_view_tabs[0].push( tab_employee_contact_column1 );
+		this.edit_view_tabs[0].push( tab_employee_contact_column2 );
 
-		// tab0 column1
+		// tab_employee_contact column1
 
 		// Employee
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -160,7 +166,7 @@ UserContactViewController = BaseViewController.extend( {
 		default_args.permission_section = 'user_contact';
 		form_item_input.setDefaultArgs( default_args );
 
-		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_employee_contact_column1, '' );
 
 		// Status
 
@@ -169,7 +175,7 @@ UserContactViewController = BaseViewController.extend( {
 			field: 'status_id'
 		} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_employee_contact_column1 );
 
 		// Type
 
@@ -178,7 +184,7 @@ UserContactViewController = BaseViewController.extend( {
 			field: 'type_id'
 		} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_employee_contact_column1 );
 
 		// First Name
 
@@ -187,7 +193,7 @@ UserContactViewController = BaseViewController.extend( {
 			field: 'first_name',
 			width: 200
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'First Name' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'First Name' ), form_item_input, tab_employee_contact_column1 );
 
 		// Middle Name
 
@@ -196,7 +202,7 @@ UserContactViewController = BaseViewController.extend( {
 			field: 'middle_name',
 			width: 200
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Middle Name' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Middle Name' ), form_item_input, tab_employee_contact_column1 );
 
 		// Last Name
 
@@ -205,7 +211,7 @@ UserContactViewController = BaseViewController.extend( {
 			field: 'last_name',
 			width: 200
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Last Name' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Last Name' ), form_item_input, tab_employee_contact_column1 );
 
 		// Gender
 
@@ -214,7 +220,7 @@ UserContactViewController = BaseViewController.extend( {
 			field: 'sex_id'
 		} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.sex_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Gender' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Gender' ), form_item_input, tab_employee_contact_column1 );
 
 		// Ethnicity
 
@@ -227,7 +233,7 @@ UserContactViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.ETHNIC_GROUP,
 			show_search_inputs: true
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Ethnicity' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Ethnicity' ), form_item_input, tab_employee_contact_column1 );
 
 		// Home Address(Line 1)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -235,7 +241,7 @@ UserContactViewController = BaseViewController.extend( {
 			field: 'address1',
 			width: 200
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Home Address (Line 1)' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Home Address (Line 1)' ), form_item_input, tab_employee_contact_column1 );
 
 		// Home Address(Line 2)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -243,7 +249,7 @@ UserContactViewController = BaseViewController.extend( {
 			field: 'address2',
 			width: 200
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Home Address (Line 2)' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Home Address (Line 2)' ), form_item_input, tab_employee_contact_column1 );
 
 		// City
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -251,7 +257,7 @@ UserContactViewController = BaseViewController.extend( {
 			field: 'city',
 			width: 200
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'City' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'City' ), form_item_input, tab_employee_contact_column1 );
 
 		// Country
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
@@ -259,11 +265,11 @@ UserContactViewController = BaseViewController.extend( {
 			field: 'country'
 		} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.country_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab_employee_contact_column1 );
 
 		form_item_input.change( $.proxy( function() {
 			var selectVal = this.edit_view_ui_dic['country'].getValue();
-			this.eSetProvince( selectVal );
+			this.eSetProvince( selectVal, true );
 		}, this ) );
 
 		// Province/State
@@ -272,7 +278,7 @@ UserContactViewController = BaseViewController.extend( {
 			field: 'province'
 		} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
-		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab_employee_contact_column1 );
 
 		// Postal / ZIP Code
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -280,9 +286,9 @@ UserContactViewController = BaseViewController.extend( {
 			field: 'postal_code',
 			width: 90
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Postal/ZIP Code' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Postal/ZIP Code' ), form_item_input, tab_employee_contact_column1, '' );
 
-		// tab0 column2
+		// tab_employee_contact column2
 
 		// Work Phone
 
@@ -291,7 +297,7 @@ UserContactViewController = BaseViewController.extend( {
 			field: 'work_phone',
 			width: 200
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Work Phone' ), form_item_input, tab0_column2, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Work Phone' ), form_item_input, tab_employee_contact_column2, '' );
 
 		// Work Phone Ext
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -299,7 +305,7 @@ UserContactViewController = BaseViewController.extend( {
 			field: 'work_phone_ext',
 			width: 90
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Work Phone Ext' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Work Phone Ext' ), form_item_input, tab_employee_contact_column2 );
 
 		// Home Phone
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -307,7 +313,7 @@ UserContactViewController = BaseViewController.extend( {
 			field: 'home_phone',
 			width: 200
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Home Phone' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Home Phone' ), form_item_input, tab_employee_contact_column2 );
 
 		// Mobile Phone
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -315,7 +321,7 @@ UserContactViewController = BaseViewController.extend( {
 			field: 'mobile_phone',
 			width: 200
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Mobile Phone' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Mobile Phone' ), form_item_input, tab_employee_contact_column2 );
 
 		// Fax
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -323,7 +329,7 @@ UserContactViewController = BaseViewController.extend( {
 			field: 'fax_phone',
 			width: 200
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Fax' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Fax' ), form_item_input, tab_employee_contact_column2 );
 
 		// Work Email
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -331,7 +337,7 @@ UserContactViewController = BaseViewController.extend( {
 			field: 'work_email',
 			width: 200
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Work Email' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Work Email' ), form_item_input, tab_employee_contact_column2 );
 
 		// Home Email
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -339,14 +345,14 @@ UserContactViewController = BaseViewController.extend( {
 			field: 'home_email',
 			width: 200
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Home Email' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Home Email' ), form_item_input, tab_employee_contact_column2 );
 
 		// Birth Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TDatePicker( {
 			field: 'birth_date'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Birth Date' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Birth Date' ), form_item_input, tab_employee_contact_column2 );
 
 		// SIN / SSN
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -354,14 +360,14 @@ UserContactViewController = BaseViewController.extend( {
 			field: 'sin',
 			width: 200
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'SIN / SSN' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'SIN / SSN' ), form_item_input, tab_employee_contact_column2 );
 
 		// Note
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 		form_item_input.TTextArea( {
 			field: 'note'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab0_column2, '', null, null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_employee_contact_column2, '', null, null, true );
 
 		// Tags
 
@@ -370,7 +376,7 @@ UserContactViewController = BaseViewController.extend( {
 			field: 'tag',
 			object_type_id: 230
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab0_column2, '', null, null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_employee_contact_column2, '', null, null, true );
 
 	},
 
@@ -518,7 +524,7 @@ UserContactViewController = BaseViewController.extend( {
 		}
 	},
 
-	eSetProvince: function( val ) {
+	eSetProvince: function( val, refresh ) {
 		var $this = this;
 		var province_widget = $this.edit_view_ui_dic['province'];
 
@@ -533,6 +539,11 @@ UserContactViewController = BaseViewController.extend( {
 				}
 
 				$this.e_province_array = Global.buildRecordArray( res );
+				if ( refresh && $this.e_province_array.length > 0 ) {
+					$this.current_edit_record.province = $this.e_province_array[0].value;
+					province_widget.setValue( $this.current_edit_record.province );
+				}
+
 				province_widget.setSourceData( $this.e_province_array );
 
 			}} );
@@ -567,19 +578,19 @@ UserContactViewController = BaseViewController.extend( {
 		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 1 ) {
 
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.initSubDocumentView();
 			} else {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 
 		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 2 ) {
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab2' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_audit' );
 			} else {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		}
@@ -596,21 +607,21 @@ UserContactViewController = BaseViewController.extend( {
 		if ( this.edit_view_tab_selected_index === 1 ) {
 
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.initSubDocumentView();
 			} else {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 
 		} else if ( this.edit_view_tab_selected_index === 2 ) {
 
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab2' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_audit' );
 			} else {
 
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 
@@ -641,8 +652,8 @@ UserContactViewController = BaseViewController.extend( {
 		}
 
 		Global.loadScriptAsync( 'views/document/DocumentViewController.js', function() {
-			var tab1 = $this.edit_view_tab.find( '#tab1' );
-			var firstColumn = tab1.find( '.first-column-sub-view' );
+			var tab_attachment = $this.edit_view_tab.find( '#tab_attachment' );
+			var firstColumn = tab_attachment.find( '.first-column-sub-view' );
 			Global.trackView( 'Sub' + 'Document' + 'View' );
 			DocumentViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
 

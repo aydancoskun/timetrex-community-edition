@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 3387 $
- * $Id: ImportBase.class.php 3387 2010-03-04 17:42:17Z ipso $
- * $Date: 2010-03-04 09:42:17 -0800 (Thu, 04 Mar 2010) $
- */
+
 
 
 /**
@@ -47,6 +43,8 @@ class Import {
 
 	public $company_id = NULL;
 	public $user_id = NULL;
+
+	private $user_id_cache = NULL; //getUserIDByRowData cache.
 
 	public $class_name = NULL;
 	public $obj = NULL;
@@ -448,7 +446,8 @@ class Import {
 			$x++;
 		}
 
-		$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+		//Don't stop the current progress bar, let it continue into the process/_import function.
+		//$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
 		Debug::Arr($parsed_data, 'Parsed Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -664,12 +663,23 @@ class Import {
 		}
 
 		if ( isset($filter_data) ) {
-			$ulf = TTnew( 'UserListFactory' );
-			$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data );
-			if ( $ulf->getRecordCount() == 1 ) {
-				$tmp_user_obj = $ulf->getCurrent();
-				Debug::Text('Found existing record ID: '. $tmp_user_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
-				return $tmp_user_obj->getID();
+			//Cache this lookup to help speed up importing of mass data. This is about a 1000x speedup for large imports.
+			$cache_id = md5( $this->company_id.serialize( $filter_data ) );
+			if ( isset($this->user_id_cache[$cache_id]) ) {
+				Debug::Text('Found existing cached record ID: '. $this->user_id_cache[$cache_id], __FILE__, __LINE__, __METHOD__, 10);
+				return $this->user_id_cache[$cache_id];
+			} else {
+				$ulf = TTnew( 'UserListFactory' );
+				$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data );
+				if ( $ulf->getRecordCount() == 1 ) {
+					$tmp_user_obj = $ulf->getCurrent();
+					Debug::Text('Found existing record ID: '. $tmp_user_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
+
+					//return $tmp_user_obj->getID();
+					$this->user_id_cache[$cache_id] = $tmp_user_obj->getID();
+					return $this->user_id_cache[$cache_id];
+				}
+
 			}
 		}
 

@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 13638 $
- * $Id: AccrualPolicyListFactory.class.php 13638 2014-07-09 17:37:40Z mikeb $
- * $Date: 2014-07-09 10:37:40 -0700 (Wed, 09 Jul 2014) $
- */
+
 
 /**
  * @package Modules\Policy
@@ -137,8 +133,44 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
 	}
 
+	function getByCompanyIdAndAccrualPolicyAccount($id, $accrual_policy_account_id, $where = NULL, $order = NULL) {
+		if ( $id == '') {
+			return FALSE;
+		}
+
+		if ( $accrual_policy_account_id == '') {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'type_id' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$ph = array(
+					'id' => $id,
+					);
+
+		$query = '
+					select	*
+					from	'. $this->getTable() .' as a
+					where	company_id = ?
+						AND accrual_policy_account_id in ('. $this->getListSQL($accrual_policy_account_id, $ph) .')
+						AND deleted = 0';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+	
 	function getByCompanyId($id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
@@ -153,9 +185,6 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 
 		$pgf = new PolicyGroupFactory();
 		$cgmf = new CompanyGenericMapFactory();
-		$otpf = new OverTimePolicyFactory();
-		$ppf = new PremiumPolicyFactory();
-		$apf = new AbsencePolicyFactory();
 
 		$ph = array(
 					'id' => $id,
@@ -164,10 +193,7 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		$query = '
 					select	a.*,
 							(
-								( select count(*) from '. $cgmf->getTable() .' as w, '. $pgf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 140 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0)+
-								( select count(*) from '. $otpf->getTable() .' as x where x.accrual_policy_id = a.id and x.deleted = 0)+
-								( select count(*) from '. $ppf->getTable() .' as y where y.accrual_policy_id = a.id and y.deleted = 0)+
-								( select count(*) from '. $apf->getTable() .' as z where z.accrual_policy_id = a.id and z.deleted = 0)
+								( select count(*) from '. $cgmf->getTable() .' as w, '. $pgf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 140 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0)
 							) as assigned_policy_groups
 					from	'. $this->getTable() .' as a
 					where	a.company_id = ?
@@ -176,6 +202,8 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
 	}
 
 	function getByPolicyGroupUserId($user_id, $where = NULL, $order = NULL) {
@@ -410,6 +438,9 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
+		$query .= ( isset($filter_data['description']) ) ? $this->getWhereClauseSQL( 'a.description', $filter_data['description'], 'text', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['length_of_service_contributing_pay_code_policy_id']) ) ? $this->getWhereClauseSQL( 'a.length_of_service_contributing_pay_code_policy_id', $filter_data['length_of_service_contributing_pay_code_policy_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;

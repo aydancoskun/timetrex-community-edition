@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 11811 $
- * $Id: UserGenericStatusListFactory.class.php 11811 2013-12-26 23:56:23Z mikeb $
- * $Date: 2013-12-26 15:56:23 -0800 (Thu, 26 Dec 2013) $
- */
+
 
 /**
  * @package Modules\Users
@@ -148,16 +144,11 @@ class UserGenericStatusListFactory extends UserGenericStatusFactory implements I
 					select	*
 					from	'. $this->getTable() .'
 					where	user_id = ?
-						AND deleted = 0';
+							AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		if ($limit == NULL) {
-			//Run query without limit
-			$this->rs = $this->db->SelectLimit($query, $ph);
-		} else {
-			$this->rs = $this->db->PageExecute($query, $limit, $page, $ph);
-		}
+		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
@@ -192,12 +183,7 @@ class UserGenericStatusListFactory extends UserGenericStatusFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		if ($limit == NULL) {
-			//Run query without limit
-			$this->rs = $this->db->SelectLimit($query, $ph);
-		} else {
-			$this->rs = $this->db->PageExecute($query, $limit, $page, $ph);
-		}
+		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

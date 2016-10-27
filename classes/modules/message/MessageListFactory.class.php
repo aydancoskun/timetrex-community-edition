@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 11811 $
- * $Id: MessageListFactory.class.php 11811 2013-12-26 23:56:23Z mikeb $
- * $Date: 2013-12-26 15:56:23 -0800 (Thu, 26 Dec 2013) $
- */
+
 
 /**
  * @package Modules\Message
@@ -183,7 +179,6 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		}
 
 		$rf = new RequestFactory();
-		$udf = new UserDateFactory();
 		$uf = new UserFactory();
 		$pptsvf = new PayPeriodTimeSheetVerifyFactory();
 
@@ -206,7 +201,6 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 							LEFT JOIN '. $uf->getTable() .' as d ON a.object_type_id = 5 AND a.object_id = d.id
 							LEFT JOIN '. $uf->getTable() .' as f ON a.created_by = f.id
 							LEFT JOIN '. $rf->getTable() .' as b ON a.object_type_id = 50 AND a.object_id = b.id
-							LEFT JOIN '. $udf->getTable() .' as c ON b.user_date_id = c.id
 							LEFT JOIN '. $pptsvf->getTable() .' as e ON a.object_type_id = 90 AND a.object_id = e.id
 						WHERE
 								a.object_type_id in (5, 50, 90)
@@ -214,7 +208,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 								AND
 								(
 									(
-										c.user_id = ?
+										b.user_id = ?
 										OR d.id = ?
 										OR e.user_id = ?
 										OR a.parent_id in ( select parent_id FROM '. $this->getTable() .' WHERE created_by = ? AND parent_id != 0 )
@@ -225,10 +219,9 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 
 							AND ( a.deleted = 0 AND f.deleted = 0
 								AND ( b.id IS NULL OR ( b.id IS NOT NULL AND b.deleted = 0 ) )
-								AND ( c.id IS NULL OR ( c.id IS NOT NULL AND c.deleted = 0 ) )
 								AND ( d.id IS NULL OR ( d.id IS NOT NULL AND d.deleted = 0 ) )
 								AND ( e.id IS NULL OR ( e.id IS NOT NULL AND e.deleted = 0 ) )
-								AND NOT ( b.id IS NULL AND c.id IS NULL AND d.id IS NULL AND e.id IS NULL )
+								AND NOT ( b.id IS NULL AND d.id IS NULL AND e.id IS NULL )
 							)
 
 						';
@@ -258,7 +251,6 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 
 		$rf = new RequestFactory();
 		$uf = new UserFactory();
-		$udf = new UserDateFactory();
 		$pptsvf = new PayPeriodTimeSheetVerifyFactory();
 
 		$ph = array(
@@ -295,12 +287,11 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		//Need to include all threads that user has posted to.
 		$query = '
 					SELECT a.*,
-							CASE WHEN a.object_type_id = 5 THEN d.id WHEN a.object_type_id = 50 THEN c.user_id WHEN a.object_type_id = 90 THEN e.user_id END as sent_to_user_id
+							CASE WHEN a.object_type_id = 5 THEN d.id WHEN a.object_type_id = 50 THEN b.user_id WHEN a.object_type_id = 90 THEN e.user_id END as sent_to_user_id
 					FROM '. $this->getTable() .' as a
 						LEFT JOIN '. $uf->getTable() .' as d ON a.object_type_id = 5 AND a.object_id = d.id
 						LEFT JOIN '. $uf->getTable() .' as f ON a.created_by = f.id
 						LEFT JOIN '. $rf->getTable() .' as b ON a.object_type_id = 50 AND a.object_id = b.id
-						LEFT JOIN '. $udf->getTable() .' as c ON b.user_date_id = c.id
 						LEFT JOIN '. $pptsvf->getTable() .' as e ON a.object_type_id = 90 AND a.object_id = e.id
 					WHERE
 							a.object_type_id in (5, 50, 90)
@@ -309,7 +300,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 
 								(
 									(
-										c.user_id = ?
+										b.user_id = ?
 										'. $folder_sent_query .'
 										'. $folder_inbox_query_a .'
 										'. $folder_inbox_query_ab .'
@@ -322,10 +313,9 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 
 						AND ( a.deleted = 0 AND f.deleted = 0
 								AND ( b.id IS NULL OR ( b.id IS NOT NULL AND b.deleted = 0 ) )
-								AND ( c.id IS NULL OR ( c.id IS NOT NULL AND c.deleted = 0 ) )
 								AND ( d.id IS NULL OR ( d.id IS NOT NULL AND d.deleted = 0 ) )
 								AND ( e.id IS NULL OR ( e.id IS NOT NULL AND e.deleted = 0 ) )
-								AND NOT ( b.id IS NULL AND c.id IS NULL AND d.id IS NULL AND e.id IS NULL )
+								AND NOT ( b.id IS NULL AND d.id IS NULL AND e.id IS NULL )
 							)
 					';
 

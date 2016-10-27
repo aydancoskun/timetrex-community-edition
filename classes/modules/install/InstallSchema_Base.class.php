@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 15617 $
- * $Id: InstallSchema_Base.class.php 15617 2014-12-30 20:52:43Z mikeb $
- * $Date: 2014-12-30 12:52:43 -0800 (Tue, 30 Dec 2014) $
- */
+
 
 /**
  * @package Modules\Install
@@ -45,6 +41,7 @@
 class InstallSchema_Base {
 
 	protected $schema_sql_file_name = NULL;
+	protected $schema_failure_state_file = NULL;
 	protected $version = NULL;
 	protected $db = NULL;
 	protected $is_upgrade = FALSE;
@@ -138,29 +135,67 @@ class InstallSchema_Base {
 			return FALSE;
 		}
 
+		global $config_vars;
+		if ( isset($config_vars['cache']['dir']) ) {
+			$this->schema_failure_state_file = $config_vars['cache']['dir'] . DIRECTORY_SEPARATOR . 'tt_schema_failure.state';
+		}
+
+		//Save a state file if any SQL query fails, so we can continue on from where it left off.
+		//Only do this for MySQL though, as PostgreSQL has DDL transactions.
+
+		$schema_failure_state = array();
+		if ( file_exists( $this->schema_failure_state_file ) AND strncmp( $this->getDatabaseConnection()->databaseType, 'mysql', 5) == 0 ) {
+			$schema_failure_state = unserialize( file_get_contents( $this->schema_failure_state_file ) );
+			Debug::Arr($schema_failure_state, 'Schema Failure State: '. $this->schema_failure_state_file, __FILE__, __LINE__, __METHOD__, 9);
+		} else {
+			Debug::text('No previous Schema failure state file: '. $this->schema_failure_state_file, __FILE__, __LINE__, __METHOD__, 9);
+		}
+
 		if ( $sql !== FALSE AND strlen($sql) > 0 ) {
 			Debug::text('Schema SQL has data, executing commands!', __FILE__, __LINE__, __METHOD__, 9);
+
+			$i = 0;
 
 			//Split into individual SQL queries, as MySQL apparently doesn't like more then one query
 			//in a single query() call.
 			$split_sql = explode(';', $sql);
 			if ( is_array($split_sql) ) {
-
 				foreach( $split_sql as $sql_line ) {
-				
-					if ( trim($sql_line) != '' ) {
-
-						$retval = $this->getDatabaseConnection()->Execute( $sql_line );
-
-						if ( $retval == FALSE ) {
+					if ( isset($schema_failure_state[$this->getVersion()]) ) {
+						if ( $i < ( $schema_failure_state[$this->getVersion()] ) ) {
+							Debug::text('Skipping already committed SQL command on line: '. $i .' of: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+							$i++;
+							continue;
+						}
+					}
+					
+					//Debug::text('SQL Line: '. trim($sql_line), __FILE__, __LINE__, __METHOD__, 9);
+					if ( trim($sql_line) != '' AND substr( trim($sql_line), 0, 2 ) != '--' ) {
+						try {
+							$retval = $this->getDatabaseConnection()->Execute( $sql_line );
+						} catch ( Exception $e ) {
+							$schema_failure_state = array( $this->getVersion() => $i );
+							Debug::text('SQL Command failed on line: '. $i .' of: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+							@file_put_contents( $this->schema_failure_state_file, serialize( $schema_failure_state ) );
+							throw new DBError($e);
 							return FALSE;
 						}
 					}
+
+					$i++;
 				}
 			}
+
+			//Save state that all schema changes succeeded so they aren't run again even if postInstall fails.
+			$schema_failure_state = array( $this->getVersion() => $i );
+			Debug::text('Schema upgrade succeeded, last line: '. $i .' of: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+			@file_put_contents( $this->schema_failure_state_file, serialize( $schema_failure_state ) );
+		} else {
+			Debug::text('Schema SQL does not have data, not executing commands, continuing...', __FILE__, __LINE__, __METHOD__, 9);
 		}
 
-		Debug::text('Schema SQL does not have data, not executing commands, continuing...', __FILE__, __LINE__, __METHOD__, 9);
+		//Clear state file only once postInstall() has completed.
+		
 		return TRUE;
 	}
 
@@ -198,6 +233,8 @@ class InstallSchema_Base {
 				if ( $this->postInstall() == TRUE ) {
 					$retval = $this->_postPostInstall();
 					if ( $retval == TRUE ) {
+						Debug::text('Clearing schema failure state file: '. $this->schema_failure_state_file, __FILE__, __LINE__, __METHOD__, 9);
+						@unlink( $this->schema_failure_state_file ); //Clear state when schema is applied successfully, including postInstall.
 
 						$this->getDatabaseConnection()->CompleteTrans();
 

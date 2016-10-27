@@ -288,6 +288,11 @@ ROEViewController = BaseViewController.extend( {
 
 	setDefaultMenu: function( doNotSetFocus ) {
 
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+		if ( !this.context_menu_array ) {
+			return;
+		}
+
 		if ( !Global.isSet( doNotSetFocus ) || !doNotSetFocus ) {
 			this.selectContextMenu();
 		}
@@ -609,25 +614,31 @@ ROEViewController = BaseViewController.extend( {
 				api_class: (APIFactory.getAPIClass( 'APIUser' )),
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
-			new SearchField( {label: $.i18n._( 'Reason' ),
+			new SearchField( {
+				label: $.i18n._( 'Reason' ),
 				in_column: 1,
 				field: 'code_id',
 				multiple: true,
 				basic_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Pay Period Type' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Pay Period Type' ),
 				in_column: 1,
 				field: 'pay_period_type_id',
 				multiple: true,
 				basic_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Comments' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Comments' ),
 				field: 'comments',
 				basic_search: true,
 				in_column: 1,
-				form_item_type: FormItemType.TEXT_INPUT} ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
 
 			new SearchField( {
 				label: $.i18n._( 'First Name' ),
@@ -643,7 +654,8 @@ ROEViewController = BaseViewController.extend( {
 				basic_search: true,
 				form_item_type: FormItemType.TEXT_INPUT
 			} ),
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -651,9 +663,11 @@ ROEViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				script_name: 'EmployeeView',
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -661,8 +675,8 @@ ROEViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				script_name: 'EmployeeView',
-				form_item_type: FormItemType.AWESOME_BOX} )
-
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 
 		];
 
@@ -718,12 +732,11 @@ ROEViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		var tab_2_label = this.edit_view.find( 'a[ref=tab2]' );
-		tab_0_label.text( $.i18n._( 'ROE' ) );
-		tab_1_label.text( $.i18n._( 'Form Setup' ) );
-		tab_2_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_roe': $.i18n._( 'ROE' ),
+			'tab_form_setup': $.i18n._( 'Form Setup' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIROE' )),
@@ -738,17 +751,17 @@ ROEViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
-		var tab1 = this.edit_view_tab.find( '#tab1' );
+		var tab_roe = this.edit_view_tab.find( '#tab_roe' );
+		var tab_form_setup = this.edit_view_tab.find( '#tab_form_setup' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
-		var tab1_column1 = tab1.find( '.first-column' );
+		var tab_roe_column1 = tab_roe.find( '.first-column' );
+		var tab_form_setup_column1 = tab_form_setup.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 		this.edit_view_tabs[1] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
-		this.edit_view_tabs[1].push( tab1_column1 );
+		this.edit_view_tabs[0].push( tab_roe_column1 );
+		this.edit_view_tabs[1].push( tab_form_setup_column1 );
 
 		// Employee
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -765,19 +778,19 @@ ROEViewController = BaseViewController.extend( {
 		default_args.permission_section = 'roe';
 		form_item_input.setDefaultArgs( default_args );
 
-		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_roe_column1, '' );
 
 		// Reason
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( { field: 'code_id' } );
+		form_item_input.TComboBox( {field: 'code_id'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.code_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Reason' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Reason' ), form_item_input, tab_roe_column1 );
 
 		// Pay Period Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( { field: 'pay_period_type_id' } );
+		form_item_input.TComboBox( {field: 'pay_period_type_id'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Pay Period Type' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Pay Period Type' ), form_item_input, tab_roe_column1 );
 
 		// First Day Worked
 
@@ -790,24 +803,24 @@ ROEViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'First Day Worked' ), form_item_input, tab0_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'First Day Worked' ), form_item_input, tab_roe_column1, '', widgetContainer );
 
 		// Last Day For Which Paid
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TDatePicker( {field: 'last_date'} );
-		this.addEditFieldToColumn( $.i18n._( 'Last Day For Which Paid' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Last Day For Which Paid' ), form_item_input, tab_roe_column1 );
 
 		//Final Pay Period Ending Date
 
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TDatePicker( {field: 'pay_period_end_date'} );
-		this.addEditFieldToColumn( $.i18n._( 'Final Pay Period Ending Date' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Final Pay Period Ending Date' ), form_item_input, tab_roe_column1 );
 
 		// Expected Date of Recall
 
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TDatePicker( {field: 'recall_date'} );
-		this.addEditFieldToColumn( $.i18n._( 'Expected Date of Recall' ), form_item_input, tab0_column1 )
+		this.addEditFieldToColumn( $.i18n._( 'Expected Date of Recall' ), form_item_input, tab_roe_column1 )
 
 		// Serial No
 
@@ -820,23 +833,23 @@ ROEViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Serial No' ), form_item_input, tab0_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Serial No' ), form_item_input, tab_roe_column1, '', widgetContainer );
 
 		// Comments
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'comments', width: 400} );
-		this.addEditFieldToColumn( $.i18n._( 'Comments' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Comments' ), form_item_input, tab_roe_column1 );
 
 		// Release All Accruals
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( {field: 'release_accruals'} );
-		this.addEditFieldToColumn( $.i18n._( 'Release All Accruals' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Release All Accruals' ), form_item_input, tab_roe_column1 );
 
 		// Generate Final Pay Stub
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( {field: 'generate_pay_stub'} );
-		this.addEditFieldToColumn( $.i18n._( 'Generate Final Pay Stub' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Generate Final Pay Stub' ), form_item_input, tab_roe_column1, '' );
 
 		// Insurable Absence Policies
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -849,7 +862,7 @@ ROEViewController = BaseViewController.extend( {
 			set_empty: true
 		} );
 
-		this.addEditFieldToColumn( $.i18n._( 'Insurable Absence Policies' ), form_item_input, tab1_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Insurable Absence Policies' ), form_item_input, tab_form_setup_column1, '' );
 
 		var args = {};
 		args.filter_data = {};
@@ -868,7 +881,7 @@ ROEViewController = BaseViewController.extend( {
 		} );
 
 		form_item_input.setDefaultArgs( args );
-		this.addEditFieldToColumn( $.i18n._( 'Insurable Earnings (Box 15B)' ), form_item_input, tab1_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Insurable Earnings (Box 15B)' ), form_item_input, tab_form_setup_column1 );
 
 		// Vacation Pay (Box 17A)
 
@@ -883,11 +896,11 @@ ROEViewController = BaseViewController.extend( {
 		} );
 
 		form_item_input.setDefaultArgs( args );
-		this.addEditFieldToColumn( $.i18n._( 'Vacation Pay (Box 17A)' ), form_item_input, tab1_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Vacation Pay (Box 17A)' ), form_item_input, tab_form_setup_column1, '' );
 
 	},
 
-	onContentMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function( context_btn, menu_name ) {
 		var id;
 		if ( Global.isSet( menu_name ) ) {
 			id = menu_name;
@@ -980,21 +993,23 @@ ROEViewController = BaseViewController.extend( {
 		args.filter_data.user_id = "0";
 		args.filter_data.is_default = true;
 
-		this.user_generic_data_api.getUserGenericData( args, {onResult: function( result ) {
+		this.user_generic_data_api.getUserGenericData( args, {
+			onResult: function( result ) {
 
-			var result_data = result.getResult();
+				var result_data = result.getResult();
 
-			if ( result_data && result_data.length > 0 ) {
-				$this.form_setup_item = result_data[0];
-			} else {
-				$this.form_setup_item = {};
+				if ( result_data && result_data.length > 0 ) {
+					$this.form_setup_item = result_data[0];
+				} else {
+					$this.form_setup_item = {};
+				}
+
+				if ( callBack ) {
+					callBack();
+				}
+
 			}
-
-			if ( callBack ) {
-				callBack();
-			}
-
-		}} );
+		} );
 	},
 
 	setFormSetupData: function() {
@@ -1006,6 +1021,11 @@ ROEViewController = BaseViewController.extend( {
 	},
 
 	getFormSetupData: function( form_item ) {
+
+		//Error: TypeError: form_item is undefined in https://ondemand1.timetrex.com/interface/html5/framework/jquery.min.js?v=8.0.0-20141117-091433 line 2 > eval line 1015
+		if ( !form_item ) {
+			form_item = {};
+		}
 
 		form_item.form = {};
 
@@ -1030,15 +1050,17 @@ ROEViewController = BaseViewController.extend( {
 
 		form_setup.data = this.getFormSetupData( {} ).form;
 
-		this.user_generic_data_api.setUserGenericData( form_setup, {onResult: function( result ) {
+		this.user_generic_data_api.setUserGenericData( form_setup, {
+			onResult: function( result ) {
 
-			if ( result.isValid() ) {
-				TAlertManager.showAlert( $.i18n._( 'Form setup has been saved successfully' ) );
-			} else {
-				TAlertManager.showAlert( $.i18n._( 'Form setup save failed, Please try again' ) );
+				if ( result.isValid() ) {
+					TAlertManager.showAlert( $.i18n._( 'Form setup has been saved successfully' ) );
+				} else {
+					TAlertManager.showAlert( $.i18n._( 'Form setup save failed, Please try again' ) );
+				}
+
 			}
-
-		}} );
+		} );
 
 	},
 
@@ -1077,7 +1099,7 @@ ROEViewController = BaseViewController.extend( {
 				args.form = this.form_setup_item.data;
 			}
 		} else {
-			args.form = this.getFormSetupData().form;
+			args.form = this.getFormSetupData( this.current_edit_record ).form;
 		}
 
 		var post_data;
@@ -1171,35 +1193,15 @@ ROEViewController = BaseViewController.extend( {
 		}
 	},
 
-	setTabStatus: function() {
-		//Handle most cases that one tab and on audit tab
-		if ( this.is_mass_editing ) {
-
-			$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
-			this.edit_view_tab.tabs( 'select', 0 );
-
-		} else {
-			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li' )[2] ).show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
-		}
-
-		this.editFieldResize( 0 );
-	},
-
 	initTabData: function() {
 
 		//Handle most case that one tab and one audit tab
 		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 2 ) {
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab2' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_audit' );
 			} else {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		}
@@ -1217,10 +1219,10 @@ ROEViewController = BaseViewController.extend( {
 		if ( this.edit_view_tab_selected_index === 2 ) {
 
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab2' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_audit' );
 			} else {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 
@@ -1242,20 +1244,22 @@ ROEViewController = BaseViewController.extend( {
 
 		switch ( key ) {
 			case 'user_id':
-				this.api['get' + this.api.key_name + 'DefaultData']( c_value, {onResult: function( res ) {
-					var result = res.getResult();
-					$this.edit_view_ui_dic['first_date'].setValue( result.first_date );
-					$this.edit_view_ui_dic['last_date'].setValue( result.last_date );
-					$this.edit_view_ui_dic['pay_period_end_date'].setValue( result.pay_period_end_date );
-					$this.edit_view_ui_dic['pay_period_type_id'].setValue( result.pay_period_type_id );
+				this.api['get' + this.api.key_name + 'DefaultData']( c_value, {
+					onResult: function( res ) {
+						var result = res.getResult();
+						$this.edit_view_ui_dic['first_date'].setValue( result.first_date );
+						$this.edit_view_ui_dic['last_date'].setValue( result.last_date );
+						$this.edit_view_ui_dic['pay_period_end_date'].setValue( result.pay_period_end_date );
+						$this.edit_view_ui_dic['pay_period_type_id'].setValue( result.pay_period_type_id );
 
-					$this.current_edit_record.first_date = result.first_date;
-					$this.current_edit_record.last_date = result.last_date;
-					$this.current_edit_record.pay_period_end_date = result.pay_period_end_date;
-					$this.current_edit_record.pay_period_type_id = result.pay_period_type_id;
+						$this.current_edit_record.first_date = result.first_date;
+						$this.current_edit_record.last_date = result.last_date;
+						$this.current_edit_record.pay_period_end_date = result.pay_period_end_date;
+						$this.current_edit_record.pay_period_type_id = result.pay_period_type_id;
 
-					$this.current_edit_record[key] = c_value;
-				}} );
+						$this.current_edit_record[key] = c_value;
+					}
+				} );
 				break;
 			default:
 				this.current_edit_record[key] = c_value;
@@ -1273,7 +1277,5 @@ ROEViewController = BaseViewController.extend( {
 
 		return records;
 	}
-
-
 
 } );

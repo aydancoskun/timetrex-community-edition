@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14800 $
- * $Id: PayStubEntryFactory.class.php 14800 2014-10-16 19:27:31Z mikeb $
- * $Date: 2014-10-16 12:27:31 -0700 (Thu, 16 Oct 2014) $
- */
+
 
 /**
  * @package Modules\PayStub
@@ -49,6 +45,27 @@ class PayStubEntryFactory extends Factory {
 	protected $pay_stub_entry_account_obj = NULL;
 	protected $pay_stub_obj = NULL;
 	protected $ps_amendment_obj = NULL;
+
+	function _getVariableToFunctionMap( $data ) {
+		$variable_function_map = array(
+									'id' => 'ID',
+									'type_id' => FALSE,
+									'name' => FALSE,
+									'pay_stub_id' => 'PayStub',
+									'rate' => 'Rate',
+									'units' => 'Units',
+									'ytd_units' => 'YTDUnits',
+									'amount' => 'Amount',
+									'ytd_amount' => 'YTDAmount',
+									'description' => 'Description',
+									'pay_stub_entry_name_id' => 'PayStubEntryNameId',
+									'pay_stub_amendment_id' => 'PayStubAmendment',
+									'user_expense_id' => 'UserExpense',
+
+									'deleted' => 'Deleted',
+									);
+		return $variable_function_map;
+	}
 
 	function getPayStubEntryAccountObject() {
 		if ( is_object($this->pay_stub_entry_account_obj) ) {
@@ -120,16 +137,12 @@ class PayStubEntryFactory extends Factory {
 
 		Debug::text('Entry Account ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
-		//$psenlf = TTnew( 'PayStubEntryNameListFactory' );
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-		$result = $psealf->getById($id);
-
 		if (  $this->Validator->isResultSetWithRows(	'pay_stub_entry_name_id',
-														$result,
+														$psealf->getById($id),
 														TTi18n::gettext('Invalid Entry Account Id')
 														) ) {
-			Debug::text('TRUE: '. $id .' matches result: '. $result->getCurrent()->getId(), __FILE__, __LINE__, __METHOD__, 10);
-			$this->data['pay_stub_entry_name_id'] = $result->getCurrent()->getId();
+			$this->data['pay_stub_entry_name_id'] = $id;
 
 			return TRUE;
 		}
@@ -145,19 +158,17 @@ class PayStubEntryFactory extends Factory {
 		return FALSE;
 	}
 	function setPayStubAmendment($id) {
-		$id = trim($id);
+		$id = (int)$id;
 
 		Debug::text('PS Amendment ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
 		$psalf = TTnew( 'PayStubAmendmentListFactory' );
-		$result = $psalf->getById($id);
-
-		if (  $this->Validator->isResultSetWithRows(	'pay_stub_amendment_id',
-														$result,
+		if (  $id == 0
+				OR $this->Validator->isResultSetWithRows(	'pay_stub_amendment_id',
+														$psalf->getById($id),
 														TTi18n::gettext('Invalid Pay Stub Amendment')
 														) ) {
-			//Debug::text('TRUE: '. $id .' -: '. $result->getCurrent()->getId(), __FILE__, __LINE__, __METHOD__, 10);
-			$this->data['pay_stub_amendment_id'] = $result->getCurrent()->getId();
+			$this->data['pay_stub_amendment_id'] = $id;
 
 			return TRUE;
 		}
@@ -184,13 +195,13 @@ class PayStubEntryFactory extends Factory {
 			$id = 0;
 		}
 
-		if (	$id = 0
+		if (	$id == 0
 				OR $this->Validator->isResultSetWithRows(	'user_expense_id',
 															$result,
 															TTi18n::gettext('Invalid Expense')
 														) ) {
 
-			$this->data['user_expense_id'] = $result->getCurrent()->getId();
+			$this->data['user_expense_id'] = $id;
 
 			return TRUE;
 		}
@@ -604,6 +615,62 @@ class PayStubEntryFactory extends Factory {
 		*/
 
 		return TRUE;
+	}
+
+	function setObjectFromArray( $data ) {
+		if ( is_array( $data ) ) {
+			$variable_function_map = $this->getVariableToFunctionMap();
+			foreach( $variable_function_map as $key => $function ) {
+				if ( isset($data[$key]) ) {
+
+					$function = 'set'.$function;
+					switch( $key ) {
+						default:
+							if ( method_exists( $this, $function ) ) {
+								$this->$function( $data[$key] );
+							}
+							break;
+					}
+				}
+			}
+
+			$this->setCreatedAndUpdatedColumns( $data );
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getObjectAsArray( $include_columns = NULL ) {
+		$variable_function_map = $this->getVariableToFunctionMap();
+		if ( is_array( $variable_function_map ) ) {
+			foreach( $variable_function_map as $variable => $function_stub ) {
+				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {
+
+					$function = 'get'.$function_stub;
+					switch( $variable ) {
+						case 'type_id':
+						case 'name':
+							$data[$variable] = $this->getColumn( $variable );
+							break;
+						default:
+							if ( method_exists( $this, $function ) ) {
+								$data[$variable] = $this->$function();
+							}
+							break;
+					}
+
+				}
+			}
+			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
+		}
+
+		return $data;
+	}
+
+	function addLog( $log_action ) {
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Pay Stub Entry') .': '. TTi18n::getText('Amount') .': '. $this->getAmount(), NULL, $this->getTable(), $this );
 	}
 }
 ?>

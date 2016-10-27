@@ -33,17 +33,13 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2205 $
- * $Id: CLI.inc.php 2205 2008-10-17 22:17:40Z ipso $
- * $Date: 2008-10-17 15:17:40 -0700 (Fri, 17 Oct 2008) $
- */
+
 define('TIMETREX_API', TRUE );
 forceNoCacheHeaders(); //Send headers to disable caching.
 
 //Returns valid classes when unauthenticated.
 function getUnauthenticatedAPIClasses() {
-	return array('APIAuthentication','APIClientStationUnAuthenticated', 'APIAuthenticationPlugin', 'APIClientStationUnAuthenticatedPlugin', 'APIInstall');
+	return array('APIAuthentication','APIClientStationUnAuthenticated', 'APIAuthenticationPlugin', 'APIClientStationUnAuthenticatedPlugin', 'APIProgressBar', 'APIInstall');
 }
 
 //Returns session ID from _COOKIE, _POST, then _GET.

@@ -19,6 +19,12 @@
 			}
 		}
 
+		this.clearValue = function() {
+			$( this ).val( default_tooltip );
+			$( this ).removeClass( 'search-input-focus-in' );
+			$( this ).addClass( 'search-input-focus-out' );
+		}
+
 		this.each( function() {
 
 			var o = $.meta ? $.extend( {}, opts, $( this ).data() ) : opts;
@@ -49,18 +55,22 @@
 
 			} );
 
-			$( this ).keyup( function( e ) {
+			$( this ).bind( 'input propertychange', function( e ) {
 
 				if ( search_timer ) {
 					clearTimeout( search_timer );
 				}
 
-				if ( e.keyCode === 91 || e.ctrlKey || e.metaKey || e.keyCode === 17) {
+				if ( e.keyCode === 91 || e.ctrlKey || e.metaKey || e.keyCode === 17 ) {
 					return;
 				}
 
 				search_timer = setTimeout( function() {
-					$this.trigger( 'searchEnter', [$this.val(), column_model.name] );
+
+					var val = ($this.val() === default_tooltip) ? '' : $this.val();
+
+					$this.trigger( 'searchEnter', [val, column_model.name] );
+
 				}, 500 );
 
 			} );

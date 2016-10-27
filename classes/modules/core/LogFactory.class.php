@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14958 $
- * $Id: LogFactory.class.php 14958 2014-10-28 14:00:49Z mikeb $
- * $Date: 2014-10-28 07:00:49 -0700 (Tue, 28 Oct 2014) $
- */
+
 
 /**
  * @package Core
@@ -75,6 +71,7 @@ class LogFactory extends Factory {
 											'branch'							=> TTi18n::getText('Branch'),
 											'department'						=> TTi18n::getText('Department'),
 											'currency'							=> TTi18n::getText('Currency'),
+											'currency_rate'						=> TTi18n::getText('Currency Rate'),
 											'accrual'							=> TTi18n::getText('Accrual'),
 											'authorizations'					=> TTi18n::getText('Authorizations'),
 											'request'							=> TTi18n::getText('Request'),
@@ -107,8 +104,10 @@ class LogFactory extends Factory {
 											'round_interval_policy'				=> TTi18n::getText('Rounding Policy'),
 											'meal_policy'						=> TTi18n::getText('Meal Policy'),
 											'break_policy'						=> TTi18n::getText('Break Policy'),
+											'accrual_policy_account'			=> TTi18n::getText('Accrual Account'),
 											'accrual_policy'					=> TTi18n::getText('Accrual Policy'),
 											'accrual_policy_milestone'			=> TTi18n::getText('Accrual Policy Milestone'),
+											'accrual_policy_user_modifier'		=> TTi18n::getText('Accrual Policy Employee Modifier'),
 											'over_time_policy'					=> TTi18n::getText('Overtime Policy'),
 											'premium_policy'					=> TTi18n::getText('Premium Policy'),
 											'premium_policy_branch'				=> TTi18n::getText('Premium Policy Branch'),
@@ -122,6 +121,11 @@ class LogFactory extends Factory {
 											'exception_policy'					=> TTi18n::getText('Exception Policy'),
 											'holiday_policy'					=> TTi18n::getText('Holiday Policy'),
 											'holiday_policy_recurring_holiday'	=> TTi18n::getText('Holiday Policy'),
+											'regular_time_policy'				=> TTi18n::getText('Regular Time Policy'),
+											'pay_formula_policy' 				=> TTi18n::getText('Pay Formula Policy'),
+											'contributing_pay_code_policy'		=> TTi18n::getText('Contributing Pay Code Policy'),
+											'contributing_shift_policy'			=> TTi18n::getText('Contributing Shift Policy'),
+											'pay_code'							=> TTi18n::getText('Pay Code'),
 
 											'pay_period'						=> TTi18n::getText('Pay Period'),
 											'pay_period_schedule'				=> TTi18n::getText('Pay Period Schedule'),
@@ -222,6 +226,7 @@ class LogFactory extends Factory {
 											'branch'							=> array('branch'),
 											'department'						=> array('department'),
 											'currency'							=> array('currency'),
+											'currency_rate'						=> array('currency'),
 											'accrual'							=> array('accrual'),
 											'authorizations'					=> array('user'),
 											'request'							=> array('request'),
@@ -254,8 +259,10 @@ class LogFactory extends Factory {
 											'round_interval_policy'				=> array('round_policy'),
 											'meal_policy'						=> array('meal_policy'),
 											'break_policy'						=> array('break_policy'),
+											'accrual_policy_account'			=> array('accrual_policy'),
 											'accrual_policy'					=> array('accrual_policy'),
 											'accrual_policy_milestone'			=> array('accrual_policy'),
+											'accrual_policy_user_modifier'		=> array('accrual_policy'),
 											'over_time_policy'					=> array('over_time_policy'),
 											'premium_policy'					=> array('premium_policy'),
 											'premium_policy_branch'				=> array('premium_policy'),
@@ -269,6 +276,11 @@ class LogFactory extends Factory {
 											'exception_policy'					=> array('excepton_policy'),
 											'holiday_policy'					=> array('holiday_policy'),
 											'holiday_policy_recurring_holiday'	=> array('holiday_policy'),
+											'regular_time_policy'				=> array('regular_time_policy'),
+											'pay_formula_policy' 				=> array('pay_formula_policy'),
+											'contributing_pay_code_policy'		=> array('contributing_pay_code_policy'),
+											'contributing_shift_policy'			=> array('contributing_shift_policy'),
+											'pay_code'							=> array('pay_code'),
 
 											'pay_period'						=> array('pay_period_schedule'),
 											'pay_period_schedule'				=> array('pay_period_schedule'),

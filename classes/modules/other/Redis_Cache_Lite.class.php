@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 3934 $
- * $Id: EFT.class.php 3934 2010-11-17 23:29:44Z ipso $
- * $Date: 2010-11-17 15:29:44 -0800 (Wed, 17 Nov 2010) $
- */
+
 class Redis_Cache_Lite extends Cache_Lite {
 	function Redis_Cache_Lite( $options = array(NULL) ) {
 		$this->Cache_Lite( $options );
@@ -185,7 +181,7 @@ class Redis_Cache_Lite extends Cache_Lite {
 		$redis = $this->redisConnect('master');
 		//if ( !PEAR::isError($redis) ) {
 		if ( is_object($redis) AND get_class($redis) == 'Redis' ) {
-			Debug::text('Writing to REDIS as KEY: '. $this->_file, __FILE__, __LINE__, __METHOD__, 10);
+			//Debug::text('Writing to REDIS as KEY: '. $this->_file, __FILE__, __LINE__, __METHOD__, 10);
 			return $redis->set( $this->_file, $data, $this->_lifeTime );
 		}
 
@@ -200,7 +196,7 @@ class Redis_Cache_Lite extends Cache_Lite {
 				$redis = $this->redisConnect( $server_key );
 				//if ( !PEAR::isError($redis) ) {
 				if ( is_object($redis) AND get_class($redis) == 'Redis' ) {
-					Debug::text('Deleting REDIS as KEY: '. $this->_file .' Server Key: '. $server_key, __FILE__, __LINE__, __METHOD__, 10);
+					//Debug::text('Deleting REDIS as KEY: '. $this->_file .' Server Key: '. $server_key, __FILE__, __LINE__, __METHOD__, 10);
 					if ( $redis->del( $this->_file ) === FALSE ) {
 						//return $this->raiseError('Cache_Lite : Unable to delete cache file : '.$this->_file, -1);  //In order to catch these we need to include PEAR.php all the time.
 						return FALSE;

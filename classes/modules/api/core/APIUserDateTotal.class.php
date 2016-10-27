@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2196 $
- * $Id: APIUserDateTotal.class.php 2196 2008-10-14 16:08:54Z ipso $
- * $Date: 2008-10-14 09:08:54 -0700 (Tue, 14 Oct 2008) $
- */
+
 
 /**
  * @package API\Core
@@ -61,6 +57,7 @@ class APIUserDateTotal extends APIFactory {
 		Debug::Text('Getting user_date_total default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		$data = array(
+						'currency_id' => $this->getCurrentUserObject()->getCurrency(),
 						'branch_id' => $this->getCurrentUserObject()->getDefaultBranch(),
 						'department_id' => $this->getCurrentUserObject()->getDefaultDepartment(),
 						'total_time' => 0,
@@ -121,6 +118,11 @@ class APIUserDateTotal extends APIFactory {
 		}
 
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
+		//Parse date string sent by HTML5 interface for searching.
+		if ( isset($data['filter_data']['date_stamp']) ) {
+			$data['filter_data']['date_stamp'] = TTDate::getMiddleDayEpoch( TTDate::parseDateTime( $data['filter_data']['date_stamp'] ) );
+		}
 
 		//This can be used to edit Absences as well, how do we differentiate between them?
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'punch', 'view' );
@@ -201,7 +203,7 @@ class APIUserDateTotal extends APIFactory {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
 			foreach( $data as $key => $row ) {
-				$recalculate_user_date_id = FALSE;
+				$recalculate_user_date_stamp = FALSE;
 
 				$primary_validator = new Validator();
 				$lf = TTnew( 'UserDateTotalListFactory' );
@@ -217,14 +219,14 @@ class APIUserDateTotal extends APIFactory {
 							OR
 								(
 								$this->getPermissionObject()->Check('punch', 'edit')
-									OR ( $this->getPermissionObject()->Check('punch', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUserDateObject()->getUser() ) === TRUE )
-									OR ( $this->getPermissionObject()->Check('punch', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('punch', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('punch', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
 								)
 							OR
 								(
 								$this->getPermissionObject()->Check('absence', 'edit')
-									OR ( $this->getPermissionObject()->Check('absence', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUserDateObject()->getUser() ) === TRUE )
-									OR ( $this->getPermissionObject()->Check('absence', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('absence', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('absence', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
 								)
 							) {
 
@@ -233,15 +235,15 @@ class APIUserDateTotal extends APIFactory {
 
 							//When editing a record if the date changes, we need to recalculate the old date.
 							//This must occur before we merge the data together.
-							if (	( isset($row['user_date_id'])
-										AND $lf->getUserDateID() != $row['user_date_id'] )
+							if (	( isset($row['user_id'])
+										AND $lf->getUser() != $row['user_id'] )
 									OR
 									( isset($row['date_stamp'])
-										AND is_object( $lf->getUserDateObject() ) AND $lf->getUserDateObject()->getDateStamp()
-										AND TTDate::parseDateTime( $row['date_stamp'] ) != $lf->getUserDateObject()->getDateStamp() )
+										AND $lf->getDateStamp()
+										AND TTDate::parseDateTime( $row['date_stamp'] ) != $lf->getDateStamp() )
 									) {
-								Debug::Text('Date has changed, recalculate old date... New: [ Date: '. $row['date_stamp'] .' ] User Date ID: '. $lf->getUserDateID(), __FILE__, __LINE__, __METHOD__, 10);
-								$recalculate_user_date_id = $lf->getUserDateID();
+								Debug::Text('Date has changed, recalculate old date... New: [ Date: '. $row['date_stamp'] .' ] UserID: '. $lf->getUser(), __FILE__, __LINE__, __METHOD__, 10);
+								$recalculate_user_date_stamp[$lf->getUser()][] = TTDate::getMiddleDayEpoch( $lf->getDateStamp() ); //Help avoid confusion with different timezones/DST.
 							}
 
 							$row = array_merge( $lf->getObjectAsArray(), $row );
@@ -283,6 +285,9 @@ class APIUserDateTotal extends APIFactory {
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
 					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
 
+					//If the currently logged in user is timezone GMT, and he edits an absence for a user in timezone PST
+					//it can cause confusion as to which date needs to be recalculated, the GMT or PST date?
+					//Try to avoid this by using getMiddleDayEpoch() as much as possible.
 					$lf->setObjectFromArray( $row );
 
 					//Force Company ID to current company.
@@ -300,12 +305,6 @@ class APIUserDateTotal extends APIFactory {
 							$lf->setEnableCalcException( TRUE );
 
 							$save_result[$key] = $lf->Save();
-							Debug::Text('zInsert ID: '. $save_result[$key], __FILE__, __LINE__, __METHOD__, 10);
-
-							if ( $recalculate_user_date_id > 0 ) {
-								UserDateTotalFactory::reCalculateDay( $recalculate_user_date_id, FALSE, FALSE, FALSE, FALSE );
-							}
-
 						}
 						$validator_stats['valid_records']++;
 					}
@@ -323,8 +322,22 @@ class APIUserDateTotal extends APIFactory {
 					}
 				} elseif ( $validate_only == TRUE ) {
 					$lf->FailTransaction();
+				} elseif ( $is_valid == TRUE AND $validate_only == FALSE ) {
+					if ( is_array( $recalculate_user_date_stamp ) AND count( $recalculate_user_date_stamp ) > 0 ) {
+						Debug::Text('Recalculating other dates...', __FILE__, __LINE__, __METHOD__, 10);
+						foreach( $recalculate_user_date_stamp as $user_id => $date_arr ) {
+							$ulf = TTNew('UserListFactory');
+							$ulf->getByIdAndCompanyId( $user_id, $this->getCurrentCompanyObject()->getId() );
+							if ( $ulf->getRecordCount() > 0 ) {
+								$cp = TTNew('CalculatePolicy');
+								$cp->setUserObject( $ulf->getCurrent() );
+								$cp->addPendingCalculationDate( $date_arr );
+								$cp->calculate(); //This sets timezone itself.
+								$cp->Save();
+							}
+						}
+					}
 				}
-
 
 				$lf->CommitTransaction();
 
@@ -391,14 +404,14 @@ class APIUserDateTotal extends APIFactory {
 						//Object exists, check edit permissions
 						if ( 	(
 									$this->getPermissionObject()->Check('punch', 'delete')
-									OR ( $this->getPermissionObject()->Check('punch', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUserDateObject()->getUser() ) === TRUE )
-									OR ( $this->getPermissionObject()->Check('punch', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('punch', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('punch', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
 								)
 								OR
 								(
 									$this->getPermissionObject()->Check('absence', 'delete')
-									OR ( $this->getPermissionObject()->Check('absence', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUserDateObject()->getUser() ) === TRUE )
-									OR ( $this->getPermissionObject()->Check('absence', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('absence', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('absence', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
 								)
 							) {
 							Debug::Text('Record Exists, deleting record: '. $id, __FILE__, __LINE__, __METHOD__, 10);

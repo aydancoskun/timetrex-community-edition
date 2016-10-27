@@ -9,7 +9,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 		this.viewId = 'SchedulePolicy';
 		this.script_name = 'SchedulePolicyView';
 		this.table_name_key = 'schedule_policy';
-		this.context_menu_name = $.i18n._( 'Schedule Policies' );
+		this.context_menu_name = $.i18n._( 'Schedule Policy' );
 		this.navigation_label = $.i18n._( 'Schedule Policy' ) + ':';
 		this.api = new (APIFactory.getAPIClass( 'APISchedulePolicy' ))();
 		this.over_time_policy_api = new (APIFactory.getAPIClass( 'APIOvertimePolicy' ))();
@@ -21,35 +21,16 @@ SchedulePolicyViewController = BaseViewController.extend( {
 
 	},
 
-	initOptions: function() {
-		var $this = this;
-
-		var filter = {};
-		filter.filter_data = {};
-		filter.filter_data.type_id = [200, 10];
-
-		this.over_time_policy_api.getOverTimePolicy( filter, {onResult: function( res ) {
-			res = res.getResult();
-			$this.over_time_policy_array = res;
-
-			if ( !$this.sub_view_mode ) {
-				$this.basic_search_field_ui_dic['overtime_policy_id'].setSourceData( res );
-			}
-
-		}} );
-
-	},
-
 	buildEditViewUI: function() {
 
 		this._super( 'buildEditViewUI' );
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'Schedule Policy' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_schedule_policy': $.i18n._( 'Schedule Policy' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APISchedulePolicy' )),
@@ -64,38 +45,47 @@ SchedulePolicyViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_schedule_policy = this.edit_view_tab.find( '#tab_schedule_policy' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_schedule_policy_column1 = tab_schedule_policy.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_schedule_policy_column1 );
 
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab0_column1, '' );
+		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_schedule_policy_column1, '' );
+
+		form_item_input.parent().width( '45%' );
+
+		// Description
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
+		form_item_input.TTextArea( { field: 'description', width: '100%' } );
+		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_schedule_policy_column1, '', null, null, true );
+
+		form_item_input.parent().width( '45%' );
 
 		//Meal Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIMealPolicy' )),
-			allow_multiple_selection: false,
+			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.MEAL_POLICY,
 			show_search_inputs: true,
 			set_any: true,
-			field: 'meal_policy_id',
+			field: 'meal_policy',
 			custom_first_label: $.i18n._( '-- No Meal --' ),
 			addition_source_function: this.onMealOrBreakSourceCreate,
 			added_items: [
 				{value: 0, label: $.i18n._( '-- Defined By Policy Group --' )}
 			]
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Meal Policy' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Meal Policy' ), form_item_input, tab_schedule_policy_column1 );
 
-		//Break Policies
+		//Break Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIBreakPolicy' )),
@@ -103,14 +93,133 @@ SchedulePolicyViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.BREAK_POLICY,
 			show_search_inputs: true,
 			set_any: true,
-			field: 'break_policy_id',
+			field: 'break_policy',
 			custom_first_label: '-- ' + $.i18n._( 'No Break' ) + ' --',
 			addition_source_function: this.onMealOrBreakSourceCreate,
 			added_items: [
 				{value: 0, label: '-- ' + $.i18n._( 'Defined By Policy Group' ) + ' --'}
 			]
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Break Policies' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Break Policy' ), form_item_input, tab_schedule_policy_column1 );
+
+		// Regular Time Policy
+		var v_box = $( "<div class='v-box'></div>" );
+		//Include
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APIRegularTimePolicy' )),
+			allow_multiple_selection: true,
+			layout_name: ALayoutIDs.REGULAR_TIME_POLICY,
+			show_search_inputs: true,
+			set_empty: true,
+			field: 'include_regular_time_policy'
+		} );
+
+		var form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
+
+		v_box.append( form_item );
+		v_box.append( "<div class='clear-both-div'></div>" );
+
+		//Exclude
+		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+
+		form_item_input_1.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APIRegularTimePolicy' )),
+			allow_multiple_selection: true,
+			layout_name: ALayoutIDs.REGULAR_TIME_POLICY,
+			show_search_inputs: true,
+			set_empty: true,
+			field: 'exclude_regular_time_policy'
+		} );
+
+		form_item = this.putInputToInsideFormItem( form_item_input_1, $.i18n._( 'Exclude' ) );
+
+		v_box.append( form_item );
+
+		this.addEditFieldToColumn( $.i18n._( 'Regular Time Policy' ), [form_item_input, form_item_input_1], tab_schedule_policy_column1, '', v_box, false, true );
+
+		//Overtime Policy
+
+		v_box = $( "<div class='v-box'></div>" );
+
+		var default_args = {};
+		default_args.filter_data = {};
+		default_args.filter_data.type_id = [200, 10];
+
+		//Include
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APIOvertimePolicy' )),
+			allow_multiple_selection: true,
+			layout_name: ALayoutIDs.OVER_TIME_POLICY,
+			show_search_inputs: true,
+			set_empty: true,
+			field: 'include_over_time_policy'
+		} );
+
+		form_item_input.setDefaultArgs( default_args );
+
+		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
+
+		v_box.append( form_item );
+		v_box.append( "<div class='clear-both-div'></div>" );
+
+		//Exclude
+		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+
+		form_item_input_1.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APIOvertimePolicy' )),
+			allow_multiple_selection: true,
+			layout_name: ALayoutIDs.OVER_TIME_POLICY,
+			show_search_inputs: true,
+			set_empty: true,
+			field: 'exclude_over_time_policy'
+		} );
+
+		form_item_input_1.setDefaultArgs( default_args );
+
+		form_item = this.putInputToInsideFormItem( form_item_input_1, $.i18n._( 'Exclude' ) );
+
+		v_box.append( form_item );
+
+		this.addEditFieldToColumn( $.i18n._( 'Overtime Policy' ), [form_item_input, form_item_input_1], tab_schedule_policy_column1, '', v_box, false, true );
+
+		//Premium Policy
+		v_box = $( "<div class='v-box'></div>" );
+
+		//Include
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APIPremiumPolicy' )),
+			allow_multiple_selection: true,
+			layout_name: ALayoutIDs.PREMIUM_POLICY,
+			show_search_inputs: true,
+			set_empty: true,
+			field: 'include_premium_policy'
+		} );
+
+		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
+
+		v_box.append( form_item );
+		v_box.append( "<div class='clear-both-div'></div>" );
+
+		//Exclude
+		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+
+		form_item_input_1.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APIPremiumPolicy' )),
+			allow_multiple_selection: true,
+			layout_name: ALayoutIDs.PREMIUM_POLICY,
+			show_search_inputs: true,
+			set_empty: true,
+			field: 'exclude_premium_policy'
+		} );
+
+		form_item = this.putInputToInsideFormItem( form_item_input_1, $.i18n._( 'Exclude' ) );
+
+		v_box.append( form_item );
+
+		this.addEditFieldToColumn( $.i18n._( 'Premium Policy' ), [form_item_input, form_item_input_1], tab_schedule_policy_column1, '', v_box, false, true );
 
 		//Undertime Absence Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -122,38 +231,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'absence_policy_id'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Undertime Absence Policy' ), form_item_input, tab0_column1 );
-
-		//Overtime Policy
-
-		var default_args = {};
-		default_args.filter_data = {};
-		default_args.filter_data.type_id = [200, 10];
-
-		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIOvertimePolicy' )),
-			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.OVER_TIME_POLICY,
-			show_search_inputs: true,
-			set_empty: true,
-			field: 'over_time_policy_id'
-		} );
-
-		form_item_input.setDefaultArgs( default_args );
-		this.addEditFieldToColumn( $.i18n._( 'Overtime Policy' ), form_item_input, tab0_column1 );
-
-		//Premium Policies
-		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPremiumPolicy' )),
-			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PREMIUM_POLICY,
-			show_search_inputs: true,
-			set_empty: true,
-			field: 'premium_policy_id'
-		} );
-		this.addEditFieldToColumn( $.i18n._( 'Premium Policies' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Undertime Absence Policy' ), form_item_input, tab_schedule_policy_column1 );
 
 		//Start / Stop Window
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -164,7 +242,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Start / Stop Window' ), form_item_input, tab0_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Start / Stop Window' ), form_item_input, tab_schedule_policy_column1, '', widgetContainer );
 
 	},
 
@@ -246,16 +324,6 @@ SchedulePolicyViewController = BaseViewController.extend( {
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Meal Policy' ),
-				in_column: 1,
-				field: 'meal_policy_id',
-				layout_name: ALayoutIDs.MEAL_POLICY,
-				api_class: (APIFactory.getAPIClass( 'APIMealPolicy' )),
-				multiple: true,
-				basic_search: true,
-				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-
 			new SearchField( {label: $.i18n._( 'Undertime Absence Policy' ),
 				in_column: 1,
 				field: 'absence_policy_id',
@@ -265,17 +333,6 @@ SchedulePolicyViewController = BaseViewController.extend( {
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX} ),
-
-			new SearchField( {label: $.i18n._( 'Overtime Policy' ),
-				in_column: 1,
-				field: 'overtime_policy_id',
-				layout_name: ALayoutIDs.OVER_TIME_POLICY,
-				api_class: (APIFactory.getAPIClass( 'APIOvertimePolicy' )),
-				multiple: true,
-				basic_search: true,
-				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-
 			new SearchField( {label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',

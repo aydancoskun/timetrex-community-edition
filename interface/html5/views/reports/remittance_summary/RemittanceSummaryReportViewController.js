@@ -105,7 +105,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 
 	},
 	/* jshint ignore:start */
-	onContentMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function( context_btn, menu_name ) {
 		var id;
 		if ( Global.isSet( menu_name ) ) {
 			id = menu_name;

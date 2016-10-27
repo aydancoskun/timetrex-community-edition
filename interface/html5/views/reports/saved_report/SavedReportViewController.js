@@ -342,7 +342,7 @@ SavedReportViewController = BaseViewController.extend( {
 				break;
 			default:
 				ProgressBar.closeOverlay();
-				Global.log('ERROR: Saved Report name not defined: '+ report_name );
+				Global.log( 'ERROR: Saved Report name not defined: ' + report_name );
 				break;
 		}
 	},
@@ -352,12 +352,11 @@ SavedReportViewController = BaseViewController.extend( {
 		this._super( 'buildEditViewUI' );
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		var tab_2_label = this.edit_view.find( 'a[ref=tab2]' );
-		tab_0_label.text( $.i18n._( 'Report' ) );
-		tab_1_label.text( $.i18n._( 'Schedule' ) );
-		tab_2_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_report': $.i18n._( 'Report' ),
+			'tab_schedule': $.i18n._( 'Schedule' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
 
 		if ( !this.edit_only_mode ) {
 			this.navigation.AComboBox( {
@@ -374,34 +373,37 @@ SavedReportViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_report = this.edit_view_tab.find( '#tab_report' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_report_column1 = tab_report.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_report_column1 );
 
 		// Name
 
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name'} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab0_column1, '' );
+		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_report_column1, '' );
+		form_item_input.parent().width( '45%' );
 
 		// Default
 
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 
 		form_item_input.TCheckbox( {field: 'is_default'} );
-		this.addEditFieldToColumn( $.i18n._( 'Default' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Default' ), form_item_input, tab_report_column1 );
 
 		// Description
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 
-		form_item_input.TTextInput( {field: 'description'} );
-		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab0_column1, '', null, null, true );
+		form_item_input.TTextInput( {field: 'description', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_report_column1, '', null, null, true );
+
+		form_item_input.parent().width( '45%' );
 
 	},
 
@@ -461,7 +463,7 @@ SavedReportViewController = BaseViewController.extend( {
 
 		Global.loadViewSource( 'ReportSchedule', 'ReportScheduleViewController.js', function() {
 
-			var tab = $this.edit_view_tab.find( '#tab1' );
+			var tab = $this.edit_view_tab.find( '#tab_schedule' );
 
 			var firstColumn = tab.find( '.first-column-sub-view' );
 
@@ -515,10 +517,10 @@ SavedReportViewController = BaseViewController.extend( {
 		//Handle most case that one tab and one audit tab
 		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 1 ) {
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.edit_view_tab.find( '#tab_schedule' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.initSubReportScheduleView();
 			} else {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_schedule' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		}
@@ -536,20 +538,20 @@ SavedReportViewController = BaseViewController.extend( {
 		if ( this.edit_view_tab_selected_index === 1 ) {
 
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.edit_view_tab.find( '#tab_schedule' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.initSubReportScheduleView();
 			} else {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_schedule' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 
 		} else if ( this.edit_view_tab_selected_index === 2 ) {
 
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab2' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_audit' );
 			} else {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 

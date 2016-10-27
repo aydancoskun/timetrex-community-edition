@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2217 $
- * $Id: CAPayrollDeductionTest.php 2217 2008-10-31 22:48:21Z ipso $
- * $Date: 2008-10-31 15:48:21 -0700 (Fri, 31 Oct 2008) $
- */
+
 require_once('PHPUnit/Framework/TestCase.php');
 
 /**

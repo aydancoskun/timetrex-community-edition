@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2196 $
- * $Id: User.class.php 2196 2008-10-14 16:08:54Z ipso $
- * $Date: 2008-10-14 09:08:54 -0700 (Tue, 14 Oct 2008) $
- */
+
 
 /**
  * @package API\UnAuthenticated
@@ -86,7 +82,7 @@ class APIAuthentication extends APIFactory {
 					$error_message = TTi18n::gettext('Sorry, your trial period has expired, please contact our sales department to reactivate your account');
 				} elseif ( $c_obj->getStatus() == 28 ) {
 					if ( $c_obj->getMigrateURL() != '' ) {
-						$error_message = TTi18n::gettext('To better serve our customers your account has been migrated, please update your bookmarks to use the following URL from now on: ') . 'http://'. $c_obj->getMigrateURL();
+						$error_message = TTi18n::gettext('To better serve our customers your account has been migrated, please update your bookmarks to use the following URL from now on') . ': ' . 'http://'. $c_obj->getMigrateURL();
 					} else {
 						$error_message = TTi18n::gettext('To better serve our customers your account has been migrated, please contact customer support immediately.');
 					}
@@ -403,11 +399,24 @@ class APIAuthentication extends APIFactory {
 	function getPreLoginData( $api = NULL ) {
 		global $config_vars, $authentication;
 
+		if ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == 1 ) {
+			return array(
+				'analytics_enabled' => $this->isAnalyticsEnabled(),
+				'application_build' => $this->getApplicationBuild(),
+				'powered_by_logo_enabled' => $this->isPoweredByLogoEnabled(),
+				'deployment_on_demand' => $this->getDeploymentOnDemand(),
+				'product_edition' => $this->getTTProductEdition( FALSE ),
+				'locale' => TTi18n::getNormalizedLocale(),
+				'base_url' => Environment::getBaseURL(),
+				'api_base_url' => Environment::getAPIBaseURL()
+			);
+		}
+
 		$company_name = $this->getCompanyName();
 		if ( $company_name == '' ) {
 			$company_name = 'N/A';
 		}
-		
+
 		return array(
 				'primary_company_id' => PRIMARY_COMPANY_ID, //Needed for some branded checks.
 				'primary_company_name' => $company_name,

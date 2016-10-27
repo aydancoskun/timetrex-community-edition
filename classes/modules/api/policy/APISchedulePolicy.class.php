@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2196 $
- * $Id: APISchedulePolicy.class.php 2196 2008-10-14 16:08:54Z ipso $
- * $Date: 2008-10-14 09:08:54 -0700 (Tue, 14 Oct 2008) $
- */
+
 
 /**
  * @package API\Policy
@@ -80,7 +76,7 @@ class APISchedulePolicy extends APIFactory {
 						'company_id' => $company_obj->getId(),
 						'meal_policy_id' => '0', //Defined by policy group. Needs to be a string otherwise Flex ignores it.
 						'break_policy_id' => array('0'), //Defined by policy group. Needs to be a string otherwise Flex ignores it.
-						'start_stop_window' => (3600 * 2), //1hr.
+						'start_stop_window' => (3600 * 2), //Use 2hrs so its enough that we arent causing problems in common cases where EE comes in an hour early.
 					);
 
 		return $this->returnHandler( $data );

@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 13971 $
- * $Id: ForgotPassword.php 13971 2014-08-04 15:59:55Z mikeb $
- * $Date: 2014-08-04 08:59:55 -0700 (Mon, 04 Aug 2014) $
- */
+
 require_once('../includes/global.inc.php');
 
 //Debug::setVerbosity( 11 );
@@ -77,7 +73,7 @@ switch ($action) {
 			$user_name = $user_obj->getUserName();
 
 			//Make sure passwords match
-			if ( $password == $password2 ) {
+			if ( $password != '' AND trim($password) === trim($password2) ) {
 				//Change password
 				$user_obj->setPassword( $password ); //Password reset key is cleared when password is changed.
 				if ( $user_obj->isValid() ) {

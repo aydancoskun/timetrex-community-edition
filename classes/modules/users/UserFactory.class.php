@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 15145 $
- * $Id: UserFactory.class.php 15145 2014-11-13 22:42:19Z mikeb $
- * $Date: 2014-11-13 14:42:19 -0800 (Thu, 13 Nov 2014) $
- */
+
 
 /**
  * @package Modules\Users
@@ -256,7 +252,15 @@ class UserFactory extends Factory {
 										'mobile_phone' => 'MobilePhone',
 										'fax_phone' => 'FaxPhone',
 										'home_email' => 'HomeEmail',
+										'home_email_is_valid' => 'HomeEmailIsValid',
+										'home_email_is_valid_key' => 'HomeEmailIsValidKey',
+										'home_email_is_valid_date' => 'HomeEmailIsValidDate',
+
 										'work_email' => 'WorkEmail',
+										'work_email_is_valid' => 'WorkEmailIsValid',
+										'work_email_is_valid_key' => 'WorkEmailIsValidKey',
+										'work_email_is_valid_date' => 'WorkEmailIsValidDate',
+
 										'birth_date' => 'BirthDate',
 										'birth_date_age' => FALSE,
 										'hire_date' => 'HireDate',
@@ -736,11 +740,47 @@ class UserFactory extends Factory {
 
 		return trim($retval);
 	}
-	function encryptPassword($password) {
-		$encrypted_password = sha1( $this->getPasswordSalt().$password );
+
+	function getPasswordVersion( $encrypted_password = FALSE ) {
+		if ( $encrypted_password == '' ) {
+			$encrypted_password = $this->getPassword();
+		}
+		
+		$split_password = explode(':', $encrypted_password );
+		if ( is_array($split_password) AND count($split_password) == 2 ) {
+			$version = $split_password[0];
+		} else {
+			$version = 1;
+		}
+
+		return $version;
+	}
+	
+	//Always default to latest password version.
+	function encryptPassword( $password, $version = 2 ) {
+		$password = trim($password);
+		
+		//Handle password migration/versioning
+		switch( (int)$version ) {
+			case 2: //v2
+				//Case sensitive, uses sha512 and company/user specific salt.
+				//Prepend with password version.
+				//
+				//IMPORTANT: When creating a new user, the ID must be defined before this is called, otherwise the hash is incorrect.
+				//           This manifests itself as an incorrect password when its first created, but can be changed and then starts working.
+				//
+				$encrypted_password = '2:'. hash( 'sha512', $this->getPasswordSalt() . (int)$this->getCompany() . (int)$this->getID() . $password );
+				break;
+			default: //v1
+				//Case insensitive, uses sha1 and global salt.
+				$encrypted_password = sha1( $this->getPasswordSalt() . strtolower($password) );
+				break;
+		}
+		unset($password);
 
 		return $encrypted_password;
 	}
+
 	function checkPassword($password, $check_password_policy = TRUE ) {
 		global $config_vars;
 
@@ -784,22 +824,30 @@ class UserFactory extends Factory {
 			Debug::Text('LDAP authentication disabled due to config or extension missing...', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		$password = $this->encryptPassword( trim(strtolower($password)) );
+		$password_version = $this->getPasswordVersion();
+		$encrypted_password = $this->encryptPassword( $password, $password_version );
 
 		//Don't check local TT passwords if LDAP Only authentication is enabled. Still accept override passwords though.
-		if ( $ldap_authentication_type_id != 2 AND $password == $this->getPassword() ) {
+		if ( $ldap_authentication_type_id != 2 AND $encrypted_password === $this->getPassword() ) {
 			//If the passwords match, confirm that the password hasn't exceeded its maximum age.
 			//Allow override passwords always.
 			if ( $check_password_policy == TRUE AND $this->checkPasswordAge() == FALSE ) {
 				Debug::Text('Password Policy: Password exceeds maximum age, denying access...', __FILE__, __LINE__, __METHOD__, 10);
 				return FALSE;
 			} else {
+				//If password version is not the latest, update the password version when it successfully matches.
+				if ( $password_version < 2 ) {
+					Debug::Text('Converting password to latest encryption version...', __FILE__, __LINE__, __METHOD__, 10);
+					$this->db->Execute( 'UPDATE '. $this->getTable() .' SET password = ? where id = ?', array( 'password' => $this->encryptPassword( $password ), 'id' => (int)$this->getID() ) );
+					unset($password);
+				}
+
 				return TRUE; //Password accepted.
 			}
 		} elseif ( isset($config_vars['other']['override_password_prefix'])
 						AND $config_vars['other']['override_password_prefix'] != '' ) {
 			//Check override password
-			if ( $password == $this->encryptPassword( trim( trim( strtolower($config_vars['other']['override_password_prefix']) ).substr($this->getUserName(), 0, 2) ) ) ) {
+			if ( $encrypted_password == $this->encryptPassword( trim( trim( $config_vars['other']['override_password_prefix'] ).substr($this->getUserName(), 0, 2) ), $password_version ) ) {
 				TTLog::addEntry( $this->getId(), 510, TTi18n::getText('Override Password successful from IP Address').': '. $_SERVER['REMOTE_ADDR'], NULL, $this->getTable() );
 				return TRUE;
 			}
@@ -815,8 +863,8 @@ class UserFactory extends Factory {
 		return FALSE;
 	}
 	function setPassword($password, $password_confirm = NULL ) {
-		$password = trim(strtolower($password));
-		$password_confirm = ( $password_confirm !== NULL ) ? trim(strtolower($password_confirm)) : $password_confirm;
+		$password = trim($password);
+		$password_confirm = ( $password_confirm !== NULL ) ? trim($password_confirm) : $password_confirm;
 
 		//Make sure we accept just $password being set otherwise setObjectFromArray() won't work correctly.
 		if ( ( $password != '' AND $password_confirm != '' AND $password === $password_confirm ) OR ( $password != '' AND $password_confirm === NULL ) ) {
@@ -892,7 +940,7 @@ class UserFactory extends Factory {
 
 			if ( $update_password === TRUE ) {
 				Debug::Text('Setting new password...', __FILE__, __LINE__, __METHOD__, 10);
-				$this->data['password'] = $this->encryptPassword( $password );
+				$this->data['password'] = $this->encryptPassword( $password ); //Assumes latest password version is used.
 				$this->setPasswordUpdatedDate( time() );
 				$this->setEnableClearPasswordResetData( TRUE ); //Clear any outstanding password reset key to prevent unexpected changes later on.
 			}
@@ -1041,285 +1089,6 @@ class UserFactory extends Factory {
 		return FALSE;
 	}
 
-	//
-	// MUST LEAVE iButton functions in until v3.0 of TimeTrex, so allow for upgrades.
-	//
-	function checkIButton($id) {
-		$id = trim($id);
-
-		$uilf = TTnew( 'UserIdentificationListFactory' );
-		$uilf->getByUserIdAndTypeIdAndValue( $this->getId(), 10, $id );
-		if ( $uilf->getRecordCount() == 1 ) {
-			return TRUE;
-		}
-
-/*
-		if ( $id == $this->getIButtonID() ) {
-			return TRUE;
-		}
-*/
-		return FALSE;
-	}
-	function isUniqueIButtonId($id) {
-		$ph = array(
-					'id' => $id,
-					);
-
-		$query = 'select id from '. $this->getTable() .' where ibutton_id = ? and deleted = 0';
-		$ibutton_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($ibutton_id, 'Unique iButton ID:', __FILE__, __LINE__, __METHOD__, 10);
-
-		if ( $ibutton_id === FALSE ) {
-			return TRUE;
-		} else {
-			if ($ibutton_id == $this->getId() ) {
-				return TRUE;
-			}
-		}
-		return FALSE;
-	}
-	function getIButtonId() {
-		if ( isset($this->data['ibutton_id']) ) {
-			return (string)$this->data['ibutton_id']; //Should not be cast to INT.
-		}
-
-		return FALSE;
-	}
-	function setIButtonId($id) {
-		$id = trim($id);
-
-		if	( $id == ''
-				OR
-				(
-					$this->Validator->isLength(		'ibutton_id',
-													$id,
-													TTi18n::gettext('Incorrect iButton ID length'),
-													14,
-													64)
-				AND
-					$this->Validator->isTrue(		'ibutton_id',
-													$this->isUniqueIButtonId($id),
-													TTi18n::gettext('iButton ID is already taken')
-													)
-				)
-			) {
-
-			$this->data['ibutton_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	//
-	// MUST LEAVE Fingerprint functions in until v3.0 of TimeTrex, so allow for upgrades.
-	//
-	function getFingerPrint1() {
-		if ( isset($this->data['finger_print_1']) ) {
-			return $this->data['finger_print_1'];
-		}
-
-		return FALSE;
-	}
-	function setFingerPrint1($value) {
-		$value = trim($value);
-
-		if (	$value == ''
-				OR
-						$this->Validator->isLength(		'finger_print_1',
-														$value,
-														TTi18n::gettext('Fingerprint 1 is too long'),
-														1,
-														32000)
-			) {
-
-			$this->data['finger_print_1'] = $value;
-
-			$this->setFingerPrint1UpdatedDate( time() );
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-	function getFingerPrint1UpdatedDate() {
-		if ( isset($this->data['finger_print_1_updated_date']) ) {
-			return $this->data['finger_print_1_updated_date'];
-		}
-	}
-	function setFingerPrint1UpdatedDate($epoch) {
-		if ( empty($epoch) ) {
-			$epoch = NULL;
-		}
-
-		if	(	$epoch == ''
-				OR
-				$this->Validator->isDate(		'finger_print_1_updated_date',
-												$epoch,
-												TTi18n::gettext('Finger print 1 updated date is invalid')) ) {
-
-			$this->data['finger_print_1_updated_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getFingerPrint2() {
-		if ( isset($this->data['finger_print_2']) ) {
-			return $this->data['finger_print_2'];
-		}
-
-		return FALSE;
-	}
-	function setFingerPrint2($value) {
-		$value = trim($value);
-
-		if (	$value == ''
-				OR
-						$this->Validator->isLength(		'finger_print_2',
-														$value,
-														TTi18n::gettext('Fingerprint 2 is too long'),
-														1,
-														32000)
-			) {
-
-			$this->data['finger_print_2'] = $value;
-
-			$this->setFingerPrint2UpdatedDate( time() );
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-	function getFingerPrint2UpdatedDate() {
-		if ( isset($this->data['finger_print_2_updated_date']) ) {
-			return $this->data['finger_print_2_updated_date'];
-		}
-	}
-	function setFingerPrint2UpdatedDate($epoch) {
-		if ( empty($epoch) ) {
-			$epoch = NULL;
-		}
-
-		if	(	$epoch == ''
-				OR
-				$this->Validator->isDate(		'finger_print_2_updated_date',
-												$epoch,
-												TTi18n::gettext('Finger print 2 updated date is invalid')) ) {
-
-			$this->data['finger_print_2_updated_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getFingerPrint3() {
-		if ( isset($this->data['finger_print_3']) ) {
-			return $this->data['finger_print_3'];
-		}
-
-		return FALSE;
-	}
-	function setFingerPrint3($value) {
-		$value = trim($value);
-
-		if (	$value == ''
-				OR
-						$this->Validator->isLength(		'finger_print_3',
-														$value,
-														TTi18n::gettext('Fingerprint 3 is too long'),
-														1,
-														32000)
-			) {
-
-			$this->data['finger_print_3'] = $value;
-
-			$this->setFingerPrint3UpdatedDate( time() );
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-	function getFingerPrint3UpdatedDate() {
-		if ( isset($this->data['finger_print_3_updated_date']) ) {
-			return $this->data['finger_print_3_updated_date'];
-		}
-	}
-	function setFingerPrint3UpdatedDate($epoch) {
-		if ( empty($epoch) ) {
-			$epoch = NULL;
-		}
-
-		if	(	$epoch == ''
-				OR
-				$this->Validator->isDate(		'finger_print_3_updated_date',
-												$epoch,
-												TTi18n::gettext('Finger print 3 updated date is invalid')) ) {
-
-			$this->data['finger_print_3_updated_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-
-	function getFingerPrint4() {
-		if ( isset($this->data['finger_print_4']) ) {
-			return $this->data['finger_print_4'];
-		}
-
-		return FALSE;
-	}
-	function setFingerPrint4($value) {
-		$value = trim($value);
-
-		if (	$value == ''
-				OR
-						$this->Validator->isLength(		'finger_print_4',
-														$value,
-														TTi18n::gettext('Fingerprint 4 is too long'),
-														1,
-														32000)
-			) {
-
-			$this->data['finger_print_4'] = $value;
-
-			$this->setFingerPrint4UpdatedDate( time() );
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-	function getFingerPrint4UpdatedDate() {
-		if ( isset($this->data['finger_print_4_updated_date']) ) {
-			return $this->data['finger_print_4_updated_date'];
-		}
-	}
-	function setFingerPrint4UpdatedDate($epoch) {
-		if ( empty($epoch) ) {
-			$epoch = NULL;
-		}
-
-		if	(	$epoch == ''
-				OR
-				$this->Validator->isDate(		'finger_print_4_updated_date',
-												$epoch,
-												TTi18n::gettext('Finger print 4 updated date is invalid')) ) {
-
-			$this->data['finger_print_4_updated_date'] = $epoch;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
 	static function getNextAvailableEmployeeNumber( $company_id = NULL ) {
 		global $current_company;
 
@@ -1412,102 +1181,6 @@ class UserFactory extends Factory {
 			}
 
 			$this->data['employee_number'] = $value;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	//
-	// MUST LEAVE RFID functions in until v3.0 of TimeTrex, so allow for upgrades.
-	//
-	function isUniqueRFID($id) {
-		if ( $this->getCompany() == FALSE ) {
-			return FALSE;
-		}
-
-		$ph = array(
-					'rf_id' => $id,
-					'company_id' => $this->getCompany(),
-					);
-
-		$query = 'select id from '. $this->getTable() .' where rf_id = ? AND company_id = ? AND deleted = 0';
-		$user_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($user_id, 'Unique RFID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-
-		if ( $user_id === FALSE ) {
-			return TRUE;
-		} else {
-			if ($user_id == $this->getId() ) {
-				return TRUE;
-			}
-		}
-
-		return FALSE;
-	}
-	function checkRFID($id) {
-		$id = trim($id);
-
-		$uilf = TTnew( 'UserIdentificationListFactory' );
-		$uilf->getByUserIdAndTypeIdAndValue( $this->getId(), 40, $id );
-		if ( $uilf->getRecordCount() == 1 ) {
-			return TRUE;
-		}
-/*
-		//Use employee ID for now.
-		if ( $id == $this->getRFID() ) {
-			return TRUE;
-		}
-*/
-		return FALSE;
-	}
-	function getRFID() {
-		if ( isset($this->data['rf_id']) ) {
-			return (int)$this->data['rf_id'];
-		}
-
-		return FALSE;
-	}
-	function setRFID($value) {
-		$value = $this->Validator->stripNonNumeric( trim($value) );
-
-		if (	$value == ''
-				OR
-				(
-				$this->Validator->isNumeric(	'rf_id',
-												$value,
-												TTi18n::gettext('RFID must only be digits'))
-				AND
-					$this->Validator->isTrue(		'rf_id',
-													$this->isUniqueRFID($value),
-													TTi18n::gettext('RFID is already in use, please enter a different one'))
-				) ) {
-			$this->data['rf_id'] = $value;
-
-			$this->setRFIDUpdatedDate( time() );
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-	function getRFIDUpdatedDate() {
-		if ( isset($this->data['rf_id_updated_date']) ) {
-			return $this->data['rf_id_updated_date'];
-		}
-	}
-	function setRFIDUpdatedDate($epoch) {
-		if ( empty($epoch) ) {
-			$epoch = NULL;
-		}
-
-		if	(	$epoch == ''
-				OR
-				$this->Validator->isDate(		'rf_id_updated_date',
-												$epoch,
-												TTi18n::gettext('RFID updated date is invalid')) ) {
-
-			$this->data['rf_id_updated_date'] = $epoch;
 
 			return TRUE;
 		}
@@ -2309,6 +1982,64 @@ class UserFactory extends Factory {
 		return FALSE;
 	}
 
+	function getHomeEmailIsValid() {
+		return $this->fromBool( $this->data['home_email_is_valid'] );
+	}
+	function setHomeEmailIsValid($bool) {
+		$this->data['home_email_is_valid'] = $this->toBool($bool);
+
+		return TRUE;
+	}
+
+	function getHomeEmailIsValidKey() {
+		if ( isset($this->data['home_email_is_valid_key']) ) {
+			return $this->data['home_email_is_valid_key'];
+		}
+
+		return FALSE;
+	}
+	function setHomeEmailIsValidKey($value) {
+		$value = trim($value);
+
+		if (	$value == ''
+				OR
+				$this->Validator->isLength(	'home_email_is_valid_key',
+											$value,
+											TTi18n::gettext('Email validation key is invalid'),
+											1, 255) ) {
+
+			$this->data['home_email_is_valid_key'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getHomeEmailIsValidDate() {
+		if ( isset($this->data['home_email_is_valid_date']) ) {
+			return $this->data['home_email_is_valid_date'];
+		}
+	}
+	function setHomeEmailIsValidDate($epoch) {
+		if ( empty($epoch) ) {
+			$epoch = NULL;
+		}
+
+		if	(	$epoch == ''
+				OR
+				$this->Validator->isDate(		'home_email_is_valid_date',
+												$epoch,
+												TTi18n::gettext('Email validation date is invalid')) ) {
+
+			$this->data['home_email_is_valid_date'] = $epoch;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
 	function getWorkEmail() {
 		if ( isset($this->data['work_email']) ) {
 			return $this->data['work_email'];
@@ -2345,6 +2076,64 @@ class UserFactory extends Factory {
 
 			$this->data['work_email'] = $work_email;
 			$this->setEnableClearPasswordResetData( TRUE ); //Clear any outstanding password reset key to prevent unexpected changes later on.
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getWorkEmailIsValid() {
+		return $this->fromBool( $this->data['work_email_is_valid'] );
+	}
+	function setWorkEmailIsValid($bool) {
+		$this->data['work_email_is_valid'] = $this->toBool($bool);
+
+		return TRUE;
+	}
+
+	function getWorkEmailIsValidKey() {
+		if ( isset($this->data['work_email_is_valid_key']) ) {
+			return $this->data['work_email_is_valid_key'];
+		}
+
+		return FALSE;
+	}
+	function setWorkEmailIsValidKey($value) {
+		$value = trim($value);
+
+		if (	$value == ''
+				OR
+				$this->Validator->isLength(	'work_email_is_valid_key',
+											$value,
+											TTi18n::gettext('Email validation key is invalid'),
+											1, 255) ) {
+
+			$this->data['work_email_is_valid_key'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getWorkEmailIsValidDate() {
+		if ( isset($this->data['work_email_is_valid_date']) ) {
+			return $this->data['work_email_is_valid_date'];
+		}
+	}
+	function setWorkEmailIsValidDate($epoch) {
+		if ( empty($epoch) ) {
+			$epoch = NULL;
+		}
+
+		if	(	$epoch == ''
+				OR
+				$this->Validator->isDate(		'work_email_is_valid_date',
+												$epoch,
+												TTi18n::gettext('Email validation date is invalid')) ) {
+
+			$this->data['work_email_is_valid_date'] = $epoch;
 
 			return TRUE;
 		}
@@ -2722,6 +2511,64 @@ class UserFactory extends Factory {
 		return FALSE;
 	}
 
+	function sendValidateEmail( $type = 'work' ) {
+		if ( $this->getHomeEmail() != FALSE
+				OR $this->getWorkEmail() != FALSE ) {
+
+			if ( $this->getWorkEmail() != FALSE AND $type == 'work' ) {
+				$primary_email = $this->getWorkEmail();
+			} elseif( $this->getHomeEmail() != FALSE AND $type == 'home' ) {
+				$primary_email = $this->getHomeEmail();
+			} else {
+				Debug::text('ERROR: Home/Work email not defined or matching type, unable to send validation email...', __FILE__, __LINE__, __METHOD__, 10);
+				return FALSE;
+			}
+
+			if ( $type == 'work' ) {
+				$this->setWorkEmailIsValidKey( md5( uniqid() ) );
+				$this->setWorkEmailIsValidDate( time() );
+				$email_is_valid_key = $this->getWorkEmailIsValidKey();
+			} else {
+				$this->setHomeEmailIsValidKey( md5( uniqid() ) );
+				$this->setHomeEmailIsValidDate( time() );
+				$email_is_valid_key = $this->getHomeEmailIsValidKey();
+			}
+
+			$this->Save(FALSE);
+
+			$subject = APPLICATION_NAME .' - '. TTi18n::gettext('Confirm email address');
+
+			$body = '<html><body>';
+			$body .= TTi18n::gettext('The email address %1 has been added to your %2 account', array($primary_email, APPLICATION_NAME) ).', ';
+			$body .= ' <a href="'. Misc::getURLProtocol() .'://'.Misc::getHostName().Environment::getBaseURL() .'ConfirmEmail.php?action:confirm_email=1&email='. $primary_email .'&key='. $email_is_valid_key .'">'. TTi18n::gettext('please click here to confirm and activate this email address') .'</a>.';
+			$body .= '<br><br>';
+			$body .= '--<br>';
+			$body .= APPLICATION_NAME;
+			$body .= '</body></html>';
+
+			TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Employee email confirmation sent for').': '. $primary_email, NULL, $this->getTable() );
+
+			$headers = array(
+								'From'	  => '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Email Confirmation') .'"<DoNotReply@'. Misc::getEmailDomain() .'>',
+								'Subject' => $subject,
+								'X-TimeTrex-Email-Validate' => 'YES', //Help filter validation emails.
+							);
+
+			$mail = new TTMail();
+			$mail->setTo( $primary_email );
+			$mail->setHeaders( $headers );
+
+			@$mail->getMIMEObject()->setHTMLBody($body);
+
+			$mail->setBody( $mail->getMIMEObject()->get( $mail->default_mime_config ) );
+			$retval = $mail->Send();
+
+			return $retval;
+		}
+
+		return FALSE;
+	}
+
 	function sendPasswordResetEmail() {
 		if ( $this->getHomeEmail() != FALSE
 				OR $this->getWorkEmail() != FALSE ) {
@@ -2754,7 +2601,8 @@ class UserFactory extends Factory {
 			$body .= APPLICATION_NAME;
 			$body .= '</body></html>';
 
-			TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Employee Password Reset By').': '. $_SERVER['REMOTE_ADDR'] .' '. TTi18n::getText('Key').': '. $this->getPasswordResetKey(), NULL, $this->getTable() );
+			//Don't record the reset key in the audit log for security reasons.
+			TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Employee Password Reset By').': '. $_SERVER['REMOTE_ADDR'], NULL, $this->getTable() );
 
 			$headers = array(
 								'From'	  => '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Password Reset') .'"<DoNotReply@'. Misc::getEmailDomain() .'>',
@@ -2943,15 +2791,19 @@ class UserFactory extends Factory {
 			if ( $ulf->getRecordCount() > 0 ) {
 				foreach( $ulf as $u_obj ) {
 					Debug::Text('Unsubscribing: '. $email .' User ID: '. $u_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
-					if ( strtolower($u_obj->getWorkEmail()) == $email ) {
-						$u_obj->setWorkEmail( '' );
+					if ( strtolower( $u_obj->getWorkEmail() ) == $email AND $u_obj->getWorkEmailIsValid() == TRUE ) {
+						//$u_obj->setWorkEmail( '' );
+						$u_obj->setWorkEmailIsValid( FALSE );
+						$u_obj->sendValidateEmail( 'work' );
 					}
 
-					if ( strtolower($u_obj->getHomeEmail()) == $email ) {
-						$u_obj->setHomeEmail( '' );
+					if ( strtolower( $u_obj->getHomeEmail() ) == $email AND $u_obj->getHomeEmailIsValid() == TRUE ) {
+						//$u_obj->setHomeEmail( '' );
+						$u_obj->setHomeEmailIsValid( FALSE );
+						$u_obj->sendValidateEmail( 'home' );
 					}
 
-					TTLog::addEntry( $u_obj->getId(), 500, TTi18n::gettext('Removing invalid or bouncing email address').': '. $email, $u_obj->getId(), 'users' );
+					TTLog::addEntry( $u_obj->getId(), 500, TTi18n::gettext('Requiring validation for invalid or bouncing email address').': '. $email, $u_obj->getId(), 'users' );
 					if ( $u_obj->isValid() ) {
 						$u_obj->Save();
 					}
@@ -2997,7 +2849,7 @@ class UserFactory extends Factory {
 
 		//Need to require password on new employees as the database column is NOT NULL.
 		//However when mass editing, no IDs are set so this always fails during the only validation phase.
-		if ( $this->validate_only == FALSE AND $this->isNew() == TRUE AND ( $this->getPassword() == FALSE OR $this->getPassword() == '' ) ) {
+		if ( $this->validate_only == FALSE AND $this->isNew( TRUE ) == TRUE AND ( $this->getPassword() == FALSE OR $this->getPassword() == '' ) ) {
 			$this->Validator->isTrue(		'password',
 											FALSE,
 											TTi18n::gettext('Please specify a password'));
@@ -3024,7 +2876,7 @@ class UserFactory extends Factory {
 			}
 		}
 
-		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE AND $this->isNew() == FALSE ) {
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE AND $this->isNew( TRUE ) == FALSE ) {
 			if ( $this->getDefaultJob() > 0 ) {
 				$jlf = TTnew( 'JobListFactory' );
 				$jlf->getById( $this->getDefaultJob() );
@@ -3076,7 +2928,7 @@ class UserFactory extends Factory {
 		}
 
 		//Remember if this is a new user for postSave()
-		if ( $this->isNew() ) {
+		if ( $this->isNew( TRUE ) ) {
 			$this->is_new = TRUE;
 		}
 

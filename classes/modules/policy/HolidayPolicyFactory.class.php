@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 11942 $
- * $Id: HolidayPolicyFactory.class.php 11942 2014-01-09 00:50:10Z mikeb $
- * $Date: 2014-01-08 16:50:10 -0800 (Wed, 08 Jan 2014) $
- */
+
 
 /**
  * @package Modules\Policy
@@ -49,6 +45,8 @@ class HolidayPolicyFactory extends Factory {
 	protected $company_obj = NULL;
 	protected $round_interval_policy_obj = NULL;
 	protected $absence_policy_obj = NULL;
+	protected $contributing_shift_policy_obj = NULL;
+	protected $eligible_contributing_shift_policy_obj = NULL;
 
 	function _getFactoryOptions( $name ) {
 
@@ -74,11 +72,12 @@ class HolidayPolicyFactory extends Factory {
 				break;
 			case 'columns':
 				$retval = array(
-										'-1020-name' => TTi18n::gettext('Name'),
 										'-1010-type' => TTi18n::gettext('Type'),
+										'-1020-name' => TTi18n::gettext('Name'),
+										'-1025-description' => TTi18n::gettext('Description'),
 
-										'-1010-default_schedule_status' => TTi18n::gettext('Default Schedule Status'),
-										'-1010-minimum_employed_days' => TTi18n::gettext('Minimum Employed Days'),
+										'-1030-default_schedule_status' => TTi18n::gettext('Default Schedule Status'),
+										'-1040-minimum_employed_days' => TTi18n::gettext('Minimum Employed Days'),
 
 										'-1900-in_use' => TTi18n::gettext('In Use'),
 
@@ -94,6 +93,7 @@ class HolidayPolicyFactory extends Factory {
 			case 'default_display_columns': //Columns that are displayed by default.
 				$retval = array(
 								'name',
+								'description',
 								'type',
 								'updated_date',
 								'updated_by',
@@ -121,6 +121,7 @@ class HolidayPolicyFactory extends Factory {
 										'type_id' => 'Type',
 										'type' => FALSE,
 										'name' => 'Name',
+										'description' => 'Description',
 										'default_schedule_status_id' => 'DefaultScheduleStatus',
 										'default_schedule_status' => FALSE,
 										'minimum_employed_days' => 'MinimumEmployedDays',
@@ -139,6 +140,12 @@ class HolidayPolicyFactory extends Factory {
 										//'time' => 'Time',
 										'paid_absence_as_worked' => 'PaidAbsenceAsWorked',
 										'force_over_time_policy' => 'ForceOverTimePolicy',
+
+										'contributing_shift_policy_id' => 'ContributingShiftPolicy',
+										'contributing_shift_policy' => FALSE,
+										'eligible_contributing_shift_policy_id' => 'EligibleContributingShiftPolicy',
+										'eligible_contributing_shift_policy' => FALSE,
+
 										'include_over_time' => 'IncludeOverTime',
 										'include_paid_absence_time' => 'IncludePaidAbsenceTime',
 										'absence_policy_id' => 'AbsencePolicyID',
@@ -161,6 +168,14 @@ class HolidayPolicyFactory extends Factory {
 		return $this->getGenericObject( 'AbsencePolicyListFactory', $this->getAbsencePolicyID(), 'absence_policy_obj' );
 	}
 	
+	function getContributingShiftPolicyObject() {
+		return $this->getGenericObject( 'ContributingShiftPolicyListFactory', $this->getContributingShiftPolicy(), 'contributing_shift_policy_obj' );
+	}
+
+	function getEligibleContributingShiftPolicyObject() {
+		return $this->getGenericObject( 'ContributingShiftPolicyListFactory', $this->getEligibleContributingShiftPolicy(), 'eligible_contributing_shift_policy_obj' );
+	}
+
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
 			return (int)$this->data['company_id'];
@@ -255,6 +270,30 @@ class HolidayPolicyFactory extends Factory {
 						) {
 
 			$this->data['name'] = $name;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getDescription() {
+		if ( isset($this->data['description']) ) {
+			return $this->data['description'];
+		}
+
+		return FALSE;
+	}
+	function setDescription($description) {
+		$description = trim($description);
+
+		if (	$description == ''
+				OR $this->Validator->isLength(	'description',
+												$description,
+												TTi18n::gettext('Description is invalid'),
+												1, 250) ) {
+
+			$this->data['description'] = $description;
 
 			return TRUE;
 		}
@@ -635,6 +674,71 @@ class HolidayPolicyFactory extends Factory {
 		return FALSE;
 	}
 */
+
+	function getEligibleContributingShiftPolicy() {
+		if ( isset($this->data['eligible_contributing_shift_policy_id']) ) {
+			return (int)$this->data['eligible_contributing_shift_policy_id'];
+		}
+
+		return FALSE;
+	}
+	function setEligibleContributingShiftPolicy($id) {
+		$id = trim($id);
+
+		if ( $id == 0 || $id == '' ) {
+
+			$id = NULL;
+		}
+
+		$csplf = TTnew( 'ContributingShiftPolicyListFactory' );
+
+		if (	$id == NULL
+				OR
+				$this->Validator->isResultSetWithRows(	'eligible_contributing_shift_policy_id',
+													$csplf->getByID($id),
+													TTi18n::gettext('Eligible Contributing Shift Policy is invalid')
+													) ) {
+
+			$this->data['eligible_contributing_shift_policy_id'] = $id;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getContributingShiftPolicy() {
+		if ( isset($this->data['contributing_shift_policy_id']) ) {
+			return (int)$this->data['contributing_shift_policy_id'];
+		}
+
+		return FALSE;
+	}
+	function setContributingShiftPolicy($id) {
+		$id = trim($id);
+
+		if ( $id == 0 || $id == '' ) {
+
+			$id = NULL;
+		}
+
+		$csplf = TTnew( 'ContributingShiftPolicyListFactory' );
+
+		if (	$id == NULL
+				OR
+				$this->Validator->isResultSetWithRows(	'contributing_shift_policy_id',
+													$csplf->getByID($id),
+													TTi18n::gettext('Contributing Shift Policy is invalid')
+													) ) {
+
+			$this->data['contributing_shift_policy_id'] = $id;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
 	//Count all paid absence time as worked time.
 	function getPaidAbsenceAsWorked() {
 		return $this->fromBool( $this->data['paid_absence_as_worked'] );

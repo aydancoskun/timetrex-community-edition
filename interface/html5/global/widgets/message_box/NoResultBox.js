@@ -5,6 +5,7 @@
 		Global.addCss( 'global/widgets/message_box/NoResultBox.css' );
 		var opts = $.extend( {}, $.fn.NoResultBox.defaults, options );
 		var related_view_controller;
+		var message = Global.no_result_message;
 
 		this.each( function() {
 
@@ -14,15 +15,19 @@
 				related_view_controller = o.related_view_controller;
 			}
 
+			if ( o.message ) {
+				message = o.message;
+			}
+
 			var ribbon_button = $( this ).find( '.ribbon-button' );
 			var ribbon_button_div = $( this ).find( '.add-div' );
+			var label = $( this ).find( '.label' );
+			var icon = $( this ).find( '.icon' );
+			var message_div = $( this ).find( '.message' );
 
 			ribbon_button_div.css( 'display', 'block' );
 
 			if ( o.is_new ) {
-
-				var label = $( this ).find( '.label' );
-				var icon = $( this ).find( '.icon' );
 
 				icon.attr( 'src', Global.getRealImagePath( 'css/global/widgets/ribbon/icons/' + Icons.new_add ) );
 				label.text( $.i18n._( 'New' ) );
@@ -31,14 +36,22 @@
 					related_view_controller.onAddClick();
 				} );
 
+
+			} else if ( o.is_edit ) {
+
+				icon.attr( 'src', Global.getRealImagePath( 'css/global/widgets/ribbon/icons/' + Icons.edit ) );
+				label.text( $.i18n._( 'Edit' ) );
+
+				ribbon_button.bind( 'click', function() {
+					related_view_controller.onEditClick();
+				} );
+
 			} else {
 
 				ribbon_button_div.css( 'display', 'none' );
 			}
 
-			var message = $( this ).find( '.message' );
-
-			message.text( Global.no_result_message );
+			message_div.text( message );
 
 		} );
 

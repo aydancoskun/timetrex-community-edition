@@ -1,4 +1,4 @@
-TimeTrex Payroll and Time Management
+TimeTrex Workforce Management
 
 INSTALLATION INSTRUCTIONS
 

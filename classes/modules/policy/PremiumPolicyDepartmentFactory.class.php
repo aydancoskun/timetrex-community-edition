@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 11942 $
- * $Id: PremiumPolicyDepartmentFactory.class.php 11942 2014-01-09 00:50:10Z mikeb $
- * $Date: 2014-01-08 16:50:10 -0800 (Wed, 08 Jan 2014) $
- */
+
 
 /**
  * @package Modules\Policy
@@ -116,6 +112,11 @@ class PremiumPolicyDepartmentFactory extends Factory {
 		}
 
 		return FALSE;
+	}
+
+	function postSave() {
+		$this->removeCache( 'premium_policy-'. $this->getPremiumPolicy() );
+		return TRUE;
 	}
 
 	//This table doesn't have any of these columns, so overload the functions.

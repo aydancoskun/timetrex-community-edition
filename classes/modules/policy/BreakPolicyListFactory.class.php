@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2534 $
- * $Id: BreakPolicyListFactory.class.php 2534 2009-05-13 00:02:20Z ipso $
- * $Date: 2009-05-12 17:02:20 -0700 (Tue, 12 May 2009) $
- */
+
 
 /**
  * @package Modules\Policy
@@ -156,6 +152,75 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 		return $this;
 	}
 
+	function getByCompanyIdAndPayCodeId( $company_id, $id, $limit = NULL, $where = NULL, $order = NULL) {
+		if ( $id == '') {
+			return FALSE;
+		}
+
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'name' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$ph = array(
+					'company_id' => $company_id,
+					);
+
+		$query = '
+					select	*
+					from	'. $this->getTable() .'
+					where
+						company_id = ?
+						AND pay_code_id in ('. $this->getListSQL($id, $ph) .')
+						AND deleted = 0';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph, $limit );
+
+		return $this;
+	}
+
+	function getByCompanyIdAndPayFormulaPolicyId($id, $pay_formula_policy_id, $where = NULL, $order = NULL) {
+		if ( $id == '') {
+			return FALSE;
+		}
+
+		if ( $pay_formula_policy_id == '') {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'a.name' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$ph = array(
+					'id' => $id,
+					);
+
+		$query = '
+					select	*
+					from	'. $this->getTable() .' as a
+					where	company_id = ?
+						AND pay_formula_policy_id in ('. $this->getListSQL($pay_formula_policy_id, $ph) .')
+						AND deleted = 0';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+	
 	function getByPolicyGroupUserId($user_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
@@ -188,6 +253,59 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 						AND a.user_id = ?
 						AND ( b.deleted = 0 AND d.deleted = 0 )
 						';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getByPolicyGroupUserIdOrId($user_id, $id = NULL, $where = NULL, $order = NULL) {
+		if ( $user_id == '') {
+			return FALSE;
+		}
+
+		if ( $id == '') {
+			$id = 0;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'trigger_time' => 'desc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$pgf = new PolicyGroupFactory();
+		$pguf = new PolicyGroupUserFactory();
+		$cgmf = new CompanyGenericMapFactory();
+		$bpf = new BreakPolicyFactory();
+
+		$ph = array(
+					'user_id' => $user_id,
+					);
+
+		$query = '
+					select	d.*, 1 as from_policy_group
+					from	'. $pguf->getTable() .' as a,
+							'. $pgf->getTable() .' as b,
+							'. $cgmf->getTable() .' as c,
+							'. $this->getTable() .' as d
+					where	a.policy_group_id = b.id
+						AND ( b.id = c.object_id AND b.company_id = c.company_id AND c.object_type_id = 160 )
+						AND c.map_id = d.id
+						AND a.user_id = ?
+						AND ( b.deleted = 0 AND d.deleted = 0 )
+					UNION
+					select	e.*, 0 as from_policy_group
+					from
+							'. $bpf->getTable() .' as e
+					where
+							e.id in ('. $this->getListSQL($id, $ph) .')
+							AND e.deleted = 0
+						';
+
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
@@ -268,6 +386,8 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
 	}
 
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
@@ -347,6 +467,10 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
+		$query .= ( isset($filter_data['description']) ) ? $this->getWhereClauseSQL( 'a.description', $filter_data['description'], 'text', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['pay_code_id']) ) ? $this->getWhereClauseSQL( 'a.pay_code_id', $filter_data['pay_code_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['pay_formula_policy_id']) ) ? $this->getWhereClauseSQL( 'a.pay_formula_policy_id', $filter_data['pay_formula_policy_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;

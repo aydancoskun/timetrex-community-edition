@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 13917 $
- * $Id: Exception.class.php 13917 2014-07-29 04:20:50Z mikeb $
- * $Date: 2014-07-28 21:20:50 -0700 (Mon, 28 Jul 2014) $
- */
+
 
 /**
  * @package Core

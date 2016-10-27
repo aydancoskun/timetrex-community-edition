@@ -40,10 +40,10 @@ OtherFieldViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'Custom Field' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_custom_field': $.i18n._( 'Custom Field' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIOtherField' )),
@@ -59,49 +59,49 @@ OtherFieldViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_custom_field = this.edit_view_tab.find( '#tab_custom_field' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_custom_field_column1 = tab_custom_field.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_custom_field_column1 );
 
 		// Type
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {field: 'type_id'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_custom_field_column1, '' );
 
 		// Other ID1
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'other_id1', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Other ID1' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Other ID1' ), form_item_input, tab_custom_field_column1 );
 
 		// Other ID2
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'other_id2', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Other ID2' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Other ID2' ), form_item_input, tab_custom_field_column1 );
 
 		// Other ID3
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'other_id3', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Other ID3' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Other ID3' ), form_item_input, tab_custom_field_column1 );
 
 		// Other ID4
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'other_id4', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Other ID4' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Other ID4' ), form_item_input, tab_custom_field_column1 );
 
 		// Other ID5
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'other_id5', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Other ID5' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Other ID5' ), form_item_input, tab_custom_field_column1, '' );
 
 		// the below are all non-display
 
@@ -109,31 +109,31 @@ OtherFieldViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'other_id6', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Other ID6' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Other ID6' ), form_item_input, tab_custom_field_column1, '', null, true );
 
 		// Other ID7
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'other_id7', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Other ID7' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Other ID7' ), form_item_input, tab_custom_field_column1, '', null, true );
 
 		// Other ID8
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'other_id8', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Other ID8' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Other ID8' ), form_item_input, tab_custom_field_column1, '', null, true );
 
 		// Other ID9
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'other_id9', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Other ID9' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Other ID9' ), form_item_input, tab_custom_field_column1, '', null, true );
 
 		// Other ID10
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'other_id10', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Other ID10' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Other ID10' ), form_item_input, tab_custom_field_column1, '', null, true );
 
 	},
 

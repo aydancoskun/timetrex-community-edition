@@ -426,6 +426,11 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 	/* jshint ignore:start */
 	setDefaultMenu: function( doNotSetFocus ) {
 
+        //Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+        if (!this.context_menu_array) {
+            return;
+        }
+
 		if ( !Global.isSet( doNotSetFocus ) || !doNotSetFocus ) {
 			this.selectContextMenu();
 		}
@@ -707,6 +712,8 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 			this.edit_view_form_item_dic['units'].css( 'display', 'none' );
 			this.edit_view_form_item_dic['amount'].css( 'display', 'none' );
 		}
+
+		this.editFieldResize();
 	},
 
 	onFormItemKeyUp: function( target ) {
@@ -742,9 +749,9 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		widget.setReadOnly( true );
 	},
 	/* jshint ignore:end */
-	onContentMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function( context_btn, menu_name ) {
 
-		this._super( 'onContentMenuClick', context_btn, menu_name );
+		this._super( 'onContextMenuClick', context_btn, menu_name );
 
 		var id;
 
@@ -904,6 +911,13 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 	},
 
 	setCurrentEditRecordData: function() {
+
+
+		// When mass editing, these fields may not be the common data, so their value will be undefined, so this will cause their change event cannot work properly.
+		this.setDefaultData( {
+			'type_id': 10
+		} );
+
 		//Set current edit record data to all widgets
 		var widget;
 		for ( var key in this.current_edit_record ) {
@@ -1235,10 +1249,11 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		var $this = this;
 		var allow_multiple_selection = false;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'Pay Stub Amendment' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_pay_stub_amendment': $.i18n._( 'Pay Stub Amendment' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
+
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIPayStubAmendment' )),
@@ -1253,13 +1268,13 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_pay_stub_amendment = this.edit_view_tab.find( '#tab_pay_stub_amendment' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_pay_stub_amendment_column1 = tab_pay_stub_amendment.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_pay_stub_amendment_column1 );
 
 		if ( this.is_add ) {
 			allow_multiple_selection = true;
@@ -1281,13 +1296,13 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		default_args.permission_section = 'pay_stub_amendment';
 		form_item_input.setDefaultArgs( default_args );
 
-		this.addEditFieldToColumn( $.i18n._( 'Employee(s)' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Employee(s)' ), form_item_input, tab_pay_stub_amendment_column1, '' );
 
 		// Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {field: 'status_id', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.filtered_status_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_pay_stub_amendment_column1 );
 
 		var args = {};
 		var filter_data = {};
@@ -1306,13 +1321,13 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		} );
 
 		form_item_input.setDefaultArgs( args );
-		this.addEditFieldToColumn( $.i18n._( 'Pay Stub Account' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Pay Stub Account' ), form_item_input, tab_pay_stub_amendment_column1 );
 
 		// Amount Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {field: 'type_id', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Amount Type' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Amount Type' ), form_item_input, tab_pay_stub_amendment_column1 );
 
 		// Fixed
 
@@ -1320,20 +1335,20 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'rate', width: 114, hasKeyEvent: true} );
-		this.addEditFieldToColumn( $.i18n._( 'Rate' ), form_item_input, tab0_column1, '', null, true, null, null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Rate' ), form_item_input, tab_pay_stub_amendment_column1, '', null, true, null, null, true );
 
 		// Units
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'units', width: 114, hasKeyEvent: true} );
-		this.addEditFieldToColumn( $.i18n._( 'Units' ), form_item_input, tab0_column1, '', null, true, null, null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Units' ), form_item_input, tab_pay_stub_amendment_column1, '', null, true, null, null, true );
 
 		// Amount
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'amount', width: 114} );
-		this.addEditFieldToColumn( $.i18n._( 'Amount' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Amount' ), form_item_input, tab_pay_stub_amendment_column1, '', null, true );
 
 		// Percent
 
@@ -1341,7 +1356,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'percent_amount', width: 79} );
-		this.addEditFieldToColumn( $.i18n._( 'Percent' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Percent' ), form_item_input, tab_pay_stub_amendment_column1, '', null, true );
 
 		args = {};
 		filter_data = {};
@@ -1360,30 +1375,32 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		} );
 
 		form_item_input.setDefaultArgs( args );
-		this.addEditFieldToColumn( $.i18n._( 'Percent of' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Percent of' ), form_item_input, tab_pay_stub_amendment_column1, '', null, true );
 
 		// Pay Stub Note (Public)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'description', width: 359} );
-		this.addEditFieldToColumn( $.i18n._( 'Pay Stub Note (Public)' ), form_item_input, tab0_column1 );
+		form_item_input.TTextInput( {field: 'description', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Pay Stub Note (Public)' ), form_item_input, tab_pay_stub_amendment_column1 );
+
+		form_item_input.parent().width( '45%' );
 		// Description (Private)
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 
 		form_item_input.TTextArea( {field: 'private_description'} );
-		this.addEditFieldToColumn( $.i18n._( 'Description (Private)' ), form_item_input, tab0_column1, '', null, null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Description (Private)' ), form_item_input, tab_pay_stub_amendment_column1, '', null, null, true );
 
 		// Effective Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
 		form_item_input.TDatePicker( {field: 'effective_date'} );
-		this.addEditFieldToColumn( $.i18n._( 'Effective Date' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Effective Date' ), form_item_input, tab_pay_stub_amendment_column1 );
 
 		// Year to Date (YTD) Adjustment
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( {field: 'ytd_adjustment'} );
-		this.addEditFieldToColumn( $.i18n._( 'Year to Date (YTD) Adjustment' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Year to Date (YTD) Adjustment' ), form_item_input, tab_pay_stub_amendment_column1, '' );
 
 	},
 

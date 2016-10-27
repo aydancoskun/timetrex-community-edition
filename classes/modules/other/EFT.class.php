@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 11970 $
- * $Id: EFT.class.php 11970 2014-01-10 20:43:48Z mikeb $
- * $Date: 2014-01-10 12:43:48 -0800 (Fri, 10 Jan 2014) $
- */
+
 
 /*
 
@@ -96,6 +92,7 @@ class EFT {
 	var $file_format_options = array( '1464', '105', 'HSBC', 'BEANSTREAM' );
 	var $file_format = NULL; //File format
 
+	var $file_prefix_data = NULL; //Leading data in the file, primarily for RBC routing lines.
 	var $header_data = NULL;
 	var $data = NULL;
 
@@ -157,6 +154,19 @@ class EFT {
 		return FALSE;
 	}
 
+	function getFilePrefixData() {
+		if ( isset($this->file_prefix_data) ) {
+			return $this->file_prefix_data;
+		}
+
+		return FALSE;
+	}
+	function setFilePrefixData( $data ) {
+		$this->file_prefix_data = $data;
+
+		return TRUE;
+	}
+	
 	function getFileFormat() {
 		if ( isset($this->file_format) ) {
 			return $this->file_format;
@@ -343,7 +353,7 @@ class EFT {
 
 	function getCompiledData() {
 		if ( $this->compiled_data !== NULL AND $this->compiled_data !== FALSE ) {
-			return $this->compiled_data;
+			return $this->getFilePrefixData().$this->compiled_data;
 		}
 
 		return FALSE;

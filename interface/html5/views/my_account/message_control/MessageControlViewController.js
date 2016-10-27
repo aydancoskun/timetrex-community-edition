@@ -250,6 +250,11 @@ MessageControlViewController = BaseViewController.extend( {
 
 	setDefaultMenu: function( doNotSetFocus ) {
 
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+		if ( !this.context_menu_array ) {
+			return;
+		}
+
 		if ( !Global.isSet( doNotSetFocus ) || !doNotSetFocus ) {
 			this.selectContextMenu();
 		}
@@ -339,7 +344,7 @@ MessageControlViewController = BaseViewController.extend( {
 
 	},
 
-	onContentMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function( context_btn, menu_name ) {
 		var id;
 		if ( Global.isSet( menu_name ) ) {
 			id = menu_name;
@@ -530,6 +535,12 @@ MessageControlViewController = BaseViewController.extend( {
 	},
 
 	setCurrentSelectedIcon: function( icon ) {
+
+		//Error: Uncaught TypeError: Cannot read property 'find' of null in https://ondemand1.timetrex.com/interface/html5/#!m=MessageControl line 543
+		if ( !icon ) {
+			return;
+		}
+
 		var len = this.context_menu_array.length;
 		for ( var i = 0; i < len; i++ ) {
 			var context_btn = this.context_menu_array[i];
@@ -629,6 +640,11 @@ MessageControlViewController = BaseViewController.extend( {
 
 	setGridCellBackGround: function() {
 		var data = this.grid.getGridParam( 'data' );
+
+		//Error: TypeError: data is undefined in https://ondemand1.timetrex.com/interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
+		if ( !data ) {
+			return;
+		}
 
 		var len = data.length;
 
@@ -1083,44 +1099,45 @@ MessageControlViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		tab_0_label.text( $.i18n._( 'Message' ) );
+		this.setTabLabels( {
+			'tab_message': $.i18n._( 'Message' )
+		} );
 
 		this.navigation = null;
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_message = this.edit_view_tab.find( '#tab_message' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_message_column1 = tab_message.find( '.first-column' );
 
-		var tab0_column2 = tab0.find( '.second-column' );
+		var tab_message_column2 = tab_message.find( '.second-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_message_column1 );
 
 		var form_item_input;
 
 		// Employee(s)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'from_full_name'} );
-		this.addEditFieldToColumn( $.i18n._( 'Employee(s)' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Employee(s)' ), form_item_input, tab_message_column1, '' );
 
 		// Subject
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'subject', width: 359} );
-		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_message_column1 );
 
 		// Body
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 
 		form_item_input.TTextArea( {field: 'body', width: 600, height: 400} );
 
-		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab0_column1, '', null, null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_message_column1, '', null, null, true );
 
-		tab0_column2.css( 'display', 'none' );
+		tab_message_column2.css( 'display', 'none' );
 
 	},
 
@@ -1129,8 +1146,9 @@ MessageControlViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		tab_0_label.text( $.i18n._( 'Messages' ) );
+		this.setTabLabels( {
+			'tab_message': $.i18n._( 'Messages' )
+		} );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIMessageControl' )),
@@ -1145,32 +1163,32 @@ MessageControlViewController = BaseViewController.extend( {
 
 		//Tab 0 first column start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_message = this.edit_view_tab.find( '#tab_message' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_message_column1 = tab_message.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_message_column1 );
 
 		// Employee
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'full_name'} );
-		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_message_column1, '' );
 
 		// Date
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'date_stamp'} );
-		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_message_column1 );
 
 		// Type
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'type'} );
-		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_message_column1, '' );
 
-		// tab0 first column end
+		// tab_message first column end
 
-		var separate_box = tab0.find( '.separate' );
+		var separate_box = tab_message.find( '.separate' );
 
 		// Messages
 
@@ -1180,28 +1198,28 @@ MessageControlViewController = BaseViewController.extend( {
 
 		// Tab 0 second column start
 
-		var tab0_column2 = tab0.find( '.second-column' );
+		var tab_message_column2 = tab_message.find( '.second-column' );
 
-		this.edit_view_tabs[0].push( tab0_column2 );
+		this.edit_view_tabs[0].push( tab_message_column2 );
 
 		// From
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'from'} );
-		this.addEditFieldToColumn( $.i18n._( 'From' ), form_item_input, tab0_column2, '' );
+		this.addEditFieldToColumn( $.i18n._( 'From' ), form_item_input, tab_message_column2, '' );
 
 		// Subject
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'subject'} );
-		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_message_column2 );
 
 		// Body
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'body'} );
-		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab0_column2, '', null, null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_message_column2, '', null, null, true );
 
 		// Tab 0 second column end
 
-		tab0_column2.css( 'display', 'none' );
+		tab_message_column2.css( 'display', 'none' );
 
 	},
 
@@ -1210,8 +1228,9 @@ MessageControlViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		tab_0_label.text( $.i18n._( 'Messages' ) );
+		this.setTabLabels( {
+			'tab_message': $.i18n._( 'Messages' )
+		} );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIMessageControl' )),
@@ -1226,42 +1245,42 @@ MessageControlViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_message = this.edit_view_tab.find( '#tab_message' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_message_column1 = tab_message.find( '.first-column' );
 
-		var tab0_column2 = tab0.find( '.second-column' );
+		var tab_message_column2 = tab_message.find( '.second-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_message_column1 );
 
 		// From
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'from_full_name'} );
-		this.addEditFieldToColumn( $.i18n._( 'From' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'From' ), form_item_input, tab_message_column1, '' );
 
 		// To
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'to_full_name'} );
-		this.addEditFieldToColumn( $.i18n._( 'To' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'To' ), form_item_input, tab_message_column1 );
 
 		// Date
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'updated_date'} );
-		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_message_column1 );
 
 		// Subject
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'subject'} );
-		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_message_column1 );
 
 		// Body
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'body'} );
-		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab0_column1, '', null, null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_message_column1, '', null, null, true );
 
-		tab0_column2.css( 'display', 'none' );
+		tab_message_column2.css( 'display', 'none' );
 
 	},
 
@@ -1319,8 +1338,9 @@ MessageControlViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		tab_0_label.text( $.i18n._( 'Message' ) );
+		this.setTabLabels( {
+			'tab_message': $.i18n._( 'Message' )
+		} );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIMessageControl' )),
@@ -1335,15 +1355,15 @@ MessageControlViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_message = this.edit_view_tab.find( '#tab_message' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_message_column1 = tab_message.find( '.first-column' );
 
-		var tab0_column2 = tab0.find( '.second-column' );
+		var tab_message_column2 = tab_message.find( '.second-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_message_column1 );
 
 		// Employee
 
@@ -1361,22 +1381,22 @@ MessageControlViewController = BaseViewController.extend( {
 		var default_args = {};
 		default_args.permission_section = 'message_control';
 		form_item_input.setDefaultArgs( default_args );
-		this.addEditFieldToColumn( $.i18n._( 'Employee(s)' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Employee(s)' ), form_item_input, tab_message_column1, '' );
 
 		// Subject
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'subject'} );
 
-		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_message_column1 );
 
 		// Body
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 
 		form_item_input.TTextArea( {field: 'body', width: 600, height: 400} );
 
-		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab0_column1, '', null, null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_message_column1, '', null, null, true );
 
-		tab0_column2.css( 'display', 'none' );
+		tab_message_column2.css( 'display', 'none' );
 
 	},
 
@@ -1702,7 +1722,7 @@ MessageControlViewController = BaseViewController.extend( {
 			$this.edit_view_ui_dic['subject'].setValue( currentItem['subject'] );
 			$this.edit_view_ui_dic['body'].setValue( currentItem['body'] );
 
-			var cloneMessageControl = $( $this.edit_view_tab.find( '#tab0' ).find( '.edit-view-tab' ).find( '.first-column' ) ).clone();
+			var cloneMessageControl = $( $this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab' ).find( '.first-column' ) ).clone();
 
 			cloneMessageControl.css( 'display', 'block' ).appendTo( container );
 
@@ -1714,8 +1734,8 @@ MessageControlViewController = BaseViewController.extend( {
 			}} );
 		}
 
-		$this.edit_view_tab.find( '#tab0' ).find( '.edit-view-tab' ).find( '.first-column' ).remove();
-		$this.edit_view_tab.find( '#tab0' ).find( '.edit-view-tab' ).append( container.html() );
+		$this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab' ).find( '.first-column' ).remove();
+		$this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab' ).append( container.html() );
 	},
 
 	initEmbeddedMessageData: function() {
@@ -1758,7 +1778,7 @@ MessageControlViewController = BaseViewController.extend( {
 					$this.edit_view_ui_dic['subject'].setValue( currentItem.subject );
 					$this.edit_view_ui_dic['body'].setValue( currentItem.body );
 
-					var cloneMessageControl = $( $this.edit_view_tab.find( '#tab0' ).find( '.edit-view-tab' ).find( '.second-column' ) ).clone();
+					var cloneMessageControl = $( $this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab' ).find( '.second-column' ) ).clone();
 
 					cloneMessageControl.css( 'display', 'block' ).appendTo( container );
 				}
@@ -1769,8 +1789,8 @@ MessageControlViewController = BaseViewController.extend( {
 					}} );
 				}
 
-				$this.edit_view_tab.find( '#tab0' ).find( '.edit-view-tab' ).find( '.second-column' ).remove();
-				$this.edit_view_tab.find( '#tab0' ).find( '.edit-view-tab' ).append( container.html() );
+				$this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab' ).find( '.second-column' ).remove();
+				$this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab' ).append( container.html() );
 			} else {
 
 				$( $this.edit_view.find( '.separate' ) ).css( 'display', 'none' );

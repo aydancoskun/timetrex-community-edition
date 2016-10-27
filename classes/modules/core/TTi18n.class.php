@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14496 $
- * $Id: TTi18n.class.php 14496 2014-09-23 19:59:47Z mikeb $
- * $Date: 2014-09-23 12:59:47 -0700 (Tue, 23 Sep 2014) $
- */
+
 
 /*
  * --> NOTE TO Ubuntu/Debian users! <--

@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2286 $
- * $Id: CA.class.php 2286 2008-12-12 23:12:41Z ipso $
- * $Date: 2008-12-12 15:12:41 -0800 (Fri, 12 Dec 2008) $
- */
+
 
 //This is the header record for submitting XML forms to the CRA.
 include_once( 'CA.class.php' );
@@ -133,7 +129,7 @@ class GovernmentForms_CA_T619 extends GovernmentForms_CA {
 		if ( is_array($phone_arr) ) {
 			$xml->T619->CNTC->addChild('cntc_area_cd', $phone_arr[0] );
 			$xml->T619->CNTC->addChild('cntc_phn_nbr', $phone_arr[1].'-'.$phone_arr[2] );
-			//$xml->T619->CNTC->addChild('cntc_extn_nbr', '' );
+			$xml->T619->CNTC->addChild('cntc_extn_nbr', '000' ); //This is required in some cases, so just always specify it as 000 for now.
 		}
 
 		if ( $this->contact_email != '' ) { $xml->T619->CNTC->addChild('cntc_email_area', $this->contact_email ); }

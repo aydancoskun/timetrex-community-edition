@@ -30,12 +30,12 @@ PolicyGroupViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		var tab_2_label = this.edit_view.find( 'a[ref=tab2]' );
-		tab_0_label.text( $.i18n._( 'Policy Group' ) );
-		tab_1_label.text( $.i18n._( 'Attachments' ) );
-		tab_2_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_policy_group': $.i18n._( 'Policy Group' ),
+			'tab_attachment': $.i18n._( 'Attachments' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
+
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIPolicyGroup' )),
@@ -50,19 +50,28 @@ PolicyGroupViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_policy_group = this.edit_view_tab.find( '#tab_policy_group' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_policy_group_column1 = tab_policy_group.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_policy_group_column1 );
 
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab0_column1, '' );
+		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_policy_group_column1, '' );
+
+		form_item_input.parent().width( '45%' );
+
+		// Description
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
+		form_item_input.TTextArea( { field: 'description', width: '100%' } );
+		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_policy_group_column1, '', null, null, true );
+
+		form_item_input.parent().width( '45%' );
 
 		// Employee
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -77,7 +86,18 @@ PolicyGroupViewController = BaseViewController.extend( {
 		var default_args = {};
 		default_args.permission_section = 'policy_group';
 		form_item_input.setDefaultArgs( default_args );
-		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_policy_group_column1 );
+
+		// Regular Time Policies
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APIRegularTimePolicy' )),
+			allow_multiple_selection: true,
+			layout_name: ALayoutIDs.REGULAR_TIME_POLICY,
+			show_search_inputs: true,
+			set_empty: true,
+			field: 'regular_time_policy'} );
+		this.addEditFieldToColumn( $.i18n._( 'Regular Time Policies' ), form_item_input, tab_policy_group_column1 );
 
 		// Overtime Policies
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -89,7 +109,7 @@ PolicyGroupViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'over_time_policy'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Overtime Policies' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Overtime Policies' ), form_item_input, tab_policy_group_column1 );
 
 		// Rounding Policies
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -101,7 +121,7 @@ PolicyGroupViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'round_interval_policy'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Rounding Policies' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Rounding Policies' ), form_item_input, tab_policy_group_column1 );
 
 		// Meal Policies
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -113,7 +133,7 @@ PolicyGroupViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'meal_policy'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Meal Policies' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Meal Policies' ), form_item_input, tab_policy_group_column1 );
 
 		// Break Policies
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -125,7 +145,7 @@ PolicyGroupViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'break_policy'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Break Policies' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Break Policies' ), form_item_input, tab_policy_group_column1 );
 
 		// Accrual Policies
 
@@ -138,7 +158,7 @@ PolicyGroupViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'accrual_policy'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Accrual Policies' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Accrual Policies' ), form_item_input, tab_policy_group_column1 );
 
 		// Premium Policies
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -150,7 +170,7 @@ PolicyGroupViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'premium_policy'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Premium Policies' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Premium Policies' ), form_item_input, tab_policy_group_column1 );
 
 		// Holiday Policies
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -162,7 +182,7 @@ PolicyGroupViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'holiday_policy'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Holiday Policies' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Holiday Policies' ), form_item_input, tab_policy_group_column1 );
 
 		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 25 ) {
 			// Expense Policies
@@ -175,7 +195,7 @@ PolicyGroupViewController = BaseViewController.extend( {
 				set_empty: true,
 				field: 'expense_policy'
 			} );
-			this.addEditFieldToColumn( $.i18n._( 'Expense Policies' ), form_item_input, tab0_column1 );
+			this.addEditFieldToColumn( $.i18n._( 'Expense Policies' ), form_item_input, tab_policy_group_column1 );
 		}
 
 		// Exception Policy
@@ -189,7 +209,7 @@ PolicyGroupViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'exception_policy_control_id'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Exception Policy' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Exception Policies' ), form_item_input, tab_policy_group_column1 );
 
 		// Absence Policies
 
@@ -202,38 +222,37 @@ PolicyGroupViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'absence_policy'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Absence Policies' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Absence Policies' ), form_item_input, tab_policy_group_column1, '' );
 
 	},
 
 	setTabStatus: function() {
-
+		//Handle most cases that one tab and on audit tab
 		if ( this.is_mass_editing ) {
 
-			$( this.edit_view_tab.find( 'ul li' )[1] ).hide();
-			$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
+			$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
+			$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
 			this.edit_view_tab.tabs( 'select', 0 );
-		} else {
 
+		} else {
 			if ( this.subDocumentValidate() ) {
-				$( this.edit_view_tab.find( 'ul li' )[1] ).show();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().show();
 			} else {
-				$( this.edit_view_tab.find( 'ul li' )[1] ).hide();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
 				this.edit_view_tab.tabs( 'select', 0 );
 			}
-
 			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li' )[2] ).show();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().show();
 			} else {
-				$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
 				this.edit_view_tab.tabs( 'select', 0 );
 			}
 
 		}
 
 		this.editFieldResize( 0 );
-
 	},
+
 
 	onTabShow: function( e, ui ) {
 
@@ -244,20 +263,20 @@ PolicyGroupViewController = BaseViewController.extend( {
 		}
 		if ( this.edit_view_tab_selected_index === 1 ) {
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.initSubDocumentView();
 			} else {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 
 		} else if ( this.edit_view_tab_selected_index === 2 ) {
 
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab2' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_audit' );
 			} else {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		} else {
@@ -310,18 +329,18 @@ PolicyGroupViewController = BaseViewController.extend( {
 
 		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 1 ) {
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 				this.initSubDocumentView();
 			} else {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 2 ) {
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab2' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_audit' );
 			} else {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		}
@@ -340,8 +359,8 @@ PolicyGroupViewController = BaseViewController.extend( {
 		}
 
 		Global.loadScriptAsync( 'views/document/DocumentViewController.js', function() {
-			var tab1 = $this.edit_view_tab.find( '#tab1' );
-			var firstColumn = tab1.find( '.first-column-sub-view' );
+			var tab_attachment = $this.edit_view_tab.find( '#tab_attachment' );
+			var firstColumn = tab_attachment.find( '.first-column-sub-view' );
 
 			Global.trackView( 'Sub' + 'Document' + 'View' );
 			DocumentViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );

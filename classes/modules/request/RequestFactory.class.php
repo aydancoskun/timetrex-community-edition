@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 12852 $
- * $Id: RequestFactory.class.php 12852 2014-04-03 17:05:45Z mikeb $
- * $Date: 2014-04-03 10:05:45 -0700 (Thu, 03 Apr 2014) $
- */
+
 
 /**
  * @package Modules\Request
@@ -120,8 +116,12 @@ class RequestFactory extends Factory {
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
-										'user_date_id' => 'UserDateID',
-										'user_id' => FALSE,
+										//'user_date_id' => 'UserDateID',
+										'user_id' => 'User',
+										'date_stamp' => 'DateStamp',
+										'pay_period_id' => 'PayPeriod',
+
+										//'user_id' => FALSE,
 
 										'first_name' => FALSE,
 										'last_name' => FALSE,
@@ -144,70 +144,97 @@ class RequestFactory extends Factory {
 		return $variable_function_map;
 	}
 
-	function getUserDateObject() {
-		if ( is_object( $this->user_date_obj ) ) {
-			return $this->user_date_obj;
-		} else {
-			$udlf = TTnew( 'UserDateListFactory' );
-			$udlf->getById( $this->getUserDateID() );
-			if ( $udlf->getRecordCount() > 0 ) {
-				$this->user_date_obj = $udlf->getCurrent();
-				return $this->user_date_obj;
-			}
-
-			return FALSE;
-		}
-	}
-
-	//Used for authorizationFactory
 	function getUserObject() {
-		if ( is_object($this->getUserDateObject()) ) {
-			return $this->getUserDateObject()->getUserObject();
-		}
-
-		return FALSE;
+		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
 	}
 
-	//Used for authorizationFactory
 	function getUser() {
-		if ( is_object($this->getUserDateObject()) ) {
-			return $this->getUserDateObject()->getUser();
+		if ( isset($this->data['user_id']) ) {
+			return (int)$this->data['user_id'];
 		}
 
 		return FALSE;
 	}
-
-	function setUserDate($user_id, $date) {
-		$user_date_id = UserDateFactory::findOrInsertUserDate( $user_id, $date );
-		Debug::text(' User Date ID: '. $user_date_id, __FILE__, __LINE__, __METHOD__, 10);
-		if ( $user_date_id != '' ) {
-			$this->setUserDateID( $user_date_id );
-			return TRUE;
-		}
-		Debug::text(' No User Date ID found', __FILE__, __LINE__, __METHOD__, 10);
-
-		return FALSE;
-	}
-
-	function getUserDateID() {
-		if ( isset($this->data['user_date_id']) ) {
-			return (int)$this->data['user_date_id'];
-		}
-
-		return FALSE;
-	}
-	function setUserDateID($id = NULL) {
+	function setUser($id) {
 		$id = trim($id);
 
-		$udlf = TTnew( 'UserDateListFactory' );
+		$ulf = TTnew( 'UserListFactory' );
 
-		if (  $this->Validator->isResultSetWithRows(	'user_date',
-														$udlf->getByID($id),
-														TTi18n::gettext('Date/Time is incorrect or pay period does not exist for this date. Please create a pay period schedule if you have not done so already')
-														) ) {
-			$this->data['user_date_id'] = $id;
+		//Need to be able to support user_id=0 for open shifts. But this can cause problems with importing punches with user_id=0.
+		if ( $this->Validator->isResultSetWithRows(	'user',
+															$ulf->getByID($id),
+															TTi18n::gettext('Invalid User')
+															) ) {
+			$this->data['user_id'] = $id;
 
 			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getPayPeriod() {
+		if ( isset($this->data['pay_period_id']) ) {
+			return (int)$this->data['pay_period_id'];
+		}
+
+		return FALSE;
+	}
+	function setPayPeriod($id = NULL) {
+		$id = trim($id);
+
+		if ( $id == NULL ) {
+			$id = (int)PayPeriodListFactory::findPayPeriod( $this->getUser(), $this->getDateStamp() );
+		}
+
+		$pplf = TTnew( 'PayPeriodListFactory' );
+
+		//Allow NULL pay period, incase its an absence or something in the future.
+		//Cron will fill in the pay period later.
+		if (
+				$id == 0
+				OR
+				$this->Validator->isResultSetWithRows(	'pay_period',
+														$pplf->getByID($id),
+														TTi18n::gettext('Invalid Pay Period')
+														) ) {
+			$this->data['pay_period_id'] = $id;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getDateStamp( $raw = FALSE ) {
+		if ( isset($this->data['date_stamp']) ) {
+			if ( $raw === TRUE ) {
+				return $this->data['date_stamp'];
+			} else {
+				return TTDate::strtotime( $this->data['date_stamp'] );
+			}
+		}
+
+		return FALSE;
+	}
+	function setDateStamp($epoch) {
+		$epoch = (int)$epoch;
+
+		if	(	$this->Validator->isDate(		'date_stamp',
+												$epoch,
+												TTi18n::gettext('Incorrect date').' (a)')
+			) {
+
+			if	( $epoch > 0 ) {
+				$this->data['date_stamp'] = $epoch;
+
+				$this->setPayPeriod(); //Force pay period to be set as soon as the date is.
+				return TRUE;
+			} else {
+				$this->Validator->isTRUE(		'date_stamp',
+												FALSE,
+												TTi18n::gettext('Incorrect date').' (b)');
+			}
 		}
 
 		return FALSE;
@@ -376,10 +403,17 @@ class RequestFactory extends Factory {
 											TTi18n::gettext('Invalid message length') );
 		}
 
-		if ( $this->getUserDateID() == FALSE OR !is_object( $this->getUserObject() ) ) {
-			$this->Validator->isTRUE(		'user_date',
+		if ( $this->getDateStamp() == FALSE
+			AND $this->Validator->hasError('date_stamp') == FALSE ) {
+			$this->Validator->isTRUE(		'date_stamp',
 											FALSE,
-											TTi18n::gettext('Date/Time is incorrect or pay period does not exist for this date. Please create a pay period schedule if you have not done so already') );
+											TTi18n::gettext('Incorrect Date').' (c)' );
+		}
+
+		if ( !is_object( $this->getUserObject() ) ) {
+			$this->Validator->isTRUE(		'user_id',
+											FALSE,
+											TTi18n::gettext('Invalid Employee') );
 		}
 
 		//Check to make sure this user has superiors to send a request too, otherwise we can't save the request.
@@ -430,9 +464,6 @@ class RequestFactory extends Factory {
 			$this->setAuthorizationLevel( 0 );
 		}
 
-		//Remove date_stamp variable so we can generate a proper update SQL query automatically.
-		unset($this->data['date_stamp']);
-
 		return TRUE;
 	}
 
@@ -480,6 +511,7 @@ class RequestFactory extends Factory {
 
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
+			/*
 			if ( isset($data['user_id']) AND $data['user_id'] != ''
 					AND isset($data['date_stamp']) AND $data['date_stamp'] != '' ) {
 				Debug::text('Setting User Date ID based on User ID:'. $data['user_id'] .' Date Stamp: '. $data['date_stamp'], __FILE__, __LINE__, __METHOD__, 10);
@@ -490,6 +522,7 @@ class RequestFactory extends Factory {
 			} else {
 				Debug::text(' NOT CALLING setUserDate or setUserDateID!', __FILE__, __LINE__, __METHOD__, 10);
 			}
+			*/
 
 			if ( isset($data['status_id']) AND $data['status_id'] == '' ) {
 				unset($data['status_id']);
@@ -504,6 +537,9 @@ class RequestFactory extends Factory {
 				if ( isset($data[$key]) ) {
 					$function = 'set'.$function;
 					switch( $key ) {
+						case 'date_stamp':
+							$this->setDateStamp( TTDate::parseDateTime( $data['date_stamp'] ) );
+							break;
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -548,7 +584,7 @@ class RequestFactory extends Factory {
 							}
 							break;
 						case 'date_stamp':
-							$data[$variable] = TTDate::getAPIDate( 'DATE', TTDate::strtotime( $this->getColumn( 'date_stamp' ) ) );
+							$data[$variable] = TTDate::getAPIDate( 'DATE', $this->getDateStamp() );
 							break;
 						default:
 							if ( method_exists( $this, $function ) ) {

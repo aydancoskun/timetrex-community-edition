@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 8337 $
- * $Id: cron.php 8337 2012-11-20 04:40:27Z ipso $
- * $Date: 2012-11-19 20:40:27 -0800 (Mon, 19 Nov 2012) $
- */
+
 /*
  * Cron replica
  * Run this script every minute from the real cron.

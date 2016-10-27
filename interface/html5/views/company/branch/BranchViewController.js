@@ -214,9 +214,9 @@ BranchViewController = BaseViewController.extend( {
 
 	},
 
-	onContentMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function( context_btn, menu_name ) {
 
-		this._super( 'onContentMenuClick', context_btn, menu_name );
+		this._super( 'onContextMenuClick', context_btn, menu_name );
 		var id;
 
 		if ( Global.isSet( menu_name ) ) {
@@ -242,7 +242,7 @@ BranchViewController = BaseViewController.extend( {
 
 	onImportClick: function() {
 		var $this = this;
-		IndexViewController.openWizard( 'ImportCSVWizard', 'branch',function(){
+		IndexViewController.openWizard( 'ImportCSVWizard', 'branch', function() {
 			$this.search();
 		} );
 	},
@@ -286,6 +286,11 @@ BranchViewController = BaseViewController.extend( {
 		}
 
 		this.current_edit_record[key] = target.getValue();
+
+		if ( key === 'country' ) {
+			return;
+		}
+
 		if ( !doNotValidate ) {
 			this.validate();
 		}
@@ -297,8 +302,13 @@ BranchViewController = BaseViewController.extend( {
 		this._super( 'buildEditViewUI' );
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
+		this.setTabLabels( {
+			'tab_branch': $.i18n._( 'Branch' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
+
+		var tab_0_label = this.edit_view.find( 'a[ref=tab_branch]' );
+		var tab_1_label = this.edit_view.find( 'a[ref=tab_audit]' );
 		tab_0_label.text( $.i18n._( 'Branch' ) );
 		tab_1_label.text( $.i18n._( 'Audit' ) );
 
@@ -317,100 +327,107 @@ BranchViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_branch = this.edit_view_tab.find( '#tab_branch' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_branch_column1 = tab_branch.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_branch_column1 );
 
 		//Status
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {field: 'status_id'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_branch_column1, '' );
 
 		// Name
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab0_column1 );
+		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_branch_column1 );
+
+		form_item_input.parent().width( '45%' );
 
 		// Code
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'manual_id', width: 65} );
-		this.addEditFieldToColumn( $.i18n._( 'Code' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Code' ), form_item_input, tab_branch_column1 );
 
 		// Address1
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'address1', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Address (Line 1)' ), form_item_input, tab0_column1 );
+		form_item_input.TTextInput( {field: 'address1', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Address (Line 1)' ), form_item_input, tab_branch_column1 );
+
+		form_item_input.parent().width( '45%' );
 
 		// Address2
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'address2', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Address (Line 2)' ), form_item_input, tab0_column1 );
+		form_item_input.TTextInput( {field: 'address2', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Address (Line 2)' ), form_item_input, tab_branch_column1 );
+
+		form_item_input.parent().width( '45%' );
+
 		// city
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'city', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'City' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'City' ), form_item_input, tab_branch_column1 );
 
 		//Country
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'country', set_empty: true} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.country_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab_branch_column1 );
 
 		form_item_input.change( $.proxy( function() {
 			var selectVal = this.edit_view_ui_dic['country'].getValue();
-			this.eSetProvince( selectVal );
+			this.eSetProvince( selectVal, true );
 
 		}, this ) );
 
 		//Province / State
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'province', set_empty: true} );
+		form_item_input.TComboBox( {field: 'province'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
-		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab_branch_column1 );
 
 		//City
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'postal_code', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Postal/ZIP Code' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Postal/ZIP Code' ), form_item_input, tab_branch_column1 );
 
 		// Phone
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'work_phone', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Phone' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Phone' ), form_item_input, tab_branch_column1 );
 
 		// Fax
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'fax_phone', width: 149} );
 
-		this.addEditFieldToColumn( $.i18n._( 'Fax' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Fax' ), form_item_input, tab_branch_column1 );
 
 		//Tags
 		form_item_input = Global.loadWidgetByName( FormItemType.TAG_INPUT );
 
 		form_item_input.TTagInput( {field: 'tag', object_type_id: 110} );
-		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_branch_column1, '' );
 
 	},
 
@@ -424,21 +441,23 @@ BranchViewController = BaseViewController.extend( {
 
 		} else {
 
-			this.company_api.getOptions( 'province', val, {onResult: function( res ) {
-				res = res.getResult();
-				if ( !res ) {
-					res = [];
+			this.company_api.getOptions( 'province', val, {
+				onResult: function( res ) {
+					res = res.getResult();
+					if ( !res ) {
+						res = [];
+					}
+
+					$this.province_array = Global.buildRecordArray( res );
+					$this.adv_search_field_ui_dic['province'].setSourceData( $this.province_array );
+					$this.basic_search_field_ui_dic['province'].setSourceData( $this.province_array );
+
 				}
-
-				$this.province_array = Global.buildRecordArray( res );
-				$this.adv_search_field_ui_dic['province'].setSourceData( $this.province_array );
-				$this.basic_search_field_ui_dic['province'].setSourceData( $this.province_array );
-
-			}} );
+			} );
 		}
 	},
 
-	eSetProvince: function( val ) {
+	eSetProvince: function( val, refresh ) {
 		var $this = this;
 		var province_widget = $this.edit_view_ui_dic['province'];
 
@@ -446,16 +465,21 @@ BranchViewController = BaseViewController.extend( {
 			$this.e_province_array = [];
 			province_widget.setSourceData( [] );
 		} else {
-			this.company_api.getOptions( 'province', val, {onResult: function( res ) {
-				res = res.getResult();
-				if ( !res ) {
-					res = [];
+			this.company_api.getOptions( 'province', val, {
+				onResult: function( res ) {
+					res = res.getResult();
+					if ( !res ) {
+						res = [];
+					}
+					$this.e_province_array = Global.buildRecordArray( res );
+					if ( refresh && $this.e_province_array.length > 0 ) {
+						$this.current_edit_record.province = $this.e_province_array[0].value;
+						province_widget.setValue( $this.current_edit_record.province );
+					}
+					province_widget.setSourceData( $this.e_province_array );
+
 				}
-
-				$this.e_province_array = Global.buildRecordArray( res );
-				province_widget.setSourceData( $this.e_province_array );
-
-			}} );
+			} );
 		}
 	},
 
@@ -463,88 +487,113 @@ BranchViewController = BaseViewController.extend( {
 
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
-			new SearchField( {label: $.i18n._( 'Status' ),
+			new SearchField( {
+				label: $.i18n._( 'Status' ),
 				in_column: 1,
 				field: 'status_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Name' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
 				field: 'name',
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Tags' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Tags' ),
 				field: 'tag',
 				basic_search: true,
 				adv_search: true,
 				in_column: 1,
-				form_item_type: FormItemType.TAG_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Phone' ),
+				form_item_type: FormItemType.TAG_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Phone' ),
 				field: 'work_phone',
 				basic_search: false,
 				adv_search: true,
 				in_column: 1,
 				object_type_id: 110,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Fax' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Fax' ),
 				field: 'fax_phone',
 				basic_search: false,
 				adv_search: true,
 				in_column: 1,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Address (Line1)' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Address (Line1)' ),
 				field: 'address1',
 				basic_search: false,
 				adv_search: true,
 				in_column: 2,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Address (Line2)' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Address (Line2)' ),
 				field: 'address2',
 				basic_search: false,
 				adv_search: true,
 				in_column: 2,
-				form_item_type: FormItemType.TEXT_INPUT} ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Postal/ZIP Code' ),
+			new SearchField( {
+				label: $.i18n._( 'Postal/ZIP Code' ),
 				field: 'postal_code',
 				basic_search: false,
 				adv_search: true,
 				in_column: 2,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Country' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Country' ),
 				in_column: 2,
 				field: 'country',
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.COMBO_BOX} ),
-			new SearchField( {label: $.i18n._( 'Province/State' ),
+				form_item_type: FormItemType.COMBO_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Province/State' ),
 				in_column: 2,
 				field: 'province',
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'City' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'City' ),
 				field: 'city',
 				basic_search: true,
 				adv_search: true,
 				in_column: 3,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Code' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Code' ),
 				field: 'manual_id',
 				basic_search: true,
 				adv_search: true,
 				in_column: 3,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Created By' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 3,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -553,9 +602,11 @@ BranchViewController = BaseViewController.extend( {
 				basic_search: false,
 				adv_search: true,
 				script_name: 'EmployeeView',
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 3,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -564,10 +615,10 @@ BranchViewController = BaseViewController.extend( {
 				basic_search: false,
 				adv_search: true,
 				script_name: 'EmployeeView',
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 
 		];
 	}
-
 
 } );

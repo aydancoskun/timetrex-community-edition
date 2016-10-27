@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 5125 $
- * $Id: BranchFactory.class.php 5125 2011-08-12 15:48:20Z ipso $
- * $Date: 2011-08-12 08:48:20 -0700 (Fri, 12 Aug 2011) $
- */
+
 
 /**
  * @package Modules\Company

@@ -9,6 +9,7 @@ BaseWizardController = BaseWindowController.extend( {
 	next_btn: null,
 	back_btn: null,
 	done_btn: null,
+	cancel_btn: null,
 	progress: null,
 	progress_label: null,
 
@@ -26,6 +27,10 @@ BaseWizardController = BaseWindowController.extend( {
 	user_generic_data_api: null,
 
 	wizard_id: null,
+
+	edit_view_ui_dic: {},
+
+	edit_view_form_item_dic: {},
 
 	events: {
 		'click .close-btn': 'onCloseClick',
@@ -77,6 +82,12 @@ BaseWizardController = BaseWindowController.extend( {
 		this.next_btn = $( this.el ).find( '.forward-btn' );
 		this.back_btn = $( this.el ).find( '.back-btn' );
 		this.done_btn = $( this.el ).find( '.done-btn' );
+		this.close_btn = $( this.el ).find( '.close-btn' );
+
+		Global.setWidgetEnabled( this.back_btn, false );
+		Global.setWidgetEnabled( this.next_btn, false );
+		Global.setWidgetEnabled( this.close_btn, false );
+		Global.setWidgetEnabled( this.done_btn, false );
 
 		title.text( this.title );
 		title_1.text( this.title );
@@ -84,6 +95,9 @@ BaseWizardController = BaseWindowController.extend( {
 	},
 
 	setButtonsStatus: function() {
+
+		Global.setWidgetEnabled( this.done_btn, false );
+		Global.setWidgetEnabled( this.close_btn, true );
 
 		if ( this.current_step === 1 ) {
 			Global.setWidgetEnabled( this.back_btn, false );
@@ -153,6 +167,132 @@ BaseWizardController = BaseWindowController.extend( {
 
 	},
 
+	addEditFieldToColumn: function( label, widgets, column, firstOrLastRecord, widgetContainer, saveFormItemDiv, setResizeEvent, saveFormItemDivKey, hasKeyEvent, customLabelWidget ) {
+		var $this = this;
+		var form_item = $( Global.loadWidgetByName( WidgetNamesDic.EDIT_VIEW_FORM_ITEM ) );
+		var form_item_label_div = form_item.find( '.edit-view-form-item-label-div' );
+		var form_item_label = form_item.find( '.edit-view-form-item-label' );
+		var form_item_input_div = form_item.find( '.edit-view-form-item-input-div' );
+		var widget = widgets;
+
+		if ( Global.isArray( widgets ) ) {
+			for ( var i = 0; i < widgets.length; i++ ) {
+				widget = widgets[i];
+//				widget.css( 'opacity', 0 );
+			}
+		} else {
+//			widget.css( 'opacity', 0 );
+		}
+
+		if ( customLabelWidget ) {
+			form_item_label.parent().append( customLabelWidget );
+			form_item_label.remove();
+		} else {
+//			form_item_label.text( label + ': ' );
+			form_item_label.html( label + ': ' );
+		}
+
+		if ( Global.isSet( widgetContainer ) ) {
+
+			form_item_input_div.append( widgetContainer );
+
+		} else {
+			form_item_input_div.append( widget );
+		}
+
+		column.append( form_item );
+		column.append( "<div class='clear-both-div'></div>" );
+
+		//set height to text area
+		if ( form_item.height() > 35 ) {
+			form_item_label_div.css( 'height', form_item.height() );
+		} else if ( widget.hasClass( 'a-dropdown' ) ) {
+			form_item_label_div.css( 'height', 240 );
+		}
+
+		if ( setResizeEvent ) {
+
+//			form_item.unbind( 'resize' ).bind( 'resize', function() {
+//				if ( form_item_label_div.height() !== form_item.height() && form_item.height() !== 0 ) {
+//					form_item_label_div.css( 'height', form_item.height() );
+//				}
+//
+//			} );
+//			widget.unbind( 'setSize' ).bind( 'setSize', function() {
+//				form_item_label_div.css( 'height', widget.height() + 10 );
+//			} );
+
+			form_item_input_div.unbind( 'resize' ).bind( 'resize', function() {
+				form_item_label_div.css( 'height', form_item_input_div.height() + 10 );
+			} );
+
+		}
+
+		if ( !label ) {
+			form_item_input_div.remove();
+			form_item_label_div.remove();
+
+			form_item.append( widget );
+//			widget.css( 'opacity', 1 );
+
+			if ( saveFormItemDiv && saveFormItemDivKey ) {
+				this.edit_view_form_item_dic[saveFormItemDivKey] = form_item;
+			}
+
+			return;
+		}
+
+		if ( saveFormItemDiv ) {
+
+			if ( Global.isArray( widgets ) ) {
+				this.edit_view_form_item_dic[widgets[0].getField()] = form_item;
+			} else {
+				this.edit_view_form_item_dic[widget.getField()] = form_item;
+			}
+
+		}
+		if ( Global.isArray( widgets ) ) {
+
+			for ( i = 0; i < widgets.length; i++ ) {
+				widget = widgets[i];
+				this.stepsWidgetDic[this.current_step][widget.getField()] = widget;
+
+				widget.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target, doNotValidate ) {
+					$this.onFormItemChange( target, doNotValidate );
+				} );
+
+				if ( hasKeyEvent ) {
+					widget.unbind( 'formItemKeyUp' ).bind( 'formItemKeyUp', function( e, target ) {
+						$this.onFormItemKeyUp( target );
+					} );
+
+					widget.unbind( 'formItemKeyDown' ).bind( 'formItemKeyDown', function( e, target ) {
+						$this.onFormItemKeyDown( target );
+					} );
+				}
+			}
+		} else {
+			this.stepsWidgetDic[this.current_step][widget.getField()] = widget;
+
+			widget.bind( 'formItemChange', function( e, target, doNotValidate ) {
+				$this.onFormItemChange( target, doNotValidate );
+			} );
+
+			if ( hasKeyEvent ) {
+				widget.bind( 'formItemKeyUp', function( e, target ) {
+					$this.onFormItemKeyUp( target );
+				} );
+
+				widget.bind( 'formItemKeyDown', function( e, target ) {
+					$this.onFormItemKeyDown( target );
+				} );
+			}
+		}
+
+		return form_item;
+
+	},
+
 	initUserGenericData: function() {
 		var $this = this;
 		var args = {};
@@ -197,10 +337,10 @@ BaseWizardController = BaseWindowController.extend( {
 		$this.progress.attr( 'max', $this.steps );
 		$this.progress.val( $this.current_step );
 
-		$this.setButtonsStatus(); // set button enabled or disabled
 		$this.buildCurrentStepUI();
 		$this.buildCurrentStepData();
 		$this.setCurrentStepValues();
+		$this.setButtonsStatus(); // set button enabled or disabled
 
 	},
 

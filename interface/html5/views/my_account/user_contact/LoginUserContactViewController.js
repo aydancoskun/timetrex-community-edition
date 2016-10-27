@@ -182,134 +182,136 @@ LoginUserContactViewController = BaseViewController.extend( {
 		var $this = this;
 		this._super( 'buildEditViewUI' );
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'Contact Information' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_contact_information': $.i18n._( 'Contact Information' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_contact_information = this.edit_view_tab.find( '#tab_contact_information' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_contact_information_column1 = tab_contact_information.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_contact_information_column1 );
 
 		// First Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'first_name', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'First Name' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'First Name' ), form_item_input, tab_contact_information_column1, '' );
 
 		// Middle Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'middle_name', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'Middle Name' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Middle Name' ), form_item_input, tab_contact_information_column1 );
 
 		// Last Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'last_name', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'Last Name' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Last Name' ), form_item_input, tab_contact_information_column1 );
 
 		// Gender
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'sex_id'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.sex_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Gender' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Gender' ), form_item_input, tab_contact_information_column1 );
 
 		// Home Address (Line 1)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'address1', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'Home Address(Line 1)' ), form_item_input, tab0_column1 );
+		form_item_input.TTextInput( {field: 'address1', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Home Address(Line 1)' ), form_item_input, tab_contact_information_column1 );
+		form_item_input.parent().width( '45%' );
 
 		// //Home Address(Line 2)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'address2', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'Home Address(Line 2)' ), form_item_input, tab0_column1 );
+		form_item_input.TTextInput( {field: 'address2', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Home Address(Line 2)' ), form_item_input, tab_contact_information_column1 );
+		form_item_input.parent().width( '45%' );
 
 		// City
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'city'} );
-		this.addEditFieldToColumn( $.i18n._( 'City' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'City' ), form_item_input, tab_contact_information_column1 );
 
 		// Country
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'country', set_empty: true} );
-		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab_contact_information_column1 );
 
 		// Province/State
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'province', set_empty: true} );
-		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab_contact_information_column1 );
 
 		// Postal/ZIP Code
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'postal_code', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'Postal/ZIP Code' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Postal/ZIP Code' ), form_item_input, tab_contact_information_column1, '' );
 
-		var tab0_column2 = tab0.find( '.second-column' );
+		var tab_contact_information_column2 = tab_contact_information.find( '.second-column' );
 
-		this.edit_view_tabs[0].push( tab0_column2 );
+		this.edit_view_tabs[0].push( tab_contact_information_column2 );
 
 		// Work Phone
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'work_phone', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'Work Phone' ), form_item_input, tab0_column2, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Work Phone' ), form_item_input, tab_contact_information_column2, '' );
 
 		// Work Phone Ext
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'work_phone_ext', width: 100} );
-		this.addEditFieldToColumn( $.i18n._( 'Work Phone Ext' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Work Phone Ext' ), form_item_input, tab_contact_information_column2 );
 
 		// Home Phone
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'home_phone', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'Home Phone' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Home Phone' ), form_item_input, tab_contact_information_column2 );
 
 		// Mobile Phone
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'mobile_phone', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'Mobile Phone' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Mobile Phone' ), form_item_input, tab_contact_information_column2 );
 
 		// Fax
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'fax_phone', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'Fax' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Fax' ), form_item_input, tab_contact_information_column2 );
 
 		// Work Email
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'work_email', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'Work Email' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Work Email' ), form_item_input, tab_contact_information_column2 );
 
 		// Home Email
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'home_email', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'Home Email' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Home Email' ), form_item_input, tab_contact_information_column2 );
 
 		//Birth Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
 		form_item_input.TDatePicker( {field: 'birth_date'} );
-		this.addEditFieldToColumn( $.i18n._( 'Birth Date' ), form_item_input, tab0_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Birth Date' ), form_item_input, tab_contact_information_column2 );
 
 		// SIN/SSN
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'sin'} );
-		this.addEditFieldToColumn( $.i18n._( 'SIN/SSN' ), form_item_input, tab0_column2, '' );
+		this.addEditFieldToColumn( $.i18n._( 'SIN/SSN' ), form_item_input, tab_contact_information_column2, '' );
 
 	}
 

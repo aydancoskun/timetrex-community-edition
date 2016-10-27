@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2095 $
- * $Id: Sort.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
- */
+
 
 /**
  * @package Modules\Report
@@ -250,81 +246,39 @@ class TimesheetDetailReport extends Report {
 										'-2080-schedule_absence' => TTi18n::gettext('Scheduled Absence'),
 
 										'-2085-worked_days' => TTi18n::gettext('Worked Days'),
-										'-2090-worked_time' => TTi18n::gettext('Worked Time'),
+										'-2090-worked_hour_of_day_total' => TTi18n::gettext('Worked Employees/Hour'),
+										
+										'-2095-min_punch_time_stamp' => TTi18n::gettext('First In Punch'),
+										'-2096-max_punch_time_stamp' => TTi18n::gettext('Last Out Punch'),
 
-										'-2101-worked_hour_of_day_total' => TTi18n::gettext('Worked Employees/Hour'),
+										'-3000-worked_time' => TTi18n::gettext('Total Worked Time'),
+										'-3010-regular_time' => TTi18n::gettext('Total Regular Time'),
+										'-3015-overtime_time' => TTi18n::gettext('Total OverTime'),
+										'-3020-absence_time' => TTi18n::gettext('Total Absence Time'),
+										'-3022-absence_taken_time' => TTi18n::gettext('Total Absence Time (Taken)'),
+										'-3025-premium_time' => TTi18n::gettext('Total Premium Time'),
+										'-3030-gross_time' => TTi18n::gettext('Total Paid Time'),
+										//'-3030-actual_time' => TTi18n::gettext('Total Actual Time'),
+										//'-3035-actual_time_diff' => TTi18n::gettext('Actual Time Difference'),
 
-										//'-2100-actual_time' => TTi18n::gettext('Actual Time'),
-										//'-2110-actual_time_diff' => TTi18n::gettext('Actual Time Difference'),
-										//'-2130-paid_time' => TTi18n::gettext('Paid Time'),
-										'-2110-min_punch_time_stamp' => TTi18n::gettext('First In Punch'),
-										'-2115-max_punch_time_stamp' => TTi18n::gettext('Last Out Punch'),
+										'-3090-lunch_time' => TTi18n::gettext('Lunch Time (Taken)'),
+										'-3091-break_time' => TTi18n::gettext('Break Time (Taken)'),
 
-										'-2290-regular_time' => TTi18n::gettext('Regular Time'),
+										'-3210-regular_wage' => TTi18n::gettext('Total Regular Time Wage'),
+										'-3215-overtime_wage' => TTi18n::gettext('Total OverTime Wage'),
+										'-3220-absence_wage' => TTi18n::gettext('Total Absence Time Wage'),
+										'-3225-premium_wage' => TTi18n::gettext('Total Premium Time Wage'),
 
-										'-2500-gross_wage' => TTi18n::gettext('Gross Wage'),
-										'-2501-gross_wage_with_burden' => TTi18n::gettext('Gross Wage w/Burden'),
-
-										'-2530-regular_time_wage' => TTi18n::gettext('Regular Time - Wage'),
-										'-2531-regular_time_wage_with_burden' => TTi18n::gettext('Regular Time - Wage w/Burden'),
-
-										//'-2540-actual_time_wage' => TTi18n::gettext('Actual Time Wage'),
-										//'-2550-actual_time_diff_wage' => TTi18n::gettext('Actual Time Difference Wage'),
-
-										'-2690-regular_time_hourly_rate' => TTi18n::gettext('Regular Time - Hourly Rate'),
-										'-2690-regular_time_hourly_rate_with_burden' => TTi18n::gettext('Regular Time - Hourly Rate w/Burden'),
+										'-3200-gross_wage' => TTi18n::gettext('Gross Wage'),
+										'-3400-gross_wage_with_burden' => TTi18n::gettext('Gross Wage w/Burden'),
 							);
 
-				$retval = array_merge( $retval, $this->getOptions('overtime_columns'), $this->getOptions('premium_columns'), $this->getOptions('absence_columns') );
+				$retval = array_merge( $retval, $this->getOptions('paycode_columns') );
 				ksort($retval);
 
 				break;
-			case 'overtime_columns':
-				//Get all Overtime policies.
-				$retval = array();
-				$otplf = TTnew( 'OverTimePolicyListFactory' );
-				$otplf->getByCompanyId( $this->getUserObject()->getCompany() );
-				if ( $otplf->getRecordCount() > 0 ) {
-					foreach( $otplf as $otp_obj ) {
-						$retval['-2291-over_time_policy-'.$otp_obj->getId()] = $otp_obj->getName();
-						$retval['-2591-over_time_policy-'.$otp_obj->getId().'_wage'] = $otp_obj->getName() .' '. TTi18n::getText('- Wage');
-						$retval['-2591-over_time_policy-'.$otp_obj->getId().'_wage_with_burden'] = $otp_obj->getName() .' '. TTi18n::getText('- Wage w/Burden');
-						$retval['-2691-over_time_policy-'.$otp_obj->getId().'_hourly_rate'] = $otp_obj->getName() .' '. TTi18n::getText('- Hourly Rate');
-						$retval['-2691-over_time_policy-'.$otp_obj->getId().'_hourly_rate_with_burden'] = $otp_obj->getName() .' '. TTi18n::getText('- Hourly Rate w/Burden');
-					}
-				}
-				break;
-			case 'premium_columns':
-				$retval = array();
-				//Get all Premium policies.
-				$pplf = TTnew( 'PremiumPolicyListFactory' );
-				$pplf->getByCompanyId( $this->getUserObject()->getCompany() );
-				if ( $pplf->getRecordCount() > 0 ) {
-					foreach( $pplf as $pp_obj ) {
-						$retval['-2291-premium_policy-'.$pp_obj->getId()] = $pp_obj->getName();
-						$retval['-2591-premium_policy-'.$pp_obj->getId().'_wage'] = $pp_obj->getName() .' '. TTi18n::getText('- Wage');
-						$retval['-2591-premium_policy-'.$pp_obj->getId().'_wage_with_burden'] = $pp_obj->getName() .' '. TTi18n::getText('- Wage w/Burden');
-						$retval['-2691-premium_policy-'.$pp_obj->getId().'_hourly_rate'] = $pp_obj->getName() .' '. TTi18n::getText('- Hourly Rate');
-						$retval['-2691-premium_policy-'.$pp_obj->getId().'_hourly_rate_with_burden'] = $pp_obj->getName() .' '. TTi18n::getText('- Hourly Rate w/Burden');
-					}
-				}
-				break;
-			case 'absence_columns':
-				$retval = array();
-				//Get all Absence Policies.
-				$aplf = TTnew( 'AbsencePolicyListFactory' );
-				$aplf->getByCompanyId( $this->getUserObject()->getCompany() );
-				if ( $aplf->getRecordCount() > 0 ) {
-					foreach( $aplf as $ap_obj ) {
-						$retval['-2291-absence_policy-'.$ap_obj->getId()] = $ap_obj->getName();
-						if ( $ap_obj->getType() == 10 ) {
-							$retval['-2591-absence_policy-'.$ap_obj->getId().'_wage'] = $ap_obj->getName() .' '. TTi18n::getText('- Wage');
-							$retval['-2591-absence_policy-'.$ap_obj->getId().'_wage_with_burden'] = $ap_obj->getName() .' '. TTi18n::getText('- Wage w/Burden');
-							$retval['-2691-absence_policy-'.$ap_obj->getId().'_hourly_rate'] = $ap_obj->getName() .' '. TTi18n::getText('- Hourly Rate');
-							$retval['-2691-absence_policy-'.$ap_obj->getId().'_hourly_rate_with_burden'] = $ap_obj->getName() .' '. TTi18n::getText('- Hourly Rate w/Burden');
-						}
-					}
-				}
+			case 'paycode_columns':
+				$retval = parent::__getOptions( $name, 3 );
 				break;
 			case 'columns':
 				$retval = array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') );
@@ -336,7 +290,7 @@ class TimesheetDetailReport extends Report {
 					foreach($columns as $column => $name ) {
 						if ( strpos($column, '_wage') !== FALSE OR strpos($column, '_hourly_rate') !== FALSE ) {
 							$retval[$column] = 'currency';
-						} elseif ( strpos($column, '_time') OR strpos($column, 'schedule_') OR strpos($column, '_policy') ) {
+						} elseif ( strpos($column, '_time') OR strpos($column, 'schedule_') ) {
 							$retval[$column] = 'time_unit';
 						}
 					}
@@ -370,114 +324,41 @@ class TimesheetDetailReport extends Report {
 				break;
 			case 'templates':
 				$retval = array(
+										'-1050-by_employee+all_time' => TTi18n::gettext('All Time by Employee'),
+										'-1150-by_date_by_full_name+all_time' => TTi18n::gettext('All Time by Date/Employee'),
+										'-1200-by_full_name_by_date+all_time' => TTi18n::gettext('All Time by Employee/Date'),
+										'-1250-by_branch+regular+all_time' => TTi18n::gettext('All Time by Branch'),
+										'-1300-by_department+all_time' => TTi18n::gettext('All Time by Department'),
+										'-1350-by_branch_by_department+all_time' => TTi18n::gettext('All Time by Branch/Department'),
+										'-1400-by_pay_period+all_time' => TTi18n::gettext('All Time by Pay Period'),
+										'-1450-by_pay_period+all_time' => TTi18n::gettext('All Time by Pay Period/Employee'),
+										'-1455-by_pay_period_by_date_stamp_by_employee+all_time' => TTi18n::gettext('All Time by Pay Period/Date/Employee'),
+										'-1500-by_pay_period_by_branch+regular+regular_wage+all_time' => TTi18n::gettext('All Time by Pay Period/Branch'),
+										'-1550-by_pay_period_by_department+all_time' => TTi18n::gettext('All Time by Pay Period/Department'),
+										'-1600-by_pay_period_by_branch_by_department+all_time' => TTi18n::gettext('All Time by Pay Period/Branch/Department'),
+										'-1650-by_employee_by_pay_period+all_time' => TTi18n::gettext('All Time by Employee/Pay Period'),
+										'-1700-by_branch_by_pay_period+all_time' => TTi18n::gettext('All Time by Pay Branch/Pay Period'),
+										'-1850-by_department_by_pay_period+all_time' => TTi18n::gettext('All Time by Department/Pay Period'),
+										'-1900-by_branch_by_department_by_pay_period+all_time' => TTi18n::gettext('All Time by Branch/Department/Pay Period'),
+										'-1950-by_full_name_by_dow+all_time' => TTi18n::gettext('All Time by Employee/Day of Week'),
 
-										'-1010-by_employee+regular' => TTi18n::gettext('Regular Time by Employee'),
-										'-1020-by_employee+overtime' => TTi18n::gettext('Overtime by Employee'),
-										'-1030-by_employee+premium' => TTi18n::gettext('Premium Time by Employee'),
-										'-1040-by_employee+absence' => TTi18n::gettext('Absence Time by Employee'),
-										'-1050-by_employee+regular+overtime+premium+absence' => TTi18n::gettext('All Time by Employee'),
-
-										'-1060-by_employee+regular+regular_wage' => TTi18n::gettext('Regular Time+Wage by Employee'),
-										'-1070-by_employee+overtime+overtime_wage' => TTi18n::gettext('Overtime+Wage by Employee'),
-										'-1080-by_employee+premium+premium_wage' => TTi18n::gettext('Premium Time+Wage by Employee'),
-										'-1090-by_employee+absence+absence_wage' => TTi18n::gettext('Absence Time+Wage by Employee'),
-										'-1100-by_employee+regular+regular_wage+overtime+overtime_wage+premium+premium_wage+absence+absence_wage' => TTi18n::gettext('All Time+Wage by Employee'),
-
-										'-1110-by_date_by_full_name+regular+regular_wage' => TTi18n::gettext('Regular Time+Wage by Date/Employee'),
-										'-1120-by_date_by_full_name+overtime+overtime_wage' => TTi18n::gettext('Overtime+Wage by Date/Employee'),
-										'-1130-by_date_by_full_name+premium+premium_wage' => TTi18n::gettext('Premium Time+Wage by Date/Employee'),
-										'-1140-by_date_by_full_name+absence+absence_wage' => TTi18n::gettext('Absence Time+Wage by Date/Employee'),
-										'-1150-by_date_by_full_name+regular+regular_wage+overtime+overtime_wage+premium+premium_wage+absence+absence_wage' => TTi18n::gettext('All Time+Wage by Date/Employee'),
-
-										'-1160-by_full_name_by_date+regular+regular_wage' => TTi18n::gettext('Regular Time+Wage by Employee/Date'),
-										'-1170-by_full_name_by_date+overtime+overtime_wage' => TTi18n::gettext('Overtime+Wage by Employee/Date'),
-										'-1180-by_full_name_by_date+premium+premium_wage' => TTi18n::gettext('Premium Time+Wage by Employee/Date'),
-										'-1190-by_full_name_by_date+absence+absence_wage' => TTi18n::gettext('Absence Time+Wage by Employee/Date'),
-										'-1200-by_full_name_by_date+regular+regular_wage+overtime+overtime_wage+premium+premium_wage+absence+absence_wage' => TTi18n::gettext('All Time+Wage by Employee/Date'),
-
-										'-1210-by_branch+regular+regular_wage' => TTi18n::gettext('Regular Time+Wage by Branch'),
-										'-1220-by_branch+overtime+overtime_wage' => TTi18n::gettext('Overtime+Wage by Branch'),
-										'-1230-by_branch+premium+premium_wage' => TTi18n::gettext('Premium Time+Wage by Branch'),
-										'-1240-by_branch+absence+absence_wage' => TTi18n::gettext('Absence Time+Wage by Branch'),
-										'-1250-by_branch+regular+regular_wage+overtime+overtime_wage+premium+premium_wage+absence+absence_wage' => TTi18n::gettext('All Time+Wage by Branch'),
-
-										'-1260-by_department+regular+regular_wage' => TTi18n::gettext('Regular Time+Wage by Department'),
-										'-1270-by_department+overtime+overtime_wage' => TTi18n::gettext('Overtime+Wage by Department'),
-										'-1280-by_department+premium+premium_wage' => TTi18n::gettext('Premium Time+Wage by Department'),
-										'-1290-by_department+absence+absence_wage' => TTi18n::gettext('Absence Time+Wage by Department'),
-										'-1300-by_department+regular+regular_wage+overtime+overtime_wage+premium+premium_wage+absence+absence_wage' => TTi18n::gettext('All Time+Wage by Department'),
-
-										'-1310-by_branch_by_department+regular+regular_wage' => TTi18n::gettext('Regular Time+Wage by Branch/Department'),
-										'-1320-by_branch_by_department+overtime+overtime_wage' => TTi18n::gettext('Overtime+Wage by Branch/Department'),
-										'-1330-by_branch_by_department+premium+premium_wage' => TTi18n::gettext('Premium Time+Wage by Branch/Department'),
-										'-1340-by_branch_by_department+absence+absence_wage' => TTi18n::gettext('Absence Time+Wage by Branch/Department'),
-										'-1350-by_branch_by_department+regular+regular_wage+overtime+overtime_wage+premium+premium_wage+absence+absence_wage' => TTi18n::gettext('All Time+Wage by Branch/Department'),
-
-										'-1360-by_pay_period+regular+regular_wage' => TTi18n::gettext('Regular Time+Wage by Pay Period'),
-										'-1370-by_pay_period+overtime+overtime_wage' => TTi18n::gettext('Overtime+Wage by Pay Period'),
-										'-1380-by_pay_period+premium+premium_wage' => TTi18n::gettext('Premium Time+Wage by Pay Period'),
-										'-1390-by_pay_period+absence+absence_wage' => TTi18n::gettext('Absence Time+Wage by Pay Period'),
-										'-1400-by_pay_period+regular+regular_wage+overtime+overtime_wage+premium+premium_wage+absence+absence_wage' => TTi18n::gettext('All Time+Wage by Pay Period'),
-
-										'-1410-by_pay_period_by_employee+regular+regular_wage' => TTi18n::gettext('Regular Time+Wage by Pay Period/Employee'),
-										'-1420-by_pay_period+overtime+overtime_wage' => TTi18n::gettext('Overtime+Wage by Pay Period/Employee'),
-										'-1430-by_pay_period+premium+premium_wage' => TTi18n::gettext('Premium Time+Wage by Pay Period/Employee'),
-										'-1440-by_pay_period+absence+absence_wage' => TTi18n::gettext('Absence Time+Wage by Pay Period/Employee'),
-										'-1450-by_pay_period+regular+regular_wage+overtime+overtime_wage+premium+premium_wage+absence+absence_wage' => TTi18n::gettext('All Time+Wage by Pay Period/Employee'),
-
-										'-1451-by_pay_period_by_date_stamp_by_employee+regular+regular_wage' => TTi18n::gettext('Regular Time+Wage by Pay Period/Date/Employee'),
-										'-1452-by_pay_period_by_date_stamp_by_employee+overtime+overtime_wage' => TTi18n::gettext('Overtime+Wage by Pay Period/Date/Employee'),
-										'-1453-by_pay_period_by_date_stamp_by_employee+premium+premium_wage' => TTi18n::gettext('Premium Time+Wage by Pay Period/Date/Employee'),
-										'-1454-by_pay_period_by_date_stamp_by_employee+absence+absence_wage' => TTi18n::gettext('Absence Time+Wage by Pay Period/Date/Employee'),
-										'-1455-by_pay_period_by_date_stamp_by_employee+regular+regular_wage+overtime+overtime_wage+premium+premium_wage+absence+absence_wage' => TTi18n::gettext('All Time+Wage by Pay Period/Date/Employee'),
-
-										'-1460-by_pay_period_by_branch+regular+regular_wage' => TTi18n::gettext('Regular Time+Wage by Pay Period/Branch'),
-										'-1470-by_pay_period_by_branch+overtime+overtime_wage' => TTi18n::gettext('Overtime+Wage by Pay Period/Branch'),
-										'-1480-by_pay_period_by_branch+premium+premium_wage' => TTi18n::gettext('Premium Time+Wage by Pay Period/Branch'),
-										'-1490-by_pay_period_by_branch+absence+absence_wage' => TTi18n::gettext('Absence Time+Wage by Pay Period/Branch'),
-										'-1500-by_pay_period_by_branch+regular+regular_wage+overtime+overtime_wage+premium+premium_wage+absence+absence_wage' => TTi18n::gettext('All Time+Wage by Pay Period/Branch'),
-
-										'-1510-by_pay_period_by_department+regular+regular_wage' => TTi18n::gettext('Regular Time+Wage by Pay Period/Department'),
-										'-1520-by_pay_period_by_department+overtime+overtime_wage' => TTi18n::gettext('Overtime+Wage by Pay Period/Department'),
-										'-1530-by_pay_period_by_department+premium+premium_wage' => TTi18n::gettext('Premium Time+Wage by Pay Period/Department'),
-										'-1540-by_pay_period_by_department+absence+absence_wage' => TTi18n::gettext('Absence Time+Wage by Pay Period/Department'),
-										'-1550-by_pay_period_by_department+regular+regular_wage+overtime+overtime_wage+premium+premium_wage+absence+absence_wage' => TTi18n::gettext('All Time+Wage by Pay Period/Department'),
-
-										'-1560-by_pay_period_by_branch_by_department+regular+regular_wage' => TTi18n::gettext('Regular Time+Wage by Pay Period/Branch/Department'),
-										'-1570-by_pay_period_by_branch_by_department+overtime+overtime_wage' => TTi18n::gettext('Overtime+Wage by Pay Period/Branch/Department'),
-										'-1580-by_pay_period_by_branch_by_department+premium+premium_wage' => TTi18n::gettext('Premium Time+Wage by Pay Period/Branch/Department'),
-										'-1590-by_pay_period_by_branch_by_department+absence+absence_wage' => TTi18n::gettext('Absence Time+Wage by Pay Period/Branch/Department'),
-										'-1600-by_pay_period_by_branch_by_department+regular+regular_wage+overtime+overtime_wage+premium+premium_wage+absence+absence_wage' => TTi18n::gettext('All Time+Wage by Pay Period/Branch/Department'),
-
-										'-1610-by_employee_by_pay_period+regular+regular_wage' => TTi18n::gettext('Regular Time+Wage by Employee/Pay Period'),
-										'-1620-by_employee_by_pay_period+overtime+overtime_wage' => TTi18n::gettext('Overtime+Wage by Employee/Pay Period'),
-										'-1630-by_employee_by_pay_period+premium+premium_wage' => TTi18n::gettext('Premium Time+Wage by Employee/Pay Period'),
-										'-1640-by_employee_by_pay_period+absence+absence_wage' => TTi18n::gettext('Absence Time+Wage by Employee/Pay Period'),
-										'-1650-by_employee_by_pay_period+regular+regular_wage+overtime+overtime_wage+premium+premium_wage+absence+absence_wage' => TTi18n::gettext('All Time+Wage by Employee/Pay Period'),
-
-										'-1660-by_branch_by_pay_period+regular+regular_wage' => TTi18n::gettext('Regular Time+Wage by Branch/Pay Period'),
-										'-1670-by_branch_by_pay_period+overtime+overtime_wage' => TTi18n::gettext('Overtime+Wage by Branch/Pay Period'),
-										'-1680-by_branch_by_pay_period+premium+premium_wage' => TTi18n::gettext('Premium Time+Wage by Branch/Pay Period'),
-										'-1690-by_branch_by_pay_period+absence+absence_wage' => TTi18n::gettext('Absence Time+Wage by Branch/Pay Period'),
-										'-1700-by_branch_by_pay_period+regular+regular_wage+overtime+overtime_wage+premium+premium_wage+absence+absence_wage' => TTi18n::gettext('All Time+Wage by Pay Branch/Pay Period'),
-
-										'-1810-by_department_by_pay_period+regular+regular_wage' => TTi18n::gettext('Regular Time+Wage by Department/Pay Period'),
-										'-1820-by_department_by_pay_period+overtime+overtime_wage' => TTi18n::gettext('Overtime+Wage by Department/Pay Period'),
-										'-1830-by_department_by_pay_period+premium+premium_wage' => TTi18n::gettext('Premium Time+Wage by Department/Pay Period'),
-										'-1840-by_department_by_pay_period+absence+absence_wage' => TTi18n::gettext('Absence Time+Wage by Department/Pay Period'),
-										'-1850-by_department_by_pay_period+regular+regular_wage+overtime+overtime_wage+premium+premium_wage+absence+absence_wage' => TTi18n::gettext('All Time+Wage by Department/Pay Period'),
-
-										'-1860-by_branch_by_department_by_pay_period+regular+regular_wage' => TTi18n::gettext('Regular Time+Wage by Branch/Department/Pay Period'),
-										'-1870-by_branch_by_department_by_pay_period+overtime+overtime_wage' => TTi18n::gettext('Overtime+Wage by Pay Branch/Department/Pay Period'),
-										'-1880-by_branch_by_department_by_pay_period+premium+premium_wage' => TTi18n::gettext('Premium Time+Wage by Pay Branch/Department/Pay Period'),
-										'-1890-by_branch_by_department_by_pay_period+absence+absence_wage' => TTi18n::gettext('Absence Time+Wage by Pay Branch/Department/Pay Period'),
-										'-1900-by_branch_by_department_by_pay_period+regular+regular_wage+overtime+overtime_wage+premium+premium_wage+absence+absence_wage' => TTi18n::gettext('All Time+Wage by Branch/Department/Pay Period'),
-
-										'-1910-by_full_name_by_dow+regular+regular_wage' => TTi18n::gettext('Regular Time+Wage by Employee/Day of Week'),
-										'-1920-by_full_name_by_dow+overtime+overtime_wage' => TTi18n::gettext('Overtime+Wage by Pay Employee/Day of Week'),
-										'-1930-by_full_name_by_dow+premium+premium_wage' => TTi18n::gettext('Premium Time+Wage by Pay Employee/Day of Week'),
-										'-1940-by_full_name_by_dow+absence+absence_wage' => TTi18n::gettext('Absence Time+Wage by Pay Employee/Day of Week'),
-										'-1950-by_full_name_by_dow+regular+regular_wage+overtime+overtime_wage+premium+premium_wage+absence+absence_wage' => TTi18n::gettext('All Time+Wage by Employee/Day of Week'),
+										'-2100-by_employee+all_time+all_wage' => TTi18n::gettext('All Time+Wage by Employee'),
+										'-2150-by_date_by_full_name+all_time+all_wage' => TTi18n::gettext('All Time+Wage by Date/Employee'),
+										'-2200-by_full_name_by_date+all_time+all_wage' => TTi18n::gettext('All Time+Wage by Employee/Date'),
+										'-2250-by_branch+regular+all_time+all_wage' => TTi18n::gettext('All Time+Wage by Branch'),
+										'-2300-by_department+all_time+all_wage' => TTi18n::gettext('All Time+Wage by Department'),
+										'-2350-by_branch_by_department+all_time+all_wage' => TTi18n::gettext('All Time+Wage by Branch/Department'),
+										'-2400-by_pay_period+all_time+all_wage' => TTi18n::gettext('All Time+Wage by Pay Period'),
+										'-2450-by_pay_period+all_time+all_wage' => TTi18n::gettext('All Time+Wage by Pay Period/Employee'),
+										'-2455-by_pay_period_by_date_stamp_by_employee+all_time+all_wage' => TTi18n::gettext('All Time+Wage by Pay Period/Date/Employee'),
+										'-2500-by_pay_period_by_branch+regular+regular_wage+all_time+all_wage' => TTi18n::gettext('All Time+Wage by Pay Period/Branch'),
+										'-2550-by_pay_period_by_department+all_time+all_wage' => TTi18n::gettext('All Time+Wage by Pay Period/Department'),
+										'-2600-by_pay_period_by_branch_by_department+all_time+all_wage' => TTi18n::gettext('All Time+Wage by Pay Period/Branch/Department'),
+										'-2650-by_employee_by_pay_period+all_time+all_wage' => TTi18n::gettext('All Time+Wage by Employee/Pay Period'),
+										'-2700-by_branch_by_pay_period+all_time+all_wage' => TTi18n::gettext('All Time+Wage by Pay Branch/Pay Period'),
+										'-2850-by_department_by_pay_period+all_time+all_wage' => TTi18n::gettext('All Time+Wage by Department/Pay Period'),
+										'-2900-by_branch_by_department_by_pay_period+all_time+all_wage' => TTi18n::gettext('All Time+Wage by Branch/Department/Pay Period'),
+										'-2950-by_full_name_by_dow+all_time+all_wage' => TTi18n::gettext('All Time+Wage by Employee/Day of Week'),
 							);
 
 				if ( is_object( $this->getUserObject()->getCompanyObject() ) AND $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
@@ -509,39 +390,20 @@ class TimesheetDetailReport extends Report {
 
 									switch( $template_keyword ) {
 										//Columns
-										case 'regular':
+										case 'all_time':
 											$retval['columns'][] = 'worked_time';
 											$retval['columns'][] = 'regular_time';
+											$retval['columns'][] = 'overtime_time';
+											$retval['columns'][] = 'absence_time';
+											$retval['columns'][] = 'premium_time';
 											break;
-										case 'overtime':
-										case 'premium':
-										case 'absence':
-											$columns = Misc::trimSortPrefix( $this->getOptions( $template_keyword.'_columns') );
-											if ( is_array($columns) ) {
-												foreach( $columns as $column => $column_name ) {
-													if ( strpos( $column, '_wage') === FALSE AND strpos( $column, '_hourly_rate') === FALSE ) {
-														$retval['columns'][] = $column;
-													}
-												}
-											}
+										case 'all_wage':
+											$retval['columns'][] = 'gross_wage';
+											$retval['columns'][] = 'regular_wage';
+											$retval['columns'][] = 'overtime_wage';
+											$retval['columns'][] = 'absence_wage';
+											$retval['columns'][] = 'premium_wage';
 											break;
-
-										case 'regular_wage':
-											$retval['columns'][] = 'regular_time_wage';
-											break;
-										case 'overtime_wage':
-										case 'premium_wage':
-										case 'absence_wage':
-											$columns = Misc::trimSortPrefix( $this->getOptions( str_replace('_wage', '', $template_keyword).'_columns' ) );
-											if ( is_array($columns) ) {
-												foreach( $columns as $column => $column_name ) {
-													if ( strpos( $column, '_wage') !== FALSE ) {
-														$retval['columns'][] = $column;
-													}
-												}
-											}
-											break;
-
 										//Filter
 
 										//Group By
@@ -823,42 +685,6 @@ class TimesheetDetailReport extends Report {
 		return $retval;
 	}
 
-	function getPolicyHourlyRates() {
-		//Take into account wage groups!
-		$policy_rates = array();
-
-		//Get all Overtime policies.
-		$otplf = TTnew( 'OverTimePolicyListFactory' );
-		$otplf->getByCompanyId( $this->getUserObject()->getCompany() );
-		if ( $otplf->getRecordCount() > 0 ) {
-			foreach( $otplf as $otp_obj ) {
-				Debug::Text('Over Time Policy ID: '. $otp_obj->getId() .' Rate: '. $otp_obj->getRate(), __FILE__, __LINE__, __METHOD__, 10);
-				$policy_rates['over_time_policy-'.$otp_obj->getId()] = $otp_obj;
-			}
-		}
-
-		//Get all Premium policies.
-		$pplf = TTnew( 'PremiumPolicyListFactory' );
-		$pplf->getByCompanyId( $this->getUserObject()->getCompany() );
-		if ( $pplf->getRecordCount() > 0 ) {
-			foreach( $pplf as $pp_obj ) {
-				$policy_rates['premium_policy-'.$pp_obj->getId()] = $pp_obj;
-			}
-		}
-
-		//Get all Absence Policies.
-		$aplf = TTnew( 'AbsencePolicyListFactory' );
-		$aplf->getByCompanyId( $this->getUserObject()->getCompany() );
-		if ( $aplf->getRecordCount() > 0 ) {
-			foreach( $aplf as $ap_obj ) {
-				//Make sure all absence policies are included, as if they are unpaid we need to override the hourly rate to 0.
-				$policy_rates['absence_policy-'.$ap_obj->getId()] = $ap_obj;
-			}
-		}
-
-		return $policy_rates;
-	}
-
 	//This function takes worked time for a single day and multiplies it by each hour worked.
 	function splitDataByHoursWorked( $row, $dynamic_columns ) {
 		if ( isset($row['min_punch_time_stamp']) AND isset($row['max_punch_time_stamp']) AND $row['min_punch_time_stamp'] > 0 AND $row['max_punch_time_stamp'] > 0 ) {
@@ -914,7 +740,7 @@ class TimesheetDetailReport extends Report {
 
 		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
-		$policy_hourly_rates = $this->getPolicyHourlyRates();
+		$pay_code_type_map = PayCodeListFactory::getPayCodeTypeMap( $this->getUserObject()->getCompany() );
 
 		$currency_convert_to_base = $this->getCurrencyConvertToBase();
 		$base_currency_obj = $this->getBaseCurrencyObject();
@@ -967,45 +793,56 @@ class TimesheetDetailReport extends Report {
 
 				$user_id = $udt_obj->getColumn('user_id');
 
-				$date_stamp = TTDate::strtotime( $udt_obj->getColumn('date_stamp') );
-				$branch = $udt_obj->getColumn('branch_id');
-				$department = $udt_obj->getColumn('department_id');
-				$status_id = $udt_obj->getColumn('status_id');
-				$type_id = $udt_obj->getColumn('type_id');
+				$date_stamp = $udt_obj->getDateStamp();
+				$branch_id = $udt_obj->getColumn('branch_id');
+				$department_id = $udt_obj->getColumn('department_id');
+				$currency_rate = $udt_obj->getColumn('currency_rate');
+				$currency_id = $udt_obj->getColumn('currency_id');
 
-				//Can we get rid of Worked and Paid time to simplify things? People have a hard time figuring out what these are anyways for reports.
-				//Paid time doesn't belong to a branch/department, so if we try to group by branch/department there will
-				//always be a blank line showing just the paid time. So if they don't want to display paid time, just exclude it completely.
-				$column = $udt_obj->getTimeCategory();
-				//Include worked time for the PDF timesheet, however exclude it from Gross Wage totals.
-				//Worked_time includes paid lunch/break time as well.
-				if ( $column == 'paid_time' ) {
-					$column = NULL;
-				}
+				//With pay codes, paid time makes sense now and is associated with branch/departments too.
+				$time_columns = $udt_obj->getTimeCategory( FALSE, $columns  ); //Exclude 'total' as its not used in reports anyways, and causes problems when grouping by branch/default branch.
 				
 				//Debug::Text('Column: '. $column .' Total Time: '. $udt_obj->getColumn('total_time') .' Status: '. $status_id .' Type: '. $type_id .' Rate: '. $udt_obj->getColumn( 'hourly_rate' ), __FILE__, __LINE__, __METHOD__, 10);
 				if ( ( isset($filter_data['include_no_data_rows']) AND $filter_data['include_no_data_rows'] == 1 )
-						OR ( ( !isset($filter_data['include_no_data_rows']) OR ( isset($filter_data['include_no_data_rows']) AND $filter_data['include_no_data_rows'] == 0 ) ) AND $date_stamp != '' AND $column != '' AND $udt_obj->getColumn('total_time') != 0 )	 ) {
+					OR ( ( !isset($filter_data['include_no_data_rows']) OR ( isset($filter_data['include_no_data_rows']) AND $filter_data['include_no_data_rows'] == 0 ) ) AND $date_stamp != '' AND count($time_columns) > 0 AND $udt_obj->getColumn('total_time') != 0 )	 ) {
 
-					$hourly_rate = 0;
-					$hourly_rate_with_burden = 0;
-					if ( $wage_permission_children_ids === TRUE OR in_array( $user_id, $wage_permission_children_ids) ) {
-						$hourly_rate = $udt_obj->getColumn( 'hourly_rate' );
-						$hourly_rate_with_burden = bcmul( $hourly_rate, bcadd( bcdiv( $udt_obj->getColumn( 'labor_burden_percent' ), 100 ), 1) );
-					}
-					if ( isset($policy_hourly_rates[$column]) AND is_object($policy_hourly_rates[$column]) ) {
-						$hourly_rate = $policy_hourly_rates[$column]->getHourlyRate( $hourly_rate );
-						$hourly_rate_with_burden = $policy_hourly_rates[$column]->getHourlyRate( $hourly_rate_with_burden );
+					$enable_wages = FALSE;
+					if ( $wage_permission_children_ids === TRUE OR in_array( $user_id, (array)$wage_permission_children_ids) ) {
+						$enable_wages = TRUE;
 					}
 
 					//Split time by user, date, branch, department as that is the lowest level we can split time.
 					//We always need to split time as much as possible as it can always be combined together by grouping.
-					if ( !isset($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department]) ) {
-						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department] = array(
+					if ( strpos($format, 'pdf_') !== FALSE ) {
+						if ( !isset($this->form_data['user_date_total'][$user_id]['data'][$date_stamp]) ) {
+							$this->form_data['user_date_total'][$user_id]['data'][$date_stamp] = array(
+																'branch_id' => $udt_obj->getColumn('branch_id'),
+																'department_id' => $udt_obj->getColumn('department_id'),
+																'pay_period_start_date' => strtotime( $udt_obj->getColumn('pay_period_start_date') ),
+																'pay_period_end_date' => strtotime( $udt_obj->getColumn('pay_period_end_date') ),
+																'pay_period_transaction_date' => strtotime( $udt_obj->getColumn('pay_period_transaction_date') ),
+																'pay_period' => strtotime( $udt_obj->getColumn('pay_period_transaction_date') ),
+																'pay_period_id' => $udt_obj->getColumn('pay_period_id'),
+
+																//Normalize the timestamps to the same day, otherwise min/max aggregates will always use what times are on the first/last days.
+																'min_punch_time_stamp' => ( $udt_obj->getObjectType() == 10 AND $udt_obj->getColumn('start_time_stamp') != '' ) ? strtotime( $udt_obj->getColumn('start_time_stamp') ) : NULL,
+																'max_punch_time_stamp' => ( $udt_obj->getObjectType() == 10 AND $udt_obj->getColumn('end_time_stamp') != '' ) ? strtotime( $udt_obj->getColumn('end_time_stamp') ) : NULL,
+																);
+
+						} else {
+							if ( $udt_obj->getObjectType() == 10 AND ( $this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['min_punch_time_stamp'] == '' OR strtotime( $udt_obj->getColumn('start_time_stamp') ) < $this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['min_punch_time_stamp'] ) ) {
+								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['min_punch_time_stamp'] = strtotime( $udt_obj->getColumn('start_time_stamp') );
+							}
+							if ( $udt_obj->getObjectType() == 10 AND ( $this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['max_punch_time_stamp'] == '' OR strtotime( $udt_obj->getColumn('end_time_stamp') ) > $this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['max_punch_time_stamp'] ) ) {
+								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['max_punch_time_stamp'] = strtotime( $udt_obj->getColumn('end_time_stamp') );
+							}
+						}
+					}
+
+					if ( !isset($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]) ) {
+						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id] = array(
 															'branch_id' => $udt_obj->getColumn('branch_id'),
-															//'branch' => $udt_obj->getColumn('branch'),
 															'department_id' => $udt_obj->getColumn('department_id'),
-															//'department' => $udt_obj->getColumn('department'),
 															'pay_period_start_date' => strtotime( $udt_obj->getColumn('pay_period_start_date') ),
 															'pay_period_end_date' => strtotime( $udt_obj->getColumn('pay_period_end_date') ),
 															'pay_period_transaction_date' => strtotime( $udt_obj->getColumn('pay_period_transaction_date') ),
@@ -1013,116 +850,83 @@ class TimesheetDetailReport extends Report {
 															'pay_period_id' => $udt_obj->getColumn('pay_period_id'),
 
 															//Normalize the timestamps to the same day, otherwise min/max aggregates will always use what times are on the first/last days.
-															'min_punch_time_stamp' => ( $udt_obj->getColumn('min_punch_time_stamp') != '' ) ? TTDate::getTimeLockedDate( strtotime( $udt_obj->getColumn('min_punch_time_stamp') ), 86400) : NULL,
-															'max_punch_time_stamp' => ( $udt_obj->getColumn('max_punch_time_stamp') != '' ) ? TTDate::getTimeLockedDate( strtotime( $udt_obj->getColumn('max_punch_time_stamp') ), 86400) : NULL,
+															'min_punch_time_stamp' => ( $udt_obj->getColumn('start_time_stamp') != '' ) ? TTDate::getTimeLockedDate( strtotime( $udt_obj->getColumn('start_time_stamp') ), 86400) : NULL,
+															'max_punch_time_stamp' => ( $udt_obj->getColumn('end_time_stamp') != '' ) ? TTDate::getTimeLockedDate( strtotime( $udt_obj->getColumn('end_time_stamp') ), 86400) : NULL,
 															);
-					}
-
-					$udt_total_time_wage = bcmul( bcdiv($udt_obj->getColumn('total_time'), 3600), $hourly_rate );
-					$udt_total_time_wage_with_burden = bcmul( bcdiv($udt_obj->getColumn('total_time'), 3600), $hourly_rate_with_burden );
-
-					if ( isset($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department][$column]) ) {
-						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department][$column] += $udt_obj->getColumn('total_time');
 					} else {
-						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department][$column] = $udt_obj->getColumn('total_time');
-					}
-
-					if ( isset($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department][$column.'_wage']) ) {
-						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department][$column.'_wage'] += $udt_total_time_wage;
-						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department][$column.'_wage_with_burden'] += $udt_total_time_wage_with_burden;
-					} else {
-						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department][$column.'_wage'] = $udt_total_time_wage;
-						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department][$column.'_wage_with_burden'] = $udt_total_time_wage_with_burden;
-					}
-
-					if ( $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department][$column] > 0 ) {
-						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department][$column.'_hourly_rate'] = bcdiv($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department][$column.'_wage'], bcdiv($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department][$column], 3600) );
-						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department][$column.'_hourly_rate_with_burden'] = bcdiv($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department][$column.'_wage_with_burden'], bcdiv($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department][$column], 3600) );
-					} else {
-						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department][$column.'_hourly_rate'] = $hourly_rate;
-						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department][$column.'_hourly_rate_with_burden'] = $hourly_rate_with_burden;
-					}
-
-					//Gross wage calculation must go here otherwise it gets doubled up.
-					//Worked Time is required for printable TimeSheets. Therefore this report is handled differently from TimeSheetSummary.
-					if ( $column != 'worked_time' ) { //Exclude worked time from gross wage total.
-						if ( isset($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department]['gross_wage']) ) {
-							$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department]['gross_wage'] += $udt_total_time_wage;
-							$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department]['gross_wage_with_burden'] += $udt_total_time_wage_with_burden;
-						} else {
-							$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department]['gross_wage'] = $udt_total_time_wage;
-							$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department]['gross_wage_with_burden'] = $udt_total_time_wage_with_burden;
+						if ( $udt_obj->getObjectType() == 10 AND ( $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['min_punch_time_stamp'] == '' OR TTDate::getTimeLockedDate( strtotime( $udt_obj->getColumn('start_time_stamp') ), 86400 ) < $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['min_punch_time_stamp'] ) ) {
+							$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['min_punch_time_stamp'] = TTDate::getTimeLockedDate( strtotime( $udt_obj->getColumn('start_time_stamp') ), 86400 );
+						}
+						if ( $udt_obj->getObjectType() == 10 AND ( $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['max_punch_time_stamp'] == '' OR TTDate::getTimeLockedDate( strtotime( $udt_obj->getColumn('end_time_stamp') ), 86400 ) > $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['max_punch_time_stamp'] ) ) {
+							$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['max_punch_time_stamp'] = TTDate::getTimeLockedDate( strtotime( $udt_obj->getColumn('end_time_stamp') ), 86400 );
 						}
 					}
 
-					//Worked Days is tricky, since if they worked in multiple branches/departments in a single day, is that considered one worked day?
-					//How do they find out how many days they worked in each branch/department though? It would add up to more days than they actually worked.
-					//If we did some sort of partial day though, then due to rounding it could be thrown off, but either way it woulnd't be that helpful because
-					//it would show they worked .33 of a day in one branch if they filtered by that branch.
-					if ( $column == 'worked_time' AND $udt_obj->getColumn('total_time') > 0 AND !isset($this->tmp_data['worked_days'][$user_id.$date_stamp]) ) {
-						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department]['worked_days'] = 1;
-						$this->tmp_data['worked_days'][$user_id.$date_stamp] = TRUE;
-					}
-					
-					//
-					//Handle data form PDF timesheet. Don't split it out by branch/department
-					//	as that causes multiple rows per day to display.
-					//
-					if ( strpos($format, 'pdf_') !== FALSE ) {
-						if ( !isset($this->form_data['user_date_total'][$user_id]['data'][$date_stamp]) ) {
-							$this->form_data['user_date_total'][$user_id]['data'][$date_stamp] = array(
-																'branch_id' => $udt_obj->getColumn('branch_id'),
-																//'branch' => $udt_obj->getColumn('branch'),
-																'department_id' => $udt_obj->getColumn('department_id'),
-																//'department' => $udt_obj->getColumn('department'),
-																//'pay_period_start_date' => strtotime( $udt_obj->getColumn('pay_period_start_date') ),
-																//'pay_period_end_date' => strtotime( $udt_obj->getColumn('pay_period_end_date') ),
-																//'pay_period_transaction_date' => strtotime( $udt_obj->getColumn('pay_period_transaction_date') ),
-																'pay_period' => strtotime( $udt_obj->getColumn('pay_period_transaction_date') ),
-																'pay_period_id' => $udt_obj->getColumn('pay_period_id'),
-																'time_stamp' => $date_stamp,
-																
-																//Normalize the timestamps to the same day, otherwise min/max aggregates will always use what times are on the first/last days.
-																'min_punch_time_stamp' => ( $udt_obj->getColumn('min_punch_time_stamp') != '' ) ? TTDate::getTimeLockedDate( strtotime( $udt_obj->getColumn('min_punch_time_stamp') ), 86400) : NULL,
-																'max_punch_time_stamp' => ( $udt_obj->getColumn('max_punch_time_stamp') != '' ) ? TTDate::getTimeLockedDate( strtotime( $udt_obj->getColumn('max_punch_time_stamp') ), 86400) : NULL,
-																);
-						} else {
-							//Make sure we ignore NULL/blank timestamps, so the IN time displayed on the printable timesheet is not blank.
-							$tmp_min_punch_time_stamp = TTDate::getTimeLockedDate( strtotime( $udt_obj->getColumn('min_punch_time_stamp') ), 86400);
-							if ( $udt_obj->getColumn('min_punch_time_stamp') != '' AND $tmp_min_punch_time_stamp < $this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['min_punch_time_stamp'] ) {
-								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['min_punch_time_stamp'] = $tmp_min_punch_time_stamp;
-							}
-							$tmp_max_punch_time_stamp = TTDate::getTimeLockedDate( strtotime( $udt_obj->getColumn('max_punch_time_stamp') ), 86400);
-							if ( $udt_obj->getColumn('max_punch_time_stamp') != '' AND $tmp_max_punch_time_stamp > $this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['max_punch_time_stamp'] ) {
-								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['max_punch_time_stamp'] = $tmp_max_punch_time_stamp;
-							}
-							unset($tmp_min_punch_time_stamp, $tmp_max_punch_time_stamp);
-						}
 
-						if ( isset($this->form_data['user_date_total'][$user_id]['data'][$date_stamp][$column]) ) {
-							$this->form_data['user_date_total'][$user_id]['data'][$date_stamp][$column] += $udt_obj->getColumn('total_time');
-						} else {
-							$this->form_data['user_date_total'][$user_id]['data'][$date_stamp][$column] = $udt_obj->getColumn('total_time');
-						}
-						//Total overtime/absence time, along with categorizing the time for easier timesheet generation later on.
-						if ( strpos( $column, 'absence_policy' ) !== FALSE ) {
-							if ( isset($this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['absence_time']) ) {
-								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['absence_time'] += $udt_obj->getColumn('total_time');
+					$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['currency_rate'] = $currency_rate;
+					$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['currency'] = $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['current_currency'] = Option::getByKey( $currency_id, $currency_options );
+					if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
+						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['current_currency'] = Option::getByKey( $base_currency_obj->getId(), $currency_options );
+					}
+
+					foreach( $time_columns as $column ) {
+						//Debug::Text('bColumn: '. $column .' Total Time: '. $udt_obj->getColumn('total_time') .' Object Type ID: '. $udt_obj->getColumn('object_type_id') .' Rate: '. $udt_obj->getColumn( 'hourly_rate' ), __FILE__, __LINE__, __METHOD__, 10);
+
+						//
+						//Handle data for PDF timesheet. Don't split it out by branch/department
+						//	as that causes multiple rows per day to display.
+						//
+						if ( strpos($format, 'pdf_') !== FALSE ) {
+							if ( isset($this->form_data['user_date_total'][$user_id]['data'][$date_stamp][$column.'_time']) ) {
+								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp][$column.'_time'] += $udt_obj->getColumn('total_time');
 							} else {
-								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['absence_time'] = $udt_obj->getColumn('total_time');
+								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp][$column.'_time'] = $udt_obj->getColumn('total_time');
 							}
-							$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['categorized_time']['absence_policy'][$column] = TRUE;
-						}
-						if ( strpos( $column, 'over_time_policy' ) !== FALSE ) {
-							if ( isset($this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['over_time']) ) {
-								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['over_time'] += $udt_obj->getColumn('total_time');
+
+							if ( $udt_obj->getObjectType() == 20 AND strpos( $column, 'pay_code-' ) !== FALSE ) { //Regular
+								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['categorized_time']['regular_time_policy'][$column.'_time'] = TRUE;
+							} elseif ( $udt_obj->getObjectType() == 25 AND strpos( $column, 'pay_code-' ) !== FALSE ) { //Absence
+								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['categorized_time']['absence_policy'][$column.'_time'] = TRUE;
+							} elseif ( $udt_obj->getObjectType() == 30 AND strpos( $column, 'pay_code-' ) !== FALSE ) { //Overtime
+								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['categorized_time']['over_time_policy'][$column.'_time'] = TRUE;
+							}
+						} else {
+							if ( isset($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_time']) ) {
+								$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_time'] += $udt_obj->getColumn('total_time');
 							} else {
-								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['over_time'] = $udt_obj->getColumn('total_time');
+								$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_time'] = $udt_obj->getColumn('total_time');
 							}
-							$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['categorized_time']['over_time_policy'][$column] = TRUE;
+
+							//Gross wage (paid_wage) calculation must go here otherwise it gets doubled up.
+							//Worked Time is required for printable TimeSheets. Therefore this report is handled differently from TimeSheetSummary.
+							if ( $enable_wages == TRUE AND !in_array( $column, array('total','worked') ) AND ( $udt_obj->getColumn('total_time_amount') != 0 OR $udt_obj->getColumn('total_time_amount_with_burden') != 0 ) ) { //Exclude worked time from gross wage total.
+								if ( isset($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage']) ) {
+									$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage'] += $udt_obj->getColumn('total_time_amount');
+									$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage_with_burden'] += $udt_obj->getColumn('total_time_amount_with_burden');
+								} else {
+									$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage'] = $udt_obj->getColumn('total_time_amount');
+									$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage_with_burden'] = $udt_obj->getColumn('total_time_amount_with_burden');
+								}
+
+								if ( $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage'] != 0 AND $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_time'] != 0 ) {
+									$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_hourly_rate'] = bcdiv($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage'], bcdiv($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_time'], 3600) );
+									$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_hourly_rate_with_burden'] = bcdiv($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage_with_burden'], bcdiv($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_time'], 3600) );
+								} else {
+									$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_hourly_rate'] = $udt_obj->getColumn( 'hourly_rate' );
+									$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_hourly_rate_with_burden'] = $udt_obj->getColumn( 'hourly_rate_with_burden' );
+								}
+							}
+
+							//Worked Days is tricky, since if they worked in multiple branches/departments in a single day, is that considered one worked day?
+							//How do they find out how many days they worked in each branch/department though? It would add up to more days than they actually worked.
+							//If we did some sort of partial day though, then due to rounding it could be thrown off, but either way it woulnd't be that helpful because
+							//it would show they worked .33 of a day in one branch if they filtered by that branch.
+							if ( $column == 'worked' AND $udt_obj->getColumn('total_time') > 0 AND !isset($this->tmp_data['worked_days'][$user_id.$date_stamp]) ) {
+								$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['worked_days'] = 1;
+								$this->tmp_data['worked_days'][$user_id.$date_stamp] = TRUE;
+							}
 						}
 					}
-					unset($hourly_rate);
 				}
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
@@ -1139,8 +943,8 @@ class TimesheetDetailReport extends Report {
 					$status = strtolower( Option::getByKey($s_obj->getColumn('status_id'), $s_obj->getOptions('status') ) );
 
 					//Check if the user worked on any of the scheduled days, if not insert a dummy day so the scheduled time at least appears still.
-					if ( !isset($this->tmp_data['user_date_total'][(int)$s_obj->getColumn('user_id')][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch')][$s_obj->getColumn('department')]) ) {
-						$this->tmp_data['user_date_total'][(int)$s_obj->getColumn('user_id')][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch')][$s_obj->getColumn('department')] = array(
+					if ( !isset($this->tmp_data['user_date_total'][(int)$s_obj->getUser()][$s_obj->getDateStamp()][$s_obj->getColumn('branch')][$s_obj->getColumn('department')]) ) {
+						$this->tmp_data['user_date_total'][(int)$s_obj->getUser()][$s_obj->getDateStamp()][$s_obj->getColumn('branch')][$s_obj->getColumn('department')] = array(
 							'branch' => $s_obj->getColumn('branch'),
 							'department' => $s_obj->getColumn('department'),
 							'pay_period_start_date' => strtotime( $s_obj->getColumn('pay_period_start_date') ),
@@ -1152,10 +956,10 @@ class TimesheetDetailReport extends Report {
 					}
 
 					//Make sure we handle multiple schedules on the same day.
-					if ( isset($this->tmp_data['schedule'][(int)$s_obj->getColumn('user_id')][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch')][$s_obj->getColumn('department')]['schedule_'.$status]) ) {
-						$this->tmp_data['schedule'][(int)$s_obj->getColumn('user_id')][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch')][$s_obj->getColumn('department')]['schedule_'.$status] += $s_obj->getColumn('total_time');
+					if ( isset($this->tmp_data['schedule'][(int)$s_obj->getUser()][$s_obj->getDateStamp()][$s_obj->getColumn('branch')][$s_obj->getColumn('department')]['schedule_'.$status]) ) {
+						$this->tmp_data['schedule'][(int)$s_obj->getUser()][$s_obj->getDateStamp()][$s_obj->getColumn('branch')][$s_obj->getColumn('department')]['schedule_'.$status] += $s_obj->getColumn('total_time');
 					} else {
-						$this->tmp_data['schedule'][(int)$s_obj->getColumn('user_id')][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch')][$s_obj->getColumn('department')]['schedule_'.$status] = $s_obj->getColumn('total_time');
+						$this->tmp_data['schedule'][(int)$s_obj->getUser()][$s_obj->getDateStamp()][$s_obj->getColumn('branch')][$s_obj->getColumn('department')]['schedule_'.$status] = $s_obj->getColumn('total_time');
 					}
 				}
 			}
@@ -1375,12 +1179,12 @@ class TimesheetDetailReport extends Report {
 										$tmp_default_department = array();
 									}
 
-									if ( isset($this->tmp_data['branch'][$row['branch_id']]) ) {
+									if ( isset($row['branch_id']) AND isset($this->tmp_data['branch'][$row['branch_id']]) ) {
 										$tmp_branch = $this->tmp_data['branch'][$row['branch_id']];
 									} else {
 										$tmp_branch = array();
 									}
-									if ( isset($this->tmp_data['department'][$row['department_id']]) ) {
+									if ( isset($row['department_id']) AND isset($this->tmp_data['department'][$row['department_id']]) ) {
 										$tmp_department = $this->tmp_data['department'][$row['department_id']];
 									} else {
 										$tmp_department = array();
@@ -1478,7 +1282,7 @@ class TimesheetDetailReport extends Report {
 		$this->pdf->Ln();
 
 		unset($this->timesheet_week_totals);
-		$this->timesheet_week_totals = Misc::preSetArrayValues( NULL, array( 'worked_time', 'absence_time', 'regular_time', 'over_time' ), 0 );
+		$this->timesheet_week_totals = Misc::preSetArrayValues( NULL, array( 'worked_time', 'absence_time', 'regular_time', 'overtime_time' ), 0 );
 
 		return TRUE;
 	}
@@ -1499,7 +1303,7 @@ class TimesheetDetailReport extends Report {
 		$this->pdf->Cell( $column_widths['out_punch_time_stamp'], $line_h, TTi18n::gettext('Out'), 1, 0, 'C', 1, '', 1 );
 		$this->pdf->Cell( $column_widths['worked_time'], $line_h, TTi18n::gettext('Worked Time'), 1, 0, 'C', 1, '', 1 );
 		$this->pdf->Cell( $column_widths['regular_time'], $line_h, TTi18n::gettext('Regular Time'), 1, 0, 'C', 1, '', 1 );
-		$this->pdf->Cell( $column_widths['over_time'], $line_h, TTi18n::gettext('Over Time'), 1, 0, 'C', 1, '', 1 );
+		$this->pdf->Cell( $column_widths['overtime_time'], $line_h, TTi18n::gettext('Over Time'), 1, 0, 'C', 1, '', 1 );
 		$this->pdf->Cell( $column_widths['absence_time'], $line_h, TTi18n::gettext('Absence Time'), 1, 0, 'C', 1, '', 1 );
 		$this->pdf->Ln();
 
@@ -1561,12 +1365,18 @@ class TimesheetDetailReport extends Report {
 
 				$day_punch_data = $user_data['punch_rows'][$data['pay_period_id']][$data['time_stamp']];
 				$total_punch_rows = count($day_punch_data);
-			} //else { //Debug::Text('NO Punch Data Row: '. $this->counter_x, __FILE__, __LINE__, __METHOD__, 10);
+			} //else { Debug::Text('NO Punch Data Row: '. $this->counter_x .' Date: '. TTDate::getDate('DATE', $data['time_stamp'] ) .'('.$data['time_stamp'].') PP: '. $data['pay_period_id'], __FILE__, __LINE__, __METHOD__, 10);
 
 			$total_rows_arr[] = $total_punch_rows;
 
+			$total_regular_time_rows = 1;
+			if ( $data['regular_time'] > 0 AND isset($data['categorized_time']['regular_time_policy']) ) {
+				$total_regular_time_rows = count($data['categorized_time']['regular_time_policy']);
+			}
+			$total_rows_arr[] = $total_regular_time_rows;
+
 			$total_over_time_rows = 1;
-			if ( $data['over_time'] > 0 AND isset($data['categorized_time']['over_time_policy']) ) {
+			if ( $data['overtime_time'] > 0 AND isset($data['categorized_time']['over_time_policy']) ) {
 				$total_over_time_rows = count($data['categorized_time']['over_time_policy']);
 			}
 			$total_rows_arr[] = $total_over_time_rows;
@@ -1575,15 +1385,16 @@ class TimesheetDetailReport extends Report {
 			if ( $data['absence_time'] > 0 AND isset($data['categorized_time']['absence_policy']) ) {
 				$total_absence_rows = count($data['categorized_time']['absence_policy']);
 			}
+
 			$total_rows_arr[] = $total_absence_rows;
 
 			rsort($total_rows_arr);
 			$max_rows = $total_rows_arr[0];
-			$line_h = ( $format == 'pdf_timesheet_detail' ) ? ($default_line_h * $max_rows) : $default_line_h;
+			$line_h = ( $format == 'pdf_timesheet_detail' ) ? ( $default_line_h * $max_rows ) : $default_line_h;
 
 			$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(9) );
 			$this->pdf->Cell( $column_widths['line'], $line_h, $this->counter_x, 1, 0, 'C', 1);
-			$this->pdf->Cell( $column_widths['date_stamp'], $line_h, TTDate::getDate('DATE', $data['time_stamp'] ), 1, 0, 'C', 1);
+			$this->pdf->Cell( $column_widths['date_stamp'], $line_h, TTDate::getDate('DATE', $data['time_stamp'] ), 1, 0, 'C', 1, '', 1);
 			$this->pdf->Cell( $column_widths['dow'], $line_h, date('D', $data['time_stamp']), 1, 0, 'C', 1);
 
 			$pre_punch_x = $this->pdf->getX();
@@ -1626,25 +1437,52 @@ class TimesheetDetailReport extends Report {
 			}
 
 			$this->pdf->Cell( $column_widths['worked_time'], $line_h, TTDate::getTimeUnit( $data['worked_time'] ), 1, 0, 'C', 1);
-			$this->pdf->Cell( $column_widths['regular_time'], $line_h, TTDate::getTimeUnit( $data['regular_time'] ), 1, 0, 'C', 1);
 
 			if ( $format == 'pdf_timesheet_detail' ) {
-				if ( $data['over_time'] > 0 AND isset($data['categorized_time']['over_time_policy']) ) {
+
+				//If we just check to make sure there are more than two regular time entries, then if its just one entry or the other on a specific day the user won't be able to know which it is.
+				//So not sure we have much choice, but to always display the Pay Code label.
+				if ( $data['regular_time'] > 0 AND isset($data['categorized_time']['regular_time_policy']) ) {
+					$pre_regular_time_x = $this->pdf->getX();
+					$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(8) );
+
+					//Count how many absence policy rows there are.
+					$regular_time_policy_total_rows = count($data['categorized_time']['regular_time_policy']);
+					foreach( $data['categorized_time']['regular_time_policy'] as $policy_column => $value ) {
+						//When showing Regular Time details, the majority of them will show the "Regular Time" label, which is somewhat redundant...
+						//So we check here to see if there is only one row on the day and if that label is 'Regular Time', if so don't use any labels.
+						$pay_code_label = $columns[$policy_column].': ';
+						if ( $regular_time_policy_total_rows == 1 AND strtolower($columns[$policy_column]) == 'regular time' ) {
+							$pay_code_label = '';
+						}
+						$this->pdf->Cell( $column_widths['regular_time'], ($line_h / $total_regular_time_rows), $pay_code_label . TTDate::getTimeUnit( $data[$policy_column] ), 1, 0, 'C', 1, '', 1);
+						$this->pdf->setXY( $pre_regular_time_x, ($this->pdf->getY() + ($line_h / $total_regular_time_rows)) );
+
+						$regular_time_x = $this->pdf->getX();
+					}
+					unset($pay_code_label);
+					$this->pdf->setXY( ($regular_time_x + $column_widths['regular_time']), $pre_punch_y);
+					$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(9) );
+				} else {
+					$this->pdf->Cell( $column_widths['regular_time'], $line_h, TTDate::getTimeUnit( $data['regular_time'] ), 1, 0, 'C', 1);
+				}
+
+				if ( $data['overtime_time'] > 0 AND isset($data['categorized_time']['over_time_policy']) ) {
 					$pre_over_time_x = $this->pdf->getX();
 					$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(8) );
 
 					//Count how many absence policy rows there are.
 					$over_time_policy_total_rows = count($data['categorized_time']['over_time_policy']);
 					foreach( $data['categorized_time']['over_time_policy'] as $policy_column => $value ) {
-						$this->pdf->Cell( $column_widths['over_time'], ($line_h / $total_over_time_rows), $columns[$policy_column].': '.TTDate::getTimeUnit( $data[$policy_column] ), 1, 0, 'C', 1);
+						$this->pdf->Cell( $column_widths['overtime_time'], ($line_h / $total_over_time_rows), $columns[$policy_column].': '.TTDate::getTimeUnit( $data[$policy_column] ), 1, 0, 'C', 1, '', 1);
 						$this->pdf->setXY( $pre_over_time_x, ($this->pdf->getY() + ($line_h / $total_over_time_rows)) );
 
 						$over_time_x = $this->pdf->getX();
 					}
-					$this->pdf->setXY( ($over_time_x + $column_widths['over_time']), $pre_punch_y);
+					$this->pdf->setXY( ($over_time_x + $column_widths['overtime_time']), $pre_punch_y);
 					$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(9) );
 				} else {
-					$this->pdf->Cell( $column_widths['over_time'], $line_h, TTDate::getTimeUnit( $data['over_time'] ), 1, 0, 'C', 1);
+					$this->pdf->Cell( $column_widths['overtime_time'], $line_h, TTDate::getTimeUnit( $data['overtime_time'] ), 1, 0, 'C', 1);
 				}
 
 				if ( $data['absence_time'] > 0 AND isset($data['categorized_time']['absence_policy']) ) {
@@ -1654,7 +1492,7 @@ class TimesheetDetailReport extends Report {
 					//Count how many absence policy rows there are.
 					$absence_policy_total_rows = count($data['categorized_time']['absence_policy']);
 					foreach( $data['categorized_time']['absence_policy'] as $policy_column => $value ) {
-						$this->pdf->Cell( $column_widths['absence_time'], ($line_h / $total_absence_rows), $columns[$policy_column].': '.TTDate::getTimeUnit( $data[$policy_column] ), 1, 0, 'C', 1);
+						$this->pdf->Cell( $column_widths['absence_time'], ($line_h / $total_absence_rows), $columns[$policy_column].': '.TTDate::getTimeUnit( $data[$policy_column] ), 1, 0, 'C', 1, '', 1);
 						$this->pdf->setXY( $pre_absence_time_x, ($this->pdf->getY() + ($line_h / $total_absence_rows)));
 					}
 
@@ -1664,7 +1502,8 @@ class TimesheetDetailReport extends Report {
 					$this->pdf->Cell( $column_widths['absence_time'], $line_h, TTDate::getTimeUnit( $data['absence_time'] ), 1, 0, 'C', 1);
 				}
 			} else {
-				$this->pdf->Cell( $column_widths['over_time'], $line_h, TTDate::getTimeUnit( $data['over_time'] ), 1, 0, 'C', 1);
+				$this->pdf->Cell( $column_widths['regular_time'], $line_h, TTDate::getTimeUnit( $data['regular_time'] ), 1, 0, 'C', 1);
+				$this->pdf->Cell( $column_widths['overtime_time'], $line_h, TTDate::getTimeUnit( $data['overtime_time'] ), 1, 0, 'C', 1);
 				$this->pdf->Cell( $column_widths['absence_time'], $line_h, TTDate::getTimeUnit( $data['absence_time'] ), 1, 0, 'C', 1);
 			}
 			$this->pdf->Ln( $line_h );
@@ -1675,22 +1514,21 @@ class TimesheetDetailReport extends Report {
 		$this->timesheet_totals['worked_time'] += $data['worked_time'];
 		$this->timesheet_totals['absence_time'] += $data['absence_time'];
 		$this->timesheet_totals['regular_time'] += $data['regular_time'];
-		$this->timesheet_totals['over_time'] += $data['over_time'];
+		$this->timesheet_totals['overtime_time'] += $data['overtime_time'];
 
 		$this->timesheet_week_totals['worked_time'] += $data['worked_time'];
 		$this->timesheet_week_totals['absence_time'] += $data['absence_time'];
 		$this->timesheet_week_totals['regular_time'] += $data['regular_time'];
-		$this->timesheet_week_totals['over_time'] += $data['over_time'];
+		$this->timesheet_week_totals['overtime_time'] += $data['overtime_time'];
 
 		//Debug::Text('Row: '. $this->counter_x .' I: '. $this->counter_i .' Max I: '. $this->max_i, __FILE__, __LINE__, __METHOD__, 10);
-		//if ( $this->counter_x % 7 == 0 OR $this->counter_i == $max_i ) { //This used to change the week every 7 days starting from the first date in the timesheet.
 		if ( TTDate::getDayOfWeek( (TTDate::getMiddleDayEpoch($data['time_stamp']) + 86400) ) == $data['start_week_day']
 				OR ( isset($prev_data['start_week_day']) AND $data['start_week_day'] != $prev_data['start_week_day'] )
 				OR $this->counter_i == $this->max_i ) {
 			$this->timesheetWeekTotal( $column_widths, $this->timesheet_week_totals );
 
 			unset($this->timesheet_week_totals);
-			$this->timesheet_week_totals = Misc::preSetArrayValues( NULL, array( 'worked_time', 'absence_time', 'regular_time', 'over_time' ), 0 );
+			$this->timesheet_week_totals = Misc::preSetArrayValues( NULL, array( 'worked_time', 'absence_time', 'regular_time', 'overtime_time' ), 0 );
 		}
 
 		$this->counter_i++;
@@ -1713,7 +1551,7 @@ class TimesheetDetailReport extends Report {
 		$this->pdf->Cell( $total_cell_width, $line_h, TTi18n::gettext('Week Total').': ', 0, 0, 'R', 0);
 		$this->pdf->Cell( $column_widths['worked_time'], $line_h, TTDate::getTimeUnit( $week_totals['worked_time'] ), 0, 0, 'C', 0);
 		$this->pdf->Cell( $column_widths['regular_time'], $line_h, TTDate::getTimeUnit( $week_totals['regular_time'] ), 0, 0, 'C', 0);
-		$this->pdf->Cell( $column_widths['over_time'], $line_h, TTDate::getTimeUnit( $week_totals['over_time'] ), 0, 0, 'C', 0);
+		$this->pdf->Cell( $column_widths['overtime_time'], $line_h, TTDate::getTimeUnit( $week_totals['overtime_time'] ), 0, 0, 'C', 0);
 		$this->pdf->Cell( $column_widths['absence_time'], $line_h, TTDate::getTimeUnit( $week_totals['absence_time'] ), 0, 0, 'C', 0);
 		$this->pdf->Ln();
 
@@ -1735,7 +1573,7 @@ class TimesheetDetailReport extends Report {
 		$this->pdf->Cell( $column_widths['out_punch_time_stamp'], $line_h, TTi18n::gettext('Overall Total').': ', 'T', 0, 'R', 0);
 		$this->pdf->Cell( $column_widths['worked_time'], $line_h, TTDate::getTimeUnit( $totals['worked_time'] ), 'T', 0, 'C', 0);
 		$this->pdf->Cell( $column_widths['regular_time'], $line_h, TTDate::getTimeUnit( $totals['regular_time'] ), 'T', 0, 'C', 0);
-		$this->pdf->Cell( $column_widths['over_time'], $line_h, TTDate::getTimeUnit( $totals['over_time'] ), 'T', 0, 'C', 0);
+		$this->pdf->Cell( $column_widths['overtime_time'], $line_h, TTDate::getTimeUnit( $totals['overtime_time'] ), 'T', 0, 'C', 0);
 		$this->pdf->Cell( $column_widths['absence_time'], $line_h, TTDate::getTimeUnit( $totals['absence_time'] ), 'T', 0, 'C', 0);
 		$this->pdf->Ln();
 
@@ -1885,7 +1723,7 @@ class TimesheetDetailReport extends Report {
 										'pay_period_start_date' => $pay_period_start_date,
 										'pay_period_end_date' => $pay_period_end_date,
 										'pay_period' => $pay_period,
-										'start_week_day' => $data['start_week_day'],
+										'start_week_day' => ( isset( $data['start_week_day'] ) ) ? $data['start_week_day'] : 0,
 										'time_stamp' => $blank_row_time_stamp,
 										'min_punch_time_stamp' => NULL,
 										'max_punch_time_stamp' => NULL,
@@ -1893,7 +1731,7 @@ class TimesheetDetailReport extends Report {
 										'out_punch_time' => NULL,
 										'worked_time' => NULL,
 										'regular_time' => NULL,
-										'over_time' => NULL,
+										'overtime_time' => NULL,
 										'absence_time' => NULL
 									);
 
@@ -1972,7 +1810,7 @@ class TimesheetDetailReport extends Report {
 				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $plf->getRecordCount(), NULL, TTi18n::getText('Retrieving Punch Data...') );
 				if ( $plf->getRecordCount() > 0 ) {
 					foreach( $plf as $key => $p_obj ) {
-						$this->form_data['user_date_total'][$p_obj->getColumn('user_id')]['punch_rows'][$p_obj->getColumn('pay_period_id')][TTDate::strtotime( $p_obj->getColumn('date_stamp'))][$p_obj->getPunchControlID()][$p_obj->getStatus()] = array( 'status_id' => $p_obj->getStatus(), 'type_id' => $p_obj->getType(), 'type_code' => $p_obj->getTypeCode(), 'time_stamp' => $p_obj->getTimeStamp() );
+						$this->form_data['user_date_total'][(int)$p_obj->getColumn('user_id')]['punch_rows'][(int)$p_obj->getColumn('pay_period_id')][(int)TTDate::strtotime($p_obj->getColumn('date_stamp'))][$p_obj->getPunchControlID()][$p_obj->getStatus()] = array( 'status_id' => $p_obj->getStatus(), 'type_id' => $p_obj->getType(), 'type_code' => $p_obj->getTypeCode(), 'time_stamp' => $p_obj->getTimeStamp() );
 						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 					}
 				}
@@ -1998,11 +1836,11 @@ class TimesheetDetailReport extends Report {
 										'line' => ($total_width * 0.025), //Was: 5
 										'date_stamp' => ($total_width * 0.10), //Was: 20
 										'dow' => ($total_width * 0.05), //Was: 10
-										'in_punch_time_stamp' => ($total_width * 0.10), //Was: 20
-										'out_punch_time_stamp' => ($total_width * 0.10), //Was: 20
+										'in_punch_time_stamp' => ($total_width * 0.08), //Was: 20
+										'out_punch_time_stamp' => ($total_width * 0.08), //Was: 20
 										'worked_time' => ($total_width * 0.10), //Was: 20
-										'regular_time' => ($total_width * 0.10), //Was: 20
-										'over_time' => ($total_width * 0.20), //Was: 40.6
+										'regular_time' => ($total_width * 0.17), //Was: 20
+										'overtime_time' => ($total_width * 0.17), //Was: 40.6
 										'absence_time' => ($total_width * 0.225), //Was: 45
 										);
 
@@ -2012,9 +1850,9 @@ class TimesheetDetailReport extends Report {
 
 						$user_data['data'] = Sort::arrayMultiSort( $user_data['data'], array( 'time_stamp' => SORT_ASC ) );
 
-						$this->timesheet_week_totals = Misc::preSetArrayValues( NULL, array( 'worked_time', 'absence_time', 'regular_time', 'over_time' ), 0 );
+						$this->timesheet_week_totals = Misc::preSetArrayValues( NULL, array( 'worked_time', 'absence_time', 'regular_time', 'overtime_time' ), 0 );
 						$this->timesheet_totals = array();
-						$this->timesheet_totals = Misc::preSetArrayValues( $this->timesheet_totals, array( 'worked_time', 'absence_time', 'regular_time', 'over_time' ), 0 );
+						$this->timesheet_totals = Misc::preSetArrayValues( $this->timesheet_totals, array( 'worked_time', 'absence_time', 'regular_time', 'overtime_time' ), 0 );
 
 						$this->counter_i = 1; //Overall row counter.
 						$this->counter_x = 1; //Row counter, starts over each week.
@@ -2031,7 +1869,7 @@ class TimesheetDetailReport extends Report {
 
 							if ( isset($this->form_data['pay_period'][$data['pay_period_id']]) ) {
 								//Debug::Arr( $data, 'Data: i: '. $this->counter_i .' x: '. $this->counter_x .' Max I: '. $this->max_i, __FILE__, __LINE__, __METHOD__, 10);
-								$data = Misc::preSetArrayValues( $data, array('time_stamp', 'in_punch_time_stamp', 'out_punch_time_stamp', 'worked_time', 'absence_time', 'regular_time', 'over_time' ), '--' );
+								$data = Misc::preSetArrayValues( $data, array('time_stamp', 'in_punch_time_stamp', 'out_punch_time_stamp', 'worked_time', 'absence_time', 'regular_time', 'overtime_time' ), '--' );
 
 								$data['start_week_day'] = $this->form_data['pay_period'][$data['pay_period_id']]['start_week_day'];
 

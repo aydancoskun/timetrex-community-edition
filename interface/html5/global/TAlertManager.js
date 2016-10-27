@@ -97,6 +97,7 @@ var TAlertManager = (function() {
 
 	var showAlert = function( content, title, callBack ) {
 
+
 		if ( !title ) {
 			title = $.i18n._( 'Message' );
 		}

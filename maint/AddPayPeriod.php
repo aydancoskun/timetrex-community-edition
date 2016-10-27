@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 8603 $
- * $Id: AddPayPeriod.php 8603 2012-12-14 01:36:15Z ipso $
- * $Date: 2012-12-13 17:36:15 -0800 (Thu, 13 Dec 2012) $
- */
+
 /*
  * Adds pay periods X hrs in advance, so schedules/shifts have something to attach to.
  * This file should/can be run as often as it needs to (once an hour)

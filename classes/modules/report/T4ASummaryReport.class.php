@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2095 $
- * $Id: Sort.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
- */
+
 
 /**
  * @package Modules\Report
@@ -106,7 +102,7 @@ class T4ASummaryReport extends Report {
 								);
 				break;
 			case 'time_period':
-				$retval = TTDate::getTimePeriodOptions();
+				$retval = TTDate::getTimePeriodOptions( FALSE ); //Exclude Pay Period options.
 				break;
 			case 'date_columns':
 				//$retval = TTDate::getReportDateOptions( NULL, TTi18n::getText('Date'), 13, TRUE );
@@ -643,7 +639,7 @@ class T4ASummaryReport extends Report {
 			$t619->transmitter_postal_code = ( isset($setup_data['postal_code']) AND $setup_data['postal_code'] != '' ) ? $setup_data['postal_code'] : $current_company->getPostalCode();
 			$t619->contact_name = $this->getUserObject()->getFullName();
 			$t619->contact_phone = $current_company->getWorkPhone();
-			$t619->contact_email = $this->getUserObject()->getWorkEmail();
+			$t619->contact_email = ( $this->getUserObject()->getWorkEmail() != '' ) ? $this->getUserObject()->getWorkEmail() : ( ( $this->getUserObject()->getHomeEmail() != '' ) ? $this->getUserObject()->getHomeEmail() : NULL );
 			$t619->company_name = $company_name;
 			$this->getFormObject()->addForm( $t619 );
 		}
@@ -690,8 +686,9 @@ class T4ASummaryReport extends Report {
 								'address1' => $user_obj->getAddress1(),
 								'address2' => $user_obj->getAddress2(),
 								'city' => $user_obj->getCity(),
-								'province' => $user_obj->getProvince(),
-								'employment_province' => $user_obj->getProvince(),
+								'province' => ( $user_obj->getProvince() != '00' ) ?  $user_obj->getProvince() : NULL,
+								'country' => Option::getByKey( $user_obj->getCountry(), $current_company->getOptions('country') ) ,
+								'employment_province' => ( $user_obj->getProvince() != '00' ) ?  $user_obj->getProvince() : NULL,
 								'postal_code' => $user_obj->getPostalCode(),
 								'sin' => $user_obj->getSIN(),
 								'employee_number' => $user_obj->getEmployeeNumber(),
@@ -801,13 +798,16 @@ class T4ASummaryReport extends Report {
 			$mime_type = 'applications/octet-stream'; //Force file to download.
 		} else {
 			$output_format = 'PDF';
-			$file_name = $this->file_name;
+			$file_name = $this->file_name.'.pdf';
 			$mime_type = $this->file_mime_type;
 		}
 
 		$output = $this->getFormObject()->output( $output_format );
+		if ( !is_array($output) ) {
+			return array( 'file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $output );
+		}
 
-		return array( 'file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $output );
+		return $output;
 	}
 
 	//Short circuit this function, as no postprocessing is required for exporting the data.

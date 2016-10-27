@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 15179 $
- * $Id: PayStubAmendmentFactory.class.php 15179 2014-11-17 16:48:55Z mikeb $
- * $Date: 2014-11-17 08:48:55 -0800 (Mon, 17 Nov 2014) $
- */
+
 require_once( 'Numbers/Words.php');
 
 /**
@@ -988,21 +984,27 @@ class PayStubAmendmentFactory extends Factory {
 	}
 
 	function Validate() {
-		if ( $this->validate_only == FALSE AND $this->getUser() == FALSE AND $this->Validator->hasError('user_id') == FALSE) {
-			$this->Validator->isTrue(		'user_id',
-											FALSE,
-											TTi18n::gettext('Invalid Employee'));
-		}
+		if ( $this->getDeleted() == FALSE ) {
+			if ( $this->validate_only == FALSE AND $this->getUser() == FALSE AND $this->Validator->hasError('user_id') == FALSE) {
+				$this->Validator->isTrue(		'user_id',
+												FALSE,
+												TTi18n::gettext('Invalid Employee'));
+			}
 
-		if ( is_object( $this->getUserObject() ) AND $this->getUserObject()->getHireDate() != '' AND TTDate::getMiddleDayEpoch( $this->getEffectiveDate() ) < TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) ) {
-			$this->Validator->isTrue(		'effective_date',
-											FALSE,
-											TTi18n::gettext('Effective date is before the employees hire date.'));
-		}
-		if ( is_object( $this->getUserObject() ) AND $this->getUserObject()->getTerminationDate() != '' AND TTDate::getMiddleDayEpoch( $this->getEffectiveDate() ) > TTDate::getMiddleDayEpoch( $this->getUserObject()->getTerminationDate() ) ) {
-			$this->Validator->isTrue(		'effective_date',
-											FALSE,
-											TTi18n::gettext('Effective date is after the employees termination date.'));
+			if ( is_object( $this->getUserObject() ) AND $this->getUserObject()->getHireDate() != '' AND TTDate::getMiddleDayEpoch( $this->getEffectiveDate() ) < TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) ) {
+				$this->Validator->isTrue(		'effective_date',
+												FALSE,
+												TTi18n::gettext('Effective date is before the employees hire date.'));
+			}
+			if ( is_object( $this->getUserObject() ) AND $this->getUserObject()->getTerminationDate() != '' AND TTDate::getMiddleDayEpoch( $this->getEffectiveDate() ) > TTDate::getMiddleDayEpoch( $this->getUserObject()->getTerminationDate() ) ) {
+				$this->Validator->isTrue(		'effective_date',
+												FALSE,
+												TTi18n::gettext('Effective date is after the employees termination date.'));
+			}
+
+			$this->Validator->isTrue(		'user_id',
+											$this->isUnique(),
+											TTi18n::gettext('Another Pay Stub Amendment already exists for the same employee, account, effective date and amount'));
 		}
 
 		//Only show this error if it wasn't already triggered earlier.
@@ -1038,12 +1040,6 @@ class PayStubAmendmentFactory extends Factory {
 												FALSE,
 												TTi18n::gettext('Invalid Amount, calculation is incorrect'));
 			}
-		}
-
-		if ( $this->getDeleted() == FALSE ) {
-			$this->Validator->isTrue(		'user_id',
-											$this->isUnique(),
-											TTi18n::gettext('Another Pay Stub Amendment already exists for the same employee, account, effective date and amount'));
 		}
 
 		//Check the status of any pay stub this is attached too. If its PAID then don't allow editing/deleting.

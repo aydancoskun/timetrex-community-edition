@@ -35,10 +35,11 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'Rounding Policy' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_rounding_policy': $.i18n._( 'Rounding Policy' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
+
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIRoundIntervalPolicy' )),
@@ -53,72 +54,81 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_rounding_policy = this.edit_view_tab.find( '#tab_rounding_policy' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_rounding_policy_column1 = tab_rounding_policy.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_rounding_policy_column1 );
 
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: 359} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab0_column1, '' );
+		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_rounding_policy_column1, '' );
+		form_item_input.parent().width( '45%' );
+
+
+		// Description
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
+		form_item_input.TTextArea( { field: 'description', width: '100%' } );
+		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_rounding_policy_column1, '', null, null, true );
+
+		form_item_input.parent().width( '45%' );
 
 		//Punch Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'punch_type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.punch_type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Punch Type' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Punch Type' ), form_item_input, tab_rounding_policy_column1 );
 
 		//Round Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'round_type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.round_type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Round Type' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Round Type' ), form_item_input, tab_rounding_policy_column1 );
 
 		// Interval
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'round_interval', width: 149, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'round_interval', width: 50, need_parser_sec: true} );
 
 		var widgetContainer = $( "<div class='widget-h-box'></div>" );
 		var label = $( "<span class='widget-right-label'> " + $.i18n._('ie') + ' : '+ LocalCacheData.getLoginUserPreference().time_unit_format_display + "</span>" );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Interval' ), form_item_input, tab0_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Interval' ), form_item_input, tab_rounding_policy_column1, '', widgetContainer );
 
 		//Grace Period
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'grace', width: 149, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'grace', width: 50, need_parser_sec: true} );
 
 		widgetContainer = $( "<div class='widget-h-box'></div>" );
 		label = $( "<span class='widget-right-label'> " + $.i18n._('ie') + ' : '+ LocalCacheData.getLoginUserPreference().time_unit_format_display + "</span>" );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Grace Period' ), form_item_input, tab0_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Grace Period' ), form_item_input, tab_rounding_policy_column1, '', widgetContainer );
 
 		// Strict Schedule
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( {field: 'strict'} );
-		this.addEditFieldToColumn( $.i18n._( 'Strict Schedule' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Strict Schedule' ), form_item_input, tab_rounding_policy_column1, '' );
 
 		//SEPARATED
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( { label: $.i18n._( 'Only Round Punches Within The Following Window' )} );
-		this.addEditFieldToColumn( $.i18n._( '' ), form_item_input, tab0_column1, '', null, true, false, 'sp_box' );
+		this.addEditFieldToColumn( $.i18n._( '' ), form_item_input, tab_rounding_policy_column1, '', null, true, false, 'sp_box' );
 
 		//Window Based On
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'condition_type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.condition_type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Window Based On' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Window Based On' ), form_item_input, tab_rounding_policy_column1, '', null, true );
 
 		// Static Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -129,7 +139,7 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Static Time' ), form_item_input, tab0_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Static Time' ), form_item_input, tab_rounding_policy_column1, '', widgetContainer, true );
 
 		// Static Total Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -140,7 +150,7 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Static Total Time' ), form_item_input, tab0_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Static Total Time' ), form_item_input, tab_rounding_policy_column1, '', widgetContainer, true );
 
 		// Start Window
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -151,7 +161,7 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Start Window' ), form_item_input, tab0_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Start Window' ), form_item_input, tab_rounding_policy_column1, '', widgetContainer, true );
 
 		// Stop Window
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -162,7 +172,7 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Stop Window' ), form_item_input, tab0_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Stop Window' ), form_item_input, tab_rounding_policy_column1, '', widgetContainer, true );
 
 	},
 
@@ -291,6 +301,8 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 			condition_stop_window.css( 'display', 'block' );
 
 		}
+
+		this.editFieldResize();
 
 	},
 

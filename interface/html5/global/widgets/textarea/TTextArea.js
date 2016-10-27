@@ -138,11 +138,17 @@
 
 			field = o.field;
 
-			if ( o.width > 0 ) {
+			if ( o.width && (o.width > 0 || o.width.indexOf( '%' ) > 0) ) {
 				$this.width( o.width );
 			}
-			if ( o.height > 0 ) {
+			if ( o.height && (o.height > 0 || o.height.indexOf( '%' ) > 0) ) {
 				$this.height( o.height );
+			}
+
+			if ( o.rows > 0 ) {
+				$this.attr( 'rows',  o.rows );
+			}else{
+				$this.attr( 'rows',  3 );
 			}
 
 			if ( o.style ) {

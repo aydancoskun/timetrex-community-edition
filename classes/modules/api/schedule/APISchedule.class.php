@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2196 $
- * $Id: APISchedule.class.php 2196 2008-10-14 16:08:54Z ipso $
- * $Date: 2008-10-14 09:08:54 -0700 (Tue, 14 Oct 2008) $
- */
+
 
 /**
  * @package API\Schedule
@@ -366,8 +362,8 @@ class APISchedule extends APIFactory {
 							OR
 								(
 								$this->getPermissionObject()->Check('schedule', 'edit')
-									OR ( $this->getPermissionObject()->Check('schedule', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUserDateObject()->getUser() ) === TRUE )
-									OR ( $this->getPermissionObject()->Check('schedule', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('schedule', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('schedule', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -425,9 +421,9 @@ class APISchedule extends APIFactory {
 					//This is important when adding/editing a scheduled shift, without it there can be issues calculating exceptions
 					//because if a specific schedule was modified that caused the day to change, smartReCalculate
 					//may only be able to recalculate a single day, instead of both.
-					$old_user_date_id = $lf->getUserDateID();
-					if ( $old_user_date_id != 0 ) {
-						$lf->setUserDateID( $old_user_date_id );
+					$old_date_stamp = $lf->getDateStamp();
+					if ( $old_date_stamp != 0 ) {
+						$lf->setOldDateStamp( $old_date_stamp );
 					}
 
 					$row['company_id'] = $this->getCurrentCompanyObject()->getId();	 //This prevents a validation error if company_id is FALSE.
@@ -525,8 +521,8 @@ class APISchedule extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if ( $this->getPermissionObject()->Check('schedule', 'delete')
-								OR ( $this->getPermissionObject()->Check('schedule', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUserDateObject()->getUser() ) === TRUE )
-								OR ( $this->getPermissionObject()->Check('schedule', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )) {
+								OR ( $this->getPermissionObject()->Check('schedule', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
+								OR ( $this->getPermissionObject()->Check('schedule', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )) {
 							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
@@ -598,7 +594,7 @@ class APISchedule extends APIFactory {
 	 * @param integer $schedule_policy_id Schedule policy ID
 	 * @return array
 	 */
-	function getScheduleTotalTime( $start, $end, $schedule_policy_id = NULL ) {
+	function getScheduleTotalTime( $start, $end, $schedule_policy_id = NULL, $user_id = NULL ) {
 		Debug::text('Calculating total time for scheduled shift... Start: '. $start .' End: '. $end, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $start == '' ) {
@@ -611,6 +607,12 @@ class APISchedule extends APIFactory {
 
 		$sf = TTnew( 'ScheduleFactory' );
 
+		//This helps calculate the schedule total time based on schedule policy or policy groups.
+		$sf->setCompany( $this->getCurrentCompanyObject()->getId() );
+		if ( !is_array($user_id) AND $user_id > 0 ) {
+			$sf->setUser( $user_id );
+		}
+		
 		//Prefix the current date to the template, this avoids issues with parsing 24hr clock only, ie: 0600
 		//Flex was only sending the times before, so the above worked, but if date is being sent too then it fails.
 		//$date_epoch = time();
@@ -667,13 +669,13 @@ class APISchedule extends APIFactory {
 				$dst_rows[$src_row_key]['id'] = $src_rows[$src_row_key]['id'];
 				$dst_rows[$src_row_key]['user_id'] = $src_rows[$src_row_key]['user_id'];
 				//Need to set columns like user_date_id to NULL so its not overridden in setScheduel().
-				$dst_rows[$src_row_key]['start_date'] = $dst_rows[$src_row_key]['end_date'] = $dst_rows[$src_row_key]['user_date_id'] = $dst_rows[$src_row_key]['pay_period_id'] = NULL;
+				$dst_rows[$src_row_key]['start_date'] = $dst_rows[$src_row_key]['end_date'] = $dst_rows[$src_row_key]['date_stamp'] = $dst_rows[$src_row_key]['pay_period_id'] = NULL;
 
 				$dst_rows[$dst_row_key] = $src_rows[$src_row_key];
 				$dst_rows[$dst_row_key]['id'] = $src_rows[$dst_row_key]['id'];
 				$dst_rows[$dst_row_key]['user_id'] = $src_rows[$dst_row_key]['user_id'];
 				//Need to set columns like user_date_id to NULL so its not overridden in setScheduel().
-				$dst_rows[$dst_row_key]['start_date'] = $dst_rows[$dst_row_key]['end_date'] = $dst_rows[$dst_row_key]['user_date_id'] = $dst_rows[$dst_row_key]['pay_period_id'] = NULL;
+				$dst_rows[$dst_row_key]['start_date'] = $dst_rows[$dst_row_key]['end_date'] = $dst_rows[$dst_row_key]['date_stamp'] = $dst_rows[$dst_row_key]['pay_period_id'] = NULL;
 			}
 
 			//Debug::Arr($dst_rows, 'DST Rows: ', __FILE__, __LINE__, __METHOD__, 10);

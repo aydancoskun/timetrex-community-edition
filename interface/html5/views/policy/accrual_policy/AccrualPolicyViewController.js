@@ -8,6 +8,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 	length_of_service_unit_array: null,
 	date_api: null,
 	accrual_policy_milestone_api: null,
+	accrual_policy_user_modifier_api: null,
+
+	sub_accrual_policy_user_modifier_view_controller: null,
 	initialize: function() {
 		this._super( 'initialize' );
 		this.edit_view_tpl = 'AccrualPolicyEditView.html';
@@ -20,6 +23,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		this.api = new (APIFactory.getAPIClass( 'APIAccrualPolicy' ))();
 		this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
 		this.accrual_policy_milestone_api = new (APIFactory.getAPIClass( 'APIAccrualPolicyMilestone' ))();
+		this.accrual_policy_user_modifier_api = new (APIFactory.getAPIClass( 'APIAccrualPolicyUserModifier' ))();
 		this.render();
 		this.buildContextMenu();
 
@@ -28,9 +32,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 
 	},
 
-	onContentMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function( context_btn, menu_name ) {
 
-		this._super( 'onContentMenuClick', context_btn, menu_name );
+		this._super( 'onContextMenuClick', context_btn, menu_name );
 
 		var id;
 		if ( Global.isSet( menu_name ) ) {
@@ -255,6 +259,11 @@ AccrualPolicyViewController = BaseViewController.extend( {
 
 	setDefaultMenu: function( doNotSetFocus ) {
 
+        //Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+        if (!this.context_menu_array) {
+            return;
+        }
+
 		this._super( 'setDefaultMenu', doNotSetFocus );
 
 		var len = this.context_menu_array.length;
@@ -343,13 +352,13 @@ AccrualPolicyViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		var tab_2_label = this.edit_view.find( 'a[ref=tab2]' );
+		this.setTabLabels( {
+			'tab_accrual_policy': $.i18n._( 'Accrual Policy' ),
+			'tab_length_of_service_milestones': $.i18n._( 'Length Of Service Milestones' ),
+			'tab_employee_settings': $.i18n._( 'Employee Settings' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
 
-		tab_0_label.text( $.i18n._( 'Accrual Policy' ) );
-		tab_1_label.text( $.i18n._( 'Length Of Service Milestones' ) );
-		tab_2_label.text( $.i18n._( 'Audit' ) );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIAccrualPolicy' )),
@@ -364,108 +373,157 @@ AccrualPolicyViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_accrual_policy = this.edit_view_tab.find( '#tab_accrual_policy' );
+		var tab_length_of_service_milestones = this.edit_view_tab.find( '#tab_length_of_service_milestones' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_accrual_policy_column1 = tab_accrual_policy.find( '.first-column' );
+		var tab_length_of_service_milestones_column1 = tab_length_of_service_milestones.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_accrual_policy_column1 );
 
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab0_column1, '' );
+		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_accrual_policy_column1, '' );
+
+		form_item_input.parent().width( '45%' );
+
+
+		// Description
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
+		form_item_input.TTextArea( { field: 'description', width: '100%' } );
+		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_accrual_policy_column1, '', null, null, true );
+
+		form_item_input.parent().width( '45%' );
 
 		//Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'type_id', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_accrual_policy_column1 );
 
-		//Display Balance on Pay Stub
-		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'enable_pay_stub_balance_display'} );
-		this.addEditFieldToColumn( $.i18n._( 'Display Balance on Pay Stub' ), form_item_input, tab0_column1 );
+
+		// Contributing Shift
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APIContributingShiftPolicy' )),
+			allow_multiple_selection: false,
+			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
+			show_search_inputs: true,
+			set_empty: true,
+			set_default: true,
+			field: 'contributing_shift_policy_id'
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Contributing Shift Policy' ), form_item_input, tab_accrual_policy_column1, '', null, true );
+
+		// Accrual Account
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APIAccrualPolicyAccount' )),
+			allow_multiple_selection: false,
+			layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
+			show_search_inputs: true,
+			set_empty: true,
+			set_default: true,
+			field: 'accrual_policy_account_id',
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Accrual Account' ), form_item_input, tab_accrual_policy_column1 );
+
+
+
+		//Length of Service contributing pay codes.
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APIContributingPayCodePolicy' )),
+			allow_multiple_selection: false,
+			layout_name: ALayoutIDs.CONTRIBUTING_PAY_CODE_POLICY,
+			show_search_inputs: true,
+			set_empty: true,
+			set_default: true,
+			field: 'length_of_service_contributing_pay_code_policy_id'
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Length Of Service Hours Based On' ), form_item_input, tab_length_of_service_milestones_column1, '', null, true );
 
 		//Frequency In Which To Apply Time to Employee Records
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( {label: $.i18n._( 'Frequency In Which To Apply Time to Employee Records' )} );
-		this.addEditFieldToColumn( null, form_item_input, tab0_column1, '', null, true, false, 'separated_1' );
+		this.addEditFieldToColumn( null, form_item_input, tab_accrual_policy_column1, '', null, true, false, 'separated_1' );
 
 		//Frequency
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'apply_frequency_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.apply_frequency_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Frequency' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Frequency' ), form_item_input, tab_accrual_policy_column1, '', null, true );
 
 		//Employee's Hire Date
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( {field: 'apply_frequency_hire_date'} );
-		this.addEditFieldToColumn( $.i18n._( 'Employee\'s Hire Date' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Employee\'s Hire Date' ), form_item_input, tab_accrual_policy_column1, '', null, true );
 
 		//Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'apply_frequency_month'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.month_of_year_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Month' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Month' ), form_item_input, tab_accrual_policy_column1, '', null, true );
 
 		//Day Of Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'apply_frequency_day_of_month'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.day_of_month_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Day of Month' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Day of Month' ), form_item_input, tab_accrual_policy_column1, '', null, true );
 
 		//Day Of Week
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'apply_frequency_day_of_week'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $.extend( {}, $this.day_of_week_array ) ) );
-		this.addEditFieldToColumn( $.i18n._( 'Day Of Week' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Day Of Week' ), form_item_input, tab_accrual_policy_column1, '', null, true );
 
 		// After Minimum Employed Days
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'minimum_employed_days', width: 51} );
-		this.addEditFieldToColumn( $.i18n._( 'After Minimum Employed Days' ), form_item_input, tab0_column1, '', null, true );
+		form_item_input.TTextInput( {field: 'minimum_employed_days', width: 30} );
+		this.addEditFieldToColumn( $.i18n._( 'After Minimum Employed Days' ), form_item_input, tab_accrual_policy_column1, '', null, true );
 
-		var tab0_column2 = tab0.find( '.second-column' );
+		var tab_accrual_policy_column2 = tab_accrual_policy.find( '.second-column' );
 
-		this.edit_view_tabs[0].push( tab0_column2 );
+		this.edit_view_tabs[0].push( tab_accrual_policy_column2 );
 
 		//Milestone Rollover Based On
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( {label: $.i18n._( 'Milestone Rollover Based On' )} );
-		this.addEditFieldToColumn( null, form_item_input, tab0_column2, '', null, true, false, 'separated_2' );
+		this.addEditFieldToColumn( null, form_item_input, tab_accrual_policy_column2, '', null, true, false, 'separated_2' );
 
 		//Employee's Hire Date
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( {field: 'milestone_rollover_hire_date'} );
-		this.addEditFieldToColumn( $.i18n._( 'Employee\'s Hire Date' ), form_item_input, tab0_column2, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Employee\'s Hire Date' ), form_item_input, tab_accrual_policy_column2, '', null, true );
 
 		//Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {field: 'milestone_rollover_month'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.month_of_year_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Month' ), form_item_input, tab0_column2, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Month' ), form_item_input, tab_accrual_policy_column2, '', null, true );
 
 		//Day Of Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
 		form_item_input.TComboBox( {field: 'milestone_rollover_day_of_month'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.day_of_month_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Day of Month' ), form_item_input, tab0_column2, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Day of Month' ), form_item_input, tab_accrual_policy_column2, '', null, true );
 
-		var tab1 = this.edit_view_tab.find( '#tab1' );
+		var tab_length_of_service_milestones = this.edit_view_tab.find( '#tab_length_of_service_milestones' );
 
 		//Inside editor
 
-		var inside_editor_div = tab1.find( '.inside-editor-div' );
+		var inside_editor_div = tab_length_of_service_milestones.find( '.inside-editor-div' );
 		var args = {
 			length_of_service: $.i18n._( 'Length Of Service' ),
 			accrual_rate: $.i18n._( 'Accrual Rate/Year' ),
@@ -498,6 +556,8 @@ AccrualPolicyViewController = BaseViewController.extend( {
 			this.edit_view_form_item_dic['milestone_rollover_month'].css( 'display', 'block' );
 			this.edit_view_form_item_dic['milestone_rollover_day_of_month'].css( 'display', 'block' );
 		}
+
+		this.editFieldResize();
 	},
 
 	onApplyFrequencyHireDate: function() {
@@ -515,7 +575,11 @@ AccrualPolicyViewController = BaseViewController.extend( {
 				this.edit_view_form_item_dic['apply_frequency_month'].css( 'display', 'none' );
 				this.edit_view_form_item_dic['apply_frequency_day_of_month'].css( 'display', 'none' );
 			}
+
+			this.editFieldResize();
 		}
+
+
 	},
 
 	onApplyFrequencyChange: function( arg ) {
@@ -548,6 +612,8 @@ AccrualPolicyViewController = BaseViewController.extend( {
 			this.edit_view_form_item_dic['apply_frequency_day_of_week'].css( 'display', 'block' );
 		}
 
+		this.editFieldResize();
+
 	},
 
 	onTypeChange: function() {
@@ -558,12 +624,15 @@ AccrualPolicyViewController = BaseViewController.extend( {
 
 		if ( this.current_edit_record['type_id'] === 10 ) {
 			$( this.edit_view_tab.find( 'ul li' )[1] ).hide();
+			$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
 			this.edit_view_tab.tabs( 'select', 0 );
-			this.edit_view_tab.find( '#tab0' ).find( '.second-column' ).css( 'display', 'none' );
-			this.edit_view_tab.find( '#tab0' ).find( '.first-column' ).addClass( 'full-width-column' );
+			this.edit_view_tab.find( '#tab_accrual_policy' ).find( '.second-column' ).css( 'display', 'none' );
+			this.edit_view_tab.find( '#tab_accrual_policy' ).find( '.first-column' ).addClass( 'full-width-column' );
 			this.edit_view_form_item_dic['separated_1'].css( 'display', 'none' );
 			this.edit_view_form_item_dic['apply_frequency_id'].css( 'display', 'none' );
 			this.edit_view_form_item_dic['minimum_employed_days'].css( 'display', 'none' );
+
+			this.edit_view_form_item_dic['contributing_shift_policy_id'].css( 'display', 'none' );
 
 			this.onApplyFrequencyChange( false );
 
@@ -571,12 +640,15 @@ AccrualPolicyViewController = BaseViewController.extend( {
 
 			if ( !this.is_mass_editing ) {
 				$( this.edit_view_tab.find( 'ul li' )[1] ).show();
+				$( this.edit_view_tab.find( 'ul li' )[2] ).show();
 			}
-			this.edit_view_tab.find( '#tab0' ).find( '.second-column' ).css( 'display', 'block' );
-			this.edit_view_tab.find( '#tab0' ).find( '.first-column' ).removeClass( 'full-width-column' );
+			this.edit_view_tab.find( '#tab_accrual_policy' ).find( '.second-column' ).css( 'display', 'block' );
+			this.edit_view_tab.find( '#tab_accrual_policy' ).find( '.first-column' ).removeClass( 'full-width-column' );
 			this.edit_view_form_item_dic['separated_1'].css( 'display', 'block' );
 			this.edit_view_form_item_dic['apply_frequency_id'].css( 'display', 'block' );
 			this.edit_view_form_item_dic['minimum_employed_days'].css( 'display', 'block' );
+
+			this.edit_view_form_item_dic['contributing_shift_policy_id'].css( 'display', 'none' );
 
 			this.onApplyFrequencyChange();
 
@@ -586,9 +658,14 @@ AccrualPolicyViewController = BaseViewController.extend( {
 
 			if ( !this.is_mass_editing ) {
 				$( this.edit_view_tab.find( 'ul li' )[1] ).show();
+				$( this.edit_view_tab.find( 'ul li' )[2] ).show();
 			}
-			this.edit_view_tab.find( '#tab0' ).find( '.second-column' ).css( 'display', 'block' );
-			this.edit_view_tab.find( '#tab0' ).find( '.first-column' ).removeClass( 'full-width-column' );
+			this.edit_view_tab.find( '#tab_accrual_policy' ).find( '.second-column' ).css( 'display', 'block' );
+			this.edit_view_tab.find( '#tab_accrual_policy' ).find( '.first-column' ).removeClass( 'full-width-column' );
+
+			this.edit_view_form_item_dic['contributing_shift_policy_id'].css( 'display', 'block' );
+
+
 			this.edit_view_form_item_dic['separated_1'].css( 'display', 'block' );
 			this.edit_view_form_item_dic['apply_frequency_id'].css( 'display', 'none' );
 			this.edit_view_form_item_dic['minimum_employed_days'].css( 'display', 'block' );
@@ -597,6 +674,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 
 		}
 
+		this.editFieldResize();
 		this.setAccrualRageFormat();
 
 	},
@@ -629,7 +707,6 @@ AccrualPolicyViewController = BaseViewController.extend( {
 	},
 
 	onFormItemChange: function( target, doNotValidate ) {
-
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 		var key = target.getField();
@@ -656,6 +733,31 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		if ( !doNotValidate ) {
 			this.validate();
 		}
+
+	},
+
+
+	isDisplayLengthOfServiceHoursBasedOn: function() {
+		var len = this.editor.rows_widgets_array.length;
+
+		var count = 0;
+
+		for ( var i = 0; i < len; i++ ) {
+			var row = this.editor.rows_widgets_array[i];
+			if ( row['length_of_service_unit_id'].getValue() === 50 ) {
+				count++;
+			}
+
+		}
+
+		if ( count === 0 ) {
+			this.edit_view_form_item_dic['length_of_service_contributing_pay_code_policy_id'].css('display', 'none');
+			this.edit_view_tab.find( '#tab_length_of_service_milestones' ).find( '.first-column' ).css('border', 'none')
+		} else {
+			this.edit_view_form_item_dic['length_of_service_contributing_pay_code_policy_id'].css('display', 'block');
+			this.edit_view_tab.find( '#tab_length_of_service_milestones' ).find( '.first-column' ).css('border', '1px solid #c7c7c7');
+		}
+
 
 	},
 
@@ -705,6 +807,10 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		form_item_combobox.TComboBox( {field: 'length_of_service_unit_id'} );
 		form_item_combobox.setSourceData( Global.addFirstItemToArray( this.parent_controller.length_of_service_unit_array ) );
 		form_item_combobox.setValue( data.length_of_service_unit_id ? data.length_of_service_unit_id : 10 );
+
+		form_item_combobox.bind( 'formItemChange', function( e, target ) {
+			$this.parent_controller.isDisplayLengthOfServiceHoursBasedOn();
+		} );
 
 		this.setWidgetEnableBaseOnParentController( form_item_input );
 		this.setWidgetEnableBaseOnParentController( form_item_combobox );
@@ -801,6 +907,8 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		row.remove();
 		this.rows_widgets_array.splice( index, 1 );
 		this.removeLastRowLine();
+
+		this.parent_controller.isDisplayLengthOfServiceHoursBasedOn();
 	},
 
 	insideEditorGetValue: function( current_edit_item_id ) {
@@ -829,7 +937,6 @@ AccrualPolicyViewController = BaseViewController.extend( {
 	},
 
 	setEditViewDataDone: function() {
-
 		this._super( 'setEditViewDataDone' );
 
 		this.onApplyFrequencyChange();
@@ -840,7 +947,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 
 		this.initInsideEditorData();
 
+
 	},
+
 
 	initInsideEditorData: function() {
 
@@ -851,6 +960,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		if ( ( !this.current_edit_record || !this.current_edit_record.id ) && !this.copied_record_id ) {
 			$this.editor.removeAllRows();
 			$this.editor.addRow();
+			$this.isDisplayLengthOfServiceHoursBasedOn();
 
 		} else {
 
@@ -867,6 +977,8 @@ AccrualPolicyViewController = BaseViewController.extend( {
 				} else if ( data.length > 0 ) {
 					$this.editor.setValue( data );
 				}
+
+				$this.isDisplayLengthOfServiceHoursBasedOn();
 
 			}} );
 
@@ -933,6 +1045,12 @@ AccrualPolicyViewController = BaseViewController.extend( {
 			$this.setErrorTips( result );
 			$this.setErrorMenu();
 		}
+	},
+
+	removeEditView: function() {
+
+		this._super( 'removeEditView' );
+		this.sub_accrual_policy_user_modifier_view_controller = null;
 	},
 
 	onSaveAndContinueResult: function( result ) {
@@ -1143,16 +1261,18 @@ AccrualPolicyViewController = BaseViewController.extend( {
 	},
 
 	setTabStatus: function() {
-
 		if ( this.is_mass_editing ) {
-			$( this.edit_view_tab.find( 'ul li' )[1] ).hide();
-			$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
+			$( this.edit_view_tab.find( 'ul li a[ref="tab_length_of_service_milestones"]' ) ).parent().hide();
+			$( this.edit_view_tab.find( 'ul li a[ref="tab_employee_settings"]' ) ).parent().hide();
+			$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
 			this.edit_view_tab.tabs( 'select', 0 );
 		} else {
+
+			$( this.edit_view_tab.find( 'ul li a[ref="tab_employee_settings"]' ) ).parent().show();
 			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li' )[2] ).show();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().show();
 			} else {
-				$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
 				this.edit_view_tab.tabs( 'select', 0 );
 			}
 
@@ -1163,22 +1283,45 @@ AccrualPolicyViewController = BaseViewController.extend( {
 	},
 
 	onTabShow: function( e, ui ) {
-
 		var key = this.edit_view_tab_selected_index;
 		this.editFieldResize( key );
 		if ( !this.current_edit_record ) {
 			return;
 		}
 
-		if ( this.edit_view_tab_selected_index === 2 ) {
+		if ( this.edit_view_tab_selected_index === 3 ) {
 
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab2' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_audit' );
 			} else {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
+		} else if ( this.edit_view_tab_selected_index === 2 ) {
+
+			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
+
+				if ( this.current_edit_record.id ) {
+					this.edit_view_tab.find( '#tab_employee_settings' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
+					this.initSubAccrualPolicyUserModifier();
+				} else {
+					this.edit_view_tab.find( '#tab_employee_settings' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
+					this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
+				}
+
+
+			} else {
+				this.edit_view_tab.find( '#tab_employee_settings' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
+				this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
+
+			}
+
+
+
 		} else {
 			this.buildContextMenu( true );
 			this.setEditMenu();
@@ -1189,13 +1332,79 @@ AccrualPolicyViewController = BaseViewController.extend( {
 	initTabData: function() {
 
 		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 2 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab2' );
+
+			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
+
+				if ( this.current_edit_record.id ) {
+					this.edit_view_tab.find( '#tab_employee_settings' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+					this.initSubAccrualPolicyUserModifier();
+				} else {
+					this.edit_view_tab.find( '#tab_employee_settings' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+					this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
+				}
+
+				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
+
+
 			} else {
-				this.edit_view_tab.find( '#tab2' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_employee_settings' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
+				this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
+
+			}
+
+
+
+		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 3 ) {
+			if ( this.current_edit_record.id ) {
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_audit' );
+			} else {
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
+		}
+	},
+
+	initSubAccrualPolicyUserModifier: function() {
+
+		var $this = this;
+
+		if ( this.sub_accrual_policy_user_modifier_view_controller ) {
+			this.sub_accrual_policy_user_modifier_view_controller.buildContextMenu( true );
+			this.sub_accrual_policy_user_modifier_view_controller.setDefaultMenu();
+			$this.sub_accrual_policy_user_modifier_view_controller.parent_key = 'accrual_policy_id';
+			$this.sub_accrual_policy_user_modifier_view_controller.parent_value = $this.current_edit_record.id;
+			$this.sub_accrual_policy_user_modifier_view_controller.parent_edit_record = $this.current_edit_record;
+			$this.sub_accrual_policy_user_modifier_view_controller.initData(); //Init data in this parent view
+			return;
+		}
+
+		Global.loadScriptAsync( 'views/policy/accrual_policy/AccrualPolicyUserModifierViewController.js', function() {
+
+			var tab_accrual_policy = $this.edit_view_tab.find( '#tab_employee_settings' );
+
+			var firstColumn = tab_accrual_policy.find( '.first-column-sub-view' );
+
+			Global.trackView( 'Sub' + 'AccrualPolicyUserModifier' + 'View' );
+			AccrualPolicyUserModifierViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
+
+		} );
+
+		function beforeLoadView( tpl ) {
+			var args = { parent_view: 'accrual_policy' };
+
+			return _.template( tpl, args );
+		}
+
+		function afterLoadView( subViewController ) {
+
+			$this.sub_accrual_policy_user_modifier_view_controller = subViewController;
+			$this.sub_accrual_policy_user_modifier_view_controller.parent_key = 'accrual_policy_id';
+			$this.sub_accrual_policy_user_modifier_view_controller.parent_value = $this.current_edit_record.id;
+			$this.sub_accrual_policy_user_modifier_view_controller.parent_edit_record = $this.current_edit_record;
+			$this.sub_accrual_policy_user_modifier_view_controller.parent_view_controller = $this;
+			$this.sub_accrual_policy_user_modifier_view_controller.initData(); //Init data in this parent view
 		}
 	}
 

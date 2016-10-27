@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14854 $
- * $Id: StationListFactory.class.php 14854 2014-10-22 14:57:54Z mikeb $
- * $Date: 2014-10-22 07:57:54 -0700 (Wed, 22 Oct 2014) $
- */
+
 
 /**
  * @package Core
@@ -326,6 +322,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		$ulf = new UserListFactory();
 		$ulf->getById( $user_id );
 		if ( $ulf->getRecordCount() != 1 ) {
+			Debug::text('User ID does not exist: '. $user_id .' returning FALSE!', __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
 		}
 

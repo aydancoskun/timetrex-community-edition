@@ -32,6 +32,16 @@ ALayoutIDs.ACCRUAL_BALANCE = 'global_accrual_balance';
 
 ALayoutIDs.ACCRUAL_POLICY = 'global_accrual';
 
+ALayoutIDs.ACCRUAL_POLICY_ACCOUNT = 'global_accrual_policy_account';
+
+ALayoutIDs.CONTRIBUTING_SHIFT_POLICY = 'global_contributing_shift_policy';
+
+ALayoutIDs.CONTRIBUTING_PAY_CODE_POLICY = 'global_contributing_pay_code_policy';
+
+ALayoutIDs.PAY_CODE = 'global_pay_code';
+
+ALayoutIDs.PAY_FORMULA_POLICY = 'global_pay_formula_policy';
+
 ALayoutIDs.AREA_POLICY = 'global_area_policy';
 
 ALayoutIDs.BRANCH = 'global_branch';
@@ -51,6 +61,9 @@ ALayoutIDs.COMPANY = 'global_company';
 ALayoutIDs.COMPANY_DEDUCTION = 'global_deduction';
 
 ALayoutIDs.CURRENCY = 'global_currency';
+
+
+ALayoutIDs.CURRENCY_RATE = 'global_currency_rate';
 
 ALayoutIDs.DEPARTMENT = 'global_department';
 
@@ -80,6 +93,8 @@ ALayoutIDs.JOB = 'global_job';
 
 ALayoutIDs.JOB_ITEM = 'global_job_item';
 
+ALayoutIDs.JOB_ITEM_AMENDMENT = 'global_job_item_amendment';
+
 ALayoutIDs.JOB_TITLE = 'global_job_title';
 
 ALayoutIDs.ETHNIC_GROUP = 'global_ethnic_group';
@@ -97,6 +112,8 @@ ALayoutIDs.MEAL_POLICY = 'global_meal';
 ALayoutIDs.MESSAGE = 'global_message';
 
 ALayoutIDs.OTHER_FIELD = 'global_other_field';
+
+ALayoutIDs.REGULAR_TIME_POLICY = 'global_regular_time';
 
 ALayoutIDs.OVER_TIME_POLICY = 'global_over_time';
 
@@ -149,6 +166,8 @@ ALayoutIDs.STATION = 'global_station';
 ALayoutIDs.TAX_POLICY = 'global_tax_policy';
 
 ALayoutIDs.TIMESHEET = 'global_timesheet';
+
+ALayoutIDs.ABSENCE = 'global_absence';
 
 ALayoutIDs.TIMESHEET_AUTHORIZATION = 'global_timesheet_authorization';
 

@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2196 $
- * $Id: APIOverTimePolicy.class.php 2196 2008-10-14 16:08:54Z ipso $
- * $Date: 2008-10-14 09:08:54 -0700 (Tue, 14 Oct 2008) $
- */
+
 
 /**
  * @package API\Policy
@@ -78,8 +74,13 @@ class APIOverTimePolicy extends APIFactory {
 
 		$data = array(
 						'company_id' => $company_obj->getId(),
-						'rate' => '1.00',
-						'accrual_rate' => '1.00',
+						'type_id' => 10,
+						'branch_selection_type_id' => 10,
+						'department_selection_type_id' => 10,
+						'job_group_selection_type_id' => 10,
+						'job_selection_type_id' => 10,
+						'job_item_group_selection_type_id' => 10,
+						'job_item_selection_type_id' => 10,
 					);
 
 		return $this->returnHandler( $data );
@@ -192,6 +193,7 @@ class APIOverTimePolicy extends APIFactory {
 				} else {
 					//Adding new object, check ADD permissions.
 					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('over_time_policy', 'add'), TTi18n::gettext('Add permission denied') );
+					$row['id'] = $lf->getNextInsertId();
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -210,7 +212,7 @@ class APIOverTimePolicy extends APIFactory {
 						if ( $validate_only == TRUE ) {
 							$save_result[$key] = TRUE;
 						} else {
-							$save_result[$key] = $lf->Save();
+							$save_result[$key] = $lf->Save( TRUE, TRUE );
 						}
 						$validator_stats['valid_records']++;
 					}

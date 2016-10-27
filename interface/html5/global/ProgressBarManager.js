@@ -32,13 +32,17 @@ var ProgressBar = (function() {
 
 	var temp_message_until_close = '';
 
+	var second_timer;
+
+	var time_offset;
+
 	var showOverlay = function() {
-		Global.overlay().addClass( 'overlay' )
-	}
+		Global.overlay().addClass( 'overlay' );
+	};
 
 	var closeOverlay = function() {
-		Global.overlay().removeClass( 'overlay' )
-	}
+		Global.overlay().removeClass( 'overlay' );
+	};
 
 	var showProgressBar = function( message_id, auto_clear ) {
 
@@ -107,9 +111,9 @@ var ProgressBar = (function() {
 
 					strokeColor: '#ffffff',
 
-					pointDistance: .01,
+					pointDistance: 0.01,
 					stepsPerFrame: 3,
-					trailLength: .7,
+					trailLength: 0.7,
 
 					step: 'fader',
 
@@ -148,7 +152,7 @@ var ProgressBar = (function() {
 		}
 
 		resetToDefault();
-	}
+	};
 
 	var resetToDefault = function() {
 
@@ -173,7 +177,7 @@ var ProgressBar = (function() {
 
 		last_iteration = null;
 
-	}
+	};
 
 	var changeProgressBarMessage = function( val ) {
 		temp_message_until_close = val;
@@ -202,22 +206,55 @@ var ProgressBar = (function() {
 		time_remaining.css( 'display', 'block' );
 
 		complete_info.text( data.current_iteration + ' / ' + data.total_iterations + ' ' + (percentage * 100).toFixed( 0 ) + '%' );
-		progress_bar.attr( 'value', percentage * 100 );
-
-		var time_offset = (data.last_update_time - data.start_time) * (data.total_iterations / data.current_iteration);
-		time_offset = time_offset - (data.last_update_time - data.start_time);
-
-		if ( isNaN( time_offset ) ) {
-			time_offset = 0;
-		}
+		progress_bar.attr( 'value', (percentage * 100) );
 
 		if ( !last_iteration ) {
 			time_remaining.text( 'Calculating remaining time...' );
 		} else {
-			time_remaining.text( Global.secondToHHMMSS( time_offset, '99' ) );
+
+			if ( last_iteration !== data.current_iteration || !second_timer ) {
+
+				time_offset = (data.last_update_time - data.start_time) * (data.total_iterations / data.current_iteration);
+				time_offset = time_offset - (data.last_update_time - data.start_time);
+
+				if ( isNaN( time_offset ) || time_offset <= 0 ) {
+					time_offset = 0;
+				}
+
+				//Error: 'console' is undefined in https://ondemand3.timetrex.com/interface/html5/global/ProgressBarManager.js?v=8.0.0-20141117-153515 line 224
+				Global.log( 'New time_offset: ' + time_offset );
+				time_remaining.text( Global.secondToHHMMSS( time_offset, '99' ) );
+			}
+			secondDown();
+
 		}
 
 		last_iteration = data.current_iteration;
+
+	};
+
+	var secondDown = function() {
+
+		//calculate down time every one second
+		if ( !second_timer ) {
+			var time_remaining = loading_box.find( '.time-remaining' );
+			second_timer = setInterval( function() {
+
+				if ( isNaN( time_offset ) || time_offset <= 0 ) {
+					time_offset = 0;
+				}
+
+				if ( time_offset > 0 ) {
+					time_offset = (time_offset - 1);
+				}
+
+				if ( time_offset <= 0 ) {
+					time_offset = 0;
+				}
+
+				time_remaining.text( Global.secondToHHMMSS( time_offset, '99' ) );
+			}, 1000 );
+		}
 
 	};
 
@@ -239,43 +276,52 @@ var ProgressBar = (function() {
 		if ( current_process_id && $.type( 'current_process_id' ) === 'string' ) {
 			var progress_api = new APIProgressBar();
 
-			progress_api.getProgressBar( current_process_id, {onResult: function( result ) {
-				var res_data = result.getResult();
+			progress_api.getProgressBar( current_process_id, {
+				onResult: function( result ) {
+					var res_data = result.getResult();
 
-				if ( res_data === true ||
-					($.type( res_data ) === 'array' && res_data.length === 0) || !res_data.total_iterations ||
-					$.type( res_data.total_iterations ) !== 'number' ) {
+					//Means error in progress bar
+					if ( res_data.hasOwnProperty( 'status_id' ) && res_data.status_id === 9999 ) {
+						stopProgress();
+						TAlertManager.showAlert( res_data.message );
+					} else {
+						if ( res_data === true ||
+							($.type( res_data ) === 'array' && res_data.length === 0) || !res_data.total_iterations ||
+							$.type( res_data.total_iterations ) !== 'number' ) {
+							stopProgress();
+							return;
+						} else {
+							updateProgressbar( res_data );
+							if ( first_start_get_progress_timer ) {
+								first_start_get_progress_timer = false;
+								clearInterval( get_progress_timer );
+								get_progress_timer = setInterval( function() {
+									getProgressBarProcess();
+								}, 2000 );
 
-					clearInterval( get_progress_timer );
+							}
 
-					if ( auto_clear_message_id_dic[current_process_id] ) {
-						removeProgressBar( current_process_id );
-					}
-
-					get_progress_timer = false;
-					current_process_id = false;
-					last_iteration = null;
-					first_start_get_progress_timer = false;
-
-					return;
-				} else {
-					updateProgressbar( res_data );
-
-					if ( first_start_get_progress_timer ) {
-						first_start_get_progress_timer = false;
-						clearInterval( get_progress_timer );
-						get_progress_timer = setInterval( function() {
-							getProgressBarProcess();
-						}, 1000 )
-
+						}
 					}
 
 				}
-
-			}} );
+			} );
 		}
 
-	}
+		function stopProgress() {
+			clearInterval( get_progress_timer );
+
+			if ( auto_clear_message_id_dic[current_process_id] ) {
+				removeProgressBar( current_process_id );
+			}
+
+			get_progress_timer = false;
+			current_process_id = false;
+			last_iteration = null;
+			first_start_get_progress_timer = false;
+		}
+
+	};
 
 	var removeProgressBar = function( message_id ) {
 
@@ -302,6 +348,11 @@ var ProgressBar = (function() {
 				clearTimeout( close_time );
 				close_time = setTimeout( function() {
 					closeOverlay();
+
+					if ( second_timer ) {
+						clearInterval( second_timer );
+						second_timer = null;
+					}
 					timer = null;
 					temp_message_until_close = '';
 					if ( loading_box ) {
@@ -318,7 +369,7 @@ var ProgressBar = (function() {
 			}
 		}
 
-	}
+	};
 
 	return {
 		showProgressBar: showProgressBar,

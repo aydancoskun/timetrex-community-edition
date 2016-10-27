@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 2095 $
- * $Id: Sort.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
- */
+
 
 /**
  * @package Modules\Report
@@ -106,7 +102,7 @@ class T4SummaryReport extends Report {
 								);
 				break;
 			case 'time_period':
-				$retval = TTDate::getTimePeriodOptions();
+				$retval = TTDate::getTimePeriodOptions( FALSE ); //Exclude Pay Period options.
 				break;
 			case 'date_columns':
 				//$retval = TTDate::getReportDateOptions( NULL, TTi18n::getText('Date'), 13, TRUE );
@@ -728,7 +724,7 @@ class T4SummaryReport extends Report {
 			$t619->transmitter_postal_code = ( isset($setup_data['postal_code']) AND $setup_data['postal_code'] != '' ) ? $setup_data['postal_code'] : $current_company->getPostalCode();
 			$t619->contact_name = $this->getUserObject()->getFullName();
 			$t619->contact_phone = $current_company->getWorkPhone();
-			$t619->contact_email = $this->getUserObject()->getWorkEmail();
+			$t619->contact_email = ( $this->getUserObject()->getWorkEmail() != '' ) ? $this->getUserObject()->getWorkEmail() : ( ( $this->getUserObject()->getHomeEmail() != '' ) ? $this->getUserObject()->getHomeEmail() : NULL );
 			$t619->company_name = $company_name;
 			$this->getFormObject()->addForm( $t619 );
 		}
@@ -768,6 +764,32 @@ class T4SummaryReport extends Report {
 				if ( $ulf->getRecordCount() == 1 ) {
 					$user_obj = $ulf->getCurrent();
 
+					$employment_province = $user_obj->getProvince();
+					//If employees address is out of the country, use the company province instead.
+					if ( strtolower( $user_obj->getCountry() ) != 'ca' ) {
+						$employment_province = $current_company->getProvince();
+						Debug::Text('  Using Company Province of Employment: '. $employment_province, __FILE__, __LINE__, __METHOD__, 10);
+					}
+
+					//Determine the province of employment...
+					$cdlf = TTnew( 'CompanyDeductionListFactory' );
+					if ( isset($setup_data['tax']['include_pay_stub_entry_account']) ) {
+						$cdlf->getByCompanyIDAndUserIdAndCalculationIdAndPayStubEntryAccountID( $current_company->getId(), $user_obj->getId(), 200, $setup_data['tax']['include_pay_stub_entry_account'] );
+						if ( $setup_data['tax']['include_pay_stub_entry_account'] != 0
+								AND $cdlf->getRecordCount() > 0 ) {
+							//Loop through all Tax/Deduction records to find one
+							foreach( $cdlf as $cd_obj ) {
+								if ( $cd_obj->getStatus() == 10 AND strtolower( $cd_obj->getCountry() ) == 'ca' ) {
+									$employment_province = $cd_obj->getProvince();
+									Debug::Text('  Deduction Province of Employment: '. $employment_province, __FILE__, __LINE__, __METHOD__, 10);
+								}
+
+							}
+						}
+					}
+					unset($cdlf, $cd_obj);
+					Debug::Text('  Final Province of Employment: '. $employment_province, __FILE__, __LINE__, __METHOD__, 10);
+
 					$ee_data = array(
 								'first_name' => $user_obj->getFirstName(),
 								'middle_name' => $user_obj->getMiddleName(),
@@ -775,8 +797,9 @@ class T4SummaryReport extends Report {
 								'address1' => $user_obj->getAddress1(),
 								'address2' => $user_obj->getAddress2(),
 								'city' => $user_obj->getCity(),
-								'province' => $user_obj->getProvince(),
-								'employment_province' => $user_obj->getProvince(),
+								'province' => ( $user_obj->getProvince() != '00' ) ? $user_obj->getProvince() : NULL,
+								'country' => Option::getByKey( $user_obj->getCountry(), $current_company->getOptions('country') ) ,
+								'employment_province' => ( $employment_province != '00' ) ? $employment_province : NULL,
 								'postal_code' => $user_obj->getPostalCode(),
 								'sin' => $user_obj->getSIN(),
 								'employee_number' => $user_obj->getEmployeeNumber(),

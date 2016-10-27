@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 15602 $
- * $Id: PayStubFactory.class.php 15602 2014-12-30 00:31:02Z mikeb $
- * $Date: 2014-12-29 16:31:02 -0800 (Mon, 29 Dec 2014) $
- */
+
 require_once( 'Numbers/Words.php');
 
 
@@ -73,7 +69,8 @@ class PayStubFactory extends Factory {
 										20 => TTi18n::gettext('LOCKED'),
 										25 => TTi18n::gettext('Open'),
 										30 => TTi18n::gettext('Pending Transaction'),
-										40 => TTi18n::gettext('Paid')
+										40 => TTi18n::gettext('Paid'), 
+										//100 => TTi18n::gettext('Initial YTD Adjustment'),
 									);
 				break;
 			case 'export_type':
@@ -91,6 +88,7 @@ class PayStubFactory extends Factory {
 										'-1010-eft_ACH' => TTi18n::gettext('United States - ACH (94-Byte)'),
 										'-1020-eft_1464' => TTi18n::gettext('Canada - EFT (1464-Byte)'),
 										'-1022-eft_1464_cibc' => TTi18n::gettext('Canada - EFT CIBC (1464-Byte)'),
+										'-1023-eft_1464_rbc' => TTi18n::gettext('Canada - EFT RBC (1464-Byte)'),
 										'-1030-eft_105' => TTi18n::gettext('Canada - EFT (105-Byte)'),
 										'-1040-eft_HSBC' => TTi18n::gettext('Canada - HSBC EFT-PC (CSV)'),
 										'-1050-eft_BEANSTREAM' => TTi18n::gettext('Beanstream (CSV)'),
@@ -952,7 +950,7 @@ class PayStubFactory extends Factory {
 			//but that might duplicate the error messages?
 			if ( $this->isUniquePayStub() == FALSE ) {
 				Debug::Text('Unique Pay Stub...', __FILE__, __LINE__, __METHOD__, 10);
-				$this->Validator->isTrue(		'user',
+				$this->Validator->isTrue(		'user_id',
 												FALSE,
 												TTi18n::gettext('Invalid unique User and/or Pay Period') );
 			}
@@ -962,7 +960,7 @@ class PayStubFactory extends Factory {
 				if ( $this->getCurrency() == FALSE ) {
 					$this->Validator->isTrue(		'currency_id',
 													FALSE,
-													TTi18n::gettext('Currency is not specified') );
+													TTi18n::gettext('Currency not specified') );
 				}
 				if ( $this->getStartDate() == FALSE ) {
 						$this->Validator->isDate(		'start_date',
@@ -1227,11 +1225,13 @@ class PayStubFactory extends Factory {
 		if ( is_object($this->pay_stub_entry_account_link_obj) ) {
 			return $this->pay_stub_entry_account_link_obj;
 		} else {
-			$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
-			$pseallf->getByCompanyID( $this->getUserObject()->getCompany() );
-			if ( $pseallf->getRecordCount() > 0 ) {
-				$this->pay_stub_entry_account_link_obj = $pseallf->getCurrent();
-				return $this->pay_stub_entry_account_link_obj;
+			if ( is_object( $this->getUserObject() ) ) {
+				$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
+				$pseallf->getByCompanyID( $this->getUserObject()->getCompany() );
+				if ( $pseallf->getRecordCount() > 0 ) {
+					$this->pay_stub_entry_account_link_obj = $pseallf->getCurrent();
+					return $this->pay_stub_entry_account_link_obj;
+				}
 			}
 
 			return FALSE;
@@ -1964,11 +1964,11 @@ class PayStubFactory extends Factory {
 		if ( $uplf->getRecordCount() > 0 ) {
 			foreach( $uplf as $up_obj ) {
 				if ( $up_obj->getEnableEmailNotificationPayStub() == TRUE AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getStatus() == 10 ) {
-					if ( $up_obj->getUserObject()->getWorkEmail() != '' ) {
+					if ( $up_obj->getUserObject()->getWorkEmail() != '' AND $up_obj->getUserObject()->getWorkEmailIsValid() == TRUE ) {
 						$retarr[] = $up_obj->getUserObject()->getWorkEmail();
 					}
 
-					if ( $up_obj->getEnableEmailNotificationHome() AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getHomeEmail() != '' ) {
+					if ( $up_obj->getEnableEmailNotificationHome() AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getHomeEmail() != '' AND $up_obj->getUserObject()->getHomeEmailIsValid() == TRUE ) {
 						$retarr[] = $up_obj->getUserObject()->getHomeEmail();
 					}
 				}
@@ -2056,7 +2056,7 @@ class PayStubFactory extends Factory {
 
 		$email_body .= "\n";
 
-		$email_body .= TTi18n::gettext('Link:').' <a href="'. Misc::getURLProtocol() .'://'. Misc::getHostName().Environment::getDefaultInterfaceBaseURL().'">'.APPLICATION_NAME.' '. TTi18n::gettext('Login') .'</a>';
+		$email_body .= TTi18n::gettext('Link') .': <a href="'. Misc::getURLProtocol() .'://'. Misc::getHostName().Environment::getDefaultInterfaceBaseURL().'">'.APPLICATION_NAME.' '. TTi18n::gettext('Login') .'</a>';
 
 		$email_body .= ( $replace_arr[6] != '' ) ? "\n\n\n".TTi18n::gettext('Company').': #company_name#'."\n" : NULL; //Always put at the end
 
@@ -2246,6 +2246,7 @@ class PayStubFactory extends Factory {
 				case 'eft_hsbc':
 				case 'eft_1464':
 				case 'eft_1464_cibc':
+				case 'eft_1464_rbc':
 				case 'eft_105':
 				case 'eft_ach':
 				case 'eft_beanstream':
@@ -2306,6 +2307,10 @@ class PayStubFactory extends Factory {
 						$eft->setOtherData('cibc_settlement_account', $company_bank_obj->getAccount() );
 					}
 					
+					if ( strtolower($export_type) == 'eft_1464_rbc' ) {
+						$eft->setFilePrefixData( '$$AA01CPA1464[PROD{NL$$'."\r\n" ); //Some RBC services require a "routing" line at the top of the file.
+					}
+
 					$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 					foreach ($pslf as $key => $pay_stub_obj) {
 						Debug::Text('Looping over Pay Stub... ID: '. $pay_stub_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
@@ -2593,12 +2598,12 @@ class PayStubFactory extends Factory {
 											'date' => $pay_stub_obj->getTransactionDate(),
 											'amount' => $pay_stub['entries'][40][0]['amount'],
 											'stub_left_column' => $user_obj->getFullName() . "\n".
-															TTi18n::gettext("Identification #: ") . $pay_stub['display_id'] . "\n".
-															TTi18n::gettext("Net Pay: ") . $pay_stub_obj->getCurrencyObject()->getSymbol() . TTi18n::formatNumber( $pay_stub['entries'][40][0]['amount'], TRUE, $pay_stub_obj->getCurrencyObject()->getRoundDecimalPlaces() ),
+															TTi18n::gettext('Identification #') .': '. $pay_stub['display_id'] . "\n".
+															TTi18n::gettext('Net Pay') .': '. $pay_stub_obj->getCurrencyObject()->getSymbol() . TTi18n::formatNumber( $pay_stub['entries'][40][0]['amount'], TRUE, $pay_stub_obj->getCurrencyObject()->getRoundDecimalPlaces() ),
 
-											'stub_right_column' => TTi18n::gettext('Pay Start Date: ') . TTDate::getDate('DATE', $pay_stub['start_date'] ) . "\n".
-															TTi18n::gettext('Pay End Date: ') . TTDate::getDate('DATE', $pay_stub['end_date'] ) . "\n".
-															TTi18n::gettext('Payment Date: ') . TTDate::getDate('DATE', $pay_stub['transaction_date'] ),
+											'stub_right_column' => TTi18n::gettext('Pay Start Date') .': '. TTDate::getDate('DATE', $pay_stub['start_date'] ) . "\n".
+															TTi18n::gettext('Pay End Date') .': '. TTDate::getDate('DATE', $pay_stub['end_date'] ) . "\n".
+															TTi18n::gettext('Payment Date') .': '. TTDate::getDate('DATE', $pay_stub['transaction_date'] ),
 											'start_date' => $pay_stub['start_date'],
 											'end_date' => $pay_stub['end_date'],
 											'full_name' => $user_obj->getFullName(),
@@ -2718,11 +2723,11 @@ class PayStubFactory extends Factory {
 				//Pay Period info
 				$pdf->SetFont('', '', 10);
 				$pdf->setXY( Misc::AdjustXY(125, $adjust_x), Misc::AdjustXY(0, $adjust_y) );
-				$pdf->Cell(30, 5, TTi18n::gettext('Pay Start Date:').' ', $border, 0, 'R', FALSE, '', 1);
+				$pdf->Cell(30, 5, TTi18n::gettext('Pay Start Date').': ', $border, 0, 'R', FALSE, '', 1);
 				$pdf->setXY( Misc::AdjustXY(125, $adjust_x), Misc::AdjustXY(5, $adjust_y) );
-				$pdf->Cell(30, 5, TTi18n::gettext('Pay End Date:').' ', $border, 0, 'R', FALSE, '', 1);
+				$pdf->Cell(30, 5, TTi18n::gettext('Pay End Date').': ', $border, 0, 'R', FALSE, '', 1);
 				$pdf->setXY( Misc::AdjustXY(125, $adjust_x), Misc::AdjustXY(10, $adjust_y) );
-				$pdf->Cell(30, 5, TTi18n::gettext('Payment Date:').' ', $border, 0, 'R', FALSE, '', 1);
+				$pdf->Cell(30, 5, TTi18n::gettext('Payment Date').': ', $border, 0, 'R', FALSE, '', 1);
 
 				$pdf->SetFont('', 'B', 10);
 				$pdf->setXY( Misc::AdjustXY(155, $adjust_x), Misc::AdjustXY(0, $adjust_y) );
@@ -2877,8 +2882,8 @@ class PayStubFactory extends Factory {
 
 							$pdf->setXY( Misc::AdjustXY(2, $adjust_x), Misc::AdjustXY( $block_adjust_y, $adjust_y) );
 							$pdf->Cell( ($column_widths['name'] - 2), 5, $pay_stub_entry['name'] . $subscript, $border, 0, 'L', FALSE, '', 1); //68
-							$pdf->Cell( $column_widths['rate'], 5, TTi18n::formatNumber( $pay_stub_entry['rate'], TRUE ), $border, 0, 'R', FALSE, '', 1);
-							$pdf->Cell( $column_widths['units'], 5, TTi18n::formatNumber( $pay_stub_entry['units'], TRUE ), $border, 0, 'R', FALSE, '', 1);
+							$pdf->Cell( $column_widths['rate'], 5, ( $pay_stub_entry['rate'] != 0 ) ? TTi18n::formatNumber( $pay_stub_entry['rate'], TRUE ) : '-', $border, 0, 'R', FALSE, '', 1);
+							$pdf->Cell( $column_widths['units'], 5, ( $pay_stub_entry['units'] != 0 ) ? TTi18n::formatNumber( $pay_stub_entry['units'], TRUE ) : '-', $border, 0, 'R', FALSE, '', 1);
 							$pdf->Cell( $column_widths['amount'], 5, TTi18n::formatNumber( $pay_stub_entry['amount'], TRUE, $pay_stub_obj->getCurrencyObject()->getRoundDecimalPlaces() ), $border, 0, 'R', FALSE, '', 1);
 							$pdf->Cell( $column_widths['ytd_amount'], 5, ( $pay_stub_entry['ytd_amount'] != 0 ) ? TTi18n::formatNumber( $pay_stub_entry['ytd_amount'], TRUE, $pay_stub_obj->getCurrencyObject()->getRoundDecimalPlaces() ) : '-', $border, 0, 'R', FALSE, '', 1);
 						} else {
@@ -3236,7 +3241,7 @@ class PayStubFactory extends Factory {
 					$accrual_time_header_start_x = $pdf->getX();
 					$accrual_time_header_start_y = $pdf->getY();
 
-					$pdf->Cell(70, 5, TTi18n::gettext('Accrual Time Balances as of ').TTDate::getDate('DATE', time() ), $border, 0, 'L', FALSE, '', 1);
+					$pdf->Cell(70, 5, TTi18n::gettext('Accrual Time Balances as of').' '.TTDate::getDate('DATE', time() ), $border, 0, 'L', FALSE, '', 1);
 					$pdf->Cell(25, 5, TTi18n::gettext('Balance (hrs)'), $border, 0, 'R', FALSE, '', 1);
 
 					$block_adjust_y = ($block_adjust_y + 5);
@@ -3367,7 +3372,7 @@ class PayStubFactory extends Factory {
 
 					$pdf->SetFont('', 'B', 6);
 					$pdf->setXY( Misc::AdjustXY(0, $adjust_x), Misc::AdjustXY(($block_adjust_y - 3), $adjust_y) );
-					$pdf->Cell(175, 3, TTi18n::gettext('Tax Information as of ') .TTDate::getDate('DATE', time() ), 1, 0, 'C', FALSE, '', 1);
+					$pdf->Cell(175, 3, TTi18n::gettext('Tax Information as of') .' '. TTDate::getDate('DATE', time() ), 1, 0, 'C', FALSE, '', 1);
 				}
 				unset( $udlf, $ud_obj, $left_block_adjust_y, $right_block_adjust_y, $left_total_rows, $right_total_rows );
 
@@ -3450,7 +3455,7 @@ class PayStubFactory extends Factory {
 				$block_adjust_y = 215;
 				$pdf->SetFont('', '', 8);
 				$pdf->setXY( Misc::AdjustXY(125, $adjust_x), Misc::AdjustXY( ($block_adjust_y + 30), $adjust_y) );
-				$pdf->Cell(50, 5, TTi18n::gettext('Identification #:').' '. $pay_stub_obj->getDisplayID().$tainted_flag, $border, 1, 'R', FALSE, '', 1);
+				$pdf->Cell(50, 5, TTi18n::gettext('Identification #').': '. $pay_stub_obj->getDisplayID().$tainted_flag, $border, 1, 'R', FALSE, '', 1);
 				unset($net_pay_amount, $tainted_flag);
 
 				//Line
@@ -3483,7 +3488,7 @@ class PayStubFactory extends Factory {
 	}
 
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Pay Stub'), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Pay Stub') .' - '. TTi18n::getText('Status').': '. Option::getByKey($this->getStatus(), $this->getOptions('status') ) .' '. TTi18n::getText('Start').': '. TTDate::getDate('DATE', $this->getStartDate() ) .' '. TTi18n::getText('End').': '. TTDate::getDate('DATE', $this->getEndDate() ) .' '. TTi18n::getText('Transaction').': '. TTDate::getDate('DATE', $this->getTransactionDate() ), NULL, $this->getTable(), $this );
 	}
 }
 ?>

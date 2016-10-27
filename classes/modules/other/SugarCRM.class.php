@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 3934 $
- * $Id: EFT.class.php 3934 2010-11-17 23:29:44Z ipso $
- * $Date: 2010-11-17 15:29:44 -0800 (Wed, 17 Nov 2010) $
- */
+
 class SugarCRM {
 	private $soap_client_obj = NULL;
 	private $session_id = NULL;

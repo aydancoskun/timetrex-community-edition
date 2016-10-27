@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 13708 $
- * $Id: DatabaseSchema.php 13708 2014-07-15 16:32:53Z mikeb $
- * $Date: 2014-07-15 09:32:53 -0700 (Tue, 15 Jul 2014) $
- */
+
 require_once('../../includes/global.inc.php');
 require_once('HTML/Progress.php');
 
@@ -167,11 +163,15 @@ switch ($action) {
 			//Create SQL, always try to install every schema version, as
 			//installSchema() will check if its already been installed or not.
 			$install_obj->setDatabaseDriver( $config_vars['database']['type'] );
-			$install_obj->createSchemaRange( NULL, NULL ); //All schema versions
-			//FIXME: Notify the user of any errors.
-			$install_obj->setVersions();
+			$create_schema_retval = $install_obj->createSchemaRange( NULL, NULL ); //All schema versions
+			if ( $create_schema_retval == TRUE ) {
+				//FIXME: Notify the user of any errors.
+				$install_obj->setVersions();
+			} else {
+				Debug::Text('ERROR: Database schema upgrade failed!', __FILE__, __LINE__, __METHOD__,10);
+			}
 		} else {
-			Debug::Text('bDatabase does not exist.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('ERROR: Database does not exist.', __FILE__, __LINE__, __METHOD__,10);
 		}
 		//$install_obj->getDatabaseConnection()->FailTrans(); //Used for debugging only.
 

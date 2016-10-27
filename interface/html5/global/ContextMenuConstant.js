@@ -70,6 +70,8 @@ ContextMenuIconName.download = 'downloadIcon';
 
 ContextMenuIconName.timesheet = 'timesheetIcon';
 
+ContextMenuIconName.accumulated_time = 'accumulatedTimeIcon';
+
 ContextMenuIconName.import_icon = 'importIcon';
 
 ContextMenuIconName.login = 'loginIcon';
@@ -167,6 +169,8 @@ ContextMenuIconName.payment = 'PaymentIcon';
 
 ContextMenuIconName.packing_slip = 'PackingSlipIcon';
 
+ContextMenuIconName.wizard = 'WizardIcon';
+
 var Icons = function() {
 
 };
@@ -228,6 +232,7 @@ Icons.permission_wizard = 'permission_groups-35x35.png';
 Icons.quick_start_wizard = 'quicksetupwizard-35x35.png';
 Icons.re_cal_timesheet = 'calculate-35x35.png';
 Icons.re_cal_pay_stub = 'calculate_paystubs-35x35.png';
+Icons.hierarchy = 'hierarchy-35x35.png';
 
 Icons.employee_pay_stubs = 'employee_pay_stubs-35x35.png';
 Icons.employer_pay_stubs = 'employer_pay_stubs-35x35.png';
@@ -261,7 +266,7 @@ Icons.close_pay_period = 'close_pay_period-35x35.png';
 
 Icons.hr_reports = 'hr_reports-35x35.png';
 
-Icons.invoice = 'invoices-35x35.png';
+Icons.invoice = 'invoice_wizard-35x35.png';
 
 Icons.transaction = 'transactions-35x35.png';
 
@@ -272,3 +277,5 @@ Icons.packing_slip = 'packing_slip-35x35.png';
 Icons.print = 'print-35x35.png';
 
 Icons.find_available = 'fillshift-35x35.png';
+
+Icons.wizard = 'wizard2-35x35.png';

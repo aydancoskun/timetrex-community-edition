@@ -266,10 +266,10 @@ QualificationGroupViewController = BaseViewController.extend( {
 
 		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 1 ) {
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab1' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+				this.initSubLogView( 'tab_audit' );
 			} else {
-				this.edit_view_tab.find( '#tab1' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 			}
 		}
@@ -324,10 +324,10 @@ QualificationGroupViewController = BaseViewController.extend( {
 			$this.onCloseIconClick();
 		} );
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'KPI Group' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_qualification_group': $.i18n._( 'Qualification Group' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
 
 		this.navigation.AComboBox( {
 			id: this.script_name + '_navigation',
@@ -343,13 +343,13 @@ QualificationGroupViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_qualification_group = this.edit_view_tab.find( '#tab_qualification_group' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_qualification_group_column1 = tab_qualification_group.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_qualification_group_column1 );
 
 		//Parent
 		//Group
@@ -362,13 +362,15 @@ QualificationGroupViewController = BaseViewController.extend( {
 			set_empty:true,
 			field: 'parent_id'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Parent' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Parent' ), form_item_input, tab_qualification_group_column1, '' );
 
 		//Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: 149} );
-		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab0_column1, '' );
+		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_qualification_group_column1, '' );
+
+		form_item_input.parent().width( '45%' );
 
 	},
 

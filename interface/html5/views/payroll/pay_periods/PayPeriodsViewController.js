@@ -217,7 +217,7 @@ PayPeriodsViewController = BaseViewController.extend( {
 		} );
 
 		var import_data = new RibbonSubMenu( {
-			label: $.i18n._( 'Import Data' ),
+			label: $.i18n._( 'Import<br>Data' ),
 			id: ContextMenuIconName.import_icon,
 			group: other_group,
 			icon: Icons.import_icon,
@@ -226,7 +226,7 @@ PayPeriodsViewController = BaseViewController.extend( {
 		} );
 
 		var delete_data = new RibbonSubMenu( {
-			label: $.i18n._( 'Delete Data' ),
+			label: $.i18n._( 'Delete<br>Data' ),
 			id: ContextMenuIconName.delete_data,
 			group: other_group,
 			icon: Icons.delete_icon,
@@ -271,6 +271,11 @@ PayPeriodsViewController = BaseViewController.extend( {
 	},
 	/* jshint ignore:start */
 	setDefaultMenu: function( doNotSetFocus ) {
+
+        //Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+        if (!this.context_menu_array) {
+            return;
+        }
 
 		if ( !Global.isSet( doNotSetFocus ) || !doNotSetFocus ) {
 			this.selectContextMenu();
@@ -445,9 +450,9 @@ PayPeriodsViewController = BaseViewController.extend( {
 		context_btn.addClass( 'disable-image' );
 	},
 
-//	onContentMenuClick: function( context_btn, menu_name ) {
+//	onContextMenuClick: function( context_btn, menu_name ) {
 //
-//		this._super( 'onContentMenuClick', context_btn, menu_name );
+//		this._super( 'onContextMenuClick', context_btn, menu_name );
 //
 //		var id;
 //
@@ -610,11 +615,11 @@ PayPeriodsViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
+		this.setTabLabels( {
+			'tab_pay_period': $.i18n._( 'Pay Period' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
 
-		tab_0_label.text( $.i18n._( 'Pay Period' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
 
 		if ( !this.edit_only_mode ) {
 			this.navigation.AComboBox( {
@@ -631,12 +636,12 @@ PayPeriodsViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_pay_period = this.edit_view_tab.find( '#tab_pay_period' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_pay_period_column1 = tab_pay_period.find( '.first-column' );
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_pay_period_column1 );
 
 		// Status
 
@@ -644,12 +649,12 @@ PayPeriodsViewController = BaseViewController.extend( {
 
 		form_item_input.TComboBox( {field: 'status_id', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab0_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_pay_period_column1, '' );
 
 		// Pay Period Schedule
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'pay_period_schedule'} );
-		this.addEditFieldToColumn( $.i18n._( 'Pay Period Schedule' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Pay Period Schedule' ), form_item_input, tab_pay_period_column1, '', null, true );
 
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
@@ -660,25 +665,25 @@ PayPeriodsViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'pay_period_schedule_id'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Pay Period Schedule' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Pay Period Schedule' ), form_item_input, tab_pay_period_column1, '', null, true );
 
 		// Start date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
 		form_item_input.TDatePicker( {field: 'start_date'} );
-		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_pay_period_column1, '', null, true );
 
 		// End date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
 		form_item_input.TDatePicker( {field: 'end_date'} );
-		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab_pay_period_column1, '', null, true );
 
 		// Transaction date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
 		form_item_input.TDatePicker( {field: 'transaction_date'} );
-		this.addEditFieldToColumn( $.i18n._( 'Transaction Date' ), form_item_input, tab0_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Transaction Date' ), form_item_input, tab_pay_period_column1, '', null, true );
 
 	},
 
@@ -734,6 +739,8 @@ PayPeriodsViewController = BaseViewController.extend( {
 			this.edit_view_form_item_dic['pay_period_schedule'].css( 'display', 'none' );
 			this.edit_view_form_item_dic['pay_period_schedule_id'].css( 'display', 'block' );
 		}
+
+		this.editFieldResize();
 	},
 
 	setEditViewDataDone: function() {

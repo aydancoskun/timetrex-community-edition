@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 676 $
- * $Id: PayStubCalculationTest.php 676 2007-03-07 23:47:29Z ipso $
- * $Date: 2007-03-07 15:47:29 -0800 (Wed, 07 Mar 2007) $
- */
+
 require_once('PHPUnit/Framework/TestCase.php');
 
 class PunchTest extends PHPUnit_Framework_TestCase {
@@ -60,7 +56,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
 		$this->assertGreaterThan( 0, $this->company_id );
 
-		$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
+		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
 
 		$dd->createCurrency( $this->company_id, 10 );
 
@@ -74,7 +70,12 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$dd->createUserWageGroups( $this->company_id );
 
+		$this->policy_ids['pay_formula_policy'][100] = $dd->createPayFormulaPolicy( $this->company_id, 100 ); //Reg 1.0x
+		$this->policy_ids['pay_code'][100] = $dd->createPayCode( $this->company_id, 100, $this->policy_ids['pay_formula_policy'][100] ); //Regular
+
 		$this->user_id = $dd->createUser( $this->company_id, 100 );
+		
+		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
 
 		return TRUE;
@@ -230,7 +231,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 
-				$pps_obj->createNextPayPeriod( $end_date, (86400 * 3600) );
+				$pps_obj->createNextPayPeriod( $end_date , (86400*3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
 
 		}
@@ -253,6 +254,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 				$mpf->setWindowLength( (3600 * 2) );
 				break;
 		}
+		
+		$mpf->setPayCode( $this->policy_ids['pay_code'][100] );
 
 		if ( $mpf->isValid() ) {
 			$insert_id = $mpf->Save();
@@ -400,13 +403,14 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$spf->setCompany( $this->company_id );
 		$spf->setName( 'Schedule Policy' );
-		$spf->setMealPolicyID( $meal_policy_id );
-		$spf->setOverTimePolicyID( 0 );
 		$spf->setAbsencePolicyID( 0 );
 		$spf->setStartStopWindow( (3600 * 2) );
 
 		if ( $spf->isValid() ) {
-			$insert_id = $spf->Save();
+			$insert_id = $spf->Save( FALSE );
+
+			$spf->setMealPolicy( $meal_policy_id );
+			
 			Debug::Text('Schedule Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			return $insert_id;
@@ -499,30 +503,39 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_totals = array();
 
 		//Get only system totals.
-		$udtlf->getByCompanyIDAndUserIdAndStatusAndStartDateAndEndDate( $this->company_id, $this->user_id, 10, $start_date, $end_date);
+		$udtlf->getByCompanyIDAndUserIdAndObjectTypeAndStartDateAndEndDate( $this->company_id, $this->user_id, array(5, 20, 30, 40, 100, 110), $start_date, $end_date);
 		if ( $udtlf->getRecordCount() > 0 ) {
 			foreach($udtlf as $udt_obj) {
 				$user_date_stamp = TTDate::strtotime( $udt_obj->getColumn('user_date_stamp') );
 
-				$type_and_policy_id = $udt_obj->getType().(int)$udt_obj->getOverTimePolicyID();
+				$type_and_policy_id = $udt_obj->getObjectType().(int)$udt_obj->getPayCode();
 
 				$date_totals[$user_date_stamp][] = array(
 												'date_stamp' => $udt_obj->getColumn('user_date_stamp'),
 												'id' => $udt_obj->getId(),
-												'user_date_id' => $udt_obj->getUserDateId(),
+
+												//Keep legacy status_id/type_id for now, so we don't have to change as many unit tests.
 												'status_id' => $udt_obj->getStatus(),
 												'type_id' => $udt_obj->getType(),
-												'over_time_policy_id' => $udt_obj->getOverTimePolicyID(),
+												'src_object_id' => $udt_obj->getSourceObject(),
+
+												'object_type_id' => $udt_obj->getObjectType(),
+												'pay_code_id' => $udt_obj->getPayCode(),
+
 												'type_and_policy_id' => $type_and_policy_id,
 												'branch_id' => (int)$udt_obj->getBranch(),
 												'department_id' => $udt_obj->getDepartment(),
 												'total_time' => $udt_obj->getTotalTime(),
 												'name' => $udt_obj->getName(),
+
+												'quantity' => $udt_obj->getQuantity(),
+												'bad_quantity' => $udt_obj->getBadQuantity(),
+
+												'hourly_rate' => $udt_obj->getHourlyRate(),
 												//Override only shows for SYSTEM override columns...
 												//Need to check Worked overrides too.
 												'tmp_override' => $udt_obj->getOverride()
 												);
-
 			}
 		}
 
@@ -539,7 +552,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 			$prev_punch_control_id = NULL;
 			foreach( $plf as $p_obj ) {
 				if ( $prev_punch_control_id == NULL OR $prev_punch_control_id != $p_obj->getPunchControlID() ) {
-					$date_stamp = $p_obj->getPunchControlObject()->getUserDateObject()->getDateStamp();
+					$date_stamp = $p_obj->getPunchControlObject()->getDateStamp();
 					$p_obj->setUser( $this->user_id );
 					$p_obj->getPunchControlObject()->setPunchObject( $p_obj );
 
@@ -547,7 +560,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 													'id' => $p_obj->getPunchControlObject()->getID(),
 													'branch_id' => $p_obj->getPunchControlObject()->getBranch(),
 													'date_stamp' => $date_stamp,
-													'user_date_id' => $p_obj->getPunchControlObject()->getUserDateID(),
+													//'user_date_id' => $p_obj->getPunchControlObject()->getUserDateID(),
 													'shift_data' => $p_obj->getPunchControlObject()->getShiftData()
 													);
 
@@ -659,8 +672,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -718,8 +732,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (8 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -779,8 +792,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (8 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -824,8 +836,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -885,8 +896,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -961,8 +971,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (9 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -1004,8 +1013,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -1050,8 +1058,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch2][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch2][0]['total_time'] );
 
 		return TRUE;
@@ -1113,8 +1122,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch2][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch2][0]['total_time'] );
 
 		return TRUE;
@@ -1157,8 +1167,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -1202,8 +1211,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -1250,8 +1258,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch2][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch2][0]['total_time'] );
 
 		return TRUE;
@@ -1295,8 +1304,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (3 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		//Second punch pair
@@ -1325,11 +1333,18 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $punch_arr[$date_epoch2][0]['shift_data']['punches'][0]['punch_control_id'], $punch_arr[$date_epoch2][1]['shift_data']['punches'][0]['punch_control_id'] ); //Make sure punch_control_id from both shifts DO match.
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
+		
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
-		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch2][0]['total_time'] );
+		//$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] ); //Since we don't save UDT records where total_time=0, don't check this anymore.
+		//Instead check to make sure no records on that date exist at all.
+		if ( isset($udt_arr[$date_epoch][0]['object_type_id']) ) {
+			$this->assertTrue( FALSE );
+		} else {
+			$this->assertTrue( TRUE );
+		}
 
+		$this->assertEquals( 5, $udt_arr[$date_epoch2][0]['object_type_id'] );
+		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch2][0]['total_time'] );
 
 		return TRUE;
 	}
@@ -1370,8 +1385,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -1415,13 +1429,13 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time - Date 1
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (6 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		//Total Time - Date 2
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch2][0]['object_type_id'] );
 		$this->assertEquals( (2 * 3600), $udt_arr[$date_epoch2][0]['total_time'] );
 
 		return TRUE;
@@ -1463,13 +1477,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time - Date 1
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (6 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		//Total Time - Date 2
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch2][0]['object_type_id'] );
 		$this->assertEquals( (2 * 3600), $udt_arr[$date_epoch2][0]['total_time'] );
 
 		return TRUE;
@@ -1506,8 +1518,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time - Date 1
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (8 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -1542,8 +1553,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time - Date 1
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (8 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -1578,8 +1588,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time - Date 1
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (8 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -1664,8 +1673,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (8 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -1721,8 +1729,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (8 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -1782,8 +1789,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 
 		$this->assertEquals( (15.5 * 3600), $udt_arr[$date_epoch][0]['total_time'] ); //If this is the week of the DST switchover, this can be off by one hour.
 		//if ( TTDate::doesRangeSpanDST( $date_epoch, $date_epoch2 ) ) {
@@ -1851,9 +1857,13 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
-		$this->assertEquals( (0 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
+		if ( isset($udt_arr[$date_epoch][0]) ) {
+			$this->assertTrue( FALSE );
+		} else {
+			$this->assertTrue( TRUE );
+		}
+		//$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
+		//$this->assertEquals( (0 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
 	}
@@ -1912,8 +1922,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (15.5 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -1973,8 +1982,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (12 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		//Edit punch to move out time into next day.
@@ -1992,8 +2000,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (13 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 
@@ -2054,8 +2061,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (12 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		//Edit punch to move out time into next day.
@@ -2088,8 +2094,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch2][0]['object_type_id'] );
 		$this->assertEquals( (15.5 * 3600), $udt_arr[$date_epoch2][0]['total_time'] );
 
 		return TRUE;
@@ -2151,8 +2158,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch2][0]['object_type_id'] );
 		$this->assertEquals( (12 * 3600), $udt_arr[$date_epoch2][0]['total_time'] );
 
 		//Edit punch to move out time into next day.
@@ -2182,8 +2190,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (15.5 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -2251,13 +2258,13 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time - Day 1
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (1 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		//Total Time - Day 2
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch2][0]['object_type_id'] );
 		$this->assertEquals( (2 * 3600), $udt_arr[$date_epoch2][0]['total_time'] );
 
 		//Edit punch to move out time into next day.
@@ -2287,8 +2294,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time - Day1
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (12 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -2352,8 +2358,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (12 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		//Edit punch to move out time into next day.
@@ -2383,13 +2388,13 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time - Day1
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (1 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		//Total Time - Day2
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch2][0]['object_type_id'] );
 		$this->assertEquals( (2 * 3600), $udt_arr[$date_epoch2][0]['total_time'] );
 
 		return TRUE;
@@ -2449,8 +2454,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (6 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		//Edit punch to move out time into next day.
@@ -2483,8 +2487,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch2][0]['object_type_id'] );
 		$this->assertEquals( (14 * 3600), $udt_arr[$date_epoch2][0]['total_time'] );
 
 		return TRUE;
@@ -2544,8 +2549,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (12 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		//Delete punch
@@ -2560,10 +2564,13 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
-		$this->assertEquals( (0 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
-
+		if ( isset($udt_arr[$date_epoch][0]) ) {
+			$this->assertTrue( FALSE );
+		} else {
+			$this->assertTrue( TRUE );
+		}
+		//$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
+		//$this->assertEquals( (0 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
 	}
@@ -2652,8 +2659,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (3 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		//Delete first out punch, causing the totals to change, but nothing else.
@@ -2671,8 +2677,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (1.5 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		//Delete first in punch (last punch in pair), causing the totals to change, and the final two punches to switch days.
@@ -2693,8 +2698,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch2][0]['object_type_id'] );
 		$this->assertEquals( (1.5 * 3600), $udt_arr[$date_epoch2][0]['total_time'] );
 
 		return TRUE;
@@ -2735,8 +2741,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 
@@ -2756,8 +2761,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -2798,8 +2802,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 
@@ -2820,8 +2823,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -2862,8 +2864,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 
@@ -2883,8 +2884,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -2925,8 +2925,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		//Try to add another punch inbetween already existing punch pair.
@@ -2955,8 +2954,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -2996,8 +2994,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 
@@ -3025,8 +3022,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 
@@ -3049,8 +3045,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -3106,8 +3101,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 
@@ -3135,8 +3129,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -3191,9 +3184,13 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
-		$this->assertEquals( (0 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
+		if ( isset($udt_arr[$date_epoch][0]) ) {
+			$this->assertTrue( FALSE );
+		} else {
+			$this->assertTrue( TRUE );
+		}
+		//$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
+		//$this->assertEquals( (0 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
 	}
@@ -3282,8 +3279,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (8.75 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -3351,8 +3347,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (9 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -3451,8 +3446,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (8 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -3552,8 +3546,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (8 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -3613,8 +3606,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( 30360, $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -3674,8 +3666,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (9 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -3749,8 +3740,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( 33540, $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -3822,8 +3812,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (9 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -3892,9 +3881,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime($date_stamp.' 4:43PM') );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($punch_arr);
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( 26760, $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -3961,8 +3950,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (8 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -4026,8 +4014,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (9 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -4075,8 +4062,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (9 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -4138,8 +4124,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -4187,8 +4172,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -4241,8 +4225,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (8 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		$this->assertEquals( 1, count($udt_arr) );
@@ -4314,12 +4297,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//print_r($udt_arr);
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (8 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		$this->assertEquals( 1, count($udt_arr) );
-		$this->assertEquals( 2, count($udt_arr[$date_epoch]) );
+		$this->assertEquals( 3, count($udt_arr[$date_epoch]) );
 
 		return TRUE;
 	}
@@ -4373,8 +4355,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (8 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		$this->assertEquals( 1, count($udt_arr) );
@@ -4433,8 +4414,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['status_id'] );
+		//$this->assertEquals( 10, $udt_arr[$date_epoch2][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch2][0]['object_type_id'] );
 		$this->assertEquals( (6.5 * 3600), $udt_arr[$date_epoch2][0]['total_time'] );
 
 		$this->assertEquals( 1, count($udt_arr) );
@@ -4493,8 +4475,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//print_r($udt_arr);
 
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (7.5 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		//$this->assertEquals( 1, count($udt_arr) );
@@ -5758,8 +5739,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (15.5 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -5866,8 +5846,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (25.5 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
@@ -5928,8 +5907,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
 		//Total Time
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
-		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (13.5 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;

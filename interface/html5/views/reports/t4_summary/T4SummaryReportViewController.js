@@ -180,7 +180,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 
 	},
 
-	onContentMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function( context_btn, menu_name ) {
 		var id;
 		if ( Global.isSet( menu_name ) ) {
 			id = menu_name;
@@ -314,7 +314,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 
 		v_box.append( form_item );
 
-		this.addEditFieldToColumn( $.i18n._( 'Tax Income (Box 22)' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
+		this.addEditFieldToColumn( $.i18n._( 'Income Tax (Box 22)' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
 
 		//Employee CPP(Box 16)
 		v_box = $( "<div class='v-box'></div>" );
@@ -1025,20 +1025,24 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		//Company Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'company_name'} );
+		form_item_input.TTextInput( {field: 'company_name', width: '100%'} );
 		this.addEditFieldToColumn( $.i18n._( 'Company Name' ), form_item_input, tab3_column1 );
+
+		form_item_input.parent().width( '45%' );
 
 		//Address 1
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'address1'} );
+		form_item_input.TTextInput( {field: 'address1', width: '100%'} );
 		this.addEditFieldToColumn( $.i18n._( 'Address 1' ), form_item_input, tab3_column1 );
+		form_item_input.parent().width( '45%' );
 
 		//Address 2
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'address2'} );
+		form_item_input.TTextInput( {field: 'address2', width: '100%'} );
 		this.addEditFieldToColumn( $.i18n._( 'Address 2' ), form_item_input, tab3_column1 );
+		form_item_input.parent().width( '45%' );
 
 		//City
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );

@@ -483,9 +483,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			$this.onCloseIconClick();
 		} );
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		var tab_2_label = this.edit_view.find( 'a[ref=tab2]' );
+		var tab_0_label = this.edit_view.find( 'a[ref=tab_report]' );
+		var tab_1_label = this.edit_view.find( 'a[ref=tab_setup]' );
+		var tab_2_label = this.edit_view.find( 'a[ref=tab_chart]' );
 		var tab_3_label = this.edit_view.find( 'a[ref=tab3]' );
 		var tab_4_label = this.edit_view.find( 'a[ref=tab4]' );
 
@@ -525,9 +525,9 @@ ReportBaseViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_report = this.edit_view_tab.find( '#tab_report' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab0_column1 = tab_report.find( '.first-column' );
 
 		// Template
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
@@ -536,8 +536,8 @@ ReportBaseViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Template' ), form_item_input, tab0_column1 );
 
 		//Tab 1 start
-		var tab1 = this.edit_view_tab.find( '#tab1' );
-		var tab1_column1 = tab1.find( '.first-column' );
+		var tab_setup = this.edit_view_tab.find( '#tab_setup' );
+		var tab1_column1 = tab_setup.find( '.first-column' );
 
 		//Fields
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -578,11 +578,11 @@ ReportBaseViewController = BaseViewController.extend( {
 		//Maximum Pages
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'maximum_page_limit', width: 50} );
-		this.addEditFieldToColumn( $.i18n._( 'Maximum Pages' ), form_item_input, tab1_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Maximum Pages' ), form_item_input, tab1_column1 );
 
 		//Tab 2 start
-		var tab2 = this.edit_view_tab.find( '#tab2' );
-		var tab2_column1 = tab2.find( '.first-column' );
+		var tab_chart = this.edit_view_tab.find( '#tab_chart' );
+		var tab2_column1 = tab_chart.find( '.first-column' );
 
 		//Enable
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
@@ -751,10 +751,13 @@ ReportBaseViewController = BaseViewController.extend( {
 				this.visible_report_values[key] = target.getValue( true );
 
 			} else if ( key === 'time_period' ) {
-				time_period = target.getValue();
-				this.visible_report_values[key] = {time_period: time_period};
 
-				this.onTimePeriodChange( target );
+				time_period = target.getValue();
+
+				if ( !this.visible_report_values[key] || this.visible_report_values[key].time_period !== time_period ) {
+					this.visible_report_values[key] = {time_period: time_period};
+					this.onTimePeriodChange( target );
+				}
 
 			} else if ( key === 'start_date' || key === 'end_date' || key === 'pay_period_id' || key === 'pay_period_schedule_id' ) {
 				time_period = this.visible_report_values['time_period'];
@@ -877,8 +880,8 @@ ReportBaseViewController = BaseViewController.extend( {
 		this.cleanUI();
 		var $this = this;
 		var len = uiModel.length;
-		var tab0 = this.edit_view_tab.find( '#tab0' );
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_report = this.edit_view_tab.find( '#tab_report' );
+		var tab0_column1 = tab_report.find( '.first-column' );
 		this.edit_view_tabs[0] = [];
 		this.edit_view_tabs[0].push( tab0_column1 );
 		this.visible_report_widgets = {}; //report tab widgets
@@ -909,7 +912,8 @@ ReportBaseViewController = BaseViewController.extend( {
 			value = last_time_visible_values[field];
 			var widget = this.getUIWidget( field );
 
-			if ( !widget ) {
+			//Dont add field is it's not in setup fields.
+			if ( !widget || !this.getFieldLabel( field ) ) {
 				continue;
 			}
 
@@ -1008,15 +1012,17 @@ ReportBaseViewController = BaseViewController.extend( {
 				this.setEditMenu();
 			} else if ( ui.index === 2 ) {
 				if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-					this.edit_view_tab.find( '#tab2' ).find( '.first-column' ).css( 'display', 'block' );
+					this.edit_view_tab.find( '#tab_chart' ).find( '.first-column' ).css( 'display', 'block' );
+					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 				} else {
-					this.edit_view_tab.find( '#tab2' ).find( '.first-column' ).css( 'display', 'none' );
+					this.edit_view_tab.find( '#tab_chart' ).find( '.first-column' ).css( 'display', 'none' );
 					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
 					this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 				}
 			} else if ( ui.index === 3 ) {
 				if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
 					this.edit_view_tab.find( '#tab3' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 					this.initSubCustomColumnView();
 				} else {
 					this.edit_view_tab.find( '#tab3' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
@@ -1042,15 +1048,17 @@ ReportBaseViewController = BaseViewController.extend( {
 				this.setEditMenu();
 			} else if ( ui.index === 2 ) {
 				if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-					this.edit_view_tab.find( '#tab2' ).find( '.first-column' ).css( 'display', 'block' );
+					this.edit_view_tab.find( '#tab_chart' ).find( '.first-column' ).css( 'display', 'block' );
+					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 				} else {
-					this.edit_view_tab.find( '#tab2' ).find( '.first-column' ).css( 'display', 'none' );
+					this.edit_view_tab.find( '#tab_chart' ).find( '.first-column' ).css( 'display', 'none' );
 					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
 					this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 				}
 			} else if ( ui.index === 4 ) {
 				if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
 					this.edit_view_tab.find( '#tab4' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 					this.initSubCustomColumnView();
 				} else {
 					this.edit_view_tab.find( '#tab4' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
@@ -1089,9 +1097,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			html_item.remove();
 		}
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_report = this.edit_view_tab.find( '#tab_report' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab0_column1 = tab_report.find( '.first-column' );
 
 		var clear_both_div = tab0_column1.find( '.clear-both-div' );
 
@@ -1273,6 +1281,10 @@ ReportBaseViewController = BaseViewController.extend( {
 			case 'job_vacancy_id':
 				widget = this.getTComboBox( field, ALayoutIDs.JOB_VACANCY, (APIFactory.getAPIClass( 'APIJobVacancy' )) );
 				break;
+			case 'accrual_policy_account_id':
+				widget = this.getTComboBox( field, ALayoutIDs.ACCRUAL_POLICY_ACCOUNT, (APIFactory.getAPIClass( 'APIAccrualPolicyAccount' )) );
+				break;
+
 			default:
 
 				if ( !Global.isSet( ReportBaseViewController.ReportMissedField ) ) {
@@ -1785,6 +1797,8 @@ ReportBaseViewController = BaseViewController.extend( {
 			v_box.append( form_item2 );
 			v_box.append( "<div class='clear-both-div'></div>" );
 
+			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 120 );
+
 			form_input_div.append( v_box );
 		}
 
@@ -1825,6 +1839,8 @@ ReportBaseViewController = BaseViewController.extend( {
 			v_box.append( "<div class='clear-both-div'></div>" );
 			v_box.append( form_item2 );
 			v_box.append( "<div class='clear-both-div'></div>" );
+
+			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 70 );
 
 		}
 
@@ -1871,7 +1887,7 @@ ReportBaseViewController = BaseViewController.extend( {
 
 			var form_item = $this.putInputToInsideFormItem( time_period, $.i18n._( 'Section' ) );
 			var form_item2 = $this.putInputToInsideFormItem( start_date, $.i18n._( 'Start Date' ) );
-			var form_item3 = $this.putInputToInsideFormItem( end_date, $.i18n._( 'Section' ) );
+			var form_item3 = $this.putInputToInsideFormItem( end_date, $.i18n._( 'End Date' ) );
 
 			$this.visible_report_widgets.license_expiry_date = time_period;
 			$this.visible_report_widgets.start_date_3 = start_date;
@@ -1895,6 +1911,8 @@ ReportBaseViewController = BaseViewController.extend( {
 			v_box.append( "<div class='clear-both-div'></div>" );
 			v_box.append( form_item3 );
 			v_box.append( "<div class='clear-both-div'></div>" );
+
+			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 70 );
 
 			form_input_div.append( v_box );
 
@@ -1959,6 +1977,8 @@ ReportBaseViewController = BaseViewController.extend( {
 			v_box.append( form_item2 );
 			v_box.append( "<div class='clear-both-div'></div>" );
 
+			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 120 );
+
 			form_input_div.append( v_box );
 		}
 
@@ -1999,6 +2019,8 @@ ReportBaseViewController = BaseViewController.extend( {
 			v_box.append( "<div class='clear-both-div'></div>" );
 			v_box.append( form_item2 );
 			v_box.append( "<div class='clear-both-div'></div>" );
+
+			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 70 );
 
 		}
 
@@ -2045,7 +2067,7 @@ ReportBaseViewController = BaseViewController.extend( {
 
 			var form_item = $this.putInputToInsideFormItem( time_period, $.i18n._( 'Section' ) );
 			var form_item2 = $this.putInputToInsideFormItem( start_date, $.i18n._( 'Start Date' ) );
-			var form_item3 = $this.putInputToInsideFormItem( end_date, $.i18n._( 'Section' ) );
+			var form_item3 = $this.putInputToInsideFormItem( end_date, $.i18n._( 'End Date' ) );
 
 			$this.visible_report_widgets.skill_expiry_date = time_period;
 			$this.visible_report_widgets.start_date_2 = start_date;
@@ -2069,6 +2091,8 @@ ReportBaseViewController = BaseViewController.extend( {
 			v_box.append( "<div class='clear-both-div'></div>" );
 			v_box.append( form_item3 );
 			v_box.append( "<div class='clear-both-div'></div>" );
+
+			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 70 );
 
 			form_input_div.append( v_box );
 
@@ -2133,6 +2157,8 @@ ReportBaseViewController = BaseViewController.extend( {
 			v_box.append( form_item2 );
 			v_box.append( "<div class='clear-both-div'></div>" );
 
+			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 120 );
+
 			form_input_div.append( v_box );
 		}
 
@@ -2173,6 +2199,8 @@ ReportBaseViewController = BaseViewController.extend( {
 			v_box.append( "<div class='clear-both-div'></div>" );
 			v_box.append( form_item2 );
 			v_box.append( "<div class='clear-both-div'></div>" );
+
+			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 70 );
 
 		}
 
@@ -2219,7 +2247,7 @@ ReportBaseViewController = BaseViewController.extend( {
 
 			var form_item = $this.putInputToInsideFormItem( time_period, $.i18n._( 'Section' ) );
 			var form_item2 = $this.putInputToInsideFormItem( start_date, $.i18n._( 'Start Date' ) );
-			var form_item3 = $this.putInputToInsideFormItem( end_date, $.i18n._( 'Section' ) );
+			var form_item3 = $this.putInputToInsideFormItem( end_date, $.i18n._( 'End Date' ) );
 
 			$this.visible_report_widgets.membership_renewal_date = time_period;
 			$this.visible_report_widgets.start_date_1 = start_date;
@@ -2244,6 +2272,8 @@ ReportBaseViewController = BaseViewController.extend( {
 			v_box.append( form_item3 );
 			v_box.append( "<div class='clear-both-div'></div>" );
 
+			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 62 );
+
 			form_input_div.append( v_box );
 
 		}
@@ -2251,7 +2281,6 @@ ReportBaseViewController = BaseViewController.extend( {
 	},
 
 	onTimePeriodChange: function( target, defaultValue ) {
-
 		var $this = this;
 		var value = target.getValue();
 
@@ -2307,6 +2336,8 @@ ReportBaseViewController = BaseViewController.extend( {
 			v_box.append( form_item2 );
 			v_box.append( "<div class='clear-both-div'></div>" );
 
+			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 120 );
+
 			form_input_div.append( v_box );
 		}
 
@@ -2347,6 +2378,8 @@ ReportBaseViewController = BaseViewController.extend( {
 			v_box.append( "<div class='clear-both-div'></div>" );
 			v_box.append( form_item2 );
 			v_box.append( "<div class='clear-both-div'></div>" );
+
+			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 70 );
 
 		}
 
@@ -2393,7 +2426,7 @@ ReportBaseViewController = BaseViewController.extend( {
 
 			var form_item = $this.putInputToInsideFormItem( time_period, $.i18n._( 'Section' ) );
 			var form_item2 = $this.putInputToInsideFormItem( start_date, $.i18n._( 'Start Date' ) );
-			var form_item3 = $this.putInputToInsideFormItem( end_date, $.i18n._( 'Section' ) );
+			var form_item3 = $this.putInputToInsideFormItem( end_date, $.i18n._( 'End Date' ) );
 
 			$this.visible_report_widgets.time_period = time_period;
 			$this.visible_report_widgets.start_date = start_date;
@@ -2418,6 +2451,8 @@ ReportBaseViewController = BaseViewController.extend( {
 			v_box.append( form_item3 );
 			v_box.append( "<div class='clear-both-div'></div>" );
 
+			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 62 );
+
 			form_input_div.append( v_box );
 
 		}
@@ -2433,8 +2468,8 @@ ReportBaseViewController = BaseViewController.extend( {
 
 		var found_in_current_tab = false;
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
-		var tab1 = this.edit_view_tab.find( '#tab1' );
+		var tab_report = this.edit_view_tab.find( '#tab_report' );
+		var tab_setup = this.edit_view_tab.find( '#tab_setup' );
 
 		for ( var key in error_list ) {
 
@@ -2692,7 +2727,7 @@ ReportBaseViewController = BaseViewController.extend( {
 		return config;
 	},
 
-	onContentMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function( context_btn, menu_name ) {
 
 		var id;
 		if ( Global.isSet( menu_name ) ) {

@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 15602 $
- * $Id: CompanyDeductionFactory.class.php 15602 2014-12-30 00:31:02Z mikeb $
- * $Date: 2014-12-29 16:31:02 -0800 (Mon, 29 Dec 2014) $
- */
+
 
 /**
  * @package Modules\Company
@@ -466,9 +462,14 @@ class CompanyDeductionFactory extends Factory {
 														'-1242-#pay_period_start_date#' => TTi18n::getText('Pay Period - Start Date'),
 														'-1243-#pay_period_end_date#' => TTi18n::getText('Pay Period - End Date'),
 														'-1244-#pay_period_transaction_date#' => TTi18n::getText('Pay Period - Transaction Date'),
+														'-1245-#pay_period_total_days#' => TTi18n::getText('Pay Period - Total Days'),
+														'-1248-#pay_period_worked_days#' => TTi18n::getText('Pay Period - Total Worked Days'),
+														'-1249-#pay_period_paid_days#' => TTi18n::getText('Pay Period - Total Paid Days'),
+														'-1250-#pay_period_worked_time#' => TTi18n::getText('Pay Period - Total Worked Time'),
+														'-1251-#pay_period_paid_time#' => TTi18n::getText('Pay Period - Total Paid Time'),
 
 														'-1260-#employee_hire_date#' => TTi18n::getText('Employee Hire Date'),
-														'-1250-#employee_termination_date#' => TTi18n::getText('Employee Termination Date'),
+														'-1261-#employee_termination_date#' => TTi18n::getText('Employee Termination Date'),
 														'-1270-#employee_birth_date#' => TTi18n::getText('Employee Birth Date'),
 
 														'-1300-#currency_iso_code#' => TTi18n::getText('Currency ISO Code'),
@@ -477,12 +478,20 @@ class CompanyDeductionFactory extends Factory {
 														'-1510-#lookback_total_pay_stubs#' => TTi18n::getText('Lookback - Total Pay Stubs'),
 														'-1520-#lookback_start_date#' => TTi18n::getText('Lookback - Start Date'),
 														'-1522-#lookback_end_date#' => TTi18n::getText('Lookback - End Date'),
+														'-1523-#lookback_total_days#' => TTi18n::getText('Lookback - Total Days'),
+
 														'-1530-#lookback_first_pay_stub_start_date#' => TTi18n::getText('Lookback - First Pay Stub Start Date'),
 														'-1532-#lookback_first_pay_stub_end_date#' => TTi18n::getText('Lookback - First Pay Stub End Date'),
 														'-1534-#lookback_first_pay_stub_transaction_date#' => TTi18n::getText('Lookback - First Pay Stub Transaction Date'),
 														'-1540-#lookback_last_pay_stub_start_date#' => TTi18n::getText('Lookback - Last Pay Stub Start Date'),
 														'-1542-#lookback_last_pay_stub_end_date#' => TTi18n::getText('Lookback - Last Pay Stub End Date'),
 														'-1544-#lookback_last_pay_stub_transaction_date#' => TTi18n::getText('Lookback - Last Pay Stub Transaction Date'),
+
+														'-1545-#lookback_pay_stub_total_days#' => TTi18n::getText('Lookback - Pay Period Total Days'),
+														'-1546-#lookback_pay_stub_worked_days#' => TTi18n::getText('Lookback - Pay Period Worked Days'),
+														'-1547-#lookback_pay_stub_paid_days#' => TTi18n::getText('Lookback - Pay Period Paid Days'),
+														'-1548-#lookback_pay_stub_worked_time#' => TTi18n::getText('Lookback - Pay Period Worked Time'),
+														'-1549-#lookback_pay_stub_paid_time#' => TTi18n::getText('Lookback - Pay Period Paid Time'),
 
 														'-1610-#lookback_pay_stub_amount#' => TTi18n::getText('Lookback - Pay Stub Amount'),
 														'-1620-#lookback_pay_stub_ytd_amount#' => TTi18n::getText('Lookback - Pay Stub YTD Amount'),
@@ -588,6 +597,8 @@ class CompanyDeductionFactory extends Factory {
 										'maximum_length_of_service_unit_id' => 'MaximumLengthOfServiceUnit', //Must go before maximum_length_of_service_days, for calculations to not fail.
 										'maximum_length_of_service_days' => 'MaximumLengthOfServiceDays',
 										'maximum_length_of_service' => 'MaximumLengthOfService',
+										'length_of_service_contributing_pay_code_policy_id' => 'LengthOfServiceContributingPayCodePolicy',
+										'length_of_service_contributing_pay_code_policy' => FALSE,
 										'minimum_user_age' => 'MinimumUserAge',
 										'maximum_user_age' => 'MaximumUserAge',
 										'apply_frequency_id' => 'ApplyFrequency',
@@ -660,18 +671,11 @@ class CompanyDeductionFactory extends Factory {
 	}
 
 	function getPayStubEntryAccountObject() {
-		if ( is_object($this->pay_stub_entry_account_obj) ) {
-			return $this->pay_stub_entry_account_obj;
-		} else {
-			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-			$psealf->getById( $this->getPayStubEntryAccount() );
-			if ( $psealf->getRecordCount() > 0 ) {
-				$this->pay_stub_entry_account_obj = $psealf->getCurrent();
-				return $this->pay_stub_entry_account_obj;
-			}
+		return $this->getGenericObject( 'PayStubEntryAccountListFactory', $this->getPayStubEntryAccount(), 'pay_stub_entry_account_obj' );
+	}
 
-			return FALSE;
-		}
+	function getLengthOfServiceContributingPayCodePolicyObject() {
+		return $this->getGenericObject( 'ContributingPayCodePolicyListFactory', $this->getLengthOfServiceContributingPayCodePolicy(), 'length_of_service_contributing_pay_code_policy_obj' );
 	}
 
 	function getCompany() {
@@ -1125,6 +1129,33 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 
+	function getLengthOfServiceContributingPayCodePolicy() {
+		if ( isset($this->data['length_of_service_contributing_pay_code_policy_id']) ) {
+			return (int)$this->data['length_of_service_contributing_pay_code_policy_id'];
+		}
+
+		return FALSE;
+	}
+	function setLengthOfServiceContributingPayCodePolicy($id) {
+		$id = trim($id);
+
+		$csplf = TTnew( 'ContributingPayCodePolicyListFactory' );
+
+		if (	$id == 0
+				OR
+				$this->Validator->isResultSetWithRows(	'length_of_service_contributing_pay_code_policy_id',
+													$csplf->getByID($id),
+													TTi18n::gettext('Contributing Pay Code Policy is invalid')
+													) ) {
+
+			$this->data['length_of_service_contributing_pay_code_policy_id'] = $id;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+	
 	//
 	// Calendar
 	//
@@ -1314,8 +1345,13 @@ class CompanyDeductionFactory extends Factory {
 			return FALSE;
 		}
 
-		$udtlf = TTnew( 'UserDateTotalListFactory' );
-		$retval = $udtlf->getWorkedTimeSumByUserIDAndStartDateAndEndDate( $user_id, $start_date, $end_date );
+		$retval = 0;
+
+		$pay_code_policy_obj = $this->getLengthOfServiceContributingPayCodePolicyObject();
+		if ( is_object( $pay_code_policy_obj ) ) {
+			$udtlf = TTnew( 'UserDateTotalListFactory' );
+			$retval = $udtlf->getTotalTimeSumByUserIDAndPayCodeIDAndStartDateAndEndDate( $user_id, $pay_code_policy_obj->getPayCode(), $start_date, $end_date );
+		}
 
 		Debug::Text('Worked Seconds: '. (int)$retval .' Before: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 

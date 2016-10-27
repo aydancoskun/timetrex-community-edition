@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 11942 $
- * $Id: PayPeriodTimeSheetVerifyFactory.class.php 11942 2014-01-09 00:50:10Z mikeb $
- * $Date: 2014-01-08 16:50:10 -0800 (Wed, 08 Jan 2014) $
- */
+
 
 /**
  * @package Modules\PayPeriod
@@ -320,7 +316,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 	}
 
 	function getVerificationType() {
-		if ( $this->getPayPeriodObject() != FALSE AND $this->getPayPeriodObject()->getPayPeriodScheduleObject() != FALSE ) {
+		if ( is_object( $this->getPayPeriodObject() ) AND $this->getPayPeriodObject()->getPayPeriodScheduleObject() != FALSE ) {
 			$time_sheet_verification_type_id = $this->getPayPeriodObject()->getPayPeriodScheduleObject()->getTimeSheetVerifyType();
 			Debug::Text('TimeSheet Verification Type: '. $time_sheet_verification_type_id, __FILE__, __LINE__, __METHOD__, 10);
 			return $time_sheet_verification_type_id;
@@ -331,13 +327,18 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 
 	//Returns the start and end date of the verification window.
 	function getVerificationWindowDates() {
-		return array( 'start' => $this->getPayPeriodObject()->getTimeSheetVerifyWindowStartDate(), 'end' => $this->getPayPeriodObject()->getTimeSheetVerifyWindowEndDate() );
+		if ( is_object( $this->getPayPeriodObject() ) ) {
+			return array( 'start' => $this->getPayPeriodObject()->getTimeSheetVerifyWindowStartDate(), 'end' => $this->getPayPeriodObject()->getTimeSheetVerifyWindowEndDate() );
+		}
+
+		return FALSE;
 	}
 
 	//Determines the color of the verification box.
 	function getVerificationBoxColor() {
 		$retval = FALSE;
-		if ( TTDate::getTime() >= $this->getPayPeriodObject()->getTimeSheetVerifyWindowStartDate()
+		if ( is_object( $this->getPayPeriodObject() )
+				AND TTDate::getTime() >= $this->getPayPeriodObject()->getTimeSheetVerifyWindowStartDate()
 				AND TTDate::getTime() <= $this->getPayPeriodObject()->getTimeSheetVerifyWindowEndDate() ) {
 
 			if ( $this->getStatus() == 55 ) { //Declined
@@ -376,6 +377,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		} else {
 			if ( $this->isNew() == TRUE
 					AND ( is_object( $this->getUserObject() )
+							AND is_object( $this->getPayPeriodObject() )
 							AND ( TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) <= TTDate::getMiddleDayEpoch( $this->getPayPeriodObject()->getEndDate() ) )
 							AND ( $this->getUserObject()->getTerminationDate() == '' OR ( $this->getUserObject()->getTerminationDate() != '' AND TTDate::getMiddleDayEpoch( $this->getUserObject()->getTerminationDate() ) >= TTDate::getMiddleDayEpoch( $this->getPayPeriodObject()->getStartDate() ) ) )
 						)
@@ -730,12 +732,33 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 				//Recalculate exceptions on the last day of pay period to remove any TimeSheet Not Verified exceptions.
 				//Get user_date_id.
 				if ( is_object( $this->getPayPeriodObject() ) ) {
-					$udlf = new UserDateListFactory();
-					$udlf->getByUserIdAndDate( $this->getUser(), $this->getPayPeriodObject()->getEndDate() );
-					if ( $udlf->getRecordCount() > 0 ) {
-						Debug::Text('Recalculating exceptions on last day of pay period... Date: '. $this->getPayPeriodObject()->getEndDate(), __FILE__, __LINE__, __METHOD__, 10);
-						ExceptionPolicyFactory::calcExceptions( $udlf->getCurrent()->getID(), FALSE, FALSE );
-					}
+					$flags = array(
+									'meal' => FALSE,
+									'undertime_absence' => FALSE,
+									'break' => FALSE,
+									'holiday' => FALSE,
+									'schedule_absence' => FALSE,
+									'absence' => FALSE,
+									'regular' => FALSE,
+									'overtime' => FALSE,
+									'premium' => FALSE,
+									'accrual' => FALSE,
+
+									'exception' => TRUE,
+									//Exception options
+									'exception_premature' => FALSE, //Calculates premature exceptions
+									'exception_future' => FALSE, //Calculates exceptions in the future.
+
+									//Calculate policies for future dates.
+									'future_dates' => FALSE, //Calculates dates in the future.
+									'past_dates' => FALSE, //Calculates dates in the past. This is only needed when Pay Formulas that use averaging are enabled?*
+									);
+
+					$cp = TTNew('CalculatePolicy');
+					$cp->setFlag( $flags );
+					$cp->setUserObject( $this->getUserObject() );
+					$cp->calculate( $this->getPayPeriodObject()->getEndDate() ); //This sets timezone itself.
+					$cp->Save();
 				} else {
 					Debug::Text('No Pay Period found...', __FILE__, __LINE__, __METHOD__, 10);
 				}

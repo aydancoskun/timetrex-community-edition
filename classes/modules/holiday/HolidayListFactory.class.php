@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14958 $
- * $Id: HolidayListFactory.class.php 14958 2014-10-28 14:00:49Z mikeb $
- * $Date: 2014-10-28 07:00:49 -0700 (Tue, 28 Oct 2014) $
- */
+
 
 /**
  * @package Modules\Holiday
@@ -191,6 +187,54 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	function getByHolidayPolicyIdAndStartDateAndEndDate($holiday_policy_id, $start_date, $end_date, $where = NULL, $order = NULL) {
+		if ( $holiday_policy_id == '') {
+			return FALSE;
+		}
+
+		if ( $start_date == '') {
+			return FALSE;
+		}
+
+		if ( $end_date == '') {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'a.holiday_policy_id' => 'asc', 'a.date_stamp' => 'desc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$hpf = new HolidayPolicyFactory();
+		$cgmf = new CompanyGenericMapFactory();
+
+		$ph = array(
+					'start_date' => $this->db->BindDate( $start_date ),
+					'end_date' => $this->db->BindDate( $end_date ),
+					);
+
+		$query = '
+					select	a.*
+					from 	'. $this->getTable() .' as a
+					LEFT JOIN '. $hpf->getTable() .' as b ON ( a.holiday_policy_id = b.id )
+					where
+						a.date_stamp >= ?
+						AND a.date_stamp <= ?
+						AND b.id in ('. $this->getListSQL($holiday_policy_id, $ph) .')
+						AND ( a.deleted = 0 AND b.deleted=0 )
+						';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+
+		return $this;
+	}
+
 	function getByCompanyIdAndHolidayPolicyId($company_id, $id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -243,6 +287,7 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		$hpf = new HolidayPolicyFactory();
 		$cgmf = new CompanyGenericMapFactory();
 
+
 		$ph = array(
 					'user_id' => $user_id,
 					);
@@ -261,6 +306,7 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 						AND a.user_id = ?
 						AND ( c.deleted = 0 AND d.deleted = 0 AND b.deleted = 0 )
 						';
+
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 

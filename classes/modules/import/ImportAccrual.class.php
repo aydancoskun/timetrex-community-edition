@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 3387 $
- * $Id: ImportBranch.class.php 3387 2010-03-04 17:42:17Z ipso $
- * $Date: 2010-03-04 09:42:17 -0800 (Thu, 04 Mar 2010) $
- */
+
 
 
 /**
@@ -47,7 +43,7 @@ class ImportAccrual extends Import {
 
 	public $class_name = 'APIAccrual';
 
-	public $accrual_policy_options = FALSE;
+	public $accrual_policy_account_options = FALSE;
 
 	function _getFactoryOptions( $name, $parent = NULL ) {
 
@@ -55,14 +51,14 @@ class ImportAccrual extends Import {
 		switch( $name ) {
 			case 'columns':
 				$apf = TTNew('AccrualFactory');
-				$retval = Misc::prependArray( $this->getUserIdentificationColumns(), Misc::arrayIntersectByKey( array('accrual_policy', 'type', 'amount', 'date_stamp'), Misc::trimSortPrefix( $apf->getOptions('columns') ) ) );
+				$retval = Misc::prependArray( $this->getUserIdentificationColumns(), Misc::arrayIntersectByKey( array('accrual_policy_account', 'type', 'amount', 'date_stamp'), Misc::trimSortPrefix( $apf->getOptions('columns') ) ) );
 
 				break;
 			case 'column_aliases':
 				//Used for converting column names after they have been parsed.
 				$retval = array(
 								'type' => 'type_id',
-								'accrual_policy' => 'accrual_policy_id',
+								'accrual_policy_account' => 'accrual_policy_account_id',
 								);
 				break;
 			case 'import_options':
@@ -110,25 +106,25 @@ class ImportAccrual extends Import {
 	//
 	// Generic parser functions.
 	//
-	function getAccrualPolicyOptions() {
+	function getAccrualPolicyAccountOptions() {
 		//Get accrual policies
-		$aplf = TTNew('AccrualPolicyListFactory');
+		$aplf = TTNew('AccrualPolicyAccountListFactory');
 		$aplf->getByCompanyId( $this->company_id );
-		$this->accrual_policy_options = (array)$aplf->getArrayByListFactory( $aplf, FALSE, TRUE );
+		$this->accrual_policy_account_options = (array)$aplf->getArrayByListFactory( $aplf, FALSE, TRUE );
 		unset($aplf);
 
 		return TRUE;
 	}
-	function parse_accrual_policy( $input, $default_value = NULL, $parse_hint = NULL ) {
+	function parse_accrual_policy_account( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
 			return 0; //Default Wage Group
 		}
 
-		if ( !is_array( $this->accrual_policy_options ) ) {
-			$this->getAccrualPolicyOptions();
+		if ( !is_array( $this->accrual_policy_account_options ) ) {
+			$this->getAccrualPolicyAccountOptions();
 		}
 
-		$retval = $this->findClosestMatch( $input, $this->accrual_policy_options );
+		$retval = $this->findClosestMatch( $input, $this->accrual_policy_account_options );
 		if ( $retval === FALSE ) {
 			$retval = -1; //Make sure this fails.
 		}

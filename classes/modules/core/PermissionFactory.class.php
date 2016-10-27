@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 14408 $
- * $Id: PermissionFactory.class.php 14408 2014-09-12 19:02:59Z mikeb $
- * $Date: 2014-09-12 12:02:59 -0700 (Fri, 12 Sep 2014) $
- */
+
 
 /**
  * @package Core
@@ -209,9 +205,14 @@ class PermissionFactory extends Factory {
 														),
 										'policy'	=> array(
 															'policy_group',
+															'pay_code',
+															'pay_formula_policy',
+															'contributing_pay_code_policy',
+															'contributing_shift_policy',
 															'schedule_policy',
 															'meal_policy',
 															'break_policy',
+															'regular_time_policy',
 															'over_time_policy',
 															'premium_policy',
 															'accrual_policy',
@@ -322,9 +323,14 @@ class PermissionFactory extends Factory {
 										'invoice_report' => TTi18n::gettext('Invoice Reports'),
 
 										'policy_group' => TTi18n::gettext('Policy Group'),
+										'pay_code' => TTi18n::gettext('Pay Codes'),
+										'pay_formula_policy' => TTi18n::gettext('Pay Formulas'),
+										'contributing_pay_code_policy' => TTi18n::gettext('Contributing Pay Code Policies'),
+										'contributing_shift_policy' => TTi18n::gettext('Contributing Shift Policies'),
 										'schedule_policy' => TTi18n::gettext('Schedule Policies'),
 										'meal_policy' => TTi18n::gettext('Meal Policies'),
 										'break_policy' => TTi18n::gettext('Break Policies'),
+										'regular_time_policy' => TTi18n::gettext('Regular Time Policies'),
 										'over_time_policy' => TTi18n::gettext('Overtime Policies'),
 										'premium_policy' => TTi18n::gettext('Premium Policies'),
 										'accrual_policy' => TTi18n::gettext('Accrual Policies'),
@@ -663,7 +669,51 @@ class PermissionFactory extends Factory {
 																'delete' => TTi18n::gettext('Delete'),
 																//'undelete' => TTi18n::gettext('Un-Delete')
 															),
+											'pay_code' =>	array(
+																'enabled' => TTi18n::gettext('Enabled'),
+																'view_own' => TTi18n::gettext('View Own'),
+																'view' => TTi18n::gettext('View'),
+																'add' => TTi18n::gettext('Add'),
+																'edit_own' => TTi18n::gettext('Edit Own'),
+																'edit' => TTi18n::gettext('Edit'),
+																'delete_own' => TTi18n::gettext('Delete Own'),
+																'delete' => TTi18n::gettext('Delete'),
+																//'undelete' => TTi18n::gettext('Un-Delete')
+															),
+											'pay_formula_policy' =>	array(
+																'enabled' => TTi18n::gettext('Enabled'),
+																'view_own' => TTi18n::gettext('View Own'),
+																'view' => TTi18n::gettext('View'),
+																'add' => TTi18n::gettext('Add'),
+																'edit_own' => TTi18n::gettext('Edit Own'),
+																'edit' => TTi18n::gettext('Edit'),
+																'delete_own' => TTi18n::gettext('Delete Own'),
+																'delete' => TTi18n::gettext('Delete'),
+																//'undelete' => TTi18n::gettext('Un-Delete')
+															),
 											'policy_group' =>	array(
+																'enabled' => TTi18n::gettext('Enabled'),
+																'view_own' => TTi18n::gettext('View Own'),
+																'view' => TTi18n::gettext('View'),
+																'add' => TTi18n::gettext('Add'),
+																'edit_own' => TTi18n::gettext('Edit Own'),
+																'edit' => TTi18n::gettext('Edit'),
+																'delete_own' => TTi18n::gettext('Delete Own'),
+																'delete' => TTi18n::gettext('Delete'),
+																//'undelete' => TTi18n::gettext('Un-Delete')
+															),
+											'contributing_pay_code_policy' =>	array(
+																'enabled' => TTi18n::gettext('Enabled'),
+																'view_own' => TTi18n::gettext('View Own'),
+																'view' => TTi18n::gettext('View'),
+																'add' => TTi18n::gettext('Add'),
+																'edit_own' => TTi18n::gettext('Edit Own'),
+																'edit' => TTi18n::gettext('Edit'),
+																'delete_own' => TTi18n::gettext('Delete Own'),
+																'delete' => TTi18n::gettext('Delete'),
+																//'undelete' => TTi18n::gettext('Un-Delete')
+															),
+											'contributing_shift_policy' =>	array(
 																'enabled' => TTi18n::gettext('Enabled'),
 																'view_own' => TTi18n::gettext('View Own'),
 																'view' => TTi18n::gettext('View'),
@@ -719,6 +769,17 @@ class PermissionFactory extends Factory {
 																//'undelete' => TTi18n::gettext('Un-Delete')
 															),
 											'accrual_policy' =>	array(
+																'enabled' => TTi18n::gettext('Enabled'),
+																'view_own' => TTi18n::gettext('View Own'),
+																'view' => TTi18n::gettext('View'),
+																'add' => TTi18n::gettext('Add'),
+																'edit_own' => TTi18n::gettext('Edit Own'),
+																'edit' => TTi18n::gettext('Edit'),
+																'delete_own' => TTi18n::gettext('Delete Own'),
+																'delete' => TTi18n::gettext('Delete'),
+																//'undelete' => TTi18n::gettext('Un-Delete')
+															),
+											'regular_time_policy' =>	array(
 																'enabled' => TTi18n::gettext('Enabled'),
 																'view_own' => TTi18n::gettext('View Own'),
 																'view' => TTi18n::gettext('View'),
@@ -2228,6 +2289,20 @@ class PermissionFactory extends Factory {
 																				'delete' => TRUE,
 																				'assign' => TRUE
 																			),
+															'pay_code' =>	array(
+																				'enabled' => TRUE,
+																				'view' => TRUE,
+																				'add' => TRUE,
+																				'edit' => TRUE,
+																				'delete' => TRUE,
+																			),
+															'pay_formula_policy' =>	array(
+																				'enabled' => TRUE,
+																				'view' => TRUE,
+																				'add' => TRUE,
+																				'edit' => TRUE,
+																				'delete' => TRUE,
+																			),
 															'report' =>	array(
 																				'view_system_log' => TRUE,
 																				'view_employee_summary' => TRUE,
@@ -2368,6 +2443,27 @@ class PermissionFactory extends Factory {
 																				'timeclock_admin' => TRUE,
 																			),
 															'policy_group' =>	array(
+																				'enabled' => TRUE,
+																				'view' => TRUE,
+																				'add' => TRUE,
+																				'edit' => TRUE,
+																				'delete' => TRUE,
+																			),
+															'contributing_pay_code_policy' =>	array(
+																				'enabled' => TRUE,
+																				'view' => TRUE,
+																				'add' => TRUE,
+																				'edit' => TRUE,
+																				'delete' => TRUE,
+																			),
+															'contributing_shift_policy' =>	array(
+																				'enabled' => TRUE,
+																				'view' => TRUE,
+																				'add' => TRUE,
+																				'edit' => TRUE,
+																				'delete' => TRUE,
+																			),
+															'regular_time_policy' =>	array(
 																				'enabled' => TRUE,
 																				'view' => TRUE,
 																				'add' => TRUE,
@@ -2628,7 +2724,7 @@ class PermissionFactory extends Factory {
 		if ( isset($data) ) {
 			//Save data in a single SQL query.
 			$query = 'INSERT INTO '. $this->getTable() .'(PERMISSION_CONTROL_ID, SECTION, NAME, VALUE, CREATED_DATE) VALUES'. implode(',', $data );
-			Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+			//Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 			$this->db->Execute($query, $ph);
 
 			//Make sure we keep the seqenence in sync, only required for MySQL.

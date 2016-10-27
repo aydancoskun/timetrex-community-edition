@@ -104,6 +104,8 @@ LocalCacheData.cookie_path = '/';
 
 LocalCacheData.domain_name = '';
 
+LocalCacheData.fullUrlParameterStr = '';
+
 LocalCacheData.setLocalCache = function( key, val, format ) {
 	if ( LocalCacheData.isSupportHTML5LocalCache ) {
 

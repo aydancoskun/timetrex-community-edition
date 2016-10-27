@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 1827 $
- * $Id: FastTree.class.php 1827 2008-04-17 16:57:18Z ipso $
- * $Date: 2008-04-17 09:57:18 -0700 (Thu, 17 Apr 2008) $
- */
+
 
 /**
  * @package Core

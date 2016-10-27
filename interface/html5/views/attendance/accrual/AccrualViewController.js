@@ -108,10 +108,10 @@ AccrualViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var tab_0_label = this.edit_view.find( 'a[ref=tab0]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab1]' );
-		tab_0_label.text( $.i18n._( 'Accrual' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		this.setTabLabels( {
+			'tab_accrual': $.i18n._( 'Accrual' ),
+			'tab_audit': $.i18n._( 'Audit' )
+		} );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIAccrual' )),
@@ -127,13 +127,13 @@ AccrualViewController = BaseViewController.extend( {
 
 		//Tab 0 start
 
-		var tab0 = this.edit_view_tab.find( '#tab0' );
+		var tab_accrual = this.edit_view_tab.find( '#tab_accrual' );
 
-		var tab0_column1 = tab0.find( '.first-column' );
+		var tab_accrual_column1 = tab_accrual.find( '.first-column' );
 
 		this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0].push( tab0_column1 );
+		this.edit_view_tabs[0].push( tab_accrual_column1 );
 
 		var form_item_input;
 		var widgetContainer;
@@ -145,7 +145,7 @@ AccrualViewController = BaseViewController.extend( {
 
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 			form_item_input.TText( {field: 'full_name'} );
-			this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab0_column1, '' );
+			this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_accrual_column1, '' );
 		} else {
 
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -161,25 +161,25 @@ AccrualViewController = BaseViewController.extend( {
 			var default_args = {};
 			default_args.permission_section = 'accrual';
 			form_item_input.setDefaultArgs( default_args );
-			this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab0_column1, '' );
+			this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_accrual_column1, '' );
 		}
 
-		// Accrual Policy
+		// Accrual Policy Account
 
 		if ( this.sub_view_mode ) {
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-			form_item_input.TText( {field: 'accrual_policy'} );
-			this.addEditFieldToColumn( $.i18n._( 'Accrual Policy' ), form_item_input, tab0_column1 );
+			form_item_input.TText( {field: 'accrual_policy_account'} );
+			this.addEditFieldToColumn( $.i18n._( 'Accrual Account' ), form_item_input, tab_accrual_column1 );
 		} else {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIAccrualPolicy' )),
+				api_class: (APIFactory.getAPIClass( 'APIAccrualPolicyAccount' )),
 				allow_multiple_selection: false,
-				layout_name: ALayoutIDs.ACCRUAL_POLICY,
+				layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
 				show_search_inputs: true,
 				set_empty: true,
-				field: 'accrual_policy_id'} );
-			this.addEditFieldToColumn( $.i18n._( 'Accrual Policy' ), form_item_input, tab0_column1 );
+				field: 'accrual_policy_account_id'} );
+			this.addEditFieldToColumn( $.i18n._( 'Accrual Account' ), form_item_input, tab_accrual_column1 );
 
 		}
 
@@ -188,7 +188,7 @@ AccrualViewController = BaseViewController.extend( {
 
 		form_item_input.TComboBox( {field: 'type_id'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.user_type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab0_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_accrual_column1 );
 
 		// Amount
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -199,7 +199,7 @@ AccrualViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Amount' ), form_item_input, tab0_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Amount' ), form_item_input, tab_accrual_column1, '', widgetContainer );
 
 		// Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
@@ -212,7 +212,7 @@ AccrualViewController = BaseViewController.extend( {
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab0_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_accrual_column1, '', widgetContainer );
 
 	},
 
@@ -232,11 +232,11 @@ AccrualViewController = BaseViewController.extend( {
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX} ),
 
-			new SearchField( {label: $.i18n._( 'Accrual Policy' ),
-				field: 'accrual_policy_id',
+			new SearchField( {label: $.i18n._( 'Accrual Account' ),
+				field: 'accrual_policy_account_id',
 				in_column: 1,
-				layout_name: ALayoutIDs.ACCRUAL_POLICY,
-				api_class: (APIFactory.getAPIClass( 'APIAccrualPolicy' )),
+				layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
+				api_class: (APIFactory.getAPIClass( 'APIAccrualPolicyAccount' )),
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -401,8 +401,8 @@ AccrualViewController = BaseViewController.extend( {
 		column_filter.last_name = true;
 		column_filter.type_id = true;
 		if ( this.sub_view_mode ) {
-			column_filter.accrual_policy = true;
-			column_filter.accrual_policy_id = true;
+			column_filter.accrual_policy_account = true;
+			column_filter.accrual_policy_account_id = true;
 			column_filter.user_id = true;
 		}
 
@@ -707,7 +707,7 @@ AccrualViewController = BaseViewController.extend( {
 
 	},
 
-	onContentMenuClick: function( context_btn, menu_name ) {
+	onContextMenuClick: function( context_btn, menu_name ) {
 		if ( Global.isSet( menu_name ) ) {
 			var id = menu_name;
 		} else {
@@ -786,52 +786,57 @@ AccrualViewController = BaseViewController.extend( {
 
 	onImportClick: function() {
 		var $this = this;
-		IndexViewController.openWizard( 'ImportCSVWizard', 'accrual',function(){
+		IndexViewController.openWizard( 'ImportCSVWizard', 'accrual', function() {
 			$this.search();
 		} );
 	},
 
-	removeEditView: function() {
-
-		if ( this.edit_view ) {
-			this.edit_view.remove();
-		}
-		this.edit_view = null;
-		this.edit_view_tab = null;
-		this.is_mass_editing = false;
-		this.is_viewing = false;
-		this.is_edit = false;
-		this.is_changed = false;
-		this.mass_edit_record_ids = [];
-		this.edit_view_tab_selected_index = 0;
-		LocalCacheData.current_doing_context_action = '';
-		//If there is a action in url, add it back. So we have correct url when set tabs urls
-		if(LocalCacheData.all_url_args && LocalCacheData.all_url_args.a){
-			LocalCacheData.current_doing_context_action = LocalCacheData.all_url_args.a;
-		}
-
-		if ( this.current_edit_record ) {
-			this.current_edit_record = null;
-		}
-
-		// reset parent context menu if edit only mode
-		if ( !this.edit_only_mode ) {
-			this.setDefaultMenu();
-			this.initRightClickMenu();
-		} else {
-			this.setParentContextMenuAfterSubViewClose();
-
-		}
-
-		this.reSetURL();
-
-		this.sub_log_view_controller = null;
-		this.edit_view_ui_dic = {};
-		this.edit_view_form_item_dic = {};
-		this.edit_view_error_ui_dic = {};
-	},
+//	removeEditView: function() {
+//
+//		if ( this.edit_view ) {
+//			this.edit_view.remove();
+//		}
+//		this.edit_view = null;
+//		this.edit_view_tab = null;
+//		this.is_mass_editing = false;
+//		this.is_viewing = false;
+//		this.is_edit = false;
+//		this.is_changed = false;
+//		this.mass_edit_record_ids = [];
+//		this.edit_view_tab_selected_index = 0;
+//		LocalCacheData.current_doing_context_action = '';
+//		//If there is a action in url, add it back. So we have correct url when set tabs urls
+//		if ( LocalCacheData.all_url_args && LocalCacheData.all_url_args.a ) {
+//			LocalCacheData.current_doing_context_action = LocalCacheData.all_url_args.a;
+//		}
+//
+//		if ( this.current_edit_record ) {
+//			this.current_edit_record = null;
+//		}
+//
+//		// reset parent context menu if edit only mode
+//		if ( !this.edit_only_mode ) {
+//			this.setDefaultMenu();
+//			this.initRightClickMenu();
+//		} else {
+//			this.setParentContextMenuAfterSubViewClose();
+//
+//		}
+//
+//		this.reSetURL();
+//
+//		this.sub_log_view_controller = null;
+//		this.edit_view_ui_dic = {};
+//		this.edit_view_form_item_dic = {};
+//		this.edit_view_error_ui_dic = {};
+//	},
 
 	setDefaultMenu: function( doNotSetFocus ) {
+
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+		if ( !this.context_menu_array ) {
+			return;
+		}
 
 		if ( !Global.isSet( doNotSetFocus ) || !doNotSetFocus ) {
 			this.selectContextMenu();
@@ -1030,9 +1035,9 @@ AccrualViewController = BaseViewController.extend( {
 	},
 
 	getSubViewFilter: function( filter ) {
-		if ( this.parent_edit_record && this.parent_edit_record.user_id && this.parent_edit_record.accrual_policy_id ) {
+		if ( this.parent_edit_record && this.parent_edit_record.user_id && this.parent_edit_record.accrual_policy_account_id ) {
 			filter.user_id = this.parent_edit_record.user_id;
-			filter.accrual_policy_id = this.parent_edit_record.accrual_policy_id;
+			filter.accrual_policy_account_id = this.parent_edit_record.accrual_policy_account_id;
 		}
 		return filter;
 	},
@@ -1056,8 +1061,8 @@ AccrualViewController = BaseViewController.extend( {
 			result_data['user_id'] = $this.parent_edit_record['user_id'];
 			result_data['first_name'] = $this.parent_edit_record['first_name'];
 			result_data['last_name'] = $this.parent_edit_record['last_name'];
-			result_data['accrual_policy_id'] = $this.parent_edit_record['accrual_policy_id'];
-			result_data['accrual_policy'] = $this.parent_edit_record['accrual_policy'];
+			result_data['accrual_policy_account_id'] = $this.parent_edit_record['accrual_policy_account_id'];
+			result_data['accrual_policy_account'] = $this.parent_edit_record['accrual_policy_account'];
 		}
 
 		$this.current_edit_record = result_data;
@@ -1235,14 +1240,14 @@ AccrualViewController = BaseViewController.extend( {
 		//Handle most cases that one tab and on audit tab
 		if ( this.is_mass_editing || this.sub_view_mode ) {
 
-			$( this.edit_view_tab.find( 'ul li' )[1] ).hide();
+			$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
 			this.edit_view_tab.tabs( 'select', 0 );
 
 		} else if ( !this.sub_view_mode ) {
 			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li' )[1] ).show();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().show();
 			} else {
-				$( this.edit_view_tab.find( 'ul li' )[1] ).hide();
+				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
 				this.edit_view_tab.tabs( 'select', 0 );
 			}
 		}

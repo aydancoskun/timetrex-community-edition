@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 12457 $
- * $Id: install.php 12457 2014-02-25 19:56:37Z mikeb $
- * $Date: 2014-02-25 11:56:37 -0800 (Tue, 25 Feb 2014) $
- */
+
 
 /*
 
@@ -91,6 +87,7 @@ echo " 6...";
 echo " 7...";
 $test_template_c_sub_dir = $templates_c_dir . DIRECTORY_SEPARATOR . uniqid();
 if ( @mkdir( $test_template_c_sub_dir ) !== TRUE ) {
+	//If SELinux is installed, could try: chcon -t httpd_sys_content_t storage
 	echo "Your web server is unable to create directories inside of: <b>". $templates_c_dir ."</b>, please give your webserver write permissions to this directory. For help on this topic click <a href='http://forums.timetrex.com/viewtopic.php?t=66'>here</a>.<br><br>\n";
 	$redir = FALSE;
 }

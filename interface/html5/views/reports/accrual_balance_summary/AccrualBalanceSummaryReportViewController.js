@@ -84,6 +84,24 @@ AccrualBalanceSummaryReportViewController = ReportBaseViewController.extend( {
 
 		return [menu];
 
+	},
+
+	getFormValues: function() {
+
+		var other = {};
+
+		other.page_orientation = this.current_edit_record.page_orientation;
+		other.font_size = this.current_edit_record.font_size;
+		other.disable_grand_total = this.current_edit_record.disable_grand_total;
+		other.maximum_page_limit = this.current_edit_record.maximum_page_limit;
+		other.show_duplicate_values = this.current_edit_record.show_duplicate_values;
+		other.accrual_policy_account_id = this.current_edit_record.accrual_policy_account_id;
+
+		if ( this.current_saved_report ) {
+			other.report_name = this.current_saved_report.name;
+		}
+
+		return other;
 	}
 
 } );

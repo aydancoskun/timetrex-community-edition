@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 11942 $
- * $Id: HolidayFactory.class.php 11942 2014-01-09 00:50:10Z mikeb $
- * $Date: 2014-01-08 16:50:10 -0800 (Wed, 08 Jan 2014) $
- */
+
 
 /**
  * @package Modules\Holiday
@@ -97,23 +93,9 @@ class HolidayFactory extends Factory {
 	}
 
 	function getHolidayPolicyObject() {
-		if ( is_object($this->holiday_policy_obj) ) {
-			return $this->holiday_policy_obj;
-		} else {
-
-			$hplf = TTnew( 'HolidayPolicyListFactory' );
-			$hplf->getById( $this->getHolidayPolicyID() );
-
-			if ( $hplf->getRecordCount() == 1 ) {
-				$this->holiday_policy_obj = $hplf->getCurrent();
-
-				return $this->holiday_policy_obj;
-			}
-
-			return FALSE;
-		}
+		return $this->getGenericObject( 'HolidayPolicyListFactory', $this->getHolidayPolicyID(), 'holiday_policy_obj' );
 	}
-
+	
 	function getHolidayPolicyID() {
 		if ( isset($this->data['holiday_policy_id']) ) {
 			return (int)$this->data['holiday_policy_id'];
@@ -282,6 +264,55 @@ class HolidayFactory extends Factory {
 		return FALSE;
 	}
 
+	//ignore_after_eligibility is used when scheduling employees as absent on a holiday, since they haven't worked after the holiday
+	// when the schedule is created, it will always fail.
+	function isEligible( $user_id, $ignore_after_eligibility = FALSE ) {
+		if ( $user_id == '' ) {
+			return FALSE;
+		}
+
+		$ulf = TTnew( 'UserListFactory' );
+		$ulf->getById( $user_id );
+		if ( $ulf->getRecordCount() == 1 ) {
+			$user_obj = $ulf->getCurrent();
+
+			//Use CalculatePolicy to determine if they are eligible for the holiday or not.
+			$flags = array(
+								'meal' => FALSE,
+								'undertime_absence' => FALSE,
+								'break' => FALSE,
+								'holiday' => TRUE,
+								'schedule_absence' => FALSE,
+								'absence' => FALSE,
+								'regular' => FALSE,
+								'overtime' => FALSE,
+								'premium' => FALSE,
+								'accrual' => FALSE,
+								'exception' => FALSE,
+
+								//Exception options
+								'exception_premature' => FALSE, //Calculates premature exceptions
+								'exception_future' => FALSE, //Calculates exceptions in the future.
+
+								//Calculate policies for future dates.
+								'future_dates' => FALSE, //Calculates dates in the future.
+								'past_dates' => FALSE, //Calculates dates in the past. This is only needed when Pay Formulas that use averaging are enabled?*
+							);
+			$cp = TTNew('CalculatePolicy');
+			$cp->setFlag( $flags );
+			$cp->setUserObject( $user_obj );
+			$cp->getRequiredData( $this->getDateStamp() );
+
+			$retval = $cp->isEligibleForHoliday( $this->getDateStamp(), $this->getHolidayPolicyObject(), $ignore_after_eligibility );
+
+			return $retval;
+		}
+
+		Debug::text('ERROR: Unable to get user object...', __FILE__, __LINE__, __METHOD__, 10);
+		return FALSE;
+
+	}
+/*
 	function getHolidayTime( $user_id ) {
 		if ( $this->getHolidayPolicyObject()->getType() == 30  ) {
 			return $this->getAverageTime( $user_id );
@@ -322,7 +353,7 @@ class HolidayFactory extends Factory {
 		} else {
 			$last_days_worked_count = $this->getHolidayPolicyObject()->getAverageDays();
 		}
-		Debug::text('Average time over days:'. $last_days_worked_count, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Average time over days: '. $last_days_worked_count, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $this->getHolidayPolicyObject()->getIncludeOverTime() == TRUE ) {
 			Debug::text('Including OverTime!', __FILE__, __LINE__, __METHOD__, 10);
@@ -398,9 +429,9 @@ class HolidayFactory extends Factory {
 					if ( $slf->getRecordCount() > 0 ) {
 						//Get user_date_ids
 						foreach( $slf as $s_obj ) {
-							$scheduled_user_date_ids_before[] = $s_obj->getUserDateID();
+							$scheduled_date_stamps_before[] = $this->db->BindDate( $s_obj->getDateStamp() ); //Bind datestamp so it can be used in SQLList
 						}
-						//Debug::Arr($scheduled_user_date_ids_before, 'Scheduled UserDateIDs Before: ', __FILE__, __LINE__, __METHOD__, 10);
+						//Debug::Arr($scheduled_date_stamps_before, 'Scheduled UserDateIDs Before: ', __FILE__, __LINE__, __METHOD__, 10);
 					}
 				} else {
 					Debug::text('aUsing calendar days, NOT scheduled days!', __FILE__, __LINE__, __METHOD__, 10);
@@ -413,9 +444,9 @@ class HolidayFactory extends Factory {
 					if ( $slf->getRecordCount() > 0 ) {
 						//Get user_date_ids
 						foreach( $slf as $s_obj ) {
-							$scheduled_user_date_ids_after[] = $s_obj->getUserDateID();
+							$scheduled_date_stamps_after[] = $this->db->BindDate( $s_obj->getDateStamp() ); //Bind datestamp so it can be used in SQLList
 						}
-						//Debug::Arr($scheduled_user_date_ids_after, 'Scheduled UserDateIDs After: ', __FILE__, __LINE__, __METHOD__, 10);
+						//Debug::Arr($scheduled_date_stamps_after, 'Scheduled UserDateIDs After: ', __FILE__, __LINE__, __METHOD__, 10);
 					}
 				} else {
 					Debug::text('bUsing calendar days, NOT scheduled days!', __FILE__, __LINE__, __METHOD__, 10);
@@ -423,8 +454,9 @@ class HolidayFactory extends Factory {
 
 				$worked_before_days_count = 0;
 				if ( $this->getHolidayPolicyObject()->getMinimumWorkedDays() > 0 AND $this->getHolidayPolicyObject()->getMinimumWorkedPeriodDays() > 0 ) {
-					if ( isset($scheduled_user_date_ids_before) AND $this->getHolidayPolicyObject()->getWorkedScheduledDays() == 1 ) { //Scheduled Days
-						$worked_before_days_count = $udtlf->getDaysWorkedByUserIDAndUserDateIDs($user_obj->getId(), $scheduled_user_date_ids_before );
+					if ( isset($scheduled_date_stamps_before) AND $this->getHolidayPolicyObject()->getWorkedScheduledDays() == 1 ) { //Scheduled Days
+						//$worked_before_days_count = $udtlf->getDaysWorkedByUserIDAndUserDateIDs($user_obj->getId(), $scheduled_date_stamps_before );
+						$worked_before_days_count = $udtlf->getDaysWorkedByUserIDAndDateStamps($user_obj->getId(), $scheduled_date_stamps_before );
 					} elseif ( $this->getHolidayPolicyObject()->getWorkedScheduledDays() == 2 ) {  //Holiday Week Days
 						//Start/End date should reflect weeks, no days here.
 						$worked_before_days_count = $udtlf->getDaysWorkedByUserIDAndStartDateAndEndDateAndDayOfWeek($user_obj->getId(), ( $this->getDateStamp() - ( ($this->getHolidayPolicyObject()->getMinimumWorkedPeriodDays() * 7) * 86400 ) ), ( $this->getDateStamp() - 86400 ), TTDate::getDayOfWeek( $this->getDateStamp() ) );
@@ -448,8 +480,9 @@ class HolidayFactory extends Factory {
 					Debug::text('Ignoring worked after criteria...', __FILE__, __LINE__, __METHOD__, 10);
 				} else {
 					if ( $this->getHolidayPolicyObject()->getMinimumWorkedAfterDays() > 0 AND $this->getHolidayPolicyObject()->getMinimumWorkedAfterPeriodDays() > 0 ) {
-						if ( isset($scheduled_user_date_ids_after) AND $this->getHolidayPolicyObject()->getWorkedAfterScheduledDays() == 1 ) { //Scheduled Days
-							$worked_after_days_count = $udtlf->getDaysWorkedByUserIDAndUserDateIDs($user_obj->getId(), $scheduled_user_date_ids_after );
+						if ( isset($scheduled_date_stamps_after) AND $this->getHolidayPolicyObject()->getWorkedAfterScheduledDays() == 1 ) { //Scheduled Days
+							//$worked_after_days_count = $udtlf->getDaysWorkedByUserIDAndUserDateIDs($user_obj->getId(), $scheduled_date_stamps_after );
+							$worked_after_days_count = $udtlf->getDaysWorkedByUserIDAndDateStamps($user_obj->getId(), $scheduled_date_stamps_after );
 						} else { //Calendar Days
 							$worked_after_days_count = count( (array)$udtlf->getDaysWorkedByUserIDAndStartDateAndEndDate($user_obj->getId(), ($this->getDateStamp() + 86400), ( $this->getDateStamp() + ( $this->getHolidayPolicyObject()->getMinimumWorkedAfterPeriodDays() * 86400) ) ) );
 						}
@@ -476,7 +509,7 @@ class HolidayFactory extends Factory {
 
 		return FALSE;
 	}
-
+*/
 	function Validate() {
 		if ( $this->Validator->hasError('date_stamp') == FALSE AND $this->getDateStamp() == '' ) {
 			$this->Validator->isTrue(		'date_stamp',

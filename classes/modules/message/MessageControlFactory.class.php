@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 3351 $
- * $Id: MessageFactory.class.php 3351 2010-02-18 17:22:09Z ipso $
- * $Date: 2010-02-18 09:22:09 -0800 (Thu, 18 Feb 2010) $
- */
+
 
 /**
  * @package Modules\Message
@@ -493,20 +489,26 @@ class MessageControlFactory extends Factory {
 			}
 
 			//Messages attached to objects do not require a recipient.
-			if ( $this->Validator->hasError( 'to' ) == FALSE AND $this->getToUserId() == FALSE AND $this->getObjectType() == 5 ) {
+			if ( $this->Validator->hasError( 'to' ) == FALSE AND $this->getObjectType() == 5 AND ( (int)$this->getToUserId() == 0 OR ( is_array( $this->getToUserId() ) AND count( $this->getToUserId() ) == 0 ) ) ) {
 				$this->Validator->isTrue(	'to',
 											FALSE,
 											TTi18n::gettext('Message recipient is invalid') );
 			}
 		}
 
-		/* This causes issues with the HTML interface.
-		if ( $this->getObjectType() == '' ) {
-				$this->Validator->isTrue(	'object_type_id',
-											FALSE,
-											TTi18n::gettext('Object type is invalid') );
+		if ( $this->validate_only == FALSE ) {
+			if ( $this->getObjectType() == '' ) {
+					$this->Validator->isTrue(	'object_type_id',
+												FALSE,
+												TTi18n::gettext('Object type is invalid') );
+			}
+
+			if ( $this->getObject() == '' ) {
+					$this->Validator->isTrue(	'object_id',
+												FALSE,
+												TTi18n::gettext('Object is invalid') );
+			}
 		}
-		*/
 
 		//If deleted is TRUE, we need to make sure all sender/recipient records are also deleted.
 		return TRUE;
@@ -542,11 +544,11 @@ class MessageControlFactory extends Factory {
 			if ( $uplf->getRecordCount() > 0 ) {
 				foreach( $uplf as $up_obj ) {
 					if ( $up_obj->getEnableEmailNotificationMessage() == TRUE AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getStatus() == 10 ) {
-						if ( $up_obj->getUserObject()->getWorkEmail() != '' ) {
+						if ( $up_obj->getUserObject()->getWorkEmail() != '' AND $up_obj->getUserObject()->getWorkEmailIsValid() == TRUE ) {
 							$retarr[] = $up_obj->getUserObject()->getWorkEmail();
 						}
 
-						if ( $up_obj->getEnableEmailNotificationHome() AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getHomeEmail() != '' ) {
+						if ( $up_obj->getEnableEmailNotificationHome() AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getHomeEmail() != '' AND $up_obj->getUserObject()->getHomeEmailIsValid() == TRUE ) {
 							$retarr[] = $up_obj->getUserObject()->getHomeEmail();
 						}
 					}

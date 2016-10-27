@@ -33,11 +33,7 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-/*
- * $Revision: 15617 $
- * $Id: Install.class.php 15617 2014-12-30 20:52:43Z mikeb $
- * $Date: 2014-12-30 12:52:43 -0800 (Tue, 30 Dec 2014) $
- */
+
 
 /**
  * @package Modules\Install
@@ -52,6 +48,8 @@ class Install {
 	protected $versions = array(
 								'system_version' => APPLICATION_VERSION,
 								);
+	protected $progress_bar_obj = NULL;
+	protected $AMF_message_id = NULL;
 
 
 	function __construct() {
@@ -96,6 +94,30 @@ class Install {
 		if ( $this->getDatabaseType( $driver ) !== 1 ) {
 			$this->database_driver = $this->getDatabaseType( $driver );
 
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getProgressBarObject() {
+		if	( !is_object( $this->progress_bar_obj ) ) {
+			$this->progress_bar_obj = new ProgressBar();
+		}
+
+		return $this->progress_bar_obj;
+	}
+	//Returns the AMF messageID for each individual call.
+	function getAMFMessageID() {
+		if ( $this->AMF_message_id != NULL ) {
+			return $this->AMF_message_id;
+		}
+		return FALSE;
+	}
+	function setAMFMessageID( $id ) {
+		Debug::Text('AMF Message ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+		if ( $id != '' ) {
+			$this->AMF_message_id = $id;
 			return TRUE;
 		}
 
@@ -372,7 +394,6 @@ class Install {
 			} else {
 				return FALSE;
 			}
-
 		}
 
 		return TRUE;
@@ -527,6 +548,20 @@ class Install {
 	function createSchemaRange( $start_version = NULL, $end_version = NULL, $group = array('A', 'B', 'C', 'D', 'T') ) {
 		global $cache, $progress_bar, $config_vars;
 
+		if ( $this->checkDatabaseSchema() == 1 ) {
+			return FALSE;
+		}
+
+		//Some schema changes can take a very long time to complete, make sure PHP doesn't cancel out on us.
+		ignore_user_abort(TRUE);
+		ini_set( 'max_execution_time', 0 );
+		ini_set( 'memory_limit', '-1' );
+
+		//Clear all cache before we do any upgrading, this is especially important during development processes
+		//if we are switching between databases or reloading databases.
+		$this->cleanCacheDirectory();
+		$cache->clean(); //Clear all cache.
+
 		//Disable detailed audit logging during schema upgrades, as it breaks upgrading from pre-audit log versions to post-audit log versions.
 		//ie: v2.2.22 to v3.3.2.
 		$config_vars['other']['disable_audit_log_detail'] = TRUE;
@@ -539,13 +574,19 @@ class Install {
 
 		$total_schema_versions = count($schema_versions);
 		if ( is_array($schema_versions) AND $total_schema_versions > 0 ) {
-			$this->getDatabaseConnection()->StartTrans();
+			//$this->getDatabaseConnection()->StartTrans();
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_schema_versions );
 			$x = 0;
 			foreach( $schema_versions as $schema_version ) {
 				if ( ( $start_version === NULL OR $schema_version >= $start_version )
 					AND ( $end_version === NULL OR $schema_version <= $end_version )
 						) {
 
+					//Wrap each schema version in its own transaction (compared to all schema versions in one transaction), this reduces the length of time any one transaction
+					//is open for and should allow vacuum to run more often on PostgreSQL speeding up subsequency schemas.
+					//This may make it harder to test rollback schema upgrades during development though.
+					$this->getDatabaseConnection()->StartTrans();
+					
 					$create_schema_result = $this->createSchema( $schema_version );
 
 					if ( is_object($progress_bar) ) {
@@ -553,21 +594,41 @@ class Install {
 						$progress_bar->display();
 					}
 
+					if ( $this->is_upgrade ) {
+						$msg = TTi18n::getText('Upgrading database');
+					} else {
+						$msg = TTi18n::getText('Initializing database');
+					}
+
+					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $x, $msg.' - '.($x+1).' '.TTi18n::getText('of').' '.$total_schema_versions );
+
 					if ( $create_schema_result === FALSE ) {
 						Debug::text('CreateSchema Failed! On Version: '. $schema_version, __FILE__, __LINE__, __METHOD__, 9);
+						$this->getDatabaseConnection()->FailTrans();
 						return FALSE;
 					}
+					$this->getDatabaseConnection()->CompleteTrans();
 				}
+
+				//Fast way to clear memory caching only between schema upgrades to make sure it doesn't get too big.
+				$cache->_memoryCachingArray = array();
+				$cache->_memoryCachingCounter = 0; 
+
 				$x++;
 			}
-
 			$this->initializeSequences();
+			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
 			//$this->getDatabaseConnection()->FailTrans();
-			$this->getDatabaseConnection()->CompleteTrans();
+			//$this->getDatabaseConnection()->CompleteTrans();
 		}
 
-		$cache->clean(); //Clear all cache.
+		//Clear all cache after the upgrade as well, as much of it is unlikely to be used again.
+		$this->cleanCacheDirectory();
+		$cache->clean();
+
+		//Delete orphan files after schema upgrade is fully completed.
+		$this->cleanOrphanFiles();
 
 		return TRUE;
 	}
@@ -621,22 +682,26 @@ class Install {
 
 	function initializeSequence( $obj, $table, $class, $db_conn ) {
 		$next_insert_id = $obj->getNextInsertId();
-		Debug::Text('Table: '. $table .' Class: '. $class .' Next Insert ID: '. $next_insert_id, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('Table: '. $table .' Class: '. $class .' Sequence Name: '. $obj->getSequenceName() .' Next Insert ID: '. $next_insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( strncmp($db_conn->databaseType, 'mysql', 5) == 0 ) {
-			$query = 'select max(id) from '. $table;
-			$max_id = (int)$db_conn->GetOne('select max(id) from '. $table);
-
-			if ( $next_insert_id == 0 OR $next_insert_id < $max_id ) {
-				Debug::Text('  Out-of-sync sequence table, fixing... Current Max ID: '. $max_id .' Next ID: '. $next_insert_id, __FILE__, __LINE__, __METHOD__, 10);
+		$query = 'select max(id) from '. $table;
+		$max_id = (int)$db_conn->GetOne('select max(id) from '. $table);
+		if ( $next_insert_id == 0 OR $next_insert_id < $max_id ) {
+			Debug::Text('  Out-of-sync sequence table, fixing... Current Max ID: '. $max_id .' Next ID: '. $next_insert_id, __FILE__, __LINE__, __METHOD__, 10);
+			if ( strncmp($db_conn->databaseType, 'mysql', 5) == 0 ) {
 				if ( $next_insert_id == 0 ) {
-					$db_conn->Execute('insert into '. $obj->getSequenceName() .' VALUES('. ( $max_id + 1 ) .')');
+					$query = 'insert into '. $obj->getSequenceName() .' VALUES('. ( $max_id + 1 ) .')';
 				} else {
-					$db_conn->Execute('update '. $obj->getSequenceName() .' set ID = '. ( $max_id + 1 ));
+					$query = 'update '. $obj->getSequenceName() .' set ID = '. ( $max_id + 1 );
 				}
-			} else {
-				Debug::Text('  Sequence is in sync, not updating...', __FILE__, __LINE__, __METHOD__, 10);
+			} elseif ( strncmp($db_conn->databaseType, 'postgres', 8) == 0 ) {
+				//This can be helpful with PostgreSQL as well as sequences can get out of sync there too if the schema was created incorrectly.
+				$query = 'select setval(\''. $obj->getSequenceName() .'\', '. ( $max_id + 1 ) .')';
 			}
+			//Debug::Text('  Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+			$db_conn->Execute($query);
+		} else {
+			Debug::Text('  Sequence is in sync, not updating...', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return TRUE;
@@ -848,7 +913,9 @@ class Install {
 
 		$dirs[] = dirname( __FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR;
 
-		foreach( $dirs as $dir ) {
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($dirs), NULL, TTi18n::getText('Check File Permission...') );
+
+		foreach( $dirs as $k => $dir ) {
 			Debug::Text('Checking directory readable/writable: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
 			if ( is_dir( $dir ) AND is_readable( $dir ) ) {
 				try {
@@ -878,7 +945,11 @@ class Install {
 					return 1;
 				}
 			}
+
+			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $k );
 		}
+
+		$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
 		Debug::Text('All Files/Directories are readable/writable!', __FILE__, __LINE__, __METHOD__, 10);
 		return 0;
@@ -896,6 +967,7 @@ class Install {
 		}
 
 		//Load checksum file.
+
 		$checksum_file = dirname( __FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR . 'files.sha1';
 
 		if ( file_exists( $checksum_file ) ) {
@@ -903,6 +975,9 @@ class Install {
 			$checksums = explode("\n", $checksum_data );
 			unset($checksum_data);
 			if ( is_array($checksums) ) {
+
+				$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($checksums), NULL, TTi18n::getText('Check File Checksums...') );
+
 				$i = 0;
 				foreach($checksums as $checksum_line ) {
 
@@ -927,7 +1002,7 @@ class Install {
 							$checksum = trim($split_line[0]);
 
 							if ( file_exists( $file_name ) ) {
-								$my_checksum = sha1_file( $file_name );
+								$my_checksum = @sha1_file( $file_name );
 								if ( $my_checksum == $checksum ) {
 									//Debug::Text('File: '. $file_name .' Checksum: '. $checksum .' MATCHES', __FILE__, __LINE__, __METHOD__, 10);
 									unset($my_checksum); //NoOp
@@ -947,9 +1022,12 @@ class Install {
 						unset($split_line, $file_name, $checksum);
 					}
 
-					$i++;
-				}
+					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $i );
 
+					$i++;
+
+				}
+				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 				return 0; //OK
 			}
 		} else {
@@ -1029,6 +1107,27 @@ class Install {
 		return FALSE;
 	}
 
+	function checkDatabaseSchema() {
+		if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) {
+			$db_conn = $this->getDatabaseConnection();
+			if ( $db_conn == FALSE ) {
+				Debug::text('No Database Connection.', __FILE__, __LINE__, __METHOD__, 9);
+				return FALSE;
+			}
+
+			if ( $this->checkTableExists( 'system_setting' ) == TRUE ) {
+				$sslf = TTnew( 'SystemSettingListFactory' );
+				$sslf->getByName( 'schema_version_group_B' );
+				if ( $sslf->getRecordCount() == 1 ) {
+					Debug::text('ERROR: Database schema out of sync with edition...', __FILE__, __LINE__, __METHOD__, 9);
+					return 1;
+				}
+			}
+		}
+
+		return 0;
+	}
+
 	function isSUDOinstalled() {
 		if ( OPERATING_SYSTEM == 'LINUX' ) {
 			exec( 'which sudo', $output, $exit_code );
@@ -1092,11 +1191,13 @@ class Install {
 		$url = $this->getBaseURL();
 		$headers = @get_headers($url);
 		Debug::Arr($headers, 'Checking Base URL: '. $url, __FILE__, __LINE__, __METHOD__, 9);
-		if ( isset($headers[0]) AND stripos($headers[0], '404') !== FALSE ) {
-			return 1; //Not found
-		} else {
-			return 0; //Found
-		}
+//		if ( isset($headers[0]) AND stripos($headers[0], '404') !== FALSE ) {
+//			return 1; //Not found
+//		} else {
+//			return 0; //Found
+//		}
+
+		return 0; //Found
 	}
 
 	function getPHPOpenBaseDir() {
@@ -1391,6 +1492,40 @@ class Install {
 		return Misc::cleanDir( $this->config_vars['cache']['dir'], TRUE, TRUE, FALSE, $exclude_regex_filter ); //Don't clean UPGRADE.ZIP file and 'upgrade_staging' directory.
 	}
 
+	function cleanOrphanFiles() {
+		if ( PRODUCTION == TRUE ) {
+			//Load delete file list.
+			$file_list = dirname( __FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR . 'files.delete';
+
+			if ( file_exists( $file_list ) ) {
+				$file_list_data = file_get_contents( $file_list );
+				$files = explode("\n", $file_list_data );
+				unset($file_list_data);
+				if ( is_array($files) ) {
+					$i = 0;
+					foreach( $files as $file ) {
+						if ( $file != '' ) {
+							$file = Environment::getBasePath() . str_replace( array('/', '\\'), DIRECTORY_SEPARATOR, $file ); //Prefix base path to all files.
+							if ( file_exists( $file ) ) {
+								if ( @dir( $file ) ) {
+									Debug::Text('Deleting Orphaned Dir: '. $file, __FILE__, __LINE__, __METHOD__, 9);
+									Misc::cleanDir( $file, TRUE, TRUE, TRUE );
+								} else {
+									Debug::Text('Deleting Orphaned File: '. $file, __FILE__, __LINE__, __METHOD__, 9);
+									@unlink( $file );
+								}
+							} else {
+								Debug::Text('Orphaned File/Dir does not exist, not deleting: '. $file, __FILE__, __LINE__, __METHOD__, 9);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return TRUE;
+	}
+
 	function checkCleanCacheDirectory() {
 		if ( DEPLOYMENT_ON_DEMAND == FALSE ) {
 			if ( is_dir( $this->config_vars['cache']['dir'] ) ) {
@@ -1539,6 +1674,7 @@ class Install {
 		$retarr[$this->checkPHPMagicQuotesGPC()]++;
 
 		if ( $this->getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+			$retarr[$this->checkPEARValidate()]++;
 			$retarr[$this->checkMCRYPT()]++;
 		}
 

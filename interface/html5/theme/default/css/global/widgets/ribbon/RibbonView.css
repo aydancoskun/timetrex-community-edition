@@ -22,6 +22,8 @@
     position: absolute;
     top: 5px;
     right: 5px;
+    max-width: 170px;
+    max-height: 42px;
 
 }
 
