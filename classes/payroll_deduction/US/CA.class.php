@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11758 $
- * $Id: CA.class.php 11758 2013-12-20 20:07:32Z mikeb $
- * $Date: 2013-12-20 12:07:32 -0800 (Fri, 20 Dec 2013) $
+ * $Revision: 15602 $
+ * $Id: CA.class.php 15602 2014-12-30 00:31:02Z mikeb $
+ * $Date: 2014-12-29 16:31:02 -0800 (Mon, 29 Dec 2014) $
  */
 
 /**
@@ -51,6 +51,31 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 */
 
 	var $state_options = array(
+								1420099200 => array( //01-Jan-15
+													//Standard Deduction Table
+													'standard_deduction' => array(
+																				//First entry is 0,1 allowance, second is for 2 or more.
+																				'10' => array(3992.00, 3992.00),
+																				'20' => array(3992.00, 3992.00),
+																				'30' => array(3992.00, 7984.00),
+																				'40' => array(7984.00, 7984.00),
+																				),
+													//Exemption Allowance Table
+													'allowance' => array(
+																				'10' => 118.80,
+																				'20' => 118.80,
+																				'30' => 118.80,
+																				'40' => 118.80,
+																				),
+													//Low Income Exemption Table
+													'minimum_income' => array(
+																				//First entry is 0,1 allowance, 2nd is 2 or more.
+																				'10' => array(13267.00, 13267.00),
+																				'20' => array(13267.00, 13267.00),
+																				'30' => array(13267.00, 26533.00),
+																				'40' => array(26533.00, 26533.00),
+																				),
+													),
 								1388563200 => array( //01-Jan-14
 													//Standard Deduction Table
 													'standard_deduction' => array(
@@ -68,8 +93,8 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																				'40' => 116.60,
 																				),
 													//Low Income Exemption Table
-                                                    'minimum_income' => array(
-                                                                                //First entry is 0,1 allowance, 2nd is 2 or more.
+													'minimum_income' => array(
+																				//First entry is 0,1 allowance, 2nd is 2 or more.
 																				'10' => array(12997.00, 12997.00),
 																				'20' => array(12997.00, 12997.00),
 																				'30' => array(12997.00, 25994.00),
@@ -90,8 +115,8 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																				'30' => 114.40,
 																				'40' => 114.40,
 																				),
-                                                    'minimum_income' => array(
-                                                                                //First entry is 0,1 allowance, 2nd is 2 or more.
+													'minimum_income' => array(
+																				//First entry is 0,1 allowance, 2nd is 2 or more.
 																				'10' => array(12769.00, 12769.00),
 																				'20' => array(12769.00, 12769.00),
 																				'30' => array(12769.00, 25537.00),
@@ -112,8 +137,8 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																				'30' => 112.20,
 																				'40' => 112.20,
 																				),
-                                                    'minimum_income' => array(
-                                                                                //First entry is 0,1 allowance, 2nd is 2 or more.
+													'minimum_income' => array(
+																				//First entry is 0,1 allowance, 2nd is 2 or more.
 																				'10' => array(12527.00, 12527.00),
 																				'20' => array(12527.00, 12527.00),
 																				'30' => array(12527.00, 25054.00),
@@ -238,19 +263,19 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 
 		}
 
-        $minimum_income = 0;
-        if ( isset($retarr['minimum_income']) AND isset($retarr['minimum_income'][$this->getStateFilingStatus()]) ) {
-            $minimum_income_arr = $retarr['minimum_income'][$this->getStateFilingStatus()];
-            if ( $this->getStateAllowance() == 0 OR $this->getStateAllowance() == 1 ) {
-                $minimum_income = $minimum_income_arr[0];
-            } elseif ( $this->getStateAllowance() >= 2 ) {
-                $minimum_income = $minimum_income_arr[1];
-            }
-        }
+		$minimum_income = 0;
+		if ( isset($retarr['minimum_income']) AND isset($retarr['minimum_income'][$this->getStateFilingStatus()]) ) {
+			$minimum_income_arr = $retarr['minimum_income'][$this->getStateFilingStatus()];
+			if ( $this->getStateAllowance() == 0 OR $this->getStateAllowance() == 1 ) {
+				$minimum_income = $minimum_income_arr[0];
+			} elseif ( $this->getStateAllowance() >= 2 ) {
+				$minimum_income = $minimum_income_arr[1];
+			}
+		}
 
-        if ( $this->getAnnualTaxableIncome() <= $minimum_income ) {
-            return 0; //Below minimum income threshold, no withholding.
-        }
+		if ( $this->getAnnualTaxableIncome() <= $minimum_income ) {
+			return 0; //Below minimum income threshold, no withholding.
+		}
 
 		return bcsub( $this->getAnnualTaxableIncome(), $this->getStateStandardDeduction() );
 	}

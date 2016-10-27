@@ -160,7 +160,7 @@ class ImportAccrual extends Import {
 
 		TTDate::setTimeUnitFormat( $parse_hint );
 
-		$retval = TTDate::parseTimeUnit( $val->stripNonFloat($input) );
+		$retval = TTDate::parseTimeUnit( $val->stripNonTimeUnit($input) );
 
 		return $retval;
 	}

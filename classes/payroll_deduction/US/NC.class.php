@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11758 $
- * $Id: NC.class.php 11758 2013-12-20 20:07:32Z mikeb $
- * $Date: 2013-12-20 12:07:32 -0800 (Fri, 20 Dec 2013) $
+ * $Revision: 15602 $
+ * $Id: NC.class.php 15602 2014-12-30 00:31:02Z mikeb $
+ * $Date: 2014-12-29 16:31:02 -0800 (Mon, 29 Dec 2014) $
  */
 
 /**
@@ -44,24 +44,55 @@
  */
 class PayrollDeduction_US_NC extends PayrollDeduction_US {
 /*
+	*Prior to 2015 it was:
 	protected $state_nc_filing_status_options = array(
 														10 => 'Single',
 														20 => 'Married or Qualified Widow(er)',
 														30 => 'Head of Household',
 									);
+
+	After 2015:
+
+														10 => TTi18n::gettext('Single'),
+														20 => TTi18n::gettext('Married - Filing Jointly or Qualified Widow(er)'),
+														30 => TTi18n::gettext('Married - Filing Separately'),
+														40 => TTi18n::gettext('Head of Household'),
+
 */
 	var $state_options = array(
+								//Formula changed for 01-Jan-15
+								1420099200 => array(
+													'standard_deduction' => array(
+																				'10' => 7500.00,
+																				'20' => 15000.00,
+																				'30' => 7500.00,
+																				'40' => 12000.00,
+																				),
+													'allowance_cutoff' => array(
+																				'10' => 50000.00,
+																				'20' => 100000.00,
+																				'30' => 50000.00,
+																				'40' => 80000.00,
+																				),
+													'allowance' => array(
+																		1 => 2500,
+																		2 => 2000
+																		),
+													'rate' => 5.75, //Flat 5.75%
+													),
 								//Formula changed for 01-Jan-14
 								1388563200 => array(
 													'standard_deduction' => array(
 																				'10' => 7500.00,
 																				'20' => 7500.00,
-																				'30' => 12000.00,
+																				'30' => 12000.00, //30 used to be HoH
+																				'40' => 12000.00,
 																				),
 													'allowance_cutoff' => array(
 																				'10' => 60000.00,
 																				'20' => 50000.00,
-																				'30' => 80000.00,
+																				'30' => 80000.00, //30 used to be HoH
+																				'40' => 80000.00,
 																				),
 													'allowance' => array(
 																		1 => 2500,
@@ -74,12 +105,14 @@ class PayrollDeduction_US_NC extends PayrollDeduction_US {
 													'standard_deduction' => array(
 																				'10' => 3000.00,
 																				'20' => 3000.00,
-																				'30' => 4400.00,
+																				'30' => 4400.00, //30 used to be HoH
+																				'40' => 4400.00,
 																				),
 													'allowance_cutoff' => array(
 																				'10' => 60000.00,
 																				'20' => 50000.00,
-																				'30' => 80000.00,
+																				'30' => 80000.00, //30 used to be HoH
+																				'40' => 80000.00,
 																				),
 													'allowance' => array(
 																		1 => 2500,

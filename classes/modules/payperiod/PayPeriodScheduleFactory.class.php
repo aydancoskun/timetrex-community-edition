@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12943 $
- * $Id: PayPeriodScheduleFactory.class.php 12943 2014-04-15 17:50:25Z mikeb $
- * $Date: 2014-04-15 10:50:25 -0700 (Tue, 15 Apr 2014) $
+ * $Revision: 15602 $
+ * $Id: PayPeriodScheduleFactory.class.php 15602 2014-12-30 00:31:02Z mikeb $
+ * $Date: 2014-12-29 16:31:02 -0800 (Mon, 29 Dec 2014) $
  */
 
 /**
@@ -64,7 +64,10 @@ class PayPeriodScheduleFactory extends Factory {
 											20	=> TTi18n::gettext('Bi-Weekly (26/year)'),
 											30	=> TTi18n::gettext('Semi-Monthly (24/year)'),
 											//40  => TTi18n::gettext('Monthly + Advance'), //Handled with monthly PP schedule and Tax / Deduction to automatically enter advance each month. Advances are paid manually.
-											50	=> TTi18n::gettext('Monthly (12/year)') //Must have this here, for ROEs
+											50	=> TTi18n::gettext('Monthly (12/year)'), //Must have this here, for ROEs
+
+											100	=> TTi18n::gettext('Weekly (53/year)'),
+											200	=> TTi18n::gettext('Bi-Weekly (27/year)'),
 										);
 				break;
 			case 'start_week_day':
@@ -1014,7 +1017,9 @@ class PayPeriodScheduleFactory extends Factory {
 		$insert_pay_period = 1; //deprecate primary pay periods.
 		switch ( $this->getType() ) {
 			case 10: //Weekly
+			case 100: //Weekly (53)
 			case 20: //Bi-Weekly
+			case 200: //Bi-Weekly (27)
 				$last_pay_period_end_day_of_week = TTDate::getDayOfWeek( $last_pay_period_end_date );
 				Debug::text('Last Pay Period End Day Of Week: '. $last_pay_period_end_day_of_week .' Start Day Of Week: '. $this->getStartDayOfWeek(), __FILE__, __LINE__, __METHOD__, 10);
 				if ( $last_pay_period_end_day_of_week != $this->getStartDayOfWeek() ) {
@@ -1039,9 +1044,9 @@ class PayPeriodScheduleFactory extends Factory {
 
 				$start_date = ( $tmp_pay_period_end_date + 1 );
 
-				if ( $this->getType() == 10 ) { //Weekly
+				if ( $this->getType() == 10 OR $this->getType() == 100 ) { //Weekly
 					$tmp_pay_period_end_date = ( TTDate::getMiddleDayEpoch($start_date) + (86400 * 7) ); //Add one week
-				} elseif ( $this->getType() == 20 ) { //Bi-Weekly
+				} elseif ( $this->getType() == 20 OR $this->getType() == 200 ) { //Bi-Weekly
 					$tmp_pay_period_end_date = ( TTDate::getMiddleDayEpoch($start_date) + (86400 * 14) ); //Add two weeks
 				}
 
@@ -1398,10 +1403,19 @@ class PayPeriodScheduleFactory extends Factory {
 				//Needs to take into account years, where 53 weeks may occur.
 				//Will need to get the day weeks start on and the year for this to calculate properly.
 				//I believe 2015 is the next time this will occur.
+				//Not sure if we can automatically handle this as holidays could push the pay period transaction date forward/backwards
+				//depending on what the employer may want to do. In addition to that it could be a last minute change, and this may affect
+				//salary calculations which could catch them off guard too.
 				$retval = 52;
+				break;
+			case 100:
+				$retval = 53;
 				break;
 			case 20:
 				$retval = 26;
+				break;
+			case 200:
+				$retval = 27;
 				break;
 			case 30:
 				$retval = 24; //Semi-monthly
@@ -1529,7 +1543,9 @@ class PayPeriodScheduleFactory extends Factory {
 			case 5: //Manual
 				break;
 			case 10: //Weekly
+			case 100: //Weekly (53)
 			case 20: //BiWeekly
+			case 200: //BiWeekly (27)
 				//Need at least one example.
 				foreach( $example_dates as $example_date ) {
 					$start_dow[] = TTDate::getDayOfWeek( TTDate::parseDateTime( $example_date['start_date'] ) );

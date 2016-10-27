@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11758 $
- * $Id: NY_YONKERS.class.php 11758 2013-12-20 20:07:32Z mikeb $
- * $Date: 2013-12-20 12:07:32 -0800 (Fri, 20 Dec 2013) $
+ * $Revision: 15602 $
+ * $Id: NY_YONKERS.class.php 15602 2014-12-30 00:31:02Z mikeb $
+ * $Date: 2014-12-29 16:31:02 -0800 (Mon, 29 Dec 2014) $
  */
 
 /**
@@ -55,6 +55,20 @@ Used to be:
 */
 
 	var $district_options = array(
+								1420099200 => array( // 01-Jan-2015
+													'standard_deduction' => array(
+																				'10' => 7350.00,
+																				'20' => 7850.00,
+																				'30' => 7850.00,
+																				'40' => 7350.00,
+																				),
+													'allowance' => array(
+																				'10' => 1000,
+																				'20' => 1000,
+																				'30' => 1000,
+																				'40' => 1000,
+																				),
+													),
 								1388563200 => array( // 01-Jan-2014
 													'standard_deduction' => array(
 																				'10' => 7250.00,

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 14800 $
- * $Id: PayStubFactory.class.php 14800 2014-10-16 19:27:31Z mikeb $
- * $Date: 2014-10-16 12:27:31 -0700 (Thu, 16 Oct 2014) $
+ * $Revision: 15602 $
+ * $Id: PayStubFactory.class.php 15602 2014-12-30 00:31:02Z mikeb $
+ * $Date: 2014-12-29 16:31:02 -0800 (Mon, 29 Dec 2014) $
  */
 require_once( 'Numbers/Words.php');
 
@@ -3324,7 +3324,7 @@ class PayStubFactory extends Factory {
 
 					$left_block_adjust_y = $right_block_adjust_y = $block_adjust_y;
 					
-					Debug::Text('Tax Info Rows: Left: '. $left_total_rows .' Right: '. $right_total_rows, __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Text('Tax Info Rows: Left: '. $left_total_rows .' Right: '. $right_total_rows .' Transaction Date: '. TTDate::getDate('DATE', $pp_transaction_date ), __FILE__, __LINE__, __METHOD__, 10);
 					if ( $left_total_rows < $right_total_rows ) {
 						for( $i = 0; $i < ($right_total_rows - $left_total_rows); $i++ ) {
 							$pdf->setXY( Misc::AdjustXY(0, $adjust_x), Misc::AdjustXY($left_block_adjust_y, $adjust_y) );
@@ -3342,7 +3342,7 @@ class PayStubFactory extends Factory {
 					foreach( $udlf as $ud_obj ) {
 						if ( $ud_obj->getCompanyDeductionObject()->getCalculation() == 100 ) { //Federal
 							$pdf->setXY( Misc::AdjustXY(0, $adjust_x), Misc::AdjustXY($left_block_adjust_y, $adjust_y) );
-							$pdf->Cell(87.5, 3, $ud_obj->getDescription(), 1, 0, 'C', FALSE, '', 1);
+							$pdf->Cell(87.5, 3, $ud_obj->getDescription( $pp_transaction_date ), 1, 0, 'C', FALSE, '', 1);
 							$left_block_adjust_y = ($left_block_adjust_y - 3);
 						}
 					}
@@ -3350,7 +3350,7 @@ class PayStubFactory extends Factory {
 					foreach( $udlf as $ud_obj ) {
 						if ( $ud_obj->getCompanyDeductionObject()->getCalculation() == 200 ) { //Province/State
 							$pdf->setXY( Misc::AdjustXY(87.5, $adjust_x), Misc::AdjustXY($right_block_adjust_y, $adjust_y) );
-							$pdf->Cell(87.5, 3, $ud_obj->getDescription(), 1, 0, 'C', FALSE, '', 1);
+							$pdf->Cell(87.5, 3, $ud_obj->getDescription( $pp_transaction_date ), 1, 0, 'C', FALSE, '', 1);
 							$right_block_adjust_y = ($right_block_adjust_y - 3);
 						}
 					}
@@ -3367,7 +3367,7 @@ class PayStubFactory extends Factory {
 
 					$pdf->SetFont('', 'B', 6);
 					$pdf->setXY( Misc::AdjustXY(0, $adjust_x), Misc::AdjustXY(($block_adjust_y - 3), $adjust_y) );
-					$pdf->Cell(175, 3, TTi18n::gettext('Tax Information'), 1, 0, 'C', FALSE, '', 1);
+					$pdf->Cell(175, 3, TTi18n::gettext('Tax Information as of ') .TTDate::getDate('DATE', time() ), 1, 0, 'C', FALSE, '', 1);
 				}
 				unset( $udlf, $ud_obj, $left_block_adjust_y, $right_block_adjust_y, $left_total_rows, $right_total_rows );
 

@@ -24,7 +24,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 	show_hierarchy: false,
 
-	select_company_id: LocalCacheData.getCurrentCompany().id,
+	select_company_id:null,
 
 	initialize: function() {
 		this._super( 'initialize' );
@@ -38,6 +38,7 @@ EmployeeViewController = BaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Employees' );
 		this.navigation_label = $.i18n._( 'Employee' ) + ':';
 		this.api = new (APIFactory.getAPIClass( 'APIUser' ))();
+		this.select_company_id = LocalCacheData.getCurrentCompany().id;
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 
@@ -907,6 +908,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 	setTabStatus: function() {
 
+		debugger
 		if ( this.is_mass_editing ) {
 
 			$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
@@ -1327,6 +1329,7 @@ EmployeeViewController = BaseViewController.extend( {
 			this.last_select_ids = this.getGridSelectIdArray();
 		}
 
+		debugger
 		this.api['get' + this.api.key_name]( filter, {onResult: function( result ) {
 
 			var result_data = result.getResult();

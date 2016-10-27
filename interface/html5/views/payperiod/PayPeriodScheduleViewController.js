@@ -343,7 +343,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 			this.edit_view_form_item_dic['transaction_date'].css( 'display', 'none' );
 			this.edit_view_form_item_dic['transaction_date_bd'].css( 'display', 'none' );
 
-		} else if ( this.current_edit_record.type_id === 10 || this.current_edit_record.type_id === 20 ) {
+		} else if ( this.current_edit_record.type_id === 10 || this.current_edit_record.type_id === 20 || this.current_edit_record.type_id === 100 || this.current_edit_record.type_id === 200 ) {
 			this.edit_view_form_item_dic['primary'].css( 'display', 'none' );
 			this.edit_view_form_item_dic['primary_day_of_month'].css( 'display', 'none' );
 			this.edit_view_form_item_dic['primary_transaction_day_of_month'].css( 'display', 'none' );
@@ -395,6 +395,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		}
 		this.onTypeChange();
 		this.onVerifyTypeChange();
+		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
 	},
 
@@ -413,7 +414,6 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		tab_1_label.text( $.i18n._( 'Advanced' ) );
 		tab_2_label.text( $.i18n._( 'Pay Periods' ) );
 		tab_3_label.text( $.i18n._( 'Audit' ) );
-
 		if ( !this.edit_only_mode ) {
 			this.navigation.AComboBox( {
 				id: this.script_name + '_navigation',

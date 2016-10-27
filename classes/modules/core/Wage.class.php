@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11923 $
- * $Id: Wage.class.php 11923 2014-01-08 00:09:29Z mikeb $
- * $Date: 2014-01-07 16:09:29 -0800 (Tue, 07 Jan 2014) $
+ * $Revision: 15602 $
+ * $Id: Wage.class.php 15602 2014-12-30 00:31:02Z mikeb $
+ * $Date: 2014-12-29 16:31:02 -0800 (Mon, 29 Dec 2014) $
  */
 
 /**
@@ -454,7 +454,13 @@ class Wage {
 						$amount = $this->getWage( $udt_obj->getTotalTime(), $rate );
 						//$amount = $this->getWage( $udt_obj->getTotalTime(), $this->getHourlyRate( $udt_obj->getColumn('absence_policy_wage_id') ) );
 						$dock_absence_amount = bcadd( $dock_absence_amount, $amount );
-						$dock_absence_amount_arr[$udt_obj->getColumn('absence_policy_wage_id')] = $amount;
+
+						//Make sure we account for multiple dock absence policies, for the same wage entry in the same pay period.
+						if ( isset($dock_absence_amount_arr[$udt_obj->getColumn('absence_policy_wage_id')]) ) {
+							$dock_absence_amount_arr[$udt_obj->getColumn('absence_policy_wage_id')] += $amount;
+						} else {
+							$dock_absence_amount_arr[$udt_obj->getColumn('absence_policy_wage_id')] = $amount;
+						}
 						Debug::text('DOCK Absence Time.. Adding: '. $udt_obj->getTotalTime() .' Total: '. $dock_absence_time .' Rate: '. $rate, __FILE__, __LINE__, __METHOD__, 10);
 						unset($rate);
 					}

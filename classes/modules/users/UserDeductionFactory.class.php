@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 15145 $
- * $Id: UserDeductionFactory.class.php 15145 2014-11-13 22:42:19Z mikeb $
- * $Date: 2014-11-13 14:42:19 -0800 (Thu, 13 Nov 2014) $
+ * $Revision: 15602 $
+ * $Id: UserDeductionFactory.class.php 15602 2014-12-30 00:31:02Z mikeb $
+ * $Date: 2014-12-29 16:31:02 -0800 (Mon, 29 Dec 2014) $
  */
 
 /**
@@ -488,7 +488,7 @@ class UserDeductionFactory extends Factory {
 	}
 
 	//Primarily used to display marital status/allowances/claim amounts on pay stubs.
-	function getDescription() {
+	function getDescription( $transaction_date = FALSE ) {
 		$retval = FALSE;
 
 		//Calculates the deduction.
@@ -512,13 +512,25 @@ class UserDeductionFactory extends Factory {
 			$user_value3 = $this->getUserValue3();
 		}
 
+		if ( $transaction_date == '' ) {
+			$transaction_date = time();
+		}
+
+		if ( strtolower( $cd_obj->getCountry() ) == 'ca' ) {
+			require_once( Environment::getBasePath(). DIRECTORY_SEPARATOR . 'classes'. DIRECTORY_SEPARATOR .'payroll_deduction'. DIRECTORY_SEPARATOR .'PayrollDeduction.class.php');
+			$pd_obj = new PayrollDeduction( $cd_obj->getCountry(), $cd_obj->getProvince() );
+			$pd_obj->setDate( $transaction_date );
+		}
+
 		//Debug::Text('UserDeduction ID: '. $this->getID() .' Calculation ID: '. $cd_obj->getCalculation(), __FILE__, __LINE__, __METHOD__, 10);
 		switch ( $cd_obj->getCalculation() ) {
 			case 100: //Federal
 				$country_label = strtoupper( $cd_obj->getCountry() );
 
 				if ( strtolower( $cd_obj->getCountry() ) == 'ca' ) {
-					$retval = $country_label .' - '. TTI18n::getText('Claim Amount').': $'. $user_value1;
+					//Filter Claim Amount through PayrollDeduction class so it can be automatically adjusted if necessary.
+					$pd_obj->setFederalTotalClaimAmount( $user_value1 );
+					$retval = $country_label .' - '. TTI18n::getText('Claim Amount').': $'. Misc::MoneyFormat( $pd_obj->getFederalTotalClaimAmount() );
 				} elseif ( strtolower( $cd_obj->getCountry() ) == 'us' ) {
 					$retval = $country_label .' - '. TTI18n::getText('Filing Status').': '. Option::getByKey( $user_value1, $cd_obj->getOptions('federal_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. $user_value2;
 				}
@@ -526,8 +538,10 @@ class UserDeductionFactory extends Factory {
 			case 200:
 				$province_label = strtoupper( $cd_obj->getProvince() );
 
-				if ( $cd_obj->getCountry() == 'CA' ) {
-					$retval = $province_label.' - '. TTI18n::getText('Claim Amount').': $'. $user_value1;
+				if ( strtolower( $cd_obj->getCountry() ) == 'ca' ) {
+					//Filter Claim Amount through PayrollDeduction class so it can be automatically adjusted if necessary.
+					$pd_obj->setProvincialTotalClaimAmount( $user_value1 );
+					$retval = $province_label.' - '. TTI18n::getText('Claim Amount').': $'. Misc::MoneyFormat( $pd_obj->getProvincialTotalClaimAmount() );
 				} elseif ( $cd_obj->getCountry() == 'US' ) {
 					switch( strtolower( $cd_obj->getProvince() ) ) {
 						case 'az': //Percent

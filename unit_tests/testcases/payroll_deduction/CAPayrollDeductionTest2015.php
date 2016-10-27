@@ -41,9 +41,9 @@
 require_once('PHPUnit/Framework/TestCase.php');
 
 /**
- * @group CAPayrollDeductionTest2014
+ * @group CAPayrollDeductionTest2015
  */
-class CAPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
+class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	public $company_id = NULL;
 
 	public function setUp() {
@@ -51,7 +51,7 @@ class CAPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 
 		require_once( Environment::getBasePath().'/classes/payroll_deduction/PayrollDeduction.class.php');
 
-		$this->tax_table_file = dirname(__FILE__).'/CAPayrollDeductionTest2014.csv';
+		$this->tax_table_file = dirname(__FILE__).'/CAPayrollDeductionTest2015.csv';
 
 		$this->company_id = PRIMARY_COMPANY_ID;
 
@@ -70,7 +70,7 @@ class CAPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 	}
 
 	//
-	// January 2014
+	// January 2015
 	//
 
 	//
@@ -130,69 +130,15 @@ class CAPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $total_rows, ( $i - 1 ));
 	}
 
-	function testCA_ClaimAmountAdjustmentA() {
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2013'));
-		$pd_obj->setFederalTotalClaimAmount( 11038 );
-		$pd_obj->setProvincialTotalClaimAmount( 10276 );
-
-		$this->assertEquals( $this->mf( $pd_obj->getFederalTotalClaimAmount() ), '11038' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialTotalClaimAmount() ), '10276' );
-	}
-
-	//Test claim amount set lower than the minimum.
-	function testCA_ClaimAmountAdjustmentB() {
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2013'));
-		$pd_obj->setFederalTotalClaimAmount( 10000 );
-		$pd_obj->setProvincialTotalClaimAmount( 10000 );
-
-		$this->assertEquals( $this->mf( $pd_obj->getFederalTotalClaimAmount() ), '11038' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialTotalClaimAmount() ), '10276' );
-	}
-
-	//Test claim amount at 0.
-	function testCA_ClaimAmountAdjustmentC() {
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2013'));
-		$pd_obj->setFederalTotalClaimAmount( 0 );
-		$pd_obj->setProvincialTotalClaimAmount( 0 );
-
-		$this->assertEquals( $this->mf( $pd_obj->getFederalTotalClaimAmount() ), '0' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialTotalClaimAmount() ), '0' );
-	}
-
-	//Test claim amount higher than minimum.
-	function testCA_ClaimAmountAdjustmentD() {
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2013'));
-		$pd_obj->setFederalTotalClaimAmount( 11040 );
-		$pd_obj->setProvincialTotalClaimAmount( 10280 );
-
-		$this->assertEquals( $this->mf( $pd_obj->getFederalTotalClaimAmount() ), '11040' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialTotalClaimAmount() ), '10280' );
-	}
-
-	//Test claim amount at next years values, should be reverted back to current year.
-	function testCA_ClaimAmountAdjustmentE() {
-		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2013'));
-		$pd_obj->setFederalTotalClaimAmount( 11138 );
-		$pd_obj->setProvincialTotalClaimAmount( 9869 );
-
-		$this->assertEquals( $this->mf( $pd_obj->getFederalTotalClaimAmount() ), '11038' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialTotalClaimAmount() ), '10276' );
-	}
-
-	function testCA_2014a_Example() {
-		Debug::text('CA - Example Beginning of 01-Jan-2014: ', __FILE__, __LINE__, __METHOD__, 10);
+	function testCA_2015a_Example() {
+		Debug::text('CA - Example Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'AB');
-		$pd_obj->setDate(strtotime('01-Jan-2014'));
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 52 );
 
-		$pd_obj->setFederalTotalClaimAmount( 28964.50 );
+		$pd_obj->setFederalTotalClaimAmount( 29721.00 );
 		$pd_obj->setProvincialTotalClaimAmount( 17593 );
 		$pd_obj->setWCBRate( 0.18 );
 
@@ -208,20 +154,20 @@ class CAPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setGrossPayPeriodIncome( 1100 );
 
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1100' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '86.39' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '69.37' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '82.95' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '68.41' );
 	}
 
-	function testCA_2014a_Example1() {
-		Debug::text('CA - Example1 - Beginning of 01-Jan-2014: ', __FILE__, __LINE__, __METHOD__, 10);
+	function testCA_2015a_Example1() {
+		Debug::text('CA - Example1 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'AB');
-		$pd_obj->setDate(strtotime('01-Jan-2014'));
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 12 );
 
-		$pd_obj->setFederalTotalClaimAmount( 11038 );
-		$pd_obj->setProvincialTotalClaimAmount( 17593 );
+		$pd_obj->setFederalTotalClaimAmount( 11327 );
+		$pd_obj->setProvincialTotalClaimAmount( 18214 );
 		$pd_obj->setWCBRate( 0.18 );
 
 		$pd_obj->setEIExempt( FALSE );
@@ -236,20 +182,20 @@ class CAPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setGrossPayPeriodIncome( 1800 );
 
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1800' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '100.41' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '20.92' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '97.81' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '17.37' );
 	}
 
-	function testCA_2014a_Example2() {
-		Debug::text('CA - Example2 - Beginning of 01-Jan-2014: ', __FILE__, __LINE__, __METHOD__, 10);
+	function testCA_2015a_Example2() {
+		Debug::text('CA - Example2 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'AB');
-		$pd_obj->setDate(strtotime('01-Jan-2014'));
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
-		$pd_obj->setFederalTotalClaimAmount( 11038 );
-		$pd_obj->setProvincialTotalClaimAmount( 17593 );
+		$pd_obj->setFederalTotalClaimAmount( 11327 );
+		$pd_obj->setProvincialTotalClaimAmount( 18214 );
 		$pd_obj->setWCBRate( 0.18 );
 
 		$pd_obj->setEIExempt( FALSE );
@@ -264,20 +210,20 @@ class CAPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setGrossPayPeriodIncome( 2300 );
 
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2300' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '297.63' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '148.75' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '294.02' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '146.83' );
 	}
 
-	function testCA_2014a_Example3() {
-		Debug::text('CA - Example3 - Beginning of 01-Jan-2014: ', __FILE__, __LINE__, __METHOD__, 10);
+	function testCA_2015a_Example3() {
+		Debug::text('CA - Example3 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'AB');
-		$pd_obj->setDate(strtotime('01-Jan-2014'));
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 52 );
 
-		$pd_obj->setFederalTotalClaimAmount( 11038 );
-		$pd_obj->setProvincialTotalClaimAmount( 17593 );
+		$pd_obj->setFederalTotalClaimAmount( 11327 );
+		$pd_obj->setProvincialTotalClaimAmount( 18214 );
 		$pd_obj->setWCBRate( 0.18 );
 
 		$pd_obj->setEIExempt( FALSE );
@@ -292,20 +238,20 @@ class CAPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setGrossPayPeriodIncome( 2500 );
 
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2500' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '478.20' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '209.37' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '475.24' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '208.41' );
 	}
 
-	function testCA_2014a_Example4() {
-		Debug::text('CA - Example1 - Beginning of 01-Jan-2014: ', __FILE__, __LINE__, __METHOD__, 10);
+	function testCA_2015a_Example4() {
+		Debug::text('CA - Example1 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2014'));
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
-		$pd_obj->setProvincialTotalClaimAmount( 10276 );
+		$pd_obj->setProvincialTotalClaimAmount( 9938 );
 		$pd_obj->setWCBRate( 0 );
 
 		$pd_obj->setEIExempt( FALSE );
@@ -320,20 +266,20 @@ class CAPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setGrossPayPeriodIncome( 1560 );
 
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1560' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '148.26' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '57.67' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '147.06' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '57.26' );
 	}
 
-	function testCA_2014a_GovExample1() {
-		Debug::text('CA - Example1 - Beginning of 01-Jan-2014: ', __FILE__, __LINE__, __METHOD__, 10);
+	function testCA_2015a_GovExample1() {
+		Debug::text('CA - Example1 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'AB');
-		$pd_obj->setDate(strtotime('01-Jan-2014'));
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 52 );
 
-		$pd_obj->setFederalTotalClaimAmount( 11138 );
-		$pd_obj->setProvincialTotalClaimAmount( 17787 );
+		$pd_obj->setFederalTotalClaimAmount( 11327 );
+		$pd_obj->setProvincialTotalClaimAmount( 18214 );
 		$pd_obj->setWCBRate( 0 );
 
 		$pd_obj->setEIExempt( FALSE );
@@ -348,20 +294,20 @@ class CAPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setGrossPayPeriodIncome( 1030 ); //Take Gross income minus RPP and Union Dues.
 
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1030' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '122.41' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '62.37' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '120.61' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '61.42' );
 	}
 
-	function testCA_2014a_GovExample2() {
-		Debug::text('CA - Example1 - Beginning of 01-Jan-2014: ', __FILE__, __LINE__, __METHOD__, 10);
+	function testCA_2015a_GovExample2() {
+		Debug::text('CA - Example1 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2014'));
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 52 );
 
-		$pd_obj->setFederalTotalClaimAmount( 11138 );
-		$pd_obj->setProvincialTotalClaimAmount( 9869 );
+		$pd_obj->setFederalTotalClaimAmount( 11327 );
+		$pd_obj->setProvincialTotalClaimAmount( 9938 );
 		$pd_obj->setWCBRate( 0 );
 
 		$pd_obj->setEIExempt( FALSE );
@@ -376,20 +322,20 @@ class CAPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setGrossPayPeriodIncome( 1030 ); //Take Gross income minus RPP and Union Dues.
 
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1030' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '122.41' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '47.36' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '120.61' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '47.09' );
 	}
 
-	function testCA_2014a_GovExample3() {
-		Debug::text('CA - Example1 - Beginning of 01-Jan-2014: ', __FILE__, __LINE__, __METHOD__, 10);
+	function testCA_2015a_GovExample3() {
+		Debug::text('CA - Example1 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'ON');
-		$pd_obj->setDate(strtotime('01-Jan-2014'));
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 52 );
 
-		$pd_obj->setFederalTotalClaimAmount( 11138 );
-		$pd_obj->setProvincialTotalClaimAmount( 9670 );
+		$pd_obj->setFederalTotalClaimAmount( 11327 );
+		$pd_obj->setProvincialTotalClaimAmount( 9863 );
 		$pd_obj->setWCBRate( 0 );
 
 		$pd_obj->setEIExempt( FALSE );
@@ -404,19 +350,19 @@ class CAPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setGrossPayPeriodIncome( 1030 ); //Take Gross income minus RPP and Union Dues.
 
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1030' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '122.41' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '61.51' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '120.61' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '60.63' );
 	}
 
-	function testCA_2014a_GovExample4() {
-		Debug::text('CA - Example1 - Beginning of 01-Jan-2014: ', __FILE__, __LINE__, __METHOD__, 10);
+	function testCA_2015a_GovExample4() {
+		Debug::text('CA - Example1 - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'PE');
-		$pd_obj->setDate(strtotime('01-Jan-2014'));
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 52 );
 
-		$pd_obj->setFederalTotalClaimAmount( 11138 );
+		$pd_obj->setFederalTotalClaimAmount( 11327 );
 		$pd_obj->setProvincialTotalClaimAmount( 7708 );
 		$pd_obj->setWCBRate( 0 );
 
@@ -432,18 +378,18 @@ class CAPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setGrossPayPeriodIncome( 1030 ); //Take Gross income minus RPP and Union Dues.
 
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1030' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '122.41' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '96.72' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '120.61' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '96.59' );
 	}
 
 	//
 	// CPP/ EI
 	//
-	function testCA_2014a_BiWeekly_CPP_LowIncome() {
-		Debug::text('CA - BiWeekly - CPP - Beginning of 01-Jan-2014: ', __FILE__, __LINE__, __METHOD__, 10);
+	function testCA_2015a_BiWeekly_CPP_LowIncome() {
+		Debug::text('CA - BiWeekly - CPP - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2014'));
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
@@ -467,11 +413,11 @@ class CAPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getEmployerCPP() ), '22.31' );
 	}
 
-	function testCA_2014a_SemiMonthly_CPP_LowIncome() {
-		Debug::text('CA - BiWeekly - CPP - Beginning of 01-Jan-2014: ', __FILE__, __LINE__, __METHOD__, 10);
+	function testCA_2015a_SemiMonthly_CPP_LowIncome() {
+		Debug::text('CA - BiWeekly - CPP - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2014'));
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 24 );
 
@@ -495,11 +441,11 @@ class CAPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getEmployerCPP() ), '21.75' );
 	}
 
-	function testCA_2014a_SemiMonthly_MAXCPP_LowIncome() {
-		Debug::text('CA - BiWeekly - MAXCPP - Beginning of 2014 01-Jan-2014: ', __FILE__, __LINE__, __METHOD__, 10);
+	function testCA_2015a_SemiMonthly_MAXCPP_LowIncome() {
+		Debug::text('CA - BiWeekly - MAXCPP - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2014'));
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 24 );
 
@@ -513,7 +459,7 @@ class CAPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setFederalTaxExempt( FALSE );
 		$pd_obj->setProvincialTaxExempt( FALSE );
 
-		$pd_obj->setYearToDateCPPContribution( 2424.50 ); //2425.50 - 1.00
+		$pd_obj->setYearToDateCPPContribution( 2478.95 ); //2479.95 - 1.00
 		$pd_obj->setYearToDateEIContribution( 0 );
 
 		$pd_obj->setGrossPayPeriodIncome( 587.00 );
@@ -525,11 +471,11 @@ class CAPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getEmployerCPP() ), '1.00' );
 	}
 
-	function testCA_2014a_EI_LowIncome() {
-		Debug::text('CA - EI - Beginning of 01-Jan-2014: ', __FILE__, __LINE__, __METHOD__, 10);
+	function testCA_2015a_EI_LowIncome() {
+		Debug::text('CA - EI - Beginning of 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2014'));
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
@@ -555,11 +501,11 @@ class CAPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getEmployerEI() ), '15.47' );
 	}
 
-	function testCA_2014a_MAXEI_LowIncome() {
-		Debug::text('CA - MAXEI - Beginning of 2006 01-Jan-2014: ', __FILE__, __LINE__, __METHOD__, 10);
+	function testCA_2015a_MAXEI_LowIncome() {
+		Debug::text('CA - MAXEI - Beginning of 2006 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
-		$pd_obj->setDate(strtotime('01-Jan-2014'));
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 26 );
 
@@ -574,7 +520,7 @@ class CAPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setProvincialTaxExempt( FALSE );
 
 		$pd_obj->setYearToDateCPPContribution( 0 );
-		$pd_obj->setYearToDateEIContribution( 912.68 ); //913.68 - 1.00
+		$pd_obj->setYearToDateEIContribution( 929.60 ); //930.60 - 1.00
 
 		$pd_obj->setGrossPayPeriodIncome( 587.00 );
 

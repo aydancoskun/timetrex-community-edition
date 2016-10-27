@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 14962 $
- * $Id: Install.class.php 14962 2014-10-28 15:31:47Z mikeb $
- * $Date: 2014-10-28 08:31:47 -0700 (Tue, 28 Oct 2014) $
+ * $Revision: 15617 $
+ * $Id: Install.class.php 15617 2014-12-30 20:52:43Z mikeb $
+ * $Date: 2014-12-30 12:52:43 -0800 (Tue, 30 Dec 2014) $
  */
 
 /**
@@ -562,7 +562,7 @@ class Install {
 			}
 
 			$this->initializeSequences();
-			
+
 			//$this->getDatabaseConnection()->FailTrans();
 			$this->getDatabaseConnection()->CompleteTrans();
 		}
@@ -668,7 +668,6 @@ class Install {
 
 		return TRUE;
 	}
-
 	
 	/*
 
@@ -1148,7 +1147,7 @@ class Install {
 	}
 
 	function getPHPCLIRequirementsCommand() {
-		$command = '"'. $this->getPHPCLI() .'" "'. Environment::getBasePath() .'/tools/unattended_upgrade.php" --config "'. CONFIG_FILE .'" --requirements_only --web_installer';
+		$command = '"'. $this->getPHPCLI() .'" "'. Environment::getBasePath() .'tools'. DIRECTORY_SEPARATOR .'unattended_upgrade.php" --config "'. CONFIG_FILE .'" --requirements_only --web_installer';
 		return $command;
 	}
 	//Only check this if *not* being called from the CLI to prevent infinite loops.

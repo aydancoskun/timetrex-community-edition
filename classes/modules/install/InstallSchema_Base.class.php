@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11775 $
- * $Id: InstallSchema_Base.class.php 11775 2013-12-24 00:24:18Z mikeb $
- * $Date: 2013-12-23 16:24:18 -0800 (Mon, 23 Dec 2013) $
+ * $Revision: 15617 $
+ * $Id: InstallSchema_Base.class.php 15617 2014-12-30 20:52:43Z mikeb $
+ * $Date: 2014-12-30 12:52:43 -0800 (Tue, 30 Dec 2014) $
  */
 
 /**
@@ -48,6 +48,15 @@ class InstallSchema_Base {
 	protected $version = NULL;
 	protected $db = NULL;
 	protected $is_upgrade = FALSE;
+	protected $install_obj = FALSE;
+
+	function __construct( $install_obj = FALSE ) {
+		if ( is_object( $install_obj ) ) {
+			$this->install_obj = $install_obj;
+		}
+
+		return TRUE;
+	}
 
 	function setDatabaseConnection( $db ) {
 		$this->db = $db;
@@ -202,6 +211,51 @@ class InstallSchema_Base {
 		$this->getDatabaseConnection()->FailTrans();
 
 		return FALSE;
+	}
+
+	function updateCompanyDeductionForTaxYear( $date ) {
+		require_once( Environment::getBasePath(). DIRECTORY_SEPARATOR . 'classes'. DIRECTORY_SEPARATOR .'payroll_deduction'. DIRECTORY_SEPARATOR .'PayrollDeduction.class.php');
+
+		$db_conn = $this->getDatabaseConnection();
+
+		if ( $db_conn == FALSE ) {
+			Debug::text('ERROR: No database connection!', __FILE__, __LINE__, __METHOD__, 9);
+			return FALSE;
+		}
+
+		$clf = TTnew( 'CompanyListFactory' );
+		$clf->getAll();
+		if ( $clf->getRecordCount() > 0 ) {
+			foreach( $clf as $c_obj ) {
+				Debug::text('Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
+				if ( $c_obj->getStatus() != 30 ) {
+					$cdlf = TTnew('CompanyDeductionListFactory');
+					$cdlf->getAPISearchByCompanyIdAndArrayCriteria( $c_obj->getID(), array( 'calculation_id' => array(100,200), 'country' => 'CA' ) );
+					if ( $cdlf->getRecordCount() > 0 ) {
+						foreach( $cdlf as $cd_obj ) {
+							$pd_obj = new PayrollDeduction( $cd_obj->getCountry(), $cd_obj->getProvince() );
+							$pd_obj->setDate( $date );
+
+							Debug::text('Updating claim amounts based on Date: '. TTDate::getDate('DATE', $date ), __FILE__, __LINE__, __METHOD__, 9);
+							if ( $cd_obj->getCalculation() == 100 ) { //Federal
+								$pd_obj->setFederalTotalClaimAmount( $cd_obj->getUserValue1() );
+								$claim_amount = $pd_obj->getFederalTotalClaimAmount();
+							} elseif ( $cd_obj->getCalculation() == 200 ) { //Provincial
+								$pd_obj->setProvincialTotalClaimAmount( $cd_obj->getUserValue1() );
+								$claim_amount = $pd_obj->getProvincialTotalClaimAmount();
+							}
+
+							//Use a SQL query instead of modifying the CompanyDeduction class, as that can cause errors when we add columns to the table later on.
+							$query = 'UPDATE '. $cd_obj->getTable() .' set user_value1 = '. (float)$claim_amount .' where id = '. (int)$cd_obj->getId();
+							$db_conn->Execute($query);
+						}
+					}
+				}
+			}
+		}
+
+		Debug::text('Done updating claim amounts...', __FILE__, __LINE__, __METHOD__, 9);
+		return TRUE;
 	}
 }
 ?>

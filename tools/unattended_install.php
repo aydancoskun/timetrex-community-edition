@@ -85,7 +85,9 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 		exit(1);
 	} else {
 		$check_all_requirements = $install_obj->checkAllRequirements( TRUE );
-		if ( $check_all_requirements == 0 AND $install_obj->checkTimeTrexVersion() == 0 ) {
+		if ( $check_all_requirements == 0
+				//AND $install_obj->checkTimeTrexVersion() == 0 //This causes unit tests to fail when a new version is released that is newer than the unit test version.
+				) {
 
 			$install_obj->setDatabaseConnection( $db ); //Default connection
 
@@ -227,6 +229,8 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 			}
 		} else {
 			echo "ERROR: System requirements are not satisfied, or a new version exists!\n";
+			echo 'Failed Requirements: '. implode(',', $install_obj->getFailedRequirements( TRUE ) )."\n";
+
 		}
 	}
 }

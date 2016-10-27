@@ -2100,8 +2100,8 @@ class SetupPresets extends Factory {
 														'calculation_id' => 15,
 														'calculation_order' => 186,
 														'pay_stub_entry_account_id' => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, strtoupper($province).' - Disability Insurance' ),
-														'user_value1' => 1.0, //Percent
-														'user_value2' => 101636, //WageBase
+														'user_value1' => 0.9, //Percent
+														'user_value2' => 104378, //WageBase
 														'user_value3' => 0,
 														'include_pay_stub_entry_account' => array( $psea_obj->getTotalGross() ),
 														'exclude_pay_stub_entry_account' => array(

@@ -51,7 +51,7 @@ class SharedMemory {
 
 		$shared_memory = new System_SharedMemory();
 		if ( isset($config_vars['cache']['redis_host']) AND $config_vars['cache']['redis_host'] != '' ) {
-			$this->obj = $shared_memory->Factory( 'Redis', array('host' => $config_vars['cache']['redis_host'], 'timeout' => 1 ) );
+			$this->obj = $shared_memory->Factory( 'Redis', array('host' => $config_vars['cache']['redis_host'], 'db' => ( isset($config_vars['cache']['redis_db']) ) ? $config_vars['cache']['redis_db'] : '', 'timeout' => 1 ) );
 		} else {
 			if ( OPERATING_SYSTEM == 'WIN' ) {
 				$this->obj = $shared_memory->Factory( 'File', array('tmp' => $config_vars['cache']['dir'] ) );

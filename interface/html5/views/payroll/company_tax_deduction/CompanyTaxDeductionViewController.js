@@ -2067,7 +2067,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 						$this.edit_view_ui_dic.df_11.setValue( $this.current_edit_record.company_value1 );
 
 						$this.edit_view_form_item_dic.df_12.show();
-						$this.edit_view_form_item_dic.df_12.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Lock Back Period' ) + ": " );
+						$this.edit_view_form_item_dic.df_12.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Look Back Period' ) + ": " );
 						$this.edit_view_ui_dic.df_12.setField( 'company_value2' );
 						$this.edit_view_ui_dic.df_12.setValue( $this.current_edit_record.company_value2 );
 						$this.edit_view_ui_dic.df_13.setField( 'company_value3' );

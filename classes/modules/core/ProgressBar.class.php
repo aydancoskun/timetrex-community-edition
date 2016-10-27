@@ -50,6 +50,7 @@ class ProgressBar {
 	protected $obj = NULL;
 
 	var $default_key = NULL;
+	private $key_prefix = 'progress_bar_';
 
 	var $update_iteration = 1; //This is how often we actually update the progress bar, even if the function is called more often.
 
@@ -101,13 +102,13 @@ class ProgressBar {
 					'message' => $msg,
 					);
 
-		$this->obj->set( $key, $progress_bar_arr );
+		$this->obj->set( $this->key_prefix.$key, $progress_bar_arr );
 
 		return TRUE;
 	}
 
 	function delete( $key ) {
-		return $this->stop( $key );
+		return $this->stop( $this->key_prefix.$key );
 	}
 	function stop( $key ) {
 		if ( $key == '' ) {
@@ -119,7 +120,7 @@ class ProgressBar {
 
 		//Debug::text('stop: '. $key, __FILE__, __LINE__, __METHOD__, 9);
 
-		return $this->obj->delete( $key );
+		return $this->obj->delete( $this->key_prefix.$key );
 	}
 
 	function set( $key, $current_iteration, $msg = NULL ) {
@@ -135,7 +136,7 @@ class ProgressBar {
 		if ( $current_iteration <= 10 OR ( $current_iteration % $this->update_iteration ) == 0 ) {
 			//Debug::text('set: '. $key .' Iteration: '. $current_iteration, __FILE__, __LINE__, __METHOD__, 9);
 
-			$progress_bar_arr = $this->obj->get( $key );
+			$progress_bar_arr = $this->obj->get( $this->key_prefix.$key );
 
 			if ( $progress_bar_arr != FALSE
 					AND is_array( $progress_bar_arr )
@@ -158,7 +159,7 @@ class ProgressBar {
 				$progress_bar_arr['message'] = $msg;
 			}
 
-			return $this->obj->set( $key, $progress_bar_arr );
+			return $this->obj->set( $this->key_prefix.$key, $progress_bar_arr );
 		}
 
 		return TRUE;
@@ -172,7 +173,7 @@ class ProgressBar {
 			}
 		}
 
-		$retval = $this->obj->get( $key );
+		$retval = $this->obj->get( $this->key_prefix.$key );
 		//Debug::text('get: '. $key .'('.microtime(TRUE).')', __FILE__, __LINE__, __METHOD__, 9);
 		//Debug::Arr($retval, 'get: '. $key .'('.microtime(TRUE).')', __FILE__, __LINE__, __METHOD__, 9);
 

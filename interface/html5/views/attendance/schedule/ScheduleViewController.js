@@ -4466,12 +4466,12 @@ ScheduleViewController = BaseViewController.extend( {
 			var column_name = this.shift_key_name_array[ i ].replace( '_id', '' ); //judge if shit has correct field value
 			if ( column_name !== 'user' ) {
 				if ( shift[ column_name ] ) {
-					key = shift[ field_name ] + key;
+					key = shift[ field_name ] + '-' + key;
 				} else {
-					key = 0 + key;
+					key = 0 + '-' + key
 				}
 			} else {
-				key = shift[ field_name ] + key;
+				key = shift[ field_name ] + '-' + key;
 			}
 		}
 		return key;

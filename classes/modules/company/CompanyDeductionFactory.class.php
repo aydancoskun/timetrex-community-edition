@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 14797 $
- * $Id: CompanyDeductionFactory.class.php 14797 2014-10-16 19:00:06Z mikeb $
- * $Date: 2014-10-16 12:00:06 -0700 (Thu, 16 Oct 2014) $
+ * $Revision: 15602 $
+ * $Id: CompanyDeductionFactory.class.php 15602 2014-12-30 00:31:02Z mikeb $
+ * $Date: 2014-12-29 16:31:02 -0800 (Mon, 29 Dec 2014) $
  */
 
 /**
@@ -364,8 +364,9 @@ class CompanyDeductionFactory extends Factory {
 			case 'state_nc_filing_status':
 				$retval = array(
 														10 => TTi18n::gettext('Single'),
-														20 => TTi18n::gettext('Married or Qualified Widow(er)'),
-														30 => TTi18n::gettext('Head of Household'),
+														20 => TTi18n::gettext('Married - Filing Jointly or Qualified Widow(er)'),
+														30 => TTi18n::gettext('Married - Filing Separately'),
+														40 => TTi18n::gettext('Head of Household'),
 									);
 				break;
 			case 'state_ma_filing_status':

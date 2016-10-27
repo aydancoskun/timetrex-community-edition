@@ -136,7 +136,7 @@ var PermissionManager = (function() {
 				}
 				break;
 			case 'Companies':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) &&
+				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) &&
 					PermissionManager.validate( permission_section, 'enabled' ) && PermissionManager.validate( permission_section, 'view' ) ) {
 					result = true;
 				}
@@ -485,7 +485,8 @@ var PermissionManager = (function() {
 				}
 				break;
 			case 'AffordableCareReport':
-				if ( PermissionManager.validate( 'report', 'view_affordable_care' ) &&
+				if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 &&
+					PermissionManager.validate( 'report', 'view_affordable_care' ) &&
 					countryPermissionValidate( 'US' )
 					) {
 					result = true;

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 15145 $
- * $Id: StationFactory.class.php 15145 2014-11-13 22:42:19Z mikeb $
- * $Date: 2014-11-13 14:42:19 -0800 (Thu, 13 Nov 2014) $
+ * $Revision: 15602 $
+ * $Id: StationFactory.class.php 15602 2014-12-30 00:31:02Z mikeb $
+ * $Date: 2014-12-29 16:31:02 -0800 (Mon, 29 Dec 2014) $
  */
 include_once('Net/IPv4.php');
 
@@ -1847,8 +1847,8 @@ class StationFactory extends Factory {
 
 		//Required for load balancers, however we may need to add another config option to restrict
 		//the REMOTE_ADDR <-> HTTP_X_FORWARDED_FOR combination, so when not be a load balancer/proxy it ignores this header.
-		if ( isset($_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-			$x_forwarded_for = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		if ( isset($_SERVER['X-Forwarded-For'] ) ) {
+			$x_forwarded_for = $_SERVER['X-Forwarded-For'];
 		} else {
 			$x_forwarded_for = NULL;
 		}

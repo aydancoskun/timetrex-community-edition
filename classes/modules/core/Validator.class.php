@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13749 $
- * $Id: Validator.class.php 13749 2014-07-17 15:37:35Z mikeb $
- * $Date: 2014-07-17 08:37:35 -0700 (Thu, 17 Jul 2014) $
+ * $Revision: 15602 $
+ * $Id: Validator.class.php 15602 2014-12-30 00:31:02Z mikeb $
+ * $Date: 2014-12-29 16:31:02 -0800 (Mon, 29 Dec 2014) $
  */
 
 /**
@@ -684,6 +684,14 @@ class Validator {
 
 	function stripNonFloat($value) {
 		$retval = preg_replace('/[^-0-9\.]/', '', $value);
+
+		//Debug::Text('Float String:'. $retval, __FILE__, __LINE__, __METHOD__, $this->verbosity);
+
+		return $retval;
+	}
+
+	function stripNonTimeUnit($value) { //Suitable to passing to parseTimeUnit() after.
+		$retval = preg_replace('/[^-0-9\.:]/', '', $value);
 
 		//Debug::Text('Float String:'. $retval, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 

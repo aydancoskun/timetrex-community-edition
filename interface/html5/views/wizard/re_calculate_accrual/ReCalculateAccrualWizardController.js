@@ -208,7 +208,7 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 
 				break;
 			case 2:
-				new (APIFactory.getAPIClass( 'APIJobSummaryReport' ))().getOptions( 'time_period', {onResult: function( result ) {
+				new (APIFactory.getAPIClass( 'APITimesheetSummaryReport' ))().getOptions( 'time_period', {onResult: function( result ) {
 
 					current_step_ui['time_period'].setSourceData( Global.buildRecordArray( result.getResult() ) );
 

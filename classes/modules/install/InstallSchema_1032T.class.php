@@ -34,20 +34,67 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 3387 $
- * $Id: ImportBranch.class.php 3387 2010-03-04 17:42:17Z ipso $
- * $Date: 2010-03-04 09:42:17 -0800 (Thu, 04 Mar 2010) $
+ * $Revision: 2095 $
+ * $Id: InstallSchema_1007A.class.php 2095 2008-09-01 07:04:25Z ipso $
+ * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
  */
-
 
 /**
- * @package API\Import
+ * @package Modules\Install
  */
-class APIImportPunch extends APIImport {
-	protected $main_class = 'ImportPunch';
+class InstallSchema_1032T extends InstallSchema_Base {
 
-	public function __construct() {
-		parent::__construct(); //Make sure parent constructor is always called.
+	function preInstall() {
+		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+
+		return TRUE;
+	}
+
+	function postInstall() {
+		global $config_vars;
+
+		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
+
+		$sslf = TTnew( 'SystemSettingListFactory' );
+		//
+		// Tax Data Version
+		//
+		$sslf->getByName( 'tax_data_version' );
+		if ( $sslf->getRecordCount() == 1 ) {
+			$obj = $sslf->getCurrent();
+		} else {
+			$obj = TTnew( 'SystemSettingListFactory' );
+		}
+
+		$tax_data_version = '20150101';
+		$obj->setName( 'tax_data_version' );
+		$obj->setValue( $tax_data_version );
+		if ( $obj->isValid() ) {
+			Debug::text('Setting Tax Data Version to: '. $tax_data_version, __FILE__, __LINE__, __METHOD__, 9);
+			$obj->Save();
+		}
+
+		//
+		// Tax Engine Version
+		//
+		$sslf->getByName( 'tax_engine_version' );
+		if ( $sslf->getRecordCount() == 1 ) {
+			$obj = $sslf->getCurrent();
+		} else {
+			$obj = TTnew( 'SystemSettingListFactory' );
+		}
+
+		$tax_engine_version = '1.0.28';
+		$obj->setName( 'tax_engine_version' );
+		$obj->setValue( $tax_engine_version );
+		if ( $obj->isValid() ) {
+			Debug::text('Setting Tax Engine Version to: '. $tax_engine_version, __FILE__, __LINE__, __METHOD__, 9);
+			$obj->Save();
+		}
+
+		//Update Tax/Deduction records to reflect new claim amounts.
+		//This will be updated before the tax year actually starts, but PayrollDeduction class is smart enough to use previous year values in that case.
+		$this->updateCompanyDeductionForTaxYear( strtotime( $tax_data_version ) );
 
 		return TRUE;
 	}

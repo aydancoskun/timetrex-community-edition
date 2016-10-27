@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: InstallSchema.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 15612 $
+ * $Id: InstallSchema.class.php 15612 2014-12-30 16:12:10Z mikeb $
+ * $Date: 2014-12-30 08:12:10 -0800 (Tue, 30 Dec 2014) $
  */
 
 /**
@@ -69,7 +69,7 @@ class InstallSchema extends Install {
 
 			$class_name = 'InstallSchema_'. $version;
 
-			$this->obj = new $class_name;
+			$this->obj = new $class_name( $this ); //Pass current Install class object to the schema class, so we can call common functions.
 			$this->obj->setDatabaseConnection( $db_conn );
 			$this->obj->setIsUpgrade( $is_upgrade );
 			$this->obj->setVersion( $version );

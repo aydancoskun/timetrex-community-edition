@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13399 $
- * $Id: ROEFactory.class.php 13399 2014-06-12 22:06:00Z mikeb $
- * $Date: 2014-06-12 15:06:00 -0700 (Thu, 12 Jun 2014) $
+ * $Revision: 15602 $
+ * $Id: ROEFactory.class.php 15602 2014-12-30 00:31:02Z mikeb $
+ * $Date: 2014-12-29 16:31:02 -0800 (Mon, 29 Dec 2014) $
  */
 
 /**
@@ -493,6 +493,8 @@ class ROEFactory extends Factory {
 							30	=> 25, //'Semi-Monthly',
 							40	=> 13, //'Monthly + Advance',
 							50	=> 13, //'Monthly'
+							100	=> 53, //'Weekly',
+							200	=> 27, //'Bi-Weekly',
 							);
 
 		return $report_period_arr[$this->getPayPeriodType()];
@@ -507,6 +509,8 @@ class ROEFactory extends Factory {
 								30	=> 25, //'Semi-Monthly',
 								40	=> 13, //'Monthly + Advance',
 								50	=> 13, //'Monthly'
+								100	=> 53, //'Weekly',
+								200	=> 27, //'Bi-Weekly',
 								);
 		} else {
 			//Line 15b is a total of insurable hours over a shorter period than displayed in 15b often.
@@ -516,6 +520,8 @@ class ROEFactory extends Factory {
 								30	=> 13, //'Semi-Monthly',
 								40	=> 7, //'Monthly + Advance',
 								50	=> 7, //'Monthly'
+								100	=> 27, //'Weekly',
+								200	=> 14, //'Bi-Weekly',
 								);
 		}
 

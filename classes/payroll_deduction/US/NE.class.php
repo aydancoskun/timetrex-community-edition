@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11758 $
- * $Id: NE.class.php 11758 2013-12-20 20:07:32Z mikeb $
- * $Date: 2013-12-20 12:07:32 -0800 (Fri, 20 Dec 2013) $
+ * $Revision: 15602 $
+ * $Id: NE.class.php 15602 2014-12-30 00:31:02Z mikeb $
+ * $Date: 2014-12-29 16:31:02 -0800 (Mon, 29 Dec 2014) $
  */
 
 /**
@@ -45,6 +45,9 @@
 class PayrollDeduction_US_NE extends PayrollDeduction_US {
 
 	var $state_options = array(
+								1357027200 => array( // 01-Jan-2013
+													'allowance' => 1900
+												   ),
 								1262332800 => array( //01-Jan-2010: Formula changed, this is no longer used.
 													'allowance' => 118
 													),
@@ -65,10 +68,13 @@ class PayrollDeduction_US_NE extends PayrollDeduction_US {
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();
-		//$state_allowance = $this->getStateAllowanceAmount();
 
-		//$income = bcsub( $annual_income, $state_allowance );
-		$income = $annual_income;
+		if ( $this->getDate() >= strtotime('01-Jan-2013') ) {
+			$state_allowance = $this->getStateAllowanceAmount();
+			$income = bcsub( $annual_income, $state_allowance );
+		} else {
+			$income = $annual_income;
+		}
 
 		Debug::text('State Annual Taxable Income: '. $income, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -103,7 +109,9 @@ class PayrollDeduction_US_NE extends PayrollDeduction_US {
 			$retval = bcadd( bcmul( bcsub( $annual_income, $state_rate_income ), $rate ), $state_constant );
 			Debug::text('aState Annual Tax Payable: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
 
-			$retval = bcsub( $retval, $this->getStateAllowanceAmount() );
+			if ( $this->getDate() < strtotime('01-Jan-2013') ) {
+				$retval = bcsub( $retval, $this->getStateAllowanceAmount() );
+			}
 		}
 
 		if ( $retval < 0 ) {
