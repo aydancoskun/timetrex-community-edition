@@ -42,6 +42,7 @@ class CompanyDeductionFactory extends Factory {
 	protected $table = 'company_deduction';
 	protected $pk_sequence_name = 'company_deduction_id_seq'; //PK Sequence name
 
+	var $company_obj = NULL;
 	var $pay_stub_entry_account_link_obj = NULL;
 	var $pay_stub_entry_account_obj = NULL;
 
@@ -675,6 +676,10 @@ class CompanyDeductionFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	function getCompanyObject() {
+		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
+	}
+
 	function getPayStubEntryAccountLinkObject() {
 		if ( is_object($this->pay_stub_entry_account_link_obj) ) {
 			return $this->pay_stub_entry_account_link_obj;
@@ -1176,7 +1181,7 @@ class CompanyDeductionFactory extends Factory {
 
 		return FALSE;
 	}
-	
+
 	//
 	// Calendar
 	//
@@ -1347,7 +1352,7 @@ class CompanyDeductionFactory extends Factory {
 									'day_of_month' => $this->getApplyFrequencyDayOfMonth(),
 									'quarter_month' => $this->getApplyFrequencyQuarterMonth(),
 									);
-		
+
 		$specific_date = FALSE;
 		$frequency_id = $this->getApplyFrequency();
 		switch ( $this->getApplyFrequency() ) {
@@ -1480,7 +1485,7 @@ class CompanyDeductionFactory extends Factory {
 				} elseif ( abs( $user_age - $this->getMaximumUserAge() ) <= 0.25  ) {
 					$birth_month = TTDate::getBirthDateAtAge( $birth_date, $this->getMaximumUserAge() );
 					Debug::Text('  bBirth Date: '. TTDate::getDate('DATE', $birth_date ) .' Birth Month: '. TTDate::getDate('DATE+TIME', $birth_month ) .' Transaction Date: '. TTDate::getDate('DATE+TIME', $pp_transaction_date ), __FILE__, __LINE__, __METHOD__, 10);
-					
+
 					//Stop deducting CPP.
 					if ( TTDate::getEndDayEpoch( $pp_transaction_date ) > TTDate::getEndMonthEpoch( $birth_month ) ) {
 						Debug::Text('Transaction date is after the end of the birth month, skipping...', __FILE__, __LINE__, __METHOD__, 10);
@@ -1740,7 +1745,7 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 	function setCompanyValue1($value) {
-	
+
 		$value = trim($value);
 
 		if	(	$value == ''
@@ -1775,7 +1780,7 @@ class CompanyDeductionFactory extends Factory {
 
 		return FALSE;
 	}
-	
+
 	function getCompanyValue2() {
 		if ( isset($this->data['company_value2']) ) {
 			return $this->data['company_value2'];
@@ -1879,7 +1884,7 @@ class CompanyDeductionFactory extends Factory {
 
 		return FALSE;
 	}
-	
+
 	function getCompanyValue6() {
 		if ( isset($this->data['company_value6']) ) {
 			return $this->data['company_value6'];
@@ -2877,7 +2882,7 @@ class CompanyDeductionFactory extends Factory {
 
 		return FALSE;
 	}
-	
+
 	function getLookbackCalculationPayStubAmount( $include_account_amount_type_id = NULL, $exclude_account_amount_type_id = NULL ) {
 		$amount = 0;
 		if ( isset($this->lookback_pay_stub_lf) AND $this->lookback_pay_stub_lf->getRecordCount() > 0 ) {
@@ -2911,10 +2916,10 @@ class CompanyDeductionFactory extends Factory {
 		Debug::text('Start Date: '. TTDate::getDate('DATE+TIME', $retarr['start_date'] ) .' End Date: '. TTDate::getDate('DATE+TIME', $retarr['end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
 		return $retarr;
 	}
-	
+
 	function getLookbackPayStubs( $user_id, $pay_period_obj ) {
 		$lookback_dates = $this->getLookbackStartAndEndDates( $pay_period_obj );
-		
+
 		$pslf = TTNew('PayStubListFactory');
 		$this->lookback_pay_stub_lf = $pslf->getByUserIdAndStartDateAndEndDate( $user_id, $lookback_dates['start_date'], $lookback_dates['end_date'] );
 
@@ -3021,42 +3026,37 @@ class CompanyDeductionFactory extends Factory {
 	function updateCompanyDeductionForTaxYear( $date ) {
 		require_once( Environment::getBasePath(). DIRECTORY_SEPARATOR . 'classes'. DIRECTORY_SEPARATOR .'payroll_deduction'. DIRECTORY_SEPARATOR .'PayrollDeduction.class.php');
 
-		$clf = TTnew( 'CompanyListFactory' );
-		$clf->getAll();
-		if ( $clf->getRecordCount() > 0 ) {
-			foreach( $clf as $c_obj ) {
-				Debug::text('Company: '. $c_obj->getName() .' Date: '. TTDate::getDate('DATE+TIME', $date), __FILE__, __LINE__, __METHOD__, 9);
-				if ( $c_obj->getStatus() != 30 ) {
-					$cdlf = TTnew('CompanyDeductionListFactory');
-					$cdlf->getAPISearchByCompanyIdAndArrayCriteria( $c_obj->getID(), array( 'calculation_id' => array(100,200), 'country' => 'CA' ) );
-					if ( $cdlf->getRecordCount() > 0 ) {
-						foreach( $cdlf as $cd_obj ) {
-							$pd_obj = new PayrollDeduction( $cd_obj->getCountry(), $cd_obj->getProvince() );
-							$pd_obj->setDate( $date );
+		$c_obj = $this->getCompanyObject();
+		if ( is_object($c_obj) AND $c_obj->getStatus() != 30 ) {
+			Debug::text('Company: '. $c_obj->getName() .' Date: '. TTDate::getDate('DATE+TIME', $date), __FILE__, __LINE__, __METHOD__, 9);
+			$cdlf = TTnew( 'CompanyDeductionListFactory' );
+			$cdlf->getAPISearchByCompanyIdAndArrayCriteria( $c_obj->getID(), array('calculation_id' => array(100, 200), 'country' => 'CA') );
+			if ( $cdlf->getRecordCount() > 0 ) {
+				foreach ( $cdlf as $cd_obj ) {
+					$pd_obj = new PayrollDeduction( $cd_obj->getCountry(), $cd_obj->getProvince() );
+					$pd_obj->setDate( $date );
 
-							if ( $cd_obj->getCalculation() == 100 ) { //Federal
-								$pd_obj->setFederalTotalClaimAmount( $cd_obj->getUserValue1() );
-								$claim_amount = $pd_obj->getFederalTotalClaimAmount();
-							} elseif ( $cd_obj->getCalculation() == 200 ) { //Provincial
-								$pd_obj->setProvincialTotalClaimAmount( $cd_obj->getUserValue1() );
-								$claim_amount = $pd_obj->getProvincialTotalClaimAmount();
-							}
+					if ( $cd_obj->getCalculation() == 100 ) { //Federal
+						$pd_obj->setFederalTotalClaimAmount( $cd_obj->getUserValue1() );
+						$claim_amount = $pd_obj->getFederalTotalClaimAmount();
+					} elseif ( $cd_obj->getCalculation() == 200 ) { //Provincial
+						$pd_obj->setProvincialTotalClaimAmount( $cd_obj->getUserValue1() );
+						$claim_amount = $pd_obj->getProvincialTotalClaimAmount();
+					}
 
-							if ( (float)$cd_obj->getUserValue1() != (float)$claim_amount ) {
-								Debug::text('Updating claim amounts... Old: '. $cd_obj->getUserValue1() .' New: '. $claim_amount, __FILE__, __LINE__, __METHOD__, 9);								
-								//Use a SQL query instead of modifying the CompanyDeduction class, as that can cause errors when we add columns to the table later on.
-								$query = 'UPDATE '. $cd_obj->getTable() .' set user_value1 = '. (float)$claim_amount .' where id = '. (int)$cd_obj->getId();
-								$this->db->Execute($query);
-							} else {
-								Debug::text('Amount matches, no changes needed... Old: '. $cd_obj->getUserValue1() .' New: '. $claim_amount, __FILE__, __LINE__, __METHOD__, 9);
-							}
-						}
+					if ( (float)$cd_obj->getUserValue1() != (float)$claim_amount ) {
+						Debug::text( 'Updating claim amounts... Old: ' . $cd_obj->getUserValue1() . ' New: ' . $claim_amount, __FILE__, __LINE__, __METHOD__, 9 );
+						//Use a SQL query instead of modifying the CompanyDeduction class, as that can cause errors when we add columns to the table later on.
+						$query = 'UPDATE ' . $cd_obj->getTable() . ' set user_value1 = ' . (float)$claim_amount . ' where id = ' . (int)$cd_obj->getId();
+						$this->db->Execute( $query );
+					} else {
+						Debug::text( 'Amount matches, no changes needed... Old: ' . $cd_obj->getUserValue1() . ' New: ' . $claim_amount, __FILE__, __LINE__, __METHOD__, 9 );
 					}
 				}
+				Debug::text('Done updating claim amounts...', __FILE__, __LINE__, __METHOD__, 9);
 			}
 		}
 
-		Debug::text('Done updating claim amounts...', __FILE__, __LINE__, __METHOD__, 9);
 		return TRUE;
 	}
 
@@ -3086,7 +3086,7 @@ class CompanyDeductionFactory extends Factory {
 		$this->removeCache( $this->getId() );
 		$this->removeCache( 'include_pay_stub_entry-'. $this->getId() );
 		$this->removeCache( 'exclude_pay_stub_entry-'. $this->getId() );
-		
+
 		if ( $this->getDeleted() == TRUE ) {
 			//Check if any users are assigned to this, if so, delete mappings.
 			$udlf = TTnew( 'UserDeductionListFactory' );

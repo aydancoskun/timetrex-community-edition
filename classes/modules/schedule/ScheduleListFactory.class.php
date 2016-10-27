@@ -876,6 +876,13 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$rsf = new RecurringScheduleFactory();
 		$rscf = new RecurringScheduleControlFactory();
 
+		//When filtering by pay_period_id (ie: this pay period), if their are recurring scheduled shifts in the future but before the end of this pay period,
+		// they won't be displayed on the report because recurring_schedule records are not assigned to pay_period_id, since they are mostly in the future.
+		// therefore we need to join to the pay_period table to figure out which pay_period the future dates belong too.
+		// This isn't perfect, and will really only be useful for one pay period in the future, and doesn't handle PP schedule changes very well, but it should suffice for now.
+		$ppsuf = new PayPeriodScheduleUserFactory();
+		$ppf = new PayPeriodFactory();
+
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jf = new JobFactory();
 			$jgf = new JobGroupFactory();
@@ -918,6 +925,9 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 							a.user_id as user_id,
 							a.date_stamp as date_stamp,
 							a.pay_period_id as pay_period_id,
+							ppf.start_date as pay_period_start_date,
+							ppf.end_date as pay_period_end_date,
+							ppf.transaction_date as pay_period_transaction_date,
 
 							uf.first_name as first_name,
 							uf.last_name as last_name,
@@ -929,6 +939,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 
 							uwf.id as user_wage_id,
 							uwf.hourly_rate as user_wage_hourly_rate,
+							uwf.labor_burden_percent as user_labor_burden_percent,
 							uwf.effective_date as user_wage_effective_date ';
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
@@ -1003,7 +1014,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 									rsf.user_id as user_id,
 									rsf.recurring_schedule_template_control_id,
 									rsf.date_stamp as date_stamp,
-									NULL as pay_period_id,
+									ppf.id as pay_period_id,
 
 									rsf.status_id as status_id,
 									rsf.start_time as start_time,
@@ -1026,6 +1037,8 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 								FROM '. $rsf->getTable() .' as rsf
 								LEFT JOIN '. $rscf->getTable() .' as rscf ON rsf.recurring_schedule_control_id = rscf.id
 								LEFT JOIN '. $uf->getTable() .' as uf_b ON rsf.user_id = uf_b.id
+								LEFT JOIN '. $ppsuf->getTable() .' as ppsuf ON ( rsf.user_id = ppsuf.user_id )
+								LEFT JOIN '. $ppf->getTable() .' as ppf ON ( ppf.pay_period_schedule_id = ppsuf.pay_period_schedule_id AND rsf.date_stamp >= ppf.start_date AND rsf.date_stamp <= ppf.end_date )
 								LEFT JOIN schedule as sf_b ON (
 																( sf_b.user_id != 0 AND sf_b.user_id = rsf.user_id )
 																AND
@@ -1056,14 +1069,15 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 							)
 					) as a
 
-					LEFT JOIN '. $uf->getTable() .' as uf ON a.user_id = uf.id
+					LEFT JOIN '. $uf->getTable() .' as uf ON ( a.user_id = uf.id )
 					LEFT JOIN '. $bf->getTable() .' as bf ON ( uf.default_branch_id = bf.id AND bf.deleted = 0)
 					LEFT JOIN '. $bf->getTable() .' as bfb ON ( a.branch_id = bfb.id AND bfb.deleted = 0)
 					LEFT JOIN '. $df->getTable() .' as df ON ( uf.default_department_id = df.id AND df.deleted = 0)
 					LEFT JOIN '. $df->getTable() .' as dfb ON ( a.department_id = dfb.id AND dfb.deleted = 0)
 					LEFT JOIN '. $ugf->getTable() .' as ugf ON ( uf.group_id = ugf.id AND ugf.deleted = 0 )
 					LEFT JOIN '. $utf->getTable() .' as utf ON ( uf.title_id = utf.id AND utf.deleted = 0 )
-					LEFT JOIN '. $apf->getTable() .' as apf ON a.absence_policy_id = apf.id
+					LEFT JOIN '. $apf->getTable() .' as apf ON ( a.absence_policy_id = apf.id )
+					LEFT JOIN '. $ppf->getTable() .' as ppf ON ( a.pay_period_id = ppf.id AND ppf.deleted = 0 )
 					LEFT JOIN '. $uwf->getTable() .' as uwf ON uwf.id = (select z.id
 																from '. $uwf->getTable() .' as z
 																where z.user_id = a.user_id
@@ -1259,6 +1273,12 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 							a.absence_policy_id as absence_policy_id,
 							a.recurring_schedule_template_control_id as recurring_schedule_template_control_id,
 							a.note as note,
+
+							a.other_id1 as other_id1,
+							a.other_id2 as other_id2,
+							a.other_id3 as other_id3,
+							a.other_id4 as other_id4,
+							a.other_id5 as other_id5,
 
 							i.name as schedule_policy,
 							apf.name as absence_policy,

@@ -46,7 +46,7 @@ else _d.write("<scr"+"ipt language=JavaScript src={$BASE_URL}menu/mmenudom.js><\
 <div id="container">
 	<div id="rowHeader">
 		<span class="imgClientLogo">
-			<a href="{$BASE_URL}index.php"><img src="{if $current_company->getLogoFileName() != FALSE}{$BASE_URL}/send_file.php?object_type=company_logo{else}{$IMAGES_URL}timetrex_logo_wbg_small2.jpg{/if}" style="width:auto; height:42px; visibility: hidden;" id="header_logo" alt="{$APPLICATION_NAME}"></a>
+			<a href="{$BASE_URL}index.php"><img src="{if $current_company->getLogoFileName() != FALSE}{$BASE_URL}/send_file.php?object_type=company_logo{else}{$IMAGES_URL}timetrex_logo_wbg_small2.png{/if}" style="width:auto; height:42px; visibility: hidden;" id="header_logo" alt="{$APPLICATION_NAME}"></a>
 		</span>
 		<div id="rowHeaderContainer">
 		<div id="rowHeaderText">&nbsp;{$current_company->getName()} - {$current_user->getFullName()}</div>

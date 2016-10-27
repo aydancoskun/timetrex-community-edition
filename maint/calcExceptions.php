@@ -116,8 +116,10 @@ if ( $clf->getRecordCount() > 0 ) {
 			unset($ppslf, $pps_obj, $tmp_start_date);
 
 			//Get earliest pre_mature exception in a NON-closed pay period.
+			//Cap the limit at going back 90 days. This prevents the case where they open pay periods in the previous year and forget to close them.
+			//  If that happens we don't want to start trying to recalculate pay periods from a year ago.
 			$elf = new ExceptionListFactory();
-			$elf->getByCompanyIDAndTypeAndPayPeriodStatus($c_obj->getId(), 5, array(10,12,15,30), 1, NULL, NULL, array( 'a.date_stamp' => 'asc' ) ); //Limit 1
+			$elf->getByCompanyIDAndTypeAndPayPeriodStatusAndMinimumDateStamp($c_obj->getId(), 5, array(10,12,15,30), ( $end_date - ( 86400 * 90 ) ), 1, NULL, NULL, array( 'a.date_stamp' => 'asc' ) ); //Limit 1
 			if ( $elf->getRecordCount() > 0 ) {
 				foreach( $elf as $e_obj ) {
 					$tmp_start_date = TTDate::getMiddleDayEpoch( $e_obj->getDateStamp() );
@@ -159,7 +161,7 @@ if ( $clf->getRecordCount() > 0 ) {
 						Debug::text($x .'('.$i.'). User: '. $u_obj->getID() .' Start Date: '. TTDate::getDate('DATE+TIME', $start_date ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__,5);
 
 						//UserDateTotalFactory::reCalculateDay( $ud_obj->getId(), TRUE, $enable_premature_exceptions );
-						
+
 						$cp = TTNew('CalculatePolicy');
 						$cp->setFlag( $flags );
 						$cp->setUserObject( $u_obj );

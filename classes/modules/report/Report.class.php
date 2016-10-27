@@ -191,7 +191,7 @@ class Report {
 				if ( PRODUCTION == FALSE ) { //Shorter time for testing.
 					$retval[30] = TTi18n::getText('30 seconds');
 				}
-				
+
 				break;
 
 			//
@@ -362,7 +362,7 @@ class Report {
 		if ( Misc::isSystemLoadValid() == FALSE ) {
 			return FALSE;
 		}
-		
+
 		return TRUE;
 	}
 
@@ -1642,7 +1642,7 @@ class Report {
 						if ( !isset($columns[$column]) ) { //Dont bother trying to format data that isn't in the list of displayed columns.
 							continue;
 						}
-						
+
 						if ( is_array($row[$column]) AND isset($row[$column]['display']) ) { //Found sorting array, use display column.
 							$this->data[$key][$column] = $row[$column]['display'];
 						} else {
@@ -1659,7 +1659,7 @@ class Report {
 					}
 				}
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
-				
+
 				if ( $this->config['other']['maximum_row_limit'] > 0 AND $key >= $this->config['other']['maximum_row_limit'] ) {
 					Debug::Text('  Reached maximum row limit ('. $this->config['other']['maximum_row_limit'] .'), stop processing...', __FILE__, __LINE__, __METHOD__, 10);
 					array_splice( $this->data, ($key + 1) );
@@ -2072,9 +2072,10 @@ class Report {
 						foreach ($columns as $column_key => $tmp ) {
 							if ( isset($row[$column_key]) ) {
 								$data[$key][$column_key] = $row[$column_key];
-							} else {
-								//$data[$key][$column_key] = NULL; //Don't bother with NULLs as it just eats up memory.
 							}
+//							else {
+//								//$data[$key][$column_key] = NULL; //Don't bother with NULLs as it just eats up memory.
+//							}
 						}
 					}
 					$i++;
@@ -2190,7 +2191,8 @@ class Report {
 			//Debug::Text('Email Subject: '. $subject, __FILE__, __LINE__, __METHOD__, 10);
 			//Debug::Text('Email Body: '. $body, __FILE__, __LINE__, __METHOD__, 10);
 
-			TTLog::addEntry( $this->getUserObject()->getId(), 500, TTi18n::getText('Emailed Report').': '. $this->title .' '. TTi18n::getText('To') .': '. $primary_email .' '. TTi18n::getText('CC') .': '. $secondary_email, NULL, 'user_report_data' );
+			//Use $report_schedule_obj->getUserReportData() for audit logging success/failures, so they all appear in the audit tab of the *saved* report rather than the scheduled report or employee record
+			TTLog::addEntry( $report_schedule_obj->getUserReportData(), 500, TTi18n::getText('Emailed Report') .': '. $this->title .' '. TTi18n::getText('To') .': '. $primary_email .' '. TTi18n::getText('CC') .': '. $secondary_email, NULL, 'user_report_data' );
 
 			$headers = array(
 								'From'	  => '"'. APPLICATION_NAME .'-'. TTi18n::gettext('Reports') .'" <'. Misc::getEmailLocalPart() .'@'. Misc::getEmailDomain() .'>',
@@ -2208,9 +2210,17 @@ class Report {
 
 			$mail->setBody( $mail->getMIMEObject()->get( $mail->default_mime_config ) );
 			return $mail->Send();
+		} else {
+			if ( is_object( $this->getUserObject() ) ) {
+				if ( !( is_array( $output ) AND isset( $output['data'] ) AND $output['data'] != '' ) ) {
+					TTLog::addEntry( $report_schedule_obj->getUserReportData(), 500, TTi18n::getText( 'Not emailing report') .': '. $this->title .' - '. TTi18n::getText( 'Report is blank' ), NULL, 'user_report_data' );
+				} else {
+					TTLog::addEntry( $report_schedule_obj->getUserReportData(), 500, TTi18n::getText( 'Not emailing report') .': '. $this->title .' - '. TTi18n::getText( 'Work or Home email address is blank or invalid'), NULL, 'user_report_data' );
+				}
+			}
 		}
 
-		Debug::Text('No report data to email, or not email address to send them to!', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('No report data to email, or no email address to send them to!', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
 
@@ -2413,7 +2423,7 @@ class Report {
 	function _pdf_unitsToPixels( $size ) {
 		return ( $size * ( $this->PDF_IMAGE_SCALE_RATIO * 2 ) );
 	}
-	
+
 	function _pdf_scaleSize( $size ) {
 		//The config font_size variable should be a scale, not a direct font size.
 		$multiplier = $this->config['other']['font_size'];
@@ -2813,7 +2823,7 @@ class Report {
 							}
 
 							$this->html .= '">';
-							
+
 							if ( is_object( $value ) ) {
 								$this->html .= $value->display( 'html', 52, 25 );
 								$this->html .= '</td>';
@@ -2836,7 +2846,7 @@ class Report {
 				}
 
 				if ( $blank_row != TRUE ) {
-					$r++;					
+					$r++;
 				}
 
 				if ( !isset($row['_total']) AND !isset($row['_subtotal']) ) {
@@ -3320,7 +3330,7 @@ class Report {
 			if ( $report_name != '' ) {
 				$this->html .= '<table>';
 				$this->html .= '<tr>';
-				$this->html .= '<td>' .$report_name. '</td>';
+				$this->html .= '<td>' .htmlspecialchars($report_name, ENT_QUOTES). '</td>';
 				$this->html .= '</tr>';
 				$this->html .= '</table>';
 				$this->html .= '</td>';
@@ -3328,7 +3338,7 @@ class Report {
 				// title
 				$this->html .= '<table>';
 				$this->html .= '<tr>';
-				$this->html .= '<td>' .$this->title. '</td>';
+				$this->html .= '<td>' .htmlspecialchars($this->title, ENT_QUOTES). '</td>';
 				$this->html .= '</tr>';
 				$this->html .= '</table>';
 				$this->html .= '</td>';
@@ -3361,7 +3371,7 @@ class Report {
 			if ( $report_name != '' ) {
 				$this->html .= '<tr>';
 				$this->html .= '<td>' .TTi18n::getText('Report').':'. '</td>';
-				$this->html .= '<td>' .$this->title. '</td>';
+				$this->html .= '<td>' .htmlspecialchars($this->title, ENT_QUOTES). '</td>';
 				$this->html .= '</tr>';
 			}
 			//Time Period: start/end date, or pay period.
@@ -3369,7 +3379,7 @@ class Report {
 			if ( $description != '' ) {
 				$this->html .= '<tr>';
 				$this->html .= '<td class="timeperiod">' .TTi18n::getText('Time Period').':'. '</td>';
-				$this->html .= '<td>' .$description. '</td>';
+				$this->html .= '<td>' .htmlspecialchars($description, ENT_QUOTES). '</td>';
 				$this->html .= '</tr>';
 			}
 			//Filter:
@@ -3377,7 +3387,7 @@ class Report {
 			if ( $description != '' ) {
 				$this->html .= '<tr>';
 				$this->html .= '<td>' .TTi18n::getText('Filter').':'. '</td>';
-				$this->html .= '<td>' .$description. '</td>';
+				$this->html .= '<td>' .htmlspecialchars($description, ENT_QUOTES). '</td>';
 				$this->html .= '</tr>';
 			}
 			//Group:
@@ -3385,7 +3395,7 @@ class Report {
 			if ( $description != '' ) {
 				$this->html .= '<tr>';
 				$this->html .= '<td>' .TTi18n::getText('Group').':'. '</td>';
-				$this->html .= '<td>' .$description. '</td>';
+				$this->html .= '<td>' .htmlspecialchars($description, ENT_QUOTES). '</td>';
 				$this->html .= '</tr>';
 			}
 			//SubTotal:
@@ -3393,7 +3403,7 @@ class Report {
 			if ( $description != '' ) {
 				$this->html .= '<tr>';
 				$this->html .= '<td>' .TTi18n::getText('SubTotal').':'. '</td>';
-				$this->html .= '<td>' .$description. '</td>';
+				$this->html .= '<td>' .htmlspecialchars($description, ENT_QUOTES). '</td>';
 				$this->html .= '</tr>';
 			}
 			//Sort:
@@ -3401,7 +3411,7 @@ class Report {
 			if ( $description != '' ) {
 				$this->html .= '<tr>';
 				$this->html .= '<td>' .TTi18n::getText('Sort').':'. '</td>';
-				$this->html .= '<td>' .$description. '</td>';
+				$this->html .= '<td>' .htmlspecialchars($description, ENT_QUOTES). '</td>';
 				$this->html .= '</tr>';
 			}
 			//Custom Filter:
@@ -3409,7 +3419,7 @@ class Report {
 			if ( $description != '' ) {
 				$this->html .= '<tr>';
 				$this->html .= '<td>' .TTi18n::getText('Custom Filter').':'. '</td>';
-				$this->html .= '<td>' .$description. '</td>';
+				$this->html .= '<td>' .htmlspecialchars($description, ENT_QUOTES). '</td>';
 				$this->html .= '</tr>';
 			}
 			$this->html .= '</table>';
@@ -3422,7 +3432,7 @@ class Report {
 			$this->html .= '<td class="generated">';
 			$this->html .= '<table>';
 			$this->html .= '<tr><td>' .TTi18n::getText('Generated').': '. TTDate::getDate('DATE+TIME', $this->start_time ). '</td></tr>';
-			$this->html .= '<tr><td>' .TTi18n::getText('Generated For').': '. $this->getUserObject()->getFullName(). '</td></tr>';
+			$this->html .= '<tr><td>' .TTi18n::getText('Generated For').': '. htmlspecialchars($this->getUserObject()->getFullName(), ENT_QUOTES). '</td></tr>';
 			$this->html .= '</table>';
 			$this->html .= '</td>';
 
@@ -3989,7 +3999,7 @@ class ReportCellQRcode extends ReportCell {
 		if ( $height > $width ) {
 			$height = $width;
 		}
-		
+
 		if ( $format == 'pdf' ) {
 			if ( ($row_i % 2) == 0 ) {
 				$bgcolor = 255;

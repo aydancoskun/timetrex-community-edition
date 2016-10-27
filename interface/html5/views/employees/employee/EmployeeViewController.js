@@ -407,7 +407,6 @@ EmployeeViewController = BaseViewController.extend( {
 	},
 
 	initDropDownOptions: function( options, callBack ) {
-
 		var $this = this;
 		var len = options.length + 2;
 		var complete_count = 0;
@@ -1295,7 +1294,6 @@ EmployeeViewController = BaseViewController.extend( {
 
 	/* jshint ignore:start */
 	setCurrentEditRecordData: function() {
-
 		var dont_set_dic = {};
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
@@ -1316,12 +1314,13 @@ EmployeeViewController = BaseViewController.extend( {
 						if ( this.show_hierarchy ) {
 							for ( var h_key in this.current_edit_record.hierarchy_control ) {
 								var value = this.current_edit_record.hierarchy_control[h_key];
-								widget = this.edit_view_ui_dic[h_key];
-								dont_set_dic[h_key] = true;
-								widget.setValue( value );
+								if ( this.edit_view_ui_dic[h_key] ) {
+									widget = this.edit_view_ui_dic[h_key];
+									dont_set_dic[h_key] = true;
+									widget.setValue( value );
+								}
 							}
 						}
-
 						break;
 					case 'default_job_id':
 						var args = {};
@@ -2598,9 +2597,13 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.hierarchy_options_dic = {};
 			var data = res.getResult();
 			for ( var key in data ) {
+				if ( parseInt(key) === 200 &&
+						LocalCacheData.getCurrentCompany().product_edition_id !== 25 ) {
+					continue;
+				}
 				$this.hierarchy_options_dic[key] = Global.buildRecordArray( data[key] );
 			}
-			if ( data ) {
+			if ( _.size( $this.hierarchy_options_dic ) > 0 ) {
 				$this.show_hierarchy = true;
 			} else {
 				$this.show_hierarchy = false;

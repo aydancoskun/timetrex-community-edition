@@ -3673,6 +3673,99 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * @group OvertimePolicy_testBiWeeklyOverTimeDates
+	 */
+	function testBiWeeklyOverTimeDates() {
+		$cp = new CalculatePolicy();
+
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('22-Dec-2013'), strtotime('22-Dec-2013'), 0 ), FALSE ); //Sun
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('29-Dec-2013'), strtotime('22-Dec-2013'), 0 ), TRUE ); //Sun
+
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('29-Dec-2013'), strtotime('29-Dec-2013'), 0 ), FALSE ); //Sun
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('30-Dec-2013'), strtotime('29-Dec-2013'), 0 ), FALSE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('31-Dec-2013'), strtotime('29-Dec-2013'), 0 ), FALSE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('01-Jan-2014'), strtotime('29-Dec-2013'), 0 ), FALSE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('02-Jan-2014'), strtotime('29-Dec-2013'), 0 ), FALSE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('03-Jan-2014'), strtotime('29-Dec-2013'), 0 ), FALSE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('04-Jan-2014'), strtotime('29-Dec-2013'), 0 ), FALSE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('05-Jan-2014'), strtotime('29-Dec-2013'), 0 ), TRUE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('06-Jan-2014'), strtotime('29-Dec-2013'), 0 ), TRUE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('07-Jan-2014'), strtotime('29-Dec-2013'), 0 ), TRUE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('08-Jan-2014'), strtotime('29-Dec-2013'), 0 ), TRUE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('09-Jan-2014'), strtotime('29-Dec-2013'), 0 ), TRUE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('10-Jan-2014'), strtotime('29-Dec-2013'), 0 ), TRUE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('11-Jan-2014'), strtotime('29-Dec-2013'), 0 ), TRUE );
+
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('29-Dec-2013'), strtotime('01-Jan-2014'), 0 ), FALSE ); //Sun
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('30-Dec-2013'), strtotime('01-Jan-2014'), 0 ), FALSE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('31-Dec-2013'), strtotime('01-Jan-2014'), 0 ), FALSE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('01-Jan-2014'), strtotime('01-Jan-2014'), 0 ), FALSE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('02-Jan-2014'), strtotime('01-Jan-2014'), 0 ), FALSE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('03-Jan-2014'), strtotime('01-Jan-2014'), 0 ), FALSE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('04-Jan-2014'), strtotime('01-Jan-2014'), 0 ), FALSE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('05-Jan-2014'), strtotime('01-Jan-2014'), 0 ), TRUE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('06-Jan-2014'), strtotime('01-Jan-2014'), 0 ), TRUE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('07-Jan-2014'), strtotime('01-Jan-2014'), 0 ), TRUE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('08-Jan-2014'), strtotime('01-Jan-2014'), 0 ), TRUE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('09-Jan-2014'), strtotime('01-Jan-2014'), 0 ), TRUE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('10-Jan-2014'), strtotime('01-Jan-2014'), 0 ), TRUE );
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('11-Jan-2014'), strtotime('01-Jan-2014'), 0 ), TRUE );
+
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('01-May-2016'), strtotime('28-Dec-2013'), 0 ), FALSE ); //Sat
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('01-May-2016'), strtotime('29-Dec-2013'), 0 ), TRUE ); //Sun
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('01-May-2016'), strtotime('01-Jan-2014'), 0 ), TRUE ); //Wed
+
+		//Test 53 week year.
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('29-Dec-2014'), strtotime('29-Dec-2014'), 0 ), FALSE ); //Sun: Week 1
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('05-Jan-2015'), strtotime('29-Dec-2014'), 0 ), TRUE ); //Sun
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('12-Jan-2015'), strtotime('29-Dec-2014'), 0 ), FALSE ); //Sun
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('26-Jan-2015'), strtotime('29-Dec-2014'), 0 ), FALSE ); //Sun
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('09-Feb-2015'), strtotime('29-Dec-2014'), 0 ), FALSE ); //Sun
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('23-Feb-2015'), strtotime('29-Dec-2014'), 0 ), FALSE ); //Sun
+
+
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('09-Mar-2015'), strtotime('29-Dec-2014'), 0 ), FALSE ); //Sun
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('23-Mar-2015'), strtotime('29-Dec-2014'), 0 ), FALSE ); //Sun
+
+
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('14-Dec-2015'), strtotime('29-Dec-2014'), 0 ), FALSE ); //Sun: Week 51
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('21-Dec-2015'), strtotime('29-Dec-2014'), 0 ), TRUE ); //Sun: Week 52
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('28-Dec-2015'), strtotime('29-Dec-2014'), 0 ), FALSE ); //Sun: Week 53
+
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('01-Jan-2014'), strtotime('01-Jan-2014'), 0 ), FALSE ); //Sun
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('06-Jan-2014'), strtotime('01-Jan-2014'), 0 ), TRUE ); //Sun
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('12-Jan-2014'), strtotime('01-Jan-2014'), 0 ), FALSE ); //Sun
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('20-Jan-2014'), strtotime('01-Jan-2014'), 0 ), TRUE ); //Sun
+
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('03-Feb-2014'), strtotime('01-Jan-2014'), 0 ), TRUE ); //Sun
+		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('17-Feb-2014'), strtotime('01-Jan-2014'), 0 ), TRUE ); //Sun
+
+
+		$retval = FALSE;
+		$anchor_date = TTDate::getMiddleDayEpoch( strtotime('29-Dec-2014') );
+		$x = 0;
+		for( $i = $anchor_date; $i <= TTDate::getMiddleDayEpoch( strtotime('29-Dec-2015') ); $i += ( 86400 * 7 ) ) {
+			$x++; //Run at beginning so the counter essentially starts at 1.
+			$this->assertEquals( $cp->isSecondBiWeeklyOverTimeWeek( $i, $anchor_date, 0 ), $retval );
+			$retval = !$retval; //Swap
+
+		}
+		$this->assertEquals( $x, 53 );
+
+
+		$retval = FALSE;
+		$anchor_date = TTDate::getMiddleDayEpoch( strtotime('29-Dec-2014') );
+		$x = 0;
+		for( $i = $anchor_date; $i <= TTDate::getMiddleDayEpoch( strtotime('29-Dec-2025') ); $i += ( 86400 * 7 ) ) {
+			$x++; //Run at beginning so the counter essentially starts at 1.
+			$this->assertEquals( $cp->isSecondBiWeeklyOverTimeWeek( $i, $anchor_date, 0 ), $retval );
+			$retval = !$retval; //Swap
+
+		}
+		$this->assertEquals( $x, 575 );
+	}
+
+	/**
 	 * @group OvertimePolicy_testBiWeeklyOverTimePolicyA
 	 */
 	function testBiWeeklyOverTimePolicyA() {
@@ -13142,7 +13235,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (8*3600) );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['hourly_rate'], (1*20.00) );
 		//Overtime1
-		$this->assertEquals( $udt_arr[$date_epoch][3]['object_type_id'], 30 ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][3]['object_type_id'], 30 ); //OverTime
 		$this->assertEquals( $udt_arr[$date_epoch][3]['pay_code_id'], $policy_ids['pay_code'][3] ); //Overtime1
 		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], (1*3600) );
 		$this->assertEquals( $udt_arr[$date_epoch][3]['hourly_rate'], (1*24.00) );

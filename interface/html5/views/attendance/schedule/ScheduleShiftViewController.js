@@ -86,6 +86,12 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		return false;
 	},
 
+
+	getOtherFieldReferenceField: function() {
+		return 'note';
+	},
+
+
 	buildEditViewUI: function() {
 
 		this._super( 'buildEditViewUI' );

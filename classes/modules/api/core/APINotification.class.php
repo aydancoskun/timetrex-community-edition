@@ -232,10 +232,10 @@ class APINotification extends APIFactory {
 				//Check if any pay periods are past their transaction date and not closed.
 				if ( DEMO_MODE == FALSE AND $this->getPermissionObject()->Check('pay_period_schedule', 'enabled') AND $this->getPermissionObject()->Check('pay_period_schedule', 'view') ) {
 					$pplf = TTnew('PayPeriodListFactory');
-					$pplf->getByCompanyIdAndStatusAndTransactionDate( $this->getCurrentCompanyObject()->getId(), array(10, 30), TTDate::getBeginDayEpoch( time() ) ); //Open or Post Adjustment pay periods.
+					$pplf->getByCompanyIdAndStatusAndTransactionDate( $this->getCurrentCompanyObject()->getId(), array(10, 12, 30), TTDate::getBeginDayEpoch( time() ) ); //Open or Locked or Post Adjustment pay periods.
 					if ( $pplf->getRecordCount() > 0 ) {
 						foreach( $pplf as $pp_obj ) {
-							if ( $pp_obj->getCreatedDate() < (time() - (86400 * 40)) ) { //Ignore pay period schedules newer than 40 days. They are automatically closed after 45 days.
+							if ( is_object( $pp_obj->getPayPeriodScheduleObject() ) AND $pp_obj->getPayPeriodScheduleObject()->getCreatedDate() < (time() - (86400 * 40)) ) { //Ignore pay period schedules newer than 40 days. They automatically start being closed after 45 days.
 								$retarr[] = array(
 													'delay' => 0,
 													'bg_color' => '#FF0000', //Red

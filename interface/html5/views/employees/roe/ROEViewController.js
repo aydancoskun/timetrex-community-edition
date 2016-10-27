@@ -1068,9 +1068,9 @@ ROEViewController = BaseViewController.extend( {
 			onResult: function( result ) {
 
 				if ( result.isValid() ) {
-					TAlertManager.showAlert( $.i18n._( 'Form setup has been saved successfully' ) );
+					TAlertManager.showAlert( $.i18n._( 'Form Setup has been saved successfully' ) );
 				} else {
-					TAlertManager.showAlert( $.i18n._( 'Form setup save failed, Please try again' ) );
+					TAlertManager.showAlert( $.i18n._( 'Form Setup save failed, Please try again' ) );
 				}
 
 			}
@@ -1229,24 +1229,26 @@ ROEViewController = BaseViewController.extend( {
 	},
 
 	onTabShow: function( e, ui ) {
+		var last_index = ui.index;
 		var key = this.edit_view_tab_selected_index;
 		this.editFieldResize( key );
-
 		if ( !this.current_edit_record ) {
 			return;
 		}
-
 		//Handle most cases that one tab and on audit tab
+
+		if ( last_index != 1 ) { //1 is the form setup tab
+			this.checkFormSetupSaved();
+		}
 		if ( this.edit_view_tab_selected_index === 2 ) {
 
 			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
+				this.edit_view_tab.find('#tab_audit').find('.first-column-sub-view').css('display', 'block');
+				this.initSubLogView('tab_audit');
 			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
+				this.edit_view_tab.find('#tab_audit').find('.first-column-sub-view').css('display', 'none');
+				this.edit_view.find('.save-and-continue-div').css('display', 'block');
 			}
-
 		} else {
 			this.buildContextMenu( true );
 			this.setEditMenu();
@@ -1254,7 +1256,32 @@ ROEViewController = BaseViewController.extend( {
 
 	},
 
+	/**
+	 * Originally copied from same function name in ReportBaseViewController
+	 * FIXME: refactor to base class when needed in other children
+	 * @param label
+     */
+	checkFormSetupSaved: function ( label ) {
+		var $this = this;
+
+		if ( label == undefined ) {
+			label = $.i18n._( 'Form Setup' );
+		}
+
+		if ( this.form_setup_changed ) {
+			$this.form_setup_changed = false;
+			TAlertManager.showConfirmAlert( $.i18n._( 'You have modified') + ' ' + label + ' ' + $.i18n._('data without saving, would you like to save your data now?' ), '', function ( flag ) {
+				if ( flag ) {
+					$this.onSaveSetup( label );
+				}
+			} );
+		}
+	},
+
 	onFormItemChange: function( target, doNotValidate ) {
+		if ( this.edit_view_tab_selected_index == 1 ) {
+			this.form_setup_changed = true;
+		}
 
 		var $this = this;
 		this.setIsChanged( target );

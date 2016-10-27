@@ -110,7 +110,7 @@ function unauthenticatedInvokeService( $class_name, $method, $arguments, $messag
 
 function authenticatedInvokeService(  $class_name, $method, $arguments, $message_id, $authentication, $api_auth ) {
 	global $current_user, $current_user_prefs, $current_company, $obj;
-	
+
 	$current_user = $authentication->getObject();
 
 	if ( is_object( $current_user ) ) {
@@ -141,7 +141,7 @@ function authenticatedInvokeService(  $class_name, $method, $arguments, $message
 
 		if ( is_object( $current_company ) ) {
 			Debug::text('Current User: '. $current_user->getUserName() .' (User ID: '. $current_user->getID() .') Company: '. $current_company->getName() .' (Company ID: '. $current_company->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
-			
+
 			//Debug::text('Handling JSON Call To API Factory: '.  $class_name .' Method: '. $method .' Message ID: '. $message_id .' UserName: '. $current_user->getUserName(), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $class_name != '' AND class_exists( $class_name ) ) {
 				$obj = new $class_name;
@@ -264,7 +264,7 @@ unset($argument_size);
 
 $api_auth = TTNew('APIAuthentication'); //Used to handle error cases and display error messages.
 $session_id = getSessionID();
-if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == '' ) AND ( !isset($config_vars['other']['down_for_maintenance']) OR isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == '' ) AND $session_id != '' AND !in_array( strtolower($method), array('isloggedin', 'ping' ) ) ) { //When interface calls PING() on a regular basis we need to skip this check and pass it to APIAuthentication immediately to avoid updating the session time.
+if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == FALSE ) AND ( !isset($config_vars['other']['down_for_maintenance']) OR isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == '' ) AND $session_id != '' AND !isset($_GET['disable_db']) AND !in_array( strtolower($method), array('isloggedin', 'ping' ) ) ) { //When interface calls PING() on a regular basis we need to skip this check and pass it to APIAuthentication immediately to avoid updating the session time.
 	$authentication = new Authentication();
 
 	Debug::text('Session ID: '. $session_id .' Source IP: '. Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10);

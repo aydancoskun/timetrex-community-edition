@@ -114,7 +114,7 @@ class Form941Report extends Report {
 								);
 				break;
 			case 'time_period':
-				$retval = TTDate::getTimePeriodOptions( FALSE ); //Exclude Pay Period options.
+				$retval = TTDate::getTimePeriodOptions( FALSE ); //Exclude Pay Period options, since we need a specific start/end date to properly calculate this form. They should use Tax Summary if they need per pay period instead.
 				break;
 			case 'date_columns':
 				$retval = TTDate::getReportDateOptions( NULL, TTi18n::getText('Date'), 13, TRUE );

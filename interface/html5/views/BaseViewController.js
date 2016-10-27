@@ -2357,7 +2357,22 @@ BaseViewController = Backbone.View.extend( {
 
 	},
 
+
+	getOtherFieldReferenceField: function() {
+		return false;
+	},
+
+
 	buildOtherFieldUI: function( field, label ) {
+		//Not all views have other_id# permissions.
+		//Therefore fail open to allow this to be applied on a per-view basis as permissions are added down the road.
+		var permission = PermissionManager.getPermissionData();
+		if ( Global.isSet( permission[this.permission_id]['edit_' + field] ) ) {
+			if ( PermissionManager.validate( this.permission_id, 'edit_' + field ) == false ) {
+				return false;
+			}
+		}
+
 
 		if ( !this.edit_view_tab ) {
 			return;
@@ -2375,7 +2390,11 @@ BaseViewController = Backbone.View.extend( {
 		} else {
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 			form_item_input.TTextInput( {field: field} );
-			$this.addEditFieldToColumn( label, form_item_input, tab0_column1 );
+
+			var input_div = $this.addEditFieldToColumn( label, form_item_input, tab0_column1 );
+			if ( this.getOtherFieldReferenceField() !== false && $this.edit_view_ui_dic[this.getOtherFieldReferenceField()] != undefined ) {
+				input_div.insertBefore(  $this.edit_view_ui_dic[this.getOtherFieldReferenceField()].parent().parent() );
+			}
 
 			form_item_input.setValue( $this.current_edit_record[field] );
 			form_item_input.css( 'opacity', 1 );
@@ -2436,6 +2455,10 @@ BaseViewController = Backbone.View.extend( {
 				break;
 			case 'Branch':
 				res = 4;
+				break;
+			case 'Schedule':
+			case 'ScheduleShift':
+				res = 18;
 				break;
 			case 'TimeSheet':
 			case 'Punches':

@@ -164,6 +164,8 @@ TimeSheetViewController = BaseViewController.extend( {
 	accmulated_order_map: {},
 
 	url_args_before_set_date_url: {},
+	
+	previous_absence_policy_id: false,
 
 	initialize: function() {
 
@@ -2345,7 +2347,7 @@ TimeSheetViewController = BaseViewController.extend( {
 					$this.onCellSelect( 'absence_grid', row_id, cell_index, cell_val, this, e );
 				},
 				ondblClickRow: function() {
-					$this.onGridDblClickRow();
+					$this.onGridDblClickRow('absence');
 				},
 				data: [],
 				rowNum: 10000,
@@ -2474,7 +2476,7 @@ TimeSheetViewController = BaseViewController.extend( {
 
 	},
 
-	onGridDblClickRow: function() {
+	onGridDblClickRow: function(name) {
 		var len = this.context_menu_array.length;
 		var need_break = false;
 		for ( var i = 0; i < len; i++ ) {
@@ -2514,8 +2516,15 @@ TimeSheetViewController = BaseViewController.extend( {
 			context_btn = this.context_menu_array[i];
 			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 			switch ( id ) {
+				case 'addAbsenceIcon':
 				case ContextMenuIconName.add:
-					if ( context_btn.is( ':visible' ) && !context_btn.hasClass( 'disable-image' ) ) {
+					// There are 2 add icons, one for punch and one for absence.
+					// We must ensure to check the right one to provide permissions for the add click or absence will be allowed based on the punch permissions
+					if ( name == 'absence' && id != 'addAbsenceIcon' ) {
+						continue;
+					}
+
+					if ( context_btn.is(':visible') && !context_btn.hasClass('disable-image') ) {
 						if ( this.isPunchCells() ) {
 							ProgressBar.showOverlay();
 							this.onAddClick();
@@ -4026,6 +4035,8 @@ TimeSheetViewController = BaseViewController.extend( {
 			var end_row_index = row_id;
 			var end_cell_index = cell_index;
 
+
+
 			for ( i = 0; i < len; i++ ) {
 				info = cells_array[i];
 
@@ -4040,6 +4051,13 @@ TimeSheetViewController = BaseViewController.extend( {
 				} else if ( info.cell_index > end_cell_index ) {
 					end_cell_index = info.cell_index;
 				}
+			}
+
+			//If the click is inside the existing selection, truncate the existing selection to the click.
+			//Check in ScheduleViewController.js for related change
+			if ( cells_array[cells_array.length - 1].cell_index >= cell_index && cells_array[0].cell_index <= cell_index &&  cells_array[cells_array.length - 1].row_id >= row_id && cells_array[0].row_id <= row_id ) {
+				end_row_index = row_id;
+				end_cell_index = cell_index;
 			}
 
 			cells_array = [];
@@ -5397,15 +5415,17 @@ TimeSheetViewController = BaseViewController.extend( {
 
 				$this.api_date.parseDateTime( target_column_date_str, {
 					onResult: function( date_num_result ) {
-
 						var date_num = date_num_result.getResult();
 
-						var new_pinch_id = punch.id;
+						var new_punch_id = punch.id;
 						var target_id = false;
 						var target_status_id = row.status_id;
 						var action_type = $this.select_drag_menu_id === ContextMenuIconName.move ? 1 : 0;
 
-						if ( target_punch ) {
+						//Issue #2008 - All in-punches need target_id to be false to ensure that each pair retains its punch_control settings.
+						//Most out-punches need their target id to be the related in-punch.
+						//If these conditions are not met, copying groups of punches with different punch_control data will result in all copied punches having the same punch_control data as the first punch pair.
+						if ( target_punch && punch.status_id === 20 ) {
 							target_id = target_punch.id;
 							target_status_id = false;
 						} else if ( target_related_punch ) {
@@ -5421,7 +5441,7 @@ TimeSheetViewController = BaseViewController.extend( {
 
 						var api_punch_control = new (APIFactory.getAPIClass( 'APIPunchControl' ))();
 
-						api_punch_control.dragNdropPunch( new_pinch_id, target_id, target_status_id, position, action_type, date_num, {
+						api_punch_control.dragNdropPunch( new_punch_id, target_id, target_status_id, position, action_type, date_num, {
 							onResult: function( result ) {
 
 								var result_data = result.getResult();
@@ -7054,6 +7074,12 @@ TimeSheetViewController = BaseViewController.extend( {
 
 		var $this = this;
 		var result_data;
+
+		//On first run, set previous_absence_policy_id.
+		if ( this.previous_absence_policy_id == false ) {
+			this.previous_absence_policy_id = this.current_edit_record.src_object_id;
+		}
+
 		if ( this.absence_model ) {
 
 			var last_date_stamp = this.current_edit_record.date_stamp;
@@ -7076,14 +7102,16 @@ TimeSheetViewController = BaseViewController.extend( {
 					}
 
 				}
-
 			}
+
 			this.api_absence_policy.getProjectedAbsencePolicyBalance(
 				this.current_edit_record.src_object_id,
 				this.getSelectEmployee(),
 				last_date_stamp,
 				total_time,
-				this.pre_total_time, {
+				this.pre_total_time,
+				this.previous_absence_policy_id,
+				{
 					onResult: function( result ) {
 						$this.getBalanceHandler( result, last_date_stamp );
 					}

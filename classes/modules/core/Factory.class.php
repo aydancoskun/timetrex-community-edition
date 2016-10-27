@@ -905,7 +905,7 @@ abstract class Factory {
 				if ( $date != 0 ) {
 					preg_match('/^>=|>|<=|</i', $tmp_str, $operator );
 					//Debug::Arr($operator, ' Operator: ', __FILE__, __LINE__, __METHOD__, 10);
-					if ( isset($operator[0]) AND in_array( $operator[0], $operators) ) {
+					if ( isset($operator[0]) AND in_array( $operator[0], $operators ) ) {
 						if ( $operator[0] == '<=' ) {
 							$date = TTDate::getEndDayEpoch( $date );
 						} elseif ( $operator[0] == '>' ) {
@@ -937,8 +937,14 @@ abstract class Factory {
 
 						//Debug::text(' No operator specified... Using a 24hr period', __FILE__, __LINE__, __METHOD__, 10);
 						if ( $include_blank_dates == TRUE ) {
-							$operations[] = '('. $column .' >= '. $date1 .' OR ( '. $column .' is NULL OR '. $column .' = 0 ) )';
-							$operations[] = '('. $column .' <= '. $date2 .' OR ( '. $column .' is NULL OR '. $column .' = 0 ) )';
+							if (  $format == 'epoch' ) {
+								$operations[] = '(' . $column . ' >= ' . $date1 . ' OR ( ' . $column . ' is NULL OR ' . $column . ' = 0 ) )';
+								$operations[] = '(' . $column . ' <= ' . $date2 . ' OR ( ' . $column . ' is NULL OR ' . $column . ' = 0 ) )';
+							} else {
+								//When $column is a date/timestamp datatype, can't use = 0 on it without causing SQL error.
+								$operations[] = '(' . $column . ' >= ' . $date1 . ' OR ( ' . $column . ' is NULL ) )';
+								$operations[] = '(' . $column . ' <= ' . $date2 . ' OR ( ' . $column . ' is NULL ) )';
+							}
 						} else {
 							$operations[] = $column .' >= '. $date1;
 							$operations[] = $column .' <= '. $date2;
@@ -1273,11 +1279,11 @@ abstract class Factory {
 						$include_blank_dates = ( strpos( $type, '_include_blank' ) !== FALSE ) ? TRUE : FALSE;
 						switch( $type ) {
 							case 'date_range_timestamp':
-							case 'date_range_timestamp_and_blank':
+							case 'date_range_timestamp_include_blank':
 								$query_stub = $this->getDateRangeSQL($args, $columns, 'timestamp', $include_blank_dates );
 								break;
 							case 'date_range_datestamp':
-							case 'date_range_datestamp_and_blank':
+							case 'date_range_datestamp_include_blank':
 								$query_stub = $this->getDateRangeSQL($args, $columns, 'datestamp', $include_blank_dates );
 								break;
 							default:

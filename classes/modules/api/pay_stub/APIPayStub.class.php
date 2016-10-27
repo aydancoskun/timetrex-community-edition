@@ -274,7 +274,17 @@ class APIPayStub extends APIFactory {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
-							$row = array_merge( $lf->getObjectAsArray(), $row );
+
+							//Check to see if the transaction date changed, so we can trigger setEnableCalcYTD().
+							$lf_arr = $lf->getObjectAsArray();
+							if ( isset($lf_arr['transaction_date']) AND isset($row['transaction_date'])
+									AND $lf_arr['transaction_date'] != $row['transaction_date']
+									AND TTDate::getYear( TTDate::parseDateTime( $lf_arr['transaction_date'] ) ) != TTDate::getYear( TTDate::parseDateTime( $row['transaction_date'] ) ) ) {
+								Debug::Text( 'Transaction date changed to a different year, recalculate YTD amounts... Prev: '.$lf_arr['transaction_date'] .' New: '. $row['transaction_date'], __FILE__, __LINE__, __METHOD__, 10);
+								$set_enable_calc_ytd = TRUE;
+							}
+							$row = array_merge( $lf_arr, $row );
+							unset($lf_arr);
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Edit permission denied') );
 						}
@@ -294,12 +304,20 @@ class APIPayStub extends APIFactory {
 
 				$is_valid = $primary_validator->isValid( $ignore_warning );
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
-					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
-					
+					Debug::Text( 'Setting object data...', __FILE__, __LINE__, __METHOD__, 10 );
+
 					$lf->setObjectFromArray( $row );
 
-					if ( ( isset($row['entries']) AND is_array($row['entries']) AND count($row['entries']) > 0 ) ) {
-						Debug::Text(' Found modified entries!', __FILE__, __LINE__, __METHOD__, 10);
+					//If the user is changing the Transaction Date between years, make sure we always recalc the current pay stub YTD amount.
+					// ie: Changing it from Dec 31st to January 1st, or vice versa makes the YTD amount reset.
+					// This must go above processEntries() so it can be disabled by it if needed.
+					if ( isset($set_enable_calc_ytd) AND $set_enable_calc_ytd == TRUE ) {
+						$lf->setEnableCalcCurrentYTD( TRUE );
+						$lf->setEnableCalcYTD( TRUE );
+					}
+
+					if ( ( isset( $row['entries'] ) AND is_array( $row['entries'] ) AND count( $row['entries'] ) > 0 ) ) {
+						Debug::Text( ' Found modified entries!', __FILE__, __LINE__, __METHOD__, 10 );
 
 						//Load previous pay stub
 						$lf->loadPreviousPayStub();
@@ -311,21 +329,21 @@ class APIPayStub extends APIFactory {
 						$lf->setEnableLinkedAccruals( FALSE );
 
 						$processed_entries = 0;
-						foreach( $row['entries'] as $pay_stub_entry ) {
-							if ( 	(
-										( isset($pay_stub_entry['id']) AND $pay_stub_entry['id'] > 0 )
-										OR
-										( isset($pay_stub_entry['pay_stub_entry_name_id']) AND $pay_stub_entry['pay_stub_entry_name_id'] > 0 )
+						foreach ( $row['entries'] as $pay_stub_entry ) {
+							if ( (
+											( isset( $pay_stub_entry['id'] ) AND $pay_stub_entry['id'] > 0 )
+											OR
+											( isset( $pay_stub_entry['pay_stub_entry_name_id'] ) AND $pay_stub_entry['pay_stub_entry_name_id'] > 0 )
 									)
 									AND
 									(
-										!isset($pay_stub_entry['type'])
-										OR
-										( isset($pay_stub_entry['type']) AND $pay_stub_entry['type'] != 40 )
+											!isset( $pay_stub_entry['type'] )
+											OR
+											( isset( $pay_stub_entry['type'] ) AND $pay_stub_entry['type'] != 40 )
 									)
-									AND isset($pay_stub_entry['amount'])
-								) {
-								Debug::Text('Pay Stub Entry ID: '. $pay_stub_entry['id'] .' Amount: '. $pay_stub_entry['amount'] .' Pay Stub ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+									AND isset( $pay_stub_entry['amount'] )
+							) {
+								Debug::Text( 'Pay Stub Entry ID: ' . $pay_stub_entry['id'] . ' Amount: ' . $pay_stub_entry['amount'] . ' Pay Stub ID: ' . $row['id'], __FILE__, __LINE__, __METHOD__, 10 );
 
 								//Populate $pay_stub_entry_obj so we can find validation errors before postSave() is called.
 								if ( $pay_stub_entry['id'] > 0 ) {
@@ -336,75 +354,75 @@ class APIPayStub extends APIFactory {
 									}
 								}
 
-								if ( !isset($pay_stub_entry_obj) ) {
+								if ( !isset( $pay_stub_entry_obj ) ) {
 									$pay_stub_entry_obj = TTnew( 'PayStubEntryListFactory' );
 									//$pay_stub_entry_obj->setPayStub( $row['id'] ); //When creating a new pay stub, we don't have the ID, so this just causes an error anyways.
 									$pay_stub_entry_obj->setPayStubEntryNameId( $pay_stub_entry['pay_stub_entry_name_id'] );
 
-									if ( isset($pay_stub_entry['pay_stub_amendment_id']) AND $pay_stub_entry['pay_stub_amendment_id'] != '' ) {
+									if ( isset( $pay_stub_entry['pay_stub_amendment_id'] ) AND $pay_stub_entry['pay_stub_amendment_id'] != '' ) {
 										$pay_stub_entry_obj->setPayStubAmendment( $pay_stub_entry['pay_stub_amendment_id'], $lf->getStartDate(), $lf->getEndDate() );
 									}
 
-									if ( isset($pay_stub_entry['rate']) AND $pay_stub_entry['rate'] != '' ) {
+									if ( isset( $pay_stub_entry['rate'] ) AND $pay_stub_entry['rate'] != '' ) {
 										$pay_stub_entry_obj->setRate( $pay_stub_entry['rate'] );
 									}
-									if ( isset($pay_stub_entry['units']) AND $pay_stub_entry['units'] != '' ) {
+									if ( isset( $pay_stub_entry['units'] ) AND $pay_stub_entry['units'] != '' ) {
 										$pay_stub_entry_obj->setUnits( $pay_stub_entry['units'] );
 									}
 
-									if ( isset($pay_stub_entry['amount']) AND $pay_stub_entry['amount'] != '' ) {
+									if ( isset( $pay_stub_entry['amount'] ) AND $pay_stub_entry['amount'] != '' ) {
 										$pay_stub_entry_obj->setAmount( $pay_stub_entry['amount'] );
 									}
 								}
 
-								if ( !isset($pay_stub_entry['units']) OR $pay_stub_entry['units'] == '' ) {
+								if ( !isset( $pay_stub_entry['units'] ) OR $pay_stub_entry['units'] == '' ) {
 									$pay_stub_entry['units'] = 0;
 								}
-								if ( !isset($pay_stub_entry['rate']) OR $pay_stub_entry['rate'] == '' ) {
+								if ( !isset( $pay_stub_entry['rate'] ) OR $pay_stub_entry['rate'] == '' ) {
 									$pay_stub_entry['rate'] = 0;
 								}
-								if ( !isset($pay_stub_entry['description']) OR $pay_stub_entry['description'] == '' ) {
+								if ( !isset( $pay_stub_entry['description'] ) OR $pay_stub_entry['description'] == '' ) {
 									$pay_stub_entry['description'] = NULL;
 								}
-								if ( !isset($pay_stub_entry['pay_stub_amendment_id']) OR $pay_stub_entry['pay_stub_amendment_id'] == '' ) {
+								if ( !isset( $pay_stub_entry['pay_stub_amendment_id'] ) OR $pay_stub_entry['pay_stub_amendment_id'] == '' ) {
 									$pay_stub_entry['pay_stub_amendment_id'] = NULL;
 								}
-								if ( !isset($pay_stub_entry['user_expense_id']) OR $pay_stub_entry['user_expense_id'] == '' ) {
+								if ( !isset( $pay_stub_entry['user_expense_id'] ) OR $pay_stub_entry['user_expense_id'] == '' ) {
 									$pay_stub_entry['user_expense_id'] = NULL;
 								}
 
 								$ytd_adjustment = FALSE;
 								if ( $pay_stub_entry['pay_stub_amendment_id'] > 0 ) {
-									$psamlf = TTNew('PayStubAmendmentListFactory');
+									$psamlf = TTNew( 'PayStubAmendmentListFactory' );
 									$psamlf->getByIdAndCompanyId( (int)$pay_stub_entry['pay_stub_amendment_id'], $this->getCurrentCompanyObject()->getId() );
 									if ( $psamlf->getRecordCount() > 0 ) {
 										$ytd_adjustment = $psamlf->getCurrent()->getYTDAdjustment();
 									}
-									Debug::Text(' Pay Stub Amendment Id: '. $pay_stub_entry['pay_stub_amendment_id'] .' YTD Adjusment: '. (int)$ytd_adjustment, __FILE__, __LINE__, __METHOD__, 10);
+									Debug::Text( ' Pay Stub Amendment Id: ' . $pay_stub_entry['pay_stub_amendment_id'] . ' YTD Adjusment: ' . (int)$ytd_adjustment, __FILE__, __LINE__, __METHOD__, 10 );
 								}
 
 								if ( $pay_stub_entry_obj->isValid() == TRUE ) {
 									$lf->addEntry( $pay_stub_entry['pay_stub_entry_name_id'], $pay_stub_entry['amount'], $pay_stub_entry['units'], $pay_stub_entry['rate'], $pay_stub_entry['description'], $pay_stub_entry['pay_stub_amendment_id'], NULL, NULL, $ytd_adjustment );
 									$processed_entries++;
 								} else {
-									Debug::Text(' ERROR: Unable to save PayStubEntry... ', __FILE__, __LINE__, __METHOD__, 10);
-									$lf->Validator->isTrue( 'pay_stub_entry', FALSE, TTi18n::getText('%1 entry for amount: %2 is invalid', array($pay_stub_entry_obj->getPayStubEntryAccountObject()->getName(), Misc::MoneyFormat( $pay_stub_entry['amount']) ) ) );
+									Debug::Text( ' ERROR: Unable to save PayStubEntry... ', __FILE__, __LINE__, __METHOD__, 10 );
+									$lf->Validator->isTrue( 'pay_stub_entry', FALSE, TTi18n::getText( '%1 entry for amount: %2 is invalid', array($pay_stub_entry_obj->getPayStubEntryAccountObject()->getName(), Misc::MoneyFormat( $pay_stub_entry['amount'] )) ) );
 								}
 							} else {
-								Debug::Text(' Skipping Total Entry. ', __FILE__, __LINE__, __METHOD__, 10);
+								Debug::Text( ' Skipping Total Entry. ', __FILE__, __LINE__, __METHOD__, 10 );
 							}
-							unset($pay_stub_entry_obj);
+							unset( $pay_stub_entry_obj );
 						}
-						unset($pay_stub_entry_id, $pay_stub_entry);
+						unset( $pay_stub_entry_id, $pay_stub_entry );
 
 						if ( $processed_entries > 0 ) {
-							$lf->setTainted(TRUE); //Make sure tainted flag is set when any entries are processed.
+							$lf->setTainted( TRUE ); //Make sure tainted flag is set when any entries are processed.
 							$lf->setEnableCalcYTD( TRUE );
 							$lf->setEnableProcessEntries( TRUE );
 							$lf->processEntries();
 						}
 					} else {
-						Debug::Text(' Skipping ALL Entries... ', __FILE__, __LINE__, __METHOD__, 10);
+						Debug::Text( ' Skipping ALL Entries... ', __FILE__, __LINE__, __METHOD__, 10 );
 					}
 
 					$lf->Validator->setValidateOnly( $validate_only );

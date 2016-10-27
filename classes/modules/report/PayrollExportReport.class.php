@@ -89,7 +89,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				}
 				break;
 			case 'output_format':
-				$retval = parent::getOptions('default_output_format');
+				$retval = array_merge( parent::getOptions('default_output_format'), array('-0999-payroll_export' => TTi18n::gettext('Export') ) );
 				break;
 			case 'export_type':
 				$retval = array(
@@ -483,6 +483,17 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 			if ( isset($config['form']['export_type']) ) {
 				$export_type = $config['form']['export_type'];
+
+				//In case the raw Export Format is passed from the ReportScheduleFactory, make sure we extract just the data for the specific $export_type and rearrange things slightly.
+				// This is already done in JS before its passed to the API.
+				if ( isset($config['form']['export_columns'][$export_type]) ) {
+					$tmp_config[$export_type] = $config['form'];
+					$tmp_config[$export_type]['columns'] = $config['form']['export_columns'][$export_type]['columns'];
+					$tmp_config['export_type'] = $config['form']['export_type'];
+					unset($tmp_config[$export_type]['export_columns']);
+					$config['form'] = $tmp_config;
+				}
+
 				$setup_data = $config['form']; //get setup data to determine custom formats...
 
 				switch( strtolower($export_type) ) {

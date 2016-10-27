@@ -109,6 +109,7 @@ class TimesheetDetailReport extends Report {
 										'-2010-user_status_id' => TTi18n::gettext('Employee Status'),
 										'-2020-user_group_id' => TTi18n::gettext('Employee Group'),
 										'-2030-user_title_id' => TTi18n::gettext('Employee Title'),
+
 										'-2035-user_tag' => TTi18n::gettext('Employee Tags'),
 										'-2040-include_user_id' => TTi18n::gettext('Employee Include'),
 										'-2050-exclude_user_id' => TTi18n::gettext('Employee Exclude'),
@@ -153,7 +154,7 @@ class TimesheetDetailReport extends Report {
 				//Get custom fields for report data.
 				$oflf = TTnew( 'OtherFieldListFactory' );
 				//User and Punch fields conflict as they are merged together in a secondary process.
-				$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), array(4, 5, 10), array( 4 => 'branch_', 5 => 'department_', 10 => '' ) );
+				$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), array(4, 5, 10, 12), array( 4 => 'branch_', 5 => 'department_', 10 => '', 12 => 'user_title_' ) );
 				if ( is_array($other_field_names) ) {
 					$retval = Misc::addSortPrefix( $other_field_names, 9000 );
 				}
@@ -207,6 +208,8 @@ class TimesheetDetailReport extends Report {
 										'-1002-last_name' => TTi18n::gettext('Last Name'),
 										'-1005-full_name' => TTi18n::gettext('Full Name'),
 										'-1030-employee_number' => TTi18n::gettext('Employee #'),
+										'-1035-user_title_name' => TTi18n::gettext('Employee Title'),
+
 										'-1040-status' => TTi18n::gettext('Status'),
 										'-1050-title' => TTi18n::gettext('Title'),
 										'-1055-city' => TTi18n::gettext('City'),
@@ -324,6 +327,7 @@ class TimesheetDetailReport extends Report {
 				$retval['min_punch_time_stamp'] = $retval['max_punch_time_stamp'] = 'time';
 				$retval['min_schedule_time_stamp'] = $retval['max_schedule_time_stamp'] = 'time';
 				$retval['worked_hour_of_day'] = 'time';
+				$retval['worked_days'] = 'numeric';
 				break;
 			case 'aggregates':
 				$retval = array();
@@ -774,7 +778,7 @@ class TimesheetDetailReport extends Report {
 
 	//Get raw data for report
 	function _getData( $format = NULL ) {
-		$this->tmp_data = array('user_date_total' => array(), 'schedule' => array(), 'worked_days' => array(), 'user' => array(), 'timesheet_authorization' => array(), 'verified_timesheet' => array(), 'punch_rows' => array(), 'pay_period_schedule' => array(), 'pay_period' => array() );
+		$this->tmp_data = array('user_date_total' => array(), 'schedule' => array(), 'worked_days' => array(), 'user' => array(), 'user_title' => array(), 'timesheet_authorization' => array(), 'verified_timesheet' => array(), 'punch_rows' => array(), 'pay_period_schedule' => array(), 'pay_period' => array() );
 
 		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
@@ -1024,7 +1028,7 @@ class TimesheetDetailReport extends Report {
 		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $ulf as $key => $u_obj ) {
-			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$this->getColumnDataConfig(), array( 'province' => TRUE, 'hire_date' => TRUE, 'termination_date' => TRUE ) ) );
+			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$this->getColumnDataConfig(), array( 'province' => TRUE, 'hire_date' => TRUE, 'termination_date' => TRUE , 'title_id' => TRUE ) ) );
 			$this->tmp_data['user'][$u_obj->getId()]['user_province'] = $this->tmp_data['user'][$u_obj->getId()]['province']; //Used in Payroll Export for PBJ.
 
 			if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
@@ -1089,6 +1093,18 @@ class TimesheetDetailReport extends Report {
 		}
 		//Debug::Arr($this->tmp_data['default_department'], 'Default Department Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->tmp_data['department'], 'Department Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
+
+
+		$utlf = TTnew( 'UserTitleListFactory' );
+		$utlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array() ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
+		Debug::Text(' User Title Total Rows: '. $dlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		$user_title_column_config = array_merge( (array)Misc::removeKeyPrefix( 'user_title_', (array)$this->getColumnDataConfig() ), array('id' => TRUE, 'name' => TRUE ) ); //Always include title_id column so we can merge title data.
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $utlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Titles...') );
+		foreach ( $utlf as $key => $ut_obj ) {
+			$this->tmp_data['user_title'][$ut_obj->getId()] = Misc::addKeyPrefix( 'user_title_', (array)$ut_obj->getObjectAsArray( $user_title_column_config ) );
+			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+		}
+		//Debug::Arr($this->tmp_data['user_title'],'user_title_data', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get verified timesheets for all pay periods considered in report.
 		$pay_period_ids = array_unique( array_keys( $pay_period_ids ) );
@@ -1268,8 +1284,14 @@ class TimesheetDetailReport extends Report {
 										$tmp_department = array();
 									}
 
+									if ( isset($this->tmp_data['user'][$user_id]['title_id']) AND isset($this->tmp_data['user_title'][$this->tmp_data['user'][$user_id]['title_id']]) ) {
+										$tmp_user_title = $this->tmp_data['user_title'][$this->tmp_data['user'][$user_id]['title_id']];
+									} else {
+										$tmp_user_title = array();
+									}
+
 									if ( strpos($format, 'pdf_') === FALSE ) {
-										$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $tmp_default_branch, $tmp_default_department, $tmp_branch, $tmp_department, $row, $date_columns, $hire_date_columns, $termination_date_columns, $processed_data );
+										$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $tmp_default_branch, $tmp_default_department, $tmp_branch, $tmp_department, $tmp_user_title, $row, $date_columns, $hire_date_columns, $termination_date_columns, $processed_data );
 									} else {
 										$this->form_data['user_date_total'][$user_id]['data'][$date_stamp] = array_merge( $this->form_data['user_date_total'][$user_id]['data'][$date_stamp], $date_columns, $hire_date_columns, $termination_date_columns, $processed_data );
 										//$this->form_data[$user_id]['data'][] = array_merge( $row, $date_columns, $processed_data );

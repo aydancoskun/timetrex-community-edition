@@ -305,8 +305,7 @@ InstallWizardController = BaseWizardController.extend( {
 					license_html = license_html + '"' + '<b>installer_enabled = TRUE</b>' + '"';
 					license_html = license_html + '<br>';
 					license_html = license_html + '<br>';
-					license_html = license_html + $.i18n._( 'After this change has been made, you can click the "Start" button below to begin your installation. ' );
-					license_html = license_html + '<b>' + $.i18n._( 'After the installation is complete, you will want to change' ) + ' "installer_enabled" ' + $.i18n._( 'to' ) + ' "FALSE".' + '</b>';
+					license_html = license_html + $.i18n._( 'After this change has been made, you can click the "Re-Check" button below to begin your installation.' );
 					license_html = license_html + '<br>';
 					license_html = license_html + '<br>';
 					license_html = license_html + $.i18n._( 'For help, please visit' ) + ' <a href="http://www.timetrex.com">www.timetrex.com</a> ';

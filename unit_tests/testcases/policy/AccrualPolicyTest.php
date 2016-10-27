@@ -507,6 +507,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 				$apf->setApplyFrequencyHireDate( TRUE );
 
 				$apf->setMilestoneRolloverHireDate( TRUE );
+				$apf->setEnableOpeningBalance( TRUE );
 
 				$apf->setMinimumEmployedDays( 0 );
 				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
@@ -626,6 +627,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 				$apf->setApplyFrequencyHireDate( TRUE );
 
 				$apf->setMilestoneRolloverHireDate( TRUE );
+				$apf->setEnableOpeningBalance( TRUE );
 				$apf->setEnableProRateInitialPeriod( TRUE );
 
 				$apf->setMinimumEmployedDays( 0 );
@@ -1845,7 +1847,8 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, ( (111*3600)+(60*13)+20 ) ); //111:13:20
+		//$this->assertEquals( $accrual_balance, ( (111*3600)+(60*13)+20 ) ); //111:13:20 <-- This was pre-MiddleDayEpoch() in the proRate function.
+		$this->assertEquals( $accrual_balance, ( (111*3600)+(60*11)+26 ) ); //111:11:26 <-- This is after MiddleDayEpoch() in the proRate function.
 	}
 
 	/**
@@ -1929,7 +1932,8 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, ( (109*3600)+(60*34)+12 ) ); //109:34:12
+		//$this->assertEquals( $accrual_balance, ( (109*3600)+(60*34)+12 ) ); //109:34:12
+		$this->assertEquals( $accrual_balance, ( (109*3600)+(60*34)+10 ) ); //109:34:10 <-- This is after MiddleDayEpoch() in the proRate function.
 	}
 
 	/**
@@ -1990,6 +1994,101 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 	/**
+	 * @group AccrualPolicy_testCalendarAccrualProRateHireDateTimeA
+	 */
+	function testCalendarAccrualProRateHireDateTimeA() {
+		global $dd;
+
+		$u_obj = $this->getUserObject( $this->user_id );
+		$u_obj->data['hire_date'] = TTDate::getMiddleDayEpoch( $u_obj->getHireDate() );
+		$u_obj->Save();
+
+ 		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 2020, $accrual_policy_account_id );
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   array($this->user_id),
+								   NULL,
+								   array( $accrual_policy_id ) );
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( $accrual_balance, ( (109*3600)+(60*34)+10 ) ); //109:34:10
+	}
+
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualProRateHireDateTimeB
+	 */
+	function testCalendarAccrualProRateHireDateTimeB() {
+		global $dd;
+
+		$u_obj = $this->getUserObject( $this->user_id );
+		$u_obj->data['hire_date'] = ( TTDate::getBeginDayEpoch( $u_obj->getHireDate() ) + 60 );
+		$u_obj->Save();
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 2020, $accrual_policy_account_id );
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   array($this->user_id),
+								   NULL,
+								   array( $accrual_policy_id ) );
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( $accrual_balance, ( (109*3600)+(60*34)+10 ) ); //109:34:10
+	}
+
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualProRateHireDateTimeC
+	 */
+	function testCalendarAccrualProRateHireDateTimeC() {
+		global $dd;
+
+		$u_obj = $this->getUserObject( $this->user_id );
+		$u_obj->data['hire_date'] = ( TTDate::getEndDayEpoch( $u_obj->getHireDate() ) - 60 );
+		$u_obj->Save();
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 2020, $accrual_policy_account_id );
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   array($this->user_id),
+								   NULL,
+								   array( $accrual_policy_id ) );
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( $accrual_balance, ( (109*3600)+(60*34)+10 ) ); //109:34:10
+	}
+	/**
 	 * @group AccrualPolicy_testCalendarAccrualOpeningBalanceA
 	 */
 	function testCalendarAccrualOpeningBalanceA() {
@@ -2014,7 +2113,8 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, ( (112*3600)+(60*53)+20 ) ); //111:13:20
+		//$this->assertEquals( $accrual_balance, ( (112*3600)+(60*53)+20 ) ); //111:53:20
+		$this->assertEquals( $accrual_balance, ( (112*3600)+(60*51)+26 ) ); //111:51:26 <-- This is after MiddleDayEpoch() in the proRate function.
 	}
 
 	/**
@@ -2098,7 +2198,8 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, ( (112*3600)+(60*54)+12 ) ); //112:54:12
+		//$this->assertEquals( $accrual_balance, ( (112*3600)+(60*54)+12 ) ); //112:54:12
+		$this->assertEquals( $accrual_balance, ( (112*3600)+(60*54)+10 ) ); //112:54:10 <-- This is after MiddleDayEpoch() in the proRate function.
 	}
 
 	/**
@@ -2156,7 +2257,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $accrual_balance, ( (120*3600) ) ); //120:00:00
 	}
-	
+
 	/**
 	 * @group testAbsenceAccrualPolicyA
 	 */

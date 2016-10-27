@@ -687,7 +687,6 @@ class ScheduleSummaryReport extends Report {
 
 		if ( strpos( $format, 'schedule' ) === FALSE ) { //Avoid running these queries when printing out the schedule.
 			$slf = TTnew( 'ScheduleListFactory' );
-			//$slf->getScheduleSummaryReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data, NULL, NULL, NULL, array('last_name' => 'asc') ); //Sort by last name mainly for the PDF schedule for printing.
 			$slf->getSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data, NULL, NULL, NULL, array('last_name' => 'asc') ); //Sort by last name mainly for the PDF schedule for printing.
 			Debug::Text(' Total Rows: '. $slf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $slf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );

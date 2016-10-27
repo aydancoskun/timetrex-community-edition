@@ -1733,7 +1733,7 @@ TopMenuManager.buildRibbonMenuModels = function() {
 
 	if ( PermissionManager.checkTopLevelPermission( 'TaxSummaryReport' ) ) {
 		var tax_summary = new RibbonSubMenuNavItem( {
-			label: $.i18n._( 'Tax Summary(Generic)' ),
+			label: $.i18n._( 'Tax Summary (Generic)' ),
 			id: 'TaxSummaryReport',
 			nav: tax_reports
 		} );

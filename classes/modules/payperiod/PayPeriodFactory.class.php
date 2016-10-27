@@ -784,7 +784,7 @@ class PayPeriodFactory extends Factory {
 				$user_ids = array($user_ids);
 			}
 		}
-		
+
 		$pay_period_ids = array( 0 ); //Always include a 0 pay_period_id so orphaned data is pulled over too.
 
 		$pplf = TTnew('PayPeriodListFactory');
@@ -801,7 +801,7 @@ class PayPeriodFactory extends Factory {
 			Debug::Text('  Found non-Closed Pay Periods: '. $pplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		} else {
 			Debug::Text('  Custom pay_period_ids specified, only importing for them...', __FILE__, __LINE__, __METHOD__, 10);
-			
+
 			$pplf->getByIdAndCompanyId( $pay_period_id, $this->getCompany() );
 			unset($pay_period_id);
 			if ( $pplf->getRecordCount() ) {
@@ -812,7 +812,7 @@ class PayPeriodFactory extends Factory {
 						Debug::Text('  Skipping closed pay period...', __FILE__, __LINE__, __METHOD__, 10);
 					}
 				}
-			}			
+			}
 		}
 
 		if ( isset($pay_period_ids) AND is_array($pay_period_ids) AND count($pay_period_ids) > 0 AND (int)$this->getID() > 0 ) {
@@ -848,7 +848,7 @@ class PayPeriodFactory extends Factory {
 			$f->db->Execute( $query, $ph );
 			Debug::Arr($ph, 'Schedule Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
-			
+
 			//Requests
 			$f = TTnew('RequestFactory');
 			$ph = array(
@@ -1167,9 +1167,9 @@ class PayPeriodFactory extends Factory {
 			$query = 'SELECT  max(run_id) FROM '. $psf->getTable() .' as a LEFT JOIN '. $uf->getTable() .' as b ON ( a.user_id = b.id ) WHERE b.company_id = '. (int)$this->getCompany() .' AND a.pay_period_id = 0';
 			$run_id = ( (int)$this->db->GetOne($query) + 1);
 			Debug::text('Next Run ID for PayPeriodID=0: '. $run_id .' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-			
+
 			$query = 'update '. $psf->getTable() .' set pay_period_id = 0, run_id = '. (int)$run_id .' where pay_period_id = '. (int)$this->getId();
-			$this->db->Execute($query);			
+			$this->db->Execute($query);
 		} else {
 			if ( $this->getStatus() == 20 ) { //Closed
 				//Mark pay stubs as PAID once the pay period is closed?
@@ -1186,14 +1186,16 @@ class PayPeriodFactory extends Factory {
 			$pplf->getPreviousPayPeriodById( $this->getID() );
 			if ( $pplf->getRecordCount() > 0 ) {
 				$pp_obj = $pplf->getCurrent();
-				if ( $pp_obj->isFirstPayPeriodInYear()
+				if ( $pp_obj->isFirstPayPeriodInYear() == TRUE
 						AND time() >= $pp_obj->getStartDate() //Can't be end or transaction date, as those are too late. This helps prevent manual pay periods created in the future from triggering the maintenance.
+						AND time() <= $this->getEndDate() //In cases of modifying old pay periods, make sure we aren't past the transaction date of the first pay period in the year.
 					) {
-					Debug::text('Creating/Modifying 2nd Pay Period in Year... Running maintenance for 1st pay period year...', __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text('Creating/Modifying 2nd Pay Period in Year... Running maintenance for 1st pay period in year...', __FILE__, __LINE__, __METHOD__, 10);
 					$cd_obj = TTnew('CompanyDeductionFactory');
+					$cd_obj->setCompany( $this->getCompany() );
 					$cd_obj->updateCompanyDeductionForTaxYear( $pp_obj->getTransactionDate() );
 				} else {
-					Debug::text('NOT running maintenance, maybe not past the start date of the last pay period yet, or not 2nd pay period in the year...', __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text('NOT running maintenance, maybe not past the start date of the last pay period yet, or not 2nd pay period in the year, or modifying pay period more than 90days old... 1st PP Start Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ) .' 2nd PP End Date: '. TTDate::getDate('DATE+TIME', $this->getEndDate() ), __FILE__, __LINE__, __METHOD__, 10);
 				}
 			}
 			unset($pplf, $pp_obj, $cd_obj);

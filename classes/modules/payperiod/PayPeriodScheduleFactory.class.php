@@ -1334,7 +1334,7 @@ class PayPeriodScheduleFactory extends Factory {
 			//Cache results
 			$this->saveCache($retval, $id);
 		}
-		
+
 		return $retval;
 	}
 
@@ -1941,7 +1941,7 @@ class PayPeriodScheduleFactory extends Factory {
 
 		return TRUE;
 	}
-	
+
 	function getEnableInitialPayPeriods() {
 		if ( isset($this->enable_create_initial_pay_periods) ) {
 			return $this->enable_create_initial_pay_periods;
@@ -1972,7 +1972,7 @@ class PayPeriodScheduleFactory extends Factory {
 
 	//Close pay periods that were left open.
 	//Pay period schedule must be at least 45 days old so we don't close pay periods on new customers right away.
-	//Only close OPEN pay periods that have passed the transaction date by 7 days.
+	//Only close OPEN/Locked pay periods that have passed the transaction date by 5 days.
 	//Get OPEN pay periods with transaction dates at least 48hrs before the given date?
 	//Or should we just prevent customers from generating pay stubs in a pay period that has a previous pay period that is still open? Both.
 	function forceClosePreviousPayPeriods( $date = NULL ) {
@@ -1980,12 +1980,10 @@ class PayPeriodScheduleFactory extends Factory {
 			$date = time();
 		}
 
-		//Start with 7 days initially, then cut back to 5 days eventually.
 		$date = ( $date - (86400 * 5) ); //Give a 5 days grace period after the transaction date to start with.
-
 		$pplf = TTNew('PayPeriodListFactory');
-		$pplf->getByCompanyIDAndPayPeriodScheduleIdAndStatusAndStartTransactionDateAndEndTransactionDate( $this->getCompany(), $this->getID(), 10, 1, $date );
-		Debug::text('Closing Pay Periods: '. $pplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		$pplf->getByCompanyIDAndPayPeriodScheduleIdAndStatusAndStartTransactionDateAndEndTransactionDate( $this->getCompany(), $this->getID(), array( 10, 12 ), 1, $date );
+		Debug::text('Closing Open/Locked Pay Periods: '. $pplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $pplf->getRecordCount() > 0 ) {
 			foreach( $pplf as $pp_obj ) {
 				if ( is_object( $pp_obj->getPayPeriodScheduleObject() ) AND $pp_obj->getPayPeriodScheduleObject()->getCreatedDate() < ($date - (86400 * 45) ) ) {
@@ -1993,7 +1991,25 @@ class PayPeriodScheduleFactory extends Factory {
 					$pp_obj->setStatus( 20 ); //Closed
 					if ( $pp_obj->isValid() ) {
 						//Make log entry as person who last updated the pay period schedule so they can see it in the audit log at least.
-						TTLog::addEntry( $pp_obj->getId(), 500, TTi18n::getText('Force closing pay period').': '. TTDate::getDate('DATE', $pp_obj->getStartDate()) .' -> '. TTDate::getDate('DATE', $pp_obj->getEndDate()), $pp_obj->getPayPeriodScheduleObject()->getUpdatedBy(), $pp_obj->getTable() );
+						TTLog::addEntry( $pp_obj->getId(), 500, TTi18n::getText('Force closing OPEN/Locked pay period').': '. TTDate::getDate('DATE', $pp_obj->getStartDate()) .' -> '. TTDate::getDate('DATE', $pp_obj->getEndDate()), $pp_obj->getPayPeriodScheduleObject()->getUpdatedBy(), $pp_obj->getTable() );
+
+						$pp_obj->Save();
+					}
+				}
+			}
+		}
+
+		//Also force close any Post-Adjustment pay periods that haven't been updated in 65days. (two months at least, in case they are monthly pay periods)
+		$pplf->getByCompanyIDAndPayPeriodScheduleIdAndStatusAndStartTransactionDateAndEndTransactionDate( $this->getCompany(), $this->getID(), array( 30 ), 1, $date );
+		Debug::text('Closing Post-Adjustment Pay Periods: '. $pplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		if ( $pplf->getRecordCount() > 0 ) {
+			foreach( $pplf as $pp_obj ) {
+				if ( $pp_obj->getUpdatedDate() < ( $date - (86400 * 65) ) ) {
+					Debug::text('Closing Pay Period ID: '. $pp_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
+					$pp_obj->setStatus( 20 ); //Closed
+					if ( $pp_obj->isValid() ) {
+						//Make log entry as person who last updated the pay period schedule so they can see it in the audit log at least.
+						TTLog::addEntry( $pp_obj->getId(), 500, TTi18n::getText('Force closing Post-Adjustment pay period').': '. TTDate::getDate('DATE', $pp_obj->getStartDate()) .' -> '. TTDate::getDate('DATE', $pp_obj->getEndDate()), $pp_obj->getPayPeriodScheduleObject()->getUpdatedBy(), $pp_obj->getTable() );
 
 						$pp_obj->Save();
 					}

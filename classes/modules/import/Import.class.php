@@ -838,7 +838,7 @@ class Import {
 		$options = array();
 		if ( $country != '' ) {
 			$cf = TTnew('CompanyFactory');
-			$options = $cf->getOptions( 'province', $country );
+			$options = (array)$cf->getOptions( 'province', $country );
 		}
 
 		if ( !isset($options[strtoupper($input)]) ) {

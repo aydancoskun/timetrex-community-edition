@@ -61,6 +61,16 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 										60 => TTi18n::gettext('DISABLED')
 									);
 				break;
+			case 'filter_report_status':
+				//show values custom to report with the addition of not verified.
+				$retval = array(
+						0 => TTi18n::gettext('Not Verified'),
+						30 => TTi18n::gettext('PENDING AUTHORIZATION'),
+						45 => TTi18n::gettext('PENDING EMPLOYEE VERIFICATION'), //Fully authorized, waiting on employee verification.
+						50 => TTi18n::gettext('Verified'),
+						55 => TTi18n::gettext('AUTHORIZATION DECLINED'),
+				);
+				break;
 			case 'columns':
 				$retval = array(
 										'-1010-first_name' => TTi18n::gettext('First Name'),

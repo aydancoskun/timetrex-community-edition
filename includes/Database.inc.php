@@ -44,7 +44,7 @@ if ( !isset($disable_database_connection) ) {
 		try {
 			if ( isset($config_vars['database']['type']) AND trim( strtolower($config_vars['database']['type']) ) == 'mysqlt' ) { //Added in v9.0.6, 24-Dec-2015
 				if ( extension_loaded('mysqli') !== FALSE ) {
-					//If MySQLi extension is already loaded, just switch it in the config file. 
+					//If MySQLi extension is already loaded, just switch it in the config file.
 					$install_obj = TTnew('Install');
 					$install_obj->writeConfigFile( array('database' => array( 'type' => 'mysqli' ) ) );
 					$config_vars['database']['type'] = 'mysqli';
@@ -78,15 +78,11 @@ if ( !isset($disable_database_connection) ) {
 
 				//Use comma separated database hosts, assuming the first is always the master, the rest are slaves.
 				//Anything after the # is the weight. Username/password/database is assumed to be the same across all connections.
-				//ie: 127.0.0.1:5433#10,127.0.0.2:5433#100,127.0.0.3:5433#120				
+				//ie: 127.0.0.1:5433#10,127.0.0.2:5433#100,127.0.0.3:5433#120
 				$db_hosts = Misc::parseDatabaseHostString( $config_vars['database']['host'] );
 				foreach( $db_hosts as $db_host_arr ) {
 					Debug::Text( 'Adding DB Connection: Host: '. $db_host_arr[0] .' Type: '. $db_host_arr[1] .' Weight: '. $db_host_arr[2], __FILE__, __LINE__, __METHOD__, 1);
-					if ( $db_host_arr[2] == 5 ) {
-						$db_connection_obj = new ADOdbLoadBalancerConnection( $config_vars['database']['type'], $db_host_arr[1], $db_host_arr[2], (bool)$config_vars['database']['persistent_connections'], $db_host_arr[0], $config_vars['database']['user'].'9', $config_vars['database']['password'], $config_vars['database']['database_name'] );
-					} else {
-						$db_connection_obj = new ADOdbLoadBalancerConnection( $config_vars['database']['type'], $db_host_arr[1], $db_host_arr[2], (bool)$config_vars['database']['persistent_connections'], $db_host_arr[0], $config_vars['database']['user'], $config_vars['database']['password'], $config_vars['database']['database_name'] );
-					}
+					$db_connection_obj = new ADOdbLoadBalancerConnection( $config_vars['database']['type'], $db_host_arr[1], $db_host_arr[2], (bool)$config_vars['database']['persistent_connections'], $db_host_arr[0], $config_vars['database']['user'], $config_vars['database']['password'], $config_vars['database']['database_name'] );
 					$db_connection_obj->getADODbObject()->SetFetchMode(ADODB_FETCH_ASSOC);
 					$db_connection_obj->getADODbObject()->noBlobs = TRUE; //Optimization to tell ADODB to not bother checking for blobs in any result set.
 					$db_connection_obj->getADODbObject()->fmtTimeStamp = "'Y-m-d H:i:s'";
@@ -113,7 +109,7 @@ if ( !isset($disable_database_connection) ) {
 					//This should hopefully fix odd issues like hierarchy trees becoming corrupt.
 					$db->setSessionInitSQL( 'SET SESSION sql_mode=\'ansi\'' );
 					$db->setSessionInitSQL( 'SET TRANSACTION ISOLATION LEVEL READ COMMITTED' );
-				}				
+				}
 			} else {
 				//To enable PDO support. Type: pdo_pgsql or pdo_mysql
 				//$dsn = $config_vars['database']['type'].'://'.$config_vars['database']['user'].':'.$config_vars['database']['password'].'@'.$config_vars['database']['host'].'/'.$config_vars['database']['database_name'].'?persist';

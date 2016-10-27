@@ -12,6 +12,8 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 	select_grid_last_row: null,
 
+	save_export_setup_data: {},
+
 	initialize: function() {
 		this.__super( 'initialize' );
 		this.script_name = 'PayrollExportReport';
@@ -75,7 +77,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 		//menu group
 		var form_setup_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Form' ),
+			label: $.i18n._( 'Export' ),
 			id: this.viewId + 'Form',
 			ribbon_menu: menu,
 			sub_menus: []
@@ -164,6 +166,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 	setEditMenuViewIcon: function() {
 		// Don't do anything in this sub class
 	},
+
 	/* jshint ignore:start */
 	onContextMenuClick: function( context_btn, menu_name ) {
 		var id;
@@ -217,7 +220,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				this.onViewClick( 'pdf_timesheet_detail' );
 				break;
 			case ContextMenuIconName.save_setup: //All report view
-				this.onSaveSetup();
+				this.onSaveSetup( $.i18n._( 'Export setup' ) );
 				break;
 		}
 	},
@@ -248,6 +251,14 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 	},
 
 	onExportChange: function( type ) {
+
+		if ( this.save_export_setup_data[type] != undefined ) {
+			this.export_setup_data = this.save_export_setup_data[type];
+
+		} else {
+			this.export_setup_data = {};
+		}
+
 		var $this = this;
 
 		this.removeCurrentExportUI();
@@ -350,6 +361,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 		switch ( type ) {
 			case 'adp':
 			case 'adp_advanced':
+
 				columnOptions = Global.buildRecordArray( columnOptions.adp_hour_column_options );
 				for ( var i = 0; i < columnOptions.length; i++ ) {
 					if ( i !== columnOptions.length - 1 ) {
@@ -545,7 +557,8 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 						$this.export_grid.jqGrid( 'editRow', id, true );
 						$this.select_grid_last_row = id;
 					}
-				}
+				},
+
 			} );
 
 		} else {
@@ -584,7 +597,6 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 	},
 	/* jshint ignore:end */
 	setExportGridData: function( type ) {
-
 		var $this = this;
 
 		var grid_data = Global.buildRecordArray( this.export_policy_array );
@@ -602,13 +614,14 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 					default_columns = res_data[type].columns;
 				}
 
-				if ( $this.export_setup_data.export_columns && $this.export_setup_data.export_columns[type] ) {
-					export_columns = $this.export_setup_data.export_columns[type].columns;
-					doNext( export_columns, default_columns );
-				} else {
-					if ( res_data[type] && res_data[type].columns ) {
-						doNext( default_columns );
-					}
+				if ( $this.save_export_setup_data != undefined && $this.save_export_setup_data[type] && $this.save_export_setup_data[type].columns ) {
+					export_columns = $this.save_export_setup_data[type].columns;
+					doNext(export_columns, default_columns);
+				} else if ( $this.export_setup_data && $this.export_setup_data[type] ) {
+					export_columns = $this.export_setup_data[type].columns;
+					doNext(export_columns, default_columns);
+				} else if ( res_data[type] && res_data[type].columns ) {
+					doNext( default_columns );
 				}
 
 				$this.setExportGridSize();
@@ -739,6 +752,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 			this.setEditMenu();
 		}
 
+		this.checkFormSetupSaved( last_index, $.i18n._( 'Export Setup' ) );
 	},
 
 	buildAdditionalInputBox: function( type ) {
@@ -1713,325 +1727,176 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 		return columns;
 
 	},
-	/* jshint ignore:start */
-	getFormSetupData: function( for_view ) {
-		var other = {};
 
-		if ( !for_view ) {
-			other.export_type = this.current_edit_record.export_type;
-			other.export_columns = {};
-			other.export_columns[other.export_type] = {columns: this.getExportColumns( other.export_type )};
+	/**
+	 * Gets array of properly configured values for the export setup form.
+	 *
+	 * @param field_list Array
+	 * @returns {{}|*}
+     */
+	getFormSetupFieldValues: function ( field_list ) {
+		ret_arr = {};
 
-			switch ( other.export_type ) {
-
-				case 'adp':
-					if ( !this.edit_view_ui_dic.company_code.getValue() ) {
-						other.company_code = this.edit_view_ui_dic.company_code_text.getValue();
-					} else {
-						other.company_code = this.edit_view_ui_dic.company_code.getValue();
-					}
-
-					if ( !this.edit_view_ui_dic.batch_id.getValue() ) {
-						other.batch_id = this.edit_view_ui_dic.batch_id_text.getValue();
-					} else {
-						other.batch_id = this.edit_view_ui_dic.batch_id.getValue();
-					}
-
-					if ( !this.edit_view_ui_dic.temp_dept.getValue() ) {
-						other.temp_dept = this.edit_view_ui_dic.temp_dept_text.getValue();
-					} else {
-						other.temp_dept = this.edit_view_ui_dic.temp_dept.getValue();
-					}
-
-					break;
-				case 'adp_advanced':
-				case 'adp_resource':
-					if ( !this.edit_view_ui_dic.company_code.getValue() ) {
-						other.company_code = this.edit_view_ui_dic.company_code_text.getValue();
-					} else {
-						other.company_code = this.edit_view_ui_dic.company_code.getValue();
-					}
-
-					if ( !this.edit_view_ui_dic.batch_id.getValue() ) {
-						other.batch_id = this.edit_view_ui_dic.batch_id_text.getValue();
-					} else {
-						other.batch_id = this.edit_view_ui_dic.batch_id.getValue();
-					}
-
-					if ( !this.edit_view_ui_dic.temp_dept.getValue() ) {
-						other.temp_dept = this.edit_view_ui_dic.temp_dept_text.getValue();
-					} else {
-						other.temp_dept = this.edit_view_ui_dic.temp_dept.getValue();
-					}
-
-					if ( !this.edit_view_ui_dic.job_cost.getValue() ) {
-						other.job_cost = this.edit_view_ui_dic.job_cost_text.getValue();
-					} else {
-						other.job_cost = this.edit_view_ui_dic.job_cost.getValue();
-					}
-
-					if ( !this.edit_view_ui_dic.work_class.getValue() ) {
-						other.work_class = this.edit_view_ui_dic.work_class_text.getValue();
-					} else {
-						other.work_class = this.edit_view_ui_dic.work_class.getValue();
-					}
-
-					other.state_columns = this.edit_view_ui_dic.state_columns.getValue();
-					break;
-				case 'accero':
-					if ( !this.edit_view_ui_dic.temp_dept.getValue() ) {
-						other.temp_dept = this.edit_view_ui_dic.temp_dept_text.getValue();
-					} else {
-						other.temp_dept = this.edit_view_ui_dic.temp_dept.getValue();
-					}
-
-					break;
-				case 'paychex_preview':
-					other.client_number = this.edit_view_ui_dic.client_number.getValue();
-					break;
-				case 'paychex_preview_advanced_job':
-					other.client_number = this.edit_view_ui_dic.client_number_adv.getValue();
-					other.job_columns = this.edit_view_ui_dic.job_columns.getValue();
-					other.state_columns = this.edit_view_ui_dic.state_columns.getValue();
-					other.include_hourly_rate = this.edit_view_ui_dic.include_hourly_rate.getValue();
-					break;
-				case 'ceridian_insync':
-					other.employer_number = this.edit_view_ui_dic.employer_number.getValue();
-					break;
-				case 'quickbooks':
-				case 'quickbooks_advanced':
-					other.company_name = this.edit_view_ui_dic.company_name.getValue();
-					other.company_created_date = this.edit_view_ui_dic.company_created_date.getValue();
-					other.proj = this.edit_view_ui_dic.proj.getValue();
-					other.item = this.edit_view_ui_dic.item.getValue();
-					other.job = this.edit_view_ui_dic.job.getValue();
-					break;
-				case 'va_munis':
-					if ( !this.edit_view_ui_dic.department.getValue() ) {
-						other.department = this.edit_view_ui_dic.department_text.getValue();
-					} else {
-						other.department = this.edit_view_ui_dic.company_code.getValue();
-					}
-
-					if ( !this.edit_view_ui_dic.employee_number.getValue() ) {
-						other.employee_number = this.edit_view_ui_dic.employee_number_text.getValue();
-					} else {
-						other.employee_number = this.edit_view_ui_dic.employee_number.getValue();
-					}
-
-					if ( !this.edit_view_ui_dic.gl_account.getValue() ) {
-						other.gl_account = this.edit_view_ui_dic.gl_account_text.getValue();
-					} else {
-						other.gl_account = this.edit_view_ui_dic.gl_account.getValue();
-					}
-					break;
-				case 'sage_50':
-					if ( !this.edit_view_ui_dic.customer_name.getValue() ) {
-						other.customer_name = this.edit_view_ui_dic.customer_name_text.getValue();
-					} else {
-						other.customer_name = this.edit_view_ui_dic.customer_name.getValue();
-					}
-					break;
-				case 'cms_pbj':
-					if ( !this.edit_view_ui_dic.facility_code.getValue() ) {
-						other.facility_code = this.edit_view_ui_dic.facility_code_text.getValue();
-					} else {
-						other.facility_code = this.edit_view_ui_dic.facility_code.getValue();
-					}
-
-					if ( !this.edit_view_ui_dic.state_code.getValue() ) {
-						other.state_code = this.edit_view_ui_dic.state_code_text.getValue();
-					} else {
-						other.state_code = this.edit_view_ui_dic.state_code.getValue();
-					}
-
-					if ( !this.edit_view_ui_dic.pay_type_code.getValue() ) {
-						other.pay_type_code = this.edit_view_ui_dic.pay_type_code_text.getValue();
-					} else {
-						other.pay_type_code = this.edit_view_ui_dic.pay_type_code.getValue();
-					}
-
-					if ( !this.edit_view_ui_dic.job_title_code.getValue() ) {
-						other.job_title_code = this.edit_view_ui_dic.job_title_code_text.getValue();
-					} else {
-						other.job_title_code = this.edit_view_ui_dic.job_title_code.getValue();
-					}
-					break;
-				case 'csv_advanced':
-					other.csv_export_columns = this.edit_view_ui_dic.csv_export_columns.getValue();
-					break;
-
+		for ( var i = 0; i < field_list.length; i++ ) {
+			if ( this.edit_view_ui_dic[field_list[i]] != undefined && !this.edit_view_ui_dic[field_list[i]].getValue() ) {
+					ret_arr[field_list[i]] = this.edit_view_ui_dic[field_list[i] + "_text"].getValue();
+					ret_arr[field_list[i] + "_value"] = this.edit_view_ui_dic[field_list[i] + "_text"].getValue();
+			} else {
+				if ( this.edit_view_ui_dic[field_list[i]] == undefined ) {
+					ret_arr[field_list[i]] = "";
+				}
+				else {
+					ret_arr[field_list[i]] = this.edit_view_ui_dic[field_list[i]].getValue();
+				}
 			}
-		} else {
-			other.export_type = this.current_edit_record.export_type;
-			other[other.export_type] = {columns: this.getExportColumns( other.export_type )};
+		}
+		return ret_arr;
+	},
 
-			switch ( other.export_type ) {
-				case 'adp':
-					if ( !this.edit_view_ui_dic.company_code.getValue() ) {
-						other[other.export_type].company_code = 0;
-						other[other.export_type].company_code_value = this.edit_view_ui_dic.company_code_text.getValue();
-					} else {
-						other[other.export_type].company_code = this.edit_view_ui_dic.company_code.getValue();
-					}
+	getFormData: function( other, for_display ) {
+		if ( other == undefined || other == false ) {
+			return false;
+		}
 
-					if ( !this.edit_view_ui_dic.batch_id.getValue() ) {
-						other[other.export_type].batch_id = 0;
-						other[other.export_type].batch_id_value = this.edit_view_ui_dic.batch_id_text.getValue();
-					} else {
-						other[other.export_type].batch_id = this.edit_view_ui_dic.batch_id.getValue();
-					}
+		switch ( other.export_type ) {
+			case 'adp':
+				other[other.export_type] = this.getFormSetupFieldValues( [ 'company_code', 'batch_id', 'temp_dept' ] );
 
-					if ( !this.edit_view_ui_dic.temp_dept.getValue() ) {
-						other[other.export_type].temp_dept = 0;
-						other[other.export_type].temp_dept_value = this.edit_view_ui_dic.temp_dept_text.getValue();
-					} else {
-						other[other.export_type].temp_dept = this.edit_view_ui_dic.temp_dept.getValue();
-					}
+				break;
+			case 'adp_advanced':
+			case 'adp_resource':
+				other[other.export_type] = this.getFormSetupFieldValues( [ 'company_code', 'batch_id', 'temp_dept', 'job_cost', 'work_class' ] );
+				other[other.export_type].state_columns = this.edit_view_ui_dic.state_columns.getValue();
 
-					break;
-				case 'adp_advanced':
-				case 'adp_resource':
-					if ( !this.edit_view_ui_dic.company_code.getValue() ) {
-						other[other.export_type].company_code = 0;
-						other[other.export_type].company_code_value = this.edit_view_ui_dic.company_code_text.getValue();
-					} else {
-						other[other.export_type].company_code = this.edit_view_ui_dic.company_code.getValue();
-					}
+				break;
+			case 'accero':
+				other[other.export_type] = this.getFormSetupFieldValues( [ 'temp_dept' ] );
 
-					if ( !this.edit_view_ui_dic.batch_id.getValue() ) {
-						other[other.export_type].batch_id = 0;
-						other[other.export_type].batch_id_value = this.edit_view_ui_dic.batch_id_text.getValue();
-					} else {
-						other[other.export_type].batch_id = this.edit_view_ui_dic.batch_id.getValue();
-					}
+				break;
+			case 'paychex_preview':
+				other[other.export_type].client_number = this.edit_view_ui_dic.client_number.getValue();
 
-					if ( !this.edit_view_ui_dic.temp_dept.getValue() ) {
-						other[other.export_type].temp_dept = 0;
-						other[other.export_type].temp_dept_value = this.edit_view_ui_dic.temp_dept_text.getValue();
-					} else {
-						other[other.export_type].temp_dept = this.edit_view_ui_dic.temp_dept.getValue();
-					}
+				break;
+			case 'paychex_preview_advanced_job':
+				other[other.export_type].client_number = this.edit_view_ui_dic.client_number_adv.getValue();
+				other[other.export_type].job_columns = this.edit_view_ui_dic.job_columns.getValue();
+				other[other.export_type].state_columns = this.edit_view_ui_dic.state_columns.getValue();
+				other[other.export_type].include_hourly_rate = this.edit_view_ui_dic.include_hourly_rate.getValue();
 
-					if ( !this.edit_view_ui_dic.job_cost.getValue() ) {
-						other[other.export_type].job_cost = 0;
-						other[other.export_type].job_cost_value = this.edit_view_ui_dic.job_cost_text.getValue();
-					} else {
-						other[other.export_type].job_cost = this.edit_view_ui_dic.job_cost.getValue();
-					}
+				break;
+			case 'ceridian_insync':
+				other[other.export_type].employer_number = this.edit_view_ui_dic.employer_number.getValue();
 
-					if ( !this.edit_view_ui_dic.work_class.getValue() ) {
-						other[other.export_type].work_class = 0;
-						other[other.export_type].work_class_value = this.edit_view_ui_dic.work_class_text.getValue();
-					} else {
-						other[other.export_type].work_class = this.edit_view_ui_dic.work_class.getValue();
-					}
+				break;
+			case 'quickbooks':
+			case 'quickbooks_advanced':
+				other[other.export_type].company_name = this.edit_view_ui_dic.company_name.getValue();
+				other[other.export_type].company_created_date = this.edit_view_ui_dic.company_created_date.getValue();
+				other[other.export_type].proj = this.edit_view_ui_dic.proj.getValue();
+				other[other.export_type].item = this.edit_view_ui_dic.item.getValue();
+				other[other.export_type].job = this.edit_view_ui_dic.job.getValue();
 
-					other[other.export_type].state_columns = this.edit_view_ui_dic.state_columns.getValue();
-					break;
-				case 'accero':
-					if ( !this.edit_view_ui_dic.temp_dept.getValue() ) {
-						other[other.export_type].temp_dept = 0;
-						other[other.export_type].temp_dept_value = this.edit_view_ui_dic.temp_dept_text.getValue();
-					} else {
-						other[other.export_type].temp_dept = this.edit_view_ui_dic.temp_dept.getValue();
-					}
+				break;
+			case 'va_munis':
+				other[other.export_type] = this.getFormSetupFieldValues( [ 'department', 'employee_number', 'gl_account', 'customer_name', 'facility_code', 'state_code', 'pay_type_code', 'job_title_code', '' ] );
 
-					break;
-				case 'paychex_preview':
-					other[other.export_type].client_number = this.edit_view_ui_dic.client_number.getValue();
-					break;
-				case 'paychex_preview_advanced_job':
-					other[other.export_type].client_number = this.edit_view_ui_dic.client_number_adv.getValue();
-					other[other.export_type].job_columns = this.edit_view_ui_dic.job_columns.getValue();
-					other[other.export_type].state_columns = this.edit_view_ui_dic.state_columns.getValue();
-					other[other.export_type].include_hourly_rate = this.edit_view_ui_dic.include_hourly_rate.getValue();
-					break;
-				case 'ceridian_insync':
-					other[other.export_type].employer_number = this.edit_view_ui_dic.employer_number.getValue();
-					break;
-				case 'quickbooks':
-				case 'quickbooks_advanced':
-					other[other.export_type].company_name = this.edit_view_ui_dic.company_name.getValue();
-					other[other.export_type].company_created_date = this.edit_view_ui_dic.company_created_date.getValue();
-					other[other.export_type].proj = this.edit_view_ui_dic.proj.getValue();
-					other[other.export_type].item = this.edit_view_ui_dic.item.getValue();
-					other[other.export_type].job = this.edit_view_ui_dic.job.getValue();
-					break;
-				case 'va_munis':
-					if ( !this.edit_view_ui_dic.department.getValue() ) {
-						other[other.export_type].department = 0;
-						other[other.export_type].department_value = this.edit_view_ui_dic.department_text.getValue();
-					} else {
-						other[other.export_type].department = this.edit_view_ui_dic.company_code.getValue();
-					}
+				break;
+			case 'csv_advanced':
+				other[other.export_type].export_columns = this.edit_view_ui_dic.csv_export_columns.getValue();
 
-					if ( !this.edit_view_ui_dic.employee_number.getValue() ) {
-						other[other.export_type].employee_number = 0;
-						other[other.export_type].employee_number_value = this.edit_view_ui_dic.employee_number_text.getValue();
-					} else {
-						other[other.export_type].employee_number = this.edit_view_ui_dic.employee_number.getValue();
-					}
+				break;
+		}
 
-					if ( !this.edit_view_ui_dic.gl_account.getValue() ) {
-						other[other.export_type].gl_account = 0;
-						other[other.export_type].gl_account_value = this.edit_view_ui_dic.gl_account_text.getValue();
-					} else {
-						other[other.export_type].gl_account = this.edit_view_ui_dic.gl_account.getValue();
-					}
-					break;
-				case 'sage_50':
-					if ( !this.edit_view_ui_dic.customer_name.getValue() ) {
-						other[other.export_type].customer_name = 0;
-						other[other.export_type].customer_name_value = this.edit_view_ui_dic.customer_name_text.getValue();
-					} else {
-						other[other.export_type].customer_name = this.edit_view_ui_dic.customer_name.getValue();
-					}
-					break;
-				case 'cms_pbj':
-					if ( !this.edit_view_ui_dic.facility_code.getValue() ) {
-						other[other.export_type].facility_code = 0;
-						other[other.export_type].facility_code_value = this.edit_view_ui_dic.facility_code_text.getValue();
-					} else {
-						other[other.export_type].facility_code = this.edit_view_ui_dic.facility_code.getValue();
-					}
+		if ( this.save_export_setup_data == undefined || this.save_export_setup_data == false ) {
+			this.save_export_setup_data = {};
+		}
+		this.save_export_setup_data[other.export_type] = other[other.export_type];
+		this.save_export_setup_data['export_type'] = other.export_type;
 
-					if ( !this.edit_view_ui_dic.state_code.getValue() ) {
-						other[other.export_type].state_code = 0;
-						other[other.export_type].state_code_value = this.edit_view_ui_dic.state_code_text.getValue();
-					} else {
-						other[other.export_type].state_code = this.edit_view_ui_dic.state_code.getValue();
-					}
+		this.save_export_setup_data[other.export_type]['columns'] = this.getExportColumns( other.export_type ); //This is needed for the api to build reports properly.
 
-					if ( !this.edit_view_ui_dic.pay_type_code.getValue() ) {
-						other[other.export_type].pay_type_code = 0;
-						other[other.export_type].pay_type_code_value = this.edit_view_ui_dic.pay_type_code_text.getValue();
-					} else {
-						other[other.export_type].pay_type_code = this.edit_view_ui_dic.pay_type_code.getValue();
-					}
-
-					if ( !this.edit_view_ui_dic.job_title_code.getValue() ) {
-						other[other.export_type].job_title_code = 0;
-						other[other.export_type].job_title_code_value = this.edit_view_ui_dic.job_title_code_text.getValue();
-					} else {
-						other[other.export_type].job_title_code = this.edit_view_ui_dic.job_title_code.getValue();
-					}
-					break;				
-				case 'csv_advanced':
-					other[other.export_type].export_columns = this.edit_view_ui_dic.csv_export_columns.getValue();
-					break;
-
+		if ( for_display != undefined ) {
+			for ( key in this.save_export_setup_data ) {
+				if ( typeof(this.save_export_setup_data[key]) !== 'String' ) {
+					this.save_export_setup_data[key] = this.convertExportSetupValues(this.save_export_setup_data[key]);
+				}
 			}
-
 		}
 
 		return other;
 	},
+
+	/* jshint ignore:start */
+	getFormSetupData: function ( for_view ) {
+		var other = {};
+		other.export_type = this.current_edit_record.export_type;
+
+		other[other.export_type] = {};
+		other[other.export_type].columns = this.getExportColumns( other.export_type );
+
+		other = this.getFormData(other);
+
+		if ( !for_view ) {
+			var export_type = other.export_type;
+			other = other[export_type];
+			other.export_type = export_type;
+			other[export_type] = {};
+			other[export_type].columns = this.getExportColumns( other.export_type );
+		}
+
+		return other;
+	},
+
 	/* jshint ignore:end */
 
-	setFormSetupData: function( res_Data ) {
+	/**
+	 * Backwards compatible function for custom data to be moved from the way the api stores it to the way the form needs it.
+	 *
+	 * the old custom field data was stored in obj[key]
+	 * new custom field data is stored in obj[key+'_value']
+	 *
+	 * ie. obj[company_code] is now obj[company_code_value]
+	 *
+	 * @param data
+	 * @returns {*}
+     */
+	convertExportSetupValues: function ( data ) {
+		for (var api_data_key in data) {
+			var form_data_key = api_data_key.substr(0, api_data_key.indexOf('_value'));
+			if ( api_data_key.search('_value') > 0 ) {
+				data[form_data_key] = data[api_data_key];
+			}
+		}
 
-		this.export_setup_data = res_Data;
+		//conversion for lower export grid data from old format
+		if ( data.export_columns != undefined && data.columns == undefined ) {
+			data.columns = {};
+			data.columns = data.export_columns[data.export_type].columns;
+		}
+
+		return data;
+	},
+
+	/**
+	 * Get the form setup data from the api
+	 * @param res_Data
+     */
+	setFormSetupData: function ( res_Data ) {
+		//this if is for backwards compatibility
+		if ( res_Data.export_columns == undefined ) {
+			for ( key in res_Data ) {
+				if ( typeof(res_Data[key]) !== 'String') {
+					res_Data[key] = this.convertExportSetupValues(res_Data[key]);
+				}
+			}
+			this.save_export_setup_data = res_Data;
+			this.export_setup_data = res_Data[res_Data.export_type];
+		} else {
+			res_Data = this.convertExportSetupValues(res_Data);
+			this.export_setup_data = res_Data;
+			this.save_export_setup_data[res_Data.export_type] = res_Data;
+			this.save_export_setup_data['export_type'] = res_Data.export_type;
+		}
 
 		if ( !res_Data ) {
 			this.show_empty_message = true;
@@ -2040,14 +1905,49 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 		if ( res_Data ) {
 
 			if ( res_Data.export_type ) {
-
 				this.edit_view_ui_dic.export_type.setValue( res_Data.export_type );
 				this.current_edit_record.export_type = res_Data.export_type;
 			}
-
 		}
 
+		//for backwards compatibility with old csv_advanced format
+		if ( this.save_export_setup_data['csv_advanced'] != undefined ) {
+			if (this.save_export_setup_data['csv_advanced'].csv_export_columns) {
+				this.save_export_setup_data['csv_advanced'].export_columns = this.save_export_setup_data['csv_advanced'].csv_export_columns;
+			} else {
+				this.save_export_setup_data['csv_advanced'].csv_export_columns = this.save_export_setup_data['csv_advanced'].export_columns;
+			}
+		}
+
+
 		this.onExportChange( res_Data.export_type );
-	}
+	},
+
+	/**
+	 * Overridden to allow stateful export formats. This ensures your changes are put into memory..
+	 *
+	 * @param target
+	 * @param doNotDoValidate
+     */
+	preFormItemChange: function ( target, doNotDoValidate ) {
+		//If the edit grid has left any rows in edit mode, we need to finalize them now before the data is swept into memory.
+		selRowId = $('#export_grid').getGridParam( 'selrow' );
+		$('#export_grid').saveRow( selRowId );
+
+		if ( target.getField() == 'export_type' ) {
+			var other = {};
+			other.export_type = this.current_edit_record.export_type;
+			other[other.export_type] = {};
+			other[other.export_type].export_columns = {columns: this.getExportColumns( other.export_type )};
+
+			if ( this.export_setup_data.export_columns == undefined ) {
+				this.export_setup_data.export_columns = {};
+				this.export_setup_data.export_columns[other.export_type] = {};
+			}
+
+			this.export_setup_data.export_columns[other.export_type] = {columns: this.getExportColumns( other.export_type )};
+			this.save_export_setup_data[target.getField()] = this.getFormSetupData( other );
+		}
+	},
 
 } );

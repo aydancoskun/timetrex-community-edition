@@ -859,7 +859,8 @@ class AccrualPolicyFactory extends Factory {
 	function getProRateInitialFrequencyWindow( $input_amount, $current_epoch, $offset, $pay_period_dates = NULL, $u_obj = NULL ) {
 		$apply_frequency_dates = $this->getApplyFrequencyWindowDates( $current_epoch, $offset, $pay_period_dates, $u_obj );
 		if ( isset($apply_frequency_dates['start_date']) AND isset($apply_frequency_dates['end_date']) ) {
-			$pro_rate_multiplier = ( ( $apply_frequency_dates['end_date'] - $u_obj->getHireDate() ) / ( $apply_frequency_dates['end_date'] - $apply_frequency_dates['start_date'] ) );
+			Debug::Text('ProRate Based On: Start Date: '. TTDate::getDate('DATE+TIME', $apply_frequency_dates['start_date'] ) .' End Date: '. TTDate::getDate('DATE+TIME', $apply_frequency_dates['end_date'] ) .' Hire Date: '. TTDate::getDate('DATE+TIME', $u_obj->getHireDate() ), __FILE__, __LINE__, __METHOD__, 10);
+			$pro_rate_multiplier = ( ( TTDate::getMiddleDayEpoch( $apply_frequency_dates['end_date'] ) - TTDate::getMiddleDayEpoch( $u_obj->getHireDate() ) ) / ( TTDate::getMiddleDayEpoch( $apply_frequency_dates['end_date'] ) - TTDate::getMiddleDayEpoch( $apply_frequency_dates['start_date'] ) ) );
 			if ( $pro_rate_multiplier <= 0 ) {
 				$pro_rate_multiplier = 1;
 			}
@@ -873,7 +874,7 @@ class AccrualPolicyFactory extends Factory {
 	function isInitialApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates = NULL, $u_obj = NULL ) {
 		$apply_frequency_dates = $this->getApplyFrequencyWindowDates( $current_epoch, $offset, $pay_period_dates, $u_obj );
 		if ( isset($apply_frequency_dates['start_date']) AND isset($apply_frequency_dates['end_date']) ) {
-			if ( $u_obj->getHireDate() >= $apply_frequency_dates['start_date'] AND $u_obj->getHireDate() <= $apply_frequency_dates['end_date'] ) {
+			if ( is_object($u_obj) AND TTDate::getMiddleDayEpoch( $u_obj->getHireDate() ) >= TTDate::getMiddleDayEpoch( $apply_frequency_dates['start_date'] ) AND TTDate::getMiddleDayEpoch( $u_obj->getHireDate() ) <= TTDate::getMiddleDayEpoch( $apply_frequency_dates['end_date'] ) ) {
 				Debug::Text('Initial apply frequency window...', __FILE__, __LINE__, __METHOD__, 10);
 				return TRUE;
 			}
@@ -887,7 +888,14 @@ class AccrualPolicyFactory extends Factory {
 		$apply_frequency_dates = $this->getApplyFrequencyWindowDates( $current_epoch, $offset, $pay_period_dates, $u_obj );
 		if ( isset($apply_frequency_dates['start_date']) AND isset($apply_frequency_dates['end_date']) ) {
 			if ( $apply_frequency_dates['end_date'] >= ($current_epoch - $offset) AND $apply_frequency_dates['end_date'] <= $current_epoch ) {
-				return TRUE;
+				//Make sure that if enable opening balance is FALSE, we never apply on the hire date.
+				if ( $this->getEnableOpeningBalance() == FALSE
+					AND ( is_object($u_obj) AND TTDate::getMiddleDayEpoch( $u_obj->getHireDate() ) == TTDate::getMiddleDayEpoch( $current_epoch ) )
+					AND $this->isInitialApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates, $u_obj ) == TRUE ) {
+					return FALSE;
+				} else {
+					return TRUE;
+				}
 			}
 		}
 		
@@ -1142,14 +1150,14 @@ class AccrualPolicyFactory extends Factory {
 
 		//Previous time is time already taken into account in the balance, so subtract it here (opposite of adding lower down in remaining balance)
 		$available_balance = ( $this->getCurrentAccrualBalance( $u_obj->getID(), $this->getAccrualPolicyAccount() ) - $previous_time );
-		$projected_accrual = ( ( $available_balance + $this->getProjectedAccrualAmount( $u_obj, time(), $epoch ) ) + $other_policy_projected_balance );
+		$projected_accrual = ( ( $this->getProjectedAccrualAmount( $u_obj, time(), $epoch ) ) + $other_policy_projected_balance );
 
 		$retarr = array(
 						'available_balance' => $available_balance,
 						'current_time' => $current_time,
 						'remaining_balance' => ( $available_balance + $current_time ),
 						'projected_balance' => $projected_accrual,
-						'projected_remaining_balance' => ( $projected_accrual + $current_time ),
+						'projected_remaining_balance' => ( $projected_accrual + ( $current_time - $previous_time ) ),
 						);
 
 		Debug::Arr($retarr, 'Projected Accrual Arr: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -1174,17 +1182,19 @@ class AccrualPolicyFactory extends Factory {
 		if ( $ppslf->getRecordCount() > 0 ) {
 			$pps_obj = $ppslf->getCurrent();
 
-			$accrual_balance = $this->getCurrentAccrualBalance( $u_obj->getID(), $this->getAccrualPolicyAccount() );
+			$initial_accrual_balance = $this->getCurrentAccrualBalance( $u_obj->getID(), $this->getAccrualPolicyAccount() );
 
 			$pay_period_arr = array();
 			if ( $this->getApplyFrequency() == 10 ) {
 				$pay_period_arr = $this->getPayPeriodArray( $pps_obj, $u_obj, $start_epoch, $end_epoch );
 			}
 
-			$accrual_amount = 0;
+			$accrual_amount = $initial_accrual_balance; //Make the first accrual_amount match the initial accrual balance.
 			for( $epoch = $start_epoch; $epoch <= $end_epoch; $epoch += 86400) {
 				$epoch = ( TTDate::getBeginDayEpoch( $epoch ) + 7200) ; //This is required because the epoch has to be slightly AFTER the pay period end date, which is 11:59PM.
-				$accrual_amount += $this->calcAccrualPolicyTime( $u_obj, $epoch, $offset, $pps_obj, $pay_period_arr, $accrual_balance, FALSE );
+
+				//Make sure we pass the returned accrual_amount back into calcAccrualPolicyTime() as the new balance so rollover/maximum balances are all properly handled.
+				$accrual_amount += $this->calcAccrualPolicyTime( $u_obj, $epoch, $offset, $pps_obj, $pay_period_arr, $accrual_amount, FALSE );
 			}
 
 			Debug::Text('Projected Accrual Amount: '. TTDate::getHours( $accrual_amount ), __FILE__, __LINE__, __METHOD__, 10);
@@ -1197,13 +1207,13 @@ class AccrualPolicyFactory extends Factory {
 	function calcAccrualPolicyTime( $u_obj, $epoch, $offset, $pps_obj, $pay_period_arr, $accrual_balance, $update_records = TRUE ) {
 		$retval = 0;
 
-		Debug::Text('User: '. $u_obj->getFullName() .' Status: '. $u_obj->getStatus() .' Epoch: '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('User: '. $u_obj->getFullName() .' Status: '. $u_obj->getStatus() .' Epoch: '. TTDate::getDate('DATE+TIME', $epoch) .' Hire Date: '. TTDate::getDate('DATE+TIME', $u_obj->getHireDate() ), __FILE__, __LINE__, __METHOD__, 10);
 		//Make sure only active employees accrue time *after* their hire date.
 		//Will this negatively affect Employees who may be on leave?
 		if ( $u_obj->getStatus() == 10
-				AND $epoch >= $u_obj->getHireDate()
+				AND TTDate::getMiddleDayEpoch( $epoch ) >= TTDate::getMiddleDayEpoch( $u_obj->getHireDate() )
 				AND ( $this->getMinimumEmployedDays() == 0
-					OR TTDate::getDays( ($epoch - $u_obj->getHireDate()) ) >= $this->getMinimumEmployedDays() ) ) {
+					OR TTDate::getDays( ( TTDate::getMiddleDayEpoch( $epoch ) - TTDate::getMiddleDayEpoch( $u_obj->getHireDate() ) ) ) >= $this->getMinimumEmployedDays() ) ) {
 			Debug::Text('  User is active and has been employed long enough.', __FILE__, __LINE__, __METHOD__, 10);
 
 			$annual_pay_periods = $pps_obj->getAnnualPayPeriods();
@@ -1301,7 +1311,7 @@ class AccrualPolicyFactory extends Factory {
 						Debug::Text('   Found duplicate rollover accrual entry, skipping...', __FILE__, __LINE__, __METHOD__, 10);
 					}
 				} else {
-					Debug::Text('   Balance hasnt exceeded rollover adjustment...', __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Text('   Balance hasnt exceeded rollover adjustment... Balance: '. $accrual_balance .' Milestone Rollover Time: '. $milestone_obj->getRolloverTime(), __FILE__, __LINE__, __METHOD__, 10);
 				}
 				unset($rollover_accrual_adjustment, $alf, $af);
 			}
@@ -1389,7 +1399,8 @@ class AccrualPolicyFactory extends Factory {
 		}
 	}
 
-	function addAccrualPolicyTime( $epoch = NULL, $offset = 79200, $user_ids = FALSE ) { //22hr offset
+	//79200 = 22hr offset
+	function addAccrualPolicyTime( $epoch = NULL, $offset = 79200, $user_ids = FALSE ) {
 		if ( $epoch == '' ) {
 			$epoch = TTDate::getTime();
 		}

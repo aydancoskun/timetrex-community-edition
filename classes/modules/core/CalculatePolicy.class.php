@@ -481,12 +481,12 @@ class CalculatePolicy {
 		$slf = $this->filterScheduleDataByStatus( $date_stamp, $date_stamp, 20 );
 		if ( is_array( $slf ) AND count( $slf ) > 0 ) {
 			foreach( $slf as $key => $s_obj ) {
-				if ( $s_obj->getStatus() == 20 AND $s_obj->getAbsencePolicyID() > 0 ) {
+				if ( $s_obj->getStatus() == 20 AND $s_obj->getAbsencePolicyID() > 0 AND is_object( $s_obj->getAbsencePolicyObject() ) ) {
 					//Check for conflicting/overridden records, so we don't double up on the time.
 					//This is to allow users to enter a schedule shift for absence time, then override it to smaller number of hours.
 					//Only consider records using the same pay code though, so a user could have different absences on the same day
 					//like a "No Show/No Call" on a Stat holiday and still receive stat holiday time and the absence time.
-					if ( is_object( $s_obj->getAbsencePolicyObject() ) AND $this->isConflictingUserDateTotal( $date_stamp, array(25, 50), (int)$s_obj->getAbsencePolicyObject()->getPayCode() ) ) {
+					if ( $this->isConflictingUserDateTotal( $date_stamp, array(25, 50), (int)$s_obj->getAbsencePolicyObject()->getPayCode() ) ) {
 						continue;
 					}
 
@@ -518,7 +518,7 @@ class CalculatePolicy {
 						$udtf->setEndTimeStamp( ( $s_obj->getStartTime() + $s_obj->getTotalTime() ) );
 
 						$udtf->setBaseHourlyRate( $this->getBaseHourlyRate( $s_obj->getAbsencePolicyObject()->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp ) );
-						$udtf->setHourlyRate( $this->getHourlyRate( $s_obj->getAbsencePolicyObject()->getPayFormulaPolicy(), $udtf->getPayCode(), $udtf->getBaseHourlyRate() ) );
+						$udtf->setHourlyRate( $this->getHourlyRate( $s_obj->getAbsencePolicyObject()->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getBaseHourlyRate() ) );
 						$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $s_obj->getAbsencePolicyObject()->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 						$udtf->setEnableCalcSystemTotalTime(FALSE);
@@ -749,8 +749,11 @@ class CalculatePolicy {
 			$slf = $this->filterScheduleDataByStatus( $date_stamp, $date_stamp, array(10) );
 		} else {
 			$shift_udt_objs = $this->getShiftStartAndEndUserDateTotal( $date_stamp, $date_stamp );
-			if ( is_array($shift_udt_objs) AND isset($shift_udt_objs['start']) AND isset($shift_udt_objs['end']) ) {
-				$slf = $this->filterScheduleDataByShiftStartAndEnd( $shift_udt_objs['start']->getStartTimeStamp(), $shift_udt_objs['end']->getEndTimeStamp() );
+			//Make sure we handle cases where the shift hasn't ended yet, but we still need to get the proper (or closest) schedule policy for it.
+			// ie: when doing real-time punching and going for lunch.
+			// So if start/end records don't exist, just pass FALSE so we still have a hope of matching schedule data.
+			if ( is_array($shift_udt_objs) AND ( isset($shift_udt_objs['start']) OR isset($shift_udt_objs['end']) ) ) {
+				$slf = $this->filterScheduleDataByShiftStartAndEnd( ( ( isset($shift_udt_objs['start']) ) ? $shift_udt_objs['start']->getStartTimeStamp() : FALSE ), ( ( isset($shift_udt_objs['end']) ) ? $shift_udt_objs['end']->getEndTimeStamp() : FALSE ) );
 			}
 		}
 
@@ -897,7 +900,7 @@ class CalculatePolicy {
 
 						//Merge current UDT record into previous one.
 						$prev_udt_obj->setEndTimeStamp( $udt_obj->getEndTimeStamp() );
-						$prev_udt_obj->setTotalTime( $prev_udt_obj->calcTotalTime() );
+						$prev_udt_obj->setTotalTime( $prev_udt_obj->calcTotalTime() ); //FIXME: Make sure it handles negatives properly, like lunch auto-deduct. See ContributingShiftPolicyFactory->getPartialUserDateTotalObject() for more info.
 						$prev_udt_obj->setEnableCalcSystemTotalTime(FALSE);
 						if ( $prev_udt_obj->isValid() ) {
 							$prev_udt_obj->preSave(); //Call this so TotalTime, TotalTimeAmount is calculated immediately, as we don't save these records until later.
@@ -1224,7 +1227,7 @@ class CalculatePolicy {
 
 									//Base hourly rate on the regular wage
 									$udtf->setBaseHourlyRate( $this->getBaseHourlyRate( $bp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp ) );
-									$udtf->setHourlyRate( $this->getHourlyRate( $bp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $udtf->getBaseHourlyRate() ) );
+									$udtf->setHourlyRate( $this->getHourlyRate( $bp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getBaseHourlyRate() ) );
 									$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $bp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 									$udtf->setEnableCalcSystemTotalTime(FALSE);
@@ -1580,7 +1583,7 @@ class CalculatePolicy {
 
 									//Base hourly rate on the regular wage
 									$udtf->setBaseHourlyRate( $this->getBaseHourlyRate( $mp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp ) );
-									$udtf->setHourlyRate( $this->getHourlyRate( $mp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $udtf->getBaseHourlyRate() ) );
+									$udtf->setHourlyRate( $this->getHourlyRate( $mp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getBaseHourlyRate() ) );
 									$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $mp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 									$udtf->setEnableCalcSystemTotalTime(FALSE);
@@ -1755,7 +1758,7 @@ class CalculatePolicy {
 
 					//Base hourly rate on the regular wage
 					$udtf->setBaseHourlyRate( $this->getBaseHourlyRate( $ap_obj->getPayFormulaPolicy(), $udt_obj->getPayCode(), $date_stamp ) );
-					$udtf->setHourlyRate( $this->getHourlyRate( $ap_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $udtf->getBaseHourlyRate() ) );
+					$udtf->setHourlyRate( $this->getHourlyRate( $ap_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getBaseHourlyRate() ) );
 					$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $ap_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 					$udtf->setEnableCalcSystemTotalTime(FALSE);
@@ -1852,7 +1855,7 @@ class CalculatePolicy {
 
 							//Base hourly rate on the regular wage
 							$udtf->setBaseHourlyRate( $this->getBaseHourlyRate( $ap_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp ) );
-							$udtf->setHourlyRate( $this->getHourlyRate( $ap_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $udtf->getBaseHourlyRate() ) );
+							$udtf->setHourlyRate( $this->getHourlyRate( $ap_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getBaseHourlyRate() ) );
 							$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $ap_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 							$udtf->setEnableCalcSystemTotalTime(FALSE);
@@ -2131,7 +2134,7 @@ class CalculatePolicy {
 								$udtf->setTotalTime( $total_time );
 
 								$udtf->setBaseHourlyRate( $this->getBaseHourlyRate( $rtp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udt_obj->getHourlyRate() ) );
-								$udtf->setHourlyRate( $this->getHourlyRate( $rtp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $udtf->getBaseHourlyRate() ) );
+								$udtf->setHourlyRate( $this->getHourlyRate( $rtp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getBaseHourlyRate() ) );
 								$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $rtp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 								$udtf->setEnableCalcSystemTotalTime(FALSE);
@@ -2274,7 +2277,7 @@ class CalculatePolicy {
 
 					//Only recalculate rates if we are actually using averaging. Otherwise we calculate them in calculateOverTime() instead.
 					if ( $this->isPayFormulaPolicyAveraging( $this->over_time_policy[$udt_obj->getSourceObject()]->getPayFormulaPolicy(), $udt_obj->getPayCode() ) ) {
-						$udt_obj->setHourlyRate( $this->getHourlyRate( $this->over_time_policy[$udt_obj->getSourceObject()]->getPayFormulaPolicy(), $udt_obj->getPayCode(), $this->getBaseHourlyRate( $this->over_time_policy[$udt_obj->getSourceObject()]->getPayFormulaPolicy(), $udt_obj->getPayCode(), $udt_obj->getDateStamp(), $udt_obj->getBaseHourlyRate(), $this->contributing_shift_policy[$this->over_time_policy[$udt_obj->getSourceObject()]->getContributingShiftPolicy()], array( 20, 25, 100, 110 ) ) ) );
+						$udt_obj->setHourlyRate( $this->getHourlyRate( $this->over_time_policy[$udt_obj->getSourceObject()]->getPayFormulaPolicy(), $udt_obj->getPayCode(), $udt_obj->getDateStamp(), $this->getBaseHourlyRate( $this->over_time_policy[$udt_obj->getSourceObject()]->getPayFormulaPolicy(), $udt_obj->getPayCode(), $udt_obj->getDateStamp(), $udt_obj->getBaseHourlyRate(), $this->contributing_shift_policy[$this->over_time_policy[$udt_obj->getSourceObject()]->getContributingShiftPolicy()], array( 20, 25, 100, 110 ) ) ) );
 						$udt_obj->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $this->over_time_policy[$udt_obj->getSourceObject()]->getPayFormulaPolicy(), $udt_obj->getPayCode(), $udt_obj->getDateStamp(), $udt_obj->getBaseHourlyRate() ) );
 
 						$udt_obj->setEnableCalcSystemTotalTime(FALSE);
@@ -2368,7 +2371,7 @@ class CalculatePolicy {
 					} else {
 						$base_hourly_rate = $udt_obj->getHourlyRate();
 					}
-					$hourly_rate = $this->getHourlyRate( $otp_obj->getPayFormulaPolicy(), (int)$otp_obj->getPayCode(), $base_hourly_rate );
+					$hourly_rate = $this->getHourlyRate( $otp_obj->getPayFormulaPolicy(), (int)$otp_obj->getPayCode(), $date_stamp, $base_hourly_rate );
 
 					//This must be below the $udt_obj assignment above.
 					//Even if the combined_rate is lower, if the input UDT record is not overtime, then we know some UDT records were skipped over likely due to differential criteria OT policies that only matched the middle of a shift.
@@ -2719,6 +2722,9 @@ class CalculatePolicy {
 	function isSecondBiWeeklyOverTimeWeek( $date_stamp, $first_pay_period_start_date, $start_week_day_id = 0 ) {
 		//This must be based on an "anchor" date, or first_pay_period_start_date, otherwise when there are 53 weeks in a year
 		//it will throw off the odd/even calculation.
+		//FIXME: What happens if they transition from one pay period schedule to another, and the first pay period is a shorter pay period.
+		//  For example from Semi-Monthly to Bi-Weekly, and the first BiWeekly PP is 01-Jan-2014 to 05-Jan-215, then it continues as regular biweekly PPs after that.
+		//  I think for now they will just need to modify their pay period dates so the pay period always starts on the 1st week, not the 2nd week.
 
 		if ( $first_pay_period_start_date == '' ) {
 			$first_pay_period_start_date = 788947200; //Sun, 01-Jan-1995... Used to calculate weeks from.
@@ -2734,8 +2740,7 @@ class CalculatePolicy {
 
 		$retval = ( $weekly_period_diff % 2 );
 
-		//Debug::text(' Days Diff: '. $days_diff .' Weekly Period Diff: '. $weekly_period_diff, __FILE__, __LINE__, __METHOD__, 10);
-		Debug::text(' Date: '. TTDate::getDate('DATE', $date_stamp ) .' First PP Start Date: '. TTDate::getDate('DATE+TIME', $first_pay_period_start_date ).' Retval: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text(' Date: '. TTDate::getDate('DATE', $date_stamp ) .' First PP Start Date: '. TTDate::getDate('DATE+TIME', $first_pay_period_start_date ).' Days: '. $days_diff .' Weeks: '. $weekly_period_diff .' Retval: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $retval == 1 ) {
 			return TRUE;
@@ -3322,6 +3327,11 @@ class CalculatePolicy {
 							foreach( $slf as $s_obj ) {
 								if ( $s_obj->getStatus() == 10 AND ( $current_epoch >= $s_obj->getEndTime() ) ) {
 									$add_exception = TRUE;
+
+									//FIXME: If no punches match, find punches that fall within this schedule time including start/stop window.
+									//  In case the punches got assigned to a different day due to some other shift running long.
+									//  ie: Current Schedule 8A-5P, the employee punched 8A-5P, but the previous day was 11P to 6A, so both shifts get assigned to the previous day.
+
 									//Debug::text(' Found Schedule: Start Time: '. TTDate::getDate('DATE+TIME', $s_obj->getStartTime() ), __FILE__, __LINE__, __METHOD__, 10);
 									//Find punches that fall within this schedule time including start/stop window.
 									if ( TTDate::doesRangeSpanMidnight( $s_obj->getStartTime(), $s_obj->getEndTime() ) ) {
@@ -5440,7 +5450,7 @@ class CalculatePolicy {
 		return $hourly_rate;
 	}
 
-	function getHourlyRate( $pay_formula_policy_id, $pay_code_id, $base_hourly_rate ) {
+	function getHourlyRate( $pay_formula_policy_id, $pay_code_id, $date_stamp, $base_hourly_rate ) {
 		$pay_code_id = (int)$pay_code_id;
 		$pay_formula_policy_id = (int)$pay_formula_policy_id;
 
@@ -5454,7 +5464,23 @@ class CalculatePolicy {
 		}
 
 		if ( is_object( $pay_formula_policy_obj ) ) {
-			$hourly_rate = $pay_formula_policy_obj->getHourlyRate( $base_hourly_rate );
+			$tmp_hourly_rate = 0;
+			switch ( $pay_formula_policy_obj->getWageSourceType() ) {
+				case 10: //Wage Group: Since this is based on a static rate, always full that rate in, regardless of what $base_hourly_rate says. This is required to have a OT policy that uses a Pay Formula that in turn specifies a secondary wage group.
+					$uw_obj = $this->filterUserWage( $pay_formula_policy_obj->getWageGroup(), $date_stamp );
+					if ( is_object( $uw_obj) ) {
+						$tmp_hourly_rate = $uw_obj->getHourlyRate();
+					}
+					break;
+				case 20: //Contributing Pay Code
+					$tmp_hourly_rate = $base_hourly_rate;
+					break;
+				case 30: //Average Contributing Pay Codes
+					$tmp_hourly_rate = $base_hourly_rate;
+					break;
+			}
+
+			$hourly_rate = $pay_formula_policy_obj->getHourlyRate( $tmp_hourly_rate );
 		}
 
 		if ( isset($this->pay_codes[$pay_code_id]) AND $this->pay_codes[$pay_code_id]->getType() == 30 AND $hourly_rate > 0 ) { //Dock Pay
@@ -5942,7 +5968,7 @@ class CalculatePolicy {
 													$udtf->setTotalTime( $total_time );
 
 													$udtf->setBaseHourlyRate( $this->getBaseHourlyRate( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udt_obj->getHourlyRate() ) );
-													$udtf->setHourlyRate( $this->getHourlyRate( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $udtf->getBaseHourlyRate() ) );
+													$udtf->setHourlyRate( $this->getHourlyRate( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getBaseHourlyRate() ) );
 													$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 													$udtf->setEnableCalcSystemTotalTime(FALSE);
@@ -6053,7 +6079,7 @@ class CalculatePolicy {
 																$udtf->setTotalTime( $total_time );
 
 																$udtf->setBaseHourlyRate( $this->getBaseHourlyRate( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udt_obj->getHourlyRate() ) );
-																$udtf->setHourlyRate( $this->getHourlyRate( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $udtf->getBaseHourlyRate() ) );
+																$udtf->setHourlyRate( $this->getHourlyRate( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getBaseHourlyRate() ) );
 																$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 																$udtf->setEnableCalcSystemTotalTime(FALSE);
@@ -6146,7 +6172,7 @@ class CalculatePolicy {
 												$udtf->setTotalTime( $total_time );
 
 												$udtf->setBaseHourlyRate( $this->getBaseHourlyRate( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udt_obj->getHourlyRate() ) );
-												$udtf->setHourlyRate( $this->getHourlyRate( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $udtf->getBaseHourlyRate() ) );
+												$udtf->setHourlyRate( $this->getHourlyRate( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getBaseHourlyRate() ) );
 												$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 												$udtf->setEnableCalcSystemTotalTime(FALSE);
@@ -6299,7 +6325,7 @@ class CalculatePolicy {
 															$udtf->setTotalTime( $total_time );
 
 															$udtf->setBaseHourlyRate( $this->getBaseHourlyRate( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udt_obj->getHourlyRate() ) );
-															$udtf->setHourlyRate( $this->getHourlyRate( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $udtf->getBaseHourlyRate() ) );
+															$udtf->setHourlyRate( $this->getHourlyRate( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getBaseHourlyRate() ) );
 															$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 															$udtf->setEnableCalcSystemTotalTime(FALSE);
@@ -6448,7 +6474,7 @@ class CalculatePolicy {
 													$udtf->setTotalTime( $total_time );
 
 													$udtf->setBaseHourlyRate( $this->getBaseHourlyRate( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udt_obj->getHourlyRate() ) );
-													$udtf->setHourlyRate( $this->getHourlyRate( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $udtf->getBaseHourlyRate() ) );
+													$udtf->setHourlyRate( $this->getHourlyRate( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getBaseHourlyRate() ) );
 													$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 													$udtf->setEnableCalcSystemTotalTime(FALSE);
@@ -7068,7 +7094,7 @@ class CalculatePolicy {
 						}
 
 						$udtf->setBaseHourlyRate( $this->getBaseHourlyRate( $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyObject()->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp ) );
-						$udtf->setHourlyRate( $this->getHourlyRate( $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyObject()->getPayFormulaPolicy(), $udtf->getPayCode(), $udtf->getBaseHourlyRate() ) );
+						$udtf->setHourlyRate( $this->getHourlyRate( $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyObject()->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getBaseHourlyRate() ) );
 						$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyObject()->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 						if ( $holiday_time == 0 AND $this->is_eligible_holiday_description != '' ) { //Include note explaining why they are not receiving holiday time.
@@ -8278,6 +8304,10 @@ class CalculatePolicy {
 			$date_stamp = $this->_calculate( $date_stamp );
 			$i++;
 		} while ( $date_stamp !== FALSE AND $i <= 366 ); //Don't exceed one year.
+
+		if ( $i >= 366 ) {
+			Debug::text(' ERROR: Attempted to recalculate more than one year and reached limit!', __FILE__, __LINE__, __METHOD__, 10);
+		}
 
 		//Make sure reverTimeZone() and Commit transaction are in the Save() function below, so we don't revert the timezone before we save the records.
 

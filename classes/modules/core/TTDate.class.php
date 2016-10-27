@@ -2017,75 +2017,96 @@ class TTDate {
 		return $retval;
 	}
 
+	/**
+	 * break up a timespan into array of days between times and on midnight
+	 * if no filter break days on midnight only
+	 *
+	 * @param time $start_time_stamp
+	 * @param time $end_time_stamp
+	 * @param time $filter_start_time_stamp
+	 * @param time $filter_end_time_stamp
+	 * @return array
+	 */
 	static function splitDateRangeAtMidnight( $start_time_stamp, $end_time_stamp, $filter_start_time_stamp = FALSE, $filter_end_time_stamp = FALSE ) {
-		Debug::text('Splitting TimeStamps: Start: '. TTDate::getDate('DATE+TIME', $start_time_stamp ) .' End: '. TTDate::getDate('DATE+TIME', $end_time_stamp ) .' Filter: Start: '. TTDate::getDate('DATE+TIME', $filter_start_time_stamp ) .' End: '. TTDate::getDate('DATE+TIME', $filter_end_time_stamp ), __FILE__, __LINE__, __METHOD__, 10);
+		$return_arr = array();
+		$start_timestamp_at_midnight = TTDate::getEndDayEpoch( $start_time_stamp ) + 1;
 
-		if ( TTDate::isMidnight( $filter_start_time_stamp ) AND TTDate::isMidnight( $filter_end_time_stamp ) ) {
-			$filter_start_time_stamp = FALSE;
-			$filter_end_time_stamp = FALSE;
+		/**
+		 * set up first pair
+		 */
+		$date_floor = $date_ceiling = $start_time_stamp;
+
+		if ( $filter_start_time_stamp != FALSE AND $filter_end_time_stamp != FALSE ) {
+			$date_ceiling = TTDate::getNextDateFromArray( $date_floor, array($start_timestamp_at_midnight, TTDate::getTimeLockedDate( $filter_start_time_stamp, $start_time_stamp ), TTDate::getTimeLockedDate( $filter_end_time_stamp, $start_time_stamp )) );
+		} else {
+			$date_ceiling = TTDate::getNextDateFromArray( $date_floor, array($start_timestamp_at_midnight, $end_time_stamp));
 		}
 
-		$filter_spans_midnight = FALSE;
-		if ( $filter_end_time_stamp < $filter_start_time_stamp OR TTDate::getDayOfYear( $filter_start_time_stamp ) != TTDate::getDayOfYear( $filter_end_time_stamp ) ) {
-			$filter_end_time_stamp = TTDate::getTimeLockedDate( $filter_end_time_stamp, ( TTDate::getMiddleDayEpoch( $filter_end_time_stamp ) + 86400 ) ); //Due to DST, jump ahead 1.5 days, then jump back to the time locked date.
-			$filter_spans_midnight = TRUE;
-			//Debug::text( '  Filter spans midnight...', __FILE__, __LINE__, __METHOD__, 10 );
+		if ( $date_ceiling >= $end_time_stamp ) {
+			$return_arr[] =   array('start_time_stamp' => $start_time_stamp, 'end_time_stamp' => $end_time_stamp);
+			return $return_arr;
 		}
 
-		$retarr = array();
+		$c = 0;
+		$max_loops = ((($end_time_stamp - $start_time_stamp) / 86400) * 6);
+		while ( $date_ceiling <= $end_time_stamp AND $c <= $max_loops ) {
+			$return_arr[] = array('start_time_stamp' => $date_floor, 'end_time_stamp' => $date_ceiling);
+			$date_floor = $date_ceiling;
 
-		$current_time_stamp = $start_time_stamp;
-		$next_filter_time_stamp = FALSE;
+			/**
+			 * There are 3 valid scenarios for the date ceiling:
+			 * 1. next filter start time
+			 * 2. next filter end time
+			 * 3. next midnight
+			 *
+			 * ensure each is greater than $date_floor, then choose the lowest of the qualifying values.
+			 */
+			if ( $filter_start_time_stamp != FALSE AND $filter_end_time_stamp != FALSE) {
+				$next_midnight = TTDate::getTimeLockedDate( $start_timestamp_at_midnight, TTDate::getMiddleDayEpoch($date_floor) + 86400 );
+				$next_filter_start = TTDate::getTimeLockedDate( $filter_start_time_stamp, $date_floor );
+				$next_filter_end = TTDate::getTimeLockedDate( $filter_end_time_stamp, $date_floor );
 
-		$x = 0;
-		while ( $current_time_stamp < $end_time_stamp ) {
-			if ( $filter_start_time_stamp != '' AND $filter_end_time_stamp != '' ) {
-				if ( $filter_spans_midnight == FALSE OR ( $filter_spans_midnight == TRUE AND $x % 2 == 1 ) ) {
-					$filter_start_time_stamp = TTDate::getTimeLockedDate( $filter_start_time_stamp, $current_time_stamp ); //Base the end time on day of the in_epoch.
-					$filter_end_time_stamp = TTDate::getTimeLockedDate( $filter_end_time_stamp, $current_time_stamp ); //Base the end time on day of the in_epoch.
-					if ( $filter_end_time_stamp < $filter_start_time_stamp ) {
-						if ( $current_time_stamp >= $filter_start_time_stamp ) {
-							$filter_end_time_stamp = TTDate::getTimeLockedDate( $filter_end_time_stamp, ( TTDate::getMiddleDayEpoch( $current_time_stamp ) + 86400 ) ); //Due to DST, jump ahead 1.5 days, then jump back to the time locked date.
-							//Debug::text( '  Moving Filter End TimeStamp to next day: Start: ' . TTDate::getDate( 'DATE+TIME', $filter_start_time_stamp ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $filter_end_time_stamp ), __FILE__, __LINE__, __METHOD__, 10 );
-						}
-					}
-				}
-
-				if ( $current_time_stamp < $filter_start_time_stamp ) {
-					$next_filter_time_stamp = $filter_start_time_stamp;
-				} elseif ( $current_time_stamp < $filter_end_time_stamp ) {
-					$next_filter_time_stamp = $filter_end_time_stamp;
-				} else {
-					$next_filter_time_stamp = $end_time_stamp;
-				}
-			}
-
-			//Debug::text('  bSplitting TimeStamps: Current: '. TTDate::getDate('DATE+TIME', $current_time_stamp ) .' Filter: Next: '. TTDate::getDate('DATE+TIME', $next_filter_time_stamp ), __FILE__, __LINE__, __METHOD__, 10);
-			if ( ( $next_filter_time_stamp == FALSE AND TTDate::doesRangeSpanMidnight( $current_time_stamp, $end_time_stamp ) == TRUE ) OR ( $next_filter_time_stamp != FALSE AND TTDate::doesRangeSpanMidnight( $current_time_stamp, $next_filter_time_stamp ) == TRUE) ) {
-				$next_time_stamp = ( TTDate::getEndDayEpoch( $current_time_stamp ) + 1 );
-				//Debug::text('   Range Spans Midnight: Start: '. TTDate::getDate('DATE+TIME', $current_time_stamp ) .' End: '. TTDate::getDate('DATE+TIME', $end_time_stamp ) .' Next: '. TTDate::getDate('DATE+TIME', $next_time_stamp ), __FILE__, __LINE__, __METHOD__, 10);
+				$date_ceiling = TTDate::getNextDateFromArray( $date_floor, array( $next_midnight, $next_filter_start, $next_filter_end) );
 			} else {
-				if ( $next_filter_time_stamp == FALSE OR $end_time_stamp < $next_filter_time_stamp ) {
-					$next_time_stamp = $end_time_stamp;
-				} else {
-					$next_time_stamp = $next_filter_time_stamp;
-				}
-				//Debug::text('   Range DOES NOT Span Midnight: Start: '. TTDate::getDate('DATE+TIME', $current_time_stamp ) .' End: '. TTDate::getDate('DATE+TIME', $end_time_stamp ) .' Next: '. TTDate::getDate('DATE+TIME', $next_time_stamp ), __FILE__, __LINE__, __METHOD__, 10);
+				$date_ceiling = TTDate::getTimeLockedDate( $start_timestamp_at_midnight, TTDate::getMiddleDayEpoch($date_floor) + 86400 );
 			}
 
-			$retarr[] = array( 'start_time_stamp' => $current_time_stamp, 'end_time_stamp' => $next_time_stamp );
+			/**
+			 * Final case.
+			 **/
+			if ( $date_ceiling >= $end_time_stamp ) {
+				$date_ceiling = $end_time_stamp;
+				$return_arr[] = array( 'start_time_stamp' => $date_floor, 'end_time_stamp' => $date_ceiling );
+				unset( $end_time_stamp, $start_time_stamp, $filter_end_time_stamp, $filter_start_time_stamp );
+				return $return_arr;
+			}
 
-			$current_time_stamp = $next_time_stamp;
-
-			$x++;
+			$c++;
 		}
 
-//		Debug::Arr( $retarr, 'Ranges split at midnight: ', __FILE__, __LINE__, __METHOD__, 10);
-//		foreach( $retarr as $timestamp_key => $timestamp_arr ) {
-//			Debug::text( ' aSplit: Key: '. $timestamp_key .' Start: '. TTDate::getDate('DATE+TIME', $timestamp_arr['start_time_stamp']) .' End: '. TTDate::getDate('DATE+TIME', $timestamp_arr['end_time_stamp']), __FILE__, __LINE__, __METHOD__, 10 );
-//		}
+		Debug::Text("ERROR: infinite loop detected. This should never happen", __FILE__, __LINE__, __METHOD__, 10);
+		return $return_arr;
+	}
 
-		return $retarr;
+	/**
+	 * returns next date from array that is after the floor date
+	 * @param int $floor
+	 * @param array $dates
+	 * @return mixed
+	 */
+	static function getNextDateFromArray($floor, $dates){
+		$tmp_end_times = array();
+		foreach ( $dates as $date ) {
+			if ( $date > $floor ) {
+				$tmp_end_times[] = $date;
+			}
+		}
+
+		if ( count($tmp_end_times) > 0 ) {
+			return min($tmp_end_times);
+		} else {
+			return $floor;
+		}
 	}
 
 	public static function isConsecutiveDays( $date_array ) {
@@ -2295,10 +2316,24 @@ class TTDate {
 						'-1650-last_24_months' => TTi18n::getText('Last 24 Months'),
 
 						'-1700-this_year' => TTi18n::getText('This Year (Year-To-Date)'),
-						'-1710-last_year' => TTi18n::getText('Last Year'),
-						'-1720-last_2_years' => TTi18n::getText('Last Two Years'),
-						'-1730-last_3_years' => TTi18n::getText('Last Three Years'),
-						'-1740-last_5_years' => TTi18n::getText('Last Five Years'),
+						'-1705-this_year_this_pay_period' => TTi18n::getText('This Year (Up To This Pay Period)'),
+						'-1710-this_year_last_pay_period' => TTi18n::getText('This Year (Up To Last Pay Period)'),
+						'-1715-this_year_yesterday' => TTi18n::getText('This Year (Up To Yesterday)'),
+						'-1720-this_year_last_week' => TTi18n::getText('This Year (Up To Last Week)'),
+						'-1725-this_year_this_week' => TTi18n::getText('This Year (Up To This Week)'),
+						'-1730-this_year_last_month' => TTi18n::getText('This Year (Up To Last Month)'),
+						'-1735-this_year_this_month' => TTi18n::getText('This Year (Up To This Month)'),
+						'-1740-this_year_30_days' => TTi18n::getText('This Year (Up To 30 Days Ago)'),
+						'-1745-this_year_45_days' => TTi18n::getText('This Year (Up To 45 Days Ago)'),
+						'-1750-this_year_60_days' => TTi18n::getText('This Year (Up To 60 Days Ago)'),
+						'-1755-this_year_90_days' => TTi18n::getText('This Year (Up To 90 Days Ago)'),
+						'-1765-this_year_last_quarter' => TTi18n::getText('This Year (Up To Last Quarter)'),
+						'-1770-this_year_this_quarter' => TTi18n::getText('This Year (Up To This Quarter)'),
+
+						'-1780-last_year' => TTi18n::getText('Last Year'),
+						'-1785-last_2_years' => TTi18n::getText('Last Two Years'),
+						'-1790-last_3_years' => TTi18n::getText('Last Three Years'),
+						'-1795-last_5_years' => TTi18n::getText('Last Five Years'),
 
 						'-1800-to_yesterday' => TTi18n::getText('Up To Yesterday'),
 						'-1802-to_today' => TTi18n::getText('Up To Today'),
@@ -2619,6 +2654,103 @@ class TTDate {
 				$start_date = TTDate::getBeginYearEpoch( $epoch );
 				$end_date = TTDate::getEndYearEpoch( $epoch );
 				break;
+
+			case 'this_year_this_pay_period':
+			case 'this_year_last_pay_period':
+				$start_date = TTDate::getBeginYearEpoch( $epoch );
+
+				//Make sure user_obj is set.
+				if ( !is_object( $user_obj ) ) {
+					Debug::text('User Object was not passsed...', __FILE__, __LINE__, __METHOD__, 10);
+					break;
+				}
+
+				if ( !isset($params['pay_period_schedule_id']) ) {
+					$params['pay_period_schedule_id'] = NULL;
+				}
+
+				$end_date = FALSE;
+				//Since we allow multiple pay_period schedules to be selected, we have to return pay_period_ids, not start/end dates.
+				if ( $time_period == 'this_year_this_pay_period' ) {
+					$pplf = TTnew( 'PayPeriodListFactory' );
+					$pplf->getThisPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate( $user_obj->getCompany(), $params['pay_period_schedule_id'], time() );
+					if ( $pplf->getRecordCount() > 0 ) {
+						foreach( $pplf as $pp_obj ) {
+							if ( $end_date == FALSE OR $pp_obj->getStartDate() < $end_date ) {
+								$end_date = $pp_obj->getStartDate();
+							}
+						}
+					}
+				} elseif ( $time_period == 'this_year_last_pay_period' ) {
+					$pplf = TTnew( 'PayPeriodListFactory' );
+					$pplf->getLastPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate( $user_obj->getCompany(), $params['pay_period_schedule_id'], time() );
+					if ( $pplf->getRecordCount() > 0 ) {
+						foreach( $pplf as $pp_obj ) {
+							if ( $end_date == FALSE OR $pp_obj->getStartDate() < $end_date ) {
+								$end_date = $pp_obj->getStartDate();
+							}
+						}
+					}
+				}
+				$end_date--;
+				break;
+			case 'this_year_yesterday':
+				$start_date = TTDate::getBeginYearEpoch( $epoch );
+				$end_date = ( TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - 86400) ) - 1);
+				break;
+			case 'this_year_last_week':
+				$start_date = TTDate::getBeginYearEpoch( $epoch );
+				$end_date = ( TTDate::getBeginWeekEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 7)), $start_week_day ) - 1 );
+				break;
+			case 'this_year_this_week':
+				$start_date = TTDate::getBeginYearEpoch( $epoch );
+				$end_date = ( TTDate::getBeginWeekEpoch( $epoch, $start_week_day ) - 1);
+				break;
+			case 'this_year_this_month':
+				$start_date = TTDate::getBeginYearEpoch( $epoch );
+				$end_date = ( TTDate::getBeginMonthEpoch( $epoch ) - 1 );
+				break;
+			case 'this_year_last_month':
+				$start_date = TTDate::getBeginYearEpoch( $epoch );
+				$end_date = ( TTDate::getBeginMonthEpoch( (TTDate::getBeginMonthEpoch( $epoch ) - 86400) ) - 1 );
+				break;
+			case 'this_year_30_days':
+				$start_date = TTDate::getBeginYearEpoch( $epoch );
+				$end_date = ( TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 30) ) ) - 1 );
+				break;
+			case 'this_year_45_days':
+				$start_date = TTDate::getBeginYearEpoch( $epoch );
+				$end_date = ( TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 45) ) ) - 1 );
+				break;
+			case 'this_year_60_days':
+				$start_date = TTDate::getBeginYearEpoch( $epoch );
+				$end_date = ( TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 60) ) ) - 1 );
+				break;
+			case 'this_year_90_days':
+				$start_date = TTDate::getBeginYearEpoch( $epoch );
+				$end_date = ( TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 90) ) ) - 1 );
+				break;
+			case 'this_year_90_days':
+				$start_date = TTDate::getBeginYearEpoch( $epoch );
+				$end_date = ( TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 90) ) ) - 1 );
+				break;
+			case 'this_year_last_quarter':
+				$start_date = TTDate::getBeginYearEpoch( $epoch );
+				$quarter = ( TTDate::getYearQuarter( $epoch ) - 1 );
+				if ( $quarter == 0 ) {
+					$quarter = 4;
+					$epoch = (TTDate::getBeginYearEpoch() - 86400); //Need to jump back into the previous year.
+				}
+				$quarter_dates = TTDate::getYearQuarters( $epoch, $quarter );
+				$end_date = ( $quarter_dates['start'] - 1 );
+				break;
+			case 'this_year_this_quarter':
+				$start_date = TTDate::getBeginYearEpoch( $epoch );
+				$quarter = TTDate::getYearQuarter( $epoch );
+				$quarter_dates = TTDate::getYearQuarters( $epoch, $quarter );
+				$end_date = ( $quarter_dates['start'] - 1 );
+				break;
+
 			case 'last_year':
 				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( $epoch ) - 86400) );
 				$end_date = TTDate::getEndYearEpoch( (TTDate::getBeginYearEpoch( $epoch ) - 86400) );

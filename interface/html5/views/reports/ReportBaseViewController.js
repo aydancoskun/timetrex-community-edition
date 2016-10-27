@@ -770,8 +770,15 @@ ReportBaseViewController = BaseViewController.extend( {
 
 	},
 
+	//Shim method to allow override for classes that need their own onFormItemChange for a specific purpose ie payroll export reports
+	//eg in payroll export, when export_type is changed, we need to execute code but also need the default behaviour of onFormItemChange.
+	preFormItemChange: function (target, doNotDoValidate) {
+		return true;
+	},
+
 	/* jshint ignore:start */
 	onFormItemChange: function( target, doNotDoValidate ) {
+		this.preFormItemChange(target); //shim for child class
 		var $this = this;
 		this.setIsChanged( target );
 		var key = target.getField();
@@ -861,10 +868,9 @@ ReportBaseViewController = BaseViewController.extend( {
 
 		}
 
-		if ( doNotDoValidate && this.include_form_setup && this.edit_view_tab_selected_index === 3 ) {
+		if ( this.include_form_setup && this.edit_view_tab_selected_index === 3 ) {
 			this.form_setup_changed = true;
 		}
-
 	},
 	/* jshint ignore:end */
 	//Create first tab widget base on select template
@@ -1116,18 +1122,34 @@ ReportBaseViewController = BaseViewController.extend( {
 				this.setEditMenu();
 			}
 
-			if ( last_index === 3 && this.form_setup_changed ) {
-				this.form_setup_changed = false;
-				TAlertManager.showConfirmAlert( $.i18n._( 'You have modified Form Setup data without saving, would you like to save your Form Setup data now?' ), '', function( flag ) {
-					if ( flag ) {
-						$this.onSaveSetup();
-					}
-				} );
-			}
+			this.checkFormSetupSaved(last_index);
 
 		}
 
 	},
+
+	/**
+	 * Copied to ROEViewController as it doesn't share this base
+	 * FIXME: might need to go into BaseViewController eventually
+	 * @param label
+	 */
+	checkFormSetupSaved: function ( last_index, label ) {
+		var $this = this;
+
+		if ( label == undefined ) {
+			label = $.i18n._( 'Form Setup' );
+		}
+
+		if ( last_index === 3 && this.form_setup_changed ) {
+			$this.form_setup_changed = false;
+			TAlertManager.showConfirmAlert( $.i18n._( 'You have modified') + ' ' + label + ' ' + $.i18n._('data without saving, would you like to save your data now?' ), '', function ( flag ) {
+				if ( flag ) {
+					$this.onSaveSetup( label );
+				}
+			} );
+		}
+	},
+
 	/* jshint ignore:end */
 	cleanUI: function() {
 		for ( var key in this.edit_view_form_item_dic ) {
@@ -1645,7 +1667,8 @@ ReportBaseViewController = BaseViewController.extend( {
 				break;
 			case 'pay_period_time_sheet_verify_status_id':
 				api_instance = new (APIFactory.getAPIClass( 'APITimeSheetVerify' ))();
-				option = 'status';
+				//show valid values specific to the report
+				option = 'filter_report_status';
 				break;
 			case 'job_status_id':
 				api_instance = new (APIFactory.getAPIClass( 'APIJob' ))();
@@ -2383,7 +2406,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			buildCustomDateUI();
 		} else if ( value === 'custom_pay_period' ) {
 			buildPayPeriodUI();
-		} else if ( value === 'this_pay_period' || value === 'last_pay_period' || value === 'to_last_pay_period' || value === 'to_this_pay_period' ) {
+		} else if ( value === 'this_pay_period' || value === 'last_pay_period' || value === 'to_last_pay_period' || value === 'to_this_pay_period' || value === 'this_year_this_pay_period' || value === 'this_year_last_pay_period' ) {
 			buildPayPeriodScheduleUI();
 		} else {
 			buildDefaultUI();
@@ -2653,7 +2676,7 @@ ReportBaseViewController = BaseViewController.extend( {
 
 		if ( this.current_saved_report && Global.isSet( this.current_saved_report.name ) ) {
 
-			other.report_name = _.escape( this.current_saved_report.name );
+			other.report_name = this.current_saved_report.name;
 		}
 
 		return other;
@@ -2810,7 +2833,6 @@ ReportBaseViewController = BaseViewController.extend( {
 				this.onViewClick();
 				break;
 			case ContextMenuIconName.view_html:
-
 				this.onViewClick( 'html' );
 				break;
 			case ContextMenuIconName.view_html_new_window:
@@ -2834,19 +2856,33 @@ ReportBaseViewController = BaseViewController.extend( {
 		}
 	},
 
-	onSaveSetup: function() {
+	onSaveSetup: function( label ) {
 		var $this = this;
 		var form_setup = this.getFormSetupData();
 
+		if ( label == undefined ) {
+			label = $.i18n._( 'Form setup' );
+		}
+
+		//Allows saving of all export config data for all export formats at once in PayrollExport
+		if ( this.save_export_setup_data != undefined ) {
+			form_setup = this.save_export_setup_data;
+		}
+
+		//do this before the api call for speed to stop #
+		$this.show_empty_message = false;
+		$this.form_setup_changed = false;
+
 		this.api.setCompanyFormConfig( form_setup, {
 			onResult: function( result ) {
-				if ( result.isValid() ) {
-					$this.show_empty_message = false;
-					$this.form_setup_changed = false;
 
-					TAlertManager.showAlert( $.i18n._( 'Form setup has been saved successfully' ) );
+				if ( result.isValid() ) {
+
+					TAlertManager.showAlert( label + ' ' + $.i18n._( 'has been saved successfully' ) );
 				} else {
-					TAlertManager.showAlert( $.i18n._( 'Form setup save failed, Please try again' ) );
+					$this.show_empty_message = true;
+					$this.form_setup_changed = true;
+					TAlertManager.showAlert( label + ' ' + $.i18n._( 'save failed, Please try again' ) );
 				}
 
 			}

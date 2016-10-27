@@ -1356,14 +1356,15 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('03-Jan-2016 8:00:00AM'), TRUE ), TRUE );
 	}
 
+
 	function testsplitDateRange() {
+
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('02-Jan-2016 8:00AM') );
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('01-Jan-2016 8:00AM') );
 		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('02-Jan-2016 12:00AM') );
 		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('02-Jan-2016 12:00AM') );
 		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('02-Jan-2016 8:00AM') );
 		$this->assertEquals( count($split_range_arr), 2 );
-
 
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('03-Jan-2016 8:00AM') );
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('01-Jan-2016 8:00AM') );
@@ -1430,6 +1431,16 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime('02-Jan-2016 8:00AM') );
 		$this->assertEquals( count($split_range_arr), 4 );
 
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('02-Jan-2016 8:00AM'), strtotime('01-Jan-2016 11:00PM'), strtotime('01-Jan-2016 1:00AM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('01-Jan-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('01-Jan-2016 11:00PM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('01-Jan-2016 11:00PM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('02-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime('02-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime('02-Jan-2016 1:00AM') );
+		$this->assertEquals( $split_range_arr[3]['start_time_stamp'], strtotime('02-Jan-2016 1:00AM') );
+		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime('02-Jan-2016 8:00AM') );
+		$this->assertEquals( count($split_range_arr), 4 );
 
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('04-Jan-2016 8:00AM'), strtotime('01-Jan-2016 11:00PM'), strtotime('02-Jan-2016 1:00AM') );
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('01-Jan-2016 8:00AM') );
@@ -1443,13 +1454,16 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[4]['start_time_stamp'], strtotime('02-Jan-2016 11:00PM') );
 		$this->assertEquals( $split_range_arr[4]['end_time_stamp'], strtotime('03-Jan-2016 12:00AM') );
 		$this->assertEquals( $split_range_arr[5]['start_time_stamp'], strtotime('03-Jan-2016 12:00AM') );
-		$this->assertEquals( $split_range_arr[5]['end_time_stamp'], strtotime('03-Jan-2016 11:00PM') );
-		$this->assertEquals( $split_range_arr[6]['start_time_stamp'], strtotime('03-Jan-2016 11:00PM') );
-		$this->assertEquals( $split_range_arr[6]['end_time_stamp'], strtotime('04-Jan-2016 12:00AM') );
-		$this->assertEquals( $split_range_arr[7]['start_time_stamp'], strtotime('04-Jan-2016 12:00AM') );
-		$this->assertEquals( $split_range_arr[7]['end_time_stamp'], strtotime('04-Jan-2016 8:00AM') );
-		$this->assertEquals( count($split_range_arr), 8 );
-
+		$this->assertEquals( $split_range_arr[5]['end_time_stamp'], strtotime('03-Jan-2016 1:00AM') );//should be 1am. things are wrong south of here.
+		$this->assertEquals( $split_range_arr[6]['start_time_stamp'], strtotime('03-Jan-2016 1:00AM') );
+		$this->assertEquals( $split_range_arr[6]['end_time_stamp'], strtotime('03-Jan-2016 11:00PM') );
+		$this->assertEquals( $split_range_arr[7]['start_time_stamp'], strtotime('03-Jan-2016 11:00PM') );
+		$this->assertEquals( $split_range_arr[7]['end_time_stamp'], strtotime('04-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[8]['start_time_stamp'], strtotime('04-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[8]['end_time_stamp'], strtotime('04-Jan-2016 1:00AM') );
+		$this->assertEquals( $split_range_arr[9]['start_time_stamp'], strtotime('04-Jan-2016 1:00AM') );
+		$this->assertEquals( $split_range_arr[9]['end_time_stamp'], strtotime('04-Jan-2016 8:00AM') );
+		$this->assertEquals( count($split_range_arr), 10 );
 
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('03-Jan-2016 8:00PM'), strtotime('01-Jan-2016 9:00AM'), strtotime('01-Jan-2016 7:00PM') );
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('01-Jan-2016 8:00AM') );
@@ -1471,6 +1485,254 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[8]['start_time_stamp'], strtotime('03-Jan-2016 7:00PM') );
 		$this->assertEquals( $split_range_arr[8]['end_time_stamp'], strtotime('03-Jan-2016 8:00PM') );
 		$this->assertEquals( count($split_range_arr), 9 );
+
+		//start and end only one day apart
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('10-Mar-2016 8:00AM'), strtotime('11-Mar-2016 8:00PM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('10-Mar-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('11-Mar-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('11-Mar-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('11-Mar-2016 8:00PM') );
+		$this->assertEquals( count($split_range_arr), 2 );
+
+		TTDate::setTimeZone('PST8PDT', TRUE); //Force to timezone that observes DST.
+		//spans daylight savings time in spring
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('13-Mar-2016 8:00AM'), strtotime('14-Mar-2016 8:00PM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('13-Mar-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('14-Mar-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('14-Mar-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('14-Mar-2016 8:00PM') );
+		$this->assertEquals( count($split_range_arr), 2 );
+
+		//spans daylight savings time in spring with filter
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('13-Mar-2016 8:00AM'), strtotime('14-Mar-2016 8:00PM'), strtotime('01-Jan-2016 9:00AM'), strtotime('01-Jan-2016 7:00PM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('13-Mar-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('13-Mar-2016 9:00AM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('13-Mar-2016 9:00AM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('13-Mar-2016 7:00PM') );
+		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime('13-Mar-2016 7:00PM') );
+		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime('14-Mar-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[3]['start_time_stamp'], strtotime('14-Mar-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime('14-Mar-2016 9:00AM') );
+		$this->assertEquals( $split_range_arr[4]['start_time_stamp'], strtotime('14-Mar-2016 9:00AM') );
+		$this->assertEquals( $split_range_arr[4]['end_time_stamp'], strtotime('14-Mar-2016 7:00PM') );
+		$this->assertEquals( $split_range_arr[5]['start_time_stamp'], strtotime('14-Mar-2016 7:00PM') );
+		$this->assertEquals( $split_range_arr[5]['end_time_stamp'], strtotime('14-Mar-2016 8:00PM') );
+		$this->assertEquals( count($split_range_arr), 6 );
+
+		//spans daylight savings time in spring with filter where the filter spans 11-2
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('12-Mar-2016 8:00AM'), strtotime('13-Mar-2016 4:00AM'), strtotime('12-Mar-2016 11:00PM'), strtotime('13-Mar-2016 2:00AM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('12-Mar-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('12-Mar-2016 11:00PM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('12-Mar-2016 11:00PM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('13-Mar-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime('13-Mar-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime('13-Mar-2016 3:00AM') );
+		$this->assertEquals( $split_range_arr[3]['start_time_stamp'], strtotime('13-Mar-2016 3:00AM') );
+		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime('13-Mar-2016 4:00AM') );
+		$this->assertEquals( count($split_range_arr), 4 );
+
+		//spans daylight savings time in fall
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('6-Nov-2016 8:00AM'), strtotime('7-Nov-2016 8:00PM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('6-Nov-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('7-Nov-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('7-Nov-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('7-Nov-2016 8:00PM') );
+		$this->assertEquals( count($split_range_arr), 2 );
+
+		//spans daylight savings time in fall with filter
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('6-Nov-2016 8:00AM'), strtotime('7-Nov-2016 8:00PM'), strtotime('01-Jan-2016 9:00AM'), strtotime('01-Jan-2016 7:00PM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('6-Nov-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('6-Nov-2016 9:00AM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('6-Nov-2016 9:00AM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('6-Nov-2016 7:00PM') );
+		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime('6-Nov-2016 7:00PM') );
+		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime('7-Nov-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[3]['start_time_stamp'], strtotime('7-Nov-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime('7-Nov-2016 9:00AM') );
+		$this->assertEquals( $split_range_arr[4]['start_time_stamp'], strtotime('7-Nov-2016 9:00AM') );
+		$this->assertEquals( $split_range_arr[4]['end_time_stamp'], strtotime('7-Nov-2016 7:00PM') );
+		$this->assertEquals( $split_range_arr[5]['start_time_stamp'], strtotime('7-Nov-2016 7:00PM') );
+		$this->assertEquals( $split_range_arr[5]['end_time_stamp'], strtotime('7-Nov-2016 8:00PM') );
+		$this->assertEquals( count($split_range_arr), 6 );
+
+		//http://stackoverflow.com/questions/2613338/date-returning-wrong-day-although-the-timestamp-is-correct
+		//fall daylight savings. illustrating the missing hour
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('6-Nov-2016 8:00AM'), strtotime('6-Nov-2016 1:00AM')+7200 );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('06-Nov-2016 08:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'],   strtotime('06-Nov-2016 02:00AM') );
+		$this->assertEquals( count($split_range_arr), 1 );
+
+		//the missing hour shows up in the filter
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('5-Nov-2016 8:00AM'), strtotime('6-Nov-2016 1:00AM')+7200, strtotime('6-Nov-2016 8:00AM'), strtotime('6-Nov-2016 1:00AM'));
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('5-Nov-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('6-Nov-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('6-Nov-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('6-Nov-2016 1:00AM') );
+		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime('6-Nov-2016 1:00AM') );
+		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime('6-Nov-2016 2:00AM') );
+		$this->assertEquals( count($split_range_arr), 3 );
+
+		//fall daylight savings. illustrating the missing hour
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('5-Nov-2016 8:00AM'), strtotime('6-Nov-2016 1:00AM')+7200, strtotime('6-Nov-2016 8:00AM'), strtotime('6-Nov-2016 1:00AM')+3600 );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('05-Nov-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('06-Nov-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('06-Nov-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('06-Nov-2016 1:00AM') );
+		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime('06-Nov-2016 1:00AM') );
+		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime('06-Nov-2016 2:00AM') );
+		$this->assertEquals( count($split_range_arr), 3 );
+
+		//spring daylight savings. illustrating the extra hour
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('13-Mar-2016 8:00AM'), strtotime('13-Mar-2016 12:00AM')+7200 );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('13-Mar-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('13-Mar-2016 3:00AM') );
+		$this->assertEquals( count($split_range_arr), 1 );
+
+		//spring daylight savings. illustrating the extra hour
+		$split_range_arr = TTDate::splitDateRangeAtMidnight(strtotime('11-Mar-2016 8:00AM'), strtotime('13-Mar-2016 12:00AM')+7200 ,strtotime('13-Mar-2016 4:00AM'), strtotime('13-Mar-2016 1:00AM')+7200);
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('11-Mar-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('12-Mar-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('12-Mar-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('12-Mar-2016 4:00AM') );
+		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime('12-Mar-2016 4:00AM') );
+		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime('13-Mar-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[3]['start_time_stamp'], strtotime('13-Mar-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime('13-Mar-2016 3:00AM') );
+		$this->assertEquals( count($split_range_arr), 4 );
+
+		//leap year illustration
+		$split_range_arr = TTDate::splitDateRangeAtMidnight(strtotime('28-Feb-2016 8:00AM'), strtotime('1-Mar-2016 12:00AM')+7200 ,strtotime('28-Feb-2016 4:00AM'), strtotime('28-Feb-2016 1:00AM')+7200);
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('28-Feb-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('29-Feb-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('29-Feb-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('29-Feb-2016 3:00AM') );
+		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime('29-Feb-2016 3:00AM') );
+		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime('29-Feb-2016 4:00AM') );
+		$this->assertEquals( $split_range_arr[3]['start_time_stamp'], strtotime('29-Feb-2016 4:00AM') );
+		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime('01-Mar-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[4]['start_time_stamp'], strtotime('01-Mar-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[4]['end_time_stamp'], strtotime('01-Mar-2016 2:00AM') );
+		$this->assertEquals( count($split_range_arr), 5 );
+
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('Tue, 03 May 2016 06:00:00 -0600'), strtotime('Thu, 05 May 2016 15:00:00 -0600'), strtotime('Tue, 03 May 2016 08:00:00 -0600'), strtotime('Tue, 03 May 2016 15:00:00 -0600'));
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('03 May 2016 06:00:00 -0600') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('03 May 2016 08:00:00 -0600') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('Tue, 03 May 2016 08:00:00 -0600') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('03 May 2016 15:00:00 -0600') );
+		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime('03 May 2016 15:00:00 -0600') );
+		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime('04-May-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[3]['start_time_stamp'], strtotime('04-May-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime('04 May 2016 08:00:00 -0600') );
+		$this->assertEquals( $split_range_arr[4]['start_time_stamp'], strtotime('04 May 2016 08:00:00 -0600') );
+		$this->assertEquals( $split_range_arr[4]['end_time_stamp'], strtotime('04 May 2016 15:00:00 -0600') );
+		$this->assertEquals( $split_range_arr[5]['start_time_stamp'], strtotime('04 May 2016 15:00:00 -0600') );
+		$this->assertEquals( $split_range_arr[5]['end_time_stamp'], strtotime('05-May-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[6]['start_time_stamp'], strtotime('05-May-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[6]['end_time_stamp'], strtotime('05 May 2016 08:00:00 -0600') );
+		$this->assertEquals( $split_range_arr[7]['start_time_stamp'], strtotime('05 May 2016 08:00:00 -0600') );
+		$this->assertEquals( $split_range_arr[7]['end_time_stamp'], strtotime('05 May 2016 15:00:00 -0600') );
+		$this->assertEquals( count($split_range_arr), 8 );
+
+		//multi-year test
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('15-Jun-2010 8:00AM'), strtotime('30-Aug-2016 5:00PM'), strtotime('25-Jun-2010 2:00AM'), strtotime('26-Aug-2016 10:00PM'));
+		//first 3 days
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('2010-06-15 08:00:00am') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('2010-06-15 10:00:00pm') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('2010-06-15 10:00:00pm') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('2010-06-16 12:00:00am') );
+		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime('2010-06-16 12:00:00am') );
+		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime('2010-06-16 02:00:00am') );
+		//a few from the middle
+		$this->assertEquals( $split_range_arr[3000]['start_time_stamp'], strtotime('2013-03-11 02:00:00am') );
+		$this->assertEquals( $split_range_arr[3000]['end_time_stamp'], strtotime('2013-03-11 10:00:00pm') );
+		$this->assertEquals( $split_range_arr[3001]['start_time_stamp'], strtotime('2013-03-11 10:00:00pm') );
+		$this->assertEquals( $split_range_arr[3001]['end_time_stamp'], strtotime('2013-03-12 12:00:00am') );
+		$this->assertEquals( $split_range_arr[3002]['start_time_stamp'], strtotime('2013-03-12 12:00:00am') );
+		$this->assertEquals( $split_range_arr[3002]['end_time_stamp'], strtotime('2013-03-12 02:00:00am') );
+		//last 3 days
+		$this->assertEquals( $split_range_arr[6802]['start_time_stamp'], strtotime('2016-08-29 10:00:00pm') );
+		$this->assertEquals( $split_range_arr[6802]['end_time_stamp'], strtotime('2016-08-30 12:00:00am') );
+		$this->assertEquals( $split_range_arr[6803]['start_time_stamp'], strtotime('2016-08-30 12:00:00am') );
+		$this->assertEquals( $split_range_arr[6803]['end_time_stamp'], strtotime('2016-08-30 02:00:00am') );
+		$this->assertEquals( $split_range_arr[6804]['start_time_stamp'], strtotime('2016-08-30 02:00:00am') );
+		$this->assertEquals( $split_range_arr[6804]['end_time_stamp'], strtotime('2016-08-30 05:00:00pm') );
+		$this->assertEquals( count($split_range_arr), 6805 );
+
 	}
+
+	/**
+	 * Magic days and all the problems they leave for us.
+	 */
+	function testDSTMagic() {
+		TTDate::setTimeZone('PST8PDT', TRUE); //Force to timezone that observes DST.
+		$time_stamp = 1457859600;
+		$this->assertEquals( strtotime('13-Mar-2016 1:00AM'), $time_stamp );
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $time_stamp), '13-Mar-16 1:00 AM PST' );
+
+		$this->assertEquals( strtotime('13-Mar-2016 2:00AM'), ( $time_stamp + 3600 ) );
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp + 3600 ) ), '13-Mar-16 3:00 AM PDT' );
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp + 86400 ) ), '14-Mar-16 2:00 AM PDT' );
+
+		TTDate::setTimeZone('Etc/GMT+8', TRUE); //Force to timezone that does not observe
+		$time_stamp = 1457859600;
+		$this->assertEquals( strtotime('13-Mar-2016 1:00AM PST'), $time_stamp );
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $time_stamp), '13-Mar-16 1:00 AM GMT+8' );
+
+		$this->assertEquals( strtotime('13-Mar-2016 2:00AM PST'), ( $time_stamp + 3600 ) );
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp + 3600 ) ), '13-Mar-16 2:00 AM GMT+8' );
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp + 86400 ) ), '14-Mar-16 1:00 AM GMT+8' );
+
+
+
+
+		TTDate::setTimeZone('PST8PDT', TRUE); //Force to timezone that observes DST.
+		$time_stamp = 1478419200;
+		$this->assertEquals( strtotime('06-Nov-2016 1:00AM'), $time_stamp );
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $time_stamp), '06-Nov-16 1:00 AM PDT' );
+
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp + 3600 ) ), '06-Nov-16 1:00 AM PST' );
+
+		$this->assertEquals( strtotime('06-Nov-2016 2:00AM'), ($time_stamp + 7200) );
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp + 7200 ) ), '06-Nov-16 2:00 AM PST' );
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp + 86400 ) ), '07-Nov-16 12:00 AM PST' );
+
+
+
+
+		//http://stackoverflow.com/questions/2613338/date-returning-wrong-day-although-the-timestamp-is-correct
+		//illustrating that +86400 will not always give you tomorrow.
+		$time_stamp = strtotime('05-Nov-2016 12:00AM');
+		$time_stamp += 86400;
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ),'06-Nov-16 12:00 AM PDT'); //normal operation
+		$time_stamp += 86400;
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ),'06-Nov-16 11:00 PM PST'); //extra day!!!
+		$time_stamp += 86400;
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ),'07-Nov-16 11:00 PM PST'); //normal operation
+
+		//and the same for fall daylight savings
+		$time_stamp = strtotime('15-Mar-2016 12:00AM');
+		$time_stamp -= 86400;
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ), '14-Mar-16 12:00 AM PDT'); //normal operation
+		$time_stamp -= 86400;
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ), '12-Mar-16 11:00 PM PST'); //missing day!!! where is 13th?
+		$time_stamp -= 86400;
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ), '11-Mar-16 11:00 PM PST'); //normal operation
+
+
+
+
+		//illustrating that +86400 will not always give you tomorrow, but the middle day epoch will dodge the issue.
+		//if we do all the math on the middle of day epoch and continually force it back to noon we can avoid problems with dst
+		$time_stamp = TTDate::getMiddleDayEpoch(strtotime('04-Nov-2016 12:00AM'));
+		$time_stamp = TTDate::getMiddleDayEpoch($time_stamp + 86400);
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ),'05-Nov-16 12:00 PM PDT'); //normal operation
+		$time_stamp = TTDate::getMiddleDayEpoch($time_stamp + 86400);
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ),'06-Nov-16 12:00 PM PST'); //normal operation
+		$time_stamp = TTDate::getMiddleDayEpoch($time_stamp + 86400);
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ),'07-Nov-16 12:00 PM PST'); //normal operation
+		$time_stamp = TTDate::getMiddleDayEpoch($time_stamp + 86400);
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ),'08-Nov-16 12:00 PM PST'); //normal operation
+	}
+
 }
 ?>

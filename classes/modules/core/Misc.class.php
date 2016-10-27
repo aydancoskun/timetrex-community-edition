@@ -614,7 +614,7 @@ class Misc {
 			if ( $tmp_minimum_decimals > $minimum_decimals ) {
 				$minimum_decimals = $tmp_minimum_decimals;
 			}
-			
+
 			return number_format( $value, $minimum_decimals, '.', '' );
 		}
 
@@ -774,7 +774,7 @@ class Misc {
 			return 0;
 		}
 	}
-	
+
 	static function calculateMultipleColumns($data, $include_elements = array(), $exclude_elements = array() ) {
 		if ( !is_array($data) ) {
 			return FALSE;
@@ -1016,7 +1016,7 @@ class Misc {
 									'PolicyGroupRoundIntervalPolicyFactory',
 									'ProductTaxPolicyProductFactory',
 									);
-		
+
 		$dependency_tree = new DependencyTree();
 		$i = 0;
 		foreach( $global_class_map as $class => $file ) {
@@ -1051,9 +1051,9 @@ class Misc {
 		if ( isset($filtered_factory_arr) AND count($filtered_factory_arr) > 0 ) {
 			@unlink( $output_file );
 			$fp = bzopen( $output_file, 'w');
-			
+
 			Debug::Arr($filtered_factory_arr, 'Filtered/Ordered Factory List: ', __FILE__, __LINE__, __METHOD__, 10);
-			
+
 			Debug::Text('Exporting data...', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $filtered_factory_arr as $factory ) {
 				$class = str_replace( 'Factory', 'ListFactory', $factory );
@@ -1071,7 +1071,7 @@ class Misc {
 
 	static function ExportListFactory2XML( $lf, $filter_data, $file_pointer ) {
 		require_once(Environment::getBasePath() .'classes/pear/XML/Serializer.php');
-		
+
 		$serializer = new XML_Serializer( array(
 													XML_SERIALIZER_OPTION_INDENT		=> '  ',
 													XML_SERIALIZER_OPTION_RETURN_RESULT => TRUE,
@@ -1141,7 +1141,7 @@ class Misc {
 
 		return $arr;
 	}
-	
+
 	static function getMimeType( $file_name, $buffer = FALSE, $keep_charset = FALSE, $unknown_type = 'application/octet-stream' ) {
 		if ( function_exists('finfo_buffer') ) { //finfo extension in PHP v5.3+
 			if ( $buffer == FALSE AND file_exists( $file_name ) ) {
@@ -1448,7 +1448,7 @@ class Misc {
 
 	static function getEmailDomain() {
 		global $config_vars;
-		
+
 		if ( isset($config_vars['other']['email_domain']) AND $config_vars['other']['email_domain'] != '' ) {
 			$domain = $config_vars['other']['email_domain'];
 		} else {
@@ -1525,7 +1525,7 @@ class Misc {
 	//Checks refer to help mitigate CSRF attacks.
 	static function checkValidReferer( $referer = FALSE ) {
 		global $config_vars;
-		
+
 		if ( PRODUCTION == TRUE AND isset($config_vars['other']['enable_csrf_validation']) AND $config_vars['other']['enable_csrf_validation'] == TRUE ) {
 			if ( $referer == FALSE ) {
 				if ( isset($_SERVER['HTTP_ORIGIN']) AND $_SERVER['HTTP_ORIGIN'] != '' ) {
@@ -1571,7 +1571,7 @@ class Misc {
 
 		return TRUE;
 	}
-	
+
 	static function getHostNameWithoutSubDomain( $host_name ) {
 		$split_host_name = explode('.', $host_name );
 		if ( count($split_host_name) > 2 ) {
@@ -1581,7 +1581,7 @@ class Misc {
 
 		return $host_name;
 	}
-	
+
 	static function getHostName( $include_port = TRUE ) {
 		global $config_vars;
 
@@ -1717,7 +1717,7 @@ class Misc {
 			return $retval;
 		}
 	}
-	
+
 	static function issetOr( &$var, $default = NULL ) {
 		if ( isset($var) ) {
 			return $var;
@@ -1960,7 +1960,7 @@ class Misc {
 
 		return 2147483647; //If not linux, return large number, this is in Bytes.
 	}
-	
+
 	static function getSystemLoad() {
 		if ( OPERATING_SYSTEM == 'LINUX' ) {
 			$loadavg_file = '/proc/loadavg';
@@ -2013,7 +2013,7 @@ class Misc {
 		}
 
 		$to = 'errors@timetrex.com';
-		
+
 		global $config_vars;
 		if ( isset($config_vars['other']['system_admin_email']) ) {
 			if ( $config_vars['other']['system_admin_email'] != '' ) {
@@ -2442,7 +2442,7 @@ class Misc {
 		if ( isset($config_vars['other']['proxy_protocol_header_name']) AND $config_vars['other']['proxy_protocol_header_name'] != '' ) {
 			$header_name = $config_vars['other']['proxy_protocol_header_name']; //'HTTP_X_FORWARDED_PROTO'; //X-Forwarded-Proto;
 		}
-		
+
 		//ignore_force_ssl is used for things like cookies where we need to determine if SSL is *currently* in use, vs. if we want it to be used or not.
 		if ( $ignore_force_ssl == FALSE AND isset($config_vars['other']['force_ssl']) AND ( $config_vars['other']['force_ssl'] == TRUE ) ) {
 			return TRUE;
@@ -2507,8 +2507,8 @@ class Misc {
 		return str_replace( array('&', '"', '\'', '>', '<'), '', $str );
 	}
 
-	//Returns TRUE/FALSE if the identifier is within the staged rollout period. 
-	static function getStagedRollout( $identifier, $original_release_date, $max_rollout_days = 10, $force = FALSE ) {
+	//Returns TRUE/FALSE if the identifier is within the staged rollout period.
+	static function getStagedRollout( $product_edition_id, $identifier, $original_release_date, $max_rollout_days = 10, $force = FALSE ) {
 		//Divide the max_rollout_days into 5 brackets.
 		//In the first 20% of the rollout period, update 1% of the customers.
 		//In the next 20% of the rollout period, update 25% of the customers.
@@ -2522,16 +2522,41 @@ class Misc {
 			$days_remaining = 0;
 		}
 
-		if ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.20 ) ) ) {
-			$percent_chance = 1;
-		} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.40 ) ) ) {
-			$percent_chance = 25;
-		} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.60 ) ) ) {
-			$percent_chance = 50;
-		} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.80 ) ) ) {
-			$percent_chance = 75;
-		} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 1.00 ) ) ) {
-			$percent_chance = 100;
+		if ( $product_edition_id > 10 ) { //Pro and higher editions.
+			if ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.10 ) ) ) {
+				$percent_chance = 0;
+			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.20 ) ) ) {
+				$percent_chance = 0;
+			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.30 ) ) ) {
+				$percent_chance = 0;
+			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.40 ) ) ) {
+				$percent_chance = 1;
+			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.50 ) ) ) {
+				$percent_chance = 1;
+			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.60 ) ) ) {
+				$percent_chance = 25;
+			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.70 ) ) ) {
+				$percent_chance = 25;
+			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.80 ) ) ) {
+				$percent_chance = 50;
+			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.90 ) ) ) {
+				$percent_chance = 50;
+			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 1.00 ) ) ) {
+				$percent_chance = 100;
+			}
+		} else {
+			//Community Edition, rollout faster, so any major bugs can be caught by them first.
+			if ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.20 ) ) ) {
+				$percent_chance = 1;
+			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.40 ) ) ) {
+				$percent_chance = 25;
+			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.60 ) ) ) {
+				$percent_chance = 50;
+			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.80 ) ) ) {
+				$percent_chance = 75;
+			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 1.00 ) ) ) {
+				$percent_chance = 100;
+			}
 		}
 
 		srand( hexdec( substr( $identifier, 0, 10 ) ) );
@@ -2551,7 +2576,7 @@ class Misc {
 		$mime_type = Misc::getMimeType( $file_data, TRUE );
 		if ( strpos( $mime_type, 'image' ) !== FALSE ) {
 			$file_size = strlen( $file_data );
-			
+
 			//use getimagesize() to make sure image isn't too large and actually is an image.
 			$image_size = getimagesizefromstring( $file_data );
 			Debug::Arr($size, 'Mime Type: '. $mime_type .' Bytes: '. $file_size .' Size: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -2561,7 +2586,7 @@ class Misc {
 				Debug::Text('Bytes to image ratio: '. $bytes_to_image_size_ratio, __FILE__, __LINE__, __METHOD__, 10);
 
 				//UNFINISHED!
-				
+
 				return TRUE;
 			}
 
@@ -2576,7 +2601,7 @@ class Misc {
 		if ( $name != '' ) {
 			$retarr[] = $name;
 		}
-		
+
 		if ( $address1 != '' ) {
 			$retarr[] = $address1;
 		}
@@ -2604,7 +2629,7 @@ class Misc {
 		if ( $country != '' ) {
 			$retarr[] = $country;
 		}
-		
+
 		return implode("\n", $retarr );
 	}
 
@@ -2621,7 +2646,7 @@ class Misc {
 		} else {
 			$retval = uniqid( $salt . dechex( mt_rand() ), TRUE );
 		}
-	
+
 		return $retval;
 	}
 }

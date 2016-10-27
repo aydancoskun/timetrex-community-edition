@@ -51,21 +51,27 @@ class OtherFieldFactory extends Factory {
 		switch( $name ) {
 			case 'type':
 				$retval = array(
-											2  => TTi18n::gettext('Company'),
-											4  => TTi18n::gettext('Branch'),
-											5  => TTi18n::gettext('Department'),
-											10	=> TTi18n::gettext('Employee'),
-											12	=> TTi18n::gettext('Employee Title'),
-											15	=> TTi18n::gettext('Punch'),
-											20	=> TTi18n::gettext('Job'),
-											30	=> TTi18n::gettext('Task'),
-											50	=> TTi18n::gettext('Client'),
-											55	=> TTi18n::gettext('Client Contact'),
-											//57  => TTi18n::gettext('Client Payment'),
-											60	=> TTi18n::gettext('Product'),
-											70	=> TTi18n::gettext('Invoice'),
-											80	=> TTi18n::gettext('Document'),
-									);
+									2  => TTi18n::gettext('Company'),
+									4  => TTi18n::gettext('Branch'),
+									5  => TTi18n::gettext('Department'),
+									10	=> TTi18n::gettext('Employee'),
+									12	=> TTi18n::gettext('Employee Title'),
+									15	=> TTi18n::gettext('Punch'),
+									18	=> TTi18n::gettext('Schedule')
+								);
+
+				$product_edition = Misc::getCurrentCompanyProductEdition();
+				if ( $product_edition >= TT_PRODUCT_CORPORATE ) {
+					$retval[20] = TTi18n::gettext('Job');
+					$retval[30] = TTi18n::gettext('Task');
+					$retval[50] = TTi18n::gettext('Client');
+					$retval[55] = TTi18n::gettext('Client Contact');
+					//$retval[57] = TTi18n::gettext('Client Payment');
+					$retval[60] = TTi18n::gettext('Product');
+					$retval[70] = TTi18n::gettext('Invoice');
+					$retval[80] = TTi18n::gettext('Document');
+				}
+
 				break;
 			case 'columns':
 				$retval = array(

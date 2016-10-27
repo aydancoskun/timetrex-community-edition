@@ -39,13 +39,13 @@ require_once('PHPUnit/Framework/TestCase.php');
 class SQLTest extends PHPUnit_Framework_TestCase {
 	public function setUp() {
 		global $dd;
-		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$dd = new DemoData();
 		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
-		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
+		$dd->setUserNamePostFix( '_' . uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
-		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Company ID: ' . $this->company_id, __FILE__, __LINE__, __METHOD__, 10 );
 		$this->assertGreaterThan( 0, $this->company_id );
 
 		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
@@ -64,9 +64,10 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
-	
+
 	public function tearDown() {
-		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10 );
+
 		return TRUE;
 	}
 
@@ -76,13 +77,14 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$retarr = array();
 
 		//Get all ListFactory classes
-		foreach( $global_class_map as $class_name => $class_file_name ) {
+		foreach ( $global_class_map as $class_name => $class_file_name ) {
 			if ( strpos( $class_name, 'ListFactory' ) !== FALSE ) {
 				$retarr[] = $class_name;
 			}
 		}
 
-		$chunk_size = ceil( ( count($retarr) / $equal_parts ) );
+		$chunk_size = ceil( ( count( $retarr ) / $equal_parts ) );
+
 		return array_chunk( $retarr, $chunk_size );
 	}
 
@@ -91,33 +93,33 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 			$reflectionClass = new ReflectionClass( $factory_name );
 			$class_file_name = $reflectionClass->getFileName();
 
-			Debug::text('Checking Class: '. $factory_name .' File: '. $class_file_name, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( 'Checking Class: ' . $factory_name . ' File: ' . $class_file_name, __FILE__, __LINE__, __METHOD__, 10 );
 
 			$filter_data_types = array(
-										'not_set', //passes
-										'true', //passes
-										'false', //passes
-										'null', //passes
-										'negative_small_int', //passes
-										'small_int', //passes
-										'large_int',
-										'string', //passes
-										'array', //passes
-									);
+					'not_set', //passes
+					'true', //passes
+					'false', //passes
+					'null', //passes
+					'negative_small_int', //passes
+					'small_int', //passes
+					'large_int',
+					'string', //passes
+					'array', //passes
+			);
 
 			//Parse filter array keys from class file so we can populate them with dummy data.
-			preg_match_all( '/\$filter_data\[\'([a-z0-9_]*)\'\]/i', file_get_contents($class_file_name), $filter_data_match);
-			if ( isset($filter_data_match[1]) ) {
+			preg_match_all( '/\$filter_data\[\'([a-z0-9_]*)\'\]/i', file_get_contents( $class_file_name ), $filter_data_match );
+			if ( isset( $filter_data_match[1] ) ) {
 				//Debug::Arr($filter_data_match, 'Filter Data Match: ', __FILE__, __LINE__, __METHOD__, 10);
-				foreach( $filter_data_types as $filter_data_type ) {
-					Debug::Text('Filter Data Type: '. $filter_data_type, __FILE__, __LINE__, __METHOD__, 10);
+				foreach ( $filter_data_types as $filter_data_type ) {
+					Debug::Text( 'Filter Data Type: ' . $filter_data_type, __FILE__, __LINE__, __METHOD__, 10 );
 
 					$filter_data = array();
 
 					$filter_data_match[1] = array_unique( $filter_data_match[1] );
-					foreach( $filter_data_match[1] as $filter_data_key ) {
+					foreach ( $filter_data_match[1] as $filter_data_key ) {
 						//Skip sort_column/sort_order
-						if ( in_array( $filter_data_key, array('sort_column', 'sort_order' ) ) ) {
+						if ( in_array( $filter_data_key, array('sort_column', 'sort_order') ) ) {
 							continue;
 						}
 
@@ -128,28 +130,28 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 						// Arrays
 						switch ( $filter_data_type ) {
 							case 'true':
-								$filter_data[$filter_data_key] = TRUE;
+								$filter_data[ $filter_data_key ] = TRUE;
 								break;
 							case 'false':
-								$filter_data[$filter_data_key] = FALSE;
+								$filter_data[ $filter_data_key ] = FALSE;
 								break;
 							case 'null':
-								$filter_data[$filter_data_key] = NULL;
+								$filter_data[ $filter_data_key ] = NULL;
 								break;
 							case 'negative_small_int':
-								$filter_data[$filter_data_key] = ( rand(0, 128) * -1 );
+								$filter_data[ $filter_data_key ] = ( rand( 0, 128 ) * -1 );
 								break;
 							case 'small_int':
-								$filter_data[$filter_data_key] = rand(0, 128);
+								$filter_data[ $filter_data_key ] = rand( 0, 128 );
 								break;
 							case 'large_int':
-								$filter_data[$filter_data_key] = rand(2147483648, 21474836489);
+								$filter_data[ $filter_data_key ] = rand( 2147483648, 21474836489 );
 								break;
 							case 'string':
-								$filter_data[$filter_data_key] = 'A'.substr( md5(microtime()), rand(0, 26), 10 );
+								$filter_data[ $filter_data_key ] = 'A' . substr( md5( microtime() ), rand( 0, 26 ), 10 );
 								break;
 							case 'array':
-								$filter_data[$filter_data_key] = array( rand(0, 128), rand(2147483648, 21474836489), 'A'.substr( md5(microtime()), rand(0, 26), 10 ) );
+								$filter_data[ $filter_data_key ] = array(rand( 0, 128 ), rand( 2147483648, 21474836489 ), 'A' . substr( md5( microtime() ), rand( 0, 26 ), 10 ));
 								break;
 							case 'not_set':
 								break;
@@ -158,24 +160,24 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 					//Debug::Arr($filter_data, 'Filter Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 					$lf = TTNew( $factory_name );
-					switch( $factory_name ) {
+					switch ( $factory_name ) {
 						case 'RecurringScheduleControlListFactory':
 							$retarr = $lf->getAPIExpandedSearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data, 1, 1, NULL, NULL );
 							$this->assertNotEquals( $retarr, FALSE );
-							$this->assertTrue( is_object($retarr), TRUE );
+							$this->assertTrue( is_object( $retarr ), TRUE );
 
 							$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data, 1, 1, NULL, NULL );
 							$this->assertNotEquals( $retarr, FALSE );
-							$this->assertTrue( is_object($retarr), TRUE );
+							$this->assertTrue( is_object( $retarr ), TRUE );
 							break;
 						case 'ScheduleListFactory':
 							$retarr = $lf->getSearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data, 1, 1, NULL, NULL );
 							$this->assertNotEquals( $retarr, FALSE );
-							$this->assertTrue( is_object($retarr), TRUE );
+							$this->assertTrue( is_object( $retarr ), TRUE );
 
 							$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data, 1, 1, NULL, NULL );
 							$this->assertNotEquals( $retarr, FALSE );
-							$this->assertTrue( is_object($retarr), TRUE );
+							$this->assertTrue( is_object( $retarr ), TRUE );
 							break;
 						case 'MessageControlListFactory':
 							$filter_data['current_user_id'] = $this->user_id;
@@ -184,18 +186,19 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 								//Make sure we test pagination, especially with MySQL due to its limitation with subqueries and need for _ADODB_COUNT workarounds, $limit = NULL, $page = NULL, $where = NULL, $order = NULL
 								$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data, 1, 1, NULL, NULL );
 								$this->assertNotEquals( $retarr, FALSE );
-								$this->assertTrue( is_object($retarr), TRUE );
+								$this->assertTrue( is_object( $retarr ), TRUE );
 							}
 							break;
 					}
 				}
 			}
-			unset($filter_data_match);
+			unset( $filter_data_match );
 
-			Debug::text('Done...', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( 'Done...', __FILE__, __LINE__, __METHOD__, 10 );
+
 			return TRUE;
 		} else {
-			Debug::text('Class does not exist: '. $factory_name, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( 'Class does not exist: ' . $factory_name, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
 		return FALSE;
@@ -209,73 +212,73 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 											'PolicyGroupPremiumPolicyListFactory',
 											'PolicyGroupRoundIntervalPolicyListFactory',
 											'ProductTaxPolicyProductListFactory',
-											)
-				)
-			) {
+									)
+		)
+		) {
 			return TRUE; //Deprecated classes.
 		}
 
 		if ( class_exists( $factory_name ) ) {
 			$reflectionClass = new ReflectionClass( $factory_name );
-			Debug::text('Checking Class: '. $factory_name, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( 'Checking Class: ' . $factory_name, __FILE__, __LINE__, __METHOD__, 10 );
 
 			$raw_methods = $reflectionClass->getMethods( ReflectionMethod::IS_PUBLIC );
-			if ( is_array($raw_methods) ) {
+			if ( is_array( $raw_methods ) ) {
 				global $db;
-				foreach( $raw_methods as $raw_method ) {
+				foreach ( $raw_methods as $raw_method ) {
 					if ( $factory_name == $raw_method->class
 							AND (
-									strpos( $raw_method->name, 'getAll') !== FALSE
-									OR strpos( $raw_method->name, 'getBy') !== FALSE
-									OR strpos( $raw_method->name, 'Report') !== FALSE
-								)
+									strpos( $raw_method->name, 'getAll' ) !== FALSE
+									OR strpos( $raw_method->name, 'getBy' ) !== FALSE
+									OR strpos( $raw_method->name, 'Report' ) !== FALSE
+							)
 							AND (
-									strncmp($db->databaseType, 'mysql', 5) != 0
+									strncmp( $db->databaseType, 'mysql', 5 ) != 0
 									OR
 									//Exclude function calls that are known to not work in MySQL.
-									( strncmp($db->databaseType, 'mysql', 5) == 0 AND !in_array( $raw_method->name, array( 'getByPhonePunchDataByCompanyIdAndStartDateAndEndDate') ) )
-								)
+									( strncmp( $db->databaseType, 'mysql', 5 ) == 0 AND !in_array( $raw_method->name, array('getByPhonePunchDataByCompanyIdAndStartDateAndEndDate') ) )
+							)
 							AND (
-									//Skip getByCompanyIdArray() functions, but include getBy*AndArrayCriteria(). So just check if its ends with Array or not.
-									( substr( $raw_method->name, -5 ) !== 'Array' )
-								)
-						) {
-						Debug::text('Class: '. $factory_name .' Method: '. $raw_method->name, __FILE__, __LINE__, __METHOD__, 10);
+								//Skip getByCompanyIdArray() functions, but include getBy*AndArrayCriteria(). So just check if its ends with Array or not.
+							( substr( $raw_method->name, -5 ) !== 'Array' )
+							)
+					) {
+						Debug::text( 'Class: ' . $factory_name . ' Method: ' . $raw_method->name, __FILE__, __LINE__, __METHOD__, 10 );
 
 						$test_modes = array('default', 'fuzz');
-						foreach( $test_modes as $test_mode ) {
-							Debug::text('  Test Mode: '. $test_mode, __FILE__, __LINE__, __METHOD__, 10);
+						foreach ( $test_modes as $test_mode ) {
+							Debug::text( '  Test Mode: ' . $test_mode, __FILE__, __LINE__, __METHOD__, 10 );
 							//Get method arguments.
 							$method_parameters = $raw_method->getParameters();
 							if ( is_array( $method_parameters ) ) {
 								$input_arguments = array();
-								foreach( $method_parameters as $method_parameter ) {
-									Debug::text('  Parameter: '. $method_parameter->name, __FILE__, __LINE__, __METHOD__, 10);
+								foreach ( $method_parameters as $method_parameter ) {
+									Debug::text( '  Parameter: ' . $method_parameter->name, __FILE__, __LINE__, __METHOD__, 10 );
 
-									switch( $factory_name ) {
+									switch ( $factory_name ) {
 										case 'ClientContactListFactory':
-											switch( $method_parameter->name ) {
+											switch ( $method_parameter->name ) {
 												case 'key':
 													$input_argument = '900d6136975e3a728051a62ed1191910';
 													break;
 											}
 											break;
 										case 'ClientContactListFactory':
-											switch( $method_parameter->name ) {
+											switch ( $method_parameter->name ) {
 												case 'name':
 													$input_argument = 'test';
 													break;
 											}
 											break;
 										case 'RoundIntervalPolicyListFactory':
-											switch( $method_parameter->name ) {
+											switch ( $method_parameter->name ) {
 												case 'type_id':
 													$input_argument = 40;
 													break;
 											}
 											break;
 										case 'ScheduleListFactory':
-											switch( $method_parameter->name ) {
+											switch ( $method_parameter->name ) {
 												case 'direction':
 													$input_argument = 'before';
 													break;
@@ -283,7 +286,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 											break;
 										case 'UserListFactory':
 										case 'UserContactListFactory':
-											switch( $method_parameter->name ) {
+											switch ( $method_parameter->name ) {
 												case 'email':
 													$input_argument = 'hi@hi.com';
 													break;
@@ -294,22 +297,22 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 											break;
 										case 'PayPeriodTimeSheetVerifyListFactory':
 										case 'RequestListFactory':
-											switch( $method_parameter->name ) {
+											switch ( $method_parameter->name ) {
 												case 'hierarchy_level_map':
 													$input_argument = array(
-																				array(
-																					  'hierarchy_control_id' => 1,
-																					  'level' => 1,
-																					  'last_level' => 2,
-																					  'object_type_id' => 10,
-																					  )
-																			);
+															array(
+																	'hierarchy_control_id' => 1,
+																	'level'                => 1,
+																	'last_level'           => 2,
+																	'object_type_id'       => 10,
+															)
+													);
 													break;
 
 											}
 											break;
 										case 'ExceptionListFactory':
-											switch( $method_parameter->name ) {
+											switch ( $method_parameter->name ) {
 												case 'time_period':
 													$input_argument = 'week';
 													break;
@@ -320,101 +323,111 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 
 									if ( $test_mode == 'fuzz' ) {
 										//If LIMIT argument is available always set it to 1 to reduce memory usage.
-										if ( in_array( $method_parameter->name, array( 'where', 'order', 'page' ) ) ) {
+										if ( in_array( $method_parameter->name, array('where', 'order', 'page') ) ) {
 											$input_argument = NULL;
-										} elseif ( !isset($input_argument) AND ( $method_parameter->name == 'id' OR strpos( $method_parameter->name, '_id' ) !== FALSE OR $method_parameter->name == 'limit' ) ) { //Use integer as its a ID argument.
+										} elseif ( !isset( $input_argument ) AND ( $method_parameter->name == 'id' OR strpos( $method_parameter->name, '_id' ) !== FALSE OR $method_parameter->name == 'limit' ) ) { //Use integer as its a ID argument.
 											$input_argument = 'false'; //Try passing a string where ID is expected.
-										} elseif ( !isset($input_argument) ) {
+										} elseif ( !isset( $input_argument ) ) {
 											$input_argument = 2;
 										}
 										$input_arguments[] = $input_argument;
 									} else {
 										//If LIMIT argument is available always set it to 1 to reduce memory usage.
-										if ( in_array( $method_parameter->name, array( 'where', 'order', 'page' ) ) ) {
+										if ( in_array( $method_parameter->name, array('where', 'order', 'page') ) ) {
 											$input_argument = NULL;
-										} elseif ( !isset($input_argument) AND ( $method_parameter->name == 'id' OR strpos( $method_parameter->name, '_id' ) !== FALSE OR $method_parameter->name == 'limit' ) ) { //Use integer as its a ID argument.
+										} elseif ( !isset( $input_argument ) AND ( $method_parameter->name == 'id' OR strpos( $method_parameter->name, '_id' ) !== FALSE OR $method_parameter->name == 'limit' ) ) { //Use integer as its a ID argument.
 											$input_argument = 1;
-										} elseif ( !isset($input_argument) ) {
+										} elseif ( !isset( $input_argument ) ) {
 											$input_argument = 2;
 										}
 										$input_arguments[] = $input_argument;
 									}
-									unset($input_argument);
+									unset( $input_argument );
 								}
 
-								if ( isset($input_arguments) AND is_array($input_arguments) ) {
-									Debug::Arr($input_arguments, '    Calling Class: '. $factory_name .' Method: '. $raw_method->name, __FILE__, __LINE__, __METHOD__, 10);
+								if ( isset( $input_arguments ) AND is_array( $input_arguments ) ) {
+									Debug::Arr( $input_arguments, '    Calling Class: ' . $factory_name . ' Method: ' . $raw_method->name, __FILE__, __LINE__, __METHOD__, 10 );
 									$lf = TTNew( $factory_name );
-									switch( $factory_name.'::'.$raw_method->name ) {
+									switch ( $factory_name . '::' . $raw_method->name ) {
 										case 'StationListFactory::getByUserIdAndStatusAndType':
 										case 'PayStubEntryAccountListFactory::getByTypeArrayByCompanyIdAndStatusId':
 											//Skip due to failures.
 											break;
 										case 'CompanyListFactory::getByPhoneID':
-											$retarr = call_user_func_array( array( $lf, $raw_method->name ), $input_arguments );
+											$retarr = call_user_func_array( array($lf, $raw_method->name), $input_arguments );
 											if ( $test_mode == 'fuzz' ) {
 												$this->assertEquals( $retarr, FALSE ); //This will be FALSE
 											} else {
 												$this->assertNotEquals( $retarr, FALSE );
-												$this->assertTrue( is_object($retarr), TRUE );
+												$this->assertTrue( is_object( $retarr ), TRUE );
 											}
 											break;
 										case 'MessageControlListFactory::getByCompanyIdAndObjectTypeAndObjectAndNotUser':
-											$retarr = call_user_func_array( array( $lf, $raw_method->name ), $input_arguments );
+											$retarr = call_user_func_array( array($lf, $raw_method->name), $input_arguments );
 											$this->assertEquals( $retarr, FALSE ); //This will be FALSE, but it still executes a query.
 											//$this->assertTrue( is_object($retarr), TRUE );
 											break;
 										case 'CompanyListFactory::getByPhoneID':
 										case 'PayStubEntryListFactory::getByPayStubIdAndEntryNameId':
 											//FUZZ tests should return FALSE, otherwise they should be normal.
-											$retarr = call_user_func_array( array( $lf, $raw_method->name ), $input_arguments );
+											$retarr = call_user_func_array( array($lf, $raw_method->name), $input_arguments );
 											if ( $test_mode == 'fuzz' ) {
 												$this->assertEquals( $retarr, FALSE ); //This will be FALSE
 											} else {
 												$this->assertNotEquals( $retarr, FALSE );
-												$this->assertTrue( is_object($retarr), TRUE );
+												$this->assertTrue( is_object( $retarr ), TRUE );
 											}
 											break;
 										default:
-											$retarr = call_user_func_array( array( $lf, $raw_method->name ), $input_arguments );
+											$retarr = call_user_func_array( array($lf, $raw_method->name), $input_arguments );
 											//Debug::Arr($retarr, '    RetArr: ', __FILE__, __LINE__, __METHOD__, 10);
 											$this->assertNotEquals( $retarr, FALSE );
-											$this->assertTrue( is_object($retarr), TRUE );
+											$this->assertTrue( is_object( $retarr ), TRUE );
 											break;
 									}
 								} else {
-									Debug::text('  No INPUT arguments... Skipping Class: '. $factory_name .' Method: '. $raw_method->name, __FILE__, __LINE__, __METHOD__, 10);
+									Debug::text( '  No INPUT arguments... Skipping Class: ' . $factory_name . ' Method: ' . $raw_method->name, __FILE__, __LINE__, __METHOD__, 10 );
 								}
 
 							}
 						}
 					} else {
-						Debug::text('Skipping... Class: '. $factory_name .' Method: '. $raw_method->name, __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text( 'Skipping... Class: ' . $factory_name . ' Method: ' . $raw_method->name, __FILE__, __LINE__, __METHOD__, 10 );
 					}
 				}
 			}
 
-			Debug::text('Done...', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( 'Done...', __FILE__, __LINE__, __METHOD__, 10 );
+
 			return TRUE;
 		} else {
-			Debug::text('Class does not exist: '. $factory_name, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( 'Class does not exist: ' . $factory_name, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
 		return FALSE;
 	}
 
 	function runSQLTestOnEdition( $product_edition = TT_PRODUCT_ENTERPRISE, $class_list ) {
-		global $TT_PRODUCT_EDITION;
+		global $TT_PRODUCT_EDITION, $db;
 
 		$original_product_edition = getTTProductEdition();
 
 		$this->assertTrue( TRUE );
 		if ( $product_edition <= $original_product_edition ) {
 			$TT_PRODUCT_EDITION = $product_edition;
-			Debug::text('Checking against Edition: '. getTTProductEditionName(), __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text( 'Checking against Edition: ' . getTTProductEditionName(), __FILE__, __LINE__, __METHOD__, 10 );
 
 			//Loop through all ListFactory classes testing SQL queries.
-			foreach( $class_list as $class_name ) {
+
+			//Run tests with count rows enabled, then with it disabled as well.
+			$db->pageExecuteCountRows = FALSE;
+			foreach ( $class_list as $class_name ) {
+				$this->runSQLTestOnListFactoryMethods( $class_name );
+				$this->runSQLTestOnListFactory( $class_name );
+			}
+
+			$db->pageExecuteCountRows = TRUE;
+			foreach ( $class_list as $class_name ) {
 				$this->runSQLTestOnListFactoryMethods( $class_name );
 				$this->runSQLTestOnListFactory( $class_name );
 			}
@@ -430,6 +443,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$classes = $this->getListFactoryClassList( 4 );
 		$this->runSQLTestOnEdition( TT_PRODUCT_COMMUNITY, $classes[0] );
 	}
+
 	/**
 	 * @group SQL_CommunityB
 	 */
@@ -437,6 +451,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$classes = $this->getListFactoryClassList( 4 );
 		$this->runSQLTestOnEdition( TT_PRODUCT_COMMUNITY, $classes[1] );
 	}
+
 	/**
 	 * @group SQL_CommunityC
 	 */
@@ -444,6 +459,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$classes = $this->getListFactoryClassList( 4 );
 		$this->runSQLTestOnEdition( TT_PRODUCT_COMMUNITY, $classes[2] );
 	}
+
 	/**
 	 * @group SQL_CommunityD
 	 */
@@ -453,7 +469,6 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-
 	/**
 	 * @group SQL_ProfessionalA
 	 */
@@ -461,6 +476,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$classes = $this->getListFactoryClassList( 4 );
 		$this->runSQLTestOnEdition( TT_PRODUCT_PROFESSIONAL, $classes[0] );
 	}
+
 	/**
 	 * @group SQL_ProfessionalB
 	 */
@@ -468,6 +484,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$classes = $this->getListFactoryClassList( 4 );
 		$this->runSQLTestOnEdition( TT_PRODUCT_PROFESSIONAL, $classes[1] );
 	}
+
 	/**
 	 * @group SQL_ProfessionalC
 	 */
@@ -475,6 +492,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$classes = $this->getListFactoryClassList( 4 );
 		$this->runSQLTestOnEdition( TT_PRODUCT_PROFESSIONAL, $classes[2] );
 	}
+
 	/**
 	 * @group SQL_ProfessionalD
 	 */
@@ -484,8 +502,6 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-
-
 	/**
 	 * @group SQL_CorporateA
 	 */
@@ -493,6 +509,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$classes = $this->getListFactoryClassList( 4 );
 		$this->runSQLTestOnEdition( TT_PRODUCT_CORPORATE, $classes[0] );
 	}
+
 	/**
 	 * @group SQL_CorporateB
 	 */
@@ -500,6 +517,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$classes = $this->getListFactoryClassList( 4 );
 		$this->runSQLTestOnEdition( TT_PRODUCT_CORPORATE, $classes[1] );
 	}
+
 	/**
 	 * @group SQL_CorporateC
 	 */
@@ -507,6 +525,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$classes = $this->getListFactoryClassList( 4 );
 		$this->runSQLTestOnEdition( TT_PRODUCT_CORPORATE, $classes[2] );
 	}
+
 	/**
 	 * @group SQL_CorporateD
 	 */
@@ -516,8 +535,6 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-
-
 	/**
 	 * @group SQL_EnterpriseA
 	 */
@@ -525,6 +542,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$classes = $this->getListFactoryClassList( 4 );
 		$this->runSQLTestOnEdition( TT_PRODUCT_ENTERPRISE, $classes[0] );
 	}
+
 	/**
 	 * @group SQL_EnterpriseB
 	 */
@@ -532,6 +550,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$classes = $this->getListFactoryClassList( 4 );
 		$this->runSQLTestOnEdition( TT_PRODUCT_ENTERPRISE, $classes[1] );
 	}
+
 	/**
 	 * @group SQL_EnterpriseC
 	 */
@@ -539,6 +558,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$classes = $this->getListFactoryClassList( 4 );
 		$this->runSQLTestOnEdition( TT_PRODUCT_ENTERPRISE, $classes[2] );
 	}
+
 	/**
 	 * @group SQL_EnterpriseD
 	 */
@@ -547,4 +567,92 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$this->runSQLTestOnEdition( TT_PRODUCT_ENTERPRISE, $classes[3] );
 	}
 
+	/**
+	 * @group SQL_ADODBActiveRecordCount
+	 */
+	function testADODBActiveRecordCount() {
+		global $db;
+
+		//This will test the automatic functionality of ADODB to add count(*) in SQL queries.
+
+		//PageExecute($query, $limit, $page, $ph)
+
+		$db->pageExecuteCountRows = TRUE;
+
+		try {
+			$query = 'SELECT id FROM currency';
+			$db->PageExecute( $query, 2, 2 );
+			$this->assertTrue( TRUE );
+		}  catch ( Exception $e ) {
+			$this->assertTrue( FALSE );
+		}
+
+		try {
+			$query = 'SELECT id, status_id FROM currency';
+			$db->PageExecute( $query, 2, 2 );
+			$this->assertTrue( TRUE );
+		}  catch ( Exception $e ) {
+			$this->assertTrue( FALSE );
+		}
+
+		try {
+			$query = 'SELECT a.id FROM currency AS a LEFT JOIN company as tmp ON a.id = tmp.id';
+			$db->PageExecute( $query, 2, 2 );
+			$this->assertTrue( TRUE );
+		}  catch ( Exception $e ) {
+			$this->assertTrue( FALSE );
+		}
+
+		try {
+			$query = 'SELECT a.id FROM currency AS a LEFT JOIN ( SELECT id FROM company ) as tmp ON a.id = tmp.id';
+			$db->PageExecute( $query, 2, 2 );
+			$this->assertTrue( TRUE );
+		}  catch ( Exception $e ) {
+			$this->assertTrue( FALSE );
+		}
+
+		try {
+			$query = 'SELECT a.id, a.status_id FROM currency AS a LEFT JOIN ( SELECT id, status_id FROM company ) as tmp ON a.id = tmp.id';
+			$db->PageExecute( $query, 2, 2 );
+			$this->assertTrue( TRUE );
+		}  catch ( Exception $e ) {
+			$this->assertTrue( FALSE );
+		}
+
+		try {
+			$query = 'SELECT * FROM ( SELECT a.id FROM currency AS a LEFT JOIN company as tmp ON a.id = tmp.id ) as tmp2';
+			$db->PageExecute( $query, 2, 2 );
+			$this->assertTrue( TRUE );
+		}  catch ( Exception $e ) {
+			$this->assertTrue( FALSE );
+		}
+
+		try {
+			$query = 'SELECT _ADODB_COUNT id, (SELECT 1 FROM currency LIMIT 1) _ADODB_COUNT AS tmp FROM users';
+			$db->PageExecute( $query, 2, 2 );
+
+			$this->assertTrue( TRUE );
+		} catch ( Exception $e ) {
+			$this->assertTrue( FALSE );
+		}
+
+		//This will fail on MySQL, but pass on PostgreSQL. Since this query should have the _ADODB_COUNT keyword above to make it work on all databases.
+		//It works on PGSQL because it can wrap it in a sub-query, ie: SELECT count(*) FROM ( $query )
+		try {
+			$query = 'SELECT id, (SELECT 1 FROM currency LIMIT 1) AS tmp FROM users';
+			$db->PageExecute( $query, 2, 2 );
+
+			//Expect everything to succeed on PGSQL.
+			if ( strncmp( $db->databaseType, 'mysql', 5 ) != 0 ) {
+				$this->assertTrue( TRUE ); //PGSQL
+			}
+		} catch ( Exception $e ) {
+			//Expect an exception on MySQL.
+			if ( strncmp( $db->databaseType, 'mysql', 5 ) == 0 ) {
+				$this->assertTrue( TRUE ); //MYSQL
+			} else {
+				$this->assertTrue( FALSE ); //PGSQL
+			}
+		}
+	}
 }

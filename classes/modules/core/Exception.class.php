@@ -61,8 +61,10 @@ class DBError extends Exception {
 		if ( $e->getMessage() != '' ) {
 			if ( stristr( $e->getMessage(), 'statement timeout' ) !== FALSE ) {
 				$code = 'DBTimeout';
+			} elseif ( stristr( $e->getMessage(), 'unique constraint' ) !== FALSE) {
+				$code = 'DBUniqueConstraint';
 			}
-			Debug::Text( $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text( 'Code: '. $code .'('. $e->getCode() .') Message: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		if ( $e->getTrace() != '' ) {
@@ -86,6 +88,9 @@ class DBError extends Exception {
 						case 'dbtimeout':
 							$description = TTi18n::getText('%1 database query has timed-out, if you were trying to run a report it may be too large, please narrow your search criteria and try again.', array( APPLICATION_NAME ) );
 							break;
+						case 'dbuniqueconstraint':
+							$description = TTi18n::getText('%1 has detected a duplicate request, this may be due to double-clicking a button or a poor internet connection.', array( APPLICATION_NAME ) );
+							break;
 						default:
 							$description = TTi18n::getText('%1 is currently undergoing maintenance. We\'re sorry for any inconvenience this may cause. Please try again in 15 minutes.', array( APPLICATION_NAME ) );
 							break;
@@ -94,6 +99,9 @@ class DBError extends Exception {
 					switch ( strtolower($code) ) {
 						case 'dbtimeout':
 							$description = TTi18n::getText('%1 database query has timed-out, if you were trying to run a report it may be too large, please narrow your search criteria and try again.', array( APPLICATION_NAME ) );
+							break;
+						case 'dbuniqueconstraint':
+							$description = TTi18n::getText('%1 has detected a duplicate request, this may be due to double-clicking a button or a poor internet connection.', array( APPLICATION_NAME ) );
 							break;
 						case 'dberror':
 							$description = TTi18n::getText('%1 is unable to connect to its database, please make sure that the database service on your own local %1 server has been started and is running. If you are unsure, try rebooting your server.', array( APPLICATION_NAME ));
@@ -106,8 +114,8 @@ class DBError extends Exception {
 							break;
 					}
 				}
-				
-				$obj = new APIAuthentication();				
+
+				$obj = new APIAuthentication();
 				echo json_encode( $obj->returnHandler( FALSE, 'EXCEPTION', $description ) );
 				exit;
 			} else {
@@ -133,7 +141,7 @@ class GeneralError extends Exception {
 		global $db;
 
 		//debug_print_backtrace();
-		
+
 		//If we couldn't connect to the database, this method may not exist.
 		if ( isset($db) AND is_object($db) AND method_exists( $db, 'FailTrans' ) ) {
 			$db->FailTrans();

@@ -291,6 +291,7 @@ class TimesheetSummaryReport extends Report {
 				}
 				$retval['verified_time_sheet'] = 'first';
 				$retval['verified_time_sheet_date'] = 'first';
+				$retval['worked_days'] = 'numeric';
 				break;
 			case 'templates':
 				$retval = array(

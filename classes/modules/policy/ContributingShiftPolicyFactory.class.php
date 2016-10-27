@@ -1148,7 +1148,7 @@ class ContributingShiftPolicyFactory extends Factory {
 		Debug::text(' Not active FilterDayOfWeek!', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
-	
+
 	function getPartialUserDateTotalObject( $udt_obj, $udt_key, $calculate_policy_obj = NULL ) {
 		if ( !is_object($udt_obj) ) {
 			return FALSE;
@@ -1181,32 +1181,49 @@ class ContributingShiftPolicyFactory extends Factory {
 			return array( $udt_key => $udt_obj );
 		}
 
-		$split_udt_time_stamps = TTDate::splitDateRangeAtMidnight( $udt_obj->getStartTimeStamp(), $udt_obj->getEndTimeStamp(), $filter_start_time_stamp, $filter_end_time_stamp );
-
-		$i = 0;
-		foreach( $split_udt_time_stamps as $split_udt_time_stamp ) {
-			if ( $i > 0 ) {
-				$udt_key = $calculate_policy_obj->user_date_total_insert_id;
-			}
-
-			$tmp_udt_obj = clone $udt_obj; //Make sure we clone the object so we don't modify the original record for all subsequent accesses.
-			$tmp_udt_obj->setStartTimeStamp( $split_udt_time_stamp['start_time_stamp'] );
-			$tmp_udt_obj->setEndTimeStamp( $split_udt_time_stamp['end_time_stamp'] );
-			$tmp_udt_obj->setTotalTime( $tmp_udt_obj->calcTotalTime() );
-			$tmp_udt_obj->setIsPartialShift( TRUE );
-			$tmp_udt_obj->setEnableCalcSystemTotalTime(FALSE);
-			if ( $tmp_udt_obj->isValid() ) {
-				$tmp_udt_obj->preSave(); //Call this so TotalTime, TotalTimeAmount is calculated immediately, as we don't save these records until later.
-			}
-
-			$retarr[$udt_key] = $tmp_udt_obj;
-
-			$calculate_policy_obj->user_date_total_insert_id--;
-
-			$i++;
+		if ( $udt_obj->getStartTimeStamp() == $udt_obj->getEndTimeStamp() ) {
+			Debug::text(' Start/End time match, nothing to do...', __FILE__, __LINE__, __METHOD__, 10);
+			return array( $udt_key => $udt_obj );
 		}
 
-		return $retarr;
+		$split_udt_time_stamps = TTDate::splitDateRangeAtMidnight( $udt_obj->getStartTimeStamp(), $udt_obj->getEndTimeStamp(), $filter_start_time_stamp, $filter_end_time_stamp );
+		if ( is_array($split_udt_time_stamps) AND count($split_udt_time_stamps) > 0 ) {
+			$i = 0;
+			foreach ( $split_udt_time_stamps as $split_udt_time_stamp ) {
+				if ( $i > 0 ) {
+					$udt_key = $calculate_policy_obj->user_date_total_insert_id;
+				}
+
+				$tmp_udt_obj = clone $udt_obj; //Make sure we clone the object so we don't modify the original record for all subsequent accesses.
+				$tmp_udt_obj->setStartTimeStamp( $split_udt_time_stamp['start_time_stamp'] );
+				$tmp_udt_obj->setEndTimeStamp( $split_udt_time_stamp['end_time_stamp'] );
+
+				//In cases where auto-deduct meal policies exist, the total time may be negative, and without digging into the source object we may never be able to determine that.
+				//So when splitting records, if the total time is already negative, keep it as such.
+				$total_time = $tmp_udt_obj->calcTotalTime();
+				if ( $tmp_udt_obj->getTotalTime() < 0 ) {
+					$total_time = ($total_time * -1);
+					Debug::text(' Total Time was negative, maintain minus... Total Time: Before: '. $tmp_udt_obj->getTotalTime() .' After: '. $total_time, __FILE__, __LINE__, __METHOD__, 10);
+				}
+				$tmp_udt_obj->setTotalTime( $total_time );
+				$tmp_udt_obj->setIsPartialShift( TRUE );
+				$tmp_udt_obj->setEnableCalcSystemTotalTime( FALSE );
+				if ( $tmp_udt_obj->isValid() ) {
+					$tmp_udt_obj->preSave(); //Call this so TotalTime, TotalTimeAmount is calculated immediately, as we don't save these records until later.
+				}
+
+				$retarr[$udt_key] = $tmp_udt_obj;
+
+				$calculate_policy_obj->user_date_total_insert_id--;
+
+				$i++;
+			}
+
+			return $retarr;
+		}
+
+		Debug::text(' Nothing to split, returning original UDT record...', __FILE__, __LINE__, __METHOD__, 10);
+		return array( $udt_key => $udt_obj );
 	}
 
 	function checkIndividualDifferentialCriteria( $selection_type, $exclude_default_item, $current_item, $allowed_items, $default_item = NULL ) {

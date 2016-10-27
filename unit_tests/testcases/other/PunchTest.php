@@ -74,7 +74,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->policy_ids['pay_code'][100] = $dd->createPayCode( $this->company_id, 100, $this->policy_ids['pay_formula_policy'][100] ); //Regular
 
 		$this->user_id = $dd->createUser( $this->company_id, 100 );
-		
+
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
 
@@ -254,7 +254,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 				$mpf->setWindowLength( (3600 * 2) );
 				break;
 		}
-		
+
 		$mpf->setPayCode( $this->policy_ids['pay_code'][100] );
 
 		if ( $mpf->isValid() ) {
@@ -352,7 +352,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 				$ripf->setInterval( (60 * 5) ); //5mins
 				$ripf->setGrace( 0 ); //3min
 				$ripf->setStrict( FALSE );
-				
+
 				$ripf->setConditionType( 30 ); //Static Time
 				$ripf->setConditionStaticTime( strtotime( '5:00 PM' ) );
 				$ripf->setConditionStartWindow( 900 ); //15 Min
@@ -419,7 +419,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 			$insert_id = $spf->Save( FALSE );
 
 			$spf->setMealPolicy( $meal_policy_id );
-			
+
 			Debug::Text('Schedule Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			return $insert_id;
@@ -1002,7 +1002,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$date_epoch3 = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
 		$date_stamp3 = TTDate::getDate('DATE', $date_epoch3 );
-		$date_epoch4 = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );				
+		$date_epoch4 = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
 		$date_stamp4 = TTDate::getDate('DATE', $date_epoch4 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1082,11 +1082,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( 5, $udt_arr[$date_epoch3][0]['object_type_id'] );
 		$this->assertEquals( (24 * 3600), $udt_arr[$date_epoch3][0]['total_time'] );
-		
+
 		return TRUE;
 	}
 
-	
+
 	/**
 	 * @group Punch_testDayShiftEndsBasicA
 	 */
@@ -1443,7 +1443,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $punch_arr[$date_epoch2][0]['shift_data']['punches'][0]['punch_control_id'], $punch_arr[$date_epoch2][1]['shift_data']['punches'][0]['punch_control_id'] ); //Make sure punch_control_id from both shifts DO match.
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
-		
+
 		//Total Time
 		//$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] ); //Since we don't save UDT records where total_time=0, don't check this anymore.
 		//Instead check to make sure no records on that date exist at all.
@@ -2168,7 +2168,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (16 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
-		
+
 		return TRUE;
 	}
 
@@ -2453,7 +2453,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//  Make sure that UDT records follow the date properly too.
 		//
 		TTDate::setTimeZone('PST8PDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
-		
+
 		$this->createPayPeriodSchedule( 10 ); //Day shift starts on
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
@@ -4084,7 +4084,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 										),
 								TRUE
 								);
-		
+
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch) );
 		//print_r($punch_arr);
 		$this->assertEquals( 1, count($punch_arr[$date_epoch]) );
@@ -4976,7 +4976,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	function testDefaultPunchSettingsNoScheduleA() {
 		//No defaults in station or employee profile.
 		global $dd;
-		
+
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
@@ -4988,20 +4988,20 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$ulf = TTNew('UserListFactory');
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
-		
+
 		$plf = TTNew('PunchFactory');
-		
+
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 		//var_dump($data);
-		
+
 		$this->assertEquals( 10, $data['status_id'] ); //In/Out
 		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
-		
+
 		$this->assertEquals( 0, $data['branch_id'] );
 		$this->assertEquals( 0, $data['department_id'] );
 		$this->assertEquals( 0, $data['job_id'] );
 		$this->assertEquals( 0, $data['job_item_id'] );
-		
+
 		return TRUE;
 	}
 
@@ -5011,13 +5011,13 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	function testDefaultPunchSettingsNoScheduleB() {
 		//Test with default branch/department set in employee profile
 		global $dd;
-				
-		$this->tmp_branch_id[] = $this->branch_id; 
-		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 ); 
+
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
-		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 ); 
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
 		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
-		
+
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
@@ -5029,27 +5029,27 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$ulf = TTNew('UserListFactory');
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
-		
+
 		$plf = TTNew('PunchFactory');
-		
+
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 		//var_dump($data);
 
 		$this->assertEquals( 10, $data['status_id'] ); //In/Out
 		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
-		
+
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
 		$this->assertEquals( 0, $data['job_id'] );
 		$this->assertEquals( 0, $data['job_item_id'] );
-		
+
 		return TRUE;
 	}
-	
+
 	//
 	//Test with default branch/department set in employee profile and station.
 	//
-	
+
 	/**
 	 * @group Punch_testDefaultPunchSettingsNoScheduleD
 	 */
@@ -5057,10 +5057,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Test with previous Normal punch.
 		global $dd;
 
-		$this->tmp_branch_id[] = $this->branch_id; 
-		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 ); 
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
-		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 ); 
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
 		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
@@ -5083,7 +5083,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 										),
 								TRUE
 								);
-		
+
 		$date_epoch = TTDate::getBeginWeekEpoch( time() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 5:00PM');
@@ -5091,19 +5091,19 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$ulf = TTNew('UserListFactory');
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
-		
+
 		$plf = TTNew('PunchFactory');
-		
+
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
-		
+
 		$this->assertEquals( 20, $data['status_id'] ); //In/Out
 		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
-		
+
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
 		$this->assertEquals( 0, $data['job_id'] );
 		$this->assertEquals( 0, $data['job_item_id'] );
-		
+
 		return TRUE;
 	}
 
@@ -5114,10 +5114,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Test with previous Break punch.
 		global $dd;
 
-		$this->tmp_branch_id[] = $this->branch_id; 
-		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 ); 
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
-		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 ); 
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
 		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
@@ -5140,7 +5140,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 										),
 								TRUE
 								);
-		
+
 		$date_epoch = TTDate::getBeginWeekEpoch( time() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 9:30AM');
@@ -5148,19 +5148,19 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$ulf = TTNew('UserListFactory');
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
-		
+
 		$plf = TTNew('PunchFactory');
-		
+
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
-		
+
 		$this->assertEquals( 10, $data['status_id'] ); //In/Out
 		$this->assertEquals( 30, $data['type_id'] ); //Normal/Lunch/Break
-		
+
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
 		$this->assertEquals( 0, $data['job_id'] );
 		$this->assertEquals( 0, $data['job_item_id'] );
-		
+
 		return TRUE;
 	}
 
@@ -5171,10 +5171,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Test with previous Lunch punch.
 		global $dd;
 
-		$this->tmp_branch_id[] = $this->branch_id; 
-		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 ); 
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
-		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 ); 
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
 		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
@@ -5197,7 +5197,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 										),
 								TRUE
 								);
-		
+
 		$date_epoch = TTDate::getBeginWeekEpoch( time() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 1:00PM');
@@ -5205,19 +5205,19 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$ulf = TTNew('UserListFactory');
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
-		
+
 		$plf = TTNew('PunchFactory');
-		
+
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
-		
+
 		$this->assertEquals( 10, $data['status_id'] ); //In/Out
 		$this->assertEquals( 20, $data['type_id'] ); //Normal/Lunch/Break
-		
+
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
 		$this->assertEquals( 0, $data['job_id'] );
 		$this->assertEquals( 0, $data['job_item_id'] );
-		
+
 		return TRUE;
 	}
 
@@ -5228,10 +5228,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Test with split shift.
 		global $dd;
 
-		$this->tmp_branch_id[] = $this->branch_id; 
-		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 ); 
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
-		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 ); 
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
 		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
@@ -5254,7 +5254,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 										),
 								TRUE
 								);
-		
+
 		$date_epoch = TTDate::getBeginWeekEpoch( time() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 2:00PM');
@@ -5262,19 +5262,19 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$ulf = TTNew('UserListFactory');
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
-		
+
 		$plf = TTNew('PunchFactory');
-		
+
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
-		
+
 		$this->assertEquals( 10, $data['status_id'] ); //In/Out
 		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
-		
+
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
 		$this->assertEquals( 0, $data['job_id'] );
 		$this->assertEquals( 0, $data['job_item_id'] );
-		
+
 		return TRUE;
 	}
 
@@ -5285,10 +5285,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Test with split shift (B)
 		global $dd;
 
-		$this->tmp_branch_id[] = $this->branch_id; 
-		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 ); 
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
-		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 ); 
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
 		$this->user_id = $dd->createUser( $this->company_id, 10, 0, 0, 0 ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
@@ -5311,7 +5311,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 										),
 								TRUE
 								);
-		
+
 		$date_epoch = TTDate::getBeginWeekEpoch( time() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 2:00PM');
@@ -5319,19 +5319,19 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$ulf = TTNew('UserListFactory');
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
-		
+
 		$plf = TTNew('PunchFactory');
-		
+
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
-		
+
 		$this->assertEquals( 10, $data['status_id'] ); //In/Out
 		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
-		
+
 		$this->assertEquals( 0, $data['branch_id'] );
 		$this->assertEquals( 0, $data['department_id'] );
 		$this->assertEquals( 0, $data['job_id'] );
 		$this->assertEquals( 0, $data['job_item_id'] );
-		
+
 		return TRUE;
 	}
 
@@ -5391,7 +5391,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
-	
+
 	/**
 	 * @group Punch_testDefaultPunchSettingsNoScheduleHB
 	 */
@@ -5525,19 +5525,19 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//No defaults in station or employee profile.
 		global $dd;
 
-		$this->tmp_branch_id[] = $this->branch_id; 
-		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 ); 
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
 		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
-		
+
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
 		$date_epoch = TTDate::getBeginWeekEpoch( time() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
-		
+
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
 		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -5545,9 +5545,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 																	'start_time' => ' 8:00AM',
 																	'end_time' => '5:00PM',
 																	'branch_id' => 0, //If no branch/department is specified in the schedule, use EE profile.
-																	'department_id' => 0, 
+																	'department_id' => 0,
 																	) );
-		
+
 		$date_epoch = TTDate::getBeginWeekEpoch( time() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 8:00AM');
@@ -5555,20 +5555,20 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$ulf = TTNew('UserListFactory');
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
-		
+
 		$plf = TTNew('PunchFactory');
-		
+
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 		//var_dump($data);
-		
+
 		$this->assertEquals( 10, $data['status_id'] ); //In/Out
 		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
-		
+
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
 		$this->assertEquals( 0, $data['job_id'] );
 		$this->assertEquals( 0, $data['job_item_id'] );
-		
+
 		return TRUE;
 	}
 
@@ -5579,19 +5579,19 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//No defaults in station or employee profile.
 		global $dd;
 
-		$this->tmp_branch_id[] = $this->branch_id; 
-		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 ); 
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
 		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
-		
+
 		$this->createPayPeriodSchedule( 10 );
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
 		$date_epoch = TTDate::getBeginWeekEpoch( time() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
-		
+
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
 		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -5599,9 +5599,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 																	'start_time' => ' 8:00AM',
 																	'end_time' => '5:00PM',
 																	'branch_id' => $this->tmp_branch_id[1],
-																	'department_id' => $this->tmp_department_id[1], 
+																	'department_id' => $this->tmp_department_id[1],
 																	) );
-		
+
 		$date_epoch = TTDate::getBeginWeekEpoch( time() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 8:00AM');
@@ -5609,20 +5609,20 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$ulf = TTNew('UserListFactory');
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
-		
+
 		$plf = TTNew('PunchFactory');
-		
+
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
 		//var_dump($data);
-		
+
 		$this->assertEquals( 10, $data['status_id'] ); //In/Out
 		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
-		
+
 		$this->assertEquals( $this->tmp_branch_id[1], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[1], $data['department_id'] );
 		$this->assertEquals( 0, $data['job_id'] );
 		$this->assertEquals( 0, $data['job_item_id'] );
-		
+
 		return TRUE;
 	}
 
@@ -5633,10 +5633,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Test with previous Normal punch.
 		global $dd;
 
-		$this->tmp_branch_id[] = $this->branch_id; 
-		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 ); 
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
-		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 ); 
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
 		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
@@ -5645,7 +5645,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$date_epoch = TTDate::getBeginWeekEpoch( time() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
-				
+
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
 		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -5653,9 +5653,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 																	'start_time' => ' 8:00AM',
 																	'end_time' => '5:00PM',
 																	'branch_id' => $this->tmp_branch_id[1],
-																	'department_id' => $this->tmp_department_id[1], 
+																	'department_id' => $this->tmp_department_id[1],
 																	) );
-		
+
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 8:00AM'),
 								NULL, //Out
@@ -5669,7 +5669,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 										),
 								TRUE
 								);
-		
+
 		$date_epoch = TTDate::getBeginWeekEpoch( time() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 5:00PM');
@@ -5677,19 +5677,19 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$ulf = TTNew('UserListFactory');
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
-		
+
 		$plf = TTNew('PunchFactory');
-		
+
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
-		
+
 		$this->assertEquals( 20, $data['status_id'] ); //In/Out
 		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
-		
+
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
 		$this->assertEquals( 0, $data['job_id'] );
 		$this->assertEquals( 0, $data['job_item_id'] );
-		
+
 		return TRUE;
 	}
 
@@ -5700,10 +5700,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Test with previous Break punch.
 		global $dd;
 
-		$this->tmp_branch_id[] = $this->branch_id; 
-		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 ); 
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
-		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 ); 
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
 		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
@@ -5720,7 +5720,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 																	'start_time' => ' 8:00AM',
 																	'end_time' => '5:00PM',
 																	'branch_id' => $this->tmp_branch_id[1],
-																	'department_id' => $this->tmp_department_id[1], 
+																	'department_id' => $this->tmp_department_id[1],
 																	) );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5736,7 +5736,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 										),
 								TRUE
 								);
-		
+
 		$date_epoch = TTDate::getBeginWeekEpoch( time() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 9:30AM');
@@ -5744,19 +5744,19 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$ulf = TTNew('UserListFactory');
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
-		
+
 		$plf = TTNew('PunchFactory');
-		
+
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
-		
+
 		$this->assertEquals( 10, $data['status_id'] ); //In/Out
 		$this->assertEquals( 30, $data['type_id'] ); //Normal/Lunch/Break
-		
+
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
 		$this->assertEquals( 0, $data['job_id'] );
 		$this->assertEquals( 0, $data['job_item_id'] );
-		
+
 		return TRUE;
 	}
 
@@ -5767,10 +5767,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Test with previous Lunch punch.
 		global $dd;
 
-		$this->tmp_branch_id[] = $this->branch_id; 
-		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 ); 
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
-		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 ); 
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
 		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
@@ -5787,7 +5787,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 																	'start_time' => ' 8:00AM',
 																	'end_time' => '5:00PM',
 																	'branch_id' => $this->tmp_branch_id[1],
-																	'department_id' => $this->tmp_department_id[1], 
+																	'department_id' => $this->tmp_department_id[1],
 																	) );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5803,7 +5803,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 										),
 								TRUE
 								);
-		
+
 		$date_epoch = TTDate::getBeginWeekEpoch( time() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 1:00PM');
@@ -5811,19 +5811,19 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$ulf = TTNew('UserListFactory');
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
-		
+
 		$plf = TTNew('PunchFactory');
-		
+
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
-		
+
 		$this->assertEquals( 10, $data['status_id'] ); //In/Out
 		$this->assertEquals( 20, $data['type_id'] ); //Normal/Lunch/Break
-		
+
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
 		$this->assertEquals( 0, $data['job_id'] );
 		$this->assertEquals( 0, $data['job_item_id'] );
-		
+
 		return TRUE;
 	}
 
@@ -5834,10 +5834,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Test with split shift.
 		global $dd;
 
-		$this->tmp_branch_id[] = $this->branch_id; 
-		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 ); 
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
-		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 ); 
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
 		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
@@ -5854,9 +5854,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 																	'start_time' => ' 8:00AM',
 																	'end_time' => '5:00PM',
 																	'branch_id' => $this->tmp_branch_id[1],
-																	'department_id' => $this->tmp_department_id[1], 
+																	'department_id' => $this->tmp_department_id[1],
 																	) );
-		
+
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 8:00AM'),
 								strtotime($date_stamp.' 1:00PM'),
@@ -5870,7 +5870,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 										),
 								TRUE
 								);
-		
+
 		$date_epoch = TTDate::getBeginWeekEpoch( time() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 2:00PM');
@@ -5878,19 +5878,19 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$ulf = TTNew('UserListFactory');
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
-		
+
 		$plf = TTNew('PunchFactory');
-		
+
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
-		
+
 		$this->assertEquals( 10, $data['status_id'] ); //In/Out
 		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
-		
+
 		$this->assertEquals( $this->tmp_branch_id[1], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[1], $data['department_id'] );
 		$this->assertEquals( 0, $data['job_id'] );
 		$this->assertEquals( 0, $data['job_item_id'] );
-		
+
 		return TRUE;
 	}
 
@@ -5901,10 +5901,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Test with split shift (B)
 		global $dd;
 
-		$this->tmp_branch_id[] = $this->branch_id; 
-		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 ); 
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
-		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 ); 
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
 		$this->user_id = $dd->createUser( $this->company_id, 10, 0, 0, 0 ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
@@ -5921,9 +5921,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 																	'start_time' => ' 8:00AM',
 																	'end_time' => '5:00PM',
 																	'branch_id' => $this->tmp_branch_id[1],
-																	'department_id' => $this->tmp_department_id[1], 
+																	'department_id' => $this->tmp_department_id[1],
 																	) );
-		
+
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 8:00AM'),
 								strtotime($date_stamp.' 1:00PM'),
@@ -5937,7 +5937,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 										),
 								TRUE
 								);
-		
+
 		$date_epoch = TTDate::getBeginWeekEpoch( time() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 2:00PM');
@@ -5945,22 +5945,22 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$ulf = TTNew('UserListFactory');
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
-		
+
 		$plf = TTNew('PunchFactory');
-		
+
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
-		
+
 		$this->assertEquals( 10, $data['status_id'] ); //In/Out
 		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
-		
+
 		$this->assertEquals( $this->tmp_branch_id[1], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[1], $data['department_id'] );
 		$this->assertEquals( 0, $data['job_id'] );
 		$this->assertEquals( 0, $data['job_item_id'] );
-		
+
 		return TRUE;
 	}
-	
+
 	/**
 	 * @group Punch_testDefaultPunchSettingsScheduleFC
 	 */
@@ -5968,10 +5968,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Test with split shift (C)
 		global $dd;
 
-		$this->tmp_branch_id[] = $this->branch_id; 
-		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 ); 
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
-		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 ); 
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
 		$this->user_id = $dd->createUser( $this->company_id, 10, 0, 0, 0 ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
@@ -5988,7 +5988,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 																	'start_time' => ' 8:00AM',
 																	'end_time' => '1:00PM',
 																	'branch_id' => $this->tmp_branch_id[0],
-																	'department_id' => $this->tmp_department_id[0], 
+																	'department_id' => $this->tmp_department_id[0],
 																	) );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -5996,7 +5996,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 																	'start_time' => ' 2:00PM',
 																	'end_time' => '5:00PM',
 																	'branch_id' => $this->tmp_branch_id[1],
-																	'department_id' => $this->tmp_department_id[1], 
+																	'department_id' => $this->tmp_department_id[1],
 																	) );
 		/*
 		$dd->createPunchPair( 	$this->user_id,
@@ -6020,19 +6020,19 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$ulf = TTNew('UserListFactory');
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
-		
+
 		$plf = TTNew('PunchFactory');
-		
+
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
-		
+
 		$this->assertEquals( 10, $data['status_id'] ); //In/Out
 		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
-		
+
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
 		$this->assertEquals( 0, $data['job_id'] );
 		$this->assertEquals( 0, $data['job_item_id'] );
-		
+
 		return TRUE;
 	}
 
@@ -6043,10 +6043,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Test with split shift (D)
 		global $dd;
 
-		$this->tmp_branch_id[] = $this->branch_id; 
-		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 ); 
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
-		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 ); 
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
 		$this->user_id = $dd->createUser( $this->company_id, 10, 0, 0, 0 ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
@@ -6063,7 +6063,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 																	'start_time' => ' 8:00AM',
 																	'end_time' => '1:00PM',
 																	'branch_id' => $this->tmp_branch_id[0],
-																	'department_id' => $this->tmp_department_id[0], 
+																	'department_id' => $this->tmp_department_id[0],
 																	) );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -6071,9 +6071,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 																	'start_time' => ' 2:00PM',
 																	'end_time' => '5:00PM',
 																	'branch_id' => $this->tmp_branch_id[1],
-																	'department_id' => $this->tmp_department_id[1], 
+																	'department_id' => $this->tmp_department_id[1],
 																	) );
-		
+
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 8:00AM'),
 								FALSE, //strtotime($date_stamp.' 1:00PM'),
@@ -6087,7 +6087,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 										),
 								TRUE
 								);
-		
+
 		$date_epoch = TTDate::getBeginWeekEpoch( time() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 1:00PM');
@@ -6095,19 +6095,19 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$ulf = TTNew('UserListFactory');
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
-		
+
 		$plf = TTNew('PunchFactory');
-		
+
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
-		
+
 		$this->assertEquals( 10, $data['status_id'] ); //In/Out
 		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
-		
+
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
 		$this->assertEquals( 0, $data['job_id'] );
 		$this->assertEquals( 0, $data['job_item_id'] );
-		
+
 		return TRUE;
 	}
 
@@ -6118,10 +6118,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Test with split shift (E)
 		global $dd;
 
-		$this->tmp_branch_id[] = $this->branch_id; 
-		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 ); 
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
 		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
-		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 ); 
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
 		$this->user_id = $dd->createUser( $this->company_id, 10, 0, 0, 0 ); //Non-Admin user.
 
 		$this->createPayPeriodSchedule( 10 );
@@ -6138,7 +6138,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 																	'start_time' => ' 8:00AM',
 																	'end_time' => '1:00PM',
 																	'branch_id' => $this->tmp_branch_id[0],
-																	'department_id' => $this->tmp_department_id[0], 
+																	'department_id' => $this->tmp_department_id[0],
 																	) );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -6146,9 +6146,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 																	'start_time' => ' 2:00PM',
 																	'end_time' => '5:00PM',
 																	'branch_id' => $this->tmp_branch_id[1],
-																	'department_id' => $this->tmp_department_id[1], 
+																	'department_id' => $this->tmp_department_id[1],
 																	) );
-		
+
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 8:00AM'),
 								NULL, //strtotime($date_stamp.' 1:00PM'),
@@ -6162,7 +6162,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 										),
 								TRUE
 								);
-		
+
 		$date_epoch = TTDate::getBeginWeekEpoch( time() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 2:10PM');
@@ -6170,22 +6170,22 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$ulf = TTNew('UserListFactory');
 		$ulf->getById( $this->user_id );
 		$user_obj = $ulf->getCurrent();
-		
+
 		$plf = TTNew('PunchFactory');
-		
+
 		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
-		
+
 		$this->assertEquals( 20, $data['status_id'] ); //In/Out
 		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
-		
+
 		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
 		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
 		$this->assertEquals( 0, $data['job_id'] );
 		$this->assertEquals( 0, $data['job_item_id'] );
-		
+
 		return TRUE;
 	}
-	
+
 	/**
 	 * @group Punch_testMaximumShiftTimeA
 	 */
@@ -6218,7 +6218,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch, 1), TTDate::getEndDayEpoch($date_epoch2, 1) );
 		//print_r($punch_arr);
-		
+
 		$this->assertEquals( 2, count($punch_arr[$date_epoch][0]['shift_data']['punches']) );
 		$this->assertEquals( 1, count($punch_arr[$date_epoch][0]['shift_data']['punch_control_ids']) );
 		//$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
@@ -6399,5 +6399,90 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group SQL_UniqueConstraint
+	 */
+	function testSQLUniqueConstraintError() {
+		global $config_vars;
+
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods( strtotime('01-Jan-2013') );
+		$this->getAllPayPeriods();
+
+		$date_epoch = strtotime('02-Nov-2013'); //Use current year
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+
+		$fail_transaction = FALSE;
+		$pf = TTnew( 'PunchFactory' );
+		$pf->setTransfer( FALSE );
+		$pf->setUser( $this->user_id );
+		$pf->setType( 10 );
+		$pf->setStatus( 10 );
+		$pf->setTimeStamp( strtotime($date_stamp.' 8:00AM') );
+
+		if ( $pf->isNew() ) {
+			$pf->setActualTimeStamp( strtotime($date_stamp.' 8:00AM') );
+			$pf->setOriginalTimeStamp( $pf->getTimeStamp() );
+		}
+
+		$punch_control_id = $pf->findPunchControlID();
+		$pf->setPunchControlID( $punch_control_id );
+		if ( $pf->isValid() ) {
+			if ( $punch_id = $pf->Save( FALSE ) === FALSE ) {
+				Debug::Text(' aFail Transaction: ', __FILE__, __LINE__, __METHOD__, 10);
+				$fail_transaction = TRUE;
+			}
+		} else {
+			$fail_transaction = TRUE;
+		}
+
+		if ( $fail_transaction == FALSE ) {
+			$pcf = TTnew( 'PunchControlFactory' );
+			$pcf->setId( $pf->getPunchControlID() );
+			$pcf->setPunchObject( $pf );
+			//$pcf->setBranch( 0 );
+			//$pcf->setDepartment( 0 );
+			$pcf->setEnableCalcUserDateID( TRUE );
+			$pcf->setEnableCalcTotalTime( FALSE );
+			$pcf->setEnableCalcSystemTotalTime( FALSE );
+			$pcf->setEnableCalcWeeklySystemTotalTime( FALSE );
+			$pcf->setEnableCalcUserDateTotal( FALSE );
+			$pcf->setEnableCalcException( FALSE );
+
+			if ( $pcf->isValid() == TRUE ) {
+				$punch_control_id = $pcf->Save(TRUE, TRUE); //Force lookup
+
+				if ( $fail_transaction == FALSE ) {
+					Debug::Text('Punch Control ID: '. $punch_control_id, __FILE__, __LINE__, __METHOD__, 10);
+					$pf->CommitTransaction();
+				}
+			}
+		}
+
+		Debug::text('Punch ID: '. $punch_id .' Punch Control ID: '. $punch_control_id, __FILE__, __LINE__, __METHOD__, 10);
+
+		//Cause a unique constraint failure by trying to do a raw insert using the duplicate values.
+		$db2 = ADONewConnection( $config_vars['database']['type'] );
+		$db2->SetFetchMode(ADODB_FETCH_ASSOC);
+		$db2->Connect( $config_vars['database']['host'], $config_vars['database']['user'], $config_vars['database']['password'], $config_vars['database']['database_name']);
+
+		try {
+			$db2->Execute('INSERT INTO punch ( ID, PUNCH_CONTROL_ID, STATION_ID, TYPE_ID, STATUS_ID, TIME_STAMP, ORIGINAL_TIME_STAMP, ACTUAL_TIME_STAMP, CREATED_DATE, CREATED_BY, UPDATED_DATE, UPDATED_BY, LONGITUDE, LATITUDE, POSITION_ACCURACY )
+							VALUES ( 3'. ( $punch_id + 1 ) .', '. (int)$punch_control_id .', 111125, 10, 10, \'2013-11-02 8:00:00\', \'2013-11-02 8:00:00\', \'2013-11-02 8:00:00\', 1461089023, 178455, 1461089023, 178455, 0.0000000000, 0.0000000000, 0.0000000000 )');
+		} catch (Exception $e) {
+			try {
+				$this->assertEquals( $e->getCode(), -5 );
+				throw new DBError($e);
+			} catch (Exception $e) {
+				$this->assertEquals( $e->getCode(), 0 );
+			}
+		}
+
+		$pf->FailTransaction();
+		$pf->CommitTransaction();
+	}
 }
 ?>

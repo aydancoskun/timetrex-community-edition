@@ -256,7 +256,12 @@ switch ($object_type) {
 							$error = TTi18n::gettext('Incorrect file type, must be a JPG or PNG image') .' (b)';
 						}
 					} else {
-						Debug::Text('dUpload Failed! Incorrect mime_type: '. $_POST['mime_type'], __FILE__, __LINE__, __METHOD__, 10);
+						if ( isset($_POST['mime_type']) ) {
+							Debug::Text('dUpload Failed! Incorrect mime_type: '. $_POST['mime_type'], __FILE__, __LINE__, __METHOD__, 10);
+						} else {
+							Debug::Text('eUpload Failed! Mime_type not specified...', __FILE__, __LINE__, __METHOD__, 10);
+						}
+
 						$error = TTi18n::gettext('Incorrect file type, must be a JPG or PNG image') .' (a)';
 					}
 				}

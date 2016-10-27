@@ -424,7 +424,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 
 		$strict_order = TRUE;
 		if ( $order == NULL ) {
-			$order = array( 'a.start_date' => 'desc', 'a.run_id' => 'desc' );
+			$order = array( 'a.transaction_date' => 'asc', 'a.run_id' => 'asc' ); //Sort in ASC order as its getting the NEXT pay stub. This is required for PayStubFactory->reCalculateYTD()
 			$strict_order = FALSE;
 		}
 
@@ -790,7 +790,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 						AND a.pay_period_id = ?
 						AND a.transaction_date < ?
 						AND a.status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .')
-						AND a.deleted = 0';
+						AND ( a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0 )';
 
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict_order );

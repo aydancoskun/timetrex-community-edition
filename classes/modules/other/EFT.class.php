@@ -89,7 +89,7 @@ $eft->save('/tmp/eft01.txt');
  */
 class EFT {
 
-	var $file_format_options = array( '1464', '105', 'HSBC', 'BEANSTREAM' );
+	var $file_format_options = array( '1464', '105', 'HSBC', 'BEANSTREAM', 'ACH' );
 	var $file_format = NULL; //File format
 
 	var $file_prefix_data = NULL; //Leading data in the file, primarily for RBC routing lines.
@@ -302,6 +302,69 @@ class EFT {
 		return FALSE;
 	}
 
+	//
+	//See similar function in EFT_Record class.
+	//
+	function getBatchBusinessNumber() {
+		if ( isset($this->header_data['batch_business_number']) ) {
+			return $this->header_data['batch_business_number'];
+		} else {
+			//If batch business number is not set, fall back to file business number instead.
+			return $this->getBusinessNumber();
+		}
+
+		return FALSE;
+	}
+	function setBatchBusinessNumber($value) {
+		if ( $this->isAlphaNumeric( $value ) AND strlen( $value ) <= 10 ) {
+			$this->header_data['batch_business_number'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	//See similar function in EFT_Record class.
+	function getBatchServiceCode() {
+		if ( isset($this->header_data['batch_service_code']) ) {
+			return $this->header_data['batch_service_code'];
+		} else {
+			return 'PPD'; //Prearranged Payment and Deposit Entry type transactions
+		}
+	}
+	function setBatchServiceCode($value) {
+		$value = strtoupper(trim($value));
+		if ( $this->isAlphaNumeric( $value ) AND strlen( $value ) <= 3 ) {
+			$this->header_data['batch_service_code'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getBatchEntryDescription() {
+		if ( isset($this->header_data['batch_entry_description']) ) {
+			return $this->header_data['batch_entry_description'];
+		} else {
+			return 'PAYROLL'; //Prearranged Payment and Deposit Entry type transactions
+		}
+	}
+	function setBatchEntryDescription($value) {
+		$value = strtoupper(trim($value));
+		if ( $this->isAlphaNumeric( $value ) AND strlen( $value ) <= 10 ) {
+			$this->header_data['batch_entry_description'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+	//
+	//See similar function in EFT_Record class.
+	//
+
 	function getOtherData( $key ) {
 		if ( isset($this->header_data[$key]) ) {
 			return $this->header_data[$key];
@@ -315,16 +378,50 @@ class EFT {
 		return TRUE;
 	}
 
-	private function usortByDueDateAndType($a, $b) {
-		if ( $a->record_data['due_date'] == $b->record_data['due_date'] ) {
-			return strcmp($a->record_data['type'], $b->record_data['type']);
+	private function usortByBusinessNumberAndServiceCodeAndEntryDescriptionAndDueDateAndType($a, $b) {
+		if ( !isset($a->record_data['business_number']) ) {
+			$a->record_data['business_number'] = FALSE;
+		}
+		if ( !isset($b->record_data['business_number']) ) {
+			$b->record_data['business_number'] = FALSE;
+		}
+
+		if ( $a->record_data['business_number'] == $b->record_data['business_number'] ) {
+			if ( !isset($a->record_data['service_code']) ) {
+				$a->record_data['service_code'] = FALSE;
+			}
+			if ( !isset($b->record_data['service_code']) ) {
+				$b->record_data['service_code'] = FALSE;
+			}
+
+			if ( $a->record_data['service_code'] == $b->record_data['service_code'] ) {
+				if ( !isset($a->record_data['entry_description']) ) {
+					$a->record_data['entry_description'] = FALSE;
+				}
+				if ( !isset($b->record_data['entry_description']) ) {
+					$b->record_data['entry_description'] = FALSE;
+				}
+
+				if ( $a->record_data['entry_description'] == $b->record_data['entry_description'] ) {
+					if ( $a->record_data['due_date'] == $b->record_data['due_date'] ) {
+						return strcmp( $a->record_data['type'], $b->record_data['type'] );
+					} else {
+						return ( $a->record_data['due_date'] < $b->record_data['due_date'] ) ? (-1) : 1; //Sort ASC.
+					}
+				} else {
+					return strcmp( $a->record_data['entry_description'], $b->record_data['entry_description'] );
+				}
+			} else {
+				return strcmp( $a->record_data['service_code'], $b->record_data['service_code'] );
+			}
 		} else {
-			return ( $a->record_data['due_date'] > $b->record_data['due_date'] ) ? (-1) : 1;
+			return ( $a->record_data['business_number'] < $b->record_data['business_number'] ) ? (-1) : 1; //Sort ASC.
 		}
 	}
+
 	private function sortRecords() {
 		if ( is_array($this->data) ) {
-			return usort( $this->data, array( $this, 'usortByDueDateAndType' ) );
+			return usort( $this->data, array( $this, 'usortByBusinessNumberAndServiceCodeAndEntryDescriptionAndDueDateAndType' ) );
 		}
 
 		return FALSE;
@@ -332,6 +429,14 @@ class EFT {
 
 	function setRecord( $obj ) {
 		if ( is_object( $obj ) ) {
+
+			//Need this to handle switching transactions between batches with ACH record types.
+			if ( strtoupper( $this->getFileFormat() ) == 'ACH' ) {
+				$obj->setBusinessNumber( $this->getBatchBusinessNumber() );
+				$obj->setServiceCode( $this->getBatchServiceCode() );
+				$obj->setEntryDescription( $this->getBatchEntryDescription() );
+			}
+
 			$this->data[] = $obj;
 
 			return TRUE;
@@ -356,6 +461,9 @@ class EFT {
 				break;
 			case 'an':
 				$retval = str_pad( $value, $length, ' ', STR_PAD_RIGHT);
+				break;
+			case 'x': //Same as AN only padded to the left instead of right.
+				$retval = str_pad( $value, $length, ' ', STR_PAD_LEFT);
 				break;
 		}
 
@@ -541,6 +649,70 @@ class EFT_record extends EFT {
 
 		return FALSE;
 	}
+
+	//
+	//ACH Only, helps set the batches based on different criteria.
+	//
+	function getBusinessNumber() {
+		if ( isset($this->record_data['business_number']) ) {
+			return $this->record_data['business_number'];
+		}
+
+		return FALSE;
+	}
+	function setBusinessNumber($value) {
+		if ( $this->isAlphaNumeric( $value ) AND strlen( $value ) <= 10 ) {
+			$this->record_data['business_number'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getServiceCode() {
+		if ( isset($this->record_data['service_code']) ) {
+			return $this->record_data['service_code'];
+		} else {
+			return 'PPD'; //Prearranged Payment and Deposit Entry type transactions
+		}
+	}
+	function setServiceCode($value) {
+		$value = strtoupper(trim($value));
+		if ( $this->isAlphaNumeric( $value ) AND strlen( $value ) <= 3 ) {
+			$this->record_data['service_code'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getEntryDescription() {
+		if ( isset($this->record_data['entry_description']) ) {
+			return $this->record_data['entry_description'];
+		} else {
+			return 'PAYROLL'; //Prearranged Payment and Deposit Entry type transactions
+		}
+	}
+	function setEntryDescription($value) {
+		$value = strtoupper(trim($value));
+		if ( $this->isAlphaNumeric( $value ) AND strlen( $value ) <= 10 ) {
+			$this->record_data['entry_description'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getBatchKey() {
+		return trim( $this->getBusinessNumber().$this->getServiceCode().$this->getEntryDescription().$this->getDueDate() );
+	}
+	//
+	//ACH Only, helps set the batches based on different criteria.
+	//
+
 
 	function getInstitution() {
 		if ( isset($this->record_data['institution']) ) {
@@ -1264,8 +1436,8 @@ class EFT_File_Format_ACH Extends EFT {
 	private function compileFileHeader() {
 		$line[] = '1'; //1 Record
 		$line[] = '01'; //Priority code
-		$line[] = ' '.$this->padRecord( $this->getDataCenter(), 9, 'N'); //Immidiate destination - Must be proceeded with a space then 9 digits. '072000805' - Standard Federal Bank
-		$line[] = ' '.$this->padRecord( $this->getOriginatorID(), 9, 'N'); //Immediate Origin - Must be proceeded with a space then 9 digits. Recommend IRS Federal Tax ID Number
+		$line[] = $this->padRecord( $this->getDataCenter(), 10, 'X'); //Immidiate destination - 10 digits, left padding with space. '072000805' - Standard Federal Bank
+		$line[] = $this->padRecord( $this->getOriginatorID(), 10, 'X'); //Immediate Origin - 10 digits, left padding with space. Recommend IRS Federal Tax ID Number
 
 		$line[] = $this->padRecord( date('ymd', $this->getFileCreationDate() ), 6, 'N');
 		$line[] = $this->padRecord( date('Hi', $this->getFileCreationDate() ), 4, 'N');
@@ -1288,7 +1460,7 @@ class EFT_File_Format_ACH Extends EFT {
 		return $retval;
 	}
 
-	private function compileBatchHeader( $type, $due_date ) {
+	private function compileBatchHeader( $type, $business_number, $service_code, $entry_description, $due_date ) {
 		$line[] = '5'; //5 Record
 
 		if ( $type == 'CD' ) {
@@ -1301,9 +1473,9 @@ class EFT_File_Format_ACH Extends EFT {
 		
 		$line[] = $this->padRecord( strtoupper( $this->getOriginatorShortName() ), 16, 'AN'); //Company Short Name
 		$line[] = $this->padRecord( '', 20, 'AN'); //Discretionary Data
-		$line[] = $this->padRecord( $this->getBusinessNumber(), 10, 'N'); //Company Identification - Recommend IRS Federal Tax ID Number
-		$line[] = $this->padRecord( 'PPD', 3, 'AN'); //Standard Entry Class. (PPD, CCD, CTX, TEL, WEB)
-		$line[] = $this->padRecord( 'PAYROLL', 10, 'AN'); //Entry Description
+		$line[] = $this->padRecord( $business_number, 10, 'N'); //Company Identification - Recommend IRS Federal Tax ID Number
+		$line[] = $this->padRecord( $service_code, 3, 'AN'); //Standard Entry Class. (PPD, CCD, CTX, TEL, WEB)
+		$line[] = $this->padRecord( $entry_description, 10, 'AN'); //Entry Description
 		$line[] = $this->padRecord( date('ymd', $this->getFileCreationDate() ), 6, 'N'); //Date
 		$line[] = $this->padRecord( date('ymd', $due_date ), 6, 'N'); //Date to post funds.
 		$line[] = $this->padRecord( '', 3, 'AN'); //Blank
@@ -1369,25 +1541,26 @@ class EFT_File_Format_ACH Extends EFT {
 			return FALSE;
 		}
 
-		//Batch records by due date.
-		$prev_due_date = FALSE;
+		//Batch records by business number, service code, entry description and due date. All fields in the batch header.
+		$prev_batch_key = FALSE;
 		$batch_id = 0;
 		foreach( $this->data as $key => $record ) {
-			$prev_due_date = $record->getDueDate();
+			$prev_batch_key = $record->getBatchKey();
 
 			$batched_records[$batch_id][] = $record;
 
-			if ( isset($this->data[($key + 1)]) AND ( $prev_due_date == FALSE OR $prev_due_date != $this->data[($key + 1)]->getDueDate() ) ) {
+			if ( isset($this->data[($key + 1)]) AND ( $prev_batch_key == FALSE OR $prev_batch_key != $this->data[($key + 1)]->getBatchKey() ) ) {
 				$batch_id++;
-				Debug::Text('  Starting new batch: '. $batch_id, __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text('  Starting new batch: '. $batch_id .' Key: Prev: '. $prev_batch_key .' New: '. $this->data[($key + 1)]->getBatchKey(), __FILE__, __LINE__, __METHOD__, 10);
+			} else {
+				Debug::Text('  Continuing batch: '. $batch_id .' Key: Prev: '. $prev_batch_key, __FILE__, __LINE__, __METHOD__, 10);
 			}
 		}
-		unset($prev_due_date, $batch_id);
+		unset($prev_batch_key, $batch_id, $key, $record);
 
 		$i = 1;
 		$max = count($this->data);
 		foreach( $batched_records as $batch_id => $batch_records ) {
-			$batch_max = count($batch_records);
 			$batch_debit_amount = 0;
 			$batch_credit_amount = 0;
 			$batch_record_count = 0;
@@ -1395,7 +1568,7 @@ class EFT_File_Format_ACH Extends EFT {
 			
 			$batch_record_types = $this->getRecordTypes( $batch_records );
 
-			$retval[] = $this->compileBatchHeader( $batch_record_types, $record->getDueDate() );
+			$retval[] = $this->compileBatchHeader( $batch_record_types, $batch_records[0]->getBusinessNumber(), $batch_records[0]->getServiceCode(), $batch_records[0]->getEntryDescription(), $batch_records[0]->getDueDate() );
 			
 			foreach( $batch_records as $key => $record ) {
 				//Debug::Arr($record, 'Record Object:', __FILE__, __LINE__, __METHOD__, 10);

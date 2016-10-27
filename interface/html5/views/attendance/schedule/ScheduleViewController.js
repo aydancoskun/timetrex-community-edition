@@ -2505,6 +2505,10 @@ ScheduleViewController = BaseViewController.extend( {
 		return false;
 	},
 
+	getOtherFieldReferenceField: function() {
+		return 'note';
+	},
+
 	buildEditViewUI: function() {
 
 		var $this = this;
@@ -5633,9 +5637,9 @@ ScheduleViewController = BaseViewController.extend( {
 
 		switch ( row.type ) {
 			case ScheduleViewControllerRowType.EMPTY:
-				if ( !Global.isSet( cell_value ) ) {
-					time_span.text( $.i18n._( 'E' ) );
-				}
+				// if ( !Global.isSet( cell_value ) ) {
+				// 	time_span.text( $.i18n._( 'ZE' ) );
+				// }
 
 				time_span.addClass( 'empty' );
 
@@ -6167,6 +6171,13 @@ ScheduleViewController = BaseViewController.extend( {
 				} else if ( parseInt( info.cell_index ) > parseInt( end_cell_index ) ) {
 					end_cell_index = info.cell_index;
 				}
+			}
+
+			//If the click is inside the existing selection, truncate the existing selection to the click.
+			//Check in TimeSheetViewController.js for related change
+			if ( cells_array[cells_array.length - 1].cell_index >= cell_index && cells_array[0].cell_index <= cell_index &&  cells_array[cells_array.length - 1].row_id >= row_id && cells_array[0].row_id <= row_id ) {
+				end_row_index = row_id;
+				end_cell_index = cell_index;
 			}
 
 			start_row_index = parseInt( start_row_index );
@@ -7561,7 +7572,7 @@ ScheduleViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		var $this = this;
 
-		var default_args = {permission_section: 'punch'};
+		var default_args = {permission_section: 'schedule'};
 		this.search_fields = [
 
 			new SearchField( {

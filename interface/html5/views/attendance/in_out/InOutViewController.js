@@ -607,39 +607,10 @@ InOutViewController = BaseViewController.extend( {
 		}
 	},
 
-	buildOtherFieldUI: function( field, label ) {
-
-		if ( !this.edit_view_tab ) {
-			return;
-		}
-
-		var form_item_input;
-		var $this = this;
-		var tab_punch = this.edit_view_tab.find( '#tab_punch' );
-		var tab_punch_column1 = tab_punch.find( '.first-column' );
-
-		if ( $this.edit_view_ui_dic[field] ) {
-			form_item_input = $this.edit_view_ui_dic[field];
-			form_item_input.setValue( $this.current_edit_record[field] );
-			form_item_input.css( 'opacity', 1 );
-		} else {
-			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			form_item_input.TTextInput( {field: field} );
-			var input_div = $this.addEditFieldToColumn( label, form_item_input, tab_punch_column1 );
-
-			input_div.insertBefore( this.edit_view_form_item_dic['note'] );
-
-			form_item_input.setValue( $this.current_edit_record[field] );
-			form_item_input.css( 'opacity', 1 );
-		}
-
-		if ( $this.is_viewing ) {
-			form_item_input.setEnabled( false );
-		} else {
-			form_item_input.setEnabled( true );
-		}
-
+	getOtherFieldReferenceField: function() {
+		return 'note';
 	},
+
 
 	buildEditViewUI: function() {
 		this._super( 'buildEditViewUI' );

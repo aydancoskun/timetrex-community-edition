@@ -1848,7 +1848,13 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$query .= ( isset($filter_data['punch_department_id']) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['punch_department_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['pay_period_time_sheet_verify_status_id']) ) ? $this->getWhereClauseSQL( 'pptsvlf.status_id', $filter_data['pay_period_time_sheet_verify_status_id'], 'numeric_list', $ph ) : NULL;
+
+		$subquery = NULL;
+		if ( isset( $filter_data['pay_period_time_sheet_verify_status_id'] ) AND in_array( 0, $filter_data['pay_period_time_sheet_verify_status_id'] ) ) {
+			$subquery .= 'OR pptsvlf.status_id IS NULL';
+		}
+		$query .= ( isset($filter_data['pay_period_time_sheet_verify_status_id']) ) ? ' AND (' . $this->getWhereClauseSQL( 'pptsvlf.status_id', $filter_data['pay_period_time_sheet_verify_status_id'], 'numeric_list', $ph, NULL, FALSE ) . ' ' . $subquery . ' )' : NULL;
+
 
 		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'uf.id', array( 'company_id' => (int)$company_id, 'object_type_id' => 200, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 

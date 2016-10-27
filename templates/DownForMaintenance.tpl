@@ -9,7 +9,7 @@
 
 <div id="container">
 
-<div id="rowHeaderLogin"><a href="http://{$ORGANIZATION_URL}"><img src="{if $exception == 'dberror'}{$IMAGES_URL}/timetrex_logo_wbg_small2.jpg{else}{$BASE_URL}/send_file.php?object_type=primary_company_logo{/if}" alt="{$ORGANIZATION_NAME}"></a></div>
+<div id="rowHeaderLogin"><a href="http://{$ORGANIZATION_URL}"><img src="{if $exception == 'dberror'}{$IMAGES_URL}/timetrex_logo_wbg_small2.png{else}{$BASE_URL}/send_file.php?object_type=primary_company_logo{/if}" alt="{$ORGANIZATION_NAME}"></a></div>
 
 <div id="rowContentLogin">
   <form method="post" name="login" action="{$smarty.server.SCRIPT_NAME}">

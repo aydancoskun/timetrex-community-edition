@@ -434,7 +434,7 @@ class APIAbsencePolicy extends APIFactory {
 		return $this->returnHandler( FALSE );
 	}
 
-	function getProjectedAbsencePolicyBalance( $absence_policy_id, $user_id, $epoch, $amount, $previous_amount = 0 ) {
+	function getProjectedAbsencePolicyBalance( $absence_policy_id, $user_id, $epoch, $amount, $previous_amount = 0, $previous_absence_policy_id = FALSE ) {
 		if ( $absence_policy_id == '' ) {
 			return $this->returnHandler( FALSE );
 		}
@@ -505,6 +505,17 @@ class APIAbsencePolicy extends APIFactory {
 			}
 
 			if ( is_object($pfp_obj) AND $pfp_obj->getAccrualPolicyAccount() != '' ) {
+				//The previous amount is cleared when the accrual policy (by way of absence policy) is changed to prevent miscalculation of remaining accrued time.
+				$prev_aplf = TTnew( 'AbsencePolicyListFactory' );
+				$prev_aplf->getByIdAndCompanyId( $previous_absence_policy_id, $this->getCurrentCompanyObject()->getId() );
+				if ( $prev_aplf->getRecordCount() > 0 ) {
+					$prev_pfp_obj = $prev_aplf->getCurrent()->getPayFormulaPolicyObject();
+					if ( is_object($prev_pfp_obj) AND (int)$pfp_obj->getAccrualPolicyAccount() != (int)$prev_pfp_obj->getAccrualPolicyAccount() ) {
+						Debug::Text( 'Accrual policy has been changed clearing previous amount.', __FILE__, __LINE__, __METHOD__, 10 );
+						$previous_amount = 0;
+					}
+				}
+
 				$aplf = new AccrualPolicyListFactory();
 				$aplf->getByPolicyGroupUserIdAndAccrualPolicyAccount( (int)$user_id, (int)$pfp_obj->getAccrualPolicyAccount() );
 				Debug::Text('Accrual Policy Records: '. $aplf->getRecordCount() .' User ID: '. $user_id .' Accrual Policy Account: '. $pfp_obj->getAccrualPolicyAccount(), __FILE__, __LINE__, __METHOD__, 10);
@@ -530,8 +541,9 @@ class APIAbsencePolicy extends APIFactory {
 						return $this->returnHandler( $retarr );
 					}
 				} elseif ( is_object( $pfp_obj->getAccrualPolicyAccountObject() ) ) {
-					Debug::Text('No Accrual Policies to return projection for, just get current balance then...', __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Text( 'No Accrual Policies to return projection for, just get current balance then...', __FILE__, __LINE__, __METHOD__, 10 );
 					$available_balance = ( $pfp_obj->getAccrualPolicyAccountObject()->getCurrentAccrualBalance( (int)$user_id ) - $previous_amount );
+
 
 					$retarr = array(
 									'available_balance' => $available_balance,

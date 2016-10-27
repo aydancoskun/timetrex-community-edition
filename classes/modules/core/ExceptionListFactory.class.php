@@ -103,7 +103,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 
 		return $this;
 	}
-	
+
 	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
@@ -397,7 +397,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getByCompanyIDAndTypeAndPayPeriodStatus($company_id, $type, $status, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getByCompanyIDAndTypeAndPayPeriodStatusAndMinimumDateStamp($company_id, $type, $status, $min_date_stamp = NULL, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -424,6 +424,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 
 		$ph = array(
 					'company_id' => (int)$company_id,
+					'min_date_stamp' => $this->db->BindDate( $min_date_stamp ),
 					);
 
 		$query = '
@@ -438,6 +439,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 					LEFT JOIN '. $ppf->getTable() .' as e ON a.pay_period_id = e.id
 					where
 						c.company_id = ?
+						AND a.date_stamp >= ?						
 						AND a.type_id in ('. $this->getListSQL( $type, $ph, 'int' ) .')
 						AND e.status_id in ('. $this->getListSQL( $status, $ph, 'int' ) .')
 						AND ( a.deleted = 0 AND c.deleted = 0 AND d.deleted = 0 AND e.deleted = 0 )
@@ -806,7 +808,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 				$order['c.first_name'] = 'asc';
 			}
 			if ( !isset($order['a.date_stamp']) ) {
-				$order['a.date_stamp'] = 'desc'; 
+				$order['a.date_stamp'] = 'desc';
 			}
 			if ( !isset($order['i.severity_id']) ) {
 				$order['i.severity_id'] = 'desc';

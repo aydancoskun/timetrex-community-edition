@@ -767,6 +767,19 @@ class PayStubFactory extends Factory {
 		return TRUE;
 	}
 
+	function getEnableCalcCurrentYTD() {
+		if ( isset($this->calc_current_ytd) ) {
+			return $this->calc_current_ytd;
+		}
+
+		return FALSE;
+	}
+	function setEnableCalcCurrentYTD($bool) {
+		$this->calc_current_ytd = (bool)$bool;
+
+		return TRUE;
+	}
+
 	function getEnableEmail() {
 		if ( isset($this->email) ) {
 			return $this->email;
@@ -986,6 +999,15 @@ class PayStubFactory extends Factory {
 		return FALSE;
 	}
 
+	function reCalculateCurrentYTD() {
+		Debug::Text('ReCalculating Current Pay Stub YTD...', __FILE__, __LINE__, __METHOD__, 10);
+
+		//Recalculate the current pay stub as well, in case they changed the transaction date into the next year without modifying entries.
+		$this->reCalculatePayStubYTD( $this->getId(), FALSE );
+
+		return TRUE;
+	}
+
 	function reCalculateYTD() {
 		Debug::Text('ReCalculating YTD on all newer pay stubs...', __FILE__, __LINE__, __METHOD__, 10);
 		//Get all pay stubs NEWER then this one.
@@ -993,6 +1015,7 @@ class PayStubFactory extends Factory {
 
 		//Because this recalculates YTD amounts and accrual balances which span years, we need to recalculate ALL (even 10yrs into the future) newer pay stubs.
 		//Increase transaction date by one day, otherwise it can include the current pay stub and recalculate it, causing it to the incorrect with YTD adjustment PS amendments.
+		// Ensure that the sort order is always oldest pay stub to newest, so YTD amounts are properly progated from one to the next.
 		//$pslf->getByUserIdAndStartDateAndEndDate( $this->getUser(), ($this->getTransactionDate() + 86400), (time() + (9999 * 86400)) );
 		$pslf->getNextPayStubByUserIdAndTransactionDateAndRun( $this->getUser(), $this->getTransactionDate(), $this->getRun() );
 		$total_pay_stubs = $pslf->getRecordCount();
@@ -1208,6 +1231,10 @@ class PayStubFactory extends Factory {
 		if ( $this->getDeleted() == TRUE ) {
 			Debug::Text('Deleting Pay Stub, re-calculating YTD ', __FILE__, __LINE__, __METHOD__, 10);
 			$this->setEnableCalcYTD( TRUE );
+		}
+
+		if ( $this->getEnableCalcCurrentYTD() == TRUE ) {
+			$this->reCalculateCurrentYTD(); //Recalculate the current pay stub as well, in case they changed the transaction date into the next year without modifying entries.
 		}
 
 		if ( $this->getEnableCalcYTD() == TRUE ) {
@@ -1766,6 +1793,8 @@ class PayStubFactory extends Factory {
 		$this->addDeductionSum();
 		$this->addEmployerDeductionSum();
 		$this->addNetPay();
+
+		$this->setEnableCalcCurrentYTD( FALSE ); //No need to recalculate current YTD if we are processing entries.
 
 		return TRUE;
 	}

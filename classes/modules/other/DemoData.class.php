@@ -5841,6 +5841,8 @@ class DemoData {
 					}
 					$rstf->setBranch( '-1' ); //Default
 					$rstf->setDepartment( '-1' ); //Default
+					$rstf->setJob( '-1' ); //Default
+					$rstf->setJobItem( '-1' ); //Default
 
 					if ( $rstf->isValid() ) {
 						Debug::Text('Saving Recurring Schedule Week...', __FILE__, __LINE__, __METHOD__, 10);
@@ -5879,6 +5881,8 @@ class DemoData {
 					}
 					$rstf->setBranch( '-1' ); //Default
 					$rstf->setDepartment( '-1' ); //Default
+					$rstf->setJob( '-1' ); //Default
+					$rstf->setJobItem( '-1' ); //Default
 
 					if ( $rstf->isValid() ) {
 						Debug::Text('Saving Recurring Schedule Week...', __FILE__, __LINE__, __METHOD__, 10);
@@ -5917,6 +5921,8 @@ class DemoData {
 					}
 					$rstf->setBranch( '-1' ); //Default
 					$rstf->setDepartment( '-1' ); //Default
+					$rstf->setJob( '-1' ); //Default
+					$rstf->setJobItem( '-1' ); //Default
 
 					if ( $rstf->isValid() ) {
 						Debug::Text('Saving Recurring Schedule Week...', __FILE__, __LINE__, __METHOD__, 10);
@@ -5955,6 +5961,8 @@ class DemoData {
 					}
 					$rstf->setBranch( '-1' ); //Default
 					$rstf->setDepartment( '-1' ); //Default
+					$rstf->setJob( '-1' ); //Default
+					$rstf->setJobItem( '-1' ); //Default
 
 					if ( $rstf->isValid() ) {
 						Debug::Text('Saving Recurring Schedule Week...', __FILE__, __LINE__, __METHOD__, 10);
@@ -6012,6 +6020,8 @@ class DemoData {
 
 					$rstf->setStartTime( strtotime('06:00 AM') );
 					$rstf->setEndTime( strtotime('03:00 PM') );
+					$rstf->setJob( '-1' ); //Default
+					$rstf->setJobItem( '-1' ); //Default
 
 					if ( $schedule_policy_id > 0 ) {
 						$rstf->setSchedulePolicyID( $schedule_policy_id );
@@ -6069,6 +6079,8 @@ class DemoData {
 					}
 					$rstf->setBranch( '-1' ); //Default
 					$rstf->setDepartment( '-1' ); //Default
+					$rstf->setJob( '-1' ); //Default
+					$rstf->setJobItem( '-1' ); //Default
 
 					if ( $rstf->isValid() ) {
 						Debug::Text('Saving Recurring Schedule Week...', __FILE__, __LINE__, __METHOD__, 10);

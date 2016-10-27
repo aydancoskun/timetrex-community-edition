@@ -265,12 +265,12 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 
 		if ( this.edit_view_tab_selected_index == 1 ) {
 			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-				this.edit_view_tab.find( '#tab_schedule_synchornization' ).find( '.first-column' ).css( 'display', 'block' );
+				this.edit_view_tab.find( '#tab_schedule_synchronization' ).find( '.first-column' ).css( 'display', 'block' );
 				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 				this.buildContextMenu( true );
 				this.setEditMenu();
 			} else {
-				this.edit_view_tab.find( '#tab_schedule_synchornization' ).find( '.first-column' ).css( 'display', 'none' );
+				this.edit_view_tab.find( '#tab_schedule_synchronization' ).find( '.first-column' ).css( 'display', 'none' );
 				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
 				this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 			}
@@ -286,7 +286,7 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		//Handle most case that one tab and one audit tab
 //		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 1 ) {
 //			if ( this.current_edit_record.id ) {
-//				this.initSubLogView( 'tab_schedule_synchornization' );
+//				this.initSubLogView( 'tab_schedule_synchronization' );
 //			} else {
 //				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
 //			}
@@ -364,7 +364,7 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 
 		this.setTabLabels( {
 			'tab_preferences': $.i18n._( 'Preferences' ),
-			'tab_schedule_synchornization': $.i18n._( 'Schedule Synchornization' )
+			'tab_schedule_synchronization': $.i18n._( 'Schedule Synchronization' )
 		} );
 
 		//Tab 0 start
@@ -476,30 +476,30 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 
 		//Tab 1 start
 
-		var tab_schedule_synchornization = this.edit_view_tab.find( '#tab_schedule_synchornization' );
+		var tab_schedule_synchronization = this.edit_view_tab.find( '#tab_schedule_synchronization' );
 
-		var tab_schedule_synchornization_column1 = tab_schedule_synchornization.find( '.first-column' );
+		var tab_schedule_synchronization_column1 = tab_schedule_synchronization.find( '.first-column' );
 
 		this.edit_view_tabs[1] = [];
 
-		this.edit_view_tabs[1].push( tab_schedule_synchornization_column1 );
+		this.edit_view_tabs[1].push( tab_schedule_synchronization_column1 );
 
 		// Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {field: 'schedule_icalendar_type_id'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.schedule_icalendar_type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_schedule_synchornization_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_schedule_synchronization_column1, '' );
 
 		// Calendar URL
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'calendar_url'} );
 		form_item_input.addClass( 'link' );
-		this.addEditFieldToColumn( $.i18n._( 'Calendar URL' ), form_item_input, tab_schedule_synchornization_column1, '', null, true );
+		this.addEditFieldToColumn( $.i18n._( 'Calendar URL' ), form_item_input, tab_schedule_synchronization_column1, '', null, true );
 
 		// Shifts Scheduled to Work
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( {label: $.i18n._( 'Shifts Scheduled to Work' )} );
-		this.addEditFieldToColumn( null, form_item_input, tab_schedule_synchornization_column1, '', null, true, false, 'shifts_scheduled_to_work' );
+		this.addEditFieldToColumn( null, form_item_input, tab_schedule_synchronization_column1, '', null, true, false, 'shifts_scheduled_to_work' );
 
 		// Alarm 1
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -511,7 +511,7 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 
-		this.addEditFieldToColumn( $.i18n._( 'Alarm 1' ), form_item_input, tab_schedule_synchornization_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Alarm 1' ), form_item_input, tab_schedule_synchronization_column1, '', widgetContainer, true );
 
 		// Alarm 2
 
@@ -524,13 +524,13 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 
-		this.addEditFieldToColumn( $.i18n._( 'Alarm 2' ), form_item_input, tab_schedule_synchornization_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Alarm 2' ), form_item_input, tab_schedule_synchronization_column1, '', widgetContainer, true );
 
 		// Shifts Scheduled Absent
 
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( {label: $.i18n._( 'Shifts Scheduled Absent' )} );
-		this.addEditFieldToColumn( null, form_item_input, tab_schedule_synchornization_column1, '', null, true, false, 'shifts_scheduled_absent' );
+		this.addEditFieldToColumn( null, form_item_input, tab_schedule_synchronization_column1, '', null, true, false, 'shifts_scheduled_absent' );
 
 		// Alarm 1
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -542,7 +542,7 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 
-		this.addEditFieldToColumn( $.i18n._( 'Alarm 1' ), form_item_input, tab_schedule_synchornization_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Alarm 1' ), form_item_input, tab_schedule_synchronization_column1, '', widgetContainer, true );
 
 		// Alarm 2
 
@@ -555,13 +555,13 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 
-		this.addEditFieldToColumn( $.i18n._( 'Alarm 2' ), form_item_input, tab_schedule_synchornization_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Alarm 2' ), form_item_input, tab_schedule_synchronization_column1, '', widgetContainer, true );
 
 		// Modified Shifts
 
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( {label: $.i18n._( 'Modified Shifts' )} );
-		this.addEditFieldToColumn( null, form_item_input, tab_schedule_synchornization_column1, '', null, true, false, 'modified_shifts' );
+		this.addEditFieldToColumn( null, form_item_input, tab_schedule_synchronization_column1, '', null, true, false, 'modified_shifts' );
 
 		// Alarm 1
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -573,7 +573,7 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 
-		this.addEditFieldToColumn( $.i18n._( 'Alarm 1' ), form_item_input, tab_schedule_synchornization_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Alarm 1' ), form_item_input, tab_schedule_synchronization_column1, '', widgetContainer, true );
 
 		// Alarm 2
 
@@ -586,7 +586,7 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 
-		this.addEditFieldToColumn( $.i18n._( 'Alarm 2' ), form_item_input, tab_schedule_synchornization_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Alarm 2' ), form_item_input, tab_schedule_synchronization_column1, '', widgetContainer, true );
 
 	}
 

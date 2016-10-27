@@ -319,7 +319,6 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $ppsf->getTable() .' as b
-
 					where	a.pay_period_schedule_id = b.id
 						AND a.company_id = ?
 						AND a.transaction_date <= ?
@@ -862,7 +861,6 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 
 		$ph = array(
 					'company_id' => (int)$company_id,
-					'status_id' => (int)$status_id,
 					'start_date' => $this->db->BindTimeStamp( $start_transaction_date ),
 					'end_date' => $this->db->BindTimeStamp( $end_transaction_date ),
 					);
@@ -871,11 +869,11 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 					select	a.*
 					from	'. $this->getTable() .' as a
 					LEFT JOIN '. $ppsf->getTable() .' as ppsf ON ( a.pay_period_schedule_id = ppsf.id )
-					where	ppsf.company_id = ?
-						AND a.status_id = ?
+					where	ppsf.company_id = ?						
 						AND a.transaction_date >= ?
 						AND a.transaction_date <= ?
 						AND a.pay_period_schedule_id in ( '. $this->getListSQL( $id, $ph, 'int' ) .' )
+						AND a.status_id in ( '. $this->getListSQL( $status_id, $ph, 'int' ) .' )
 						AND a.deleted=0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -1107,7 +1105,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 						AND deleted=0
 					ORDER BY start_date desc
 					LIMIT 1';
-					
+
 		$this->ExecuteSQL( $query, $ph );
 
 		return $this;

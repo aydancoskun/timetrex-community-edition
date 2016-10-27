@@ -197,6 +197,12 @@ class ScheduleFactory extends Factory {
 										'job_item' => FALSE,
 										'total_time' => 'TotalTime',
 
+										'other_id1'=> 'OtherID1',
+										'other_id2'=> 'OtherID2',
+										'other_id3'=> 'OtherID3',
+										'other_id4'=> 'OtherID4',
+										'other_id5'=> 'OtherID5',
+
 										'recurring_schedule_template_control_id' => 'RecurringScheduleTemplateControl',
 
 										'note' => 'Note',
@@ -865,6 +871,131 @@ class ScheduleFactory extends Factory {
 												1024) ) {
 
 			$this->data['note'] = $val;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getOtherID1() {
+		if ( isset($this->data['other_id1']) ) {
+			return $this->data['other_id1'];
+		}
+
+		return FALSE;
+	}
+	function setOtherID1($value) {
+		$value = trim($value);
+
+		if (	$value == ''
+				OR
+				$this->Validator->isLength(	'other_id1',
+											   $value,
+											   TTi18n::gettext('Other ID 1 is invalid'),
+											   1, 255) ) {
+
+			$this->data['other_id1'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getOtherID2() {
+		if ( isset($this->data['other_id2']) ) {
+			return $this->data['other_id2'];
+		}
+
+		return FALSE;
+	}
+	function setOtherID2($value) {
+		$value = trim($value);
+
+		if (	$value == ''
+				OR
+				$this->Validator->isLength(	'other_id2',
+											   $value,
+											   TTi18n::gettext('Other ID 2 is invalid'),
+											   1, 255) ) {
+
+			$this->data['other_id2'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getOtherID3() {
+		if ( isset($this->data['other_id3']) ) {
+			return $this->data['other_id3'];
+		}
+
+		return FALSE;
+	}
+	function setOtherID3($value) {
+		$value = trim($value);
+
+		if (	$value == ''
+				OR
+				$this->Validator->isLength(	'other_id3',
+											   $value,
+											   TTi18n::gettext('Other ID 3 is invalid'),
+											   1, 255) ) {
+
+			$this->data['other_id3'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getOtherID4() {
+		if ( isset($this->data['other_id4']) ) {
+			return $this->data['other_id4'];
+		}
+
+		return FALSE;
+	}
+	function setOtherID4($value) {
+		$value = trim($value);
+
+		if (	$value == ''
+				OR
+				$this->Validator->isLength(	'other_id4',
+											   $value,
+											   TTi18n::gettext('Other ID 4 is invalid'),
+											   1, 255) ) {
+
+			$this->data['other_id4'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getOtherID5() {
+		if ( isset($this->data['other_id5']) ) {
+			return $this->data['other_id5'];
+		}
+
+		return FALSE;
+	}
+	function setOtherID5($value) {
+		$value = trim($value);
+
+		if (	$value == ''
+				OR
+				$this->Validator->isLength(	'other_id5',
+											   $value,
+											   TTi18n::gettext('Other ID 5 is invalid'),
+											   1, 255) ) {
+
+			$this->data['other_id5'] = $value;
 
 			return TRUE;
 		}

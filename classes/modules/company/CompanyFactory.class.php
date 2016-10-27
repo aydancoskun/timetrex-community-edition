@@ -223,6 +223,7 @@ class CompanyFactory extends Factory {
 										'MD' => TTi18n::gettext('Moldova, Republic of'),
 										'MC' => TTi18n::gettext('Monaco'),
 										'MN' => TTi18n::gettext('Mongolia'),
+										'ME' => TTi18n::gettext('Montenegro'), //Used to be CS
 										'MS' => TTi18n::gettext('Montserrat'),
 										'MA' => TTi18n::gettext('Morocco'),
 										'MZ' => TTi18n::gettext('Mozambique'),
@@ -269,7 +270,8 @@ class CompanyFactory extends Factory {
 										'ST' => TTi18n::gettext('Sao Tome and Principe'),
 										'SA' => TTi18n::gettext('Saudi Arabia'),
 										'SN' => TTi18n::gettext('Senegal'),
-										'CS' => TTi18n::gettext('Serbia and Montenegro'),
+										//'CS' => TTi18n::gettext('Serbia and Montenegro'), //Reassigned to seperate Serbia and Montenegro
+										'RS' => TTi18n::gettext('Serbia'), //Used to be CS
 										'SC' => TTi18n::gettext('Seychelles'),
 										'SL' => TTi18n::gettext('Sierra Leone'),
 										'SG' => TTi18n::gettext('Singapore'),

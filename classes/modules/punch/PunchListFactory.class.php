@@ -316,6 +316,40 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	function getDuplicatePunchByUserIdAndDateStampAndActualTime( $user_id, $time_stamp, $actual_time_stamp = 0 ) {
+		if ( $user_id == '') {
+			return FALSE;
+		}
+
+		if ( $time_stamp == '') {
+			return FALSE;
+		}
+
+		$pcf = new PunchControlFactory();
+
+		$ph = array(
+				'user_id' => (int)$user_id,
+				'time_stamp' => $this->db->BindTimeStamp( $time_stamp ),
+				'actual_stamp' => $this->db->BindTimeStamp( $actual_time_stamp ),
+		);
+
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a,
+							'. $pcf->getTable() .' as b
+					where	a.punch_control_id = b.id
+						AND	b.user_id = ?
+						AND	( a.time_stamp = ? OR a.actual_time_stamp = ? )
+						AND ( a.deleted = 0 AND b.deleted = 0 )
+					LIMIT 1
+					';
+
+		$this->ExecuteSQL( $query, $ph );
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+
+		return $this;
+	}
+
 	function getByUserIdAndDateStampAndType($user_id, $date_stamp, $type_id, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;

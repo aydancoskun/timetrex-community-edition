@@ -128,13 +128,8 @@ class PermissionFactory extends Factory {
 											);
 
 				//Remove sections that don't apply to the current product edition.
-				global $current_company;
-				if ( is_object($current_company) ) {
-					$product_edition = $current_company->getProductEdition();
-				} else {
-					$product_edition = getTTProductEdition();
-				}
-				
+				$product_edition = Misc::getCurrentCompanyProductEdition();
+
 				//if ( $product_edition == TT_PRODUCT_ENTERPRISE ) { //Enterprise
 				// } elseif {
 				if ( $product_edition == TT_PRODUCT_CORPORATE ) { //Corporate
@@ -258,13 +253,7 @@ class PermissionFactory extends Factory {
 										);
 
 				//Remove sections that don't apply to the current product edition.
-				global $current_company;
-				if ( is_object($current_company) ) {
-					$product_edition = $current_company->getProductEdition();
-				} else {
-					$product_edition = getTTProductEdition();
-				}
-
+				$product_edition = Misc::getCurrentCompanyProductEdition();
 				//if ( $product_edition == TT_PRODUCT_ENTERPRISE ) { //Enterprise
 				//} else
 				if ( $product_edition == TT_PRODUCT_CORPORATE ) { //Corporate
@@ -2687,7 +2676,7 @@ class PermissionFactory extends Factory {
 
 		//Delete all previous permissions for this control record..
 		$this->deletePermissions( $this->getCompany(), $permission_control_id );
-		
+
 		$created_date = time();
 		foreach($preset_permissions as $section => $permissions) {
 			foreach($permissions as $name => $value) {
@@ -2700,7 +2689,7 @@ class PermissionFactory extends Factory {
 					$ph[] = (int)$value;
 					$ph[] = $created_date;
 					$data[] = '(?, ?, ?, ?, ?)';
-					
+
 					/*
 					//Debug::Text('Setting Permission - Section: '. $section .' Name: '. $name .' Value: '. (int)$value, __FILE__, __LINE__, __METHOD__, 10);
 					$pf->setPermissionControl( $permission_control_id );
