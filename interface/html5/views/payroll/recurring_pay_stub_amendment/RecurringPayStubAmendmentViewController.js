@@ -76,18 +76,18 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 
 	onTypeChange: function() {
 		if ( this.current_edit_record.type_id === 10 ) {
-			this.edit_view_form_item_dic['percent_amount'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['percent_amount_entry_name_id'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['rate'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['units'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['amount'].css( 'display', 'block' );
+			this.detachElement( 'percent_amount' );
+			this.detachElement( 'percent_amount_entry_name_id' );
+			this.attachElement( 'rate' );
+			this.attachElement( 'units' );
+			this.attachElement( 'amount' );
 
 		} else if ( this.current_edit_record.type_id === 20 ) {
-			this.edit_view_form_item_dic['percent_amount'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['percent_amount_entry_name_id'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['rate'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['units'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['amount'].css( 'display', 'none' );
+			this.attachElement( 'percent_amount' );
+			this.attachElement( 'percent_amount_entry_name_id' );
+			this.detachElement( 'rate' );
+			this.detachElement( 'units' );
+			this.detachElement( 'amount' );
 		}
 
 		this.editFieldResize();

@@ -221,7 +221,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 
 		this.addEditFieldToColumn( $.i18n._( 'Premium Policy' ), [form_item_input, form_item_input_1], tab_schedule_policy_column1, '', v_box, false, true );
 
-		//Undertime Absence Policy
+		//Full Shift Undertime Absence Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIAbsencePolicy' )),
@@ -229,20 +229,27 @@ SchedulePolicyViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.ABSENCES_POLICY,
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'absence_policy_id'
+			field: 'full_shift_absence_policy_id'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Undertime Absence Policy' ), form_item_input, tab_schedule_policy_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Full Shift Undertime Absence Policy' ), form_item_input, tab_schedule_policy_column1 );
 
+		//Partial Shift Undertime Absence Policy
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APIAbsencePolicy' )),
+			allow_multiple_selection: false,
+			layout_name: ALayoutIDs.ABSENCES_POLICY,
+			show_search_inputs: true,
+			set_empty: true,
+			field: 'partial_shift_absence_policy_id'
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Partial Shift Undertime Absence Policy' ), form_item_input, tab_schedule_policy_column1 );
+		
 		//Start / Stop Window
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'start_stop_window', width: 50, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'start_stop_window', mode:'time_unit', need_parser_sec: true} );
 
-		var widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'> (" + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().time_unit_format_display + ")</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Start / Stop Window' ), form_item_input, tab_schedule_policy_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Start / Stop Window' ), form_item_input, tab_schedule_policy_column1, '', null );
 
 	},
 
@@ -324,9 +331,18 @@ SchedulePolicyViewController = BaseViewController.extend( {
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Undertime Absence Policy' ),
+			new SearchField( {label: $.i18n._( 'Full Shift Absence Policy' ),
 				in_column: 1,
-				field: 'absence_policy_id',
+				field: 'full_shift_absence_policy_id',
+				layout_name: ALayoutIDs.ABSENCES_POLICY,
+				api_class: (APIFactory.getAPIClass( 'APIAbsencePolicy' )),
+				multiple: true,
+				basic_search: true,
+				adv_search: false,
+				form_item_type: FormItemType.AWESOME_BOX} ),
+			new SearchField( {label: $.i18n._( 'Partial Shift Absence Policy' ),
+				in_column: 1,
+				field: 'partial_shift_absence_policy_id',
 				layout_name: ALayoutIDs.ABSENCES_POLICY,
 				api_class: (APIFactory.getAPIClass( 'APIAbsencePolicy' )),
 				multiple: true,

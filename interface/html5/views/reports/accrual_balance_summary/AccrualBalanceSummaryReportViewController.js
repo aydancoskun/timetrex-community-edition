@@ -37,11 +37,20 @@ AccrualBalanceSummaryReportViewController = ReportBaseViewController.extend( {
 			sub_menus: []
 		} );
 
-		var view = new RibbonSubMenu( {
+		var view_html = new RibbonSubMenu( {
 			label: $.i18n._( 'View' ),
-			id: ContextMenuIconName.view,
+			id: ContextMenuIconName.view_html,
 			group: editor_group,
 			icon: Icons.view,
+			permission_result: true,
+			permission: null
+		} );
+
+		var view_pdf = new RibbonSubMenu( {
+			label: $.i18n._( 'PDF' ),
+			id: ContextMenuIconName.view,
+			group: editor_group,
+			icon: Icons.print,
 			permission_result: true,
 			permission: null
 		} );
@@ -92,13 +101,14 @@ AccrualBalanceSummaryReportViewController = ReportBaseViewController.extend( {
 
 		other.page_orientation = this.current_edit_record.page_orientation;
 		other.font_size = this.current_edit_record.font_size;
+		other.auto_refresh = this.current_edit_record.auto_refresh;
 		other.disable_grand_total = this.current_edit_record.disable_grand_total;
 		other.maximum_page_limit = this.current_edit_record.maximum_page_limit;
 		other.show_duplicate_values = this.current_edit_record.show_duplicate_values;
 		other.accrual_policy_account_id = this.current_edit_record.accrual_policy_account_id;
 
 		if ( this.current_saved_report ) {
-			other.report_name = this.current_saved_report.name;
+			other.report_name = _.escape( this.current_saved_report.name );
 		}
 
 		return other;

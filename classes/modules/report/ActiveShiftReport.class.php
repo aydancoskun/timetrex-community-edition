@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -266,6 +266,7 @@ class ActiveShiftReport extends Report {
 						}
 					}
 				}
+				$retval['time_stamp'] = $retval['actual_time_stamp'] = 'time_stamp';
 				break;
 			case 'aggregates':
 				$retval = array();
@@ -316,9 +317,8 @@ class ActiveShiftReport extends Report {
 
 				break;
 			case 'template_config':
-				//Last 7 days does not include today.
-				//$retval['-1010-time_period']['time_period'] = 'last_7_days'; //Default to just the last 7 days to speed up the query.
-				$retval['-1010-time_period']['time_period'] = 'today'; //Default to just the last 7 days to speed up the query.
+				$retval['-1010-time_period']['time_period'] = 'today'; //Default to just the last day to speed up the query.
+				$retval['filter']['user_status_id'] = array(10); //Only show active employees.
 
 				$template = strtolower( Misc::trimSortPrefix( $params['template'] ) );
 				if ( isset($template) AND $template != '' ) {
@@ -578,28 +578,8 @@ class ActiveShiftReport extends Report {
 		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
 
-		if ( $this->getPermissionObject()->Check('user', 'view') == FALSE ) {
-			$hlf = TTnew( 'HierarchyListFactory' );
-			$permission_children_ids = $hlf->getHierarchyChildrenByCompanyIdAndUserIdAndObjectTypeID( $this->getUserObject()->getCompany(), $this->getUserObject()->getID() );
-			Debug::Arr($permission_children_ids, 'Permission Children Ids:', __FILE__, __LINE__, __METHOD__, 10);
-		} else {
-			//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
-			$permission_children_ids = array();
-		}
-		if ( $this->getPermissionObject()->Check('user', 'view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('user', 'view_child') == FALSE ) {
-				$permission_children_ids = array();
-			}
-			if ( $this->getPermissionObject()->Check('user', 'view_own') ) {
-				$permission_children_ids[] = $this->getUserObject()->getID();
-			}
-
-			$filter_data['permission_children_ids'] = $permission_children_ids;
-		}
-		//Debug::Text(' Permission Children: '. count($permission_children_ids) .' Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
-		//Debug::Arr($permission_children_ids, 'Permission Children: '. count($permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
-		//Debug::Arr($wage_permission_children_ids, 'Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
-
+		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
+		
 		//
 		//FIXME: Figure out way to only show users with punches if they specify that. Perhaps some sort of array intersect?
 		//
@@ -639,6 +619,7 @@ class ActiveShiftReport extends Report {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $plf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $plf as $key => $p_obj ) {
 			$this->tmp_data['punch'][$p_obj->getUser()] = (array)$p_obj->getObjectAsArray( $this->getColumnDataConfig() );
+			$this->tmp_data['punch'][$p_obj->getUser()]['time_stamp'] = $p_obj->getTimeStamp();
 			if ( $p_obj->getStatus() == 10 ) {
 				$this->tmp_data['punch'][$p_obj->getUser()]['_bgcolor'] = array(225, 255, 225);
 				//$this->tmp_data['punch'][$p_obj->getUser()]['_fontcolor'] = array(25, 225, 25); //Green

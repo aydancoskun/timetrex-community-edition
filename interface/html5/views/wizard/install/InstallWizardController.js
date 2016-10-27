@@ -8,6 +8,10 @@ InstallWizardController = BaseWizardController.extend( {
 
 	external_installer: null,
 
+	company_id: null,
+
+	user_id: null,
+
 	edit_view_error_ui_dic: {},
 
 	initialize: function() {
@@ -65,7 +69,6 @@ InstallWizardController = BaseWizardController.extend( {
 	},
 
 	initCurrentStep: function( step ) {
-
 		var $this = this;
 
 		if ( step ){}
@@ -145,7 +148,7 @@ InstallWizardController = BaseWizardController.extend( {
 				}} );
 				break;
 			case 'company':
-				this.api.getCompany( {onResult: function( res ) {
+				this.api.getCompany( this.company_id, {onResult: function( res ) {
 					if ( res.isValid() ) {
 						$this.stepsDataDic[$this.current_step] = res.getResult();
 						$this._initCurrentStep();
@@ -160,7 +163,7 @@ InstallWizardController = BaseWizardController.extend( {
 				if ( Global.isSet( this.stepsDataDic[this.current_step] ) ) {
 					company_id = this.stepsDataDic[this.current_step]['company_id'];
 				}
-				this.api.getUser( company_id, {onResult: function( res ) {
+				this.api.getUser( company_id, this.user_id, {onResult: function( res ) {
 					if ( res.isValid() ) {
 						$this.stepsDataDic[$this.current_step] = res.getResult();
 						$this._initCurrentStep();
@@ -188,8 +191,14 @@ InstallWizardController = BaseWizardController.extend( {
 			case 'maintenanceJobs':
 				this.api.getMaintenanceJobs(  {onResult: function( res ){
 					if ( res.isValid() ) {
+						if ( res.getResult() === true ) {
+							$this.current_step = 'installDone';
+							$this.initCurrentStep();
+						} else {
 						$this.stepsDataDic[$this.current_step] = res.getResult();
 						$this._initCurrentStep();
+						}
+
 					} else {
 						$this.current_step = 'license';
 						$this.initCurrentStep();
@@ -339,13 +348,23 @@ InstallWizardController = BaseWizardController.extend( {
 					+ $.i18n._('installation to function properly, please ensure all of the system check items listed below are marked as') + ' '
 					+ '<b>OK</b>' + '. '
 					+ $.i18n._('If any are red, please take the necessary steps to fix them.');
+
 				if ( stepData.check_all_requirements != 0 ) {
-					step_title_htm = step_title_htm
-						+ '<p style="background-color: #FFFF00">'
-						+ $.i18n._('For installation support, please join our community ')
-						+ '<a href="http://forums.timetrex.com" target="_blank">' + $.i18n._('forums') + '</a>'
-						+ $.i18n._(' or contact a TimeTrex support expert for ')
-						+ '<a href="http://www.timetrex.com/setup_support.php" target="_blank">' + $.i18n._('Implementation Support Services') + '</a></p>';
+
+					if ( stepData.tt_product_edition > 10 ) {
+						step_title_htm = step_title_htm
+							+ '<p style="background-color: #FFFF00">'
+							+ $.i18n._('For installation support, please contact ')
+							+ '<a href="http://www.timetrex.com/contactus.php" target="_blank">' + $.i18n._('TimeTrex support') + '</a>';
+					} else if ( stepData.tt_product_edition == 10 ) {
+
+						step_title_htm = step_title_htm
+							+ '<p style="background-color: #FFFF00">'
+							+ $.i18n._('For installation support, please join our community ')
+							+ '<a href="http://forums.timetrex.com" target="_blank">' + $.i18n._('forums') + '</a>'
+							+ $.i18n._(' or contact a TimeTrex support expert for ')
+							+ '<a href="http://www.timetrex.com/setup_support.php" target="_blank">' + $.i18n._('Implementation Support Services') + '</a></p>';
+					}
 
 				}
 
@@ -1157,6 +1176,7 @@ InstallWizardController = BaseWizardController.extend( {
 				break;
 			case 'company':
 				$data = {};
+				$data['company_id'] = $this.company_id;
 				for ( var key in this.stepsWidgetDic[this.current_step] ) {
 					var widget = this.stepsWidgetDic[this.current_step][key];
 					$data[key] = widget.getValue();
@@ -1164,9 +1184,9 @@ InstallWizardController = BaseWizardController.extend( {
 
 				this.api.setCompany( $data, {onResult: function( res ) {
 					if ( res.isValid() ) {
-
 						var company_id = res.getResult();
 						$this.current_step = 'user';
+						$this.company_id = company_id;
 						$this.stepsDataDic[$this.current_step] = {company_id: company_id};
 						$this.initCurrentStep();
 
@@ -1178,6 +1198,7 @@ InstallWizardController = BaseWizardController.extend( {
 				break;
 			case 'user':
 				$data = {};
+				$data['user_id'] = this.user_id;
 				for ( var key in this.stepsWidgetDic[this.current_step] ) {
 					var widget = this.stepsWidgetDic[this.current_step][key];
 					$data[key] = widget.getValue();
@@ -1187,6 +1208,7 @@ InstallWizardController = BaseWizardController.extend( {
 				this.api.setUser( $data, this.external_installer, {onResult: function( res ) {
 					if ( res.isValid() ) {
 						var next_page = res.getResult().next_page;
+						$this.user_id = res.getResult().user_id;
 						$this.current_step = next_page;
 						$this.initCurrentStep();
 					} else {
@@ -1217,10 +1239,16 @@ InstallWizardController = BaseWizardController.extend( {
 				ProgressBar.closeOverlay();
 				break;
 			case 'company':
+				for ( var key in widgets ) {
+					if ( stepData[key] ) {
+						widgets[key].setValue( stepData[key] );
+					}
+				}
 				var country = widgets.country.getValue();
 				this.api.getProvinceOptions( country, {onResult: function(res ) {
 					if ( res.isValid() ) {
 						widgets.province.setSourceData( Global.addFirstItemToArray( res.getResult() ) );
+						widgets.province.setValue( stepData['province'] );
 					}
 					ProgressBar.closeOverlay();
 				}} );
@@ -1578,7 +1606,7 @@ InstallWizardController = BaseWizardController.extend( {
 
 		for ( var key in this.edit_view_error_ui_dic ) {
 
-			//Error: Uncaught TypeError: Cannot read property 'clearErrorStyle' of undefined in https://ondemand2001.timetrex.com/interface/html5/views/BaseViewController.js?v=8.0.0-20141117-111140 line 1779
+			//Error: Uncaught TypeError: Cannot read property 'clearErrorStyle' of undefined in /interface/html5/views/BaseViewController.js?v=8.0.0-20141117-111140 line 1779
 			if ( !this.edit_view_error_ui_dic.hasOwnProperty( key ) || !this.edit_view_error_ui_dic[key] ) {
 				continue;
 			}

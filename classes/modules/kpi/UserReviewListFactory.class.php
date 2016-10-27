@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -64,7 +64,7 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 		$urcf = new UserReviewControlFactory();
 		$this->rs = $this->getCache( $id );
 		if ( $this->rs === FALSE ) {
-			$ph = array( 'id' => $id, );
+			$ph = array( 'id' => (int)$id, );
 			$query = '
 						select	a.*
 						from	' . $this->getTable() . ' as a
@@ -86,7 +86,7 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 			return FALSE;
 		}
 		$urcf = new UserReviewControlFactory();
-		$ph = array( 'user_review_control_id' => $id, );
+		$ph = array( 'user_review_control_id' => (int)$id, );
 		$query = '
 					select	a.*
 					from	' . $this->getTable() . ' as a
@@ -107,7 +107,7 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 			return FALSE;
 		}
 		$urcf = new UserReviewControlFactory();
-		$ph = array( 'kpi_id' => $id, );
+		$ph = array( 'kpi_id' => (int)$id, );
 		$query = '
                     select  *
                     from    ' . $this->getTable() . ' as a
@@ -127,7 +127,7 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 		}
 		$kf = new KPIFactory();
 		$urcf = new UserReviewControlFactory();
-		$ph = array( 'company_id' => $company_id );
+		$ph = array( 'company_id' => (int)$company_id, );
 		$query = '
 					select	a.*
 					from	' . $this->getTable() . ' as a
@@ -152,7 +152,7 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 		}
 		$kf = new KPIFactory();
 		$urcf = new UserReviewControlFactory();
-		$ph = array( 'id' => $id, 'company_id' => $company_id );
+		$ph = array( 'id' => (int)$id, 'company_id' => (int)$company_id, );
 		$query = '
 					select	a.*
 					from	' . $this->getTable() . ' as a
@@ -195,7 +195,7 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 		$uf = new UserFactory();
 		$kf = new KPIFactory();
 		$urcf = new UserReviewControlFactory();
-		$ph = array( 'company_id' => $company_id, );
+		$ph = array( 'company_id' => (int)$company_id, );
 		$query = '
 					select	a.*,
 							kf.name,
@@ -225,7 +225,7 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 		$query .= ( isset( $filter_data['severity_id'] ) ) ? $this->getWhereClauseSQL( 'urcf.severity_id', $filter_data['severity_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset( $filter_data['rating'] ) ) ? $this->getWhereClauseSQL( 'a.rating', $filter_data['rating'], 'numeric', $ph ) : NULL;
 		$query .= ( isset( $filter_data['note'] ) ) ? $this->getWhereClauseSQL( 'a.note', $filter_data['note'], 'text', $ph ) : NULL;
-		$query .= ( isset( $filter_data['tag'] ) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => $company_id, 'object_type_id' => 330, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
+		$query .= ( isset( $filter_data['tag'] ) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => (int)$company_id, 'object_type_id' => 330, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['created_date']) ) ? $this->getWhereClauseSQL( 'a.created_date', $filter_data['created_date'], 'date_range', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_date']) ) ? $this->getWhereClauseSQL( 'a.updated_date', $filter_data['updated_date'], 'date_range', $ph ) : NULL;

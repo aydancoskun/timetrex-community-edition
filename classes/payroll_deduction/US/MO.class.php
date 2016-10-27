@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -46,8 +46,61 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 														40 => 'Head of Household',
 */
 
+	var $state_income_tax_rate_options = array(
+												20060101 => array(
+															10 => array(
+																	array( 'income' => 1000,	'rate' => 1.5,	'constant' => 0 ),
+																	array( 'income' => 2000,	'rate' => 2.0,	'constant' => 15.00 ),
+																	array( 'income' => 3000,	'rate' => 2.5,	'constant' => 35.00 ),
+																	array( 'income' => 4000,	'rate' => 3.0,	'constant' => 60.00 ),
+																	array( 'income' => 5000,	'rate' => 3.5,	'constant' => 90.00 ),
+																	array( 'income' => 6000,	'rate' => 4.0,	'constant' => 125.00 ),
+																	array( 'income' => 7000,	'rate' => 4.5,	'constant' => 165.00 ),
+																	array( 'income' => 8000,	'rate' => 5.0,	'constant' => 210.00 ),
+																	array( 'income' => 9000,	'rate' => 5.5,	'constant' => 260.00 ),
+																	array( 'income' => 9000,	'rate' => 6.0,	'constant' => 315.00 ),
+																	),
+															20 => array(
+																	array( 'income' => 1000,	'rate' => 1.5,	'constant' => 0 ),
+																	array( 'income' => 2000,	'rate' => 2.0,	'constant' => 15.00 ),
+																	array( 'income' => 3000,	'rate' => 2.5,	'constant' => 35.00 ),
+																	array( 'income' => 4000,	'rate' => 3.0,	'constant' => 60.00 ),
+																	array( 'income' => 5000,	'rate' => 3.5,	'constant' => 90.00 ),
+																	array( 'income' => 6000,	'rate' => 4.0,	'constant' => 125.00 ),
+																	array( 'income' => 7000,	'rate' => 4.5,	'constant' => 165.00 ),
+																	array( 'income' => 8000,	'rate' => 5.0,	'constant' => 210.00 ),
+																	array( 'income' => 9000,	'rate' => 5.5,	'constant' => 260.00 ),
+																	array( 'income' => 9000,	'rate' => 6.0,	'constant' => 315.00 ),
+																	),
+															30 => array(
+																	array( 'income' => 1000,	'rate' => 1.5,	'constant' => 0 ),
+																	array( 'income' => 2000,	'rate' => 2.0,	'constant' => 15.00 ),
+																	array( 'income' => 3000,	'rate' => 2.5,	'constant' => 35.00 ),
+																	array( 'income' => 4000,	'rate' => 3.0,	'constant' => 60.00 ),
+																	array( 'income' => 5000,	'rate' => 3.5,	'constant' => 90.00 ),
+																	array( 'income' => 6000,	'rate' => 4.0,	'constant' => 125.00 ),
+																	array( 'income' => 7000,	'rate' => 4.5,	'constant' => 165.00 ),
+																	array( 'income' => 8000,	'rate' => 5.0,	'constant' => 210.00 ),
+																	array( 'income' => 9000,	'rate' => 5.5,	'constant' => 260.00 ),
+																	array( 'income' => 9000,	'rate' => 6.0,	'constant' => 315.00 ),
+																	),
+															40 => array(
+																	array( 'income' => 1000,	'rate' => 1.5,	'constant' => 0 ),
+																	array( 'income' => 2000,	'rate' => 2.0,	'constant' => 15.00 ),
+																	array( 'income' => 3000,	'rate' => 2.5,	'constant' => 35.00 ),
+																	array( 'income' => 4000,	'rate' => 3.0,	'constant' => 60.00 ),
+																	array( 'income' => 5000,	'rate' => 3.5,	'constant' => 90.00 ),
+																	array( 'income' => 6000,	'rate' => 4.0,	'constant' => 125.00 ),
+																	array( 'income' => 7000,	'rate' => 4.5,	'constant' => 165.00 ),
+																	array( 'income' => 8000,	'rate' => 5.0,	'constant' => 210.00 ),
+																	array( 'income' => 9000,	'rate' => 5.5,	'constant' => 260.00 ),
+																	array( 'income' => 9000,	'rate' => 6.0,	'constant' => 315.00 ),
+																),
+															),
+												);
+	
 	var $state_options = array(
-								1420099200 => array( //01-Jan-15
+								20150101 => array( //01-Jan-15
 													'standard_deduction' => array(
 																				'10' => 6300.00,
 																				'20' => 6300.00,
@@ -67,7 +120,7 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 																				'40' => 5000.00
 																				)
 													),
-								1388563200 => array( //01-Jan-14
+								20140101 => array( //01-Jan-14
 													'standard_deduction' => array(
 																				'10' => 6200.00,
 																				'20' => 6200.00,
@@ -87,7 +140,7 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 																				'40' => 5000.00
 																				)
 													),
-								1357027200 => array( //01-Jan-13
+								20130101 => array( //01-Jan-13
 													'standard_deduction' => array(
 																				'10' => 6100.00,
 																				'20' => 6100.00,
@@ -107,7 +160,7 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 																				'40' => 5000.00
 																				)
 													),
-								1325404800 => array( //01-Jan-12
+								20120101 => array( //01-Jan-12
 													'standard_deduction' => array(
 																				'10' => 5800.00,
 																				'20' => 5800.00,
@@ -127,7 +180,7 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 																				'40' => 5000.00
 																				)
 													),
-								1230796800 => array( //01-Jan-09
+								20090101 => array( //01-Jan-09
 													'standard_deduction' => array(
 																				'10' => 5700.00,
 																				'20' => 5700.00,
@@ -147,7 +200,7 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 																				'40' => 5000.00
 																				)
 													),
-								1167638400 => array(
+								20070101 => array(
 													'standard_deduction' => array(
 																				'10' => 5350.00,
 																				'20' => 5350.00,
@@ -167,7 +220,7 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 																				'40' => 5000.00
 																				)
 													),
-								1136102400 => array(
+								20060101 => array(
 													'standard_deduction' => array(
 																				'10' => 5150.00,
 																				'20' => 5150.00,
@@ -190,8 +243,8 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 													)
 								);
 
-	function getStatePayPeriodDeductions() {
-		return $this->RoundNearestDollar( bcdiv($this->getStateTaxPayable(), $this->getAnnualPayPeriods() ) );
+	function getStatePayPeriodDeductionRoundedValue( $amount ) {
+		return $this->RoundNearestDollar( $amount );
 	}
 
 	function getStateAnnualTaxableIncome() {

@@ -138,7 +138,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 				//Inside editor
 
 				var args = { country: $.i18n._( 'Country' ),
-					province: $.i18n._( 'Province' )
+					province: $.i18n._( 'Province/State' )
 				};
 
 				var editor = Global.loadWidgetByName( FormItemType.INSIDE_EDITOR );
@@ -331,7 +331,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 		var first_cell_val;
 
-		//rror: Uncaught TypeError: Cannot read property 'start_date' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Schedule&date=20141201&mode=week line 332 
+		//rror: Uncaught TypeError: Cannot read property 'start_date' of undefined in /interface/html5/#!m=Schedule&date=20141201&mode=week line 332 
 		if ( data && data[0] ) {
 			first_cell_val = data[0].start_date;
 		}

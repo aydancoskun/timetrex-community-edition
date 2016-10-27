@@ -11,6 +11,7 @@ var APIHierarchyControl = ServiceCaller.extend( {
 
 	setHierarchyLevel: function() {
 
+
 		return this.argumentsHandler( this.className, 'setHierarchyLevel', arguments );
 
 	},
@@ -40,7 +41,7 @@ var APIHierarchyControl = ServiceCaller.extend( {
 	},
 
 	setHierarchyControl: function() {
-
+		LocalCacheData.result_cache['getHierarchyControlOptions'] = null;
 		return this.argumentsHandler( this.className, 'setHierarchyControl', arguments );
 
 	},
@@ -52,7 +53,7 @@ var APIHierarchyControl = ServiceCaller.extend( {
 	},
 
 	deleteHierarchyControl: function() {
-
+		LocalCacheData.result_cache['getHierarchyControlOptions'] = null;
 		return this.argumentsHandler( this.className, 'deleteHierarchyControl', arguments );
 
 	},
@@ -64,7 +65,7 @@ var APIHierarchyControl = ServiceCaller.extend( {
 	},
 
 	copyHierarchyControl: function() {
-
+		LocalCacheData.result_cache['getHierarchyControlOptions'] = null;
 		return this.argumentsHandler( this.className, 'copyHierarchyControl', arguments );
 
 	}

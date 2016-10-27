@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -45,7 +45,7 @@ class UserContactFactory extends Factory {
 
 	protected $tmp_data = NULL;
 	protected $user_obj = NULL;
-	protected $name_validator_regex = '/^[a-zA-Z -\.\'|\x{0080}-\x{FFFF}]{1,250}$/iu';
+	protected $name_validator_regex = '/^[a-zA-Z- \.\'|\x{0080}-\x{FFFF}]{1,250}$/iu';
 	protected $address_validator_regex = '/^[a-zA-Z0-9-,_\/\.\'#\ |\x{0080}-\x{FFFF}]{1,250}$/iu';
 	protected $city_validator_regex = '/^[a-zA-Z0-9-,_\.\'#\ |\x{0080}-\x{FFFF}]{1,250}$/iu';
 
@@ -236,11 +236,6 @@ class UserContactFactory extends Factory {
 	function setStatus($status) {
 		$status = trim($status);
 
-		$key = Option::getByValue($status, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$status = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'status_id',
 											$status,
 											TTi18n::gettext('Incorrect Status'),
@@ -263,10 +258,6 @@ class UserContactFactory extends Factory {
 	}
 	function setType($type) {
 		$type = trim($type);
-		$key = Option::getByValue($type, $this->getOptions('type'));
-		if ($key !== FALSE) {
-			$type = $key ;
-		}
 
 		if ( $this->Validator->inArrayKey( 'type_id',
 											$type,
@@ -821,17 +812,25 @@ class UserContactFactory extends Factory {
 		return FALSE;
 	}
 	function setBirthDate($epoch) {
-		if	(	( $epoch !== FALSE AND $epoch == '' )
-				OR $this->Validator->isDate(	'birth_date',
+		if	( ( $epoch !== FALSE AND $epoch == '' )
+				OR
+				(
+					$this->Validator->isDate(	'birth_date',
 												$epoch,
-												TTi18n::gettext('Birth date is invalid, try specifying the year with four digits.')) ) {
+												TTi18n::gettext('Birth date is invalid, try specifying the year with four digits'))
+					AND
+					$this->Validator->isTRUE(	'birth_date',
+												( TTDate::getMiddleDayEpoch( $epoch ) <= TTDate::getMiddleDayEpoch( ( time() + (365 * 86400) ) ) ) ? TRUE : FALSE,
+												TTi18n::gettext('Birth date can not be more than one year in the future'))
+				)
+			) {
 
 			//Allow for negative epochs, for birthdates less than 1960's
 			$this->data['birth_date'] = ( $epoch != 0 AND $epoch != '' ) ? TTDate::getMiddleDayEpoch( $epoch ) : '' ; //Allow blank birthdate.
 
 			return TRUE;
 		}
-
+		
 		return FALSE;
 	}
 
@@ -908,7 +907,7 @@ class UserContactFactory extends Factory {
 
 			$this->data['note'] = $value;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -949,7 +948,7 @@ class UserContactFactory extends Factory {
 		return TRUE;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		//When doing a mass edit of employees, user name is never specified, so we need to avoid this validation issue.
 
 		//Re-validate the province just in case the country was set AFTER the province.

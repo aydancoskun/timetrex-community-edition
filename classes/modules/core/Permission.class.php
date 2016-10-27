@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -39,7 +39,15 @@
  * @package Core
  */
 class Permission {
+	private $cached_permissions = array();
+	private $cached_permission_children_ids = array();
+	
 	function getPermissions( $user_id, $company_id ) {
+		//When Permission->Check() is used in a tight loop, even getCache() can be slow as it has to load a large array.
+		//So cache the permissions in even faster access memory when possible.
+		if ( isset($this->cached_permissions[$user_id][$company_id]) AND $this->cached_permissions[$user_id][$company_id] != FALSE ) {
+			return $this->cached_permissions[$user_id][$company_id];
+		}
 
 		$plf = TTnew( 'PermissionListFactory' );
 
@@ -52,7 +60,7 @@ class Permission {
 				//Debug::Text('Found Permissions in DB!', __FILE__, __LINE__, __METHOD__, 9);
 				$perm_arr['_system']['last_updated_date'] = NULL;
 				foreach($plf as $p_obj) {
-					//Debug::Text('Perm -  Section: '. $p_obj->getSection(), __FILE__, __LINE__, __METHOD__, 9);
+					//Debug::Text('Perm -  Section: '. $p_obj->getSection() .' Name: '. $p_obj->getName() .' Value: '. (int)$p_obj->getValue(), __FILE__, __LINE__, __METHOD__, 9);
 					if ( $p_obj->getUpdatedDate() > $perm_arr['_system']['last_updated_date'] ) {
 						$perm_arr['_system']['last_updated_date'] = $p_obj->getUpdatedDate();
 					}
@@ -62,11 +70,10 @@ class Permission {
 				$perm_arr['_system']['level'] = $p_obj->getColumn('level');
 
 				$plf->saveCache($perm_arr, $cache_id);
-
-				return $perm_arr;
 			}
 		}
-
+		
+		$this->cached_permissions[$user_id][$company_id] = $perm_arr; //Populate local cache.
 		return $perm_arr;
 	}
 
@@ -312,11 +319,16 @@ class Permission {
 	}
 
 	function getPermissionHierarchyChildren( $company_id, $user_id ) {
-		$hlf = TTnew( 'HierarchyListFactory' );
-		$permission_children_ids = $hlf->getHierarchyChildrenByCompanyIdAndUserIdAndObjectTypeID( $company_id, $user_id, 100 );
-		//Debug::Arr($permission_children_ids, 'Permission Child IDs: ', __FILE__, __LINE__, __METHOD__, 10);
+		if ( isset($this->cached_permission_children_ids[$company_id][$user_id]) ) {
+			return $this->cached_permission_children_ids[$company_id][$user_id];
+		} else {
+			Debug::Text('  Getting hierarchy children for User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
+			$hlf = TTnew( 'HierarchyListFactory' );
+			$this->cached_permission_children_ids[$company_id][$user_id] = $hlf->getHierarchyChildrenByCompanyIdAndUserIdAndObjectTypeID( $company_id, $user_id, 100 );
+			//Debug::Arr($this->cached_permission_children_ids[$company_id][$user_id], 'Permission Child IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		return $permission_children_ids;
+			return $this->cached_permission_children_ids[$company_id][$user_id];
+		}
 	}
 
 	function getPermissionChildren($section, $name, $user_id = NULL, $company_id = NULL) {
@@ -335,13 +347,11 @@ class Permission {
 			$company_id = $current_company->getId();
 		}
 
-		$permission_children_ids = $this->getPermissionHierarchyChildren( $company_id, $user_id );
-
 		//If 'view' is FALSE, we are not returning children to check for edit/delete permissions, so those are denied.
 		//This can be tested with 'users', 'view', 'users', 'edit_subordinate' allowed. They won't be able to edit subordinates.
-		if ( $this->Check( $section, $name ) == FALSE ) {
-			if ( $this->Check( $section, $name.'_child') ) {
-				$retarr = $permission_children_ids;
+		if ( $this->Check( $section, $name, $user_id, $company_id ) == FALSE ) {
+			if ( $this->Check( $section, $name.'_child', $user_id, $company_id ) == TRUE ) {
+				$retarr = $this->getPermissionHierarchyChildren( $company_id, $user_id );
 			}
 			//Why are we including the current user in the "child" list, if they can view their own records.
 			//This essentially makes edit_child permissions include edit_own as well. Which for the editing punches
@@ -350,19 +360,30 @@ class Permission {
 			//Its different view view_own/view_child as compared to edit_own/edit_child.
 			//	So we need to include the current user if they can only view their own, but exclude the current user when doing is_child checks above.
 			//Another way we could handle this is to return an array of children and owner separately, then in SQL queries combine them together.
-			if ( $this->Check( $section, $name.'_own') ) {
-				$retarr[] = $user_id;
+			if ( $this->Check( $section, $name.'_own', $user_id, $company_id) == TRUE ) {
+				$retarr[] = (int)$user_id;
+			}
+
+			//If they don't have permissions to view anything, make sure we return a blank array, so all in_array() or isPermissionChild() returns FALSE.
+			if ( !isset($retarr) ) {
+				$retarr = array();
 			}
 		} else {
-			//This must return NULL, otherwise the SQL query will restrict returned records just to the children.
+			//This must return TRUE, otherwise the SQL query will restrict returned records just to the children.
+			//Used to be NULL, but isset() doesn't work on NULL. Using TRUE though caused is_array() to always return TRUE too, which may not be a bad thing.
+			//   However using TRUE causing other PHP warnings when trying to add values to it as if it were an array.
 			$retarr = NULL;
 		}
 
-		if ( isset($retarr) ) {
-			return $retarr;
+		return $retarr;
+	}
+
+	function isPermissionChild( $user_id, $permission_children_ids ) {
+		if ( $permission_children_ids === NULL OR in_array( (int)$user_id, (array)$permission_children_ids, TRUE ) ) { //Make sure we do a STRICT in_array() match, so $user_id=TRUE isn't matched.
+			return TRUE;
 		}
 
-		return NULL;
+		return FALSE;
 	}
 
 	function getLastUpdatedDate( $user_id = NULL, $company_id = NULL ) {

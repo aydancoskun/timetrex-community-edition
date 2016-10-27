@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -1854,7 +1854,7 @@ class DemoData {
 
 		$spf->setCompany( $company_id );
 		$spf->setName( 'One Hour Lunch' );
-		$spf->setAbsencePolicyID( 0 );
+		//$spf->setAbsencePolicyID( 0 );
 		$spf->setStartStopWindow( 1800 );
 
 		if ( $spf->isValid() ) {
@@ -2184,9 +2184,7 @@ class DemoData {
 	}
 
 	function createPayPeriodSchedule( $company_id, $user_ids ) {
-
 		$ppsf = TTnew( 'PayPeriodScheduleFactory' );
-
 		$ppsf->setCompany( $company_id );
 		$ppsf->setName( 'Bi-Weekly' );
 		$ppsf->setDescription( 'Pay every two weeks' );
@@ -3104,12 +3102,11 @@ class DemoData {
 		switch ( $type ) {
 			case 10: //John Doe
 				$uf->setUserName( 'john.doe'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 
 				//Set Phone ID/Password to test web quickpunch
 				if (  $this->getEnableQuickPunch() == TRUE ) {
 					$uf->setPhoneId( '1235'.$this->getUserNamePostfix() );
-					$uf->setPhonePassword( '1234' );
+					$uf->setPhonePassword( '1234', TRUE  );
 				}
 
 				$uf->setFirstName( 'John' );
@@ -3140,7 +3137,6 @@ class DemoData {
 				break;
 			case 11: //Theodora	 Simmons
 				$uf->setUserName( 'theodora.simmons'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 				//$uf->setPhoneId( '1111' );
 				//$uf->setPhonePassword( '1111' );
 
@@ -3172,7 +3168,6 @@ class DemoData {
 				break;
 			case 12: //Kitty  Nicholas
 				$uf->setUserName( 'kitty.nicholas'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 				//$uf->setPhoneId( '1111' );
 				//$uf->setPhonePassword( '1111' );
 
@@ -3204,7 +3199,6 @@ class DemoData {
 				break;
 			case 13: //Tristen	Braun
 				$uf->setUserName( 'tristen.braun'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 				//$uf->setPhoneId( '1111' );
 				//$uf->setPhonePassword( '1111' );
 
@@ -3236,7 +3230,6 @@ class DemoData {
 				break;
 			case 14: //Gale	 Mench
 				$uf->setUserName( 'gale.mench'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 				//$uf->setPhoneId( '1111' );
 				//$uf->setPhonePassword( '1111' );
 
@@ -3268,7 +3261,6 @@ class DemoData {
 				break;
 			case 15: //Beau	 Mayers
 				$uf->setUserName( 'beau.mayers'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 				//$uf->setPhoneId( '1111' );
 				//$uf->setPhonePassword( '1111' );
 
@@ -3300,7 +3292,6 @@ class DemoData {
 				break;
 			case 16: //Ian	Schofield
 				$uf->setUserName( 'ian.schofield'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 				//$uf->setPhoneId( '1111' );
 				//$uf->setPhonePassword( '1111' );
 
@@ -3332,7 +3323,6 @@ class DemoData {
 				break;
 			case 17: //Gabe	 Hoffhants
 				$uf->setUserName( 'gabe.hoffhants'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 				//$uf->setPhoneId( '1111' );
 				//$uf->setPhonePassword( '1111' );
 
@@ -3364,7 +3354,6 @@ class DemoData {
 				break;
 			case 18: //Franklin	 Mcmichaels
 				$uf->setUserName( 'franklin.mcmichaels'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 				//$uf->setPhoneId( '1111' );
 				//$uf->setPhonePassword( '1111' );
 
@@ -3396,7 +3385,6 @@ class DemoData {
 				break;
 			case 19: //Donald  Whitling
 				$uf->setUserName( 'donald.whitling'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 				//$uf->setPhoneId( '1111' );
 				//$uf->setPhonePassword( '1111' );
 
@@ -3428,12 +3416,11 @@ class DemoData {
 				break;
 			case 20: //Jane Doe
 				$uf->setUserName( 'jane.doe'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 
 				//Set Phone ID/Password to test web quickpunch
 				if (  $this->getEnableQuickPunch() == TRUE ) {
 					$uf->setPhoneId( '1234'.$this->getUserNamePostfix() );
-					$uf->setPhonePassword( '1234' );
+					$uf->setPhonePassword( '1234', TRUE );
 				}
 
 				$uf->setFirstName( 'Jane' );
@@ -3464,7 +3451,6 @@ class DemoData {
 				break;
 			case 21: //Tamera  Erschoff
 				$uf->setUserName( 'tamera.erschoff'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 				//$uf->setPhoneId( '1111' );
 				//$uf->setPhonePassword( '1111' );
 
@@ -3496,7 +3482,6 @@ class DemoData {
 				break;
 			case 22: //Redd	 Rifler
 				$uf->setUserName( 'redd.rifler'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 				//$uf->setPhoneId( '1111' );
 				//$uf->setPhonePassword( '1111' );
 
@@ -3528,7 +3513,6 @@ class DemoData {
 				break;
 			case 23: //Brent  Pawle
 				$uf->setUserName( 'brent.pawle'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 				//$uf->setPhoneId( '1111' );
 				//$uf->setPhonePassword( '1111' );
 
@@ -3560,7 +3544,6 @@ class DemoData {
 				break;
 			case 24: //Heather	Grant
 				$uf->setUserName( 'heather.grant'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 				//$uf->setPhoneId( '1111' );
 				//$uf->setPhonePassword( '1111' );
 
@@ -3592,7 +3575,6 @@ class DemoData {
 				break;
 			case 25: //Steph  Mench
 				$uf->setUserName( 'steph.mench'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 				//$uf->setPhoneId( '1111' );
 				//$uf->setPhonePassword( '1111' );
 
@@ -3624,7 +3606,6 @@ class DemoData {
 				break;
 			case 26: //Kailey  Klockman
 				$uf->setUserName( 'kailey.klockman'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 				//$uf->setPhoneId( '1111' );
 				//$uf->setPhonePassword( '1111' );
 
@@ -3656,7 +3637,6 @@ class DemoData {
 				break;
 			case 27: //Matt	 Marcotte
 				$uf->setUserName( 'matt.marcotte'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 				//$uf->setPhoneId( '1111' );
 				//$uf->setPhonePassword( '1111' );
 
@@ -3688,7 +3668,6 @@ class DemoData {
 				break;
 			case 28: //Nick	 Hanseu
 				$uf->setUserName( 'nick.hanseu'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 				//$uf->setPhoneId( '1111' );
 				//$uf->setPhonePassword( '1111' );
 
@@ -3720,7 +3699,6 @@ class DemoData {
 				break;
 			case 29: //Rich	 Wiggins
 				$uf->setUserName( 'rich.wiggins'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 				//$uf->setPhoneId( '1111' );
 				//$uf->setPhonePassword( '1111' );
 
@@ -3753,7 +3731,6 @@ class DemoData {
 			case 30: //Mike Smith
 
 				$uf->setUserName( 'mike.smith'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 				//$uf->setPhoneId( '2222' );
 				//$uf->setPhonePassword( '2222' );
 
@@ -3785,7 +3762,6 @@ class DemoData {
 				break;
 			case 40: //John Hancock
 				$uf->setUserName( 'john.hancock'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 
 				$uf->setFirstName( 'John' );
 				$uf->setLastName( 'Hancock' );
@@ -3817,12 +3793,11 @@ class DemoData {
 				$hire_date = strtotime('01-Jan-2001'); //Force consistent hire date for the administrator, so other unit tests can rely on it.
 				
 				$uf->setUserName( 'demoadmin'. $this->getUserNamePostfix() );
-				$uf->setPassword( 'demo' );
 
 				//Set Phone ID/Password to test web quickpunch
 				if (  $this->getEnableQuickPunch() == TRUE ) {
 					$uf->setPhoneId( '1'.$this->getUserNamePostfix().'34' );
-					$uf->setPhonePassword( '1234' );
+					$uf->setPhonePassword( '1234', TRUE );
 				}
 
 				$uf->setFirstName( 'Mr.' );
@@ -3859,7 +3834,6 @@ class DemoData {
 				$last_name = $this->getRandomLastName();
 				if ( $first_name != '' AND $last_name != '' ) {
 					$uf->setUserName( $first_name.'.'. $last_name .'_'. $next_available_employee_number .'_'. $this->getUserNamePostfix() );
-					$uf->setPassword( 'demo' );
 
 					$uf->setFirstName( $first_name );
 					$uf->setLastName( $last_name );
@@ -3891,6 +3865,7 @@ class DemoData {
 
 				break;
 		}
+		$uf->setPassword( 'demo', NULL, TRUE );
 
 		if ( $uf->isValid() ) {
 			$insert_id = $uf->Save( TRUE, TRUE );
@@ -6120,6 +6095,27 @@ class DemoData {
 		return FALSE;
 	}
 
+	function deleteSchedule( $id ) {
+		$slf = TTnew( 'ScheduleListFactory' );
+		$slf->getById( $id );
+		if ( $slf->getRecordCount() > 0 ) {
+			foreach( $slf as $s_obj ) {
+				$s_obj->setDeleted(TRUE);
+				$s_obj->setEnableReCalculateDay(TRUE);
+				if ( $s_obj->isValid() ) {
+					Debug::Text('Schedule ID deleted: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+					$s_obj->Save();
+				}
+			}
+
+			return TRUE;
+		}
+
+		Debug::Text('No Schedule to Delete: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+		
+		return FALSE;
+	}
+
 	function deletePunch( $id ) {
 		$plf = TTnew( 'PunchListFactory' );
 		$plf->getById( $id );
@@ -6274,7 +6270,7 @@ class DemoData {
 		return $retval;
 	}
 
-	function createAbsence( $user_id, $date_stamp, $total_time, $absence_policy_id ) {
+	function createAbsence( $user_id, $date_stamp, $total_time, $absence_policy_id, $override = FALSE ) {
 		$udtf = TTnew( 'UserDateTotalFactory' );
 
 		$udtf->StartTransaction();
@@ -6283,6 +6279,30 @@ class DemoData {
 		$aplf->getById( $absence_policy_id );
 		if ( $aplf->getRecordCount() == 1 ) {
 			$pay_code_id = $aplf->getCurrent()->getPayCode();
+
+			if ( $override == TRUE ) {
+				$filter_data = array( 	'user_id' => (int)$user_id,
+										'date_stamp' => $date_stamp,
+										'object_type_id' => (int)50,
+
+										//Restrict based on src_object_id when entering absences as well.
+										//This allows multiple absence policies to point to the same pay code
+										//and still have multiple entries on the same day with the same branch/department/job/task.
+										//Some customers have 5-10 UNPAID absence policies all going to the same UNPAID pay code.
+										//This is required to allow more than one to be used on the same day.
+										'src_object_id' => (int)$absence_policy_id,
+										'pay_code_id' => (int)$pay_code_id,
+									);
+
+				$udtlf = TTnew( 'UserDateTotalListFactory' );
+				$udtlf->getAPISearchByCompanyIdAndArrayCriteria( $aplf->getCurrent()->getCompany(), $filter_data );
+				if ( $udtlf->getRecordCount() > 0 ) {
+					$udtf = $udtlf->getCurrent();
+					Debug::Text(' Found existing Absence, UDT ID: '.  $udtf->getID(), __FILE__, __LINE__, __METHOD__, 10);
+				} else {
+					Debug::Text(' No existing Absence...', __FILE__, __LINE__, __METHOD__, 10);
+				}
+			}
 			
 			$udtf->setUser( $user_id );
 			$udtf->setDateStamp( $date_stamp );
@@ -6307,7 +6327,12 @@ class DemoData {
 			$udtf->setEnableCalcException( TRUE );
 
 			if ( $udtf->isValid() ) {
-				$retval = $udtf->Save();
+				if ( $udtf->isNew() ) {
+					$retval = $udtf->Save();
+				} else {
+					$retval = $udtf->getID();
+					$udtf->Save();
+				}
 
 				$udtf->CommitTransaction();
 
@@ -6343,6 +6368,8 @@ class DemoData {
 
 			return TRUE;
 		}
+
+		Debug::Text('No record to delete UDT ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 	}

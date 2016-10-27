@@ -430,7 +430,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 	/* jshint ignore:start */
 	setDefaultMenu: function( doNotSetFocus ) {
 
-        //Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+        //Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
         if (!this.context_menu_array) {
             return;
         }
@@ -703,18 +703,18 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 	onTypeChange: function() {
 		if ( this.current_edit_record.type_id === 10 ) {
-			this.edit_view_form_item_dic['percent_amount'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['percent_amount_entry_name_id'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['rate'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['units'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['amount'].css( 'display', 'block' );
+			this.detachElement( 'percent_amount' );
+			this.detachElement( 'percent_amount_entry_name_id' );
+			this.attachElement( 'rate' );
+			this.attachElement( 'units' );
+			this.attachElement( 'amount' );
 
 		} else if ( this.current_edit_record.type_id === 20 ) {
-			this.edit_view_form_item_dic['percent_amount'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['percent_amount_entry_name_id'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['rate'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['units'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['amount'].css( 'display', 'none' );
+			this.attachElement( 'percent_amount' );
+			this.attachElement( 'percent_amount_entry_name_id' );
+			this.detachElement( 'rate' );
+			this.detachElement( 'units' );
+			this.detachElement( 'amount' );
 		}
 
 		this.editFieldResize();
@@ -1065,25 +1065,30 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		}} );
 	},
 
-	onSaveAndContinue: function() {
+	onSaveAndContinue: function( ignoreWarning ) {
 		var $this = this;
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
+		this.is_changed = false;
 		this.is_add = false;
 		LocalCacheData.current_doing_context_action = 'save_and_continue';
 		this.current_edit_record.user_id = this.current_edit_record.user_id[0];
-		this.api['set' + this.api.key_name]( this.current_edit_record, {onResult: function( result ) {
+		this.api['set' + this.api.key_name]( this.current_edit_record, false, ignoreWarning, {onResult: function( result ) {
 			$this.onSaveAndContinueResult( result );
 
 		}} );
 	},
 
-	onSaveClick: function() {
+	onSaveClick: function( ignoreWarning ) {
 		var $this = this;
 		var record;
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
 		this.is_add = false;
 		LocalCacheData.current_doing_context_action = 'save';
-
 		var records_data = null;
-
 		if ( this.is_mass_editing ) {
 
 			var check_fields = {};
@@ -1127,7 +1132,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 			record = records_data;
 		}
 
-		this.api['set' + this.api.key_name]( record, {onResult: function( result ) {
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {onResult: function( result ) {
 			if ( result.isValid() ) {
 				var result_data = result.getResult();
 				if ( result_data === true ) {
@@ -1148,8 +1153,11 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		}} );
 	},
 
-	onSaveAndCopy: function() {
+	onSaveAndCopy: function( ignoreWarning ) {
 		var $this = this;
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
 		this.is_add = true;
 		var record = this.current_edit_record;
 		LocalCacheData.current_doing_context_action = 'save_and_copy';
@@ -1175,7 +1183,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 			record = records_data;
 		}
 
-		this.api['set' + this.api.key_name]( record, {onResult: function( result ) {
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {onResult: function( result ) {
 			if ( result.isValid() ) {
 				var result_data = result.getResult();
 				if ( result_data === true ) {
@@ -1194,8 +1202,11 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		}} );
 	},
 
-	onSaveAndNewClick: function() {
+	onSaveAndNewClick: function( ignoreWarning ) {
 		var $this = this;
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
 		this.is_add = true;
 		var record = this.current_edit_record;
 		LocalCacheData.current_doing_context_action = 'new';
@@ -1220,7 +1231,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		if ( Global.isSet( records_data ) && records_data.length > 0 ) {
 			record = records_data;
 		}
-		this.api['set' + this.api.key_name]( record, {onResult: function( result ) {
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {onResult: function( result ) {
 			if ( result.isValid() ) {
 				var result_data = result.getResult();
 				if ( result_data === true ) {
@@ -1321,7 +1332,8 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'pay_stub_entry_name_id'
+			field: 'pay_stub_entry_name_id',
+			validation_field: 'pay_stub_entry_name',
 		} );
 
 		form_item_input.setDefaultArgs( args );
@@ -1440,6 +1452,15 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				default_args: default_args,
 				layout_name: ALayoutIDs.USER,
 				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				multiple: true,
+				basic_search: true,
+				adv_search: true,
+				form_item_type: FormItemType.AWESOME_BOX} ),
+			new SearchField( {label: $.i18n._( 'Pay Stub Account' ),
+				in_column: 1,
+				field: 'pay_stub_entry_name_id',
+				layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+				api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,

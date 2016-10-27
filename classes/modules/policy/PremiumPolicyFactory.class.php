@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -136,10 +136,6 @@ class PremiumPolicyFactory extends Factory {
 										'-1030-name' => TTi18n::gettext('Name'),
 										'-1035-description' => TTi18n::gettext('Description'),
 
-										'-1040-pay_type' => TTi18n::gettext('Pay Type'),
-										'-1040-rate' => TTi18n::gettext('Rate'),
-										'-1050-accrual_rate' => TTi18n::gettext('Accrual Rate'),
-
 										'-1900-in_use' => TTi18n::gettext('In Use'),
 
 										'-2000-created_by' => TTi18n::gettext('Created By'),
@@ -221,13 +217,6 @@ class PremiumPolicyFactory extends Factory {
 										'pay_code' => FALSE,
 										'pay_formula_policy_id' => 'PayFormulaPolicy',
 										'pay_formula_policy' => FALSE,
-
-										'wage_group_id' => 'WageGroup',
-										'rate' => 'Rate',
-										'accrual_rate' => 'AccrualRate',
-										'accrual_policy_id' => 'AccrualPolicyID',
-										'pay_stub_entry_account_id' => 'PayStubEntryAccountId',
-										'pay_stub_entry_account' => FALSE,
 										
 										'branch' => 'Branch',
 										'branch_selection_type_id' => 'BranchSelectionType',
@@ -302,11 +291,6 @@ class PremiumPolicyFactory extends Factory {
 	}
 	function setType($value) {
 		$value = trim($value);
-
-		$key = Option::getByValue($value, $this->getOptions('type') );
-		if ($key !== FALSE) {
-			$value = $key;
-		}
 
 		if ( $this->Validator->inArrayKey(	'type',
 											$value,
@@ -428,11 +412,6 @@ class PremiumPolicyFactory extends Factory {
 	function setPayType($value) {
 		$value = trim($value);
 
-		$key = Option::getByValue($value, $this->getOptions('pay_type') );
-		if ($key !== FALSE) {
-			$value = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'pay_type_id',
 											$value,
 											TTi18n::gettext('Incorrect Pay Type'),
@@ -458,7 +437,7 @@ class PremiumPolicyFactory extends Factory {
 		return FALSE;
 	}
 	function setStartDate($epoch) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ( $epoch == '' ) {
 			$epoch = NULL;
@@ -492,7 +471,7 @@ class PremiumPolicyFactory extends Factory {
 		return FALSE;
 	}
 	function setEndDate($epoch) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ( $epoch == '' ) {
 			$epoch = NULL;
@@ -525,7 +504,7 @@ class PremiumPolicyFactory extends Factory {
 		return FALSE;
 	}
 	function setStartTime($epoch) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if	(	$epoch == ''
 				OR
@@ -554,7 +533,7 @@ class PremiumPolicyFactory extends Factory {
 		return FALSE;
 	}
 	function setEndTime($epoch) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if	(	$epoch == ''
 				OR
@@ -1060,192 +1039,6 @@ class PremiumPolicyFactory extends Factory {
 		}
 
 		return FALSE;
-	}
-
-	function getWageGroup() {
-		if ( isset($this->data['wage_group_id']) ) {
-			return (int)$this->data['wage_group_id'];
-		}
-
-		return FALSE;
-	}
-	function setWageGroup($id) {
-		$id = trim($id);
-
-		$wglf = TTnew( 'WageGroupListFactory' );
-
-		if ( $id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'wage_group',
-													$wglf->getByID($id),
-													TTi18n::gettext('Wage Group is invalid')
-													) ) {
-
-			$this->data['wage_group_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getRate() {
-		if ( isset($this->data['rate']) ) {
-			return Misc::removeTrailingZeros( $this->data['rate'] );
-		}
-
-		return FALSE;
-	}
-	function setRate($int) {
-		$int = trim($int);
-
-		if	( empty($int) ) {
-			$int = 0;
-		}
-
-		if	(	$this->Validator->isFloat(		'rate',
-												$int,
-												TTi18n::gettext('Incorrect Rate')) ) {
-			$this->data['rate'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getAccrualRate() {
-		if ( isset($this->data['accrual_rate']) ) {
-			return $this->data['accrual_rate'];
-		}
-
-		return FALSE;
-	}
-	function setAccrualRate($int) {
-		$int = trim($int);
-
-		if	( empty($int) ) {
-			$int = 0;
-		}
-
-		if	(	$this->Validator->isFloat(		'accrual_rate',
-												$int,
-												TTi18n::gettext('Incorrect Accrual Rate')) ) {
-			$this->data['accrual_rate'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getAccrualPolicyID() {
-		if ( isset($this->data['accrual_policy_id']) ) {
-			return (int)$this->data['accrual_policy_id'];
-		}
-
-		return FALSE;
-	}
-	function setAccrualPolicyID($id) {
-		$id = trim($id);
-
-		if ( $id == '' OR empty($id) ) {
-			$id = NULL;
-		}
-
-		$aplf = TTnew( 'AccrualPolicyListFactory' );
-
-		if ( $id == NULL
-				OR
-				$this->Validator->isResultSetWithRows(	'accrual_policy',
-													$aplf->getByID($id),
-													TTi18n::gettext('Accrual Policy is invalid')
-													) ) {
-
-			$this->data['accrual_policy_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getPayStubEntryAccountId() {
-		if ( isset($this->data['pay_stub_entry_account_id']) ) {
-			return (int)$this->data['pay_stub_entry_account_id'];
-		}
-
-		return FALSE;
-	}
-	function setPayStubEntryAccountId($id) {
-		$id = trim($id);
-
-		Debug::text('Entry Account ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-
-		if ( $id == '' OR empty($id) ) {
-			$id = NULL;
-		}
-
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-		if (
-				$id == NULL
-				OR
-				$this->Validator->isResultSetWithRows(	'pay_stub_entry_account_id',
-														$psealf->getById($id),
-														TTi18n::gettext('Invalid Pay Stub Account')
-														) ) {
-			$this->data['pay_stub_entry_account_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-	function getHourlyRate( $original_hourly_rate ) {
-		//Debug::text(' Getting Premium Rate based off Hourly Rate: '. $original_hourly_rate, __FILE__, __LINE__, __METHOD__, 10);
-		$rate = 0;
-
-		switch ( $this->getPayType() ) {
-			case 10: //Pay Factor
-				//Since they are already paid for this time with regular or OT, minus 1 from the rate
-				$rate = ( $original_hourly_rate * ( $this->getRate() - 1) );
-				break;
-			case 20: //Pay Plus Premium
-				$rate = $this->getRate();
-				break;
-			case 30: //Flat Hourly Rate (Relative)
-				//Get the difference between the employees current wage and the premium wage.
-				$rate = ( $this->getRate() - $original_hourly_rate );
-				break;
-			case 32: //Flat Hourly Rate (NON relative)
-				//This should be original_hourly_rate, which is typically related to the users wage/wage group, so they can pay whatever is defined there.
-				//If they want to pay a flat hourly rate specified in the premium policy use Pay Plus Premium instead.
-				$rate = $original_hourly_rate;
-				break;
-			case 40: //Minimum/Prevailing wage
-				if ( $this->getRate() > $original_hourly_rate ) {
-					$rate = ( $this->getRate() - $original_hourly_rate );
-				} else {
-					$rate = 0;
-				}
-				break;
-			case 42: //Minimum/Prevailing wage (NON relative)
-				if ( $this->getRate() > $original_hourly_rate ) {
-					$rate = $this->getRate();
-				} else {
-					//Use the original rate rather than 0, since this is non-relative its likely
-					//that the employee is just getting paid from premium policies, so if they are getting
-					//paid more than the premium policy states, without this they would get paid nothing.
-					//This allows premium policies like "Painting (Regular)" to actually have wages associated with them.
-					$rate = $original_hourly_rate;
-				}
-				break;
-		}
-
-		//Don't round rate, as some currencies accept more than 2 decimal places now.
-		//and all wages support up to 4 decimal places too.
-		//return Misc::MoneyFormat($rate, FALSE);
-		return $rate;
 	}
 
 	/*
@@ -2188,8 +1981,8 @@ class PremiumPolicyFactory extends Factory {
 		return FALSE;
 	}
 
-	function Validate() {
-		if ( $this->getDeleted() != TRUE AND $this->validate_only == FALSE ) { //Don't check the below when mass editing.
+	function Validate( $ignore_warning = TRUE ) {
+		if ( $this->getDeleted() != TRUE AND $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing.
 			if ( $this->getPayCode() == 0 ) {
 				$this->Validator->isTRUE(	'pay_code_id',
 											FALSE,
@@ -2231,15 +2024,7 @@ class PremiumPolicyFactory extends Factory {
 			$this->setPayType( 10 );
 		}
 
-		if ( $this->getWageGroup() === FALSE ) {
-			$this->setWageGroup( 0 );
-		}
-		if ( $this->getRate() === FALSE ) {
-			$this->setRate( 0 );
-		}
-		if ( $this->getAccrualRate() === FALSE ) {
-			$this->setAccrualRate( 0 );
-		}
+		$this->data['rate'] = 0; //This is required until the schema removes the NOT NULL constraint.
 
 		return TRUE;
 	}

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -61,7 +61,7 @@ class DepartmentListFactory extends DepartmentFactory implements IteratorAggrega
 		$this->rs = $this->getCache($id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => $id,
+						'id' => (int)$id,
 						);
 
 			$query = '
@@ -93,8 +93,9 @@ class DepartmentListFactory extends DepartmentFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -118,8 +119,8 @@ class DepartmentListFactory extends DepartmentFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
-					'status_id' => $status_id,
+					'company_id' => (int)$company_id,
+					'status_id' => (int)$status_id,
 					);
 
 		$query = '
@@ -144,8 +145,8 @@ class DepartmentListFactory extends DepartmentFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
-					'id' => $id,
+					'company_id' => (int)$company_id,
+					'id' => (int)$id,
 					);
 
 		$query = '
@@ -171,8 +172,8 @@ class DepartmentListFactory extends DepartmentFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'id' => $this->Validator->stripNon32bitInteger( $id ),
-					'company_id' => $company_id,
+					'id' => (int)$this->Validator->stripNon32bitInteger( $id ),
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -210,8 +211,8 @@ class DepartmentListFactory extends DepartmentFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
-					'status_id' => $status_id,
+					'company_id' => (int)$company_id,
+					'status_id' => (int)$status_id,
 					);
 
 		$query = '
@@ -260,8 +261,8 @@ class DepartmentListFactory extends DepartmentFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
-					'status_id' => $status_id,
+					'company_id' => (int)$company_id,
+					'status_id' => (int)$status_id,
 					);
 
 		//Make sure we return distinct rows so there aren't duplicates.
@@ -283,7 +284,7 @@ class DepartmentListFactory extends DepartmentFactory implements IteratorAggrega
 		}
 
 		if ( isset($valid_ids) AND is_array($valid_ids) AND count($valid_ids) > 0 ) {
-			$query	.=	' OR a.id in ('. $this->getListSQL($valid_ids, $ph) .') ';
+			$query	.=	' OR a.id in ('. $this->getListSQL( $valid_ids, $ph, 'int' ) .') ';
 		}
 
 		$query .= '	)
@@ -303,7 +304,7 @@ class DepartmentListFactory extends DepartmentFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					'id2' => $id,
 					);
 
@@ -376,7 +377,7 @@ class DepartmentListFactory extends DepartmentFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'created_date' => $date,
 					'updated_date' => $date,
 					'deleted_date' => $date,
@@ -444,7 +445,7 @@ class DepartmentListFactory extends DepartmentFactory implements IteratorAggrega
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -472,7 +473,7 @@ class DepartmentListFactory extends DepartmentFactory implements IteratorAggrega
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text_metaphone', $ph ) : NULL;
 		$query .= ( isset($filter_data['manual_id']) ) ? $this->getWhereClauseSQL( 'a.manual_id', $this->Validator->stripNon32bitInteger( $filter_data['manual_id'] ), 'numeric', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => $company_id, 'object_type_id' => 120, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
+		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => (int)$company_id, 'object_type_id' => 120, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 
 /*
 		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {

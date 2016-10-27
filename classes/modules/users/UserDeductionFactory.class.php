@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -109,6 +109,10 @@ class UserDeductionFactory extends Factory {
 										'first_name' => FALSE,
 										'last_name' => FALSE,
 
+										'length_of_service_date' => 'LengthOfServiceDate',
+										'start_date' => 'StartDate',
+										'end_date' => 'EndDate',
+
 										'user_value1' => 'UserValue1',
 										'user_value2' => 'UserValue2',
 										'user_value3' => 'UserValue3',
@@ -119,7 +123,7 @@ class UserDeductionFactory extends Factory {
 										'user_value8' => 'UserValue8',
 										'user_value9' => 'UserValue9',
 										'user_value10' => 'UserValue10',
-										
+
 										'deleted' => 'Deleted',
 										);
 		return $variable_function_map;
@@ -223,6 +227,132 @@ class UserDeductionFactory extends Factory {
 		return FALSE;
 	}
 
+	function getLengthOfServiceDate( $raw = FALSE ) {
+		$retval = FALSE;
+		if ( isset($this->data['length_of_service_date']) ) {
+			if ( $raw === TRUE ) {
+				$retval = $this->data['length_of_service_date'];
+			} else {
+				$retval = TTDate::strtotime( $this->data['length_of_service_date'] );
+			}
+		}
+
+		if ( $retval == '' AND $this->getColumn('hire_date') != '' ) {
+			if ( $raw === TRUE ) {
+				return $this->getColumn('hire_date');
+			} else {
+				return TTDate::strtotime( $this->getColumn('hire_date') );
+			}
+		} else {
+			return $retval;
+		}
+	}
+	function setLengthOfServiceDate($epoch) {
+		if ( $epoch != '' ) {
+			$epoch = TTDate::getBeginDayEpoch( trim($epoch) );
+		}
+
+		Debug::Arr($epoch, 'Length of Service Date: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
+
+		if	(	$epoch == ''
+				OR
+				$this->Validator->isDate(		'length_of_service_date',
+												$epoch,
+												TTi18n::gettext('Incorrect Length Of Service Date'))
+			) {
+
+			$this->data['length_of_service_date'] = $epoch;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+	
+	function getStartDate( $raw = FALSE ) {
+		$retval = FALSE;
+		if ( isset($this->data['start_date']) ) {
+			if ( $raw === TRUE ) {
+				$retval = $this->data['start_date'];
+			} else {
+				$retval = TTDate::strtotime( $this->data['start_date'] );
+			}
+		}
+
+		if ( $retval == '' AND $this->getColumn('company_deduction_start_date') != '' ) {
+			if ( $raw === TRUE ) {
+				return $this->getColumn('company_deduction_start_date');
+			} else {
+				return TTDate::strtotime( $this->getColumn('company_deduction_start_date') );
+			}
+		} else {
+			return $retval;
+		}
+	}
+	function setStartDate($epoch) {
+		if ( $epoch != '' ) {
+			$epoch = TTDate::getBeginDayEpoch( trim($epoch) );
+		}
+
+		Debug::Arr($epoch, 'Start Date: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
+
+		if	(	$epoch == ''
+				OR
+				$this->Validator->isDate(		'start_date',
+												$epoch,
+												TTi18n::gettext('Incorrect Start Date'))
+			) {
+
+			$this->data['start_date'] = $epoch;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getEndDate( $raw = FALSE ) {
+		$retval = FALSE;
+		if ( isset($this->data['end_date']) ) {
+			if ( $raw === TRUE ) {
+				$retval = $this->data['end_date'];
+			} else {
+				$retval = TTDate::strtotime( $this->data['end_date'] );
+			}
+		}
+
+		if ( $retval == '' AND $this->getColumn('company_deduction_end_date') != '' ) {
+			if ( $raw === TRUE ) {
+				return $this->getColumn('company_deduction_end_date');
+			} else {
+				return TTDate::strtotime( $this->getColumn('company_deduction_end_date') );
+			}
+		} else {
+			return $retval;
+		}
+	}
+	function setEndDate($epoch) {
+		if ( $epoch != '' ) {
+			$epoch = TTDate::getBeginDayEpoch( trim($epoch) );
+		}
+
+		Debug::Arr($epoch, 'End Date: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
+
+		if	(	$epoch == ''
+				OR
+				$this->Validator->isDate(		'end_date',
+												$epoch,
+												TTi18n::gettext('Incorrect End Date'))
+			) {
+
+			$this->data['end_date'] = $epoch;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+	
 	function getUserValue1() {
 		if ( isset($this->data['user_value1']) ) {
 			return $this->data['user_value1'];
@@ -605,8 +735,7 @@ class UserDeductionFactory extends Factory {
 		return $retval;
 	}
 
-	//function getDeductionAmount( $user_id, $pay_stub_id, $annual_pay_periods, $date = NULL ) {
-	function getDeductionAmount( $user_id, $pay_stub_obj, $pay_period_obj ) {
+	function getDeductionAmount( $user_id, $pay_stub_obj, $pay_period_obj, $formula_type_id = 10 ) {
 		if ( $user_id == '' ) {
 			Debug::Text('Missing User ID: ', __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
@@ -629,9 +758,15 @@ class UserDeductionFactory extends Factory {
 		if ( $annual_pay_periods <= 0 ) {
 			$annual_pay_periods = 1;
 		}
+		$current_pay_period = $pay_period_obj->getPayPeriodScheduleObject()->getCurrentPayPeriodNumber( $pay_period_obj->getTransactionDate(), $pay_period_obj->getEndDate() );
 
 		if ( !is_object($cd_obj) ) {
 			return FALSE;
+		}
+
+		if ( in_array( $cd_obj->getCalculation(), array(100,200,300) ) AND (int)$cd_obj->getCompanyValue1() > 0 ) {
+			Debug::Text('Overriding Formula Type to: '. (int)$cd_obj->getCompanyValue1() .' From: '. $formula_type_id, __FILE__, __LINE__, __METHOD__, 10);
+			$formula_type_id = (int)$cd_obj->getCompanyValue1();			
 		}
 
 		require_once( Environment::getBasePath(). DIRECTORY_SEPARATOR . 'classes'. DIRECTORY_SEPARATOR .'payroll_deduction'. DIRECTORY_SEPARATOR .'PayrollDeduction.class.php');
@@ -1404,7 +1539,7 @@ class UserDeductionFactory extends Factory {
 
 				Debug::Text( 'Formula Retval: '. $retval, __FILE__, __LINE__, __METHOD__, 10 );
 				break;
-
+			/*
 			case 80: //US Earning Income Credit (EIC). Repealed as of 31-Dec-2010.
 				if ( $this->getUserValue1() == '' ) {
 					$user_value1 = $cd_obj->getUserValue1();
@@ -1438,7 +1573,7 @@ class UserDeductionFactory extends Factory {
 				$retval = $pd_obj->getEIC();
 
 				break;
-
+			*/
 			case 82: //US - Medicare - Employee
 			case 83: //US - Medicare - Employer
 			case 84: //US - Social Security - Employee
@@ -1564,7 +1699,7 @@ class UserDeductionFactory extends Factory {
 				}
 
 				break;
-			case 100: //Federal Income Tax
+			case 100: //Federal Income Tax				
 				if ( $this->getUserValue1() == '' ) {
 					$user_value1 = $cd_obj->getUserValue1();
 				} else {
@@ -1590,12 +1725,18 @@ class UserDeductionFactory extends Factory {
 				$pd_obj->setUser( $this->getUser() );
 				$pd_obj->setDate( $pay_period_obj->getTransactionDate() );
 				$pd_obj->setAnnualPayPeriods( $annual_pay_periods );
+				$pd_obj->setCurrentPayPeriod( $current_pay_period );
+				$pd_obj->setFormulaType( $formula_type_id );
 
 				if ( is_object( $this->getUserObject() ) ) {
 					$currency_id = $this->getUserObject()->getCurrency();
 					$pd_obj->setUserCurrency( $currency_id );
 					Debug::Text('User Currency ID: '. $currency_id, __FILE__, __LINE__, __METHOD__, 10);
 				}
+
+				$pd_obj->setYearToDateGrossIncome( $cd_obj->getCalculationYTDAmount( $pay_stub_obj ) ); //Make sure YTD amount is specified for all calculation types.
+				$pd_obj->setYearToDateDeduction( $cd_obj->getPayStubEntryAccountYTDAmount( $pay_stub_obj ) ); //Make sure YTD amount is specified for all calculation types.
+				$pd_obj->setGrossPayPeriodIncome( $amount );
 
 				if ( $this->getCompanyDeductionObject()->getCountry() == 'CA' ) {
 					//CA
@@ -1652,8 +1793,6 @@ class UserDeductionFactory extends Factory {
 					$pd_obj->setFederalAllowance( $user_value2 );	 //Allownces/Children
 				}
 
-				$pd_obj->setGrossPayPeriodIncome( $amount );
-
 				$retval = $pd_obj->getFederalPayPeriodDeductions();
 
 				if ( $retval < 0 ) {
@@ -1694,7 +1833,17 @@ class UserDeductionFactory extends Factory {
 				$pd_obj->setUser( $this->getUser() );
 				$pd_obj->setDate( $pay_period_obj->getTransactionDate() );
 				$pd_obj->setAnnualPayPeriods( $annual_pay_periods );
+				$pd_obj->setCurrentPayPeriod( $current_pay_period );				
+				$pd_obj->setFormulaType( $formula_type_id );
+				
+				if ( is_object( $this->getUserObject() ) ) {
+					$currency_id = $this->getUserObject()->getCurrency();
+					$pd_obj->setUserCurrency( $currency_id );
+					Debug::Text('User Currency ID: '. $currency_id, __FILE__, __LINE__, __METHOD__, 10);
+				}
 
+				$pd_obj->setYearToDateGrossIncome( $cd_obj->getCalculationYTDAmount( $pay_stub_obj ) ); //Make sure YTD amount is specified for all calculation types.
+				$pd_obj->setYearToDateDeduction( $cd_obj->getPayStubEntryAccountYTDAmount( $pay_stub_obj ) ); //Make sure YTD amount is specified for all calculation types.			
 				$pd_obj->setGrossPayPeriodIncome( $amount );
 
 				if ( $this->getCompanyDeductionObject()->getCountry() == 'CA' ) {
@@ -1826,7 +1975,9 @@ class UserDeductionFactory extends Factory {
 				$pd_obj->setUser( $this->getUser() );
 				$pd_obj->setDate( $pay_period_obj->getTransactionDate() );
 				$pd_obj->setAnnualPayPeriods( $annual_pay_periods );
-
+				$pd_obj->setCurrentPayPeriod( $current_pay_period );				
+				$pd_obj->setFormulaType( $formula_type_id );
+				
 				$pd_obj->setDistrictFilingStatus( $user_value1 );
 				$pd_obj->setDistrictAllowance( $user_value2 );
 
@@ -1834,6 +1985,8 @@ class UserDeductionFactory extends Factory {
 				$pd_obj->setUserValue2( $user_value2 );
 				$pd_obj->setUserValue3( $user_value3 );
 
+				$pd_obj->setYearToDateGrossIncome( $cd_obj->getCalculationYTDAmount( $pay_stub_obj ) ); //Make sure YTD amount is specified for all calculation types.
+				$pd_obj->setYearToDateDeduction( $cd_obj->getPayStubEntryAccountYTDAmount( $pay_stub_obj ) ); //Make sure YTD amount is specified for all calculation types.				
 				$pd_obj->setGrossPayPeriodIncome( $amount );
 
 				$retval = $pd_obj->getDistrictPayPeriodDeductions();
@@ -1919,7 +2072,7 @@ class UserDeductionFactory extends Factory {
 		return $retval;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		if ( $this->getUser() == FALSE ) {
 			$this->Validator->isTrue(		'user',
 											FALSE,
@@ -1931,6 +2084,24 @@ class UserDeductionFactory extends Factory {
 													$this->isUniqueCompanyDeduction( $this->getCompanyDeduction() ),
 													TTi18n::gettext('Tax/Deduction is already assigned to employee').': '. $this->getCompanyDeductionObject()->getName()
 													);
+		}
+
+		return TRUE;
+	}
+
+	function preSave() {
+		//If the length of service date matches the current hire date, make it blank so we always default to the hire date in case it changes later.
+		if ( is_object( $this->getUserObject() ) AND TTDate::getMiddleDayEpoch( $this->getLengthOfServiceDate() ) == TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) ) {
+			Debug::Text('Forcing blank LengthOfServiceDate as it matches hire_date...', __FILE__, __LINE__, __METHOD__, 10);
+			$this->setLengthOfServiceDate('');
+		}
+		if ( is_object( $this->getCompanyDeductionObject() ) AND TTDate::getMiddleDayEpoch( $this->getStartDate() ) == TTDate::getMiddleDayEpoch( $this->getCompanyDeductionObject()->getStartDate() ) ) {
+			Debug::Text('Forcing blank StartDate as it matches Tax/Deduction record...', __FILE__, __LINE__, __METHOD__, 10);
+			$this->setStartDate('');
+		}
+		if ( is_object( $this->getCompanyDeductionObject() ) AND TTDate::getMiddleDayEpoch( $this->getEndDate() ) == TTDate::getMiddleDayEpoch( $this->getCompanyDeductionObject()->getEndDate() ) ) {
+			Debug::Text('Forcing blank EndDate as it matches Tax/Deduction record...', __FILE__, __LINE__, __METHOD__, 10);
+			$this->setEndDate('');
 		}
 
 		return TRUE;
@@ -1950,6 +2121,13 @@ class UserDeductionFactory extends Factory {
 
 					$function = 'set'.$function;
 					switch( $key ) {
+						case 'length_of_service_date':
+						case 'start_date':
+						case 'end_date':
+							if ( method_exists( $this, $function ) ) {
+								$this->$function( TTDate::parseDateTime( $data[$key] ) );
+							}
+							break;
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -1993,6 +2171,11 @@ class UserDeductionFactory extends Factory {
 						case 'calculation':
 							$data[$variable] = Option::getByKey( $this->getColumn( $variable.'_id' ), $cdf->getOptions( $variable ) );
 							break;
+						case 'length_of_service_date':
+						case 'start_date':
+						case 'end_date':
+							$data[$variable] = TTDate::getAPIDate( 'DATE', $this->$function() );
+							break;						
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = $this->$function();

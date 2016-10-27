@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -59,7 +59,7 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
 
 		$query = '
@@ -76,13 +76,13 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 	}
 
 
-	function getByAccrualPolicyId( $id ) {
+	function getByAccrualPolicyId( $id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-			'accrual_policy_id' => $id,
+			'accrual_policy_id' => (int)$id,
 		);
 
 		$query = '
@@ -91,8 +91,11 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 					where	accrual_policy_id = ?
 						AND deleted = 0';
 
-		$this->ExecuteSQL( $query, $ph );
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
 
+		$this->ExecuteSQL( $query, $ph, $limit, $page );
+						
 		return $this;
 	}
 
@@ -108,8 +111,8 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'id' => $id,
-					'company_id' => $company_id
+					'id' => (int)$id,
+					'company_id' => (int)$company_id
 					);
 
 		$query = '
@@ -135,7 +138,7 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id
+					'company_id' => (int)$company_id
 					);
 
 		$query = '
@@ -162,8 +165,8 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'user_id' => $user_id,
-					'company_id' => $company_id
+					'user_id' => (int)$user_id,
+					'company_id' => (int)$company_id
 					);
 
 		$uf = new UserFactory();
@@ -207,9 +210,9 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		$udtf = new UserDateTotalFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
-					'company_id' => $company_id,
-					'accrual_policy_account_id' => $accrual_policy_account_id,
+					'user_id' => (int)$user_id,
+					'company_id' => (int)$company_id,
+					'accrual_policy_account_id' => (int)$accrual_policy_account_id,
 					);
 
 		$query = '
@@ -263,9 +266,9 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		$udtf = new UserDateTotalFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
-					'company_id' => $company_id,
-					'accrual_policy_account_id' => $accrual_policy_account_id,
+					'user_id' => (int)$user_id,
+					'company_id' => (int)$company_id,
+					'accrual_policy_account_id' => (int)$accrual_policy_account_id,
 					'time_stamp' => $this->db->BindTimeStamp( $time_stamp ),
 					'amount' => $amount,
 					);
@@ -322,10 +325,10 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		$udtf = new UserDateTotalFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
-					'company_id' => $company_id,
-					'accrual_policy_account_id' => $accrual_policy_account_id,
-					'type_id' => $type_id,
+					'user_id' => (int)$user_id,
+					'company_id' => (int)$company_id,
+					'accrual_policy_account_id' => (int)$accrual_policy_account_id,
+					'type_id' => (int)$type_id,
 					'time_stamp' => $this->db->BindTimeStamp( $time_stamp ),
 					);
 
@@ -364,9 +367,9 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'user_id' => $user_id,
-					'accrual_policy_account_id' => $accrual_policy_account_id,
-					'user_date_total_id' => $user_date_total_id,
+					'user_id' => (int)$user_id,
+					'accrual_policy_account_id' => (int)$accrual_policy_account_id,
+					'user_date_total_id' => (int)$user_date_total_id,
 					);
 
 		$query = '
@@ -438,8 +441,8 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'user_id' => $user_id,
-					'user_date_total_id' => $user_date_total_id,
+					'user_id' => (int)$user_id,
+					'user_date_total_id' => (int)$user_date_total_id,
 					);
 
 		$query = '
@@ -513,7 +516,7 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		//
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					//Filter the accrual rows to one day before and one day after as an optimization.
 					//This causes problems when only calculating one day, or the last day of the week though, it will delete
 					//accruals for the previous day and not put them back if needed.
@@ -559,8 +562,8 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		$udtf = new UserDateTotalFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
-					'accrual_policy_account_id' => $accrual_policy_account_id,
+					'user_id' => (int)$user_id,
+					'accrual_policy_account_id' => (int)$accrual_policy_account_id,
 					);
 
 		//Make sure orphaned records that slip through are not counted in the balance.
@@ -600,8 +603,8 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		$udtf = new UserDateTotalFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
-					'accrual_policy_account_id' => $accrual_policy_account_id,
+					'user_id' => (int)$user_id,
+					'accrual_policy_account_id' => (int)$accrual_policy_account_id,
 					'time_stamp' => $this->db->BindTimeStamp( $epoch ),
 					);
 
@@ -627,13 +630,62 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		return $total;
 	}
 
+	function getSumByUserIdAndAccrualPolicyAccountAndTypeAndStartDateAndEndDate($user_id, $accrual_policy_account_id, $type_id, $start_date, $end_date ) {
+		if ( $user_id == '') {
+			return FALSE;
+		}
+
+		if ( $accrual_policy_account_id == '') {
+			return FALSE;
+		}
+
+		if ( $start_date == '') {
+			return FALSE;
+		}
+		if ( $end_date == '') {
+			return FALSE;
+		}
+
+		$udtf = new UserDateTotalFactory();
+
+		$ph = array(
+					'user_id' => (int)$user_id,
+					'accrual_policy_account_id' => (int)$accrual_policy_account_id,
+					'start_date' => $this->db->BindTimeStamp( $start_date ),
+					'end_date' => $this->db->BindTimeStamp( $end_date ),
+					);
+
+		//Make sure orphaned records that slip through are not counted in the balance.
+		$query = '
+					select	sum(amount) as amount
+					from	'. $this->getTable() .' as a
+					LEFT JOIN '. $udtf->getTable() .' as b ON a.user_date_total_id = b.id
+					where	a.user_id = ?
+						AND a.accrual_policy_account_id = ?
+						AND ( ( a.user_date_total_id is NOT NULL AND b.id is NOT NULL AND b.deleted = 0 )
+								OR ( a.user_date_total_id IS NULL AND b.id is NULL ) )
+						AND a.time_stamp >= ?
+						AND a.time_stamp <= ?
+						AND a.type_id in ('. $this->getListSQL( $type_id, $ph, 'int' ) .')
+						AND a.deleted = 0';
+
+		$total = $this->db->GetOne($query, $ph);
+
+		if ($total === FALSE ) {
+			$total = 0;
+		}
+		Debug::text('Balance After Date: '. $total, __FILE__, __LINE__, __METHOD__, 10);
+
+		return $total;
+	}
+
 	function getByAccrualPolicyAccount($accrual_policy_account_id, $where = NULL, $order = NULL) {
 		if ( $accrual_policy_account_id == '') {
 			return FALSE;
 		}
 
 		$ph = array(
-					'accrual_policy_account_id' => $accrual_policy_account_id,
+					'accrual_policy_account_id' => (int)$accrual_policy_account_id,
 					);
 
 		$uf = new UserFactory();
@@ -715,7 +767,7 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		$apf = new AccrualPolicyFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '

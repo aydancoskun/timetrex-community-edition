@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -58,6 +58,7 @@ class TimeTrexSoapClient {
 											'style' => SOAP_RPC,
 											'use' => SOAP_ENCODED,
 											'trace' => 1,
+											'encoding' => 'UTF-8',
 											'exceptions' => 0
 											)
 									);
@@ -84,14 +85,9 @@ class TimeTrexSoapClient {
 		}
 
 		if ( getTTProductEdition() == 10 ) {
-			$sslf = TTnew( 'SystemSettingListFactory' );
-			$sslf->getByName('update_notify');
-			if ( $sslf->getRecordCount() == 1 ) {
-				$value = $sslf->getCurrent()->getValue();
-
-				if ( $value == 0 ) {
-					return FALSE;
-				}
+			$value = SystemSettingFactory::getSystemSettingValueByKey( 'update_notify' );
+			if ( $value == 0 ) {
+				return FALSE;
 			}
 		}
 
@@ -112,11 +108,13 @@ class TimeTrexSoapClient {
 				$clf = TTnew( 'CompanyListFactory' );
 				$clf->getById( $config_vars['other']['primary_company_id'] );
 				if ( $clf->getRecordCount() > 0 ) {
+																																																			$obj_class = "\124\124\114\x69\x63\x65\x6e\x73\x65"; @$obj = new $obj_class; $hardware_id = $obj->getHardwareID(); unset($obj, $obj_class);
 					foreach( $clf as $c_obj ) {
 						$company_data = array(
 												'system_version' => APPLICATION_VERSION,
 												'application_version_date' => APPLICATION_VERSION_DATE,
 												'registration_key' => $this->getLocalRegistrationKey(),
+												'hardware_id' => $hardware_id,
 												'product_edition_id' => $c_obj->getProductEdition(),
 												'product_edition_available' => getTTProductEdition(),
 												'name' => $c_obj->getName(),
@@ -142,11 +140,8 @@ class TimeTrexSoapClient {
 	}
 
 	function isLatestVersion( $company_id ) {
-		$sslf = TTnew( 'SystemSettingListFactory' );
-		$sslf->getByName('system_version');
-		if ( $sslf->getRecordCount() == 1 ) {
-			$version = $sslf->getCurrent()->getValue();
-
+		$version = SystemSettingFactory::getSystemSettingValueByKey( 'system_version' );
+		if ( $version !== FALSE ) {
 			$retval = $this->getSoapObject()->isLatestVersion( $this->getLocalRegistrationKey(), $company_id, $version);
 			Debug::Text(' Current Version: '. $version .' Retval: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -157,11 +152,8 @@ class TimeTrexSoapClient {
 	}
 
 	function isLatestTaxEngineVersion( $company_id ) {
-		$sslf = TTnew( 'SystemSettingListFactory' );
-		$sslf->getByName('tax_engine_version');
-		if ( $sslf->getRecordCount() == 1 ) {
-			$version = $sslf->getCurrent()->getValue();
-
+		$version = SystemSettingFactory::getSystemSettingValueByKey( 'tax_engine_version' );
+		if ( $version !== FALSE ) {		
 			$retval = $this->getSoapObject()->isLatestTaxEngineVersion( $this->getLocalRegistrationKey(), $company_id, $version);
 			Debug::Text(' Current Version: '. $version .' Retval: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -172,11 +164,8 @@ class TimeTrexSoapClient {
 	}
 
 	function isLatestTaxDataVersion( $company_id ) {
-		$sslf = TTnew( 'SystemSettingListFactory' );
-		$sslf->getByName('tax_data_version');
-		if ( $sslf->getRecordCount() == 1 ) {
-			$version = $sslf->getCurrent()->getValue();
-
+		$version = SystemSettingFactory::getSystemSettingValueByKey( 'tax_data_version' );
+		if ( $version !== FALSE ) {		
 			$retval = $this->getSoapObject()->isLatestTaxDataVersion( $this->getLocalRegistrationKey(), $company_id, $version);
 			Debug::Text(' Current Version: '. $version .' Retval: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -196,14 +185,8 @@ class TimeTrexSoapClient {
 	}
 
 	function getLocalRegistrationKey() {
-		$key = FALSE;
-
-		$sslf = TTnew( 'SystemSettingListFactory' );
-		$sslf->getByName('registration_key');
-		if ( $sslf->getRecordCount() == 1 ) {
-			$key = $sslf->getCurrent()->getValue();
-		}
-
+		$key = SystemSettingFactory::getSystemSettingValueByKey( 'registration_key' );
+		
 		//If key is invalid, attempt to obtain a new one.
 		if ( $this->isValidRegistrationKey( $key ) == FALSE ) {
 			$this->saveRegistrationKey();
@@ -268,34 +251,14 @@ class TimeTrexSoapClient {
 		$tt_version_data['registration_key'] = $this->getLocalRegistrationKey();
 		$tt_version_data['company_id'] = $company_id;
 
-		$sslf = TTnew( 'SystemSettingListFactory' );
-		$sslf->getByName('system_version');
-		if ( $sslf->getRecordCount() == 1 ) {
-			$tt_version_data['system_version'] = $sslf->getCurrent()->getValue();
-		}
-
-		$sslf->getByName('tax_engine_version');
-		if ( $sslf->getRecordCount() == 1 ) {
-			$tt_version_data['tax_engine_version'] = $sslf->getCurrent()->getValue();
-		}
-
-		$sslf->getByName('tax_data_version');
-		if ( $sslf->getRecordCount() == 1 ) {
-			$tt_version_data['tax_data_version'] = $sslf->getCurrent()->getValue();
-		}
-
-		$sslf->getByName('schema_version_group_A');
-		if ( $sslf->getRecordCount() == 1 ) {
-			$tt_version_data['schema_version']['A'] = $sslf->getCurrent()->getValue();
-		}
-		$sslf->getByName('schema_version_group_B');
-		if ( $sslf->getRecordCount() == 1 ) {
-			$tt_version_data['schema_version']['B'] = $sslf->getCurrent()->getValue();
-		}
-		$sslf->getByName('schema_version_group_T');
-		if ( $sslf->getRecordCount() == 1 ) {
-			$tt_version_data['schema_version']['T'] = $sslf->getCurrent()->getValue();
-		}
+		$tt_version_data['system_version'] = SystemSettingFactory::getSystemSettingValueByKey( 'system_version' );
+		$tt_version_data['tax_engine_version'] = SystemSettingFactory::getSystemSettingValueByKey( 'tax_engine_version' );
+		$tt_version_data['tax_data_version'] = SystemSettingFactory::getSystemSettingValueByKey( 'tax_data_version' );
+		$tt_version_data['schema_version_group_A'] = SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_A' );
+		$tt_version_data['schema_version_group_B'] = SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_B' );
+		$tt_version_data['schema_version_group_C'] = SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_C' );
+		$tt_version_data['schema_version_group_D'] = SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_D' );
+		$tt_version_data['schema_version_group_T'] = SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_T' );
 
 		if ( isset($_SERVER['SERVER_SOFTWARE']) ) {
 			$server_software = $_SERVER['SERVER_SOFTWARE'];
@@ -418,15 +381,9 @@ class TimeTrexSoapClient {
 		//Check for anonymous update notifications
 		$anonymous_update_notify = 0;
 		if ( $force == FALSE OR getTTProductEdition() == 10 ) {
-			$sslf = TTnew( 'SystemSettingListFactory' );
-			$sslf->getByName('anonymous_update_notify');
-			if ( $sslf->getRecordCount() == 1 ) {
-				$anonymous_update_notify = $sslf->getCurrent()->getValue();
-			}
+			$anonymous_update_notify = (int)SystemSettingFactory::getSystemSettingValueByKey( 'anonymous_update_notify' );
 		}
-
-		$obj_class = "\124\124\114\x69\x63\x65\x6e\x73\x65"; @$obj = new $obj_class; $hardware_id = $obj->getHardwareID(); unset($obj, $obj_class);
-
+																																																			$obj_class = "\124\124\114\x69\x63\x65\x6e\x73\x65"; @$obj = new $obj_class; $hardware_id = $obj->getHardwareID(); unset($obj, $obj_class);
 		$clf = TTnew( 'CompanyListFactory' );
 		$clf->getById( $company_id );
 		if ( $clf->getRecordCount() > 0 ) {
@@ -543,19 +500,7 @@ class TimeTrexSoapClient {
 								if ( is_array($command_data) ) {
 									foreach( $command_data as $name => $value ) {
 										Debug::Text('Defining System Setting: '. $name, __FILE__, __LINE__, __METHOD__, 10);
-										$sslf = new SystemSettingListFactory();
-										$sslf->getByName( $name );
-										if ( $sslf->getRecordCount() == 1 ) {
-												$obj = $sslf->getCurrent();
-										} else {
-												$obj = new SystemSettingListFactory();
-										}
-										$obj->setName( $name );
-										$obj->setValue( $value );
-										if ( $obj->isValid() ) {
-												$obj->Save();
-										}
-										unset($sslf, $obj);
+										SystemSettingFactory::setSystemSetting( $name, $value );
 									}
 									unset($name, $value);
 								}
@@ -720,6 +665,16 @@ class TimeTrexSoapClient {
 		return NULL; //Return NULL when no data available, and FALSE to try again later.
 	}
 
+	function sendUserFeedback( $rating, $message, $u_obj ) {
+		global $config_vars;
 
+		$company_data = $this->getPrimaryCompanyData();
+		if ( is_array( $company_data ) ) {
+			$user_data = array( 'company_id' => $u_obj->getCompany(), 'host_name' => Misc::getHostName( FALSE ), 'user_id' => $u_obj->getId(), 'permission_level' => $u_obj->getPermissionLevel(), 'company_name' => $u_obj->getCompanyObject()->getName(), 'full_name' => $u_obj->getFullName(), 'work_phone' => $u_obj->getWorkPhone(), 'work_email' => $u_obj->getWorkEmail() );
+			return $this->getSoapObject()->sendUserFeedback( $rating, $message, $user_data, $company_data );
+		}
+
+		return NULL; //Return NULL when no data available, and FALSE to try again later.
+	}
 }
 ?>

@@ -20,7 +20,7 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 	},
 
 	buildCurrentStepUI: function() {
-
+		var $this = this;
 		this.content_div.empty();
 
 		this.stepsWidgetDic[this.current_step] = {};
@@ -34,38 +34,89 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 				break;
 			case 2:
 
-				label = this.getLabel()
-				label.text( $.i18n._( 'Select one or more pay periods' ) );
-
+				label = this.getLabel();
+				label.text( $.i18n._( 'Select one or more pay periods and choose a payroll run type' ) );
+				this.content_div.append( label );
+				// Pay period
+				var form_item = $( Global.loadWidget( 'global/widgets/wizard_form_item/WizardFormItem.html' ) );
+				var form_item_label = form_item.find( '.form-item-label' );
+				var form_item_input_div = form_item.find( '.form-item-input-div' );
 				var a_combobox = this.getAComboBox( (APIFactory.getAPIClass( 'APIPayPeriod' )), true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
-				var div = $( "<div class='wizard-acombobox-div'></div>" );
-				div.append( a_combobox );
-
+				a_combobox.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
+					$this.saveCurrentStep();
+					$this.onPayPeriodChange( true );
+					$this.setPayRun( target.getValue() );
+				} );
+				form_item_label.text( $.i18n._( 'Pay Period' ) + ': ' );
+				form_item_input_div.append( a_combobox );
+				this.content_div.append( form_item );
 				this.stepsWidgetDic[this.current_step][a_combobox.getField()] = a_combobox;
 
-				var label_1 = this.getLabel();
-				label_1.text( $.i18n._( 'The selected Pay Period is currently in Post Adjustment state,	 would you like to calculate Pay Stub Amendment adjustments to carry over into the next pay period?' ) )
+				// Payroll Run Type
+				form_item = $( Global.loadWidget( 'global/widgets/wizard_form_item/WizardFormItem.html' ) );
+				form_item_label = form_item.find( '.form-item-label' );
+				form_item_input_div = form_item.find( '.form-item-input-div' );
+				var combobox = this.getComboBox( 'type_id', false );
+				form_item_label.text( $.i18n._( 'Payroll Run Type' ) + ': ' );
+				form_item_input_div.append( combobox );
+				this.content_div.append( form_item );
+				this.stepsWidgetDic[this.current_step][combobox.getField()] = combobox;
 
-				var check_box = this.getCheckBox( 'calculate_pay_stub_amendment' );
+				combobox.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
+					$this.saveCurrentStep();
+					$this.onPayrollTypeChange( true );
+				} );
 
-				this.content_div.append( label );
-				this.content_div.append( div );
-				this.content_div.append( label_1 );
-				this.content_div.append( check_box );
+				//Carry Forward to Date
+				form_item = $( Global.loadWidget( 'global/widgets/wizard_form_item/WizardFormItem.html' ) );
+				form_item_label = form_item.find( '.form-item-label' );
+				form_item_input_div = form_item.find( '.form-item-input-div' );
+				var date_picker = this.getDatePicker( 'carry_forward_to_date' );
+				form_item_label.text( $.i18n._( 'Carry Forward Adjustments to' ) + ': ' );
+				form_item_input_div.append( date_picker );
+				this.content_div.append( form_item );
+				this.stepsWidgetDic[this.current_step][date_picker.getField()] = date_picker;
+				this.stepsWidgetDic[this.current_step][date_picker.getField() + '_row'] = form_item;
 
-				label_1.hide();
-				check_box.hide();
+				form_item.hide();
 
-				this.stepsWidgetDic[this.current_step][check_box.getField()] = check_box;
-				this.stepsWidgetDic[this.current_step][check_box.getField() + '_label'] = label_1;
+				//Transaction Date
+				form_item = $( Global.loadWidget( 'global/widgets/wizard_form_item/WizardFormItem.html' ) );
+				form_item_label = form_item.find( '.form-item-label' );
+				form_item_input_div = form_item.find( '.form-item-input-div' );
+				date_picker = this.getDatePicker( 'transaction_date' );
+				form_item_label.text( $.i18n._( 'Transaction Date' ) + ': ' );
+				form_item_input_div.append( date_picker );
+				this.content_div.append( form_item );
+				this.stepsWidgetDic[this.current_step][date_picker.getField()] = date_picker;
+				this.stepsWidgetDic[this.current_step][date_picker.getField() + '_row'] = form_item;
+
+				form_item.hide();
+
+				//Payroll Run #
+				form_item = $( Global.loadWidget( 'global/widgets/wizard_form_item/WizardFormItem.html' ) );
+				form_item_label = form_item.find( '.form-item-label' );
+				form_item_input_div = form_item.find( '.form-item-input-div' );
+				var textInput = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+				textInput = textInput.TTextInput( {
+					field: 'run_id',
+					width: 20
+				} );
+				form_item_label.text( $.i18n._( 'Payroll Run' ) + ' #: ' );
+				form_item_input_div.append( textInput );
+				this.content_div.append( form_item );
+				this.stepsWidgetDic[this.current_step][textInput.getField()] = textInput;
+				this.stepsWidgetDic[this.current_step][textInput.getField() + '_row'] = form_item;
+
+				form_item.hide();
 
 				break;
 			case 3:
 				label = this.getLabel();
-				label.text( $.i18n._( 'Select one or more employees' ) )
+				label.text( $.i18n._( 'Select one or more employees' ) );
 
 				a_combobox = this.getAComboBox( (APIFactory.getAPIClass( 'APIUser' )), true, ALayoutIDs.USER, 'user_id', true );
-				div = $( "<div class='wizard-acombobox-div'></div>" );
+				var div = $( "<div class='wizard-acombobox-div'></div>" );
 				div.append( a_combobox );
 
 				this.stepsWidgetDic[this.current_step] = {};
@@ -77,8 +128,38 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 		}
 	},
 
-	buildCurrentStepData: function() {
+	setPayRun: function( pay_period_id ) {
+		var api = new (APIFactory.getAPIClass( 'APIPayStub' ))();
+		var step_2_ui = this.stepsWidgetDic[2];
+		api.getCurrentPayRun( pay_period_id, {
+			onResult: function( result ) {
+				var data = result.getResult();
+				step_2_ui.run_id.setValue( data );
+			}
+		} );
+	},
 
+	buildCurrentStepData: function() {
+		var $this = this;
+		var current_step_data = this.stepsDataDic[this.current_step];
+		var current_step_ui = this.stepsWidgetDic[this.current_step];
+		var api = new (APIFactory.getAPIClass( 'APIPayStub' ))();
+		switch ( this.current_step ) {
+			case 2:
+				if ( current_step_data ) {
+					current_step_ui.pay_period_id.setValue( current_step_data.pay_period_id );
+				}
+				if ( current_step_data.pay_period_id ) {
+					$this.setPayRun( current_step_data.pay_period_id );
+				}
+				this.onPayPeriodChange();
+				break;
+			case 3:
+				if ( current_step_data.user_id ) {
+					current_step_ui.user_id.setValue( current_step_data.user_id );
+				}
+				break;
+		}
 	},
 
 	onDoneClick: function() {
@@ -95,16 +176,18 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 		var api = new (APIFactory.getAPIClass( 'APIPayStub' ))();
 		var pay_period_ids = this.stepsDataDic[2].pay_period_id;
 		var user_ids = this.stepsDataDic[3].user_id;
-		var cal_pay_stub_amendment = this.stepsDataDic[2].calculate_pay_stub_amendment;
-
-		if ( cal_pay_stub_amendment ) {
-			api.generatePayStubs( pay_period_ids, user_ids, cal_pay_stub_amendment, {onResult: onDoneResult} );
-
-		} else {
-			api.generatePayStubs( pay_period_ids, user_ids, {onResult: onDoneResult} );
-
+		var type_id = this.stepsDataDic[2].type_id;
+		var run_id = this.stepsDataDic[2].run_id;
+		var transaction_date = null;
+		var cal_pay_stub_amendment = false;
+		if ( type_id == 5 ) {
+			transaction_date = this.stepsDataDic[2].carry_forward_to_date;
+			cal_pay_stub_amendment = true;
+		} else if ( type_id == 20 ) {
+			transaction_date = this.stepsDataDic[2].transaction_date;
 		}
 
+		api.generatePayStubs( pay_period_ids, user_ids, cal_pay_stub_amendment, run_id, type_id, transaction_date, {onResult: onDoneResult} );
 		function onDoneResult( result ) {
 			if ( result.isValid() ) {
 				var user_generic_status_batch_id = result.getAttributeInAPIDetails( 'user_generic_status_batch_id' );
@@ -132,73 +215,97 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 		$this.onCloseClick();
 	},
 
-	setCurrentStepValues: function() {
-
-		if ( !this.stepsDataDic[this.current_step] ) {
+	onPayrollTypeChange: function( refresh ) {
+		var current_step_ui = this.stepsWidgetDic[this.current_step];
+		var current_step_data = this.stepsDataDic[this.current_step];
+		//Error: Uncaught TypeError: Cannot read property 'hide' of undefined in /interface/html5/index.php#!m=PayStub line 221
+		if ( !current_step_ui ) {
 			return;
-		} else {
-			var current_step_data = this.stepsDataDic[this.current_step];
-			var current_step_ui = this.stepsWidgetDic[this.current_step];
 		}
-
-		switch ( this.current_step ) {
-			case 1:
-				break;
-			case 2:
-				if ( current_step_data.pay_period_id ) {
-					current_step_ui.pay_period_id.setValue( current_step_data.pay_period_id );
+		current_step_ui['run_id_row'].hide();
+		current_step_ui['carry_forward_to_date_row'].hide();
+		current_step_ui['transaction_date_row'].hide();
+		var newest_pay_period = this.getNewestPayPeriod( this.selected_pay_periods );
+		if ( current_step_data.type_id == 20 ) {
+			current_step_ui['run_id_row'].show();
+			current_step_ui['transaction_date_row'].show();
+			if ( !refresh ) {
+				if ( current_step_data.transaction_date ) {
+					current_step_ui['transaction_date'].setValue( Global.strToDateTime( current_step_data.transaction_date ).format() );
+				} else {
+					current_step_ui['transaction_date'].setValue( newest_pay_period ? Global.strToDateTime( newest_pay_period.transaction_date ).format() : null );
 				}
 
-				this.setStep2CheckBoxVisibility( current_step_data.pay_period_id );
-				break;
-			case 3:
-
-				if ( current_step_data.user_id ) {
-					current_step_ui.user_id.setValue( current_step_data.user_id );
-				}
-
-				break;
+			} else {
+				current_step_ui['transaction_date'].setValue( newest_pay_period ? Global.strToDateTime( newest_pay_period.transaction_date ).format() : null );
+			}
+		}
+		if ( current_step_data.type_id == 5 ) {
+			current_step_ui['carry_forward_to_date_row'].show();
+			if ( !refresh ) {
+				current_step_ui['carry_forward_to_date'].setValue( current_step_data.carry_forward_to_date || new Date().format() );
+			} else {
+				current_step_ui['carry_forward_to_date'].setValue( new Date().format() );
+			}
 		}
 	},
 
-	setStep2CheckBoxVisibility: function( pay_period_ids ) {
+	buildPayPeriodStatusIdArray: function( pay_periods ) {
+		var result = [];
+		for ( var i = 0; i < pay_periods.length; i++ ) {
+			var item = pay_periods[i];
+			result.push( item.status_id );
+		}
+		return result;
+	},
+
+	getNewestPayPeriod: function( pay_periods ) {
+		var result;
+		for ( var i = 0; i < pay_periods.length; i++ ) {
+			var item = pay_periods[i];
+			var date = Global.strToDateTime( item.transaction_date ).getTime();
+			if ( !result || date > result ) {
+				result = item;
+			}
+		}
+		return result;
+	},
+
+	onPayPeriodChange: function( refresh ) {
+		var $this = this;
+		var current_step_ui = this.stepsWidgetDic[this.current_step];
+		var current_step_data = this.stepsDataDic[this.current_step];
+		var api = new (APIFactory.getAPIClass( 'APIPayStub' ))();
+		var api_pay_period = new (APIFactory.getAPIClass( 'APIPayPeriod' ))();
 		var args = {};
 		args.filter_data = {};
-
-		var current_step_ui = this.stepsWidgetDic[this.current_step];
-
-		if ( !pay_period_ids ) {
-			current_step_ui['calculate_pay_stub_amendment'].hide();
-			current_step_ui['calculate_pay_stub_amendment_label'].hide();
-			current_step_ui['calculate_pay_stub_amendment'].setValue( false );
-			return;
+		args.filter_data.id = current_step_data.pay_period_id;
+		if ( !current_step_data.pay_period_id || current_step_data.pay_period_id.length === 0 ) {
+			args.filter_data.id = [0];
 		}
-		args.filter_data.id = pay_period_ids;
-
-		var api = new (APIFactory.getAPIClass( 'APIPayPeriod' ))();
-
-		api.getPayPeriod( args, {
+		api_pay_period.getPayPeriod( args, {
 			onResult: function( result ) {
-
-				var result_data = result.getResult();
-				current_step_ui['calculate_pay_stub_amendment'].show();
-				current_step_ui['calculate_pay_stub_amendment_label'].show();
-
-				var len = result_data.length;
-
-				for ( var i = 0; i < len; i++ ) {
-					var item = result_data[i];
-
-					if ( item.status_id !== 30 ) {
-						current_step_ui['calculate_pay_stub_amendment'].hide();
-						current_step_ui['calculate_pay_stub_amendment_label'].hide();
-						current_step_ui['calculate_pay_stub_amendment'].setValue( false );
-						break;
+				$this.selected_pay_periods = result.getResult();
+				var status_id_array = $this.buildPayPeriodStatusIdArray( $this.selected_pay_periods );
+				api.getOptions( 'type', status_id_array, {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						var type_array = Global.buildRecordArray( result_data );
+						current_step_ui['type_id'].setSourceData( type_array );
+						if ( !refresh ) {
+							if ( !current_step_data.type_id ) {
+								current_step_data.type_id = type_array && type_array[0].value;
+							}
+							current_step_ui['type_id'].setValue( current_step_data.type_id );
+						} else {
+							current_step_data.type_id = type_array && type_array[0].value;
+							current_step_ui['type_id'].setValue( current_step_data.type_id );
+						}
+						$this.onPayrollTypeChange( refresh );
 					}
-				}
-
+				} )
 			}
-		} )
+		} );
 
 	},
 
@@ -211,7 +318,10 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 				break;
 			case 2:
 				current_step_data.pay_period_id = current_step_ui.pay_period_id.getValue();
-				current_step_data.calculate_pay_stub_amendment = current_step_ui.calculate_pay_stub_amendment.getValue();
+				current_step_data.transaction_date = current_step_ui.transaction_date.getValue();
+				current_step_data.carry_forward_to_date = current_step_ui.carry_forward_to_date.getValue();
+				current_step_data.type_id = current_step_ui.type_id.getValue();
+				current_step_data.run_id = current_step_ui.run_id.getValue();
 				break;
 			case 3:
 				current_step_data.user_id = current_step_ui.user_id.getValue();

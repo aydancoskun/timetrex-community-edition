@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -60,8 +60,9 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -85,7 +86,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		$hcf = new HierarchyControlFactory();
 
 		$ph = array(
-					'company_id' => $company_id
+					'company_id' => (int)$company_id
 					);
 
 		$query = '
@@ -115,8 +116,8 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		$hcf = new HierarchyControlFactory();
 
 		$ph = array(
-					'id' => $id,
-					'company_id' => $company_id
+					'id' => (int)$id,
+					'company_id' => (int)$company_id
 					);
 
 		$query = '
@@ -147,8 +148,9 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -176,8 +178,8 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		}
 
 		$ph = array(
-					'id' => $id,
-					'user_id' => $user_id
+					'id' => (int)$id,
+					'user_id' => (int)$user_id,
 					);
 
 		$query = '
@@ -238,9 +240,9 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					'idb' => $id,
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					);
 
 		$query = '
@@ -279,7 +281,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		$hcf = new HierarchyControlFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					);
 
 		$query = '
@@ -291,7 +293,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 								from	'. $this->getTable() .' as a
 									LEFT JOIN '. $hotf->getTable() .' as b ON a.hierarchy_control_id = b.hierarchy_control_id
 								where a.user_id = ?
-									AND b.object_type_id in ('. $this->getListSQL($object_type_id, $ph) .')
+									AND b.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
 									AND a.deleted = 0
 					) as z
 				where
@@ -343,8 +345,8 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		$huf = new HierarchyUserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					'user_id' => $user_id,
+					'company_id' => (int)$company_id,
+					'user_id' => (int)$user_id,
 					);
 
 		$query = '
@@ -381,7 +383,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		$hcf = new HierarchyControlFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					);
 
 		//Include object_type_ids for each hierarchy_control_id, because we need to do additional filtering by hierarchy_control_id, level, object_type_ids
@@ -397,7 +399,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 								from	'. $this->getTable() .' as a
 									LEFT JOIN '. $hotf->getTable() .' as b ON a.hierarchy_control_id = b.hierarchy_control_id
 								where a.user_id = ?
-									AND b.object_type_id in ('. $this->getListSQL($object_type_id, $ph) .')
+									AND b.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
 									AND a.deleted = 0
 					) as z
 				where
@@ -436,7 +438,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 						$last_level = FALSE;
 					}
 
-					$retarr[$i][] = array('hierarchy_control_id' => $hierarchy_control_id, 'level' => $level, 'last_level' => $last_level, 'object_type_id' => array_unique( $hierarchy_to_object_type_map[$hierarchy_control_id] ) );
+					$retarr[$i][] = array('hierarchy_control_id' => (int)$hierarchy_control_id, 'level' => $level, 'last_level' => $last_level, 'object_type_id' => array_unique( $hierarchy_to_object_type_map[$hierarchy_control_id] ) );
 
 					$i++;
 				}
@@ -484,7 +486,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		$hcf = new HierarchyControlFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -544,8 +546,8 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		$this->rs = $this->getCache($cache_id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => $id,
-						'object_type_id' => $object_type_id,
+						'id' => (int)$id,
+						'object_type_id' => (int)$object_type_id,
 						);
 
 			$query = '
@@ -585,8 +587,9 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		$hcf = new HierarchyControlFactory();
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*

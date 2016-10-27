@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -62,7 +62,7 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 		if ( $this->rs === FALSE ) {
 
 			$ph = array(
-						'id' => $id,
+						'id' => (int)$id,
 						);
 
 			$query = '
@@ -91,7 +91,7 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -99,7 +99,7 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 					from	'. $this->getTable() .'
 					where
 						company_id = ?
-						AND	id in ('. $this->getListSQL($id, $ph) .')
+						AND	id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -122,8 +122,9 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	a.*
@@ -158,7 +159,7 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 
 		$ph = array(
 					'company' => $company_id,
-					'id' => $id,
+					'id' => (int)$id,
 					);
 
 		$query = '
@@ -214,12 +215,13 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 		$apf = new AbsencePolicyFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
 					select	a.*,
-							c.name as absence_policy,
+							d.name as full_shift_absence_policy,
+							c.name as partial_shift_absence_policy,
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
 							y.last_name as created_by_last_name,
@@ -227,7 +229,8 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
 					from	'. $this->getTable() .' as a
-						LEFT JOIN '. $apf->getTable() .' as c ON a.absence_policy_id = c.id
+						LEFT JOIN '. $apf->getTable() .' as c ON a.partial_shift_absence_policy_id = c.id
+						LEFT JOIN '. $apf->getTable() .' as d ON a.full_shift_absence_policy_id = d.id
 						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	a.company_id = ?
@@ -239,8 +242,8 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
 
-		//$query .= ( isset($filter_data['meal_policy_id']) ) ? $this->getWhereClauseSQL( 'a.meal_policy_id', $filter_data['meal_policy_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['absence_policy_id']) ) ? $this->getWhereClauseSQL( 'a.absence_policy_id', $filter_data['absence_policy_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['full_shift_absence_policy_id']) ) ? $this->getWhereClauseSQL( 'a.full_shift_absence_policy_id', $filter_data['full_shift_absence_policy_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['partial_shift_absence_policy_id']) ) ? $this->getWhereClauseSQL( 'a.partial_shift_absence_policy_id', $filter_data['partial_shift_absence_policy_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -184,6 +184,8 @@ class AccrualBalanceSummaryReport extends Report {
 
 										'-1150-accrual_policy' => TTi18n::gettext('Accrual Policy'),
 										'-1160-accrual_policy_type' => TTi18n::gettext('Accrual Policy Type'),
+
+										'-3010-note' => TTi18n::gettext('Note'),
 								);
 
 				$retval = array_merge( $retval, (array)$this->getOptions('date_columns'), (array)$this->getOptions('custom_columns'), (array)$this->getOptions('report_static_custom_column') );
@@ -463,48 +465,9 @@ class AccrualBalanceSummaryReport extends Report {
 		$this->handleReportCurrency( $currency_convert_to_base, $base_currency_obj, $filter_data );
 		$currency_options = $this->getOptions('currency');
 
-		if ( $this->getPermissionObject()->Check('user', 'view') == FALSE OR $this->getPermissionObject()->Check('accrual', 'view') == FALSE ) {
-			$hlf = TTnew( 'HierarchyListFactory' );
-			$permission_children_ids = $accrual_permission_children_ids	= $wage_permission_children_ids = $hlf->getHierarchyChildrenByCompanyIdAndUserIdAndObjectTypeID( $this->getUserObject()->getCompany(), $this->getUserObject()->getID() );
-			Debug::Arr($permission_children_ids, 'Permission Children Ids:', __FILE__, __LINE__, __METHOD__, 10);
-		} else {
-			//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
-			$permission_children_ids = array();
-			$accrual_permission_children_ids = array();
-			$wage_permission_children_ids = array();
-		}
-		if ( $this->getPermissionObject()->Check('user', 'view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('user', 'view_child') == FALSE ) {
-				$permission_children_ids = array();
-			}
-			if ( $this->getPermissionObject()->Check('user', 'view_own') ) {
-				$permission_children_ids[] = $this->getUserObject()->getID();
-			}
-
-			$filter_data['permission_children_ids'] = $permission_children_ids;
-		}
-		//Get Wage Permission Hierarchy Children first, as this can be used for viewing, or editing.
-		if ( $this->getPermissionObject()->Check('accrual', 'view') == TRUE ) {
-			$accrual_permission_children_ids = TRUE;
-		} elseif ( $this->getPermissionObject()->Check('accrual', 'view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('accrual', 'view_child') == FALSE ) {
-				$accrual_permission_children_ids = array();
-			}
-			if ( $this->getPermissionObject()->Check('accrual', 'view_own') ) {
-				$accrual_permission_children_ids[] = $this->getUserObject()->getID();
-			}
-		}
-		//Get Wage Permission Hierarchy Children first, as this can be used for viewing, or editing.
-		if ( $this->getPermissionObject()->Check('wage', 'view') == TRUE ) {
-			$wage_permission_children_ids = TRUE;
-		} elseif ( $this->getPermissionObject()->Check('wage', 'view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('wage', 'view_child') == FALSE ) {
-				$wage_permission_children_ids = array();
-			}
-			if ( $this->getPermissionObject()->Check('wage', 'view_own') ) {
-				$wage_permission_children_ids[] = $this->getUserObject()->getID();
-			}
-		}
+		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
+		$wage_permission_children_ids = $this->getPermissionObject()->getPermissionChildren( 'wage', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
+		$accrual_permission_children_ids = $this->getPermissionObject()->getPermissionChildren( 'accrual', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
 
 		//Get user data for joining.
 		$ulf = TTnew( 'UserListFactory' );
@@ -528,14 +491,13 @@ class AccrualBalanceSummaryReport extends Report {
 		Debug::Text(' User Wage Rows: '. $uwlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $uwlf as $key => $uw_obj ) {
-			if ( $wage_permission_children_ids === TRUE OR in_array( $uw_obj->getUser(), $wage_permission_children_ids) ) {
+			if ( $this->getPermissionObject()->isPermissionChild( $uw_obj->getUser(), $wage_permission_children_ids ) ) {
 				$this->tmp_data['user_wage'][$uw_obj->getUser()] = (array)$uw_obj->getObjectAsArray( $columns );
 
 				if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
 					$this->tmp_data['user_wage'][$uw_obj->getUser()]['current_currency'] = Option::getByKey( $base_currency_obj->getId(), $currency_options );
 					if ( isset($this->tmp_data['user'][$uw_obj->getUser()]['currency_rate']) ) {
 						$this->tmp_data['user_wage'][$uw_obj->getUser()]['hourly_rate'] = $base_currency_obj->getBaseCurrencyAmount( $uw_obj->getHourlyRate(), $this->tmp_data['user'][$uw_obj->getUser()]['currency_rate'], $currency_convert_to_base );
-						//$this->tmp_data['user_wage'][$uw_obj->getUser()]['wage'] = $base_currency_obj->getBaseCurrencyAmount( $uw_obj->getWage(), $this->tmp_data['user'][$uw_obj->getUser()]['currency_rate'], $currency_convert_to_base );
 					}
 				}
 
@@ -555,7 +517,7 @@ class AccrualBalanceSummaryReport extends Report {
 			$columns['date_stamp'] = TRUE;
 		}
 		foreach ( $alf as $key => $a_obj ) {
-			if ( $accrual_permission_children_ids === TRUE OR in_array( $a_obj->getUser(), $accrual_permission_children_ids) ) {
+			if ( $this->getPermissionObject()->isPermissionChild( $a_obj->getUser(), $accrual_permission_children_ids ) ) {
 				$tmp_data = (array)$a_obj->getObjectAsArray( $columns );
 				if ( isset($tmp_data['amount']) ) {
 					if ( $tmp_data['amount'] < 0 ) {
@@ -587,7 +549,7 @@ class AccrualBalanceSummaryReport extends Report {
 						foreach( $level_2 as $accrual_policy_account_id => $rows ) {
 							foreach( $rows as $row ) {
 								if ( isset( $row['date_stamp'] ) ) {
-									$date_columns = TTDate::getReportDates( NULL, TTDate::strtotime($row['date_stamp']), FALSE, $this->getUserObject() );
+									$date_columns = TTDate::getReportDates( NULL, TTDate::parseDateTime($row['date_stamp']), FALSE, $this->getUserObject() );
 								} else {
 									$date_columns = array();
 								}								

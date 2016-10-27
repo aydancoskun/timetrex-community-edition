@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -59,8 +59,9 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -85,8 +86,8 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 		}
 
 		$ph = array(
-					'id' => $id,
-					'company_id' => $company_id
+					'id' => (int)$id,
+					'company_id' => (int)$company_id
 					);
 
 		$query = '
@@ -153,7 +154,7 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 */
 		$pguf = new PolicyGroupUserFactory();
 
-		$ph = array( 'company_id' => $company_id );
+		$ph = array( 'company_id' => (int)$company_id, );
 
 		$query = '
 					select	a.*,
@@ -164,7 +165,7 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 						AND a.company_id = ? ';
 
 		if ( $user_ids AND is_array($user_ids) AND isset($user_ids[0]) ) {
-			$query	.=	' AND b.user_id in ('. $this->getListSQL($user_ids, $ph) .') ';
+			$query	.=	' AND b.user_id in ('. $this->getListSQL( $user_ids, $ph, 'int' ) .') ';
 		}
 
 		$query .= '	AND a.deleted = 0';
@@ -189,7 +190,7 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 		}
 
 		$ph = array(
-					'company_id' => $id,
+					'company_id' => (int)$id,
 					);
 
 		$query = '
@@ -231,7 +232,7 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 		$cgmf = new CompanyGenericMapFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -379,7 +380,7 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 		$cgmf = new CompanyGenericMapFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		//Count total users in PolicyGroup factory, so we can disable it when needed. That way it doesn't slow down Policy Group dropdown boxes.

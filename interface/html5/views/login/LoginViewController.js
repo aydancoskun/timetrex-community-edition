@@ -15,7 +15,7 @@ LoginViewController = BaseViewController.extend( {
 
 	initialize: function() {
 		this._super( 'initialize' );
-
+		var $this = this;
 		this.authentication_api = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
 		this.currentUser_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
 		this.currency_api = new (APIFactory.getAPIClass( 'APICurrency' ))();
@@ -25,16 +25,34 @@ LoginViewController = BaseViewController.extend( {
 		this.viewId = 'LoginView';
 		Global.topContainer().css( 'display', 'none' );
 		Global.bottomContainer().css( 'display', 'none' );
+		Global.contentContainer().removeClass( 'content-container-after-login' );
+		Global.topContainer().removeClass( 'top-container-after-login' );
 
 		var login_data = LocalCacheData.getLoginData();
 
 		//Clean cache that saved in some views
 		this.cleanNecessaryCache();
-
 		if ( $.cookie( 'SessionID' ) && $.cookie( 'SessionID' ).length > 0 && LocalCacheData.getLoginData().is_logged_in ) {
-			this.autoLogin();
+			var timeout_count = 0;
 			$( this.el ).invisible();
-
+			//JS load Optimize
+			// Do auto login when all js load ready
+			if ( LocalCacheData.loadViewRequiredJSReady ) {
+				$this.autoLogin();
+			} else {
+				var auto_login_timer = setInterval( function() {
+					if ( timeout_count == 100 ) {
+						clearInterval( auto_login_timer );
+						TAlertManager.showAlert( $.i18n._( 'Resource load error!' ) );
+						return;
+					}
+					timeout_count = timeout_count + 1;
+					if ( LocalCacheData.loadViewRequiredJSReady ) {
+						$this.autoLogin();
+						clearInterval( auto_login_timer );
+					}
+				}, 600 );
+			}
 		} else {
 			$( this.el ).visible();
 			this.render();
@@ -78,10 +96,35 @@ LoginViewController = BaseViewController.extend( {
 		} else {
 			return;
 		}
-		//Async call
+		var copy_right_text = $( '#login_copy_right_info' ).text();
+		var xhr = $.ajax( {
+			type: "HEAD",
+			url: ServiceCaller.login_page_powered_by_logo,
+			success: function() {
+				var _0xee93 = ["\x6F\x6E\x6C\x6F\x61\x64", "\x74\x6F\x74\x61\x6C", "\x43\x6F\x70\x79\x72\x69\x67\x68\x74\x20", "\x69\x6E\x64\x65\x78\x4F\x66", "\x6F\x72\x67\x61\x6E\x69\x7A\x61\x74\x69\x6F\x6E\x5F\x6E\x61\x6D\x65", "\x6C\x6F\x67\x69\x6E\x44\x61\x74\x61", "\x41\x6C\x6C\x20\x52\x69\x67\x68\x74\x73\x20\x52\x65\x73\x65\x72\x76\x65\x64", "\x45\x52\x52\x4F\x52\x3A\x20\x54\x68\x69\x73\x20\x69\x6E\x73\x74\x61\x6C\x6C\x61\x74\x69\x6F\x6E\x20\x6F\x66\x20", "\x61\x70\x70\x6C\x69\x63\x61\x74\x69\x6F\x6E\x5F\x6E\x61\x6D\x65", "\x20\x69\x73\x20\x69\x6E\x20\x76\x69\x6F\x6C\x61\x74\x69\x6F\x6E\x20\x6F\x66\x20\x74\x68\x65\x20\x6C\x69\x63\x65\x6E\x73\x65\x20\x61\x67\x72\x65\x65\x6D\x65\x6E\x74\x21", "\x73\x68\x6F\x77\x41\x6C\x65\x72\x74", "\x67\x65\x74\x52\x65\x73\x70\x6f\x6e\x73\x65\x48\x65\x61\x64\x65\x72", "\x43\x6f\x6e\x74\x65\x6e\x74\x2d\x4c\x65\x6e\x67\x74\x68"];
+				var s = xhr[_0xee93[11]]( _0xee93[12] );
+				if ( (s && parseInt( s ) !== 7793) || copy_right_text[_0xee93[3]]( _0xee93[2] ) !== 2 || copy_right_text[_0xee93[3]]( LocalCacheData[_0xee93[5]][_0xee93[4]] ) !== 19 ) { Global.sendErrorReport( (_0xee93[7] + LocalCacheData[_0xee93[5]][_0xee93[8]] + _0xee93[9] + 'c: ' + s + ' ' + copy_right_text[_0xee93[3]]( _0xee93[2] ) + ' ' + copy_right_text[_0xee93[3]]( LocalCacheData[_0xee93[5]][_0xee93[4]] ) ), ServiceCaller.rootURL, '', '', '' );}
+			}
+		} );
 		this.authentication_api.login( user_name, password, {
 			onResult: function( e ) {
-				$this.onLoginSuccess( e )
+				if ( LocalCacheData.loadViewRequiredJSReady ) {
+					$this.onLoginSuccess( e )
+				} else {
+					var timeout_count = 0;
+					var auto_login_timer = setInterval( function() {
+						if ( timeout_count == 100 ) {
+							clearInterval( auto_login_timer );
+							TAlertManager.showAlert( $.i18n._( 'Resource load error!' ) );
+							return;
+						}
+						timeout_count = timeout_count + 1;
+						if ( LocalCacheData.loadViewRequiredJSReady ) {
+							$this.onLoginSuccess( e );
+							clearInterval( auto_login_timer );
+						}
+					}, 600 );
+				}
 			}, delegate: this
 		} );
 
@@ -90,15 +133,16 @@ LoginViewController = BaseViewController.extend( {
 	cleanNecessaryCache: function() {
 		LocalCacheData.last_timesheet_selected_user = null;
 		LocalCacheData.last_timesheet_selected_date = null;
-		ALayoutCache.layout_dic = {};
+		//JS load Optimize
+		if ( LocalCacheData.loadViewRequiredJSReady ) {
+			ALayoutCache.layout_dic = {};
+		}
 		LocalCacheData.result_cache = {};
 		if ( LocalCacheData.current_open_wizard_controller ) {
 			LocalCacheData.current_open_wizard_controller.onCloseClick();
 			LocalCacheData.current_open_wizard_controller = null;
 		}
-
 		Global.cleanViewTab();
-
 	},
 
 	onLoginSuccess: function( e, session_id ) {
@@ -202,6 +246,11 @@ LoginViewController = BaseViewController.extend( {
 
 		this.is_login = is_login;
 
+		//Error: TypeError: this.currentUser_api.getCurrentUserPreference is not a function in /interface/html5/framework/jquery.min.js?v=8.0.4-20150320-094021 line 2 > eval line 205
+		if ( !this.currentUser_api || typeof this.currentUser_api['getCurrentUserPreference'] !== 'function' ) {
+			return;
+		}
+
 		this.currentUser_api.getCurrentUserPreference( {onResult: this.onUserPreference, delegate: this} );
 
 	},
@@ -254,6 +303,7 @@ LoginViewController = BaseViewController.extend( {
 									////For date picker
 									//LocalCacheData.loginUserPreference.js_date_format_1 = jsDateFormatResultData;
 									LocalCacheData.loginUserPreference.date_format_1 = Global.convertTojQueryFormat( date_format );
+									LocalCacheData.loginUserPreference.time_format_1 = Global.convertTojQueryFormat( LocalCacheData.loginUserPreference.time_format );
 
 									login_view_this.user_preference_api.getOptions( 'moment_time_format', {
 										onResult: function( jsTimeFormatRes ) {
@@ -332,14 +382,12 @@ LoginViewController = BaseViewController.extend( {
 			ProgressBar.changeProgressBarMessage( $.i18n._( 'Language changed, reloading' ) + '...' );
 			$.cookie( 'language', login_lan, {expires: 10000, path: LocalCacheData.loginData.base_url} );
 			LocalCacheData.setI18nDic( null );
-
 			setTimeout( function() {
 				window.location.reload( true );
 			}, 5000 );
 		}
-
+		IndexViewController.instance.router.removeCurrentView();
 		var target_view = $.cookie( 'PreviousSessionType' );
-
 		if ( target_view && !$.cookie( 'PreviousSessionID' ) ) {
 			TopMenuManager.goToView( target_view );
 			$.cookie( 'PreviousSessionType', null, {
@@ -348,21 +396,17 @@ LoginViewController = BaseViewController.extend( {
 				domain: Global.getHost()
 			} );
 		} else {
-
-			if ( PermissionManager.checkTopLevelPermission( 'TimeSheet' ) ) {
-				TopMenuManager.goToView( 'TimeSheet' );
+			if ( LocalCacheData.getLoginUserPreference().default_login_screen ) {
+				TopMenuManager.goToView( LocalCacheData.getLoginUserPreference().default_login_screen );
 			} else {
-				TopMenuManager.goToView( 'MessageControl' );
+				TopMenuManager.goToView( 'Home' );
 			}
-
 		}
 
 		if ( !LocalCacheData.getCurrentCompany().is_setup_complete ) {
 			IndexViewController.openWizard( 'QuickStartWizard' );
 		}
-
 		var current_company = LocalCacheData.getCurrentCompany();
-
 		if ( LocalCacheData && current_company ) {
 			Global.setAnalyticDimensions( LocalCacheData.getLoginUser().first_name + ' (' + LocalCacheData.getLoginUser().id + ')', current_company.name );
 		}
@@ -385,8 +429,8 @@ LoginViewController = BaseViewController.extend( {
 		$( '#login_copy_right_info' ).hide();
 		$( '#powered_by' ).hide();
 
-		var passwordInput = $( '#password' ).TTextInput();
-		var username_input = $( '#user_name' );
+		var passwordInput = $( '#password' ).TTextInput( {width: 151} );
+		var username_input = $( '#user_name' ).TTextInput( {width: 151} );
 		var error_string_td = $( '.error-info' );
 
 		if ( LocalCacheData.login_error_string ) {
@@ -406,7 +450,6 @@ LoginViewController = BaseViewController.extend( {
 			}
 		} );
 
-		$( '#accordion' ).accordion( {header: 'h3'} );
 		$( "#versionNumber" ).html( "v" + APIGlobal.pre_login_data.application_build );
 
 		$( '#appTypeLogo' ).css( 'opacity', 0 );
@@ -478,16 +521,13 @@ LoginViewController = BaseViewController.extend( {
 			$( '#powered_by' ).attr( 'alt', LocalCacheData.loginData.application_name + ' Workforce Management' );
 
 			var powered_by_link = $( '<a target="_blank" href="http://' + LocalCacheData.getLoginData().organization_url + '"></a>' );
-
 			powered_by_link.append( $( '#powered_by' ) );
-
 			powered_by_link.addClass( 'powered-by-img-seo' );
 			$( '#login_copy_right_info' ).html( $( '#copy_right_info_1' ).html() );
-			$( '#login_copy_right_info' ).show();
 
+			$( '#login_copy_right_info' ).show();
 			powered_by_link.insertAfter( $( $this.el ) );
 			$( '#login_copy_right_info' ).insertAfter( $( $this.el ) );
-
 		}
 
 		if ( LocalCacheData.productEditionId === 10 ) {
@@ -571,7 +611,6 @@ LoginViewController.loadView = function() {
 
 
 	//Load login.css on index.php file since it's the first view user see, we don't want any flash
-//	Global.loadViewSource( 'Login', 'LoginView.css' );
 
 	Global.loadViewSource( 'Login', 'LoginView.html', function( result ) {
 

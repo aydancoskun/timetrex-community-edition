@@ -46,7 +46,6 @@ class GeneralLedgerExport {
 	var $set_journal_entry_errors = 0;
 	var $journal_entry_error_msgs = array();
 
-
 	function __construct() {
 		Debug::Text(' Contruct... ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -169,10 +168,11 @@ class GeneralLedgerExport {
 class GeneralLedgerExport_JournalEntry extends GeneralLedgerExport {
 	var $journal_entry_data = NULL;
 	var $journal_entry_error_msg = NULL;
+	var $ignore_balance_check = FALSE;
 
-	function __construct() {
+	function __construct( $ignore_balance_check = FALSE ) {
 		Debug::Text(' GLE_JournalEntry Contruct... ', __FILE__, __LINE__, __METHOD__, 10);
-
+		$this->ignore_balance_check = $ignore_balance_check;
 		return TRUE;
 	}
 
@@ -314,9 +314,14 @@ class GeneralLedgerExport_JournalEntry extends GeneralLedgerExport {
 		}
 
 		Debug::Text(' Journal Entry DOES NOT BALANCE!', __FILE__, __LINE__, __METHOD__, 10);
-		$this->journal_entry_error_msg = TTi18n::getText('Debit: %1 Credit: %2', array( $debit_amount, $credit_amount ) );
-
-		return FALSE;
+		if ( $this->ignore_balance_check == TRUE ) {
+			Debug::Text(' Skipping Balance of Journal Entry...', __FILE__, __LINE__, __METHOD__, 10);
+			return TRUE;
+		} else {
+			$this->journal_entry_error_msg = TTi18n::getText('Debit: %1 Credit: %2', array( $debit_amount, $credit_amount ) );
+	
+			return FALSE;
+		}
 	}
 
 
@@ -396,7 +401,7 @@ class GeneralLedgerExport_Record extends GeneralLedgerExport_JournalEntry {
 		return FALSE;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		if ( $this->getType() == FALSE OR $this->getAccount() == FALSE OR $this->getAmount() == FALSE ) {
 			Debug::Text(' ERROR: Validation Failed! Amount: '. $this->getAmount() .' Type: '. $this->getType()  .' Account: '. $this->getAccount(), __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;

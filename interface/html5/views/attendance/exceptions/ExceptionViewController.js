@@ -51,7 +51,7 @@ ExceptionViewController = BaseViewController.extend( {
 
 	setDefaultMenu: function( doNotSetFocus ) {
 
-        //Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+        //Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
         if (!this.context_menu_array) {
             return;
         }
@@ -115,7 +115,7 @@ ExceptionViewController = BaseViewController.extend( {
 	autoOpenEditViewIfNecessary: function() {
 		//Auto open edit view. Should set in IndexController
 		//Don't have any edit view
-		//Error: Uncaught TypeError: undefined is not a function in https://ondemand1.timetrex.com/interface/html5/views/BaseViewController.js?v=7.4.3-20140924-084605 line 2751
+		//Error: Uncaught TypeError: undefined is not a function in /interface/html5/views/BaseViewController.js?v=7.4.3-20140924-084605 line 2751
 		this.autoOpenEditOnlyViewIfNecessary();
 
 	},
@@ -677,7 +677,7 @@ ExceptionViewController = BaseViewController.extend( {
 	setGridCellBackGround: function() {
 
 		var data = this.grid.getGridParam( 'data' );
-		//Error: TypeError: data is undefined in https://ondemand1.timetrex.com/interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
+		//Error: TypeError: data is undefined in /interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
 		if ( !data ) {
 			return;
 		}

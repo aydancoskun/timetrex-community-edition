@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -40,20 +40,32 @@
  */
 class PayrollDeduction_US_IA extends PayrollDeduction_US {
 
+	var $state_income_tax_rate_options = array(
+												20060401 => array(
+															0 => array(
+																	array( 'income' => 1300,	'rate' => 0.36,	'constant' => 0 ),
+																	array( 'income' => 2600,	'rate' => 0.72,	'constant' => 4.68 ),
+																	array( 'income' => 5200,	'rate' => 2.43,	'constant' => 14.04 ),
+																	array( 'income' => 11700,	'rate' => 4.50,	'constant' => 77.22 ),
+																	array( 'income' => 19500,	'rate' => 6.12,	'constant' => 369.72 ),
+																	array( 'income' => 26000,	'rate' => 6.48,	'constant' => 847.08 ),
+																	array( 'income' => 39000,	'rate' => 6.80,	'constant' => 1268.28 ),
+																	array( 'income' => 58500,	'rate' => 7.92,	'constant' => 2152.28 ),
+																	array( 'income' => 58500,	'rate' => 8.98,	'constant' => 3696.68 ),
+																),
+															),
+												);
+		
 	var $state_options = array(
-								1136102400 => array(
+								20060401 => array( //01-Apr-06
+													'standard_deduction' => array( 1650.00, 4060.00 ),
+													'allowance' => 40
+													),
+								20060101 => array(
 													'standard_deduction' => array( 1500.00, 2600.00 ),
 													'allowance' => 40
 													),
-								1143878400 => array( //01-Apr-06
-													'standard_deduction' => array( 1650.00, 4060.00 ),
-													'allowance' => 40
-													)
 								);
-
-	function getStatePayPeriodDeductions() {
-		return bcdiv($this->getStateTaxPayable(), $this->getAnnualPayPeriods() );
-	}
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();

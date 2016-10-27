@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -43,6 +43,7 @@ class AuthorizationFactory extends Factory {
 	protected $pk_sequence_name = 'authorizations_id_seq'; //PK Sequence name
 
 	protected $obj_handler = NULL;
+	protected $obj_handler_obj = NULL;
 	protected $hierarchy_parent_arr = NULL;
 
 	function _getFactoryOptions( $name ) {
@@ -138,25 +139,29 @@ class AuthorizationFactory extends Factory {
 		} else {
 			$user_id = $this->getCurrentUser();
 
-			$this->getObjectHandler()->getByID( $this->getObject() );
-			$current_obj = $this->getObjectHandler()->getCurrent();
-			$object_user_id = $current_obj->getUser();
+			if ( is_object( $this->getObjectHandler() ) ) {
+				$this->getObjectHandler()->getByID( $this->getObject() );
+				$current_obj = $this->getObjectHandler()->getCurrent();
+				$object_user_id = $current_obj->getUser();
 
-			if ( $object_user_id > 0 ) {
-				Debug::Text(' Authorizing User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
-				Debug::Text(' Object User ID: '. $object_user_id, __FILE__, __LINE__, __METHOD__, 10);
+				if ( $object_user_id > 0 ) {
+					Debug::Text(' Authorizing User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Text(' Object User ID: '. $object_user_id, __FILE__, __LINE__, __METHOD__, 10);
 
-				$ulf = TTnew( 'UserListFactory' );
-				$company_id = $ulf->getById( $object_user_id )->getCurrent()->getCompany();
-				Debug::Text(' Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
+					$ulf = TTnew( 'UserListFactory' );
+					$company_id = $ulf->getById( $object_user_id )->getCurrent()->getCompany();
+					Debug::Text(' Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
 
-				$hlf = TTnew( 'HierarchyListFactory' );
-				$this->hierarchy_parent_arr = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $company_id, $object_user_id, $this->getObjectType(), FALSE);
+					$hlf = TTnew( 'HierarchyListFactory' );
+					$this->hierarchy_parent_arr = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $company_id, $object_user_id, $this->getObjectType(), FALSE);
 
-				Debug::Arr($this->hierarchy_parent_arr, ' Parent Arr: ', __FILE__, __LINE__, __METHOD__, 10);
-				return $this->hierarchy_parent_arr;
+					Debug::Arr($this->hierarchy_parent_arr, ' Parent Arr: ', __FILE__, __LINE__, __METHOD__, 10);
+					return $this->hierarchy_parent_arr;
+				} else {
+					Debug::Text(' Could not find Object User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
+				}
 			} else {
-				Debug::Text(' Could not find Object User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text(' ERROR: No ObjectHandler defined...', __FILE__, __LINE__, __METHOD__, 10);
 			}
 		}
 
@@ -221,7 +226,6 @@ class AuthorizationFactory extends Factory {
 		if ( is_object($this->obj_handler) ) {
 			return $this->obj_handler;
 		} else {
-
 			switch ( $this->getObjectType() ) {
 				case 90: //TimeSheet
 					$this->obj_handler = TTnew( 'PayPeriodTimeSheetVerifyListFactory' );
@@ -253,12 +257,6 @@ class AuthorizationFactory extends Factory {
 	function setObjectType($type) {
 		$type = trim($type);
 
-		// i18n: passing 3rd param as false because object_type options do not use gettext
-		$key = Option::getByValue($type, $this->getOptions('object_type'), FALSE );
-		if ($key !== FALSE) {
-			$type = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'object_type',
 											$type,
 											TTi18n::gettext('Object Type is invalid'),
@@ -266,7 +264,7 @@ class AuthorizationFactory extends Factory {
 
 			$this->data['object_type_id'] = $type;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -321,7 +319,46 @@ class AuthorizationFactory extends Factory {
 		return TRUE;
 	}
 
-	function Validate() {
+	function getObjectHandlerObject() {
+		if ( is_object($this->obj_handler_obj) ) {
+			return $this->obj_handler_obj;
+		} else {
+			$is_final_authorization = $this->isFinalAuthorization();
+
+			//Get user_id of object.
+			$this->getObjectHandler()->getByID( $this->getObject() );
+			$this->obj_handler_obj = $this->getObjectHandler()->getCurrent();
+			if ( $this->getAuthorized() === TRUE ) {
+				if ( $is_final_authorization === TRUE ) {
+					Debug::Text('  Approving Authorization... Final Authorizing Object: '. $this->getObject() .' - Type: '. $this->getObjectType(), __FILE__, __LINE__, __METHOD__, 10);
+					$this->obj_handler_obj->setAuthorizationLevel( 1 );
+					$this->obj_handler_obj->setStatus(50); //Active/Authorized
+					$this->obj_handler_obj->setAuthorized(TRUE);
+				} else {
+					Debug::text('  Approving Authorization, moving to next level up...', __FILE__, __LINE__, __METHOD__, 10);
+					$current_level = $this->obj_handler_obj->getAuthorizationLevel();
+					if ( $current_level > 1 ) { //Highest level is 1, so no point in making it less than that.
+
+						//Get the next level above the current user doing the authorization, in case they have dropped down a level or two.
+						$next_level = $this->getNextHierarchyLevel();
+						if ( $next_level !== FALSE AND $next_level < $current_level ) {
+							Debug::text('  Current Level: '. $current_level .' Moving Up To Level: '. $next_level, __FILE__, __LINE__, __METHOD__, 10);
+							$this->obj_handler_obj->setAuthorizationLevel( $next_level );
+						}
+					}
+					unset( $current_level, $next_level );
+				}
+			} else {
+				Debug::text('  Declining Authorization...', __FILE__, __LINE__, __METHOD__, 10);
+				$this->obj_handler_obj->setStatus(55); //'AUTHORIZATION DECLINED'
+				$this->obj_handler_obj->setAuthorized(FALSE);
+			}
+			
+			return $this->obj_handler_obj;
+		}	
+	}
+	
+	function Validate( $ignore_warning = TRUE ) {
 		if ( $this->getDeleted() === FALSE
 				AND $this->isFinalAuthorization() === FALSE
 				AND $this->isValidParent() === FALSE ) {
@@ -331,54 +368,28 @@ class AuthorizationFactory extends Factory {
 
 			return FALSE;
 		}
+
+		if ( $this->getDeleted() == FALSE AND is_object( $this->getObjectHandlerObject() ) AND $this->getObjectHandlerObject()->isValid() == FALSE ) {
+			Debug::text('  ObjectHandler Validation Failed, pass validation errors up the chain...', __FILE__, __LINE__, __METHOD__, 10);
+			$this->Validator->merge( $this->getObjectHandlerObject()->Validator );
+		}
+
 		return TRUE;
 	}
-
+	
 	function preSave() {
 		//Debug::Text(' Calling preSave!: ', __FILE__, __LINE__, __METHOD__, 10);
 		$this->StartTransaction();
-
+		
 		return TRUE;
 	}
 
 	function postSave() {
-		//Debug::Text(' Post Save: ', __FILE__, __LINE__, __METHOD__, 10);
 		if ( $this->getDeleted() == FALSE ) {
-			$is_final_authorization = $this->isFinalAuthorization();
-
-			//Get user_id of object.
-			$this->getObjectHandler()->getByID( $this->getObject() );
-			$current_obj = $this->getObjectHandler()->getCurrent();
-			if ( $this->getAuthorized() === TRUE ) {
-				if ( $is_final_authorization === TRUE ) {
-					Debug::Text('  Approving Authorization... Final Authorizing Object: '. $this->getObject() .' - Type: '. $this->getObjectType(), __FILE__, __LINE__, __METHOD__, 10);
-					$current_obj->setAuthorizationLevel( 1 );
-					$current_obj->setStatus(50); //Active/Authorized
-					$current_obj->setAuthorized(TRUE);
-				} else {
-					Debug::text('  Approving Authorization, moving to next level up...', __FILE__, __LINE__, __METHOD__, 10);
-					$current_level = $current_obj->getAuthorizationLevel();
-					if ( $current_level > 1 ) { //Highest level is 1, so no point in making it less than that.
-
-						//Get the next level above the current user doing the authorization, in case they have dropped down a level or two.
-						$next_level = $this->getNextHierarchyLevel();
-						if ( $next_level !== FALSE AND $next_level < $current_level ) {
-							Debug::text('  Current Level: '. $current_level .' Moving Up To Level: '. $next_level, __FILE__, __LINE__, __METHOD__, 10);
-							$current_obj->setAuthorizationLevel( $next_level );
-						}
-					}
-					unset( $current_level, $next_level );
-				}
-			} else {
-				Debug::text('  Declining Authorization...', __FILE__, __LINE__, __METHOD__, 10);
-				$current_obj->setStatus(55); //'AUTHORIZATION DECLINED'
-			}
-
-			if ( $current_obj->isValid() ) {
+			if ( is_object( $this->getObjectHandlerObject() ) AND $this->getObjectHandlerObject()->isValid() == TRUE ) {
 				Debug::text('  Object Valid...', __FILE__, __LINE__, __METHOD__, 10);
 				//Return true if object saved correctly.
-				$retval = $current_obj->Save();
-
+				$retval = $this->getObjectHandlerObject()->Save();
 				if ( $retval === TRUE ) {
 					$this->CommitTransaction();
 					return TRUE;

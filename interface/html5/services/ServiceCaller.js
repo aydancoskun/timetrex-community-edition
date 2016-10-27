@@ -129,7 +129,6 @@ var ServiceCaller = Backbone.Model.extend( {
 	},
 
 	call: function( className, function_name, responseObject, apiArgs ) {
-
 		var $this = this;
 		var message_id;
 		var url = ServiceCaller.getURLWithSessionId( 'Class=' + className + '&Method=' + function_name + '&v=2' );
@@ -151,8 +150,15 @@ var ServiceCaller = Backbone.Model.extend( {
 			case 'getOptions':
 			case 'getOtherField':
 			case 'isBranchAndDepartmentAndJobAndJobItemEnabled':
-				cache_key = this.getOptionsCacheKey( apiArgs, className + '.' + function_name );
-
+			case 'getHierarchyControlOptions':
+			case 'getUserGroup':
+				if ( function_name === 'getUserGroup' ) {
+					cache_key = className + '.' + 'userGroup';
+				} else if ( function_name === 'getHierarchyControlOptions' ) {
+					cache_key = 'getHierarchyControlOptions';
+				} else {
+					cache_key = this.getOptionsCacheKey( apiArgs, className + '.' + function_name );
+				}
 				if ( responseObject.get( 'noCache' ) === true ) {
 					LocalCacheData.result_cache[cache_key] = false;
 				}
@@ -175,7 +181,11 @@ var ServiceCaller = Backbone.Model.extend( {
 
 				}
 				break;
-
+			case 'setUserGroup':
+			case 'deleteUserGroup':
+				cache_key = className + '.' + 'userGroup';
+				LocalCacheData.result_cache[cache_key] = false;
+				break;
 		}
 
 		if ( className !== 'APIProgressBar' && function_name !== 'Logout' ) {
@@ -220,6 +230,7 @@ var ServiceCaller = Backbone.Model.extend( {
 			ProgressBar.showProgressBar( message_id );
 		}
 
+		ServiceCaller.cancelNetworkError = false;
 		$.ajax(
 			{
 				dataType: 'JSON',
@@ -243,6 +254,8 @@ var ServiceCaller = Backbone.Model.extend( {
 						case 'getOptions':
 						case 'getOtherField':
 						case 'isBranchAndDepartmentAndJobAndJobItemEnabled':
+						case 'getUserGroup':
+						case 'getHierarchyControlOptions':
 							LocalCacheData.result_cache[cache_key] = result;
 							break;
 					}
@@ -266,7 +279,8 @@ var ServiceCaller = Backbone.Model.extend( {
 
 						return;
 					} else {
-						if ( responseObject.get( 'onResult' ) ) {
+						//Error: Function expected in /interface/html5/services/ServiceCaller.js?v=9.0.0-20150822-090205 line 269
+						if ( responseObject.get( 'onResult' ) && typeof(responseObject.get( 'onResult' )) == 'function' ) {
 							responseObject.get( 'onResult' )( apiReturnHandler );
 						}
 					}
@@ -274,7 +288,6 @@ var ServiceCaller = Backbone.Model.extend( {
 				},
 
 				error: function( error ) { //Server exceptions
-
 					if ( className !== 'APIProgressBar' && function_name !== 'Login' && function_name !== 'getPreLoginData' ) {
 						ProgressBar.removeProgressBar( message_id );
 					}
@@ -282,6 +295,9 @@ var ServiceCaller = Backbone.Model.extend( {
 					if ( ServiceCaller.cancelAllError ) {
 						return;
 					}
+
+					var network_lost_msg = $.i18n._( 'The network connection was lost. Please check your network connection then try again.' );
+
 					if ( error.responseText && error.responseText.indexOf( 'User not authenticated' ) >= 0 ) {
 
 						ServiceCaller.cancelAllError = true;
@@ -294,11 +310,9 @@ var ServiceCaller = Backbone.Model.extend( {
 						return;
 
 					} else {
-
 						if ( error.responseText && $.type( error.responseText ) === 'string' ) {
-							TAlertManager.showAlert( error.responseText, 'Error' );
+							TAlertManager.showAlert( network_lost_msg + "\n" + error.responseText, 'Error' );
 						}
-
 					}
 
 					if ( error.status === 200 && !error.responseText ) {
@@ -313,6 +327,11 @@ var ServiceCaller = Backbone.Model.extend( {
 						}
 						return apiReturnHandler;
 
+					} else if ( error.status === 0 && !ServiceCaller.cancelNetworkError ) {
+						TAlertManager.showAlert( network_lost_msg );
+						ProgressBar.cancelProgressBar();
+						ServiceCaller.cancelNetworkError = true;
+						return null;
 					} else {
 						return null;
 					}
@@ -328,7 +347,7 @@ var ServiceCaller = Backbone.Model.extend( {
 
 ServiceCaller.getURLWithSessionId = function( rest_url ) {
 
-	//Error: Object doesn't support property or method 'cookie' in https://ondemand2001.timetrex.com/interface/html5/services/ServiceCaller.js?v=8.0.0-20150126-192230 line 326
+	//Error: Object doesn't support property or method 'cookie' in /interface/html5/services/ServiceCaller.js?v=8.0.0-20150126-192230 line 326
 	if ( $ && $.cookie && !$.cookie( 'SessionID' ) ) {
 		LocalCacheData.setSessionID( '' );
 	}
@@ -362,6 +381,8 @@ ServiceCaller.rootURL = null;
 ServiceCaller.sessionID = '';
 
 ServiceCaller.cancelAllError = false;
+
+ServiceCaller.cancelNetworkError = false;
 
 ServiceCaller.ozUrl = false;
 

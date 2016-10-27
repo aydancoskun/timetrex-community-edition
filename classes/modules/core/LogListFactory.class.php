@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -59,8 +59,9 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -87,8 +88,8 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'id' => $id,
-					'company_id' => $company_id
+					'id' => (int)$id,
+					'company_id' => (int)$company_id
 					);
 
 		$query = '
@@ -114,7 +115,7 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id
+					'company_id' => (int)$company_id
 					);
 
 		$query = '
@@ -144,13 +145,8 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		$action_key = Option::getByValue($action, $this->getOptions('action') );
-		if ($action_key !== FALSE) {
-			$action = $action_key;
-		}
-
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'table_name' => $table_name,
 					'action_id' => $action,
 					);
@@ -210,7 +206,7 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -271,7 +267,7 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					//'company_id' => $company_id,
+					//'company_id' => (int)$company_id,
 					'start_date' => $start_date,
 					'end_date' => $end_date,
 					);
@@ -302,7 +298,7 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 															AND (a.date >= ? AND a.date < ? ) ';
 
 															if ( $company_id != '' AND ( isset($company_id[0]) AND !in_array(-1, (array)$company_id) ) ) {
-																$query	.=	' AND company_id in ('. $this->getListSQL($company_id, $ph) .') ';
+																$query	.=	' AND company_id in ('. $this->getListSQL( $company_id, $ph, 'int' ) .') ';
 															}
 
 		$query .= '									) as tmp
@@ -358,7 +354,7 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '

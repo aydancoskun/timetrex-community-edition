@@ -50,6 +50,8 @@ BaseViewController = Backbone.View.extend( {
 
 	edit_view_ui_dic: {},
 
+	edit_view_ui_validation_field_dic: {},
+
 	edit_view_form_item_dic: {}, //Whole FormItem
 
 	edit_view_error_ui_dic: {},
@@ -134,6 +136,12 @@ BaseViewController = Backbone.View.extend( {
 
 	grid_total_width: null,
 
+	show_warning_when_validation: false,
+
+	pulse_time_dic: false,
+
+	edit_view_close_icon: null,
+
 	initialize: function() {
 
 		if ( this.options && Global.isSet( this.options.can_cache_controller ) ) {
@@ -176,15 +184,18 @@ BaseViewController = Backbone.View.extend( {
 			//this.total_display_span.text( 'Displaying 0 - 0 of 0 total. Selected: 0' );
 			//}
 
-			//Init paging widget, next step, add widget to UI and bind events in setSelectLayout
-			if ( LocalCacheData.paging_type === 0 ) {
-				this.paging_widget = Global.loadWidgetByName( WidgetNamesDic.PAGING );
-			} else {
-				this.paging_widget = Global.loadWidgetByName( WidgetNamesDic.PAGING_2 );
-				this.paging_widget_2 = Global.loadWidgetByName( WidgetNamesDic.PAGING_2 );
+			//JS load Optimize
+			if ( LocalCacheData.loadViewRequiredJSReady ) {
+				//Init paging widget, next step, add widget to UI and bind events in setSelectLayout
+				if ( LocalCacheData.paging_type === 0 ) {
+					this.paging_widget = Global.loadWidgetByName( WidgetNamesDic.PAGING );
+				} else {
+					this.paging_widget = Global.loadWidgetByName( WidgetNamesDic.PAGING_2 );
+					this.paging_widget_2 = Global.loadWidgetByName( WidgetNamesDic.PAGING_2 );
 
-				this.paging_widget = this.paging_widget.Paging2();
-				this.paging_widget_2 = this.paging_widget_2.Paging2();
+					this.paging_widget = this.paging_widget.Paging2();
+					this.paging_widget_2 = this.paging_widget_2.Paging2();
+				}
 			}
 		} else {
 			this.ui_id = Global.getRandomNum();
@@ -193,6 +204,7 @@ BaseViewController = Backbone.View.extend( {
 		//init all dic or array, or it will extends last viewcontroller's value. Why?
 		this.sub_log_view_controller = null;
 		this.edit_view_ui_dic = {};
+		this.edit_view_ui_validation_field_dic = {};
 		this.basic_search_field_ui_dic = {};
 		this.adv_search_field_ui_dic = {};
 		this.invisible_context_menu_dic = {};
@@ -226,9 +238,7 @@ BaseViewController = Backbone.View.extend( {
 
 				$this.onSearch();
 				$( ':focus' ).blur(); //Make focus out of current view. pevent search too much when user keep click enter
-
 			}
-
 		} );
 
 	},
@@ -357,8 +367,7 @@ BaseViewController = Backbone.View.extend( {
 
 	//Set right click menu for list view grid
 	initRightClickMenu: function( target_type ) {
-
-		//Error: Object doesn't support property or method 'contextMenu' in https://ondemand2001.timetrex.com/interface/html5/views/BaseViewController.js?v=7.4.6-20141027-132733 line 393
+		//Error: Object doesn't support property or method 'contextMenu' in /interface/html5/views/BaseViewController.js?v=7.4.6-20141027-132733 line 393
 		if ( !$.hasOwnProperty( 'contextMenu' ) ) {
 			return;
 		}
@@ -379,6 +388,9 @@ BaseViewController = Backbone.View.extend( {
 			case RightClickMenuType.ABSENCE_GRID:
 				selector = '#' + this.ui_id + '_absence_grid';
 				break;
+			case RightClickMenuType.VIEW_ICON:
+				selector = '#' + ContextMenuIconName.view_html;
+				break;
 			default:
 				selector = '#gbox_' + this.ui_id + '_grid';
 				break;
@@ -394,7 +406,7 @@ BaseViewController = Backbone.View.extend( {
 		if ( !items || $.isEmptyObject( items ) ) {
 			return;
 		}
-
+		$.contextMenu( 'destroy', selector );
 		$.contextMenu( {
 			selector: selector,
 			callback: function( key, options ) {
@@ -418,7 +430,7 @@ BaseViewController = Backbone.View.extend( {
 			var html_content = $( context_btn.html() );
 			var label = context_btn.text();
 
-			//DOn't add sub menu context icon to right click
+			//Don't add sub menu context icon to right click
 			if ( context_btn.children().eq( 0 ).hasClass( 'ribbon-sub-menu-nav-icon' ) ) {
 				continue;
 			}
@@ -474,13 +486,8 @@ BaseViewController = Backbone.View.extend( {
 		$this.getAllLayouts( function() {
 
 			$this.getDefaultDisplayColumns( function() {
-
 				$this.setSelectLayout();
-
 				$this.search();
-
-				//set right click menu to list view grid
-				$this.initRightClickMenu();
 
 			} );
 
@@ -896,7 +903,7 @@ BaseViewController = Backbone.View.extend( {
 		LocalCacheData.current_doing_context_action = 'new';
 		$this.openEditView();
 
-		//Error: Uncaught TypeError: undefined is not a function in https://ondemand2001.timetrex.com/interface/html5/views/BaseViewController.js?v=8.0.0-20141117-111140 line 897
+		//Error: Uncaught TypeError: undefined is not a function in /interface/html5/views/BaseViewController.js?v=8.0.0-20141117-111140 line 897
 		if ( $this.api && typeof $this.api['get' + $this.api.key_name + 'DefaultData'] === 'function' ) {
 			$this.api['get' + $this.api.key_name + 'DefaultData']( {
 				onResult: function( result ) {
@@ -1052,15 +1059,18 @@ BaseViewController = Backbone.View.extend( {
 		}
 	},
 
-	onSaveAndCopy: function() {
+	onSaveAndCopy: function( ignoreWarning ) {
 		var $this = this;
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
 		this.is_add = true;
 		LocalCacheData.current_doing_context_action = 'save_and_copy';
 		var record = this.current_edit_record;
 		record = this.uniformVariable( record );
 
 		this.clearNavigationData();
-		this.api['set' + this.api.key_name]( record, {
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
 			onResult: function( result ) {
 				$this.onSaveAndCopyResult( result );
 
@@ -1080,18 +1090,22 @@ BaseViewController = Backbone.View.extend( {
 			$this.search( false );
 			$this.onCopyAsNewClick();
 		} else {
-			$this.setErrorTips( result );
 			$this.setErrorMenu();
+			$this.setErrorTips( result );
+
 		}
 	},
 
-	onSaveAndNewClick: function() {
+	onSaveAndNewClick: function( ignoreWarning ) {
 		var $this = this;
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
 		this.is_add = true;
 		var record = this.current_edit_record;
 		LocalCacheData.current_doing_context_action = 'new';
 		record = this.uniformVariable( record );
-		this.api['set' + this.api.key_name]( record, {
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
 			onResult: function( result ) {
 				$this.onSaveAndNewResult( result );
 
@@ -1112,18 +1126,23 @@ BaseViewController = Backbone.View.extend( {
 			$this.search( false );
 			$this.onAddClick( true );
 		} else {
-			$this.setErrorTips( result );
 			$this.setErrorMenu();
+			$this.setErrorTips( result );
+
 		}
 	},
 
-	onSaveAndContinue: function() {
+	onSaveAndContinue: function( ignoreWarning ) {
 		var $this = this;
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
+		this.is_changed = false;
 		this.is_add = false;
 		LocalCacheData.current_doing_context_action = 'save_and_continue';
 		var record = this.current_edit_record;
 		record = this.uniformVariable( record );
-		this.api['set' + this.api.key_name]( record, {
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
 			onResult: function( result ) {
 				$this.onSaveAndContinueResult( result );
 
@@ -1146,18 +1165,22 @@ BaseViewController = Backbone.View.extend( {
 			$this.onSaveAndContinueDone( result );
 			$this.search( false );
 		} else {
-			$this.setErrorTips( result );
 			$this.setErrorMenu();
+			$this.setErrorTips( result );
+
 		}
 	},
 
-	onSaveAndNextClick: function() {
+	onSaveAndNextClick: function( ignoreWarning ) {
 		var $this = this;
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
 		this.is_add = false;
 		var record = this.current_edit_record;
 		LocalCacheData.current_doing_context_action = 'save_and_next';
 		record = this.uniformVariable( record );
-		this.api['set' + this.api.key_name]( record, {
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
 			onResult: function( result ) {
 				$this.onSaveAndNextResult( result );
 
@@ -1179,8 +1202,9 @@ BaseViewController = Backbone.View.extend( {
 			$this.onSaveAndNextDone( result );
 
 		} else {
-			$this.setErrorTips( result );
 			$this.setErrorMenu();
+			$this.setErrorTips( result );
+
 		}
 	},
 
@@ -1189,10 +1213,12 @@ BaseViewController = Backbone.View.extend( {
 		return records;
 	},
 
-	onSaveClick: function() {
+	onSaveClick: function( ignoreWarning ) {
 		var $this = this;
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
 		var record;
-//		this.is_add = false;
 		LocalCacheData.current_doing_context_action = 'save';
 		if ( this.is_mass_editing ) {
 
@@ -1220,7 +1246,7 @@ BaseViewController = Backbone.View.extend( {
 			record = this.uniformVariable( record );
 		}
 
-		this.api['set' + this.api.key_name]( record, {
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
 			onResult: function( result ) {
 
 				$this.onSaveResult( result );
@@ -1250,8 +1276,9 @@ BaseViewController = Backbone.View.extend( {
 			$this.removeEditView();
 
 		} else {
-			$this.setErrorTips( result );
 			$this.setErrorMenu();
+			$this.setErrorTips( result );
+
 		}
 	},
 
@@ -1569,6 +1596,8 @@ BaseViewController = Backbone.View.extend( {
 
 				}
 			} );
+			$this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
+			$this.edit_view_ui_dic['job_id'].setCheckBox( true );
 		} else if ( key === 'job_item_quick_search' ) {
 
 			args.filter_data = {manual_id: value};
@@ -1587,6 +1616,8 @@ BaseViewController = Backbone.View.extend( {
 
 				}
 			} );
+			this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
+			this.edit_view_ui_dic['job_item_id'].setCheckBox( true );
 		}
 
 	},
@@ -1656,10 +1687,9 @@ BaseViewController = Backbone.View.extend( {
 			var field = target.getField();
 			var linked_fields = [];
 			var is_linked_field = false;
-
 			$.each( this.linked_columns, function( index, value ) {
 				if ( value !== field ) {
-					linked_fields.push( value )
+					linked_fields.push( value );
 				} else {
 					is_linked_field = true;
 				}
@@ -1668,7 +1698,7 @@ BaseViewController = Backbone.View.extend( {
 			if ( is_linked_field ) {
 				$.each( linked_fields, function( index, value ) {
 					var is_checked = $this.edit_view_ui_dic[field].isChecked();
-					$this.edit_view_ui_dic[value].setCheckBox( is_checked )
+					$this.edit_view_ui_dic[value].setCheckBox( is_checked );
 				} );
 			}
 
@@ -1719,6 +1749,23 @@ BaseViewController = Backbone.View.extend( {
 
 		}
 
+		this.hideErrorTips();
+	},
+
+	hideErrorTips: function() {
+		for ( var key in this.edit_view_error_ui_dic ) {
+			this.edit_view_error_ui_dic[key].hideErrorTip();
+		}
+		this.removeEditViewErrorTip();
+	},
+
+	//Error: Uncaught TypeError: Cannot read property 'interfaces' of undefined in interface/html5/framework/jquery.qtip.min.js?v=9.0.0-20150918-221906 line 15
+	removeEditViewErrorTip: function() {
+		if ( this.edit_view_error_tip ) {
+			this.edit_view_error_tip.qtip( 'hide' );
+			this.edit_view_error_tip = null;
+			$( '.qtip-defaults' ).remove();
+		}
 	},
 
 	setTabStatus: function() {
@@ -1755,38 +1802,28 @@ BaseViewController = Backbone.View.extend( {
 
 	//Make sure this.current_edit_record is updated before validate
 	validate: function() {
-
 		var $this = this;
-
 		var record = {};
-
 		if ( this.is_mass_editing ) {
 			for ( var key in this.edit_view_ui_dic ) {
 
 				if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
 					continue;
 				}
-
 				var widget = this.edit_view_ui_dic[key];
-
 				if ( Global.isSet( widget.isChecked ) ) {
 					if ( widget.isChecked() && widget.getEnabled() ) {
 						record[key] = widget.getValue();
 					}
-
 				}
 			}
-
 		} else {
 			record = this.current_edit_record;
 		}
-
 		record = this.uniformVariable( record );
-
 		this.api['validate' + this.api.key_name]( record, {
 			onResult: function( result ) {
 				$this.validateResult( result );
-
 			}
 		} );
 	},
@@ -1794,117 +1831,306 @@ BaseViewController = Backbone.View.extend( {
 	validateResult: function( result ) {
 		var $this = this;
 		$this.clearErrorTips(); //Always clear error
-
 		if ( !$this.edit_view ) {
 			return;
 		}
-
 		if ( result.isValid() ) {
 			$this.edit_view.attr( 'validate_complete', true );
 			$this.setEditMenu();
 		} else {
-			$this.setErrorTips( result );
 			$this.setErrorMenu();
+			$this.setErrorTips( result, this.show_warning_when_validation );
+
 		}
 	},
 
 	clearErrorTips: function() {
 
 		for ( var key in this.edit_view_error_ui_dic ) {
-
-			//Error: Uncaught TypeError: Cannot read property 'clearErrorStyle' of undefined in https://ondemand2001.timetrex.com/interface/html5/views/BaseViewController.js?v=8.0.0-20141117-111140 line 1779
+			//Error: Uncaught TypeError: Cannot read property 'clearErrorStyle' of undefined in /interface/html5/views/BaseViewController.js?v=8.0.0-20141117-111140 line 1779
 			if ( !this.edit_view_error_ui_dic.hasOwnProperty( key ) || !this.edit_view_error_ui_dic[key] ) {
 				continue;
 			}
-
 			this.edit_view_error_ui_dic[key].clearErrorStyle();
 		}
 
+		// Error: Uncaught TypeError: Cannot read property 'interfaces' of undefined in interface/html5/framework/jquery.qtip.min.js?v=9.0.0-20150918-221906 line 15
+		this.removeEditViewErrorTip();
+		$( '.error-tab' ).removeClass( 'error-tab' );
+		$( '.error-tab-hide' ).removeClass( 'error-tab-hide' );
+		$( '.warning-tab' ).removeClass( 'warning-tab' );
+		$( '.warning-tab-hide' ).removeClass( 'warning-tab-hide' );
+		// Clear pulse on tabs
+		if ( this.pulse_time_dic ) {
+			for ( var key1 in this.pulse_time_dic ) {
+				clearInterval( this.pulse_time_dic[key1] );
+			}
+			this.pulse_time_dic = {};
+		}
 		this.edit_view_error_ui_dic = {};
 	},
 
 	//Override this if more than one tab
-	setErrorTips: function( result, dont_switch_tab ) {
+	setErrorTips: function( result, show_warning ) {
 		this.clearErrorTips();
-
+		if ( !Global.isSet( show_warning ) ) {
+			show_warning = true;
+		}
 		//Error: Unable to get property 'find' of undefined or null reference in http://timeclock:8085/interface/html5/views/BaseViewController.js?v=7.4.3-20140926-105827 line 1769
 		if ( !this.edit_view_tab ) {
 			return;
 		}
-
 		var details = result.getDetails();
-		var error_list = details[0];
+		// Only check first item
+		// Error: Uncaught TypeError: Cannot call method 'hasOwnProperty' of undefined in /interface/html5/views/BaseViewController.js?v=9.0.0-20150822-134259 line 1879
+		if ( details && details[0] && details[0].hasOwnProperty( 'error' ) ) {
+			this.setErrorTipsError( result );
+		} else if ( details && details[0] && details[0].hasOwnProperty( 'warning' ) ) { //Error: TypeError: details[0] is undefined in https://greenacres.timetrex.com/interface/html5/views/BaseViewController.js?v=9.0.0-20150822-105118 line 1883
+			if ( show_warning ) {
+				this.setErrorTipsWarning( result );
+			}
+			this.setEditMenu();
+		} else {
+			// Make sure current codes work.
+			this.setErrorTipsError( result );
+		}
 
+	},
+
+	setErrorTipsWarning: function( result ) {
+		var $this = this;
+		var widget;
+		// when do validation, only show warning no alert
+		if ( LocalCacheData.current_doing_context_action != 'validate' ) {
+			TAlertManager.showWarningAlert( result, function( flag ) {
+				if ( flag ) {
+					switch ( LocalCacheData.current_doing_context_action ) {
+						case 'save':
+							$this.onSaveClick( true );
+							break;
+						case 'save_and_continue':
+							$this.onSaveAndContinue( true );
+							break;
+						case 'save_and_next':
+							$this.onSaveAndNextClick( true );
+							break;
+						case 'save_and_copy':
+							$this.onSaveAndCopy( true );
+							break;
+						case 'new':
+							$this.onSaveAndNewClick( true );
+							break;
+					}
+				} else {
+					$this.show_warning_when_validation = true;
+				}
+			} );
+		}
+		var error_list = result.getDetails()[0].warning;
 		var found_in_current_tab = false;
-
 		for ( var key in error_list ) {
-
 			if ( !error_list.hasOwnProperty( key ) ) {
 				continue;
 			}
-
-			if ( !Global.isSet( this.edit_view_ui_dic[key] ) ) {
+			if ( Global.isSet( this.edit_view_ui_dic[key] ) && this.edit_view_ui_dic[key].closest( document.documentElement ).length > 0 ) {
+				widget = this.edit_view_ui_dic[key];
+			} else if ( Global.isSet( this.edit_view_ui_validation_field_dic[key] ) ) {
+				if ( Global.isArray( this.edit_view_ui_validation_field_dic[key] ) ) {
+					var len = this.edit_view_ui_validation_field_dic[key].length;
+					for ( var i = 0; i < len; i++ ) {
+						var item = this.edit_view_ui_validation_field_dic[key][i];
+						if ( item.closest( document.documentElement ).length > 0 ) {
+							widget = item;
+							break;
+						}
+					}
+				} else if ( this.edit_view_ui_validation_field_dic[key].closest( document.documentElement ).length > 0 ) {
+					widget = this.edit_view_ui_validation_field_dic[key];
+				} else {
+					continue;
+				}
+			} else if ( key.indexOf( '_id' ) < 0 && Global.isSet( this.edit_view_ui_dic[key + '_id'] ) && this.edit_view_ui_dic[key + '_id'].closest( document.documentElement ).length > 0 ) {
+				widget = this.edit_view_ui_dic[key + '_id'];
+			} else {
 				continue;
 			}
-
-			if ( this.edit_view_ui_dic[key].is( ':visible' ) ) {
-
-				this.edit_view_ui_dic[key].setErrorStyle( error_list[key], true );
+			if ( widget.is( ':visible' ) ) {
+				widget.setErrorStyle( error_list[key], true, true );
 				found_in_current_tab = true;
-
 			} else {
-
-				this.edit_view_ui_dic[key].setErrorStyle( error_list[key] );
+				widget.setErrorStyle( error_list[key], false, true );
 			}
-
-			this.edit_view_error_ui_dic[key] = this.edit_view_ui_dic[key];
-
+			this.showErrorStatusOnTab( widget, false );
+			this.edit_view_error_ui_dic[key] = widget;
 		}
-
 		if ( !found_in_current_tab ) {
-
 			this.showEditViewError( result );
+		}
+	},
+
+	showErrorStatusOnTab: function( widget, isError ) {
+		var parentContainer = widget.parent();
+		var i = 0;
+		while ( !parentContainer.hasClass( 'edit-view-tab-outside' ) && i < 5 ) {
+			i = i + 1;
+			parentContainer = parentContainer.parent();
+		}
+		if ( parentContainer.hasClass( 'edit-view-tab-outside' ) ) {
+			var id = parentContainer.attr( 'id' );
+			var tab = this.edit_view.find( 'a[ref="' + id + '"]' );
+			if ( isError ) {
+				tab.parent().addClass( 'error-tab' );
+				this.startPulse( id, tab.parent() );
+			} else {
+				tab.parent().addClass( 'warning-tab' );
+				this.startPulse( id, tab.parent(), true );
+			}
 
 		}
 	},
 
+	startPulse: function( tab_id, target, is_warning ) {
+		var $this = this;
+		if ( !this.pulse_time_dic ) {
+			this.pulse_time_dic = {};
+		}
+		if ( this.pulse_time_dic[tab_id] ) {
+			cleanTimer( tab_id );
+		}
+		this.pulse_time_dic[tab_id] = setInterval( function() {
+			if ( is_warning ) {
+				if ( target.hasClass( 'warning-tab-hide' ) ) {
+					target.removeClass( 'warning-tab-hide' )
+				} else if ( target.hasClass( 'warning-tab' ) ) {
+					target.addClass( 'warning-tab-hide' );
+				} else {
+					cleanTimer( tab_id );
+				}
+			} else {
+				if ( target.hasClass( 'error-tab-hide' ) ) {
+					target.removeClass( 'error-tab-hide' )
+				} else if ( target.hasClass( 'error-tab' ) ) {
+					target.addClass( 'error-tab-hide' );
+					cleanTimer( tab_id );
+					setTimeout( function() {
+						if ( target.hasClass( 'error-tab-hide' ) ) {
+							target.removeClass( 'error-tab-hide' );
+						}
+						$this.startPulse( tab_id, target, is_warning );
+					}, 1700 );
+				} else {
+					cleanTimer( tab_id );
+				}
+			}
+		}, 2000 );
+
+		function cleanTimer( tab_id ) {
+			clearInterval( $this.pulse_time_dic[tab_id] );
+			$this.pulse_time_dic[tab_id] = null;
+		}
+	},
+
+	setErrorTipsError: function( result ) {
+		//Error: TypeError: details[0] is undefined in interface/html5/views/BaseViewController.js?v=9.0.0-20150822-105118 line 1883
+		var error_list = result.getDetails() ? result.getDetails()[0] : {};
+		var widget;
+		if ( error_list && error_list.hasOwnProperty( 'error' ) ) {
+			error_list = error_list.error;
+		}
+		var found_in_current_tab = false;
+		for ( var key in error_list ) {
+			if ( !error_list.hasOwnProperty( key ) ) {
+				continue;
+			}
+			if ( Global.isSet( this.edit_view_ui_dic[key] ) && this.edit_view_ui_dic[key].closest( document.documentElement ).length > 0 ) {
+				widget = this.edit_view_ui_dic[key];
+			} else if ( Global.isSet( this.edit_view_ui_validation_field_dic[key] ) ) {
+				if ( Global.isArray( this.edit_view_ui_validation_field_dic[key] ) ) {
+					var len = this.edit_view_ui_validation_field_dic[key].length;
+					for ( var i = 0; i < len; i++ ) {
+						var item = this.edit_view_ui_validation_field_dic[key][i];
+						if ( item.closest( document.documentElement ).length > 0 ) {
+							widget = item;
+							break;
+						}
+					}
+				} else if ( this.edit_view_ui_validation_field_dic[key].closest( document.documentElement ).length > 0 ) {
+					widget = this.edit_view_ui_validation_field_dic[key];
+				} else {
+					continue;
+				}
+			} else if ( key.indexOf( '_id' ) < 0 && Global.isSet( this.edit_view_ui_dic[key + '_id'] ) && this.edit_view_ui_dic[key + '_id'].closest( document.documentElement ).length > 0 ) {
+				widget = this.edit_view_ui_dic[key + '_id'];
+			} else {
+				continue;
+			}
+			if ( widget.is( ':visible' ) ) {
+				widget.setErrorStyle( error_list[key], true );
+				found_in_current_tab = true;
+			} else {
+				widget.setErrorStyle( error_list[key] );
+			}
+			this.showErrorStatusOnTab( widget, true );
+			this.edit_view_error_ui_dic[key] = widget;
+		}
+		if ( !found_in_current_tab ) {
+			this.showEditViewError( result );
+		}
+	},
+
 	showEditViewError: function( result ) {
-
-		var details = result.getDetails();
+		var details = result.getDetails()[0];
+		var isError = true;
+		//Error: TypeError: details is undefined in interface/html5/views/BaseViewController.js?v=9.0.0-20150908-081451 line 2078
+		if ( !details ) {
+			return;
+		}
+		if ( details.hasOwnProperty( 'error' ) ) {
+			details = details.error;
+			isError = true;
+		} else if ( details.hasOwnProperty( 'warning' ) ) {
+			isError = false;
+			details = details.warning;
+		}
 		var error_string = '';
-
+		var background_color = isError ? '#cb2e2e' : '#ffff00';
+		var color = isError ? '#fff' : '#000';
+		var border_color = isError ? '#CB2E2E' : '#e7be00';
 		$.each( details, function( index, val ) {
 			for ( var key in val ) {
 				if ( Global.isArray( val[key] ) ) {
 					for ( var i = 0, ii = val[key].length; i < ii; i++ ) {
-						var item = val[key][i];
 						error_string = error_string + val[key][i] + "<br>";
 					}
 				} else {
 					error_string = error_string + val[key] + "<br>";
 				}
-
 			}
 		} );
-
-		this.edit_view.children().eq( 0 ).children().eq( 2 ).qtip(
+		this.removeEditViewErrorTip();
+		this.edit_view_error_tip = this.edit_view.children().eq( 0 ).children().eq( 2 ).qtip(
 			{
 				show: {
 					when: false,
 					ready: true
 				},
 				hide: {
-					when: 'unfocus',
-					delay: 1000
+					when: false,
+					delay: 0
+				},
+				events: {
+					hide: function( event, api ) {
+						$( this ).qtip( 'destroy' );
+					}
 				},
 				content: error_string,
 				style: {
-					name: 'red',
-					color: '#ffffff',
-					'background-color': '#cb2e2e',
+					color: color,
+					'background-color': background_color,
 					tip: true,
 					border: {
-						width: 2
+						width: 2,
+						color: border_color
 					}
 				},
 				position: {
@@ -1920,10 +2146,13 @@ BaseViewController = Backbone.View.extend( {
 
 	selectContextMenu: function() {
 
-		//Error: Uncaught TypeError: Cannot read property 'el' of null in https://ondemand2001.timetrex.com/interface/html5/views/BaseViewController.js?v=8.0.0-20141230-113526 line 1880
+		//Error: Uncaught TypeError: Cannot read property 'el' of null in /interface/html5/views/BaseViewController.js?v=8.0.0-20141230-113526 line 1880
 		if ( TopMenuManager.selected_menu_id !== this.viewId + 'ContextMenu' && TopMenuManager.ribbon_view_controller ) {
 			var ribbon = $( TopMenuManager.ribbon_view_controller.el );
-			ribbon.tabs( {selected: this.viewId + 'ContextMenu'} );
+			// Error: Object doesn't support property or method 'tabs' in /interface/html5/views/BaseViewController.js?v=8.0.6-20150417-083849 line 2032
+			if ( ribbon ) {
+				ribbon.tabs( {selected: this.viewId + 'ContextMenu'} );
+			}
 		}
 
 	},
@@ -1942,7 +2171,9 @@ BaseViewController = Backbone.View.extend( {
 			tab0.css( 'opacity', 1 );
 			this.edit_view.attr( 'init_complete', true );
 			this.setEditViewTabSize();
-
+			if ( this.edit_view_close_icon ) {
+				this.edit_view_close_icon.show();
+			}
 		} else {
 			this.edit_view_tab.find( 'ul li' ).hide();
 			tab0.css( 'opacity', 0 );
@@ -1968,25 +2199,11 @@ BaseViewController = Backbone.View.extend( {
 			if ( !column.hasClass( 'v-box' ) ) {
 
 				if ( !did_clean_dic[tab_id] ) {
-					column.find( '.edit-view-form-item-label-div-first-row' ).removeClass( 'edit-view-form-item-label-div-first-row' );
-					column.find( '.edit-view-form-item-label-div-last-row' ).removeClass( 'edit-view-form-item-label-div-last-row' );
-					column.find( '.edit-view-form-item-div-last-row' ).removeClass( 'edit-view-form-item-div-last-row' );
 					did_clean_dic[tab_id] = true;
 				}
 
 				var child_length = column.children().length;
 				var parent_div = widget.parent().parent();
-
-				if ( child_length === 2 ) {
-					parent_div.children().eq( 0 ).addClass( 'edit-view-form-item-label-div-first-row' );
-					parent_div.children().eq( 0 ).addClass( 'edit-view-form-item-label-div-last-row' );
-					parent_div.addClass( 'edit-view-form-item-div-last-row' );
-				} else if ( parent_div.index() === 0 ) {
-					parent_div.children().eq( 0 ).addClass( 'edit-view-form-item-label-div-first-row' );
-				} else if ( parent_div.index() === child_length - 2 ) {
-					parent_div.children().eq( 0 ).addClass( 'edit-view-form-item-label-div-last-row' );
-					parent_div.addClass( 'edit-view-form-item-div-last-row' );
-				}
 
 				if ( Global.isSet( widget.setEnabled ) ) {
 					widget.setEnabled( true );
@@ -2048,50 +2265,11 @@ BaseViewController = Backbone.View.extend( {
 
 		this.buildEditViewUI();
 
-		//Calculated tab's height
-		this.edit_view_tab.resize( function() {
-
-			$this.setEditViewTabHeight();
-
-		} );
-
 		$this.setEditViewTabHeight();
 	},
 
 	setEditViewTabHeight: function() {
 		var $this = this;
-		var tab = $this.edit_view_tab.find( '.edit-view-tab-outside' );
-		if ( tab.length > 0 ) {
-
-			tab.height( $this.edit_view_tab.height() - 60 );
-
-		}
-
-		tab = $this.edit_view_tab.find( '.edit-view-tab-outside-sub-view' );
-		if ( tab.length > 0 ) {
-
-			tab.height( $this.edit_view_tab.height() - 34 );
-
-		}
-//		var i = 0;
-//		var hasTab = true;
-//		while ( hasTab ) {
-//			var tab = $this.edit_view_tab.find( 'edit-view-tab-outside' );
-//			if ( tab.length > 0 ) {
-//				hasTab = true;
-//
-//				if ( tab.hasClass( 'edit-view-tab-outside-sub-view' ) ) {
-//					tab.height( $this.edit_view_tab.height() - 34 );
-//				} else {
-//					tab.height( $this.edit_view_tab.height() - 60 );
-//				}
-//
-//			} else {
-//				hasTab = false;
-//			}
-//
-//			i = i + 1;
-//		}
 	},
 
 	setTabLabels: function( source ) {
@@ -2102,7 +2280,7 @@ BaseViewController = Backbone.View.extend( {
 
 	//Call this after initEditViewUI, usually after current_edit_record is set
 	initEditView: function() {
-
+		this.show_warning_when_validation = false;
 		//Uncaught TypeError: Cannot read property 'find' of null in Timehseet Authorization view when quickly click Cancel from replay
 		if ( !this.edit_view_tab ) {
 			return;
@@ -2112,7 +2290,7 @@ BaseViewController = Backbone.View.extend( {
 		//Remove cover once edit menu is set
 		ProgressBar.closeOverlay();
 
-		//Error: Unable to get property 'find' of undefined or null reference in https://ondemand1.timetrex.com/interface/html5/views/BaseViewController.js?v=7.4.6-20141027-074127 line 2055
+		//Error: Unable to get property 'find' of undefined or null reference in /interface/html5/views/BaseViewController.js?v=7.4.6-20141027-074127 line 2055
 		if ( this.edit_view_tab ) {
 			this.edit_view_tab.find( 'ul li' ).show(); // All tabs are hidden when initEditView UI, show all of them before set status
 		}
@@ -2199,17 +2377,6 @@ BaseViewController = Backbone.View.extend( {
 			return;
 		}
 
-		var tab0 = $( this.edit_view_tab.find( '.edit-view-tab-outside' )[0] );
-		var tab0_column1 = tab0.find( '.first-column' );
-		tab0_column1.find( '.edit-view-form-item-div-last-row' ).removeClass( 'edit-view-form-item-div-last-row' );
-		tab0_column1.find( '.edit-view-form-item-label-div-last-row' ).removeClass( 'edit-view-form-item-label-div-last-row' );
-
-		var len = tab0_column1.children().length;
-
-		var last_form_item = tab0_column1.children().eq( len - 2 );
-		last_form_item.addClass( 'edit-view-form-item-div-last-row' );
-		last_form_item.children().eq( 0 ).addClass( 'edit-view-form-item-label-div-last-row' );
-
 	},
 
 	getOtherFieldTypeId: function() {
@@ -2281,7 +2448,7 @@ BaseViewController = Backbone.View.extend( {
 			var tab_name = this.edit_view_tab ? this.edit_view_tab.find( '.edit-view-tab-bar-label' ).children().eq( this.edit_view_tab_selected_index ).text() : '';
 			tab_name = tab_name.replace( /\/|\s+/g, '' );
 
-			//Error: Unable to get property 'id' of undefined or null reference in https://ondemand1.timetrex.com/interface/html5/views/BaseViewController.js?v=8.0.0-20141117-132941 line 2234
+			//Error: Unable to get property 'id' of undefined or null reference in /interface/html5/views/BaseViewController.js?v=8.0.0-20141117-132941 line 2234
 			if ( this.current_edit_record && this.current_edit_record.id ) {
 				if ( a ) {
 
@@ -2326,37 +2493,49 @@ BaseViewController = Backbone.View.extend( {
 
 	setFocusToFirstInput: function() {
 		if ( !this.is_viewing ) {
-			for ( var key in this.edit_view_ui_dic ) {
-
-				if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
-					continue;
+			if ( this.script_name === 'ScheduleView' ) {
+				if ( this.edit_view_ui_dic.start_time ) {
+					this.edit_view_ui_dic.start_time.children().eq( 0 ).focus();
+					this.edit_view_ui_dic.start_time.children().eq( 0 )[0].select();
 				}
-				var widget = this.edit_view_ui_dic[key];
+			} else {
+				for ( var key in this.edit_view_ui_dic ) {
 
-				if ( widget.hasClass( 't-text-input' ) && widget.is( ':visible' ) === true && !widget.attr( 'readonly' ) ) {
-					widget.focus();
-					break;
+					if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
+						continue;
+					}
+					var widget = this.edit_view_ui_dic[key];
+
+					if ( widget.is( ':visible' ) === true ) {
+						if ( widget.hasClass( 't-text-input' ) && !widget.attr( 'readonly' ) ) {
+							widget.focus();
+							widget[0].select();
+							break;
+						} else if ( widget.hasClass( 't-time-picker-div' ) && !widget.children().eq( 0 ).attr( 'readonly' ) ) {
+							widget.children().eq( 0 ).focus();
+							widget.children().eq( 0 )[0].select();
+							break;
+						} else if ( widget.hasClass( 't-date-picker-div' ) && !widget.children().eq( 0 ).attr( 'readonly' ) ) {
+							widget.children().eq( 0 ).focus();
+							widget.children().eq( 0 )[0].select();
+							break;
+						}
+
+					}
+
 				}
-
 			}
+
 		}
 	},
 
-	removeLastRowClass: function( formItem ) {
-		//Error: TypeError: undefined is not an object (evaluating 'formItem.find') in https://ondemand2001.timetrex.com/interface/html5/views/BaseViewController.js?v=8.0.0-20150126-192230 line 2339
-		if ( !formItem ) {
-			return;
+	initNavigationWidget: function( navigation_widget_div ) {
+		if ( !this.navigation ) {
+			this.navigation = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+			navigation_widget_div.append( this.navigation );
+		} else {
+			navigation_widget_div.append( this.navigation );
 		}
-		formItem.find( '.edit-view-form-item-label-div-last-row' ).removeClass( 'edit-view-form-item-label-div-last-row' );
-		formItem.removeClass( 'edit-view-form-item-div-last-row' );
-	},
-
-	addLastRowClass: function( formItem ) {
-
-		this.removeLastRowClass( formItem );
-
-		formItem.find( '.edit-view-form-item-label-div' ).addClass( 'edit-view-form-item-label-div-last-row' );
-		formItem.addClass( 'edit-view-form-item-div-last-row' );
 	},
 
 	buildEditViewUI: function() {
@@ -2370,26 +2549,26 @@ BaseViewController = Backbone.View.extend( {
 			var left_click = navigation_div.find( '.left-click' );
 			var right_click = navigation_div.find( '.right-click' );
 			var navigation_widget_div = navigation_div.find( '.navigation-widget-div' );
-
-			this.navigation = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-
-			navigation_widget_div.append( this.navigation );
-
+			this.initNavigationWidget( navigation_widget_div );
 			left_click.attr( 'src', Global.getRealImagePath( 'images/left_arrow.png' ) );
 			right_click.attr( 'src', Global.getRealImagePath( 'images/right_arrow.png' ) );
-
 			label.text( this.navigation_label );
 
-			navigation_widget_div.append( this.navigation );
 		}
 
-		var close_icon = this.edit_view.find( '.close-icon' );
+		this.edit_view_close_icon = this.edit_view.find( '.close-icon' );
+		this.edit_view_close_icon.hide();
 
-		close_icon.click( function() {
+		this.edit_view_close_icon.click( function() {
 
 			$this.onCloseIconClick();
 
 		} );
+
+		this.edit_view_ui_dic = {};
+		this.edit_view_ui_validation_field_dic = {};
+		this.edit_view_form_item_dic = {};
+		this.edit_view_error_ui_dic = {};
 
 	},
 
@@ -2437,7 +2616,6 @@ BaseViewController = Backbone.View.extend( {
 		}
 
 		column.append( form_item );
-		column.append( "<div class='clear-both-div'></div>" );
 
 		//set height to text area
 		if ( form_item.height() > 35 ) {
@@ -2447,14 +2625,11 @@ BaseViewController = Backbone.View.extend( {
 		}
 
 		if ( setResizeEvent ) {
-
 			form_item.unbind( 'resize' ).bind( 'resize', function() {
 				if ( form_item_label_div.height() !== form_item.height() && form_item.height() !== 0 ) {
 					form_item_label_div.css( 'height', form_item.height() );
 				}
-
 			} );
-			//
 			widget.unbind( 'setSize' ).bind( 'setSize', function() {
 				form_item_label_div.css( 'height', widget.height() + 10 );
 			} );
@@ -2488,6 +2663,7 @@ BaseViewController = Backbone.View.extend( {
 			for ( i = 0; i < widgets.length; i++ ) {
 				widget = widgets[i];
 				this.edit_view_ui_dic[widget.getField()] = widget;
+				setValidationDic();
 
 				widget.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target, doNotValidate ) {
 					$this.onFormItemChange( target, doNotValidate );
@@ -2505,6 +2681,7 @@ BaseViewController = Backbone.View.extend( {
 			}
 		} else {
 			this.edit_view_ui_dic[widget.getField()] = widget;
+			setValidationDic();
 
 			widget.bind( 'formItemChange', function( e, target, doNotValidate ) {
 				$this.onFormItemChange( target, doNotValidate );
@@ -2518,6 +2695,21 @@ BaseViewController = Backbone.View.extend( {
 				widget.bind( 'formItemKeyDown', function( e, target ) {
 					$this.onFormItemKeyDown( target );
 				} );
+			}
+		}
+
+		function setValidationDic() {
+			if ( widget.hasOwnProperty( 'getValidationField' ) && widget.getValidationField() ) {
+				if ( $this.edit_view_ui_validation_field_dic[widget.getValidationField()] ) {
+					if ( !Global.isArray( $this.edit_view_ui_validation_field_dic[widget.getValidationField()] ) ) {
+						$this.edit_view_ui_validation_field_dic[widget.getValidationField()] = [$this.edit_view_ui_validation_field_dic[widget.getValidationField()], widget];
+					} else {
+						$this.edit_view_ui_validation_field_dic[widget.getValidationField()].push( widget );
+					}
+				} else {
+					$this.edit_view_ui_validation_field_dic[widget.getValidationField()] = widget;
+				}
+
 			}
 		}
 
@@ -2584,7 +2776,7 @@ BaseViewController = Backbone.View.extend( {
 
 		var $this = this;
 
-		//Error: Unable to get value of the property 'getGridParam': object is null or undefined in https://villa.timetrex.com/interface/html5/views/BaseViewController.js?v=8.0.0-20141230-103725 line 2575
+		//Error: Unable to get value of the property 'getGridParam': object is null or undefined in /interface/html5/views/BaseViewController.js?v=8.0.0-20141230-103725 line 2575
 		if ( !this.grid ) {
 			return;
 		}
@@ -2675,20 +2867,28 @@ BaseViewController = Backbone.View.extend( {
 		}
 	},
 
+	needShowNavigation: function() {
+		if ( this.current_edit_record && Global.isSet( this.current_edit_record.id ) && this.current_edit_record.id ) {
+			return true;
+		} else {
+			return false;
+		}
+	},
+
 	//Call this from setEditViewData
 	initEditViewData: function() {
 		var $this = this;
 
 		//add this.grid to fix exception
-		//Error: Unable to get property 'getGridParam' of undefined or null reference in https://villa.timetrex.com/interface/html5/views/BaseViewController.js?v=7.4.3-20140924-090129 line 2523
+		//Error: Unable to get property 'getGridParam' of undefined or null reference in /interface/html5/views/BaseViewController.js?v=7.4.3-20140924-090129 line 2523
 		if ( !this.edit_only_mode && this.navigation && this.grid ) {
 
 			var grid_current_page_items = this.grid.getGridParam( 'data' );
 
 			var navigation_div = this.edit_view.find( '.navigation-div' );
 
-			//Error: TypeError: this.current_edit_record is undefined in https://villa.timetrex.com/interface/html5/views/BaseViewController.js?v=8.0.0-20141230-103725 line 2673
-			if ( this.current_edit_record && Global.isSet( this.current_edit_record.id ) && this.current_edit_record.id ) {
+			//Error: TypeError: this.current_edit_record is undefined in /interface/html5/views/BaseViewController.js?v=8.0.0-20141230-103725 line 2673
+			if ( this.needShowNavigation() ) {
 				navigation_div.css( 'display', 'block' );
 				//Set Navigation Awesomebox
 
@@ -2762,7 +2962,7 @@ BaseViewController = Backbone.View.extend( {
 //			//Set all UI field to current edit record, we need validate all UI field when save and validate
 			//use != to ingore string or number, value from html is string.
 
-			//Error: TypeError: $this.current_edit_record is undefined in https://ondemand2001.timetrex.com/interface/html5/views/BaseViewController.js?v=8.0.0-20141117-122453 line 2702
+			//Error: TypeError: $this.current_edit_record is undefined in /interface/html5/views/BaseViewController.js?v=8.0.0-20141117-122453 line 2702
 			if ( $this.current_edit_record && !Global.isSet( $this.current_edit_record[key] ) ) {
 
 				$this.current_edit_record[key] = false;
@@ -2808,7 +3008,7 @@ BaseViewController = Backbone.View.extend( {
 			//use != to ingore string or number, value from html is string.
 			//is visible make sure the widget is shown on screen of current select type
 
-			//Error: TypeError: undefined is not an object (evaluating '$this.current_edit_record[key]') in https://ondemand2001.timetrex.com/interface/html5/views/BaseViewController.js?v=8.0.0-20141230-124906 line 2792 
+			//Error: TypeError: undefined is not an object (evaluating '$this.current_edit_record[key]') in /interface/html5/views/BaseViewController.js?v=8.0.0-20141230-124906 line 2792
 			if ( value && $this.current_edit_record && $this.current_edit_record[key] != value ) {
 
 				if ( !value || value === '0' || (Global.isArray( value ) && value.length === 0) ) {
@@ -2911,9 +3111,12 @@ BaseViewController = Backbone.View.extend( {
 		left_arrow.removeClass( 'disabled' );
 		right_arrow.removeClass( 'disabled' );
 
-		if ( !this.navigation ) {
+		//TypeError: this.navigation.getSelectIndex is not a function
+		//navigation could not be initial in cases, for example in Request new view
+		if ( !this.navigation || !(this.navigation.hasOwnProperty('getSelectIndex')) ) {
 			return;
 		}
+
 
 		var selected_index = this.navigation.getSelectIndex();
 		var source_data = this.navigation.getSourceData();
@@ -2922,39 +3125,47 @@ BaseViewController = Backbone.View.extend( {
 			return;
 		}
 
-		if ( selected_index === 0 ) {
-			left_arrow.addClass( 'disabled' );
+		var current_pager_data = this.navigation.getPagerData();
+
+		// It's possible the navigation don't have a pager data, like Timesheet edit view, so it's become a no page navigation.
+		if ( !current_pager_data ) {
+			if ( selected_index === 0 ) {
+				left_arrow.addClass( 'disabled' );
+			}
+
+			if ( selected_index === source_data.length - 1 ) {
+				right_arrow.addClass( 'disabled' );
+			}
+		} else {
+			if ( selected_index === 0 && current_pager_data.current_page === 1 ) {
+				left_arrow.addClass( 'disabled' );
+			}
+
+			if ( selected_index === source_data.length - 1 && current_pager_data.current_page === current_pager_data.last_page_number ) {
+				right_arrow.addClass( 'disabled' );
+			}
 		}
 
-		if ( selected_index === source_data.length - 1 ) {
-			right_arrow.addClass( 'disabled' );
-		}
 	},
 
 	onLeftArrowClick: function() {
+		var $this = this;
 		var selected_index = this.navigation.getSelectIndex();
 		var source_data = this.navigation.getSourceData();
-
+		var current_pager_data = this.navigation.getPagerData();
+		var next_select_item;
 		if ( selected_index > 0 ) {
-			var next_select_item = this.navigation.getItemByIndex( selected_index - 1 );
-
+			next_select_item = this.navigation.getItemByIndex( selected_index - 1 );
+			$this.onRightOrLeftArrowClickCallBack( next_select_item );
+		} else if ( selected_index === 0 && current_pager_data.current_page > 1 ) {
+			this.navigation.onADropDownSearch( 'unselect_grid', current_pager_data.current_page - 1, 'last', function( result ) {
+				next_select_item = result;
+				$this.onRightOrLeftArrowClickCallBack( next_select_item );
+			} );
 		} else {
-//			next_select_item = this.navigation.getItemByIndex( source_data.length - 1 );
-
 			this.onCancelClick();
 			return;
-
 		}
-
-		ProgressBar.showOverlay();
-
-		if ( this.is_viewing ) {
-			this.onViewClick( next_select_item.id ); //Dont refresh UI
-		} else {
-			this.onEditClick( next_select_item.id ); //Dont refresh UI
-		}
-
-		this.setNavigationArrowsEnabled();
 	},
 
 	refreshCurrentRecord: function() {
@@ -2970,36 +3181,45 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	onRightArrowClick: function() {
+		var $this = this;
 		var selected_index = this.navigation.getSelectIndex();
 		var source_data = this.navigation.getSourceData();
-
-		//Error: Uncaught TypeError: Cannot read property 'length' of null in https://ondemand2001.timetrex.com/interface/html5/views/BaseViewController.js?v=8.0.0-20141230-125919 line 2956
+		var current_pager_data = this.navigation.getPagerData();
+		var next_select_item;
+		//Error: Uncaught TypeError: Cannot read property 'length' of null in /interface/html5/views/BaseViewController.js?v=8.0.0-20141230-125919 line 2956
 		if ( !source_data ) {
 			return;
 		}
 
 		if ( selected_index < (source_data.length - 1) ) {
-			var next_select_item = this.navigation.getItemByIndex( (selected_index + 1) );
+			next_select_item = this.navigation.getItemByIndex( (selected_index + 1) );
+			$this.onRightOrLeftArrowClickCallBack( next_select_item );
 
+		} else if ( selected_index === (source_data.length - 1) && current_pager_data.current_page < current_pager_data.last_page_number ) {
+			this.navigation.onADropDownSearch( 'unselect_grid', current_pager_data.current_page + 1, 'first', function( result ) {
+				next_select_item = result;
+				$this.onRightOrLeftArrowClickCallBack( next_select_item );
+			} );
 		} else {
-//			next_select_item = this.navigation.getItemByIndex( 0 );
 			this.onCancelClick();
 			return;
 		}
 
+	},
+
+	onRightOrLeftArrowClickCallBack: function( next_select_item ) {
 		ProgressBar.showOverlay();
 		if ( this.is_viewing ) {
 			this.onViewClick( next_select_item.id ); //Dont refresh UI
 		} else {
 			this.onEditClick( next_select_item.id ); //Dont refresh UI
 		}
-
 		this.setNavigationArrowsEnabled();
 	},
 
 	setParentContextMenuAfterSubViewClose: function() {
 
-		//Error: Uncaught TypeError: Cannot read property 'buildContextMenu' of null in https://ondemand2001.timetrex.com/interface/html5/views/BaseViewController.js?v=7.4.6-20141027-085016 line 2887
+		//Error: Uncaught TypeError: Cannot read property 'buildContextMenu' of null in /interface/html5/views/BaseViewController.js?v=7.4.6-20141027-085016 line 2887
 		if ( !this.parent_view_controller ) {
 			return;
 		}
@@ -3016,6 +3236,7 @@ BaseViewController = Backbone.View.extend( {
 	removeEditView: function() {
 
 		if ( this.edit_view ) {
+			this.clearErrorTips();
 			this.edit_view.remove();
 		}
 		this.edit_view = null;
@@ -3041,7 +3262,6 @@ BaseViewController = Backbone.View.extend( {
 		// reset parent context menu if edit only mode
 		if ( !this.edit_only_mode ) {
 			this.setDefaultMenu();
-			this.initRightClickMenu();
 		} else {
 			this.setParentContextMenuAfterSubViewClose();
 
@@ -3058,6 +3278,7 @@ BaseViewController = Backbone.View.extend( {
 
 		this.sub_log_view_controller = null;
 		this.edit_view_ui_dic = {};
+		this.edit_view_ui_validation_field_dic = {};
 		this.edit_view_form_item_dic = {};
 		this.edit_view_error_ui_dic = {};
 	},
@@ -3075,7 +3296,7 @@ BaseViewController = Backbone.View.extend( {
 			return false;
 		}
 
-		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand3.timetrex.com/interface/html5/#!m=RecurringScheduleTemplateControl line 1007
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=RecurringScheduleTemplateControl line 1007
 		var result = this.grid.jqGrid( 'getGridParam', 'selarrrow' );
 
 		if ( !result ) {
@@ -3084,13 +3305,6 @@ BaseViewController = Backbone.View.extend( {
 
 		return result;
 	},
-
-//	getGridSelectRowArray: function( colName ) {
-//		var selRowId = this.getGridSelectIdArray();
-//		var result = this.grid.jqGrid( 'getCell', selRowId, colName );
-//
-//		return result;
-//	},
 
 	setDefaultMenuAddIcon: function( context_btn, grid_selected_length, pId ) {
 		if ( !this.addPermissionValidate( pId ) || this.edit_only_mode ) {
@@ -3409,7 +3623,7 @@ BaseViewController = Backbone.View.extend( {
 	//Call this when setLayout
 	setDefaultMenu: function( doNotSetFocus ) {
 
-		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand0.timetrex.com/interface/html5/#!m=Client line 308
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Client line 308
 		if ( !this.context_menu_array ) {
 			return;
 		}
@@ -3617,6 +3831,9 @@ BaseViewController = Backbone.View.extend( {
 			this.selectContextMenu();
 		}
 
+		//set right click menu to list view grid
+		this.initRightClickMenu();
+
 	},
 
 	setErrorMenu: function() {
@@ -3639,19 +3856,15 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	render: function() {
-
 		var $this = this;
 
 		$( window ).resize( function() {
 			if ( $this.grid ) {
 				$this.setGridSize();
-
 			}
-
 			if ( $this.edit_view ) {
 				$this.setEditViewTabSize();
 			}
-
 		} );
 
 		//Create search panel only when show as a main view
@@ -3690,6 +3903,10 @@ BaseViewController = Backbone.View.extend( {
 
 	setCurrentViewPosition: function() {
 		var current_view_div = this.search_panel.find( '.layout-selector-div' );
+		// Error: Unable to get property 'left' of undefined or null reference in /interface/html5/views/BaseViewController.js?v=8.0.6-20150417-083849 line 3691
+		if ( !current_view_div ) {
+			return;
+		}
 		var saved_layout_li = this.search_panel.find( "a[ref='saved_layout']" ).parent();
 		var offset_left = saved_layout_li.offset().left;
 
@@ -3863,6 +4080,7 @@ BaseViewController = Backbone.View.extend( {
 			onResult: function( res ) {
 
 				if ( res.isValid() ) {
+					$this.clearViewLayoutCache();
 					$this.clearAwesomeboxLayoutCache();
 					$this.need_select_layout_name = layout_name;
 					$this.initLayout();
@@ -3934,6 +4152,7 @@ BaseViewController = Backbone.View.extend( {
 			onResult: function( res ) {
 
 				if ( res.isValid() ) {
+					$this.clearViewLayoutCache();
 					$this.need_select_layout_name = layout_name;
 					$this.initLayout();
 				}
@@ -3980,6 +4199,7 @@ BaseViewController = Backbone.View.extend( {
 
 				if ( res.isValid() ) {
 					$this.clearAwesomeboxLayoutCache();
+					$this.clearViewLayoutCache();
 					$this.need_select_layout_name = layout_name;
 					$this.initLayout();
 
@@ -4020,6 +4240,7 @@ BaseViewController = Backbone.View.extend( {
 
 				if ( res.isValid() ) {
 					$this.clearAwesomeboxLayoutCache();
+					$this.clearViewLayoutCache();
 					$this.need_select_layout_name = layout_name;
 					$this.initLayout();
 				}
@@ -4027,6 +4248,12 @@ BaseViewController = Backbone.View.extend( {
 			}
 		} );
 
+	},
+
+	clearViewLayoutCache: function() {
+		if ( LocalCacheData.view_layout_cache && LocalCacheData.view_layout_cache[this.script_name] ) {
+			LocalCacheData.view_layout_cache[this.script_name] = null;
+		}
 	},
 
 	clearAwesomeboxLayoutCache: function() {
@@ -4044,6 +4271,7 @@ BaseViewController = Backbone.View.extend( {
 			onResult: function( res ) {
 				if ( res.isValid() ) {
 					$this.clearAwesomeboxLayoutCache();
+					$this.clearViewLayoutCache();
 					$this.need_select_layout_name = $this.select_layout.name;
 					$this.initLayout();
 				}
@@ -4308,6 +4536,7 @@ BaseViewController = Backbone.View.extend( {
 		} );
 
 		form_item_label.text( $.i18n._( 'Display Columns' ) + ':' );
+		form_item_label.addClass('SearchPanel-displayColumns-label');
 		form_item_input_div.append( this.column_selector );
 
 		layout_div.append( form_item );
@@ -4315,7 +4544,7 @@ BaseViewController = Backbone.View.extend( {
 		layout_div.append( "<div class='clear-both-div'></div>" );
 
 		this.column_selector.setColumns( [
-			{name: 'label', index: 'label', label: $.i18n._('Column Name'), width: 100, sortable: false}
+			{name: 'label', index: 'label', label: $.i18n._( 'Column Name' ), width: 100, sortable: false}
 		] );
 
 		//Sort By
@@ -4727,7 +4956,8 @@ BaseViewController = Backbone.View.extend( {
 	getValidSearchFilter: function() {
 		var validFilterData = {};
 		for ( var key in  this.filter_data ) {
-			if ( Global.isSet( this.filter_data[key].value ) && this.filter_data[key].value !== '' ) {
+			// Error: Unable to get property 'value' of undefined or null reference in /interface/html5/views/BaseViewController.js?v=8.0.6-20150417-143734 line 4727
+			if ( Global.isSet( this.filter_data[key] ) && Global.isSet( this.filter_data[key].value ) && this.filter_data[key].value !== '' ) {
 				validFilterData[key] = this.filter_data[key];
 			}
 		}
@@ -4754,7 +4984,7 @@ BaseViewController = Backbone.View.extend( {
 
 		if ( select_items && select_items.length > 0 ) {
 			$.each( select_items, function( index, content ) {
-				var sort = {}
+				var sort = {};
 				sort[content.value] = content.sort;
 				sort_filter.push( sort );
 			} );
@@ -5101,7 +5331,7 @@ BaseViewController = Backbone.View.extend( {
 					var found = false;
 					var new_record = result_data[0];
 
-					//Error: Uncaught TypeError: Cannot read property 'id' of undefined in https://ondemand1.timetrex.com/interface/html5/views/BaseViewController.js?v=7.4.3-20140924-084605 line 4851
+					//Error: Uncaught TypeError: Cannot read property 'id' of undefined in /interface/html5/views/BaseViewController.js?v=7.4.3-20140924-084605 line 4851
 					if ( new_record ) {
 						for ( var i = 0; i < len; i++ ) {
 							var record = grid_source_data[i];
@@ -5145,6 +5375,9 @@ BaseViewController = Backbone.View.extend( {
 						var current_data = $this.grid.getGridParam( 'data' );
 						result_data = current_data.concat( result_data );
 					}
+
+					// Process result_data if necessary, this always needs override.
+					result_data = $this.processResultData( result_data );
 					$this.grid.clearGridData();
 					$this.grid.setGridParam( {data: result_data} );
 
@@ -5189,10 +5422,15 @@ BaseViewController = Backbone.View.extend( {
 
 	},
 
+	processResultData: function( result_data ) {
+		//Always needs override
+		return result_data;
+	},
+
 	searchDone: function() {
 		//the rotate icon from search panel
 		var $this = this;
-		$( '.search-refresh-rotate' ).removeClass( 'search-refresh-rotate' );
+		$( '.button-rotate' ).removeClass( 'button-rotate' );
 
 		$( this.el ).attr( 'init_complete', true );
 
@@ -5201,6 +5439,8 @@ BaseViewController = Backbone.View.extend( {
 				$this.search_panel.attr( 'search_complete', true );
 			}
 		}, 4000 );
+
+		this.setGridSize();
 
 	},
 
@@ -5284,7 +5524,7 @@ BaseViewController = Backbone.View.extend( {
 
 			var data = this.grid.getGridParam( 'data' );
 
-			//Error: TypeError: data is undefined in https://ondemand1.timetrex.com/interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
+			//Error: TypeError: data is undefined in /interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
 			if ( !data ) {
 				return;
 			}
@@ -5316,7 +5556,7 @@ BaseViewController = Backbone.View.extend( {
 		this.grid_total_width = 0;
 
 		//Possible exception
-		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand1.timetrex.com/interface/html5/#!m=TimeSheet&date=20141102&user_id=53130 line 4288
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=TimeSheet&date=20141102&user_id=53130 line 4288
 		if ( !col_model ) {
 			return;
 		}
@@ -5350,7 +5590,6 @@ BaseViewController = Backbone.View.extend( {
 
 			if ( longest_words ) {
 				var width_test = $( '<span id="width_test" />' );
-//				width_test.css( 'font-family', "'Lucida Grande', 'Lucida Sans', Arial, sans-serif" );
 				width_test.css( 'font-size', '11' );
 				width_test.css( 'font-weight', 'normal' );
 				$( 'body' ).append( width_test );
@@ -5365,21 +5604,13 @@ BaseViewController = Backbone.View.extend( {
 				}
 
 				this.grid_total_width += width + 5;
-
 				this.grid.setColProp( field, {widthOrg: width + 5} );
 				width_test.remove();
 
 			}
 		}
-
 		var gw = this.grid.getGridParam( 'width' );
-
-//		if ( total_width > gw ) {
-//			gw = total_width;
-//		}
-
 		this.grid.setGridWidth( gw );
-
 	},
 
 	setGridSize: function() {
@@ -5388,6 +5619,8 @@ BaseViewController = Backbone.View.extend( {
 
 			return;
 		}
+		var header_table = $( $( this.el ).find( 'table[aria-labelledby=gbox_' + this.ui_id + '_grid]' )[0] );
+		var header_size = header_table.height();
 
 		if ( !this.sub_view_mode ) {
 			if ( Global.bodyWidth() > Global.app_min_width ) {
@@ -5396,16 +5629,32 @@ BaseViewController = Backbone.View.extend( {
 				this.grid.setGridWidth( Global.app_min_width - 14 );
 			}
 		} else {
-
-			this.grid.setGridWidth( $( this.el ).parent().width() - 2 );
+			this._setGridSizeGridWidthOfSubViewMode();
 		}
 
+		this._setGridSizeGridHeight( header_size );
+
+	},
+
+	_setGridSizeGridHeight: function( header_size ) {
 		if ( !this.sub_view_mode ) {
-			this.grid.setGridHeight( ($( this.el ).height() - this.search_panel.height() - 90) );
-		} else {
-			this.grid.setGridHeight( $( this.el ).parent().parent().parent().height() - 80 );
-		}
+			this.grid.setGridHeight( ($( this.el ).height() - (this.search_panel && this.search_panel.is( ':visible' ) ? this.search_panel.height() : 0) - 68 - header_size) );
+		} else if ( !Global.isSet( this.resizeSubGridHeight ) ) {
+			if ( this.pager_data && this.pager_data.last_page_number > 1 ) {
+				this.grid.setGridHeight( $( this.el ).parent().parent().parent().height() - 56 - header_size );
+			} else {
+				this.grid.setGridHeight( $( this.el ).parent().parent().parent().height() - 28 - header_size );
+			}
 
+		}
+	},
+
+	_setGridSizeGroupheight: function( header_size ) {
+		this.grid.setGridHeight( ($( this.el ).height() - (this.search_panel && this.search_panel.is( ':visible' ) ? this.search_panel.height() : 0) - 43 - header_size) );
+	},
+
+	_setGridSizeGridWidthOfSubViewMode: function() {
+		this.grid.setGridWidth( $( this.el ).parent().width() - 2 );
 	},
 
 	setEditViewTabSize: function() {
@@ -5449,7 +5698,7 @@ BaseViewController = Backbone.View.extend( {
 				wrap_div.children().eq( 0 ).width( tab_width - nav_width - 100 );
 			}
 
-			if ( tab_bar_label.children().eq( 0 ).is( ':visible' ) ) {
+			if ( tab_bar_label.children().eq( 0 ).is( ':visible' ) && !this.is_mass_editing ) {
 				this.edit_view_tab.find( '.tab-arrow' ).show()
 			} else {
 				this.edit_view_tab.find( '.tab-arrow' ).hide()
@@ -5500,7 +5749,7 @@ BaseViewController = Backbone.View.extend( {
 		if ( this.grid ) {
 			display_columns = this.grid.getGridParam( 'colModel' );
 		}
-		//Fixed possible exception -- Error: Unable to get property 'length' of undefined or null reference in https://villa.timetrex.com/interface/html5/views/BaseViewController.js?v=7.4.3-20140924-090129 line 5031
+		//Fixed possible exception -- Error: Unable to get property 'length' of undefined or null reference in /interface/html5/views/BaseViewController.js?v=7.4.3-20140924-090129 line 5031
 		if ( display_columns ) {
 			var len = display_columns.length;
 
@@ -5535,52 +5784,49 @@ BaseViewController = Backbone.View.extend( {
 
 			return;
 		}
-
-		this.user_generic_data_api.getUserGenericData( {filter_data: {script: this.script_name, deleted: false}}, {
-			onResult: function( results ) {
-				var result_data = results.getResult();
-
-				$this.select_layout = null; //Reset select layout;
-
-				if ( result_data && result_data.length > 0 ) {
-
-					result_data.sort( function( a, b ) {
-							if ( a.name > b.name ) {
-								return true;
-							} else {
-								return false;
-							}
-						}
-					);
-
-					var len = result_data.length;
-
-					for ( var i = 0; i < len; i++ ) {
-						var layout = result_data[i];
-						if ( layout.name === current_select_layout_name ) {
-							$this.select_layout = layout;
-							break;
-						}
-					}
-
-					if ( !$this.select_layout ) {
-						$this.select_layout = result_data[0];
-					}
-
-					$this.search_panel.setLayoutsArray( result_data );
-
-				} else {
-
-					$this.select_layout = null;
-					$this.search_panel.setLayoutsArray( null );
+		// Check view layout cache.
+		if ( LocalCacheData.view_layout_cache[this.script_name] ) {
+			//Make this async way
+			setTimeout( function() {
+				onGetUserGenericDataResult( LocalCacheData.view_layout_cache[$this.script_name] );
+			}, 0 );
+		} else {
+			this.user_generic_data_api.getUserGenericData( {filter_data: {script: this.script_name, deleted: false}}, {
+				onResult: function( results ) {
+					onGetUserGenericDataResult( results );
 				}
+			} );
+		}
 
-				if ( callBack ) {
-					callBack();
+		function onGetUserGenericDataResult( results ) {
+			var result_data = results.getResult();
+			$this.select_layout = null; //Reset select layout;
+			LocalCacheData.view_layout_cache[$this.script_name] = results;
+			if ( result_data && result_data.length > 0 ) {
+				result_data.sort( function( a, b ) {
+						return Global.compare( a, b, 'name' );
+					}
+				);
+				var len = result_data.length;
+				for ( var i = 0; i < len; i++ ) {
+					var layout = result_data[i];
+					if ( layout.name === current_select_layout_name ) {
+						$this.select_layout = layout;
+						break;
+					}
 				}
-
+				if ( !$this.select_layout ) {
+					$this.select_layout = result_data[0];
+				}
+				$this.search_panel.setLayoutsArray( result_data );
+			} else {
+				$this.select_layout = null;
+				$this.search_panel.setLayoutsArray( null );
 			}
-		} );
+			if ( callBack ) {
+				callBack();
+			}
+		}
 
 	},
 
@@ -5701,7 +5947,9 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	removeContentMenuByName: function( name ) {
-
+		if ( !LocalCacheData.current_open_primary_controller ) {
+			return;
+		}
 		var primary_view_id = LocalCacheData.current_open_primary_controller.viewId;
 		var select_menu_id = TopMenuManager.menus_quick_map[primary_view_id];
 		if ( TopMenuManager.ribbon_view_controller && TopMenuManager.selected_menu_id && TopMenuManager.selected_menu_id.indexOf( 'ContextMenu' ) !== -1 ) {
@@ -6131,7 +6379,10 @@ BaseViewController = Backbone.View.extend( {
 			return;
 		}
 
-		Global.loadScriptAsync( 'views/core/log/LogViewController.js', function() {
+		Global.loadScript( 'views/core/log/LogViewController.js', function() {
+			if ( !$this.edit_view_tab ) {
+				return;
+			}
 			var tab = $this.edit_view_tab.find( '#' + tab_id );
 			var firstColumn = tab.find( '.first-column-sub-view' );
 			Global.trackView( 'Sub' + 'Log' + 'View', LocalCacheData.current_doing_context_action );
@@ -6236,6 +6487,82 @@ BaseViewController = Backbone.View.extend( {
 
 		this.grid.parent().parent().parent().find( '.cbox-header' ).attr( 'checked', true );
 		this.setDefaultMenu();
+	},
+
+	detachElement: function( key ) {
+		//Error: Uncaught TypeError: Cannot read property 'detach' of undefined in interface/html5/views/BaseViewController.js?v=9.0.0-20150824-110300 line 6441
+		if ( !this.edit_view_form_item_dic || !this.edit_view_form_item_dic[key] ) {
+			return;
+		}
+
+		var place_holder = $( '<p style="display: none">' );
+		place_holder.addClass( 'place_holder_' + key )
+		place_holder.insertBefore( this.edit_view_form_item_dic[key] );
+		this.edit_view_form_item_dic[key].detach();
+	},
+
+	attachElement: function( key ) {
+		//Error: Uncaught TypeError: Cannot read property 'insertBefore' of undefined in interface/html5/views/BaseViewController.js?v=9.0.0-20150822-210544 line 6439
+		if ( !this.edit_view_form_item_dic || !this.edit_view_form_item_dic[key] ) {
+			return;
+		}
+
+		var place_holder = $( '.place_holder_' + key );
+		this.edit_view_form_item_dic[key].insertBefore( place_holder );
+		place_holder.remove();
+	},
+
+	getBalanceHandler: function( result, last_date_stamp ) {
+		var $this = this;
+		var available_balance_value, current_time_value, remaining_balance_value, summary_available_value;
+		var result_data = result.getResult();
+		//Error: TypeError: this.edit_view_ui_dic.available_balance is undefined in /interface/html5/framework/jquery.min.js?v=8.0.0-20141117-091433 line 2 > eval line 6570
+		if ( !$this.edit_view_ui_dic || !$this.edit_view_ui_dic['available_balance'] ) {
+			return;
+		}
+		if ( !result_data ) {
+			$this.detachElement( 'available_balance' );
+			return;
+		}
+		$this.attachElement( 'available_balance' );
+
+		available_balance_value = Global.secondToHHMMSS( result_data.available_balance );
+		current_time_value = Global.secondToHHMMSS( result_data.current_time );
+		remaining_balance_value = Global.secondToHHMMSS( result_data.remaining_balance );
+		summary_available_value = Global.secondToHHMMSS( result_data.projected_remaining_balance );
+		if ( result_data.hasOwnProperty( 'remaining_dollar_balance' ) ) {
+			available_balance_value = available_balance_value + ' / ' + LocalCacheData.getCurrentCurrencySymbol() + result_data.available_dollar_balance;
+			current_time_value = current_time_value + ' / ' + LocalCacheData.getCurrentCurrencySymbol() + result_data.current_dollar_amount;
+			remaining_balance_value = remaining_balance_value + ' / ' + LocalCacheData.getCurrentCurrencySymbol() + result_data.remaining_dollar_balance;
+			summary_available_value = summary_available_value + ' / ' + LocalCacheData.getCurrentCurrencySymbol() + result_data.remaining_dollar_balance;
+		}
+		$this.edit_view_ui_dic['available_balance'].setValue( summary_available_value );
+
+		$this.available_balance_info.qtip(
+			{
+				show: {
+					when: {event: 'click'},
+					delay: 10,
+					effect: {type: 'fade', length: 0}
+				},
+
+				hide: {
+					when: {event: 'unfocus'}
+				},
+
+				style: {
+					name: 'cream',
+					width: 340 //Dynamically changing the width causes display bugs when switching between Absence Policies and thereby widths.
+				},
+				content: '<div style="width:100%;">' +
+				'<div style="width:100%; clear: both;"><span style="float:left;">' + $.i18n._( "Available Balance" ) + ': </span><span style="float:right;">' + available_balance_value + '</span></div>' +
+				'<div style="width:100%; clear: both;"><span style="float:left;">' + $.i18n._( "Current Time" ) + ': </span><span style="float:right;">' + current_time_value + '</span></div>' +
+				'<div style="width:100%; clear: both;"><span style="float:left;">' + $.i18n._( "Remaining Balance" ) + ' : </span><span style="float:right;">' + remaining_balance_value + '</span></div>' +
+				'<div style="width:100%; height: 20px; clear: both;"></div>' +
+				'<div style="width:100%; clear: both;"><span style="float:left;">' + $.i18n._( "Projected Balance by" ) + ' ' + last_date_stamp + ': </span><span style="float:right;">' + Global.secondToHHMMSS( result_data.projected_balance ) + '</span></div>' +
+				'<div style="width:100%; clear: both;"><span style="float:left;">' + $.i18n._( "Projected Remaining Balance" ) + ':</span><span style="float:right;">' + Global.secondToHHMMSS( result_data.projected_remaining_balance ) + '</span></div>' +
+				'</div>'
+			} );
 	}
 
 } );
@@ -6276,6 +6603,7 @@ BaseViewController.loadView = function( view_id ) {
 				break;
 		}
 
+		IndexViewController.instance.router.removeCurrentView();
 		var template = _.template( result, args );
 		Global.contentContainer().html( template );
 

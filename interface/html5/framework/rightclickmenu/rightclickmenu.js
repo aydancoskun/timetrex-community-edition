@@ -381,7 +381,7 @@
 					var triggerAction = ((root.trigger == 'left' && button === 0) || (root.trigger == 'right' && button === 2));
 
 					// find the element that would've been clicked, wasn't the layer in the way
-					if ( document.elementFromPoint ) {
+					if ( document.elementFromPoint && root.$layer) {
 						root.$layer.hide();
 						target = document.elementFromPoint( x - $win.scrollLeft(), y - $win.scrollTop() );
 						root.$layer.show();
@@ -473,7 +473,10 @@
 								return;
 							}
 						} else {
-							opt.$menu.trigger( 'nextcommand' );
+							// Error: Unable to get value of the property 'trigger': object is null or undefined in /interface/html5/framework/rightclickmenu/rightclickmenu.js?v=8.0.6-20150417-155720 line 476
+							if(opt.$menu){
+								opt.$menu.trigger( 'nextcommand' );
+							}
 							return;
 						}
 						break;
@@ -546,7 +549,7 @@
 
 					default: // 0-9, a-z
 						var k = (String.fromCharCode( e.keyCode )).toUpperCase();
-						//Error: Uncaught TypeError: Cannot read property '' of undefined in https://ondemand1.timetrex.com/interface/html5/framework/rightclickmenu/rightclickmenu.js?v=7.4.3-20140924-123317 line 549
+						//Error: Uncaught TypeError: Cannot read property '' of undefined in /interface/html5/framework/rightclickmenu/rightclickmenu.js?v=7.4.3-20140924-123317 line 549
 						if ( opt && opt.accesskeys && opt.accesskeys[k] ) {
 							// according to the specs accesskeys must be invoked immediately
 							opt.accesskeys[k].$node.trigger( opt.accesskeys[k].$menu

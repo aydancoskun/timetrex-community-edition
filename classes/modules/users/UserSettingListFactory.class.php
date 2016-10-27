@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -59,7 +59,7 @@ class UserSettingListFactory extends UserSettingFactory implements IteratorAggre
 		}
 
 		$ph = array(
-					'id' => $id, 
+					'id' => (int)$id, 
 					);
 
 		$query = '
@@ -83,7 +83,7 @@ class UserSettingListFactory extends UserSettingFactory implements IteratorAggre
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id
+					'company_id' => (int)$company_id
 					);
 
 		$query = '
@@ -112,7 +112,7 @@ class UserSettingListFactory extends UserSettingFactory implements IteratorAggre
 		$cache_id = $user_id.$name;
 
 		$ph = array(
-					'user_id' => $user_id, 
+					'user_id' => (int)$user_id, 
 					'name' => $name, 
 					);
 

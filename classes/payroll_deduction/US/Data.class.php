@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -115,74 +115,73 @@ C:19-Jun-15-NOCHANGE-	'WV' => 'West Virginia',- https://www.wva.state.wv.us/wvta
 class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 	var $db = NULL;
 	var $income_tax_rates = array();
-	var $table = 'income_tax_rate_us';
 	var $country_primary_currency = 'USD';
 
 	var $federal_allowance = array(
-									1420099200 => 4000.00, //01-Jan-15
-									1388563200 => 3950.00, //01-Jan-14
-									1357027200 => 3900.00, //01-Jan-13
-									1325404800 => 3800.00, //01-Jan-12
-									1293868800 => 3700.00, //01-Jan-11
+									20150101 => 4000.00, //01-Jan-15
+									20140101 => 3950.00, //01-Jan-14
+									20130101 => 3900.00, //01-Jan-13
+									20120101 => 3800.00, //01-Jan-12
+									20110101 => 3700.00, //01-Jan-11
 									//01-Jan-10 - No Change
-									1230796800 => 3650.00, //01-Jan-09
-									1199174400 => 3500.00, //01-Jan-08
-									1167638400 => 3400.00, //01-Jan-07
-									1136102400 => 3300.00  //01-Jan-06
+									20090101 => 3650.00, //01-Jan-09
+									20080101 => 3500.00, //01-Jan-08
+									20070101 => 3400.00, //01-Jan-07
+									20060101 => 3300.00  //01-Jan-06
 								);
 
 	//http://www.ssa.gov/pressoffice/factsheets/colafacts2013.htm
 	var $social_security_options = array(
-									1420099200 => array( //2015
+									20150101 => array( //2015
 														'maximum_earnings' => 118500,
 														'employee_rate' => 6.2,
 														'employer_rate' => 6.2,
 														//'employee_maximum_contribution' => 7254.00 //Employee
 													),
-									1388563200 => array( //2014
+									20140101 => array( //2014
 														'maximum_earnings' => 117000,
 														'employee_rate' => 6.2,
 														'employer_rate' => 6.2,
 														//'employee_maximum_contribution' => 7254.00 //Employee
 													),
-									1357027200 => array( //2013
+									20130101 => array( //2013
 														'maximum_earnings' => 113700,
 														'employee_rate' => 6.2,
 														'employer_rate' => 6.2,
 														//'employee_maximum_contribution' => 7049.40 //Employee
 													),
-									1325404800 => array( //2012
+									20120101 => array( //2012
 														'maximum_earnings' => 110100,
 														'employee_rate' => 4.2,
 														'employer_rate' => 6.2,
 														//'maximum_contribution' => 4624.20 //Employee
 													),
-									1293868800 => array( //2011 - Employer is still 6.2%
+									20110101 => array( //2011 - Employer is still 6.2%
 														'maximum_earnings' => 106800,
 														'employee_rate' => 4.2,
 														'employer_rate' => 6.2,
 														//'maximum_contribution' => 4485.60 //Employee
 													),
 									//2010 - No Change.
-									1230796800 => array( //2009
+									20090101 => array( //2009
 														'maximum_earnings' => 106800,
 														'employee_rate' => 6.2,
 														'employer_rate' => 6.2,
 														//'maximum_contribution' => 6621.60 //Employee
 													),
-									1199174400 => array( //2008
+									20080101 => array( //2008
 														'maximum_earnings' => 102000,
 														'employee_rate' => 6.2,
 														'employer_rate' => 6.2,
 														//'maximum_contribution' => 6324.00 //Employee
 													),
-									1167638400 => array( //2007
+									20070101 => array( //2007
 														'maximum_earnings' => 97500,
 														'employee_rate' => 6.2,
 														'employer_rate' => 6.2,
 														//'maximum_contribution' => 6045.00 //Employee
 													),
-									1136102400 => array( //2006
+									20060101 => array( //2006
 														'maximum_earnings' => 94200,
 														'employee_rate' => 6.2,
 														'employer_rate' => 6.2,
@@ -191,12 +190,12 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 								);
 
 	var $federal_ui_options = array(
-									1309503600 => array( //2011 (July 1st)
+									20110701 => array( //2011 (July 1st)
 														'maximum_earnings' => 7000,
 														'rate' => 6.0,
 														'minimum_rate' => 0.6,
 													),
-									1136102400 => array( //2006
+									20060101 => array( //2006
 														'maximum_earnings' => 7000,
 														'rate' => 6.2,
 														'minimum_rate' => 0.8,
@@ -205,7 +204,7 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 
 	var $medicare_options = array(
 									//No changes in 2015.
-									1388563200 => array( //2014
+									20140101 => array( //2014
 														'employee_rate' => 1.45,
 														'employee_threshold_rate' => 0.90,
 														'employee_threshold' => array(
@@ -216,7 +215,7 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 														'employer_rate' => 1.45,
 														'employer_threshold' => 200000, //Threshold for Form 941
 														),
-									1357027200 => array( //2013
+									20130101 => array( //2013
 														'employee_rate' => 1.45,
 														'employee_threshold_rate' => 0.90,
 														'employee_threshold' => array(
@@ -227,7 +226,7 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 														'employer_rate' => 1.45,
 														'employer_threshold' => 200000, //Threshold for Form 941
 														),
-									1136102400 => array( //2006
+									20060101 => array( //2006
 														'employee_rate' => 1.45,
 														'employee_threshold_rate' => 0,
 														'employee_threshold' => array(
@@ -254,7 +253,7 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 
 	*/
 	var $eic_options = array(
-								1262332800 => array( //01-Jan-10
+								20100101 => array( //01-Jan-10
 													10 => array(
 																array( 'income' => 8970,  'calculation_type' => 10, 'percent' => 20.40 ),
 																array( 'income' => 16450, 'calculation_type' => 20, 'amount' => 1830 ),
@@ -271,7 +270,7 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 																array( 'income' => 10730, 'calculation_type' => 30, 'amount' => 915, 'percent' => 9.588  ),
 																),
 													),
-								1238569200 => array( //01-Apr-09
+								20090401 => array( //01-Apr-09
 													10 => array(
 																array( 'income' => 8950,  'calculation_type' => 10, 'percent' => 20.40 ),
 																array( 'income' => 16420, 'calculation_type' => 20, 'amount' => 1826 ),
@@ -288,7 +287,7 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 																array( 'income' => 10710, 'calculation_type' => 30, 'amount' => 913, 'percent' => 9.588  ),
 																),
 													),
-								1199174400 => array( //01-Jan-08
+								20080101 => array( //01-Jan-08
 													10 => array(
 																array( 'income' => 8580,  'calculation_type' => 10, 'percent' => 20.40 ),
 																array( 'income' => 15740, 'calculation_type' => 20, 'amount' => 1750 ),
@@ -307,6 +306,242 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 													),
 							);
 
+	/*
+		Federal Income Tax Rates
+	*/
+	var $federal_income_tax_rate_options = array(
+													20150101 => array(
+																10 => array(
+																		array( 'income' => 2300,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 11525,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 39750,	'rate' => 15,	'constant' => 922.50 ),
+																		array( 'income' => 93050,	'rate' => 25,	'constant' => 5156.25 ),
+																		array( 'income' => 191600,	'rate' => 28,	'constant' => 18481.25 ),
+																		array( 'income' => 413800,	'rate' => 33,	'constant' => 46075.25 ),
+																		array( 'income' => 415500,	'rate' => 35,	'constant' => 119401.25 ),
+																		array( 'income' => 415500,	'rate' => 39.6,	'constant' => 119996.25 ),
+																		),
+																20 => array(
+																		array( 'income' => 8600,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 27050,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 83500,	'rate' => 15,	'constant' => 1845.00 ),
+																		array( 'income' => 159800,	'rate' => 25,	'constant' => 10312.50 ),
+																		array( 'income' => 239050,	'rate' => 28,	'constant' => 29387.50 ),
+																		array( 'income' => 420100,	'rate' => 33,	'constant' => 51577.50 ),
+																		array( 'income' => 473450,	'rate' => 35,	'constant' => 111324.00 ),
+																		array( 'income' => 473450,	'rate' => 39.6,	'constant' => 129996.50 ),
+																		),
+																),
+													20140101 => array(
+																10 => array(
+																		array( 'income' => 2250,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 11325,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 39150,	'rate' => 15,	'constant' => 907.50 ),
+																		array( 'income' => 91600,	'rate' => 25,	'constant' => 5081.25 ),
+																		array( 'income' => 188600,	'rate' => 28,	'constant' => 18193.75 ),
+																		array( 'income' => 407350,	'rate' => 33,	'constant' => 45353.75 ),
+																		array( 'income' => 409000,	'rate' => 35,	'constant' => 112683.50 ),
+																		array( 'income' => 409000,	'rate' => 39.6,	'constant' => 118118.75 ),
+																		),
+																20 => array(
+																		array( 'income' => 8450,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 26600,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 82250,	'rate' => 15,	'constant' => 1815.00 ),
+																		array( 'income' => 157300,	'rate' => 25,	'constant' => 10162.50 ),
+																		array( 'income' => 235300,	'rate' => 28,	'constant' => 28925.00 ),
+																		array( 'income' => 413550,	'rate' => 33,	'constant' => 50765.00 ),
+																		array( 'income' => 466050,	'rate' => 35,	'constant' => 109587.50 ),
+																		array( 'income' => 466050,	'rate' => 39.6,	'constant' => 127962.50 ),
+																		),
+																),
+													20130101 => array(
+																10 => array(
+																		array( 'income' => 2200,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 11125,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 38450,	'rate' => 15,	'constant' => 892.50 ),
+																		array( 'income' => 90050,	'rate' => 25,	'constant' => 4991.25 ),
+																		array( 'income' => 185450,	'rate' => 28,	'constant' => 17891.25 ),
+																		array( 'income' => 400550,	'rate' => 33,	'constant' => 44603.25 ),
+																		array( 'income' => 402200,	'rate' => 35,	'constant' => 115586.25 ),
+																		array( 'income' => 402200,	'rate' => 39.6,	'constant' => 116163.75 ),
+																		),
+																20 => array(
+																		array( 'income' => 8300,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 26150,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 80800,	'rate' => 15,	'constant' => 1785.00 ),
+																		array( 'income' => 154700,	'rate' => 25,	'constant' => 9982.50 ),
+																		array( 'income' => 231350,	'rate' => 28,	'constant' => 28457.50 ),
+																		array( 'income' => 406650,	'rate' => 33,	'constant' => 49919.50 ),
+																		array( 'income' => 458300,	'rate' => 35,	'constant' => 107768.50 ),
+																		array( 'income' => 458300,	'rate' => 39.6,	'constant' => 125846.00 ),
+																		),
+																),
+													20120101 => array(
+																10 => array(
+																		array( 'income' => 2150,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 10850,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 37500,	'rate' => 15,	'constant' => 870.00 ),
+																		array( 'income' => 87800,	'rate' => 25,	'constant' => 4867.50 ),
+																		array( 'income' => 180800,	'rate' => 28,	'constant' => 17442.50 ),
+																		array( 'income' => 390500,	'rate' => 33,	'constant' => 43482.50 ),
+																		array( 'income' => 390500,	'rate' => 35,	'constant' => 112683.50 ),
+																		),
+																20 => array(
+																		array( 'income' => 8100,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 25500,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 78800,	'rate' => 15,	'constant' => 1740.00 ),
+																		array( 'income' => 150800,	'rate' => 25,	'constant' => 9735.00 ),
+																		array( 'income' => 225550,	'rate' => 28,	'constant' => 27735.00 ),
+																		array( 'income' => 396450,	'rate' => 33,	'constant' => 48665.00 ),
+																		array( 'income' => 396450,	'rate' => 35,	'constant' => 105062.00 ),
+																		),
+																),
+													20110101 => array(
+																10 => array(
+																		array( 'income' => 2100,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 10600,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 36600,	'rate' => 15,	'constant' => 850.00 ),
+																		array( 'income' => 85700,	'rate' => 25,	'constant' => 4750.00 ),
+																		array( 'income' => 176500,	'rate' => 28,	'constant' => 17025.00 ),
+																		array( 'income' => 381250,	'rate' => 33,	'constant' => 42449.00 ),
+																		array( 'income' => 381250,	'rate' => 35,	'constant' => 110016.50 ),
+																		),
+																20 => array(
+																		array( 'income' => 7900,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 24900,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 76900,	'rate' => 15,	'constant' => 1700.00 ),
+																		array( 'income' => 147250,	'rate' => 25,	'constant' => 9500.00 ),
+																		array( 'income' => 220200,	'rate' => 28,	'constant' => 27087.50 ),
+																		array( 'income' => 387050,	'rate' => 33,	'constant' => 47513.50 ),
+																		array( 'income' => 387050,	'rate' => 35,	'constant' => 102574.00 ),
+																		),
+																),
+													20100101 => array(
+																10 => array(
+																		array( 'income' => 6050,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 10425,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 36050,	'rate' => 15,	'constant' => 437.50 ),
+																		array( 'income' => 67700,	'rate' => 25,	'constant' => 4281.25 ),
+																		array( 'income' => 84450,	'rate' => 27,	'constant' => 12193.75 ),
+																		array( 'income' => 87700,	'rate' => 30,	'constant' => 16716.25 ),
+																		array( 'income' => 173900,	'rate' => 28,	'constant' => 17691.25 ),
+																		array( 'income' => 375700,	'rate' => 33,	'constant' => 41827.25 ),
+																		array( 'income' => 375700,	'rate' => 35,	'constant' => 108421.25 ),
+																		),
+																20 => array(
+																		array( 'income' => 13750,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 24500,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 75750,	'rate' => 15,	'constant' => 1075.00 ),
+																		array( 'income' => 94050,	'rate' => 25,	'constant' => 8762.50 ),
+																		array( 'income' => 124050,	'rate' => 27,	'constant' => 13337.50 ),
+																		array( 'income' => 145050,	'rate' => 25,	'constant' => 21437.50 ),
+																		array( 'income' => 217000,	'rate' => 28,	'constant' => 26687.50 ),
+																		array( 'income' => 381400,	'rate' => 33,	'constant' => 46833.50 ),
+																		array( 'income' => 381400,	'rate' => 35,	'constant' => 101085.50 ),
+																		),
+																),
+													20090401 => array(
+																10 => array(
+																		array( 'income' => 7180,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 10400,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 36200,	'rate' => 15,	'constant' => 322 ),
+																		array( 'income' => 66530,	'rate' => 25,	'constant' => 4192 ),
+																		array( 'income' => 173600,	'rate' => 28,	'constant' => 11774.50 ),
+																		array( 'income' => 375000,	'rate' => 33,	'constant' => 41754.10 ),
+																		array( 'income' => 375000,	'rate' => 35,	'constant' => 108216.10 ),
+																		),
+																20 => array(
+																		array( 'income' => 15750,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 24450,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 75650,	'rate' => 15,	'constant' => 870 ),
+																		array( 'income' => 118130,	'rate' => 25,	'constant' => 8550 ),
+																		array( 'income' => 216600,	'rate' => 28,	'constant' => 19170 ),
+																		array( 'income' => 380700,	'rate' => 33,	'constant' => 46741.60 ),
+																		array( 'income' => 380700,	'rate' => 35,	'constant' => 100894.60 ),
+																		),
+																),
+													20090101 => array(
+																10 => array(
+																		array( 'income' => 2650,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 10400,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 35400,	'rate' => 15,	'constant' => 775 ),
+																		array( 'income' => 84300,	'rate' => 25,	'constant' => 4525 ),
+																		array( 'income' => 173600,	'rate' => 28,	'constant' => 16750 ),
+																		array( 'income' => 375000,	'rate' => 33,	'constant' => 41754 ),
+																		array( 'income' => 375000,	'rate' => 35,	'constant' => 108216 ),
+																		),
+																20 => array(
+																		array( 'income' => 8000,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 23950,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 75650,	'rate' => 15,	'constant' => 1595 ),
+																		array( 'income' => 144800,	'rate' => 25,	'constant' => 9350 ),
+																		array( 'income' => 216600,	'rate' => 28,	'constant' => 26637.50 ),
+																		array( 'income' => 380700,	'rate' => 33,	'constant' => 46741.50 ),
+																		array( 'income' => 380700,	'rate' => 35,	'constant' => 100894.50 ),
+																		),
+																),
+													20080101 => array(
+																10 => array(
+																		array( 'income' => 2650,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 10300,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 33960,	'rate' => 15,	'constant' => 765.00 ),
+																		array( 'income' => 79725,	'rate' => 25,	'constant' => 4314.00 ),
+																		array( 'income' => 166500,	'rate' => 28,	'constant' => 15755.25 ),
+																		array( 'income' => 359650,	'rate' => 33,	'constant' => 4052.25 ),
+																		array( 'income' => 359650,	'rate' => 35,	'constant' => 103791.75 ),
+																		),
+																20 => array(
+																		array( 'income' => 8000,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 23550,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 72150,	'rate' => 15,	'constant' => 1555.00 ),
+																		array( 'income' => 137850,	'rate' => 25,	'constant' => 8845.00 ),
+																		array( 'income' => 207700,	'rate' => 28,	'constant' => 25270.00 ),
+																		array( 'income' => 365100,	'rate' => 33,	'constant' => 44828.00 ),
+																		array( 'income' => 365100,	'rate' => 35,	'constant' => 96770.00 ),
+																		),
+																),
+													20070101 => array(
+																10 => array(
+																		array( 'income' => 2650,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 10120,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 33520,	'rate' => 15,	'constant' => 747 ),
+																		array( 'income' => 77075,	'rate' => 25,	'constant' => 4257 ),
+																		array( 'income' => 162800,	'rate' => 28,	'constant' => 15145.75 ),
+																		array( 'income' => 351650,	'rate' => 33,	'constant' => 39148.75 ),
+																		array( 'income' => 351650,	'rate' => 35,	'constant' => 101469.25 ),
+																		),
+																20 => array(
+																		array( 'income' => 8000,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 23350,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 70700,	'rate' => 15,	'constant' => 1535 ),
+																		array( 'income' => 133800,	'rate' => 25,	'constant' => 8637.50 ),
+																		array( 'income' => 203150,	'rate' => 28,	'constant' => 24412.50 ),
+																		array( 'income' => 357000,	'rate' => 33,	'constant' => 43830 ),
+																		array( 'income' => 357000,	'rate' => 35,	'constant' => 94601 ),
+																		),
+																),
+													20060101 => array(
+																10 => array(
+																		array( 'income' => 2650,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 10000,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 32240,	'rate' => 15,	'constant' => 735 ),
+																		array( 'income' => 73250,	'rate' => 25,	'constant' => 4071 ),
+																		array( 'income' => 156650,	'rate' => 28,	'constant' => 14323.50 ),
+																		array( 'income' => 338400,	'rate' => 33,	'constant' => 37675.50 ),
+																		array( 'income' => 338400,	'rate' => 35,	'constant' => 97653 ),
+																		),
+																20 => array(
+																		array( 'income' => 8000,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 22900,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 68040,	'rate' => 15,	'constant' => 1490 ),
+																		array( 'income' => 126900,	'rate' => 25,	'constant' => 8261 ),
+																		array( 'income' => 195450,	'rate' => 28,	'constant' => 22976 ),
+																		array( 'income' => 343550,	'rate' => 33,	'constant' => 42170 ),
+																		array( 'income' => 343550,	'rate' => 35,	'constant' => 91043 ),
+																	),
+																),
+													);
+
 	function __construct() {
 		global $db;
 
@@ -321,8 +556,8 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 		$country = $this->getCountry();
 		$state = $this->getProvince();
 		$district = $this->getDistrict();
-
 		$epoch = $this->getDate();
+
 		$federal_status = $this->getFederalFilingStatus();
 		if ( empty($federal_status) ) {
 			$federal_status = 10;
@@ -334,155 +569,125 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 		$district_status = $this->getDistrictFilingStatus();
 
 		if ( $epoch == NULL OR $epoch == '' ) {
-			$epoch = TTDate::getTime();
+			$epoch = $this->getISODate( TTDate::getTime() );
 		}
 
-		Debug::text('Using ('. $state .'/'. $district .') values from: '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Using ('. $state .'/'. $district .') values from: '. TTDate::getDate('DATE+TIME', $epoch) .' Status: State: '. $state_status, __FILE__, __LINE__, __METHOD__, 10);
 
-		$cache_id = $country.$state.$district.$epoch.$federal_status.$state_status.$district_status;
-
-		if ( is_string( $cache->get($cache_id, $this->table ) ) ) {
-			$this->income_tax_rates = unserialize( $cache->get($cache_id, $this->table ) );
-		} else {
-			$this->income_tax_rates = FALSE;
-		}
-
-
-		if ( $this->income_tax_rates === FALSE ) {
-			//There were issues with this query when provincial taxes were updated but not federal
-			//We need to basically make a union query that queries the latest federal taxes separate
-			//from the provincial
-			$query = 'select country,state,district,status,income,rate,constant,effective_date
-						from '. $this->table .'
-						where
-								(
-								effective_date = ( 	select effective_date
-													from '. $this->table .'
-													where effective_date <= '. $epoch .'
-														AND country = '. $this->db->qstr($country).'
-														AND state is NULL
-														AND district is NULL
-														AND ( status = 0
-															OR status = '. $federal_status .' )
-													ORDER BY effective_date DESC
-													LIMIT 1) )
-							AND
-							( ( country = '. $this->db->qstr($country).'
-									and state is NULL
-									and ( status = 0 OR status = '. $federal_status .') ) )
-							OR
-								(
-								effective_date = ( 	select effective_date
-													from '. $this->table .'
-													where effective_date <= '. $epoch .'
-														AND country = '. $this->db->qstr($country).'
-														AND state = '. $this->db->qstr($state) .'
-														AND district is NULL
-														AND ( status = 0
-															OR status = '. $state_status .' )
-													ORDER BY effective_date DESC
-													LIMIT 1) )
-							AND
-							( country = '. $this->db->qstr($country).'
-									and state = '. $this->db->qstr($state) .'
-									and district is NULL
-									and ( status = 0 OR status = '. $state_status .') )
-							OR
-								(
-								effective_date = ( 	select effective_date
-													from '. $this->table .'
-													where effective_date <= '. $epoch .'
-														AND country = '. $this->db->qstr($country).'
-														AND state = '. $this->db->qstr($state) .'
-														AND district = '. $this->db->qstr($district) .'
-														AND ( status = 0
-															OR status = '. $district_status .' )
-													ORDER BY effective_date DESC
-													LIMIT 1) )
-							AND
-							( country = '. $this->db->qstr($country).'
-									and state = '. $this->db->qstr($state) .'
-									and district = '. $this->db->qstr($district) .'
-									and ( status = 0 OR status = '. $district_status .') )
-						ORDER BY state desc, district desc, income asc, rate asc';
-
-			//Debug::text('Query: '. $query , __FILE__, __LINE__, __METHOD__, 10);
-			try {
-				$rs = $this->db->Execute($query);
-			} catch (Exception $e) {
-				throw new DBError($e);
-			}
-
-			$rows = $rs->GetRows();
-
+		$this->income_tax_rates = FALSE;
+		if ( isset($this->federal_income_tax_rate_options) AND count($this->federal_income_tax_rate_options) > 0 ) {
 			$prev_income = 0;
 			$prev_rate = 0;
 			$prev_constant = 0;
-			$prev_type = NULL;
-			foreach($rows as $key => $arr) {
-				if ( $arr['district'] != NULL) {
-					$type = 'district';
-				} elseif ( $arr['state'] != NULL ) {
-					$type = 'state';
-				} else {
-					$type = 'federal';
-				}
 
-				//Tax brackets can get carried over from Federal to State, to District if we don't clear them out each time the type changes.
-				if ( $type != $prev_type ) {
-					$prev_income = 0;
-					$prev_rate = 0;
-					$prev_constant = 0;
-				}
-
-				$this->income_tax_rates[$type][] = array(	'prev_income' => trim($prev_income),
-															'income' => trim($arr['income']),
-															'prev_rate' => ( bcdiv( trim($prev_rate), 100 ) ),
-															'rate' => ( bcdiv( trim($arr['rate']), 100 ) ),
-															'prev_constant' => trim($prev_constant),
-															'constant' => trim($arr['constant']) );
-
-				$prev_type = $type;
-				$prev_income = $arr['income'];
-				$prev_rate = $arr['rate'];
-				$prev_constant = $arr['constant'];
+			$federal_income_tax_rate_options = $this->getDataFromRateArray($epoch, $this->federal_income_tax_rate_options );
+			if ( !isset($federal_income_tax_rate_options[$federal_status]) AND isset($federal_income_tax_rate_options[0]) ) {
+				$federal_status = 0;
 			}
 
-			if ( isset($this->income_tax_rates) AND is_array($this->income_tax_rates) ) {
-				foreach( $this->income_tax_rates as $type => $brackets ) {
-					$i = 0;
-					$total_brackets = ( count($brackets) - 1 );
-					foreach( $brackets as $key => $bracket_data ) {
-						if ( $i == 0 ) {
-							$first = TRUE;
-						} else {
-							$first = FALSE;
-						}
+			if ( isset($federal_income_tax_rate_options[$federal_status]) ) {
+				foreach( $federal_income_tax_rate_options[$federal_status] as $data ) {
+					$this->income_tax_rates['federal'][] = array(
+															'prev_income' => $prev_income,
+															'income' => $data['income'],
+															'prev_rate' => ( $prev_rate / 100 ),
+															'rate' => ( $data['rate'] / 100 ),
+															'prev_constant' => $prev_constant,
+															'constant' => $data['constant']
+															);
 
-						if ( $i == $total_brackets ) {
-							$last = TRUE;
-						} else {
-							$last = FALSE;
-						}
-
-						$this->income_tax_rates[$type][$key]['first'] = $first;
-						$this->income_tax_rates[$type][$key]['last'] = $last;
-
-						$i++;
-					}
+					$prev_income = $data['income'];
+					$prev_rate = $data['rate'];
+					$prev_constant = $data['constant'];
 				}
 			}
-
-			/*
-			if ( isset($arr) ) {
-				Debug::text('Using values from: '. TTDate::getDate('DATE+TIME', $arr['effective_date']) , __FILE__, __LINE__, __METHOD__, 10);
-			}
-			*/
-
-			//Debug::Arr($this->income_tax_rates, 'Income Tax Rates: ', __FILE__, __LINE__, __METHOD__, 10);
-			$cache->save(serialize($this->income_tax_rates), $cache_id, $this->table );
+			unset($prev_income, $prev_rate, $prev_constant, $data, $federal_income_tax_rate_options);
 		}
 
+		if ( isset($this->state_income_tax_rate_options) AND count($this->state_income_tax_rate_options) > 0 ) {
+			$prev_income = 0;
+			$prev_rate = 0;
+			$prev_constant = 0;
+
+			$state_income_tax_rate_options = $this->getDataFromRateArray($epoch, $this->state_income_tax_rate_options );
+			if ( !isset($state_income_tax_rate_options[$state_status]) AND isset($state_income_tax_rate_options[0]) ) {
+				$state_status = 0;
+			}
+
+			if ( isset($state_income_tax_rate_options[$state_status]) ) {
+				foreach( $state_income_tax_rate_options[$state_status] as $data ) {
+					$this->income_tax_rates['state'][] = array(
+															'prev_income' => $prev_income,
+															'income' => $data['income'],
+															'prev_rate' => ( $prev_rate / 100 ),
+															'rate' => ( $data['rate'] / 100 ),
+															'prev_constant' => $prev_constant,
+															'constant' => $data['constant']
+															);
+
+					$prev_income = $data['income'];
+					$prev_rate = $data['rate'];
+					$prev_constant = $data['constant'];
+				}
+			}
+			unset($prev_income, $prev_rate, $prev_constant, $data, $state_income_tax_rate_options);
+		}
+
+		if ( isset($this->district_income_tax_rate_options) AND count($this->district_income_tax_rate_options) > 0 ) {
+			$prev_income = 0;
+			$prev_rate = 0;
+			$prev_constant = 0;
+
+			$district_income_tax_rate_options = $this->getDataFromRateArray($epoch, $this->district_income_tax_rate_options );			
+			if ( !isset($district_income_tax_rate_options[$district_status]) AND isset($district_income_tax_rate_options[0]) ) {
+				$district_status = 0;
+			}
+			
+			if ( isset($district_income_tax_rate_options[$district_status]) ) {
+				foreach( $district_income_tax_rate_options[$district_status] as $data ) {
+					$this->income_tax_rates['district'][] = array(
+															'prev_income' => $prev_income,
+															'income' => $data['income'],
+															'prev_rate' => ( $prev_rate / 100 ),
+															'rate' => ( $data['rate'] / 100 ),
+															'prev_constant' => $prev_constant,
+															'constant' => $data['constant']
+															);
+
+					$prev_income = $data['income'];
+					$prev_rate = $data['rate'];
+					$prev_constant = $data['constant'];
+				}
+			}
+			unset($prev_income, $prev_rate, $prev_constant, $district_income_tax_rate_options);
+		}
+
+		if ( isset($this->income_tax_rates) AND is_array($this->income_tax_rates) ) {
+			foreach( $this->income_tax_rates as $type => $brackets ) {
+				$i = 0;
+				$total_brackets = ( count($brackets) - 1 );
+				foreach( $brackets as $key => $bracket_data ) {
+					if ( $i == 0 ) {
+						$first = TRUE;
+					} else {
+						$first = FALSE;
+					}
+
+					if ( $i == $total_brackets ) {
+						$last = TRUE;
+					} else {
+						$last = FALSE;
+					}
+
+					$this->income_tax_rates[$type][$key]['first'] = $first;
+					$this->income_tax_rates[$type][$key]['last'] = $last;
+
+					$i++;
+				}
+			}
+		}
+
+		//Debug::Arr($this->income_tax_rates, 'Income Tax Rates: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $this;
 	}
 

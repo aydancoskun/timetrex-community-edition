@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -113,8 +113,8 @@ class AccrualPolicyMilestoneFactory extends Factory {
 											'length_of_service_unit_id' => 'LengthOfServiceUnit',
 											//'length_of_service_unit' => FALSE,
 											'accrual_rate' => 'AccrualRate',
+											'annual_maximum_time' => 'AnnualMaximumTime',
 											'maximum_time' => 'MaximumTime',
-											'minimum_time' => 'MinimumTime',
 											'rollover_time' => 'RolloverTime',
 											'deleted' => 'Deleted',
 											);
@@ -250,11 +250,6 @@ class AccrualPolicyMilestoneFactory extends Factory {
 	function setLengthOfServiceUnit($value) {
 		$value = trim($value);
 
-		$key = Option::getByValue($value, $this->getOptions('length_of_service_unit') );
-		if ($key !== FALSE) {
-			$value = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'length_of_service_unit_id'.$this->getLabelID(),
 											$value,
 											TTi18n::gettext('Incorrect Length of service unit'),
@@ -291,6 +286,29 @@ class AccrualPolicyMilestoneFactory extends Factory {
 		return FALSE;
 	}
 
+	function getAnnualMaximumTime() {
+		if ( isset($this->data['annual_maximum_time']) ) {
+			return (int)$this->data['annual_maximum_time'];
+		}
+
+		return FALSE;
+	}
+	function setAnnualMaximumTime($int) {
+		$int = trim($int);
+
+		if	(	$int == 0
+				OR
+				$this->Validator->isNumeric(		'annual_maximum_time'.$this->getLabelID(),
+													$int,
+													TTi18n::gettext('Incorrect Accrual Annual Maximum')) ) {
+			$this->data['annual_maximum_time'] = $int;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
 	function getMaximumTime() {
 		if ( isset($this->data['maximum_time']) ) {
 			return (int)$this->data['maximum_time'];
@@ -305,31 +323,8 @@ class AccrualPolicyMilestoneFactory extends Factory {
 				OR
 				$this->Validator->isNumeric(		'maximum_time'.$this->getLabelID(),
 													$int,
-													TTi18n::gettext('Incorrect Maximum Time')) ) {
+													TTi18n::gettext('Incorrect Maximum Balance')) ) {
 			$this->data['maximum_time'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getMinimumTime() {
-		if ( isset($this->data['minimum_time']) ) {
-			return (int)$this->data['minimum_time'];
-		}
-
-		return FALSE;
-	}
-	function setMinimumTime($int) {
-		$int = trim($int);
-
-		if	(	$int == 0
-				OR
-				$this->Validator->isNumeric(		'minimum_time'.$this->getLabelID(),
-													$int,
-													TTi18n::gettext('Incorrect Minimum Time')) ) {
-			$this->data['minimum_time'] = $int;
 
 			return TRUE;
 		}
@@ -385,16 +380,6 @@ class AccrualPolicyMilestoneFactory extends Factory {
 
 					$function = 'set'.$function;
 					switch( $key ) {
-						/* Once Flex interface is discontinued we can remove parseTimeUnit from HTML5 interface and do it in the API instead.
-						case 'accrual_rate':
-						case 'maximum_time':
-						case 'minimum_time':
-						case 'rollover_time':
-							if ( method_exists( $this, $function ) ) {
-								$this->$function( TTDate::parseTimeUnit( $data[$key] ) );
-							}
-							break;
-						*/
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );

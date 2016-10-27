@@ -9,6 +9,11 @@ var APIPayStub = ServiceCaller.extend( {
 
 	},
 
+	getCurrentPayRun: function() {
+
+		return this.argumentsHandler( this.className, 'getCurrentPayRun', arguments );
+
+	},
 
 	getPayStubDefaultData: function() {
 

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -40,9 +40,8 @@ if ( !isset($_SERVER['REQUEST_TIME_FLOAT']) OR version_compare(PHP_VERSION, '5.4
 }
 
 //BUG in PHP 5.2.2 that causes $HTTP_RAW_POST_DATA not to be set. Work around it.
-if ( strpos( phpversion(), '5.2.2') !== FALSE ) {
-	$HTTP_RAW_POST_DATA = file_get_contents("php://input");
-}
+//This is deprecated in PHP v5.6 and removed in PHP v7, so switch to just always populating it.
+$HTTP_RAW_POST_DATA = file_get_contents('php://input');
 
 if ( !isset($_SERVER['HTTP_HOST']) ) {
 	$_SERVER['HTTP_HOST'] = 'localhost';
@@ -57,8 +56,8 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '8.0.9' );
-define('APPLICATION_VERSION_DATE', @strtotime('10-Jul-2015') ); // Release date of version.
+define('APPLICATION_VERSION', '9.0.0' );
+define('APPLICATION_VERSION_DATE', @strtotime('13-Oct-2015') ); // Release date of version.
 
 if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'WIN' ) { define('OPERATING_SYSTEM', 'WIN' ); } else { define('OPERATING_SYSTEM', 'LINUX' ); }
 
@@ -196,7 +195,7 @@ if ( !isset($_SERVER['REQUEST_URI']) ) {
 }
 
 //HTTP Basic authentication doesn't work properly with CGI/FCGI unless we decode it this way.
-if ( isset($_SERVER['HTTP_AUTHORIZATION']) AND stripos( php_sapi_name(), 'cgi' ) !== FALSE ) {
+if ( isset($_SERVER['HTTP_AUTHORIZATION']) AND $_SERVER['HTTP_AUTHORIZATION'] != '' AND stripos( php_sapi_name(), 'cgi' ) !== FALSE ) {
 	//<IfModule mod_rewrite.c>
 	//RewriteEngine on
 	//RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]
@@ -442,7 +441,7 @@ if ( isset($_SERVER['HTTP_USER_AGENT']) ) {
 }
 
 //Supress PHP errors on this, mainly if $config_vars['database'] is not set.
-@Debug::Text('Version: '. APPLICATION_VERSION .' Edition: '. getTTProductEdition() .' Production: '. (int)PRODUCTION .' Database: Type: '. $config_vars['database']['type']  .' Name: '. $config_vars['database']['database_name'] .' Config: '. CONFIG_FILE .' Demo Mode: '. (int)DEMO_MODE, __FILE__, __LINE__, __METHOD__, 10);
+@Debug::Text('Version: '. APPLICATION_VERSION .' Edition: '. getTTProductEdition() .' Production: '. (int)PRODUCTION .' Server: '. ( isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : 'N/A' ) .' Database: Type: '. $config_vars['database']['type']  .' Name: '. $config_vars['database']['database_name'] .' Config: '. CONFIG_FILE .' Demo Mode: '. (int)DEMO_MODE, __FILE__, __LINE__, __METHOD__, 10);
 
 if ( function_exists('bcscale') ) {
 	bcscale(10);

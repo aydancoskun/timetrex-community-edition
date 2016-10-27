@@ -15,6 +15,10 @@
 
 			tab.attr( 'view_url', url );
 
+			setTimeout( function() {
+				tab.addClass( 'show' );
+			}, 100 );
+
 			var close_btn = tab.find( '.close-btn' );
 
 			tab.unbind( 'click' ).click( function() {
@@ -43,18 +47,18 @@
 
 		this.buildTabs = function( tab_map ) {
 
-			$this.empty();
+			//$this.empty();
 			var i = 0;
 			for ( var key in tab_map ) {
-
 				if ( tab_map.hasOwnProperty( key ) && key.indexOf( '_url' ) === -1 ) {
 					var view_id = key;
 					var view_label = tab_map[key];
 					var view_url = tab_map[key + '_url'];
-					createTab( view_id, view_label, view_url );
+					if ( $( '#min_tab_' + view_id ).length === 0 ) {
+						createTab( view_id, view_label, view_url );
+					}
 
 				}
-
 				i = i + 1;
 
 			}
@@ -71,8 +75,6 @@
 
 	};
 
-	$.fn.ViewMinTabBar.defaults = {
-
-	};
+	$.fn.ViewMinTabBar.defaults = {};
 
 })( jQuery );

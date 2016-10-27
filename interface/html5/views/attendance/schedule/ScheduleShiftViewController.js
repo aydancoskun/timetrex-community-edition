@@ -64,15 +64,17 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			$this.user_status_array = Global.buildRecordArray( res );
 		} );
 
-		this.user_group_api.getUserGroup( '', false, false, {onResult: function( res ) {
-			res = res.getResult();
+		this.user_group_api.getUserGroup( '', false, false, {
+			onResult: function( res ) {
+				res = res.getResult();
 
-			res = Global.buildTreeRecord( res );
-			$this.user_group_array = res;
+				res = Global.buildTreeRecord( res );
+				$this.user_group_array = res;
 
-			$this.adv_search_field_ui_dic['group_ids'].setSourceData( res );
+				$this.adv_search_field_ui_dic['group_ids'].setSourceData( res );
 
-		}} );
+			}
+		} );
 
 	},
 
@@ -95,7 +97,6 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			'tab_audit': $.i18n._( 'Audit' )
 		} );
 
-
 		var form_item_input;
 		var widgetContainer;
 
@@ -105,7 +106,8 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.SCHEDULE,
 			navigation_mode: true,
-			show_search_inputs: true} );
+			show_search_inputs: true
+		} );
 
 		this.setNavigation();
 
@@ -157,38 +159,21 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
 		form_item_input.TDatePicker( {field: 'date_stamp'} );
-
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().date_format_example + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_schedule_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_schedule_column1, '', null );
 
 		// In
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input = Global.loadWidgetByName( FormItemType.TIME_PICKER );
 
-		form_item_input.TTextInput( {field: 'start_time'} );
-
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().time_format_display + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'In' ), form_item_input, tab_schedule_column1, '', widgetContainer );
+		form_item_input.TTimePicker( {field: 'start_time'} );
+		this.addEditFieldToColumn( $.i18n._( 'In' ), form_item_input, tab_schedule_column1, '', null );
 
 		// Out
 
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input = Global.loadWidgetByName( FormItemType.TIME_PICKER );
 
-		form_item_input.TTextInput( {field: 'end_time'} );
+		form_item_input.TTimePicker( {field: 'end_time'} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().time_format_display + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Out' ), form_item_input, tab_schedule_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Out' ), form_item_input, tab_schedule_column1, '', null );
 
 		// Total
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
@@ -229,7 +214,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		// Available Balance
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'available_balance'} );
-		form_item_input.setClassStyle( {float: 'left', 'margin-right': '5px' } );
+		form_item_input.setClassStyle( {float: 'left', 'margin-right': '5px'} );
 
 		widgetContainer = $( "<div style='position: relative' class='widget-h-box'></div>" );
 		var icon = $( "<img class='balance_icon' src='theme/default/images/infox16x16.png' />" );
@@ -325,7 +310,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 		//Note
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
-		form_item_input.TTextArea( {field: 'note', width: '100%' } );
+		form_item_input.TTextArea( {field: 'note', width: '100%'} );
 		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_schedule_column1, '', null, null, true );
 		form_item_input.parent().width( '45%' );
 
@@ -372,7 +357,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			return false;
 		} );
 
-		//Error: Object doesn't support property or method 'unshift' in https://ondemand1.timetrex.com/interface/html5/line 6953
+		//Error: Object doesn't support property or method 'unshift' in /interface/html5/line 6953
 		if ( !source_data || $.type( source_data ) !== 'array' ) {
 			source_data = [];
 		}
@@ -387,16 +372,19 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		var $this = this;
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Status' ),
+			new SearchField( {
+				label: $.i18n._( 'Status' ),
 				in_column: 1,
 				field: 'status_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Employee' ),
+			new SearchField( {
+				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
@@ -407,9 +395,11 @@ ScheduleShiftViewController = BaseViewController.extend( {
 					return $this.onEmployeeSourceCreate( target, source_data );
 				}),
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Pay Period' ),
+			new SearchField( {
+				label: $.i18n._( 'Pay Period' ),
 				in_column: 1,
 				field: 'pay_period_id',
 				layout_name: ALayoutIDs.PAY_PERIOD,
@@ -417,18 +407,22 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Employee Status' ),
+			new SearchField( {
+				label: $.i18n._( 'Employee Status' ),
 				in_column: 1,
 				field: 'user_status_id',
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Default Branch' ),
+			new SearchField( {
+				label: $.i18n._( 'Default Branch' ),
 				in_column: 1,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
@@ -437,9 +431,11 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				basic_search: false,
 				adv_search: true,
 				script_name: 'BranchView',
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Default Department' ),
+			new SearchField( {
+				label: $.i18n._( 'Default Department' ),
 				in_column: 1,
 				field: 'default_department_id',
 				layout_name: ALayoutIDs.DEPARTMENT,
@@ -448,9 +444,11 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				basic_search: false,
 				adv_search: true,
 				script_name: 'DepartmentView',
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Group' ),
+			new SearchField( {
+				label: $.i18n._( 'Group' ),
 				in_column: 2,
 				multiple: true,
 				field: 'group_ids',
@@ -458,9 +456,11 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				tree_mode: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Title' ),
+			new SearchField( {
+				label: $.i18n._( 'Title' ),
 				field: 'title_id',
 				in_column: 2,
 				layout_name: ALayoutIDs.JOB_TITLE,
@@ -468,9 +468,11 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Job' ),
+			new SearchField( {
+				label: $.i18n._( 'Job' ),
 				in_column: 2,
 				field: 'job_id',
 				layout_name: ALayoutIDs.JOB,
@@ -478,9 +480,11 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: (this.show_job_ui && ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 )),
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Task' ),
+			new SearchField( {
+				label: $.i18n._( 'Task' ),
 				in_column: 2,
 				field: 'job_item_id',
 				layout_name: ALayoutIDs.JOB_ITEM,
@@ -488,9 +492,11 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: (this.show_job_item_ui && ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 )),
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Schedule Branch' ),
+			new SearchField( {
+				label: $.i18n._( 'Schedule Branch' ),
 				in_column: 2,
 				field: 'branch_id',
 				layout_name: ALayoutIDs.BRANCH,
@@ -499,9 +505,11 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				basic_search: true,
 				adv_search: true,
 				script_name: 'BranchView',
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Schedule Department' ),
+			new SearchField( {
+				label: $.i18n._( 'Schedule Department' ),
 				in_column: 2,
 				field: 'department_id',
 				layout_name: ALayoutIDs.DEPARTMENT,
@@ -510,9 +518,11 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				basic_search: true,
 				adv_search: true,
 				script_name: 'DepartmentView',
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Schedule Policy' ),
+			new SearchField( {
+				label: $.i18n._( 'Schedule Policy' ),
 				in_column: 2,
 				field: 'schedule_policy_id',
 				layout_name: ALayoutIDs.SCHEDULE_POLICY,
@@ -520,7 +530,8 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} )];
+				form_item_type: FormItemType.AWESOME_BOX
+			} )];
 	},
 
 	/*
@@ -534,6 +545,8 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		var job_item_widget = $this.edit_view_ui_dic['job_item_id'];
 		var current_job_item_id = job_item_widget.getValue();
 		job_item_widget.setSourceData( null );
+		job_item_widget.setCheckBox(true);
+		this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
 		var args = {};
 		args.filter_data = {status_id: 10, job_id: $this.current_edit_record.job_id};
 		$this.edit_view_ui_dic['job_item_id'].setDefaultArgs( args );
@@ -544,17 +557,19 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 			new_arg.filter_data.id = current_job_item_id;
 			new_arg.filter_columns = $this.edit_view_ui_dic['job_item_id'].getColumnFilter();
-			$this.job_item_api.getJobItem( new_arg, {onResult: function( task_result ) {
-				var data = task_result.getResult();
+			$this.job_item_api.getJobItem( new_arg, {
+				onResult: function( task_result ) {
+					var data = task_result.getResult();
 
-				if ( data.length > 0 ) {
-					job_item_widget.setValue( current_job_item_id );
-					$this.current_edit_record.job_item_id = current_job_item_id;
-				} else {
-					setDefaultData();
+					if ( data.length > 0 ) {
+						job_item_widget.setValue( current_job_item_id );
+						$this.current_edit_record.job_item_id = current_job_item_id;
+					} else {
+						setDefaultData();
+					}
+
 				}
-
-			}} )
+			} )
 
 		} else {
 			setDefaultData();
@@ -592,11 +607,13 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.setJobItemValueWhenJobChanged( target.getValue( true ) );
+					this.edit_view_ui_dic['job_quick_search'].setCheckBox(true);
 				}
 				break;
 			case 'job_item_id':
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
+					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
 				}
 				break;
 			case 'job_quick_search':
@@ -626,7 +643,6 @@ ScheduleShiftViewController = BaseViewController.extend( {
 	},
 
 	getProjectedAbsencePolicyBalance: function() {
-
 		$( this.edit_view_form_item_dic['available_balance'].find( ".schedule-view-balance-info" ) ).css( 'display', 'none' );
 
 		if ( this.current_edit_record['absence_policy_id'] && this.edit_view_form_item_dic['absence_policy_id'].css( 'display' ) === 'block' && !this.is_mass_editing ) {
@@ -642,7 +658,13 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			var date_stamp = this.current_edit_record['date_stamp'];
 			var result_data = this.absence_policy_api.getProjectedAbsencePolicyBalance( this.current_edit_record['absence_policy_id'], user_id, date_stamp, this.total_time, this.pre_total_time, {async: false} ).getResult();
 
-			result_data = result_data ? result_data : { available_balance: 0, current_time: 0, remaining_balance: 0, projected_balance: 0, projected_remaining_balance: 0 };
+			result_data = result_data ? result_data : {
+				available_balance: 0,
+				current_time: 0,
+				remaining_balance: 0,
+				projected_balance: 0,
+				projected_remaining_balance: 0
+			};
 
 			this.edit_view_ui_dic['available_balance'].setValue( Global.secondToHHMMSS( result_data.remaining_balance ) );
 
@@ -690,12 +712,9 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			p_str += "</table>";
 
 			container.html( p_str );
-
-			this.edit_view_form_item_dic['available_balance'].css( 'display', 'block' );
-
+			this.attachElement('available_balance');
 		} else {
-
-			this.edit_view_form_item_dic['available_balance'].css( 'display', 'none' );
+			this.detachElement('available_balance');
 		}
 	},
 
@@ -798,18 +817,14 @@ ScheduleShiftViewController = BaseViewController.extend( {
 	onStatusChange: function() {
 
 		if ( this.current_edit_record['status_id'] === 10 ) {
-
-			this.edit_view_form_item_dic['absence_policy_id'].css( 'display', 'none' );
-//			this.edit_view_form_item_dic['available_balance'].css( 'display', 'none' );
-
+			this.detachElement('absence_policy_id')
 		} else if ( this.current_edit_record['status_id'] === 20 ) {
-			this.edit_view_form_item_dic['absence_policy_id'].css( 'display', 'block' );
+			this.attachElement('absence_policy_id')
 		}
 
 		this.editFieldResize();
 
 	}
-
 
 } );
 

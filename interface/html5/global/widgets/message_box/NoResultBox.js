@@ -6,7 +6,7 @@
 		var opts = $.extend( {}, $.fn.NoResultBox.defaults, options );
 		var related_view_controller;
 		var message = Global.no_result_message;
-
+		var iconLabel = '';
 		this.each( function() {
 
 			var o = $.meta ? $.extend( {}, opts, $( this ).data() ) : opts;
@@ -17,6 +17,12 @@
 
 			if ( o.message ) {
 				message = o.message;
+			}
+
+			if ( o.iconLabel ) {
+				iconLabel = o.iconLabel;
+			} else {
+				iconLabel = $.i18n._( 'New' );
 			}
 
 			var ribbon_button = $( this ).find( '.ribbon-button' );
@@ -30,12 +36,11 @@
 			if ( o.is_new ) {
 
 				icon.attr( 'src', Global.getRealImagePath( 'css/global/widgets/ribbon/icons/' + Icons.new_add ) );
-				label.text( $.i18n._( 'New' ) );
+				label.text( iconLabel );
 
 				ribbon_button.bind( 'click', function() {
 					related_view_controller.onAddClick();
 				} );
-
 
 			} else if ( o.is_edit ) {
 
@@ -59,8 +64,6 @@
 
 	};
 
-	$.fn.NoResultBox.defaults = {
-
-	};
+	$.fn.NoResultBox.defaults = {};
 
 })( jQuery );

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -40,15 +40,64 @@
  */
 class PayrollDeduction_US_KS extends PayrollDeduction_US {
 
+	var $state_income_tax_rate_options = array(
+												20150101 => array(
+															10 => array(
+																	array( 'income' => 3000,	'rate' => 0,	'constant' => 0 ),
+																	array( 'income' => 18000,	'rate' => 2.7,	'constant' => 0 ),
+																	array( 'income' => 18000,	'rate' => 4.6,	'constant' => 405 ),
+																	),
+															20 => array(
+																	array( 'income' => 6000,	'rate' => 0,	'constant' => 0 ),
+																	array( 'income' => 36000,	'rate' => 2.7,	'constant' => 0 ),
+																	array( 'income' => 36000,	'rate' => 4.6,	'constant' => 810 ),
+																	),
+															),
+												20140101 => array(
+															10 => array(
+																	array( 'income' => 3000,	'rate' => 0,	'constant' => 0 ),
+																	array( 'income' => 18000,	'rate' => 2.7,	'constant' => 0 ),
+																	array( 'income' => 18000,	'rate' => 4.8,	'constant' => 405 ),
+																	),
+															20 => array(
+																	array( 'income' => 6000,	'rate' => 0,	'constant' => 0 ),
+																	array( 'income' => 36000,	'rate' => 2.7,	'constant' => 0 ),
+																	array( 'income' => 36000,	'rate' => 4.8,	'constant' => 810 ),
+																	),
+															),
+												20130101 => array(
+															10 => array(
+																	array( 'income' => 3000,	'rate' => 0,	'constant' => 0 ),
+																	array( 'income' => 18000,	'rate' => 3.0,	'constant' => 0 ),
+																	array( 'income' => 18000,	'rate' => 4.9,	'constant' => 450 ),
+																	),
+															20 => array(
+																	array( 'income' => 6000,	'rate' => 0,	'constant' => 0 ),
+																	array( 'income' => 36000,	'rate' => 3.0,	'constant' => 0 ),
+																	array( 'income' => 36000,	'rate' => 4.9,	'constant' => 900 ),
+																	),
+															),
+												20060101 => array(
+															10 => array(
+																	array( 'income' => 3000,	'rate' => 0,	'constant' => 0 ),
+																	array( 'income' => 18000,	'rate' => 3.5,	'constant' => 0 ),
+																	array( 'income' => 33000,	'rate' => 6.25,	'constant' => 525 ),
+																	array( 'income' => 33000,	'rate' => 6.45,	'constant' => 1462.50 ),
+																	),
+															20 => array(
+																	array( 'income' => 6000,	'rate' => 0,	'constant' => 0 ),
+																	array( 'income' => 36000,	'rate' => 3.5,	'constant' => 0 ),
+																	array( 'income' => 66000,	'rate' => 6.25,	'constant' => 1050 ),
+																	array( 'income' => 66000,	'rate' => 6.45,	'constant' => 2925 ),
+																),
+															),
+												);
+
 	var $state_options = array(
-								1136102400 => array(
+								20060101 => array(
 													'allowance' => 2250
 													)
 								);
-
-	function getStatePayPeriodDeductions() {
-		return bcdiv($this->getStateTaxPayable(), $this->getAnnualPayPeriods() );
-	}
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();

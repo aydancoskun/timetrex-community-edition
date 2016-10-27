@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -183,11 +183,11 @@ class Debug {
 		}
 
 		if ( empty($method) ) {
-			$method = "[Function]";
+			$method = '[Function]';
 		}
 
 		//If text is too long, split it into an array.
-		$text_arr = self::splitInput( $text, 'DEBUG [L'. str_pad( $line, 4, 0, STR_PAD_LEFT) .'] ['. self::getExecutionTime() .'ms]:'. "\t" .''. $method .'(): ', "\n" );
+		$text_arr = self::splitInput( $text, 'DEBUG [L'. str_pad( $line, 4, 0, STR_PAD_LEFT) .'] ['. str_pad( self::getExecutionTime(), 5, 0, STR_PAD_LEFT) .'ms]: '. $method .'(): ', "\n" );
 
 		if ( self::$buffer_output == TRUE ) {
 			foreach( $text_arr as $text_line ) {
@@ -289,10 +289,10 @@ class Debug {
 		}
 
 		if ( empty($method) ) {
-			$method = "[Function]";
+			$method = '[Function]';
 		}
 
-		$text_arr[] = 'DEBUG [L'. str_pad( $line, 4, 0, STR_PAD_LEFT) .'] ['. self::getExecutionTime() .'ms] Array: '. $method .'(): '. $text ."\n";
+		$text_arr[] = 'DEBUG [L'. str_pad( $line, 4, 0, STR_PAD_LEFT) .'] ['. str_pad( self::getExecutionTime(), 5, 0, STR_PAD_LEFT) .'ms] Array: '. $method .'(): '. $text ."\n";
 		$text_arr = array_merge( $text_arr, self::splitInput( self::varDump($array), NULL, "\n" ) );
 		$text_arr[] = "\n";
 
@@ -463,7 +463,7 @@ class Debug {
 			if ( function_exists('memory_get_usage') ) {
 				$memory_usage = memory_get_usage();
 			} else {
-				$memory_usage = "N/A";
+				$memory_usage = 'N/A';
 			}
 
 			if (strlen($output) > 0) {
@@ -515,10 +515,10 @@ class Debug {
 		//This will affect displaying large buffers though, but otherwise we may run out of memory.
 		//If we detect PHP errors, buffer up to 10x the maximum size to try and capture those errors.
 		if ( ( self::$php_errors == 0 AND self::$buffer_size >= self::$max_buffer_size ) OR ( self::$php_errors > 0 AND self::$buffer_size >= ( self::$max_buffer_size * 10 ) ) ) {
-			self::$debug_buffer[] = array(1, 'DEBUG [L'. $line .'] ['. self::getExecutionTime() .'ms]:'. "\t" .''. $method .'(): Maximum debug buffer size of: '. self::$max_buffer_size .' reached. Writing out buffer before continuing... Buffer ID: '. self::$buffer_id ."\n" );
+			self::$debug_buffer[] = array(1, 'DEBUG [L'. str_pad( $line, 4, 0, STR_PAD_LEFT) .'] ['. str_pad( self::getExecutionTime(), 5, 0, STR_PAD_LEFT) .'ms]: '. $method .'(): Maximum debug buffer size of: '. self::$max_buffer_size .' reached. Writing out buffer before continuing... Buffer ID: '. self::$buffer_id ."\n" );
 			self::writeToLog();
 			self::clearBuffer();
-			self::$debug_buffer[] = array(1, 'DEBUG [L'. $line .'] ['. self::getExecutionTime() .'ms]:'. "\t" .''. $method .'(): Continuing debug output from Buffer ID: '. self::$buffer_id ."\n" );
+			self::$debug_buffer[] = array(1, 'DEBUG [L'. str_pad( $line, 4, 0, STR_PAD_LEFT) .'] ['. str_pad( self::getExecutionTime(), 5, 0, STR_PAD_LEFT) .'ms]: '. $method .'(): Continuing debug output from Buffer ID: '. self::$buffer_id ."\n" );
 
 			return TRUE;
 		}

@@ -145,11 +145,14 @@
 
 		this.getBoxWidth = function() {
 			return box_width;
-		}
+		};
 
-		this.setErrorStyle = function( errStr, show ) {
-			$( this ).addClass( 'error-tip' );
-
+		this.setErrorStyle = function( errStr, show, isWarning ) {
+			if ( isWarning ) {
+				$( this ).addClass( 'warning-tip' );
+			} else {
+				$( this ).addClass( 'error-tip' );
+			}
 			error_string = errStr;
 
 			if ( show ) {
@@ -167,7 +170,11 @@
 				error_tip_box = Global.loadWidgetByName( WidgetNamesDic.ERROR_TOOLTIP );
 				error_tip_box = error_tip_box.ErrorTipBox()
 			}
-			error_tip_box.show( this, error_string, sec )
+			if ( $( this ).hasClass( 'warning-tip' ) ) {
+				error_tip_box.show( this, error_string, sec, true );
+			} else {
+				error_tip_box.show( this, error_string, sec );
+			}
 		};
 
 		this.hideErrorTip = function() {
@@ -180,6 +187,8 @@
 
 		this.clearErrorStyle = function() {
 			$( this ).removeClass( 'error-tip' );
+			$( this ).removeClass( 'warning-tip' );
+			this.hideErrorTip();
 			error_string = '';
 		};
 
@@ -189,11 +198,11 @@
 
 		// Must call after setUnSelectGridData
 		this.setValue = function( val ) {
-			this.setSelectGridData( val )
+			this.setSelectGridData( val );
 		};
 
 		this.getValue = function() {
-			return this.getSelectItems()
+			return this.getSelectItems();
 		};
 
 		this.getSelectGridSortMap = function() {
@@ -265,7 +274,7 @@
 
 			function onUnSelectColumnHeaderClick( e, headerE, column_model ) {
 
-				//Error: Uncaught TypeError: Cannot read property 'setCachedSortFilter' of null in https://ondemand3.timetrex.com/interface/html5/global/widgets/awesomebox/ADropDown.js?v=7.4.6-20141027-072624 line 286
+				//Error: Uncaught TypeError: Cannot read property 'setCachedSortFilter' of null in /interface/html5/global/widgets/awesomebox/ADropDown.js?v=7.4.6-20141027-072624 line 286
 				if ( !parent_a_combo_box || !parent_a_combo_box.getAPI() ) {
 					return;
 				}
@@ -484,11 +493,22 @@
 			if ( source_data ) {
 				$.each( source_data, function( index, content ) {
 					if ( content[key] == val[key] ) {  //Some times 0, sometimes '0'
-
 						//Always use id to set select row, all record array should have id
-						target_grid.jqGrid( 'setSelection', content['id'], false );
 
 						target_grid.find( 'tr[id="' + content['id'] + '"]' ).focus();
+						if ( target_grid.hasClass( 'unselect-grid' ) ) {
+							if ( unselect_grid_last_row ) {
+								target_grid.jqGrid( 'saveRow', unselect_grid_last_row );
+							}
+							unselect_grid_last_row = content['id'];
+						} else {
+							if ( select_grid_last_row ) {
+								target_grid.jqGrid( 'saveRow', select_grid_last_row );
+							}
+							select_grid_last_row = content['id'];
+						}
+						target_grid.jqGrid( 'setSelection', content['id'], false );
+						target_grid.jqGrid( 'editRow', content['id'], true );
 						select_item = content;
 						return false;
 					}
@@ -568,7 +588,7 @@
 			this.grid_total_width = 0;
 
 			//Possible exception
-			//Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand1.timetrex.com/interface/html5/#!m=TimeSheet&date=20141102&user_id=53130 line 4288
+			//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=TimeSheet&date=20141102&user_id=53130 line 4288
 			if ( !col_model ) {
 				return;
 			}
@@ -874,7 +894,6 @@
 						a_dropdown_this.resizeUnSelectSearchInputs();
 					},
 					onSelectRow: function( id ) {
-
 						id = Global.convertToNumberIfPossible( id );
 
 						if ( id >= -1 || $.type( id ) === 'string' ) {
@@ -1474,7 +1493,7 @@
 				if ( event.stopPropagation ) {
 					event.stopPropagation(); // stops the browser from redirecting.
 				}
-
+				$( '.drag-holder-table' ).remove();
 				//drag from left to right
 				if ( event.originalEvent.dataTransfer.getData( 'Text' ) === 'select_grid' ) {
 					var grid_selected_id_array = select_grid.jqGrid( 'getGridParam', 'selarrrow' );
@@ -1485,6 +1504,14 @@
 					}
 				}
 			} );
+
+			trs.unbind( 'dragend' ).bind( 'dragend', function( event ) {
+				$( '.drag-holder-table' ).remove();
+			});
+
+			unselect_grid.parent().parent().unbind( 'dragend' ).bind( 'dragend', function( event ) {
+				$( '.drag-holder-table' ).remove();
+			});
 
 		};
 
@@ -1534,7 +1561,7 @@
 					container.append( len + ' item(s) selected' );
 				}
 
-				$( 'body' ).find( '.drag-holder-table' ).remove();
+				$( '.drag-holder-table' ).remove();
 
 				$( 'body' ).append( container );
 
@@ -1543,7 +1570,6 @@
 				if ( event.originalEvent.dataTransfer.setDragImage ) {
 					event.originalEvent.dataTransfer.setDragImage( container[0], 0, 0 );
 				}
-
 				return true;
 
 			} );
@@ -1558,7 +1584,7 @@
 				if ( event.stopPropagation ) {
 					event.stopPropagation(); // stops the browser from redirecting.
 				}
-
+				$( '.drag-holder-table' ).remove();
 				//drag from left to right
 				if ( event.originalEvent.dataTransfer.getData( 'Text' ) === 'un_select_grid' ) {
 					if ( !tree_mode ) {
@@ -1592,13 +1618,24 @@
 
 			} );
 
-			parent_grid_container.unbind( 'drop' ).bind( 'drop', function( event ) {
+			trs.unbind( 'dragend' ).bind( 'dragend', function( event ) {
+				$( '.drag-holder-table' ).remove();
+			});
 
+			select_grid.parent().parent().unbind( 'dragend' ).bind( 'dragend', function( event ) {
+				$( '.drag-holder-table' ).remove();
+			});
+
+			parent_grid_container.unbind( 'dragend' ).bind( 'dragend', function( event ) {
+				$( '.drag-holder-table' ).remove();
+			});
+
+			parent_grid_container.unbind( 'drop' ).bind( 'drop', function( event ) {
 				event.preventDefault();
 				if ( event.stopPropagation ) {
 					event.stopPropagation(); // stops the browser from redirecting.
 				}
-
+				$( '.drag-holder-table' ).remove();
 				$( trs[0] ).removeClass( 'drag-over-top' );
 				if ( event.originalEvent.dataTransfer.getData( 'Text' ) === 'select_grid' ) {
 
@@ -1622,7 +1659,7 @@
 					}
 
 					var scroll_position = select_grid.closest( '.ui-jqgrid-bdiv' ).scrollTop();
-
+					isChanged = true;
 					select_grid.trigger( 'reloadGrid' );
 
 					$$this.setSelectGridDragAble();
@@ -1707,9 +1744,8 @@
 
 						$( row ).insertAfter( $this );
 					}
-
+					isChanged = true;
 					var scroll_position = select_grid.closest( '.ui-jqgrid-bdiv' ).scrollTop();
-
 					select_grid.trigger( 'reloadGrid' );
 
 					$$this.setSelectGridDragAble();
@@ -1754,7 +1790,6 @@
 		};
 
 		this.setTotalDisplaySpan = function() {
-
 			var grid_selected_id_array;
 
 			if ( allow_multiple_selection ) {
@@ -1791,7 +1826,7 @@
 							start = (pager_data.current_page - 1) * pager_data.rows_per_page + 1;
 							end = start + pager_data.rows_per_page - 1;
 						} else {
-							start = totalRows - pager_data.rows_per_page + 1;
+							start = totalRows - unselect_grid.getGridParam( 'data' ).length + 1;
 							end = totalRows;
 						}
 
@@ -2462,13 +2497,19 @@
 					source_data = select_grid.getGridParam( 'data' );
 					target_data = unselect_grid.getGridParam( 'data' );
 				}
-				finalArray = target_data.concat( source_data );
-				target_grid.clearGridData();
-				target_grid.setGridParam( {data: finalArray} );
-				target_grid.trigger( 'reloadGrid' );
-				source_grid.clearGridData();
-				source_grid.trigger( 'reloadGrid' );
-				a_dropdown_this.setTotalDisplaySpan();
+				if ( tree_mode ) {
+					source_grid.clearGridData();
+					source_grid.trigger( 'reloadGrid' );
+					a_dropdown_this.setTotalDisplaySpan();
+				} else {
+					finalArray = target_data.concat( source_data );
+					target_grid.clearGridData();
+					target_grid.setGridParam( {data: finalArray} );
+					target_grid.trigger( 'reloadGrid' );
+					source_grid.clearGridData();
+					source_grid.trigger( 'reloadGrid' );
+					a_dropdown_this.setTotalDisplaySpan();
+				}
 				if ( !parent_a_combo_box ) {
 					a_dropdown_this.trigger( 'formItemChange', [a_dropdown_this] );
 				}

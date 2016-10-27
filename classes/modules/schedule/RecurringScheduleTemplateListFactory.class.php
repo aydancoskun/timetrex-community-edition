@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -59,8 +59,9 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -83,7 +84,7 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 		$rstcf = new RecurringScheduleTemplateControlFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -112,8 +113,8 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 		$rstcf = new RecurringScheduleTemplateControlFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					'id' => $id,
+					'company_id' => (int)$company_id,
+					'id' => (int)$id,
 					);
 
 		$query = '
@@ -137,8 +138,9 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -154,6 +156,142 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 		return $this;
 	}
 
+	function getByRecurringScheduleControlIdAndStartDateAndEndDate( $recurring_schedule_control_id, $start_date, $end_date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
+		if ( $recurring_schedule_control_id == '') {
+			return FALSE;
+		}
+
+		if ( $start_date == '') {
+			return FALSE;
+		}
+
+		if ( $end_date == '') {
+			return FALSE;
+		}
+
+		$additional_order_fields = array('name', 'description', 'last_name', 'start_date', 'user_id');
+		if ( $order == NULL ) {
+			$order = array( 'c.start_date' => 'asc', 'cb.user_id' => 'desc', 'a.week' => 'asc', 'a.start_time' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		//Debug::Arr($order, 'bOrder Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
+
+		$uf = new UserFactory();
+		$rscf = new RecurringScheduleControlFactory();
+		$rsuf = new RecurringScheduleUserFactory();
+		$rstcf = new RecurringScheduleTemplateControlFactory();
+		$ppsuf = new PayPeriodScheduleUserFactory();
+		$ppsf = new PayPeriodScheduleFactory();
+		$pguf = new PolicyGroupUserFactory();
+
+		$ph = array(
+					'recurring_schedule_control_id' => (int)$recurring_schedule_control_id,
+					);
+
+		$query = '
+					SELECT	a.*,
+							cb.user_id as user_id,
+
+							c.start_date as recurring_schedule_control_start_date,
+							c.end_date as recurring_schedule_control_end_date,
+							c.start_week as recurring_schedule_control_start_week,
+							zz.max_week as max_week,
+							( (((a.week-1)+zz.max_week-(c.start_week-1))%zz.max_week) + 1) as remapped_week,
+
+							d.created_by as user_created_by,
+							d.hire_date as hire_date,
+							d.termination_date as termination_date,
+
+							pguf.policy_group_id as policy_group_id,
+							
+							ppsf.shift_assigned_day_id as shift_assigned_day_id,
+							c.created_by as recurring_schedule_control_created_by
+							';
+
+		$query .= '
+					FROM	'. $this->getTable() .' as a
+						LEFT JOIN ( SELECT z.recurring_schedule_template_control_id, max(z.week) as max_week FROM recurring_schedule_template as z WHERE deleted = 0 GROUP BY z.recurring_schedule_template_control_id ) as zz ON a.recurring_schedule_template_control_id = zz.recurring_schedule_template_control_id
+						LEFT JOIN '. $rstcf->getTable() .' as b ON a.recurring_schedule_template_control_id = b.id
+						LEFT JOIN '. $rscf->getTable() .' as c ON a.recurring_schedule_template_control_id = c.recurring_schedule_template_control_id
+						LEFT JOIN '. $rsuf->getTable() .' as cb ON c.id = cb.recurring_schedule_control_id
+						LEFT JOIN '. $uf->getTable() .' as d ON cb.user_id = d.id
+
+						LEFT JOIN '. $ppsuf->getTable() .' as ppsuf ON d.id = ppsuf.user_id
+						LEFT JOIN '. $ppsf->getTable() .' as ppsf ON ( ppsuf.pay_period_schedule_id = ppsf.id AND ppsf.deleted = 0 )
+						
+						LEFT JOIN '. $pguf->getTable() .' as pguf ON ( cb.user_id = pguf.user_id )						
+						';
+
+		$query .= ' WHERE c.id = ? ';
+
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'cb.user_id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'cb.user_id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['recurring_schedule_template_control_id']) ) ? $this->getWhereClauseSQL( 'a.recurring_schedule_template_control_id', $filter_data['recurring_schedule_template_control_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
+
+		if ( isset($start_date) AND trim($start_date) != ''
+				AND isset($end_date) AND trim($end_date) != '') {
+			$start_date_stamp = $this->db->BindDate( $start_date );
+			$end_date_stamp = $this->db->BindDate( $end_date );
+
+			$ph[] = $start_date_stamp;
+			$ph[] = $end_date_stamp;
+			$ph[] = $start_date_stamp;
+			$ph[] = $start_date_stamp;
+			$ph[] = $end_date_stamp;
+			$ph[] = $start_date_stamp;
+			$ph[] = $end_date_stamp;
+			$ph[] = $start_date_stamp;
+			$ph[] = $end_date_stamp;
+			$ph[] = $start_date_stamp;
+			$ph[] = $end_date_stamp;
+			$ph[] = $start_date_stamp;
+			$ph[] = $end_date_stamp;
+
+			$ph[] = $end_date ;
+			$ph[] = $start_date;
+
+			$query	.=	' AND (
+								(c.start_date >= ? AND c.start_date <= ? AND c.end_date IS NULL )
+								OR
+								(c.start_date <= ? AND c.end_date IS NULL )
+								OR
+								(c.start_date <= ? AND c.end_date >= ? )
+								OR
+								(c.start_date >= ? AND c.end_date <= ? )
+								OR
+								(c.start_date >= ? AND c.start_date <= ? )
+								OR
+								(c.end_date >= ? AND c.end_date <= ? )
+								OR
+								(c.start_date <= ? AND c.end_date >= ? )
+							)
+							AND
+							(
+								( d.hire_date is NULL OR d.hire_date <= ? )
+								AND
+								( d.termination_date is NULL OR d.termination_date >= ? )
+							)
+						';
+		}
+
+		$query .=	'
+						AND ( a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0 AND (d.deleted is NULL OR d.deleted = 0 ) )
+					';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
+
+		//Debug::Arr($ph, ' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+
+		$this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		return $this;
+	}
+/*
 	function getSearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -186,11 +324,6 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 		if ( isset($filter_data['include_user_ids']) ) {
 			$filter_data['id'] = $filter_data['include_user_ids'];
 		}
-		/*
-		if ( isset($filter_data['user_status_ids']) ) {
-			$filter_data['status_id'] = $filter_data['user_status_ids'];
-		}
-		*/
 		if ( isset($filter_data['user_title_ids']) ) {
 			$filter_data['title_id'] = $filter_data['user_title_ids'];
 		}
@@ -254,7 +387,7 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 
 		$ph = array(
 					'filter_end_date' => $this->db->BindDate( $filter_data['end_date'] ),
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -345,7 +478,6 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 																		and uwb.effective_date <= ?
 																		and uwb.deleted = 0
 																		order by uwb.effective_date desc limit 1)
-
 						';
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
@@ -354,15 +486,19 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 		}
 
 		$query .= ' where	b.company_id = ? ';
+		
+		if ( isset($filter_data['recurring_schedule_template_control_id']) AND isset($filter_data['recurring_schedule_template_control_id'][0]) AND !in_array(-1, (array)$filter_data['recurring_schedule_template_control_id']) ) {
+			$query	.=	' AND a.recurring_schedule_template_control_id in ('. $this->getListSQL($filter_data['recurring_schedule_template_control_id'], $ph) .') ';
+		}
 
 		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
 			$query	.=	' AND d.id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
 		}
 		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query	.=	' AND d.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
+			$query	.=	' AND cb.user_id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
 		}
 		if ( isset($filter_data['exclude_id']) AND isset($filter_data['exclude_id'][0]) AND !in_array(-1, (array)$filter_data['exclude_id']) ) {
-			$query	.=	' AND d.id not in ('. $this->getListSQL($filter_data['exclude_id'], $ph) .') ';
+			$query	.=	' AND cb.user_id not in ('. $this->getListSQL($filter_data['exclude_id'], $ph) .') ';
 		}
 
 		if ( isset($filter_data['user_status_id']) AND isset($filter_data['user_status_id'][0]) AND !in_array(-1, (array)$filter_data['user_status_id']) ) {
@@ -472,7 +608,7 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 
 		return $this;
 	}
-
+*/
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -487,9 +623,7 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 
 
 		$additional_order_fields = array();
-		$sort_column_aliases = array(
-
-									);
+		$sort_column_aliases = array();
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 
@@ -514,7 +648,7 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '

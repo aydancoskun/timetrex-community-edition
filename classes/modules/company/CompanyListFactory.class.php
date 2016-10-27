@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -139,7 +139,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 		$this->rs = $this->getCache($id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => $id,
+						'id' => (int)$id,
 						);
 
 			$query = '
@@ -171,8 +171,8 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'id' => $id,
-					'company_id' => $company_id,
+					'id' => (int)$id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -189,6 +189,28 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	function getByStatusID($status_id, $where = NULL, $order = NULL) {
+		if ( $status_id == '' ) {
+			return FALSE;
+		}
+
+		$uf = new UserFactory();
+
+		$ph = array();
+
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a
+					where a.status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .')
+						AND ( a.deleted = 0 )';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+	
 	function getByShortName($short_name, $where = NULL, $order = NULL) {
 		if ( $short_name == '' ) {
 			return FALSE;
@@ -262,7 +284,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 
 		return $this;
 	}
-
+	
 	function getArrayByListFactory($lf, $include_blank = TRUE, $include_disabled = TRUE ) {
 		if ( !is_object($lf) ) {
 			return FALSE;
@@ -317,7 +339,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 			}
 		}
 
-		$additional_order_fields = array('status_id', 'last_login_date', 'total_active_days', 'last_login_days', 'this_month_max_active_users', 'this_month_avg_active_users', 'this_month_min_active_users', 'last_month_max_active_users', 'last_month_avg_active_users', 'last_month_min_active_users' );
+		$additional_order_fields = array('status_id', 'last_login_date', 'total_active_days', 'last_login_days', 'this_month_max_active_users', 'this_month_avg_active_users', 'this_month_min_active_users', 'last_month_max_active_users', 'last_month_avg_active_users', 'last_month_min_active_users', 'regular_user_feedback_rating', 'supervisor_user_feedback_rating', 'admin_user_feedback_rating', 'all_user_feedback_rating' );
 
 		$sort_column_aliases = array(
 									'status' => 'status_id',
@@ -345,23 +367,30 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 
 		$uf = new UserFactory();
 		$cuff = new CompanyUserCountFactory();
+		$puf = new PermissionUserFactory();
+		$pcf = new PermissionControlFactory();
 
-		$ph = array(
-					//'company_id' => $company_id,
-					);
+		$ph = array();
 
 		$query = '
-					select	a.*,
+					SELECT	a.*,
 							_ADODB_COUNT
-							(select max(last_login_date) from '. $uf->getTable() .' as uf where uf.company_id = a.id ) as last_login_date,
-							((select max(last_login_date) from '. $uf->getTable() .' as uf where uf.company_id = a.id )-a.created_date) as total_active_days,
-							('. time() .'-(select max(last_login_date) from '. $uf->getTable() .' as uf where uf.company_id = a.id )) as last_login_days,
-							(select min(active_users) as min_active_users from '. $cuff->getTable() .' as cuff where cuff.company_id = a.id AND date_stamp >= '. $this->db->qstr( $this->db->BindDate( TTDate::getBeginMonthEpoch() ) ) .' AND date_stamp <= '. $this->db->qstr( $this->db->BindDate( time() ) ) .' ) as this_month_min_active_users,
-							(select avg(active_users) as avg_active_users from '. $cuff->getTable() .' as cuff where cuff.company_id = a.id AND date_stamp >= '. $this->db->qstr( $this->db->BindDate( TTDate::getBeginMonthEpoch() ) ) .' AND date_stamp <= '. $this->db->qstr( $this->db->BindDate( time() ) ) .' ) as this_month_avg_active_users,
-							(select max(active_users) as max_active_users from '. $cuff->getTable() .' as cuff where cuff.company_id = a.id AND date_stamp >= '. $this->db->qstr( $this->db->BindDate( TTDate::getBeginMonthEpoch() ) ) .' AND date_stamp <= '. $this->db->qstr( $this->db->BindDate( time() ) ) .' ) as this_month_max_active_users,
-							(select min(active_users) as min_active_users from '. $cuff->getTable() .' as cuff where cuff.company_id = a.id AND date_stamp >= '. $this->db->qstr( $this->db->BindDate( TTDate::getBeginMonthEpoch( (TTDate::getBeginMonthEpoch() - 86400) ) ) ) .' AND date_stamp <= '. $this->db->qstr( $this->db->BindDate( TTDate::getEndMonthEpoch( (TTDate::getBeginMonthEpoch() - 86400) ) ) ) .' ) as last_month_min_active_users,
-							(select avg(active_users) as avg_active_users from '. $cuff->getTable() .' as cuff where cuff.company_id = a.id AND date_stamp >= '. $this->db->qstr( $this->db->BindDate( TTDate::getBeginMonthEpoch( (TTDate::getBeginMonthEpoch() - 86400) ) ) ) .' AND date_stamp <= '. $this->db->qstr( $this->db->BindDate( TTDate::getEndMonthEpoch( (TTDate::getBeginMonthEpoch() - 86400) ) ) ) .' ) as last_month_avg_active_users,
-							(select max(active_users) as max_active_users from '. $cuff->getTable() .' as cuff where cuff.company_id = a.id AND date_stamp >= '. $this->db->qstr( $this->db->BindDate( TTDate::getBeginMonthEpoch( (TTDate::getBeginMonthEpoch() - 86400) ) ) ) .' AND date_stamp <= '. $this->db->qstr( $this->db->BindDate( TTDate::getEndMonthEpoch( (TTDate::getBeginMonthEpoch() - 86400) ) ) ) .' ) as last_month_max_active_users,
+							user_last_login.last_login_date as last_login_date,
+							user_last_login.total_active_days as total_active_days,
+							user_last_login.last_login_days as last_login_days,
+
+							this_month_company_user_count.min_active_users as this_month_min_active_users,
+							this_month_company_user_count.avg_active_users as this_month_avg_active_users,
+							this_month_company_user_count.max_active_users as this_month_max_active_users,
+							last_month_company_user_count.min_active_users as last_month_min_active_users,
+							last_month_company_user_count.avg_active_users as last_month_avg_active_users,
+							last_month_company_user_count.max_active_users as last_month_max_active_users,
+
+							feedback_rating.regular_user_feedback_rating as regular_user_feedback_rating,
+							feedback_rating.supervisor_user_feedback_rating as supervisor_user_feedback_rating,
+							feedback_rating.admin_user_feedback_rating as admin_user_feedback_rating,
+							feedback_rating.all_user_feedback_rating as all_user_feedback_rating,
+
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
 							y.last_name as created_by_last_name,
@@ -369,10 +398,67 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
 							_ADODB_COUNT
-					from	'. $this->getTable() .' as a
+					FROM 	'. $this->getTable() .' as a
+						LEFT JOIN (
+									SELECT
+									company_id,
+									max(last_login_date) as last_login_date,
+									max(last_login_date)-min(cf.created_date) as total_active_days,
+									( '. time() .'-max(last_login_date) ) as last_login_days
+									FROM
+									'. $uf->getTable() .' as uf
+									LEFT JOIN '. $this->getTable() .' as cf ON ( uf.company_id = cf.id )
+									AND uf.deleted = 0 AND cf.deleted = 0
+									GROUP BY uf.company_id
+						) as user_last_login ON ( a.id = user_last_login.company_id )
+						LEFT JOIN (
+									SELECT
+									company_id,
+									min(active_users) as min_active_users,
+									avg(active_users) as avg_active_users,
+									max(active_users) as max_active_users
+									FROM '. $cuff->getTable() .' as cuf
+									WHERE
+									cuf.date_stamp >= '. $this->db->qstr( $this->db->BindDate( TTDate::getBeginMonthEpoch() ) ) .'
+									AND cuf.date_stamp <= '. $this->db->qstr( $this->db->BindDate( time() ) ) .'
+									GROUP BY company_id
+						) as this_month_company_user_count ON ( a.id = this_month_company_user_count.company_id )
+						LEFT JOIN (
+									SELECT
+									company_id,
+									min(active_users) as min_active_users,
+									avg(active_users) as avg_active_users,
+									max(active_users) as max_active_users
+									FROM '. $cuff->getTable() .' as cuf
+									WHERE
+									cuf.date_stamp >= '. $this->db->qstr( $this->db->BindDate( TTDate::getBeginMonthEpoch( (TTDate::getBeginMonthEpoch() - 86400) ) ) ) .'
+									AND cuf.date_stamp <= '. $this->db->qstr( $this->db->BindDate( TTDate::getEndMonthEpoch( (TTDate::getBeginMonthEpoch() - 86400) ) ) ) .'
+									GROUP BY company_id
+						) as last_month_company_user_count ON ( a.id = last_month_company_user_count.company_id )
+						LEFT JOIN (
+									SELECT
+									company_id,
+									avg(regular_user_feedback_rating) as regular_user_feedback_rating,
+									avg(supervisor_user_feedback_rating) as supervisor_user_feedback_rating,
+									avg(admin_user_feedback_rating) as admin_user_feedback_rating,
+									avg(all_user_feedback_rating) as all_user_feedback_rating
+									FROM (
+										SELECT
+										uf.company_id as company_id,
+										CASE WHEN pcf.level < 10 THEN feedback_rating ELSE NULL END as regular_user_feedback_rating,
+										CASE WHEN pcf.level >= 10 AND pcf.level < 20 THEN feedback_rating ELSE NULL END as supervisor_user_feedback_rating,
+										CASE WHEN pcf.level >= 20 THEN feedback_rating ELSE NULL END as admin_user_feedback_rating,
+										feedback_rating as all_user_feedback_rating
+										FROM '. $uf->getTable() .' as uf
+										LEFT JOIN '. $puf->getTable() .' as puf ON ( uf.id = puf.user_id )
+										LEFT JOIN '. $pcf->getTable() .' as pcf ON ( puf.permission_control_id = pcf.id )
+										WHERE feedback_rating IS NOT NULL AND ( uf.deleted = 0 AND pcf.deleted = 0 )
+									) as feedback_rating
+									GROUP BY company_id
+						) as feedback_rating ON ( a.id = feedback_rating.company_id )
 						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
-					where	1=1
+					WHERE	1=1
 					';
 
 		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
@@ -406,6 +492,8 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}

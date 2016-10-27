@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -59,8 +59,9 @@ class RecurringPayStubAmendmentListFactory extends RecurringPayStubAmendmentFact
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -81,7 +82,7 @@ class RecurringPayStubAmendmentListFactory extends RecurringPayStubAmendmentFact
 		}
 
 		$ph = array(
-					'status_id' => $status_id,
+					'status_id' => (int)$status_id,
 					);
 
 		$query = '
@@ -107,7 +108,7 @@ class RecurringPayStubAmendmentListFactory extends RecurringPayStubAmendmentFact
 		}
 
 		$ph = array(
-					'status_id' => $status_id,
+					'status_id' => (int)$status_id,
 					'start_date' => $start_date,
 					);
 
@@ -135,8 +136,8 @@ class RecurringPayStubAmendmentListFactory extends RecurringPayStubAmendmentFact
 		}
 
 		$ph = array(
-					'id' => $id,
-					'company_id' => $company_id,
+					'id' => (int)$id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -166,7 +167,7 @@ class RecurringPayStubAmendmentListFactory extends RecurringPayStubAmendmentFact
 		}
 
 		$ph = array(
-					'company_id' => $id,
+					'company_id' => (int)$id,
 					);
 
 		$query = '
@@ -253,7 +254,7 @@ class RecurringPayStubAmendmentListFactory extends RecurringPayStubAmendmentFact
 		$pseaf = new PayStubEntryAccountFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -295,40 +296,6 @@ class RecurringPayStubAmendmentListFactory extends RecurringPayStubAmendmentFact
 
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
-
-/*
-		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query	.=	' AND a.created_by in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
-		}
-		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query	.=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
-		}
-		if ( isset($filter_data['exclude_id']) AND isset($filter_data['exclude_id'][0]) AND !in_array(-1, (array)$filter_data['exclude_id']) ) {
-			$query	.=	' AND a.id not in ('. $this->getListSQL($filter_data['exclude_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['status_id']) AND isset($filter_data['status_id'][0]) AND !in_array(-1, (array)$filter_data['status_id']) ) {
-			$query	.=	' AND a.status_id in ('. $this->getListSQL($filter_data['status_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['type_id']) AND isset($filter_data['type_id'][0]) AND !in_array(-1, (array)$filter_data['type_id']) ) {
-			$query	.=	' AND a.type_id in ('. $this->getListSQL($filter_data['type_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['frequency_id']) AND isset($filter_data['frequency_id'][0]) AND !in_array(-1, (array)$filter_data['frequency_id']) ) {
-			$query	.=	' AND a.frequency_id in ('. $this->getListSQL($filter_data['frequency_id'], $ph) .') ';
-		}
-
-		if ( isset($filter_data['name']) AND !is_array($filter_data['name']) AND trim($filter_data['name']) != '' ) {
-			$ph[] = strtolower(trim($filter_data['name']));
-			$query	.=	' AND lower(a.name) LIKE ?';
-		}
-		if ( isset($filter_data['description']) AND !is_array($filter_data['description']) AND trim($filter_data['description']) != '' ) {
-			$ph[] = strtolower(trim($filter_data['description']));
-			$query	.=	' AND lower(a.description) LIKE ?';
-		}
-
-		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-
-		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
-*/
 
 		$query .=	'
 						AND a.deleted = 0

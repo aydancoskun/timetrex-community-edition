@@ -22,13 +22,14 @@ UserGroupViewController = BaseViewController.extend( {
 		this.invisible_context_menu_dic[ContextMenuIconName.delete_and_next] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.save_and_continue] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.save_and_next] = true;
+		this.grid_select_id_array = [];
 
 		this.render();
 		this.buildContextMenu();
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'UserGroup' );
 
-		this.grid_select_id_array = [];
+
 	},
 
 	onDeleteDone: function( result ) {
@@ -321,9 +322,9 @@ UserGroupViewController = BaseViewController.extend( {
 			navigation_widget_div.append( this.navigation );
 		}
 
-		var close_icon = this.edit_view.find( '.close-icon' );
-
-		close_icon.click( function() {
+		this.edit_view_close_icon = this.edit_view.find( '.close-icon' );
+		this.edit_view_close_icon.hide();
+		this.edit_view_close_icon.click( function() {
 			$this.onCloseIconClick();
 		} );
 
@@ -400,13 +401,8 @@ UserGroupViewController = BaseViewController.extend( {
 		var $this = this;
 
 		$this.getDefaultDisplayColumns( function() {
-
 			$this.setSelectLayout();
-
 			$this.search();
-			//set right click menu to list view grid
-			$this.initRightClickMenu();
-
 		} );
 
 	},
@@ -502,31 +498,12 @@ UserGroupViewController = BaseViewController.extend( {
 
 		this.showGridBorders();
 
+		$this.setGridSize();
+
 	},
 
-	setGridSize: function() {
-
-		if ( !this.grid || !this.grid.is( ':visible' ) ) {
-			return;
-		}
-
-		if ( !this.sub_view_mode ) {
-			if ( Global.bodyWidth() > Global.app_min_width ) {
-				this.grid.setGridWidth( Global.bodyWidth() - 14 );
-			} else {
-				this.grid.setGridWidth( Global.app_min_width - 14 );
-			}
-		} else {
-
-			this.grid.setGridWidth( $( this.el ).parent().width() - 10 );
-		}
-
-		if ( !this.sub_view_mode ) {
-			this.grid.setGridHeight( $( this.el ).height() - 90 );
-		} else {
-			this.grid.setGridHeight( $( this.el ).parent().height() );
-		}
-
+	_setGridSizeGridHeight: function(header_size) {
+		this._setGridSizeGroupheight( header_size );
 	},
 
 	getGridSelectIdArray: function() {

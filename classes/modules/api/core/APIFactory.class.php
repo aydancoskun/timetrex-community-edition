@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -216,10 +216,8 @@ abstract class APIFactory {
 							'total_records' => count($data)
 							);
 		} else {
-			$tmp_data[0] = $data;
-
 			$retarr = array(
-							'data' => $tmp_data,
+							'data' => array( 0 => $data ),
 							'total_records' => 1
 							);
 		}
@@ -374,6 +372,94 @@ abstract class APIFactory {
 	//Bridge to main class getVariableToFunctionMap factory.
 	function getVariableToFunctionMap( $name, $parent = NULL ) {
 		return $this->getMainClassObject()->getVariableToFunctionMap($name, $parent);
+	}
+
+	//Take a API ReturnHandler array and pulls out the Validation errors/warnings to be merged back into another Validator
+	//This is useful for calling one API function from another one when their are sub-classes.
+	function convertAPIReturnHandlerToValidatorObject( $api_retarr, $validator_obj = FALSE ) {
+		if ( is_object( $validator_obj ) ) {
+			$validator = $validator_obj;
+		} else {
+			$validator = new Validator;
+		}
+
+		if ( isset($api_retarr['api_retval']) AND $api_retarr['api_retval'] === FALSE AND isset($api_retarr['api_details']['details']) ) {
+			foreach( $api_retarr['api_details']['details'] as $tmp_validation_error_label => $validation_row ) {
+				if ( isset($validation_row['error']) ) {
+					foreach( $validation_row['error'] as $validation_error_label => $validation_error_msg ) {
+						$validator->Error( $validation_error_label, $validation_error_msg[0] );
+					}
+				}
+
+				if ( isset($validation_row['warning']) ) {
+					foreach( $validation_row['warning'] as $validation_warning_label => $validation_warning_msg ) {
+						$validator->Warning( $validation_warning_label, $validation_warning_msg[0] );
+					}
+				}
+
+				//Before warnings were added, validation errors were just directly in the details array, so try to handle those here.
+				if ( !isset($validation_row['error']) AND !isset($validation_row['warning']) ) {
+					foreach( $validation_row as $validation_error_msg ) {
+						$validator->Error( $tmp_validation_error_label, $validation_error_msg );
+					}
+				}
+
+			}
+		}
+
+		return $validator;
+	}
+
+	function setValidationArray( $primary_validator, $secondary_validator, $tertiary_validator = FALSE ) {
+		//Handle primary validator first
+		$validator = array();
+		if ( $primary_validator->isError() === TRUE ) {
+			$validator['error'] = $primary_validator->getErrorsArray();
+		} else {
+			//Check for primary validator warnings next.
+			if ( $primary_validator->isWarning() === TRUE ) {
+				$validator['warning'] = $primary_validator->Validator->getWarningsArray();
+			} else {
+				//Check secondary validator for errors.
+				if ( $secondary_validator->Validator->isError() === TRUE ) {
+					$validator['error'] = $secondary_validator->Validator->getErrorsArray();
+				} else {
+					//Check secondary validator for warnings.
+					if ( $secondary_validator->Validator->isWarning() === TRUE ) {
+						$validator['warning'] = $secondary_validator->Validator->getWarningsArray();
+					} else {
+						//Check secondary validator for errors.
+						if ( $tertiary_validator->isError() === TRUE ) {
+							$validator['error'] = $tertiary_validator->getErrorsArray();
+						} else {
+							//Check secondary validator for warnings.
+							if ( $tertiary_validator->isWarning() === TRUE ) {
+								$validator['warning'] = $tertiary_validator->getWarningsArray();
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if ( count($validator) > 0 ) {
+			return $validator;
+		}
+
+		return FALSE;
+	}
+
+
+	function handleRecordValidationResults( $validator, $validator_stats, $key, $save_result ) {
+		if ( $validator_stats['valid_records'] > 0 AND $validator_stats['total_records'] == $validator_stats['valid_records'] ) {
+			if ( $validator_stats['total_records'] == 1 ) {
+				return $this->returnHandler( $save_result[$key] ); //Single valid record
+			} else {
+				return $this->returnHandler( TRUE, 'SUCCESS', TTi18n::getText('MULTIPLE RECORDS SAVED'), $save_result, $validator_stats ); //Multiple valid records
+			}
+		} else {
+			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
+		}
 	}
 }
 ?>

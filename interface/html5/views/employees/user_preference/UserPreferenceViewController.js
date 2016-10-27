@@ -76,16 +76,19 @@ UserPreferenceViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'time_zone' );
 		this.initDropDownOption( 'start_week_day' );
 		this.initDropDownOption( 'schedule_icalendar_type' );
-		this.user_group_api.getUserGroup( '', false, false, {onResult: function( res ) {
-			res = res.getResult();
-			res = Global.buildTreeRecord( res );
-			$this.user_group_array = res;
-			if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
-				$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
-				$this.adv_search_field_ui_dic['group_id'].setSourceData( res );
-			}
+		this.initDropDownOption( 'default_login_screen' );
+		this.user_group_api.getUserGroup( '', false, false, {
+			onResult: function( res ) {
+				res = res.getResult();
+				res = Global.buildTreeRecord( res );
+				$this.user_group_array = res;
+				if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
+					$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
+					$this.adv_search_field_ui_dic['group_id'].setSourceData( res );
+				}
 
-		}} );
+			}
+		} );
 
 	},
 
@@ -96,16 +99,18 @@ UserPreferenceViewController = BaseViewController.extend( {
 			$this.province_array = [];
 			this.adv_search_field_ui_dic['province'].setSourceData( [] );
 		} else {
-			this.company_api.getOptions( 'province', val, {onResult: function( res ) {
-				res = res.getResult();
-				if ( !res ) {
-					res = [];
+			this.company_api.getOptions( 'province', val, {
+				onResult: function( res ) {
+					res = res.getResult();
+					if ( !res ) {
+						res = [];
+					}
+
+					$this.province_array = Global.buildRecordArray( res );
+					$this.adv_search_field_ui_dic['province'].setSourceData( $this.province_array );
+
 				}
-
-				$this.province_array = Global.buildRecordArray( res );
-				$this.adv_search_field_ui_dic['province'].setSourceData( $this.province_array );
-
-			}} );
+			} );
 		}
 	},
 
@@ -117,21 +122,23 @@ UserPreferenceViewController = BaseViewController.extend( {
 			$this.e_province_array = [];
 			province_widget.setSourceData( [] );
 		} else {
-			this.company_api.getOptions( 'province', val, {onResult: function( res ) {
-				res = res.getResult();
-				if ( !res ) {
-					res = [];
+			this.company_api.getOptions( 'province', val, {
+				onResult: function( res ) {
+					res = res.getResult();
+					if ( !res ) {
+						res = [];
+					}
+
+					$this.e_province_array = Global.buildRecordArray( res );
+
+					if ( refresh && $this.e_province_array.length > 0 ) {
+						$this.current_edit_record.province = $this.e_province_array[0].value;
+						province_widget.setValue( $this.current_edit_record.province );
+					}
+					province_widget.setSourceData( $this.e_province_array );
+
 				}
-
-				$this.e_province_array = Global.buildRecordArray( res );
-
-				if ( refresh && $this.e_province_array.length > 0 ) {
-					$this.current_edit_record.province = $this.e_province_array[0].value;
-					province_widget.setValue( $this.current_edit_record.province );
-				}
-				province_widget.setSourceData( $this.e_province_array );
-
-			}} );
+			} );
 		}
 	},
 
@@ -251,7 +258,8 @@ UserPreferenceViewController = BaseViewController.extend( {
 				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
-			new SearchField( {label: $.i18n._( 'Default Branch' ),
+			new SearchField( {
+				label: $.i18n._( 'Default Branch' ),
 				in_column: 2,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
@@ -261,7 +269,8 @@ UserPreferenceViewController = BaseViewController.extend( {
 				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
-			new SearchField( {label: $.i18n._( 'Default Department' ),
+			new SearchField( {
+				label: $.i18n._( 'Default Department' ),
 				field: 'default_department_id',
 				in_column: 2,
 				layout_name: ALayoutIDs.DEPARTMENT,
@@ -272,7 +281,8 @@ UserPreferenceViewController = BaseViewController.extend( {
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
-			new SearchField( {label: $.i18n._( 'Title' ),
+			new SearchField( {
+				label: $.i18n._( 'Title' ),
 				field: 'title_id',
 				in_column: 2,
 				layout_name: ALayoutIDs.JOB_TITLE,
@@ -282,7 +292,8 @@ UserPreferenceViewController = BaseViewController.extend( {
 				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
-			new SearchField( {label: $.i18n._( 'Country' ),
+			new SearchField( {
+				label: $.i18n._( 'Country' ),
 				in_column: 3,
 				field: 'country',
 				multiple: true,
@@ -291,7 +302,8 @@ UserPreferenceViewController = BaseViewController.extend( {
 				layout_name: ALayoutIDs.OPTION_COLUMN,
 				form_item_type: FormItemType.COMBO_BOX
 			} ),
-			new SearchField( {label: $.i18n._( 'Province/State' ),
+			new SearchField( {
+				label: $.i18n._( 'Province/State' ),
 				in_column: 3,
 				field: 'province',
 				multiple: true,
@@ -300,7 +312,6 @@ UserPreferenceViewController = BaseViewController.extend( {
 				layout_name: ALayoutIDs.OPTION_COLUMN,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
-
 
 		];
 	},
@@ -327,13 +338,11 @@ UserPreferenceViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-
 		this.setTabLabels( {
 			'tab_preference': $.i18n._( 'Preference' ),
 			'tab_schedule_sync': $.i18n._( 'Schedule Synchronization' ),
 			'tab_audit': $.i18n._( 'Audit' )
 		} );
-
 
 		this.navigation.AComboBox( {
 			id: this.script_name + '_navigation',
@@ -404,6 +413,12 @@ UserPreferenceViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'items_per_page', width: 50} );
 		this.addEditFieldToColumn( $.i18n._( 'Rows per page' ), form_item_input, tab_preference_column1 );
+
+		// Default Login Screen
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( {field: 'default_login_screen'} );
+		form_item_input.setSourceData( Global.addFirstItemToArray( $this.default_login_screen_array ) );
+		this.addEditFieldToColumn( $.i18n._( 'Default Screen' ), form_item_input, tab_preference_column1 );
 
 		// Save TimeSheet State
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
@@ -580,20 +595,22 @@ UserPreferenceViewController = BaseViewController.extend( {
 		filter.filter_data = {};
 		filter.filter_data.id = this.mass_edit_record_ids;
 
-		this.api['getCommon' + this.api.key_name + 'Data']( filter, {onResult: function( result ) {
-			var result_data = result.getResult();
+		this.api['getCommon' + this.api.key_name + 'Data']( filter, {
+			onResult: function( result ) {
+				var result_data = result.getResult();
 
-			if ( !result_data ) {
-				result_data = [];
+				if ( !result_data ) {
+					result_data = [];
+				}
+
+				$this.unique_columns = [];
+				$this.linked_columns = [];
+
+				$this.current_edit_record = result_data;
+				$this.initEditView();
+
 			}
-
-			$this.unique_columns = [];
-			$this.linked_columns = [];
-
-			$this.current_edit_record = result_data;
-			$this.initEditView();
-
-		}} );
+		} );
 
 	},
 
@@ -601,33 +618,32 @@ UserPreferenceViewController = BaseViewController.extend( {
 
 		if ( this.current_edit_record.schedule_icalendar_type_id === 0 ) {
 			//this.edit_view_form_item_dic['calendar_url'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm1_working'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm2_working'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm1_absence'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm2_absence'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm1_modified'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm2_modified'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['shifts_scheduled_to_work'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['shifts_scheduled_absent'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['modified_shifts'].css( 'display', 'none' );
+			this.detachElement( 'schedule_icalendar_alarm1_working' );
+			this.detachElement( 'schedule_icalendar_alarm2_working' );
+			this.detachElement( 'schedule_icalendar_alarm1_absence' );
+			this.detachElement( 'schedule_icalendar_alarm2_absence' );
+			this.detachElement( 'schedule_icalendar_alarm1_modified' );
+			this.detachElement( 'schedule_icalendar_alarm2_modified' );
+			this.detachElement( 'shifts_scheduled_to_work' );
+			this.detachElement( 'shifts_scheduled_absent' );
+			this.detachElement( 'modified_shifts' );
 
 		} else {
 			//this.setCalendarURL();
 			//this.edit_view_form_item_dic['calendar_url'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm1_working'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm2_working'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm1_absence'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm2_absence'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm1_modified'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm2_modified'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['shifts_scheduled_to_work'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['shifts_scheduled_absent'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['modified_shifts'].css( 'display', 'block' );
+			this.attachElement( 'schedule_icalendar_alarm1_working' );
+			this.attachElement( 'schedule_icalendar_alarm2_working' );
+			this.attachElement( 'schedule_icalendar_alarm1_absence' );
+			this.attachElement( 'schedule_icalendar_alarm2_absence' );
+			this.attachElement( 'schedule_icalendar_alarm1_modified' );
+			this.attachElement( 'schedule_icalendar_alarm2_modified' );
+			this.attachElement( 'shifts_scheduled_to_work' );
+			this.attachElement( 'shifts_scheduled_absent' );
+			this.attachElement( 'modified_shifts' );
 		}
 
 		this.editFieldResize();
 	},
-
 
 	setCurrentEditRecordData: function() {
 
@@ -678,17 +694,19 @@ UserPreferenceViewController = BaseViewController.extend( {
 			return;
 		}
 
-		this.api['getScheduleIcalendarURL']( this.current_edit_record.user_name, this.current_edit_record.schedule_icalendar_type_id, {onResult: function( result ) {
-			var result_data = result.getResult();
-			widget.setValue( ServiceCaller.rootURL + result_data );
+		this.api['getScheduleIcalendarURL']( this.current_edit_record.user_name, this.current_edit_record.schedule_icalendar_type_id, {
+			onResult: function( result ) {
+				var result_data = result.getResult();
+				widget.setValue( ServiceCaller.rootURL + result_data, true );
 
-			widget.unbind( 'click' ); // First unbind all click events, otherwise, when we change the schedule icalendar type this will trigger several times click events.
+				widget.unbind( 'click' ); // First unbind all click events, otherwise, when we change the schedule icalendar type this will trigger several times click events.
 
-			widget.click( function() {
-				window.open( widget.text() );
-			} );
+				widget.click( function() {
+					window.open( widget.text() );
+				} );
 
-		}} );
+			}
+		} );
 
 	},
 
@@ -743,11 +761,13 @@ UserPreferenceViewController = BaseViewController.extend( {
 		} else {
 			record = this.current_edit_record;
 		}
-		this.api['validate' + this.api.key_name]( record, {onResult: function( result ) {
+		this.api['validate' + this.api.key_name]( record, {
+			onResult: function( result ) {
 
-			$this.validateResult( result );
+				$this.validateResult( result );
 
-		}} );
+			}
+		} );
 	}
 
 } );

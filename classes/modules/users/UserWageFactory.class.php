@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -145,7 +145,7 @@ class UserWageFactory extends Factory {
 	function getUserObject() {
 		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
 	}
-	
+
 	function getWageGroupObject() {
 		if ( is_object($this->wage_group_obj) ) {
 			return $this->wage_group_obj;
@@ -227,11 +227,6 @@ class UserWageFactory extends Factory {
 	}
 	function setType($type) {
 		$type = trim($type);
-
-		$key = Option::getByValue($type, $this->getOptions('type') );
-		if ($key !== FALSE) {
-			$type = $key;
-		}
 
 		if ( $this->Validator->inArrayKey(	'type_id',
 											$type,
@@ -388,8 +383,8 @@ class UserWageFactory extends Factory {
 		$must_validate = FALSE;
 
 		$uwlf = TTnew( 'UserWageListFactory' );
-		$uwlf->getByUserIdAndGroupIDAndBeforeDate( $this->getUser(), 0, $epoch );
-		//Debug::text(' Total Rows: '. $uwlf->getRecordCount() .' User: '. $this->getUser() .' Epoch: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
+		$uwlf->getByUserIdAndGroupIDAndBeforeDate( $this->getUser(), 0, $epoch, 1, NULL, NULL, array('effective_date' => 'asc') );
+		Debug::text(' Total Rows: '. $uwlf->getRecordCount() .' User: '. $this->getUser() .' Epoch: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $uwlf->getRecordCount() <= 1 ) {
 			//If it returns one row, we need to check to see if the returned row is the current record.
@@ -496,7 +491,7 @@ class UserWageFactory extends Factory {
 
 			$this->data['note'] = $value;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -744,27 +739,40 @@ class UserWageFactory extends Factory {
 		return TRUE;
 	}
 
-	function Validate() {
-		if ( $this->validate_only == FALSE AND $this->getUser() == '' ) {
+	function Validate( $ignore_warning = TRUE ) {
+		if ( $ignore_warning == FALSE ) {
+			if ( $this->getWage() <= 1 ) {
+				$this->Validator->Warning( 'wage', TTi18n::gettext('Wage may be too low') );
+			}
+
+			if ( $this->getType() != 10 ) { //Salary
+				//Make sure they won't put 0 or 1hr for the weekly time, as that is almost certainly wrong.
+				if ( $this->getWeeklyTime() <= 3601 ) {
+					$this->Validator->Warning( 'weekly_time', TTi18n::gettext('Average Time / Week may be too low, a proper estimated time is critical even for salary wages') );
+				}
+
+				//Make sure the weekly total time is within reason and hourly rates aren't 1000+/hr.
+				if ( $this->getHourlyRate() <= 1 ) {
+					$this->Validator->Warning( 'hourly_rate', TTi18n::gettext('Annual Hourly Rate may be too low, a proper hourly rate is critical even for salary wages') );
+				}
+				if ( is_object( $this->getUserObject() )
+					AND is_object( $this->getUserObject()->getCurrencyObject() )
+					AND in_array( $this->getUserObject()->getCurrencyObject()->getISOCode(), array('USD', 'CAD', 'EUR') )
+					AND $this->getHourlyRate() > 500 ) {
+					$this->Validator->Warning( 'hourly_rate', TTi18n::gettext('Annual Hourly Rate may be too high, a proper hourly rate is critical even for salary wages') );
+				}
+			}
+
+			//If the wage record is added at noon on the hire date, and the employee has already punched in/out and finished their shift, still need to show this warning.
+			if ( TTDate::getMiddleDayEpoch( $this->getEffectiveDate() ) <= TTDate::getMiddleDayEpoch( time() ) ) {
+				$this->Validator->Warning( 'effective_date', TTi18n::gettext('When changing wages retroactively, you may need to recalculate this employees timesheet for the affected pay period(s)') );
+			}
+		}
+
+		if ( $this->Validator->getValidateOnly() == FALSE AND $this->getUser() == '' ) {
 			$this->Validator->isTRUE(	'user_id',
 										FALSE,
 										TTi18n::gettext('No employee specified') );
-		}
-
-		if ( $this->getType() != 10 ) { //Salary
-			//Make sure they won't put 0 or 1hr for the weekly time, as that is almost certainly wrong.
-			if ( $this->getWeeklyTime() <= 3601 ) {
-				$this->Validator->isTRUE(	'weekly_time',
-											FALSE,
-											TTi18n::gettext('Average Time / Week is invalid') );
-			}
-
-			//Make sure the weekly total time is within reason and hourly rates aren't 1000+/hr.
-			if ( $this->getHourlyRate() > 1000 ) {
-				$this->Validator->isTRUE(	'hourly_rate',
-											FALSE,
-											TTi18n::gettext('Annual Hourly Rate is too high') );
-			}
 		}
 
 		if ( $this->getDeleted() == FALSE ) {

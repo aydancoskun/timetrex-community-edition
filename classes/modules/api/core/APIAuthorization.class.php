@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -52,12 +52,9 @@ class APIAuthorization extends APIFactory {
 	 * @return array
 	 */
 	function getAuthorizationDefaultData() {
-		$company_obj = $this->getCurrentCompanyObject();
-
 		Debug::Text('Getting authorization default data...', __FILE__, __LINE__, __METHOD__, 10);
 
-		$data = array(
-					);
+		$data = array();
 
 		return $this->returnHandler( $data );
 	}
@@ -117,6 +114,7 @@ class APIAuthorization extends APIFactory {
 
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids']	);
 
@@ -154,8 +152,9 @@ class APIAuthorization extends APIFactory {
 	 * @param array $data authorization data
 	 * @return array
 	 */
-	function setAuthorization( $data, $validate_only = FALSE ) {
+	function setAuthorization( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
+		$ignore_warning = (bool)$ignore_warning;
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
@@ -174,11 +173,12 @@ class APIAuthorization extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		if ( is_array($data) ) {
+		$validator = $save_result = FALSE;
+		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
 			foreach( $data as $key => $row ) {
-				$primary_validator = new Validator();
+				$primary_validator = $tertiary_validator = new Validator();
 				$lf = TTnew( 'AuthorizationListFactory' );
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] > 0 ) {
@@ -215,23 +215,41 @@ class APIAuthorization extends APIFactory {
 				//}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-				$is_valid = $primary_validator->isValid();
+				$is_valid = $primary_validator->isValid( $ignore_warning );
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
-					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
-					$lf->setObjectFromArray( $row );
-
-					//Set the current user so we know who is doing the authorization.
-					$lf->setCurrentUser( $this->getCurrentUserObject()->getId() );
-
-					$is_valid = $lf->isValid();
-					if ( $is_valid == TRUE ) {
-						Debug::Text('Saving data...', __FILE__, __LINE__, __METHOD__, 10);
-						if ( $validate_only == TRUE ) {
-							$save_result[$key] = TRUE;
+					//Handle authorizing timesheets that have no PPTSVF records yet.
+					if ( isset($row['object_type_id']) AND $row['object_type_id'] == 90
+							AND isset($row['object_id']) AND $row['object_id'] == -1
+							AND isset($row['user_id']) AND isset($row['pay_period_id']) ) {
+						$api_ts = new APITimeSheet();
+						$api_raw_retval = $api_ts->verifyTimeSheet( $row['user_id'], $row['pay_period_id'] );
+						Debug::Arr($api_raw_retval, 'API Retval: ', __FILE__, __LINE__, __METHOD__, 10);
+						$api_retval = $this->stripReturnHandler( $api_raw_retval );
+						if ( $api_retval > 0 ) {
+							$row['object_id'] = $api_retval;
 						} else {
-							$save_result[$key] = $lf->Save();
+							$tertiary_validator = $this->convertAPIreturnHandlerToValidatorObject( $api_raw_retval, $tertiary_validator );
+							$is_valid = $tertiary_validator->isValid( $ignore_warning );
 						}
-						$validator_stats['valid_records']++;
+					}
+
+					if ( $is_valid == TRUE ) {
+						Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
+						$lf->setObjectFromArray( $row );
+
+						//Set the current user so we know who is doing the authorization.
+						$lf->setCurrentUser( $this->getCurrentUserObject()->getId() );
+
+						$is_valid = $lf->isValid( $ignore_warning );
+						if ( $is_valid == TRUE ) {
+							Debug::Text('Saving data...', __FILE__, __LINE__, __METHOD__, 10);
+							if ( $validate_only == TRUE ) {
+								$save_result[$key] = TRUE;
+							} else {
+								$save_result[$key] = $lf->Save();
+							}
+							$validator_stats['valid_records']++;
+						}
 					}
 				}
 
@@ -240,11 +258,7 @@ class APIAuthorization extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					if ( $primary_validator->isValid() == FALSE ) {
-						$validator[$key] = $primary_validator->getErrorsArray();
-					} else {
-						$validator[$key] = $lf->Validator->getErrorsArray();
-					}
+					$validator[$key] = $this->setValidationArray( $primary_validator, $lf, $tertiary_validator );
 				} elseif ( $validate_only == TRUE ) {
 					$lf->FailTransaction();
 				}
@@ -256,15 +270,7 @@ class APIAuthorization extends APIFactory {
 
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
-			if ( $validator_stats['valid_records'] > 0 AND $validator_stats['total_records'] == $validator_stats['valid_records'] ) {
-				if ( $validator_stats['total_records'] == 1 ) {
-					return $this->returnHandler( $save_result[$key] ); //Single valid record
-				} else {
-					return $this->returnHandler( TRUE, 'SUCCESS', TTi18n::getText('MULTIPLE RECORDS SAVED'), $save_result, $validator_stats ); //Multiple valid records
-				}
-			} else {
-				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
-			}
+			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
 
 		return $this->returnHandler( FALSE );
@@ -292,8 +298,9 @@ class APIAuthorization extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
+		$validator = $save_result = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		if ( is_array($data) ) {
+		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
 			foreach( $data as $key => $id ) {
@@ -346,11 +353,7 @@ class APIAuthorization extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					if ( $primary_validator->isValid() == FALSE ) {
-						$validator[$key] = $primary_validator->getErrorsArray();
-					} else {
-						$validator[$key] = $lf->Validator->getErrorsArray();
-					}
+					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
 				}
 
 				$lf->CommitTransaction();
@@ -360,15 +363,7 @@ class APIAuthorization extends APIFactory {
 
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
-			if ( $validator_stats['valid_records'] > 0 AND $validator_stats['total_records'] == $validator_stats['valid_records'] ) {
-				if ( $validator_stats['total_records'] == 1 ) {
-					return $this->returnHandler( $save_result[$key] ); //Single valid record
-				} else {
-					return $this->returnHandler( TRUE, 'SUCCESS', TTi18n::getText('MULTIPLE RECORDS SAVED'), $save_result, $validator_stats ); //Multiple valid records
-				}
-			} else {
-				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
-			}
+			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
 
 		return $this->returnHandler( FALSE );

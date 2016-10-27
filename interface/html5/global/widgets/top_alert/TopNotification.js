@@ -140,7 +140,7 @@
 
 			data = arg;
 
-			//Error: TypeError: undefined is not an object (evaluating 'el.width') in https://ondemand2001.timetrex.com/interface/html5/global/widgets/top_alert/TopNotification.js?v=7.4.6-20141027-085016 line 143
+			//Error: TypeError: undefined is not an object (evaluating 'el.width') in /interface/html5/global/widgets/top_alert/TopNotification.js?v=7.4.6-20141027-085016 line 143
 			if ( !el ) {
 				return;
 			}
@@ -180,7 +180,7 @@
 
 		};
 
-		//Error: Unable to get property 'remove' of undefined or null reference in https://ondemand2001.timetrex.com/interface/html5/global/widgets/top_alert/TopNotification.js?v=7.4.6-20141027-132733 line 179
+		//Error: Unable to get property 'remove' of undefined or null reference in /interface/html5/global/widgets/top_alert/TopNotification.js?v=7.4.6-20141027-132733 line 179
 		this.remove = function() {
 			if ( el ) {
 				el.remove();

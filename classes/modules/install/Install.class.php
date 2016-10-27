@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -356,40 +356,15 @@ class Install {
 	function setVersions() {
 		if ( is_array($this->versions) ) {
 			foreach( $this->versions as $name => $value ) {
-				$sslf = TTnew( 'SystemSettingListFactory' );
-				$sslf->getByName( $name );
-				if ( $sslf->getRecordCount() == 1 ) {
-					$obj = $sslf->getCurrent();
-				} else {
-					$obj = TTnew( 'SystemSettingListFactory' );
-				}
-
-				$obj->setName( $name );
-				$obj->setValue( $value );
-				if ( $obj->isValid() ) {
-					if ( $obj->Save() === FALSE ) {
-						return FALSE;
-					}
-				} else {
+				$result = SystemSettingFactory::setSystemSetting( $name, $value );
+				if ( $result === FALSE ) {
 					return FALSE;
 				}
 			}
 
 			//Set the date when the upgrade was performed, so we can tell when the version was installed.
-			$sslf = TTnew( 'SystemSettingListFactory' );
-			$sslf->getByName( 'system_version_install_date' );
-			if ( $sslf->getRecordCount() == 1 ) {
-				$obj = $sslf->getCurrent();
-			} else {
-				$obj = TTnew( 'SystemSettingListFactory' );
-			}
-			$obj->setName( 'system_version_install_date' );
-			$obj->setValue( time() );
-			if ( $obj->isValid() ) {
-				if ( $obj->Save() === FALSE ) {
-					return FALSE;
-				}
-			} else {
+			$result = SystemSettingFactory::setSystemSetting( 'system_version_install_date', time() );
+			if ( $result === FALSE ) {
 				return FALSE;
 			}
 		}
@@ -464,7 +439,7 @@ class Install {
 
 	//Get all schema versions
 	//A=Community, B=Professional, C=Corporate, D=Enterprise, T=Tax
-	function getAllSchemaVersions( $group = array('A', 'B', 'C', 'D', 'T') ) {
+	function getAllSchemaVersions( $group = array('A', 'B', 'C', 'D') ) {
 		if ( !is_array($group) ) {
 			$group = array( $group );
 		}
@@ -543,7 +518,7 @@ class Install {
 
 	//Creates DB schema starting at and including start_version, and ending at, including end version.
 	//Starting at NULL is first version, ending at NULL is last version.
-	function createSchemaRange( $start_version = NULL, $end_version = NULL, $group = array('A', 'B', 'C', 'D', 'T') ) {
+	function createSchemaRange( $start_version = NULL, $end_version = NULL, $group = array('A', 'B', 'C', 'D') ) {
 		global $cache, $progress_bar, $config_vars;
 
 		if ( $this->checkDatabaseSchema() == 1 ) {
@@ -623,6 +598,13 @@ class Install {
 			//$this->getDatabaseConnection()->CompleteTrans();
 		}
 
+		//Update Tax Engine/Data Versions
+		Debug::text('Updating Tax Engine/Data versions...', __FILE__, __LINE__, __METHOD__, 9);
+		require_once( Environment::getBasePath(). DIRECTORY_SEPARATOR . 'classes'. DIRECTORY_SEPARATOR .'payroll_deduction'. DIRECTORY_SEPARATOR .'PayrollDeduction.class.php');
+		$pd_obj = new PayrollDeduction( 'CA', 'AB' );
+		SystemSettingFactory::setSystemSetting( 'tax_data_version', $pd_obj->getDataVersion() );
+		SystemSettingFactory::setSystemSetting( 'tax_engine_version', $pd_obj->getVersion() );
+		
 		//Clear all cache after the upgrade as well, as much of it is unlikely to be used again.
 		$this->cleanCacheDirectory();
 		$cache->clean();

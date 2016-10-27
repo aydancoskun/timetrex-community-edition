@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -588,103 +588,14 @@ class UserQualificationReport extends Report {
 
 		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
-		if ( $this->getPermissionObject()->Check('user', 'view') == FALSE OR $this->getPermissionObject()->Check('wage', 'view') == FALSE OR $this->getPermissionObject()->Check('user_skill', 'view') == FALSE
-		OR $this->getPermissionObject()->Check('user_education', 'view') == FALSE OR $this->getPermissionObject()->Check('user_license', 'view') == FALSE OR $this->getPermissionObject()->Check('user_language', 'view') == FALSE OR $this->getPermissionObject()->Check('user_membership', 'view') == FALSE ) {
-			$hlf = TTnew( 'HierarchyListFactory' );
-			$permission_children_ids = $wage_permission_children_ids = $user_skill_permission_children_ids = $user_education_permission_children_ids = $user_license_permission_children_ids = $user_language_permission_children_ids = $user_membership_permission_children_ids = $hlf->getHierarchyChildrenByCompanyIdAndUserIdAndObjectTypeID( $this->getUserObject()->getCompany(), $this->getUserObject()->getID() );
-			Debug::Arr($permission_children_ids, 'Permission Children Ids:', __FILE__, __LINE__, __METHOD__, 10);
-		} else {
-			//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
-			$permission_children_ids = array();
-			$wage_permission_children_ids = array();
-			$user_skill_permission_children_ids = array();
-			$user_education_permission_children_ids = array();
-			$user_license_permission_children_ids = array();
-			$user_language_permission_children_ids = array();
-			$user_membership_permission_children_ids = array();
 
-		}
-		if ( $this->getPermissionObject()->Check('user', 'view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('user', 'view_child') == FALSE ) {
-				$permission_children_ids = array();
-			}
-			if ( $this->getPermissionObject()->Check('user', 'view_own') ) {
-				$permission_children_ids[] = $this->getUserObject()->getID();
-			}
-
-			$filter_data['permission_children_ids'] = $permission_children_ids;
-		}
-		//Get Wage Permission Hierarchy Children first, as this can be used for viewing, or editing.
-		if ( $this->getPermissionObject()->Check('wage', 'view') == TRUE ) {
-			$wage_permission_children_ids = TRUE;
-		} elseif ( $this->getPermissionObject()->Check('wage', 'view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('wage', 'view_child') == FALSE ) {
-				$wage_permission_children_ids = array();
-			}
-			if ( $this->getPermissionObject()->Check('wage', 'view_own') ) {
-				$wage_permission_children_ids[] = $this->getUserObject()->getID();
-			}
-		}
-
-		if ( $this->getPermissionObject()->Check('user_skill', 'view') == TRUE ) {
-			$user_skill_permission_children_ids = TRUE;
-		} elseif ( $this->getPermissionObject()->Check('user_skill', 'view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('user_skill', 'view_child') == FALSE ) {
-				$user_skill_permission_children_ids = array();
-			}
-			if ( $this->getPermissionObject()->Check('user_skill', 'view_own') ) {
-				$user_skill_permission_children_ids[] = $this->getUserObject()->getID();
-			}
-		}
-
-		if ( $this->getPermissionObject()->Check('user_education', 'view') == TRUE ) {
-			$user_education_permission_children_ids = TRUE;
-		} elseif ( $this->getPermissionObject()->Check('user_education', 'view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('user_education', 'view_child') == FALSE ) {
-				$user_education_permission_children_ids = array();
-			}
-			if ( $this->getPermissionObject()->Check('user_education', 'view_own') ) {
-				$user_education_permission_children_ids[] = $this->getUserObject()->getID();
-			}
-		}
-
-		if ( $this->getPermissionObject()->Check('user_license', 'view') == TRUE ) {
-			$user_license_permission_children_ids = TRUE;
-		} elseif ( $this->getPermissionObject()->Check('user_license', 'view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('user_license', 'view_child') == FALSE ) {
-				$user_license_permission_children_ids = array();
-			}
-			if ( $this->getPermissionObject()->Check('user_license', 'view_own') ) {
-				$user_license_permission_children_ids[] = $this->getUserObject()->getID();
-			}
-		}
-
-
-		if ( $this->getPermissionObject()->Check('user_language', 'view') == TRUE ) {
-			$user_language_permission_children_ids = TRUE;
-		} elseif ( $this->getPermissionObject()->Check('user_language', 'view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('user_language', 'view_child') == FALSE ) {
-				$user_language_permission_children_ids = array();
-			}
-			if ( $this->getPermissionObject()->Check('user_language', 'view_own') ) {
-				$user_language_permission_children_ids[] = $this->getUserObject()->getID();
-			}
-		}
-
-		if ( $this->getPermissionObject()->Check('user_membership', 'view') == TRUE ) {
-			$user_membership_permission_children_ids = TRUE;
-		} elseif ( $this->getPermissionObject()->Check('user_membership', 'view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('user_membership', 'view_child') == FALSE ) {
-				$user_membership_permission_children_ids = array();
-			}
-			if ( $this->getPermissionObject()->Check('user_membership', 'view_own') ) {
-				$user_membership_permission_children_ids[] = $this->getUserObject()->getID();
-			}
-		}
-
-		//Debug::Text(' Permission Children: '. count($permission_children_ids) .' Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
-		//Debug::Arr($permission_children_ids, 'Permission Children: '. count($permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
-		//Debug::Arr($wage_permission_children_ids, 'Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
+		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
+		$wage_permission_children_ids = $this->getPermissionObject()->getPermissionChildren( 'wage', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
+		$user_skill_permission_children_ids = $this->getPermissionObject()->getPermissionChildren( 'user_skill', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
+		$user_education_permission_children_ids = $this->getPermissionObject()->getPermissionChildren( 'user_education', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
+		$user_license_permission_children_ids = $this->getPermissionObject()->getPermissionChildren( 'user_license', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
+		$user_language_permission_children_ids = $this->getPermissionObject()->getPermissionChildren( 'user_language', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
+		$user_membership_permission_children_ids = $this->getPermissionObject()->getPermissionChildren( 'user_membership', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
 
 		//Always include date columns, because 'hire-date_stamp' is not recognized by the UserFactory.
 		$columns['hire_date'] = $columns['termination_date'] = $columns['birth_date'] = TRUE;
@@ -717,14 +628,16 @@ class UserQualificationReport extends Report {
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
 
+		unset($filter_data['permission_children_ids']);
+
 		//Get user wage data for joining.
 		//$filter_data['wage_group_id'] = 0; //Use default wage groups only.
 		$uwlf = TTnew( 'UserWageListFactory' );
 		$uwlf->getAPILastWageSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Wage Rows: '. $uwlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
-		foreach ( $uwlf as $key => $uw_obj ) {
-			if ( $wage_permission_children_ids === TRUE OR in_array( $uw_obj->getUser(), $wage_permission_children_ids) ) {
+		foreach ( $uwlf as $key => $uw_obj ) {			
+			if ( $this->getPermissionObject()->isPermissionChild( $uw_obj->getUser(), $wage_permission_children_ids ) ) {
 				$this->tmp_data['user_wage'][$uw_obj->getUser()] = Misc::addKeyPrefix('user_wage.', (array)$uw_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_wage.', $columns ) ));
 			}
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
@@ -744,7 +657,7 @@ class UserQualificationReport extends Report {
 		Debug::Text(' User Skill Rows: '.$uslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $uslf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $uslf as $key => $us_obj ) {
-			if ( $user_skill_permission_children_ids === TRUE OR in_array( $us_obj->getUser(), $user_skill_permission_children_ids) ) {
+			if ( $this->getPermissionObject()->isPermissionChild( $us_obj->getUser(), $user_skill_permission_children_ids ) ) {
 				$this->tmp_data['user_skill'][$us_obj->getQualification()][$us_obj->getUser()][] = Misc::addKeyPrefix('user_skill.', (array)$us_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_skill.', $columns ) ), array( 'qualification' ));
 			}
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
@@ -755,7 +668,7 @@ class UserQualificationReport extends Report {
 		Debug::Text(' User Education Rows: '.$uelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $uelf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $uelf as $key => $ue_obj ) {
-			if ( $user_education_permission_children_ids === TRUE OR in_array( $ue_obj->getUser(), $user_education_permission_children_ids) ) {
+			if ( $this->getPermissionObject()->isPermissionChild( $ue_obj->getUser(), $user_education_permission_children_ids ) ) {
 				$this->tmp_data['user_education'][$ue_obj->getQualification()][$ue_obj->getUser()][] = Misc::addKeyPrefix('user_education.', (array)$ue_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_education.', $columns ) ), array( 'qualification' ));
 			}
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
@@ -766,7 +679,7 @@ class UserQualificationReport extends Report {
 		Debug::Text(' User License Rows: '.$ullf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ullf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $ullf as $key => $ul_obj ) {
-			if ( $user_license_permission_children_ids === TRUE OR in_array( $ul_obj->getUser(), $user_license_permission_children_ids) ) {
+			if ( $this->getPermissionObject()->isPermissionChild( $ul_obj->getUser(), $user_license_permission_children_ids ) ) {
 				$this->tmp_data['user_license'][$ul_obj->getQualification()][$ul_obj->getUser()][] = Misc::addKeyPrefix('user_license.', (array)$ul_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_license.', $columns ) ), array( 'qualification' ));
 			}
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
@@ -778,7 +691,7 @@ class UserQualificationReport extends Report {
 		Debug::Text(' User Language Rows: '.$ullf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ullf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $ullf as $key => $ul_obj ) {
-			if ( $user_language_permission_children_ids === TRUE OR in_array( $ul_obj->getUser(), $user_language_permission_children_ids) ) {
+			if ( $this->getPermissionObject()->isPermissionChild( $ul_obj->getUser(), $user_language_permission_children_ids ) ) {
 				$this->tmp_data['user_language'][$ul_obj->getqualification()][$ul_obj->getUser()][] = Misc::addKeyPrefix('user_language.', (array)$ul_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_language.', $columns ) ), array( 'qualification' ));
 			}
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
@@ -790,7 +703,7 @@ class UserQualificationReport extends Report {
 		Debug::Text(' User Membership Rows: '.$umlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $umlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $umlf as $key => $um_obj ) {
-			if ( $user_membership_permission_children_ids === TRUE OR in_array( $um_obj->getUser(), $user_membership_permission_children_ids) ) {
+			if ( $this->getPermissionObject()->isPermissionChild( $um_obj->getUser(), $user_membership_permission_children_ids ) ) {
 				$this->tmp_data['user_membership'][$um_obj->getQualification()][$um_obj->getUser()][] = Misc::addKeyPrefix('user_membership.', (array)$um_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_membership.', $columns ) ), array( 'qualification' ));
 			}
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );

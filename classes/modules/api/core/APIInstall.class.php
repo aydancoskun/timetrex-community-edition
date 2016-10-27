@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -484,24 +484,10 @@ class APIInstall extends APIFactory {
 
 			if ( $install_obj->getIsUpgrade() == TRUE ) {
 				//Make sure when using external installer that update notifications are always enabled.
-				$sslf = TTnew( 'SystemSettingListFactory' );
-				$sslf->getByName('update_notify');
-				if ( $sslf->getRecordCount() == 1 ) {
-					$obj = $sslf->getCurrent();
-				} else {
-					$obj = TTnew( 'SystemSettingListFactory' );
-				}
-
-				$obj->setName( 'update_notify' );
 				if ( $external_installer == 1 ) {
-					$obj->setValue( 1 );
+					SystemSettingFactory::setSystemSetting( 'update_notify', 1 );
 				}
-				if ( $obj->isValid() ) {
-					$obj->Save();
-				}
-
 				$retval = array('next_page' => 'postUpgrade');
-
 			} else {
 				if ( $external_installer == 1 ) {
 					$retval = array('next_page' => 'systemSettings', 'action' => 'next');
@@ -552,46 +538,13 @@ class APIInstall extends APIFactory {
 			$install_obj->writeConfigFile( $tmp_config_data );
 
 			//Reset new_version flag.
-			$sslf = TTnew( 'SystemSettingListFactory' );
-			$sslf->getByName('new_version');
-			if ( $sslf->getRecordCount() == 1 ) {
-				$obj = $sslf->getCurrent();
-			} else {
-				$obj = TTnew( 'SystemSettingListFactory' );
-			}
-			$obj->setName( 'new_version' );
-			$obj->setValue( 0 );
-			if ( $obj->isValid() ) {
-				$obj->Save();
-			}
+			SystemSettingFactory::setSystemSetting( 'new_version', 0 );
 
 			//Reset system requirement flag, as all requirements should have passed.
-			$sslf = new SystemSettingListFactory();
-			$sslf->getByName('valid_install_requirements');
-			if ( $sslf->getRecordCount() == 1 ) {
-				$obj = $sslf->getCurrent();
-			} else {
-				$obj = new SystemSettingListFactory();
-			}
-			$obj->setName( 'valid_install_requirements' );
-			$obj->setValue( 1 );
-			if ( $obj->isValid() ) {
-				$obj->Save();
-			}
+			SystemSettingFactory::setSystemSetting( 'valid_install_requirements', 1 );
 
 			//Reset auto_upgrade_failed flag, as they likely just upgraded to the latest version.
-			$sslf = new SystemSettingListFactory();
-			$sslf->getByName('auto_upgrade_failed');
-			if ( $sslf->getRecordCount() == 1 ) {
-				$obj = $sslf->getCurrent();
-			} else {
-				$obj = new SystemSettingListFactory();
-			}
-			$obj->setName( 'auto_upgrade_failed' );
-			$obj->setValue( 0 );
-			if ( $obj->isValid() ) {
-				$obj->Save();
-			}
+			SystemSettingFactory::setSystemSetting( 'auto_upgrade_failed', 0 );
 
 			$cache->clean(); //Clear all cache.
 
@@ -638,45 +591,21 @@ class APIInstall extends APIFactory {
 			$install_obj->writeConfigFile( $tmp_config_data );
 
 			//Write auto_update feature to system settings.
-			$sslf = TTnew( 'SystemSettingListFactory' );
-			$sslf->getByName('update_notify');
-			if ( $sslf->getRecordCount() == 1 ) {
-				$obj = $sslf->getCurrent();
-			} else {
-				$obj = TTnew( 'SystemSettingListFactory' );
-			}
-
-			$obj->setName( 'update_notify' );
 			if ( ( isset($data['update_notify']) AND $data['update_notify'] == 1 )
 					OR getTTProductEdition() > 10
 					OR $external_installer == 1 ) {
-				$obj->setValue( 1 );
+				SystemSettingFactory::setSystemSetting( 'update_notify', 1 );
 			} else {
-				$obj->setValue( 0 );
-			}
-			if ( $obj->isValid() ) {
-				$obj->Save();
+				SystemSettingFactory::setSystemSetting( 'update_notify', 0 );
 			}
 
 			//Write anonymous_auto_update feature to system settings.
-			$sslf = TTnew( 'SystemSettingListFactory' );
-			$sslf->getByName('anonymous_update_notify');
-			if ( $sslf->getRecordCount() == 1 ) {
-				$obj = $sslf->getCurrent();
-			} else {
-				$obj = TTnew( 'SystemSettingListFactory' );
-			}
-
-			$obj->setName( 'anonymous_update_notify' );
 			if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY AND isset($data['anonymous_update_notify']) AND $data['anonymous_update_notify'] == 1 ) {
-				$obj->setValue( 1 );
+				SystemSettingFactory::setSystemSetting( 'anonymous_update_notify', 1 );
 			} else {
-				$obj->setValue( 0 );
+				SystemSettingFactory::setSystemSetting( 'anonymous_update_notify', 0 );
 			}
-			if ( $obj->isValid() ) {
-				$obj->Save();
-			}
-
+			
 			$ttsc = new TimeTrexSoapClient();
 			$ttsc->saveRegistrationKey();
 
@@ -710,22 +639,40 @@ class APIInstall extends APIFactory {
 		return $this->returnHandler( FALSE );
 	}
 
-	function getCompany() {
+	function getCompany( $company_id = NULL ) {
 		$install_obj = new Install();
 		if ( $install_obj->isInstallMode() == TRUE  ) {
 			$cf = TTnew( 'CompanyFactory' );
+			$clf = TTnew( 'CompanyListFactory' );
+
+			if ( isset( $company_id ) AND (int)$company_id > 0 ) {
+				$clf->getByCompanyId( $company_id );
+				if (  $clf->getRecordCount() == 1 ) {
+					$cf = $clf->getCurrent();
+					$company_data['name'] = $cf->getName();
+					$company_data['short_name'] = $cf->getShortName();
+					$company_data['industry_id'] = $cf->getIndustry();
+					$company_data['address1'] = $cf->getAddress1();
+					$company_data['address2'] = $cf->getAddress2();
+					$company_data['city'] = $cf->getCity();
+					$company_data['country'] = $cf->getCountry();
+					$company_data['province'] = $cf->getProvince();
+					$company_data['postal_code'] = $cf->getPostalCode();
+					$company_data['work_phone'] = $cf->getWorkPhone();
+				}
+			}
+
 			//Select box options;
 			$company_data['status_options'] = $cf->getOptions('status');
 			$company_data['country_options'] = $cf->getOptions('country');
 			$company_data['industry_options'] = $cf->getOptions('industry');
 
-			if (!isset($id) AND isset($company_data['id']) ) {
-				$id = $company_data['id'];
-			} else {
-				$id = '';
-			}
-			$company_data['user_list_options'] = UserListFactory::getByCompanyIdArray($id);
-
+//			if (!isset($id) AND isset($company_data['id']) ) {
+//				$id = $company_data['id'];
+//			} else {
+//				$id = '';
+//			}
+//			$company_data['user_list_options'] = UserListFactory::getByCompanyIdArray($id);
 
 			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'company'), 'pre_install.php'), "r");
 			@fclose($handle);
@@ -744,7 +691,14 @@ class APIInstall extends APIFactory {
 		$install_obj = new Install();
 		if ( $install_obj->isInstallMode() == TRUE ) {
 			$cf = TTnew( 'CompanyFactory' );
-			//$cf->setParent($company_data['parent']);
+			$clf = TTnew( 'CompanyListFactory' );
+			if ( isset( $company_data['company_id'] ) AND (int)$company_data['company_id'] > 0  ) {
+				$clf->getById( $company_data['company_id'] );
+				if ( $clf->getRecordCount() == 1 ) {
+					$cf = $clf->getCurrent();
+				}
+			}
+
 			$cf->setStatus( 10 );
 			$cf->setProductEdition( (int)getTTProductEdition() );
 			$cf->setName($company_data['name'], TRUE); //Force change.
@@ -767,8 +721,9 @@ class APIInstall extends APIFactory {
 			$cf->setEnableAddRecurringHolidayPreset( TRUE );
 
 			if ( $cf->isValid() ) {
-				$company_id = $cf->Save();
-
+				$cf->Save( FALSE );
+				$company_id = $cf->getId();
+				unset( $cf );
 				$install_obj->writeConfigFile( array( 'other' => array( 'primary_company_id' => $company_id ) ) );
 
 				return $this->returnHandler( $company_id );
@@ -784,11 +739,23 @@ class APIInstall extends APIFactory {
 		return $this->returnHandler( FALSE );
 	}
 
-	function getUser( $company_id ) {
+	function getUser( $company_id, $user_id ) {
 		$install_obj = new Install();
 		if ( $install_obj->isInstallMode() == TRUE ) {
-			if ( isset($company_id) ) {
+			if ( isset($company_id) AND (int)$company_id > 0 ) {
 				$user_data['company_id'] = $company_id;
+			}
+
+			if ( isset($user_id) AND (int)$user_id > 0 ) {
+				$ulf = TTnew('UserListFactory');
+				$ulf->getById( $user_id );
+				if ( $ulf->getRecordCount() == 1 ) {
+					$uf = $ulf->getCurrent();
+					$user_data['user_name'] = $uf->getUserName();
+					$user_data['first_name'] = $uf->getFirstName();
+					$user_data['last_name'] = $uf->getLastName();
+					$user_data['work_email'] = $uf->getWorkEmail();
+				}
 			}
 
 			$user_data['application_name'] = APPLICATION_NAME;
@@ -806,8 +773,16 @@ class APIInstall extends APIFactory {
 		$install_obj = new Install();
 		if ( $install_obj->isInstallMode() == TRUE ) {
 			$uf = TTnew( 'UserFactory' );
+			$ulf = TTnew( 'UserListFactory' );
+			if ( isset( $user_data['user_id'] ) AND (int)$user_data['user_id'] > 0  ) {
+				$ulf->getByIdAndCompanyId( $user_data['user_id'], $user_data['company_id'] );
+				if ( $ulf->getRecordCount() == 1 ) {
+					$uf = $ulf->getCurrent();
+				}
+			} else {
+				$uf->setId( $uf->getNextInsertId() ); //Because password encryption requires the user_id, we need to get it first when creating a new employee.
+			}
 			$uf->StartTransaction();
-			$uf->setId( $uf->getNextInsertId() ); //Because password encryption requires the user_id, we need to get it first when creating a new employee.
 			$uf->setCompany( $user_data['company_id'] );
 			$uf->setStatus( 10 );
 			$uf->setUserName($user_data['user_name']);
@@ -823,6 +798,7 @@ class APIInstall extends APIFactory {
 			$uf->setFirstName($user_data['first_name']);
 			$uf->setLastName($user_data['last_name']);
 			$uf->setWorkEmail($user_data['work_email']);
+			$uf->setLastLoginDate( time() + 5 ); //This prevents them from needing to change their password upon first login.
 
 			if ( is_object( $uf->getCompanyObject() ) ) {
 				$uf->setCountry( $uf->getCompanyObject()->getCountry() );
@@ -851,8 +827,8 @@ class APIInstall extends APIFactory {
 			}
 
 			if ( $uf->isValid() ) {
-				$user_id = $uf->Save( TRUE, TRUE );
-
+				$user_id = $uf->getId();
+				$uf->Save( TRUE, TRUE );
 				//Assign this user as admin/support/billing contact for now.
 				$clf = TTnew( 'CompanyListFactory' );
 				$clf->getById( $user_data['company_id'] );
@@ -870,9 +846,9 @@ class APIInstall extends APIFactory {
 				$uf->CommitTransaction();
 
 				if ( $external_installer == 1 ) {
-					return $this->returnHandler( array( 'next_page' => 'installDone' ) );
+					return $this->returnHandler( array( 'user_id' => $user_id, 'next_page' => 'installDone' ) );
 				} else {
-					return $this->returnHandler( array( 'next_page' => 'maintenanceJobs' ) );
+					return $this->returnHandler( array( 'user_id' => $user_id, 'next_page' => 'maintenanceJobs' ) );
 				}
 
 			} else {
@@ -929,13 +905,14 @@ class APIInstall extends APIFactory {
 
 		if ( $install_obj->isInstallMode() == TRUE ) {
 
+			$retval['application_name'] = APPLICATION_NAME ? APPLICATION_NAME : '';
+
 			$uf = TTnew( 'UserFactory' );
 
 			if ( isset($data['company_id']) ) {
 				$retval['company_id'] = $data['company_id'];
 			}
 
-			$retval['application_name'] = APPLICATION_NAME ? APPLICATION_NAME : '';
 			$retval['php_os'] = PHP_OS;
 
 			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'maintenance'), 'pre_install.php'), "r");
@@ -957,6 +934,7 @@ class APIInstall extends APIFactory {
 			$retval['is_sudo_installed'] = $install_obj->isSUDOInstalled();
 
 			return $this->returnHandler( $retval );
+
 		}
 
 		return $this->returnHandler( FALSE );

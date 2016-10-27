@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -248,8 +248,8 @@ class FastTree {
 		Debug::Text(' Object ID: '. $object_id .' - Left: '. $left_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		$ph = array(
-					'tree_id' => $this->getTree(),
-					'parent_id' => $object_id,
+					'tree_id' => (int)$this->getTree(),
+					'parent_id' => (int)$object_id,
 					);
 
 		// get all children of this node
@@ -279,10 +279,10 @@ class FastTree {
 		}
 
 		$ph = array(
-					'left_id' => $left_id,
-					'right_id' => $right_id,
-					'tree_id' => $this->getTree(),
-					'object_id' => $object_id,
+					'left_id' => (int)$left_id,
+					'right_id' => (int)$right_id,
+					'tree_id' => (int)$this->getTree(),
+					'object_id' => (int)$object_id,
 					);
 
 		// we've got the left value, and now that we've processed
@@ -311,9 +311,9 @@ class FastTree {
 		}
 
 		$ph = array(
-					'tree_id' => $this->getTree(),
-					'object_id' => $object_id,
-					'object_id2' => $object_id,
+					'tree_id' => (int)$this->getTree(),
+					'object_id' => (int)$object_id,
+					'object_id2' => (int)$object_id,
 					);
 
 		$query	= '
@@ -337,8 +337,8 @@ class FastTree {
 		}
 
 		$ph = array(
-					'tree_id' => $this->getTree(),
-					'object_id' => $object_id,
+					'tree_id' => (int)$this->getTree(),
+					'object_id' => (int)$object_id,
 					);
 
 		Debug::Text(' Getting Last Child of: '. $object_id, __FILE__, __LINE__, __METHOD__, 10);
@@ -406,8 +406,8 @@ class FastTree {
 				break;
 			default:
 				$ph = array(
-							'tree_id' => $this->getTree(),
-							'object_id' => $object_id,
+							'tree_id' => (int)$this->getTree(),
+							'object_id' => (int)$object_id,
 							);
 
 				$query .= '
@@ -485,7 +485,7 @@ class FastTree {
 		Debug::Text(' Next Left ID: '. $left_id, __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Text(' Next Right ID: '. $right_id, __FILE__, __LINE__, __METHOD__, 10);
 
-		return array('left_id' => $left_id, 'right_id' => $right_id);
+		return array('left_id' => (int)$left_id, 'right_id' => (int)$right_id);
 
 	}
 
@@ -594,11 +594,11 @@ class FastTree {
 				AND is_numeric( $left_id )
 				AND is_numeric( $right_id ) ) {
 			$ph = array(
-						'tree_id' => $this->getTree(),
-						'parent_id' => $parent_id,
-						'object_id' => $object_id,
-						'left_id' => $left_id,
-						'right_id' => $right_id,
+						'tree_id' => (int)$this->getTree(),
+						'parent_id' => (int)$parent_id,
+						'object_id' => (int)$object_id,
+						'left_id' => (int)$left_id,
+						'right_id' => (int)$right_id,
 						);
 
 			Debug::Text(' Inserting Node... Left ID: '. $left_id .' Right ID: '. $right_id, __FILE__, __LINE__, __METHOD__, 10);
@@ -683,8 +683,8 @@ class FastTree {
 			Debug::Text(' No Children: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			$ph = array(
-						'tree_id' => $this->getTree(),
-						'object_id' => $object_id,
+						'tree_id' => (int)$this->getTree(),
+						'object_id' => (int)$object_id,
 						);
 
 			$query = 'DELETE FROM '. $this->table .' WHERE tree_id = ? AND object_id = ?';
@@ -708,17 +708,17 @@ class FastTree {
 			$parent_id = $this->getParentId( $object_id );
 
 			$ph = array(
-						'tree_id' => $this->getTree(),
-						'object_id' => $object_id,
+						'tree_id' => (int)$this->getTree(),
+						'object_id' => (int)$object_id,
 						);
 
 			$query = 'DELETE FROM '. $this->table .' WHERE tree_id = ? AND object_id = ?';
 			$this->db->Execute($query, $ph);
 
 			$ph = array(
-						'parent_id' => $parent_id,
-						'tree_id' => $this->getTree(),
-						'object_id' => $object_id,
+						'parent_id' => (int)$parent_id,
+						'tree_id' => (int)$this->getTree(),
+						'object_id' => (int)$object_id,
 						);
 
 			$query = '	UPDATE '. $this->table .'
@@ -758,9 +758,9 @@ class FastTree {
 		$this->db->BeginTrans();
 
 		$ph = array(
-					'parent_id' => $parent_id,
-					'tree_id' => $this->getTree(),
-					'object_id' => $object_id,
+					'parent_id' => (int)$parent_id,
+					'tree_id' => (int)$this->getTree(),
+					'object_id' => (int)$object_id,
 					);
 
 		$query = '	UPDATE '. $this->table .'
@@ -804,9 +804,9 @@ class FastTree {
 			$this->db->BeginTrans();
 
 			$ph = array(
-						'new_object_id' => $new_object_id,
-						'tree_id' => $this->getTree(),
-						'object_id' => $object_id,
+						'new_object_id' => (int)$new_object_id,
+						'tree_id' => (int)$this->getTree(),
+						'object_id' => (int)$object_id,
 						);
 
 			//Update parent IDs

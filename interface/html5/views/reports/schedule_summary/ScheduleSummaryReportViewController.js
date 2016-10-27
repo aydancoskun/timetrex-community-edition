@@ -28,9 +28,10 @@ ScheduleSummaryReportViewController = ReportBaseViewController.extend( {
 				$this.initEditViewUI( $this.viewId, $this.view_file );
 			}
 
+			$this.do_validate_after_create_ui = true;
+
 			$this.getReportData( function( result ) {
 				// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
-
 				var edit_item = result[0];
 				if ( LocalCacheData.default_edit_id_for_next_open_edit_view ) {
 					for ( var i = 0; i < result.length; i++ ) {
@@ -97,11 +98,20 @@ ScheduleSummaryReportViewController = ReportBaseViewController.extend( {
 			sub_menus: []
 		} );
 
-		var view = new RibbonSubMenu( {
+		var view_html = new RibbonSubMenu( {
 			label: $.i18n._( 'View' ),
-			id: ContextMenuIconName.view,
+			id: ContextMenuIconName.view_html,
 			group: editor_group,
 			icon: Icons.view,
+			permission_result: true,
+			permission: null
+		} );
+
+		var view_pdf = new RibbonSubMenu( {
+			label: $.i18n._( 'PDF' ),
+			id: ContextMenuIconName.view,
+			group: editor_group,
+			icon: Icons.print,
 			permission_result: true,
 			permission: null
 		} );

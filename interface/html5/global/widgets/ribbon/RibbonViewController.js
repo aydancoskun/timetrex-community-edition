@@ -199,6 +199,10 @@ RibbonViewController = Backbone.View.extend( {
 	},
 
 	render: function() {
+		// Error: TypeError: $(...).tabs is not a function in /interface/html5/framework/jquery.min.js?v=8.0.6-20150417-104146 line 2 > eval line 205
+		if ( !this.el ) {
+			return;
+		}
 
 		this.buildRibbonMenus();
 
@@ -215,13 +219,20 @@ RibbonViewController = Backbone.View.extend( {
 		} else {
 			$( '#leftLogo' ).attr( 'src', Global.getRealImagePath( 'css/global/widgets/ribbon/images/logo.png' ) );
 		}
-
-//		$( '#rightLogo' ).load( function() {
-//
-//		} );
-
 		$( '#rightLogo' ).attr( 'src', ServiceCaller.companyLogo + '&t=' + new Date().getTime() );
-
+		$( '#leftLogo' ).unbind( 'click' ).bind( 'click', function() {
+			if ( LocalCacheData.current_open_primary_controller.viewId !== 'Home' ) {
+				TopMenuManager.goToView( 'Home' );
+			} else {
+				LocalCacheData.current_open_primary_controller.setDefaultMenu();
+				if(LocalCacheData.current_open_edit_only_controller){
+					LocalCacheData.current_open_edit_only_controller.onCancelClick();
+				}
+				if ( LocalCacheData.current_open_report_controller ) {
+					LocalCacheData.current_open_report_controller.removeEditView();
+				}
+			}
+		} );
 	},
 
 	setSelectMenu: function( name ) {

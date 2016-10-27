@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -42,6 +42,7 @@ class RecurringScheduleControlFactory extends Factory {
 	protected $table = 'recurring_schedule_control';
 	protected $pk_sequence_name = 'recurring_schedule_control_id_seq'; //PK Sequence name
 
+	protected $company_obj = NULL;
 	protected $recurring_schedule_template_obj = NULL;
 
 	function _getFactoryOptions( $name ) {
@@ -57,6 +58,7 @@ class RecurringScheduleControlFactory extends Factory {
 										'-1040-recurring_schedule_template_control_description' => TTi18n::gettext('Description'),
 										'-1050-start_date' => TTi18n::gettext('Start Date'),
 										'-1060-end_date' => TTi18n::gettext('End Date'),
+										'-1065-display_weeks' => TTi18n::gettext('Display Weeks'),
 										'-1070-auto_fill' => TTi18n::gettext('Auto-Punch'),
 
 										'-1090-title' => TTi18n::gettext('Title'),
@@ -113,12 +115,22 @@ class RecurringScheduleControlFactory extends Factory {
 										'start_week' => 'StartWeek',
 										'start_date' => 'StartDate',
 										'end_date' => 'EndDate',
+										'display_weeks' => 'DisplayWeeks',
 										'auto_fill' => 'AutoFill',
 										'user' => 'User',
 										'deleted' => 'Deleted',
 										);
 		return $variable_function_map;
 	}
+
+	function getCompanyObject() {
+		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
+	}
+
+	function getRecurringScheduleTemplateControlObject() {
+		return $this->getGenericObject( 'RecurringScheduleTemplateControlListFactory', $this->getRecurringScheduleTemplateControl(), 'recurring_schedule_template_control_obj' );
+	}
+
 
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
@@ -181,12 +193,12 @@ class RecurringScheduleControlFactory extends Factory {
 		$int = trim($int);
 
 		if	(
-				$this->Validator->isGreaterThan(	'week',
+				$this->Validator->isGreaterThan(	'start_week',
 													$int,
-													TTi18n::gettext('Start week is invalid'),
+													TTi18n::gettext('Start week must be at least 1'),
 													1)
 				AND
-				$this->Validator->isNumeric(		'week',
+				$this->Validator->isNumeric(		'start_week',
 													$int,
 													TTi18n::gettext('Start week is invalid')) ) {
 			$this->data['start_week'] = $int;
@@ -209,7 +221,7 @@ class RecurringScheduleControlFactory extends Factory {
 		return FALSE;
 	}
 	function setStartDate($epoch) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if	(	$this->Validator->isDate(		'start_date',
 												$epoch,
@@ -236,7 +248,7 @@ class RecurringScheduleControlFactory extends Factory {
 		return FALSE;
 	}
 	function setEndDate($epoch) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ( $epoch == '' ) {
 			$epoch = NULL;
@@ -250,6 +262,38 @@ class RecurringScheduleControlFactory extends Factory {
 			) {
 
 			$this->data['end_date'] = $epoch;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getDisplayWeeks() {
+		if ( isset($this->data['display_weeks']) ) {
+			return (int)$this->data['display_weeks'];
+		}
+
+		return FALSE;
+	}
+	function setDisplayWeeks($int) {
+		$int = trim($int);
+
+		if	(
+				$this->Validator->isGreaterThan(	'display_weeks',
+													$int,
+													TTi18n::gettext('Display Weeks must be at least 1'),
+													1)
+				AND
+				$this->Validator->isLessThan(		'display_weeks',
+													$int,
+													TTi18n::gettext('Display Weeks cannot exceed 78'),
+													78)
+				AND
+				$this->Validator->isNumeric(		'display_weeks',
+													$int,
+													TTi18n::gettext('Display weeks is invalid')) ) {
+			$this->data['display_weeks'] = $int;
 
 			return TRUE;
 		}
@@ -403,128 +447,39 @@ class RecurringScheduleControlFactory extends Factory {
 		return $week_arr;
 	}
 
-	//Used when taking recurring schedules and committing shifts for them in maintenance jobs.
-	function getShiftsByStartDateAndEndDate($start_date, $end_date) {
-
-		//Make sure timezone isn't in the time format. Because recurring schedules
-		//are timezone agnostic. 7:00AM in PST is also 7:00AM in EST.
-		//This causes an issue where the previous users timezone carries over to the next
-		//users timezone, causing errors.
-		//TTDate::setTimeFormat('g:i A');
-
-		if ( $start_date == '' ) {
-			return FALSE;
-		}
-
-		if ( $end_date == '' ) {
-			return FALSE;
-		}
-
-		if ( $start_date < $this->getStartDate() ) {
-			$start_date = $this->getStartDate();
-		}
-
-		if ( $this->getEndDate(TRUE) != NULL AND $end_date > $this->getEndDate() ) {
-			$end_date = $this->getEndDate();
-		}
-		Debug::text('Start Date: '. TTDate::getDate('DATE+TIME', $start_date) .'('.$start_date.') End Date: '. TTDate::getDate('DATE+TIME', $end_date) .'('.$end_date.')', __FILE__, __LINE__, __METHOD__, 10);
-
-		//Get week data
-		$rstlf = TTnew( 'RecurringScheduleTemplateListFactory' );
-		$rstlf->getByRecurringScheduleTemplateControlId( $this->getRecurringScheduleTemplateControl() )->getCurrent();
-		$max_week = 1;
-		$weeks = array();
-		if ( $rstlf->getRecordCount() > 0 ) {
-			foreach($rstlf as $rst_obj) {
-				//Debug::text('Week: '. $rst_obj->getWeek(), __FILE__, __LINE__, __METHOD__, 10);
-				$template_week_rows[$rst_obj->getWeek()][] = $rst_obj->getObjectAsArray();
-
-				$weeks[$rst_obj->getWeek()] = $rst_obj->getWeek();
-
-				if ( $rst_obj->getWeek() > $max_week ) {
-					$max_week = $rst_obj->getWeek();
-				}
-			}
-		}
-
-		$weeks = $this->ReMapWeeks( $weeks );
-
-		//Get week of start_date
-		$start_date_week = TTDate::getBeginWeekEpoch( $this->getStartDate(), 0 ); //Start week on Sunday to match Recurring Schedule.
-		//Debug::text('Week of Start Date: '. $start_date_week .' Date: '. TTDate::getDate('DATE+TIME', $this->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
-
-		//Since we add 43200 to each iteration (even though its removed right after), we need to add 43200 to the end_date as well so we loop the
-		//proper amount of times, otherwise schedules may be added too late.
-		for ( $i = $start_date; $i <= ($end_date + 43200); $i += (86400 + 43200) ) {
-			//Handle DST by adding 12hrs to the date to get the mid-day epoch, then forcing it back to the beginning of the day.
-			$i = TTDate::getBeginDayEpoch( $i );
-
-			//This needs to take into account weeks spanning January 1st of each year. Where the week goes from 53 to 1.
-			//Rather then use the week of the year, calculate the weeks between the recurring schedule start date and now.
-			$current_week = round( ( TTDate::getBeginWeekEpoch( $i, 0 ) - $start_date_week ) / ( 604800 ) ); //Find out which week we are on based on the recurring schedule start date. Use round due to DST the week might be 6.9 or 7.1, so we need to round to the nearest full week.
-			//Debug::text('I: '. $i .' User ID: '. $this->getColumn('user_id') .' Current Date: '. TTDate::getDate('DATE+TIME', $i) .' Current Week: '. $current_week .' Start Week: '. $start_date_week, __FILE__, __LINE__, __METHOD__, 10);
-
-			$template_week = ( ( $current_week % $max_week ) + 1 );
-			//Debug::text('Template Week: '. $template_week .' Max Week: '. $max_week, __FILE__, __LINE__, __METHOD__, 10);
-
-			$day_of_week = strtolower( date('D', $i) );
-			//Debug::text('Day Of Week: '. $day_of_week, __FILE__, __LINE__, __METHOD__, 10);
-
-			if ( isset($weeks[$template_week] ) ) {
-				$mapped_template_week = $weeks[$template_week];
-				//Debug::text('&nbsp;&nbsp;Mapped Template Week: '. $mapped_template_week, __FILE__, __LINE__, __METHOD__, 10);
-
-				if ( isset($template_week_rows[$mapped_template_week]) ) {
-					//Debug::text('&nbsp;&nbsp;&nbsp;&nbsp;Starting Looping...!', __FILE__, __LINE__, __METHOD__, 10);
-
-					foreach( $template_week_rows[$mapped_template_week] as $template_week_arr ) {
-						if ( $template_week_arr['days'][$day_of_week] == TRUE ) {
-							//Debug::text('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Found Scheduled Time: Start Time: '. TTDate::getDate('DATE+TIME', TTDate::getTimeLockedDate( $template_week_arr['start_time'], $i ) ), __FILE__, __LINE__, __METHOD__, 10);
-
-							$start_time = TTDate::getTimeLockedDate( $template_week_arr['raw_start_time'], $i );
-							$end_time = TTDate::getTimeLockedDate( $template_week_arr['raw_end_time'], $i );
-							if ( $end_time < $start_time ) {
-								//Spans the day boundary, add 86400 to end_time
-								$end_time = ( $end_time + 86400 );
-								//Debug::text('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Schedule spans day boundary, bumping endtime to next day: ', __FILE__, __LINE__, __METHOD__, 10);
-							}
-							//Debug::text('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Start Date: '. TTDate::getDate('DATE+TIME', $start_time) .' End Date: '. TTDate::getDate('DATE+TIME', $end_time), __FILE__, __LINE__, __METHOD__, 10);
-
-							//$shifts[TTDate::getBeginDayEpoch($i)][] = array(
-							$shifts[TTDate::getISODateStamp($i)][] = array(
-																'status_id' => $template_week_arr['status_id'],
-																'absence_policy_id' => (int)$template_week_arr['absence_policy_id'],
-																'start_time' => $start_time,
-																'raw_start_time' => TTDate::getDate('DATE+TIME', $start_time ),
-																'end_time' => $end_time,
-																'raw_end_time' => TTDate::getDate('DATE+TIME', $end_time ),
-																'total_time' => $template_week_arr['total_time'],
-																'schedule_policy_id' => $template_week_arr['schedule_policy_id'],
-																'branch_id' => $template_week_arr['branch_id'],
-																'department_id' => $template_week_arr['department_id'],
-																'job_id' => $template_week_arr['job_id'],
-																'job_item_id' => $template_week_arr['job_item_id']
-																);
-							unset($start_time, $end_time);
-						} //else { //Debug::text('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aSkipping!', __FILE__, __LINE__, __METHOD__, 10);
-					}
-				} //else { //Debug::text('&nbsp;&nbsp;&nbsp;&nbsp;bSkipping!', __FILE__, __LINE__, __METHOD__, 10);
-			} //else { //Debug::text('&nbsp;&nbsp;cSkipping!', __FILE__, __LINE__, __METHOD__, 10);
-		}
-
-		//var_dump($shifts);
-		if ( isset($shifts) ) {
-			return $shifts;
-		}
-
-		return FALSE;
-	}
-
 	function preSave() {
 		if ( $this->getStartWeek() < 1 ) {
 			$this->setStartWeek( 1 );
 		}
-		
+
+		return TRUE;
+	}
+
+	function postSave() {
+		//
+		//**THIS IS DONE IN RecurringScheduleControlFactory, RecurringScheduleTemplateControlFactory, HolidayFactory postSave() as well.
+		//
+
+		//Handle generating recurring schedule rows, so they are as real-time as possible.
+		$current_epoch = time();
+
+		$rsf = TTnew('RecurringScheduleFactory');
+		$rsf->StartTransaction();
+		$rsf->clearRecurringSchedulesFromRecurringScheduleControl( $this->getID(), ( $current_epoch - (86400 * 720) ), ( $current_epoch + (86400 * 720) ) );
+		if ( $this->getDeleted() == FALSE ) {
+			//FIXME: Put a cap on this perhaps, as 3mths into the future so we don't spend a ton of time doing this
+			//if the user puts sets it to display 1-2yrs in the future. Leave creating the rest of the rows to the maintenance job?
+			//Since things may change we will want to delete all schedules with each change, but only add back in X weeks at most unless from a maintenance job.
+			$maximum_end_date = ( TTDate::getBeginWeekEpoch($current_epoch) + ( $this->getDisplayWeeks() * ( 86400 * 7 ) ) );
+			if ( $this->getEndDate() != '' AND $maximum_end_date > $this->getEndDate() ) {
+				$maximum_end_date = $this->getEndDate();
+			}
+			Debug::text('Recurring Schedule ID: '. $this->getID() .' Maximum End Date: '. TTDate::getDate('DATE+TIME', $maximum_end_date ), __FILE__, __LINE__, __METHOD__, 10);
+
+			$rsf->addRecurringSchedulesFromRecurringScheduleControl( $this->getCompany(), $this->getID(), $current_epoch, $maximum_end_date );
+		}
+		$rsf->CommitTransaction();
+
 		return TRUE;
 	}
 

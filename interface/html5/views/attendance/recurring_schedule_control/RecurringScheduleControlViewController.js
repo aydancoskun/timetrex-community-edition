@@ -39,18 +39,20 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 			$this.user_status_array = Global.buildRecordArray( res );
 		} );
 
-		this.user_group_api.getUserGroup( '', false, false, {onResult: function( res ) {
-			res = res.getResult();
+		this.user_group_api.getUserGroup( '', false, false, {
+			onResult: function( res ) {
+				res = res.getResult();
 
-			res = Global.buildTreeRecord( res );
-			$this.user_group_array = res;
+				res = Global.buildTreeRecord( res );
+				$this.user_group_array = res;
 
-			if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
-				$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
-				$this.adv_search_field_ui_dic['group_id'].setSourceData( res );
+				if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
+					$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
+					$this.adv_search_field_ui_dic['group_id'].setSourceData( res );
+				}
+
 			}
-
-		}} );
+		} );
 
 	},
 
@@ -65,7 +67,6 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 			'tab_audit': $.i18n._( 'Audit' )
 		} );
 
-
 		var form_item_input;
 		var widgetContainer;
 
@@ -75,7 +76,8 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.RECURRING_SCHEDULE_CONTROL,
 			navigation_mode: true,
-			show_search_inputs: true} );
+			show_search_inputs: true
+		} );
 
 		this.setNavigation();
 
@@ -106,46 +108,39 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 		// Start Week
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( {field: 'start_week', width: 40} );
-		this.addEditFieldToColumn( $.i18n._( 'Start Week' ), form_item_input, tab_recurring_schedule_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Template Start Week' ), form_item_input, tab_recurring_schedule_column1 );
 
 		// Start Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-
 		form_item_input.TDatePicker( {field: 'start_date'} );
-
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().date_format_example + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_recurring_schedule_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_recurring_schedule_column1, '', null );
 
 		// End Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-
 		form_item_input.TDatePicker( {field: 'end_date'} );
-
 		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().date_format_example + " " + $.i18n._( "(Leave blank for no end date)" ) + "</span>" );
+		var label = $( "<span class='widget-right-label'>"+ $.i18n._( '(Leave blank for no start date)' ) + "</span>" );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab_recurring_schedule_column1, '', widgetContainer );
 
-		// Auto-Punch
+		// Display Weeks
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( {field: 'display_weeks', width: 20} );
+		this.addEditFieldToColumn( $.i18n._( 'Display Weeks' ), form_item_input, tab_recurring_schedule_column1, '', null );
 
-		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'auto_fill'} );
-
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> ( " + $.i18n._( 'Punches employees in/out automatically' ) + " )</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-
-		this.addEditFieldToColumn( $.i18n._( 'Auto-Punch' ), form_item_input, tab_recurring_schedule_column1, '', widgetContainer );
+		if ( ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) ) {
+			// Auto-Punch
+			form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
+			form_item_input.TCheckbox( {field: 'auto_fill'} );
+			widgetContainer = $( "<div class='widget-h-box'></div>" );
+			label = $( "<span class='widget-right-label t-checkbox-padding-left'> (" + $.i18n._( 'Punches employees in/out automatically' ) + ")</span>" );
+			widgetContainer.append( form_item_input );
+			widgetContainer.append( label );
+			this.addEditFieldToColumn( $.i18n._( 'Auto-Punch' ), form_item_input, tab_recurring_schedule_column1, '', widgetContainer );
+		}
 
 		// Employees
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -201,17 +196,19 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-
-			new SearchField( {label: $.i18n._( 'Employee Status' ),
+			new SearchField( {
+				label: $.i18n._( 'Employee Status' ),
 				in_column: 1,
 				field: 'user_status_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Template' ),
+			new SearchField( {
+				label: $.i18n._( 'Template' ),
 				in_column: 1,
 				field: 'recurring_schedule_template_control_id',
 				layout_name: ALayoutIDs.RECURRING_TEMPLATE_CONTROL,
@@ -219,9 +216,11 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Employee' ),
+			new SearchField( {
+				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
@@ -230,9 +229,11 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				basic_search: true,
 				adv_search: true,
 				addition_source_function: this.onEmployeeSourceCreate,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Group' ),
+			new SearchField( {
+				label: $.i18n._( 'Group' ),
 				in_column: 1,
 				multiple: true,
 				field: 'group_id',
@@ -240,9 +241,11 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				tree_mode: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Title' ),
+			new SearchField( {
+				label: $.i18n._( 'Title' ),
 				field: 'title_id',
 				in_column: 1,
 				layout_name: ALayoutIDs.JOB_TITLE,
@@ -250,9 +253,11 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Default Branch' ),
+			new SearchField( {
+				label: $.i18n._( 'Default Branch' ),
 				in_column: 2,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
@@ -261,9 +266,11 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				basic_search: true,
 				adv_search: true,
 				script_name: 'BranchView',
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Default Department' ),
+			new SearchField( {
+				label: $.i18n._( 'Default Department' ),
 				in_column: 2,
 				field: 'default_department_id',
 				layout_name: ALayoutIDs.DEPARTMENT,
@@ -272,9 +279,11 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				basic_search: true,
 				adv_search: true,
 				script_name: 'DepartmentView',
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -282,9 +291,11 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -292,7 +303,8 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} )];
+				form_item_type: FormItemType.AWESOME_BOX
+			} )];
 	},
 
 	onEmployeeSourceCreate: function( target, source_data ) {
@@ -311,7 +323,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 			return false;
 		} );
 
-		//Error: Object doesn't support property or method 'unshift' in https://ondemand1.timetrex.com/interface/html5/line 6953
+		//Error: Object doesn't support property or method 'unshift' in /interface/html5/line 6953
 		if ( !source_data || $.type( source_data ) !== 'array' ) {
 			source_data = [];
 		}
@@ -575,9 +587,9 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		this._super( 'setEditViewDataDone' );
 
 		if ( this.is_mass_editing ) {
-			this.edit_view_form_item_dic.user.hide();
+			this.detachElement('user');
 		} else {
-			this.edit_view_form_item_dic.user.show();
+			this.attachElement('user');
 		}
 
 	},
@@ -632,26 +644,28 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		filter.filter_data = {};
 		filter.filter_data.id = [selectedId];
 
-		this.api['get' + this.api.key_name]( filter, {onResult: function( result ) {
-			var result_data = result.getResult();
+		this.api['get' + this.api.key_name]( filter, {
+			onResult: function( result ) {
+				var result_data = result.getResult();
 
-			if ( !result_data ) {
-				result_data = [];
+				if ( !result_data ) {
+					result_data = [];
+				}
+
+				result_data = result_data[0];
+
+				if ( !result_data ) {
+					TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
+					$this.onCancelClick();
+					return;
+				}
+
+				$this.current_edit_record = result_data;
+
+				$this.initEditView();
+
 			}
-
-			result_data = result_data[0];
-
-			if ( !result_data ) {
-				TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-				$this.onCancelClick();
-				return;
-			}
-
-			$this.current_edit_record = result_data;
-
-			$this.initEditView();
-
-		}} );
+		} );
 
 	},
 
@@ -674,38 +688,44 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		filter.filter_data = {};
 		filter.filter_data.id = this.mass_edit_record_ids;
 
-		this.api['getCommon' + this.api.key_name + 'Data']( filter, {onResult: function( result ) {
+		this.api['getCommon' + this.api.key_name + 'Data']( filter, {
+			onResult: function( result ) {
 
-			var result_data = result.getResult();
+				var result_data = result.getResult();
 
-			if ( result_data.id ) {
-				$this.onEditClick( result_data.id );
-				return;
-			}
+				if ( result_data.id ) {
+					$this.onEditClick( result_data.id );
+					return;
+				}
 
-			$this.openEditView();
+				$this.openEditView();
 
-			if ( !result_data ) {
-				result_data = [];
-			}
+				if ( !result_data ) {
+					result_data = [];
+				}
 
-			$this.api['getOptions']( 'unique_columns', {onResult: function( result ) {
-				$this.unique_columns = result.getResult();
-				$this.api['getOptions']( 'linked_columns', {onResult: function( result1 ) {
-					$this.linked_columns = result1.getResult();
+				$this.api['getOptions']( 'unique_columns', {
+					onResult: function( result ) {
+						$this.unique_columns = result.getResult();
+						$this.api['getOptions']( 'linked_columns', {
+							onResult: function( result1 ) {
+								$this.linked_columns = result1.getResult();
 
-					if ( $this.sub_view_mode && $this.parent_key ) {
-						result_data[$this.parent_key] = $this.parent_value;
+								if ( $this.sub_view_mode && $this.parent_key ) {
+									result_data[$this.parent_key] = $this.parent_value;
+								}
+
+								$this.current_edit_record = result_data;
+								$this.initEditView();
+
+							}
+						} );
+
 					}
+				} );
 
-					$this.current_edit_record = result_data;
-					$this.initEditView();
-
-				}} );
-
-			}} );
-
-		}} );
+			}
+		} );
 
 	},
 
@@ -738,10 +758,12 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		filter.filter_data = {};
 		filter.filter_data.id = [selectedId];
 
-		this.api['get' + this.api.key_name]( filter, {onResult: function( result ) {
-			$this.onEditClickResult( result );
+		this.api['get' + this.api.key_name]( filter, {
+			onResult: function( result ) {
+				$this.onEditClickResult( result );
 
-		}} );
+			}
+		} );
 
 	},
 
@@ -806,11 +828,13 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 			filter.filter_data = {};
 			filter.filter_data.id = [selectedId];
 
-			this.api['get' + this.api.key_name]( filter, {onResult: function( result ) {
+			this.api['get' + this.api.key_name]( filter, {
+				onResult: function( result ) {
 
-				$this.onCopyAsNewResult( result );
+					$this.onCopyAsNewResult( result );
 
-			}} );
+				}
+			} );
 		}
 
 	},
@@ -832,10 +856,12 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		}
 
 		ProgressBar.showOverlay();
-		$this.api['copy' + $this.api.key_name]( copyIds, {onResult: function( result ) {
-			$this.onCopyResult( result )
+		$this.api['copy' + $this.api.key_name]( copyIds, {
+			onResult: function( result ) {
+				$this.onCopyResult( result )
 
-		}} );
+			}
+		} );
 	},
 
 	onDeleteAndNextClick: function() {
@@ -846,16 +872,18 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 			var remove_ids = [];
 			if ( $this.edit_view ) {
-				remove_ids[$this.current_edit_record.id] = [ $this.current_edit_record.user_id];
+				remove_ids[$this.current_edit_record.id] = [$this.current_edit_record.user_id];
 			}
 
 			if ( result ) {
 
 				ProgressBar.showOverlay();
-				$this.api['delete' + $this.api.key_name]( remove_ids, {onResult: function( result ) {
-					$this.onDeleteAndNextResult( result, remove_ids );
+				$this.api['delete' + $this.api.key_name]( remove_ids, {
+					onResult: function( result ) {
+						$this.onDeleteAndNextResult( result, remove_ids );
 
-				}} );
+					}
+				} );
 
 			} else {
 				ProgressBar.closeOverlay();
@@ -871,7 +899,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 			var remove_ids = {};
 			if ( $this.edit_view ) {
-				remove_ids[$this.current_edit_record.id] = [ $this.current_edit_record.user_id];
+				remove_ids[$this.current_edit_record.id] = [$this.current_edit_record.user_id];
 			} else {
 				var ids = $this.getGridSelectIdArray().slice();
 
@@ -890,9 +918,11 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 			}
 			if ( result ) {
 				ProgressBar.showOverlay();
-				$this.api['delete' + $this.api.key_name]( remove_ids, {onResult: function( result ) {
-					$this.onDeleteResult( result, remove_ids );
-				}} );
+				$this.api['delete' + $this.api.key_name]( remove_ids, {
+					onResult: function( result ) {
+						$this.onDeleteResult( result, remove_ids );
+					}
+				} );
 
 			} else {
 				ProgressBar.closeOverlay();
@@ -919,27 +949,29 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 					temp_filter.filter_data.id = [selected_item.id];
 					temp_filter.filter_columns = {user_id: true};
 
-					this.api['get' + this.api.key_name]( temp_filter, {onResult: function( result ) {
-						var result_data = result.getResult();
+					this.api['get' + this.api.key_name]( temp_filter, {
+						onResult: function( result ) {
+							var result_data = result.getResult();
 
-						if ( !result_data ) {
-							result_data = [];
+							if ( !result_data ) {
+								result_data = [];
+							}
+
+							result_data = result_data[0];
+
+							include_users = [result_data.user_id];
+
+							filter.filter_data.include_user_ids = {value: include_users};
+							filter.select_date = now_date.format();
+							Global.addViewTab( $this.viewId, 'Recurring Schedules', window.location.href );
+							IndexViewController.goToView( 'Schedule', filter );
+
 						}
-
-						result_data = result_data[0];
-
-						include_users = [result_data.user_id];
-
-						filter.filter_data.include_user_ids = {value: include_users };
-						filter.select_date = now_date.format();
-						Global.addViewTab( $this.viewId, 'Recurring Schedules', window.location.href );
-						IndexViewController.goToView( 'Schedule', filter );
-
-					}} );
+					} );
 
 				} else {
 					include_users = [selected_item.user_id];
-					filter.filter_data.include_user_ids = {value: include_users };
+					filter.filter_data.include_user_ids = {value: include_users};
 					filter.select_date = now_date.format();
 
 					Global.addViewTab( this.viewId, 'Recurring Schedules', window.location.href );
@@ -959,21 +991,23 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 					temp_filter.filter_data = {};
 					temp_filter.filter_data.id = [selected_item.id];
 
-					this.api['get' + this.api.key_name]( temp_filter, {onResult: function( result ) {
-						var result_data = result.getResult();
+					this.api['get' + this.api.key_name]( temp_filter, {
+						onResult: function( result ) {
+							var result_data = result.getResult();
 
-						if ( !result_data ) {
-							result_data = [];
+							if ( !result_data ) {
+								result_data = [];
+							}
+
+							result_data = result_data[0];
+
+							filter.filter_data.id = [result_data.recurring_schedule_template_control_id];
+
+							Global.addViewTab( $this.viewId, 'Recurring Schedules', window.location.href );
+							IndexViewController.goToView( 'RecurringScheduleTemplateControl', filter );
+
 						}
-
-						result_data = result_data[0];
-
-						filter.filter_data.id = [result_data.recurring_schedule_template_control_id];
-
-						Global.addViewTab( $this.viewId, 'Recurring Schedules', window.location.href );
-						IndexViewController.goToView( 'RecurringScheduleTemplateControl', filter );
-
-					}} );
+					} );
 
 				} else {
 					filter.filter_data.id = [selected_item.recurring_schedule_template_control_id];
@@ -989,10 +1023,10 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 	setDefaultMenu: function( doNotSetFocus ) {
 
-        //Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
-        if (!this.context_menu_array) {
-            return;
-        }
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+		if ( !this.context_menu_array ) {
+			return;
+		}
 
 		if ( !Global.isSet( doNotSetFocus ) || !doNotSetFocus ) {
 			this.selectContextMenu();
@@ -1161,75 +1195,77 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 		this.last_select_ids = this.getGridSelectIdArray();
 
-		this.api['get' + this.api.key_name]( filter, {onResult: function( result ) {
+		this.api['get' + this.api.key_name]( filter, {
+			onResult: function( result ) {
 
-			var result_data = result.getResult();
-			if ( !Global.isArray( result_data ) ) {
-				$this.showNoResultCover()
-			} else {
-				$this.removeNoResultCover();
-				if ( Global.isSet( $this.__createRowId ) ) {
-					result_data = $this.__createRowId( result_data );
-				}
-
-				result_data = Global.formatGridData( result_data, $this.api.key_name );
-			}
-			//Set Page data to widget, next show display info when setDefault Menu
-			$this.pager_data = result.getPagerData();
-
-			//CLick to show more mode no need this step
-			if ( LocalCacheData.paging_type !== 0 ) {
-				$this.paging_widget.setPagerData( $this.pager_data );
-				$this.paging_widget_2.setPagerData( $this.pager_data );
-			}
-
-			if ( LocalCacheData.paging_type === 0 && page_action === 'next' ) {
-				var current_data = $this.grid.getGridParam( 'data' );
-				result_data = current_data.concat( result_data );
-			}
-
-			///Override to reset id, because id of each record is the same if employess assigned to this id.
-			var len = result_data.length;
-
-			for ( var i = 0; i < len; i++ ) {
-				var item = result_data[i];
-
-				item.id = item.id + '_' + item.user_id;
-			}
-
-			$this.grid.clearGridData();
-			$this.grid.setGridParam( {data: result_data} );
-			$this.grid.trigger( 'reloadGrid' );
-
-			$this.reSelectLastSelectItems();
-
-			$this.setGridCellBackGround(); //Set cell background for some views
-
-			ProgressBar.closeOverlay(); //Add this in initData
-			if ( set_default_menu ) {
-				$this.setDefaultMenu( true );
-			}
-
-			if ( LocalCacheData.paging_type === 0 ) {
-				if ( !$this.pager_data || $this.pager_data.is_last_page ) {
-					$this.paging_widget.css( 'display', 'none' );
+				var result_data = result.getResult();
+				if ( !Global.isArray( result_data ) ) {
+					$this.showNoResultCover()
 				} else {
-					$this.paging_widget.css( 'display', 'block' );
+					$this.removeNoResultCover();
+					if ( Global.isSet( $this.__createRowId ) ) {
+						result_data = $this.__createRowId( result_data );
+					}
+
+					result_data = Global.formatGridData( result_data, $this.api.key_name );
 				}
+				//Set Page data to widget, next show display info when setDefault Menu
+				$this.pager_data = result.getPagerData();
+
+				//CLick to show more mode no need this step
+				if ( LocalCacheData.paging_type !== 0 ) {
+					$this.paging_widget.setPagerData( $this.pager_data );
+					$this.paging_widget_2.setPagerData( $this.pager_data );
+				}
+
+				if ( LocalCacheData.paging_type === 0 && page_action === 'next' ) {
+					var current_data = $this.grid.getGridParam( 'data' );
+					result_data = current_data.concat( result_data );
+				}
+
+				///Override to reset id, because id of each record is the same if employess assigned to this id.
+				var len = result_data.length;
+
+				for ( var i = 0; i < len; i++ ) {
+					var item = result_data[i];
+
+					item.id = item.id + '_' + item.user_id;
+				}
+
+				$this.grid.clearGridData();
+				$this.grid.setGridParam( {data: result_data} );
+				$this.grid.trigger( 'reloadGrid' );
+
+				$this.reSelectLastSelectItems();
+
+				$this.setGridCellBackGround(); //Set cell background for some views
+
+				ProgressBar.closeOverlay(); //Add this in initData
+				if ( set_default_menu ) {
+					$this.setDefaultMenu( true );
+				}
+
+				if ( LocalCacheData.paging_type === 0 ) {
+					if ( !$this.pager_data || $this.pager_data.is_last_page ) {
+						$this.paging_widget.css( 'display', 'none' );
+					} else {
+						$this.paging_widget.css( 'display', 'block' );
+					}
+				}
+
+				if ( callBack ) {
+					callBack( result );
+				}
+
+				// when call this from save and new result, we don't call auto open, because this will call onAddClick twice
+				if ( set_default_menu ) {
+					$this.autoOpenEditViewIfNecessary();
+				}
+
+				$this.searchDone();
+
 			}
-
-			if ( callBack ) {
-				callBack( result );
-			}
-
-			// when call this from save and new result, we don't call auto open, because this will call onAddClick twice
-			if ( set_default_menu ) {
-				$this.autoOpenEditViewIfNecessary();
-			}
-
-			$this.searchDone();
-
-		}} );
+		} );
 
 	},
 

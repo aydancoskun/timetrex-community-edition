@@ -22,6 +22,10 @@ ALayoutIDs.EXPENSE = 'global_expense';
 
 ALayoutIDs.ABSENCES_POLICY = 'global_absences';
 
+ALayoutIDs.DASHBOARD = 'global_dashboard';
+
+ALayoutIDs.DASHBOARD_ORDER = 'global_dashboard_order';
+
 ALayoutIDs.BANK_ACCOUNT = 'global_bank_account';
 
 ALayoutIDs.KPI = 'global_kpi';
@@ -61,7 +65,6 @@ ALayoutIDs.COMPANY = 'global_company';
 ALayoutIDs.COMPANY_DEDUCTION = 'global_deduction';
 
 ALayoutIDs.CURRENCY = 'global_currency';
-
 
 ALayoutIDs.CURRENCY_RATE = 'global_currency_rate';
 
@@ -162,7 +165,6 @@ ALayoutIDs.SCHEDULE_SHIFT = 'global_schedule_shift';
 ALayoutIDs.SHIPPING_POLICY = 'global_shipping_policy';
 
 ALayoutIDs.STATION = 'global_station';
-
 
 ALayoutIDs.TAX_POLICY = 'global_tax_policy';
 

@@ -178,6 +178,13 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 			case ContextMenuIconName.view:
 				this.onViewClick();
 				break;
+			case ContextMenuIconName.view_html:
+
+				this.onViewClick('html');
+				break;
+			case ContextMenuIconName.view_html_new_window:
+				this.onViewClick('html', true);
+				break;
 			case ContextMenuIconName.export_excel:
 				this.onViewExcelClick();
 				break;
@@ -538,19 +545,15 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 			for ( var i = 0; i < len; i++ ) {
 				var row = grid_data[i];
 				var column_id = row.label;
-
 				var export_column_value = export_columns[row.value];
-
+				// Error: Uncaught TypeError: Cannot read property 'hour_column' of undefined in /interface/html5/#!m=Exception&sm=PayrollExportReport&sid=1726 line 523 
 				if ( !export_column_value ) {
-
-					if ( default_columns ) {
+					if ( default_columns && row.value ) {
 						export_column_value = default_columns[row.value]
 					} else {
 						export_column_value = {};
 					}
-
 				}
-
 				hour_column = export_column_value.hour_column;
 				hour_code = export_column_value.hour_code;
 
@@ -620,6 +623,9 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 			this.setEditMenu();
 		} else if ( ui.index === 1 ) {
 			this.edit_view_ui_dic.setup_field.setValue( this.current_edit_record.setup_field );
+			if ( LocalCacheData.getCurrentCompany().product_edition_id == 10 ) {
+				this.edit_view_ui_dic.auto_refresh.parent().parent().css( 'display', 'none' );
+			}
 			this.buildContextMenu( true );
 			this.setEditMenu();
 		} else if ( ui.index === 2 ) {
@@ -1036,7 +1042,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				code = 'include_hourly_rate';
 				form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 				form_item_input.TCheckbox( {field: code} );
-				this.addEditFieldToColumn( $.i18n._( 'Include Override Dates' ), form_item_input, tab3_column1, '', null, true );
+				this.addEditFieldToColumn( $.i18n._( 'Include Override Rates' ), form_item_input, tab3_column1, '', null, true );
 				form_item_input.setValue( $this.export_setup_data[code] );
 
 				$this.export_setup_ui_dic[code] = $this.edit_view_form_item_dic[code];
@@ -1181,7 +1187,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 			html_item.remove();
 		}
 
-		//Error: Unable to get property 'find' of undefined or null reference in https://ondemand3.timetrex.com/interface/html5/ line 1033
+		//Error: Unable to get property 'find' of undefined or null reference in /interface/html5/ line 1033
 		if ( !this.edit_view_tab ) {
 			return;
 		}

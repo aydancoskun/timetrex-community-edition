@@ -1,12 +1,11 @@
 .a-combobox {
-
     display: inline-block;
     height: 24px;
-    min-width: 192px;
     cursor: pointer;
     text-align: left;
     margin-right: 3px;
-    font-size: 0px;
+    font-size: 0;
+    vertical-align: middle;
 
 }
 
@@ -122,8 +121,8 @@
 .a-combobox .focus-input {
     width: 1px;
     height: 1px;
-    border: 0px;
-    padding: 0px;
+    border: 0;
+    padding: 0;
     position: absolute;
     opacity: 0;
 }
@@ -138,7 +137,6 @@
     height: 24px;
     font-size: 12px;
     line-height: 24px;
-    min-width: 132px;
     overflow: hidden;
     display: inline-block;
     word-wrap: break-word;
@@ -173,10 +171,11 @@
 }
 
 .a-dropdown-div {
+    -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
-    -o-user-select: none;
+    -ms-user-select: none;
     user-select: none;
     cursor: default;
     position: absolute;

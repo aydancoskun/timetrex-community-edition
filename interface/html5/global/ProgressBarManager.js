@@ -44,6 +44,17 @@ var ProgressBar = (function() {
 		Global.overlay().removeClass( 'overlay' );
 	};
 
+	cancelProgressBar = function() {
+		if ( get_progress_timer ) {
+			clearInterval( get_progress_timer );
+		}
+		removeProgressBar( current_process_id );
+		get_progress_timer = false;
+		current_process_id = false;
+		last_iteration = null;
+		first_start_get_progress_timer = false;
+	};
+
 	var showProgressBar = function( message_id, auto_clear ) {
 
 		if ( !timer ) {
@@ -92,13 +103,7 @@ var ProgressBar = (function() {
 			var close_icon = loadngBox.find( '.close-icon' );
 
 			close_icon.unbind( 'click' ).click( function() {
-
-				clearInterval( get_progress_timer );
-				removeProgressBar( current_process_id );
-				get_progress_timer = false;
-				current_process_id = false;
-				last_iteration = null;
-				first_start_get_progress_timer = false;
+				cancelProgressBar();
 
 			} );
 
@@ -221,7 +226,7 @@ var ProgressBar = (function() {
 					time_offset = 0;
 				}
 
-				//Error: 'console' is undefined in https://ondemand3.timetrex.com/interface/html5/global/ProgressBarManager.js?v=8.0.0-20141117-153515 line 224
+				//Error: 'console' is undefined in /interface/html5/global/ProgressBarManager.js?v=8.0.0-20141117-153515 line 224
 				Global.log( 'New time_offset: ' + time_offset );
 				time_remaining.text( Global.secondToHHMMSS( time_offset, '99' ) );
 			}
@@ -377,7 +382,8 @@ var ProgressBar = (function() {
 		showOverlay: showOverlay,
 		closeOverlay: closeOverlay,
 		message_id_dic: message_id_dic,
-		changeProgressBarMessage: changeProgressBarMessage
+		changeProgressBarMessage: changeProgressBarMessage,
+		cancelProgressBar:cancelProgressBar
 	};
 
 })();

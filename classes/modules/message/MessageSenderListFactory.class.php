@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -59,8 +59,9 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -83,7 +84,7 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -111,7 +112,7 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -120,7 +121,7 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 						LEFT JOIN '. $uf->getTable() .' as b ON a.user_id = b.id
 					WHERE
 							b.company_id = ?
-							AND a.id in ('. $this->getListSQL($id, $ph) .')
+							AND a.id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 							AND a.deleted = 0
 					';
 		$this->ExecuteSQL( $query, $ph );
@@ -141,7 +142,7 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		//Ignore deleted message_sender rows, as the sender could have deleted the original message.
@@ -152,7 +153,7 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 						LEFT JOIN '. $uf->getTable() .' as c ON a.user_id = c.id
 					WHERE
 							c.company_id = ?
-							AND b.id in ('. $this->getListSQL($id, $ph) .')
+							AND b.id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 							AND ( b.deleted = 0 )
 					';
 		$this->ExecuteSQL( $query, $ph );
@@ -178,9 +179,9 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 		$mcf = new MessageControlFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					'object_type_id' => $object_type_id,
-					'object_id' => $object_id,
+					'company_id' => (int)$company_id,
+					'object_type_id' => (int)$object_type_id,
+					'object_id' => (int)$object_id,
 					'user_id' => (int)$user_id,
 					);
 
@@ -216,8 +217,8 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					'user_id' => $user_id,
+					'company_id' => (int)$company_id,
+					'user_id' => (int)$user_id,
 					);
 
 		$query = '
@@ -227,7 +228,7 @@ class MessageSenderListFactory extends MessageSenderFactory implements IteratorA
 					WHERE
 							b.company_id = ?
 							AND a.user_id = ?
-							AND a.id in ('. $this->getListSQL($id, $ph) .')
+							AND a.id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 							AND a.deleted = 0
 					';
 		$this->ExecuteSQL( $query, $ph );

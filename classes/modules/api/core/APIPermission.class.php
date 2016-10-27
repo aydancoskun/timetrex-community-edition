@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -51,7 +51,6 @@ class APIPermission extends APIFactory {
 		global $current_company;
 		$company_id = (int)$current_company->getId();
 
-		global $current_company;
 		$ulf = TTNew('UserListFactory');
 		return $ulf->getUniqueCountryByCompanyId( $company_id );
 	}
@@ -90,6 +89,7 @@ class APIPermission extends APIFactory {
 		}
 
 		//Debug::Arr($section_groups, 'bSection Groups: ', __FILE__, __LINE__, __METHOD__, 10);
+		$retarr = array();
 		foreach( $section_groups as $section_group ) {
 			$section_group = Misc::trimSortPrefix( $section_group );
 			if ( isset($section_group_map[$section_group]) ) {
@@ -99,7 +99,7 @@ class APIPermission extends APIFactory {
 			}
 		}
 		
-		if ( isset($retarr) ) {
+		if ( count($retarr) > 0 ) {
 			//Debug::Arr($retarr, 'Sections: ', __FILE__, __LINE__, __METHOD__, 10);
 			return $this->returnHandler( Misc::trimSortPrefix( $retarr, 1000 ) );
 		}

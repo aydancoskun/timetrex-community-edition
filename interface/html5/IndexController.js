@@ -21,7 +21,6 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 	reloadView: function( view_id ) {
 		TopMenuManager.selected_sub_menu_id = ''; // clear select ribbon menu, set in view init;
-		this.removeCurrentView();
 		BaseViewController.loadView( view_id );
 	},
 
@@ -34,6 +33,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 	/* jshint ignore:start */
 	onViewChange: function( viewName ) {
+		var $this = this;
 		var args = {};
 		var view_id;
 		var edit_id;
@@ -84,7 +84,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 					switch ( action ) {
 						case 'edit':
 
-							//Error: Unable to get property 'id' of undefined or null reference in https://villa.timetrex.com/interface/html5/IndexController.js?v=8.0.0-20141230-125406 line 87
+							//Error: Unable to get property 'id' of undefined or null reference in /interface/html5/IndexController.js?v=8.0.0-20141230-125406 line 87
 							if ( !LocalCacheData.current_open_primary_controller.edit_view ||
 								(LocalCacheData.current_open_primary_controller.current_edit_record &&
 								LocalCacheData.current_open_primary_controller.current_edit_record.id != edit_id) ) {
@@ -168,22 +168,105 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 		}
 
-		this.removeCurrentView();
-
+		var timeout_count;
 		if ( view_id !== 'Login' && !LocalCacheData.getLoginUser() ) {
 			Global.setURLToBrowser( Global.getBaseURL() + '#!m=Login' );
 			return;
-		} else if ( view_id !== 'Login' && Global.isSet( view_id ) ) {
+		} else {
+			timeout_count = 0;
+			if ( view_id !== 'Login' && Global.isSet( view_id ) ) {
+				if ( LocalCacheData.loadViewRequiredJSReady ) {
+					initRibbonMenuAndCopyRight();
+				} else {
+					var auto_login_timer = setInterval( function() {
+						if ( timeout_count == 100 ) {
+							clearInterval( auto_login_timer );
+						}
+						timeout_count = timeout_count + 1;
+						if ( LocalCacheData.loadViewRequiredJSReady ) {
+							initRibbonMenuAndCopyRight();
+							clearInterval( auto_login_timer );
+						}
+					}, 600 );
+				}
+			} else {
+				showRibbonMenuAndLoadView();
+			}
 
+		}
+
+		function showRibbonMenuAndLoadView() {
+			//Show ribbon menu UI
+			if ( view_id && view_id !== 'Login' && !TopMenuManager.ribbon_view_controller ) {
+				$this.addTopMenu();
+				$( 'body' ).removeClass( 'login-bg' );
+				$( 'body' ).addClass( 'application-bg' );
+				$this.setContentDivHeight();
+				$this.setLoginInformationLabel();
+
+			} else if ( view_id && view_id !== 'Login' && TopMenuManager.ribbon_view_controller ) {
+				Global.topContainer().css( 'display', 'block' );
+				$( 'body' ).removeClass( 'login-bg' );
+				$( 'body' ).addClass( 'application-bg' );
+			}
+
+			Global.loadViewSource( view_id, view_id + 'ViewController.js', function() {
+
+				var permission_id = view_id;
+
+				switch ( view_id ) {
+					case 'ClientGroup':
+						permission_id = 'Client';
+						break;
+					case 'ProductGroup':
+						permission_id = 'Product';
+						break;
+
+				}
+
+				if ( view_id === 'Login' || view_id === 'Home' || PermissionManager.checkTopLevelPermission( permission_id ) ) {
+					BaseViewController.loadView( view_id );
+				} else {
+					TAlertManager.showAlert( 'Permission denied' );
+				}
+
+			} );
+		}
+
+		function initRibbonMenuAndCopyRight() {
 			if ( !TopMenuManager.ribbon_menus ) {
 				TopMenuManager.initRibbonMenu();
 				TopMenuManager.selected_sub_menu_id = view_id;
 				TopMenuManager.selected_menu_id = TopMenuManager.menus_quick_map[view_id];
-
 			}
 
 			//Add copy right
 			Global.bottomContainer().css( 'display', 'block' );
+
+			//Add feedback event
+
+			if ( !Global.bottomFeedbackContainer().is( ':visible' ) ) {
+				$( '.yay-filter' ).attr( 'src', 'theme/default/css/global/widgets/ribbon/icons/happy.png' );
+				$( '.meh-filter' ).attr( 'src', 'theme/default/css/global/widgets/ribbon/icons/neutral.png' );
+				$( '.grr-filter' ).attr( 'src', 'theme/default/css/global/widgets/ribbon/icons/sad.png' );
+				Global.bottomFeedbackContainer().css( 'display', 'block' );
+				Global.bottomFeedbackContainer().find( 'img' ).each( function() {
+					var path = $( this ).attr( 'src' ).replace( /^(.*\/)[^\/]+$/, '$1' );
+					if ( Global.isSet( LocalCacheData.getLoginUser().feedback_rating ) && $( this ).attr( 'data-feedback' ) === LocalCacheData.getLoginUser().feedback_rating ) {
+						$( this ).addClass( 'current' ).attr( 'src', path + $( this ).attr( 'alt' ) + '_light.png' );
+					}
+					$( this ).unbind( 'click' ).bind( 'click', function() {
+						$( this ).TFeedback();
+					} )
+					$( this ).hover( function() {
+						$( this ).attr( 'src', path + $( this ).attr( 'alt' ) + '_light.png' );
+					}, function() {
+						if ( !$( this ).hasClass( 'current' ) ) {
+							$( this ).attr( 'src', path + $( this ).attr( 'alt' ) + '.png' );
+						}
+					} )
+				} );
+			}
 
 			$( '#copy_right_info_1' ).css( 'display', 'inline' );
 
@@ -194,42 +277,8 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 			}
 
+			showRibbonMenuAndLoadView();
 		}
-		//Show ribbon menu UI
-		if ( view_id && view_id !== 'Login' && !TopMenuManager.ribbon_view_controller ) {
-			this.addTopMenu();
-			$( 'body' ).removeClass( 'login-bg' );
-			$( 'body' ).addClass( 'application-bg' );
-			this.setContentDivHeight();
-			this.setLoginInformationLabel();
-
-		} else if ( view_id && view_id !== 'Login' && TopMenuManager.ribbon_view_controller ) {
-			Global.topContainer().css( 'display', 'block' );
-			$( 'body' ).removeClass( 'login-bg' );
-			$( 'body' ).addClass( 'application-bg' );
-		}
-
-		Global.loadViewSource( view_id, view_id + 'ViewController.js', function() {
-
-			var permission_id = view_id;
-
-			switch ( view_id ) {
-				case 'ClientGroup':
-					permission_id = 'Client';
-					break;
-				case 'ProductGroup':
-					permission_id = 'Product';
-					break;
-
-			}
-
-			if ( view_id === 'Login' || PermissionManager.checkTopLevelPermission( permission_id ) ) {
-				BaseViewController.loadView( view_id );
-			} else {
-				TAlertManager.showAlert( 'Permission denied' );
-			}
-
-		} );
 
 		function checkIds() {
 
@@ -349,6 +398,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 		Global.contentContainer().removeClass( 'content-container' );
 		Global.contentContainer().addClass( 'content-container-after-login' );
+		Global.topContainer().addClass( 'top-container-after-login' );
 
 	},
 
@@ -356,7 +406,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 		Global.loadScript( 'global/widgets/ribbon/RibbonViewController.js' );
 
-		//Error: ReferenceError: Can't find variable: RibbonViewController in https://ondemand1.timetrex.com/interface/html5/IndexController.js?v=8.0.0-20141117-091433 line 346
+		//Error: ReferenceError: Can't find variable: RibbonViewController in /interface/html5/IndexController.js?v=8.0.0-20141117-091433 line 346
 		if ( Global.isSet( RibbonViewController ) ) {
 			RibbonViewController.loadView();
 		}
@@ -484,7 +534,6 @@ IndexViewController.openReport = function( parent_view_controller, view_name, id
 				if ( LocalCacheData.default_edit_id_for_next_open_edit_view ) {
 					current_url = current_url + '&sid=' + LocalCacheData.default_edit_id_for_next_open_edit_view;
 				}
-
 				Global.setURLToBrowser( current_url );
 
 			} );
@@ -500,6 +549,10 @@ IndexViewController.openEditView = function( parent_view_controller, view_name, 
 	if ( !PermissionManager.checkTopLevelPermission( view_name ) ) {
 		TAlertManager.showAlert( 'Permission denied' );
 		return;
+	}
+
+	if ( LocalCacheData.current_open_edit_only_controller ) {
+		LocalCacheData.current_open_edit_only_controller.onCancelClick();
 	}
 
 	// track edit view only view
@@ -540,7 +593,7 @@ IndexViewController.setNotificationBar = function( target ) {
 
 	var api = new (APIFactory.getAPIClass( 'APINotification' ))();
 
-	//Error: TypeError: api.getNotification is not a function in https://ondemand2001.timetrex.com/interface/html5/IndexController.js?v=8.0.0-20141117-095711 line 529
+	//Error: TypeError: api.getNotification is not a function in /interface/html5/IndexController.js?v=8.0.0-20141117-095711 line 529
 	if ( !api || !api.getNotification || typeof(api.getNotification) !== 'function' ) {
 		return;
 	}

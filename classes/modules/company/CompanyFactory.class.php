@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -1443,9 +1443,12 @@ class CompanyFactory extends Factory {
 				break;
 			case 'password_minimum_strength':
 				$retval = array(
-										1 => TTi18n::gettext('Low'), //1-2 is low
-										3 => TTi18n::gettext('Medium'), //3-4 is medium
-										5 => TTi18n::gettext('High'), //5+ is high
+										1 => TTi18n::gettext('Very Low'),
+										2 => TTi18n::gettext('Low'),
+										3 => TTi18n::gettext('Medium'),
+										4 => TTi18n::gettext('High'),
+										5 => TTi18n::gettext('Very High'),
+										6 => TTi18n::gettext('Extremely High'), //6+ is extremely high
 									);
 				break;
 			case 'password_minimum_permission_level':
@@ -1487,6 +1490,11 @@ class CompanyFactory extends Factory {
 										'-1430-last_month_min_active_users' => TTi18n::gettext('Employees [Last Month] (MIN)'),
 										'-1435-last_month_avg_active_users' => TTi18n::gettext('Employees [Last Month] (AVG)'),
 										'-1440-last_month_max_active_users' => TTi18n::gettext('Employees [Last Month] (MAX)'),
+
+										'-1501-regular_user_feedback_rating' => TTi18n::gettext('Regular Employees Feedback Rating'),
+										'-1502-supervisor_user_feedback_rating' => TTi18n::gettext('Supervisor Employees Feedback Rating'),
+										'-1503-admin_user_feedback_rating' => TTi18n::gettext('Administrator Employees Feedback Rating'),
+										'-1504-all_user_feedback_rating' => TTi18n::gettext('All Employees Feedback Rating'),
 
 										'-2000-created_by' => TTi18n::gettext('Created By'),
 										'-2010-created_date' => TTi18n::gettext('Created Date'),
@@ -1587,6 +1595,11 @@ class CompanyFactory extends Factory {
 											'last_month_min_active_users' => FALSE,
 											'last_month_avg_active_users' => FALSE,
 											'last_month_max_active_users' => FALSE,
+
+											'regular_user_feedback_rating' => FALSE,
+											'supervisor_user_feedback_rating' => FALSE,
+											'admin_user_feedback_rating' => FALSE,
+											'all_user_feedback_rating' => FALSE,
 
 											'deleted' => 'Deleted',
 											);
@@ -1690,11 +1703,6 @@ class CompanyFactory extends Factory {
 	function setStatus($status) {
 		$status = trim($status);
 
-		$key = Option::getByValue($status, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$status = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'status',
 											$status,
 											TTi18n::gettext('Incorrect Status'),
@@ -1721,11 +1729,6 @@ class CompanyFactory extends Factory {
 	}
 	function setProductEdition($val) {
 		$val = trim($val);
-
-		$key = Option::getByValue($val, $this->getOptions('product_edition') );
-		if ($key !== FALSE) {
-			$val = $key;
-		}
 
 		if ( $this->Validator->inArrayKey(	'product_edition',
 											$val,
@@ -3118,7 +3121,7 @@ class CompanyFactory extends Factory {
 		return FALSE;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		global $config_vars;
 
 		//Don't allow the primary company to be deleted.
@@ -3376,6 +3379,13 @@ class CompanyFactory extends Factory {
 						case 'last_month_avg_active_users':
 						case 'last_month_max_active_users':
 							$data[$variable] = (int)$this->getColumn( $variable );
+							break;
+						case 'regular_user_feedback_rating':
+						case 'supervisor_user_feedback_rating':
+						case 'admin_user_feedback_rating':
+						case 'all_user_feedback_rating':
+							$data[$variable] = ( $this->getColumn( $variable ) != '' ) ? round( Misc::reScaleRange( $this->getColumn( $variable ), $old_min = -1, $old_max = 1, $new_min = 1, $new_max = 10 ) ) : NULL;
+							//$data[$variable] = $this->getColumn( $variable );
 							break;
 						case 'name_metaphone':
 							break;

@@ -17,6 +17,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Accumulated Time' );
 		this.navigation_label = $.i18n._( 'Accumulated Time' ) + ':';
 		this.api = new (APIFactory.getAPIClass( 'APIUserDateTotal' ))();
+		this.currency_api = new (APIFactory.getAPIClass( 'APICurrency' ))();
 		$( this.el ).find( '.warning-message' ).text( $.i18n._( 'WARNING: Manually modifying Accumulated Time records may prevent policies from being calculated properly and should only be done as a last resort when instructed to do so by a support representative.' ) )
 
 		this.initPermission();
@@ -49,7 +50,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 
 		var data = this.grid.getGridParam( 'data' );
 
-		//Error: TypeError: data is undefined in https://ondemand1.timetrex.com/interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
+		//Error: TypeError: data is undefined in /interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
 		if ( !data ) {
 			return;
 		}
@@ -247,6 +248,10 @@ UserDateTotalViewController = BaseViewController.extend( {
 				delete this.current_edit_record[key];
 				this.onSrcObjectChange( key );
 				break;
+			case 'total_time':
+			case 'hourly_rate':
+				this.calculateAmount();
+				break;
 		}
 
 		if ( key !== 'override' ) {
@@ -260,6 +265,11 @@ UserDateTotalViewController = BaseViewController.extend( {
 
 	},
 
+	calculateAmount: function() {
+		this.current_edit_record.total_time_amount = (this.current_edit_record.total_time / 3600) * parseFloat( this.current_edit_record.hourly_rate );
+		this.edit_view_ui_dic.total_time_amount.setValue( this.current_edit_record.total_time_amount.toFixed( 4 ) );
+	},
+
 	onAddClick: function() {
 		var $this = this;
 		this.is_viewing = false;
@@ -268,7 +278,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		LocalCacheData.current_doing_context_action = 'new';
 		$this.openEditView();
 
-		//Error: Uncaught TypeError: undefined is not a function in https://ondemand2001.timetrex.com/interface/html5/views/BaseViewController.js?v=8.0.0-20141117-111140 line 897
+		//Error: Uncaught TypeError: undefined is not a function in /interface/html5/views/BaseViewController.js?v=8.0.0-20141117-111140 line 897
 		if ( $this.api ) {
 			$this.api['get' + $this.api.key_name + 'DefaultData'](
 				this.parent_edit_record.user_id,
@@ -307,7 +317,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 	setDefaultMenu: function( doNotSetFocus ) {
 
 
-		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=UserDateTotal line 282
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=UserDateTotal line 282
 		if ( !this.context_menu_array ) {
 			return;
 		}
@@ -516,8 +526,28 @@ UserDateTotalViewController = BaseViewController.extend( {
 		return false;
 	},
 
-	setCurrentEditRecordData: function() {
+	setCurrency: function() {
+		var $this = this;
+		if ( Global.isSet( this.current_edit_record.user_id ) ) {
+			var filter = {};
+			filter.filter_data = {user_id: this.current_edit_record.user_id};
+			this.currency_api.getCurrency( filter, false, false, {
+				onResult: function( res ) {
+					res = res.getResult();
+					if ( Global.isArray( res ) ) {
+						$('.userDateTotal-currency').text( res[0].symbol );
+						$('.userDateTotal-code').text( res[0].iso_code );
+					} else {
+						$('.userDateTotal-currency').text( '' );
+						$('.userDateTotal-code').text( '' );
+					}
+				}
+			} );
+		}
+	},
 
+	setCurrentEditRecordData: function() {
+		this.setCurrency();
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
 
@@ -535,7 +565,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 								var user_data = result.getResult()[0];
 							}
 
-							//Error: Unable to get property 'first_name' of undefined or null reference in https://ondemand2001.timetrex.com/interface/html5/ line 511
+							//Error: Unable to get property 'first_name' of undefined or null reference in /interface/html5/ line 511
 							if ( user_data && user_data.first_name ) {
 								current_widget.setValue( user_data.first_name + ' ' + user_data.last_name );
 							} else {
@@ -574,12 +604,12 @@ UserDateTotalViewController = BaseViewController.extend( {
 	},
 
 	onTypeChange: function( reset ) {
-		this.edit_view_form_item_dic['regular_policy_id'].css( 'display', 'none' );
-		this.edit_view_form_item_dic['absence_policy_id'].css( 'display', 'none' );
-		this.edit_view_form_item_dic['overtime_policy_id'].css( 'display', 'none' );
-		this.edit_view_form_item_dic['premium_policy_id'].css( 'display', 'none' );
-		this.edit_view_form_item_dic['meal_policy_id'].css( 'display', 'none' );
-		this.edit_view_form_item_dic['break_policy_id'].css( 'display', 'none' );
+		this.detachElement( 'regular_policy_id' );
+		this.detachElement( 'absence_policy_id' );
+		this.detachElement( 'overtime_policy_id' );
+		this.detachElement( 'premium_policy_id' );
+		this.detachElement( 'meal_policy_id' );
+		this.detachElement( 'break_policy_id' );
 		var key = '';
 		if ( this.current_edit_record['object_type_id'] === 20 ) {
 			key = 'regular_policy_id';
@@ -595,7 +625,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 			key = 'break_policy_id';
 		}
 		if ( key ) {
-			this.edit_view_form_item_dic[key].css( 'display', 'block' );
+			this.attachElement( key );
 			if ( reset ) {
 				this.edit_view_ui_dic[key].setValue( '' );
 				this.edit_view_ui_dic['pay_code_id'].setValue( '' );
@@ -679,6 +709,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		var tab_user_date_total = this.edit_view_tab.find( '#tab_user_date_total' );
 
 		var tab_user_date_total_column1 = tab_user_date_total.find( '.first-column' );
+		var tab_user_date_total_column2 = tab_user_date_total.find( '.second-column' );
 
 		//Employee
 
@@ -694,15 +725,9 @@ UserDateTotalViewController = BaseViewController.extend( {
 
 		//Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'total_time', need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'total_time', mode: 'time_unit', need_parser_sec: true} );
 
-		var widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'>" + $.i18n._( 'ie' ) + ': ' + $.i18n._( '' + LocalCacheData.loginUserPreference.time_unit_format_display ) + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-
-		this.addEditFieldToColumn( $.i18n._( 'Time' ), form_item_input, tab_user_date_total_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Time' ), form_item_input, tab_user_date_total_column1, '', null, true );
 
 		//Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
@@ -722,7 +747,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 			field: 'regular_policy_id'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Policy' ), form_item_input, tab_user_date_total_column1, null, null, true );
-		this.edit_view_form_item_dic['regular_policy_id'].hide();
+		this.detachElement( 'regular_policy_id' );
 
 		//Absence Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -735,7 +760,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 			field: 'absence_policy_id'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Policy' ), form_item_input, tab_user_date_total_column1, null, null, true );
-		this.edit_view_form_item_dic['absence_policy_id'].hide();
+		this.detachElement( 'absence_policy_id' );
 
 		//Overtime Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -748,7 +773,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 			field: 'overtime_policy_id'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Policy' ), form_item_input, tab_user_date_total_column1, null, null, true );
-		this.edit_view_form_item_dic['overtime_policy_id'].hide();
+		this.detachElement( 'overtime_policy_id' );
 
 		//Premium Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -761,7 +786,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 			field: 'premium_policy_id'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Policy' ), form_item_input, tab_user_date_total_column1, null, null, true );
-		this.edit_view_form_item_dic['premium_policy_id'].hide();
+		this.detachElement( 'premium_policy_id' );
 
 		//Meal Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -774,7 +799,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 			field: 'meal_policy_id'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Policy' ), form_item_input, tab_user_date_total_column1, null, null, true );
-		this.edit_view_form_item_dic['meal_policy_id'].hide();
+		this.detachElement( 'meal_policy_id' );
 
 		//Break Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -787,7 +812,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 			field: 'break_policy_id'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Policy' ), form_item_input, tab_user_date_total_column1, null, null, true );
-		this.edit_view_form_item_dic['break_policy_id'].hide();
+		this.detachElement( 'break_policy_id' );
 
 		//Pay Code
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -815,7 +840,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Branch' ), form_item_input, tab_user_date_total_column1, '', null, true );
 
 		if ( !this.show_branch_ui ) {
-			this.edit_view_form_item_dic.branch_id.hide();
+			this.detachElement( 'branch_id' );
 		}
 
 		//Department
@@ -832,7 +857,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Department' ), form_item_input, tab_user_date_total_column1, '', null, true );
 
 		if ( !this.show_department_ui ) {
-			this.edit_view_form_item_dic.department_id.hide();
+			this.detachElement( 'department_id' );
 		}
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
@@ -864,7 +889,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 			this.addEditFieldToColumn( $.i18n._( 'Job' ), [form_item_input, job_coder], tab_user_date_total_column1, '', widgetContainer, true );
 
 			if ( !this.show_job_ui ) {
-				this.edit_view_form_item_dic.job_id.hide();
+				this.detachElement( 'job_id' );
 			}
 
 			//Job Item
@@ -894,15 +919,73 @@ UserDateTotalViewController = BaseViewController.extend( {
 			this.addEditFieldToColumn( $.i18n._( 'Task' ), [form_item_input, job_item_coder], tab_user_date_total_column1, '', widgetContainer, true );
 
 			if ( !this.show_job_item_ui ) {
-				this.edit_view_form_item_dic.job_item_id.hide();
+				this.detachElement( 'job_item_id' );
 			}
 
 		}
 
+		//Start Date Time
+		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
+		form_item_input.TDatePicker( {field: 'start_time_stamp', mode: 'date_time'} );
+		this.addEditFieldToColumn( $.i18n._( 'Start Date/Time' ), form_item_input, tab_user_date_total_column2, '', null, true, true );
+
+		//End Date Time
+		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
+		form_item_input.TDatePicker( {field: 'end_time_stamp', mode: 'date_time'} );
+		this.addEditFieldToColumn( $.i18n._( 'End Date/Time' ), form_item_input, tab_user_date_total_column2, '', null, true, true );
+
+		//Currency
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APICurrency' )),
+			allow_multiple_selection: false,
+			layout_name: ALayoutIDs.CURRENCY,
+			show_search_inputs: true,
+			field: 'currency_id',
+			set_empty: true
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Currency' ), form_item_input, tab_user_date_total_column2 );
+
+		//Base Hourly Rate
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( {field: 'base_hourly_rate', width: 90} );
+
+		widgetContainer = $( "<div class='widget-h-box'></div>" );
+		var currency = $( "<span class='userDateTotal-currency widget-left-label'></span>" );
+		var code = $( "<span class='userDateTotal-code widget-right-label'></span>" );
+		widgetContainer.append( currency );
+		widgetContainer.append( form_item_input );
+		widgetContainer.append( code );
+
+		this.addEditFieldToColumn( $.i18n._( 'Base Hourly Rate' ), form_item_input, tab_user_date_total_column2, '', widgetContainer, true );
+
+		//Hourly Rate
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( {field: 'hourly_rate', width: 90} );
+
+		widgetContainer = $( "<div class='widget-h-box'></div>" );
+		currency = $( "<span class='userDateTotal-currency widget-left-label'></span>" );
+		code = $( "<span class='userDateTotal-code widget-right-label'></span>" );
+		widgetContainer.append( currency );
+		widgetContainer.append( form_item_input );
+		widgetContainer.append( code );
+
+		this.addEditFieldToColumn( $.i18n._( 'Hourly Rate' ), form_item_input, tab_user_date_total_column2, '', widgetContainer, true );
+
+		//Total Amount
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+		form_item_input.TText( {field: 'total_time_amount'} );
+		widgetContainer = $( "<div class='widget-h-box'></div>" );
+		currency = $( "<span class='userDateTotal-currency widget-left-label'></span>" );
+		code = $( "<span class='userDateTotal-code widget-right-label'></span>" );
+		widgetContainer.append( currency );
+		widgetContainer.append( form_item_input );
+		widgetContainer.append( code );
+		this.addEditFieldToColumn( $.i18n._( 'Total Amount' ), form_item_input, tab_user_date_total_column2, '', widgetContainer, true );
+
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 
 			//Quanitity
-
 			var good = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 			good.TTextInput( {field: 'quantity', width: 50} );
 			good.addClass( 'quantity-input' );
@@ -915,17 +998,17 @@ UserDateTotalViewController = BaseViewController.extend( {
 
 			var bad_label = $( "<span class='widget-right-label'>/ " + $.i18n._( 'Bad' ) + ": </span>" );
 
-			widgetContainer = $( "<div class='widget-h-box'></div>" );
+			var widgetContainer = $( "<div class='widget-h-box'></div>" );
 
 			widgetContainer.append( good_label );
 			widgetContainer.append( good );
 			widgetContainer.append( bad_label );
 			widgetContainer.append( bad );
 
-			this.addEditFieldToColumn( $.i18n._( 'Quantity' ), [good, bad], tab_user_date_total_column1, '', widgetContainer, true );
+			this.addEditFieldToColumn( $.i18n._( 'Quantity' ), [good, bad], tab_user_date_total_column2, '', widgetContainer, true );
 
 			if ( !this.show_bad_quantity_ui && !this.show_good_quantity_ui ) {
-				this.edit_view_form_item_dic.quantity.hide();
+				this.detachElement( 'quantity' );
 			} else {
 				if ( !this.show_bad_quantity_ui ) {
 					bad_label.hide();
@@ -938,21 +1021,21 @@ UserDateTotalViewController = BaseViewController.extend( {
 				}
 			}
 		}
-
 		//Note
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 		form_item_input.TTextArea( {field: 'note', width: '100%'} );
-		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_user_date_total_column1, '', null, true, true );
+		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_user_date_total_column2, '', null, true, true );
 		form_item_input.parent().width( '45%' );
 
 		if ( !this.show_note_ui ) {
-			this.edit_view_form_item_dic.note.hide();
+			this.detachElement( 'note' );
 		}
 
 		//Override
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( {field: 'override'} );
-		this.addEditFieldToColumn( $.i18n._( 'Override' ), form_item_input, tab_user_date_total_column1, '', null, true, true );
+		this.addEditFieldToColumn( $.i18n._( 'Override' ), form_item_input, tab_user_date_total_column2, '', null, true, true );
+
 
 	},
 

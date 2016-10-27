@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -59,8 +59,9 @@ class PermissionControlListFactory extends PermissionControlFactory implements I
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -85,7 +86,7 @@ class PermissionControlListFactory extends PermissionControlFactory implements I
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					'level' => $level,
 					);
 
@@ -113,8 +114,8 @@ class PermissionControlListFactory extends PermissionControlFactory implements I
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
-					'id' => $id,
+					'company_id' => (int)$company_id,
+					'id' => (int)$id,
 					);
 
 		$query = '
@@ -146,8 +147,9 @@ class PermissionControlListFactory extends PermissionControlFactory implements I
 		$additional_sort_fields = array( 'name', 'description', 'id' );
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -185,7 +187,7 @@ class PermissionControlListFactory extends PermissionControlFactory implements I
 		$additional_sort_fields = array( 'name', 'level', 'description', 'id' );
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					'level' => $level,
 					);
 
@@ -219,7 +221,7 @@ class PermissionControlListFactory extends PermissionControlFactory implements I
 		$puf = new PermissionUserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -228,7 +230,7 @@ class PermissionControlListFactory extends PermissionControlFactory implements I
 							'. $puf->getTable() .' as b
 					where	a.id = b.permission_control_id
 						AND a.company_id = ?
-						AND b.user_id in ('. $this->getListSQL($user_id, $ph) .')
+						AND b.user_id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .')
 						AND a.deleted = 0
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -310,7 +312,7 @@ class PermissionControlListFactory extends PermissionControlFactory implements I
 		$puf = new PermissionUserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '

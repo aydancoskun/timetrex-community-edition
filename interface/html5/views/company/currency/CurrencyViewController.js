@@ -238,7 +238,7 @@ CurrencyViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScriptAsync( 'views/company/currency/CurrencyRateViewController.js', function() {
+		Global.loadScript( 'views/company/currency/CurrencyRateViewController.js', function() {
 			var tab = $this.edit_view_tab.find( '#tab_rates' );
 			var firstColumn = tab.find( '.first-column-sub-view' );
 			Global.trackView( 'Sub' + 'CurrencyRate' + 'View', LocalCacheData.current_doing_context_action );

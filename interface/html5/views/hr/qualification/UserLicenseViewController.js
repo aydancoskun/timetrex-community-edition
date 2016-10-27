@@ -31,31 +31,6 @@ UserLicenseViewController = BaseViewController.extend( {
 
 	},
 
-	setGridSize: function() {
-		if ( (!this.grid || !this.grid.is( ':visible' )) ) {
-
-			return;
-		}
-
-		if ( !this.sub_view_mode ) {
-
-			if ( Global.bodyWidth() > Global.app_min_width ) {
-				this.grid.setGridWidth( Global.bodyWidth() - 14 );
-			} else {
-				this.grid.setGridWidth( Global.app_min_width - 14 );
-			}
-		} else {
-
-			this.grid.setGridWidth( $( this.el ).parent().width() - 10 );
-		}
-
-		if ( !this.sub_view_mode ) {
-			this.grid.setGridHeight( ($( this.el ).height() - this.search_panel.height() - 90) );
-
-		}
-
-	},
-
 	showNoResultCover: function( show_new_btn ) {
 
 		show_new_btn = this.ifContextButtonExist( ContextMenuIconName.add );
@@ -483,7 +458,7 @@ UserLicenseViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScriptAsync( 'views/document/DocumentViewController.js', function() {
+		Global.loadScript( 'views/document/DocumentViewController.js', function() {
 			var tab_attachment = $this.edit_view_tab.find( '#tab_attachment' );
 			var firstColumn = tab_attachment.find( '.first-column-sub-view' );
 			Global.trackView( 'Sub' + 'Document' + 'View' );

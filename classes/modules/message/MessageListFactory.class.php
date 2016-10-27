@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -59,8 +59,9 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -83,7 +84,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -120,9 +121,9 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'id' => $id,
-					'user_id' => $user_id,
-					'company_id' => $company_id,
+					'id' => (int)$id,
+					'user_id' => (int)$user_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -152,7 +153,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					'id2' => $id,
 					'id3' => $id,
 					);
@@ -187,7 +188,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		$unread_messages = $this->getCache($user_id);
 		if ( $unread_messages === FALSE ) {
 			$ph = array(
-						'user_id' => $user_id,
+						'user_id' => (int)$user_id,
 						'id' => $user_id,
 						'created_by1' => $user_id,
 						'created_by2' => $user_id,
@@ -244,17 +245,13 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		}
 
 		//Folder is: INBOX, SENT
-		$key = Option::getByValue($folder, $this->getOptions('folder') );
-		if ($key !== FALSE) {
-			$folder = $key;
-		}
 
 		$rf = new RequestFactory();
 		$uf = new UserFactory();
 		$pptsvf = new PayPeriodTimeSheetVerifyFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					//'id' => $user_id,
 					);
 
@@ -337,9 +334,9 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 
 		$ph = array(
 					'object_type' => $object_type,
-					'object_id' => $object_id,
-					'id' => $id,
-					'parent_id' => $id,
+					'object_id' => (int)$object_id,
+					'id' => (int)$id,
+					'parent_id' => (int)$id,
 					);
 
 		$query = '
@@ -365,7 +362,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 
 		$ph = array(
 					'object_type' => $object_type,
-					'object_id' => $object_id,
+					'object_id' => (int)$object_id,
 					);
 
 		$query = '

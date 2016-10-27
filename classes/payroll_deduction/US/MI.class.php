@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -41,39 +41,35 @@
 class PayrollDeduction_US_MI extends PayrollDeduction_US {
 
 	var $state_options = array(
-								1388563200 => array( //01-Jan-14
+								20140101 => array( //01-Jan-14
 													'rate' => 4.25,
 													'allowance' => 4000
 													),
-								1357027200 => array( //01-Jan-13
+								20130101 => array( //01-Jan-13
 													'rate' => 4.25,
 													'allowance' => 3950
 													),
-								1293858000 => array( //01-Jan-11
+								20110101 => array( //01-Jan-11
 													'rate' => 4.35,
 													'allowance' => 3700
 													),
-								1230796800 => array( //01-Jan-09
+								20090101 => array( //01-Jan-09
 													'rate' => 4.35,
 													'allowance' => 3600
 													),
-								1191222000 => array( //01-Oct-07
+								20071001 => array( //01-Oct-07
 													'rate' => 4.35,
 													'allowance' => 3400
 													),
-								1167638400 => array(
+								20070101 => array(
 													'rate' => 3.9,
 													'allowance' => 3400
 													),
-								1136102400 => array(
+								20060101 => array(
 													'rate' => 3.9,
 													'allowance' => 3300
 													)
 								);
-
-	function getStatePayPeriodDeductions() {
-		return bcdiv($this->getStateTaxPayable(), $this->getAnnualPayPeriods() );
-	}
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();

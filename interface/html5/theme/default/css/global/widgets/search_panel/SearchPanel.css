@@ -5,8 +5,8 @@
 
 .search-panel .search-panel-tab-bar {
     background: none;
-    padding-top: 0px;
-    padding-left: 0px;
+    padding-top: 0;
+    padding-left: 0;
     padding-right: 1px;
     border: none;
 }
@@ -30,7 +30,7 @@
 /*Tab's left offset'*/
 .search-panel .search-panel-tab-bar-label {
     padding-left: 30px;
-    padding-top: 0px;
+    padding-top: 0;
     background: none repeat scroll 0 0 transparent;
     border: medium none;
 
@@ -83,16 +83,16 @@
     float: left;
     margin-bottom: 2px;
     width: 100%;
-    border-bottom-left-radius: 0px;
+    border-bottom-left-radius: 0;
 
 }
 
 .search-panel .search-panel-tab-outside-collapse {
-    height: 0px;
+    height: 0;
 }
 
 .search-panel .ui-tabs-panel {
-    padding: 0px;
+    padding: 0;
 }
 
 .search-panel .ui-tabs .ui-tabs-nav li a {
@@ -115,37 +115,6 @@
 
 .search-panel .refresh-btn:focus {
     outline: 0;
-}
-
-@-webkit-keyframes rotateAnimation {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes rotateAnimation {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.search-panel .search-refresh-rotate {
-    animation-name: rotateAnimation;
-    animation-duration: 2s;
-    animation-iteration-count: infinite;
-    animation-timing-function: linear;
-
-    -webkit-animation-name: rotateAnimation;
-    -webkit-animation-duration: 2s;
-    -webkit-animation-iteration-count: infinite;
-    -webkit-animation-timing-function: linear;
-
 }
 
 .search-panel .collapse-btn {
@@ -174,7 +143,7 @@
 .search-panel .layout-selector-div {
     left: 550px;
     position: absolute;
-    top: 8px;
+    top: 5px;
     display: none;
 }
 
@@ -210,8 +179,8 @@
     border: 1px solid #BDBDBD;
     border-top: none;
     border-radius: 6px;
-    border-top-right-radius: 0px;
-    border-top-left-radius: 0px;
+    border-top-right-radius: 0;
+    border-top-left-radius: 0;
     padding: 3px;
     margin-bottom: 5px;
     margin-top: -3px;

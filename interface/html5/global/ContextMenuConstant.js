@@ -10,15 +10,25 @@ ContextMenuIconName.save = 'saveIcon';
 
 ContextMenuIconName.add = 'addIcon';
 
+ContextMenuIconName.refresh_all = 'refressAllIcon';
+
+ContextMenuIconName.reset_all = 'resetAllIcon';
+
 ContextMenuIconName.add_absence = 'addAbsenceIcon';
 
 ContextMenuIconName.add_company = 'addCompanyIcon';
 
 ContextMenuIconName.view = 'viewIcon';
 
+ContextMenuIconName.view_html = 'viewHTMLIcon';
+
+ContextMenuIconName.view_html_new_window = 'viewHTMLNewWindow';
+
 ContextMenuIconName.send = 'sendIcon';
 
 ContextMenuIconName.decline = 'declineIcon';
+
+ContextMenuIconName.request = 'requestIcon';
 
 ContextMenuIconName.authorization_request = 'authorizationRequestIcon';
 
@@ -69,6 +79,8 @@ ContextMenuIconName.view_detail = 'viewDetailIcon';
 ContextMenuIconName.download = 'downloadIcon';
 
 ContextMenuIconName.timesheet = 'timesheetIcon';
+
+ContextMenuIconName.in_out = 'inOutIcon';
 
 ContextMenuIconName.accumulated_time = 'accumulatedTimeIcon';
 
@@ -127,6 +139,7 @@ ContextMenuIconName.view_form = 'viewFormIcon';
 ContextMenuIconName.print_form = 'printFormIcon';
 
 ContextMenuIconName.print_checks = 'printChecksIcon';
+ContextMenuIconName.re_order = 'reOrderIcon';
 
 ContextMenuIconName.direct_deposit = 'directDepositIcon';
 
@@ -173,6 +186,8 @@ ContextMenuIconName.migrate_pay_codes = 'MigratePayCodeIcon';
 
 ContextMenuIconName.migrate_pay_stub_account = 'MigratePayStubAccount';
 
+ContextMenuIconName.auto_arrange = 'autoArrange';
+
 var Icons = function() {
 
 };
@@ -212,22 +227,15 @@ Icons.pay_period = 'pay_periods-35x35.png';
 Icons.pay_period_schedule = 'pay_period_schedules-35x35.png';
 Icons.send = 'send-35x35.png';
 Icons.inbox = 'inbox-35x35.png';
-
 Icons.check_updates = 'about-35x35.png';
-
 Icons.authorization = 'authorize-35x35.png';
-
 Icons.authorization_request = 'authorize_request-35x35.png';
 Icons.authorization_timesheet = 'authorize_timesheet-35x35.png';
 Icons.authorization_expense = 'approved_expense-35x35.png';
-
 Icons.sent = 'sent-35x35.png';
-
 Icons.close_misc = 'close_misc-35x35.png';
-
 Icons.process_payroll = 'process_payroll-35x35.png';
 Icons.map = 'map-35x35.png';
-
 Icons.import_icon = 'import-35x35.png';
 Icons.login = 'login-35x35.png';
 Icons.permission_wizard = 'permission_groups-35x35.png';
@@ -235,49 +243,30 @@ Icons.quick_start_wizard = 'quicksetupwizard-35x35.png';
 Icons.re_cal_timesheet = 'calculate-35x35.png';
 Icons.re_cal_pay_stub = 'calculate_paystubs-35x35.png';
 Icons.hierarchy = 'hierarchy-35x35.png';
-
 Icons.employee_pay_stubs = 'employee_pay_stubs-35x35.png';
 Icons.employer_pay_stubs = 'employer_pay_stubs-35x35.png';
-
 Icons.save_setup = 'save_setup-35x35.png';
-
 Icons.e_file = 'export_to_efile-35x35.png';
-
 Icons.recurring_template = 'recurring_template-35x35.png';
 Icons.recurring_schedule = 'recurring_schedule-35x35.png';
-
 Icons.request = 'requests-35x35.png';
-
 Icons.exceptions = 'exceptions-35x35.png';
-
 Icons.timesheet_reports = 'timesheet_reports-35x35.png';
-
 Icons.lock = 'lock-35x35.png';
-
 Icons.unlock = 'unlock-35x35.png';
-
 Icons.pay_stub_amendment = 'pay_stub_amendments-35x35.png';
-
 Icons.pay_stub_account = 'pay_stubs_accounts-35x35.png';
-
 Icons.payroll_export_report = 'payroll_reports-35x35.png';
-
 Icons.close = 'close-35x35.png';
-
 Icons.close_pay_period = 'close_pay_period-35x35.png';
-
 Icons.hr_reports = 'hr_reports-35x35.png';
-
 Icons.invoice = 'invoice_wizard-35x35.png';
-
 Icons.transaction = 'transactions-35x35.png';
-
 Icons.payment_method = 'payment_methods-35x35.png';
-
 Icons.packing_slip = 'packing_slip-35x35.png';
-
 Icons.print = 'print-35x35.png';
-
+Icons.in_out = 'clock_in_out-35x35.png';
 Icons.find_available = 'fillshift-35x35.png';
-
 Icons.wizard = 'wizard2-35x35.png';
+Icons.restart = 'restart-35x35.png';
+Icons.branches = 'branches-35x35.png';

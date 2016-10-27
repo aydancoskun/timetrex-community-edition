@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -40,8 +40,12 @@
  */
 class Validator {
 	private $num_errors = 0; //Number of errors.
+	private $num_warnings = 0; //Number of errors.
 	private $errors = array(); //Array of errors.
+	private $warnings = array(); //Array of errors.
 	private $verbosity = 8;
+
+	public $validate_only = FALSE;
 
 	//Checks a result set for one or more rows.
 	function isResultSetWithRows($label, $rs, $msg = NULL) {
@@ -507,8 +511,9 @@ class Validator {
 
 	function isEmail($label, $value, $msg = NULL) {
 		//Debug::text('Raw Email: '. $value, __FILE__, __LINE__, __METHOD__, $this->verbosity);
-
-		if ( preg_match('/^[\w\.\-\&\+]+\@[\w\.\-]+\.[a-z]{2,5}$/i', $value) ) { //Allow 5 char suffixes to support .local domains.
+		if ( function_exists('filter_var') AND filter_var($value, FILTER_VALIDATE_EMAIL) !== FALSE ) {
+			return TRUE;
+		} elseif ( preg_match('/^[\w\.\-\&\+]+\@[\w\.\-]+\.[a-z]{2,5}$/i', $value) ) { //This Email regex is no where near correct, use PHP filter_var instead. - Allow 5 char suffixes to support .local domains.
 			return TRUE;
 		}
 
@@ -750,6 +755,32 @@ class Validator {
 		return $retval;
 	}
 
+	function setValidateOnly( $validate_only ) {
+		$this->validate_only = $validate_only;
+	}
+
+	function getValidateOnly() {
+		return $this->validate_only;
+	}
+
+	//Returns both Errors and Warnings combined.
+	function getErrorsAndWarningsArray() {
+		return array( 'errors' => $this->errors, 'warnings' => $this->warnings );
+	}
+
+	//Merges all errors/warnings from the passed $validator object to this one.
+	function merge( $validator ) {
+		if ( is_object( $validator ) AND $validator->isValid() == FALSE ) {
+			$this->errors = array_merge( $this->errors, $validator->getErrorsArray() );
+			$this->num_errors += count( $validator->getErrorsArray() );
+			
+			$this->warnings = array_merge( $this->warnings, $validator->getWarningsArray() );
+			$this->num_warnings += count( $validator->getWarningsArray() );
+		}
+
+		return TRUE;
+	}
+
 	function getErrorsArray() {
 		return $this->errors;
 	}
@@ -790,21 +821,26 @@ class Validator {
 		return FALSE;
 	}
 
-	final function isValid($label = NULL) {
-		if ($this->num_errors == 0) {
-			return TRUE;
-		} elseif ($label != NULL) {
-			//Debug::text('Num Errors: '. $this->num_errors, __FILE__, __LINE__, __METHOD__, $this->verbosity);
+	final function isValid( $label = NULL ) {
+		if ( $this->isError( $label ) OR $this->isWarning( $label ) ) {
+			return FALSE;
+		}
 
-			//Check to see if a single form variable is valid.
-			if ( !isset($this->errors[$label]) ) {
+		return TRUE;
+	}
+
+
+	final function isError( $label = NULL ) {
+		if ( $this->num_errors > 0 ) {
+			Debug::Arr($this->errors, 'Errors', __FILE__, __LINE__, __METHOD__, $this->verbosity);
+			return TRUE;
+		} elseif ( $label != NULL ) {
+			if ( isset( $this->errors[$label] ) ) {
 				return TRUE;
 			} else {
 				return FALSE;
 			}
 		}
-
-		Debug::Arr($this->errors, 'Errors', __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
 		return FALSE;
 	}
@@ -824,7 +860,7 @@ class Validator {
 		return FALSE;
 	}
 
-	private function Error($label, $msg, $value = '' ) {
+	function Error( $label, $msg, $value = '' ) {
 		Debug::text('Validation Error: Label: '. $label .' Value: "'. $value .'" Msg: '. $msg, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
 		//If label is NULL, assume we don't actually want to trigger an error.
@@ -839,5 +875,59 @@ class Validator {
 
 		return FALSE;
 	}
+
+	//
+	// Warning functions below here
+	//
+
+	function getWarningsArray() {
+		return $this->warnings;
+	}
+	
+	final function isWarning( $label = NULL ) {
+		if ( $this->num_warnings > 0 ) {
+			Debug::Arr($this->warnings, 'Warnings', __FILE__, __LINE__, __METHOD__, $this->verbosity);
+			return TRUE;
+		} elseif ( $label != NULL ) {
+			if ( isset( $this->warnings[$label] ) ) {
+				return TRUE;
+			} else {
+				return FALSE;
+			}
+		}
+
+		return FALSE;
+	}
+
+	function resetWarnings() {
+		unset($this->warnings);
+		$this->num_warnings = 0;
+
+		return TRUE;
+	}
+
+	function hasWarning( $label ) {
+		if ( in_array($label, array_keys($this->warnings)) ) {
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function Warning( $label, $msg, $value = '' ) {
+		Debug::text('Validation Warning: Label: '. $label .' Value: "'. $value .'" Msg: '. $msg, __FILE__, __LINE__, __METHOD__, $this->verbosity);
+
+		if ( $label != '') {
+			$this->warnings[$label][] = $msg;
+
+			$this->num_warnings++;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+
 }
 ?>

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -61,7 +61,7 @@ class QualificationListFactory extends QualificationFactory implements IteratorA
 		$this->rs = $this->getCache($id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => $id,
+						'id' => (int)$id,
 						);
 
 			$query = '
@@ -93,7 +93,7 @@ class QualificationListFactory extends QualificationFactory implements IteratorA
 		}
 
 		$ph = array(
-					'company_id' => $id,
+					'company_id' => (int)$id,
 					);
 
 		$query = '
@@ -119,8 +119,8 @@ class QualificationListFactory extends QualificationFactory implements IteratorA
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
-					'id' => $id,
+					'company_id' => (int)$company_id,
+					'id' => (int)$id,
 					);
 
 		$query = '
@@ -146,8 +146,8 @@ class QualificationListFactory extends QualificationFactory implements IteratorA
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
-					'group_id' => $id,
+					'company_id' => (int)$company_id,
+					'group_id' => (int)$id,
 					);
 
 		$query = '
@@ -174,8 +174,8 @@ class QualificationListFactory extends QualificationFactory implements IteratorA
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
-					'type_id' => $type_id,
+					'company_id' => (int)$company_id,
+					'type_id' => (int)$type_id,
 					);
 
 		$query = '
@@ -239,7 +239,7 @@ class QualificationListFactory extends QualificationFactory implements IteratorA
 		$qgf = new QualificationGroupFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -273,7 +273,7 @@ class QualificationListFactory extends QualificationFactory implements IteratorA
 		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'a.group_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['group']) ) ? $this->getWhereClauseSQL( 'd.name', $filter_data['group'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => $company_id, 'object_type_id' => 250, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
+		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => (int)$company_id, 'object_type_id' => 250, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 
 		if ( isset($filter_data['created_date']) AND !is_array($filter_data['created_date']) AND trim($filter_data['created_date']) != '' ) {
 			$date_filter = $this->getDateRangeSQL( $filter_data['created_date'], 'a.created_date' );

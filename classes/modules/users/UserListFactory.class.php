@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -61,11 +61,6 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 	}
 
 	function getByStatus($status, $where = NULL, $order = NULL) {
-		//$key = Option::getByValue($status, $this->getOptions('status') );
-		//if ($key !== FALSE) {
-		//	$status = $key;
-		//}
-
 		$ph = array(
 					'status_id' => $status,
 					);
@@ -93,8 +88,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	distinct a.country
@@ -118,13 +114,8 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 	}
 
 	function getByCompanyIdAndStatus($company_id, $status, $where = NULL, $order = NULL) {
-		//$key = Option::getByValue($status, $this->getOptions('status') );
-		//if ($key !== FALSE) {
-		//	$status = $key;
-		//}
-
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'status_id' => $status,
 					);
 
@@ -167,7 +158,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$this->rs = $this->getCache($id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => $id,
+						'id' => (int)$id,
 						);
 
 			$query = '
@@ -201,14 +192,14 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
-						AND	id in ('. $this->getListSQL($id, $ph) .')
+						AND	id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -230,14 +221,14 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
 					select	id
 					from	'. $this->getTable() .'
 					where company_id = ?
-						AND id in ('. $this->getListSQL($id, $ph) .')
+						AND id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 						AND deleted = 0';
 
 		//This supports a list of IDs, so we need to make sure paging is also available.
@@ -358,7 +349,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'user_name' => $user_name,
 					);
 
@@ -381,11 +372,6 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		if ( $user_name == '') {
 			return FALSE;
 		}
-
-		//$key = Option::getByValue($status, $this->getOptions('status') );
-		//if ($key !== FALSE) {
-		//	$status = $key;
-		//}
 
 		$ph = array(
 					'user_name' => strtolower( trim( $user_name ) ),
@@ -412,15 +398,10 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		if ( $phone_id == '') {
 			return FALSE;
 		}
-
-		//$key = Option::getByValue($status, $this->getOptions('status') );
-		//if ($key !== FALSE) {
-		//	$status = $key;
-		//}
-
+		
 		$ph = array(
 					'phone_id' => $phone_id,
-					'status' => $status,
+					'status' => (int)$status,
 					);
 
 		$query = '
@@ -443,13 +424,8 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		//$key = Option::getByValue($status, $this->getOptions('status') );
-		//if ($key !== FALSE) {
-		//	$status = $key;
-		//}
-
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					'status' => $status,
 					);
 
@@ -474,8 +450,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -511,7 +488,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$puf = new PermissionUserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'level' => $level,
 					);
 
@@ -546,8 +523,8 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
-					'id' => $id,
+					'company_id' => (int)$company_id,
+					'id' => (int)$id,
 					);
 
 		$query = '
@@ -575,7 +552,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'employee_number' => $employee_number,
 					);
 
@@ -626,9 +603,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$seuf = new StationExcludeUserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					'station_id' => $station_id,
-					'status_id' => $status_id,
+					'company_id' => (int)$company_id,
+					'station_id' => (int)$station_id,
+					'status_id' => (int)$status_id,
 					//'date' => $date,
 					//'date2' => $date,
 					);
@@ -719,9 +696,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$uif = new UserIdentificationFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					'station_id' => $station_id,
-					'status_id' => $status_id,
+					'company_id' => (int)$company_id,
+					'station_id' => (int)$station_id,
+					'status_id' => (int)$status_id,
 					//'date' => $date,
 					//'date2' => $date,
 					);
@@ -779,7 +756,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		}
 
 		if ( isset($valid_user_ids) AND is_array($valid_user_ids) AND count($valid_user_ids) > 0 ) {
-			$query	.=	' OR a.id in ('. $this->getListSQL($valid_user_ids, $ph) .') ';
+			$query	.=	' OR a.id in ('. $this->getListSQL( $valid_user_ids, $ph, 'int' ) .') ';
 		}
 
 		$query .= '			)
@@ -822,9 +799,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$uif = new UserIdentificationFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					'station_id' => $station_id,
-					'status_id' => $status_id,
+					'company_id' => (int)$company_id,
+					'station_id' => (int)$station_id,
+					'status_id' => (int)$status_id,
 					'employee_number' => $employee_number,
 					//'date' => $date,
 					//'date2' => $date,
@@ -898,7 +875,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -927,7 +904,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -1019,7 +996,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'created_date' => $date,
 					'updated_date' => $date,
 					'deleted_date' => $date,
@@ -1058,7 +1035,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'created_date' => $date,
 					'updated_date' => $date,
 					'uif_created_date' => $date,
@@ -1100,7 +1077,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					'id2' => $id,
 					);
 
@@ -1391,7 +1368,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$utf = new UserTitleFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -1497,7 +1474,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -1507,13 +1484,13 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					';
 
 		if ( $status_id != '' AND isset($status_id[0]) AND !in_array(-1, (array)$status_id) ) {
-			$query	.=	' AND status_id in ('. $this->getListSQL($status_id, $ph) .') ';
+			$query	.=	' AND status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .') ';
 		}
 		if ( $branch_id != '' AND isset($branch_id[0]) AND !in_array(-1, (array)$branch_id) ) {
-			$query	.=	' AND default_branch_id in ('. $this->getListSQL($branch_id, $ph) .') ';
+			$query	.=	' AND default_branch_id in ('. $this->getListSQL( $branch_id, $ph, 'int' ) .') ';
 		}
 		if ( $department_id != '' AND ( isset($department_id[0]) AND !in_array(-1, (array)$department_id) ) ) {
-			$query	.=	' AND default_department_id in ('. $this->getListSQL($department_id, $ph) .') ';
+			$query	.=	' AND default_department_id in ('. $this->getListSQL( $department_id, $ph, 'int' ) .') ';
 		}
 
 		$query .=	'
@@ -1545,7 +1522,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -1555,16 +1532,16 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					';
 
 		if ( $status_id != '' AND isset($status_id[0]) AND !in_array(-1, (array)$status_id) ) {
-			$query	.=	' AND status_id in ('. $this->getListSQL($status_id, $ph) .') ';
+			$query	.=	' AND status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .') ';
 		}
 		if ( $group_id != '' AND isset($group_id[0]) AND !in_array(-1, (array)$group_id) ) {
-			$query	.=	' AND group_id in ('. $this->getListSQL($group_id, $ph) .') ';
+			$query	.=	' AND group_id in ('. $this->getListSQL( $group_id, $ph, 'int' ) .') ';
 		}
 		if ( $branch_id != '' AND isset($branch_id[0]) AND !in_array(-1, (array)$branch_id) ) {
-			$query	.=	' AND default_branch_id in ('. $this->getListSQL($branch_id, $ph) .') ';
+			$query	.=	' AND default_branch_id in ('. $this->getListSQL( $branch_id, $ph, 'int' ) .') ';
 		}
 		if ( $department_id != '' AND ( isset($department_id[0]) AND !in_array(-1, (array)$department_id) ) ) {
-			$query	.=	' AND default_department_id in ('. $this->getListSQL($department_id, $ph) .') ';
+			$query	.=	' AND default_department_id in ('. $this->getListSQL( $department_id, $ph, 'int' ) .') ';
 		}
 
 		$query .=	'
@@ -1600,27 +1577,27 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
-						AND	id in ('. $this->getListSQL($user_id, $ph) .')
+						AND	id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .')
 					';
 
 		if ( $status_id != '' AND isset($status_id[0]) AND !in_array(-1, (array)$status_id) ) {
-			$query	.=	' AND status_id in ('. $this->getListSQL($status_id, $ph) .') ';
+			$query	.=	' AND status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .') ';
 		}
 		if ( $group_id != '' AND isset($group_id[0]) AND !in_array(-1, (array)$group_id) ) {
-			$query	.=	' AND group_id in ('. $this->getListSQL($group_id, $ph) .') ';
+			$query	.=	' AND group_id in ('. $this->getListSQL( $group_id, $ph, 'int' ) .') ';
 		}
 		if ( $branch_id != '' AND isset($branch_id[0]) AND !in_array(-1, (array)$branch_id) ) {
-			$query	.=	' AND default_branch_id in ('. $this->getListSQL($branch_id, $ph) .') ';
+			$query	.=	' AND default_branch_id in ('. $this->getListSQL( $branch_id, $ph, 'int' ) .') ';
 		}
 		if ( $department_id != '' AND ( isset($department_id[0]) AND !in_array(-1, (array)$department_id) ) ) {
-			$query	.=	' AND default_department_id in ('. $this->getListSQL($department_id, $ph) .') ';
+			$query	.=	' AND default_department_id in ('. $this->getListSQL( $department_id, $ph, 'int' ) .') ';
 		}
 
 		$query .=	'
@@ -1646,7 +1623,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -1658,19 +1635,19 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 
 		$filter_query = NULL;
 		if ( $status_id != '' AND isset($status_id[0]) AND !in_array(-1, $status_id) ) {
-			$filter_query  .=	' AND a.status_id in ('. $this->getListSQL($status_id, $ph) .') ';
+			$filter_query  .=	' AND a.status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .') ';
 		}
 		if ( $branch_id != '' AND isset($branch_id[0]) AND !in_array(-1, $branch_id) ) {
-			$filter_query  .=	' AND a.default_branch_id in ('. $this->getListSQL($branch_id, $ph) .') ';
+			$filter_query  .=	' AND a.default_branch_id in ('. $this->getListSQL( $branch_id, $ph, 'int' ) .') ';
 		}
 		if ( $department_id != '' AND isset($department_id[0]) AND !in_array(-1, $department_id) ) {
-			$filter_query  .=	' AND a.default_department_id in ('. $this->getListSQL($department_id, $ph) .') ';
+			$filter_query  .=	' AND a.default_department_id in ('. $this->getListSQL( $department_id, $ph, 'int' ) .') ';
 		}
 		if ( $user_title_id != '' AND isset($user_title_id[0]) AND !in_array(-1, $user_title_id) ) {
-			$filter_query  .=	' AND a.title_id in ('. $this->getListSQL($user_title_id, $ph) .') ';
+			$filter_query  .=	' AND a.title_id in ('. $this->getListSQL( $user_title_id, $ph, 'int' ) .') ';
 		}
 		if ( $exclude_user_id != '' AND isset($exclude_user_id[0]) ) {
-			$filter_query  .=	' AND a.id not in ('. $this->getListSQL($exclude_user_id, $ph) .') ';
+			$filter_query  .=	' AND a.id not in ('. $this->getListSQL( $exclude_user_id, $ph, 'int' ) .') ';
 		}
 
 		//If Branch, Dept, Status, Exclude are set, we need to prepend
@@ -1692,7 +1669,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 			} else {
 				$query .= ' AND ';
 			}
-			$query	.=	' ( a.company_id = ? AND a.id in ('. $this->getListSQL($include_user_id, $ph) .') ) ';
+			$query	.=	' ( a.company_id = ? AND a.id in ('. $this->getListSQL( $include_user_id, $ph, 'int' ) .') ) ';
 		}
 
 		$query .=	'
@@ -1727,7 +1704,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$baf = new BankAccountFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -1736,7 +1713,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					LEFT JOIN '. $baf->getTable() .' as c ON a.id = c.user_id AND (c.deleted=0 OR c.deleted IS NULL)
 					where
 						a.company_id = ?
-						AND a.id in ('. $this->getListSQL($user_ids, $ph) .')
+						AND a.id in ('. $this->getListSQL( $user_ids, $ph, 'int' ) .')
 						AND ( a.deleted = 0 )
 				';
 		$query .= $this->getSortSQL( $order, FALSE );
@@ -1835,7 +1812,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 	 *
 	 * @return object $this
 	 */
-	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
+	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL, $include_last_punch_time = FALSE ) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -1891,6 +1868,10 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 											'pay_period_schedule',
 											'policy_group',
 											);
+		
+		if ( $include_last_punch_time == TRUE ) {
+			$additional_order_fields[] = 'max_punch_time_stamp';
+		}
 
 		$sort_column_aliases = array(
 									'type' => 'type_id',
@@ -1937,17 +1918,20 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$pgf = new PolicyGroupFactory();
 		$egf = new EthnicGroupFactory();
 
+		$punchf = new PunchFactory();
+		$punchcf = new PunchControlFactory();
+
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jf = new JobFactory();
 			$jif = new JobItemFactory();
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
-					select
+					SELECT
 							a.*,
 							compf.name as company,
 							b.name as default_branch,
@@ -1975,51 +1959,78 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 						jif.manual_id as default_job_item_manual_id, ';
 		}
 
+		if ( $include_last_punch_time == TRUE ) {
+			$query .= '	punch.max_punch_time_stamp as max_punch_time_stamp, ';
+		}
+		
+		//We need to use SUB-SELECTs when joining to permission_control/permission_user, pay_period_schedule/pay_period_schedule_user, policy_group/policy_group_user
+		//Since the employee may not be assigned to any of them, or they may be assigned to ones that were already deleted, and a basic LEFT JOIN
+		//will return multiple records for a single employee unless its done with a sub-select. This can be tested by created a new pay period schedule,
+		//assigning the employee to it, then deleting the pay period schedule, doing that a few times. Then the LEFT JOIN will return one record for each pay period schedule that was created.
 		$query .= '			y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
 							y.last_name as created_by_last_name,
 							z.first_name as updated_by_first_name,
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
-					from	'. $this->getTable() .' as a
+					FROM	'. $this->getTable() .' as a
 						LEFT JOIN '. $compf->getTable() .' as compf ON ( a.company_id = compf.id AND compf.deleted = 0)
-						LEFT JOIN '. $bf->getTable() .' as b ON ( a.default_branch_id = b.id AND b.deleted = 0)
-						LEFT JOIN '. $df->getTable() .' as c ON ( a.default_department_id = c.id AND c.deleted = 0)
-						LEFT JOIN '. $ugf->getTable() .' as d ON ( a.group_id = d.id AND d.deleted = 0 )
-						LEFT JOIN '. $utf->getTable() .' as e ON ( a.title_id = e.id AND e.deleted = 0 )
-						LEFT JOIN '. $cf->getTable() .' as f ON ( a.currency_id = f.id AND f.deleted = 0 )
-						LEFT JOIN '. $egf->getTable() .' as egf ON ( a.ethnic_group_id = egf.id AND egf.deleted = 0 ) ';
-
-		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			$query .= '	LEFT JOIN '. $jf->getTable() .' as jf ON a.default_job_id = jf.id';
-			$query .= '	LEFT JOIN '. $jif->getTable() .' as jif ON a.default_job_item_id = jif.id';
-		}
-
-		$query .= '		LEFT JOIN
+						LEFT JOIN '. $bf->getTable() .' as b ON ( a.company_id = b.company_id AND a.default_branch_id = b.id AND b.deleted = 0)
+						LEFT JOIN '. $df->getTable() .' as c ON ( a.company_id = c.company_id AND a.default_department_id = c.id AND c.deleted = 0)
+						LEFT JOIN '. $ugf->getTable() .' as d ON ( a.company_id = d.company_id AND a.group_id = d.id AND d.deleted = 0 )
+						LEFT JOIN '. $utf->getTable() .' as e ON ( a.company_id = e.company_id AND a.title_id = e.id AND e.deleted = 0 )
+						LEFT JOIN '. $cf->getTable() .' as f ON ( a.company_id = f.company_id AND a.currency_id = f.id AND f.deleted = 0 )
+						LEFT JOIN '. $egf->getTable() .' as egf ON ( a.company_id = egf.company_id AND a.ethnic_group_id = egf.id AND egf.deleted = 0 )
+						LEFT JOIN
 						(
-							SELECT g2.*, g1.user_id
-							FROM '. $puf->getTable() .' as g1, '. $pcf->getTable() .' as g2
-							WHERE ( g1.permission_control_id = g2.id AND g2.deleted = 0)
+								SELECT g2.*, g1.user_id
+								FROM '. $puf->getTable() .' as g1, '. $pcf->getTable() .' as g2
+								WHERE ( g1.permission_control_id = g2.id AND g2.deleted = 0)
 						) as g ON ( a.id = g.user_id )
 						LEFT JOIN
 						(
-							SELECT h2.*, h1.user_id
-							FROM '. $ppsuf->getTable() .' as h1, '. $ppsf->getTable() .' as h2
-							WHERE ( h1.pay_period_schedule_id = h2.id AND h2.deleted = 0)
+								SELECT h2.*, h1.user_id
+								FROM '. $ppsuf->getTable() .' as h1, '. $ppsf->getTable() .' as h2
+								WHERE ( h1.pay_period_schedule_id = h2.id AND h2.deleted = 0)
 						) as h ON ( a.id = h.user_id )
 						LEFT JOIN
 						(
-							SELECT i2.*, i1.user_id
-							FROM '. $pguf->getTable() .' as i1, '. $pgf->getTable() .' as i2
-							WHERE ( i1.policy_group_id = i2.id AND i2.deleted = 0)
-						) as i ON ( a.id = i.user_id ) ';
+								SELECT i2.*, i1.user_id
+								FROM '. $pguf->getTable() .' as i1, '. $pgf->getTable() .' as i2
+								WHERE ( i1.policy_group_id = i2.id AND i2.deleted = 0)
+						) as i ON ( a.id = i.user_id )
+						';
+
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+			$query .= '	LEFT JOIN '. $jf->getTable() .' as jf ON ( a.company_id = jf.company_id AND a.default_job_id = jf.id AND jf.deleted = 0 )
+						LEFT JOIN '. $jif->getTable() .' as jif ON ( a.company_id = jif.company_id AND a.default_job_item_id = jif.id AND jif.deleted = 0 ) ';
+		}
+
+		if ( $include_last_punch_time == TRUE ) {
+			$query .= '
+						LEFT JOIN
+						(
+								SELECT tmp2_d.id as user_id, max(tmp2_a.time_stamp) as max_punch_time_stamp
+								FROM	'. $punchf->getTable() .' as tmp2_a
+								LEFT JOIN '. $punchcf->getTable() .' as tmp2_b ON tmp2_a.punch_control_id = tmp2_b.id
+								LEFT JOIN '. $this->getTable() .' as tmp2_d ON tmp2_b.user_id = tmp2_d.id
+								WHERE tmp2_d.company_id = '. (int)$company_id .'
+									AND tmp2_d.status_id = 10
+									AND tmp2_b.date_stamp >= '. $this->db->qstr( $this->db->BindDate( TTDate::getBeginDayEpoch( time() - (86400 * 31 ) ) ) ) .'
+									AND tmp2_b.date_stamp <= '. $this->db->qstr( $this->db->BindDate( TTDate::getEndDayEpoch( time() ) ) ) .'
+									AND tmp2_a.time_stamp IS NOT NULL
+									AND ( tmp2_a.deleted = 0 AND tmp2_b.deleted = 0 )
+								GROUP BY tmp2_d.id
+						) as punch ON ( a.id = punch.user_id )
+					';
+		}
 
 		$query .= Permission::getPermissionHierarchySQL( $company_id, ( isset($filter_data['permission_current_user_id']) ) ? $filter_data['permission_current_user_id'] : 0, 'a.id' );
 
 		$query .= '
-						LEFT JOIN '. $this->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
-						LEFT JOIN '. $this->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
-					where	a.company_id = ?
+						LEFT JOIN '. $this->getTable() .' as y ON ( a.company_id = y.company_id AND a.created_by = y.id AND y.deleted = 0 )
+						LEFT JOIN '. $this->getTable() .' as z ON ( a.company_id = z.company_id AND a.updated_by = z.id AND z.deleted = 0 )
+					WHERE	a.company_id = ?
 					';
 
 		$query .= Permission::getPermissionIsChildIsOwnerFilterSQL( $filter_data, 'a.id' );
@@ -2044,6 +2055,14 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 
 		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'a.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['default_department']) ) ? $this->getWhereClauseSQL( 'c.name', $filter_data['default_department'], 'text', $ph ) : NULL;
+
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+			$query .= ( isset($filter_data['default_job_id']) ) ? $this->getWhereClauseSQL( 'a.default_job_id', $filter_data['default_job_id'], 'numeric_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['default_job']) ) ? $this->getWhereClauseSQL( 'jf.name', $filter_data['default_job'], 'text', $ph ) : NULL;
+
+			$query .= ( isset($filter_data['default_job_item_id']) ) ? $this->getWhereClauseSQL( 'a.default_job_item_id', $filter_data['default_job_item_id'], 'numeric_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['default_job_item']) ) ? $this->getWhereClauseSQL( 'jif.name', $filter_data['default_job_item'], 'text', $ph ) : NULL;
+		}
 
 		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'a.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['title']) ) ? $this->getWhereClauseSQL( 'e.name', $filter_data['title'], 'text', $ph ) : NULL;
@@ -2087,7 +2106,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['work_email']) ) ? $this->getWhereClauseSQL( 'a.work_email', $filter_data['work_email'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['home_email']) ) ? $this->getWhereClauseSQL( 'a.home_email', $filter_data['home_email'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => $company_id, 'object_type_id' => 200, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
+		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => (int)$company_id, 'object_type_id' => 200, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 
 		//$query .= ( isset($filter_data['longitude']) ) ? $this->getWhereClauseSQL( 'a.longitude', $filter_data['longitude'], 'numeric', $ph ) : NULL;
 
@@ -2134,9 +2153,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}

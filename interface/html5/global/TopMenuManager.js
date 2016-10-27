@@ -247,7 +247,7 @@ TopMenuManager.buildRibbonMenuModels = function() {
 
 	var permission = PermissionManager.getPermissionData();
 
-	//Error: TypeError: null is not an object (evaluating 'permission.punch') in https://ondemand1.timetrex.com/interface/html5/global/TopMenuManager.js?v=8.0.0-20141230-130626 line 280
+	//Error: TypeError: null is not an object (evaluating 'permission.punch') in /interface/html5/global/TopMenuManager.js?v=8.0.0-20141230-130626 line 280
 	if ( !permission ) {
 		permission = {};
 	}
@@ -714,6 +714,7 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		permission: permission.pay_stub_amendment
 	} );
 
+	/* //Removed as of v9.0
 	var recurring_pay_stub_amendment = new RibbonSubMenu( {
 		label: $.i18n._( 'Recurring PS<br>Amendments' ),
 		id: 'RecurringPayStubAmendment',
@@ -722,6 +723,7 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		permission_result: PermissionManager.checkTopLevelPermission( 'RecurringPayStubAmendment' ),
 		permission: permission.pay_stub_amendment
 	} );
+	*/
 
 	var pay_period_schedule_1 = new RibbonSubMenu( {
 		label: $.i18n._( 'Pay Period<br>Schedules' ),
@@ -1385,7 +1387,7 @@ TopMenuManager.buildRibbonMenuModels = function() {
 	} );
 
 	var request_authorization = new RibbonSubMenu( {
-		label: $.i18n._( 'Request<br>Authorization' ),
+		label: $.i18n._( 'Request<br>Authorizations' ),
 		id: 'RequestAuthorization',
 		group: authorization,
 		icon: 'authorize_request-35x35.png',
@@ -1394,7 +1396,7 @@ TopMenuManager.buildRibbonMenuModels = function() {
 	} );
 
 	var pay_period_time_sheet_verify = new RibbonSubMenu( {
-		label: $.i18n._( 'TimeSheet<br>Authorization' ),
+		label: $.i18n._( 'TimeSheet<br>Authorizations' ),
 		id: 'TimeSheetAuthorization',
 		group: authorization,
 		icon: 'authorize_timesheet-35x35.png',

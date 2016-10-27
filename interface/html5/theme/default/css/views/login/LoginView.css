@@ -3,7 +3,6 @@
     position: fixed;
     width: 652px;
     height: 455px;
-    background: url("images/login_view_bg.png");
     top: 50%;
     left: 50%;
     margin: -238.5px 0 0 -326px;
@@ -110,8 +109,8 @@
     bottom: 8px;
     margin-left: auto;
     margin-right: auto;
-    left: 0px;
-    right: 0px;
+    left: 0;
+    right: 0;
     width: 96px;
 }
 
@@ -123,8 +122,8 @@
     margin-left: auto;
     margin-right: auto;
     margin-top: 220px;
-    left: 0px;
-    right: 0px;
+    left: 0;
+    right: 0;
     width: 300px;
     text-align: center;
     z-index: 7;

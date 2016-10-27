@@ -3,10 +3,10 @@ var TAlertManager = (function() {
 	var view = null;
 
 	var showPreSessionAlert = function() {
-		var result = $( Global.loadWidget( 'global/widgets/talert/SessionAlert.html' ) );
-
-		Global.addCss( 'global/widgets/talert/TAlert.css' );
-
+		var result = $( '<div class="session-alert"> ' +
+		'<span class="close-icon">X</span>' +
+		'<span class="content"/>' +
+		'</div>' );
 		setTimeout( function() {
 			$( 'body' ).append( result );
 			result.find( '.content' ).html( $.i18n._( 'Previous Session' ) );
@@ -60,9 +60,9 @@ var TAlertManager = (function() {
 
 	var closeBrowserBanner = function() {
 		$( '.browser-banner' ).remove();
-	}
+	};
 
-	var showBrowserTopBanner = function( val ) {
+	var showBrowserTopBanner = function() {
 		var div = $( '<div class="browser-banner"><a href="http://www.timetrex.com/supported_web_browsers.php" target="_blank"><span class="label"></span></a></div>' );
 
 		div.children().find( 'span' ).text( $.i18n._( LocalCacheData.getLoginData().application_name + ' requires a modern HTML5 standards compatible web browser, click here for more information.' ) );
@@ -73,15 +73,21 @@ var TAlertManager = (function() {
 	var showErrorAlert = function( result ) {
 		var details = result.getDetails();
 
+		if ( details.hasOwnProperty( 'error' ) ) {
+
+		}
 		if ( !details ) {
 			details = result.getDescription(); // If the details is empty, try to get description to show.
 		}
-
 		var error_string = '';
 
 		if ( Global.isArray( details ) || typeof details === 'object' ) {
 
 			$.each( details, function( index, val ) {
+
+				if ( val.hasOwnProperty( 'error' ) ) {
+					val = val.error;
+				}
 
 				for ( var key in val ) {
 					error_string = error_string + val[key] + "<br>";
@@ -94,6 +100,41 @@ var TAlertManager = (function() {
 
 		showAlert( error_string, 'Error' );
 
+	};
+
+	var showWarningAlert = function( result, callBack ) {
+		var details = result.getDetails();
+		var ul_container = $( '<ol>' );
+		if ( Global.isArray( details ) || typeof details === 'object' ) {
+			$.each( details, function( index, val ) {
+				if ( val.hasOwnProperty( 'warning' ) ) {
+					val = val.warning;
+				}
+				for ( var key in val ) {
+					var li = $( '<li>' );
+					var child_val = val[key];
+					var has_child = false;
+					for ( var child_key in child_val ) {
+						if ( child_val.hasOwnProperty( child_key ) ) {
+							has_child = true;
+							li = $( '<li>' );
+							li.append( child_val[child_key] );
+							ul_container.append( li );
+						}
+					}
+					if ( !has_child ) {
+						li.append( val[key] );
+						ul_container.append( li );
+					}
+				}
+			} );
+		}
+		var div = $( '<div>' );
+		var p = $( '<p>' );
+		p.append( $.i18n._( 'Are you sure you wish to save this record without correcting the above warnings?' ) )
+		div.append( ul_container );
+		div.append( p );
+		showConfirmAlert( div[0], 'Warning', callBack, 'Save', 'Cancel' );
 	};
 
 	var showAlert = function( content, title, callBack ) {
@@ -112,12 +153,14 @@ var TAlertManager = (function() {
 
 			remove();
 
-			if ( callBack ) {
-				callBack();
-			}
 		}
-		Global.addCss( 'global/widgets/talert/TAlert.css' );
-		var result = $( Global.loadWidget( 'global/widgets/talert/TAlert.html' ) );
+		var result = $( '<div class="t-alert">' +
+		'<div class="content-div"><span class="content"/></div>' +
+		'<span class="title"/>' +
+		'<div class="bottom-bar">' +
+		'<button class="t-button">Close</button>' +
+		'</div>' +
+		'</div>' );
 		view = result;
 		setTimeout( function() {
 			$( 'body' ).append( result );
@@ -143,10 +186,18 @@ var TAlertManager = (function() {
 
 	};
 
-	var showConfirmAlert = function( content, title, callBackFunction ) {
+	var showConfirmAlert = function( content, title, callBackFunction, yesLabel, noLabel ) {
 
 		if ( !Global.isSet( title ) ) {
 			title = $.i18n._( 'Message' );
+		}
+
+		if ( !Global.isSet( yesLabel ) ) {
+			yesLabel = $.i18n._( 'Yes' );
+		}
+
+		if ( !Global.isSet( noLabel ) ) {
+			noLabel = $.i18n._( 'No' );
 		}
 
 		if ( view !== null ) {
@@ -159,19 +210,22 @@ var TAlertManager = (function() {
 
 			remove();
 		}
-
-		Global.addCss( 'global/widgets/talert/TAlert.css' );
-
-		var result = $( Global.loadWidget( 'global/widgets/talert/ConfirmAlert.html' ) );
-
+		var result = $( '<div class="confirm-alert"> ' +
+		'<span class="content"></span>' +
+		'<span class="title"></span>' +
+		'<div class="bottom-bar">' +
+		'<button id="yesBtn" class="t-button bottom-bar-yes-btn"></button>' +
+		'<button id="noBtn" class="t-button"></button>' +
+		'</div>' +
+		'</div>' );
 		view = result;
 		$( 'body' ).append( result );
 
-		result.find( '#yesBtn' ).text( $.i18n._( 'Yes' ) );
-		result.find( '#noBtn' ).text( $.i18n._( 'No' ) );
+		result.find( '#yesBtn' ).text( yesLabel );
+		result.find( '#noBtn' ).text( noLabel );
 		result.find( '.title' ).text( title );
 
-		result.find( '.content' ).text( content );
+		result.find( '.content' ).html( content );
 
 		result.find( '#yesBtn' ).bind( 'click', function() {
 			remove();
@@ -185,7 +239,7 @@ var TAlertManager = (function() {
 
 		} );
 
-	}
+	};
 
 	var remove = function() {
 
@@ -194,7 +248,7 @@ var TAlertManager = (function() {
 			view = null;
 		}
 
-	}
+	};
 
 	return {
 		showConfirmAlert: showConfirmAlert,
@@ -202,7 +256,8 @@ var TAlertManager = (function() {
 		showErrorAlert: showErrorAlert,
 		showPreSessionAlert: showPreSessionAlert,
 		showBrowserTopBanner: showBrowserTopBanner,
-		closeBrowserBanner: closeBrowserBanner
+		closeBrowserBanner: closeBrowserBanner,
+		showWarningAlert: showWarningAlert
 	}
 
 })();

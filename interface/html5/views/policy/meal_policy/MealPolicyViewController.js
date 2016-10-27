@@ -88,27 +88,17 @@ MealPolicyViewController = BaseViewController.extend( {
 		//Active After
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'trigger_time', width: 149, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'trigger_time', mode:'time_unit', need_parser_sec: true} );
 
-		var widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'> " + $.i18n._('ie') + ' : '+ LocalCacheData.getLoginUserPreference().time_unit_format_display + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Active After' ), form_item_input, tab_meal_policy_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Active After' ), form_item_input, tab_meal_policy_column1, '', null );
 
 		// Meal Time
 		// Deduction/Addition Time
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'amount', width: 149, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'amount', mode:'time_unit', need_parser_sec: true} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._('ie') + ' : '+ LocalCacheData.getLoginUserPreference().time_unit_format_display + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Deduction/Addition Time' ), form_item_input, tab_meal_policy_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Deduction/Addition Time' ), form_item_input, tab_meal_policy_column1, '', null, true );
 
 		// Auto-Detect Meals By
 
@@ -120,48 +110,28 @@ MealPolicyViewController = BaseViewController.extend( {
 
 		// Minimum Punch Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'minimum_punch_time', width: 149, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'minimum_punch_time', mode:'time_unit', need_parser_sec: true} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._('ie') + ' : '+ LocalCacheData.getLoginUserPreference().time_unit_format_display + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Minimum Punch Time' ), form_item_input, tab_meal_policy_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Minimum Punch Time' ), form_item_input, tab_meal_policy_column1, '', null, true );
 
 		// Maximum Punch Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'maximum_punch_time', width: 149, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'maximum_punch_time', mode:'time_unit', need_parser_sec: true} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._('ie') + ' : '+ LocalCacheData.getLoginUserPreference().time_unit_format_display + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Maximum Punch Time' ), form_item_input, tab_meal_policy_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Maximum Punch Time' ), form_item_input, tab_meal_policy_column1, '', null, true );
 
 		// Start Window
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'start_window', width: 149, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'start_window', mode:'time_unit', need_parser_sec: true} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._('ie') + ' : '+ LocalCacheData.getLoginUserPreference().time_unit_format_display + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Start Window' ), form_item_input, tab_meal_policy_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Start Window' ), form_item_input, tab_meal_policy_column1, '', null, true );
 
 		// Window Length
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'window_length', width: 149, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'window_length', mode:'time_unit', need_parser_sec: true} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._('ie') + ' : '+ LocalCacheData.getLoginUserPreference().time_unit_format_display + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Window Length' ), form_item_input, tab_meal_policy_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Window Length' ), form_item_input, tab_meal_policy_column1, '', null, true );
 
 		// Include Any Punched Time for Meal
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
@@ -309,14 +279,14 @@ MealPolicyViewController = BaseViewController.extend( {
 		if ( this.current_edit_record['type_id'] === 10 || this.current_edit_record['type_id'] === 15 ) {
 
 			this.edit_view_form_item_dic['amount'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Deduction/Addition Time' ) + ": " );
-			this.edit_view_form_item_dic['include_lunch_punch_time'].css( 'display', 'block' );
+			this.attachElement( 'include_lunch_punch_time' );
 
 		} else if ( this.current_edit_record['type_id'] === 20 ) {
 			this.edit_view_form_item_dic['amount'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Meal Time' ) + ": " );
-			this.edit_view_form_item_dic['include_lunch_punch_time'].css( 'display', 'none' );
+			this.detachElement( 'include_lunch_punch_time' );
 		} else {
 			this.edit_view_form_item_dic['amount'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Deduction/Addition Time' ) + ": " );
-			this.edit_view_form_item_dic['include_lunch_punch_time'].css( 'display', 'block' );
+			this.attachElement( 'include_lunch_punch_time' );
 		}
 
 		this.editFieldResize();
@@ -326,22 +296,22 @@ MealPolicyViewController = BaseViewController.extend( {
 	onAutoDetectTypeChange: function() {
 
 		if ( this.current_edit_record['auto_detect_type_id'] === 10 ) {
-			this.edit_view_form_item_dic['start_window'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['window_length'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['minimum_punch_time'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['maximum_punch_time'].css( 'display', 'none' );
+			this.attachElement( 'start_window' );
+			this.attachElement( 'window_length' );
+			this.detachElement( 'minimum_punch_time' );
+			this.detachElement( 'maximum_punch_time' );
 
 		} else if ( this.current_edit_record['auto_detect_type_id'] === 20 ) {
-			this.edit_view_form_item_dic['start_window'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['window_length'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['minimum_punch_time'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['maximum_punch_time'].css( 'display', 'block' );
+			this.detachElement( 'start_window' );
+			this.detachElement( 'window_length' );
+			this.attachElement( 'minimum_punch_time' );
+			this.attachElement( 'maximum_punch_time' );
 
 		} else {
-			this.edit_view_form_item_dic['start_window'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['window_length'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['minimum_punch_time'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['maximum_punch_time'].css( 'display', 'none' );
+			this.attachElement( 'start_window' );
+			this.attachElement( 'window_length' );
+			this.detachElement( 'minimum_punch_time' );
+			this.detachElement( 'maximum_punch_time' );
 
 		}
 

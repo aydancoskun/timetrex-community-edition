@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -280,12 +280,12 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 		$huf = new HierarchyUserFactory();
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					'idb' => $id,
 					'idc' => $id,
 					'min_level' => $min_level,
 					'max_level' => $max_level,
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					);
 
 		$query = '
@@ -393,7 +393,7 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 						LEFT JOIN '. $hotf->getTable() .' as y2 ON x.hierarchy_control_id = y2.hierarchy_control_id
 						LEFT JOIN '. $hlf->getTable() .' as z ON x.hierarchy_control_id = z.hierarchy_control_id AND z.user_id = '. (int)$user_id .'
 						where
-							y2.object_type_id in ('. $this->getListSQL($object_type_id, $ph) .')
+							y2.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
 							AND x.level >= z.level-1
 							AND ( x.deleted = 0 AND y.deleted = 0 AND z.deleted = 0 )
 
@@ -413,7 +413,7 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 						LEFT JOIN '. $hotf->getTable() .' as p ON n.hierarchy_control_id = p.hierarchy_control_id
 						LEFT JOIN '. $hlf->getTable() .' as z ON n.hierarchy_control_id = z.hierarchy_control_id AND z.user_id = '. (int)$user_id .'
 						where
-							p.object_type_id in ('. $this->getListSQL($object_type_id, $ph) .')
+							p.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
 							AND ( o.deleted = 0 AND z.deleted = 0 )
 					) as tmp
 					WHERE level >= '. (int)$min_level .'
@@ -500,7 +500,7 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 						LEFT JOIN '. $hotf->getTable() .' as y2 ON x.hierarchy_control_id = y2.hierarchy_control_id
 						LEFT JOIN '. $hlf->getTable() .' as z ON x.hierarchy_control_id = z.hierarchy_control_id AND z.user_id = '. (int)$user_id .'
 						where
-							y2.object_type_id in ('. $this->getListSQL($object_type_id, $ph) .')
+							y2.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
 							AND x.level >= z.level-1
 							AND ( x.deleted = 0 AND y.deleted = 0 AND z.deleted = 0 )
 
@@ -520,11 +520,11 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 						LEFT JOIN '. $hotf->getTable() .' as p ON n.hierarchy_control_id = p.hierarchy_control_id
 						LEFT JOIN '. $hlf->getTable() .' as z ON n.hierarchy_control_id = z.hierarchy_control_id AND z.user_id = '. (int)$user_id .'
 						where
-							p.object_type_id in ('. $this->getListSQL($object_type_id, $ph) .')
+							p.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
 							AND ( o.deleted = 0 AND z.deleted = 0 )
 					) as tmp
 					WHERE
-						hierarchy_control_id in ('. $this->getListSQL($hierarchy_control_ids, $ph) .')
+						hierarchy_control_id in ('. $this->getListSQL( $hierarchy_control_ids, $ph, 'int' ) .')
 						AND ( level >= '. (int)$min_level .' AND level <= '. (int)$max_level.' )
 					ORDER BY level ASC, user_id ASC
 				';
@@ -590,9 +590,9 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 		$hcf = new HierarchyControlFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
-					'company_id' => $company_id,
-					//'object_type_id' => $object_type_id,
+					'user_id' => (int)$user_id,
+					'company_id' => (int)$company_id,
+					//'object_type_id' => (int)$object_type_id,
 					);
 
 		$query = '
@@ -605,7 +605,7 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 						WHERE
 							x.user_id = ?
 							AND z.company_id = ?
-							AND y.object_type_id in ('. $this->getListSQL($object_type_id, $ph) .')
+							AND y.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
 							AND ( w.deleted = 0 AND e.deleted = 0 )
 						ORDER BY w.level DESC
 					';
@@ -670,9 +670,9 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 		//When it comes to permissions we only consider subordinates, not other supervisors/managers in the hierarchy.
 
 		$ph = array(
-					'user_id' => $user_id,
-					'company_id' => $company_id,
-					//'object_type_id' => $object_type_id,
+					'user_id' => (int)$user_id,
+					'company_id' => (int)$company_id,
+					//'object_type_id' => (int)$object_type_id,
 					//'user_idb' => $user_id,
 					//'object_type_idb' => $object_type_id,
 					//'company_idb' => $company_id,
@@ -691,18 +691,18 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 						WHERE
 							x.user_id = ?
 							AND z.company_id = ?
-							AND y.object_type_id in ('. $this->getListSQL($object_type_id, $ph) .')
+							AND y.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
 							AND w.user_id != x.user_id
 							AND ( x.deleted = 0 AND z2.deleted = 0 AND z.deleted = 0 )
 					';
 
-		//Debug::Text(' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($ph, ' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 		$rs = $this->db->Execute($query, $ph);
 		//Debug::Text(' Rows: '. $rs->RecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $rs->RecordCount() > 0 ) {
 			foreach( $rs as $row ) {
-				$retval[] = $row['user_id'];
+				$retval[] = (int)$row['user_id'];
 			}
 		}
 

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -110,6 +110,20 @@ class PayrollDeduction_Base {
 	// Generic
 	//
 
+	//10=Periodic (Default), 20=Non-Periodic.
+	function setFormulaType($type_id) {
+		$this->data['formula_type_id'] = $type_id;
+
+		return TRUE;
+	}
+	function getFormulaType() {
+		if ( isset($this->data['formula_type_id']) ) {
+			return $this->data['formula_type_id'];
+		}
+
+		return 10;
+	}
+
 	function setUserValue1($value) {
 		$this->data['user_value1'] = $value;
 
@@ -162,8 +176,14 @@ class PayrollDeduction_Base {
 		return FALSE;
 	}
 
+	function getDateEpoch() {
+		return strtotime( $this->getDate() );
+	}
+	function getISODate( $epoch ) {
+		return date('Ymd', $epoch );
+	}
 	function setDate($epoch) {
-		$this->data['date'] = $epoch;
+		$this->data['date'] = $this->getISODate( $epoch );
 
 		return TRUE;
 	}
@@ -186,6 +206,26 @@ class PayrollDeduction_Base {
 		}
 
 		return FALSE;
+	}
+
+	function setCurrentPayPeriod($value) {
+		$this->data['current_pay_period'] = $value;
+
+		return TRUE;
+	}
+	function getCurrentPayPeriod() {
+		if ( isset($this->data['current_pay_period']) ) {
+			return $this->data['current_pay_period'];
+		}
+
+		return FALSE;
+	}
+	
+	function getRemainingPayPeriods() {
+		$retval = ( $this->getAnnualPayPeriods() - $this->getCurrentPayPeriod() );
+		Debug::Text('Pay Periods Remaining: '. $retval .' Annual PPs: '. $this->getAnnualPayPeriods() .' Current PP: '. $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10 );
+
+		return $retval;
 	}
 
 	function getCountryPrimaryCurrency() {
@@ -273,6 +313,25 @@ class PayrollDeduction_Base {
 		return FALSE;
 	}
 
+	function setYearToDateDeduction($amount) {
+		$amount = $this->convertToCountryCurrency( $amount );
+
+		$this->data['ytd_deduction'] = $amount;
+
+		return TRUE;
+	}
+
+	function getYearToDateDeduction() {
+		if ( isset($this->data['ytd_deduction']) ) {
+			Debug::text('YTD Deduction: '. $this->data['ytd_deduction'], __FILE__, __LINE__, __METHOD__, 10);
+
+			return $this->data['ytd_deduction'];
+		}
+
+		return FALSE;
+	}
+
+
 	//This function convert '$amount' from the user currency, to the country currency for calculations
 	function convertToCountryCurrency($amount) {
 		$user_currency_id = $this->getUserCurrency();
@@ -302,7 +361,24 @@ class PayrollDeduction_Base {
 		return $retval;
 	}
 
-	protected function getDataFromRateArray($epoch, $arr) {
+	function calcNonPeriodicIncome( $ytd_gross_income, $gross_pp_income, $annual_pp, $current_pp ) {
+		$retval = bcdiv( bcmul( bcadd( $ytd_gross_income, $gross_pp_income ), $annual_pp ), $current_pp );
+		if ( $retval < 0 ) {
+			$retval = 0;
+		}
+
+		return $retval;
+	}
+	function calcNonPeriodicDeduction( $annual_tax_payable, $ytd_deduction, $annual_pp, $current_pp ) {
+		$retval = bcsub( bcmul( bcdiv( $annual_tax_payable, $annual_pp ), $current_pp ), $ytd_deduction );
+		if ( $retval < 0 ) {
+			$retval = 0;
+		}
+
+		return $retval;
+	}
+
+	function getDataFromRateArray($epoch, $arr) {
 		if ( !is_array($arr) ) {
 			return FALSE;
 		}
@@ -311,7 +387,7 @@ class PayrollDeduction_Base {
 			return FALSE;
 		}
 
-		krsort($arr);
+		krsort($arr, SORT_NUMERIC);
 		foreach( $arr as $date => $val ) {
 			if ( $epoch >= $date ) {
 				return $val;

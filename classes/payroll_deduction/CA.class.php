@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -53,8 +53,8 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		//that exactly, we know to use the current year value instead.
 		//This helps when the claim amount decreases.
 		//Also check next years amount in case the amount gets increased then they try to calculate pay stubs in the previous year.
-		$previous_year = ( TTDate::getBeginYearEpoch( $this->getDate() ) - 86400 );
-		$next_year = ( TTDate::getEndYearEpoch( $this->getDate() ) + 86400 );
+		$previous_year = $this->getISODate( ( TTDate::getBeginYearEpoch( $this->getDateEpoch() ) - 86400 ) );
+		$next_year = $this->getISODate( ( TTDate::getEndYearEpoch( $this->getDateEpoch() ) + 86400 ) );
 
 		if ( $this->data['federal_total_claim_amount'] > 0 ) {
 			if ( $this->getBasicFederalClaimCodeAmount() > 0
@@ -66,7 +66,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 							$this->data['federal_total_claim_amount'] == $this->getBasicFederalClaimCodeAmount( $next_year )
 						)
 				) {
-				Debug::text('Using Basic Federal Claim Code Amount: '. $this->getBasicFederalClaimCodeAmount() .' (Previous Amount: '. $this->data['federal_total_claim_amount'] .') Date: '. TTDate::getDate('DATE', $this->getDate() ), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text('Using Basic Federal Claim Code Amount: '. $this->getBasicFederalClaimCodeAmount() .' (Previous Amount: '. $this->data['federal_total_claim_amount'] .') Date: '. TTDate::getDate('DATE', $this->getDateEpoch() ), __FILE__, __LINE__, __METHOD__, 10);
 				return $this->getBasicFederalClaimCodeAmount();
 			}
 		}
@@ -88,8 +88,8 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		//that exactly, we know to use the current year value instead.
 		//This helps when the claim amount decreases.
 		//Also check next years amount in case the amount gets increased then they try to calculate pay stubs in the previous year.
-		$previous_year = ( TTDate::getBeginYearEpoch( $this->getDate() ) - 86400 );
-		$next_year = ( TTDate::getEndYearEpoch( $this->getDate() ) + 86400 );
+		$previous_year = $this->getISODate( ( TTDate::getBeginYearEpoch( $this->getDateEpoch() ) - 86400 ) );
+		$next_year = $this->getISODate( ( TTDate::getEndYearEpoch( $this->getDateEpoch() ) + 86400 ) );
 
 		if ( $this->data['provincial_total_claim_amount'] > 0 ) {
 			if ( $this->getBasicProvinceClaimCodeAmount() > 0
@@ -101,7 +101,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 							$this->data['provincial_total_claim_amount'] == $this->getBasicProvinceClaimCodeAmount( $next_year )
 						)
 				) {
-				Debug::text('Using Basic Provincial Claim Code Amount: '. $this->getBasicProvinceClaimCodeAmount() .' (Previous Amount: '. $this->data['provincial_total_claim_amount'] .') Date: '. TTDate::getDate('DATE', $this->getDate() ), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text('Using Basic Provincial Claim Code Amount: '. $this->getBasicProvinceClaimCodeAmount() .' (Previous Amount: '. $this->data['provincial_total_claim_amount'] .') Date: '. TTDate::getDate('DATE', $this->getDateEpoch() ), __FILE__, __LINE__, __METHOD__, 10);
 				return $this->getBasicProvinceClaimCodeAmount();
 			}
 		}
@@ -274,37 +274,54 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 	}
 
 	function getFederalPayPeriodDeductions() {
-		return bcdiv( $this->getFederalTaxPayable(), $this->getAnnualPayPeriods() );
+		if ( $this->getFormulaType() == 20 ) {
+			Debug::text('Formula Type: '. $this->getFormulaType() .' YTD Payable: '. $this->getFederalTaxPayable() .' YTD Paid: '. $this->getYearToDateDeduction() .' Current PP: '. $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10);
+			$retval = $this->calcNonPeriodicDeduction( $this->getFederalTaxPayable(), $this->getYearToDateDeduction(), $this->getAnnualPayPeriods(), $this->getCurrentPayPeriod() );
+		} else {
+			$retval = bcdiv( $this->getFederalTaxPayable(), $this->getAnnualPayPeriods() );
+		}
+		return $retval;
 	}
 
 	function getProvincialPayPeriodDeductions() {
-		return bcdiv( $this->getProvincialTaxPayable(), $this->getAnnualPayPeriods() );
+		if ( $this->getFormulaType() == 20 ) {
+			Debug::text('Formula Type: '. $this->getFormulaType() .' YTD Payable: '. $this->getProvincialTaxPayable() .' YTD Paid: '. $this->getYearToDateDeduction() .' Current PP: '. $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10);
+			$retval = $this->calcNonPeriodicDeduction( $this->getProvincialTaxPayable(), $this->getYearToDateDeduction(), $this->getAnnualPayPeriods(), $this->getCurrentPayPeriod() );
+		} else {
+			$retval = bcdiv( $this->getProvincialTaxPayable(), $this->getAnnualPayPeriods() );
+		}
+		return $retval;
 	}
 
 	function getAnnualTaxableIncome() {
-		/*
-		A = [P * (I - F - F2 - U1)] - HD - F1
-			if the result is negative T = L
+		if ( $this->getFormulaType() == 20 ) {
+			Debug::text('Formula Type: '. $this->getFormulaType() .' YTD Gross: '. $this->getYearToDateGrossIncome() .' This Gross: '. $this->getGrossPayPeriodIncome() .' Current PP: '. $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10);
+			$A = $this->calcNonPeriodicIncome( $this->getYearToDateGrossIncome(), $this->getGrossPayPeriodIncome(), $this->getAnnualPayPeriods(), $this->getCurrentPayPeriod() );
+		} else {
+			/*
+			A = [P * (I - F - F2 - U1)] - HD - F1
+				if the result is negative T = L
 
-			//Take into account non-periodic payments such as one-time bonuses/vacation payout.
-			//Must include bonus amount for pay period, as well as YTD bonus amount.
-        */
+				//Take into account non-periodic payments such as one-time bonuses/vacation payout.
+				//Must include bonus amount for pay period, as well as YTD bonus amount.
+			*/
 
-		$A = 0;
-		$P = $this->getAnnualPayPeriods();
-		$I = $this->getGrossPayPeriodIncome();
-		$F = 0;
-		$F2 = 0;
-		$U1 = $this->getUnionDuesAmount();
-		$HD = 0;
-		$F1 = 0;
-		Debug::text('P: '. $P, __FILE__, __LINE__, __METHOD__, 10);
-		Debug::text('I: '. $I, __FILE__, __LINE__, __METHOD__, 10);
-		Debug::text('U1: '. $U1, __FILE__, __LINE__, __METHOD__, 10);
+			$A = 0;
+			$P = $this->getAnnualPayPeriods();
+			$I = $this->getGrossPayPeriodIncome();
+			$F = 0;
+			$F2 = 0;
+			$U1 = $this->getUnionDuesAmount();
+			$HD = 0;
+			$F1 = 0;
+			Debug::text('P: '. $P, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text('I: '. $I, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text('U1: '. $U1, __FILE__, __LINE__, __METHOD__, 10);
 
-		//$A = ($P * ($I - $F - $F2 - $U1) ) - $HD - $F1;
-		$A = bcsub( bcsub( bcmul($P, bcsub( bcsub( bcsub($I, $F), $F2 ), $U1 ) ), $HD ), $F1 );
-		Debug::text('A: '. $A, __FILE__, __LINE__, __METHOD__, 10);
+			//$A = ($P * ($I - $F - $F2 - $U1) ) - $HD - $F1;
+			$A = bcsub( bcsub( bcmul($P, bcsub( bcsub( bcsub($I, $F), $F2 ), $U1 ) ), $HD ), $F1 );
+			Debug::text('A: '. $A, __FILE__, __LINE__, __METHOD__, 10);
+		}
 
 		return $A;
 	}
@@ -331,7 +348,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 
 		$K3 = 0;
 
-		if ( $this->getDate() >= strtotime('01-Jul-06') ) {
+		if ( $this->getDate() >= 20060701 ) {
 			$K4 = $this->getFederalEmploymentCredit();
 		} else {
 			$K4 = 0;
@@ -415,18 +432,8 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 			0.155 * $1000
 		*/
 
+		//Yukon only currently.
 		$K4P = 0;
-		if ( $this->getProvince() == 'YT' AND $this->getDate() >= strtotime('01-Jan-2013') ) { //Yukon only currently.
-			$tmp1_K4P = bcmul( $this->getData()->getProvincialLowestRate(), $this->getAnnualTaxableIncome() );
-			$tmp2_K4P = bcmul( $this->getData()->getProvincialLowestRate(), $this->getData()->getFederalEmploymentCreditAmount() ); //This matches the federal employment credit amount currently.
-
-			if ( $tmp2_K4P < $tmp1_K4P ) {
-				$K4P = $tmp2_K4P;
-			} else {
-				$K4P = $tmp1_K4P;
-			}
-		}
-
 		Debug::text('K4P: '. $K4P, __FILE__, __LINE__, __METHOD__, 10);
 		return $K4P;
 	}
@@ -445,16 +452,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		}
 		Debug::text('P_times_C: '. $P_times_C, __FILE__, __LINE__, __METHOD__, 10);
 
-		//$K2_CPP = ($this->getData()->getFederalLowestRate() * $P_times_C);
 		$K2_CPP = bcmul( $this->getData()->getFederalLowestRate(), $P_times_C);
-
-		/*
-		$K2_CPP = ($this->getData()->getFederalLowestRate() * ($P * $C) );
-
-		if ($K2_CPP > $this->cpp_employee_maximum_contribution ) {
-			$K2_CPP = $this->cpp_employee_maximum_contribution;
-		}
-		*/
 
 		Debug::text('K2_CPP: '. $K2_CPP, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -471,34 +469,20 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 
 		//$P_times_C = ($P * $C);
 		$P_times_C = bcmul($P, $C);
-		/*
-		if ($P_times_C > $this->ei_employee_maximum_contribution) {
-			$P_times_C = $this->ei_employee_maximum_contribution;
-		}
-		*/
 		if ($P_times_C > $this->getEIEmployeeMaximumContribution() ) {
 			$P_times_C = $this->getEIEmployeeMaximumContribution();
 		}
 
 		Debug::text('P_times_C: '. $P_times_C, __FILE__, __LINE__, __METHOD__, 10);
 
-		//$K2_EI = ($this->getData()->getFederalLowestRate() * $P_times_C);
 		$K2_EI = bcmul($this->getData()->getFederalLowestRate(), $P_times_C);
 
-		/*
-		$K2_CPP = ($this->getData()->getFederalLowestRate() * ($P * $C) );
-
-		if ($K2_CPP > $this->cpp_employee_maximum_contribution ) {
-			$K2_CPP = $this->cpp_employee_maximum_contribution;
-		}
-		*/
 		Debug::text('K2_EI: '. $K2_EI, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $K2_EI;
 	}
 
 	function getFederalCPPAndEITaxCredit() {
-		//$K2 = $this->getFederalCPPTaxCredit() + $this->getFederalEITaxCredit();
 		$K2 = bcadd($this->getFederalCPPTaxCredit(), $this->getFederalEITaxCredit() );
 
 		Debug::text('K2: '. $K2, __FILE__, __LINE__, __METHOD__, 10);

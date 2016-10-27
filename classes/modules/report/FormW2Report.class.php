@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -992,16 +992,16 @@ class FormW2Report extends Report {
 
 			//Debug::Arr($total_row, 'Total Row Data: ', __FILE__, __LINE__, __METHOD__, 10);
 			if ( is_array($total_row) ) {
-				$fw3->l1 = ( $total_row['l1'] != 0 ) ? $total_row['l1'] : NULL;
-				$fw3->l2 = ( $total_row['l2'] != 0 ) ? $total_row['l2'] : NULL;
-				$fw3->l3 = ( $total_row['l3'] != 0 ) ? $total_row['l3'] : NULL;
-				$fw3->l4 = ( $total_row['l4'] != 0 ) ? $total_row['l4'] : NULL;
-				$fw3->l5 = ( $total_row['l5'] != 0 ) ? $total_row['l5'] : NULL;
-				$fw3->l6 = ( $total_row['l6'] != 0 ) ? $total_row['l6'] : NULL;
-				$fw3->l7 = ( $total_row['l7'] != 0 ) ? $total_row['l7'] : NULL;
-				$fw3->l8 = ( $total_row['l8'] != 0 ) ? $total_row['l8'] : NULL;
-				$fw3->l10 = ( $total_row['l10'] != 0 ) ? $total_row['l10'] : NULL;
-				$fw3->l11 = ( $total_row['l11'] != 0 ) ? $total_row['l11'] : NULL;
+				$fw3->l1 = ( isset($total_row['l1']) AND $total_row['l1'] != 0 ) ? $total_row['l1'] : NULL;
+				$fw3->l2 = ( isset($total_row['l2']) AND $total_row['l2'] != 0 ) ? $total_row['l2'] : NULL;
+				$fw3->l3 = ( isset($total_row['l3']) AND $total_row['l3'] != 0 ) ? $total_row['l3'] : NULL;
+				$fw3->l4 = ( isset($total_row['l4']) AND $total_row['l4'] != 0 ) ? $total_row['l4'] : NULL;
+				$fw3->l5 = ( isset($total_row['l5']) AND $total_row['l5'] != 0 ) ? $total_row['l5'] : NULL;
+				$fw3->l6 = ( isset($total_row['l6']) AND $total_row['l6'] != 0 ) ? $total_row['l6'] : NULL;
+				$fw3->l7 = ( isset($total_row['l7']) AND $total_row['l7'] != 0 ) ? $total_row['l7'] : NULL;
+				$fw3->l8 = ( isset($total_row['l8']) AND $total_row['l8'] != 0 ) ? $total_row['l8'] : NULL;
+				$fw3->l10 = ( isset($total_row['l10']) AND $total_row['l10'] != 0 ) ? $total_row['l10'] : NULL;
+				$fw3->l11 = ( isset($total_row['l11']) AND $total_row['l11'] != 0 ) ? $total_row['l11'] : NULL;
 
 				$l12a_letters = array( 'd', 'e', 'f', 'g', 'h', 's', 'y', 'aa', 'bb', 'ee' );
 				$fw3->l12a = NULL;

@@ -22,8 +22,8 @@
     outline: none;
     border: 1px inset;
     border-right: none;
-    padding-left: 0px;
-    padding-right: 0px;
+    padding-left: 0;
+    padding-right: 0;
     height: 20px;
 }
 
@@ -92,7 +92,7 @@
 
 .a-dropdown .unselect-grid-div .ui-jqgrid {
     position: relative;
-    border-radius: 0px;
+    border-radius: 0;
 }
 
 .a-dropdown .select-grid-div {
@@ -128,7 +128,7 @@
 
 .a-dropdown .select-grid-div .ui-jqgrid {
     position: relative;
-    border-radius: 0px;
+    border-radius: 0;
 
 }
 
@@ -307,7 +307,7 @@
     height: 12px;
     position: relative;
     width: 12px;
-    padding: 0px;
+    padding: 0;
     right: -3px;
     top: 2px;
 }

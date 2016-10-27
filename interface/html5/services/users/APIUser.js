@@ -75,10 +75,13 @@ var APIUser = ServiceCaller.extend( {
 
 		return this.argumentsHandler( this.className, 'getUniqueUserProvinces', arguments );
 
+	},
+
+
+	setUserFeedbackRating: function() {
+		return this.argumentsHandler( this.className, 'setUserFeedbackRating', arguments );
+
 	}
-
-
-
 
 
 

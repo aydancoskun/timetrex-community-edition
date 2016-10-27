@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -110,7 +110,8 @@ class UserSummaryReport extends Report {
 				//Get custom fields for report data.
 				$oflf = TTnew( 'OtherFieldListFactory' );
 				//User and Punch fields conflict as they are merged together in a secondary process.
-				$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), array(10), array( 10 => '' ) );
+				//$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), array(10, 12), array( 10 => '', 12 => 'user_title_' ) );
+				$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), array(10, 4, 5, 12, 20, 30), array( 10 => '', 4 => 'branch_', 5 => 'department_', 12 => 'user_title_', 20 => 'job_', 30 => 'job_item_') );
 				if ( is_array($other_field_names) ) {
 					$retval = Misc::addSortPrefix( $other_field_names, 9000 );
 				}
@@ -171,13 +172,18 @@ class UserSummaryReport extends Report {
 										'-1032-employee_number_barcode' => TTi18n::gettext('Barcode'),
 										'-1034-employee_number_qrcode' => TTi18n::gettext('QRcode'),
 
+										'-1038-user_photo' => TTi18n::gettext('Photo'),
+
 										'-1040-status' => TTi18n::gettext('Status'),
 										'-1050-title' => TTi18n::gettext('Title'),
 										//'-1060-province' => TTi18n::gettext('Province/State'),
 										//'-1070-country' => TTi18n::gettext('Country'),
 										'-1080-user_group' => TTi18n::gettext('Group'),
+
 										'-1090-default_branch' => TTi18n::gettext('Branch'), //abbreviate for space
+										'-1091-default_branch_manual_id' => TTi18n::gettext('Branch Code'),
 										'-1100-default_department' => TTi18n::gettext('Department'), //abbreviate for space
+										'-1101-default_department_manual_id' => TTi18n::gettext('Department Code'),
 										'-1190-ethnic_group' => TTi18n::gettext('Ethnicity'),
 
 										'-1200-permission_control' => TTi18n::gettext('Permission Group'),
@@ -222,7 +228,9 @@ class UserSummaryReport extends Report {
 										'-1680-time_zone_display' => TTi18n::gettext('Time Zone'),
 										'-1690-items_per_page' => TTi18n::gettext('Rows Per page'),
 
-										'-1695-password_updated_date' => TTi18n::gettext('Password Updated Date'),
+										'-1695-last_login_date' => TTi18n::gettext('Last Login Date'),
+										'-1696-max_punch_time_stamp' => TTi18n::gettext('Last Punch Time'),
+										'-1697-password_updated_date' => TTi18n::gettext('Password Updated Date'),
 
 										'-1699-hire_date_age' => TTi18n::gettext('Length of Service'),
 										'-1899-birth_date_age' => TTi18n::gettext('Age'),
@@ -233,7 +241,9 @@ class UserSummaryReport extends Report {
 
 				if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 					$retval['-1120-default_job'] = TTi18n::gettext('Job');
+					$retval['-1121-default_job_manual_id'] = TTi18n::gettext('Job Code');
 					$retval['-1125-default_job_item'] = TTi18n::gettext('Task');
+					$retval['-1126-default_job_item_manual_id'] = TTi18n::gettext('Task Code');									
 				}
 
 				$retval = array_merge( $retval, (array)$this->getOptions('date_columns'), (array)$this->getOptions('custom_columns'), (array)$this->getOptions('report_static_custom_column')  );
@@ -266,8 +276,8 @@ class UserSummaryReport extends Report {
 						}
 					}
 				}
-				$retval['password_updated_date'] = 'time_stamp';
-				$retval['effective_date'] = 'date_stamp';
+				$retval['password_updated_date'] = $retval['max_punch_time_stamp'] = 'time_stamp';
+				$retval['effective_date'] = $retval['last_login_date'] = 'date_stamp';
 				break;
 			case 'aggregates':
 				$retval = array();
@@ -773,7 +783,7 @@ class UserSummaryReport extends Report {
 
 	//Get raw data for report
 	function _getData( $format = NULL ) {
-		$this->tmp_data = array('user' => array(), 'user_preference' => array(), 'user_wage' => array(), 'user_bank' => array(), 'user_deduction' => array(), 'total_user' => array() );
+		$this->tmp_data = array('user' => array(), 'user_preference' => array(), 'user_wage' => array(), 'user_bank' => array(), 'branch' => array(), 'department' => array(), 'job' => array(), 'job_item' => array(), 'total_user' => array() );
 
 		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
@@ -783,39 +793,8 @@ class UserSummaryReport extends Report {
 		$this->handleReportCurrency( $currency_convert_to_base, $base_currency_obj, $filter_data );
 		$currency_options = $this->getOptions('currency');
 
-		if ( $this->getPermissionObject()->Check('user', 'view') == FALSE OR $this->getPermissionObject()->Check('wage', 'view') == FALSE ) {
-			$hlf = TTnew( 'HierarchyListFactory' );
-			$permission_children_ids = $wage_permission_children_ids = $hlf->getHierarchyChildrenByCompanyIdAndUserIdAndObjectTypeID( $this->getUserObject()->getCompany(), $this->getUserObject()->getID() );
-			Debug::Arr($permission_children_ids, 'Permission Children Ids:', __FILE__, __LINE__, __METHOD__, 10);
-		} else {
-			//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
-			$permission_children_ids = array();
-			$wage_permission_children_ids = array();
-		}
-		if ( $this->getPermissionObject()->Check('user', 'view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('user', 'view_child') == FALSE ) {
-				$permission_children_ids = array();
-			}
-			if ( $this->getPermissionObject()->Check('user', 'view_own') ) {
-				$permission_children_ids[] = $this->getUserObject()->getID();
-			}
-
-			$filter_data['permission_children_ids'] = $permission_children_ids;
-		}
-		//Get Wage Permission Hierarchy Children first, as this can be used for viewing, or editing.
-		if ( $this->getPermissionObject()->Check('wage', 'view') == TRUE ) {
-			$wage_permission_children_ids = TRUE;
-		} elseif ( $this->getPermissionObject()->Check('wage', 'view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('wage', 'view_child') == FALSE ) {
-				$wage_permission_children_ids = array();
-			}
-			if ( $this->getPermissionObject()->Check('wage', 'view_own') ) {
-				$wage_permission_children_ids[] = $this->getUserObject()->getID();
-			}
-		}
-		//Debug::Text(' Permission Children: '. count($permission_children_ids) .' Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
-		//Debug::Arr($permission_children_ids, 'Permission Children: '. count($permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
-		//Debug::Arr($wage_permission_children_ids, 'Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
+		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
+		$wage_permission_children_ids = $this->getPermissionObject()->getPermissionChildren( 'wage', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
 
 		//Rename start/end_date to employed_start/end_date, this prevents other reports like JobDetail from sending the start/end to the UserListFactory which may cause no records to be returned.
 		if ( isset($filter_data['start_date']) ) {
@@ -828,15 +807,25 @@ class UserSummaryReport extends Report {
 		//Always include date columns, because 'hire-date_stamp' is not recognized by the UserFactory. This greatly slows down the report though.
 		$columns['effective_date'] = $columns['hire_date'] = $columns['termination_date'] = $columns['birth_date'] = $columns['created_date'] = $columns['updated_date'] = TRUE;
 
+		$include_last_punch_time = ( isset($columns['max_punch_time_stamp']) ) ? TRUE : FALSE;
+
 		//Get user data for joining.
 		$ulf = TTnew( 'UserListFactory' );
-		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data, NULL, NULL, NULL, NULL, $include_last_punch_time );
 		Debug::Text(' User Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $ulf as $key => $u_obj ) {
 			//We used to just get return the entire $u_obj->data array, but this wouldn't include tags and other columns that required some additional processing.
 			//Not sure why this was done that way... I think because we had problems with the multiple date fields (Hire Date/Termination Date/Birth Date, etc...)
-			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( $columns );
+			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$columns, array('title_id' => TRUE, 'default_branch_id' => TRUE, 'default_department_id' => TRUE, 'default_job_id' => TRUE, 'default_job_item_id' => TRUE ) ) );
+
+			if ( isset($this->tmp_data['user'][$u_obj->getId()]['last_login_date']) ) {
+				$this->tmp_data['user'][$u_obj->getId()]['last_login_date'] = TTDate::parseDateTime( $this->tmp_data['user'][$u_obj->getId()]['last_login_date'] );
+			}
+			if ( isset($this->tmp_data['user'][$u_obj->getId()]['max_punch_time_stamp']) ) {
+				$this->tmp_data['user'][$u_obj->getId()]['max_punch_time_stamp'] = TTDate::parseDateTime( $this->tmp_data['user'][$u_obj->getId()]['max_punch_time_stamp'] );
+			}
+
 			if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
 				$this->tmp_data['user'][$u_obj->getId()]['currency_rate'] = $u_obj->getColumn('currency_rate');
 			}
@@ -847,6 +836,9 @@ class UserSummaryReport extends Report {
 			}
 			if ( isset($columns['employee_number_qrcode']) ) {
 				$this->tmp_data['user'][$u_obj->getId()]['employee_number_qrcode'] = new ReportCellQRcode( $this, 'U'.$this->tmp_data['user'][$u_obj->getId()]['employee_number'] );
+			}						
+			if ( isset($columns['user_photo']) AND $u_obj->isPhotoExists() ) {
+				$this->tmp_data['user'][$u_obj->getId()]['user_photo'] = new ReportCellImage( $this, $u_obj->getPhotoFileName( $u_obj->getCompany(), $u_obj->getID(), FALSE ) );
 			}						
 
 			$this->tmp_data['user_preference'][$u_obj->getId()] = array();
@@ -867,14 +859,85 @@ class UserSummaryReport extends Report {
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
 
+		//Get user bank data for joining.
+		$balf = TTnew( 'BankAccountListFactory' );
+		$balf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+		Debug::Text(' User Bank Rows: '. $balf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $balf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
+		foreach ( $balf as $key => $ba_obj ) {
+			$this->tmp_data['user_bank'][$ba_obj->getUser()] = (array)$ba_obj->getObjectAsArray( $columns );
+			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+		}
+
+		$blf = TTnew( 'BranchListFactory' );
+		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array() ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
+		Debug::Text(' Branch Total Rows: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $blf->getRecordCount(), NULL, TTi18n::getText('Retrieving Branches...') );
+		foreach ( $blf as $key => $b_obj ) {
+			//$this->tmp_data['default_branch'][$b_obj->getId()] = Misc::addKeyPrefix( 'default_branch_', (array)$b_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE, 'manual_id' => TRUE, 'other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE ) ) );
+			$this->tmp_data['branch'][$b_obj->getId()] = Misc::addKeyPrefix( 'branch_', (array)$b_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE, 'manual_id' => TRUE, 'other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE ) ) );
+			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+		}
+		//Debug::Arr($this->tmp_data['default_branch'], 'Default Branch Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		$dlf = TTnew( 'DepartmentListFactory' );
+		$dlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array() ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
+		Debug::Text(' Department Total Rows: '. $dlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $dlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Departments...') );
+		foreach ( $dlf as $key => $d_obj ) {
+			$this->tmp_data['department'][$d_obj->getId()] = Misc::addKeyPrefix( 'department_', (array)$d_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE, 'manual_id' => TRUE, 'other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE ) ) );
+			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+		}
+
+		$utlf = TTnew( 'UserTitleListFactory' );
+		$utlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array() ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
+		Debug::Text(' User Title Total Rows: '. $dlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		$user_title_column_config = array_merge( (array)Misc::removeKeyPrefix( 'user_title_', (array)$this->getColumnDataConfig() ), array('id' => TRUE ) ); //Always include title_id column so we can merge title data.
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $utlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Titles...') );
+		foreach ( $utlf as $key => $ut_obj ) {
+			$this->tmp_data['user_title'][$ut_obj->getId()] = Misc::addKeyPrefix( 'user_title_', (array)$ut_obj->getObjectAsArray( $user_title_column_config ) );
+			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+		}
+
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+			//Get job data for joining.
+			$jlf = TTnew( 'JobListFactory' );
+			$jlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+			Debug::Text(' Job Total Rows: '. $jlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $jlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Jobs...') );
+			$job_column_config = array_merge( (array)Misc::removeKeyPrefix( 'job_', (array)$this->getColumnDataConfig() ), array('client_id' => TRUE ) ); //Always include client_id column so we can merge client data.
+			$this->tmp_data['job'][0] = array( 'name' => TTi18n::getText('No Job'), 'description' => TTi18n::getText('No Job'), 'job_manual_id' => 0 );
+			foreach ( $jlf as $key => $j_obj ) {
+				$this->tmp_data['job'][$j_obj->getId()] = (array)Misc::addKeyPrefix( 'job_', (array)$j_obj->getObjectAsArray( $job_column_config ) );
+
+				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			}
+			unset($jlf, $j_obj, $key);
+
+			$jilf = TTnew( 'JobItemListFactory' );
+			$jilf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+			Debug::Text(' Job Item Total Rows: '. $jilf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $jilf->getRecordCount(), NULL, TTi18n::getText('Retrieving Tasks...') );
+			$job_item_column_config = Misc::removeKeyPrefix( 'job_item_', (array)$this->getColumnDataConfig() );
+			$this->tmp_data['job_item'][0] = array( 'name' => TTi18n::getText('No Task'), 'description' => TTi18n::getText('No Task'), 'job_item_manual_id' => 0 );
+			foreach ( $jilf as $key => $ji_obj ) {
+				$this->tmp_data['job_item'][$ji_obj->getId()] = (array)Misc::addKeyPrefix( 'job_item_', (array)$ji_obj->getObjectAsArray( $job_item_column_config ) );
+	
+				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			}
+			unset($jilf, $ji_obj, $key);
+		}
+
 		//Get user wage data for joining.
 		$filter_data['wage_group_id'] = array(0); //Use default wage groups only.
+		$filter_data['permission_children_ids'] = $wage_permission_children_ids;
 		$uwlf = TTnew( 'UserWageListFactory' );
 		$uwlf->getAPILastWageSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Wage Rows: '. $uwlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
-		foreach ( $uwlf as $key => $uw_obj ) {
-			if ( $wage_permission_children_ids === TRUE OR in_array( $uw_obj->getUser(), $wage_permission_children_ids) ) {
+		unset($columns['note']); //Prevent wage note from overwriting user note.
+		foreach ( $uwlf as $key => $uw_obj ) {			
+			if ( $this->getPermissionObject()->isPermissionChild( $uw_obj->getUser(), $wage_permission_children_ids ) ) { //This is required in cases where they have 'view'(all) wage permisisons, but only view_child user permissions. As the SQL will return all employees wages, which then need to be filtered out here.
 				$this->tmp_data['user_wage'][$uw_obj->getUser()] = (array)$uw_obj->getObjectAsArray( $columns );
 
 				if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
@@ -889,16 +952,6 @@ class UserSummaryReport extends Report {
 			}
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
-
-		//Get user bank data for joining.
-		$balf = TTnew( 'BankAccountListFactory' );
-		$balf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-		Debug::Text(' User Bank Rows: '. $balf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $balf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
-		foreach ( $balf as $key => $ba_obj ) {
-			$this->tmp_data['user_bank'][$ba_obj->getUser()] = (array)$ba_obj->getObjectAsArray( $columns );
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
-		}
 		
 		//Debug::Arr($this->tmp_data['user_preference'], 'TMP Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		return TRUE;
@@ -908,32 +961,51 @@ class UserSummaryReport extends Report {
 	function _preProcess() {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['user']), NULL, TTi18n::getText('Pre-Processing Data...') );
 
+		//Because we include date columns no matter what, do the optimization here to make sure they are actually being displayed, otherwise don't process them.
+		$enable_date_columns = array(
+									'hire' => FALSE,
+									'termination' => FALSE,
+									'birth' => FALSE,
+									'created' => FALSE,
+									'updated' => FALSE,
+									 );
+		$columns = $this->getColumnDataConfig();
+		foreach( $columns as $column => $value ) {
+			foreach( $enable_date_columns as $enable_date_column => $enable_date_column_value ) {
+				Debug::Text('Checking for Column: '. $enable_date_column .' In: '. $column, __FILE__, __LINE__, __METHOD__, 10);
+				if ( strpos( $column, $enable_date_column.'-' ) !== FALSE ) {
+					$enable_date_columns[$enable_date_column] = TRUE;
+				}
+			}
+		}
+		unset($columns, $column, $value, $enable_date_column, $enable_date_column_value );
+
 		$key = 0;
 		if ( isset($this->tmp_data['user']) ) {
 			foreach( $this->tmp_data['user'] as $user_id => $row ) {
-				if ( isset($row['hire_date']) ) {
+				if ( isset($row['hire_date']) AND $enable_date_columns['hire'] == TRUE ) {
 					$hire_date_columns = TTDate::getReportDates( 'hire', TTDate::parseDateTime( $row['hire_date'] ), FALSE, $this->getUserObject() );
 				} else {
 					$hire_date_columns = array();
 				}
 
-				if ( isset($row['termination_date']) ) {
+				if ( isset($row['termination_date']) AND $enable_date_columns['termination'] == TRUE ) {
 					$termination_date_columns = TTDate::getReportDates( 'termination', TTDate::parseDateTime( $row['termination_date'] ), FALSE, $this->getUserObject() );
 				} else {
 					$termination_date_columns = array();
 				}
-				if ( isset($row['birth_date']) ) {
+				if ( isset($row['birth_date']) AND $enable_date_columns['birth'] == TRUE ) {
 					$birth_date_columns = TTDate::getReportDates( 'birth', TTDate::parseDateTime( $row['birth_date'] ), FALSE, $this->getUserObject() );
 				} else {
 					$birth_date_columns = array();
 				}
 
-				if ( isset($row['created_date']) ) {
+				if ( isset($row['created_date']) AND $enable_date_columns['created'] == TRUE ) {
 					$created_date_columns = TTDate::getReportDates( 'created', TTDate::parseDateTime( $row['created_date'] ), FALSE, $this->getUserObject() );
 				} else {
 					$created_date_columns = array();
 				}
-				if ( isset($row['updated_date']) ) {
+				if ( isset($row['updated_date']) AND $enable_date_columns['updated'] == TRUE ) {
 					$updated_date_columns = TTDate::getReportDates( 'updated', TTDate::parseDateTime( $row['updated_date'] ), FALSE, $this->getUserObject() );
 				} else {
 					$updated_date_columns = array();
@@ -950,6 +1022,22 @@ class UserSummaryReport extends Report {
 					$processed_data = array_merge( $processed_data, $this->tmp_data['user_wage'][$user_id] );
 				}
 
+				if ( isset($this->tmp_data['branch'][$row['default_branch_id']]) ) {
+					$processed_data = array_merge( $processed_data, $this->tmp_data['branch'][$row['default_branch_id']] );
+				}
+				if ( isset($this->tmp_data['department'][$row['default_department_id']]) ) {
+					$processed_data = array_merge( $processed_data, $this->tmp_data['department'][$row['default_department_id']] );
+				}
+				if ( isset($this->tmp_data['job'][$row['default_job_id']]) ) {
+					$processed_data = array_merge( $processed_data, $this->tmp_data['job'][$row['default_job_id']] );
+				}
+				if ( isset($this->tmp_data['job_item'][$row['default_job_item_id']]) ) {
+					$processed_data = array_merge( $processed_data, $this->tmp_data['job_item'][$row['default_job_item_id']] );
+				}
+				if ( isset($this->tmp_data['user_title'][$row['title_id']]) ) {
+					$processed_data = array_merge( $processed_data, $this->tmp_data['user_title'][$row['title_id']] );
+				}
+				
 				$this->data[] = array_merge( $row, $hire_date_columns, $termination_date_columns, $birth_date_columns, $created_date_columns, $updated_date_columns, $processed_data );
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );

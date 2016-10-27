@@ -319,12 +319,12 @@ KPIViewController = BaseViewController.extend( {
 
 	onTypeChange: function() {
 		if ( this.current_edit_record.type_id === 10 ) {
-			this.edit_view_form_item_dic['minimum_rate'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['maximum_rate'].css( 'display', 'block' );
+			this.attachElement( 'minimum_rate' );
+			this.attachElement( 'maximum_rate' );
 
 		} else {
-			this.edit_view_form_item_dic['minimum_rate'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['maximum_rate'].css( 'display', 'none' );
+			this.detachElement( 'minimum_rate' );
+			this.detachElement( 'maximum_rate' );
 		}
 
 		this.editFieldResize();
@@ -395,7 +395,7 @@ KPIViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScriptAsync( 'views/document/DocumentViewController.js', function() {
+		Global.loadScript( 'views/document/DocumentViewController.js', function() {
 			var tab_attachment = $this.edit_view_tab.find( '#tab_attachment' );
 			var firstColumn = tab_attachment.find( '.first-column-sub-view' );
 			Global.trackView( 'Sub' + 'Document' + 'View' );

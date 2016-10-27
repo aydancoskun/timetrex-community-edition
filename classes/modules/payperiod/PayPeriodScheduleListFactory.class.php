@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -61,7 +61,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		$this->rs = $this->getCache($id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => $id,
+						'id' => (int)$id,
 						);
 
 			$query = '
@@ -88,7 +88,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		$ppsulf = new PayPeriodScheduleUserListFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					);
 
 		$query = '
@@ -112,8 +112,9 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -146,7 +147,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 */
 		$ppsuf = new PayPeriodScheduleUserFactory();
 
-		$ph = array( 'company_id' => $company_id );
+		$ph = array( 'company_id' => (int)$company_id, );
 
 		$query = '
 					select	a.*,
@@ -157,7 +158,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 						AND a.company_id = ? ';
 
 		if ( isset($user_ids) AND ( $user_ids != '' OR ( is_array($user_ids) AND isset($user_ids[0]) ) ) ) {
-			$query	.=	' AND b.user_id in ('. $this->getListSQL($user_ids, $ph) .') ';
+			$query	.=	' AND b.user_id in ('. $this->getListSQL( $user_ids, $ph, 'int' ) .') ';
 		}
 
 		$query .= '	AND a.deleted = 0';
@@ -179,8 +180,8 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
-					'id' => $id,
+					'company_id' => (int)$company_id,
+					'id' => (int)$id,
 					);
 
 		$query = '
@@ -206,7 +207,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$ppf = new PayPeriodFactory();
@@ -217,7 +218,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 						_ADODB_COUNT
 					from	'. $this->getTable() .'
 					where	company_id = ?
-						AND	id in ( select ppf.pay_period_schedule_id from '. $ppf->getTable() .' as ppf where ppf.id in ('. $this->getListSQL($id, $ph) .') )
+						AND	id in ( select ppf.pay_period_schedule_id from '. $ppf->getTable() .' as ppf where ppf.id in ('. $this->getListSQL( $id, $ph, 'int' ) .') )
 						AND deleted=0';
 		$query .= $this->getSortSQL( $order );
 
@@ -313,7 +314,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		$ppsuf = new PayPeriodScheduleUserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '

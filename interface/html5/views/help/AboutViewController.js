@@ -109,8 +109,7 @@ AboutViewController = BaseViewController.extend( {
 	onCheckClick: function() {
 		var $this = this;
 		this.api['isNewVersionAvailable']( {onResult: function( result ) {
-			var result_data = result.getResult();
-			$this.current_edit_record = result_data.api_retval;
+			$this.current_edit_record = result.getResult();
 			$this.setEditViewWidgetsMode();
 			$this.initEditView();
 		}} );
@@ -155,44 +154,12 @@ AboutViewController = BaseViewController.extend( {
 
 	setCurrentEditRecordData: function() {
 		//Set current edit record data to all widgets
-
-//		this.current_edit_record['new_version'] = 1;
-//		this.current_edit_record['license_data'] = {
-//				'organization_name': 'ABC Company',
-//				'major_version': '3.0',
-//				'minor_version': '1.0',
-//				'product_name': 'TimeTrex',
-//				'active_employee_licenses': 23,
-//				'issue_date': false,
-//				'expire_date': false,
-//				'expire_date_display': false,
-//				'registration_key': false,
-//				'message': 'sdfffffffffffff',
-//				'retval': true
-//		};
-//		this.current_edit_record['user_counts'] = [
-//			{
-//				'label': 'May 2014',
-//				'max_active_users': '30',
-//				'max_inactive_users': '40',
-//				'max_deleted_users': '50'
-//			},
-//			{
-//				'label': 'April 2014',
-//				'max_active_users': '10',
-//				'max_inactive_users': '20',
-//				'max_deleted_users': '30'
-//			},
-//			{
-//				'label': 'March 2014',
-//				'max_active_users': '1',
-//				'max_inactive_users': '2',
-//				'max_deleted_users': '3'
-//			}
-//		];
+		if ( !Global.isSet( this.current_edit_record['license_data'] ) ) {
+			this.current_edit_record['license_data'] = {};
+		}
 
 		for ( var i in this.edit_view_form_item_dic ) {
-			this.edit_view_form_item_dic[i].css( 'display', 'none' );
+			this.detachElement( i );
 		}
 
 		for ( var key in this.current_edit_record ) {
@@ -206,7 +173,7 @@ AboutViewController = BaseViewController.extend( {
 				case 'new_version':
 					if ( this.current_edit_record[key] === true ) {
 
-						this.edit_view_form_item_dic['notice'].css( 'display', 'block' );
+						this.attachElement( 'notice' );
 
 						var html = '<br><b>' + $.i18n._( 'NOTICE' ) + ':' + '</b> ' + $.i18n._( 'There is a new version of' ) + ' ';
 						html += '<b>' + $.i18n._( this.current_edit_record['application_name'] ) + '</b> ' + $.i18n._( 'available' ) + '.';
@@ -248,27 +215,30 @@ AboutViewController = BaseViewController.extend( {
 				case 'license_data':
 					if ( Global.isSet( this.current_edit_record[key] ) ) {
 
-						this.edit_view_form_item_dic['license_info'].css( 'display', 'block' );
-						this.edit_view_form_item_dic['license_browser'].css( 'display', 'block' );
+						this.attachElement( 'license_info' );
+						this.attachElement( 'license_browser' );
 
-						if ( Global.isSet( this.current_edit_record[key]['message'] ) && this.current_edit_record[key]['message'] !== '' ) {
-							var separated_box = $( this.edit_view_form_item_dic['license_info'].find( '.separated-box' ) );
+						var separated_box = $( this.edit_view_form_item_dic['license_info'].find( '.separated-box' ) );
+
+						if ( this.current_edit_record[key]['message'] ) {
 							separated_box.css( {'font-weight': 'bold', 'background-color': 'red', 'height': 'auto', 'color': '#000000'} );
 							separated_box.html( $.i18n._( 'License Information' ) + '<br>' + $.i18n._( 'WARNING' ) + ': ' + this.current_edit_record[key]['message'] );
 							$( separated_box.find( 'span' ) ).removeClass( 'label' ).css( {'font-size': 'normal', 'font-weight': 'bold'} );
+						} else {
+							separated_box.html( '<span class="label">' + $.i18n._( 'License Information' ) + '</span>' );
 						}
 
-						if ( Global.isSet( this.current_edit_record[key]['organization_name'] ) && this.current_edit_record[key]['organization_name'] !== '' ) {
+						if ( this.current_edit_record[key]['organization_name'] ) {
 							for ( var k in this.current_edit_record[key] ) {
 								switch ( k ) {
 									case 'major_version':
 									case 'minor_version':
-										this.edit_view_form_item_dic['_version'].css( 'display', 'block' );
+										this.attachElement( '_version' );
 										this.edit_view_ui_dic['_version'].setValue( this.current_edit_record[key]['major_version'] + '.' + this.current_edit_record[key]['minor_version'] + '.X' );
 										break;
 									default:
 										if ( Global.isSet( this.edit_view_ui_dic[k] ) && Global.isSet( this.edit_view_form_item_dic[k] ) ) {
-											this.edit_view_form_item_dic[k].css( 'display', 'block' );
+											this.attachElement( k );
 											this.edit_view_ui_dic[k].setValue( this.current_edit_record[key][k] );
 										}
 										break;
@@ -279,7 +249,15 @@ AboutViewController = BaseViewController.extend( {
 					break;
 				case 'user_counts':
 					if ( this.current_edit_record[key].length > 0 ) {
-						this.edit_view_form_item_dic['user_active_inactive'].css( 'display', 'block' );
+						this.attachElement( 'user_active_inactive' );
+					}
+					break;
+				case 'schema_version_group_A':
+				case 'schema_version_group_B':
+				case 'schema_version_group_C':
+				case 'schema_version_group_D':
+					if ( Global.isSet( widget ) && this.current_edit_record[key] ) {
+						widget.setValue( this.current_edit_record[key] );
 					}
 					break;
 				default:
@@ -463,10 +441,17 @@ AboutViewController = BaseViewController.extend( {
 		form_item_input.TText( {field: 'schema_version_group_B' } );
 		this.addEditFieldToColumn( $.i18n._( 'Group B' ), form_item_input, tab_about_column1 );
 
-		// Group T
+		// Group C
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'schema_version_group_T' } );
-		this.addEditFieldToColumn( $.i18n._( 'Group T' ), form_item_input, tab_about_column1 );
+		form_item_input.TText( {field: 'schema_version_group_C' } );
+		this.addEditFieldToColumn( $.i18n._( 'Group C' ), form_item_input, tab_about_column1 );
+
+
+		// Group D
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+		form_item_input.TText( {field: 'schema_version_group_D' } );
+		this.addEditFieldToColumn( $.i18n._( 'Group D' ), form_item_input, tab_about_column1 );
+
 
 		// Separated Box
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );

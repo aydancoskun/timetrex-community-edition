@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -59,8 +59,9 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$this->rs = $this->getCache($id);
 		if ( $this->rs === FALSE ) {
@@ -91,7 +92,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
-					where	id in ('. $this->getListSQL($id, $ph) .')
+					where	id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -109,7 +110,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -138,8 +139,8 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					'id' => $id,
+					'company_id' => (int)$company_id,
+					'id' => (int)$id,
 					);
 
 		$query = '
@@ -181,7 +182,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 		$ppf = new PayPeriodFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'start_date' => $this->db->BindDate( $start_date ),
 					'end_date' => $this->db->BindDate( $end_date ),
 					);
@@ -211,7 +212,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					);
 
 		$query = '
@@ -232,7 +233,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'pay_period_id' => $pay_period_id,
+					'pay_period_id' => (int)$pay_period_id,
 					);
 
 		$query = '
@@ -284,7 +285,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'date' => $this->db->BindDate( $date ),
 					);
 
@@ -336,7 +337,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 					where
 						date_stamp >= ?
 						AND date_stamp <= ?
-						AND user_id in ('. $this->getListSQL($user_ids, $ph) .')
+						AND user_id in ('. $this->getListSQL( $user_ids, $ph, 'int' ) .')
 						AND deleted = 0
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -380,7 +381,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 					where
 						date_stamp >= ?
 						AND date_stamp <= ?
-						AND user_id in ('. $this->getListSQL($user_ids, $ph) .')
+						AND user_id in ('. $this->getListSQL( $user_ids, $ph, 'int' ) .')
 						AND ( pay_period_id = 0 OR pay_period_id IS NULL )
 						AND deleted = 0
 					';
@@ -410,12 +411,14 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 			$strict = TRUE;
 		}
 
+		$ph = array();
+
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
 					where
-						user_id in ('. $this->getListSQL($user_id, $ph) .')
-						AND pay_period_id in ('. $this->getListSQL($pay_period_id, $ph) .')
+						user_id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .')
+						AND pay_period_id in ('. $this->getListSQL( $pay_period_id, $ph, 'int' ) .')
 						AND deleted = 0
 					';
 
@@ -448,8 +451,8 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					//'pay_period_id' => $pay_period_id,
+					'company_id' => (int)$company_id,
+					//'pay_period_id' => (int)$pay_period_id,
 					);
 
 		$query = '
@@ -459,7 +462,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 					where
 						a.user_id = b.id
 						AND b.company_id = ?
-						AND a.pay_period_id in ('. $this->getListSQL($pay_period_id, $ph) .')
+						AND a.pay_period_id in ('. $this->getListSQL( $pay_period_id, $ph, 'int' ) .')
 						AND ( a.deleted = 0 AND b.deleted = 0 )
 					';
 
@@ -500,12 +503,6 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 
 		$current_epoch = time();
 
-		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
-				$to_timestamp_sql = 'FROM_UNIXTIME';
-		} else {
-				$to_timestamp_sql = 'to_timestamp';
-		}
-
 		$ph = array(
 					'current_time1' => $this->db->BindTimeStamp( $current_epoch ),
 					'current_time2' => $this->db->BindTimeStamp( $current_epoch ),
@@ -545,13 +542,13 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 																		OR
 																		( epf.type_id = \'S6\' AND ( pf.time_stamp >= sf.end_time ) )
 																		OR
-																		( epf.type_id = \'C1\' AND ( pf.status_id = 10 AND pf.time_stamp <= '. $to_timestamp_sql .'(?-epf.grace) ) )
+																		( epf.type_id = \'C1\' AND ( pf.status_id = 10 AND pf.time_stamp <= '. $this->getSQLToTimeStampFunction() .'(?-epf.grace) ) )
 																	)
 																)
 					WHERE ( epf.type_id in (\'S4\', \'S6\', \'C1\') AND epf.active = 1 )
 						AND ( uf.status_id = 10 AND cf.status_id != 30 )
 						AND ( udf.date_stamp >= ? AND udf.date_stamp <= ? )
-						AND ppf.status_id in ('. $this->getListSQL($pay_period_status_id, $ph) .')
+						AND ppf.status_id in ('. $this->getListSQL( $pay_period_status_id, $ph, 'int' ) .')
 						AND ( ( ( epf.type_id in (\'S4\', \'S6\') AND ( sf.id IS NOT NULL AND sf.deleted = 0 ) AND pf.id IS NULL ) OR epf.type_id = \'C1\' ) AND ef.id IS NULL	)
 						AND ( epf.deleted = 0 AND epcf.deleted = 0 AND pgf.deleted = 0 AND uf.deleted = 0 AND cf.deleted = 0 AND udf.deleted = 0 )
 				';
@@ -604,7 +601,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'start_date' => $this->db->BindDate( $start_date ),
 					'end_date' => $this->db->BindDate( $end_date ),
 					);
@@ -625,7 +622,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 							AND b.company_id = ?
 							AND a.date_stamp >= ?
 							AND a.date_stamp <= ?
-							AND a.user_id in ('. $this->getListSQL($user_ids, $ph) .')
+							AND a.user_id in ('. $this->getListSQL( $user_ids, $ph, 'int' ) .')
 							AND exists(
 										select id
 										from '. $pcf->getTable() .' as z
@@ -659,7 +656,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'date' => $this->db->BindDate( $date ),
 					'deleted' => (int)$deleted
 					);

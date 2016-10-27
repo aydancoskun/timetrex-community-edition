@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -61,7 +61,7 @@ class UserLanguageListFactory extends UserLanguageFactory implements IteratorAgg
 		$this->rs = $this->getCache($id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => $id,
+						'id' => (int)$id,
 						);
 
 			$query = '
@@ -86,7 +86,7 @@ class UserLanguageListFactory extends UserLanguageFactory implements IteratorAgg
 		}
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					);
 
 		$query = '
@@ -113,8 +113,8 @@ class UserLanguageListFactory extends UserLanguageFactory implements IteratorAgg
 		$qf = new QualificationFactory();
 
 		$ph = array(
-					'id' => $id,
-					'company_id' => $company_id
+					'id' => (int)$id,
+					'company_id' => (int)$company_id
 					);
 
 		$query = '
@@ -140,7 +140,7 @@ class UserLanguageListFactory extends UserLanguageFactory implements IteratorAgg
 		$qf = new QualificationFactory();
 
 		$ph = array(
-					'company_id' => $company_id
+					'company_id' => (int)$company_id
 					);
 
 		$query = '
@@ -165,8 +165,8 @@ class UserLanguageListFactory extends UserLanguageFactory implements IteratorAgg
 		$this->rs = $this->getCache($id.$user_id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => $id,
-						'user_id' => $user_id,
+						'id' => (int)$id,
+						'user_id' => (int)$user_id,
 						);
 
 			$query = '
@@ -194,8 +194,8 @@ class UserLanguageListFactory extends UserLanguageFactory implements IteratorAgg
 		$this->rs = $this->getCache($user_id.$qualification_id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'user_id' => $user_id,
-						'qualification_id' => $qualification_id,
+						'user_id' => (int)$user_id,
+						'qualification_id' => (int)$qualification_id,
 						);
 
 			$query = '
@@ -271,7 +271,7 @@ class UserLanguageListFactory extends UserLanguageFactory implements IteratorAgg
 		$umf = new UserMembershipFactory();
 		$qgf = new QualificationGroupFactory();
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -339,7 +339,7 @@ class UserLanguageListFactory extends UserLanguageFactory implements IteratorAgg
 		$query .= ( isset($filter_data['qualification_type_id']) ) ? $this->getWhereClauseSQL( 'qf.type_id', $filter_data['qualification_type_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => $company_id, 'object_type_id' => 254, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
+		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => (int)$company_id, 'object_type_id' => 254, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 
 		if ( isset($filter_data['created_date']) AND !is_array($filter_data['created_date']) AND trim($filter_data['created_date']) != '' ) {
 			$date_filter = $this->getDateRangeSQL( $filter_data['created_date'], 'a.created_date' );

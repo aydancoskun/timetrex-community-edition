@@ -3,10 +3,14 @@
 #Unit testw with HHVM
 #hhvm /usr/bin/phpunit -d max_execution_time=86400 --configuration config.xml
 
+php_bin=/usr/bin/php
+#php_bin=/usr/bin/hhvm
+phpunit_bin=/usr/bin/phpunit
+
 if [ "$#" -eq 0 ] ; then
 	echo "Running tests in parallel..."
 	# Retrieve and parse all groups, strip off the first 5 lines though due to PHPUnit  banner
-	groups=$(phpunit -d max_execution_time=86400 --configuration config.xml --list-groups | tail -n +5)
+	groups=$($php_bin $phpunit_bin -d max_execution_time=86400 --configuration config.xml --list-groups | tail -n +5)
 	
 	 
 	parsed=$(echo $groups | sed "s/-/\t/g")
@@ -16,7 +20,7 @@ if [ "$#" -eq 0 ] ; then
 	echo "Start: `date`"
 	for i in $results; do
 	   echo $i
-	done | parallel -P 200% --load 100% --halt-on-error 2 $0 -v --group {}
+	done | parallel --no-notice -P 200% --load 100% --halt-on-error 2 $0 -v --group {}
 	if [ $? != 0 ] ; then
 	        echo "UNIT TESTS FAILED...";
 			echo "End: `date`"
@@ -26,10 +30,10 @@ if [ "$#" -eq 0 ] ; then
 elif [ "$1" == "-v" ] ; then
 	#Being called from itself, use quiet mode.
 	echo -n "Running: $@ :: ";
-	#phpunit -d max_execution_time=86400 --configuration config.xml $@ | tail -n 3 | tr -s "\n" | tr "\n" " "
+	#$php_bin $phpunit_bin -d max_execution_time=86400 --configuration config.xml $@ | tail -n 3 | tr -s "\n" | tr "\n" " "
 	
 	#Capture output to a variable so we show it all if a unit test fails.
-	PHPUNIT_OUTPUT=$(phpunit -d max_execution_time=86400 --configuration config.xml $@)
+	PHPUNIT_OUTPUT=$($php_bin $phpunit_bin -d max_execution_time=86400 --configuration config.xml $@)
 	#Capture the exit status of PHPUNIT and make sure we return that. 
 	exit_code=${PIPESTATUS[0]};
 
@@ -44,5 +48,5 @@ elif [ "$1" == "-v" ] ; then
 	echo ""
 	exit $exit_code;
 else
-	phpunit -d max_execution_time=86400 --configuration config.xml $@ 
+	$php_bin $phpunit_bin -d max_execution_time=86400 --configuration config.xml $@ 
 fi

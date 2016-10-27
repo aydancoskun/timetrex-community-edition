@@ -21,7 +21,6 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 	reloadView: function( view_id ) {
 		TopMenuManager.selected_sub_menu_id = ''; // clear select ribbon menu, set in view init;
-		this.removeCurrentView();
 		BaseViewController.loadView( view_id );
 	},
 
@@ -157,7 +156,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 		}
 
-		this.removeCurrentView();
+
 
 		if ( view_id !== 'PortalLogin' && !LocalCacheData.getLoginUser() ) {
 			Global.setURLToBrowser( Global.getBaseURL() + '#!m=PortalLogin' );
@@ -215,6 +214,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 			if ( view_id === 'PortalLogin' || PermissionManager.checkTopLevelPermission( permission_id ) ) {
 				BaseViewController.loadView( view_id );
 			} else {
+				this.removeCurrentView();
 				TAlertManager.showAlert( 'Permission denied' );
 			}
 
@@ -345,7 +345,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 		Global.loadScript( 'global/widgets/ribbon/RibbonViewController.js' );
 
-		//Error: ReferenceError: Can't find variable: RibbonViewController in https://ondemand1.timetrex.com/interface/html5/IndexController.js?v=8.0.0-20141117-091433 line 346
+		//Error: ReferenceError: Can't find variable: RibbonViewController in /interface/html5/IndexController.js?v=8.0.0-20141117-091433 line 346
 		if ( RibbonViewController ) {
 			RibbonViewController.loadView();
 		}
@@ -528,7 +528,7 @@ IndexViewController.setNotificationBar = function( target ) {
 
 	var api = new (APIFactory.getAPIClass( 'APINotification' ))();
 
-	//Error: TypeError: api.getNotification is not a function in https://ondemand2001.timetrex.com/interface/html5/IndexController.js?v=8.0.0-20141117-095711 line 529
+	//Error: TypeError: api.getNotification is not a function in /interface/html5/IndexController.js?v=8.0.0-20141117-095711 line 529
 	if ( !api || !api.getNotification || typeof(api.getNotification) !== 'function' ) {
 		return;
 	}

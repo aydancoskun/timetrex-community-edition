@@ -249,26 +249,16 @@ CompanyViewController = BaseViewController.extend( {
 
 	},
 
-	onSaveClick: function() {
-
+	onSaveClick: function( ignoreWarning ) {
 		var $this = this;
 		var record = this.current_edit_record;
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
 		LocalCacheData.current_doing_context_action = 'save';
-//		var file_data = this.file_browser.getValue();
-
-//		if ( file_data ) {
-//			this.api.uploadFile( file_data, 'object_type=company_logo', {onResult: function( result ) {
-//				$this.updateCompanyLogo();
-//				doNext();
-//			}} )
-//		} else {
-//			doNext();
-//		}
-
 		doNext();
-
 		function doNext() {
-			$this.api['set' + $this.api.key_name]( record, {onResult: function( result ) {
+			$this.api['set' + $this.api.key_name]( record, false, ignoreWarning, {onResult: function( result ) {
 
 				if ( result.isValid() ) {
 					var result_data = result.getResult();
@@ -876,24 +866,24 @@ CompanyViewController = BaseViewController.extend( {
 
 	onTypeChange: function() {
 		if ( this.current_edit_record.ldap_authentication_type_id === 0 ) {
-			this.edit_view_form_item_dic['ldap_host'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['ldap_port'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['ldap_bind_user_name'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['ldap_bind_password'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['ldap_base_dn'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['ldap_bind_attribute'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['ldap_user_filter'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['ldap_login_attribute'].css( 'display', 'none' );
+			this.detachElement('ldap_host');
+			this.detachElement('ldap_port');
+			this.detachElement('ldap_bind_user_name');
+			this.detachElement('ldap_bind_password');
+			this.detachElement('ldap_base_dn');
+			this.detachElement('ldap_bind_attribute');
+			this.detachElement('ldap_user_filter');
+			this.detachElement('ldap_login_attribute');
 
 		} else {
-			this.edit_view_form_item_dic['ldap_host'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['ldap_port'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['ldap_bind_user_name'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['ldap_bind_password'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['ldap_base_dn'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['ldap_bind_attribute'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['ldap_user_filter'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['ldap_login_attribute'].css( 'display', 'block' );
+			this.attachElement('ldap_host');
+			this.attachElement('ldap_port');
+			this.attachElement('ldap_bind_user_name');
+			this.attachElement('ldap_bind_password');
+			this.attachElement('ldap_base_dn');
+			this.attachElement('ldap_bind_attribute');
+			this.attachElement('ldap_user_filter');
+			this.attachElement('ldap_login_attribute');
 		}
 
 		this.editFieldResize();

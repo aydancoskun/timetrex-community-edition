@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -48,9 +48,65 @@ class PayrollDeduction_US_AL extends PayrollDeduction_US {
 														50 => 'Status "MS"'
 									);
 */
-
+	var $state_income_tax_rate_options = array(
+												20120101 => array(
+															10 => array(
+																	array( 'income' => 500,		'rate' => 2,	'constant' => 0 ),
+																	array( 'income' => 2500,	'rate' => 4,	'constant' => 10 ),
+																	array( 'income' => 3000,	'rate' => 5,	'constant' => 90 ),
+																	),
+															20 => array(
+																	array( 'income' => 1000,	'rate' => 2,	'constant' => 0 ),
+																	array( 'income' => 5000,	'rate' => 4,	'constant' => 20 ),
+																	array( 'income' => 6000,	'rate' => 5,	'constant' => 180 ),
+																	),
+															30 => array(
+																	array( 'income' => 500,		'rate' => 2,	'constant' => 0 ),
+																	array( 'income' => 2500,	'rate' => 4,	'constant' => 10 ),
+																	array( 'income' => 3000,	'rate' => 5,	'constant' => 90 ),
+																	),
+															40 => array(
+																	array( 'income' => 500,		'rate' => 2,	'constant' => 0 ),
+																	array( 'income' => 2500,	'rate' => 4,	'constant' => 10 ),
+																	array( 'income' => 3000,	'rate' => 5,	'constant' => 90 ),
+																	),
+															50 => array(
+																	array( 'income' => 500,		'rate' => 2,	'constant' => 0 ),
+																	array( 'income' => 2500,	'rate' => 4,	'constant' => 10 ),
+																	array( 'income' => 3000,	'rate' => 5,	'constant' => 90 ),
+																	),
+															),
+												20060101 => array(
+															10 => array(
+																	array( 'income' => 500,		'rate' => 2,	'constant' => 0 ),
+																	array( 'income' => 3000,	'rate' => 4,	'constant' => 10 ),
+																	array( 'income' => 3000,	'rate' => 5,	'constant' => 110 ),
+																	),
+															20 => array(
+																	array( 'income' => 1000,	'rate' => 2,	'constant' => 0 ),
+																	array( 'income' => 6000,	'rate' => 4,	'constant' => 20 ),
+																	array( 'income' => 6000,	'rate' => 5,	'constant' => 220 ),
+																	),
+															30 => array(
+																	array( 'income' => 500,		'rate' => 2,	'constant' => 0 ),
+																	array( 'income' => 3000,	'rate' => 4,	'constant' => 10 ),
+																	array( 'income' => 3000,	'rate' => 5,	'constant' => 110 ),
+																	),
+															40 => array(
+																	array( 'income' => 500,		'rate' => 2,	'constant' => 0 ),
+																	array( 'income' => 3000,	'rate' => 4,	'constant' => 10 ),
+																	array( 'income' => 3000,	'rate' => 5,	'constant' => 110 ),
+																	),
+															50 => array(
+																	array( 'income' => 500,		'rate' => 2,	'constant' => 0 ),
+																	array( 'income' => 3000,	'rate' => 4,	'constant' => 10 ),
+																	array( 'income' => 3000,	'rate' => 5,	'constant' => 110 ),
+																),
+															),
+												);
+	
 	var $state_options = array(
-								1373353200 => array( //13-Jul-09
+								20130709 => array( //09-Jul-13 (was 13-Jul-09)
 													'standard_deduction_rate' => 0,
 													'standard_deduction_maximum' => array(
 																				'10' => array(
@@ -97,7 +153,7 @@ class PayrollDeduction_US_AL extends PayrollDeduction_US {
 																				2 => array(100000, 300)
 																				)
 													),
-								1167638400 => array(
+								20070101 => array(
 													'standard_deduction_rate' => 0,
 													'standard_deduction_maximum' => array(
 																				'10' => array(
@@ -144,7 +200,7 @@ class PayrollDeduction_US_AL extends PayrollDeduction_US {
 																				2 => array(100000, 300)
 																				)
 													),
-								1136102400 => array(
+								20060101 => array(
 													'standard_deduction_rate' => 20,
 													'standard_deduction_maximum' => array(
 																				'10' => 2000,
@@ -164,10 +220,6 @@ class PayrollDeduction_US_AL extends PayrollDeduction_US {
 													'dependant_allowance' => 300
 													)
 								);
-
-	function getStatePayPeriodDeductions() {
-		return bcdiv($this->getStateTaxPayable(), $this->getAnnualPayPeriods() );
-	}
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();
@@ -215,7 +267,7 @@ class PayrollDeduction_US_AL extends PayrollDeduction_US {
 			return FALSE;
 		}
 
-		if ( $this->getDate() >= strtotime('01-Jan-2007') ) {
+		if ( $this->getDate() >= 20070101 ) {
 			Debug::text('Standard Deduction Formula (NEW)', __FILE__, __LINE__, __METHOD__, 10);
 			$deduction_arr = $this->getDataByIncome( $this->getAnnualTaxableIncome(), $retarr['standard_deduction_maximum'][$this->getStateFilingStatus()] );
 
@@ -264,7 +316,7 @@ class PayrollDeduction_US_AL extends PayrollDeduction_US {
 
 		}
 
-		if ( $this->getDate() >= strtotime('01-Jan-2007') ) {
+		if ( $this->getDate() >= 20070101 ) {
 			$allowance_arr = $this->getDataByIncome( $this->getAnnualTaxableIncome(), $retarr['dependant_allowance'] );
 			$allowance = $allowance_arr[1];
 		} else {

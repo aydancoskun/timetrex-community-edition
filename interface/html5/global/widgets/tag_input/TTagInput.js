@@ -35,7 +35,11 @@
 				error_tip_box = Global.loadWidgetByName( WidgetNamesDic.ERROR_TOOLTIP );
 				error_tip_box = error_tip_box.ErrorTipBox()
 			}
-			error_tip_box.show( this, error_string, sec )
+			if ( $( this ).hasClass( 'warning-tip' ) ) {
+				error_tip_box.show( this, error_string, sec, true );
+			} else {
+				error_tip_box.show( this, error_string, sec );
+			}
 		};
 
 		this.hideErrorTip = function() {
@@ -66,15 +70,18 @@
 		};
 
 		this.setCheckBox = function( val ) {
-			check_box.attr( 'checked', val )
+			if ( check_box ) {
+				check_box.children().eq( 0 )[0].checked = val;
+			}
 		};
 
 		this.isChecked = function() {
 			if ( check_box ) {
-				if ( check_box.attr( 'checked' ) || check_box[0].checked === true ) {
-					return true
+				if ( check_box.children().eq( 0 )[0].checked === true ) {
+					return true;
 				}
 			}
+
 			return false;
 		};
 
@@ -82,7 +89,8 @@
 			mass_edit_mode = val;
 
 			if ( mass_edit_mode ) {
-				check_box = $( " <input type='checkbox' class='ta-mass-edit-checkbox' />" );
+				check_box = $( ' <div class="mass-edit-checkbox-wrapper tag-mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
+				'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
@@ -113,7 +121,10 @@
 			var value = '';
 
 			for ( var key in tag_span_dic ) {
-				value = value + tag_span_dic[key].find( '.tag-span' ).text() + ',';
+				// Error: Unable to get property 'find' of undefined or null reference in /interface/html5/global/widgets/tag_input/TTagInput.js?v=8.0.6-20150417-143734 line 116
+				if ( tag_span_dic[key] ) {
+					value = value + tag_span_dic[key].find( '.tag-span' ).text() + ',';
+				}
 			}
 
 			value = value.substring( 0, value.length - 1 );
@@ -133,7 +144,11 @@
 			}
 
 			for ( var key in tag_span_dic ) {
-				tag_span_dic[key].remove();
+				// Error: Unable to get property 'remove' of undefined or null reference in /interface/html5/global/widgets/tag_input/TTagInput.js?v=8.0.6-20150417-143734 line 136
+				if ( tag_span_dic[key] ) {
+					tag_span_dic[key].remove();
+				}
+
 			}
 
 			tag_span_dic = {};
@@ -180,7 +195,7 @@
 					delete tag_span_dic[value];
 
 					if ( check_box ) {
-						check_box.attr( 'checked', 'true' )
+						$this.setCheckBox( true );
 					}
 
 					$this.trigger( 'formItemChange', [$this] );
@@ -210,7 +225,7 @@
 						var current_div = tag_span_dic[value];
 						var new_value = '';
 
-						//Error: Unable to get property 'removeClass' of undefined or null reference in https://ondemand1.timetrex.com/interface/html5/global/widgets/tag_input/TTagInput.js?v=8.0.0-20150126-192326 line 214
+						//Error: Unable to get property 'removeClass' of undefined or null reference in /interface/html5/global/widgets/tag_input/TTagInput.js?v=8.0.0-20150126-192326 line 214
 						if ( !current_div ) {
 							return;
 						}
@@ -231,7 +246,7 @@
 						tag_span_dic[new_value] = current_div;
 
 						if ( check_box ) {
-							check_box.attr( 'checked', 'true' )
+							$this.setCheckBox( true );
 						}
 
 						$this.trigger( 'formItemChange', [$this] );
@@ -275,7 +290,7 @@
 				delete tag_span_dic[value];
 
 				if ( check_box ) {
-					check_box.attr( 'checked', 'true' )
+					$this.setCheckBox( true );
 				}
 
 				$this.trigger( 'formItemChange', [$this] );
@@ -355,7 +370,7 @@
 				select: function( e, ui ) {
 					$this.createTag( ui.item.value );
 					if ( check_box ) {
-						check_box.attr( 'checked', 'true' );
+						$this.setCheckBox( true );
 					}
 					add_tag_input.autocomplete( "option", "source", [] );
 					$this.trigger( 'formItemChange', [$this] );
@@ -413,7 +428,7 @@
 					add_tag_input.val( '' );
 
 					if ( check_box ) {
-						check_box.attr( 'checked', 'true' );
+						$this.setCheckBox( true );
 					}
 
 					$this.trigger( 'formItemChange', [$this] );
@@ -473,7 +488,7 @@
 					add_tag_input.val( '' );
 
 					if ( check_box ) {
-						check_box.attr( 'checked', 'true' );
+						$this.setCheckBox( true );
 					}
 					add_tag_input.autocomplete( "option", "source", [] );
 					$this.trigger( 'formItemChange', [$this] );

@@ -272,7 +272,7 @@ PayPeriodsViewController = BaseViewController.extend( {
 	/* jshint ignore:start */
 	setDefaultMenu: function( doNotSetFocus ) {
 
-		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
 			return;
 		}
@@ -686,19 +686,19 @@ PayPeriodsViewController = BaseViewController.extend( {
 		// Start date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'start_date'} );
+		form_item_input.TDatePicker( {field: 'start_date', mode: 'date_time'} );
 		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_pay_period_column1, '', null, true );
 
 		// End date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'end_date'} );
+		form_item_input.TDatePicker( {field: 'end_date',  mode: 'date_time'} );
 		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab_pay_period_column1, '', null, true );
 
 		// Transaction date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'transaction_date'} );
+		form_item_input.TDatePicker( {field: 'transaction_date',  mode: 'date_time'} );
 		this.addEditFieldToColumn( $.i18n._( 'Transaction Date' ), form_item_input, tab_pay_period_column1, '', null, true );
 
 	},
@@ -746,14 +746,15 @@ PayPeriodsViewController = BaseViewController.extend( {
 
 	isEditChange: function() {
 		if ( this.current_edit_record.id ) {
-			this.edit_view_form_item_dic['pay_period_schedule'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['pay_period_schedule_id'].css( 'display', 'none' );
+			this.attachElement( 'pay_period_schedule' );
+			this.detachElement( 'pay_period_schedule_id' );
 		} else if ( this.is_mass_editing ) {
-			this.edit_view_form_item_dic['pay_period_schedule'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['pay_period_schedule_id'].css( 'display', 'none' );
+			this.detachElement( 'pay_period_schedule' );
+			this.detachElement( 'pay_period_schedule_id' );
 		} else {
-			this.edit_view_form_item_dic['pay_period_schedule'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['pay_period_schedule_id'].css( 'display', 'block' );
+			this.detachElement( 'pay_period_schedule' );
+			this.attachElement( 'pay_period_schedule_id' );
+
 		}
 
 		this.editFieldResize();

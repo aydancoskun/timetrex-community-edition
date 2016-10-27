@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -59,7 +59,7 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'id' => $id, 
+					'id' => (int)$id, 
 					);
 
 		$query = '
@@ -85,8 +85,8 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'id' => $id, 
-					'company_id' => $company_id
+					'id' => (int)$id, 
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -117,7 +117,7 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $id, 
+					'company_id' => (int)$id, 
 					);
 
 		$query = '
@@ -145,8 +145,8 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		$cgmf = new CompanyGenericMapFactory();
 
 		$ph = array(
-					'company_id' => $company_id, 
-					'map_id' => $id, 
+					'company_id' => (int)$company_id, 
+					'map_id' => (int)$id, 
 					);
 
 		$query = '
@@ -211,7 +211,7 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		$cgmf = new CompanyGenericMapFactory();
 		//$kgf = new KPIGroupFactory();
 		$ph = array(
-					'company_id' => $company_id, 
+					'company_id' => (int)$company_id, 
 					);
 
 		$query = '
@@ -246,7 +246,7 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'b.map_id', $filter_data['group_id'], 'numeric_list_with_all', $ph ) : NULL;
-		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => $company_id, 'object_type_id' => 310, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
+		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => (int)$company_id, 'object_type_id' => 310, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 
 		if ( isset($filter_data['created_date']) AND !is_array($filter_data['created_date']) AND trim($filter_data['created_date']) != '' ) {
 			$date_filter = $this->getDateRangeSQL( $filter_data['created_date'], 'a.created_date' );

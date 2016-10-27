@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -59,8 +59,9 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -85,8 +86,8 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
-					'id' => $id,
+					'company_id' => (int)$company_id,
+					'id' => (int)$id,
 					);
 
 		$query = '
@@ -122,8 +123,9 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 		$uf = new UserFactory();
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	a.*,
@@ -176,7 +178,7 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 		$rstcf = new RecurringScheduleTemplateControlFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'start_date1' => $start_date_stamp,
 					'end_date1' => $end_date_stamp,
 					'start_date2' => $start_date_stamp,
@@ -226,6 +228,63 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 		return $this;
 	}
 
+	function getByCompanyIdAndEndDate($company_id, $end_date, $where = NULL, $order = NULL) {
+		if ( $end_date == '') {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'a.company_id' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$ph = array(
+					'company_id' => (int)$company_id,
+					'end_date' => $this->db->BindDate( $end_date ),
+					);
+
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a
+					where	 a.company_id = ?
+						AND ( a.end_date IS NOT NULL AND a.end_date <= ? )
+						AND ( a.deleted = 0 )
+					';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getMostCommonDisplayWeeksByCompanyId($company_id, $where = NULL) {
+		$ph = array(
+					'company_id' => (int)$company_id,
+					);
+
+		$rstcf = new RecurringScheduleTemplateControlFactory();
+
+		$query = '
+					SELECT	a.display_weeks as display_weeks
+					FROM	'. $this->getTable() .' as a
+					LEFT JOIN '. $rstcf->getTable() .' as b ON a.recurring_schedule_template_control_id = b.id
+					WHERE	 a.company_id = ?
+						AND ( a.deleted = 0 AND b.deleted = 0 )
+					GROUP BY a.display_weeks
+					ORDER BY count(*) DESC
+					LIMIT 1
+					';
+
+		$query .= $this->getWhereSQL( $where );
+
+		$result = $this->db->GetOne($query, $ph);
+
+		return $result;
+	}
+
 	function getByCompanyIdAndStartDateAndEndDate($company_id, $start_date, $end_date, $where = NULL, $order = NULL) {
 		if ( $start_date == '') {
 			return FALSE;
@@ -249,7 +308,7 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 		$rstcf = new RecurringScheduleTemplateControlFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'start_date1' => $start_date_stamp,
 					'end_date1' => $end_date_stamp,
 					'start_date2' => $start_date_stamp,
@@ -292,6 +351,109 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 		return $this;
 	}
 
+	function getByCompanyIdAndIDAndStartDateAndEndDate($company_id, $id, $start_date, $end_date, $where = NULL, $order = NULL) {
+		if ( $start_date == '') {
+			return FALSE;
+		}
+
+		if ( $end_date == '') {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'a.company_id' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$start_date_stamp = $this->db->BindDate( $start_date );
+		$end_date_stamp = $this->db->BindDate( $end_date );
+
+		//$rsuf = new RecurringScheduleUserFactory();
+		$rstcf = new RecurringScheduleTemplateControlFactory();
+
+		$ph = array(
+					'company_id' => (int)$company_id,
+					//'id' => $id,
+					'start_date1' => $start_date_stamp,
+					'end_date1' => $end_date_stamp,
+					'start_date2' => $start_date_stamp,
+					'start_date3' => $start_date_stamp,
+					'end_date3' => $end_date_stamp,
+					'start_date4' => $start_date_stamp,
+					'end_date4' => $end_date_stamp,
+					'start_date5' => $start_date_stamp,
+					'end_date5' => $end_date_stamp,
+					'start_date6' => $start_date_stamp,
+					'end_date6' => $end_date_stamp,
+					);
+
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a
+						LEFT JOIN '. $rstcf->getTable() .' as b ON a.recurring_schedule_template_control_id = b.id
+					where	 a.company_id = ?
+						AND
+						(
+							(a.start_date >= ? AND a.start_date <= ? AND a.end_date IS NULL )
+							OR
+							(a.start_date <= ? AND a.end_date IS NULL )
+							OR
+							(a.start_date >= ? AND a.end_date <= ? )
+							OR
+							(a.start_date >= ? AND a.start_date <= ? )
+							OR
+							(a.end_date >= ? AND a.end_date <= ? )
+							OR
+							(a.start_date <= ? AND a.end_date >= ? )
+						)
+						AND a.id in ('. $this->getListSQL( $id, $ph, 'int' ) .')						
+						AND ( a.deleted = 0 AND b.deleted = 0 )
+					';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getByCompanyIdAndTemplateID($company_id, $id, $where = NULL, $order = NULL) {
+		if ( $order == NULL ) {
+			$order = array( 'a.company_id' => 'asc', 'a.start_date' => 'asc', 'a.id' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$rstcf = new RecurringScheduleTemplateControlFactory();
+
+		$ph = array(
+					'company_id' => (int)$company_id,
+					'id' => (int)$id,
+					);
+
+		//Don't filter on b.deleted=0, as this is mainly called when deleting a RecurringScheduleTemplateControl record
+		//at which point the record is already deleted and therefore this won't return any data, causing things to break.
+		//This shouldn't be called from any other function most likely.
+		//AND b.deleted = 0
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a
+						LEFT JOIN '. $rstcf->getTable() .' as b ON a.recurring_schedule_template_control_id = b.id
+					where	 a.company_id = ?
+						AND a.recurring_schedule_template_control_id = ?
+						AND ( a.deleted = 0 )
+					';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
 	function getSearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -303,7 +465,7 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 				$order = array(Misc::trimSortPrefix($filter_data['sort_column']) => $filter_data['sort_order']);
 			}
 		}
-		Debug::Arr($order, 'aOrder Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($order, 'aOrder Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$additional_order_fields = array('name', 'description', 'last_name', 'template_id');
 		if ( $order == NULL ) {
@@ -325,19 +487,6 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 				unset($order['template_id']);
 			}
 
-			/*
-			if ( isset($order['status']) ) {
-				$order['status_id'] = $order['status'];
-				unset($order['status']);
-			}
-
-			if ( isset($order['transaction_date']) ) {
-				$order['last_name'] = 'asc';
-			} else {
-				$order['transaction_date'] = 'desc';
-			}
-			*/
-
 			$strict = TRUE;
 		}
 		//Debug::Arr($order, 'bOrder Data:', __FILE__, __LINE__, __METHOD__, 10);
@@ -348,7 +497,7 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 		$rstcf = new RecurringScheduleTemplateControlFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -438,12 +587,6 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 			$order = array( 'recurring_schedule_template_control_id' => 'asc', );
 			$strict = FALSE;
 		} else {
-			//Always sort by last name, first name after other columns
-			/*
-			if ( !isset($order['effective_date']) ) {
-				$order['effective_date'] = 'desc';
-			}
-			*/
 			$strict = TRUE;
 		}
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
@@ -453,7 +596,7 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 		$rstcf = new RecurringScheduleTemplateControlFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -473,18 +616,6 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['recurring_schedule_template_control_id']) ) ? $this->getWhereClauseSQL( 'a.recurring_schedule_template_control_id', $filter_data['recurring_schedule_template_control_id'], 'numeric_list', $ph ) : NULL;
-/*
-		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query	.=	' AND rsuf.user_id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
-		}
-
-		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query	.=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
-		}
-		if ( isset($filter_data['recurring_schedule_template_control_id']) AND isset($filter_data['recurring_schedule_template_control_id'][0]) AND !in_array(-1, (array)$filter_data['recurring_schedule_template_control_id']) ) {
-			$query	.=	' AND a.recurring_schedule_template_control_id in ('. $this->getListSQL($filter_data['recurring_schedule_template_control_id'], $ph) .') ';
-		}
-*/
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['created_by'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( 'a.updated_by', $filter_data['updated_by'], 'numeric_list', $ph ) : NULL;
 
@@ -521,12 +652,6 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 			$order = array( 'recurring_schedule_template_control_id' => 'asc', );
 			$strict = FALSE;
 		} else {
-			//Always sort by last name, first name after other columns
-			/*
-			if ( !isset($order['effective_date']) ) {
-				$order['effective_date'] = 'desc';
-			}
-			*/
 			$strict = TRUE;
 		}
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
@@ -541,7 +666,7 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 		$rstcf = new RecurringScheduleTemplateControlFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -592,49 +717,6 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 		$query .= ( isset($filter_data['country']) ) ?$this->getWhereClauseSQL( 'b.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['province']) ) ? $this->getWhereClauseSQL( 'b.province', $filter_data['province'], 'upper_text_list', $ph ) : NULL;
 
-/*
-		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query	.=	' AND ac.user_id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
-		}
-		if ( isset($filter_data['user_id']) AND isset($filter_data['user_id'][0]) AND !in_array(-1, (array)$filter_data['user_id']) ) {
-			$query	.=	' AND ac.user_id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query	.=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
-		}
-		if ( isset($filter_data['exclude_id']) AND isset($filter_data['exclude_id'][0]) AND !in_array(-1, (array)$filter_data['exclude_id']) ) {
-			$query	.=	' AND ac.user_id not in ('. $this->getListSQL($filter_data['exclude_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['recurring_schedule_template_control_id']) AND isset($filter_data['recurring_schedule_template_control_id'][0]) AND !in_array(-1, (array)$filter_data['recurring_schedule_template_control_id']) ) {
-			$query	.=	' AND a.recurring_schedule_template_control_id in ('. $this->getListSQL($filter_data['recurring_schedule_template_control_id'], $ph) .') ';
-		}
-
-		if ( isset($filter_data['status_id']) AND isset($filter_data['status_id'][0]) AND !in_array(-1, (array)$filter_data['status_id']) ) {
-			$query	.=	' AND b.status_id in ('. $this->getListSQL($filter_data['status_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['group_id']) AND isset($filter_data['group_id'][0]) AND !in_array(-1, (array)$filter_data['group_id']) ) {
-			if ( isset($filter_data['include_subgroups']) AND (bool)$filter_data['include_subgroups'] == TRUE ) {
-				$uglf = new UserGroupListFactory();
-				$filter_data['group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['group_id'], TRUE);
-			}
-			$query	.=	' AND b.group_id in ('. $this->getListSQL($filter_data['group_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['default_branch_id']) AND isset($filter_data['default_branch_id'][0]) AND !in_array(-1, (array)$filter_data['default_branch_id']) ) {
-			$query	.=	' AND b.default_branch_id in ('. $this->getListSQL($filter_data['default_branch_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['default_department_id']) AND isset($filter_data['default_department_id'][0]) AND !in_array(-1, (array)$filter_data['default_department_id']) ) {
-			$query	.=	' AND b.default_department_id in ('. $this->getListSQL($filter_data['default_department_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['title_id']) AND isset($filter_data['title_id'][0]) AND !in_array(-1, (array)$filter_data['title_id']) ) {
-			$query	.=	' AND b.title_id in ('. $this->getListSQL($filter_data['title_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['country']) AND isset($filter_data['country'][0]) AND !in_array(-1, (array)$filter_data['country']) ) {
-			$query	.=	' AND b.country in ('. $this->getListSQL($filter_data['country'], $ph) .') ';
-		}
-		if ( isset($filter_data['province']) AND isset($filter_data['province'][0]) AND !in_array( -1, (array)$filter_data['province']) AND !in_array( '00', (array)$filter_data['province']) ) {
-			$query	.=	' AND b.province in ('. $this->getListSQL($filter_data['province'], $ph) .') ';
-		}
-*/
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
 

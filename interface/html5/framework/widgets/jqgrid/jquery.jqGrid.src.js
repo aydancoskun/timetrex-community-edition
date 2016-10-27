@@ -757,6 +757,7 @@
                 datatype: "xml",
                 mtype: "GET",
                 altRows: false,
+                alt2Rows: false,
                 selarrrow: [],
                 savedRow: [],
                 shrinkToFit: true,
@@ -770,6 +771,7 @@
                 selrow: null,
                 beforeSelectRow: null,
                 onSelectRow: null,
+                onEndEditRow: null,
                 onSortCol: null,
                 ondblClickRow: null,
                 onRightClickRow: null,
@@ -1562,7 +1564,12 @@
                         }
                         idr = ts.p.idPrefix + idr;
                         altr = rcnt === 1 ? 0 : rcnt;
-                        cn1 = (altr + i) % 2 == 1 ? cn : '';
+                        if(ts.p.alt2Rows){
+                            cn1 = ( (altr + i) % 4 == 2 || (altr + i) % 4 == 3  ) ? cn : '';
+                        }else {
+                            cn1 = (altr + i) % 2 == 1 ? cn : '';
+                        }
+
                         if ( selected ) {
                             if ( ts.p.multiselect ) {
                                 selr = ($.inArray( idr, ts.p.selarrrow ) !== -1);
@@ -3049,6 +3056,7 @@
                     } else {
                         ts.grid.populate();
                     }
+
                     if ( ts.p._inlinenav === true ) {
                         $( ts ).jqGrid( 'showAddEditButtons' );
                     }
@@ -4283,7 +4291,7 @@
                 $t.p.data = [];
                 $t.p._index = {};
 
-                //Error: TypeError: $t.updatepager is not a function in https://ondemand2001.timetrex.com/interface/html5/framework/widgets/jqgrid/jquery.jqGrid.src.js?v=7.4.6-20141027-085016 line 4282
+                //Error: TypeError: $t.updatepager is not a function in /interface/html5/framework/widgets/jqgrid/jquery.jqGrid.src.js?v=7.4.6-20141027-085016 line 4282
                 if($t.updatepager && typeof($t.updatepager) === 'function'){
                     $t.updatepager( true, false );
                 }
@@ -5360,7 +5368,7 @@
  * Dual licensed under the MIT and GPL licenses:
  *   http://www.opensource.org/licenses/mit-license.php
  *   http://www.gnu.org/licenses/gpl.html
- * 
+ *
  * $Version: 07/06/2008 +r13
  */
 (function( $ ) {
@@ -5511,7 +5519,7 @@
  * Copyright (c) 2007 Brice Burgess <bhb@iceburg.net>, http://www.iceburg.net
  * Licensed under the MIT License:
  * http://www.opensource.org/licenses/mit-license.php
- * 
+ *
  * $Version: 2007.08.19 +r2
  */
 
@@ -5607,7 +5615,7 @@
 
  License:     http://creativecommons.org/licenses/LGPL/2.1/
  Author:      Stefan Goessner/2006
- Web:         http://goessner.net/ 
+ Web:         http://goessner.net/
 
  Modifications made:
 
@@ -5861,7 +5869,7 @@ var xmlJsonClass = {
              if (objRegExp.test(os) || FuncTest.test(os) || os==="false" || os==="true") {
              // int or float
              json += (name && ":")  + "\"" +os + "\"";
-             } 
+             }
              else {
              */
             json += (name && ":") + "\"" + o.replace( /\\/g, '\\\\' ).replace( /\"/g, '\\"' ) + "\"";
@@ -5947,14 +5955,14 @@ var xmlJsonClass = {
  * formatter for values but most of the values if for jqGrid
  * Some of this was inspired and based on how YUI does the table datagrid but in jQuery fashion
  * we are trying to keep it as light as possible
- * Joshua Burnett josh@9ci.com	
+ * Joshua Burnett josh@9ci.com
  * http://www.greenbill.com
  *
  * Changes from Tony Tomov tony@trirand.com
  * Dual licensed under the MIT and GPL licenses:
  * http://www.opensource.org/licenses/mit-license.php
  * http://www.gnu.org/licenses/gpl-2.0.html
- * 
+ *
  **/
 
 ;
@@ -6620,7 +6628,7 @@ var xmlJsonClass = {
     /*
      * jqGrid common function
      * Tony Tomov tony@trirand.com
-     * http://trirand.com/blog/ 
+     * http://trirand.com/blog/
      * Dual licensed under the MIT and GPL licenses:
      * http://www.opensource.org/licenses/mit-license.php
      * http://www.gnu.org/licenses/gpl-2.0.html
@@ -7444,23 +7452,23 @@ var xmlJsonClass = {
  * Dual licensed under the MIT and GPL licenses
  * http://www.opensource.org/licenses/mit-license.php
  * http://www.gnu.org/licenses/gpl-2.0.html
- * 
+ *
  * The work is inspired from this Stefan Pirvu
  * http://www.codeproject.com/KB/scripting/json-filtering.aspx
  *
  * The filter uses JSON entities to hold filter rules and groups. Here is an example of a filter:
 
  { "groupOp": "AND",
- "groups" : [ 
+ "groups" : [
  { "groupOp": "OR",
  "rules": [
- { "field": "name", "op": "eq", "data": "England" }, 
+ { "field": "name", "op": "eq", "data": "England" },
  { "field": "id", "op": "le", "data": "5"}
  ]
- } 
+ }
  ],
  "rules": [
- { "field": "name", "op": "eq", "data": "Romania" }, 
+ { "field": "name", "op": "eq", "data": "Romania" },
  { "field": "id", "op": "le", "data": "1"}
  ]
  }
@@ -7610,7 +7618,7 @@ var xmlJsonClass = {
              */
 
             this.onchange = function() {
-                // clear any error 
+                // clear any error
                 this.p.error = false;
                 this.p.errmsg = "";
                 return $.isFunction( this.p.onChange ) ? this.p.onChange.call( this, this.p ) : false;
@@ -10694,7 +10702,7 @@ var xmlJsonClass = {
                 }
                 // last two not as param, but as object (sorry)
                 //if (typeof restoreAfterError !== "undefined") { o.restoreAfterError = restoreAfterError; }
-                //if (typeof mtype !== "undefined") { o.mtype = mtype || "POST"; }			
+                //if (typeof mtype !== "undefined") { o.mtype = mtype || "POST"; }
             }
             o = $.extend( true, {
                 keys: false,
@@ -10780,17 +10788,7 @@ var xmlJsonClass = {
                         $( "td:eq(" + focus + ") input", ind ).focus();
                         if ( o.keys === true ) {
                             $( ind ).bind( "keydown", function( e ) {
-                                if ( e.keyCode === 27 ) {
-                                    $( $t ).jqGrid( "restoreRow", rowid, o.afterrestorefunc );
-                                    if ( $t.p._inlinenav ) {
-                                        try {
-                                            $( $t ).jqGrid( 'showAddEditButtons' );
-                                        } catch ( eer1 ) {
-                                        }
-                                    }
-                                    return false;
-                                }
-                                if ( e.keyCode === 13 ) {
+                                if ( e.keyCode === 13 || e.keyCode === 27 ) {
                                     var ta = e.target;
                                     if ( ta.tagName == 'TEXTAREA' ) {
                                         return true;
@@ -10802,6 +10800,9 @@ var xmlJsonClass = {
                                             } catch ( eer2 ) {
                                             }
                                         }
+                                    }
+                                    if ( $t.p.onEndEditRow ) {
+                                        $t.p.onEndEditRow.call( $t,$t.p.selrow, true, e );
                                     }
                                     return false;
                                 }
@@ -11353,7 +11354,7 @@ var xmlJsonClass = {
      **
      * jqGrid extension for cellediting Grid Data
      * Tony Tomov tony@trirand.com
-     * http://trirand.com/blog/ 
+     * http://trirand.com/blog/
      * Dual licensed under the MIT and GPL licenses:
      * http://www.opensource.org/licenses/mit-license.php
      * http://www.gnu.org/licenses/gpl-2.0.html
@@ -12806,7 +12807,7 @@ var xmlJsonClass = {
                 }
             } );
         },
-        // experimental 
+        // experimental
         setTreeRow: function( rowid, data ) {
             var success = false;
             this.each( function() {
@@ -13328,7 +13329,7 @@ var xmlJsonClass = {
                 var grp = $t.p.groupingView;
                 $t.p.grouping = true;
 
-                //Set default, in case visibilityOnNextGrouping is undefined 
+                //Set default, in case visibilityOnNextGrouping is undefined
                 if ( typeof grp.visibiltyOnNextGrouping === "undefined" ) {
                     grp.visibiltyOnNextGrouping = [];
                 }
@@ -13434,7 +13435,7 @@ var xmlJsonClass = {
     /*
      * jqGrid extension for constructing Grid Data from external file
      * Tony Tomov tony@trirand.com
-     * http://trirand.com/blog/ 
+     * http://trirand.com/blog/
      * Dual licensed under the MIT and GPL licenses:
      * http://www.opensource.org/licenses/mit-license.php
      * http://www.gnu.org/licenses/gpl-2.0.html
@@ -13661,12 +13662,12 @@ var xmlJsonClass = {
 (function( $ ) {
     /*
      **
-     * jqGrid addons using jQuery UI 
+     * jqGrid addons using jQuery UI
      * Author: Mark Williams
      * Dual licensed under the MIT and GPL licenses:
      * http://www.opensource.org/licenses/mit-license.php
      * http://www.gnu.org/licenses/gpl-2.0.html
-     * depends on jQuery UI 
+     * depends on jQuery UI
      **/
     if ( $.browser.msie && $.browser.version == 8 ) {
         $.expr[":"].hidden = function( elem ) {
@@ -13816,7 +13817,7 @@ var xmlJsonClass = {
                 "msel": "multiselect",
                 /* "msel_opts" : {}, */
 
-                /* dlog is either the name of a ui widget class that 
+                /* dlog is either the name of a ui widget class that
                  behaves in a dialog-like way, or a function, that
                  supports creating a dialog (when passed dlog_opts)
                  or destroying a dialog (when passed the string
@@ -13826,7 +13827,7 @@ var xmlJsonClass = {
                 "dialog_opts": {
                     "minWidth": 470
                 },
-                /* dlog_opts is either an option object to be passed 
+                /* dlog_opts is either an option object to be passed
                  to "dlog", or (more likely) a function that creates
                  the options object.
                  The default produces a suitable options object for
@@ -14231,7 +14232,7 @@ var xmlJsonClass = {
 })( jQuery );
 /*
  Transform a table to a jqGrid.
- Peter Romianowski <peter.romianowski@optivo.de> 
+ Peter Romianowski <peter.romianowski@optivo.de>
  If the first column of the table contains checkboxes or
  radiobuttons then the jqGrid is made selectable.
  */
@@ -14323,7 +14324,7 @@ function tableToGrid( selector, options ) {
                 id = rowIds[a];
                 if ( id && id.replace ) {
                     // We have to do this since the value of a checkbox
-                    // or radio button can be anything 
+                    // or radio button can be anything
                     id = encodeURIComponent( id ).replace( /[.\-%]/g, "_" );
                 }
             }

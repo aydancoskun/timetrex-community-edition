@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -225,7 +225,7 @@ class Misc {
 			$params[0] = (array)$params[0];
 
 			if ($argc < 2) {
-				trigger_error("array_column() expects at least 2 parameters, {$argc} given", E_USER_WARNING);
+				trigger_error('array_column() expects at least 2 parameters, '. $argc .' given', E_USER_WARNING);
 				return NULL;
 			}
 
@@ -602,12 +602,17 @@ class Misc {
 	static function removeTrailingZeros( $value, $minimum_decimals = 2 ) {
 		//Remove trailing zeros after the decimal, leave a minimum of X though.
 		if ( strpos( $value, '.') !== FALSE ) {
-			$trimmed_value = rtrim( $value, 0);
+			$trimmed_value = (float)$value;
+			if ( strpos( $trimmed_value, '.') !== FALSE ) {
+				$tmp_minimum_decimals = strlen( (int)strrev($trimmed_value) );
+			} else {
+				$tmp_minimum_decimals = 0;
+			}
 
-			$tmp_minimum_decimals = strlen( (int)strrev($trimmed_value) );
 			if ( $tmp_minimum_decimals > $minimum_decimals ) {
 				$minimum_decimals = $tmp_minimum_decimals;
 			}
+			
 			return number_format( $value, $minimum_decimals, '.', '' );
 		}
 
@@ -1289,17 +1294,6 @@ class Misc {
 		return FALSE;
 	}
 
-	static function importCallInputParseFunction( $function_name, $input, $default_value = NULL, $parse_hint = NULL ) {
-		$full_function_name = 'parse_'.$function_name;
-
-		if ( function_exists( $full_function_name ) ) {
-			//echo "	  Calling Custom Parse Function for: $function_name\n";
-			return call_user_func( $full_function_name, $input, $default_value, $parse_hint );
-		}
-
-		return $input;
-	}
-
 	static function encrypt( $str, $key = NULL ) {
 		if ( $str == '' OR $str === FALSE OR empty($str) ) {
 			return FALSE;
@@ -1423,6 +1417,18 @@ class Misc {
 		return $retval;
 	}
 
+	static function getRemoteHTTPFileSize( $url ) {
+		$headers = array_change_key_case( get_headers($url, 1) );
+
+		if ( isset($headers[0]) AND stripos( $headers[0], '404 Not Found') !== FALSE ) {
+			return FALSE;
+		}
+
+		$retval = isset($headers['content-length']) ? $headers['content-length'] : FALSE;
+
+		return $retval;
+	}
+
 	static function getEmailDomain() {
 		global $config_vars;
 		
@@ -1507,7 +1513,7 @@ class Misc {
 			}
 
 			//Debug::Text( 'Raw Referer: '. $referer, __FILE__, __LINE__, __METHOD__, 10);
-			$referer = parse_url( $referer, PHP_URL_HOST );
+			$referer = strtolower( parse_url( $referer, PHP_URL_HOST ) ); //Make sure we lowercase it, so case doesn't prevent a match.
 
 			//Use HTTP_HOST rather than getHostName() as the same site can be referenced with multiple different host names
 			//Especially considering on-site installs that default to 'localhost'
@@ -1522,7 +1528,7 @@ class Misc {
 			} else {
 				$host_name = '';
 			}
-			$host_name = ( $host_name != '' ) ? parse_url( 'http://'.$host_name, PHP_URL_HOST ) : ''; //Need to add 'http://' so parse_url() can strip it off again.
+			$host_name = ( $host_name != '' ) ? strtolower( parse_url( 'http://'.$host_name, PHP_URL_HOST ) ) : ''; //Need to add 'http://' so parse_url() can strip it off again. Also lowercase it so case differences don't prevent a match.
 			//Debug::Text( 'Parsed Referer: '. $referer .' Hostname: '. $host_name, __FILE__, __LINE__, __METHOD__, 10);
 
 			if ( $referer == $host_name OR $host_name == '' ) {
@@ -1673,6 +1679,15 @@ class Misc {
 		return chr( ($number + 65) );
 	}
 
+	static function reScaleRange( $value, $old_min = 1, $old_max = 5, $new_min = 1, $new_max = 10 ) {
+		if ( $value === '' OR $value === NULL ) {
+			return $value;
+		} else {
+			$retval = ( ( ( ( $value - $old_min) * ( $new_max - $new_min ) ) / ( $old_max - $old_min ) ) + $new_min );
+			return $retval;
+		}
+	}
+	
 	static function issetOr( &$var, $default = NULL ) {
 		if ( isset($var) ) {
 			return $var;
@@ -2097,17 +2112,17 @@ class Misc {
 			$strength++;
 		}
 
-		//check string length is 8-15 chars
+		//check string length is 6-9 chars
 		if ( $length >= 6 && $length <= 9 ) {
 			$strength++;
 		}
 
-		//check if length is 16-35 chars
+		//check if length is 10-15 chars
 		if ( $length >= 10 && $length <= 15 ) {
 			$strength += 2;
 		}
 
-		//check if length greater than 35 chars
+		//check if length greater than 15 chars
 		if ( $length > 15 ) {
 			$strength += 3;
 		}
@@ -2129,6 +2144,7 @@ class Misc {
 		$strength = $strength > 99 ? 99 : $strength;
 		$strength = floor( ( ( $strength / 10 ) + 1 ) );
 
+		Debug::Text('Strength: '. $strength, __FILE__, __LINE__, __METHOD__, 10);
 		return $strength;
 	}
 
@@ -2367,6 +2383,12 @@ class Misc {
 
 		if ( isset($header_name) AND isset($_SERVER[$header_name]) AND $_SERVER[$header_name] != ''  ) {
 			//Debug::text('Remote IP: '. $_SERVER['REMOTE_ADDR'] .' Behind Proxy IP: '. $_SERVER[$header_name], __FILE__, __LINE__, __METHOD__, 10);
+
+			//Make sure we handle it if multiple IP addresses are returned due to multiple proxies.
+			$comma_pos = strpos($_SERVER[$header_name], ',');
+			if ( $comma_pos !== FALSE ) {
+				$_SERVER[$header_name] = substr($_SERVER[$header_name], 0, $comma_pos );
+			}
 			return $_SERVER[$header_name];
 		} elseif( isset($_SERVER['REMOTE_ADDR']) ) {
 			//Debug::text('Remote IP: '. $_SERVER['REMOTE_ADDR'], __FILE__, __LINE__, __METHOD__, 10);
@@ -2390,6 +2412,7 @@ class Misc {
 					( isset($_SERVER['HTTPS']) AND ( strtolower($_SERVER['HTTPS']) == 'on' OR $_SERVER['HTTPS'] == '1' ) )
 					OR
 					//Handle load balancer/proxy forwarding with SSL offloading.
+					//FIXME: Similar to X_FORWARDED_FOR, this can have a comma and contain multiple protocols.
 					( isset($header_name) AND isset($_SERVER[$header_name]) AND strtolower($_SERVER[$header_name]) == 'https'  )
 				) {
 			return TRUE;

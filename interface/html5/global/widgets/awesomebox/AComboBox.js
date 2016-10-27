@@ -39,6 +39,8 @@
 
 		var field = '';
 
+		var validation_field;
+
 		var user_generic_api = null;
 
 		var display_columns = null; //Display columns in ADropDown in jGrid model format
@@ -154,12 +156,25 @@
 
 		//use to juedge if need to clear quick_search_typed_keys
 		var quick_search_timer;
+
+		var current_open_page = 1;
+
+		//deal with result when doing dropdown search, TimesheetAuthorizationViewControl need this.
+		var extendDataProcessWhenSearch;
 //
 //		//Used for modify search result when doing Paging or Searching, For example, used in AccrualBalanceViewController to set correct ids
 //		this.customSearchResultHandler = null;
 
 		//Used for modify search filter when open awesomebox or do search/sorting and paging. First used in Timehsheet absency_policy awesomebox
 		this.customSearchFilter = null;
+
+		this.getCurrentOpenPage = function() {
+			return current_open_page;
+		};
+
+		this.getPagerData = function() {
+			return pager_data;
+		};
 
 		this.getHeaderWidth = function() {
 			return total_header_width;
@@ -235,10 +250,12 @@
 				if ( check_box ) {
 					check_box.hide();
 				}
-
 				if ( $this.shouldInitColumns() ) { //Sort Selector in search panel
-
 					edit_icon_div.css( 'display', 'none' );
+				}
+
+				if ( !this.children().eq( 1 ).text() ) {
+					this.children().eq( 1 ).text( $.i18n._( 'N/A' ) );
 				}
 
 			} else {
@@ -252,17 +269,23 @@
 
 					edit_icon_div.css( 'display', 'inline-block' );
 				}
+
+				if ( !this.children().eq( 1 ).text() === $.i18n._( 'N/A' ) ) {
+					this.children().eq( 1 ).text( '' );
+				}
 			}
 
 		};
 
 		this.setCheckBox = function( val ) {
-			check_box.attr( 'checked', val );
+			if ( check_box ) {
+				check_box.children().eq( 0 )[0].checked = val;
+			}
 		};
 
 		this.isChecked = function() {
 			if ( check_box ) {
-				if ( check_box.attr( 'checked' ) || check_box[0].checked === true ) {
+				if ( check_box.children().eq( 0 )[0].checked === true ) {
 					return true;
 				}
 			}
@@ -274,7 +297,8 @@
 			mass_edit_mode = val;
 
 			if ( mass_edit_mode ) {
-				check_box = $( " <input type='checkbox' class='a-mass-edit-checkbox' />" );
+				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
+				'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
@@ -344,9 +368,12 @@
 			return 0;
 		};
 
-		this.setErrorStyle = function( errStr, show ) {
-			$( this ).addClass( 'a-error-tip' );
-
+		this.setErrorStyle = function( errStr, show, isWarning ) {
+			if ( isWarning ) {
+				$( this ).addClass( 'a-warning-tip' );
+			} else {
+				$( this ).addClass( 'a-error-tip' );
+			}
 			error_string = errStr;
 
 			if ( show ) {
@@ -364,7 +391,11 @@
 				error_tip_box = Global.loadWidgetByName( WidgetNamesDic.ERROR_TOOLTIP );
 				error_tip_box = error_tip_box.ErrorTipBox()
 			}
-			error_tip_box.show( this, error_string, sec )
+			if ( $( this ).hasClass( 'a-warning-tip' ) ) {
+				error_tip_box.show( this, error_string, sec, true );
+			} else {
+				error_tip_box.show( this, error_string, sec );
+			}
 		};
 
 		this.hideErrorTip = function() {
@@ -377,6 +408,7 @@
 
 		this.clearErrorStyle = function() {
 			$( this ).removeClass( 'a-error-tip' );
+			$( this ).removeClass( 'a-warning-tip' );
 			error_string = '';
 			this.hideErrorTip();
 		};
@@ -387,6 +419,10 @@
 
 		this.getField = function() {
 			return field;
+		};
+
+		this.getValidationField = function() {
+			return validation_field;
 		};
 
 		this.getValue = function( return_full_value ) {
@@ -457,32 +493,21 @@
 
 			return return_value;
 
-		}
+		};
 
 		this.setSourceData = function( val ) {
-
-			//why set navigation_mode_source_data_before_open instead source_data?
-			//			  if ( navigation_mode ) {
-			//				  navigation_mode_source_data_before_open = val;
-			//			  } else {
-			//				  source_data = val;
-			//
-			//				  if ( !allow_multiple_selection ) {
-			//					  if ( val && val.length > 0 ) {
-			//						  if ( set_empty || set_any || set_default || set_open ) {
-			//							  $this.createFirstItem()
-			//						  }
-			//					  }
-			//				  }
-			//
-			//			  }
-
 			source_data = val;
 
 			if ( !allow_multiple_selection ) {
 				if ( val && val.length > 0 ) {
 					if ( set_empty || set_any || set_default || set_open || set_all || set_special_empty ) {
 						$this.createFirstItem();
+					} else {
+						if ( !select_item ) {
+							//Related to 1825, directly use item not item id, since use item id willl
+							// trigger getReal data which case problems and not necessary.
+							this.setValue( val[0] );
+						}
 					}
 				}
 			} else {
@@ -501,7 +526,7 @@
 					this.setValue( select_item );
 				}
 			}
-		}
+		};
 
 		this.getSourceData = function() {
 
@@ -515,16 +540,16 @@
 			}
 
 			return source_data;
-		}
+		};
 
 		//Always return source data only
 		this.getStaticSourceData = function() {
 			return source_data;
-		}
+		};
 
 		this.getRowPerPage = function() {
 			return row_per_page;
-		}
+		};
 
 		this.getAllColumns = function() {
 
@@ -532,35 +557,42 @@
 				return possible_display_columns;
 			}
 			return all_columns;
-		}
+		};
 
 		this.getDisplayColumnsForEditor = function() {
 			return display_columns_in_columnEditor;
-		}
+		};
 
 		this.setValue = function( val ) {
-
 			if ( allow_multiple_selection ) {
 
-				if ( $.type( val ) === 'string' || $.type( val ) === 'number' ) {
-					this.setSelectItems( [val] );
-				} else if ( !val || $.type( val ) === 'array' ) {
+				if ( !val || $.type( val ) === 'array' ) {
 					this.setSelectItems( val )
+				} else if ( $.type( val ) === 'string' || $.type( val ) === 'number' ) {
+					this.setSelectItems( [val] );
 				}
 			} else {
 
 				if ( $.type( val ) === 'array' && val.length > 0 ) {
 					val = val[0];
 				}
-
-				this.setSelectItem( val );
+				//If no default value set first item as default select item.
+				if ( !val ) {
+					if ( !set_empty && !set_any && !set_default && !set_open && !set_all && !set_special_empty && source_data && source_data.length > 0 ) {
+						this.setValue( source_data[0] );
+					} else {
+						this.setSelectItem( null );
+					}
+				} else {
+					this.setSelectItem( val );
+				}
 			}
 
-		}
+		};
 
 		this.getAllowMultipleSelection = function() {
 			return allow_multiple_selection;
-		}
+		};
 
 		//Get full data from api, if get a id
 		this.getRealData = function( val ) {
@@ -626,7 +658,7 @@
 				}
 			}
 
-		}
+		};
 
 		this.getColumnFilter = function() {
 
@@ -646,6 +678,9 @@
 			column_filter.default_item_id = true;
 			column_filter.accrual_policy_id = true;
 			column_filter.pay_code_id = true;
+			column_filter.start_date = true;
+			column_filter.end_date = true;
+			column_filter.pay_period_id = true;
 
 			if ( api && api.className === 'APIUser' ) {
 				column_filter.pay_period_schedule_id = true;
@@ -658,7 +693,7 @@
 				column_filter[item.name] = true;
 			} );
 			return column_filter;
-		}
+		};
 
 		this.setSelectItem = function( val ) {
 
@@ -677,13 +712,13 @@
 				this.setLabel();
 			}
 
-		}
+		};
 
 		this.cleanDropDownValues = function() {
 			if ( a_dropdown ) {
 				a_dropdown.setSelectGridData( [] );
 			}
-		}
+		};
 
 		this.setSelectItems = function( val ) {
 			if ( !val || val.length < 1 ) {
@@ -849,7 +884,7 @@
 			} else {
 
 				if ( !select_item ) {
-					this.setEmptyLabel()
+					this.setEmptyLabel();
 					return;
 				}
 
@@ -908,7 +943,6 @@
 					}
 				}
 			}
-
 			if ( custom_first_label ) {
 				label_span.text( custom_first_label );
 			}
@@ -970,6 +1004,10 @@
 				filter_data: filter_data
 			};
 
+			//Error: TypeError: user_generic_api is null in /interface/html5/global/widgets/awesomebox/AComboBox.js?v=9.0.0-20150822-090205 line 987
+			if ( !user_generic_api ) {
+				user_generic_api = new (APIFactory.getAPIClass( 'APIUserGenericData' ))();
+			}
 			user_generic_api.setUserGenericData( filter, {
 				onResult: function( res ) {
 					ALayoutCache.layout_dic[layout_name] = null;
@@ -986,7 +1024,7 @@
 
 			user_generic_api = new (APIFactory.getAPIClass( 'APIUserGenericData' ))();
 
-			//Error: TypeError: 'undefined' is not a function (evaluating 'user_generic_api.getUserGenericData') in https://ondemand2001.timetrex.com/interface/html5/global/widgets/awesomebox/AComboBox.js?v=8.0.0-20141117-095711 line 1044
+			//Error: TypeError: 'undefined' is not a function (evaluating 'user_generic_api.getUserGenericData') in /interface/html5/global/widgets/awesomebox/AComboBox.js?v=8.0.0-20141117-095711 line 1044
 			if ( !user_generic_api || !user_generic_api.getUserGenericData || typeof(user_generic_api.getUserGenericData) !== 'function' ) {
 				return;
 			}
@@ -1179,7 +1217,7 @@
 
 		var filterBaseOnPossibleColumns = function( display_columns ) {
 
-			//Error: Unable to get property 'length' of undefined or null reference in https://villa.timetrex.com/interface/html5/global/widgets/awesomebox/AComboBox.js?v=8.0.0-20141230-125406 line 1169
+			//Error: Unable to get property 'length' of undefined or null reference in /interface/html5/global/widgets/awesomebox/AComboBox.js?v=8.0.0-20141230-125406 line 1169
 			if ( !possible_display_columns ) {
 				return display_columns;
 			}
@@ -1262,7 +1300,7 @@
 
 			if ( a_dropdown.isChanged() ) {
 				if ( check_box ) {
-					check_box.attr( 'checked', 'true' )
+					$this.setCheckBox( true );
 				}
 
 				$this.trigger( 'formItemChange', [$this] );
@@ -1552,17 +1590,15 @@
 			return args;
 		};
 
-		this.onADropDownSearch = function( targetName, page_action ) {
-
+		this.onADropDownSearch = function( targetName, page_action, default_select_item, callBack ) {
 			var args = {};
 			args.filter_columns = $this.getColumnFilter();
 			args.filter_items_per_page = row_per_page;
 			if ( targetName === 'unselect_grid' ) {
-
 				args = this.buildUnSelectGridFilter();
 
-				//Error: Unable to get property 'current_page' of undefined or null reference in https://ondemand1.timetrex.com/interface/html5/global/widgets/awesomebox/AComboBox.js?v=7.4.6-20141027-070003 line 1489
-				if ( a_dropdown.getPagerData() ) {
+				//Error: Unable to get property 'current_page' of undefined or null reference in /interface/html5/global/widgets/awesomebox/AComboBox.js?v=7.4.6-20141027-070003 line 1489
+				if ( a_dropdown && a_dropdown.getPagerData() ) {
 					if ( LocalCacheData.paging_type === 0 ) {
 						if ( page_action === 'next' ) {
 							args.filter_page = a_dropdown.getPagerData().next_page;
@@ -1588,6 +1624,10 @@
 								break;
 						}
 					}
+				}
+
+				if ( parseInt( page_action ) >= 1 ) {
+					args.filter_page = page_action;
 				}
 
 				api['get' + custom_key_name]( args, {
@@ -1622,6 +1662,7 @@
 							pager_data = result.getPagerData();
 						} else {
 							unselect_grid_search_result = result_data;
+							current_open_page = result.getPagerData().current_page;
 						}
 
 						if ( $.type( result_data ) != 'array' ) {
@@ -1634,23 +1675,39 @@
 
 						result_data = Global.formatGridData( result_data, api.key_name );
 
-						a_dropdown.setUnselectedGridData( result_data );
+						if ( extendDataProcessWhenSearch ) {
+							result_data = extendDataProcessWhenSearch( result_data );
+						}
+						a_dropdown && a_dropdown.setUnselectedGridData( result_data );
 
 						if ( allow_multiple_selection ) {
-							a_dropdown.setSelectGridData( a_dropdown.getSelectItems(), true );
+							a_dropdown && a_dropdown.setSelectGridData( a_dropdown.getSelectItems(), true );
 						} else {
-							a_dropdown.setSelectItem( a_dropdown.getSelectItem() );
+							a_dropdown && a_dropdown.setSelectItem( a_dropdown.getSelectItem() );
+							if ( default_select_item == 'first' ) {
+								$this.setValue( result_data[0] );
+								$this.trigger( 'formItemChange', [$this] );
+								if ( callBack ) {
+									callBack( result_data[0] );
+								}
+							} else if ( default_select_item == 'last' ) {
+								$this.setValue( result_data[result_data.length - 1] );
+								$this.trigger( 'formItemChange', [$this] );
+								if ( callBack ) {
+									callBack( result_data[result_data.length - 1] );
+								}
+							}
 						}
 
-						a_dropdown.setPagerData( result.getPagerData() );
+						a_dropdown && a_dropdown.setPagerData( result.getPagerData() );
 
 						if ( result_data.length < 1 ) {
-							a_dropdown.showNoResultCover( 'unselect_grid' );
+							a_dropdown && a_dropdown.showNoResultCover( 'unselect_grid' );
 						} else {
-							a_dropdown.removeNoResultCover( 'unselect_grid' );
+							a_dropdown && a_dropdown.removeNoResultCover( 'unselect_grid' );
 						}
 
-						a_dropdown.getUnSelectGrid().show();
+						a_dropdown && a_dropdown.getUnSelectGrid().show();
 
 						if ( focused_element.length ) {
 							focused_element.focus();
@@ -2033,6 +2090,10 @@
 			var edit_icon = $( this ).find( '.edit_column_icon' );
 			var focus_input = $( this ).find( '.focus-input' );
 
+			if( o.extendDataProcessWhenSearch){
+				extendDataProcessWhenSearch = o.extendDataProcessWhenSearch;
+			}
+
 			if ( o.always_search_full_columns ) {
 				always_search_full_columns = o.always_search_full_columns;
 			}
@@ -2062,14 +2123,21 @@
 			if ( o.navigation_mode ) {
 				navigation_mode = o.navigation_mode;
 				$( this ).children().eq( 1 ).css( 'max-width', 132 );
+				$( this ).children().eq( 1 ).css( 'min-width', 132 );
 			}
 
 			if ( o.search_panel_model ) {
 				$( this ).children().eq( 1 ).css( 'max-width', 132 );
+				$( this ).children().eq( 1 ).css( 'min-width', 132 );
 			}
 
 			if ( o.width ) {
 				$( this ).children().eq( 1 ).css( 'max-width', o.width );
+				if ( o.is_static_width ) {
+					$( this ).children().eq( 1 ).css( 'min-width', o.width );
+				}
+			} else {
+				$( this ).children().eq( 1 ).css( 'min-width', 132 );
 			}
 
 			if ( o.api_class ) {
@@ -2123,6 +2191,10 @@
 			}
 
 			field = o.field;
+
+			if ( o.validation_field ) {
+				validation_field = o.validation_field;
+			}
 
 			if ( o.layout_name ) {
 				if ( navigation_mode ) {
@@ -2208,8 +2280,12 @@
 			} );
 
 			if ( $this.shouldInitColumns() ) { //Sort Selector in search panel
+				if ( !o.width ) {
+					$( this ).css( 'min-width', '194px' );
+				} else {
+					$( this ).css( 'min-width', (o.width + 60) + 'px' );
+				}
 
-				$( this ).css( 'min-width', '194px' );
 				edit_icon_div.css( 'display', 'inline-block' );
 				edit_icon.attr( 'src', Global.getRealImagePath( 'images/edit.png' ) );
 
@@ -2247,7 +2323,11 @@
 
 			} else {
 				do_not_get_real_data = true; // For Simple OPTIONS mode
-				$( this ).css( 'min-width', '169px' );
+				if ( !o.width ) {
+					$( this ).css( 'min-width', '169px' );
+				} else {
+					$( this ).css( 'min-width', (o.width + 40) + 'px' );
+				}
 				edit_icon_div.css( 'display', 'none' );
 			}
 
@@ -2436,7 +2516,7 @@
 				if ( !source_data ) {
 					var args = $this.buildUnSelectGridFilter();
 
-					//Error: TypeError: api is null in https://ondemand1.timetrex.com/interface/html5/global/widgets/awesomebox/AComboBox.js?v=8.0.0-20141117-112033 line 2364
+					//Error: TypeError: api is null in /interface/html5/global/widgets/awesomebox/AComboBox.js?v=8.0.0-20141117-112033 line 2364
 					if ( !api ) {
 						return;
 					}
@@ -2479,7 +2559,7 @@
 									args.filter_items_per_page = 10000;
 									var local_data = false;
 
-									//Error: TypeError: null is not an object (evaluating 'select_items.length') in https://ondemand2001.timetrex.com/interface/html5/global/widgets/awesomebox/AComboBox.js?v=8.0.0-20141230-113526 line 2441
+									//Error: TypeError: null is not an object (evaluating 'select_items.length') in /interface/html5/global/widgets/awesomebox/AComboBox.js?v=8.0.0-20141230-113526 line 2441
 									//if select items contains data like 0, for example Employee in Recurring Schedule edit view
 									if ( select_items && select_items.length > 0 && select_items[0] == 0 ) {
 										local_data = $this.getLocalSelectItem( select_items[0] );
@@ -2587,6 +2667,12 @@
 					if ( !Global.isEmpty( cached_search_inputs_filter ) || !Global.isEmpty( cached_sort_filter ) ) {
 						a_dropdown.getUnSelectGrid().hide();
 						$this.onADropDownSearch( 'unselect_grid' );
+						current_open_page = 1;
+					} else {
+						if ( current_open_page > 1 && current_open_page <= pager_data.last_page_number ) {
+							a_dropdown.getUnSelectGrid().hide();
+							$this.onADropDownSearch( 'unselect_grid', current_open_page );
+						}
 					}
 
 					if ( !Global.isEmpty( cached_select_grid_search_inputs_filter ) || !Global.isEmpty( cached_selected_grid_sort_filter ) ) {

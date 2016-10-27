@@ -49,7 +49,6 @@ ALayoutCache.buildDefaultColumns = function() {
 		{label: $.i18n._( 'Number' ), value: 'display_number'},
 		{label: $.i18n._( 'Type' ), value: 'type'}
 	];
-
 	default_columns[ALayoutIDs.OPTION_COLUMN] = [
 		{label: $.i18n._( 'Name' ), value: 'label'}
 	];

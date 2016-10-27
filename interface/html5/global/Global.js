@@ -6,6 +6,20 @@ Global.app_min_width = 990;
 
 Global.theme = 'default';
 
+Global.isScrolledIntoView = function( elem ) {
+	var $elem = elem;
+	var $window = $( window );
+	var docViewTop = $window.scrollTop();
+	var docViewBottom = docViewTop + $window.height();
+	if ( !$elem.offset() ) {
+		return true;
+	}
+	var elemTop = $elem.offset().top;
+	//var elemBottom = elemTop + $elem.height();
+	//((elemBottom <= (docViewBottom + 200)) && (elemTop >= docViewTop));
+	return elemTop < docViewBottom;
+};
+
 Global.KEYCODES = {
 	'48': '0',
 	'49': '1',
@@ -63,8 +77,13 @@ Global.sendErrorReport = function() {
 		error_string.indexOf( "NS_ERROR_FAILURE" ) >= 0 ) {
 		return;
 	}
+	var error;
+	if ( login_user ) {
+		error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\n Uncaught Error From: ' + LocalCacheData.current_open_primary_controller.script_name + '\n\n' + 'Error: ' + error_string + ' in ' + from_file + ' line ' + line + ' ' + '\n\nUser: ' + login_user.user_name + ' ' + '\n\nURL: ' + window.location.href + ' ' + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie;
+	} else {
+		error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\n Uncaught Error From: ' + LocalCacheData.current_open_primary_controller.script_name + '\n\n' + 'Error: ' + error_string + ' in ' + from_file + ' line ' + line + ' ' + '\n\nUser: ' + '\n\nURL: ' + window.location.href + ' ' + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie;
 
-	var error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\n Uncaught Error From: ' + LocalCacheData.current_open_primary_controller.script_name + '\n\n' + 'Error: ' + error_string + ' in ' + from_file + ' line ' + line + ' ' + '\n\nUser: ' + login_user.user_name + ' ' + '\n\nURL: ' + window.location.href + ' ' + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie;
+	}
 
 	//Don't send error report if exception not happens in our codes.
 	//from_file should always contains the root url
@@ -92,10 +111,15 @@ Global.sendErrorReport = function() {
 				var image_string = canvas.toDataURL().split( ',' )[1];
 				api_authentication.sendErrorReport( error, image_string, {
 					onResult: function( result ) {
-						if ( APIGlobal.pre_login_data.production === true && result.getResult() !== APIGlobal.pre_login_data.application_build ) {
-							TAlertManager.showAlert( $.i18n._( 'Your web browser is caching incorrect data, please press the refresh button on your web browser or log out, clear your web browsers cache and try logging in again.' ) + '<br><br>' + $.i18n._( 'Local Version' ) + ':  ' + result.getResult() + '<br>' + $.i18n._( 'Remote Version' ) + ': ' + APIGlobal.pre_login_data.application_build, '', function() {
+						if ( !Global.dont_check_browser_cache && APIGlobal.pre_login_data.production === true && result.getResult() !== APIGlobal.pre_login_data.application_build ) {
+							var message = $.i18n._( 'Your web browser is caching incorrect data, please press the refresh button on your web browser or log out, clear your web browsers cache and try logging in again.' ) + '<br><br>' + $.i18n._( 'Local Version' ) + ':  ' + result.getResult() + '<br>' + $.i18n._( 'Remote Version' ) + ': ' + APIGlobal.pre_login_data.application_build;
+							Global.dont_check_browser_cache = true;
+							Global.sendErrorReport( 'Your web browser is caching incorrect data. Local Version' + ':  ' + result.getResult()  + 'Remote Version' + ': ' + APIGlobal.pre_login_data.application_build, ServiceCaller.rootURL, '', '', '' );
+							TAlertManager.showAlert( message, '', function() {
 								window.location.reload( true );
 							} );
+						} else if ( Global.dont_check_browser_cache ) {
+							Global.dont_check_browser_cache = false;
 						}
 
 					}
@@ -139,8 +163,13 @@ Global.initStaticStrings = function() {
 
 	Global.modify_alert_message = $.i18n._( 'You have modified data without saving, are you sure you want to continue and lose your changes' );
 
-	Global.delete_confirm_message = $.i18n._( 'You are about to delete data, once data is deleted it can not be recovered Are you sure you wish to continue?' );
+	Global.delete_confirm_message = $.i18n._( 'You are about to delete data, once data is deleted it can not be recovered.<br>Are you sure you wish to continue?' );
 
+	Global.delete_dashlet_confirm_message = $.i18n._( 'You are about to delete this dashlet, once a dashlet is deleted it can not be recovered.<br>Are you sure you wish to continue?' );
+
+	Global.auto_arrange_dashlet_confirm_message = $.i18n._( 'You are about to restore all dashlets to their default size/layout.<br>Are you sure you wish to continue?' );
+
+	Global.rese_all_dashlet_confirm_message = $.i18n._( 'You are about to remove all your customized dashlets and restore them back to the defaults.<br>Are you sure you wish to continue?' );
 };
 
 Global.getUpgradeMessage = function() {
@@ -152,40 +181,20 @@ Global.getUpgradeMessage = function() {
 	return message;
 };
 
-Global.setupPing = function() {
-
+Global.doPingIfNecessary = function(){
 	var api = new (APIFactory.getAPIClass( 'APIMisc' ))();
-	var idle_time = 0;
-	$( 'body' ).mousemove( function( e ) {
-		doPingIfNecessary();
-	} );
-	$( 'body' ).keypress( function( e ) {
-		doPingIfNecessary();
-
-	} );
-
-	var idle_interval = setInterval( timerIncrement, 60000 ); // 1 minute
-
-	function timerIncrement() {
-		idle_time = idle_time + 1;
-	}
-
-	function doPingIfNecessary() {
-
-		if ( idle_time < 15 ) {
-			idle_time = 0;
+	if ( Global.idle_time < 15 ) {
+		Global.idle_time = 0;
 			return;
 		}
-		idle_time = 0;
+	Global.idle_time = 0;
 		if ( LocalCacheData.current_open_primary_controller.viewId === 'LoginView' ) {
 			return;
 		}
-
-		//Error: Uncaught TypeError: undefined is not a function in https://ondemand2001.timetrex.com/interface/html5/global/Global.js?v=8.0.0-20141230-124906 line 182
+		//Error: Uncaught TypeError: undefined is not a function in /interface/html5/global/Global.js?v=8.0.0-20141230-124906 line 182
 		if ( !api || (typeof api.isLoggedIn) !== 'function' ) {
 			return;
 		}
-
 		api.isLoggedIn( false, {
 			onResult: function( result ) {
 				var res_data = result.getResult();
@@ -200,6 +209,21 @@ Global.setupPing = function() {
 
 			}
 		} );
+}
+
+Global.setupPing = function() {
+
+	Global.idle_time = 0;
+	$( 'body' ).mousemove( function( e ) {
+		Global.doPingIfNecessary();
+	} );
+	$( 'body' ).keypress( function( e ) {
+		Global.doPingIfNecessary();
+
+	} );
+	setInterval( timerIncrement, 60000 ); // 1 minute
+	function timerIncrement() {
+		Global.idle_time = Global.idle_time + 1;
 	}
 };
 
@@ -230,17 +254,18 @@ Global.setWidgetEnabled = function( widget, val ) {
 };
 
 Global.createViewTabs = function() {
+	//JS load Optimize
+	if ( LocalCacheData.loadViewRequiredJSReady ) {
+		if ( !LocalCacheData.view_min_tab_bar ) {
+			var view_min_tab_bar = Global.loadWidgetByName( WidgetNamesDic.VIEW_MIN_TAB_BAR );
+			view_min_tab_bar = $( view_min_tab_bar ).ViewMinTabBar();
+			$( 'body' ).append( view_min_tab_bar );
 
-	if ( !LocalCacheData.view_min_tab_bar ) {
-		var view_min_tab_bar = Global.loadWidgetByName( WidgetNamesDic.VIEW_MIN_TAB_BAR );
-		view_min_tab_bar = $( view_min_tab_bar ).ViewMinTabBar();
-		$( 'body' ).append( view_min_tab_bar );
+			LocalCacheData.view_min_tab_bar = view_min_tab_bar;
+		}
 
-		LocalCacheData.view_min_tab_bar = view_min_tab_bar;
+		LocalCacheData.view_min_tab_bar.buildTabs( LocalCacheData.view_min_map );
 	}
-
-	LocalCacheData.view_min_tab_bar.buildTabs( LocalCacheData.view_min_map );
-
 };
 
 Global.addViewTab = function( view_id, view_name, url ) {
@@ -255,7 +280,7 @@ Global.addViewTab = function( view_id, view_name, url ) {
 Global.removeViewTab = function( view_id ) {
 
 	delete LocalCacheData.view_min_map[view_id];
-	Global.createViewTabs();
+	$( '#min_tab_' + view_id ).remove();
 };
 
 Global.cleanViewTab = function() {
@@ -271,6 +296,30 @@ Global.upCaseFirstLetter = function( str ) {
 	return str;
 };
 
+Global.calculateTextWidth = function( text, font_size, min_width, max_width, padding ) {
+	if ( typeof font_size === 'undefined' ) {
+		font_size = '11';
+	}
+	var width_test = $( '<span id="width_test" />' );
+	width_test.css( 'font-size', font_size );
+	width_test.css( 'font-weight', 'normal' );
+	$( 'body' ).append( width_test );
+	width_test.text( text );
+	var content_width = width_test.width();
+	width_test.remove();
+	if ( min_width > 0 && content_width < min_width ) {
+		content_width = min_width;
+	}
+	if ( padding > 0 ) {
+		content_width = content_width + padding;
+	}
+	if ( max_width > 0 && content_width > max_width ) {
+		content_width = max_width;
+	}
+
+	return content_width;
+};
+
 Global.strToDate = function( date_string, format ) {
 
 	//better to use Date.parse, let's see
@@ -278,11 +327,12 @@ Global.strToDate = function( date_string, format ) {
 		format = LocalCacheData.getLoginUserPreference().date_format;
 	}
 
-	var date = moment( date_string, format )
+	var date = moment( date_string, format );
 	date = date.toDate();
 
-	// Means this is not a correct date_string
-	if ( date.getTime() === 946656000000 ) {
+	//The moment will pass everything as a date. Judge if the year less 1000 than 1900 or beyond 1000 of 1900,
+	//we think it's a invalid year
+	if ( date.getYear() < -1000 || date.getYear() > 1000 ) {
 		return null;
 	}
 
@@ -290,7 +340,7 @@ Global.strToDate = function( date_string, format ) {
 };
 
 Global.strToDateTime = function( date_string ) {
-	//Error: TypeError: Global.strToDateTime(...) is null in https://ondemand3.timetrex.com/interface/html5/framework/jquery.min.js?v=8.0.0-20141117-153515 line 4862
+	//Error: TypeError: Global.strToDateTime(...) is null in /interface/html5/framework/jquery.min.js?v=8.0.0-20141117-153515 line 4862
 	if ( !date_string ) {
 		return null;
 	}
@@ -330,7 +380,12 @@ Global.convertTojQueryFormat = function( date_format ) {
 		'D, F d Y': 'D, MM dd yy',
 		'D, M d Y': 'D, M dd yy',
 		'D, d-M-Y': 'D, dd-M-yy',
-		'D, dMY': 'D, ddMyy'
+		'D, dMY': 'D, ddMyy',
+		'G:i': 'HH:mm',
+		'G:i T': 'HH:mm',
+		'g:i A': 'h:mm TT',
+		'g:i A T': 'h:mm TT',
+		'g:i a': 'h:mm tt'
 	};
 
 	return jquery_date_format[date_format];
@@ -381,6 +436,7 @@ Global.updateUserPreference = function( callBack, message ) {
 									////For date picker
 									//LocalCacheData.loginUserPreference.js_date_format_1 = jsDateFormatResultData;
 									LocalCacheData.loginUserPreference.date_format_1 = Global.convertTojQueryFormat( date_format );
+									LocalCacheData.loginUserPreference.time_format_1 = Global.convertTojQueryFormat( LocalCacheData.loginUserPreference.time_format );
 
 									user_preference_api.getOptions( 'moment_time_format', {
 										onResult: function( jsTimeFormatRes ) {
@@ -487,7 +543,7 @@ Global.removeTrailingZeros = function( value, minimum_decimals ) {
 		if ( trimmed_value.indexOf( '.' ) > 0 ) {
 			// If after removed has the point, then reverse it.
 			var tmp_minimum_decimals = parseInt( trimmed_value.split( '' ).reverse().join( '' ) ).toString().length;
-			if ( tmp_minimum_decimals > minimum_decimals ) {
+			if ( tmp_minimum_decimals >= minimum_decimals && tmp_minimum_decimals <= 4 ) {
 				minimum_decimals = tmp_minimum_decimals;
 			}
 
@@ -902,14 +958,24 @@ Global.getParentIdByTreeRecord = function( array, selectId ) {
 
 };
 
-Global.addFirstItemToArray = function( array, firstItemType ) {
-
-	//Error: Unable to get property 'unshift' of undefined or null reference in https://villa.timetrex.com/interface/html5/global/Global.js?v=8.0.0-20141230-153942 line 903 
+Global.addFirstItemToArray = function( array, firstItemType, customLabel ) {
+	//Error: Unable to get property 'unshift' of undefined or null reference in /interface/html5/global/Global.js?v=8.0.0-20141230-153942 line 903 
+	var label;
 	if ( array ) {
 		if ( firstItemType === 'any' ) {
-			array.unshift( {label: Global.any_item, value: '-1', fullValue: '-1', orderValue: ''} );
+			if ( customLabel ) {
+				label = customLabel;
+			} else {
+				label = Global.any_item;
+			}
+			array.unshift( {label: label, value: '-1', fullValue: '-1', orderValue: ''} );
 		} else if ( firstItemType === 'empty' ) {
-			array.unshift( {label: Global.empty_item, value: '0', fullValue: '0', orderValue: ''} );
+			if ( customLabel ) {
+				label = customLabel;
+			} else {
+				label = Global.empty_item;
+			}
+			array.unshift( {label: label, value: '0', fullValue: '0', orderValue: ''} );
 		}
 	}
 
@@ -1038,6 +1104,10 @@ Global.bottomContainer = function() {
 	return $( '#bottomContainer' );
 };
 
+Global.bottomFeedbackContainer = function() {
+	return $( '#feedbackContainer' );
+};
+
 Global.contentContainer = function() {
 	return $( '#contentContainer' );
 };
@@ -1050,22 +1120,52 @@ Global.bodyHeight = function() {
 	return $( window ).height();
 };
 
-Global.loadScriptAsync = function( path, onResult ) {
-	if ( LocalCacheData.loadedScriptNames[path] ) {
-		onResult();
-		return;
+Global.loadScript = function( scriptPath, onResult ) {
+	var async = true;
+	if ( typeof (onResult) === 'undefined' ) {
+		async = false;
 	}
-	var realPath = path + '?v=' + APIGlobal.pre_login_data.application_build;
+
+	if ( async ) {
+		if ( LocalCacheData.loadedScriptNames[scriptPath] ) {
+			onResult();
+			return;
+		}
+	} else {
+		if ( LocalCacheData.loadedScriptNames[scriptPath] ) {
+			return true;
+		}
+	}
+
+	var successflag = false;
+
+	var realPath = scriptPath + '?v=' + APIGlobal.pre_login_data.application_build;
 
 	if ( Global.url_offset ) {
 		realPath = Global.url_offset + realPath;
 	}
 
-	jQuery.getScript( realPath, function() {
-		LocalCacheData.loadedScriptNames[path] = true;
-
-		onResult();
+	jQuery.ajax( {
+		async: async,
+		type: 'GET',
+		url: realPath,
+		data: null,
+		cache: true,
+		success: function() {
+			successflag = true;
+			if ( async ) {
+				LocalCacheData.loadedScriptNames[scriptPath] = true;
+				onResult();
+			}
+		},
+		dataType: 'script'
 	} );
+
+	if ( !async ) {
+		LocalCacheData.loadedScriptNames[scriptPath] = true;
+		return (successflag);
+	}
+
 };
 
 Global.getRealImagePath = function( path ) {
@@ -1109,6 +1209,7 @@ Global.loadLanguage = function( name ) {
 		type: 'GET',
 		url: realPath,
 		data: null,
+		cache: true,
 		success: function( result ) {
 			successflag = true;
 		},
@@ -1144,36 +1245,6 @@ Global.setURLToBrowser = function( new_url ) {
 	if ( new_url !== window.location.href ) {
 		window.location = new_url;
 	}
-};
-
-Global.loadScript = function( scriptPath ) {
-
-	if ( LocalCacheData.loadedScriptNames[scriptPath] ) {
-		return true;
-	}
-
-	var successflag = false;
-
-	var realPath = scriptPath + '?v=' + APIGlobal.pre_login_data.application_build;
-
-	if ( Global.url_offset ) {
-		realPath = Global.url_offset + realPath;
-	}
-
-	jQuery.ajax( {
-		async: false,
-		type: 'GET',
-		url: realPath,
-		data: null,
-		success: function() {
-			successflag = true;
-		},
-		dataType: 'script'
-	} );
-
-	LocalCacheData.loadedScriptNames[scriptPath] = true;
-
-	return (successflag);
 };
 
 Global.clone = function( obj ) {
@@ -1427,6 +1498,10 @@ Global.loadWidgetByName = function( widgetName ) {
 			input = Global.loadWidget( 'global/widgets/datepicker/TDatePicker.html' );
 			input = $( input );
 			break;
+		case FormItemType.TIME_PICKER:
+			input = Global.loadWidget( 'global/widgets/timepicker/TTimePicker.html' );
+			input = $( input );
+			break;
 		case FormItemType.TEXT_AREA:
 			input = Global.loadWidget( 'global/widgets/textarea/TTextArea.html' );
 			input = $( input );
@@ -1473,6 +1548,10 @@ Global.loadWidgetByName = function( widgetName ) {
 			break;
 		case WidgetNamesDic.ERROR_TOOLTIP:
 			input = Global.loadWidget( 'global/widgets/error_tip/ErrorTipBox.html' );
+			input = $( input );
+			break;
+		case FormItemType.FEEDBACK_BOX:
+			input = Global.loadWidget( 'global/widgets/feedback/Feedback.html' );
 			input = $( input );
 			break;
 		case WidgetNamesDic.EDIT_VIEW_FORM_ITEM:
@@ -1522,6 +1601,7 @@ Global.loadWidget = function( url ) {
 		type: 'GET',
 		url: realPath,
 		data: null,
+		cache: true,
 		success: function() {
 			successflag = true;
 		}
@@ -1550,6 +1630,9 @@ Global.removeCss = function( path ) {
 Global.getViewPathByViewId = function( viewId ) {
 	var path;
 	switch ( viewId ) {
+		case 'Home':
+			path = 'views/home/dashboard/';
+			break;
 		case 'PortalJobVacancy':
 			path = 'views/portal/hr/recruitment/';
 			break;
@@ -2016,6 +2099,12 @@ Global.getViewPathByViewId = function( viewId ) {
 		case 'PayStubAccountWizard':
 			path = 'views/wizard/pay_stub_account/';
 			break;
+		case 'DashletWizard':
+			path = 'views/wizard/dashlet/';
+			break;
+		case 'ReportViewWizard':
+			path = 'views/wizard/report_view/';
+			break;
 	}
 
 	return path;
@@ -2032,7 +2121,7 @@ Global.loadViewSource = function( viewId, fileName, onResult, sync ) {
 		if ( sync ) {
 			return Global.loadScript( Global.getViewPathByViewId( viewId ) + fileName );
 		} else {
-			Global.loadScriptAsync( Global.getViewPathByViewId( viewId ) + fileName, onResult );
+			Global.loadScript( Global.getViewPathByViewId( viewId ) + fileName, onResult );
 		}
 
 	} else if ( fileName.indexOf( '.css' ) > 0 ) {
@@ -2062,6 +2151,7 @@ Global.loadPageSync = function( url ) {
 		type: 'GET',
 		url: realPath,
 		data: null,
+		cache: true,
 		success: function() {
 			successflag = true;
 		}
@@ -2087,6 +2177,7 @@ Global.loadPage = function( url, onResult ) {
 		type: 'GET',
 		url: realPath,
 		data: null,
+		cache: true,
 		success: function( result ) {
 			ProgressBar.removeProgressBar();
 			onResult( result );
@@ -2364,6 +2455,15 @@ Global.formatGridData = function( grid_data, key_name ) {
 
 			// Handle the specially format columns which are not different with others.
 			switch ( key_name ) {
+				case 'AccrualPolicyUserModifier':
+					switch ( key ) {
+						case 'annual_maximum_time_modifier':
+							if ( grid_data[i]['type_id'] === 20 ) {
+								grid_data[i][key] = $.i18n._( 'N/A' );
+							}
+							break;
+					}
+					break;
 				case 'BreakPolicy':
 				case 'MealPolicy':
 				case 'Accrual':
@@ -2376,6 +2476,7 @@ Global.formatGridData = function( grid_data, key_name ) {
 
 					}
 					break;
+				case 'accrual_balance_summary':
 				case 'AccrualBalance':
 					switch ( key ) {
 						case 'balance':
@@ -2563,7 +2664,7 @@ dateFormat.i18n = {
 Date.prototype.format = function( mask, utc ) {
 
 	if ( !Global.isSet( mask ) ) {
-		mask = LocalCacheData.loginUserPreference.date_format;
+		mask = LocalCacheData.getLoginUserPreference().date_format;
 	}
 
 	var format_str = moment( this ).format( mask );
@@ -2579,31 +2680,19 @@ RightClickMenuType.LISTVIEW = '1';
 RightClickMenuType.EDITVIEW = '2';
 RightClickMenuType.NORESULTBOX = '3';
 RightClickMenuType.ABSENCE_GRID = '4';
+RightClickMenuType.VIEW_ICON = '5';
 
 Global.htmlEncode = function( str ) {
-	var s = "";
-	if ( str.length === 0 ) {return "";}
-	s = str.replace( /&/g, "&gt;" );
-	s = s.replace( /</g, "&lt;" );
-	s = s.replace( />/g, "&gt;" );
-	s = s.replace( / /g, "&nbsp;" );
-	s = s.replace( /\'/g, "&#39;" );
-	s = s.replace( /\"/g, "&quot;" );
-	s = s.replace( /\n/g, "<br>" );
-	return s;
-};
-
-Global.htmlDecode = function( str ) {
-	var s = "";
-	if ( str.length === 0 ) {return "";}
-	s = str.replace( /&gt;/g, "&" );
-	s = s.replace( /&lt;/g, "<" );
-	s = s.replace( /&gt;/g, ">" );
-	s = s.replace( /&nbsp;/g, " " );
-	s = s.replace( /&#39;/g, "\'" );
-	s = s.replace( /&quot;/g, "\"" );
-	s = s.replace( /<br>/g, "\n" );
-	return s;
+	var encodedStr = str;
+	if ( encodedStr ) {
+		encodedStr = str.replace( /[\u00A0-\u9999<>\&]/gim, function( i ) {
+			return '&#' + i.charCodeAt( 0 ) + ';';
+		} );
+		encodedStr = encodedStr.replace( /&#60;br&#62;/g, "<br>" );
+		return encodedStr;
+	} else {
+		return encodedStr;
+	}
 };
 
 //Sort by module
@@ -2715,23 +2804,6 @@ $.fn.visible = function() {
 	} );
 };
 
-/* jshint ignore:start */
-if ( APIGlobal.pre_login_data.analytics_enabled === true ) {
-	(function( i, s, o, g, r, a, m ) {
-		i['GoogleAnalyticsObject'] = r;
-		i[r] = i[r] || function() {
-			(i[r].q = i[r].q || []).push( arguments );
-		}, i[r].l = 1 * new Date();
-		a = s.createElement( o ),
-			m = s.getElementsByTagName( o )[0];
-		a.async = 1;
-		a.src = g;
-		m.parentNode.insertBefore( a, m );
-	})( window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga' );
-	ga( 'create', 'UA-333702-3', 'auto' );
-}
-/* jshint ignore:end */
-
 Global.trackView = function( name, action ) {
 	if ( APIGlobal.pre_login_data.analytics_enabled === true ) {
 		var track_address;
@@ -2789,7 +2861,11 @@ Global.sendAnalytics = function( track_address ) {
 		if ( APIGlobal.pre_login_data.production !== true ) {
 			Global.log( 'Sending Analytics w/Address: ' + track_address );
 		}
-		ga( 'send', 'pageview', track_address );
+		// Call this delay so view load goes first
+		setTimeout( function() {
+			ga( 'send', 'pageview', track_address );
+		}, 500 )
+
 	}
 };
 

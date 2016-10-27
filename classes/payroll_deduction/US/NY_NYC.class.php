@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -50,8 +50,69 @@ Used to be:
 														40 => 'Head of Household',
 */
 
+	var $district_income_tax_rate_options = array(
+												20150601 => array(
+															10 => array(
+																	array( 'income' => 8000,	'rate' => 1.9,	'constant' => 0 ),
+																	array( 'income' => 8700,	'rate' => 2.65,	'constant' => 152 ),
+																	array( 'income' => 15000,	'rate' => 3.1,	'constant' => 171 ),
+																	array( 'income' => 25000,	'rate' => 3.7,	'constant' => 366 ),
+																	array( 'income' => 60000,	'rate' => 3.9,	'constant' => 736 ),
+																	array( 'income' => 500000,	'rate' => 4.0,	'constant' => 2101 ),
+																	array( 'income' => 500000,	'rate' => 4.25,	'constant' => 20828.46 ),
+																	),
+															20 => array(
+																	array( 'income' => 8000,	'rate' => 1.9,	'constant' => 0 ),
+																	array( 'income' => 8700,	'rate' => 2.65,	'constant' => 152 ),
+																	array( 'income' => 15000,	'rate' => 3.1,	'constant' => 171 ),
+																	array( 'income' => 25000,	'rate' => 3.7,	'constant' => 366 ),
+																	array( 'income' => 60000,	'rate' => 3.9,	'constant' => 736 ),
+																	array( 'income' => 500000,	'rate' => 4.0,	'constant' => 2101 ),
+																	array( 'income' => 500000,	'rate' => 4.25,	'constant' => 20828.46 ),
+																	),
+															),
+												20110101 => array(
+															10 => array(
+																	array( 'income' => 8000,	'rate' => 1.9,	'constant' => 0 ),
+																	array( 'income' => 8700,	'rate' => 2.65,	'constant' => 152 ),
+																	array( 'income' => 15000,	'rate' => 3.1,	'constant' => 171 ),
+																	array( 'income' => 25000,	'rate' => 3.7,	'constant' => 366 ),
+																	array( 'income' => 60000,	'rate' => 3.9,	'constant' => 736 ),
+																	array( 'income' => 500000,	'rate' => 4.0,	'constant' => 2101 ),
+																	array( 'income' => 500000,	'rate' => 4.25,	'constant' => 19701 ),
+																	),
+															20 => array(
+																	array( 'income' => 8000,	'rate' => 1.9,	'constant' => 0 ),
+																	array( 'income' => 8700,	'rate' => 2.65,	'constant' => 152 ),
+																	array( 'income' => 15000,	'rate' => 3.1,	'constant' => 171 ),
+																	array( 'income' => 25000,	'rate' => 3.7,	'constant' => 366 ),
+																	array( 'income' => 60000,	'rate' => 3.9,	'constant' => 736 ),
+																	array( 'income' => 500000,	'rate' => 4.0,	'constant' => 2101 ),
+																	array( 'income' => 500000,	'rate' => 4.25,	'constant' => 19701 ),
+																	),
+															),
+												20060101 => array(
+															10 => array(
+																	array( 'income' => 8000,	'rate' => 1.9,	'constant' => 0 ),
+																	array( 'income' => 8700,	'rate' => 2.65,	'constant' => 152 ),
+																	array( 'income' => 15000,	'rate' => 3.10,	'constant' => 172 ),
+																	array( 'income' => 25000,	'rate' => 3.70,	'constant' => 366 ),
+																	array( 'income' => 60000,	'rate' => 3.90,	'constant' => 736 ),
+																	array( 'income' => 60000,	'rate' => 4.00,	'constant' => 2101 ),
+																	),
+															20 => array(
+																	array( 'income' => 8000,	'rate' => 1.9,	'constant' => 0 ),
+																	array( 'income' => 8700,	'rate' => 2.65,	'constant' => 152 ),
+																	array( 'income' => 15000,	'rate' => 3.10,	'constant' => 172 ),
+																	array( 'income' => 25000,	'rate' => 3.70,	'constant' => 366 ),
+																	array( 'income' => 60000,	'rate' => 3.90,	'constant' => 736 ),
+																	array( 'income' => 60000,	'rate' => 4.00,	'constant' => 2101 ),
+																),
+															),
+												);
+
 	var $district_options = array(
-								1136102400 => array(
+								20060101 => array(
 													'standard_deduction' => array(
 																				'10' => 5000.00,
 																				'20' => 5500.00,
@@ -66,10 +127,6 @@ Used to be:
 																				),
 													)
 								);
-
-	function getDistrictPayPeriodDeductions() {
-		return bcdiv($this->getDistrictTaxPayable(), $this->getAnnualPayPeriods() );
-	}
 
 	function getDistrictAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();

@@ -174,12 +174,14 @@ CompanyBankAccountViewController = BaseViewController.extend( {
 
 	},
 
-	onSaveClick: function() {
-
+	onSaveClick: function( ignoreWarning ) {
 		var $this = this;
 		var record = this.current_edit_record;
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
 		LocalCacheData.current_doing_context_action = 'save';
-		this.api['set' + this.api.key_name]( record, {onResult: function( result ) {
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {onResult: function( result ) {
 
 			if ( result.isValid() ) {
 				var result_data = result.getResult();
@@ -285,17 +287,14 @@ CompanyBankAccountViewController = BaseViewController.extend( {
 		var $this = this;
 
 		if ( LocalCacheData.getCurrentCompany().country === 'CA' ) {
-			$this.edit_view_form_item_dic['institution1'].css( 'display', 'none' );
-			$this.edit_view_form_item_dic['institution2'].css( 'display', 'block' );
-
+			$this.detachElement('institution1');
+			$this.attachElement('institution2');
 			$this.edit_view_form_item_dic['transit'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Bank Transit' ) + ': ' );
-
 			tab_bank_account_column2.html( "<img src = " + ServiceCaller.rootURL + LocalCacheData.getLoginData().base_url + "images/check_zoom_sm_canadian.jpg" + " />" );
 
 		} else if ( LocalCacheData.getCurrentCompany().country === 'US' ) {
-
-			$this.edit_view_form_item_dic['institution1'].css( 'display', 'block' );
-			$this.edit_view_form_item_dic['institution2'].css( 'display', 'none' );
+			$this.attachElement('institution1');
+			$this.detachElement('institution2');
 
 			$this.edit_view_form_item_dic['transit'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Routing Number' ) + ': ' );
 

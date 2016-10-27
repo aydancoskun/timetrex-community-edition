@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -72,7 +72,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 			$query = '
 						select	*
 						from	'. $this->getTable() .'
-						where	id in ('. $this->getListSQL($id, $ph) .')
+						where	id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 							AND deleted = 0';
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
@@ -100,7 +100,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -127,7 +127,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'name' => $name,
 					);
 
@@ -158,7 +158,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -186,7 +186,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -214,7 +214,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
-					where	type_id in ('. $this->getListSQL($type_id, $ph) .')
+					where	type_id in ('. $this->getListSQL( $type_id, $ph, 'int' ) .')
 						AND deleted = 0
 					ORDER BY calculation_order ASC';
 		$query .= $this->getWhereSQL( $where );
@@ -235,14 +235,14 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
-						AND type_id in ('. $this->getListSQL($type_id, $ph) .')
+						AND type_id in ('. $this->getListSQL( $type_id, $ph, 'int' ) .')
 						AND deleted = 0
 					ORDER BY calculation_order ASC';
 		$query .= $this->getWhereSQL( $where );
@@ -263,14 +263,14 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
-						AND status_id in ('. $this->getListSQL($status_id, $ph) .')
+						AND status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .')
 						AND deleted = 0
 					ORDER BY calculation_order ASC';
 		$query .= $this->getWhereSQL( $where );
@@ -295,15 +295,15 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
-						AND status_id in ('. $this->getListSQL($status_id, $ph) .')
-						AND type_id in ('. $this->getListSQL($type_id, $ph) .')
+						AND status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .')
+						AND type_id in ('. $this->getListSQL( $type_id, $ph, 'int' ) .')
 						AND deleted = 0
 					ORDER BY calculation_order ASC';
 		$query .= $this->getWhereSQL( $where );
@@ -334,9 +334,9 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$udf = new UserDeductionFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					'user_id' => $user_id,
-					'calculation_id' => $calculation_id
+					'company_id' => (int)$company_id,
+					'user_id' => (int)$user_id,
+					'calculation_id' => (int)$calculation_id,
 					);
 
 		$query = '
@@ -348,7 +348,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 						AND a.id = b.company_deduction_id
 						AND b.user_id = ?
 						AND a.calculation_id = ?
-						AND a.pay_stub_entry_account_id in ('. $this->getListSQL($pse_account_id, $ph) .')
+						AND a.pay_stub_entry_account_id in ('. $this->getListSQL( $pse_account_id, $ph, 'int' ) .')
 						AND ( a.deleted = 0 AND b.deleted = 0 )
 					ORDER BY calculation_order
 					';
@@ -470,7 +470,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -515,6 +515,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['calculation_id']) ) ? $this->getWhereClauseSQL( 'a.calculation_id', $filter_data['calculation_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['pay_stub_entry_name_id']) ) ? $this->getWhereClauseSQL( 'a.pay_stub_entry_account_id', $filter_data['pay_stub_entry_name_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['country']) ) ?$this->getWhereClauseSQL( 'a.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;

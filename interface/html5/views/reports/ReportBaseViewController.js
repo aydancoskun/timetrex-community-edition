@@ -4,6 +4,7 @@ ReportBaseViewController = BaseViewController.extend( {
 
 	page_orientation_array: null,
 	font_size_array: null,
+	auto_refresh_array: null,
 	chart_display_mode_array: null,
 	chart_type_array: null,
 	templates_array: null,
@@ -60,11 +61,18 @@ ReportBaseViewController = BaseViewController.extend( {
 
 	},
 
+	// Need always override if report has filter field.
+	processFilterField: function() {
+
+	},
+
 	openEditView: function() {
 
 		var $this = this;
 		$this.initOptions( function() {
 
+			// Always need override
+			$this.processFilterField();
 			if ( !$this.edit_view ) {
 				$this.initEditViewUI( $this.viewId, $this.view_file );
 			}
@@ -107,47 +115,51 @@ ReportBaseViewController = BaseViewController.extend( {
 	setDefaultConfigData: function() {
 
 		var $this = this;
-		this.api.getOtherConfig( {onResult: function( config_result ) {
+		this.api.getOtherConfig( {
+			onResult: function( config_result ) {
 
-			if ( $this.current_saved_report &&
-				$this.current_saved_report.data &&
-				$this.current_saved_report.data.config &&
-				$this.current_saved_report.data.config.other
+				if ( $this.current_saved_report &&
+					$this.current_saved_report.data &&
+					$this.current_saved_report.data.config &&
+					$this.current_saved_report.data.config.other
 				) {
-				//do nothing
-			} else {
+					//do nothing
+				} else {
 
-				config_result = config_result.getResult();
-				for ( var key in config_result ) {
-					if ( $this.edit_view_ui_dic.hasOwnProperty( key ) ) {
-						$this.edit_view_ui_dic[key].setValue( config_result[ key ] );
-						$this.current_edit_record[key] = config_result[ key ];
+					config_result = config_result.getResult();
+					for ( var key in config_result ) {
+						if ( $this.edit_view_ui_dic.hasOwnProperty( key ) ) {
+							$this.edit_view_ui_dic[key].setValue( config_result[key] );
+							$this.current_edit_record[key] = config_result[key];
+						}
 					}
+
 				}
-
 			}
-		}} );
+		} );
 
-		this.api.getChartConfig( {onResult: function( config_result ) {
+		this.api.getChartConfig( {
+			onResult: function( config_result ) {
 
-			if ( $this.current_saved_report &&
-				$this.current_saved_report.data &&
-				$this.current_saved_report.data.config &&
-				$this.current_saved_report.data.config.chart
+				if ( $this.current_saved_report &&
+					$this.current_saved_report.data &&
+					$this.current_saved_report.data.config &&
+					$this.current_saved_report.data.config.chart
 				) {
-				//do nothing
-			} else {
+					//do nothing
+				} else {
 
-				config_result = config_result.getResult();
-				for ( var key in config_result ) {
-					if ( $this.edit_view_ui_dic.hasOwnProperty( key ) ) {
-						$this.edit_view_ui_dic[key].setValue( config_result[ key ] );
-						$this.current_edit_record[key] = config_result[ key ];
+					config_result = config_result.getResult();
+					for ( var key in config_result ) {
+						if ( $this.edit_view_ui_dic.hasOwnProperty( key ) ) {
+							$this.edit_view_ui_dic[key].setValue( config_result[key] );
+							$this.current_edit_record[key] = config_result[key];
+						}
 					}
-				}
 
+				}
 			}
-		}} )
+		} )
 
 	},
 
@@ -169,13 +181,15 @@ ReportBaseViewController = BaseViewController.extend( {
 		var $this = this;
 		var args = {};
 		args.filter_data = {script: this.script_name};
-		this.api_user_report.getUserReportData( args, {onResult: function( result ) {
+		this.api_user_report.getUserReportData( args, {
+			onResult: function( result ) {
 
-			var res_data = result.getResult();
-			$this.pager_data = result.getPagerData();
+				var res_data = result.getResult();
+				$this.pager_data = result.getPagerData();
 
-			callBack( res_data );
-		}} );
+				callBack( res_data );
+			}
+		} );
 
 	},
 
@@ -183,6 +197,7 @@ ReportBaseViewController = BaseViewController.extend( {
 		var options = [
 			{option_name: 'page_orientation'},
 			{option_name: 'font_size'},
+			{option_name: 'auto_refresh'},
 			{option_name: 'chart_display_mode'},
 			{option_name: 'chart_type'},
 			{option_name: 'templates'},
@@ -257,52 +272,12 @@ ReportBaseViewController = BaseViewController.extend( {
 		this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'none' );
 	},
 
-	onRightArrowClick: function() {
-		var $this = this;
-		var selected_index = this.navigation.getSelectIndex();
-		var source_data = this.navigation.getSourceData();
-		var next_select_item;
-
-		if ( selected_index < source_data.length - 1 ) {
-			next_select_item = this.navigation.getItemByIndex( selected_index + 1 );
-
-		} else {
-//			next_select_item = this.navigation.getItemByIndex( 0 );
-
-			this.onCancelClick();
-			return;
-		}
-
+	onRightOrLeftArrowClickCallBack: function( next_select_item ) {
 		this.navigation.setValue( next_select_item );
-
-		$this.current_saved_report = next_select_item;
-
-		$this.current_edit_record = {};
-		$this.visible_report_values = {};
-		$this.initEditView();
-
-	},
-
-	onLeftArrowClick: function() {
-		var $this = this;
-		var selected_index = this.navigation.getSelectIndex();
-		var source_data = this.navigation.getSourceData();
-		var next_select_item;
-
-		if ( selected_index > 0 ) {
-			next_select_item = this.navigation.getItemByIndex( selected_index - 1 );
-		} else {
-//			next_select_item = this.navigation.getItemByIndex( source_data.length - 1 );
-
-			this.onCancelClick();
-			return;
-		}
-
-		this.navigation.setValue( next_select_item );
-		$this.current_saved_report = next_select_item;
-		$this.current_edit_record = {};
-		$this.visible_report_values = {};
-		$this.initEditView();
+		this.current_saved_report = next_select_item;
+		this.current_edit_record = {};
+		this.visible_report_values = {};
+		this.initEditView();
 	},
 
 	//Call this after initEditViewUI, usually after current_edit_record is set
@@ -477,9 +452,9 @@ ReportBaseViewController = BaseViewController.extend( {
 
 		navigation_widget_div.append( this.navigation );
 
-		var close_icon = this.edit_view.find( '.close-icon' );
-
-		close_icon.click( function() {
+		this.edit_view_close_icon = this.edit_view.find( '.close-icon' );
+		this.edit_view_close_icon.hide();
+		this.edit_view_close_icon.click( function() {
 			$this.onCloseIconClick();
 		} );
 
@@ -555,13 +530,13 @@ ReportBaseViewController = BaseViewController.extend( {
 
 		//Page Orientation
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'page_orientation', set_empty: false } );
+		form_item_input.TComboBox( {field: 'page_orientation', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.page_orientation_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Page Orientation' ), form_item_input, tab1_column1 );
 
 		//Font Size
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'font_size', set_empty: false } );
+		form_item_input.TComboBox( {field: 'font_size', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.font_size_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Font Size' ), form_item_input, tab1_column1 );
 
@@ -574,6 +549,12 @@ ReportBaseViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( {field: 'show_duplicate_values'} );
 		this.addEditFieldToColumn( $.i18n._( 'Show Duplicate Values' ), form_item_input, tab1_column1 );
+
+		//Auto-Refresh
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( {field: 'auto_refresh', set_empty: false} );
+		form_item_input.setSourceData( Global.addFirstItemToArray( $this.auto_refresh_array ) );
+		this.addEditFieldToColumn( $.i18n._( 'Auto-Refresh' ), form_item_input, tab1_column1 );
 
 		//Maximum Pages
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -591,13 +572,13 @@ ReportBaseViewController = BaseViewController.extend( {
 
 		//Display
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'display_mode', set_empty: false } );
+		form_item_input.TComboBox( {field: 'display_mode', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.chart_display_mode_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Display' ), form_item_input, tab2_column1 );
 
 		//Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'type', set_empty: false } );
+		form_item_input.TComboBox( {field: 'type', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.chart_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab2_column1 );
 
@@ -644,7 +625,6 @@ ReportBaseViewController = BaseViewController.extend( {
 	setCurrentEditRecordData: function() {
 
 		var $this = this;
-
 		if ( LocalCacheData.default_filter_for_next_open_view ) {
 
 			this.do_validate_after_create_ui = false;
@@ -678,11 +658,13 @@ ReportBaseViewController = BaseViewController.extend( {
 				}
 			} else {
 
-				//If no any saved report, use default setup fields
-				var default_setup_fields = this.api.getOptions( 'default_setup_fields', {async: false} );
-
-				$this.current_edit_record.setup_field = default_setup_fields.getResult();
-				$this.buildReportUIBaseOnSetupFields();
+				////If no any saved report, use default setup fields
+				//var default_setup_fields = this.api.getOptions( 'default_setup_fields', {async: false} );
+				//$this.current_edit_record.setup_field = default_setup_fields.getResult();
+				//$this.buildReportUIBaseOnSetupFields();
+				this.do_validate_after_create_ui = false;
+				this.onTemplateChange( this.templates_array[1].id );
+				this.current_edit_record['template'] = this.templates_array[1].id;
 			}
 		}
 
@@ -710,12 +692,14 @@ ReportBaseViewController = BaseViewController.extend( {
 		}
 
 		if ( this.include_form_setup ) {
-			this.api.getCompanyFormConfig( {onResult: function( result ) {
-				var res_Data = result.getResult();
+			this.api.getCompanyFormConfig( {
+				onResult: function( result ) {
+					var res_Data = result.getResult();
 
-				$this.setFormSetupData( res_Data );
+					$this.setFormSetupData( res_Data );
 
-			}} );
+				}
+			} );
 		}
 
 		this.collectUIDataToCurrentEditRecord();
@@ -735,7 +719,75 @@ ReportBaseViewController = BaseViewController.extend( {
 			this.do_validate_after_create_ui = false;
 		}
 
+		this.initRightClickMenuForViewButton();
+
 	},
+
+	validateResult: function( result ) {
+		this._super( 'validateResult', result );
+	},
+
+	initRightClickMenuForViewButton: function() {
+		var $this = this;
+		var selector = '#viewHTMLIcon';
+		if ( $( selector ).length == 0 ) {
+			return;
+		}
+		var items = this.getViewButtonRightClickItems();
+
+		if ( !items || $.isEmptyObject( items ) ) {
+			return;
+		}
+		$.contextMenu( 'destroy', selector );
+		$.contextMenu( {
+			selector: selector,
+			callback: function( key, options ) {
+				$this.onContextMenuClick( null, key );
+			},
+
+			onContextMenu: function() {
+				return false;
+			},
+			items: items,
+			zIndex: 50
+		} );
+	},
+
+	getViewButtonRightClickItems: function() {
+		var $this = this;
+		var items = {};
+		items['viewHTMLIcon'] = {
+			name: $.i18n._( 'View' ), icon: 'viewHTMLIcon', disabled: function() {
+				return isDisabled();
+			}
+		};
+		items['viewHTMLNewWindow'] = {
+			name: $.i18n._( 'View (New Window)' ), icon: 'viewHTMLIcon', disabled: function() {
+				return isDisabled();
+			}
+		};
+
+		function isDisabled() {
+			if ( $( '#viewHTMLIcon' ).parent().hasClass( 'disable-image' ) ) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		return items;
+	},
+
+//	onViewRightClick: function( key ) {
+//		//TODO show view
+//		alert('dfdf');
+//	},
+
+	// Need always override if report has filter field
+	onFormItemChangeProcessFilterField: function() {
+
+	},
+
 	/* jshint ignore:start */
 	onFormItemChange: function( target, doNotDoValidate ) {
 		var $this = this;
@@ -758,6 +810,10 @@ ReportBaseViewController = BaseViewController.extend( {
 					this.visible_report_values[key] = {time_period: time_period};
 					this.onTimePeriodChange( target );
 				}
+
+			} else if ( key === 'filter' ) {
+				//Always needs override
+				this.onFormItemChangeProcessFilterField( target, key );
 
 			} else if ( key === 'start_date' || key === 'end_date' || key === 'pay_period_id' || key === 'pay_period_schedule_id' ) {
 				time_period = this.visible_report_values['time_period'];
@@ -832,11 +888,13 @@ ReportBaseViewController = BaseViewController.extend( {
 	//Create first tab widget base on select template
 	onTemplateChange: function( templateId ) {
 		var $this = this;
-		this.api.getTemplate( templateId, {onResult: function( result ) {
-			var result_data = result.getResult();
-			$this.setSelectTemplate( result_data );
+		this.api.getTemplate( templateId, {
+			onResult: function( result ) {
+				var result_data = result.getResult();
+				$this.setSelectTemplate( result_data );
 
-		}} );
+			}
+		} );
 	},
 
 	setSelectTemplate: function( result_data ) {
@@ -1008,6 +1066,9 @@ ReportBaseViewController = BaseViewController.extend( {
 				this.setEditMenu();
 			} else if ( ui.index === 1 ) {
 				this.edit_view_ui_dic.setup_field.setValue( this.current_edit_record.setup_field );
+				if ( LocalCacheData.getCurrentCompany().product_edition_id == 10 ) {
+					this.edit_view_ui_dic.auto_refresh.parent().parent().css( 'display', 'none' );
+				}
 				this.buildContextMenu( true );
 				this.setEditMenu();
 			} else if ( ui.index === 2 ) {
@@ -1044,6 +1105,9 @@ ReportBaseViewController = BaseViewController.extend( {
 				this.setEditMenu();
 			} else if ( ui.index === 1 ) {
 				this.edit_view_ui_dic.setup_field.setValue( this.current_edit_record.setup_field );
+				if ( LocalCacheData.getCurrentCompany().product_edition_id == 10 ) {
+					this.edit_view_ui_dic.auto_refresh.parent().parent().css( 'display', 'none' );
+				}
 				this.buildContextMenu( true );
 				this.setEditMenu();
 			} else if ( ui.index === 2 ) {
@@ -1097,13 +1161,20 @@ ReportBaseViewController = BaseViewController.extend( {
 			html_item.remove();
 		}
 
-		var tab_report = this.edit_view_tab.find( '#tab_report' );
+		//Error: TypeError: this.edit_view_tab is null in /interface/html5/views/reports/ReportBaseViewController.js?v=8.0.4-20150320-094021 line 1100 
+		if ( this.edit_view_tab ) {
+			var tab_report = this.edit_view_tab.find( '#tab_report' );
 
-		var tab0_column1 = tab_report.find( '.first-column' );
+			var tab0_column1 = tab_report.find( '.first-column' );
 
-		var clear_both_div = tab0_column1.find( '.clear-both-div' );
+			var clear_both_div = tab0_column1.find( '.clear-both-div' );
 
-		clear_both_div.remove();
+			clear_both_div.remove();
+		}
+
+		$( '.errortip-box' ).remove();
+
+		$( '.errortip-box' ).remove();
 
 	},
 
@@ -1118,9 +1189,7 @@ ReportBaseViewController = BaseViewController.extend( {
 	/* jshint ignore:start */
 	//Get Widget base on field
 	getUIWidget: function( field ) {
-
 		var widget;
-
 		switch ( field ) {
 			case 'columns':
 			case 'sub_total':
@@ -1165,6 +1234,8 @@ ReportBaseViewController = BaseViewController.extend( {
 			case 'job_vacancy_status_id':
 			case 'job_vacancy_type_id':
 			case 'job_vacancy_wage_type_id':
+			case 'pay_stub_run_id':
+			case 'pay_stub_type_id':
 				widget = this.getSimpleTComboBox( field );
 				break;
 			case 'sort':
@@ -1225,6 +1296,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			case 'include_job_item_id':
 			case 'exclude_job_item_id':
 				widget = this.getTComboBox( field, ALayoutIDs.JOB_ITEM, (APIFactory.getAPIClass( 'APIJobItem' )) );
+				break;
+			case 'absence_policy_id':
+				widget = this.getTComboBox( field, ALayoutIDs.ABSENCES_POLICY, (APIFactory.getAPIClass( 'APIAbsencePolicy' )) );
 				break;
 			case 'currency_id':
 				widget = this.getTComboBox( field, ALayoutIDs.CURRENCY, (APIFactory.getAPIClass( 'APICurrency' )) );
@@ -1403,72 +1477,88 @@ ReportBaseViewController = BaseViewController.extend( {
 				api_instance = this.api;
 				option = 'columns';
 
-				api_instance.getOptions( option, {onResult: function( result ) {
-					onResult( result );
-				} } );
+				api_instance.getOptions( option, {
+					onResult: function( result ) {
+						onResult( result );
+					}
+				} );
 
 				break;
 			case 'kpi_group_id':
-				new (APIFactory.getAPIClass( 'APIKPIGroup' ))().getKPIGroup( '', false, false, {onResult: function( res ) {
+				new (APIFactory.getAPIClass( 'APIKPIGroup' ))().getKPIGroup( '', false, false, {
+					onResult: function( res ) {
 
-					res = res.getResult();
-					res = Global.buildTreeRecord( res );
-					widget.setSourceData( res );
+						res = res.getResult();
+						res = Global.buildTreeRecord( res );
+						widget.setSourceData( res );
 
-				}} );
+					}
+				} );
 				break;
 
 			case 'qualification_group_id':
-				new (APIFactory.getAPIClass( 'APIQualificationGroup' ))().getQualificationGroup( '', false, false, {onResult: function( res ) {
+				new (APIFactory.getAPIClass( 'APIQualificationGroup' ))().getQualificationGroup( '', false, false, {
+					onResult: function( res ) {
 
-					res = res.getResult();
-					res = Global.buildTreeRecord( res );
-					widget.setSourceData( res );
+						res = res.getResult();
+						res = Global.buildTreeRecord( res );
+						widget.setSourceData( res );
 
-				}} );
+					}
+				} );
 				break;
 			case 'product_group_id':
-				new (APIFactory.getAPIClass( 'APIProductGroup' ))().getProductGroup( '', false, false, {onResult: function( res ) {
+				new (APIFactory.getAPIClass( 'APIProductGroup' ))().getProductGroup( '', false, false, {
+					onResult: function( res ) {
 
-					res = res.getResult();
-					res = Global.buildTreeRecord( res );
-					widget.setSourceData( res );
+						res = res.getResult();
+						res = Global.buildTreeRecord( res );
+						widget.setSourceData( res );
 
-				}} );
+					}
+				} );
 				break;
 			case 'client_group_id':
-				new (APIFactory.getAPIClass( 'APIClientGroup' ))().getClientGroup( '', false, false, {onResult: function( res ) {
+				new (APIFactory.getAPIClass( 'APIClientGroup' ))().getClientGroup( '', false, false, {
+					onResult: function( res ) {
 
-					res = res.getResult();
-					res = Global.buildTreeRecord( res );
-					widget.setSourceData( res );
+						res = res.getResult();
+						res = Global.buildTreeRecord( res );
+						widget.setSourceData( res );
 
-				}} );
+					}
+				} );
 				break;
 			case 'user_group_id':
-				new (APIFactory.getAPIClass( 'APIUserGroup' ))().getUserGroup( '', false, false, {onResult: function( res ) {
+				new (APIFactory.getAPIClass( 'APIUserGroup' ))().getUserGroup( '', false, false, {
+					onResult: function( res ) {
 
-					res = res.getResult();
-					res = Global.buildTreeRecord( res );
-					widget.setSourceData( res );
+						res = res.getResult();
+						res = Global.buildTreeRecord( res );
+						widget.setSourceData( res );
 
-				}} );
+					}
+				} );
 				break;
 			case 'job_group_id':
-				new (APIFactory.getAPIClass( 'APIJobGroup' ))().getJobGroup( '', false, false, {onResult: function( res ) {
-					res = res.getResult();
-					res = Global.buildTreeRecord( res );
-					widget.setSourceData( res );
+				new (APIFactory.getAPIClass( 'APIJobGroup' ))().getJobGroup( '', false, false, {
+					onResult: function( res ) {
+						res = res.getResult();
+						res = Global.buildTreeRecord( res );
+						widget.setSourceData( res );
 
-				}} );
+					}
+				} );
 				break;
 			case 'job_item_group_id':
-				new (APIFactory.getAPIClass( 'APIJobItemGroup' ))().getJobItemGroup( '', false, false, {onResult: function( res ) {
-					res = res.getResult();
-					res = Global.buildTreeRecord( res );
-					widget.setSourceData( res );
+				new (APIFactory.getAPIClass( 'APIJobItemGroup' ))().getJobItemGroup( '', false, false, {
+					onResult: function( res ) {
+						res = res.getResult();
+						res = Global.buildTreeRecord( res );
+						widget.setSourceData( res );
 
-				}} );
+					}
+				} );
 				break;
 			case 'job_vacancy_employment_status_id':
 				api_instance = new (APIFactory.getAPIClass( 'APIJobVacancy' ))();
@@ -1548,7 +1638,7 @@ ReportBaseViewController = BaseViewController.extend( {
 				break;
 			case 'pay_stub_status_id':
 				api_instance = new (APIFactory.getAPIClass( 'APIPayStub' ))();
-				option = 'status';
+				option = 'filtered_status';
 				break;
 			case 'ownership_id':
 				api_instance = new (APIFactory.getAPIClass( 'APIUserMembership' ))();
@@ -1611,6 +1701,9 @@ ReportBaseViewController = BaseViewController.extend( {
 				} else if ( this.script_name === 'PayStubSummaryReport' ) {
 					api_instance = new (APIFactory.getAPIClass( 'APIPayStub' ))();
 					option = 'status';
+				} else if ( this.script_name === 'ActiveShiftReport' ) {
+					api_instance = new (APIFactory.getAPIClass( 'APIUser' ))();
+					option = 'status';
 				}
 
 				break;
@@ -1670,6 +1763,19 @@ ReportBaseViewController = BaseViewController.extend( {
 				api_instance = new (APIFactory.getAPIClass( 'APIProduct' ))();
 				option = 'type';
 				break;
+			case 'pay_stub_type_id':
+				api_instance = new (APIFactory.getAPIClass( 'APIPayStub' ))();
+				option = 'type';
+				break;
+			case 'pay_stub_run_id':
+				var result = {};
+				for ( var i = 1; i <= 128; i++ ) {
+					result[i] = i;
+				}
+				result = Global.buildRecordArray( result );
+				widget.setSourceData( result );
+				return;
+				break;
 			default:
 				//Don't deal with awesomebox with api
 				if ( widget.getAPI && widget.getAPI() ) {
@@ -1692,14 +1798,18 @@ ReportBaseViewController = BaseViewController.extend( {
 		if ( api_instance ) {
 
 			if ( this.need_refresh_display_columns && option === 'columns' ) {
-				api_instance.getOptions( option, {noCache: true, onResult: function( result ) {
+				api_instance.getOptions( option, {
+					noCache: true, onResult: function( result ) {
 
-					onResult( result );
-				} } );
+						onResult( result );
+					}
+				} );
 			} else {
-				api_instance.getOptions( option, {onResult: function( result ) {
-					onResult( result );
-				} } );
+				api_instance.getOptions( option, {
+					onResult: function( result ) {
+						onResult( result );
+					}
+				} );
 			}
 
 		}
@@ -2542,25 +2652,11 @@ ReportBaseViewController = BaseViewController.extend( {
 			if ( !column.hasClass( 'v-box' ) ) {
 
 				if ( !did_clean_dic[tab_id] ) {
-					column.find( '.edit-view-form-item-label-div-first-row' ).removeClass( 'edit-view-form-item-label-div-first-row' );
-					column.find( '.edit-view-form-item-label-div-last-row' ).removeClass( 'edit-view-form-item-label-div-last-row' );
-					column.find( '.edit-view-form-item-div-last-row' ).removeClass( 'edit-view-form-item-div-last-row' );
 					did_clean_dic[tab_id] = true;
 				}
 
 				var child_length = column.children().length;
 				var parent_div = widget.parent().parent();
-
-				if ( child_length === 2 ) {
-					parent_div.children().eq( 0 ).addClass( 'edit-view-form-item-label-div-first-row' );
-					parent_div.children().eq( 0 ).addClass( 'edit-view-form-item-label-div-last-row' );
-					parent_div.addClass( 'edit-view-form-item-div-last-row' );
-				} else if ( parent_div.index() === 0 ) {
-					parent_div.children().eq( 0 ).addClass( 'edit-view-form-item-label-div-first-row' );
-				} else if ( parent_div.index() === child_length - 2 ) {
-					parent_div.children().eq( 0 ).addClass( 'edit-view-form-item-label-div-last-row' );
-					parent_div.addClass( 'edit-view-form-item-div-last-row' );
-				}
 
 				if ( Global.isSet( widget.setEnabled ) ) {
 					widget.setEnabled( true );
@@ -2585,12 +2681,14 @@ ReportBaseViewController = BaseViewController.extend( {
 
 		other.page_orientation = this.current_edit_record.page_orientation;
 		other.font_size = this.current_edit_record.font_size;
+		other.auto_refresh = this.current_edit_record.auto_refresh;
 		other.disable_grand_total = this.current_edit_record.disable_grand_total;
 		other.maximum_page_limit = this.current_edit_record.maximum_page_limit;
 		other.show_duplicate_values = this.current_edit_record.show_duplicate_values;
 
 		if ( this.current_saved_report ) {
-			other.report_name = this.current_saved_report.name;
+
+			other.report_name = _.escape( this.current_saved_report.name );
 		}
 
 		return other;
@@ -2642,7 +2740,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			var order_fix = this.visible_report_widgets_order_fix[key];
 
 			if ( order_fix > 0 ) {
-				new_report_fields['-' + order_fix + '-' + key ] = report[key];
+				new_report_fields['-' + order_fix + '-' + key] = report[key];
 			}
 		}
 
@@ -2669,10 +2767,12 @@ ReportBaseViewController = BaseViewController.extend( {
 		if ( report.sort ) {
 			report.sort = this.convertSortValues( report.sort );
 		}
-		this.api['validateReport']( config, 'pdf', {onResult: function( result ) {
-			$this.validateResult( result );
+		this.api['validateReport']( config, 'pdf', {
+			onResult: function( result ) {
+				$this.validateResult( result );
 
-		}} );
+			}
+		} );
 	},
 
 	onViewExcelClick: function() {
@@ -2694,7 +2794,6 @@ ReportBaseViewController = BaseViewController.extend( {
 	},
 
 	getPostReportJson: function( noPreFix ) {
-
 		var other = this.getFormValues();
 		var chart = this.getChartValues();
 		var report = this.visible_report_values;
@@ -2728,7 +2827,6 @@ ReportBaseViewController = BaseViewController.extend( {
 	},
 
 	onContextMenuClick: function( context_btn, menu_name ) {
-
 		var id;
 		if ( Global.isSet( menu_name ) ) {
 			id = menu_name;
@@ -2745,6 +2843,13 @@ ReportBaseViewController = BaseViewController.extend( {
 		switch ( id ) {
 			case ContextMenuIconName.view:
 				this.onViewClick();
+				break;
+			case ContextMenuIconName.view_html:
+
+				this.onViewClick( 'html' );
+				break;
+			case ContextMenuIconName.view_html_new_window:
+				this.onViewClick( 'html', true );
 				break;
 			case ContextMenuIconName.export_excel:
 				this.onViewExcelClick();
@@ -2768,18 +2873,20 @@ ReportBaseViewController = BaseViewController.extend( {
 		var $this = this;
 		var form_setup = this.getFormSetupData();
 
-		this.api.setCompanyFormConfig( form_setup, {onResult: function( result ) {
+		this.api.setCompanyFormConfig( form_setup, {
+			onResult: function( result ) {
 
-			if ( result.isValid() ) {
-				$this.show_empty_message = false;
-				$this.form_setup_changed = false;
+				if ( result.isValid() ) {
+					$this.show_empty_message = false;
+					$this.form_setup_changed = false;
 
-				TAlertManager.showAlert( $.i18n._( 'Form setup has been saved successfully' ) );
-			} else {
-				TAlertManager.showAlert( $.i18n._( 'Form setup save failed, Please try again' ) );
+					TAlertManager.showAlert( $.i18n._( 'Form setup has been saved successfully' ) );
+				} else {
+					TAlertManager.showAlert( $.i18n._( 'Form setup save failed, Please try again' ) );
+				}
+
 			}
-
-		}} );
+		} );
 
 	},
 
@@ -2787,15 +2894,15 @@ ReportBaseViewController = BaseViewController.extend( {
 		//Always need override
 	},
 
-	onViewClick: function( key ) {
-
+	onViewClick: function( key, new_window ) {
+//		Global.loadPage('temp_page.html',function(result){
+//			IndexViewController.openWizard( 'ReportViewWizard', result);
+//		});
 		if ( !key ) {
 			key = 'pdf';
 		}
-
 		var config = this.getPostReportJson();
 		var post_data = {0: config, 1: key};
-
 		if ( this.include_form_setup ) {
 			if ( this.show_empty_message ) {
 				TAlertManager.showAlert( $.i18n._( 'Setup data for this report has not been completed yet. Please click on the Form Setup tab to do so now.' ) );
@@ -2804,7 +2911,69 @@ ReportBaseViewController = BaseViewController.extend( {
 			config.form = this.getFormSetupData( true );
 		}
 
-		this.doFormIFrameCall( post_data );
+//		if ( key === 'pdf' ) {
+//			this.doFormIFrameCall( post_data );
+//		}
+		if ( key === 'html' ) {
+			var url = ServiceCaller.getURLWithSessionId( 'Class=' + this.api.className + '&Method=' + 'get' + this.api.key_name + '&v=2' );
+			if ( LocalCacheData.getStationID() ) {
+				url = url + '&StationID=' + LocalCacheData.getStationID();
+			}
+			var message_id = UUID.guid();
+			url = url + '&MessageID=' + message_id;
+
+			var refresh_request = '<script>';
+			refresh_request += 'var Account;';
+			refresh_request += 'function RemainTime(){';
+			refresh_request += '	if (startTime >= 0){';
+			refresh_request += '		if(startTime==0){';
+			refresh_request += '			clearTimeout(Account);';
+			refresh_request += '			startRefresh();';
+			refresh_request += '		}else{';
+			refresh_request += '			Account = setTimeout("RemainTime()",1000);';
+			refresh_request += '			startTime=startTime-1;';
+			refresh_request += '		}';
+			refresh_request += '	}';
+			refresh_request += '}';
+			refresh_request += 'function startRefresh() {';
+			refresh_request += ' try {';
+			refresh_request += '		$.ajax({';
+			refresh_request += '			dataType: "JSON",';
+			refresh_request += "			data: {json:'" + JSON.stringify( post_data ) + "'},";
+			refresh_request += '			type: "POST",';
+			refresh_request += "            url: '" + url + "',";
+			refresh_request += '			success: function(result) {';
+			refresh_request += '			   console.log("refresh"); var newDoc = result.api_retval + $(\'body\').children(\':last\')[0].outerHTML; document.open("text/html"); document.write(newDoc); document.close(); ';
+			refresh_request += '			}';
+			refresh_request += '		})';
+			refresh_request += '	}  catch(e) {}';
+			refresh_request += '}';
+			refresh_request += 'RemainTime();';
+			refresh_request += '$( "body" ).mousemove( function( e ) {';
+			refresh_request += '	window.parent.Global.doPingIfNecessary()';
+			refresh_request += '} );';
+			refresh_request += '</script>';
+
+			this.api['get' + this.api.key_name]( config, key, {
+				onResult: function( res ) {
+					var result = res.getResult();
+					if ( result ) {
+						result = result + refresh_request;
+						if ( new_window ) {
+							var w = window.open();
+							w.document.writeln( result );
+							w.document.close();
+						} else if ( result ) {
+							IndexViewController.openWizard( 'ReportViewWizard', result );
+						}
+					}
+
+				}
+			} );
+		} else {
+			this.doFormIFrameCall( post_data );
+		}
+
 	},
 
 	setEditMenuViewIcon: function( context_btn, pId ) {

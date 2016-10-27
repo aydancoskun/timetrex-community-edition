@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -242,13 +242,16 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 						) {
 						Debug::text('Class: '. $factory_name .' Method: '. $raw_method->name, __FILE__, __LINE__, __METHOD__, 10);
 
-						//Get method arguments.
-						$method_parameters = $raw_method->getParameters();
-						if ( is_array( $method_parameters ) ) {
-							$input_arguments = array();
-							foreach( $method_parameters as $method_parameter ) {
-								//if ( !in_array( $method_parameter->name, array( 'where', 'order', 'page', 'limit' ) ) ) {
+						$test_modes = array('default', 'fuzz');
+						foreach( $test_modes as $test_mode ) {
+							Debug::text('  Test Mode: '. $test_mode, __FILE__, __LINE__, __METHOD__, 10);
+							//Get method arguments.
+							$method_parameters = $raw_method->getParameters();
+							if ( is_array( $method_parameters ) ) {
+								$input_arguments = array();
+								foreach( $method_parameters as $method_parameter ) {
 									Debug::text('  Parameter: '. $method_parameter->name, __FILE__, __LINE__, __METHOD__, 10);
+
 									switch( $factory_name ) {
 										case 'ClientContactListFactory':
 											switch( $method_parameter->name ) {
@@ -315,40 +318,64 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 											break;
 									}
 
-									//If LIMIT argument is available always set it to 1 to reduce memory usage.
-									if ( in_array( $method_parameter->name, array( 'where', 'order', 'page' ) ) ) {
-										$input_argument = NULL;
-									} elseif ( !isset($input_argument) AND ( $method_parameter->name == 'id' OR strpos( $method_parameter->name, '_id' ) !== FALSE OR $method_parameter->name == 'limit' ) ) { //Use integer as its a ID argument.
-										$input_argument = 1;
-									} elseif ( !isset($input_argument) ) {
-										$input_argument = 2;
+									if ( $test_mode == 'fuzz' ) {
+										//If LIMIT argument is available always set it to 1 to reduce memory usage.
+										if ( in_array( $method_parameter->name, array( 'where', 'order', 'page' ) ) ) {
+											$input_argument = NULL;
+										} elseif ( !isset($input_argument) AND ( $method_parameter->name == 'id' OR strpos( $method_parameter->name, '_id' ) !== FALSE OR $method_parameter->name == 'limit' ) ) { //Use integer as its a ID argument.
+											$input_argument = 'false'; //Try passing a string where ID is expected.
+										} elseif ( !isset($input_argument) ) {
+											$input_argument = 2;
+										}
+										$input_arguments[] = $input_argument;
+									} else {
+										//If LIMIT argument is available always set it to 1 to reduce memory usage.
+										if ( in_array( $method_parameter->name, array( 'where', 'order', 'page' ) ) ) {
+											$input_argument = NULL;
+										} elseif ( !isset($input_argument) AND ( $method_parameter->name == 'id' OR strpos( $method_parameter->name, '_id' ) !== FALSE OR $method_parameter->name == 'limit' ) ) { //Use integer as its a ID argument.
+											$input_argument = 1;
+										} elseif ( !isset($input_argument) ) {
+											$input_argument = 2;
+										}
+										$input_arguments[] = $input_argument;
 									}
+									unset($input_argument);
+								}
 
-									$input_arguments[] = $input_argument;
-								//}
-								unset($input_argument);
+								if ( isset($input_arguments) AND is_array($input_arguments) ) {
+									Debug::Arr($input_arguments, '    Calling Class: '. $factory_name .' Method: '. $raw_method->name, __FILE__, __LINE__, __METHOD__, 10);
+									$lf = TTNew( $factory_name );
+									switch( $factory_name.'::'.$raw_method->name ) {
+										case 'StationListFactory::getByUserIdAndStatusAndType':
+										case 'PayStubEntryAccountListFactory::getByTypeArrayByCompanyIdAndStatusId':
+											//Skip due to failures.
+											break;
+										case 'MessageControlListFactory::getByCompanyIdAndObjectTypeAndObjectAndNotUser':
+											$retarr = call_user_func_array( array( $lf, $raw_method->name ), $input_arguments );
+											$this->assertEquals( $retarr, FALSE ); //This will be FALSE, but it still executes a query.
+											//$this->assertTrue( is_object($retarr), TRUE );
+											break;
+										case 'PayStubEntryListFactory::getByPayStubIdAndEntryNameId':
+											$retarr = call_user_func_array( array( $lf, $raw_method->name ), $input_arguments );
+											if ( $test_mode == 'fuzz' ) {
+												$this->assertEquals( $retarr, FALSE ); //This will be FALSE
+											} else {
+												$this->assertNotEquals( $retarr, FALSE );
+												$this->assertTrue( is_object($retarr), TRUE );
+											}
+											break;
+										default:
+											$retarr = call_user_func_array( array( $lf, $raw_method->name ), $input_arguments );
+											//Debug::Arr($retarr, '    RetArr: ', __FILE__, __LINE__, __METHOD__, 10);
+											$this->assertNotEquals( $retarr, FALSE );
+											$this->assertTrue( is_object($retarr), TRUE );
+											break;
+									}
+								} else {
+									Debug::text('  No INPUT arguments... Skipping Class: '. $factory_name .' Method: '. $raw_method->name, __FILE__, __LINE__, __METHOD__, 10);
+								}
+
 							}
-
-							Debug::Arr($input_arguments, '    Calling Class: '. $factory_name .' Method: '. $raw_method->name, __FILE__, __LINE__, __METHOD__, 10);
-							$lf = TTNew( $factory_name );
-							switch( $factory_name.'::'.$raw_method->name ) {
-								case 'StationListFactory::getByUserIdAndStatusAndType':
-								case 'PayStubEntryAccountListFactory::getByTypeArrayByCompanyIdAndStatusId':
-									//Skip due to failures.
-									break;
-								case 'MessageControlListFactory::getByCompanyIdAndObjectTypeAndObjectAndNotUser':
-									$retarr = call_user_func_array( array( $lf, $raw_method->name ), $input_arguments );
-									$this->assertEquals( $retarr, FALSE ); //This will be FALSE, but it still executes a query.
-									//$this->assertTrue( is_object($retarr), TRUE );
-									break;
-								default:
-									$retarr = call_user_func_array( array( $lf, $raw_method->name ), $input_arguments );
-									//Debug::Arr($retarr, '    RetArr: ', __FILE__, __LINE__, __METHOD__, 10);
-									$this->assertNotEquals( $retarr, FALSE );
-									$this->assertTrue( is_object($retarr), TRUE );
-									break;
-							}
-
 						}
 					} else {
 						Debug::text('Skipping... Class: '. $factory_name .' Method: '. $raw_method->name, __FILE__, __LINE__, __METHOD__, 10);

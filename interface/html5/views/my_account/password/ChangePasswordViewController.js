@@ -175,14 +175,14 @@ ChangePasswordViewController = BaseViewController.extend( {
 
 	},
 
-	onSaveClick: function() {
-
+	onSaveClick: function( ignoreWarning ) {
 		var $this = this;
 		var record = this.current_edit_record;
 		LocalCacheData.current_doing_context_action = 'save';
-
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
 		this.clearErrorTips();
-
 		if ( this.edit_view_tab_selected_index === 0 ) {
 			if ( !record['web.current_password'] ) {
 				TAlertManager.showAlert( $.i18n._( 'Current password can\'t be empty' ) );

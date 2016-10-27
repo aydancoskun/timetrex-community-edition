@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -59,8 +59,9 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -99,8 +100,9 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		$suf = new StationUserFactory();
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	a.*,
@@ -133,8 +135,8 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
-					'id' => $id,
+					'company_id' => (int)$company_id,
+					'id' => (int)$id,
 					);
 
 		$query = '
@@ -160,14 +162,14 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
-						AND type_id in ('. $this->getListSQL($type_id, $ph) .')
+						AND type_id in ('. $this->getListSQL( $type_id, $ph, 'int' ) .')
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
@@ -184,8 +186,15 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 
 		$this->rs = $this->getCache($station_id);
 		if ( $this->rs === FALSE ) {
+			if ( $order == NULL ) {
+				$order = array( 'created_date' => 'asc' ); //Order oldest station first incase conflicting stations get created the newest one doesn't cause problems for existing users.
+				$strict = FALSE;
+			} else {
+				$strict = TRUE;
+			}
+
 			$ph = array(
-						'station_id' => $station_id,
+						'station_id' => (string)$station_id,
 						);
 
 			$query = '
@@ -213,9 +222,16 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
+		if ( $order == NULL ) {
+			$order = array( 'created_date' => 'asc' ); //Order oldest station first incase conflicting stations get created the newest one doesn't cause problems for existing users.
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
 		$ph = array(
-					'company_id' => $company_id,
-					'station_id' => $station_id,
+					'company_id' => (int)$company_id,
+					'station_id' => (string)$station_id,
 					);
 
 		$query = '
@@ -245,15 +261,15 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'station_id' => $station_id,
+					'station_id' => (string)$station_id,
 					);
 
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
 					where	station_id = ?
-						AND status_id in ('. $this->getListSQL($status_id, $ph) .')
-						AND type_id in ('. $this->getListSQL($type_id, $ph) .')
+						AND status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .')
+						AND type_id in ('. $this->getListSQL( $type_id, $ph, 'int' ) .')
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
@@ -272,7 +288,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -280,7 +296,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND status_id = 20
-						AND type_id in ('. $this->getListSQL($type_id, $ph) .')
+						AND type_id in ('. $this->getListSQL( $type_id, $ph, 'int' ) .')
 						AND	(
 								( last_poll_date is NULL OR last_poll_date < ('. time() .' - poll_frequency) )
 								OR
@@ -307,16 +323,6 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 
 		if ( $type == '') {
 			return FALSE;
-		}
-
-		$status_key = Option::getByValue($status, $this->getOptions('status') );
-		if ($status_key !== FALSE) {
-			$status = $status_key;
-		}
-
-		$type_key = Option::getByValue($type, $this->getOptions('type') );
-		if ($type_key !== FALSE) {
-			$type = $type_key;
 		}
 
 		$ulf = new UserListFactory();
@@ -450,7 +456,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					//'company_id' => $company_id,
+					//'company_id' => (int)$company_id,
 					);
 
 		//Only include ENABLED stations.
@@ -461,10 +467,10 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 					from	'. $this->getTable() .'
 					where
 							status_id = 20
-							AND type_id in ('. $this->getListSQL($type_id, $ph) .') ';
+							AND type_id in ('. $this->getListSQL( $type_id, $ph, 'int' ) .') ';
 							
 		if ( $company_id != '' AND ( isset($company_id[0]) AND !in_array(-1, (array)$company_id) ) ) {
-			$query	.=	' AND company_id in ('. $this->getListSQL($company_id, $ph) .') ';
+			$query	.=	' AND company_id in ('. $this->getListSQL( $company_id, $ph, 'int' ) .') ';
 		}
 
 		$query .= ' AND deleted = 0 GROUP BY company_id, type_id';
@@ -589,7 +595,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '

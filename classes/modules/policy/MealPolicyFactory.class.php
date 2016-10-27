@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -188,11 +188,6 @@ class MealPolicyFactory extends Factory {
 	function setType($value) {
 		$value = trim($value);
 
-		$key = Option::getByValue($value, $this->getOptions('type') );
-		if ($key !== FALSE) {
-			$value = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'type',
 											$value,
 											TTi18n::gettext('Incorrect Type'),
@@ -200,7 +195,7 @@ class MealPolicyFactory extends Factory {
 
 			$this->data['type_id'] = $value;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -334,11 +329,6 @@ class MealPolicyFactory extends Factory {
 	function setAutoDetectType($value) {
 		$value = trim($value);
 
-		$key = Option::getByValue($value, $this->getOptions('auto_detect_type') );
-		if ($key !== FALSE) {
-			$value = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'auto_detect_type',
 											$value,
 											TTi18n::gettext('Incorrect Auto-Detect Type'),
@@ -346,7 +336,7 @@ class MealPolicyFactory extends Factory {
 
 			$this->data['auto_detect_type_id'] = $value;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -539,7 +529,7 @@ class MealPolicyFactory extends Factory {
 		return FALSE;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		if ( $this->getDeleted() != TRUE ) {
 			if ( $this->getPayCode() == 0 ) {
 				$this->Validator->isTRUE(	'pay_code_id',

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -203,7 +203,7 @@ class RecurringHolidayFactory extends Factory {
 
 			$this->data['special_day'] = $value;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -219,11 +219,6 @@ class RecurringHolidayFactory extends Factory {
 	function setType($value) {
 		$value = trim($value);
 
-		$key = Option::getByValue($value, $this->getOptions('type') );
-		if ($key !== FALSE) {
-			$value = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'type',
 											$value,
 											TTi18n::gettext('Incorrect Type'),
@@ -231,7 +226,7 @@ class RecurringHolidayFactory extends Factory {
 
 			$this->data['type_id'] = $value;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -256,7 +251,7 @@ class RecurringHolidayFactory extends Factory {
 
 			$this->data['pivot_day_direction_id'] = $value;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -475,7 +470,8 @@ class RecurringHolidayFactory extends Factory {
 				Debug::text('Dynamic - Week Interval... Current Month: '. TTDate::getMonth( $epoch ) .' Holiday Month: '. $this->getMonth(), __FILE__, __LINE__, __METHOD__, 10);
 				//Dynamic
 
-				$start_month_epoch = TTDate::getBeginMonthEpoch( $epoch );
+				//$start_month_epoch = TTDate::getBeginMonthEpoch( $epoch );
+				$start_month_epoch = mktime(12, 0, 0, $this->getMonth(), 1, (date('Y', $epoch) + 1));
 				$end_month_epoch = mktime(12, 0, 0, ($this->getMonth() + 1), 1, (date('Y', $epoch) + 1));
 
 				$tmp_holiday_epoch = FALSE;
@@ -491,7 +487,7 @@ class RecurringHolidayFactory extends Factory {
 
 						if ( $day_of_week == abs( $this->getDayOfWeek() ) ) {
 							$day_of_week_dates[] = date('j', $i);
-							Debug::text('I: '. $i .' Day Of Month: '. date('j', $i), __FILE__, __LINE__, __METHOD__, 10);
+							//Debug::text('I: '. $i .' Day Of Month: '. date('j', $i), __FILE__, __LINE__, __METHOD__, 10);
 
 							$week_interval++;
 						}
@@ -507,7 +503,6 @@ class RecurringHolidayFactory extends Factory {
 					}
 				}
 
-				//Debug::Arr($day_of_week_dates, 'Week Dates Arr: ', __FILE__, __LINE__, __METHOD__, 10);
 				$holiday_epoch = $tmp_holiday_epoch;
 			} elseif ( $this->getType() == 30 ) { //Dynamic - Pivot Day
 				Debug::text('Dynamic - Pivot Date...', __FILE__, __LINE__, __METHOD__, 10);
@@ -553,7 +548,7 @@ class RecurringHolidayFactory extends Factory {
 		return $holiday_epoch;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		return TRUE;
 	}
 

@@ -16,6 +16,10 @@ FormItemType.LIST = 'list';
 
 FormItemType.TEXT_INPUT = 'textInput';
 
+FormItemType.TIME_PICKER = 'timePicker';
+
+FormItemType.FEEDBACK_BOX = 'feedbackBox';
+
 FormItemType.TEXT_INPUT_NO_AUTO = 'textInputNoAuto';
 
 FormItemType.PASSWORD_INPUT = 'passwordInput';

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -59,8 +59,9 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -81,7 +82,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					'start_date' => $start_date,
 					'end_date' => $end_date,
 					);
@@ -116,7 +117,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$ulf = new UserListFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -145,7 +146,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		}
 
 		$ph = array(
-					'psen_id' => $psen_id,
+					'psen_id' => (int)$psen_id,
 					);
 
 		$query = '
@@ -174,8 +175,8 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					'id' => $id,
+					'company_id' => (int)$company_id,
+					'id' => (int)$id,
 					);
 
 		$query = '
@@ -203,8 +204,8 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		}
 
 		$ph = array(
-					'id' => $id,
-					'user_id' => $user_id,
+					'id' => (int)$id,
+					'user_id' => (int)$user_id,
 					);
 
 		$query = '
@@ -228,8 +229,9 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -257,7 +259,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		}
 
 		$ph = array(
-					'recurring_ps_amendment_id' => $recurring_ps_amendment_id,
+					'recurring_ps_amendment_id' => (int)$recurring_ps_amendment_id,
 					);
 
 		$query = '
@@ -292,8 +294,8 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		}
 
 		$ph = array(
-					'user_id' => $user_id,
-					'recurring_ps_amendment_id' => $recurring_ps_amendment_id,
+					'user_id' => (int)$user_id,
+					'recurring_ps_amendment_id' => (int)$recurring_ps_amendment_id,
 					'start_date' => $start_date,
 					'end_date' => $end_date,
 					);
@@ -332,8 +334,8 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$ulf = new UserListFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					'user_id' => $user_id,
+					'company_id' => (int)$company_id,
+					'user_id' => (int)$user_id,
 					);
 
 		$query = '
@@ -380,8 +382,8 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$ulf = new UserListFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					//'user_id' => $user_id,
+					'company_id' => (int)$company_id,
+					//'user_id' => (int)$user_id,
 					//'start_date' => $start_date,
 					//'end_date' => $end_date,
 					);
@@ -395,7 +397,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 					';
 
 		if ( $user_id != '' AND isset($user_id[0]) AND !in_array(-1, (array)$user_id) ) {
-			$query	.=	' AND a.user_id in ('. $this->getListSQL($user_id, $ph) .') ';
+			$query	.=	' AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .') ';
 		}
 		if ( $start_date != ''	) {
 			$ph[] = $start_date;
@@ -430,7 +432,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		}
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'start_date' => $start_date,
 					'end_date' => $end_date,
 					'created_date' => $date,
@@ -482,7 +484,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'authorized' => $this->toBool($authorized),
 					'start_date' => $start_date,
 					'end_date' => $end_date,
@@ -538,6 +540,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$psealf = new PayStubEntryAccountListFactory();
 
 		$ph = array(
+					'status_id' => (int)50, //ACTIVE
 					'authorized' => $this->toBool($authorized),
 					'start_date' => $start_date,
 					'end_date' => $end_date,
@@ -559,10 +562,11 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 							'. $psealf->getTable() .' as psea
 					where
 						a.pay_stub_entry_name_id = psea.id
+						AND a.status_id = ?
 						AND a.authorized = ?
 						AND a.effective_date >= ?
 						AND a.effective_date <= ?
-						AND a.user_id in ('.$this->getListSQL($user_id, $ph) .')
+						AND a.user_id in ('.$this->getListSQL( $user_id, $ph, 'int' ) .')
 						AND ( a.deleted = 0 AND psea.deleted = 0 )
 					ORDER BY a.effective_date asc, a.type_id asc, psea.ps_order asc, a.id asc
 				';
@@ -610,7 +614,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 						AND effective_date >= ?
 						AND effective_date <= ?
 						AND ytd_adjustment = ?
-						AND user_id in ('.$this->getListSQL($user_id, $ph) .')
+						AND user_id in ('.$this->getListSQL( $user_id, $ph, 'int' ) .')
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -662,8 +666,8 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$psealf = new PayStubEntryAccountListFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
-					'type_id' => $type_id,
+					'user_id' => (int)$user_id,
+					'type_id' => (int)$type_id,
 					'authorized' => $this->toBool($authorized),
 					'start_date' => $start_date,
 					'end_date' => $end_date,
@@ -711,7 +715,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$psealf = new PayStubEntryAccountListFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'authorized' => $this->toBool($authorized),
 					'start_date' => $start_date,
 					'end_date' => $end_date,
@@ -726,7 +730,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 						AND a.authorized = ?
 						AND a.effective_date >= ?
 						AND a.effective_date <= ?
-						AND b.id in ('.$this->getListSQL($name_id, $ph) .')
+						AND b.id in ('.$this->getListSQL( $name_id, $ph, 'int' ) .')
 						AND a.ytd_adjustment = 0
 						AND a.deleted = 0
 						';
@@ -795,7 +799,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -900,12 +904,6 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
-			$to_timestamp_sql = 'from_unixtime(a.effective_date)';
-		} else {
-			$to_timestamp_sql = 'to_timestamp(a.effective_date)';
-		}
-
 		$uf = new UserFactory();
 		$bf = new BranchFactory();
 		$df = new DepartmentFactory();
@@ -917,7 +915,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$ppsuf = new PayPeriodScheduleUserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -953,7 +951,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 						LEFT JOIN '. $pseaf->getTable() .' as pseaf ON ( a.pay_stub_entry_name_id = pseaf.id AND pseaf.deleted = 0 )
 						LEFT JOIN '. $ppsuf->getTable() .' as ppsuf ON ( a.user_id = ppsuf.user_id )
 						LEFT JOIN '. $ppsf->getTable() .' as ppsf ON ( ppsuf.pay_period_schedule_id = ppsf.id AND ppsf.deleted = 0 )
-						LEFT JOIN '. $ppf->getTable() .' as ppf ON ( ppsuf.pay_period_schedule_id = ppf.pay_period_schedule_id AND '. $to_timestamp_sql .' >= ppf.start_date AND '. $to_timestamp_sql .' <= ppf.end_date AND ppf.deleted = 0 )
+						LEFT JOIN '. $ppf->getTable() .' as ppf ON ( ppsuf.pay_period_schedule_id = ppf.pay_period_schedule_id AND '. $this->getSQLToTimeStampFunction() .'(a.effective_date) >= ppf.start_date AND '. $this->getSQLToTimeStampFunction() .'(a.effective_date) <= ppf.end_date AND ppf.deleted = 0 )
 
 						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
@@ -964,8 +962,8 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
 
+		$query .= ( isset($filter_data['pay_stub_entry_name_id']) ) ? $this->getWhereClauseSQL( 'a.pay_stub_entry_name_id', $filter_data['pay_stub_entry_name_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'b.id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
-
 		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'ppf.id', $filter_data['pay_period_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'b.group_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
@@ -973,6 +971,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'b.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'b.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
 
+		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['recurring_ps_amendment_id']) ) ? $this->getWhereClauseSQL( 'a.recurring_ps_amendment_id', $filter_data['recurring_ps_amendment_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['start_date']) ) ? $this->getWhereClauseSQL( 'a.effective_date', $filter_data['start_date'], 'start_date', $ph ) : NULL;

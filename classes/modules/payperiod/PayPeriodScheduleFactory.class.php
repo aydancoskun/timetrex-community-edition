@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -219,11 +219,6 @@ class PayPeriodScheduleFactory extends Factory {
 	function setType($type) {
 		$type = trim($type);
 
-		$key = Option::getByValue($type, $this->getOptions('type') );
-		if ($key !== FALSE) {
-			$type = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'type',
 											$type,
 											TTi18n::gettext('Incorrect Type'),
@@ -246,11 +241,6 @@ class PayPeriodScheduleFactory extends Factory {
 	}
 	function setStartWeekDay($val) {
 		$val = trim($val);
-
-		$key = Option::getByValue($val, $this->getOptions('start_week_day') );
-		if ($key !== FALSE) {
-			$type = $key;
-		}
 
 		if ( $this->Validator->inArrayKey(	'start_week_day',
 											$val,
@@ -370,11 +360,6 @@ class PayPeriodScheduleFactory extends Factory {
 	function setStartDayOfWeek($val) {
 		$val = trim($val);
 
-		$key = Option::getByValue($val, TTDate::getDayOfWeekArray() );
-		if ($key !== FALSE) {
-			$val = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'start_day_of_week',
 											$val,
 											TTi18n::gettext('Incorrect start day of week'),
@@ -397,11 +382,6 @@ class PayPeriodScheduleFactory extends Factory {
 	}
 	function setTransactionDate($val) {
 		$val = trim($val);
-
-		$key = Option::getByValue($val, TTDate::getDayOfWeekArray() );
-		if ($key !== FALSE) {
-			$val = $key;
-		}
 
 		if ( $val == 0
 				OR $this->Validator->inArrayKey(	'transaction_date',
@@ -435,11 +415,6 @@ class PayPeriodScheduleFactory extends Factory {
 	function setPrimaryDayOfMonth($val) {
 		$val = trim($val);
 
-		$key = Option::getByValue($val, TTDate::getDayOfMonthArray() );
-		if ($key !== FALSE) {
-			$val = $key;
-		}
-
 		if (	( $val == -1 OR $val == '' OR $val == 0 )
 				OR $this->Validator->inArrayKey(	'primary_day_of_month',
 											$val,
@@ -463,11 +438,6 @@ class PayPeriodScheduleFactory extends Factory {
 	}
 	function setSecondaryDayOfMonth($val) {
 		$val = trim($val);
-
-		$key = Option::getByValue($val, TTDate::getDayOfMonthArray() );
-		if ($key !== FALSE) {
-			$val = $key;
-		}
 
 		if (	( $val == -1 OR $val == '' OR $val == 0 )
 				OR $this->Validator->inArrayKey(	'secondary_day_of_month',
@@ -493,11 +463,6 @@ class PayPeriodScheduleFactory extends Factory {
 	function setPrimaryTransactionDayOfMonth($val) {
 		$val = trim($val);
 
-		$key = Option::getByValue($val, TTDate::getDayOfMonthArray() );
-		if ($key !== FALSE) {
-			$val = $key;
-		}
-
 		if (	( $val == -1 OR $val == '' OR $val == 0 )
 				OR $this->Validator->inArrayKey(	'primary_transaction_day_of_month',
 											$val,
@@ -521,11 +486,6 @@ class PayPeriodScheduleFactory extends Factory {
 	}
 	function setSecondaryTransactionDayOfMonth($val) {
 		$val = trim($val);
-
-		$key = Option::getByValue($val, TTDate::getDayOfMonthArray() );
-		if ($key !== FALSE) {
-			$val = $key;
-		}
 
 		if (	( $val == -1 OR $val == '' OR $val == 0 )
 				OR $this->Validator->inArrayKey(	'secondary_transaction_day_of_month',
@@ -1321,16 +1281,20 @@ class PayPeriodScheduleFactory extends Factory {
 		return FALSE;
 	}
 
-	//Pay period number functionality is deprecated, it causes too many problems
-	//for little or no benefit. Its also impossible to properly handle in custom situations where pay periods
-	//may be adjusted.
+	//Pay period number functionality is deprecated, it causes too many problems for little or no benefit.
+	//Its also impossible to properly handle in custom situations where pay periods may be adjusted.
+	//However its used in FormulaType=20 situations.
 	function getCurrentPayPeriodNumber($epoch = NULL, $end_date_epoch = NULL) {
 		//EPOCH MUST BE TRANSACTION DATE!!!
 		//End Date Epoch must be END DATE of pay period
 
-		//Don't return pay period number if its a manual schedule.
+		//If its a manual pay period schedule, just guess based no percentage through the year so far.
 		if ( $this->getType() == 5 ) {
-			return FALSE;
+			$day_of_year = TTDate::getDayOfYear( $epoch );
+			$days_in_year = TTDate::getDaysInYear( $epoch );
+			$retval = round( ( $day_of_year / $days_in_year ) * $this->getAnnualPayPeriods() );
+
+			return $retval;
 		}
 
 		//FIXME: Turn this query in to a straight count(*) query for even more speed.
@@ -1339,24 +1303,12 @@ class PayPeriodScheduleFactory extends Factory {
 		}
 		//Debug::text('Epoch: '. TTDate::getDate('DATE+TIME', $epoch) .' - End Date Epoch: '. TTDate::getDate('DATE+TIME', $end_date_epoch), __FILE__, __LINE__, __METHOD__, 10);
 
-/*
-		//FIXME: If a company starts with TimeTrex half way through the year, this will be incorrect.
-		//Because it only counts pay periods that exist, not pay periods that WOULD have existed.
-		$pplf = TTnew( 'PayPeriodListFactory' );
-		$pplf->getByPayPeriodScheduleIdAndStartTransactionDateAndEndTransactionDate( $this->getId(), TTDate::getBeginYearEpoch( $epoch ), $epoch );
-		$retval = $pplf->getRecordCount();
-
-		Debug::text('Current Pay Period: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
-*/
-
-
 		//Half Fixed method here. We cache the results so to speed it up, but there still might be a faster way to do this.
 		//FIXME: Perhaps some type of hybrid system like the above unless they have less then a years worth of
 		//pay periods, then use this method below?
 		$id = $this->getId().$epoch.$end_date_epoch;
 
 		$retval = $this->getCache($id);
-
 		if ( $retval === FALSE ) {
 			//FIXME: I'm sure there is a quicker way to do this.
 			$next_transaction_date = 0;
@@ -1377,14 +1329,13 @@ class PayPeriodScheduleFactory extends Factory {
 			}
 
 			Debug::text('i: '. $i, __FILE__, __LINE__, __METHOD__, 10);
-
 			$retval = ( $this->getAnnualPayPeriods() - $i );
 			Debug::text('Current Pay Period: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
 
 			//Cache results
 			$this->saveCache($retval, $id);
 		}
-
+		
 		return $retval;
 	}
 
@@ -2069,7 +2020,7 @@ class PayPeriodScheduleFactory extends Factory {
 		return TRUE;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		if ( $this->getDeleted() == TRUE ) {
 			return TRUE;
 		}

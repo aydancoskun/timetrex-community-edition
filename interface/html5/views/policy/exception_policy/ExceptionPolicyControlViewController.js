@@ -215,15 +215,9 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 					data[key].id = '';
 					array_data.push( data[ key ] );
 				}
-
-				array_data.sort( function( a, b ) {
-						if ( a.type_id > b.type_id ) {
-							return true;
-						} else {
-							return false;
-						}
-					}
-				);
+				array_data = array_data.sort( function( a, b ) {
+					return Global.compare( a, b, 'type_id' );
+				} );
 
 				$this.editor.setValue( array_data );
 
@@ -252,14 +246,9 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 					array_data.push( data[ key ] );
 				}
 
-				array_data.sort( function( a, b ) {
-						if ( a.type_id > b.type_id ) {
-							return true;
-						} else {
-							return false;
-						}
-					}
-				);
+				array_data = array_data.sort( function( a, b ) {
+					return Global.compare( a, b, 'type_id' );
+				} );
 
 				$this.editor.setValue( array_data );
 
@@ -283,14 +272,9 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 						array_data.push( data[ key ] );
 					}
 
-					array_data.sort( function( a, b ) {
-							if ( a.type_id > b.type_id ) {
-								return true;
-							} else {
-								return false;
-							}
-						}
-					);
+					array_data = array_data.sort( function( a, b ) {
+						return Global.compare( a, b, 'type_id' );
+					} );
 
 					$this.editor.setValue( array_data );
 
@@ -455,7 +439,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 			$( render ).append( row );
 			this.rows_widgets_array.push( widgets );
 		}
-		
+
 		if ( this.parent_controller.is_viewing ) {
 			row.find( '.control-icon' ).hide();
 		}
@@ -511,8 +495,9 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 			} );
 
 		} else {
-			$this.setErrorTips( result );
 			$this.setErrorMenu();
+			$this.setErrorTips( result );
+
 		}
 	},
 

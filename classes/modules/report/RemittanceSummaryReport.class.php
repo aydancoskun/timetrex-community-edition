@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -606,7 +606,7 @@ class RemittanceSummaryReport extends Report {
 			$header_layout = $this->config['other']['layout']['header'];
 
 			$margins = $this->pdf->getMargins();
-			$page_width = ($this->pdf->getPageWidth() - $margins['left'] - $margins['right']);
+			$page_width = ($this->pdf->getPageWidth() - $margins['right']);
 
 			//Draw report information
 			if ( $this->pdf->getPage() > 1 ) {
@@ -621,11 +621,12 @@ class RemittanceSummaryReport extends Report {
 
 				$column_widths = $this->_pdf_getTableColumnWidths( $this->getLargestColumnData( array_intersect_key($column_options, (array)$columns) ), $this->config['other']['layout']['header'] ); //Table largest column data;
 				$cell_height = $this->_pdf_getMaximumHeightFromArray( $columns, $column_options, $column_widths, $this->config['other']['table_header_word_wrap'], $this->_pdf_fontSize( $header_layout['height'] ) );
+				$column_widths['due_date'] -= 1; //Fix bug with column header extending too far.
 				foreach( $columns as $column => $tmp ) {
 					if ( isset($column_options[$column]) AND isset($column_widths[$column]) ) {
 						$cell_width = $column_widths[$column];
-						if ( ($this->pdf->getX() + $cell_width) > $this->pdf->getPageWidth() ) {
-							Debug::Text(' Page not wide enough, it should be at least: '. ($this->pdf->getX() + $cell_width) .' Page Width: '. $this->pdf->getPageWidth(), __FILE__, __LINE__, __METHOD__, 10);
+						if ( ($this->pdf->getX() + $cell_width) > $page_width ) {
+							Debug::Text(' Page not wide enough, it should be at least: '. ($this->pdf->getX() + $cell_width) .' Page Width: '. $page_width, __FILE__, __LINE__, __METHOD__, 10);
 							$this->pdf->Ln();
 						}
 						$this->pdf->Cell( $cell_width, $this->_pdf_fontSize( $header_layout['height'] ), $column_options[$column], $header_layout['border'], 0, $header_layout['align'], $header_layout['fill'], '', $header_layout['stretch'] );

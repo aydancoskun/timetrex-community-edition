@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -990,13 +990,12 @@ class PermissionFactory extends Factory {
 																'enabled' => TTi18n::gettext('Enabled'),
 																'view_active_shift' => TTi18n::gettext('Whos In Summary'),
 																'view_user_information' => TTi18n::gettext('Employee Information'),
-																'view_user_detail' => TTi18n::gettext('Employee Detail'),
+																//'view_user_detail' => TTi18n::gettext('Employee Detail'),
 																'view_pay_stub_summary' => TTi18n::gettext('Pay Stub Summary'),
 																'view_payroll_export' => TTi18n::gettext('Payroll Export'),
-																'view_wages_payable_summary' => TTi18n::gettext('Wages Payable Summary'),
+																//'view_wages_payable_summary' => TTi18n::gettext('Wages Payable Summary'),
 																'view_system_log' => TTi18n::gettext('Audit Trail'),
 																//'view_employee_pay_stub_summary' => TTi18n::gettext('Employee Pay Stub Summary'),
-																//'view_shift_amendment_summary' => TTi18n::gettext('Shift Amendment Summary'),
 																'view_timesheet_summary' => TTi18n::gettext('Timesheet Summary'),
 																'view_exception_summary' => TTi18n::gettext('Exception Summary'),
 																'view_accrual_balance_summary' => TTi18n::gettext('Accrual Balance Summary'),
@@ -1004,7 +1003,6 @@ class PermissionFactory extends Factory {
 																'view_punch_summary' => TTi18n::gettext('Punch Summary'),
 																'view_remittance_summary' => TTi18n::gettext('Remittance Summary'),
 																//'view_branch_summary' => TTi18n::gettext('Branch Summary'),
-																'view_employee_summary' => TTi18n::gettext('Employee Summary'),
 																'view_t4_summary' => TTi18n::gettext('T4 Summary'),
 																'view_generic_tax_summary' => TTi18n::gettext('Generic Tax Summary'),
 																'view_form941' => TTi18n::gettext('Form 941'),
@@ -1751,7 +1749,7 @@ class PermissionFactory extends Factory {
 															'report' =>	array(
 																				'enabled' => TRUE,
 																				'view_user_information' => TRUE,
-																				'view_user_detail' => TRUE,
+																				//'view_user_detail' => TRUE,
 																				'view_user_barcode' => TRUE,
 																			),
 															'report_custom_column' =>	array(
@@ -2305,7 +2303,6 @@ class PermissionFactory extends Factory {
 																			),
 															'report' =>	array(
 																				'view_system_log' => TRUE,
-																				'view_employee_summary' => TRUE,
 																			),
 														),
 													10 => //Module: Scheduling

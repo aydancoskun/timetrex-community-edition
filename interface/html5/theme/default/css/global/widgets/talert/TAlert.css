@@ -14,7 +14,7 @@
     width: 260px;
     font-size: 12px;
     text-align: center;
-    z-index: 100;
+    z-index: 6001;
     border-radius: 15px;
     padding: 6px;
 
@@ -28,7 +28,8 @@
 
 }
 
-.t-alert .content-div{
+.t-alert .content-div,
+.confirm-alert .content-div{
     min-height: 100px;
     max-height: 200px;
     overflow: auto;
@@ -38,7 +39,7 @@
     color: #ffffff;
     position: absolute;
     top: -30px;
-    left: 0px;
+    left: 0;
     font-size: 14px;
 }
 
@@ -94,7 +95,7 @@
     width: 260px;
     font-size: 12px;
     text-align: center;
-    z-index: 100;
+    z-index: 6001;
     border-radius: 15px;
     padding: 6px;
 
@@ -112,13 +113,18 @@
     color: #ffffff;
     position: absolute;
     top: -30px;
-    left: 0px;
+    left: 0;
     font-size: 14px;
 }
 
 .confirm-alert .content {
 
     font-size: 12px;
+}
+
+.confirm-alert ol {
+
+    text-align: left;
 }
 
 .confirm-alert .bottom-bar {
@@ -140,8 +146,8 @@
     height: 30px;
     text-align: center;
     bottom: 3px;
-    right: 0px;
-    left: 0px;
+    right: 0;
+    left: 0;
     margin-left: auto;
     margin-right: auto;
     background: url("../../../../images/50_bg.png") repeat;

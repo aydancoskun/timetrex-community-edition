@@ -24,15 +24,20 @@
 				this.removeClass( 'disable-element' );
 			}
 
-		}
+		};
 
-		this.getValue = function() {
-			return btn.hasClass( 'selected' ) ? true : false;
-		}
+		//Error: TypeError: btn is null in /interface/html5/global/widgets/switch_button/SwitchButton.js?v=9.0.0-20150822-212724 line 31
+		this.getValue = function( return_number ) {
+			if ( return_number ) {
+				return (btn && btn.hasClass( 'selected' )) ? 1 : 0;
+			} else {
+				return (btn && btn.hasClass( 'selected' )) ? true : false;
+			}
+		};
 
 		this.setValue = function( val ) {
 
-			//Error: TypeError: btn is null in https://ondemand1.timetrex.com/interface/html5/global/widgets/switch_button/SwitchButton.js?v=8.0.0-20141230-130626 line 35 
+			//Error: TypeError: btn is null in /interface/html5/global/widgets/switch_button/SwitchButton.js?v=8.0.0-20141230-130626 line 35 
 			if ( !btn ) {
 				return;
 			}
@@ -46,7 +51,7 @@
 
 		this.setIcon = function( val ) {
 			btn.addClass( val )
-		}
+		};
 
 		this.each( function() {
 
@@ -91,3 +96,4 @@ SwitchButtonIcon.daily_total = 'daily';
 SwitchButtonIcon.weekly_total = 'weekly';
 SwitchButtonIcon.all_employee = 'all-employee';
 SwitchButtonIcon.strict_range = 'strict-range';
+SwitchButtonIcon.wages = 'strict-range';

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -59,7 +59,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
 
 		$query = '
@@ -90,7 +90,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		//Status sorting MUST be desc first, otherwise transfer punches are completely out of order.
@@ -125,8 +125,8 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					'company_id2' => $company_id,
+					'company_id' => (int)$company_id,
+					'company_id2' => (int)$company_id,
 					);
 
 		//Status sorting MUST be desc first, otherwise transfer punches are completely out of order.
@@ -136,7 +136,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 					from	'. $this->getTable() .' as a
 							LEFT JOIN '. $uf->getTable() .' as c ON ( a.user_id = c.id AND c.deleted = 0 )
 					where	( c.company_id = ? OR a.company_id = ? )
-						AND a.id in ('. $this->getListSQL($id, $ph) .')
+						AND a.id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 						AND ( a.deleted = 0 )
 					ORDER BY a.start_time asc, a.status_id desc
 					';
@@ -163,7 +163,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'date_stamp' => $this->db->BindDate( $date_stamp ),
 					);
 
@@ -202,9 +202,9 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'date_stamp' => $this->db->BindDate( $date_stamp ),
-					'status_id' => $status_id,
+					'status_id' => (int)$status_id,
 					);
 
 		$query = '
@@ -254,7 +254,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 					from	'. $this->getTable() .' as a
 					where	a.date_stamp >= ?
 						AND a.date_stamp <= ?
-						AND a.user_id in ('. $this->getListSQL( $user_id, $ph ) .')
+						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .')
 						AND ( a.deleted = 0 )
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -281,7 +281,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$otpf = new OverTimePolicyFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'week_start_epoch' => $this->db->BindDate( $week_start_epoch ),
 					'epoch' =>	$this->db->BindDate( $epoch ),
 					);
@@ -343,7 +343,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 
 		$ph = array(
 					'date' => $this->db->BindDate( $date ),
-					'type_id' => $type_id,
+					'type_id' => (int)$type_id,
 					);
 
 		$query = '
@@ -351,7 +351,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 					from	'. $this->getTable() .' as a
 					where	a.date_stamp '. $direction .' ?
 						AND a.status_id = ?
-						AND a.user_id in ('. $this->getListSQL( $user_id, $ph ) .')
+						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .')
 						AND ( a.deleted = 0 )
 					';
 
@@ -386,24 +386,8 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$start_timestamp = $this->db->BindTimeStamp( $start_date );
 		$end_timestamp = $this->db->BindTimeStamp( $end_date );
 
-/*
-	This doesn't allow matching start/end times. SO it doesn't work with
-	scheduling job transfers.
-						(
-							(start_time >= '. $start_date .' AND end_time <= '. $end_date .')
-							OR
-							(start_time >= '. $start_date .' AND start_time <= '. $end_date .')
-							OR
-							(end_time >= '. $start_date .' AND end_time <= '. $end_date .')
-							OR
-							(start_time <= '. $start_date .' AND end_time >= '. $end_date .')
-						)
-
-
-*/
-
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'start_date_a' => $start_datestamp,
 					'end_date_b' => $end_datestamp,
 					'id' => (int)$id,
@@ -492,11 +476,255 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		return FALSE;
 	}
 
+	//Returning RecurringScheduleIDs that have already been overridden by a committed shift, so we can exclude them from subsequent queries like getSearchByCompanyIdAndArrayCriteria()
+	function getOverriddenOpenShiftRecurringSchedules( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			//$order = array( 'udf.pay_period_id' => 'asc', 'udf.user_id' => 'asc', 'a.start_time' => 'asc' );
+			$order = array( 'uf.last_name' => 'asc', 'a.start_time' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		Debug::Text('Getting overrriden Open Shifts...', __FILE__, __LINE__, __METHOD__, 10);
+
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( isset($filter_data['pay_period_ids']) ) {
+			$filter_data['pay_period_id'] = $filter_data['pay_period_ids'];
+		}
+
+		if ( isset($filter_data['user_status_ids']) ) {
+			$filter_data['user_status_id'] = $filter_data['user_status_ids'];
+		}
+		if ( isset($filter_data['user_title_ids']) ) {
+			$filter_data['title_id'] = $filter_data['user_title_ids'];
+		}
+		if ( isset($filter_data['group_ids']) ) {
+			$filter_data['group_id'] = $filter_data['group_ids'];
+		}
+		if ( isset($filter_data['default_branch_ids']) ) {
+			$filter_data['default_branch_id'] = $filter_data['default_branch_ids'];
+		}
+		if ( isset($filter_data['default_department_ids']) ) {
+			$filter_data['default_department_id'] = $filter_data['default_department_ids'];
+		}
+		if ( isset($filter_data['status_ids']) ) {
+			$filter_data['status_id'] = $filter_data['status_ids'];
+		}
+		if ( isset($filter_data['branch_ids']) ) {
+			$filter_data['schedule_branch_id'] = $filter_data['branch_ids'];
+		}
+		if ( isset($filter_data['department_ids']) ) {
+			$filter_data['schedule_department_id'] = $filter_data['department_ids'];
+		}
+		if ( isset($filter_data['schedule_branch_ids']) ) {
+			$filter_data['schedule_branch_id'] = $filter_data['schedule_branch_ids'];
+		}
+		if ( isset($filter_data['schedule_department_ids']) ) {
+			$filter_data['schedule_department_id'] = $filter_data['schedule_department_ids'];
+		}
+
+		if ( isset($filter_data['exclude_job_ids']) ) {
+			$filter_data['exclude_id'] = $filter_data['exclude_job_ids'];
+		}
+		if ( isset($filter_data['include_job_ids']) ) {
+			$filter_data['include_job_id'] = $filter_data['include_job_ids'];
+		}
+		if ( isset($filter_data['job_group_ids']) ) {
+			$filter_data['job_group_id'] = $filter_data['job_group_ids'];
+		}
+		if ( isset($filter_data['job_item_ids']) ) {
+			$filter_data['job_item_id'] = $filter_data['job_item_ids'];
+		}
+
+		$uf = new UserFactory();
+		$apf = new AbsencePolicyFactory();
+		$rsf = new RecurringScheduleFactory();
+		$rscf = new RecurringScheduleControlFactory();
+
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+			$jf = new JobFactory();
+			$jif = new JobItemFactory();
+		}
+
+		$ph = array();
+
+		$query = '
+					SELECT
+							a.id as id,
+							a.user_id as user_id,
+							a.recurring_schedule_id as recurring_schedule_id
+					FROM
+						(
+								SELECT
+										rsf_b.id as id,
+										rsf_b.company_id as company_id,
+										rsf_b.user_id as user_id,
+										rsf_b.status_id as status_id,
+										rsf_b.start_time as start_time,
+										rsf_b.end_time as end_time,
+
+										rsf_b.branch_id as branch_id,
+										rsf_b.department_id as department_id,
+										rsf_b.job_id as job_id,
+										rsf_b.job_item_id as job_item_id,
+										rsf_b.total_time as total_time,
+										rsf_b.schedule_policy_id as schedule_policy_id,
+										rsf_b.absence_policy_id as absence_policy_id,
+										rsf_b.deleted as deleted,
+										sf_c.id as recurring_schedule_id
+								FROM '. $rsf->getTable() .' as rsf_b
+								LEFT JOIN '. $rscf->getTable() .' as rscf_b ON rsf_b.recurring_schedule_control_id = rscf_b.id
+								LEFT JOIN schedule as sf_c ON 			(
+																			rsf_b.company_id = sf_c.company_id
+																			AND rsf_b.user_id = 0
+																			AND ( rsf_b.branch_id = sf_c.branch_id OR rsf_b.branch_id = -1 )
+																			AND ( rsf_b.department_id = sf_c.department_id OR rsf_b.department_id = -1 )
+																			AND ( rsf_b.job_id = sf_c.job_id OR rsf_b.job_id = -1 )
+																			AND ( rsf_b.job_item_id = sf_c.job_item_id OR rsf_b.job_item_id = -1 )
+																			AND rsf_b.start_time = sf_c.start_time
+																			AND rsf_b.end_time = sf_c.end_time ';
+
+		$query .= ( isset($filter_data['start_date']) ) ? $this->getWhereClauseSQL( 'sf_c.start_time', $filter_data['start_date'], 'start_timestamp', $ph ) : NULL;
+		$query .= ( isset($filter_data['end_date']) ) ? $this->getWhereClauseSQL( 'sf_c.start_time', $filter_data['end_date'], 'end_timestamp', $ph ) : NULL;
+		$ph['company_id'] = (int)$company_id;
+		
+		$query .= '
+																			AND sf_c.deleted = 0
+																		)
+								WHERE rsf_b.company_id = ?
+									AND rsf_b.user_id = 0
+									AND sf_c.id IS NOT NULL
+									AND ( rsf_b.deleted = 0 AND rscf_b.deleted = 0 )
+
+							UNION ALL
+
+								SELECT
+										rsf_b.id as id,
+										rsf_b.company_id as company_id,
+										rsf_b.user_id as user_id,
+										rsf_b.status_id as status_id,
+										rsf_b.start_time as start_time,
+										rsf_b.end_time as end_time,
+			
+										rsf_b.branch_id as branch_id,
+										rsf_b.department_id as department_id,
+										rsf_b.job_id as job_id,
+										rsf_b.job_item_id as job_item_id,
+										rsf_b.total_time as total_time,
+										rsf_b.schedule_policy_id as schedule_policy_id,
+										rsf_b.absence_policy_id as absence_policy_id,
+										rsf_b.deleted as deleted,
+										rsf_c.id as recurring_schedule_id
+								FROM '. $rsf->getTable() .' as rsf_b
+								LEFT JOIN '. $rscf->getTable() .' as rscf_b ON rsf_b.recurring_schedule_control_id = rscf_b.id
+								LEFT JOIN '. $rsf->getTable() .' as rsf_c ON 	(
+																			rsf_b.company_id = rsf_c.company_id
+																			AND ( rsf_b.user_id = 0 AND rsf_c.user_id != 0 )
+																			AND ( rsf_b.branch_id = rsf_c.branch_id OR rsf_c.branch_id = -1 )
+																			AND ( rsf_b.department_id = rsf_c.department_id OR rsf_c.department_id = -1 )
+																			AND ( rsf_b.job_id = rsf_c.job_id OR rsf_c.job_id = -1 )
+																			AND ( rsf_b.job_item_id = rsf_c.job_item_id OR rsf_c.job_item_id = -1 )
+																			AND rsf_b.start_time = rsf_c.start_time
+																			AND rsf_b.end_time = rsf_c.end_time ';
+
+		$query .= ( isset($filter_data['start_date']) ) ? $this->getWhereClauseSQL( 'rsf_c.start_time', $filter_data['start_date'], 'start_timestamp', $ph ) : NULL;
+		$query .= ( isset($filter_data['end_date']) ) ? $this->getWhereClauseSQL( 'rsf_c.start_time', $filter_data['end_date'], 'end_timestamp', $ph ) : NULL;
+		$ph['company_id2'] = (int)$company_id;
+
+		$query .= '
+																			AND ( rsf_c.deleted = 0 AND rscf_b.deleted = 0 )
+																		)
+								WHERE rsf_b.company_id = ?
+									AND rsf_b.user_id = 0
+									AND rsf_c.id IS NOT NULL
+									AND ( rsf_b.deleted = 0 AND rscf_b.deleted = 0 )
+						) as a
+					LEFT JOIN '. $uf->getTable() .' as uf ON a.user_id = uf.id
+					LEFT JOIN '. $apf->getTable() .' as apf ON a.absence_policy_id = apf.id
+					';
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+			$query .= '	LEFT JOIN '. $jf->getTable() .' as x ON a.job_id = x.id';
+			$query .= '	LEFT JOIN '. $jif->getTable() .' as y ON a.job_item_id = y.id';
+		}
+
+		$ph['company_id3'] = (int)$company_id;		
+		$query .= '	WHERE ( a.company_id = ? )
+				';
+
+		$query .= ( isset($filter_data['schedule_branch_id']) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['schedule_branch_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['schedule_department_id']) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['schedule_department_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['schedule_policy_id']) ) ? $this->getWhereClauseSQL( 'a.schedule_policy_id', $filter_data['schedule_policy_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['absence_policy_id']) ) ? $this->getWhereClauseSQL( 'a.absence_policy_id', $filter_data['absence_policy_id'], 'numeric_list', $ph ) : NULL;
+
+		//$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['user_status_id']) ) ? $this->getWhereClauseSQL( 'uf.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'uf.group_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
+		
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+			$query .= ( isset($filter_data['job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['job_id'], 'numeric_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['include_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['include_job_id'], 'numeric_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['exclude_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['exclude_job_id'], 'not_numeric_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['job_group_id']) ) ? $this->getWhereClauseSQL( 'x.group_id', $filter_data['job_group_id'], 'numeric_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['job_item_id'], 'numeric_list', $ph ) : NULL;
+		}
+
+		$query .= ( isset($filter_data['start_date']) ) ? $this->getWhereClauseSQL( 'a.start_time', $filter_data['start_date'], 'start_timestamp', $ph ) : NULL;
+		$query .= ( isset($filter_data['end_date']) ) ? $this->getWhereClauseSQL( 'a.start_time', $filter_data['end_date'], 'end_timestamp', $ph ) : NULL;
+
+		$query .=	'
+						AND ( a.deleted = 0 AND ( uf.deleted IS NULL OR uf.deleted = 0 ) )
+					';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		$rows = $this->db->GetAll( $query, $ph );
+		if ( is_array($rows) ) {
+			//Debug::Arr($rows, 'Result: ', __FILE__, __LINE__, __METHOD__, 10);
+			$schedule_conflict_index = array();
+			$recurring_schedule_conflict_index = array();
+			foreach( $rows as $row ) {
+				if ( !isset($schedule_conflict_index[$row['id']]) AND !isset($recurring_schedule_conflict_index[$row['recurring_schedule_id']]) ) {
+					//Debug::Text('  Adding... ID: '. $row['id'] .' Recurring Schedule ID: '. $row['recurring_schedule_id'], __FILE__, __LINE__, __METHOD__, 10);
+					$schedule_conflict_index[$row['id']] = TRUE;
+					$recurring_schedule_conflict_index[$row['recurring_schedule_id']] = TRUE;
+				}
+				//else {
+				//	Debug::Text('  Skipping... ID: '. $row['id'] .' Recurring Schedule ID: '. $row['recurring_schedule_id'] .'('. (int)isset($recurring_schedule_conflict_index[$row['recurring_schedule_id']]).')', __FILE__, __LINE__, __METHOD__, 10);
+				//}
+			}
+			$retarr = array_keys( $schedule_conflict_index );
+		}
+
+		if ( isset($retarr) ) {
+			//Debug::Arr($retarr, 'Excluded Recurring OPEN shifts: ', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text('Excluded Recurring OPEN shifts: '. count($retarr), __FILE__, __LINE__, __METHOD__, 10);
+			return $retarr;
+		}
+
+		Debug::Text('NO Excluded Recurring OPEN shifts...', __FILE__, __LINE__, __METHOD__, 10);
+		return FALSE;
+	}
+
 	function getSearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
 
+		$exclude_recurring_schedule_ids = $this->getOverriddenOpenShiftRecurringSchedules( $company_id, $filter_data );
+		
 		if ( !is_array($order) ) {
 			//Use Filter Data ordering if its set.
 			if ( isset($filter_data['sort_column']) AND $filter_data['sort_order']) {
@@ -517,7 +745,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 		if ( $order == NULL ) {
 			//$order = array( 'udf.pay_period_id' => 'asc', 'udf.user_id' => 'asc', 'a.start_time' => 'asc' );
-			$order = array( 'uf.last_name' => 'asc', 'a.start_time' => 'asc' );
+			$order = array( 'a.user_id' => '= 0 desc', 'uf.last_name' => 'asc', 'a.start_time' => 'asc' );
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;
@@ -590,16 +818,17 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$df = new DepartmentFactory();
 		$ugf = new UserGroupFactory();
 		$utf = new UserTitleFactory();
+		$rsf = new RecurringScheduleFactory();
+		$rscf = new RecurringScheduleControlFactory();
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jf = new JobFactory();
+			$jgf = new JobGroupFactory();
 			$jif = new JobItemFactory();
+			$jigf = new JobItemGroupFactory();
 		}
 
-		$ph = array(
-					'company_id' => $company_id,
-					'company_id2' => $company_id,
-					);
+		$ph = array();
 
 		$query = '
 					select
@@ -649,41 +878,159 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$query .= ',
-						x.name as job,
-						x.status_id as job_status_id,
-						x.manual_id as job_manual_id,
-						x.branch_id as job_branch_id,
-						x.department_id as job_department_id,
-						x.group_id as job_group_id,
+							jfb.name as default_job,
+							jifb.name as default_job_item,
 
-						y.name as job_item,
-						y.manual_id as job_item_manual_id,
-						y.group_id as job_item_group_id';
+							jf.name as job,
+							jf.description as job_description,
+							jf.status_id as job_status_id,
+							jf.manual_id as job_manual_id,
+							jf.branch_id as job_branch_id,
+							jbf.name as job_branch,
+							jf.department_id as job_department_id,
+							jdf.name as job_department,
+							jf.group_id as job_group_id,
+							jgf.name as job_group,
+							jf.other_id1 as job_other_id1,
+							jf.other_id2 as job_other_id2,
+							jf.other_id3 as job_other_id3,
+							jf.other_id4 as job_other_id4,
+							jf.other_id5 as job_other_id5,
+							jif.name as job_item,
+							jif.description as job_item_description,
+							jif.manual_id as job_item_manual_id,
+							jif.group_id as job_item_group_id,
+							jigf.name as job_item_group
+							';
 		}
 
 		$query .= '
-					from	'. $this->getTable() .' as a
-							LEFT JOIN '. $uf->getTable() .' as uf ON a.user_id = uf.id
-							LEFT JOIN '. $bf->getTable() .' as bf ON ( uf.default_branch_id = bf.id AND bf.deleted = 0)
-							LEFT JOIN '. $bf->getTable() .' as bfb ON ( a.branch_id = bfb.id AND bfb.deleted = 0)
-							LEFT JOIN '. $df->getTable() .' as df ON ( uf.default_department_id = df.id AND df.deleted = 0)
-							LEFT JOIN '. $df->getTable() .' as dfb ON ( a.department_id = dfb.id AND dfb.deleted = 0)
-							LEFT JOIN '. $ugf->getTable() .' as ugf ON ( uf.group_id = ugf.id AND ugf.deleted = 0 )
-							LEFT JOIN '. $utf->getTable() .' as utf ON ( uf.title_id = utf.id AND utf.deleted = 0 )
-							LEFT JOIN '. $apf->getTable() .' as apf ON a.absence_policy_id = apf.id
-							LEFT JOIN '. $uwf->getTable() .' as uwf ON uwf.id = (select z.id
-																		from '. $uwf->getTable() .' as z
-																		where z.user_id = a.user_id
-																			and z.effective_date <= a.date_stamp
-																			and z.deleted = 0
-																			order by z.effective_date desc limit 1)
+					FROM (
+							(
+								SELECT
+									sf.id as id,
+									sf.id as schedule_id,
+									sf.company_id as company_id,
+
+									sf.user_id as user_id,
+									sf.recurring_schedule_template_control_id,
+									sf.date_stamp as date_stamp,
+									sf.pay_period_id as pay_period_id,
+
+									sf.status_id as status_id,
+									sf.start_time as start_time,
+									sf.end_time as end_time,
+
+									sf.branch_id as branch_id,
+									sf.department_id as department_id,
+									sf.job_id as job_id,
+									sf.job_item_id as job_item_id,
+									sf.total_time as total_time,
+									sf.schedule_policy_id as schedule_policy_id,
+									sf.absence_policy_id as absence_policy_id,
+
+									sf.note as note,
+
+									sf.created_date as created_date,
+									sf.updated_date as updated_date,
+									sf.deleted as deleted
+								FROM schedule as sf
+								WHERE sf.company_id = '. (int)$company_id .'
+									AND sf.deleted = 0
+							)
+						UNION ALL
+							(
+								SELECT
+									NULL as id,
+									rsf.id as schedule_id,
+									rsf.company_id as company_id,
+
+									rsf.user_id as user_id,
+									rsf.recurring_schedule_template_control_id,
+									rsf.date_stamp as date_stamp,
+									NULL as pay_period_id,
+
+									rsf.status_id as status_id,
+									rsf.start_time as start_time,
+									rsf.end_time as end_time,
+
+									CASE WHEN rsf.branch_id = -1 THEN uf_b.default_branch_id ELSE rsf.branch_id END as branch_id,
+									CASE WHEN rsf.department_id = -1 THEN uf_b.default_department_id ELSE rsf.department_id END as department_id,
+									CASE WHEN rsf.job_id = -1 THEN uf_b.default_job_id ELSE rsf.job_id END as job_id,
+									CASE WHEN rsf.job_item_id = -1 THEN uf_b.default_job_item_id ELSE rsf.job_item_id END as job_item_id,
+
+									rsf.total_time as total_time,
+									rsf.schedule_policy_id as schedule_policy_id,
+									rsf.absence_policy_id as absence_policy_id,
+
+									rsf.note as note,
+
+									rsf.created_date as created_date,
+									rsf.updated_date as updated_date,
+									rsf.deleted as deleted
+								FROM '. $rsf->getTable() .' as rsf
+								LEFT JOIN '. $rscf->getTable() .' as rscf ON rsf.recurring_schedule_control_id = rscf.id
+								LEFT JOIN '. $uf->getTable() .' as uf_b ON rsf.user_id = uf_b.id
+								LEFT JOIN schedule as sf_b ON (
+																( sf_b.user_id != 0 AND sf_b.user_id = rsf.user_id )
+																AND
+																(
+																sf_b.start_time >= rsf.start_time AND sf_b.end_time <= rsf.end_time
+																OR
+																sf_b.start_time >= rsf.start_time AND sf_b.start_time < rsf.end_time
+																OR
+																sf_b.end_time > rsf.start_time AND sf_b.end_time <= rsf.end_time
+																OR
+																sf_b.start_time <= rsf.start_time AND sf_b.end_time >= rsf.end_time
+																OR
+																sf_b.start_time = rsf.start_time AND sf_b.end_time = rsf.end_time
+																)
+																AND sf_b.deleted = 0
+															)
+								WHERE sf_b.id is NULL
+									AND rsf.company_id = '. (int)$company_id .'
+									AND ( uf_b.hire_date IS NULL OR '. $this->getSQLToTimeStampFunction() .'(uf_b.hire_date) <= rsf.date_stamp )
+									AND ( uf_b.termination_date IS NULL OR '. $this->getSQLToTimeStampFunction() .'(uf_b.termination_date) >= rsf.date_stamp )';
+
+					if ( $exclude_recurring_schedule_ids != FALSE ) {
+						$query .= ' AND rsf.id NOT IN ( '. $this->getListSQL( $exclude_recurring_schedule_ids ) .' ) ';
+					}
+
+					$query .= '
+									AND ( rsf.deleted = 0 AND rscf.deleted = 0 AND ( uf_b.deleted IS NULL OR uf_b.deleted = 0 ) )
+							)
+					) as a
+
+					LEFT JOIN '. $uf->getTable() .' as uf ON a.user_id = uf.id
+					LEFT JOIN '. $bf->getTable() .' as bf ON ( uf.default_branch_id = bf.id AND bf.deleted = 0)
+					LEFT JOIN '. $bf->getTable() .' as bfb ON ( a.branch_id = bfb.id AND bfb.deleted = 0)
+					LEFT JOIN '. $df->getTable() .' as df ON ( uf.default_department_id = df.id AND df.deleted = 0)
+					LEFT JOIN '. $df->getTable() .' as dfb ON ( a.department_id = dfb.id AND dfb.deleted = 0)
+					LEFT JOIN '. $ugf->getTable() .' as ugf ON ( uf.group_id = ugf.id AND ugf.deleted = 0 )
+					LEFT JOIN '. $utf->getTable() .' as utf ON ( uf.title_id = utf.id AND utf.deleted = 0 )
+					LEFT JOIN '. $apf->getTable() .' as apf ON a.absence_policy_id = apf.id
+					LEFT JOIN '. $uwf->getTable() .' as uwf ON uwf.id = (select z.id
+																from '. $uwf->getTable() .' as z
+																where z.user_id = a.user_id
+																	and z.effective_date <= a.date_stamp
+																	and z.deleted = 0
+																	order by z.effective_date desc limit 1)
 					';
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			$query .= '	LEFT JOIN '. $jf->getTable() .' as x ON a.job_id = x.id';
-			$query .= '	LEFT JOIN '. $jif->getTable() .' as y ON a.job_item_id = y.id';
+			$query .= '
+						LEFT JOIN '. $jf->getTable() .' as jfb ON uf.default_job_id = jfb.id
+						LEFT JOIN '. $jif->getTable() .' as jifb ON uf.default_job_item_id = jifb.id
+			
+						LEFT JOIN '. $jf->getTable() .' as jf ON a.job_id = jf.id
+						LEFT JOIN '. $jif->getTable() .' as jif ON a.job_item_id = jif.id
+						LEFT JOIN '. $bf->getTable() .' as jbf ON jf.branch_id = jbf.id
+						LEFT JOIN '. $df->getTable() .' as jdf ON jf.department_id = jdf.id
+						LEFT JOIN '. $jgf->getTable() .' as jgf ON jf.group_id = jgf.id
+						LEFT JOIN '. $jigf->getTable() .' as jigf ON jif.group_id = jigf.id
+						';
 		}
 
-		$query .= '	WHERE ( uf.company_id = ? OR a.company_id = ? )';
+		$query .= '	WHERE ( a.company_id = '. (int)$company_id .' )';
 
 		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
 		//Make sure we filter on user_date.user_id column, to handle OPEN shifts.
@@ -695,7 +1042,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
-
+		$query .= ( isset($filter_data['recurring_schedule_template_control_id']) ) ? $this->getWhereClauseSQL( 'a.recurring_schedule_template_control_id', $filter_data['recurring_schedule_template_control_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['schedule_branch_id']) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['schedule_branch_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['schedule_department_id']) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['schedule_department_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
@@ -708,7 +1055,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 			$query .= ( isset($filter_data['job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['job_id'], 'numeric_list', $ph ) : NULL;
 			$query .= ( isset($filter_data['include_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['include_job_id'], 'numeric_list', $ph ) : NULL;
 			$query .= ( isset($filter_data['exclude_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['exclude_job_id'], 'not_numeric_list', $ph ) : NULL;
-			$query .= ( isset($filter_data['job_group_id']) ) ? $this->getWhereClauseSQL( 'x.group_id', $filter_data['job_group_id'], 'numeric_list', $ph ) : NULL;
+			$query .= ( isset($filter_data['job_group_id']) ) ? $this->getWhereClauseSQL( 'jf.group_id', $filter_data['job_group_id'], 'numeric_list', $ph ) : NULL;
 			$query .= ( isset($filter_data['job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['job_item_id'], 'numeric_list', $ph ) : NULL;
 		}
 
@@ -730,173 +1077,6 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
-
-		return $this;
-	}
-
-	function getReportByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		if ( $company_id == '' ) {
-			return FALSE;
-		}
-
-		if ( isset($filter_data['branch_ids']) ) {
-			$filter_data['branch_id'] = $filter_data['branch_ids'];
-		}
-		if ( isset($filter_data['department_ids']) ) {
-			$filter_data['department_id'] = $filter_data['department_ids'];
-		}
-
-		if ( isset($filter_data['punch_branch_ids']) ) {
-			$filter_data['punch_branch_id'] = $filter_data['punch_branch_ids'];
-		}
-		if ( isset($filter_data['punch_department_ids']) ) {
-			$filter_data['punch_department_id'] = $filter_data['punch_department_ids'];
-		}
-
-		$uf = new UserFactory();
-
-		$ph = array( 'company_id' => $company_id );
-
-		$query = '
-					select	a.user_id as user_id,
-							a.pay_period_id as pay_period_id,
-							a.status_id as status_id,
-							sum(total_time) as total_time
-					from	'. $this->getTable() .' as a,
-							'. $uf->getTable() .' as c
-					where	a.user_id = c.id
-						AND c.company_id = ? ';
-		if ( isset($filter_data['user_id']) AND isset($filter_data['user_id'][0]) AND !in_array(-1, (array)$filter_data['user_id']) ) {
-			$query	.=	' AND a.user_id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
-		}
-
-		if ( isset($filter_data['pay_period_ids']) AND isset($filter_data['pay_period_ids'][0]) AND !in_array(-1, (array)$filter_data['pay_period_ids']) ) {
-			$query .=	' AND a.pay_period_id in ('. $this->getListSQL($filter_data['pay_period_ids'], $ph) .') ';
-		}
-
-		//Schedule/Punch branches/departments
-		if ( isset($filter_data['punch_branch_id']) AND isset($filter_data['punch_branch_id'][0]) AND !in_array(-1, (array)$filter_data['punch_branch_id']) ) {
-			$query .=	' AND a.branch_id in ('. $this->getListSQL($filter_data['punch_branch_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['punch_department_id']) AND isset($filter_data['punch_department_id'][0]) AND !in_array(-1, (array)$filter_data['punch_department_id']) ) {
-			$query .=	' AND a.department_id in ('. $this->getListSQL($filter_data['punch_department_id'], $ph) .') ';
-		}
-
-		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
-			$ph[] = $this->db->BindDate($filter_data['start_date']);
-			$query	.=	' AND a.date_stamp >= ?';
-		}
-		if ( isset($filter_data['end_date']) AND !is_array($filter_data['end_date']) AND trim($filter_data['end_date']) != '' ) {
-			$ph[] = $this->db->BindDate($filter_data['end_date']);
-			$query	.=	' AND a.date_stamp <= ?';
-		}
-
-		$query .= '		AND ( a.deleted = 0 AND c.deleted = 0)
-					GROUP BY a.user_id, a.pay_period_id, a.status_id
-					';
-		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
-
-		$this->ExecuteSQL( $query, $ph );
-
-		return $this;
-	}
-
-	function getDayReportByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		if ( $company_id == '' ) {
-			return FALSE;
-		}
-
-		if ( isset($filter_data['branch_ids']) ) {
-			$filter_data['branch_id'] = $filter_data['branch_ids'];
-		}
-		if ( isset($filter_data['department_ids']) ) {
-			$filter_data['department_id'] = $filter_data['department_ids'];
-		}
-
-		if ( isset($filter_data['punch_branch_ids']) ) {
-			$filter_data['punch_branch_id'] = $filter_data['punch_branch_ids'];
-		}
-		if ( isset($filter_data['punch_department_ids']) ) {
-			$filter_data['punch_department_id'] = $filter_data['punch_department_ids'];
-		}
-
-		$uf = new UserFactory();
-
-		$ph = array( 'company_id' => $company_id );
-
-		$query = '
-					select	a.user_id as user_id,
-							a.pay_period_id as pay_period_id,
-							a.date_stamp as date_stamp,
-							a.status_id as status_id,
-							sum(total_time) as total_time
-					from	'. $this->getTable() .' as a,
-							'. $uf->getTable() .' as c
-					where	a.user_id = c.id
-						AND c.company_id = ?
-					';
-
-		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query	.=	' AND a.user_id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
-		}
-
-		if ( isset($filter_data['user_id']) AND isset($filter_data['user_id'][0]) AND !in_array(-1, (array)$filter_data['user_id']) ) {
-			$query	.=	' AND a.user_id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
-		}
-
-		if ( isset($filter_data['user_status_id']) AND isset($filter_data['user_status_id'][0]) AND !in_array(-1, (array)$filter_data['user_status_id']) ) {
-			$query	.=	' AND c.status_id in ('. $this->getListSQL($filter_data['user_status_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['group_id']) AND isset($filter_data['group_id'][0]) AND !in_array(-1, (array)$filter_data['group_id']) ) {
-			if ( isset($filter_data['include_subgroups']) AND (bool)$filter_data['include_subgroups'] == TRUE ) {
-				$uglf = new UserGroupListFactory();
-				$filter_data['group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['group_id'], TRUE);
-			}
-			$query	.=	' AND c.group_id in ('. $this->getListSQL($filter_data['group_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['default_branch_id']) AND isset($filter_data['default_branch_id'][0]) AND !in_array(-1, (array)$filter_data['default_branch_id']) ) {
-			$query	.=	' AND c.default_branch_id in ('. $this->getListSQL($filter_data['default_branch_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['default_department_id']) AND isset($filter_data['default_department_id'][0]) AND !in_array(-1, (array)$filter_data['default_department_id']) ) {
-			$query	.=	' AND c.default_department_id in ('. $this->getListSQL($filter_data['default_department_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['pay_period_ids']) AND isset($filter_data['pay_period_ids'][0]) AND !in_array(-1, (array)$filter_data['pay_period_ids']) ) {
-			$query .=	' AND a.pay_period_id in ('. $this->getListSQL($filter_data['pay_period_ids'], $ph) .') ';
-		}
-		if ( isset($filter_data['title_id']) AND isset($filter_data['title_id'][0]) AND !in_array(-1, (array)$filter_data['title_id']) ) {
-			$query	.=	' AND c.title_id in ('. $this->getListSQL($filter_data['title_id'], $ph) .') ';
-		}
-
-		//Schedule/Punch branches/departments
-		if ( isset($filter_data['punch_branch_id']) AND isset($filter_data['punch_branch_id'][0]) AND !in_array(-1, (array)$filter_data['punch_branch_id']) ) {
-			$query .=	' AND a.branch_id in ('. $this->getListSQL($filter_data['punch_branch_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['punch_department_id']) AND isset($filter_data['punch_department_id'][0]) AND !in_array(-1, (array)$filter_data['punch_department_id']) ) {
-			$query .=	' AND a.department_id in ('. $this->getListSQL($filter_data['punch_department_id'], $ph) .') ';
-		}
-
-		if ( isset($filter_data['schedule_policy_id']) AND isset($filter_data['schedule_policy_id'][0]) AND !in_array(-1, (array)$filter_data['schedule_policy_id']) ) {
-			$query	.=	' AND a.schedule_policy_id in ('. $this->getListSQL($filter_data['schedule_policy_id'], $ph) .') ';
-		}
-
-		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
-			$ph[] = $this->db->BindDate($filter_data['start_date']);
-			$query	.=	' AND a.date_stamp >= ?';
-		}
-		if ( isset($filter_data['end_date']) AND !is_array($filter_data['end_date']) AND trim($filter_data['end_date']) != '' ) {
-			$ph[] = $this->db->BindDate($filter_data['end_date']);
-			$query	.=	' AND a.date_stamp <= ?';
-		}
-
-		$query .= '
-						AND ( a.deleted = 0 AND c.deleted = 0)
-					GROUP BY a.user_id, a.pay_period_id, a.date_stamp, a.status_id
-					';
-		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
-
-		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -1000,8 +1180,8 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
-					'company_id2' => $company_id,
+					'company_id' => (int)$company_id,
+					'company_id2' => (int)$company_id,
 					);
 
 		//"group" is a reserved word in MySQL.
@@ -1022,6 +1202,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 							a.total_time as total_time,
 							a.schedule_policy_id as schedule_policy_id,
 							a.absence_policy_id as absence_policy_id,
+							a.recurring_schedule_template_control_id as recurring_schedule_template_control_id,
 							a.note as note,
 
 							i.name as schedule_policy,
@@ -1046,6 +1227,11 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 
 							m.id as user_wage_id,
 							m.effective_date as user_wage_effective_date,
+
+							a.created_date as created_date,
+							a.created_by as created_by,
+							a.updated_date as updated_date,
+							a.updated_by as updated_by,
 
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
@@ -1142,277 +1328,6 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .=	' AND ( a.deleted = 0 ) ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
-
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
-
-		return $this;
-	}
-
-	function getScheduleSummaryReportByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
-		if ( $company_id == '') {
-			return FALSE;
-		}
-
-		if ( !is_array($order) ) {
-			//Use Filter Data ordering if its set.
-			if ( isset($filter_data['sort_column']) AND $filter_data['sort_order']) {
-				$order = array(Misc::trimSortPrefix($filter_data['sort_column']) => $filter_data['sort_order']);
-			}
-		}
-
-		$additional_order_fields = array('schedule_policy_id', 'schedule_policy', 'first_name', 'last_name', 'user_status_id', 'group_id', 'group', 'title_id', 'title', 'default_branch_id', 'default_branch', 'default_department_id', 'default_department', 'total_time', 'date_stamp', 'pay_period_id', );
-
-		$sort_column_aliases = array(
-									'updated_date' => 'a.updated_date',
-									'created_date' => 'a.created_date',
-									);
-
-		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
-
-		if ( $order == NULL ) {
-			$order = array( 'a.pay_period_id' => 'asc', 'a.user_id' => 'asc', 'a.start_time' => 'asc' );
-			$strict = FALSE;
-		} else {
-			$strict = TRUE;
-		}
-		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
-		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
-
-		if ( isset($filter_data['exclude_user_ids']) ) {
-			$filter_data['exclude_user_id'] = $filter_data['exclude_user_ids'];
-		}
-		if ( isset($filter_data['include_user_ids']) ) {
-			$filter_data['include_user_id'] = $filter_data['include_user_ids'];
-		}
-		if ( isset($filter_data['user_status_ids']) ) {
-			$filter_data['user_status_id'] = $filter_data['user_status_ids'];
-		}
-		if ( isset($filter_data['user_title_ids']) ) {
-			$filter_data['title_id'] = $filter_data['user_title_ids'];
-		}
-		if ( isset($filter_data['group_ids']) ) {
-			$filter_data['group_id'] = $filter_data['group_ids'];
-		}
-		if ( isset($filter_data['default_branch_ids']) ) {
-			$filter_data['default_branch_id'] = $filter_data['default_branch_ids'];
-		}
-		if ( isset($filter_data['default_department_ids']) ) {
-			$filter_data['default_department_id'] = $filter_data['default_department_ids'];
-		}
-		if ( isset($filter_data['branch_ids']) ) {
-			$filter_data['branch_id'] = $filter_data['branch_ids'];
-		}
-		if ( isset($filter_data['department_ids']) ) {
-			$filter_data['department_id'] = $filter_data['department_ids'];
-		}
-
-		if ( isset($filter_data['schedule_branch_id']) ) {
-			$filter_data['branch_id'] = $filter_data['schedule_branch_id'];
-		}
-		if ( isset($filter_data['schedule_department_id']) ) {
-			$filter_data['department_id'] = $filter_data['schedule_department_id'];
-		}
-
-		if ( isset($filter_data['exclude_job_ids']) ) {
-			$filter_data['exclude_job_id'] = $filter_data['exclude_job_ids'];
-		}
-		if ( isset($filter_data['include_job_ids']) ) {
-			$filter_data['include_job_id'] = $filter_data['include_job_ids'];
-		}
-		if ( isset($filter_data['job_group_ids']) ) {
-			$filter_data['job_group_id'] = $filter_data['job_group_ids'];
-		}
-		if ( isset($filter_data['job_item_ids']) ) {
-			$filter_data['job_item_id'] = $filter_data['job_item_ids'];
-		}
-		if ( isset($filter_data['pay_period_ids']) ) {
-			$filter_data['pay_period_id'] = $filter_data['pay_period_ids'];
-		}
-
-		if ( isset($filter_data['start_time']) ) {
-			$filter_data['start_date'] = $filter_data['start_time'];
-		}
-		if ( isset($filter_data['end_time']) ) {
-			$filter_data['end_date'] = $filter_data['end_time'];
-		}
-
-		$spf = new SchedulePolicyFactory();
-		$apf = new AbsencePolicyFactory();
-		$uf = new UserFactory();
-		$bf = new BranchFactory();
-		$df = new DepartmentFactory();
-		$ugf = new UserGroupFactory();
-		$utf = new UserTitleFactory();
-		$ppf = new PayPeriodFactory();
-		$uwf = new UserWageFactory();
-
-		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			$jf = new JobFactory();
-			$jif = new JobItemFactory();
-		}
-
-		$ph = array(
-					'company_id' => $company_id,
-					'company_id2' => $company_id,
-					);
-
-		//"group" is a reserved word in MySQL.
-		$query = '
-					select
-							a.id as id,
-							a.id as schedule_id,
-							a.status_id as status_id,
-							a.start_time as start_time,
-							a.end_time as end_time,
-
-							a.branch_id as branch_id,
-							j.name as branch,
-							a.department_id as department_id,
-							k.name as department,
-							a.job_id as job_id,
-							a.job_item_id as job_item_id,
-							a.total_time as total_time,
-							a.schedule_policy_id as schedule_policy_id,
-							i.name as schedule_policy,
-
-							a.note as note,
-
-							a.absence_policy_id as absence_policy_id,
-							apf.name as absence_policy,
-							apf.type_id as absence_policy_type_id,
-
-							a.user_id as user_id,
-							a.date_stamp as date_stamp,
-							ppf.id as pay_period_id,
-							ppf.start_date as pay_period_start_date,
-							ppf.end_date as pay_period_end_date,
-							ppf.transaction_date as pay_period_transaction_date,
-
-							a.pay_period_id as pay_period_id,
-
-							d.first_name as first_name,
-							d.last_name as last_name,
-							d.status_id as user_status_id,
-							d.group_id as group_id,
-							g.name as "group",
-							d.title_id as title_id,
-							h.name as title,
-							d.default_branch_id as default_branch_id,
-							e.name as default_branch,
-							d.default_department_id as default_department_id,
-							f.name as default_department,
-							d.created_by as user_created_by,
-
-							m.id as user_wage_id,
-							m.hourly_rate as user_wage_hourly_rate,
-							m.labor_burden_percent as user_labor_burden_percent,
-							m.effective_date as user_wage_effective_date,
-
-							y.first_name as created_by_first_name,
-							y.middle_name as created_by_middle_name,
-							y.last_name as created_by_last_name,
-							z.first_name as updated_by_first_name,
-							z.middle_name as updated_by_middle_name,
-							z.last_name as updated_by_last_name';
-
-		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			$query .= ',
-						w.name as job_name,
-						w.status_id as job_status_id,
-						w.manual_id as job_manual_id,
-						w.branch_id as job_branch_id,
-						w.department_id as job_department_id,
-						w.group_id as job_group_id';
-		}
-
-		$query .= '
-					from	'. $this->getTable() .' as a
-							LEFT JOIN '. $spf->getTable() .' as i ON ( a.schedule_policy_id = i.id AND i.deleted = 0)
-							LEFT JOIN '. $apf->getTable() .' as apf ON ( a.absence_policy_id = apf.id AND apf.deleted = 0)
-							LEFT JOIN '. $ppf->getTable() .' as ppf ON a.pay_period_id = ppf.id
-							LEFT JOIN '. $uf->getTable() .' as d ON ( a.user_id = d.id AND d.deleted = 0 )
-
-							LEFT JOIN '. $bf->getTable() .' as e ON ( d.default_branch_id = e.id AND e.deleted = 0)
-							LEFT JOIN '. $df->getTable() .' as f ON ( d.default_department_id = f.id AND f.deleted = 0)
-							LEFT JOIN '. $ugf->getTable() .' as g ON ( d.group_id = g.id AND g.deleted = 0 )
-							LEFT JOIN '. $utf->getTable() .' as h ON ( d.title_id = h.id AND h.deleted = 0 )
-
-							LEFT JOIN '. $bf->getTable() .' as j ON ( a.branch_id = j.id AND j.deleted = 0)
-							LEFT JOIN '. $df->getTable() .' as k ON ( a.department_id = k.id AND k.deleted = 0)
-
-							LEFT JOIN '. $uwf->getTable() .' as m ON m.id = (select m.id
-																		from '. $uwf->getTable() .' as m
-																		where m.user_id = a.user_id
-																			and m.effective_date <= a.date_stamp
-																			and m.deleted = 0
-																			order by m.effective_date desc limit 1)
-					';
-		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			$query .= '	LEFT JOIN '. $jf->getTable() .' as w ON a.job_id = w.id';
-			$query .= '	LEFT JOIN '. $jif->getTable() .' as x ON a.job_item_id = x.id';
-		}
-
-		$query .= '
-						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
-						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
-					WHERE ( d.company_id = ? OR a.company_id = ? )';
-
-		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-
-		//Need to include/exclude users based on a.user_id, as we need to support OPEN shifts and user_id=0 which can only happen in user_date table.
-		$query .= ( isset($filter_data['include_user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['include_user_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['exclude_user_id'], 'not_numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_status_id']) ) ? $this->getWhereClauseSQL( 'd.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : NULL;
-
-		if ( isset($filter_data['include_user_subgroups']) AND (bool)$filter_data['include_user_subgroups'] == TRUE ) {
-			$uglf = new UserGroupListFactory();
-			$filter_data['group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['group_id'], TRUE);
-		}
-		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'd.group_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
-
-		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'd.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'd.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'd.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['branch_id']) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['branch_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['department_id']) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['department_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['schedule_policy_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['schedule_policy_id'], 'numeric_list', $ph ) : NULL;
-
-		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'numeric_list', $ph ) : NULL;
-
-		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'd.id', array( 'company_id' => $company_id, 'object_type_id' => 200, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
-
-		//Use the job_id in the schedule table so we can filter by '0' or No Job
-		$query .= ( isset($filter_data['include_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['include_job_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['exclude_job_id'], 'not_numeric_list', $ph ) : NULL;
-		if ( isset($filter_data['include_job_subgroups']) AND (bool)$filter_data['include_job_subgroups'] == TRUE ) {
-			$jglf = new JobGroupListFactory();
-			$filter_data['job_group_id'] = $jglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['job_group_id'], TRUE);
-		}
-		$query .= ( isset($filter_data['job_group_id']) ) ? $this->getWhereClauseSQL( 'w.group_id', $filter_data['job_group_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['job_item_id'], 'numeric_list', $ph ) : NULL;
-
-		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
-			$ph[] = $this->db->BindTimeStamp($filter_data['start_date']);
-			$query	.=	' AND a.start_time >= ?';
-		}
-		if ( isset($filter_data['end_date']) AND !is_array($filter_data['end_date']) AND trim($filter_data['end_date']) != '' ) {
-			$ph[] = $this->db->BindTimeStamp($filter_data['end_date']);
-			$query	.=	' AND a.start_time <= ?';
-		}
-
-		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-
-		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
-
-		$query .=	'
-						AND (a.deleted = 0 )
-					';
-		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
-
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 

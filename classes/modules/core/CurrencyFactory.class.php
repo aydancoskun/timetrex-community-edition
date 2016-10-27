@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -416,11 +416,6 @@ class CurrencyFactory extends Factory {
 	function setStatus($status) {
 		$status = trim($status);
 
-		$key = Option::getByValue($status, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$status = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'status',
 											$status,
 											TTi18n::gettext('Incorrect Status'),
@@ -428,7 +423,7 @@ class CurrencyFactory extends Factory {
 
 			$this->data['status_id'] = $status;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -585,7 +580,7 @@ class CurrencyFactory extends Factory {
 		return FALSE;
 	}
 	function setActualRateUpdatedDate($epoch = NULL) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ($epoch == NULL) {
 			$epoch = TTDate::getTime();
@@ -995,7 +990,7 @@ class CurrencyFactory extends Factory {
 		return FALSE;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 
 		if ( $this->getDeleted() == TRUE ) {
 			//CHeck to make sure currency isnt in-use by paystubs/employees/wages, if so, don't delete.

@@ -2,10 +2,11 @@
 
 	$.fn.TRangePicker = function( options ) {
 		var opts = $.extend( {}, $.fn.TRangePicker.defaults, options );
-		Global.addCss( 'global/widgets/datepicker/TDatePicker.css' );
+		//Global.addCss( 'global/widgets/datepicker/TDatePicker.css' );
 
 		var $this = this;
 		var field;
+		var validation_field;
 		var date_picker_input;
 		var icon;
 		var error_string = '';
@@ -29,6 +30,30 @@
 
 		var tab_bars;
 
+		var date_picker;
+
+		var default_width_by_format = {
+			'DD-MMM-YY': 100,
+			'ddd, MMMM DD YYYY': 170,
+			'dddd, MMMM DD YYYY': 190,
+			'DD-MMM-YYYY': 110,
+			'DDMMMYYYY': 100,
+			'DD/MM/YYYY': 100,
+			'DD/MM/YY': 100,
+			'DD-MM-YY': 100,
+			'DD-MM-YYYY': 100,
+			'MM/DD/YY': 100,
+			'MM/DD/YYYY': 100,
+			'MM-DD-YY': 100,
+			'MM-DD-YYYY': 100,
+			'YYYY-MM-DD': 100,
+			'MMM-DD-YY': 100,
+			'MMM-DD-YYYY': 110,
+			'ddd, MMM DD YYYY': 140,
+			'ddd, DD-MMM-YYYY': 140,
+			'ddd, DDMMMYYYY': 130
+		};
+
 		this.getEnabled = function() {
 			return enabled;
 		};
@@ -47,27 +72,30 @@
 //				date_picker_input.removeAttr( 'readonly' );
 			}
 
-		}
+		};
 
 		this.setCheckBox = function( val ) {
-			check_box.attr( 'checked', val )
-		}
+			if ( check_box ) {
+				check_box.children().eq( 0 )[0].checked = val;
+			}
+		};
 
 		this.isChecked = function() {
 			if ( check_box ) {
-				if ( check_box.attr( 'checked' ) || check_box[0].checked === true ) {
-					return true
+				if ( check_box.children().eq( 0 )[0].checked === true ) {
+					return true;
 				}
 			}
 
 			return false;
-		}
+		};
 
 		this.setMassEditMode = function( val ) {
 			mass_edit_mode = val;
 
 			if ( mass_edit_mode ) {
-				check_box = $( " <input type='checkbox' class='mass-edit-checkbox' />" );
+				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
+				'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
@@ -81,11 +109,14 @@
 				}
 			}
 
-		}
+		};
 
-		this.setErrorStyle = function( errStr, show ) {
-			date_picker_input.addClass( 'error-tip' );
-
+		this.setErrorStyle = function( errStr, show, isWarning ) {
+			if ( isWarning ) {
+				date_picker_input.addClass( 'warning-tip' );
+			} else {
+				date_picker_input.addClass( 'error-tip' );
+			}
 			error_string = errStr;
 
 			if ( show ) {
@@ -103,7 +134,11 @@
 				error_tip_box = Global.loadWidgetByName( WidgetNamesDic.ERROR_TOOLTIP );
 				error_tip_box = error_tip_box.ErrorTipBox()
 			}
-			error_tip_box.show( this, error_string, sec )
+			if ( date_picker_input.hasClass( 'warning-tip' ) ) {
+				error_tip_box.show( this, error_string, sec, true );
+			} else {
+				error_tip_box.show( this, error_string, sec );
+			}
 		};
 
 		this.hideErrorTip = function() {
@@ -112,16 +147,22 @@
 				error_tip_box.remove();
 			}
 
-		}
+		};
 
 		this.clearErrorStyle = function() {
 			date_picker_input.removeClass( 'error-tip' );
+			date_picker_input.removeClass( 'warning-tip' );
+			this.hideErrorTip();
 			error_string = '';
-		}
+		};
 
 		this.getField = function() {
 			return field;
-		}
+		};
+
+		this.getValidationField = function() {
+			return validation_field;
+		};
 
 		this.getDefaultFormatValue = function() {
 			var val = date_picker_input.val();
@@ -129,33 +170,38 @@
 			val = Global.strToDate( val ).format( 'YYYYMMDD' );
 
 			return val;
-		}
+		};
 
 		this.getValue = function() {
 			return result;
-		}
+		};
 
 		this.setValue = function( val ) {
-
 			if ( !val ) {
 				val = '';
 			}
-
 			if ( $.type( val ) !== 'array' ) {
 				result = [val];
 				date_picker_input.val( val );
-
+				date_picker_input.removeAttr( 'readonly' );
 			} else {
 				result = val;
-
 				if ( val.length == 1 ) {
 					date_picker_input.val( val[0] );
+					date_picker_input.removeAttr( 'readonly' );
 				} else {
 					date_picker_input.val( val.length + ' ' + $.i18n._( 'dates selected' ) );
+					date_picker_input.attr( 'readonly', 'readonly' );
 				}
-
 			}
+			this.autoResize();
+		};
 
+		this.autoResize = function() {
+			var content_width, example_width;
+			example_width = Global.calculateTextWidth( LocalCacheData.getLoginUserPreference().date_format_display, 12 );
+			content_width = Global.calculateTextWidth( date_picker_input.val(), 12, example_width, ((example_width * 2) + 100), 28 );
+			date_picker.width( content_width + 'px' );
 		};
 
 		this.close = function() {
@@ -174,16 +220,21 @@
 			if ( tab_index == 0 ) {
 				result = range_start_picker.val() + ' - ' + range_end_picker.val();
 				date_picker_input.val( result );
+				date_picker_input.attr( 'readonly', 'readonly' );
 			} else {
 				result = editor.getValue();
 
 				if ( result.length > 1 ) {
 					date_picker_input.val( result.length + ' ' + $.i18n._( 'dates selected' ) );
+					date_picker_input.attr( 'readonly', 'readonly' );
 				} else {
 					date_picker_input.val( result[0] );
+					date_picker_input.removeAttr( 'readonly' );
 				}
 
 			}
+
+			this.autoResize();
 
 			setTimeout( function() {
 				$this.trigger( 'formItemChange', [$this] );
@@ -230,15 +281,17 @@
 			if ( ( !this.current_edit_record || !this.current_edit_record.id ) && !this.copied_record_id ) {
 				this.editor.addRow();
 			} else {
-				this.hierarchy_level_api.getHierarchyLevel( args, true, {onResult: function( res ) {
-					if ( !$this.edit_view ) {
-						return;
+				this.hierarchy_level_api.getHierarchyLevel( args, true, {
+					onResult: function( res ) {
+						if ( !$this.edit_view ) {
+							return;
+						}
+						var data = res.getResult();
+
+						$this.editor.setValue( data );
+
 					}
-					var data = res.getResult();
-
-					$this.editor.setValue( data );
-
-				}} );
+				} );
 			}
 
 		};
@@ -279,13 +332,17 @@
 
 			//Date
 			var form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-			form_item_input.TDatePicker( {field: 'start_date_stamp', width: 200,
+			form_item_input.TDatePicker( {
+				field: 'start_date_stamp',
 				beforeShow: function() {
 					can_not_close = true;
 				},
 				onClose: function() {
 					can_not_close = false;
-				}} );
+				}
+			} );
+
+			$( '.ranger-picker-dates-width-tr' ).width( form_item_input.width() + 80 );
 
 			form_item_input.setValue( data );
 			widgets[form_item_input.getField()] = form_item_input;
@@ -328,7 +385,8 @@
 			start_picker_label.text( $.i18n._( 'Start' ) + ':' );
 			end_picker_label.text( $.i18n._( 'End' ) + ':' );
 			var format = LocalCacheData.getLoginUserPreference().date_format_1;
-			range_start_picker.datepicker( {showTime: false,
+			range_start_picker.datepicker( {
+				showTime: false,
 				dateFormat: format,
 				showHour: false,
 				showMinute: false,
@@ -350,7 +408,8 @@
 
 			} );
 
-			range_end_picker.datepicker( {showTime: false,
+			range_end_picker.datepicker( {
+				showTime: false,
 				dateFormat: format,
 				showHour: false,
 				showMinute: false,
@@ -383,12 +442,14 @@
 			var tab_date = ranger_picker.find( '#tab_date' );
 
 			var inside_editor_div = tab_date.find( '.inside-editor-div' );
-			var args = { start_date_stamp: $.i18n._( 'Date' )
+			var args = {
+				start_date_stamp: $.i18n._( 'Date' )
 			};
 
 			editor = Global.loadWidgetByName( FormItemType.INSIDE_EDITOR );
 
-			editor = editor.InsideEditor( {title: '',
+			editor = editor.InsideEditor( {
+				title: '',
 				addRow: insideEditorAddRow,
 				getValue: insideEditorGetValue,
 				setValue: insideEditorSetValue,
@@ -408,13 +469,15 @@
 
 			tab_bars = $( ranger_picker.find( '.edit-view-tab-bar' ) );
 
-			tab_bars = tab_bars.tabs( {show: function( e, ui ) {
+			tab_bars = tab_bars.tabs( {
+				show: function( e, ui ) {
 
-				if ( !tab_bars || !tab_bars.is( ':visible' ) ) {
-					return;
+					if ( !tab_bars || !tab_bars.is( ':visible' ) ) {
+						return;
+					}
+
 				}
-
-			}} );
+			} );
 
 			ranger_picker.mouseenter( function() {
 				is_mouse_over = true;
@@ -455,16 +518,34 @@
 
 		}
 
+		this.setPlaceHolder = function( val ) {
+			date_picker_input.attr( 'placeholder', val )
+		};
+
 		this.each( function() {
 
 			var o = $.meta ? $.extend( {}, opts, $( this ).data() ) : opts;
 
+			date_picker = $( this );
+
 			field = o.field;
+			if( o.validation_field){
+				validation_field = o.validation_field;
+			}
 			icon = $( this ).find( '.t-date-picker-icon' );
 			date_picker_input = $( this ).find( '.t-date-picker' );
-			icon.attr( 'src', Global.getRealImagePath( 'images/cal.gif' ) );
+			icon.attr( 'src', Global.getRealImagePath( 'images/cal.png' ) );
 
-			date_picker_input.attr( 'readonly', 'readonly' );
+			$this.setPlaceHolder( LocalCacheData.loginUserPreference.date_format_display );
+
+			date_picker_input.change( function() {
+				if ( check_box ) {
+					$this.setCheckBox(true);
+				}
+				result = [date_picker_input.val()];
+				$this.trigger( 'formItemChange', [$this] );
+				$this.autoResize();
+			} );
 
 			icon.bind( 'mouseup', function() {
 
@@ -486,14 +567,30 @@
 
 			} );
 
+			date_picker_input.mouseover( function() {
+
+				if ( enabled ) {
+					if ( error_string && error_string.length > 0 ) {
+						$this.showErrorTip( 20 );
+					}
+				}
+
+			} );
+
+			date_picker_input.mouseout( function() {
+				if ( !$( $this ).is( ':focus' ) ) {
+					$this.hideErrorTip();
+				}
+			} );
+
+			$this.autoResize();
+
 		} );
 
 		return this;
 
 	};
 
-	$.fn.TRangePicker.defaults = {
-
-	};
+	$.fn.TRangePicker.defaults = {};
 
 })( jQuery );

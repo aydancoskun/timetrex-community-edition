@@ -1,20 +1,40 @@
 .t-date-picker-div {
-    display: inline;
+    position: relative;
+    width: 185px;
+    text-align: left;
+    height: 21px;
+    display: inline-block;
+    vertical-align: top;
 }
 
 .t-date-picker-div .t-date-picker {
-    width: 156px;
+    outline: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    line-height: 20px;
+    width: 100%;
+    padding: 0;
+    padding-left: 2px;
+    box-sizing: border-box;
+    margin: 0;
+    display: inline;
+    height: 24px;
 }
 
 .t-date-picker-div .t-date-picker-readonly {
-    background: #EAEAEA;
+    background: transparent;
     border: none;
+    height: 100%;
+    pointer-events: none;
 }
 
 .t-date-picker-div .t-date-picker-icon {
-    position: relative;
-    top: 2px;
+    position: absolute;
+    top: 3px;
     cursor: pointer;
+    right: 3px;
+    height: 18px;
 }
 
 .ui-timepicker-div .ui-widget-header {
@@ -23,6 +43,7 @@
 
 .ui-timepicker-div dl {
     text-align: left;
+    padding-left: 10px;
 }
 
 .ui-timepicker-div dl dt {

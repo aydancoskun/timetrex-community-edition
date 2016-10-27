@@ -184,12 +184,14 @@ UserDefaultViewController = BaseViewController.extend( {
 
 	},
 
-	onSaveClick: function() {
-
+	onSaveClick: function( ignoreWarning ) {
 		var $this = this;
 		var record = this.current_edit_record;
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
 		LocalCacheData.current_doing_context_action = 'save';
-		this.api['set' + this.api.key_name]( record, {onResult: function( result ) {
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {onResult: function( result ) {
 
 			if ( result.isValid() ) {
 				var result_data = result.getResult();

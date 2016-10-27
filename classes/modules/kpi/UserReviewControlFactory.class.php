@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -212,11 +212,6 @@ class UserReviewControlFactory extends Factory {
 	function setType($type) {
 		$type = trim($type);
 
-		$key = Option::getByValue($type, $this->getOptions('type') );
-		if ($key !== FALSE) {
-			$type = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'type',
 											$type,
 											TTi18n::gettext('Incorrect Type'),
@@ -238,16 +233,12 @@ class UserReviewControlFactory extends Factory {
 	function setTerm($value) {
 		$value = trim($value);
 
-		$key = Option::getByValue($value, $this->getOptions('term') );
-		if ($key !== FALSE) {
-			$value = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'term',
 											$value,
 											TTi18n::gettext('Incorrect Terms'),
 											$this->getOptions('term')) ) {
 			$this->data['term_id'] = $value;
+
 			return TRUE;
 		}
 
@@ -263,11 +254,6 @@ class UserReviewControlFactory extends Factory {
 	}
 	function setSeverity($value) {
 		$value = trim($value);
-
-		$key = Option::getByValue($value, $this->getOptions('severity') );
-		if ($key !== FALSE) {
-			$value = $key;
-		}
 
 		if ( $this->Validator->inArrayKey(	'severity',
 											$value,
@@ -292,11 +278,6 @@ class UserReviewControlFactory extends Factory {
 	function setStatus($status) {
 		$status = trim($status);
 
-		$key = Option::getByValue($status, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$status = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'status',
 											$status,
 											TTi18n::gettext('Incorrect Status'),
@@ -317,7 +298,7 @@ class UserReviewControlFactory extends Factory {
 		return FALSE;
 	}
 	function setStartDate($epoch) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ($epoch == '') {
 			$epoch == NULL;
@@ -346,7 +327,7 @@ class UserReviewControlFactory extends Factory {
 		return FALSE;
 	}
 	function setEndDate($epoch) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 		if ($epoch == '') {
 			$epoch == NULL;
 		}
@@ -374,7 +355,7 @@ class UserReviewControlFactory extends Factory {
 	}
 
 	function setDueDate($epoch) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 		if ( $epoch == '' ) {
 			$epoch == NULL;
 		}
@@ -420,14 +401,12 @@ class UserReviewControlFactory extends Factory {
 														0,
 														2
 										) ) )
-
 			) {
-				$this->data['rating'] = $value;
-				return	TRUE;
+			$this->data['rating'] = $value;
+			
+			return TRUE;
 		}
 
-		//$this->data['rating'] = $value;
-		//return  TRUE;
 		return FALSE;
 	}
 
@@ -473,7 +452,7 @@ class UserReviewControlFactory extends Factory {
 	}
 
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 
 		$start_date = $this->getStartDate();
 		$end_date = $this->getEndDate();

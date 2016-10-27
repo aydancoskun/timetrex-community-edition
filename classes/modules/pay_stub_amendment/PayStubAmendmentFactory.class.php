@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -169,7 +169,7 @@ class PayStubAmendmentFactory extends Factory {
 
 										'pay_stub_entry_name_id' => 'PayStubEntryNameId',
 										'pay_stub_entry_name' => FALSE,
-										'recurring_ps_amendment_id' => 'RecurringPayStubAmendmentId',
+										//'recurring_ps_amendment_id' => 'RecurringPayStubAmendmentId',
 										'effective_date' => 'EffectiveDate',
 										'status_id' => 'Status',
 										'status' => FALSE,
@@ -292,7 +292,7 @@ class PayStubAmendmentFactory extends Factory {
 		$result = $psealf->getById( $id );
 		//Debug::Arr($result, 'Result: ID: '. $id .' Rows: '. $result->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
-		if (  $this->Validator->isResultSetWithRows(	'pay_stub_entry_name_id',
+		if (  $this->Validator->isResultSetWithRows(	'pay_stub_entry_name',
 														$result,
 														TTi18n::gettext('Invalid Pay Stub Account')
 														) ) {
@@ -340,11 +340,11 @@ class PayStubAmendmentFactory extends Factory {
 		//$result = $rpsalf->getById( $id )->getCurrent();
 
 		if (	( $id == NULL OR $id == 0 )
-				OR
-				$this->Validator->isResultSetWithRows(	'recurring_ps_amendment_id',
-														$rpsalf,
-														TTi18n::gettext('Invalid Recurring Pay Stub Amendment ID')
-														) ) {
+				//OR
+				//$this->Validator->isResultSetWithRows(	'recurring_ps_amendment_id',
+				//										$rpsalf,
+				//										TTi18n::gettext('Invalid Recurring Pay Stub Amendment ID') )
+				) {
 
 			$this->data['recurring_ps_amendment_id'] = $id;
 
@@ -362,7 +362,7 @@ class PayStubAmendmentFactory extends Factory {
 		return FALSE;
 	}
 	function setEffectiveDate($epoch) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		//Adjust effective date, because we won't want it to be a
 		//day boundary and have issues with pay period start/end dates.
@@ -391,11 +391,6 @@ class PayStubAmendmentFactory extends Factory {
 	function setStatus($status) {
 		$status = trim($status);
 
-		$key = Option::getByValue($status, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$status = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'status',
 											$status,
 											TTi18n::gettext('Incorrect Status'),
@@ -403,7 +398,7 @@ class PayStubAmendmentFactory extends Factory {
 
 			$this->data['status_id'] = $status;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -419,11 +414,6 @@ class PayStubAmendmentFactory extends Factory {
 	function setType($type) {
 		$type = trim($type);
 
-		$key = Option::getByValue($type, $this->getOptions('type') );
-		if ($key !== FALSE) {
-			$type = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'type',
 											$type,
 											TTi18n::gettext('Incorrect Type'),
@@ -431,7 +421,7 @@ class PayStubAmendmentFactory extends Factory {
 
 			$this->data['type_id'] = $type;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -550,9 +540,8 @@ class PayStubAmendmentFactory extends Factory {
 			$pp_obj = $pplf->getCurrent();
 			Debug::text('Found Pay Period ID: '. $pp_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 
-			//Percent PS amendments can't work on advances.
 			$pslf = TTnew( 'PayStubListFactory' );
-			$pslf->getByUserIdAndPayPeriodIdAndAdvance( $this->getUser(), $pp_obj->getId(), FALSE );
+			$pslf->getByUserIdAndPayPeriodId( $this->getUser(), $pp_obj->getId() );
 			if ( $pslf->getRecordCount() > 0 ) {
 				$ps_obj = $pslf->getCurrent();
 				Debug::text('Found Pay Stub for this effective date: '. $ps_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
@@ -711,6 +700,9 @@ class PayStubAmendmentFactory extends Factory {
 	}
 	function setPercentAmount($value) {
 		$value = trim($value);
+
+		//Pull out only digits and periods.
+		$value = $this->Validator->stripNonFloat($value);
 
 		Debug::text('Amount: '. $value .' Name: '. $this->getPayStubEntryNameId(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -983,9 +975,16 @@ class PayStubAmendmentFactory extends Factory {
 		return TRUE;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		if ( $this->getDeleted() == FALSE ) {
-			if ( $this->validate_only == FALSE AND $this->getUser() == FALSE AND $this->Validator->hasError('user_id') == FALSE) {
+			if ( $ignore_warning == FALSE ) {
+				//This is needed for releasing vacation accrual after they have been terminated. Just make this a warning instead.
+				if ( is_object( $this->getUserObject() ) AND $this->getUserObject()->getTerminationDate() != '' AND TTDate::getMiddleDayEpoch( $this->getEffectiveDate() ) > TTDate::getMiddleDayEpoch( $this->getUserObject()->getTerminationDate() ) ) {
+					$this->Validator->Warning( 'effective_date', TTi18n::gettext('Effective date is after the employees termination date.') );
+				}
+			}
+
+			if ( $this->Validator->getValidateOnly() == FALSE AND $this->getUser() == FALSE AND $this->Validator->hasError('user_id') == FALSE) {
 				$this->Validator->isTrue(		'user_id',
 												FALSE,
 												TTi18n::gettext('Invalid Employee'));
@@ -996,11 +995,6 @@ class PayStubAmendmentFactory extends Factory {
 												FALSE,
 												TTi18n::gettext('Effective date is before the employees hire date.'));
 			}
-			if ( is_object( $this->getUserObject() ) AND $this->getUserObject()->getTerminationDate() != '' AND TTDate::getMiddleDayEpoch( $this->getEffectiveDate() ) > TTDate::getMiddleDayEpoch( $this->getUserObject()->getTerminationDate() ) ) {
-				$this->Validator->isTrue(		'effective_date',
-												FALSE,
-												TTi18n::gettext('Effective date is after the employees termination date.'));
-			}
 
 			$this->Validator->isTrue(		'user_id',
 											$this->isUnique(),
@@ -1008,7 +1002,7 @@ class PayStubAmendmentFactory extends Factory {
 		}
 
 		//Only show this error if it wasn't already triggered earlier.
-		if ( $this->validate_only == FALSE AND is_object($this->Validator) AND $this->Validator->hasError('pay_stub_entry_name_id') == FALSE AND $this->getPayStubEntryNameId() == FALSE ) {
+		if ( $this->Validator->getValidateOnly() == FALSE AND is_object($this->Validator) AND $this->Validator->hasError('pay_stub_entry_name_id') == FALSE AND $this->getPayStubEntryNameId() == FALSE ) {
 			$this->Validator->isTrue(		'pay_stub_entry_name_id',
 											FALSE,
 											TTi18n::gettext('Invalid Pay Stub Account'));
@@ -1025,7 +1019,7 @@ class PayStubAmendmentFactory extends Factory {
 				Debug::Text('Amount is NULL...', __FILE__, __LINE__, __METHOD__, 10);
 				$this->Validator->isTrue(		'amount',
 												FALSE,
-												TTi18n::gettext('Invalid Amount'));
+												TTi18n::gettext('Amount is blank or not specified'));
 			}
 
 			//Make sure amount is sane given the rate and units.
@@ -1048,7 +1042,7 @@ class PayStubAmendmentFactory extends Factory {
 					OR ( is_object( $this->getPayStubObject() ) AND $this->getPayStubObject()->getStatus() == 40) ) ) {
 			$this->Validator->isTrue(		'user_id',
 											FALSE,
-											TTi18n::gettext('Unable to modify Pay Stub Amendment that is currently be used by a Pay Stub marked PAID'));
+											TTi18n::gettext('Unable to modify Pay Stub Amendment that is currently in use by a Pay Stub marked PAID'));
 		}
 
 		//Don't allow these to be deleted in closed pay periods either.
@@ -1137,6 +1131,13 @@ class PayStubAmendmentFactory extends Factory {
 						case 'effective_date':
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = TTDate::getAPIDate( 'DATE', $this->$function() );
+							}
+							break;
+						case 'amount':
+							if ( $this->getType() == 20 ) { //Show percent sign at end, so the user can tell the difference.
+								$data[$variable] = Misc::removeTrailingZeros( $this->getPercentAmount(), 0 ) .'%';
+							} else {
+								$data[$variable] = $this->getAmount();
 							}
 							break;
 						default:

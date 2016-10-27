@@ -2,27 +2,24 @@
 
 	$.fn.TDatePicker = function( options ) {
 		var opts = $.extend( {}, $.fn.TDatePicker.defaults, options );
-		Global.addCss( 'global/widgets/datepicker/TDatePicker.css' );
+		//Global.addCss( 'global/widgets/datepicker/TDatePicker.css' );
 
 		var $this = this;
 		var field;
+		var validation_field;
 		var date_picker_input;
 		var icon;
 		var error_string = '';
 		var error_tip_box;
 		var mode = 'date';
 		var multiple; // This is used to test Punches -> Edit view Date
-
 		var mass_edit_mode = false;
 		var check_box = null;
-
 		var enabled = true;
-
 		var is_open = false;
-
 		var focus_out_timer;
-
 		var can_open = false; //default when the calender can be open, we only open it when click on the icon
+		var is_static_width = false;
 
 		this.getEnabled = function() {
 			return enabled;
@@ -31,38 +28,47 @@
 		this.setEnabled = function( val ) {
 			enabled = val;
 			if ( val === false || val === '' ) {
-				$this.attr( 'disabled', 'true' );
+				//$this.attr( 'disabled', 'true' );
 				date_picker_input.addClass( 't-date-picker-readonly' );
 				icon.css( 'display', 'none' );
 				date_picker_input.attr( 'readonly', 'readonly' )
+				if ( check_box ) {
+					check_box.hide();
+				}
 			} else {
-				$this.removeAttr( 'disabled' );
+				//$this.removeAttr( 'disabled' );
 				date_picker_input.removeClass( 't-date-picker-readonly' );
 				icon.css( 'display', 'inline' );
 				date_picker_input.removeAttr( 'readonly' );
+				if ( check_box ) {
+					check_box.show();
+				}
 			}
 
-		}
+		};
 
 		this.setCheckBox = function( val ) {
-			check_box.attr( 'checked', val )
-		}
+			if ( check_box ) {
+				check_box.children().eq( 0 )[0].checked = val;
+			}
+		};
 
 		this.isChecked = function() {
 			if ( check_box ) {
-				if ( check_box.attr( 'checked' ) || check_box[0].checked === true ) {
-					return true
+				if ( check_box.children().eq( 0 )[0].checked === true ) {
+					return true;
 				}
 			}
 
 			return false;
-		}
+		};
 
 		this.setMassEditMode = function( val ) {
 			mass_edit_mode = val;
 
 			if ( mass_edit_mode ) {
-				check_box = $( " <input type='checkbox' class='mass-edit-checkbox' />" );
+				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
+				'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
@@ -76,11 +82,14 @@
 				}
 			}
 
-		}
+		};
 
-		this.setErrorStyle = function( errStr, show ) {
-			date_picker_input.addClass( 'error-tip' );
-
+		this.setErrorStyle = function( errStr, show, isWarning ) {
+			if ( isWarning ) {
+				date_picker_input.addClass( 'warning-tip' );
+			} else {
+				date_picker_input.addClass( 'error-tip' );
+			}
 			error_string = errStr;
 
 			if ( show ) {
@@ -98,7 +107,11 @@
 				error_tip_box = Global.loadWidgetByName( WidgetNamesDic.ERROR_TOOLTIP );
 				error_tip_box = error_tip_box.ErrorTipBox()
 			}
-			error_tip_box.show( this, error_string, sec )
+			if ( date_picker_input.hasClass( 'warning-tip' ) ) {
+				error_tip_box.show( this, error_string, sec, true );
+			} else {
+				error_tip_box.show( this, error_string, sec );
+			}
 		};
 
 		this.hideErrorTip = function() {
@@ -107,24 +120,39 @@
 				error_tip_box.remove();
 			}
 
-		}
+		};
 
+		// Error: TypeError: date_picker_input is undefined in /interface/html5/global/widgets/datepicker/TDatePicker.js?v=8.0.3-20150313-161037 line 122
 		this.clearErrorStyle = function() {
+			if ( !date_picker_input ) {
+				return;
+			}
 			date_picker_input.removeClass( 'error-tip' );
+			date_picker_input.removeClass( 'warning-tip' );
+			this.hideErrorTip();
 			error_string = '';
-		}
+		};
 
 		this.getField = function() {
 			return field;
-		}
+		};
+
+		this.getValidationField = function() {
+			return validation_field;
+		};
 
 		this.getDefaultFormatValue = function() {
 			var val = date_picker_input.val();
 
-			val = Global.strToDate( val ).format( 'YYYYMMDD' );
+			//Error: Uncaught TypeError: Cannot read property 'format' of null in interface/html5/global/widgets/datepicker/TDatePicker.js?v=9.0.0-20150909-213207 line 140
+			val = Global.strToDate( val ) && Global.strToDate( val ).format( 'YYYYMMDD' );
 
 			return val;
-		}
+		};
+
+		this.setPlaceHolder = function( val ) {
+			date_picker_input.attr( 'placeholder', val )
+		};
 
 		this.getValue = function() {
 			// This is used to test Punches -> Edit view Date
@@ -133,11 +161,11 @@
 			}
 
 			return date_picker_input.val();
-		}
+		};
 
 		this.setValue = function( val ) {
 
-			//Error: Uncaught TypeError: Cannot read property 'val' of undefined in https://ondemand1.timetrex.com/interface/html5/global/widgets/datepicker/TDatePicker.js?v=8.0.0-20141230-130626 line 144 
+			//Error: Uncaught TypeError: Cannot read property 'val' of undefined in /interface/html5/global/widgets/datepicker/TDatePicker.js?v=8.0.0-20141230-130626 line 144 
 			if ( !date_picker_input ) {
 				return;
 			}
@@ -147,24 +175,42 @@
 			}
 
 			date_picker_input.val( val );
+
+			this.autoResize();
+		};
+
+		this.setDefaultWidgetValue = function() {
+			if ( $( this ).attr( 'widget-value' ) ) {
+				this.setValue( $( this ).attr( 'widget-value' ) )
+			}
+		};
+
+		this.autoResize = function() {
+			var content_width, example_width;
+			if ( !is_static_width ) {
+				if ( mode === 'date' ) {
+					example_width = Global.calculateTextWidth( LocalCacheData.getLoginUserPreference().date_format_display, 12 );
+				} else if ( mode === 'date_time' ) {
+					example_width = Global.calculateTextWidth( LocalCacheData.getLoginUserPreference().date_format_display + ' ' + LocalCacheData.getLoginUserPreference().time_format_displa, 12 );
+				}
+				content_width = Global.calculateTextWidth( date_picker_input.val(), 12, example_width, (example_width + 100), 28 );
+				$this.width( content_width + 'px' );
+			}
 		};
 
 		this.each( function() {
-
 			var o = $.meta ? $.extend( {}, opts, $( this ).data() ) : opts;
-
 			field = o.field;
-
+			if( o.validation_field){
+				validation_field = o.validation_field;
+			}
 			multiple = o.multiple; // This is used to test Punches -> Edit view Date
-
 			if ( Global.isSet( o.mode ) ) {
 				mode = o.mode
 			}
-
 			icon = $( this ).find( '.t-date-picker-icon' );
 			date_picker_input = $( this ).find( '.t-date-picker' );
-			icon.attr( 'src', Global.getRealImagePath( 'images/cal.gif' ) );
-
+			icon.attr( 'src', Global.getRealImagePath( 'images/cal.png' ) );
 			icon.bind( 'mouseup', function() {
 
 				if ( !enabled ) {
@@ -186,6 +232,7 @@
 			} );
 
 			var format = LocalCacheData.getLoginUserPreference().date_format_1;
+			var time_format = LocalCacheData.getLoginUserPreference().time_format_1;
 			var day_name_min = [$.i18n._( "Sun" ), $.i18n._( "Mon" ), $.i18n._( "Tue" ),
 				$.i18n._( "Wed" ), $.i18n._( "Thu" ), $.i18n._( "Fri" ), $.i18n._( "Sat" )];
 			var month_name_short = [$.i18n._( "Jan" ), $.i18n._( "Feb" ),
@@ -221,21 +268,25 @@
 					onClose: function() {
 						focus_out_timer = setTimeout( function() {
 							is_open = false;
+							$this.autoResize();
 							if ( o.onClose ) {
 								o.onClose();
 							}
 
 						}, 100 );
-
 					}
 
 				} );
 
-			} else {
+				$this.setPlaceHolder( LocalCacheData.loginUserPreference.date_format_display );
+
+			} else if ( mode === 'date_time' ) {
 				date_picker_input = date_picker_input.datetimepicker( {
-					showTime: false,
-					showHour: false,
-					showMinute: false,
+					dateFormat: format,
+					timeFormat: time_format,
+					showTime: true,
+					showHour: true,
+					showMinute: true,
 					changeMonth: true,
 					changeYear: true,
 					showButtonPanel: true,
@@ -250,17 +301,24 @@
 					onClose: function() {
 						focus_out_timer = setTimeout( function() {
 							is_open = false;
-						}, 100 )
+							$this.autoResize();
+							if ( o.onClose ) {
+								o.onClose();
+							}
+						}, 100 );
 					}
 				} );
+
+				$this.setPlaceHolder( LocalCacheData.loginUserPreference.date_format_display + ' ' + LocalCacheData.loginUserPreference.time_format_display );
 			}
 
 			date_picker_input.change( function() {
 				if ( check_box ) {
-					check_box.attr( 'checked', 'true' )
+					$this.setCheckBox(true);
 				}
 
 				$this.trigger( 'formItemChange', [$this] );
+				$this.autoResize();
 			} );
 
 			date_picker_input.mouseover( function() {
@@ -278,24 +336,6 @@
 					$this.hideErrorTip();
 				}
 			} );
-
-//			date_picker_input.focus( function( e ) {
-//
-//				if ( !enabled || !can_open ) {
-//					if ( mode === 'date' ) {
-//						date_picker_input.datepicker( 'hide' );
-//
-//					} else {
-//						date_picker_input.datetimepicker( 'hide' );
-//
-//					}
-//				}
-//
-//				can_open = false;
-//
-//				is_open = true;
-//
-//			} );
 
 			date_picker_input.focusin( function( e ) {
 				if ( !enabled ) {
@@ -326,8 +366,14 @@
 			} );
 
 			if ( o.width > 0 ) {
-				date_picker_input.width( o.width );
+				$this.width( o.width );
+				is_static_width = true;
+			} else {
+				$this.autoResize();
+				is_static_width = false;
 			}
+
+			$this.setDefaultWidgetValue();
 
 		} );
 

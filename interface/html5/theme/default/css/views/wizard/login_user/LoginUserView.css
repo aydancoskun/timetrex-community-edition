@@ -5,3 +5,7 @@
 .find-available-view {
     height: 500px;
 }
+
+.find-available-view .grid-div{
+    height: calc(100% - 33px);
+}

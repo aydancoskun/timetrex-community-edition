@@ -87,7 +87,6 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			'tab_audit': $.i18n._( 'Audit' )
 		} );
 
-
 		var form_item_input;
 
 		this.navigation.AComboBox( {
@@ -104,11 +103,11 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 		this.edit_view_tab.css( 'max-width', 'none' );
 
 		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) {
-			this.edit_view_tab.css( 'min-width', '1380px' );
+			this.edit_view_tab.css( 'min-width', '1250px' );
 		} else if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-			this.edit_view_tab.css( 'min-width', '1150px' );
-		} else {
 			this.edit_view_tab.css( 'min-width', '1050px' );
+		} else {
+			this.edit_view_tab.css( 'min-width', '950px' );
 		}
 
 		//Tab 0 start
@@ -155,7 +154,8 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 		this.editor = Global.loadWidgetByName( FormItemType.INSIDE_EDITOR );
 
-		this.editor.InsideEditor( {title: $.i18n._( 'NOTE: To set different In/Out times for each day of the week, add additional weeks all with the same week number.' ),
+		this.editor.InsideEditor( {
+			title: $.i18n._( 'NOTE: To set different In/Out times for each day of the week, add additional weeks all with the same week number.' ),
 			addRow: this.insideEditorAddRow,
 			removeRow: this.insideEditorRemoveRow,
 			getValue: this.insideEditorGetValue,
@@ -219,14 +219,16 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 			args.filter_data.recurring_schedule_template_control_id = this.current_edit_record.id ? this.current_edit_record.id : this.copied_record_id;
 			this.copied_record_id = '';
-			$this.recurring_schedule_template_api['get' + $this.recurring_schedule_template_api.key_name]( args, {onResult: function( res ) {
-				if ( !$this.edit_view ) {
-					return;
-				}
-				var data = res.getResult();
-				$this.editor.setValue( data );
+			$this.recurring_schedule_template_api['get' + $this.recurring_schedule_template_api.key_name]( args, {
+				onResult: function( res ) {
+					if ( !$this.edit_view ) {
+						return;
+					}
+					var data = res.getResult();
+					$this.editor.setValue( data );
 
-			}} );
+				}
+			} );
 
 		}
 
@@ -292,6 +294,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 			form_item_input.css( 'position', 'absolute' );
 			form_item_input.css( 'left', '0' );
+			form_item_input.css( 'top', '30px' );
 			form_item_input.setValue( data.absence_policy_id ? data.absence_policy_id : '' );
 			widgets[form_item_input.getField()] = form_item_input;
 			this.setWidgetEnableBaseOnParentController( form_item_input );
@@ -358,11 +361,11 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			// Shift Time
 			widgetContainer = $( "<div class='widget-h-box'></div>" );
 
-			var divContainer1 = $( "<div></div>" );
+			var divContainer1 = $( "<div style='text-align: left; '></div>" );
 
-			var label_1 = $( "<span class='widget-right-label' style='margin-right: 15px;'> " + $.i18n._( 'In' ) + ': ' + " </span>" );
-			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			form_item_input.TTextInput( {field: 'start_time', width: 65} );
+			var label_1 = $( "<span class='widget-right-label recurring-template-widget-right-label' style='display: inline-block; width: 28px; vertical-align: middle;'> " + $.i18n._( 'In' ) + ': ' + " </span>" );
+			form_item_input = Global.loadWidgetByName( FormItemType.TIME_PICKER );
+			form_item_input.TTimePicker( {field: 'start_time'} );
 			form_item_input.setValue( data.start_time ? data.start_time : '' );
 
 			form_item_input.bind( 'formItemChange', function( e, target ) {
@@ -380,11 +383,11 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			widgetContainer.append( divContainer1 );
 			this.setWidgetEnableBaseOnParentController( form_item_input );
 
-			var divContainer2 = $( "<div style='margin-top: 5px'></div>" );
+			var divContainer2 = $( "<div style='text-align: left; margin-top: 5px;'></div>" );
 
-			var label_2 = $( "<span class='widget-right-label'> " + $.i18n._( 'Out' ) + ': ' + " </span>" );
-			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			form_item_input.TTextInput( {field: 'end_time', width: 65} );
+			var label_2 = $( "<span class='widget-right-label recurring-template-widget-right-label' style='display: inline-block; width: 28px; vertical-align: middle;' > " + $.i18n._( 'Out' ) + ': ' + " </span>" );
+			form_item_input = Global.loadWidgetByName( FormItemType.TIME_PICKER );
+			form_item_input.TTimePicker( {field: 'end_time'} );
 			form_item_input.setValue( data.end_time ? data.end_time : '' );
 
 			form_item_input.bind( 'formItemChange', function( e, target ) {
@@ -417,7 +420,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 			form_item_input.AComboBox( {
 				api_class: (APIFactory.getAPIClass( 'APISchedulePolicy' )),
-				width: 132,
+				width: 80,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.SCHEDULE_POLICY,
 				show_search_inputs: true,
@@ -439,7 +442,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 			// Branch / Department
 
-			widgetContainer = $( "<div class='widget-h-box'></div>" );
+			widgetContainer = $( "<div class='widget-h-box recurring-template-widget-h-box'></div>" );
 
 			divContainer1 = $( "<div></div>" );
 
@@ -449,7 +452,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 			form_item_input.AComboBox( {
 				api_class: (APIFactory.getAPIClass( 'APIBranch' )),
-				width: 132,
+				width: 80,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.BRANCH,
 				show_search_inputs: true,
@@ -475,7 +478,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 			form_item_input.AComboBox( {
 				api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
-				width: 132,
+				width: 80,
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.DEPARTMENT,
 				show_search_inputs: true,
@@ -498,7 +501,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 			if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 
-				widgetContainer = $( "<div class='widget-h-box'></div>" );
+				widgetContainer = $( "<div class='widget-h-box recurring-template-widget-h-box'></div>" );
 
 				divContainer1 = $( "<div></div>" );
 
@@ -508,7 +511,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 				form_item_input.AComboBox( {
 					api_class: (APIFactory.getAPIClass( 'APIJob' )),
-					width: 132,
+					width: 80,
 					allow_multiple_selection: false,
 					layout_name: ALayoutIDs.JOB,
 					show_search_inputs: true,
@@ -533,7 +536,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 				form_item_input.AComboBox( {
 					api_class: (APIFactory.getAPIClass( 'APIJobItem' )),
-					width: 132,
+					width: 80,
 					allow_multiple_selection: false,
 					layout_name: ALayoutIDs.JOB_ITEM,
 					show_search_inputs: true,
@@ -685,121 +688,10 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 		this.removeLastRowLine();
 	},
 
-	onSaveResult: function( result ) {
-		var $this = this;
-		if ( result.isValid() ) {
-			var result_data = result.getResult();
-			if ( result_data === true ) {
-				$this.refresh_id = $this.current_edit_record.id;
-			} else if ( result_data > 0 ) {
-				$this.refresh_id = result_data
-			}
-
-			$this.saveInsideEditorData( function() {
-				$this.search();
-				$this.onSaveDone( result );
-				$this.current_edit_record = null;
-				$this.removeEditView();
-			} );
-
-		} else {
-			$this.setErrorTips( result );
-			$this.setErrorMenu();
-		}
-	},
-
-	onSaveAndContinueResult: function( result ) {
-		var $this = this;
-		if ( result.isValid() ) {
-			var result_data = result.getResult();
-			if ( result_data === true ) {
-				$this.refresh_id = $this.current_edit_record.id;
-
-			} else if ( result_data > 0 ) { // as new
-				$this.refresh_id = result_data
-			}
-
-			$this.saveInsideEditorData( function() {
-				$this.search( false );
-				$this.onEditClick( $this.refresh_id, true );
-
-				$this.onSaveAndContinueDone( result );
-
-			} );
-
-		} else {
-			$this.setErrorTips( result );
-			$this.setErrorMenu();
-		}
-	},
-
-	onSaveAndNewResult: function( result ) {
-		var $this = this;
-		if ( result.isValid() ) {
-			var result_data = result.getResult();
-			if ( result_data === true ) {
-				$this.refresh_id = $this.current_edit_record.id;
-
-			} else if ( result_data > 0 ) { // as new
-				$this.refresh_id = result_data
-			}
-
-			$this.saveInsideEditorData( function() {
-				$this.search( false );
-				$this.onAddClick( true );
-
-			} );
-		} else {
-			$this.setErrorTips( result );
-			$this.setErrorMenu();
-		}
-	},
-
-	onSaveAndCopyResult: function( result ) {
-		var $this = this;
-		if ( result.isValid() ) {
-			var result_data = result.getResult();
-			if ( result_data === true ) {
-				$this.refresh_id = $this.current_edit_record.id;
-
-			} else if ( result_data > 0 ) {
-				$this.refresh_id = result_data
-			}
-
-			$this.saveInsideEditorData( function() {
-				$this.search( false );
-				$this.onCopyAsNewClick();
-
-			} );
-
-		} else {
-			$this.setErrorTips( result );
-			$this.setErrorMenu();
-		}
-	},
-
-	onSaveAndNextResult: function( result ) {
-		var $this = this;
-		if ( result.isValid() ) {
-			var result_data = result.getResult()
-			if ( result_data === true ) {
-				$this.refresh_id = $this.current_edit_record.id;
-
-			} else if ( result_data > 0 ) {
-				$this.refresh_id = result_data
-			}
-
-			$this.saveInsideEditorData( function() {
-				$this.onRightArrowClick();
-				$this.search( false );
-				$this.onSaveAndNextDone( result );
-
-			} );
-
-		} else {
-			$this.setErrorTips( result );
-			$this.setErrorMenu();
-		}
+	uniformVariable: function( records ) {
+		records.recurring_schedule_template = this.editor.getValue( this.refresh_id );
+		;
+		return records;
 	},
 
 	onCopyAsNewClick: function() {
@@ -833,10 +725,12 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			filter.filter_data = {};
 			filter.filter_data.id = [selectedId];
 
-			this.api['get' + this.api.key_name]( filter, {onResult: function( result ) {
-				$this.onCopyAsNewResult( result );
+			this.api['get' + this.api.key_name]( filter, {
+				onResult: function( result ) {
+					$this.onCopyAsNewResult( result );
 
-			}} );
+				}
+			} );
 		}
 
 	},
@@ -864,49 +758,33 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 		$this.initEditView();
 	},
 
-	saveInsideEditorData: function( callBack ) {
-
-		var $this = this;
-		var data = this.editor.getValue( this.refresh_id );
-		var remove_ids = $this.editor.delete_ids;
-
-		if ( remove_ids.length > 0 ) {
-			$this.recurring_schedule_template_api.deleteRecurringScheduleTemplate( remove_ids, {onResult: function( res ) {
-				$this.editor.delete_ids = [];
-			}} )
-		}
-
-		$this.recurring_schedule_template_api.setRecurringScheduleTemplate( data, {onResult: function( res ) {
-			var res_data = res.getResult();
-			if ( Global.isSet( callBack ) ) {
-				callBack();
-			}
-		}} )
-
-	},
-
 	buildSearchFields: function() {
 
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Name' ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
 				field: 'name',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Description' ),
+			new SearchField( {
+				label: $.i18n._( 'Description' ),
 				in_column: 1,
 				field: 'description',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Template' ),
+			new SearchField( {
+				label: $.i18n._( 'Template' ),
 				in_column: 1,
 				field: 'id',
 				layout_name: ALayoutIDs.RECURRING_TEMPLATE_CONTROL,
@@ -914,9 +792,11 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -924,9 +804,11 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -934,7 +816,8 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )];
+				form_item_type: FormItemType.AWESOME_BOX
+			} )];
 	},
 
 	onTabShow: function( e, ui ) {
@@ -1002,7 +885,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScriptAsync( 'views/document/DocumentViewController.js', function() {
+		Global.loadScript( 'views/document/DocumentViewController.js', function() {
 			var tab_attachment = $this.edit_view_tab.find( '#tab_attachment' );
 			var firstColumn = tab_attachment.find( '.first-column-sub-view' );
 			Global.trackView( 'Sub' + 'Document' + 'View' );
@@ -1289,10 +1172,10 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 	setDefaultMenu: function( doNotSetFocus ) {
 
-        //Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
-        if (!this.context_menu_array) {
-            return;
-        }
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+		if ( !this.context_menu_array ) {
+			return;
+		}
 
 		if ( !Global.isSet( doNotSetFocus ) || !doNotSetFocus ) {
 			this.selectContextMenu();

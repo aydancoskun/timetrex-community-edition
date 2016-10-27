@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -42,9 +42,6 @@ class PurgeDatabase {
 											);
 
 	static $parent_table_map_array = array(
-										'authentication' => array(
-														'users',
-														),
 										'absence_policy' => array(
 														'company',
 														),
@@ -440,6 +437,11 @@ class PurgeDatabase {
 														'recurring_schedule_control',
 														'users'
 														),
+										'recurring_schedule' => array(
+														'recurring_schedule_control',
+														'users',
+														'company'
+														),
 										'regular_time_policy' => array(
 														'company',
 														),
@@ -457,6 +459,7 @@ class PurgeDatabase {
 														),
 										'schedule' => array(
 														'users',
+														'company',
 														),
 										'schedule_policy' => array(
 														'company',
@@ -668,10 +671,12 @@ class PurgeDatabase {
 								'user_wage' => 120,
 								'user_report_data' => 45,
 								'users' => 120,
+								'recurring_schedule' => 0, //Delete these immediately.								
 								'bread_crumb' => 45,
 								'system_log' => 45,
 								'system_log_detail' => 45,
-
+								'company_generic_tag_map' => 45,
+								'company_generic_tag' => 45,
 								'qualification' => 45,
 								'user_education' => 45,
 								'user_license' => 45,
@@ -780,18 +785,18 @@ class PurgeDatabase {
 					switch ( $table ) {
 						case 'user_generic_status':
 							//Treat the user_generic_status table differently, as rows are never marked as deleted in it.
-							$query[] = 'delete from '. $table .' where updated_date <= '. (time() - (86400 * ($expire_days)));
+							$query[] = 'DELETE FROM '. $table .' WHERE updated_date <= '. (time() - (86400 * ($expire_days)));
 							break;
 						case 'system_log':
 							//Only delete system_log rows from deleted users, or deleted/cancelled companies
-							$query[] = 'delete from '. $table .' as a USING users as b, company as c WHERE a.user_id = b.id AND b.company_id = c.id AND ( b.deleted = 1 OR c.deleted = 1 OR c.status_id = 30 ) AND ( a.date <= '. (time() - (86400 * ($expire_days))) .' AND b.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND c.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
+							$query[] = 'DELETE FROM '. $table .' as a USING users as b, company as c WHERE a.user_id = b.id AND b.company_id = c.id AND ( b.deleted = 1 OR c.deleted = 1 OR c.status_id = 30 ) AND ( a.date <= '. (time() - (86400 * ($expire_days))) .' AND b.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND c.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
 
 							//Quite a few system_log rows are created by user_id=0 (system), they aren't shown on the audit log anyways and don't need to be kept around for long.
 							//This also deletes logs that can't be matches to any user, or those that have already been deleted.
 							//This includes log entries for the cron system.
-							//$query[] = 'delete from '. $table .' where id in ( select a.id from '. $table .' as a LEFT JOIN users as b ON a.user_id = b.id WHERE b.id is NULL AND ( a.date <= '. (time()-(86400*($expire_days))) .' ) )';
+							//$query[] = 'DELETE FROM '. $table .' WHERE id in ( select a.id from '. $table .' as a LEFT JOIN users as b ON a.user_id = b.id WHERE b.id is NULL AND ( a.date <= '. (time()-(86400*($expire_days))) .' ) )';
 							//NOTE: Make sure NOT EXISTS is a strict join query without any other where clauses, as that can cause unintended results.
-							$query[] = 'delete from '. $table .' as a where a.date <= '. (time() - (86400 * (($expire_days * 2)))) .' AND NOT EXISTS ( select 1 from users as b WHERE a.user_id = b.id )';
+							$query[] = 'DELETE FROM '. $table .' as a WHERE a.date <= '. (time() - (86400 * (($expire_days * 2)))) .' AND NOT EXISTS ( select 1 from users as b WHERE a.user_id = b.id )';
 
 							//Delete non-critical audit log entries that bloat the database
 							// 45 Days
@@ -809,7 +814,7 @@ class PurgeDatabase {
 							//  - PunchControl ( Add )
 							//  - Punch ( Add )
 							//  - Schedule ( Add )
-							$query[] = 'delete from '. $table .' as a where
+							$query[] = 'DELETE FROM '. $table .' as a WHERE
 								(
 									a.date <= '. (time() - (86400 * (($expire_days * 1)))) .'
 									AND (
@@ -848,26 +853,26 @@ class PurgeDatabase {
 							break;
 						case 'system_log_detail':
 							//Only delete system_log_detail rows when the corresponding system_log rows are already deleted
-							//$query[] = 'delete from '. $table .' where id in ( select a.id from '. $table .' as a LEFT JOIN system_log as b ON a.system_log_id = b.id WHERE b.id is NULL )';
-							$query[] = 'delete from '. $table .' as a where NOT EXISTS ( select 1 from system_log as b WHERE a.system_log_id = b.id )';
+							//$query[] = 'DELETE FROM '. $table .' WHERE id in ( select a.id from '. $table .' as a LEFT JOIN system_log as b ON a.system_log_id = b.id WHERE b.id is NULL )';
+							$query[] = 'DELETE FROM '. $table .' as a WHERE NOT EXISTS ( select 1 from system_log as b WHERE a.system_log_id = b.id )';
 							break;
 						case 'punch':
 							//Delete punch rows from deleted users, or deleted companies
-							$query[] = 'delete from '. $table .' as a USING punch_control as b, users as d, company as e WHERE a.punch_control_id = b.id AND b.user_id = d.id AND d.company_id = e.id AND ( a.deleted = 1 OR b.deleted = 1 OR d.deleted = 1 OR e.deleted = 1 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND d.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
+							$query[] = 'DELETE FROM '. $table .' as a USING punch_control as b, users as d, company as e WHERE a.punch_control_id = b.id AND b.user_id = d.id AND d.company_id = e.id AND ( a.deleted = 1 OR b.deleted = 1 OR d.deleted = 1 OR e.deleted = 1 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND d.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
 							break;
 						case 'punch_control':
 						case 'user_date_total':
 						case 'schedule':
 						case 'request':
 							//Delete punch_control/user_date rows from deleted users, or deleted companies
-							$query[] = 'delete from '. $table .' as a USING users as d, company as e WHERE a.user_id = d.id AND d.company_id = e.id AND ( a.deleted = 1 OR d.deleted = 1 OR e.deleted = 1 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND d.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
+							$query[] = 'DELETE FROM '. $table .' as a USING users as d, company as e WHERE a.user_id = d.id AND d.company_id = e.id AND ( a.deleted = 1 OR d.deleted = 1 OR e.deleted = 1 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND d.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
 							break;
 						case 'exception':
 							//Delete exception rows from deleted users, or deleted companies
-							$query[] = 'delete from '. $table .' as a USING users as d, company as e WHERE a.user_id = d.id AND d.company_id = e.id AND ( a.deleted = 1 OR d.deleted = 1 OR e.deleted = 1 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND d.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
+							$query[] = 'DELETE FROM '. $table .' as a USING users as d, company as e WHERE a.user_id = d.id AND d.company_id = e.id AND ( a.deleted = 1 OR d.deleted = 1 OR e.deleted = 1 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND d.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
 
 							//Delete exception rows from terminated users after they have been terminated for 3x the regular expire length.
-							$query[] = 'delete from '. $table .' as a USING users as d, company as e WHERE a.user_id = d.id AND d.company_id = e.id AND ( d.status_id = 20 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days * 3))) .' AND d.updated_date <= '. (time() - (86400 * ($expire_days * 3))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days * 3))) .')';
+							$query[] = 'DELETE FROM '. $table .' as a USING users as d, company as e WHERE a.user_id = d.id AND d.company_id = e.id AND ( d.status_id = 20 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days * 3))) .' AND d.updated_date <= '. (time() - (86400 * ($expire_days * 3))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days * 3))) .')';
 							break;
 						case 'user_identification':
 						case 'user_generic_data':
@@ -875,56 +880,56 @@ class PurgeDatabase {
 						case 'message_sender':
 						case 'message_recipient':
 							//Delete rows from deleted users, or deleted companies
-							$query[] = 'delete from '. $table .' as a USING users as d, company as e WHERE a.user_id = d.id AND d.company_id = e.id AND ( a.deleted = 1 OR d.deleted = 1 OR e.deleted = 1 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND d.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
+							$query[] = 'DELETE FROM '. $table .' as a USING users as d, company as e WHERE a.user_id = d.id AND d.company_id = e.id AND ( a.deleted = 1 OR d.deleted = 1 OR e.deleted = 1 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND d.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
 							break;
 						case 'accrual_balance':
 							//Delete rows from deleted users, or deleted companies. Accrual Balance table does not have updated_date column.
-							$query[] = 'delete from '. $table .' as a USING users as d, company as e WHERE a.user_id = d.id AND d.company_id = e.id AND ( a.deleted = 1 OR d.deleted = 1 OR e.deleted = 1 ) AND ( d.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
+							$query[] = 'DELETE FROM '. $table .' as a USING users as d, company as e WHERE a.user_id = d.id AND d.company_id = e.id AND ( a.deleted = 1 OR d.deleted = 1 OR e.deleted = 1 ) AND ( d.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
 							break;
 						case 'pay_stub_entry':
 							//Only delete pay_stub_entry rows from deleted users, or deleted companies
-							$query[] = 'delete from '. $table .' as a USING pay_stub as b WHERE a.pay_stub_id = b.id AND ( a.deleted = 1 OR b.deleted = 1 ) AND a.updated_date <= '. (time() - (86400 * ($expire_days)));
+							$query[] = 'DELETE FROM '. $table .' as a USING pay_stub as b WHERE a.pay_stub_id = b.id AND ( a.deleted = 1 OR b.deleted = 1 ) AND a.updated_date <= '. (time() - (86400 * ($expire_days)));
 							break;
 						case 'authorizations':
 							//Only delete authorization rows from deleted requests.
-							$query[] = 'delete from '. $table .' as a USING request as b WHERE a.object_type_id in (50, 1010, 1020, 1030, 1040, 1100) AND a.object_id = b.id AND ( b.deleted = 1 ) AND ( b.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND b.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
+							$query[] = 'DELETE FROM '. $table .' as a USING request as b WHERE a.object_type_id in (50, 1010, 1020, 1030, 1040, 1100) AND a.object_id = b.id AND ( b.deleted = 1 ) AND ( b.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND b.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
 
-							$query[] = 'delete from '. $table .' as a WHERE a.object_type_id in (50, 1010, 1020, 1030, 1040, 1100) AND NOT EXISTS ( select 1 from request as b WHERE a.object_id = b.id)';
-							$query[] = 'delete from '. $table .' as a WHERE a.object_type_id in (90) AND NOT EXISTS ( select 1 from pay_period_time_sheet_verify as b WHERE a.object_id = b.id)';
+							$query[] = 'DELETE FROM '. $table .' as a WHERE a.object_type_id in (50, 1010, 1020, 1030, 1040, 1100) AND NOT EXISTS ( select 1 from request as b WHERE a.object_id = b.id)';
+							$query[] = 'DELETE FROM '. $table .' as a WHERE a.object_type_id in (90) AND NOT EXISTS ( select 1 from pay_period_time_sheet_verify as b WHERE a.object_id = b.id)';
 							break;
 						case 'station':
 							//Delete stations that haven't been used (allowed_date) or updated in over two years. Only consider PC/WirelessWeb stations types though.
 							//Problem is when a station is created, a punch may be assigned to it, but the allowed_date is update on the wildcard entry instesd.
-							//$query[] = 'delete from '. $table .' as a WHERE a.type_id in (10, 25) AND a.deleted = 0 AND ( lower(a.station_id) != \'any\' AND lower(a.source) != \'any\' ) AND ( a.allowed_date is NULL OR a.allowed_date <= '. (time()-(86400*(730))) .') AND ( a.updated_by is NULL AND a.updated_date <= '. (time()-(86400*($expire_days))) .')'; //This will delete active stations. DO NOT USE.
-							$query[] = 'delete from '. $table .' as a WHERE a.type_id in (10, 25) AND ( lower(a.station_id) != \'any\' AND lower(a.source) != \'any\' ) AND NOT EXISTS ( select 1 from punch as b WHERE a.id = b.station_id ) AND ( a.updated_by is NULL AND a.updated_date <= '. (time() - (86400 * ($expire_days))) .' ) AND a.deleted = 0';
+							//$query[] = 'DELETE FROM '. $table .' as a WHERE a.type_id in (10, 25) AND a.deleted = 0 AND ( lower(a.station_id) != \'any\' AND lower(a.source) != \'any\' ) AND ( a.allowed_date is NULL OR a.allowed_date <= '. (time()-(86400*(730))) .') AND ( a.updated_by is NULL AND a.updated_date <= '. (time()-(86400*($expire_days))) .')'; //This will delete active stations. DO NOT USE.
+							$query[] = 'DELETE FROM '. $table .' as a WHERE a.type_id in (10, 25) AND ( lower(a.station_id) != \'any\' AND lower(a.source) != \'any\' ) AND NOT EXISTS ( select 1 from punch as b WHERE a.id = b.station_id ) AND ( a.updated_by is NULL AND a.updated_date <= '. (time() - (86400 * ($expire_days))) .' ) AND a.deleted = 0';
 
 							//Delete station rows from deleted/cancelled companies
-							$query[] = 'delete from '. $table .' as a USING company as e WHERE a.company_id = e.id AND ( a.deleted = 1 OR e.deleted = 1 OR e.status_id = 30 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
+							$query[] = 'DELETE FROM '. $table .' as a USING company as e WHERE a.company_id = e.id AND ( a.deleted = 1 OR e.deleted = 1 OR e.status_id = 30 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND e.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
 
 							//Disable iButton/Fingerprint/Barcode stations that have never been used.
-							$query[] = 'update '. $table .' set status_id = 10 where type_id in (30, 40, 50) AND status_id = 20 AND allowed_date is NULL AND updated_date <= '. (time() - (86400 * (120))) .' AND ( deleted = 0 )';
+							$query[] = 'update '. $table .' set status_id = 10 WHERE type_id in (30, 40, 50) AND status_id = 20 AND allowed_date is NULL AND updated_date <= '. (time() - (86400 * (120))) .' AND ( deleted = 0 )';
 							break;
 						case 'permission_control':
-							$query[] = 'delete from '. $table .' as a USING company as c WHERE a.company_id = c.id AND ( c.deleted = 1 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND c.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
+							$query[] = 'DELETE FROM '. $table .' as a USING company as c WHERE a.company_id = c.id AND ( c.deleted = 1 ) AND ( a.updated_date <= '. (time() - (86400 * ($expire_days))) .' AND c.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
 							break;
 						case 'permission':
-							$query[] = 'delete from '. $table .' where id in ( select a.id from '. $table .' as a LEFT JOIN permission_control as b ON a.permission_control_id = b.id WHERE b.id is NULL )';
+							$query[] = 'DELETE FROM '. $table .' WHERE id in ( select a.id from '. $table .' as a LEFT JOIN permission_control as b ON a.permission_control_id = b.id WHERE b.id is NULL )';
 							break;
 						case 'message_control':
-							$query[] = 'delete from '. $table .' where id in ( select a.id from '. $table .' as a LEFT JOIN message_sender as b ON a.id = b.message_control_id WHERE b.id is NULL )';
+							$query[] = 'DELETE FROM '. $table .' WHERE id in ( select a.id from '. $table .' as a LEFT JOIN message_sender as b ON a.id = b.message_control_id WHERE b.id is NULL )';
 							break;
 						case 'bank_account':
 						case 'user_generic_data':
 						case 'user_report_data':
 							//user_id column can be NULL for company wide data, make sure we leave that alone.
-							$query[] = 'delete from '. $table .' as a USING company as b WHERE a.company_id = b.id AND ( b.deleted = 1 AND b.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
-							$query[] = 'delete from '. $table .' as a USING users as b WHERE a.user_id = b.id AND ( b.deleted = 1 AND b.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
+							$query[] = 'DELETE FROM '. $table .' as a USING company as b WHERE a.company_id = b.id AND ( b.deleted = 1 AND b.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
+							$query[] = 'DELETE FROM '. $table .' as a USING users as b WHERE a.user_id = b.id AND ( b.deleted = 1 AND b.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
 
 							//Delete rows where the parent table rows are already deleted.
-							$query[] = 'delete from '. $table .' as a where NOT EXISTS ( select 1 from company as b WHERE a.company_id = b.id )';
+							$query[] = 'DELETE FROM '. $table .' as a WHERE NOT EXISTS ( select 1 from company as b WHERE a.company_id = b.id )';
 
 							//bank_account can have user_id is NULL or user_id = 0, we don't want to purge those records in either case.
-							$query[] = 'delete from '. $table .' as a where ( a.user_id is NOT NULL AND a.user_id != 0 ) AND NOT EXISTS ( select 1 from users as b WHERE a.user_id = b.id )';
+							$query[] = 'DELETE FROM '. $table .' as a WHERE ( a.user_id is NOT NULL AND a.user_id != 0 ) AND NOT EXISTS ( select 1 from users as b WHERE a.user_id = b.id )';
 							break;
 						case 'user_group_tree':
 						case 'document_group_tree':
@@ -935,10 +940,28 @@ class PurgeDatabase {
 						case 'qualification_group_tree':
 						case 'kpi_group_tree':
 							$parent_table = str_replace('_tree', '', $table);
-							$query[] = 'delete from '. $table .' as a WHERE NOT EXISTS ( select 1 from '. $parent_table .' as b WHERE a.object_id = b.id)';
+							$query[] = 'DELETE FROM '. $table .' as a WHERE NOT EXISTS ( select 1 from '. $parent_table .' as b WHERE a.object_id = b.id)';
+							break;
+						case 'authentication':
+							$query[] = 'DELETE FROM '. $table .' as a USING users as b WHERE a.object_id = b.id AND a.type_id NOT IN (100,110) AND ( b.deleted = 1 AND b.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
+							break;
+						case 'company_generic_tag_map':
+							//Tag mapping is specific to almost every other major table, so need to handle it one at a time.
+							$table_arr = $db->MetaTables(); //Get list of tables, so we don't cause SQL errors if the table doesn't exist.
+
+							$cgtf = TTnew('CompanyGenericTagFactory');
+							$object_type_arr = $cgtf->getOptions('object_type');
+							foreach( $object_type_arr as $object_type_id => $object_type ) {
+								if ( in_array( $object_type, $table_arr ) ) {
+									$query[] = 'DELETE FROM '. $table .' as a WHERE a.object_type_id = '. $object_type_id .' AND NOT EXISTS ( select 1 from '. $object_type .' as b WHERE a.object_id = b.id)';
+								}
+							}
+							unset($cgtf, $object_type_arr,  $object_type, $table_arr);
+							break;
+						case 'company_generic_tag':
+							$query[] = 'DELETE FROM '. $table .' as a WHERE NOT EXISTS ( select 1 from company_generic_tag_map as b WHERE a.id = b.tag_id)';
 							break;
 						//Tables that don't require custom queries, but don't have a deleted/updated_date column.
-						case 'authentication':
 						case 'company_user_count':
 						case 'company_generic_map':
 						case 'permission_user':
@@ -980,7 +1003,7 @@ class PurgeDatabase {
 						case 'job_user_allow':
 						case 'job_item_allow':
 							if ( version_compare(APPLICATION_VERSION, '3.5.0', '>=') ) {
-								$query[] = 'delete from '. $table;
+								$query[] = 'DELETE FROM '. $table;
 							}
 							break;
 						default:
@@ -991,7 +1014,7 @@ class PurgeDatabase {
 							//
 							//
 							Debug::Text('Default Query... Table: '. $table, __FILE__, __LINE__, __METHOD__, 10);
-							$query[] = 'delete from '. $table .' where deleted = 1 AND updated_date <= '. (time() - (86400 * ($expire_days)));
+							$query[] = 'DELETE FROM '. $table .' WHERE deleted = 1 AND updated_date <= '. (time() - (86400 * ($expire_days)));
 							break;
 					}
 
@@ -1010,12 +1033,12 @@ class PurgeDatabase {
 								//Delete rows where the parent table rows are already marked as deleted.
 								//MySQL gets a syntax error on these types of queries, need to rewrite them using the IN clause without referencing the table we are deleting from.
 								//Due to this we need to rewrite almost all queries here, which requires extensive testing as well.
-								//$query[] = 'delete from '. $table .' where '. $parent_table_column .' in ( select id from '. $parent_table .' as b where b.deleted = 1 AND b.updated_date <= '. (time()-(86400*($expire_days))) .')';
-								$query[] = 'delete from '. $table .' as a USING '. $parent_table .' as b WHERE a.'. $parent_table_column .' = b.id AND ( b.deleted = 1 AND b.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
+								//$query[] = 'DELETE FROM '. $table .' WHERE '. $parent_table_column .' in ( select id from '. $parent_table .' as b WHERE b.deleted = 1 AND b.updated_date <= '. (time()-(86400*($expire_days))) .')';
+								$query[] = 'DELETE FROM '. $table .' as a USING '. $parent_table .' as b WHERE a.'. $parent_table_column .' = b.id AND ( b.deleted = 1 AND b.updated_date <= '. (time() - (86400 * ($expire_days))) .')';
 
 								//Delete rows where the parent table rows are already deleted.
 								//Keep records where ID = 0 or NULL as those can still be valid in some cases.
-								$query[] = 'delete from '. $table .' as a where a.'. $parent_table_column .' != 0 AND a.'. $parent_table_column .' is NOT NULL AND NOT EXISTS ( select 1 from '. $parent_table .' as b WHERE a.'. $parent_table_column .' = b.id )';
+								$query[] = 'DELETE FROM '. $table .' as a WHERE a.'. $parent_table_column .' != 0 AND a.'. $parent_table_column .' is NOT NULL AND NOT EXISTS ( SELECT 1 FROM '. $parent_table .' as b WHERE a.'. $parent_table_column .' = b.id )';
 							}
 
 							unset($parent_table_column, $parent_table);

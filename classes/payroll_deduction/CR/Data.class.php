@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -40,17 +40,33 @@
 class PayrollDeduction_CR_Data extends PayrollDeduction_Base {
 	var $db = NULL;
 	var $income_tax_rates = array();
-	var $table = 'income_tax_rate_cr';
 	var $country_primary_currency = 'CRC';
 
+	var $federal_income_tax_rate_options = array(
+												20070930 => array(
+															10 => array(
+																	array( 'income' => 6096000,	'rate' => 0,	'constant' => 0 ),
+																	array( 'income' => 9144000,	'rate' => 10,	'constant' => 0 ),
+																	array( 'income' => 9144000,	'rate' => 15,	'constant' => 0 ),
+																	),
+															),
+												20060930 => array(
+															10 => array(
+																	array( 'income' => 5616000,	'rate' => 0,	'constant' => 0 ),
+																	array( 'income' => 8424000,	'rate' => 10,	'constant' => 0 ),
+																	array( 'income' => 8424000,	'rate' => 15,	'constant' => 0 ),
+																),
+															),
+												);
+
 	var $federal_allowance = array(
-									1159678800 => 10560.00, //01-Oct-07
-									1191214800 => 11520.00  //01-Oct-07
+									20060930 => 10560.00, //01-Oct-07
+									20070930 => 11520.00  //01-Oct-07
 								);
 
 	var $federal_filing = array(
-									1159678800 => 15720.00, //01-Oct-07
-									1191214800 => 17040.00  //01-Oct-07
+									20060930 => 15720.00, //01-Oct-07
+									20070930 => 17040.00  //01-Oct-07
 								);
 
 	function __construct() {
@@ -73,66 +89,35 @@ class PayrollDeduction_CR_Data extends PayrollDeduction_Base {
 		}
 
 		if ($epoch == NULL OR $epoch == ''){
-			$epoch = TTDate::getTime();
+			$epoch = $this->getISODate( TTDate::getTime() );
 		}
 
-		$cache_id = $country.$epoch.$federal_status;
-
-		if ( is_string( $cache->get($cache_id, $this->table ) ) ) {
-			$this->income_tax_rates = unserialize( $cache->get($cache_id, $this->table ) );
-		} else {
-			$this->income_tax_rates = FALSE;
-		}
-
-
-		if ( $this->income_tax_rates === FALSE ) {
-			$query = 'select country,state,district,status,income,rate,constant,effective_date
-						from '. $this->table .'
-						where
-								(
-								effective_date = ( 	select effective_date
-													from '. $this->table .'
-													where effective_date <= '. $epoch .'
-														AND country = '. $this->db->qstr($country).'
-													ORDER BY effective_date DESC
-													LIMIT 1)
-								)
-							AND
-							( country = '. $this->db->qstr($country).')
-						ORDER BY effective_date desc, income asc, rate asc
-					';
-
-			//Debug::text('Query: '. $query , __FILE__, __LINE__, __METHOD__, 10);
-			try {
-				$rs = $this->db->Execute($query);
-			} catch (Exception $e) {
-				throw new DBError($e);
-			}
-
-			$rs = $rs->GetRows();
-
+		$this->income_tax_rates = FALSE;
+		if ( isset($this->federal_income_tax_rate_options) AND count($this->federal_income_tax_rate_options) > 0 ) {
 			$prev_income = 0;
 			$prev_rate = 0;
 			$prev_constant = 0;
-			foreach($rs as $key => $arr) {
 
-				$type = 'federal';
+			$federal_income_tax_rate_options = $this->getDataFromRateArray($epoch, $this->federal_income_tax_rate_options );
+			if ( isset($federal_income_tax_rate_options[$federal_status]) ) {
+				foreach( $federal_income_tax_rate_options[$federal_status] as $data ) {
+					$this->income_tax_rates['federal'][] = array(
+															'prev_income' => $prev_income,
+															'income' => $data['income'],
+															'prev_rate' => ( $prev_rate / 100 ),
+															'rate' => ( $data['rate'] / 100 ),
+															'prev_constant' => $prev_constant,
+															'constant' => $data['constant']
+															);
 
-				$this->income_tax_rates[$type][] = array('prev_income' => trim($prev_income), 'income' => trim($arr['income']), 'prev_rate' => ( bcdiv( trim($prev_rate), 100 ) ), 'rate' => ( bcdiv( trim($arr['rate']), 100 ) ), 'prev_constant' => trim($prev_constant), 'constant' => trim($arr['constant']) );
-
-				$prev_income = $arr['income'];
-				$prev_rate = $arr['rate'];
-				$prev_constant = $arr['constant'];
+					$prev_income = $data['income'];
+					$prev_rate = $data['rate'];
+					$prev_constant = $data['constant'];
+				}
 			}
-
-			if ( isset($arr) ) {
-				Debug::text('bUsing values from: '. TTDate::getDate('DATE+TIME', $arr['effective_date']), __FILE__, __LINE__, __METHOD__, 10);
-			}
-
-			//var_dump($this->income_tax_rates);
-			$cache->save(serialize($this->income_tax_rates), $cache_id, $this->table );
+			unset($prev_income, $prev_rate, $prev_constant, $data, $federal_income_tax_rate_options);
 		}
-
+				
 		return $this;
 	}
 

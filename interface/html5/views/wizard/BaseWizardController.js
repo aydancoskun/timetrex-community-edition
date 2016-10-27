@@ -34,6 +34,8 @@ BaseWizardController = BaseWindowController.extend( {
 
 	events: {
 		'click .close-btn': 'onCloseClick',
+		'click .close-icon': 'onCloseClick',
+		'click .wizard-overlay': 'onCloseClick',
 		'click .forward-btn': 'onNextClick',
 		'click .back-btn': 'onBackClick',
 		'click .done-btn': 'onDoneClick'
@@ -55,6 +57,7 @@ BaseWizardController = BaseWindowController.extend( {
 		LocalCacheData.current_open_wizard_controller = this;
 
 		this.setDefaultDataToSteps();
+
 	},
 
 	setDefaultDataToSteps: function() {
@@ -155,13 +158,15 @@ BaseWizardController = BaseWindowController.extend( {
 	saveAllStepsToUserGenericData: function( callBack ) {
 
 		// Function called stacks: TypeError: Unable to set property 'data' of undefined or null reference
-		if ( this.script_name && this.saved_user_generic_data) {
+		if ( this.script_name && this.saved_user_generic_data ) {
 			this.saved_user_generic_data.data = this.stepsDataDic;
 			this.saved_user_generic_data.data.current_step = this.current_step;
 
-			this.user_generic_data_api.setUserGenericData( this.saved_user_generic_data, {onResult: function( result ) {
-				callBack( result.getResult() );
-			}} );
+			this.user_generic_data_api.setUserGenericData( this.saved_user_generic_data, {
+				onResult: function( result ) {
+					callBack( result.getResult() );
+				}
+			} );
 		} else {
 			callBack( true );
 		}
@@ -202,14 +207,14 @@ BaseWizardController = BaseWindowController.extend( {
 		}
 
 		column.append( form_item );
-		column.append( "<div class='clear-both-div'></div>" );
+		//column.append( "<div class='clear-both-div'></div>" );
 
 		//set height to text area
-		if ( form_item.height() > 35 ) {
-			form_item_label_div.css( 'height', form_item.height() );
-		} else if ( widget.hasClass( 'a-dropdown' ) ) {
-			form_item_label_div.css( 'height', 240 );
-		}
+//		if ( form_item.height() > 35 ) {
+//			form_item_label_div.css( 'height', form_item.height() );
+//		} else if ( widget.hasClass( 'a-dropdown' ) ) {
+//			form_item_label_div.css( 'height', 240 );
+//		}
 
 		if ( setResizeEvent ) {
 
@@ -223,9 +228,9 @@ BaseWizardController = BaseWindowController.extend( {
 //				form_item_label_div.css( 'height', widget.height() + 10 );
 //			} );
 
-			form_item_input_div.unbind( 'resize' ).bind( 'resize', function() {
-				form_item_label_div.css( 'height', form_item_input_div.height() + 10 );
-			} );
+//			form_item_input_div.unbind( 'resize' ).bind( 'resize', function() {
+//				form_item_label_div.css( 'height', form_item_input_div.height() + 10 );
+//			} );
 
 		}
 
@@ -300,31 +305,33 @@ BaseWizardController = BaseWindowController.extend( {
 
 		if ( this.script_name ) {
 			args.filter_data = {script: this.script_name, deleted: false};
-			this.user_generic_data_api.getUserGenericData( args, {onResult: function( result ) {
+			this.user_generic_data_api.getUserGenericData( args, {
+				onResult: function( result ) {
 
-				var result_data = result.getResult();
+					var result_data = result.getResult();
 
-				if ( $.type( result_data ) === 'array' ) {
-					$this.saved_user_generic_data = result_data[0];
-					$this.stepsDataDic = $this.saved_user_generic_data.data;
-				} else {
-					$this.saved_user_generic_data = {};
-					$this.saved_user_generic_data.script = $this.script_name;
-					$this.saved_user_generic_data.name = $this.script_name;
-					$this.saved_user_generic_data.is_default = false;
-					$this.saved_user_generic_data.data = {current_step: 1};
+					if ( $.type( result_data ) === 'array' ) {
+						$this.saved_user_generic_data = result_data[0];
+						$this.stepsDataDic = $this.saved_user_generic_data.data;
+					} else {
+						$this.saved_user_generic_data = {};
+						$this.saved_user_generic_data.script = $this.script_name;
+						$this.saved_user_generic_data.name = $this.script_name;
+						$this.saved_user_generic_data.is_default = false;
+						$this.saved_user_generic_data.data = {current_step: 1};
+
+					}
+
+					$this.current_step = $this.saved_user_generic_data.data.current_step;
+
+					if ( $this.current_step > $this.steps ) {
+						$this.current_step = 1;
+					}
+
+					$this.initCurrentStep();
 
 				}
-
-				$this.current_step = $this.saved_user_generic_data.data.current_step;
-
-				if ( $this.current_step > $this.steps ) {
-					$this.current_step = 1;
-				}
-
-				$this.initCurrentStep();
-
-			}} );
+			} );
 		} else {
 			$this.initCurrentStep();
 		}
@@ -388,11 +395,20 @@ BaseWizardController = BaseWindowController.extend( {
 		return widget;
 	},
 
+	getTextInput: function( field ) {
+		var widget = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+
+		widget = widget.TTextInput( {
+			field: field
+		} );
+
+		return widget;
+	},
+
 	getText: function() {
 		var widget = Global.loadWidgetByName( FormItemType.TEXT );
 
-		widget = widget.TText( {
-		} );
+		widget = widget.TText( {} );
 
 		return widget;
 	},
@@ -568,7 +584,7 @@ BaseWizardController.openWizard = function( viewId, templateName ) {
 	}
 
 	Global.loadViewSource( viewId, templateName, function( result ) {
-		var args = { };
+		var args = {};
 		var template = _.template( result, args );
 
 		$( 'body' ).append( template );

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -39,6 +39,29 @@
  * @package PayrollDeduction\CA
  */
 class PayrollDeduction_CA_NS extends PayrollDeduction_CA {
+	var $provincial_income_tax_rate_options = array(
+													20110101 => array(
+																	array( 'income' => 29590,	'rate' => 8.79,	'constant' => 0 ),
+																	array( 'income' => 59180,	'rate' => 14.95,'constant' => 1823 ),
+																	array( 'income' => 93000,	'rate' => 16.67,'constant' => 2841 ),
+																	array( 'income' => 150000,	'rate' => 17.5,	'constant' => 3613 ),
+																	array( 'income' => 150000,	'rate' => 21.0,	'constant' => 8863 ),
+																),
+													20100701 => array(
+																	array( 'income' => 29590,	'rate' => 8.79,	'constant' => 0 ),
+																	array( 'income' => 59180,	'rate' => 14.95,'constant' => 1823 ),
+																	array( 'income' => 93000,	'rate' => 16.67,'constant' => 2841 ),
+																	array( 'income' => 150000,	'rate' => 17.5,	'constant' => 3613 ),
+																	array( 'income' => 150000,	'rate' => 24.5,	'constant' => 14113 ),
+																),
+													20070101 => array(
+																	array( 'income' => 29590,	'rate' => 8.79,	'constant' => 0 ),
+																	array( 'income' => 59180,	'rate' => 14.95,'constant' => 1823 ),
+																	array( 'income' => 93000,	'rate' => 16.67,'constant' => 2841 ),
+																	array( 'income' => 93000,	'rate' => 17.5,	'constant' => 3613 ),
+																),
+													);
+
 	function getProvincialSurtax() {
 		/*
 			V1 =
@@ -53,7 +76,7 @@ class PayrollDeduction_CA_NS extends PayrollDeduction_CA {
 		$T4 = $this->getProvincialBasicTax();
 		$V1 = 0;
 
-		if ( $this->getDate() >= strtotime('01-Jan-2008') ) {
+		if ( $this->getDate() >= 20080101 ) {
 			if ( $T4 <= 10000 ) {
 				$V1 = 0;
 			} elseif ( $T4 > 10000 ) {

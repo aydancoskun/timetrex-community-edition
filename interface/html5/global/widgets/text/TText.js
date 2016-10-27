@@ -27,17 +27,14 @@
 
 		this.setValue = function( val ) {
 			if ( !val ) {
-				val = '';
+				val = $.i18n._('N/A');
 			}
 
 			val = val.toString();
-
 			val = val.replace( /\n|\r|(\r\n)|(\u0085)|(\u2028)|(\u2029)/g, '<br>' );
 			val = val.replace( /\n|\r|(\r\n)|(\u0085)|(\u2028)|(\u2029)/g, '<br>' );
-
 			val = Global.htmlEncode( val );
 			val = val.replace( /&lt;br&gt;/g, '<br>' );
-
 			$this.html( ( val ) );
 			$this.height( 'auto' );
 
@@ -66,8 +63,6 @@
 
 	};
 
-	$.fn.TText.defaults = {
-
-	};
+	$.fn.TText.defaults = {};
 
 })( jQuery );

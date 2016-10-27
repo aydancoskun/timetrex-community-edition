@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -40,17 +40,26 @@
  */
 class PayrollDeduction_US_SC extends PayrollDeduction_US {
 
+	var $state_income_tax_rate_options = array(
+												20060101 => array(
+															0 => array(
+																	array( 'income' => 2000,	'rate' => 2,	'constant' => 0 ),
+																	array( 'income' => 4000,	'rate' => 3,	'constant' => 20 ),
+																	array( 'income' => 6000,	'rate' => 4,	'constant' => 60 ),
+																	array( 'income' => 8000,	'rate' => 5,	'constant' => 120 ),
+																	array( 'income' => 10000,	'rate' => 6,	'constant' => 200 ),
+																	array( 'income' => 10000,	'rate' => 7,	'constant' => 300 ),
+																),
+															),
+												);
+
 	var $state_options = array(
-								1136102400 => array(
+								20060101 => array(
 													'standard_deduction_rate' => 10,
 													'standard_deduction_maximum' => 2600,
 													'allowance' => 2300
 													)
 								);
-
-	function getStatePayPeriodDeductions() {
-		return bcdiv($this->getStateTaxPayable(), $this->getAnnualPayPeriods() );
-	}
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();

@@ -502,7 +502,7 @@ FastClick.prototype.onTouchEnd = function(event) {
         targetElement = document.elementFromPoint(touch.pageX - window.pageXOffset, touch.pageY - window.pageYOffset);
     }
 
-	//Error: TypeError: null is not an object (evaluating 'targetElement.tagName') in https://ondemand2001.timetrex.com/interface/html5/framework/fastclick.js?v=8.0.0-20141117-122453 line 505
+	//Error: TypeError: null is not an object (evaluating 'targetElement.tagName') in /interface/html5/framework/fastclick.js?v=8.0.0-20141117-122453 line 505
 	if(!targetElement){
 		return false;
 	}

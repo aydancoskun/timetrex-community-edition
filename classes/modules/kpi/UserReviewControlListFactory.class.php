@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -61,7 +61,7 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 		$this->rs = $this->getCache($id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => $id,
+						'id' => (int)$id,
 						);
 
 			$query = '
@@ -88,7 +88,7 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 		}
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					);
 
 		$query = '
@@ -111,8 +111,8 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 		$this->rs = $this->getCache($id.$user_id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => $id,
-						'user_id' => $user_id,
+						'id' => (int)$id,
+						'user_id' => (int)$user_id,
 						);
 
 			$query = '
@@ -147,7 +147,7 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id
+					'company_id' => (int)$company_id
 					);
 
 		$query = '
@@ -176,8 +176,8 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 		$uf = new UserFactory();
 
 		$ph = array(
-					'id' => $id,
-					'company_id' => $company_id
+					'id' => (int)$id,
+					'company_id' => (int)$company_id
 					);
 
 		$query = '
@@ -266,7 +266,7 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 		$urf = new UserReviewFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -316,7 +316,7 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['term_id']) ) ? $this->getWhereClauseSQL( 'a.term_id', $filter_data['term_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['severity_id']) ) ? $this->getWhereClauseSQL( 'a.severity_id', $filter_data['severity_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => $company_id, 'object_type_id' => 320, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
+		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => (int)$company_id, 'object_type_id' => 320, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 		$query .= ( isset($filter_data['due_date']) ) ? $this->getWhereClauseSQL( 'a.due_date', $filter_data['due_date'], 'date_range', $ph ) : NULL;
 		$query .= ( isset($filter_data['kpi_id']) ) ? $this->getWhereClauseSQL( 'urf.kpi_id', $filter_data['kpi_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['rating']) ) ? $this->getWhereClauseSQL( 'a.rating', $filter_data['rating'], 'numeric', $ph ) : NULL;

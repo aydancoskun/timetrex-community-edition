@@ -4,7 +4,7 @@ var PermissionManager = (function() {
 
 		var permission = PermissionManager.getPermissionData();
 
-		//Error: Uncaught TypeError: Cannot read property 'punch' of null in https://ondemand1.timetrex.com/interface/html5/global/PermissionManager.js?v=8.0.0-20141230-115759 line 6
+		//Error: Uncaught TypeError: Cannot read property 'punch' of null in /interface/html5/global/PermissionManager.js?v=8.0.0-20141230-115759 line 6
 		if ( !permission || !Global.isSet( permission[name] ) || !Global.isSet( permission[name][value] ) ) {
 			return false;
 		} else {

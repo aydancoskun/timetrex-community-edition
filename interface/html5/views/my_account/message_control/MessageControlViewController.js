@@ -60,7 +60,8 @@ MessageControlViewController = BaseViewController.extend( {
 		default_args.permission_section = 'message_control';
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Employee' ),
+			new SearchField( {
+				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
 				default_args: default_args,
@@ -69,26 +70,32 @@ MessageControlViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Type' ),
+			new SearchField( {
+				label: $.i18n._( 'Type' ),
 				in_column: 1,
 				multiple: true,
 				field: 'object_type_id',
 				basic_search: true,
 				adv_search: false,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Subject' ),
+			new SearchField( {
+				label: $.i18n._( 'Subject' ),
 				in_column: 1,
 				field: 'subject',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -96,9 +103,11 @@ MessageControlViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -106,7 +115,8 @@ MessageControlViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 		];
 	},
 
@@ -250,7 +260,7 @@ MessageControlViewController = BaseViewController.extend( {
 
 	setDefaultMenu: function( doNotSetFocus ) {
 
-		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
 			return;
 		}
@@ -461,8 +471,9 @@ MessageControlViewController = BaseViewController.extend( {
 			}
 
 		} else {
-			$this.setErrorTips( result );
 			$this.setErrorMenu();
+			$this.setErrorTips( result );
+
 		}
 	},
 
@@ -536,7 +547,7 @@ MessageControlViewController = BaseViewController.extend( {
 
 	setCurrentSelectedIcon: function( icon ) {
 
-		//Error: Uncaught TypeError: Cannot read property 'find' of null in https://ondemand1.timetrex.com/interface/html5/#!m=MessageControl line 543
+		//Error: Uncaught TypeError: Cannot read property 'find' of null in /interface/html5/#!m=MessageControl line 543
 		if ( !icon ) {
 			return;
 		}
@@ -641,7 +652,7 @@ MessageControlViewController = BaseViewController.extend( {
 	setGridCellBackGround: function() {
 		var data = this.grid.getGridParam( 'data' );
 
-		//Error: TypeError: data is undefined in https://ondemand1.timetrex.com/interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
+		//Error: TypeError: data is undefined in /interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
 		if ( !data ) {
 			return;
 		}
@@ -688,30 +699,22 @@ MessageControlViewController = BaseViewController.extend( {
 	},
 
 	initEditViewUI: function( view_id, edit_view_file_name ) {
-//		if ( this.sub_view_mode ) {
-//			Global.trackView( 'Sub' + this.viewId + '_view' + '_edit_view' );
-//		} else {
-//			Global.trackView( this.viewId + '_view' + '_edit_view' );
-//		}
 
 		var $this = this;
 
 		if ( this.edit_view ) {
 			this.edit_view.remove();
 		}
-
 		this.edit_view = $( Global.loadViewSource( view_id, edit_view_file_name, null, true ) );
-
 		this.edit_view_tab = $( this.edit_view.find( '.edit-view-tab-bar' ) );
-
 		//Give edt view tab a id, so we can load it when put right click menu on it
 		this.edit_view_tab.attr( 'id', this.ui_id + '_edit_view_tab' );
-
 		this.setTabOVisibility( false );
-
-		this.edit_view_tab = this.edit_view_tab.tabs( {show: function( e, ui ) {
-			$this.onTabShow( e, ui );
-		}} );
+		this.edit_view_tab = this.edit_view_tab.tabs( {
+			show: function( e, ui ) {
+				$this.onTabShow( e, ui );
+			}
+		} );
 
 		this.edit_view_tab.bind( 'tabsselect', function( e, ui ) {
 			$this.onTabIndexChange( e, ui );
@@ -728,29 +731,16 @@ MessageControlViewController = BaseViewController.extend( {
 		this.initRightClickMenu( RightClickMenuType.EDITVIEW );
 
 		if ( this.is_add ) {
-
 			this.buildAddViewUI();
 		} else if ( this.is_viewing ) {
-
 			if ( this.is_request ) {
 				this.buildRequestViewUI();
 			} else if ( this.is_message ) {
-
 				this.buildMessageViewUI();
 			}
-
 		} else if ( this.is_edit ) {
-
 			this.buildEditViewUI();
 		}
-
-		//Calculated tab's height
-		this.edit_view_tab.resize( function() {
-
-			$this.setEditViewTabHeight();
-
-		} );
-
 		$this.setEditViewTabHeight();
 	},
 
@@ -795,83 +785,86 @@ MessageControlViewController = BaseViewController.extend( {
 
 		if ( $this.is_request ) {
 
-			this.request_api['getRequest']( filter, {onResult: function( result ) {
+			this.request_api['getRequest']( filter, {
+				onResult: function( result ) {
 
-				var result_data = result.getResult();
+					var result_data = result.getResult();
 
-				if ( !result_data ) {
-					result_data = [];
-				}
-
-				result_data = result_data[0];
-
-				if ( !result_data ) {
-					TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-					if ( !$this.edit_view ) {
-						$this.onCancelClick();
-					}
-					return;
-				}
-
-				// save current select grid data. Not this not work when access from url action. See autoOpenEditView function for why
-				$this.current_select_message_control_data = selected_item;
-
-				$this.current_edit_record = result_data;
-
-				//if access from url, current_select_message_control_data need be get again
-				if ( !$this.current_select_message_control_data.hasOwnProperty( 'to_user_id' ) ) {
-					var filter = {filter_data: {id: $this.current_select_message_control_data.id}};
-					var message_control_data = $this.api.getMessageControl( filter, {async: false} ).getResult()[0];
-
-					if ( message_control_data ) {
-						$this.current_select_message_control_data = message_control_data;
+					if ( !result_data ) {
+						result_data = [];
 					}
 
+					result_data = result_data[0];
+
+					if ( !result_data ) {
+						TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
+						if ( !$this.edit_view ) {
+							$this.onCancelClick();
+						}
+						return;
+					}
+
+					// save current select grid data. Not this not work when access from url action. See autoOpenEditView function for why
+					$this.current_select_message_control_data = selected_item;
+
+					$this.current_edit_record = result_data;
+
+					//if access from url, current_select_message_control_data need be get again
+					if ( !$this.current_select_message_control_data.hasOwnProperty( 'to_user_id' ) ) {
+						var filter = {filter_data: {id: $this.current_select_message_control_data.id}};
+						var message_control_data = $this.api.getMessageControl( filter, {async: false} ).getResult()[0];
+
+						if ( message_control_data ) {
+							$this.current_select_message_control_data = message_control_data;
+						}
+
+					}
+
+					$this.initEditView();
+
 				}
-
-				$this.initEditView();
-
-			}} );
+			} );
 
 		} else {
 
-			this.api['getMessage']( filter, {onResult: function( result ) {
+			this.api['getMessage']( filter, {
+				onResult: function( result ) {
 
-				var result_data = result.getResult();
+					var result_data = result.getResult();
 
-				if ( !result_data ) {
-					result_data = [];
-				}
-
-				result_data = result_data.length > 1 ? result_data.reverse() : result_data[0];
-
-				if ( !result_data ) {
-					TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-					if ( !$this.edit_view ) {
-						$this.onCancelClick();
-					}
-					return;
-				}
-
-				// save current select grid data. Not this not work when access from url action. See autoOpenEditView function for why
-				$this.current_select_message_control_data = selected_item;
-
-				$this.current_edit_record = result_data;
-
-				//if access from url, current_select_message_control_data need be get again
-				if ( !$this.current_select_message_control_data.hasOwnProperty( 'to_user_id' ) ) {
-					var filter = {filter_data: {id: $this.current_select_message_control_data.id}};
-					var message_control_data = $this.api.getMessageControl( filter, {async: false} ).getResult()[0];
-
-					if ( message_control_data ) {
-						$this.current_select_message_control_data = message_control_data;
+					if ( !result_data ) {
+						result_data = [];
 					}
 
+					result_data = result_data.length > 1 ? result_data.reverse() : result_data[0];
+
+					if ( !result_data ) {
+						TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
+						if ( !$this.edit_view ) {
+							$this.onCancelClick();
+						}
+						return;
+					}
+
+					// save current select grid data. Not this not work when access from url action. See autoOpenEditView function for why
+					$this.current_select_message_control_data = selected_item;
+
+					$this.current_edit_record = result_data;
+					//if access from url, current_select_message_control_data need be get again
+					if ( !$this.current_select_message_control_data.hasOwnProperty( 'to_user_id' ) ) {
+						var filter = {filter_data: {id: $this.current_select_message_control_data.id}};
+						var message_control_data = $this.api.getMessageControl( filter, {async: false} ).getResult()[0];
+
+						if ( message_control_data ) {
+							$this.current_select_message_control_data = message_control_data;
+						}
+
+					}
+
+					$this.initEditView();
+
 				}
-
-				$this.initEditView();
-
-			}} );
+			} );
 
 		}
 
@@ -904,14 +897,14 @@ MessageControlViewController = BaseViewController.extend( {
 
 					if ( this.is_request ) {
 						Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId +
-							'&a=' + a + '&id=' + this.current_select_message_control_data.id +
-							'&t=request&object_id=' + this.current_select_message_control_data.object_id +
-							'&tab=' + tab_name );
+						'&a=' + a + '&id=' + this.current_select_message_control_data.id +
+						'&t=request&object_id=' + this.current_select_message_control_data.object_id +
+						'&tab=' + tab_name );
 					} else {
 						Global.setURLToBrowser( Global.getBaseURL() +
-							'#!m=' + this.viewId + '&a=' +
-							a + '&id=' + this.current_select_message_control_data.id + '&t=message' +
-							'&tab=' + tab_name );
+						'#!m=' + this.viewId + '&a=' +
+						a + '&id=' + this.current_select_message_control_data.id + '&t=message' +
+						'&tab=' + tab_name );
 					}
 
 				}
@@ -923,10 +916,10 @@ MessageControlViewController = BaseViewController.extend( {
 					//Edit a record which don't have id, schedule view Recurring Scedule
 					if ( a === 'edit' ) {
 						Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&a=new&t=' + (this.is_request ? 'request' : 'message') +
-							'&tab=' + tab_name );
+						'&tab=' + tab_name );
 					} else {
 						Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&a=' + a + '&t=' + (this.is_request ? 'request' : 'message') +
-							'&tab=' + tab_name );
+						'&tab=' + tab_name );
 					}
 
 				} else {
@@ -956,7 +949,7 @@ MessageControlViewController = BaseViewController.extend( {
 
 			this.navigation_source_data = navigation_source_data;
 
-			if ( Global.isSet( navigation_source_data.id ) && navigation_source_data.id ) {
+			if ( this.is_viewing && Global.isSet( navigation_source_data.id ) && navigation_source_data.id ) {
 				navigation_div.css( 'display', 'block' );
 				//Set Navigation Awesomebox
 
@@ -1107,8 +1100,6 @@ MessageControlViewController = BaseViewController.extend( {
 			'tab_message': $.i18n._( 'Message' )
 		} );
 
-		this.navigation = null;
-
 		//Tab 0 start
 
 		var tab_message = this.edit_view_tab.find( '#tab_message' );
@@ -1146,6 +1137,8 @@ MessageControlViewController = BaseViewController.extend( {
 	},
 
 	buildRequestViewUI: function() {
+		var pager_data = this.navigation && this.navigation.getPagerData && this.navigation.getPagerData();
+		var source_data = this.navigation && this.navigation.getSourceData && this.navigation.getSourceData();
 		this._super( 'buildEditViewUI' );
 
 		var $this = this;
@@ -1164,6 +1157,11 @@ MessageControlViewController = BaseViewController.extend( {
 		} );
 
 		this.setNavigation();
+
+		if ( pager_data && source_data ) {
+			this.navigation.setSourceData( source_data );
+			this.navigation.setPagerData( pager_data );
+		}
 
 		//Tab 0 first column start
 
@@ -1228,14 +1226,13 @@ MessageControlViewController = BaseViewController.extend( {
 	},
 
 	buildMessageViewUI: function() {
+		var pager_data = this.navigation && this.navigation.getPagerData && this.navigation.getPagerData();
+		var source_data = this.navigation && this.navigation.getSourceData && this.navigation.getSourceData();
 		this._super( 'buildEditViewUI' );
-
 		var $this = this;
-
 		this.setTabLabels( {
 			'tab_message': $.i18n._( 'Messages' )
 		} );
-
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIMessageControl' )),
 			id: this.script_name + '_navigation',
@@ -1244,8 +1241,12 @@ MessageControlViewController = BaseViewController.extend( {
 			navigation_mode: true,
 			show_search_inputs: true
 		} );
-
 		this.setNavigation();
+
+		if ( pager_data && source_data ) {
+			this.navigation.setSourceData( source_data );
+			this.navigation.setPagerData( pager_data );
+		}
 
 		//Tab 0 start
 
@@ -1288,27 +1289,6 @@ MessageControlViewController = BaseViewController.extend( {
 
 	},
 
-	onLeftArrowClick: function() {
-
-		var selected_index = this.navigation.getSelectIndex();
-		var source_data = this.navigation.getSourceData();
-		var next_select_item;
-		if ( selected_index > 0 ) {
-			next_select_item = this.navigation.getItemByIndex( selected_index - 1 );
-
-		} else {
-			this.onCancelClick();
-			return;
-
-		}
-
-		ProgressBar.showOverlay();
-
-		this.onViewClick( next_select_item ); //Dont refresh UI
-
-		this.setNavigationArrowsEnabled();
-	},
-
 	refreshCurrentRecord: function() {
 		var next_select_item = this.navigation.getItemByIndex( this.navigation.getSelectIndex() );
 		ProgressBar.showOverlay();
@@ -1316,24 +1296,9 @@ MessageControlViewController = BaseViewController.extend( {
 		this.setNavigationArrowsEnabled();
 	},
 
-	onRightArrowClick: function() {
-
-		var selected_index = this.navigation.getSelectIndex();
-		var source_data = this.navigation.getSourceData();
-		var next_select_item;
-
-		if ( selected_index < (source_data.length - 1) ) {
-			next_select_item = this.navigation.getItemByIndex( (selected_index + 1) );
-
-		} else {
-			this.onCancelClick();
-			return;
-		}
-
+	onRightOrLeftArrowClickCallBack: function( next_select_item ) {
 		ProgressBar.showOverlay();
-
 		this.onViewClick( next_select_item ); //Dont refresh UI
-
 		this.setNavigationArrowsEnabled();
 	},
 
@@ -1345,17 +1310,6 @@ MessageControlViewController = BaseViewController.extend( {
 		this.setTabLabels( {
 			'tab_message': $.i18n._( 'Message' )
 		} );
-
-		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIMessageControl' )),
-			id: this.script_name + '_navigation',
-			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.MESSAGE_USER,
-			navigation_mode: true,
-			show_search_inputs: true
-		} );
-
-		this.setNavigation();
 
 		//Tab 0 start
 
@@ -1470,33 +1424,36 @@ MessageControlViewController = BaseViewController.extend( {
 		if ( Global.isSet( this.edit_view_ui_dic['subject'] ) ) {
 			record.subject = this.edit_view_ui_dic['subject'].getValue();
 		}
-
 		record = this.uniformVariable( record );
 
-		this.api['validate' + this.api.key_name]( record, {onResult: function( result ) {
-			$this.validateResult( result );
+		this.api['validate' + this.api.key_name]( record, {
+			onResult: function( result ) {
+				$this.validateResult( result );
 
-		}} );
+			}
+		} );
 	},
 
-	onSaveClick: function() {
-
-		this.is_add = false;
+	onSaveClick: function( ignoreWarning ) {
 		LocalCacheData.current_doing_context_action = 'save';
 		var $this = this;
 		var record = this.current_edit_record;
-
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
 		if ( Global.isSet( this.edit_view_ui_dic['subject'] ) ) {
 			record.subject = this.edit_view_ui_dic['subject'].getValue();
 		}
 
 		record = this.uniformVariable( record );
 
-		this.api['set' + this.api.key_name]( record, {onResult: function( result ) {
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
+			onResult: function( result ) {
 
-			$this.onSaveResult( result );
+				$this.onSaveResult( result );
 
-		}} );
+			}
+		} );
 	},
 
 	uniformVariable: function( records ) {
@@ -1590,9 +1547,11 @@ MessageControlViewController = BaseViewController.extend( {
 
 			//request will do this when initEmbeddedMessage
 			if ( this.is_message && this.current_edit_record.status_id == 10 ) {
-				this.api['markRecipientMessageAsRead']( [this.current_edit_record.id], {onResult: function( res ) {
-					$this.search( false );
-				}} );
+				this.api['markRecipientMessageAsRead']( [this.current_edit_record.id], {
+					onResult: function( res ) {
+						$this.search( false );
+					}
+				} );
 			}
 
 		}
@@ -1635,6 +1594,10 @@ MessageControlViewController = BaseViewController.extend( {
 
 			var remove_ids = [];
 			if ( $this.edit_view ) {
+				if ( !$this.current_select_message_control_data ) {
+					TAlertManager.showAlert( $.i18n._( 'Invalid Message id' ) );
+					return;
+				}
 				remove_ids.push( $this.current_select_message_control_data.id );
 			} else {
 				remove_ids = $this.getGridSelectIdArray().slice();
@@ -1642,10 +1605,12 @@ MessageControlViewController = BaseViewController.extend( {
 			if ( result ) {
 				//Add folder
 				ProgressBar.showOverlay();
-				$this.api['delete' + $this.api.key_name]( remove_ids, $this.folder_id, {onResult: function( result ) {
-					$this.isReloadViewUI = false;
-					$this.onDeleteResult( result, remove_ids );
-				}} );
+				$this.api['delete' + $this.api.key_name]( remove_ids, $this.folder_id, {
+					onResult: function( result ) {
+						$this.isReloadViewUI = false;
+						$this.onDeleteResult( result, remove_ids );
+					}
+				} );
 
 			} else {
 				ProgressBar.closeOverlay();
@@ -1669,12 +1634,14 @@ MessageControlViewController = BaseViewController.extend( {
 
 				//Add folder
 				ProgressBar.showOverlay();
-				$this.api['delete' + $this.api.key_name]( remove_ids, $this.folder_id, {onResult: function( result ) {
+				$this.api['delete' + $this.api.key_name]( remove_ids, $this.folder_id, {
+					onResult: function( result ) {
 
-					$this.isReloadViewUI = false;
-					$this.onDeleteAndNextResult( result, remove_ids );
+						$this.isReloadViewUI = false;
+						$this.onDeleteAndNextResult( result, remove_ids );
 
-				}} );
+					}
+				} );
 
 			} else {
 				ProgressBar.closeOverlay();
@@ -1733,9 +1700,11 @@ MessageControlViewController = BaseViewController.extend( {
 		}
 
 		if ( read_ids.length > 0 ) {
-			$this.api['markRecipientMessageAsRead']( read_ids, {onResult: function( res ) {
-				$this.search( false );
-			}} );
+			$this.api['markRecipientMessageAsRead']( read_ids, {
+				onResult: function( res ) {
+					$this.search( false );
+				}
+			} );
 		}
 
 		$this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab' ).find( '.first-column' ).remove();
@@ -1749,58 +1718,62 @@ MessageControlViewController = BaseViewController.extend( {
 		args.filter_data.object_type_id = 50;
 		args.filter_data.object_id = this.current_edit_record.id;
 
-		$this.api['getEmbeddedMessage']( args, {onResult: function( res ) {
+		$this.api['getEmbeddedMessage']( args, {
+			onResult: function( res ) {
 
-			if ( !$this.edit_view ) {
-				return;
-			}
+				if ( !$this.edit_view ) {
+					return;
+				}
 
-			var data = res.getResult();
+				var data = res.getResult();
 
-			if ( Global.isArray( data ) ) {
-				$( $this.edit_view.find( '.separate' ) ).css( 'display', 'block' );
+				if ( Global.isArray( data ) ) {
+					$( $this.edit_view.find( '.separate' ) ).css( 'display', 'block' );
 
-				$this.messages = data;
-				var read_ids = [];
+					$this.messages = data;
+					var read_ids = [];
 
-				var container = $( '<div></div>' );
+					var container = $( '<div></div>' );
 
-				for ( var key in data ) {
+					for ( var key in data ) {
 
-					var currentItem = data[key];
-					/* jshint ignore:start */
+						var currentItem = data[key];
+						/* jshint ignore:start */
 
-					if ( currentItem.status_id == 10 ) {
+						if ( currentItem.status_id == 10 ) {
 
-						read_ids.push( currentItem.id );
+							read_ids.push( currentItem.id );
 
+						}
+						/* jshint ignore:end */
+
+						var from = currentItem.from_first_name + ' ' + currentItem.from_last_name + '@' + currentItem.updated_date;
+						$this.edit_view_ui_dic['from'].setValue( from );
+						$this.edit_view_ui_dic['subject'].setValue( currentItem.subject );
+						$this.edit_view_ui_dic['body'].setValue( currentItem.body );
+
+						var cloneMessageControl = $( $this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab' ).find( '.second-column' ) ).clone();
+
+						cloneMessageControl.css( 'display', 'block' ).appendTo( container );
 					}
-					/* jshint ignore:end */
 
-					var from = currentItem.from_first_name + ' ' + currentItem.from_last_name + '@' + currentItem.updated_date;
-					$this.edit_view_ui_dic['from'].setValue( from );
-					$this.edit_view_ui_dic['subject'].setValue( currentItem.subject );
-					$this.edit_view_ui_dic['body'].setValue( currentItem.body );
+					if ( read_ids.length > 0 ) {
+						$this.api['markRecipientMessageAsRead']( read_ids, {
+							onResult: function( res ) {
+								$this.search( false );
+							}
+						} );
+					}
 
-					var cloneMessageControl = $( $this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab' ).find( '.second-column' ) ).clone();
+					$this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab' ).find( '.second-column' ).remove();
+					$this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab' ).append( container.html() );
+				} else {
 
-					cloneMessageControl.css( 'display', 'block' ).appendTo( container );
+					$( $this.edit_view.find( '.separate' ) ).css( 'display', 'none' );
 				}
 
-				if ( read_ids.length > 0 ) {
-					$this.api['markRecipientMessageAsRead']( read_ids, {onResult: function( res ) {
-						$this.search( false );
-					}} );
-				}
-
-				$this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab' ).find( '.second-column' ).remove();
-				$this.edit_view_tab.find( '#tab_message' ).find( '.edit-view-tab' ).append( container.html() );
-			} else {
-
-				$( $this.edit_view.find( '.separate' ) ).css( 'display', 'none' );
 			}
-
-		}} );
+		} );
 	},
 
 	/* jshint ignore:start */
@@ -1810,7 +1783,6 @@ MessageControlViewController = BaseViewController.extend( {
 	}
 
 	/* jshint ignore:end */
-
 
 } );
 

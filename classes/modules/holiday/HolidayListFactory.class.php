@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -54,13 +54,14 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 	}
 
 	function getById($id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
+		if ( $id == '' ) {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -76,13 +77,13 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 	}
 
 	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
+		if ( $company_id == '' ) {
 			return FALSE;
 		}
 
 		$hpf = new HolidayPolicyFactory();
 
-		$ph = array(	'company_id' => $company_id,
+		$ph = array(	'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -100,11 +101,11 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 	}
 
 	function getByIDAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
+		if ( $company_id == '' ) {
 			return FALSE;
 		}
 
-		if ( $id == '') {
+		if ( $id == '' ) {
 			return FALSE;
 		}
 
@@ -117,8 +118,8 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 
 		$hpf = new HolidayPolicyFactory();
 
-		$ph = array(	'company_id' => $company_id,
-						'id' => $id
+		$ph = array(	'company_id' => (int)$company_id,
+						'id' => (int)$id
 					);
 
 		$query = '
@@ -137,13 +138,13 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 	}
 
 	function getByIdAndHolidayPolicyID($id, $holiday_policy_id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
+		if ( $id == '' ) {
 			return FALSE;
 		}
 
 		$ph = array(
-					'id' => $id,
-					'holiday_policy_id' => $holiday_policy_id,
+					'id' => (int)$id,
+					'holiday_policy_id' => (int)$holiday_policy_id,
 					);
 
 		$query = '
@@ -161,7 +162,7 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 	}
 
 	function getByHolidayPolicyId($id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
+		if ( $id == '' ) {
 			return FALSE;
 		}
 
@@ -177,7 +178,7 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		$query = '
 					select	*
 					from	'. $this->getTable() .' as a
-					where	holiday_policy_id in ('. $this->getListSQL($id, $ph) .')
+					where	holiday_policy_id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -188,15 +189,15 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 	}
 
 	function getByHolidayPolicyIdAndStartDateAndEndDate($holiday_policy_id, $start_date, $end_date, $where = NULL, $order = NULL) {
-		if ( $holiday_policy_id == '') {
+		if ( $holiday_policy_id == '' ) {
 			return FALSE;
 		}
 
-		if ( $start_date == '') {
+		if ( $start_date == '' ) {
 			return FALSE;
 		}
 
-		if ( $end_date == '') {
+		if ( $end_date == '' ) {
 			return FALSE;
 		}
 
@@ -222,7 +223,7 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 					where
 						a.date_stamp >= ?
 						AND a.date_stamp <= ?
-						AND b.id in ('. $this->getListSQL($holiday_policy_id, $ph) .')
+						AND b.id in ('. $this->getListSQL( $holiday_policy_id, $ph, 'int' ) .')
 						AND ( a.deleted = 0 AND b.deleted=0 )
 						';
 		$query .= $this->getWhereSQL( $where );
@@ -236,11 +237,11 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 	}
 
 	function getByCompanyIdAndHolidayPolicyId($company_id, $id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
+		if ( $company_id == '' ) {
 			return FALSE;
 		}
 
-		if ( $id == '') {
+		if ( $id == '' ) {
 			return FALSE;
 		}
 
@@ -253,14 +254,14 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 
 		$hpf = new HolidayPolicyFactory();
 
-		$ph = array( 'company_id' => $company_id );
+		$ph = array( 'company_id' => (int)$company_id, );
 
 		$query = '
 					select	a.*
 					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $hpf->getTable() .' as b ON a.holiday_policy_id = b.id
 					where	b.company_id = ?
-						AND a.holiday_policy_id in ('. $this->getListSQL($id, $ph) .')
+						AND a.holiday_policy_id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 						AND ( a.deleted = 0 AND b.deleted = 0) ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -271,7 +272,7 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 	}
 
 	function getByPolicyGroupUserId($user_id, $where = NULL, $order = NULL) {
-		if ( $user_id == '') {
+		if ( $user_id == '' ) {
 			return FALSE;
 		}
 
@@ -289,7 +290,7 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					);
 
 		$query = '
@@ -316,11 +317,11 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 	}
 
 	function getByPolicyGroupUserIdAndDate($user_id, $date, $where = NULL, $order = NULL) {
-		if ( $user_id == '') {
+		if ( $user_id == '' ) {
 			return FALSE;
 		}
 
-		if ( $date == '') {
+		if ( $date == '' ) {
 			return FALSE;
 		}
 
@@ -338,7 +339,7 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'date' => $this->db->BindDate( $date ),
 					);
 
@@ -366,15 +367,15 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 	}
 
 	function getByPolicyGroupUserIdAndStartDateAndEndDate($user_id, $start_date, $end_date, $where = NULL, $order = NULL) {
-		if ( $user_id == '') {
+		if ( $user_id == '' ) {
 			return FALSE;
 		}
 
-		if ( $start_date == '') {
+		if ( $start_date == '' ) {
 			return FALSE;
 		}
 
-		if ( $end_date == '') {
+		if ( $end_date == '' ) {
 			return FALSE;
 		}
 
@@ -410,7 +411,7 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 						AND d.holiday_policy_id = c.id
 						AND d.date_stamp >= ?
 						AND d.date_stamp <= ?
-						AND a.user_id in ('. $this->getListSQL($user_id, $ph) .')
+						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .')
 						AND ( c.deleted = 0 AND d.deleted=0 )
 						';
 		$query .= $this->getWhereSQL( $where );
@@ -422,15 +423,15 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 	}
 
 	function getByCompanyIdAndStartDateAndEndDate($company_id, $start_date, $end_date, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
+		if ( $company_id == '' ) {
 			return FALSE;
 		}
 
-		if ( $start_date == '') {
+		if ( $start_date == '' ) {
 			return FALSE;
 		}
 
-		if ( $end_date == '') {
+		if ( $end_date == '' ) {
 			return FALSE;
 		}
 
@@ -448,7 +449,7 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'start_date' => $this->db->BindDate( $start_date ),
 					'end_date' => $this->db->BindDate( $end_date ),
 					);
@@ -494,7 +495,7 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 	}
 
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
-		if ( $company_id == '') {
+		if ( $company_id == '' ) {
 			return FALSE;
 		}
 
@@ -530,7 +531,7 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		$cgmf = new CompanyGenericMapFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 		
 		$query = '

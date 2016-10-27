@@ -37,11 +37,20 @@ TimesheetSummaryReportViewController = ReportBaseViewController.extend( {
 			sub_menus: []
 		} );
 
-		var view = new RibbonSubMenu( {
+		var view_html = new RibbonSubMenu( {
 			label: $.i18n._( 'View' ),
-			id: ContextMenuIconName.view,
+			id: ContextMenuIconName.view_html,
 			group: editor_group,
 			icon: Icons.view,
+			permission_result: true,
+			permission: null
+		} );
+
+		var view_pdf = new RibbonSubMenu( {
+			label: $.i18n._( 'PDF' ),
+			id: ContextMenuIconName.view,
+			group: editor_group,
+			icon: Icons.print,
 			permission_result: true,
 			permission: null
 		} );
@@ -84,6 +93,49 @@ TimesheetSummaryReportViewController = ReportBaseViewController.extend( {
 
 		return [menu];
 
+	},
+
+	onContextMenuClick: function( context_btn, menu_name ) {
+		var id;
+		if ( Global.isSet( menu_name ) ) {
+			id = menu_name;
+		} else {
+			context_btn = $( context_btn );
+
+			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
+
+			if ( context_btn.hasClass( 'disable-image' ) ) {
+				return;
+			}
+		}
+
+		switch ( id ) {
+			case ContextMenuIconName.view:
+				this.onViewClick();
+				break;
+			case ContextMenuIconName.view_html:
+
+				this.onViewClick('html');
+				break;
+			case ContextMenuIconName.view_html_new_window:
+				this.onViewClick('html', true);
+				break;
+			case ContextMenuIconName.export_excel:
+				this.onViewExcelClick();
+				break;
+			case ContextMenuIconName.cancel:
+				this.onCancelClick();
+				break;
+			case ContextMenuIconName.save_existed_report: //All report view
+				this.onSaveExistedReportClick();
+				break;
+			case ContextMenuIconName.save_new_report: //All report view
+				this.onSaveNewReportClick();
+				break;
+			case ContextMenuIconName.save_setup: //All report view
+				this.onSaveSetup();
+				break;
+		}
 	}
 
 } );

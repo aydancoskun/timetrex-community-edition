@@ -213,7 +213,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScriptAsync( 'views/payroll/pay_periods/PayPeriodsViewController.js', function() {
+		Global.loadScript( 'views/payroll/pay_periods/PayPeriodsViewController.js', function() {
 
 			var tab_pay_period_schedule = $this.edit_view_tab.find( '#tab_pay_period' );
 
@@ -269,11 +269,11 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 
 	onVerifyTypeChange: function() {
 		if ( this.current_edit_record.timesheet_verify_type_id === 10 ) {
-			this.edit_view_form_item_dic['timesheet_verify_before_end_date'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['timesheet_verify_before_transaction_date'].css( 'display', 'none' );
+			this.detachElement( 'timesheet_verify_before_end_date' );
+			this.detachElement( 'timesheet_verify_before_transaction_date' );
 		} else {
-			this.edit_view_form_item_dic['timesheet_verify_before_end_date'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['timesheet_verify_before_transaction_date'].css( 'display', 'block' );
+			this.attachElement( 'timesheet_verify_before_end_date' );
+			this.attachElement( 'timesheet_verify_before_transaction_date' );
 		}
 
 		this.editFieldResize();
@@ -328,63 +328,63 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 	onTypeChange: function() {
 
 		if ( this.current_edit_record.type_id === 5 ) {
-			this.edit_view_form_item_dic['anchor_date'].css( 'display', 'none' );
+			this.detachElement( 'anchor_date' );
 		} else {
 
 			if ( this.current_edit_record.id ) {
-				this.edit_view_form_item_dic['anchor_date'].css( 'display', 'none' );
+				this.detachElement( 'anchor_date' );
 			} else {
-				this.edit_view_form_item_dic['anchor_date'].css( 'display', 'block' );
+				this.attachElement( 'anchor_date' );
 			}
 
 		}
 
 		if ( this.current_edit_record.type_id === 5 ) {
-			this.edit_view_form_item_dic['primary'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['primary_day_of_month'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['primary_transaction_day_of_month'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['secondary'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['secondary_day_of_month'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['secondary_transaction_day_of_month'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['annual_pay_periods'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['start_day_of_week'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['transaction_date'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['transaction_date_bd'].css( 'display', 'none' );
+			this.detachElement( 'primary' );
+			this.detachElement( 'primary_day_of_month' );
+			this.detachElement( 'primary_transaction_day_of_month' );
+			this.detachElement( 'secondary' );
+			this.detachElement( 'secondary_day_of_month' );
+			this.detachElement( 'secondary_transaction_day_of_month' );
+			this.attachElement( 'annual_pay_periods' );
+			this.detachElement( 'start_day_of_week' );
+			this.detachElement( 'transaction_date' );
+			this.detachElement( 'transaction_date_bd' );
 
 		} else if ( this.current_edit_record.type_id === 10 || this.current_edit_record.type_id === 20 || this.current_edit_record.type_id === 100 || this.current_edit_record.type_id === 200 ) {
-			this.edit_view_form_item_dic['primary'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['primary_day_of_month'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['primary_transaction_day_of_month'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['secondary'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['secondary_day_of_month'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['secondary_transaction_day_of_month'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['annual_pay_periods'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['start_day_of_week'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['transaction_date'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['transaction_date_bd'].css( 'display', 'block' );
+			this.detachElement( 'primary' );
+			this.detachElement( 'primary_day_of_month' );
+			this.detachElement( 'primary_transaction_day_of_month' );
+			this.detachElement( 'secondary' );
+			this.detachElement( 'secondary_day_of_month' );
+			this.detachElement( 'secondary_transaction_day_of_month' );
+			this.detachElement( 'annual_pay_periods' );
+			this.attachElement( 'start_day_of_week' );
+			this.attachElement( 'transaction_date' );
+			this.attachElement( 'transaction_date_bd' );
 
 		} else if ( this.current_edit_record.type_id === 30 ) {
-			this.edit_view_form_item_dic['primary'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['primary_day_of_month'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['primary_transaction_day_of_month'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['secondary'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['secondary_day_of_month'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['secondary_transaction_day_of_month'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['annual_pay_periods'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['start_day_of_week'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['transaction_date'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['transaction_date_bd'].css( 'display', 'block' );
+			this.attachElement( 'primary' );
+			this.attachElement( 'primary_day_of_month' );
+			this.attachElement( 'primary_transaction_day_of_month' );
+			this.attachElement( 'secondary' );
+			this.attachElement( 'secondary_day_of_month' );
+			this.attachElement( 'secondary_transaction_day_of_month' );
+			this.detachElement( 'annual_pay_periods' );
+			this.detachElement( 'start_day_of_week' );
+			this.detachElement( 'transaction_date' );
+			this.attachElement( 'transaction_date_bd' );
 		} else if ( this.current_edit_record.type_id === 50 ) {
-			this.edit_view_form_item_dic['primary'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['primary_day_of_month'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['primary_transaction_day_of_month'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['secondary'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['secondary_day_of_month'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['secondary_transaction_day_of_month'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['annual_pay_periods'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['start_day_of_week'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['transaction_date'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['transaction_date_bd'].css( 'display', 'block' );
+			this.attachElement( 'primary' );
+			this.attachElement( 'primary_day_of_month' );
+			this.attachElement( 'primary_transaction_day_of_month' );
+			this.detachElement( 'secondary' );
+			this.detachElement( 'secondary_day_of_month' );
+			this.detachElement( 'secondary_transaction_day_of_month' );
+			this.detachElement( 'annual_pay_periods' );
+			this.detachElement( 'start_day_of_week' );
+			this.detachElement( 'transaction_date' );
+			this.attachElement( 'transaction_date_bd' );
 		}
 
 		this.editFieldResize();
@@ -600,23 +600,19 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 
 		// Minimum Time-Off Between Shifts
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'new_day_trigger_time', width: 58, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'new_day_trigger_time', mode: 'time_unit', need_parser_sec: true} );
 
 		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'>" + $.i18n._( 'hh:mm(2:15)' ) + ' (' + $.i18n._( 'Only for shifts that span midnight' ) + ")</span>" );
+		label = $( "<span class='widget-right-label'>(" + $.i18n._( 'Only for shifts that span midnight' ) + ")</span>" );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Minimum Time-Off Between Shifts' ), form_item_input, tab_advanced_column1, '', widgetContainer );
 
 		// Maximum Shift Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'maximum_shift_time', width: 58, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'maximum_shift_time', mode: 'time_unit', need_parser_sec: true} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'>" + $.i18n._( 'hh:mm(2:15)' ) + "</span>" );
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Maximum Shift Time' ), form_item_input, tab_advanced_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Maximum Shift Time' ), form_item_input, tab_advanced_column1, '', null );
 
 		// Assign Shifts To
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );

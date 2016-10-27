@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -51,8 +51,24 @@
  */
 class PayrollDeduction_US_LA extends PayrollDeduction_US {
 
+	var $state_income_tax_rate_options = array(
+												20090701 => array(
+															10 => array(
+																	array( 'income' => 12500,	'rate' => 2.1,	'constant' => 0 ),
+																	array( 'income' => 50000,	'rate' => 3.7,	'constant' => 262.50 ),
+																	array( 'income' => 50000,	'rate' => 5.05,	'constant' => 1650.00 ),
+																	),
+															20 => array(
+																	array( 'income' => 25000,	'rate' => 2.1,	'constant' => 0 ),
+																	array( 'income' => 100000,	'rate' => 3.75,	'constant' => 525.00 ),
+																	array( 'income' => 100000,	'rate' => 5.10,	'constant' => 3337.50 ),
+																),
+															),
+												);
+
+
 	var $state_options = array(
-								1136102400 => array(
+								20060101 => array(
 													'allowance' => 4500,
 													'dependant_allowance' => 1000,
 													'allowance_rates' => array( //Personal exceptions
@@ -85,10 +101,6 @@ class PayrollDeduction_US_LA extends PayrollDeduction_US {
 	}
 	function getStateAllowance() {
 		return $this->getUserValue1();
-	}
-
-	function getStatePayPeriodDeductions() {
-		return bcdiv($this->getStateTaxPayable(), $this->getAnnualPayPeriods() );
 	}
 
 	function getStateTotalAllowanceAmount() {

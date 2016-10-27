@@ -33,12 +33,14 @@
 		};
 
 		this.setCheckBox = function( val ) {
-			check_box.attr( 'checked', val );
+			if ( check_box ) {
+				check_box.children().eq( 0 )[0].checked = val;
+			}
 		};
 
 		this.isChecked = function() {
 			if ( check_box ) {
-				if ( check_box.attr( 'checked' ) || check_box[0].checked === true ) {
+				if ( check_box.children().eq( 0 )[0].checked === true ) {
 					return true;
 				}
 			}
@@ -50,9 +52,9 @@
 			mass_edit_mode = val;
 
 			if ( mass_edit_mode ) {
-				check_box = $( " <input type='checkbox' class='mass-edit-checkbox' />" );
+				check_box = $( ' <div class="mass-edit-checkbox-wrapper checkbox-mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
+				'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
-
 				check_box.change( function() {
 					$this.trigger( 'formItemChange', [$this] );
 				} );
@@ -66,9 +68,12 @@
 
 		};
 
-		this.setErrorStyle = function( errStr, show ) {
-			$( this ).addClass( 'ck-error-tip' );
-
+		this.setErrorStyle = function( errStr, show, isWarning ) {
+			if ( isWarning ) {
+				$( this ).addClass( 'warning-tip' );
+			} else {
+				$( this ).addClass( 'error-tip' );
+			}
 			error_string = errStr;
 
 			if ( show ) {
@@ -86,7 +91,11 @@
 				error_tip_box = error_tip_box.ErrorTipBox();
 			}
 			error_tip_box.cancelRemove();
-			error_tip_box.show( this, error_string, sec );
+			if ( $( this ).hasClass( 'warning-tip' ) ) {
+				error_tip_box.show( this, error_string, sec, true );
+			} else {
+				error_tip_box.show( this, error_string, sec );
+			}
 		};
 
 		this.hideErrorTip = function() {
@@ -96,7 +105,9 @@
 		};
 
 		this.clearErrorStyle = function() {
-			$( this ).removeClass( 'ck-error-tip' );
+			$( this ).removeClass( 'error-tip' );
+			$( this ).removeClass( 'warning-tip' );
+			this.hideErrorTip();
 			error_string = '';
 		};
 
@@ -132,7 +143,7 @@
 
 			$( this ).change( function() {
 				if ( check_box ) {
-					check_box.attr( 'checked', 'true' );
+					$this.setCheckBox( true );
 				}
 
 				if ( $this.attr( 'checked' ) === 'checked' ) {
@@ -152,8 +163,6 @@
 
 	};
 
-	$.fn.TCheckbox.defaults = {
-
-	};
+	$.fn.TCheckbox.defaults = {};
 
 })( jQuery );

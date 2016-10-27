@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -52,9 +52,9 @@ class APIUserGenericData extends APIFactory {
 	 * @param array $data filter data
 	 * @return array
 	 */
-	function getUserGenericData( $data = NULL ) {
+	function getUserGenericData( $data = NULL, $disable_paging = TRUE ) { //Default to disable paging as it would rarely be used for this.
 
-		$data = $this->initializeFilterAndPager( $data );
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		//Only allow getting generic data for currently logged in user unless user_id = 0, then get company wide data.
 		//$data['filter_data']['user_id'] = $this->getCurrentUserObject()->getId();
@@ -89,7 +89,7 @@ class APIUserGenericData extends APIFactory {
 	 * @param array $data user data
 	 * @return array
 	 */
-	function setUserGenericData( $data ) {
+	function setUserGenericData( $data, $ignore_warning = TRUE ) {
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
 		}
@@ -99,7 +99,8 @@ class APIUserGenericData extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		if ( is_array($data) ) {
+		$validator = $save_result = FALSE;
+		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$row['company_id'] = $this->getCurrentUserObject()->getCompany();
 				if ( !isset($row['user_id']) OR ( isset($row['user_id']) AND (int)$row['user_id'] !== 0 ) ) {
@@ -131,7 +132,7 @@ class APIUserGenericData extends APIFactory {
 				//}
 				Debug::Arr($row, 'User Generic Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-				$is_valid = $primary_validator->isValid();
+				$is_valid = $primary_validator->isValid( $ignore_warning );
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
 					Debug::Text('Attempting to save User Data...', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -140,7 +141,7 @@ class APIUserGenericData extends APIFactory {
 
 					$lf->setObjectFromArray( $row );
 
-					$is_valid = $lf->isValid();
+					$is_valid = $lf->isValid( $ignore_warning );
 					if ( $is_valid == TRUE ) {
 						Debug::Text('Saving User Data...', __FILE__, __LINE__, __METHOD__, 10);
 						$save_result[$key] = $lf->Save();
@@ -153,25 +154,13 @@ class APIUserGenericData extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					if ( $primary_validator->isValid() == FALSE ) {
-						$validator[$key] = $primary_validator->getErrorsArray();
-					} else {
-						$validator[$key] = $lf->Validator->getErrorsArray();
-					}
+					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
 				}
 
 				$lf->CommitTransaction();
 			}
 
-			if ( $validator_stats['valid_records'] > 0 AND $validator_stats['total_records'] == $validator_stats['valid_records'] ) {
-				if ( $validator_stats['total_records'] == 1 ) {
-					return $this->returnHandler( $save_result[$key] ); //Single valid record
-				} else {
-					return $this->returnHandler( TRUE, 'SUCCESS', TTi18n::getText('MULTIPLE RECORDS SAVED'), $save_result, $validator_stats ); //Multiple valid records
-				}
-			} else {
-				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
-			}
+			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
 
 		return $this->returnHandler( FALSE );
@@ -183,8 +172,6 @@ class APIUserGenericData extends APIFactory {
 	 * @return array
 	 */
 	function deleteUserGenericData( $data ) {
-		Debug::Arr($data, 'DataA: ', __FILE__, __LINE__, __METHOD__, 10);
-
 		if ( is_numeric($data) ) {
 			$data = array($data);
 		}
@@ -197,8 +184,9 @@ class APIUserGenericData extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
+		$validator = $save_result = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		if ( is_array($data) ) {
+		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'UserGenericDataListFactory' );
@@ -239,25 +227,13 @@ class APIUserGenericData extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					if ( $primary_validator->isValid() == FALSE ) {
-						$validator[$key] = $primary_validator->getErrorsArray();
-					} else {
-						$validator[$key] = $lf->Validator->getErrorsArray();
-					}
+					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
 				}
 
 				$lf->CommitTransaction();
 			}
 
-			if ( $validator_stats['valid_records'] > 0 AND $validator_stats['total_records'] == $validator_stats['valid_records'] ) {
-				if ( $validator_stats['total_records'] == 1 ) {
-					return $this->returnHandler( $save_result[$key] ); //Single valid record
-				} else {
-					return $this->returnHandler( TRUE, 'SUCCESS', TTi18n::getText('MULTIPLE RECORDS SAVED'), $save_result, $validator_stats ); //Multiple valid records
-				}
-			} else {
-				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
-			}
+			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
 
 		return $this->returnHandler( FALSE );

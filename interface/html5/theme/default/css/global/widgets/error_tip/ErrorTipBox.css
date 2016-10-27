@@ -9,8 +9,16 @@
     border-radius: 3px;
 }
 
+.warningtip-box{
+    background-color: #ffff00 !important;
+    border: 1px solid #e7be00 !important;
+}
+
 .errortip-box .errortip-label {
     font-size: 11px;
     color: #ffffff;
 }
 
+.warningtip-box .errortip-label{
+    color: #362B36 !important;
+}

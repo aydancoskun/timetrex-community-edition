@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -220,6 +220,7 @@ class MessageControlFactory extends Factory {
 
 		$ids = array_unique($ids);
 		if ( count($ids) > 0 ) {
+			$this->tmp_data['to_user_id'] = array(); //Reset the TO array, so if this is called multiple times, we don't keep adding more and more users to it.
 			foreach($ids as $id ) {
 				if ( $id > 0 ) {
 					$this->tmp_data['to_user_id'][] = $id;
@@ -327,11 +328,6 @@ class MessageControlFactory extends Factory {
 	function setObjectType($type) {
 		$type = trim($type);
 
-		$key = Option::getByValue($type, $this->getOptions('type') );
-		if ($key !== FALSE) {
-			$type = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'object_type',
 											$type,
 											TTi18n::gettext('Object Type is invalid'),
@@ -381,11 +377,6 @@ class MessageControlFactory extends Factory {
 			$priority = 50;
 		}
 
-		$key = Option::getByValue($priority, $this->getOptions('priority') );
-		if ($key !== FALSE) {
-			$priority = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'priority',
 											$priority,
 											TTi18n::gettext('Invalid Priority'),
@@ -393,7 +384,7 @@ class MessageControlFactory extends Factory {
 
 			$this->data['priority_id'] = $priority;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -436,7 +427,7 @@ class MessageControlFactory extends Factory {
 		$text = trim($text);
 
 		//Flex interface validates the message too soon, make it skip a 0 length message when only validating.
-		if ( $this->validate_only == TRUE AND $text == '' ) {
+		if ( $this->Validator->getValidateOnly() == TRUE AND $text == '' ) {
 			$minimum_length = 0;
 		} else {
 			$minimum_length = 5;
@@ -478,7 +469,7 @@ class MessageControlFactory extends Factory {
 		return TRUE;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		//Only validate from/to user if there is a subject and body set, otherwise validation will fail on a new object with no data all the time.
 		if ( $this->getSubject() != '' AND $this->getBody() != '' ) {
 			if ( $this->Validator->hasError( 'from' ) == FALSE AND $this->getFromUserId() == '' ) {
@@ -496,7 +487,7 @@ class MessageControlFactory extends Factory {
 			}
 		}
 
-		if ( $this->validate_only == FALSE ) {
+		if ( $this->Validator->getValidateOnly() == FALSE ) {
 			if ( $this->getObjectType() == '' ) {
 					$this->Validator->isTrue(	'object_type_id',
 												FALSE,

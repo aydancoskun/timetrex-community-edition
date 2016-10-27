@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -103,6 +103,7 @@ class APIAccrual extends APIFactory {
 
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
@@ -141,8 +142,9 @@ class APIAccrual extends APIFactory {
 	 * @param array $data accrual data
 	 * @return array
 	 */
-	function setAccrual( $data, $validate_only = FALSE ) {
+	function setAccrual( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
+		$ignore_warning = (bool)$ignore_warning;
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
@@ -166,7 +168,8 @@ class APIAccrual extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		if ( is_array($data) ) {
+		$validator = $save_result = FALSE;
+		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
 			foreach( $data as $key => $row ) {
@@ -216,7 +219,7 @@ class APIAccrual extends APIFactory {
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-				$is_valid = $primary_validator->isValid();
+				$is_valid = $primary_validator->isValid( $ignore_warning );
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
 					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -226,11 +229,9 @@ class APIAccrual extends APIFactory {
 					//Force Company ID to current company.
 					//$lf->setCompany( $this->getCurrentCompanyObject()->getId() );
 
-					if ( $validate_only == TRUE ) {
-						$lf->validate_only = TRUE;
-					}
+					$lf->Validator->setValidateOnly( $validate_only );
 
-					$is_valid = $lf->isValid();
+					$is_valid = $lf->isValid( $ignore_warning );
 					if ( $is_valid == TRUE ) {
 						Debug::Text('Saving data...', __FILE__, __LINE__, __METHOD__, 10);
 						if ( $validate_only == TRUE ) {
@@ -247,11 +248,7 @@ class APIAccrual extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					if ( $primary_validator->isValid() == FALSE ) {
-						$validator[$key] = $primary_validator->getErrorsArray();
-					} else {
-						$validator[$key] = $lf->Validator->getErrorsArray();
-					}
+					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
 				} elseif ( $validate_only == TRUE ) {
 					$lf->FailTransaction();
 				}
@@ -264,15 +261,7 @@ class APIAccrual extends APIFactory {
 
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
-			if ( $validator_stats['valid_records'] > 0 AND $validator_stats['total_records'] == $validator_stats['valid_records'] ) {
-				if ( $validator_stats['total_records'] == 1 ) {
-					return $this->returnHandler( $save_result[$key] ); //Single valid record
-				} else {
-					return $this->returnHandler( TRUE, 'SUCCESS', TTi18n::getText('MULTIPLE RECORDS SAVED'), $save_result, $validator_stats ); //Multiple valid records
-				}
-			} else {
-				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
-			}
+			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
 
 		return $this->returnHandler( FALSE );
@@ -301,8 +290,9 @@ class APIAccrual extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
+		$validator = $save_result = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		if ( is_array($data) ) {
+		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
 			foreach( $data as $key => $id ) {
@@ -352,11 +342,8 @@ class APIAccrual extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					if ( $primary_validator->isValid() == FALSE ) {
-						$validator[$key] = $primary_validator->getErrorsArray();
-					} else {
-						$validator[$key] = $lf->Validator->getErrorsArray();
-					}
+
+					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
 				}
 
 				$lf->CommitTransaction();
@@ -366,15 +353,7 @@ class APIAccrual extends APIFactory {
 
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
-			if ( $validator_stats['valid_records'] > 0 AND $validator_stats['total_records'] == $validator_stats['valid_records'] ) {
-				if ( $validator_stats['total_records'] == 1 ) {
-					return $this->returnHandler( $save_result[$key] ); //Single valid record
-				} else {
-					return $this->returnHandler( TRUE, 'SUCCESS', TTi18n::getText('MULTIPLE RECORDS SAVED'), $save_result, $validator_stats ); //Multiple valid records
-				}
-			} else {
-				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
-			}
+			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
 
 		return $this->returnHandler( FALSE );
@@ -402,7 +381,7 @@ class APIAccrual extends APIFactory {
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {
-				unset( $src_rows[$key]['id'] ); //Clear fields that can't be copied
+				unset( $src_rows[$key]['id'], $row ); //Clear fields that can't be copied
 			}
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 

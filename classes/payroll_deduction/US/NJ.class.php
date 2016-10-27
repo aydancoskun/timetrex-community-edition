@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -49,15 +49,58 @@
 */
 class PayrollDeduction_US_NJ extends PayrollDeduction_US {
 
+	var $state_income_tax_rate_options = array(
+												20060101 => array(
+															10 => array(
+																	array( 'income' => 20000,	'rate' => 1.5,	'constant' => 0 ),
+																	array( 'income' => 35000,	'rate' => 2.0,	'constant' => 300 ),
+																	array( 'income' => 40000,	'rate' => 3.9,	'constant' => 600 ),
+																	array( 'income' => 75000,	'rate' => 6.1,	'constant' => 795 ),
+																	array( 'income' => 500000,	'rate' => 7.0,	'constant' => 2930 ),
+																	array( 'income' => 500000,	'rate' => 9.9,	'constant' => 32680 ),
+																	),
+															20 => array(
+																	array( 'income' => 20000,	'rate' => 1.5,	'constant' => 0 ),
+																	array( 'income' => 50000,	'rate' => 2.0,	'constant' => 300 ),
+																	array( 'income' => 70000,	'rate' => 2.7,	'constant' => 900 ),
+																	array( 'income' => 80000,	'rate' => 3.9,	'constant' => 1440 ),
+																	array( 'income' => 150000,	'rate' => 6.1,	'constant' => 1830 ),
+																	array( 'income' => 500000,	'rate' => 7.0,	'constant' => 6100 ),
+																	array( 'income' => 500000,	'rate' => 9.9,	'constant' => 30600 ),
+																	),
+															30 => array(
+																	array( 'income' => 20000,	'rate' => 1.5,	'constant' => 0 ),
+																	array( 'income' => 40000,	'rate' => 2.3,	'constant' => 300 ),
+																	array( 'income' => 50000,	'rate' => 2.8,	'constant' => 760 ),
+																	array( 'income' => 60000,	'rate' => 3.5,	'constant' => 1040 ),
+																	array( 'income' => 150000,	'rate' => 5.6,	'constant' => 1390 ),
+																	array( 'income' => 500000,	'rate' => 6.6,	'constant' => 6430 ),
+																	array( 'income' => 500000,	'rate' => 9.9,	'constant' => 29530 ),
+																	),
+															40 => array(
+																	array( 'income' => 20000,	'rate' => 1.5,	'constant' => 0 ),
+																	array( 'income' => 40000,	'rate' => 2.7,	'constant' => 300 ),
+																	array( 'income' => 50000,	'rate' => 3.4,	'constant' => 840 ),
+																	array( 'income' => 60000,	'rate' => 4.3,	'constant' => 1180 ),
+																	array( 'income' => 150000,	'rate' => 5.6,	'constant' => 1610 ),
+																	array( 'income' => 500000,	'rate' => 6.5,	'constant' => 6650 ),
+																	array( 'income' => 500000,	'rate' => 9.9,	'constant' => 29400 ),
+																	),
+															50 => array(
+																	array( 'income' => 20000,	'rate' => 1.5,	'constant' => 0 ),
+																	array( 'income' => 35000,	'rate' => 2.0,	'constant' => 300 ),
+																	array( 'income' => 100000,	'rate' => 5.8,	'constant' => 600 ),
+																	array( 'income' => 500000,	'rate' => 6.5,	'constant' => 4370 ),
+																	array( 'income' => 500000,	'rate' => 9.9,	'constant' => 30370 ),
+																),
+															),
+												);
+
 	var $state_options = array(
-								1136102400 => array(
+								20060101 => array(
 													'allowance' => 1000
 													)
 								);
-
-	function getStatePayPeriodDeductions() {
-		return bcdiv($this->getStateTaxPayable(), $this->getAnnualPayPeriods() );
-	}
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();

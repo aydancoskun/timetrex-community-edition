@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -58,8 +58,9 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -80,7 +81,7 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$pcf = new PermissionControlFactory();
@@ -110,8 +111,8 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
-					'permission_control_id' => $permission_control_id,
+					'company_id' => (int)$company_id,
+					'permission_control_id' => (int)$permission_control_id,
 					);
 
 		$pcf = new PermissionControlFactory();
@@ -150,8 +151,8 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
-					'permission_control_id' => $permission_control_id,
+					'company_id' => (int)$company_id,
+					'permission_control_id' => (int)$permission_control_id,
 					'section' => $section,
 					//'name' => $name, //Allow a list of names.
 					);
@@ -194,8 +195,8 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
-					'permission_control_id' => $permission_control_id,
+					'company_id' => (int)$company_id,
+					'permission_control_id' => (int)$permission_control_id,
 					'section' => $section,
 					'value' => (int)$value,
 					//'name' => $name, //Allow a list of names.
@@ -236,7 +237,7 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$pcf = new PermissionControlFactory();
@@ -261,7 +262,7 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		}
 
 		if ( isset($valid_ids) AND is_array($valid_ids) AND count($valid_ids) > 0 ) {
-			$query	.=	' OR a.id in ('. $this->getListSQL($valid_ids, $ph) .') ';
+			$query	.=	' OR a.id in ('. $this->getListSQL( $valid_ids, $ph, 'int' ) .') ';
 		}
 
 		$query .= '	)
@@ -284,8 +285,8 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
-					'user_id' => $user_id,
+					'company_id' => (int)$company_id,
+					'user_id' => (int)$user_id,
 					);
 
 		$pcf = new PermissionControlFactory();
@@ -319,7 +320,7 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'created_date' => $date,
 					'updated_date' => $date,
 					'deleted_date' => $date,

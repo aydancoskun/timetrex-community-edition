@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -39,5 +39,57 @@
  * @package PayrollDeduction\CA
  */
 class PayrollDeduction_CA_SK extends PayrollDeduction_CA {
+	var $provincial_income_tax_rate_options = array(
+													20150101 => array(
+																	array( 'income' => 44028,	'rate' => 11,	'constant' => 0 ),
+																	array( 'income' => 125795,	'rate' => 13,	'constant' => 881 ),
+																	array( 'income' => 125795,	'rate' => 15,	'constant' => 3396 ),
+																),
+													20140101 => array(
+																	array( 'income' => 43292,	'rate' => 11,	'constant' => 0 ),
+																	array( 'income' => 123692,	'rate' => 13,	'constant' => 866 ),
+																	array( 'income' => 123692,	'rate' => 15,	'constant' => 3340 ),
+																),
+													20130101 => array(
+																	array( 'income' => 42906,	'rate' => 11,	'constant' => 0 ),
+																	array( 'income' => 122589,	'rate' => 13,	'constant' => 858 ),
+																	array( 'income' => 122589,	'rate' => 15,	'constant' => 3310 ),
+																),
+													20120101 => array(
+																	array( 'income' => 42065,	'rate' => 11,	'constant' => 0 ),
+																	array( 'income' => 120185,	'rate' => 13,	'constant' => 841 ),
+																	array( 'income' => 120185,	'rate' => 15,	'constant' => 3245 ),
+																),
+													20110101 => array(
+																	array( 'income' => 40919,	'rate' => 11,	'constant' => 0 ),
+																	array( 'income' => 116911,	'rate' => 13,	'constant' => 818 ),
+																	array( 'income' => 116911,	'rate' => 15,	'constant' => 3157 ),
+																),
+													20100101 => array(
+																	array( 'income' => 40354,	'rate' => 11,	'constant' => 0 ),
+																	array( 'income' => 115297,	'rate' => 13,	'constant' => 807 ),
+																	array( 'income' => 115297,	'rate' => 15,	'constant' => 3113 ),
+																),
+													20090101 => array(
+																	array( 'income' => 40113,	'rate' => 11,	'constant' => 0 ),
+																	array( 'income' => 114610,	'rate' => 13,	'constant' => 802 ),
+																	array( 'income' => 114610,	'rate' => 15,	'constant' => 3094 ),
+																),
+													20080101 => array(
+																	array( 'income' => 39135,	'rate' => 11,	'constant' => 0 ),
+																	array( 'income' => 111814,	'rate' => 13,	'constant' => 783 ),
+																	array( 'income' => 111814,	'rate' => 15,	'constant' => 3019 ),
+																),
+													20070101 => array(
+																	array( 'income' => 38405,	'rate' => 11.0,	'constant' => 0 ),
+																	array( 'income' => 109720,	'rate' => 13.0,	'constant' => 768 ),
+																	array( 'income' => 109720,	'rate' => 15.0,	'constant' => 2963 ),
+																),
+													20060101 => array(
+																	array( 'income' => 37579,	'rate' => 11,	'constant' => 0 ),
+																	array( 'income' => 107367,	'rate' => 13,	'constant' => 752 ),
+																	array( 'income' => 107367,	'rate' => 15,	'constant' => 2899 ),
+																),
+													);
 }
 ?>

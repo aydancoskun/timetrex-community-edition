@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -287,12 +287,13 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		return FALSE;
 	}
 
-	function createSchedulePolicy( $meal_policy_id, $absence_policy_id = 0 ) {
+	function createSchedulePolicy( $meal_policy_id, $full_shift_absence_policy_id = 0, $partial_shift_absence_policy_id = 0 ) {
 		$spf = TTnew( 'SchedulePolicyFactory' );
 
 		$spf->setCompany( $this->company_id );
 		$spf->setName( 'Schedule Policy' );
-		$spf->setAbsencePolicyID( $absence_policy_id );
+		$spf->setFullShiftAbsencePolicyID( $full_shift_absence_policy_id );
+		$spf->setPartialShiftAbsencePolicyID( $partial_shift_absence_policy_id );
 		$spf->setStartStopWindow( (3600*2) );
 
 		if ( $spf->isValid() ) {
@@ -356,7 +357,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$sf->setEndTime( $end_time );
 
 		if ( $sf->isValid() ) {
-			$sf->setEnableReCalculateDay(FALSE);
+			$sf->setEnableReCalculateDay(TRUE);
 			$insert_id = $sf->Save();
 			Debug::Text('Schedule ID: '. $insert_id, __FILE__, __LINE__, __METHOD__,10);
 
@@ -391,7 +392,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$date_totals = array();
 
 		//Get only system totals.
-		$udtlf->getByCompanyIDAndUserIdAndObjectTypeAndStartDateAndEndDate( $this->company_id, $this->user_id, array(5, 20, 25, 30, 40, 100, 110), $start_date, $end_date);
+		$udtlf->getByCompanyIDAndUserIdAndObjectTypeAndStartDateAndEndDate( $this->company_id, $this->user_id, array(5, 20, 25, 30, 40, 50, 100, 110), $start_date, $end_date);
 		if ( $udtlf->getRecordCount() > 0 ) {
 			foreach($udtlf as $udt_obj) {
 				$type_and_policy_id = $udt_obj->getObjectType().(int)$udt_obj->getPayCode();
@@ -660,7 +661,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
-		$schedule_policy_id = $this->createSchedulePolicy( array( 0 ), $this->policy_ids['absence_policy'][10] );
+		$schedule_policy_id = $this->createSchedulePolicy( array( 0 ), 0, $this->policy_ids['absence_policy'][10] ); //Partial Shift Only
 		$schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
 																	'schedule_policy_id' => $schedule_policy_id,
 																	'start_time' => ' 8:00AM',
@@ -714,9 +715,13 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][2]['object_type_id'], 25 ); //Absence
 		$this->assertEquals( $udt_arr[$date_epoch][2]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Absence
 		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (1*3600) );
+		//Absence Time
+		$this->assertEquals( $udt_arr[$date_epoch][3]['object_type_id'], 50 ); //Absence
+		$this->assertEquals( $udt_arr[$date_epoch][3]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Absence
+		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], (1*3600) );
 
 		//Make sure no other hours
-		$this->assertEquals( count($udt_arr[$date_epoch]), 3 );
+		$this->assertEquals( count($udt_arr[$date_epoch]), 4 );
 
 		//Check Accrual Balance
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][20] );
@@ -725,7 +730,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		//Add a 0.5hr absence of the same type, but because there is already an entry for this,
 		//this will take precedance and override the undertime absence.
 		//Therefore it shouldn't change the accrual due to the conflict detection.
-		$absence_id = $dd->createAbsence( $this->user_id, $date_epoch, (0.5 * 3600), $this->policy_ids['absence_policy'][10] );
+		$absence_id = $dd->createAbsence( $this->user_id, $date_epoch, (0.5 * 3600), $this->policy_ids['absence_policy'][10], TRUE );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][20] );
 		$this->assertEquals( $accrual_balance, (0.5 * -3600) );
 
@@ -747,7 +752,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 
 
 		//Add a 2hr absence of the same type, this should adjust the accrual balance by 2hrs though.
-		$absence_id = $dd->createAbsence( $this->user_id, $date_epoch, (2 * 3600), $this->policy_ids['absence_policy'][10] );
+		$absence_id = $dd->createAbsence( $this->user_id, $date_epoch, (2 * 3600), $this->policy_ids['absence_policy'][10], TRUE );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][20] );
 		$this->assertEquals( $accrual_balance, (2 * -3600) );
 
@@ -757,7 +762,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 
 
 		//Add a 1hr absence of a *different*  type
-		$absence_id = $dd->createAbsence( $this->user_id, $date_epoch, (1 * 3600), $this->policy_ids['absence_policy'][30] );
+		$absence_id = $dd->createAbsence( $this->user_id, $date_epoch, (1 * 3600), $this->policy_ids['absence_policy'][30], TRUE );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][30] );
 		$this->assertEquals( $accrual_balance, (1 * -3600) );
 
@@ -767,5 +772,176 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
+
+	function testScheduleUnderTimePolicyB() {
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL, //Meal
+									NULL, //Exception
+									NULL, //Holiday
+									NULL, //OT
+									NULL, //Premium
+									NULL, //Round
+									array($this->user_id), //Users
+									NULL, //Break
+									NULL, //Accrual
+									NULL, //Expense
+									array( $this->policy_ids['absence_policy'][10], $this->policy_ids['absence_policy'][30] ), //Absence
+									array($this->policy_ids['regular'][10]) //Regular
+									);
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
+		$schedule_policy_id = $this->createSchedulePolicy( array( 0 ), 0, 0 ); //No undertime
+		$schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
+																	'schedule_policy_id' => $schedule_policy_id,
+																	'start_time' => ' 8:00AM',
+																	'end_time' => '4:00PM',
+																  ) );
+
+		$slf = TTNew('ScheduleListFactory');
+		$slf->getByID( $schedule_id );
+		if ( $slf->getRecordCount() == 1 ) {
+			$s_obj = $slf->getCurrent();
+			$this->assertEquals( $date_stamp,  TTDate::getDate('DATE', $s_obj->getStartTime() ) );
+			$this->assertEquals( $date_stamp,  TTDate::getDate('DATE', $s_obj->getEndTime() ) );
+			$this->assertEquals( (8*3600),  $s_obj->getTotalTime() );
+		} else {
+			$this->assertEquals( TRUE, FALSE );
+		}
+
+
+		//Create punches to trigger undertime on same day.
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 8:00AM'),
+								strtotime($date_stamp.' 3:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch) );
+		//print_r($punch_arr);
+		$this->assertEquals( 1, count($punch_arr[$date_epoch]) );
+		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//var_dump( $udt_arr );
+
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], 0 );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (7*3600) );
+		//Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 20 ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][100] ); //Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (7*3600) );
+		//Absence Time
+		//$this->assertEquals( $udt_arr[$date_epoch][2]['object_type_id'], 25 ); //Absence
+		//$this->assertEquals( $udt_arr[$date_epoch][2]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Absence
+		//$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (1*3600) );
+		//Absence Time
+		//$this->assertEquals( $udt_arr[$date_epoch][3]['object_type_id'], 50 ); //Absence
+		//$this->assertEquals( $udt_arr[$date_epoch][3]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Absence
+		//$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], (1*3600) );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
+
+		//Check Accrual Balance
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][20] );
+		$this->assertEquals( $accrual_balance, 0 );
+
+		return TRUE;
+	}
+
+	function testScheduleUnderTimePolicyC() {
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL, //Meal
+									NULL, //Exception
+									NULL, //Holiday
+									NULL, //OT
+									NULL, //Premium
+									NULL, //Round
+									array($this->user_id), //Users
+									NULL, //Break
+									NULL, //Accrual
+									NULL, //Expense
+									array( $this->policy_ids['absence_policy'][10], $this->policy_ids['absence_policy'][30] ), //Absence
+									array($this->policy_ids['regular'][10]) //Regular
+									);
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
+		$schedule_policy_id = $this->createSchedulePolicy( array( 0 ), $this->policy_ids['absence_policy'][10] , 0 ); //Full Shift Undertime
+		$schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
+																	'schedule_policy_id' => $schedule_policy_id,
+																	'start_time' => ' 8:00AM',
+																	'end_time' => '4:00PM',
+																  ) );
+
+		$slf = TTNew('ScheduleListFactory');
+		$slf->getByID( $schedule_id );
+		if ( $slf->getRecordCount() == 1 ) {
+			$s_obj = $slf->getCurrent();
+			$this->assertEquals( $date_stamp,  TTDate::getDate('DATE', $s_obj->getStartTime() ) );
+			$this->assertEquals( $date_stamp,  TTDate::getDate('DATE', $s_obj->getEndTime() ) );
+			$this->assertEquals( (8*3600),  $s_obj->getTotalTime() );
+		} else {
+			$this->assertEquals( TRUE, FALSE );
+		}
+
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//var_dump( $udt_arr );
+
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], 0 );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8*3600) );
+		//Absence Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 25 ); //Absence
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Absence
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8*3600) );
+		//Absence Time
+		$this->assertEquals( $udt_arr[$date_epoch][2]['object_type_id'], 50 ); //Absence
+		$this->assertEquals( $udt_arr[$date_epoch][2]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Absence
+		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (8*3600) );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 3 );
+
+		//Check Accrual Balance
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][20] );
+		$this->assertEquals( $accrual_balance, (-8 * 3600) );
+
+		return TRUE;
+	}
+
 }
 ?>

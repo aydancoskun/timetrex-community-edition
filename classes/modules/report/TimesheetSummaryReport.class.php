@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -631,39 +631,8 @@ class TimesheetSummaryReport extends Report {
 		$this->handleReportCurrency( $currency_convert_to_base, $base_currency_obj, $filter_data );
 		$currency_options = $this->getOptions('currency');
 
-		if ( $this->getPermissionObject()->Check('punch', 'view') == FALSE OR $this->getPermissionObject()->Check('wage', 'view') == FALSE ) {
-			$hlf = TTnew( 'HierarchyListFactory' );
-			$permission_children_ids = $wage_permission_children_ids = $hlf->getHierarchyChildrenByCompanyIdAndUserIdAndObjectTypeID( $this->getUserObject()->getCompany(), $this->getUserObject()->getID() );
-			//Debug::Arr($permission_children_ids, 'Permission Children Ids:', __FILE__, __LINE__, __METHOD__, 10);
-		} else {
-			//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
-			$permission_children_ids = array();
-			$wage_permission_children_ids = array();
-		}
-		if ( $this->getPermissionObject()->Check('punch', 'view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('punch', 'view_child') == FALSE ) {
-				$permission_children_ids = array();
-			}
-			if ( $this->getPermissionObject()->Check('punch', 'view_own') ) {
-				$permission_children_ids[] = $this->getUserObject()->getID();
-			}
-
-			$filter_data['permission_children_ids'] = $permission_children_ids;
-		}
-		//Get Wage Permission Hierarchy Children first, as this can be used for viewing, or editing.
-		if ( $this->getPermissionObject()->Check('wage', 'view') == TRUE ) {
-			$wage_permission_children_ids = TRUE;
-		} elseif ( $this->getPermissionObject()->Check('wage', 'view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('wage', 'view_child') == FALSE ) {
-				$wage_permission_children_ids = array();
-			}
-			if ( $this->getPermissionObject()->Check('wage', 'view_own') ) {
-				$wage_permission_children_ids[] = $this->getUserObject()->getID();
-			}
-		}
-		//Debug::Text(' Permission Children: '. count($permission_children_ids) .' Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
-		//Debug::Arr($permission_children_ids, 'Permission Children: '. count($permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
-		//Debug::Arr($wage_permission_children_ids, 'Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
+		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'punch', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
+		$wage_permission_children_ids = $this->getPermissionObject()->getPermissionChildren( 'wage', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
 
 		$pay_period_ids = array();
 
@@ -671,6 +640,7 @@ class TimesheetSummaryReport extends Report {
 		$udtlf->getTimesheetSummaryReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' Total Rows: '. $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $udtlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
+		$include_no_data_rows_arr = array();
 		if ( $udtlf->getRecordCount() > 0 ) {
 			foreach ( $udtlf as $key => $udt_obj ) {
 				$pay_period_ids[$udt_obj->getColumn('pay_period_id')] = TRUE;
@@ -681,7 +651,7 @@ class TimesheetSummaryReport extends Report {
 				$department_id = $udt_obj->getColumn('department_id');
 				$currency_rate = $udt_obj->getColumn('currency_rate');
 				$currency_id = $udt_obj->getColumn('currency_id');
-
+				
 				//With pay codes, paid time makes sense now and is associated with branch/departments too.
 				$time_columns = $udt_obj->getTimeCategory( FALSE, $columns  ); //Exclude 'total' as its not used in reports anyways, and causes problems when grouping by branch/default branch.
 
@@ -689,35 +659,7 @@ class TimesheetSummaryReport extends Report {
 				if ( ( isset($filter_data['include_no_data_rows']) AND $filter_data['include_no_data_rows'] == 1 )
 						OR ( $date_stamp != '' AND count($time_columns) > 0 AND $udt_obj->getColumn('total_time') != 0 )  ) {
 
-					$enable_wages = FALSE;
-					if ( $wage_permission_children_ids === TRUE OR in_array( $user_id, (array)$wage_permission_children_ids) ) {
-						$enable_wages = TRUE;
-					}
-
-					/*
-					//The below doesn't handle fill gaps at the beginning/end of the date range.
-					//For example if the start date is 01-Nov and the first row that employee is on 05-Nov, it won't fill from 01 to 05.
-					if ( ( isset($filter_data['include_no_data_rows']) AND $filter_data['include_no_data_rows'] == 1 )
-							AND (int)$udt_obj->getColumn('object_type_id') == 5
-							AND isset($prev_date_stamp) AND ( $date_stamp - $prev_date_stamp ) > (86400+3601) ) {
-						
-						for( $d = TTDate::getMiddleDayEpoch($prev_date_stamp); $d < $date_stamp; $d += 86400) {
-							if ( !isset($this->tmp_data['user_date_total'][$user_id][$d][$branch_id][$department_id]) ) {
-								Debug::Text('Filling gap for Date: '. TTDate::getDate('DATE', $d ) .' Current Date: '. TTDate::getDate('DATE', $date_stamp ) .' Test: '. $udt_obj->getColumn('object_type_id'), __FILE__, __LINE__, __METHOD__, 10);
-								$this->tmp_data['user_date_total'][$user_id][$d][$branch_id][$department_id] = array(
-																	'branch_id' => 0,
-																	'department_id' => 0,
-																	'pay_period_start_date' => strtotime( $udt_obj->getColumn('pay_period_start_date') ),
-																	'pay_period_end_date' => strtotime( $udt_obj->getColumn('pay_period_end_date') ),
-																	'pay_period_transaction_date' => strtotime( $udt_obj->getColumn('pay_period_transaction_date') ),
-																	'pay_period' => strtotime( $udt_obj->getColumn('pay_period_transaction_date') ),
-																	'pay_period_id' => $udt_obj->getColumn('pay_period_id'),
-																	);
-							}
-						}
-						unset($d);
-					}
-					*/
+					$enable_wages = $this->getPermissionObject()->isPermissionChild( $user_id, $wage_permission_children_ids );
 
 					//Split time by user, date, branch, department as that is the lowest level we can split time.
 					//We always need to split time as much as possible as it can always be combined together by grouping.
@@ -733,6 +675,18 @@ class TimesheetSummaryReport extends Report {
 															'pay_period' => strtotime( $udt_obj->getColumn('pay_period_transaction_date') ),
 															'pay_period_id' => $udt_obj->getColumn('pay_period_id'),
 															);
+						
+						if ( !isset($include_no_data_rows_arr[$udt_obj->getColumn('pay_period_id')][$date_stamp]) ) {
+							$include_no_data_rows_arr[$udt_obj->getColumn('pay_period_id')][$date_stamp] = array(
+																			'branch_id' => 0,
+																			'department_id' => 0,
+																			'pay_period_start_date' => strtotime( $udt_obj->getColumn('pay_period_start_date') ),
+																			'pay_period_end_date' => strtotime( $udt_obj->getColumn('pay_period_end_date') ),
+																			'pay_period_transaction_date' => strtotime( $udt_obj->getColumn('pay_period_transaction_date') ),
+																			'pay_period' => strtotime( $udt_obj->getColumn('pay_period_transaction_date') ),
+																			'pay_period_id' => $udt_obj->getColumn('pay_period_id'),																		   
+																		   );
+						}
 					}
 
 					$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['currency_rate'] = $currency_rate;
@@ -791,7 +745,8 @@ class TimesheetSummaryReport extends Report {
 		if ( isset($columns['schedule_working']) OR isset($columns['schedule_working_diff']) OR isset($columns['schedule_absence']) ) {
 			$slf = TTnew( 'ScheduleListFactory' );
 			//$slf->getDayReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-			$slf->getScheduleSummaryReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+			//$slf->getScheduleSummaryReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+			$slf->getSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 			if ( $slf->getRecordCount() > 0 ) {
 				foreach($slf as $s_obj) {
 					$status = strtolower( Option::getByKey($s_obj->getColumn('status_id'), $s_obj->getOptions('status') ) );
@@ -836,8 +791,19 @@ class TimesheetSummaryReport extends Report {
 				$this->tmp_data['user'][$u_obj->getId()]['current_currency'] =	$u_obj->getColumn('currency');
 			}
 
+			//User doesn't have any UDT rows, add a blank one.
+			if ( ( isset($filter_data['include_no_data_rows']) AND $filter_data['include_no_data_rows'] == 1 AND !isset($this->tmp_data['user_date_total'][$u_obj->getId()]) ) ) {
+				foreach( $include_no_data_rows_arr as $tmp_pay_period_id => $tmp_date_stamps ) {
+					foreach( $tmp_date_stamps as $tmp_date_stamp => $tmp_pay_period_data ) {
+						$this->tmp_data['user_date_total'][$u_obj->getId()][$tmp_date_stamp][0][0] = $tmp_pay_period_data;
+					}					
+				}
+				unset($tmp_pay_period_id, $tmp_date_stamps, $tmp_date_stamp, $tmp_pay_period_data);
+			}
+
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
+		unset($include_no_data_rows_arr);
 
 		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -114,12 +114,27 @@ class ScheduleSummaryReport extends Report {
 										'-2100-custom_filter' => TTi18n::gettext('Custom Filter'),
 
 										'-3000-status_id' => TTi18n::gettext('Schedule Status'),
+										'-3100-absence_policy_id' => TTi18n::gettext('Absence Policy'),
 
 										'-5000-columns' => TTi18n::gettext('Display Columns'),
 										'-5010-group' => TTi18n::gettext('Group By'),
 										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
 										'-5030-sort' => TTi18n::gettext('Sort By'),
 							);
+
+				if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
+					$corporate_edition_setup_fields = array(
+										'-2510-job_status_id' => TTi18n::gettext('Job Status'),
+										'-2520-job_group_id' => TTi18n::gettext('Job Group'),
+										'-2530-include_job_id' => TTi18n::gettext('Include Job'),
+										'-2540-exclude_job_id' => TTi18n::gettext('Exclude Job'),
+
+										'-2610-job_item_group_id' => TTi18n::gettext('Task Group'),
+										'-2620-include_job_item_id' => TTi18n::gettext('Include Task'),
+										'-2630-exclude_job_item_id' => TTi18n::gettext('Exclude Task'),
+									);
+					$retval = array_merge( $retval, $corporate_edition_setup_fields );
+				}
 				break;
 			case 'time_period':
 				$retval = TTDate::getTimePeriodOptions();
@@ -217,6 +232,27 @@ class ScheduleSummaryReport extends Report {
 
 										'-5000-schedule_note' => TTi18n::gettext('Note'),
 								);
+
+				if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
+					$corporate_edition_static_columns = array(
+											//Static Columns - Aggregate functions can't be used on these.
+											'-1101-default_job' => TTi18n::gettext('Default Job'),
+											'-1102-default_job_item' => TTi18n::gettext('Default Task'),
+
+											'-1810-job' => TTi18n::gettext('Job'),
+											'-1820-job_manual_id' => TTi18n::gettext('Job Code'),
+											'-1830-job_description' => TTi18n::gettext('Job Description'),
+											'-1840-job_status' => TTi18n::gettext('Job Status'),
+											'-1850-job_branch' => TTi18n::gettext('Job Branch'),
+											'-1860-job_department' => TTi18n::gettext('Job Department'),
+											'-1870-job_group' => TTi18n::gettext('Job Group'),
+											'-1910-job_item' => TTi18n::gettext('Task'),
+											'-1920-job_item_manual_id' => TTi18n::gettext('Task Code'),
+											'-1930-job_item_description' => TTi18n::gettext('Task Description'),
+											'-1940-job_item_group' => TTi18n::gettext('Task Group'),
+									);
+					$retval = array_merge( $retval, $corporate_edition_static_columns );
+				}
 
 				$retval = array_merge( $retval, (array)$this->getOptions('date_columns'), (array)$this->getOptions('custom_columns'), (array)$this->getOptions('report_static_custom_column') );
 				ksort($retval);
@@ -626,39 +662,8 @@ class ScheduleSummaryReport extends Report {
 		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
 
-		if ( $this->getPermissionObject()->Check('schedule', 'view') == FALSE OR $this->getPermissionObject()->Check('wage', 'view') == FALSE ) {
-			$hlf = TTnew( 'HierarchyListFactory' );
-			$permission_children_ids = $wage_permission_children_ids = $hlf->getHierarchyChildrenByCompanyIdAndUserIdAndObjectTypeID( $this->getUserObject()->getCompany(), $this->getUserObject()->getID() );
-			Debug::Arr($permission_children_ids, 'Permission Children Ids:', __FILE__, __LINE__, __METHOD__, 10);
-		} else {
-			//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
-			$permission_children_ids = array();
-			$wage_permission_children_ids = array();
-		}
-		if ( $this->getPermissionObject()->Check('schedule', 'view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('schedule', 'view_child') == FALSE ) {
-				$permission_children_ids = array();
-			}
-			if ( $this->getPermissionObject()->Check('schedule', 'view_own') ) {
-				$permission_children_ids[] = $this->getUserObject()->getID();
-			}
-
-			$filter_data['permission_children_ids'] = $permission_children_ids;
-		}
-		//Get Wage Permission Hierarchy Children first, as this can be used for viewing, or editing.
-		if ( $this->getPermissionObject()->Check('wage', 'view') == TRUE ) {
-			$wage_permission_children_ids = TRUE;
-		} elseif ( $this->getPermissionObject()->Check('wage', 'view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('wage', 'view_child') == FALSE ) {
-				$wage_permission_children_ids = array();
-			}
-			if ( $this->getPermissionObject()->Check('wage', 'view_own') ) {
-				$wage_permission_children_ids[] = $this->getUserObject()->getID();
-			}
-		}
-		//Debug::Text(' Permission Children: '. count($permission_children_ids) .' Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
-		//Debug::Arr($permission_children_ids, 'Permission Children: '. count($permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
-		//Debug::Arr($wage_permission_children_ids, 'Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
+		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'schedule', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
+		$wage_permission_children_ids = $this->getPermissionObject()->getPermissionChildren( 'wage', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
 
 		if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jlf = TTnew( 'JobListFactory' );
@@ -676,13 +681,16 @@ class ScheduleSummaryReport extends Report {
 
 		if ( strpos( $format, 'schedule' ) === FALSE ) { //Avoid running these queries when printing out the schedule.
 			$slf = TTnew( 'ScheduleListFactory' );
-			$slf->getScheduleSummaryReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data, NULL, NULL, NULL, array('last_name' => 'asc') ); //Sort by last name mainly for the PDF schedule for printing.
+			//$slf->getScheduleSummaryReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data, NULL, NULL, NULL, array('last_name' => 'asc') ); //Sort by last name mainly for the PDF schedule for printing.
+			$slf->getSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data, NULL, NULL, NULL, array('last_name' => 'asc') ); //Sort by last name mainly for the PDF schedule for printing.
 			Debug::Text(' Total Rows: '. $slf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $slf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 			if ( $slf->getRecordCount() > 0 ) {
 				foreach ( $slf as $key => $s_obj ) {
+					$enable_wages = $this->getPermissionObject()->isPermissionChild( $s_obj->getUser(), $wage_permission_children_ids );
+					
 					$hourly_rate = 0;
-					if ( $wage_permission_children_ids === TRUE OR in_array( $s_obj->getUser(), $wage_permission_children_ids) ) {
+					if ( $enable_wages ) {
 						$hourly_rate = $s_obj->getColumn( 'user_wage_hourly_rate' );
 					}
 
@@ -694,16 +702,22 @@ class ScheduleSummaryReport extends Report {
 						'group' => $s_obj->getColumn('group'),
 						'default_branch' => $s_obj->getColumn('default_branch'),
 						'default_department' => $s_obj->getColumn('default_department'),
+						'default_job' => $s_obj->getColumn('default_job'),
+						'default_job_item' => $s_obj->getColumn('default_job_item'),
 						'branch' => $s_obj->getColumn('branch'),
 						'department' => $s_obj->getColumn('department'),
 						'job' => $s_obj->getColumn('job'),
-						'job_status_id' => Option::getByKey($s_obj->getColumn('job_status_id'), $job_status_options, NULL ),
+						'job_status_id' => $s_obj->getColumn('job_status_id'),
+						'job_status' => Option::getByKey($s_obj->getColumn('job_status_id'), $job_status_options, NULL ),
 						'job_manual_id' => $s_obj->getColumn('job_manual_id'),
 						'job_description' => $s_obj->getColumn('job_description'),
 						'job_branch' => $s_obj->getColumn('job_branch'),
 						'job_department' => $s_obj->getColumn('job_department'),
 						'job_group' => $s_obj->getColumn('job_group'),
 						'job_item' => $s_obj->getColumn('job_item'),
+						'job_item_manual_id' => $s_obj->getColumn('job_item_manual_id'),
+						'job_item_description' => $s_obj->getColumn('job_item_description'),
+						'job_item_group' => $s_obj->getColumn('job_item_group'),
 						'quantity' => $s_obj->getColumn('quantity'),
 						'bad_quantity' => $s_obj->getColumn('bad_quantity'),
 
@@ -813,7 +827,7 @@ class ScheduleSummaryReport extends Report {
 		return TRUE;
 	}
 
-	function scheduleHeader( $branch = NULL, $department = NULL, $user = NULL, $new_page = TRUE ) {
+	function scheduleHeader( $branch = NULL, $department = NULL, $job = NULL, $job_item = NULL, $user = NULL, $new_page = TRUE ) {
 
 		$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(16) );
 		if ( $new_page == TRUE ) {
@@ -842,6 +856,17 @@ class ScheduleSummaryReport extends Report {
 			}
 		}
 
+		if ( $job !== 0 AND $job != '' ) {
+			$label[] = TTi18n::getText('Job').': '. $job;
+		}
+		if ( $job_item !== 0 AND $job_item != '' ) {
+			$label[] = TTi18n::getText('Task').': '. $job_item;
+		} else {
+			if ( $job !== 0 AND $job != '' ) {
+				$label[] = TTi18n::getText('Task').': N/A';
+			}
+		}
+		
 		if ( $user !== 0 AND $user != '' ) {
 			$label[] = TTi18n::getText('Employee').': '. $user;
 		}
@@ -1094,24 +1119,43 @@ class ScheduleSummaryReport extends Report {
 									$unique_department[$department] = TRUE;
 
 									$lines_per_day += count($level_3);
-									if ( $user_id == FALSE AND isset($level_3[0]['user_id']) ) {
-										$user_id = $level_3[0]['user_id'];
+									foreach( $level_3 as $job => $level_4 ) {
+										$unique_job[$job] = TRUE;
+
+										$lines_per_day += count($level_4);
+										foreach( $level_4 as $job_item => $level_5 ) {
+											$unique_job_item[$job_item] = TRUE;
+
+											$lines_per_day += count($level_5);
+											if ( $user_id == FALSE AND isset($level_5[0]['user_id']) ) {
+												$user_id = $level_5[0]['user_id'];
+											}
+
+											if ( ( count($unique_job_item) == 1 AND isset($level_5[0]['default_job_item']) AND $job_item == $level_5[0]['default_job_item'] ) ) {
+												$lines_per_day--;
+											}
+
+											//Debug::Text('aLines Per Day: '. $lines_per_day .' Max: '. $max_lines_per_day .' Branch: '. $branch .' Department: '. $department .' User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
+											$s++;
+										}
+
+										if ( ( count($unique_job) == 1 AND isset($level_5[0]['default_job']) AND $job == $level_5[0]['default_job'] ) ) {
+											$lines_per_day--;
+										}
+										//Debug::Text('bLines Per Day: '. $lines_per_day .' Max: '. $max_lines_per_day .' Branch: '. $branch .' Department: '. $department .' User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 									}
 
-									if ( ( count($unique_department) == 1 AND $department == $level_3[0]['default_department'] ) ) {
+									if ( ( count($unique_department) == 1 AND isset($level_5[0]['default_department']) AND $department == $level_5[0]['default_department'] ) ) {
 										$lines_per_day--;
 									}
-
-									//Debug::Text('aLines Per Day: '. $lines_per_day .' Max: '. $max_lines_per_day .' Branch: '. $branch .' Department: '. $department .' User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
-									$s++;
+									//Debug::Text('cLines Per Day: '. $lines_per_day .' Max: '. $max_lines_per_day .' Branch: '. $branch .' Department: '. $department .' User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 								}
 
 								//Remove lines if they match default branch/department to save space.
-								if ( ( count($unique_branch) == 1 AND isset($level_3) AND $branch == $level_3[0]['default_branch'] ) ) {
+								if ( ( count($unique_branch) == 1 AND isset($level_5[0]['default_branch']) AND $branch == $level_5[0]['default_branch'] ) ) {
 									$lines_per_day--;
 								}
-								//Debug::Text('bLines Per Day: '. $lines_per_day .' Max: '. $max_lines_per_day .' Branch: '. $branch .' Department: '. $department .' User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
-
+								//Debug::Text('dLines Per Day: '. $lines_per_day .' Max: '. $max_lines_per_day .' Branch: '. $branch .' Department: '. $department .' User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 							}
 
 							if ( $lines_per_day > $max_lines_per_day ) {
@@ -1125,15 +1169,27 @@ class ScheduleSummaryReport extends Report {
 					//Track if the user is assigned to multiple branches/departments, if we are going to display even one in the week, we may as well
 					//display them all as it doesn't take up anymore space.
 					$multiple_branches = FALSE;
-					if ( count($unique_branch) > 1 ) {
+					if ( isset($unique_branch) AND count($unique_branch) > 1 ) {
 						$multiple_branches = TRUE;
 						unset($unique_branch);
 					}
 
 					$multiple_departments = FALSE;
-					if ( count($unique_department) > 1 ) {
+					if ( isset($unique_department) AND count($unique_department) > 1 ) {
 						$multiple_departments = TRUE;
 						unset($unique_departments);
+					}
+
+					$multiple_jobs = FALSE;
+					if ( isset($unique_job) AND count($unique_job) > 1 ) {
+						$multiple_jobs = TRUE;
+						unset($unique_jobs);
+					}
+
+					$multiple_job_items = FALSE;
+					if ( isset($unique_job_item) AND count($unique_job_item) > 1 ) {
+						$multiple_job_items = TRUE;
+						unset($unique_job_items);
 					}
 
 					if ( $s > 0 ) {
@@ -1173,34 +1229,52 @@ class ScheduleSummaryReport extends Report {
 								$x = 0;
 								if ( isset($schedule_data[$date_stamp]) ) {
 									foreach( $schedule_data[$date_stamp] as $branch => $level_2 ) {
-										if ( $branch !== 0 AND ( $multiple_branches == TRUE OR $branch != $level_3[0]['default_branch'] ) ) { //Don't display the employees default branch to save space.
+										if ( $branch !== 0 AND ( $multiple_branches == TRUE OR $branch != $level_5[0]['default_branch'] ) ) { //Don't display the employees default branch to save space.
 											$this->pdf->setFillColor(215, 215, 215);
 											$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(8) );
 											$this->pdf->Cell($column_widths['day'], $row_height, $branch, 'LR', 2, 'C', TRUE, NULL, 1);
 											$x++;
 										}
 										foreach( $level_2 as $department => $level_3 ) {
-											if ( $department !== 0 AND ( $multiple_departments == TRUE OR $department != $level_3[0]['default_department'] ) ) { //Don't display the employees default branch to save space.
+											if ( $department !== 0 AND ( $multiple_departments == TRUE OR $department != $level_5[0]['default_department'] ) ) { //Don't display the employees default branch to save space.
 												$this->pdf->setFillColor(230, 230, 230);
 												$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(8) );
 												$this->pdf->Cell($column_widths['day'], $row_height, $department, 'LR', 2, 'C', TRUE, NULL, 1);
 												$x++;
 											}
 
-											//$this->pdf->setFillColor(255, 255, 255);
-											$this->pdf->setFillColorArray( $row_bg_color_arr );
-											$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(8) );
-											$schedule_shift_label = array();
-											foreach( $level_3 as $schedule_data_shift ) {
-												if ( isset($schedule_data_shift['status_id']) AND $schedule_data_shift['status_id'] == 20 ) {
-													$this->pdf->setTextColor(255, 0, 0);
-													$this->pdf->Cell($column_widths['day'], $row_height, ( $schedule_data_shift['absence_policy'] != '' ) ? $schedule_data_shift['absence_policy'] : TTi18n::getText('N/A'), 'LR', 2, 'C', TRUE, NULL, 1);
-													$this->pdf->setTextColor(0, 0, 0);
-												} else {
-													$this->pdf->Cell($column_widths['day'], $row_height, $schedule_data_shift['start_time'] .' - '. $schedule_data_shift['end_time'], 'LR', 2, 'C', TRUE, NULL, 1);
+											foreach( $level_3 as $job => $level_4 ) {
+												if ( $job !== 0 AND ( $multiple_jobs == TRUE OR $job != $level_5[0]['default_job'] ) ) { //Don't display the employees default branch to save space.
+													$this->pdf->setFillColor(230, 230, 230);
+													$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(8) );
+													$this->pdf->Cell($column_widths['day'], $row_height, $job, 'LR', 2, 'C', TRUE, NULL, 1);
+													$x++;
 												}
 
-												$x++;
+												foreach( $level_4 as $job_item => $level_5 ) {
+													if ( $job_item !== 0 AND ( $multiple_job_items == TRUE OR $job_item != $level_5[0]['default_job_item'] ) ) { //Don't display the employees default branch to save space.
+														$this->pdf->setFillColor(230, 230, 230);
+														$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(8) );
+														$this->pdf->Cell($column_widths['day'], $row_height, $job_item, 'LR', 2, 'C', TRUE, NULL, 1);
+														$x++;
+													}
+											
+													//$this->pdf->setFillColor(255, 255, 255);
+													$this->pdf->setFillColorArray( $row_bg_color_arr );
+													$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(8) );
+													$schedule_shift_label = array();
+													foreach( $level_5 as $schedule_data_shift ) {
+														if ( isset($schedule_data_shift['status_id']) AND $schedule_data_shift['status_id'] == 20 ) {
+															$this->pdf->setTextColor(255, 0, 0);
+															$this->pdf->Cell($column_widths['day'], $row_height, ( $schedule_data_shift['absence_policy'] != '' ) ? $schedule_data_shift['absence_policy'] : TTi18n::getText('N/A'), 'LR', 2, 'C', TRUE, NULL, 1);
+															$this->pdf->setTextColor(0, 0, 0);
+														} else {
+															$this->pdf->Cell($column_widths['day'], $row_height, $schedule_data_shift['start_time'] .' - '. $schedule_data_shift['end_time'], 'LR', 2, 'C', TRUE, NULL, 1);
+														}
+		
+														$x++;
+													}
+												}
 											}
 										}
 									}
@@ -1286,11 +1360,12 @@ class ScheduleSummaryReport extends Report {
 			$key = 0;
 			foreach( $raw_schedule_shifts as $date_stamp => $day_schedule_shifts ) {
 				foreach( $day_schedule_shifts as $shift_arr ) {
-					$this->form_data['schedule_by_branch'][$shift_arr['branch']][$shift_arr['department']][$shift_arr['last_name'].$shift_arr['first_name']][$date_stamp][] = $shift_arr;
+					//$this->form_data['schedule_by_branch'][$shift_arr['branch']][$shift_arr['department']][$shift_arr['last_name'].$shift_arr['first_name']][$date_stamp][] = $shift_arr;
+					$this->form_data['schedule_by_branch'][$shift_arr['branch']][$shift_arr['department']][$shift_arr['job']][$shift_arr['job_item']][$shift_arr['last_name'].$shift_arr['first_name']][$date_stamp][] = $shift_arr;
 
 					//Need to be able to sort employees by last name first. Use names as keys instead of user_ids.
-					//$this->form_data['schedule_by_user'][$shift_arr['user_id']][$date_stamp][$shift_arr['branch']][$shift_arr['department']][] = $shift_arr;
-					$this->form_data['schedule_by_user'][$shift_arr['last_name'].'_'.$shift_arr['first_name']][$date_stamp][$shift_arr['branch']][$shift_arr['department']][] = $shift_arr;
+					//$this->form_data['schedule_by_user'][$shift_arr['last_name'].'_'.$shift_arr['first_name']][$date_stamp][$shift_arr['branch']][$shift_arr['department']][] = $shift_arr;
+					$this->form_data['schedule_by_user'][$shift_arr['last_name'].'_'.$shift_arr['first_name']][$date_stamp][$shift_arr['branch']][$shift_arr['department']][$shift_arr['job']][$shift_arr['job_item']][] = $shift_arr;
 
 					if ( !isset($this->form_data['dates']['start_date']) OR $this->form_data['dates']['start_date'] > $date_stamp ) {
 						$this->form_data['dates']['start_date'] = $date_stamp;
@@ -1359,7 +1434,7 @@ class ScheduleSummaryReport extends Report {
 										);
 
 					if ( isset($this->form_data['schedule_by_branch']) ) {
-						$this->pdf->AddPage( $this->config['other']['page_orientation'], 'Letter' );
+						$this->pdf->AddPage( $this->config['other']['page_orientation'], 'LETTER' );
 
 						$n = 0;
 						$x = 0;
@@ -1368,73 +1443,79 @@ class ScheduleSummaryReport extends Report {
 							ksort($level_2);
 							foreach( $level_2 as $department => $level_3 ) {
 								ksort($level_3);
+								foreach( $level_3 as $job => $level_4 ) {
+									ksort($level_4);
+									foreach( $level_4 as $job_item => $level_5 ) {
+										ksort($level_5);
 
-								if ( $format == 'pdf_schedule_group_pagebreak' OR $format == 'pdf_schedule_group_pagebreak_print') {
-									//Insert page breaks after each branch/department in this mode.
-									if ( $n > 0 ) {
-										$this->pdf->AddPage( $this->config['other']['page_orientation'], 'Letter' );
-									}
-									$page_break = TRUE;
-								} else {
-									$page_break = ( $x == 0 ) ? TRUE : $this->scheduleCheckPageBreak( 30, TRUE );
-								}
-
-								$this->scheduleHeader( $branch, $department, NULL, $page_break );
-								$this->scheduleDayOfWeekNameHeader( $start_week_day, $column_widths, $format );
-
-								//FIXME: Find a better way to determine how many iterations there will be in this loop.
-								$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($calendar_array), NULL, TTi18n::getText('Generating Schedules...') );
-								$key = 0;
-								$i = 0;
-								foreach( $calendar_array as $calendar_day ) {
-									if ( ($i % 7) == 0 ) {
-										$calendar_week_array = array_slice( $calendar_array, $i, 7 );
-										if ( $i != 0 ) {
-											$this->scheduleFooterWeek();
+										if ( $format == 'pdf_schedule_group_pagebreak' OR $format == 'pdf_schedule_group_pagebreak_print') {
+											//Insert page breaks after each branch/department in this mode.
+											if ( $n > 0 ) {
+												$this->pdf->AddPage( $this->config['other']['page_orientation'], 'LETTER' );
+											}
+											$page_break = TRUE;
+										} else {
+											$page_break = ( $x == 0 ) ? TRUE : $this->scheduleCheckPageBreak( 30, TRUE );
+											//Debug::Arr($this->form_data, 'zabUser Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 										}
 
-										$this->scheduleWeekHeader( $calendar_week_array, $column_widths, $format );
+										$this->scheduleHeader( $branch, $department, $job, $job_item, NULL, $page_break );
+										$this->scheduleDayOfWeekNameHeader( $start_week_day, $column_widths, $format );
 
-										$s = 0;
-										foreach( $level_3 as $user_id => $user_schedule ) {
-											if ( $this->_pdf_checkMaximumPageLimit() == FALSE ) {
-												Debug::Text('Exceeded maximum page count...', __FILE__, __LINE__, __METHOD__, 10);
-												//Exceeded maximum pages, stop processing.
-												$this->_pdf_displayMaximumPageLimitError();
-												break 4;
+										//FIXME: Find a better way to determine how many iterations there will be in this loop.
+										$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($calendar_array), NULL, TTi18n::getText('Generating Schedules...') );
+										$key = 0;
+										$i = 0;
+										foreach( $calendar_array as $calendar_day ) {
+											if ( ($i % 7) == 0 ) {
+												$calendar_week_array = array_slice( $calendar_array, $i, 7 );
+												if ( $i != 0 ) {
+													$this->scheduleFooterWeek();
+												}
+
+												$this->scheduleWeekHeader( $calendar_week_array, $column_widths, $format );
+
+												$s = 0;
+												foreach( $level_5 as $user_id => $user_schedule ) {
+													if ( $this->_pdf_checkMaximumPageLimit() == FALSE ) {
+														Debug::Text('Exceeded maximum page count...', __FILE__, __LINE__, __METHOD__, 10);
+														//Exceeded maximum pages, stop processing.
+														$this->_pdf_displayMaximumPageLimitError();
+														break 4;
+													}
+
+													//Handle page break.
+													$page_break_height = 5;
+													if ( $this->scheduleCheckPageBreak( $page_break_height, TRUE ) == TRUE ) {
+														$this->scheduleHeader( $branch, $department, $job, $job_item );
+														$this->scheduleDayOfWeekNameHeader( $start_week_day, $column_widths, $format );
+														$this->scheduleWeekHeader( $calendar_week_array, $column_widths, $format, TRUE );
+													}
+
+													if ( ($s % 2) == 0 ) {
+														$this->pdf->setFillColor(255, 255, 255);
+													} else {
+														$this->pdf->setFillColor(245, 245, 245);
+													}
+
+													if ( $this->scheduleUserWeek( $user_schedule, $calendar_week_array, $start_week_day, $column_widths, $format, $key ) == TRUE ) {
+														$s++;
+													}													
+												}
 											}
 
-											//Handle page break.
-											$page_break_height = 5;
-											if ( $this->scheduleCheckPageBreak( $page_break_height, TRUE ) == TRUE ) {
-												$this->scheduleHeader( $branch, $department );
-												$this->scheduleDayOfWeekNameHeader( $start_week_day, $column_widths, $format );
-												$this->scheduleWeekHeader( $calendar_week_array, $column_widths, $format, TRUE );
+											$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+											if ( ($key % 25) == 0 AND $this->isSystemLoadValid() == FALSE ) {
+												return FALSE;
 											}
-
-											if ( ($s % 2) == 0 ) {
-												$this->pdf->setFillColor(255, 255, 255);
-											} else {
-												$this->pdf->setFillColor(245, 245, 245);
-											}
-
-											if ( $this->scheduleUserWeek( $user_schedule, $calendar_week_array, $start_week_day, $column_widths, $format, $key ) == TRUE ) {
-												$s++;
-											}
+											$key++;
+											$i++;
 										}
-									}
 
-									$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
-									if ( ($key % 25) == 0 AND $this->isSystemLoadValid() == FALSE ) {
-										return FALSE;
+										$this->scheduleFooterWeek( $column_widths );
+										$x++;										
 									}
-									$key++;
-									$i++;
 								}
-
-								$this->scheduleFooterWeek( $column_widths );
-
-								$x++;
 							}
 
 							$n++;
@@ -1459,7 +1540,7 @@ class ScheduleSummaryReport extends Report {
 
 					$this->getProgressBarObject()->start( $this->getAMFMessageID(), (count($this->form_data['schedule_by_user']) * ( count($calendar_array) / 7 )), NULL, TTi18n::getText('Generating Schedules...') );
 
-					$this->pdf->AddPage( $this->config['other']['page_orientation'], 'Letter' );
+					$this->pdf->AddPage( $this->config['other']['page_orientation'], 'LETTER' );
 
 					$this->scheduleHeader();
 					$this->scheduleDayOfWeekNameHeader( $start_week_day, $column_widths, $format );
@@ -1523,12 +1604,12 @@ class ScheduleSummaryReport extends Report {
 										'day' => ($this->pdf->getPageWidth() - $this->config['other']['left_margin'] - $this->config['other']['right_margin'] - 0 ) / 7,
 										);
 
-					if ( isset($this->form_data['schedule_by_user']) ) {
+					if ( isset($this->form_data['schedule_by_user']) AND count($this->form_data['schedule_by_user']) > 0 ) {
 						$this->getProgressBarObject()->start( $this->getAMFMessageID(), ( count($this->form_data['schedule_by_user']) * (count($calendar_array) / 7) ), NULL, TTi18n::getText('Generating Schedules...') );
 						$key = 0;
 
 						foreach( $this->form_data['schedule_by_user'] as $user_full_name => $user_schedule ) {
-							$this->pdf->AddPage( $this->config['other']['page_orientation'], 'Letter' );
+							$this->pdf->AddPage( $this->config['other']['page_orientation'], 'LETTER' );
 
 							$split_name = explode( '_', $user_full_name );
 							$this->scheduleHeader( NULL, NULL, $split_name[1] .' '. $split_name[0] );

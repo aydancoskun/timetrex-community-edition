@@ -33,33 +33,8 @@ UserSkillViewController = BaseViewController.extend( {
 
 	},
 
-
-	setGridSize: function() {
-		if ( (!this.grid || !this.grid.is( ':visible' )) ) {
-
-			return;
-		}
-
-		if ( !this.sub_view_mode ) {
-
-			if ( Global.bodyWidth() > Global.app_min_width ) {
-				this.grid.setGridWidth( Global.bodyWidth() - 14 );
-			} else {
-				this.grid.setGridWidth( Global.app_min_width - 14 );
-			}
-		} else {
-
-			this.grid.setGridWidth( $( this.el ).parent().width() - 10 );
-		}
-
-		if ( !this.sub_view_mode ) {
-			this.grid.setGridHeight( ($( this.el ).height() - this.search_panel.height() - 90) );
-
-		}
-
-	},
-
 	resizeSubGridHeight: function( length ) {
+		debugger
 		var height = ( length * 26 >= 200 ) ? 200 : length * 26;
 		this.grid.setGridHeight( height );
 	},
@@ -350,13 +325,7 @@ UserSkillViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
 		form_item_input.TDatePicker( {field: 'expiry_date'} );
-
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().date_format_example + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Expiry Date' ), form_item_input, tab_skill_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Expiry Date' ), form_item_input, tab_skill_column1, '', null );
 
 		// Description
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
@@ -542,7 +511,7 @@ UserSkillViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScriptAsync( 'views/document/DocumentViewController.js', function() {
+		Global.loadScript( 'views/document/DocumentViewController.js', function() {
 			var tab_attachment = $this.edit_view_tab.find( '#tab_attachment' );
 			var firstColumn = tab_attachment.find( '.first-column-sub-view' );
 			Global.trackView( 'Sub' + 'Document' + 'View' );
@@ -566,6 +535,15 @@ UserSkillViewController = BaseViewController.extend( {
 
 	},
 
+	setEditViewDataDone: function() {
+		this._super( 'setEditViewDataDone' );
+		if ( this.current_edit_record["enable_calc_experience"] ) {
+			this.edit_view_ui_dic['experience'].setEnabled( false );
+		} else {
+			this.edit_view_ui_dic['experience'].setEnabled( true );
+		}
+	},
+
 	onFormItemChange: function( target, doNotValidate ) {
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
@@ -575,15 +553,15 @@ UserSkillViewController = BaseViewController.extend( {
 		switch ( key ) {
 			case 'enable_calc_experience':
 				if ( c_value ) {
-					this.edit_view_ui_dic['experience'].setEnabled( false );
-					var first_used_date = this.edit_view_ui_dic['first_used_date'].getValue();
-					var last_used_date = this.edit_view_ui_dic['last_used_date'].getValue();
-					if ( first_used_date !== '' && last_used_date !== '' ) {
-						var experience = this.api.calcExperience( first_used_date, last_used_date, {async: false} ).getResult();
-						this.edit_view_ui_dic['experience'].setValue( experience );
-					}
+					this.calcExperience();
 				} else {
 					this.edit_view_ui_dic['experience'].setEnabled( true );
+				}
+				break;
+			case 'last_used_date':
+			case 'first_used_date':
+				if ( this.current_edit_record["enable_calc_experience"] ) {
+					this.calcExperience();
 				}
 				break;
 		}
@@ -594,8 +572,22 @@ UserSkillViewController = BaseViewController.extend( {
 			this.validate();
 		}
 
-	}
+	},
 
+	calcExperience: function() {
+		this.edit_view_ui_dic['experience'].setEnabled( false );
+		var first_used_date = this.edit_view_ui_dic['first_used_date'].getValue();
+		var last_used_date = this.edit_view_ui_dic['last_used_date'].getValue();
+
+		last_used_date = last_used_date ? last_used_date : new Date().format();
+
+		if ( first_used_date !== '' && last_used_date !== '' ) {
+			var experience = this.api.calcExperience( first_used_date, last_used_date, {async: false} ).getResult();
+			this.edit_view_ui_dic['experience'].setValue( experience );
+		} else {
+			this.edit_view_ui_dic['experience'].setValue( 0 );
+		}
+	}
 
 
 } );

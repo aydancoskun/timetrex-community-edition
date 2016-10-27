@@ -93,25 +93,15 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 
 		// Interval
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'round_interval', width: 50, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'round_interval', mode:'time_unit', need_parser_sec: true} );
 
-		var widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'> " + $.i18n._('ie') + ' : '+ LocalCacheData.getLoginUserPreference().time_unit_format_display + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Interval' ), form_item_input, tab_rounding_policy_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Interval' ), form_item_input, tab_rounding_policy_column1, '', null );
 
 		//Grace Period
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'grace', width: 50, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'grace', mode:'time_unit', need_parser_sec: true} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._('ie') + ' : '+ LocalCacheData.getLoginUserPreference().time_unit_format_display + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Grace Period' ), form_item_input, tab_rounding_policy_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Grace Period' ), form_item_input, tab_rounding_policy_column1, '', null );
 
 		// Strict Schedule
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
@@ -131,48 +121,28 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Window Based On' ), form_item_input, tab_rounding_policy_column1, '', null, true );
 
 		// Static Time
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'condition_static_time', width: 149} );
+		form_item_input = Global.loadWidgetByName( FormItemType.TIME_PICKER );
+		form_item_input.TTimePicker( {field: 'condition_static_time'} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> ie: " + $.i18n._( LocalCacheData.getLoginUserPreference().time_format_display ) + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Static Time' ), form_item_input, tab_rounding_policy_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Static Time' ), form_item_input, tab_rounding_policy_column1, '', null, true );
 
 		// Static Total Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'condition_static_total_time', width: 149, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'condition_static_total_time', mode:'time_unit', need_parser_sec: true} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> ie: " + $.i18n._( LocalCacheData.getLoginUserPreference().time_unit_format_display ) + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Static Total Time' ), form_item_input, tab_rounding_policy_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Static Total Time' ), form_item_input, tab_rounding_policy_column1, '', null, true );
 
 		// Start Window
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'condition_start_window', width: 149, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'condition_start_window', mode:'time_unit', need_parser_sec: true} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> ie: " + $.i18n._( LocalCacheData.getLoginUserPreference().time_unit_format_display ) + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Start Window' ), form_item_input, tab_rounding_policy_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Start Window' ), form_item_input, tab_rounding_policy_column1, '', null, true );
 
 		// Stop Window
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'condition_stop_window', width: 149, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'condition_stop_window', mode:'time_unit', need_parser_sec: true} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> ie: " + $.i18n._( LocalCacheData.getLoginUserPreference().time_unit_format_display ) + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Stop Window' ), form_item_input, tab_rounding_policy_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Stop Window' ), form_item_input, tab_rounding_policy_column1, '', null, true );
 
 	},
 
@@ -270,36 +240,34 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 		var condition_stop_window = this.edit_view_form_item_dic.condition_stop_window;
 
 		if ( LocalCacheData.getCurrentCompany().product_edition_id < 15 ) {
-			condition_type.css( 'display', 'none' );
-			sp_box.css( 'display', 'none' );
-			static_time.css( 'display', 'none' );
-			condition_static_total_time.css( 'display', 'none' );
-			condition_start_window.css( 'display', 'none' );
-			condition_stop_window.css( 'display', 'none' );
+			this.detachElement('condition_type_id');
+			this.detachElement('sp_box');
+			this.detachElement('condition_static_total_time');
+			this.detachElement('condition_start_window');
+			this.detachElement('condition_stop_window');
+			this.detachElement('condition_static_time');
 			return;
 		}
 
-		static_time.css( 'display', 'none' );
-		condition_static_total_time.css( 'display', 'none' );
-		condition_start_window.css( 'display', 'none' );
-		condition_stop_window.css( 'display', 'none' );
+		this.detachElement('condition_static_total_time');
+		this.detachElement('condition_start_window');
+		this.detachElement('condition_stop_window');
+		this.detachElement('condition_static_time');
 
 		if ( condition_type_id === 10 || condition_type_id === 20 ) {
-
-			condition_start_window.css( 'display', 'block' );
-			condition_stop_window.css( 'display', 'block' );
+			this.attachElement('condition_start_window');
+			this.attachElement('condition_stop_window');
 
 		} else if ( condition_type_id === 30 ) {
-			static_time.css( 'display', 'block' );
-			condition_start_window.css( 'display', 'block' );
-			condition_stop_window.css( 'display', 'block' );
+			this.attachElement('condition_static_time');
+			this.attachElement('condition_stop_window');
+			this.attachElement('condition_start_window');
 
 		} else if ( condition_type_id === 40 ) {
 
-			condition_static_total_time.css( 'display', 'block' );
-			condition_start_window.css( 'display', 'block' );
-			condition_stop_window.css( 'display', 'block' );
-
+			this.attachElement('condition_static_total_time');
+			this.attachElement('condition_stop_window');
+			this.attachElement('condition_start_window');
 		}
 
 		this.editFieldResize();

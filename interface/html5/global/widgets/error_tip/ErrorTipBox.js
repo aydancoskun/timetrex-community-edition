@@ -15,8 +15,14 @@
 
 		};
 
-		this.show = function( target, error_string, sec ) {
+		this.show = function( target, error_string, sec, isWarning ) {
 			related_widget = target;
+
+			if ( isWarning ) {
+				$( this ).addClass( 'warningtip-box' );
+			} else {
+				$( this ).removeClass( 'warningtip-box' );
+			}
 
 			if ( $.type( error_string ) === 'array' ) {
 				error_string = error_string.join( '<br>' );
@@ -56,8 +62,6 @@
 
 	};
 
-	$.fn.ErrorTipBox.defaults = {
-
-	};
+	$.fn.ErrorTipBox.defaults = {};
 
 })( jQuery );

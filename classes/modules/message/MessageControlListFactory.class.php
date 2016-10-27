@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -59,8 +59,9 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -84,7 +85,7 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id
+					'company_id' => (int)$company_id
 					);
 
 		$query = '
@@ -121,8 +122,8 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 			$pptsvf = new PayPeriodTimeSheetVerifyFactory();
 			
 			$ph = array(
-						'user_id' => $user_id,
-						'company_id' => $company_id,
+						'user_id' => (int)$user_id,
+						'company_id' => (int)$company_id,
 						);
 
 			//Need to include all threads that user has posted to.
@@ -172,10 +173,6 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		}
 
 		//Folder is: INBOX, SENT
-		$key = Option::getByValue($folder, $this->getOptions('folder') );
-		if ($key !== FALSE) {
-			$folder = $key;
-		}
 
 		$mrf = new MessageRecipientFactory();
 		$msf = new MessageSenderFactory();
@@ -185,8 +182,8 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		$pptsvf = new PayPeriodTimeSheetVerifyFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
-					'company_id' => $company_id,
+					'user_id' => (int)$user_id,
+					'company_id' => (int)$company_id,
 					);
 
 		if ( $folder == 10 ) { //Inbox
@@ -288,17 +285,17 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		$pptsvf = new PayPeriodTimeSheetVerifyFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 
-					'id' => $id,
-					'id_b' => $id,
-					'id_c' => $id,
-					'id_d' => $id,
+					'id' => (int)$id,
+					'id_b' => (int)$id,
+					'id_c' => (int)$id,
+					'id_d' => (int)$id,
 
-					'user_id' => $user_id,
-					'user_id_b' => $user_id,
+					'user_id' => (int)$user_id,
+					'user_id_b' => (int)$user_id,
 					//'id_b' => $id,
-					//'parent_id' => $id,
+					//'parent_id' => (int)$id,
 					);
 
 		//Need to include all threads that user has posted to.
@@ -368,12 +365,12 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		$uf = new UserFactory();
 
 		$ph = array(
-					//'user_id' => $user_id,
+					//'user_id' => (int)$user_id,
 					//'user_id_b' => $user_id,
 					//'user_id_c' => $user_id,
-					'company_id' => $company_id,
-					'object_type_id' => $object_type_id,
-					'object_id' => $object_id,
+					'company_id' => (int)$company_id,
+					'object_type_id' => (int)$object_type_id,
+					'object_id' => (int)$object_id,
 					);
 
 		//Return status_id column so we can optimize marking messages as read or not.
@@ -471,9 +468,9 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					'object_type_id' => $object_type_id,
-					'object_id' => $object_id,
+					'company_id' => (int)$company_id,
+					'object_type_id' => (int)$object_type_id,
+					'object_id' => (int)$object_id,
 					);
 
 		//Return status_id column so we can optimize marking messages as read or not.
@@ -537,9 +534,9 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					'object_type_id' => $object_type_id,
-					'object_id' => $object_id,
+					'company_id' => (int)$company_id,
+					'object_type_id' => (int)$object_type_id,
+					'object_id' => (int)$object_id,
 					);
 
 		$query = '
@@ -626,7 +623,7 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 
 		$ph = array(
 					'user_id' => $filter_data['current_user_id'],
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		if ( $filter_data['folder_id'] == 10 ) { //Inbox
@@ -758,7 +755,7 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		$pptsvf = new PayPeriodTimeSheetVerifyFactory();
 		
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 
 					'id' => $filter_data['id'],
 					'id_b' => $filter_data['id'],
@@ -768,7 +765,7 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 					'user_id' => $filter_data['current_user_id'],
 					'user_id_b' => $filter_data['current_user_id'],
 					//'id_b' => $id,
-					//'parent_id' => $id,
+					//'parent_id' => (int)$id,
 					);
 
 		//Need to include all threads that user has posted to.

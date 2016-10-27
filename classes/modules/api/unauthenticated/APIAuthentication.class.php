@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -47,15 +47,22 @@ class APIAuthentication extends APIFactory {
 		return TRUE;
 	}
 
-	function Login($user_name, $password = NULL, $type = 'USER_NAME') {
+	function Login($user_name = NULL, $password = NULL, $type = 'USER_NAME') { //Default username=NULL to prevent argument warnings messages if its not passed from the API.
 		global $config_vars;
 		$authentication = new Authentication();
 
 		Debug::text('User Name: '. $user_name .' Password Length: '. strlen($password) .' Type: '. $type, __FILE__, __LINE__, __METHOD__, 10);
 
-		//FIXME: When using Flex, I think it sets the cookie itself, so we need to pass this information on to it before it will actually work.
-		//However this should work fine for JSON/SOAP.
-		//FIXME: Store the type in the authentication table so we know how the user logged in. Then we can disable certain functionality if using the phone_id.
+		if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == 1 ) OR ( isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == 1 ) ) {
+			//When installer is enabled, just display down for maintenance message to user if they try to login.
+			$error_message = TTi18n::gettext('%1 is currently undergoing maintenance. We apologize for any inconvenience this may cause, please try again later.', array(APPLICATION_NAME) );
+			$validator_obj = new Validator();
+			$validator_stats = array('total_records' => 1, 'valid_records' => 0 );
+			$validator_obj->isTrue( 'user_name', FALSE, $error_message );
+			$validator[0] = $validator_obj->getErrorsArray();
+			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
+		}
+
 		if ( isset($config_vars['other']['web_session_expire']) AND $config_vars['other']['web_session_expire'] != '' ) {
 			$authentication->setEnableExpireSession( (int)$config_vars['other']['web_session_expire'] );
 		}
@@ -88,20 +95,30 @@ class APIAuthentication extends APIFactory {
 					}
 				} elseif ( $c_obj->getStatus() == 30 ) {
 					$error_message = TTi18n::gettext('Sorry, your company\'s account has been CANCELLED, please contact customer support if you believe this is an error');
-				} elseif ( $c_obj->getPasswordPolicyType() == 1 AND $c_obj->getProductEdition() > 10 ) {
-					//Password policy is enabled, confirm users password has not exceeded maximum age.
+				} else {
 					$ulf = TTnew( 'UserListFactory' );
 					$ulf->getByUserName( $user_name );
-					if ( $ulf->getRecordCount() > 0 ) {
-						foreach( $ulf as $u_obj ) {
-							//Make sure we confirm that the password is in fact correct, but just expired.
-							if ( $u_obj->checkPassword($password, FALSE) == TRUE AND $u_obj->checkPasswordAge() == FALSE ) {
-								$error_message = TTi18n::gettext('Sorry, your password has exceeded its maximum age specified by your company\'s password policy and must be changed immediately');
+					if ( $ulf->getRecordCount() == 1 ) {
+						$u_obj = $ulf->getCurrent();
+
+						if ( $u_obj->checkPassword($password, FALSE) == TRUE ) {
+							if ( $u_obj->isFirstLogin() == TRUE AND $u_obj->isCompromisedPassword() == TRUE ) {
+								$error_message = TTi18n::gettext('Welcome to %1, since this is your first time logging in, we ask that you change your password to something more secure', array(APPLICATION_NAME) );
 								$error_column = 'password';
+							} elseif ( $u_obj->isPasswordPolicyEnabled() == TRUE ) {
+								if ( $u_obj->isCompromisedPassword() == TRUE ) {
+									$error_message = TTi18n::gettext('Due to your company\'s password policy, your password must be changed immediately');
+									$error_column = 'password';
+								} elseif(  $u_obj->checkPasswordAge() == FALSE ) {
+									//Password policy is enabled, confirm users password has not exceeded maximum age.
+									//Make sure we confirm that the password is in fact correct, but just expired.
+									$error_message = TTi18n::gettext('Your password has exceeded its maximum age specified by your company\'s password policy and must be changed immediately');
+									$error_column = 'password';
+								}
 							}
 						}
 					}
-					unset($ulf, $u_obj);
+					unset($ulf, $u_obj);					
 				}
 			}
 
@@ -222,7 +239,7 @@ class APIAuthentication extends APIFactory {
 		}
 	}
 
-	function isLoggedIn( $touch_updated_date = TRUE ) {
+	function isLoggedIn( $touch_updated_date = TRUE, $type = 'USER_NAME' ) {
 		global $authentication, $config_vars;
 
 		$session_id = getSessionID();
@@ -234,7 +251,7 @@ class APIAuthentication extends APIFactory {
 			if ( isset($config_vars['other']['web_session_timeout']) AND $config_vars['other']['web_session_timeout'] != '' ) {
 				$authentication->setIdle( (int)$config_vars['other']['web_session_timeout'] );
 			}
-			if ( $authentication->Check( $session_id, $touch_updated_date ) === TRUE ) {
+			if ( $authentication->Check( $session_id, $type, $touch_updated_date ) === TRUE ) {
 				return TRUE;
 			}
 		}
@@ -341,14 +358,7 @@ class APIAuthentication extends APIFactory {
 	}
 
 	function getRegistrationKey() {
-		$sslf = new SystemSettingListFactory();
-		$sslf->getByName( 'registration_key' );
-		if ( $sslf->getRecordCount() == 1 ) {
-			$key = $sslf->getCurrent()->getValue();
-			return $key;
-		}
-
-		return FALSE;
+		return SystemSettingFactory::getSystemSettingValueByKey( 'registration_key' );
 	}
 
 	function getLocale( $language = NULL, $country = NULL ) {
@@ -399,8 +409,10 @@ class APIAuthentication extends APIFactory {
 	function getPreLoginData( $api = NULL ) {
 		global $config_vars, $authentication;
 
-		if ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == 1 ) {
+		if ( isset($_GET['disable_db']) OR ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == 1 ) ) {
 			return array(
+				'primary_company_id' => PRIMARY_COMPANY_ID, //Needed for some branded checks.
+				'primary_company_name' => 'N/A',
 				'analytics_enabled' => $this->isAnalyticsEnabled(),
 				'application_build' => $this->getApplicationBuild(),
 				'powered_by_logo_enabled' => $this->isPoweredByLogoEnabled(),
@@ -408,7 +420,12 @@ class APIAuthentication extends APIFactory {
 				'product_edition' => $this->getTTProductEdition( FALSE ),
 				'locale' => TTi18n::getNormalizedLocale(),
 				'base_url' => Environment::getBaseURL(),
-				'api_base_url' => Environment::getAPIBaseURL()
+				'api_base_url' => Environment::getAPIBaseURL(),
+				'language_options' => Misc::addSortPrefix( TTi18n::getLanguageArray() ),
+				//Make sure locale is set properly before this function is called, either in api.php or APIGlobal.js.php for example.
+				'enable_default_language_translation' => ( isset($config_vars['other']['enable_default_language_translation']) ) ? $config_vars['other']['enable_default_language_translation'] : FALSE,
+				'language' => TTi18n::getLanguage(),
+				'locale' => TTi18n::getNormalizedLocale(), //Needed for HTML5 interface to load proper translation file.
 			);
 		}
 
@@ -428,6 +445,7 @@ class APIAuthentication extends APIFactory {
 				'powered_by_logo_enabled' => $this->isPoweredByLogoEnabled(),
 				'is_application_branded' => $this->isApplicationBranded(),
 				'application_name' => $this->getApplicationName(),
+				'organization_name' => $this->getOrganizationName(),
 				'organization_url' => $this->getOrganizationURL(),
 				'copyright_notice' => COPYRIGHT_NOTICE,
 				'product_edition' => $this->getTTProductEdition( FALSE ),
@@ -456,6 +474,15 @@ class APIAuthentication extends APIFactory {
 
 	//Function that Flex can call when an irrecoverable error or uncaught exception is triggered.
 	function sendErrorReport( $data = NULL, $screenshot = NULL ) {
+		$rl = TTNew('RateLimit');
+		$rl->setID( 'error_report_'. Misc::getRemoteIPAddress() );
+		$rl->setAllowedCalls( 20 );
+		$rl->setTimeFrame( 900 ); //15 minutes
+		if ( $rl->check() == FALSE ) {
+			Debug::Text('Excessive error reports... Preventing error reports from: '. Misc::getRemoteIPAddress() .' for up to 15 minutes...', __FILE__, __LINE__, __METHOD__, 10);
+			return APPLICATION_BUILD;
+		}
+
 		$attachments = NULL;
 		if ( $screenshot != '' ) {
 			$attachments[] = array( 'file_name' => 'screenshot.png', 'mime_type' => 'image/png', 'data' => base64_decode( $screenshot ) );
@@ -466,6 +493,8 @@ class APIAuthentication extends APIFactory {
 		} else {
 			$subject = TTi18n::gettext('Flex Error Report');
 		}
+
+		$data = 'IP Address: '. Misc::getRemoteIPAddress() ."\nServer Version: ". APPLICATION_BUILD ."\n\n". $data;
 
 		Misc::sendSystemMail( $subject, $data, $attachments, TRUE ); //Always force these emails to be sent, even when PRODUCTION=FALSE
 
@@ -504,18 +533,24 @@ class APIAuthentication extends APIFactory {
 												TTi18n::gettext('Current password is incorrect') );
 					}
 
-					if ( $new_password != '' OR $new_password2 != ''  ) {
-						if ( $new_password == $new_password2 ) {
-							$u_obj->setPassword($new_password);
+					if ( $current_password == $new_password ) {
+						$u_obj->Validator->isTrue(	'password',
+												FALSE,
+												TTi18n::gettext('New password must be different than current password') );
+					} else {
+						if ( $new_password != '' OR $new_password2 != ''  ) {
+							if ( $new_password == $new_password2 ) {
+								$u_obj->setPassword($new_password);
+							} else {
+								$u_obj->Validator->isTrue(	'password',
+														FALSE,
+														TTi18n::gettext('Passwords don\'t match') );
+							}
 						} else {
 							$u_obj->Validator->isTrue(	'password',
 													FALSE,
 													TTi18n::gettext('Passwords don\'t match') );
 						}
-					} else {
-						$u_obj->Validator->isTrue(	'password',
-												FALSE,
-												TTi18n::gettext('Passwords don\'t match') );
 					}
 
 					if ( $u_obj->isValid() ) {
@@ -523,13 +558,21 @@ class APIAuthentication extends APIFactory {
 							//Return TRUE even in demo mode, but nothing happens.
 							return $this->returnHandler( TRUE );
 						} else {
-							TTLog::addEntry( $u_obj->getID(), 20, TTi18n::getText('Password - Web (Exceeded Maximum Age)'), NULL, $u_obj->getTable() );
-							return $this->returnHandler( $u_obj->Save() ); //Single valid record
+							//This should force the updated_by field to match the user changing their password,
+							//  so we know now to ask the user to change their password again, since they were the last ones to do so.
+							global $current_user;
+							$current_user = $u_obj;
+							
+							TTLog::addEntry( $u_obj->getID(), 20, TTi18n::getText('Password - Web (Password Policy)'), NULL, $u_obj->getTable() );
+							$retval = $u_obj->Save();
+
+							unset($current_user);
+							
+							return $this->returnHandler( $retval ); //Single valid record
 						}
 					} else {
 						return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $u_obj->Validator->getErrorsArray(), array('total_records' => 1, 'valid_records' => 0) );
 					}
-
 				}
 			}
 		}

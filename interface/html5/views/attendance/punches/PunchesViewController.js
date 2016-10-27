@@ -196,15 +196,17 @@ PunchesViewController = BaseViewController.extend( {
 
 		this.initDropDownOption( 'status', 'user_status_id', this.user_api, null, 'user_status_array' );
 
-		this.user_group_api.getUserGroup( '', false, false, {onResult: function( res ) {
-			res = res.getResult();
+		this.user_group_api.getUserGroup( '', false, false, {
+			onResult: function( res ) {
+				res = res.getResult();
 
-			res = Global.buildTreeRecord( res );
-			$this.user_group_array = res;
-			$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
-			$this.adv_search_field_ui_dic['group_id'].setSourceData( res );
+				res = Global.buildTreeRecord( res );
+				$this.user_group_array = res;
+				$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
+				$this.adv_search_field_ui_dic['group_id'].setSourceData( res );
 
-		}} );
+			}
+		} );
 
 	},
 
@@ -217,14 +219,15 @@ PunchesViewController = BaseViewController.extend( {
 		var $this = this;
 		var arg = {filter_data: {id: this.current_edit_record.station_id}};
 
-		this.api_station.getStation( arg, {onResult: function( result ) {
+		this.api_station.getStation( arg, {
+			onResult: function( result ) {
+				$this.station = result.getResult()[0];
+				var widget = $this.edit_view_ui_dic['station_id'];
+				widget.setValue( $this.station.type + '-' + $this.station.description );
+				widget.css( 'cursor', 'pointer' );
 
-			$this.station = result.getResult()[0];
-
-			var widget = $this.edit_view_ui_dic['station_id'];
-			widget.setValue( $this.station.type + '-' + $this.station.description );
-
-		}} );
+			}
+		} );
 	},
 
 	uniformVariable: function( records ) {
@@ -247,7 +250,6 @@ PunchesViewController = BaseViewController.extend( {
 			'tab_audit': $.i18n._( 'Audit' )
 		} );
 
-
 		var form_item_input;
 		var widgetContainer;
 
@@ -257,7 +259,8 @@ PunchesViewController = BaseViewController.extend( {
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PUNCH,
 			navigation_mode: true,
-			show_search_inputs: true} );
+			show_search_inputs: true
+		} );
 
 		this.setNavigation();
 
@@ -291,9 +294,9 @@ PunchesViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_punch_column1, '', null, true );
 
 		// Time
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input = Global.loadWidgetByName( FormItemType.TIME_PICKER );
 
-		form_item_input.TTextInput( {field: 'punch_time'} );
+		form_item_input.TTimePicker( {field: 'punch_time', validation_field: 'time_stamp'} );
 
 		widgetContainer = $( "<div class='widget-h-box'></div>" );
 		this.actual_time_label = $( "<span class='widget-right-label'></span>" );
@@ -303,28 +306,15 @@ PunchesViewController = BaseViewController.extend( {
 
 		//Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-		form_item_input.TDatePicker( {field: 'punch_date'} );
+		form_item_input.TDatePicker( {field: 'punch_date', validation_field: 'date_stamp'} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'>" + $.i18n._( 'ie' ) + ': ' + $.i18n._( '' + LocalCacheData.loginUserPreference.date_format_display ) + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-
-		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_punch_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_punch_column1, '', null, true );
 
 		//Mass Add Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
+		form_item_input.TRangePicker( {field: 'punch_dates', validation_field: 'date_stamp'} );
 
-		form_item_input.TRangePicker( {field: 'punch_dates'} );
-
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'>" + $.i18n._( 'ie' ) + ': ' + LocalCacheData.loginUserPreference.date_format_display + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-
-		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_punch_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_punch_column1, '', null, true );
 
 		// Punch
 
@@ -366,7 +356,7 @@ PunchesViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Branch' ), form_item_input, tab_punch_column1, '', null, true );
 
 		if ( !this.show_branch_ui ) {
-			this.edit_view_form_item_dic.branch_id.hide();
+			this.detachElement( 'branch_id' );
 		}
 
 		// Department
@@ -384,7 +374,7 @@ PunchesViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Department' ), form_item_input, tab_punch_column1, '', null, true );
 
 		if ( !this.show_department_ui ) {
-			this.edit_view_form_item_dic.department_id.hide();
+			this.detachElement( 'department_id' )
 		}
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
@@ -416,7 +406,7 @@ PunchesViewController = BaseViewController.extend( {
 			this.addEditFieldToColumn( $.i18n._( 'Job' ), [form_item_input, job_coder], tab_punch_column1, '', widgetContainer, true );
 
 			if ( !this.show_job_ui ) {
-				this.edit_view_form_item_dic.job_id.hide();
+				this.detachElement( 'job_id' );
 			}
 
 			//Job Item
@@ -446,14 +436,13 @@ PunchesViewController = BaseViewController.extend( {
 			this.addEditFieldToColumn( $.i18n._( 'Task' ), [form_item_input, job_item_coder], tab_punch_column1, '', widgetContainer, true );
 
 			if ( !this.show_job_item_ui ) {
-				this.edit_view_form_item_dic.job_item_id.hide();
+				this.detachElement( 'job_item_id' )
 			}
 
 		}
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 			// Quantity
-
 			var good = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 			good.TTextInput( {field: 'quantity', width: 40} );
 			good.addClass( 'quantity-input' );
@@ -476,7 +465,7 @@ PunchesViewController = BaseViewController.extend( {
 			this.addEditFieldToColumn( $.i18n._( 'Quantity' ), [good, bad], tab_punch_column1, '', widgetContainer, true );
 
 			if ( !this.show_bad_quantity_ui && !this.show_good_quantity_ui ) {
-				this.edit_view_form_item_dic.quantity.hide();
+				this.detachElement( 'quantity' );
 			} else {
 				if ( !this.show_bad_quantity_ui ) {
 					bad_label.hide();
@@ -493,20 +482,19 @@ PunchesViewController = BaseViewController.extend( {
 		//Note
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 
-		form_item_input.TTextArea( {field: 'note', width: '100%' } );
+		form_item_input.TTextArea( {field: 'note', width: '100%'} );
 
 		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_punch_column1, '', null, true, true );
 
 		form_item_input.parent().width( '45%' );
 
 		if ( !this.show_note_ui ) {
-			this.edit_view_form_item_dic.note.hide();
+			this.detachElement( 'note' );
 		}
 
 		// Station
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'station_id'} );
-		form_item_input.css( 'cursor', 'pointer' );
 		this.addEditFieldToColumn( $.i18n._( 'Station' ), form_item_input, tab_punch_column1, '', null, true, true );
 
 		form_item_input.click( function() {
@@ -516,18 +504,14 @@ PunchesViewController = BaseViewController.extend( {
 
 		} );
 
-		if ( this.show_station_ui ) {
-			form_item_input.css( 'cursor', 'pointer' );
-		}
-
 		//Punch Image
 		form_item_input = Global.loadWidgetByName( FormItemType.IMAGE );
 		form_item_input.TImage( {field: 'punch_image'} );
 		this.addEditFieldToColumn( $.i18n._( 'Image' ), form_item_input, tab_punch_column1, '', null, true, true );
 
 		if ( this.is_mass_editing ) {
-			this.edit_view_form_item_dic.punch_image.hide();
-			this.edit_view_form_item_dic.user_id.hide();
+			this.detachElement( 'punch_image' );
+			this.detachElement( 'user_id' );
 		}
 
 	},
@@ -551,25 +535,11 @@ PunchesViewController = BaseViewController.extend( {
 			if ( !column.hasClass( 'v-box' ) ) {
 
 				if ( !did_clean_dic[tab_id] ) {
-					column.find( '.edit-view-form-item-label-div-first-row' ).removeClass( 'edit-view-form-item-label-div-first-row' );
-					column.find( '.edit-view-form-item-label-div-last-row' ).removeClass( 'edit-view-form-item-label-div-last-row' );
-					column.find( '.edit-view-form-item-div-last-row' ).removeClass( 'edit-view-form-item-div-last-row' );
 					did_clean_dic[tab_id] = true;
 				}
 
 				var child_length = column.children().length;
 				var parent_div = widget.parent().parent();
-
-				if ( child_length === 2 ) {
-					parent_div.children().eq( 0 ).addClass( 'edit-view-form-item-label-div-first-row' );
-					parent_div.children().eq( 0 ).addClass( 'edit-view-form-item-label-div-last-row' );
-					parent_div.addClass( 'edit-view-form-item-div-last-row' );
-				} else if ( parent_div.index() === 0 ) {
-					parent_div.children().eq( 0 ).addClass( 'edit-view-form-item-label-div-first-row' );
-				} else if ( parent_div.index() === child_length - 2 ) {
-					parent_div.children().eq( 0 ).addClass( 'edit-view-form-item-label-div-last-row' );
-					parent_div.addClass( 'edit-view-form-item-div-last-row' );
-				}
 
 				if ( Global.isSet( widget.setEnabled ) ) {
 					widget.setEnabled( true );
@@ -581,22 +551,22 @@ PunchesViewController = BaseViewController.extend( {
 			switch ( key ) {
 				case 'punch_dates':
 					if ( this.is_mass_adding ) {
-						widgetContainer.css( 'display', 'block' );
+						this.attachElement(key);
 						widget.css( 'opacity', 1 );
 						break;
 					} else {
-						widgetContainer.css( 'display', 'none' );
+						this.detachElement(key);
 						widget.css( 'opacity', 0 );
 						break;
 					}
 					break;
 				case 'punch_date':
 					if ( this.is_mass_adding ) {
-						widgetContainer.css( 'display', 'none' );
+						this.detachElement(key);
 						widget.css( 'opacity', 0 );
 						break;
 					} else {
-						widgetContainer.css( 'display', 'block' );
+						this.attachElement(key);
 						widget.css( 'opacity', 1 );
 						break;
 					}
@@ -655,10 +625,12 @@ PunchesViewController = BaseViewController.extend( {
 			record = this.uniformVariable( record );
 		}
 
-		this.api['validate' + this.api.key_name]( record, {onResult: function( result ) {
-			$this.validateResult( result );
+		this.api['validate' + this.api.key_name]( record, {
+			onResult: function( result ) {
+				$this.validateResult( result );
 
-		}} );
+			}
+		} );
 	},
 
 	setMassAddingRecord: function() {
@@ -695,8 +667,8 @@ PunchesViewController = BaseViewController.extend( {
 	parserDatesRange: function( date ) {
 		var dates = date.split( " - " );
 		var resultArray = [];
-		var beginDate = Global.strToDate( dates[ 0 ] );
-		var endDate = Global.strToDate( dates[ 1 ] );
+		var beginDate = Global.strToDate( dates[0] );
+		var endDate = Global.strToDate( dates[1] );
 
 		var nextDate = beginDate;
 
@@ -705,7 +677,7 @@ PunchesViewController = BaseViewController.extend( {
 			nextDate = new Date( new Date( nextDate.getTime() ).setDate( nextDate.getDate() + 1 ) );
 		}
 
-		resultArray.push( dates[ 1 ] );
+		resultArray.push( dates[1] );
 
 		return resultArray;
 	},
@@ -723,8 +695,13 @@ PunchesViewController = BaseViewController.extend( {
 			if ( Global.isSet( widget ) ) {
 				switch ( key ) {
 					case 'punch_dates':
-						var date_array = [this.current_edit_record['punch_date']];
-						this.current_edit_record.punch_dates = date_array;
+						var date_array;
+						if(!this.current_edit_record.punch_dates){
+							date_array = [this.current_edit_record['punch_date']];
+							this.current_edit_record.punch_dates = date_array;
+						}else{
+							date_array = this.current_edit_record.punch_dates;
+						}
 						widget.setValue( date_array );
 						break;
 					case 'country': //popular case
@@ -763,18 +740,17 @@ PunchesViewController = BaseViewController.extend( {
 							this.setStation();
 						} else {
 							widget.setValue( 'N/A' );
+							widget.css( 'cursor', 'default' );
 						}
 						break;
 					case 'punch_image':
 						var station_form_item = this.edit_view_form_item_dic['station_id'];
 						if ( this.current_edit_record['has_image'] ) {
-							this.edit_view_form_item_dic['punch_image'].show();
-							this.removeLastRowClass( station_form_item );
+							this.attachElement( 'punch_image' )
 							widget.setValue( ServiceCaller.fileDownloadURL + '?object_type=punch_image&parent_id=' + this.current_edit_record.user_id + '&object_id=' + this.current_edit_record.id );
 
 						} else {
-							this.edit_view_form_item_dic['punch_image'].hide();
-							this.addLastRowClass( station_form_item );
+							this.detachElement( 'punch_image' );
 						}
 						break;
 					default:
@@ -794,8 +770,6 @@ PunchesViewController = BaseViewController.extend( {
 				actual_time_value = 'N/A';
 			}
 
-		} else {
-			actual_time_value = $.i18n._( 'ie' ) + ': ' + $.i18n._( '' + LocalCacheData.loginUserPreference.time_format_display )
 		}
 
 		this.actual_time_label.text( actual_time_value );
@@ -850,7 +824,7 @@ PunchesViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScriptAsync( 'views/core/log/LogViewController.js', function() {
+		Global.loadScript( 'views/core/log/LogViewController.js', function() {
 			var tab = $this.edit_view_tab.find( '#' + tab_id );
 			var firstColumn = tab.find( '.first-column-sub-view' );
 			Global.trackView( 'Sub' + 'Log' + 'View' );
@@ -951,16 +925,19 @@ PunchesViewController = BaseViewController.extend( {
 		var default_args = {permission_section: 'punch'};
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Employee Status' ),
+			new SearchField( {
+				label: $.i18n._( 'Employee Status' ),
 				in_column: 1,
 				field: 'user_status_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Pay Period' ),
+			new SearchField( {
+				label: $.i18n._( 'Pay Period' ),
 				in_column: 1,
 				field: 'pay_period_id',
 				layout_name: ALayoutIDs.PAY_PERIOD,
@@ -968,9 +945,11 @@ PunchesViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Employee' ),
+			new SearchField( {
+				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
@@ -979,18 +958,22 @@ PunchesViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Status' ),
+			new SearchField( {
+				label: $.i18n._( 'Status' ),
 				in_column: 1,
 				field: 'status_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Title' ),
+			new SearchField( {
+				label: $.i18n._( 'Title' ),
 				in_column: 1,
 				field: 'title_id',
 				layout_name: ALayoutIDs.USER_TITLE,
@@ -998,9 +981,11 @@ PunchesViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Group' ),
+			new SearchField( {
+				label: $.i18n._( 'Group' ),
 				in_column: 1,
 				multiple: true,
 				field: 'group_id',
@@ -1008,18 +993,22 @@ PunchesViewController = BaseViewController.extend( {
 				tree_mode: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Type' ),
+			new SearchField( {
+				label: $.i18n._( 'Type' ),
 				in_column: 1,
 				field: 'type_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Default Branch' ),
+			new SearchField( {
+				label: $.i18n._( 'Default Branch' ),
 				in_column: 2,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
@@ -1027,9 +1016,11 @@ PunchesViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Default Department' ),
+			new SearchField( {
+				label: $.i18n._( 'Default Department' ),
 				in_column: 2,
 				field: 'default_department_id',
 				layout_name: ALayoutIDs.DEPARTMENT,
@@ -1037,9 +1028,11 @@ PunchesViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Punch Branch' ),
+			new SearchField( {
+				label: $.i18n._( 'Punch Branch' ),
 				in_column: 2,
 				field: 'branch_id',
 				layout_name: ALayoutIDs.BRANCH,
@@ -1047,9 +1040,11 @@ PunchesViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Punch Department' ),
+			new SearchField( {
+				label: $.i18n._( 'Punch Department' ),
 				in_column: 2,
 				field: 'department_id',
 				layout_name: ALayoutIDs.DEPARTMENT,
@@ -1057,9 +1052,11 @@ PunchesViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Job' ),
+			new SearchField( {
+				label: $.i18n._( 'Job' ),
 				in_column: 2,
 				field: 'job_id',
 				layout_name: ALayoutIDs.JOB,
@@ -1067,9 +1064,11 @@ PunchesViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: (this.show_job_ui && ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 )),
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Task' ),
+			new SearchField( {
+				label: $.i18n._( 'Task' ),
 				in_column: 2,
 				field: 'job_item_id',
 				layout_name: ALayoutIDs.JOB_ITEM,
@@ -1077,9 +1076,11 @@ PunchesViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: (this.show_job_item_ui && ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 )),
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -1087,9 +1088,11 @@ PunchesViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -1097,7 +1100,8 @@ PunchesViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} )];
+				form_item_type: FormItemType.AWESOME_BOX
+			} )];
 	},
 
 	buildContextMenuModels: function() {
@@ -1289,10 +1293,12 @@ PunchesViewController = BaseViewController.extend( {
 		LocalCacheData.current_doing_context_action = 'new';
 		$this.openEditView();
 
-		$this.api['get' + $this.api.key_name + 'DefaultData']( {onResult: function( result ) {
-			$this.onAddResult( result );
+		$this.api['get' + $this.api.key_name + 'DefaultData']( {
+			onResult: function( result ) {
+				$this.onAddResult( result );
 
-		}} );
+			}
+		} );
 
 	},
 
@@ -1376,11 +1382,10 @@ PunchesViewController = BaseViewController.extend( {
 
 	setDefaultMenu: function( doNotSetFocus ) {
 
-
-        //Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
-        if (!this.context_menu_array) {
-            return;
-        }
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+		if ( !this.context_menu_array ) {
+			return;
+		}
 
 		if ( !Global.isSet( doNotSetFocus ) || !doNotSetFocus ) {
 			this.selectContextMenu();
@@ -1566,23 +1571,25 @@ PunchesViewController = BaseViewController.extend( {
 						temp_filter.filter_data = {};
 						temp_filter.filter_data.id = [selectedId];
 
-						this.api['get' + this.api.key_name]( temp_filter, {onResult: function( result ) {
+						this.api['get' + this.api.key_name]( temp_filter, {
+							onResult: function( result ) {
 
-							var result_data = result.getResult();
+								var result_data = result.getResult();
 
-							if ( !result_data ) {
-								result_data = [];
+								if ( !result_data ) {
+									result_data = [];
+								}
+
+								result_data = result_data[0];
+
+								filter.user_id = result_data.user_id;
+								filter.base_date = result_data.punch_date;
+
+								Global.addViewTab( $this.viewId, 'Punches', window.location.href );
+								IndexViewController.goToView( 'TimeSheet', filter );
+
 							}
-
-							result_data = result_data[0];
-
-							filter.user_id = result_data.user_id;
-							filter.base_date = result_data.punch_date;
-
-							Global.addViewTab( $this.viewId, 'Punches', window.location.href );
-							IndexViewController.goToView( 'TimeSheet', filter );
-
-						}} );
+						} );
 					}
 
 				}
@@ -1604,18 +1611,20 @@ PunchesViewController = BaseViewController.extend( {
 						temp_filter.filter_data = {};
 						temp_filter.filter_data.id = [selectedId];
 
-						this.api['get' + this.api.key_name]( temp_filter, {onResult: function( result ) {
-							var result_data = result.getResult();
+						this.api['get' + this.api.key_name]( temp_filter, {
+							onResult: function( result ) {
+								var result_data = result.getResult();
 
-							if ( !result_data ) {
-								result_data = [];
+								if ( !result_data ) {
+									result_data = [];
+								}
+
+								result_data = result_data[0];
+
+								IndexViewController.openEditView( $this, 'Employee', result_data.user_id );
+
 							}
-
-							result_data = result_data[0];
-
-							IndexViewController.openEditView( $this, 'Employee', result_data.user_id );
-
-						}} );
+						} );
 					}
 
 				}
@@ -1639,6 +1648,8 @@ PunchesViewController = BaseViewController.extend( {
 		var job_item_widget = $this.edit_view_ui_dic['job_item_id'];
 		var current_job_item_id = job_item_widget.getValue();
 		job_item_widget.setSourceData( null );
+		job_item_widget.setCheckBox(true);
+		this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
 		var args = {};
 		args.filter_data = {status_id: 10, job_id: $this.current_edit_record.job_id};
 		$this.edit_view_ui_dic['job_item_id'].setDefaultArgs( args );
@@ -1649,17 +1660,19 @@ PunchesViewController = BaseViewController.extend( {
 
 			new_arg.filter_data.id = current_job_item_id;
 			new_arg.filter_columns = $this.edit_view_ui_dic['job_item_id'].getColumnFilter();
-			$this.job_item_api.getJobItem( new_arg, {onResult: function( task_result ) {
-				var data = task_result.getResult();
+			$this.job_item_api.getJobItem( new_arg, {
+				onResult: function( task_result ) {
+					var data = task_result.getResult();
 
-				if ( data.length > 0 ) {
-					job_item_widget.setValue( current_job_item_id );
-					$this.current_edit_record.job_item_id = current_job_item_id;
-				} else {
-					setDefaultData();
+					if ( data.length > 0 ) {
+						job_item_widget.setValue( current_job_item_id );
+						$this.current_edit_record.job_item_id = current_job_item_id;
+					} else {
+						setDefaultData();
+					}
+
 				}
-
-			}} )
+			} )
 
 		} else {
 			setDefaultData();
@@ -1724,10 +1737,12 @@ PunchesViewController = BaseViewController.extend( {
 			filter.filter_data = {};
 			filter.filter_data.id = [selectedId];
 
-			this.api['get' + this.api.key_name]( filter, {onResult: function( result ) {
-				$this.onCopyAsNewResult( result );
+			this.api['get' + this.api.key_name]( filter, {
+				onResult: function( result ) {
+					$this.onCopyAsNewResult( result );
 
-			}} );
+				}
+			} );
 		}
 
 	},
@@ -1748,8 +1763,11 @@ PunchesViewController = BaseViewController.extend( {
 		return false;
 	},
 
-	onSaveAndCopy: function() {
+	onSaveAndCopy: function( ignoreWarning ) {
 		var $this = this;
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
 		this.is_add = true;
 		LocalCacheData.current_doing_context_action = 'save_and_copy';
 		var record = this.current_edit_record;
@@ -1760,14 +1778,19 @@ PunchesViewController = BaseViewController.extend( {
 		}
 
 		this.clearNavigationData();
-		this.api['set' + this.api.key_name]( record, {onResult: function( result ) {
-			$this.onSaveAndCopyResult( result );
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
+			onResult: function( result ) {
+				$this.onSaveAndCopyResult( result );
 
-		}} );
+			}
+		} );
 	},
 
-	onSaveAndNewClick: function() {
+	onSaveAndNewClick: function( ignoreWarning ) {
 		var $this = this;
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
 		this.is_add = true;
 		var record = this.current_edit_record;
 		LocalCacheData.current_doing_context_action = 'new';
@@ -1776,10 +1799,12 @@ PunchesViewController = BaseViewController.extend( {
 		} else {
 			record = this.uniformVariable( record );
 		}
-		this.api['set' + this.api.key_name]( record, {onResult: function( result ) {
-			$this.onSaveAndNewResult( result );
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
+			onResult: function( result ) {
+				$this.onSaveAndNewResult( result );
 
-		}} );
+			}
+		} );
 	},
 
 	onMassEditClick: function() {
@@ -1803,30 +1828,36 @@ PunchesViewController = BaseViewController.extend( {
 		filter.filter_data = {};
 		filter.filter_data.id = this.mass_edit_record_ids;
 
-		this.api['getCommon' + this.api.key_name + 'Data']( filter, {onResult: function( result ) {
-			var result_data = result.getResult();
+		this.api['getCommon' + this.api.key_name + 'Data']( filter, {
+			onResult: function( result ) {
+				var result_data = result.getResult();
 
-			if ( !result_data ) {
-				result_data = [];
-			}
+				if ( !result_data ) {
+					result_data = [];
+				}
 
-			$this.api['getOptions']( 'unique_columns', {onResult: function( result ) {
-				$this.unique_columns = result.getResult();
-				$this.api['getOptions']( 'linked_columns', {onResult: function( result1 ) {
-					$this.linked_columns = result1.getResult();
+				$this.api['getOptions']( 'unique_columns', {
+					onResult: function( result ) {
+						$this.unique_columns = result.getResult();
+						$this.api['getOptions']( 'linked_columns', {
+							onResult: function( result1 ) {
+								$this.linked_columns = result1.getResult();
 
-					if ( $this.sub_view_mode && $this.parent_key ) {
-						result_data[$this.parent_key] = $this.parent_value;
+								if ( $this.sub_view_mode && $this.parent_key ) {
+									result_data[$this.parent_key] = $this.parent_value;
+								}
+
+								$this.current_edit_record = result_data;
+								$this.initEditView();
+
+							}
+						} );
+
 					}
+				} );
 
-					$this.current_edit_record = result_data;
-					$this.initEditView();
-
-				}} );
-
-			}} );
-
-		}} );
+			}
+		} );
 
 	},
 
@@ -1857,35 +1888,41 @@ PunchesViewController = BaseViewController.extend( {
 		filter.filter_data = {};
 		filter.filter_data.id = [selectedId];
 
-		this.api['get' + this.api.key_name]( filter, {onResult: function( result ) {
-			var result_data = result.getResult();
+		this.api['get' + this.api.key_name]( filter, {
+			onResult: function( result ) {
+				var result_data = result.getResult();
 
-			if ( !result_data ) {
-				result_data = [];
+				if ( !result_data ) {
+					result_data = [];
+				}
+
+				result_data = result_data[0];
+
+				if ( !result_data ) {
+					TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
+					$this.onCancelClick();
+					return;
+				}
+
+				if ( $this.sub_view_mode && $this.parent_key ) {
+					result_data[$this.parent_key] = $this.parent_value;
+				}
+
+				$this.current_edit_record = result_data;
+
+				$this.initEditView();
+
 			}
-
-			result_data = result_data[0];
-
-			if ( !result_data ) {
-				TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-				$this.onCancelClick();
-				return;
-			}
-
-			if ( $this.sub_view_mode && $this.parent_key ) {
-				result_data[$this.parent_key] = $this.parent_value;
-			}
-
-			$this.current_edit_record = result_data;
-
-			$this.initEditView();
-
-		}} );
+		} );
 
 	},
 
-	onSaveAndContinue: function() {
+	onSaveAndContinue: function( ignoreWarning ) {
 		var $this = this;
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
+		this.is_changed = false;
 		LocalCacheData.current_doing_context_action = 'save_and_continue';
 
 		if ( this.is_mass_adding ) {
@@ -1902,26 +1939,11 @@ PunchesViewController = BaseViewController.extend( {
 
 		this.current_edit_record = this.uniformVariable( this.current_edit_record );
 
-		this.api['set' + this.api.key_name]( this.current_edit_record, {onResult: function( result ) {
-			if ( result.isValid() ) {
-				var result_data = result.getResult();
-				var refresh_id;
-				if ( result_data === true ) {
-					refresh_id = $this.current_edit_record.id;
-
-				} else if ( result_data > 0 ) {
-					refresh_id = result_data
-				}
-				$this.search();
-				$this.onEditClick( refresh_id );
-
-				$this.onSaveAndContinueDone( result );
-			} else {
-				$this.setErrorTips( result );
-				$this.setErrorMenu();
+		this.api['set' + this.api.key_name]( this.current_edit_record, false, ignoreWarning, {
+			onResult: function( result ) {
+				$this.onSaveAndContinueResult( result );
 			}
-
-		}} );
+		} );
 	},
 
 	onFormItemChange: function( target, doNotValidate ) {
@@ -1944,11 +1966,13 @@ PunchesViewController = BaseViewController.extend( {
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.setJobItemValueWhenJobChanged( target.getValue( true ) );
+					this.edit_view_ui_dic['job_quick_search'].setCheckBox(true);
 				}
 				break;
 			case 'job_item_id':
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
+					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
 				}
 				break;
 			case 'job_quick_search':
@@ -1968,12 +1992,15 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	onSaveClick: function() {
+	onSaveClick: function( ignoreWarning ) {
 		var $this = this;
 		var record;
 		var key;
 		var rows;
 		var i;
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
 		LocalCacheData.current_doing_context_action = 'save';
 		if ( this.is_mass_editing ) {
 
@@ -2003,14 +2030,14 @@ PunchesViewController = BaseViewController.extend( {
 			record = this.uniformVariable( record );
 		}
 
-		this.api['set' + this.api.key_name]( record, {onResult: function( result ) {
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
+			onResult: function( result ) {
 
-			$this.onSaveResult( result );
+				$this.onSaveResult( result );
 
-		}} );
+			}
+		} );
 	}
-
-
 
 } );
 

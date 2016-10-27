@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -193,6 +193,18 @@ class APITimeSheet extends APIFactory {
 			$meal_and_break_total_data = array();
 		}
 
+		//Get Wage Permission Hierarchy Children first, as this can be used for viewing, or editing.
+		if ( $this->getPermissionObject()->Check('wage', 'view') == TRUE ) {
+			$wage_permission_children_ids = TRUE;
+		} elseif ( $this->getPermissionObject()->Check('wage', 'view') == FALSE ) {
+			if ( $this->getPermissionObject()->Check('wage', 'view_child') == FALSE ) {
+				$wage_permission_children_ids = array();
+			}
+			if ( $this->getPermissionObject()->Check('wage', 'view_own') ) {
+				$wage_permission_children_ids[] = $this->getCurrentUserObject()->getID();
+			}
+		}
+
 		//
 		//Get total time for day/pay period
 		//
@@ -249,7 +261,12 @@ class APITimeSheet extends APIFactory {
 					'override' => TRUE,
 					'note' => TRUE,
 					);
-
+			
+			if ( isset($wage_permission_children_ids) AND ( $wage_permission_children_ids === TRUE OR in_array( $user_id, (array)$wage_permission_children_ids) ) ) {
+				$udt_columns['total_time_amount'] = TRUE;
+				$udt_columns['hourly_rate'] = TRUE;
+			}
+			
 			foreach( $udtlf as $udt_obj ) {
 				//Don't need to pass permission_children_ids, as Flex uses is_owner/is_child from the timesheet user record instead, not the punch record.
 				//$user_date_total = $udt_obj->getObjectAsArray( NULL, $data['filter_data']['permission_children_ids'] );
@@ -346,6 +363,11 @@ class APITimeSheet extends APIFactory {
 						'job_item' => TRUE,
 						);
 
+				if ( isset($wage_permission_children_ids) AND ( $wage_permission_children_ids === TRUE OR in_array( $user_id, (array)$wage_permission_children_ids) ) ) {
+					$udt_columns['total_time_amount'] = TRUE;
+					$udt_columns['hourly_rate'] = TRUE;
+				}
+						
 				foreach( $udtlf as $udt_obj ) {
 					$pp_user_date_total_data[] = $udt_obj->getObjectAsArray( $udt_columns );
 				}
@@ -392,6 +414,7 @@ class APITimeSheet extends APIFactory {
 				$exception_data[] = $e_obj->getObjectAsArray( $exception_columns );
 			}
 		}
+		unset($elf, $e_obj, $exception_columns);
 
 		//
 		//Get request data, so authorized/pending can be shown in a request row for each day.
@@ -403,10 +426,21 @@ class APITimeSheet extends APIFactory {
 		$rlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $filter_data['filter_data'], $filter_data['filter_items_per_page'], $filter_data['filter_page'], NULL, $filter_data['filter_sort'] );
 		Debug::Text('Request Record Count: '. $rlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $rlf->getRecordCount() > 0 ) {
+			$request_columns = array(
+					'id' => TRUE,
+					'user_id' => TRUE,
+					'type_id' => TRUE,
+					'status_id' => TRUE,
+					'status' => TRUE,
+					'date_stamp' => TRUE,
+					'authorized' => TRUE,
+					);
+
 			foreach( $rlf as $r_obj ) {
-				$request_data[] = $r_obj->getObjectAsArray();
+				$request_data[] = $r_obj->getObjectAsArray( $request_columns );
 			}
 		}
+		unset($rlf, $r_obj, $request_columns);
 
 		//
 		//Get timesheet verification information.
@@ -474,11 +508,18 @@ class APITimeSheet extends APIFactory {
 		$hlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), array( 'start_date' => $timesheet_dates['start_date'], 'end_date' => $timesheet_dates['end_date'], 'user_id' => $user_id ), $filter_data['filter_items_per_page'], $filter_data['filter_page'], NULL, $filter_data['filter_sort'] );
 		Debug::Text('Holiday Record Count: '. $hlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $hlf->getRecordCount() > 0 ) {
+			$holiday_columns = array(
+					'id' => TRUE,
+					'holiday_policy_id' => TRUE,
+					'date_stamp' => TRUE,
+					'name' => TRUE,
+					);
+
 			foreach( $hlf as $h_obj ) {
-				$holiday_data[] = $h_obj->getObjectAsArray();
+				$holiday_data[] = $h_obj->getObjectAsArray( $holiday_columns );
 			}
 		}
-		unset($hlf, $h_obj);
+		unset($hlf, $h_obj, $holiday_columns);
 
 		$pplf->CommitTransaction();
 
@@ -591,7 +632,7 @@ class APITimeSheet extends APIFactory {
 									(
 									$recalculate_company == TRUE
 									AND ( $u_obj->getStatus() == 10
-										 OR
+											OR
 											(
 												$u_obj->getStatus() != 10
 												AND
@@ -657,12 +698,15 @@ class APITimeSheet extends APIFactory {
 			$pptsvf->setPayPeriod( $pay_period_id );
 
 			if ( $pptsvf->isValid() ) {
-				$pptsvf->Save();
-			}
-			//$pptsvlf->FailTransaction();
+				$pptsvf->Save( FALSE );
 			$pptsvlf->CommitTransaction();
 
-			return $this->returnHandler( TRUE );
+				//return $this->returnHandler( TRUE );
+				return $this->returnHandler( $pptsvf->getId() );
+			} else {
+				$pptsvlf->FailTransaction();
+				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $pptsvf->Validator->getErrorsArray(), array('total_records' => 1, 'valid_records' => 0) );
+			}
 		}
 
 		return $this->returnHandler( FALSE );

@@ -143,11 +143,11 @@ OtherFieldViewController = BaseViewController.extend( {
 	},
 
 	hiddenOtherField: function() {
-		this.edit_view_form_item_dic['other_id6'].css( 'display', 'none' );
-		this.edit_view_form_item_dic['other_id7'].css( 'display', 'none' );
-		this.edit_view_form_item_dic['other_id8'].css( 'display', 'none' );
-		this.edit_view_form_item_dic['other_id9'].css( 'display', 'none' );
-		this.edit_view_form_item_dic['other_id10'].css( 'display', 'none' );
+		this.detachElement('other_id6');
+		this.detachElement('other_id7');
+		this.detachElement('other_id8');
+		this.detachElement('other_id9');
+		this.detachElement('other_id10');
 	},
 
 	buildSearchFields: function() {

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -48,10 +48,21 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	$cf = new CompanyFactory();
 	$province_arr = $cf->getOptions('province');
 
+
+	//
+	//
+	//TESTING
+	//
+	//
+	unset($province_arr['AK']);
+
+
 	if ( !isset($province_arr[$country]) ) {
 		echo "Country does not have any province/states.\n";
 	}
 	ksort($province_arr[$country]);
+
+
 
 	$pay_periods = 26;
 	$static_test_data = array(
@@ -87,6 +98,7 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 		foreach( $province_arr[$country] as $province_code => $province ) {
 			//echo "Province: $province_code\n";
 
+			/*
 			//Get all tax rates for each province.
 			switch ( $country ) {
 				case 'US':
@@ -125,10 +137,27 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 						);
 
 			$result = $db->Execute($query, $ph);
+			*/
+			$raw_result = array();
+
+			$pd_obj = new PayrollDeduction( $country, $province_code);
 
 			//echo 'Tax Bracket Rows: '. $result->RecordCount() ."\n";
 			if ( $country == 'US' ) { //US
-				if ( $result->RecordCount() == 0 ) {
+				if ( isset($pd_obj->obj->state_income_tax_rate_options) ) {
+					$raw_result = $pd_obj->obj->getDataFromRateArray( $effective_date, $pd_obj->obj->state_income_tax_rate_options );
+				}
+
+				$result = array();
+				foreach( $raw_result as $raw_filing_status => $row_a ) {
+					foreach( $row_a as $row ) {
+						$row['status'] = ( $raw_filing_status == 0 ) ? 10 : $raw_filing_status ;
+						$result[] = $row;
+					}
+				}
+				unset($raw_result, $raw_filing_status, $row_a, $row);
+
+				if ( count($result) == 0 ) {
 					//Use static test rates.
 					$test_data[$country][$province_code] = $static_test_data[$country];
 				} else {
@@ -169,7 +198,7 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 					foreach( $test_data[$country][$province_code]['allowance'] as $allowance ) {
 						foreach( $test_data[$country][$province_code]['income'] as $income ) {
 							$pd_obj = new PayrollDeduction( $country, $province_code);
-							$pd_obj->setDate( $effective_date);
+							$pd_obj->setDate( $effective_date );
 							$pd_obj->setAnnualPayPeriods( $pay_periods );
 
 							$pd_obj->setFederalFilingStatus( $filing_status );
@@ -215,7 +244,12 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 					}
 				}
 			} elseif ( $country == 'CA' ) { //Canada
-				if ( $result->RecordCount() == 0 ) {
+				$result = array();
+				if ( isset($pd_obj->obj->provincial_income_tax_rate_options) ) {
+					$result = $pd_obj->obj->getDataFromRateArray( $effective_date, $pd_obj->obj->provincial_income_tax_rate_options );
+				}
+
+				if ( count($result) == 0 ) {
 					//Use static test rates.
 					$test_data[$country][$province_code] = $static_test_data[$country];
 				} else {
@@ -226,6 +260,10 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 					$prev_status = NULL;
 					$prev_province = NULL;
 					foreach( $result as $tax_row ) {
+						if ( $tax_row['income'] == 0 ) {
+							continue;
+						}
+						
 						//Test $100 less then the first bracket, and $100 more then all other brackets for each status.
 						$income = round($tax_row['income'] / $pay_periods);
 						$variance = round(100 / $pay_periods);
@@ -253,7 +291,7 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 					foreach( $test_data[$country][$province_code]['federal_claim'] as $federal_claim ) {
 						foreach( $test_data[$country][$province_code]['income'] as $income ) {
 							$pd_obj = new PayrollDeduction( $country, $province_code);
-							$pd_obj->setDate( $effective_date);
+							$pd_obj->setDate( $effective_date );
 							$pd_obj->setAnnualPayPeriods( $pay_periods );
 							$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
 

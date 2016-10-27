@@ -60,30 +60,6 @@ UserEducationViewController = BaseViewController.extend( {
 		}} );
 	},
 
-	setGridSize: function() {
-		if ( (!this.grid || !this.grid.is( ':visible' )) ) {
-
-			return;
-		}
-
-		if ( !this.sub_view_mode ) {
-
-			if ( Global.bodyWidth() > Global.app_min_width ) {
-				this.grid.setGridWidth( Global.bodyWidth() - 14 );
-			} else {
-				this.grid.setGridWidth( Global.app_min_width - 14 );
-			}
-		} else {
-
-			this.grid.setGridWidth( $( this.el ).parent().width() - 10 );
-		}
-
-		if ( !this.sub_view_mode ) {
-			this.grid.setGridHeight( ($( this.el ).height() - this.search_panel.height() - 90) );
-
-		}
-
-	},
 
 	showNoResultCover: function( show_new_btn ) {
 
@@ -319,37 +295,20 @@ UserEducationViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
 		form_item_input.TDatePicker( {field: 'graduate_date'} );
-
-		var widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().date_format_example + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Graduation Date' ), form_item_input, tab_education_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Graduation Date' ), form_item_input, tab_education_column1, '', null );
 
 		// Start Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
 		form_item_input.TDatePicker( {field: 'start_date'} );
-
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().date_format_example + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_education_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_education_column1, '', null );
 
 		// End Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
 		form_item_input.TDatePicker( {field: 'end_date'} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().date_format_example + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab_education_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab_education_column1, '', null );
 
 		//Tags
 		form_item_input = Global.loadWidgetByName( FormItemType.TAG_INPUT );
@@ -549,7 +508,7 @@ UserEducationViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScriptAsync( 'views/document/DocumentViewController.js', function() {
+		Global.loadScript( 'views/document/DocumentViewController.js', function() {
 			var tab_attachment = $this.edit_view_tab.find( '#tab_attachment' );
 			var firstColumn = tab_attachment.find( '.first-column-sub-view' );
 			Global.trackView( 'Sub' + 'Document' + 'View' );

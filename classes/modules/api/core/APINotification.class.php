@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -98,7 +98,7 @@ class APINotification extends APIFactory {
 												);
 						}
 					}
-					unset($license, $license_validate, $license_message, $destination);
+					unset($license, $license_validate, $license_message, $destination_url);
 				}
 
 				//Database schema still in sync.
@@ -169,7 +169,7 @@ class APINotification extends APIFactory {
 											'destination' => ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) ? 'http://www.timetrex.com/r.php?id=19' : 'http://www.timetrex.com/r.php?id=9',
 											);
 					}
-					unset($new_version_available_notification);
+					unset($new_version_available_notification_arr);
 				}
 
 				//Check for major new version.
@@ -188,7 +188,7 @@ class APINotification extends APIFactory {
 										'destination' => 'http://www.timetrex.com/r.php?id=300',
 										);
 				}
-				unset($new_version_notification);
+				unset($new_version_notification_arr);
 
 				//Check installer enabled.
 				if ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == 1 ) {

@@ -122,6 +122,7 @@ LogViewController = BaseViewController.extend( {
 		this.script_name = 'LogView';
 		this.log_detail_script_name = 'LogDetailView';
 		this.api = new (APIFactory.getAPIClass( 'APILog' ))();
+		this.noticeDiv = $( '.audit-info' );
 
 		this.render();
 
@@ -280,9 +281,8 @@ LogViewController = BaseViewController.extend( {
 					result_data = Global.formatGridData( result_data, $this.api.key_name );
 
 					len = result_data.length;
-
-					$this.setAuditInfo();
 				}
+				$this.setAuditInfo();
 				if ( $this.refresh_id > 0 ) {
 					$this.refresh_id = null;
 					var grid_source_data = $this.grid.getGridParam( 'data' );
@@ -295,7 +295,7 @@ LogViewController = BaseViewController.extend( {
 					var found = false;
 					var new_record = result_data[0];
 
-					//Error: Uncaught TypeError: Cannot read property 'id' of undefined in https://ondemand1.timetrex.com/interface/html5/views/BaseViewController.js?v=7.4.3-20140924-084605 line 4851
+					//Error: Uncaught TypeError: Cannot read property 'id' of undefined in /interface/html5/views/BaseViewController.js?v=7.4.3-20140924-084605 line 4851
 					if ( new_record ) {
 						for ( var i = 0; i < len; i++ ) {
 							var record = grid_source_data[i];
@@ -384,29 +384,24 @@ LogViewController = BaseViewController.extend( {
 
 	},
 
+	_setGridSizeGridHeight: function( header_size ) {
+		if ( !this.sub_view_mode ) {
+			this.grid.setGridHeight( ($( this.el ).height() - (this.search_panel && this.search_panel.is( ':visible' ) ? this.search_panel.height() : 0) - 68 - header_size) );
+		} else if ( !Global.isSet( this.resizeSubGridHeight ) ) {
+			if ( this.pager_data && this.pager_data.last_page_number > 1 ) {
+				this.grid.setGridHeight( $( this.el ).parent().parent().parent().height() - 101 - header_size );
+			} else {
+				this.grid.setGridHeight( $( this.el ).parent().parent().parent().height() - 78 - header_size );
+			}
+
+		}
+	},
+
 	setAuditInfo: function() {
-		var updated_info = null;
-		var created_info = null;
-
-		if ( Global.isSet( this.parent_edit_record['updated_date'] ) && Global.isFalseOrNull( this.parent_edit_record['updated_date'] ) === false ) {
-			updated_info = this.parent_edit_record['updated_date'] + ' ';
-		}
-		if ( Global.isSet( this.parent_edit_record['updated_by'] ) && Global.isFalseOrNull( this.parent_edit_record['updated_by'] ) === false ) {
-			updated_info = updated_info + $.i18n._( 'by' ) + ' ' + this.parent_edit_record['updated_by'] + ' ';
-		}
-		if ( Global.isSet( this.parent_edit_record['created_date'] ) && Global.isFalseOrNull( this.parent_edit_record['created_date'] ) === false ) {
-			created_info = this.parent_edit_record['created_date'] + ' ';
-		}
-		if ( Global.isSet( this.parent_edit_record['created_by'] ) && Global.isFalseOrNull( this.parent_edit_record['created_by'] ) === false ) {
-			created_info = created_info + $.i18n._( 'by' ) + ' ' + this.parent_edit_record['created_by'] + ' ';
-		}
-
-		if ( updated_info || created_info ) {
-			this.noticeDiv.find( '.left > .info' ).text( updated_info ? updated_info : '' );
-			this.noticeDiv.find( '.right > .info' ).text( created_info ? created_info : '' );
-			this.noticeDiv.show();
-		}
-
+		var updated_info = (this.parent_edit_record['updated_date'] || $.i18n._('N/A')) + ' ' + $.i18n._( 'by' ) + ' ' + (this.parent_edit_record['updated_by'] || $.i18n._('N/A')) + ' ';
+		var created_info = (this.parent_edit_record['created_date'] || $.i18n._('N/A')) + ' ' + $.i18n._( 'by' ) + ' ' + (this.parent_edit_record['created_by'] || $.i18n._('N/A')) + ' ';
+		this.noticeDiv.find( '.left > .info' ).text( updated_info );
+		this.noticeDiv.find( '.right > .info' ).text( created_info );
 	},
 
 	autoOpenEditViewIfNecessary: function() {
@@ -434,9 +429,9 @@ LogViewController = BaseViewController.extend( {
 
 		var column_info_array = [];
 		var display_columns = [
-			{label: $.i18n._('Field'), value: 'display_field'},
-			{label: $.i18n._('Before'), value: 'old_value'},
-			{label: $.i18n._('After'), value: 'new_value'}
+			{label: $.i18n._( 'Field' ), value: 'display_field'},
+			{label: $.i18n._( 'Before' ), value: 'old_value'},
+			{label: $.i18n._( 'After' ), value: 'new_value'}
 		];
 
 		//Set Data Grid on List view
@@ -675,7 +670,7 @@ LogViewController = BaseViewController.extend( {
 
 	setDefaultMenu: function() {
 
-		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
 			return;
 		}

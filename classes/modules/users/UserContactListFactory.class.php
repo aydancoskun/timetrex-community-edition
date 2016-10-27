@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -61,11 +61,6 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 	}
 
 	function getByStatus($status, $where = NULL, $order = NULL) {
-		$key = Option::getByValue($status, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$status = $key;
-		}
-
 		$ph = array(
 					'status_id' => $status,
 					);
@@ -83,15 +78,10 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 	}
 
 	function getByCompanyIdAndStatus($company_id, $status, $where = NULL, $order = NULL) {
-		$key = Option::getByValue($status, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$status = $key;
-		}
-
 		$uf = TTnew( 'UserFactory' );
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'status_id' => $status,
 					);
 
@@ -132,7 +122,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		$this->rs = $this->getCache($id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => $id,
+						'id' => (int)$id,
 						);
 
 			$query = '
@@ -167,7 +157,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 
 		$uf	 = TTnew('UserFactory');
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -175,7 +165,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 					from	'. $this->getTable() .' as a
 					LEFT JOIN '. $uf->getTable() .' as u ON	 ( u.id = a.user_id AND u.deleted = 0 )
 					where	u.company_id = ?
-						AND	a.id in ('. $this->getListSQL($id, $ph) .')
+						AND	a.id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 						AND a.deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -223,13 +213,8 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 			return FALSE;
 		}
 
-		$key = Option::getByValue($status, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$status = $key;
-		}
-
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					'status' => $status,
 					);
 
@@ -259,7 +244,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 
 		$uf = TTnew('UserFactory');
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -346,7 +331,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		}
 		$uf = TTnew('UserFactory');
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'created_date' => $date,
 					'updated_date' => $date,
 					'deleted_date' => $date,
@@ -418,7 +403,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		$utf = new UserTitleFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -489,7 +474,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		$query .= ( isset($filter_data['work_email']) ) ? $this->getWhereClauseSQL( 'a.work_email', $filter_data['work_email'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['home_email']) ) ? $this->getWhereClauseSQL( 'a.home_email', $filter_data['home_email'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => $company_id, 'object_type_id' => 230, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
+		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => (int)$company_id, 'object_type_id' => 230, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 
 		if ( isset($filter_data['created_date']) AND !is_array($filter_data['created_date']) AND trim($filter_data['created_date']) != '' ) {
 			$date_filter = $this->getDateRangeSQL( $filter_data['created_date'], 'a.created_date' );

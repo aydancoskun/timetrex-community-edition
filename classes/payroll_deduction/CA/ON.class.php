@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -39,8 +39,174 @@
  * @package PayrollDeduction\CA
  */
 class PayrollDeduction_CA_ON extends PayrollDeduction_CA {
-	function getProvincialTaxReduction() {
+	var $provincial_income_tax_rate_options = array(
+													20150101 => array(
+																	array( 'income' => 40922,	'rate' => 5.05,	'constant' => 0 ),
+																	array( 'income' => 81847,	'rate' => 9.15,	'constant' => 1678 ),
+																	array( 'income' => 150000,	'rate' => 11.16,'constant' => 3323 ),
+																	array( 'income' => 220000,	'rate' => 12.16,'constant' => 4823 ),
+																	array( 'income' => 220000,	'rate' => 13.16,'constant' => 7023 ),
+																),
+													20140901 => array(
+																	array( 'income' => 40120,	'rate' => 5.05,	'constant' => 0 ),
+																	array( 'income' => 80242,	'rate' => 9.15,	'constant' => 1645 ),
+																	array( 'income' => 150000,	'rate' => 11.16,'constant' => 3258 ),
+																	array( 'income' => 220000,	'rate' => 14.16,'constant' => 7758 ),
+																	array( 'income' => 514090,	'rate' => 13.16,'constant' => -6206 ),
+																	array( 'income' => 514090,	'rate' => 17.16,'constant' => 14358 ),
+																),
+													20140101 => array(
+																	array( 'income' => 40120,	'rate' => 5.05,	'constant' => 0 ),
+																	array( 'income' => 80242,	'rate' => 9.15,	'constant' => 1645 ),
+																	array( 'income' => 514090,	'rate' => 11.16,'constant' => 3258 ),
+																	array( 'income' => 514090,	'rate' => 13.16,'constant' => 13540 ),
+																),
+													20130101 => array(
+																	array( 'income' => 39723,	'rate' => 5.05,	'constant' => 0 ),
+																	array( 'income' => 79448,	'rate' => 9.15,	'constant' => 1629 ),
+																	array( 'income' => 509000,	'rate' => 11.16,'constant' => 3226 ),
+																	array( 'income' => 509000,	'rate' => 13.16,'constant' => 13406 ),
+																),
+													20120101 => array(
+																	array( 'income' => 39020,	'rate' => 5.05,	'constant' => 0 ),
+																	array( 'income' => 78043,	'rate' => 9.15,	'constant' => 1600 ),
+																	array( 'income' => 78043,	'rate' => 11.16,'constant' => 3168 ),
+																),
+													20110101 => array(
+																	array( 'income' => 37774,	'rate' => 5.05,	'constant' => 0 ),
+																	array( 'income' => 75550,	'rate' => 9.15,	'constant' => 1549 ),
+																	array( 'income' => 75550,	'rate' => 11.16,'constant' => 3067 ),
+																),
+													20100101 => array(
+																	array( 'income' => 37106,	'rate' => 5.05,	'constant' => 0 ),
+																	array( 'income' => 74214,	'rate' => 9.15,	'constant' => 1521 ),
+																	array( 'income' => 74214,	'rate' => 11.16,'constant' => 3013 ),
+																),
+													20090101 => array(
+																	array( 'income' => 36848,	'rate' => 6.05,	'constant' => 0 ),
+																	array( 'income' => 73698,	'rate' => 9.15,	'constant' => 1142 ),
+																	array( 'income' => 73698,	'rate' => 11.16,'constant' => 2624 ),
+																),
+													20080101 => array(
+																	array( 'income' => 36020,	'rate' => 6.05,	'constant' => 0 ),
+																	array( 'income' => 72041,	'rate' => 9.15,	'constant' => 1117 ),
+																	array( 'income' => 72041,	'rate' => 11.16,'constant' => 2565 ),
+																),
+													20070101 => array(
+																	array( 'income' => 35488,	'rate' => 6.05,	'constant' => 0 ),
+																	array( 'income' => 70976,	'rate' => 9.15,	'constant' => 1100 ),
+																	array( 'income' => 70976,	'rate' => 11.16,'constant' => 2527 ),
+																),
+													20060101 => array(
+																	array( 'income' => 34758,	'rate' => 6.05,	'constant' => 0 ),
+																	array( 'income' => 69517,	'rate' => 9.15,	'constant' => 1077 ),
+																	array( 'income' => 69517,	'rate' => 11.16,'constant' => 2475 ),
+																	),
+													);
 
+	/*
+		Provincial surtax
+	*/
+	var $provincial_surtax_options = array(
+											20150101 => array( //2015
+																'income1' => 4418,
+																'income2' => 5654,
+																'rate1' => 0.20,
+																'rate2' => 0.36,
+																),
+											20140101 => array( //2014
+																'income1' => 4331,
+																'income2' => 5543,
+																'rate1' => 0.20,
+																'rate2' => 0.36,
+																),
+											20130101 => array( //2013
+																'income1' => 4289,
+																'income2' => 5489,
+																'rate1' => 0.20,
+																'rate2' => 0.36,
+																),
+											20120101 => array( //2012
+																'income1' => 4213,
+																'income2' => 5392,
+																'rate1' => 0.20,
+																'rate2' => 0.36,
+																),
+											20110101 => array( //2011
+																'income1' => 4078,
+																'income2' => 5219,
+																'rate1' => 0.20,
+																'rate2' => 0.36,
+														),
+											20100101 => array( //2010
+																'income1' => 4006,
+																'income2' => 5127,
+																'rate1' => 0.20,
+																'rate2' => 0.36,
+														),
+											20090101 => array( //2009
+																'income1' => 4257,
+																'income2' => 5370,
+																'rate1' => 0.20,
+																'rate2' => 0.36,
+														),
+											20080101 => array( //2008
+																'income1' => 4162,
+																'income2' => 5249,
+																'rate1' => 0.20,
+																'rate2' => 0.36,
+														),
+											20070101	=> array( //2007
+																'income1' => 4100,
+																'income2' => 5172,
+																'rate1' => 0.20,
+																'rate2' => 0.36,
+														),
+											20060101 => array( //2006
+																'income1' => 4016,
+																'income2' => 5065,
+																'rate1' => 0.20,
+																'rate2' => 0.36,
+														),
+											);
+
+	/*
+		Provincial tax reduction
+	*/
+	var $provincial_tax_reduction_options = array(
+													20150101 => array( //2015
+																		'amount' => 228,
+																		),
+													20140101 => array( //2014
+																		'amount' => 223,
+																		),
+													20130101 => array( //2013
+																		'amount' => 221,
+																		),
+													20120101 => array( //2012
+																		'amount' => 217,
+																		),
+													20110101 => array( //2011
+																		'amount' => 210,
+																),
+													20100101 => array( //2010
+																		'amount' => 206,
+																),
+													20090101 => array( //2009
+																		'amount' => 205,
+																),
+													20080101 => array( //2008
+																		'amount' => 201,
+																),
+													20070101	=> array( //2007
+																		'amount' => 198,
+																),
+													20060101 => array( //2006
+																		'amount' => 194,
+																),
+													);
+
+	function getProvincialTaxReduction() {
 		$A = $this->getAnnualTaxableIncome();
 		$T4 = $this->getProvincialBasicTax();
 		$V1 = $this->getProvincialSurtax();
@@ -48,7 +214,7 @@ class PayrollDeduction_CA_ON extends PayrollDeduction_CA {
 		$S = 0;
 
 		Debug::text('ON Specific - Province: '. $this->getProvince(), __FILE__, __LINE__, __METHOD__, 10);
-		$tax_reduction_data = $this->getProvincialTaxReductionData( $this->getDate(), $this->getProvince() );
+		$tax_reduction_data = $this->getProvincialTaxReductionData( $this->getDate() );
 		if ( is_array($tax_reduction_data) ) {
 			$tmp_Sa = bcadd($T4, $V1);
 			$tmp_Sb = bcsub( bcmul( 2, bcadd( $tax_reduction_data['amount'], $Y ) ), bcadd( $T4, $V1 ) );
@@ -88,7 +254,7 @@ class PayrollDeduction_CA_ON extends PayrollDeduction_CA {
 		$T4 = $this->getProvincialBasicTax();
 		$V1 = 0;
 
-		$surtax_data = $this->getProvincialSurTaxData( $this->getDate(), $this->getProvince() );
+		$surtax_data = $this->getProvincialSurTaxData( $this->getDate() );
 		if ( is_array($surtax_data) ) {
 			if ( $T4 < $surtax_data['income1'] ) {
 				$V1 = 0;
@@ -117,7 +283,7 @@ class PayrollDeduction_CA_ON extends PayrollDeduction_CA {
 		$A = $this->getAnnualTaxableIncome();
 		$V2 = 0;
 
-		if ( $this->getDate() >= strtotime('01-Jan-2006') ) {
+		if ( $this->getDate() >= 20060101 ) {
 			if ( $A < 20000 ) {
 				$V2 = 0;
 			} elseif ( $A > 20000 AND $A <= 36000 ) {

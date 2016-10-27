@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -404,7 +404,7 @@ abstract class Factory {
 		return FALSE;
 	}
 	function setCreatedDate($epoch = NULL) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ( $epoch == NULL OR $epoch == '' OR $epoch == 0 ) {
 			$epoch = TTDate::getTime();
@@ -472,7 +472,7 @@ abstract class Factory {
 		return FALSE;
 	}
 	function setUpdatedDate($epoch = NULL) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ( $epoch == NULL OR $epoch == '' OR $epoch == 0 ) {
 			$epoch = TTDate::getTime();
@@ -543,7 +543,7 @@ abstract class Factory {
 		return FALSE;
 	}
 	function setDeletedDate($epoch = NULL) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ( $epoch == NULL OR $epoch == '' OR $epoch == 0 ) {
 			$epoch = TTDate::getTime();
@@ -677,6 +677,8 @@ abstract class Factory {
 	function getOptions($name, $parent = NULL) {
 		if ( $parent == NULL OR $parent == '') {
 			return $this->_getFactoryOptions( $name );
+		} elseif ( is_array( $parent ) ) {
+			return $this->_getFactoryOptions( $name, $parent );
 		} else {
 			$retval = $this->_getFactoryOptions( $name, $parent );
 			if ( isset($retval[$parent]) ) {
@@ -964,6 +966,36 @@ abstract class Factory {
 
 	protected function stripSQLSyntax( $arg ) {
 		return str_replace( array('"'), '', $arg); //Strip syntax characters out.
+	}
+
+	protected function getSQLToTimeStampFunction() {
+		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
+			$to_timestamp_sql = 'FROM_UNIXTIME';
+		} else {
+			$to_timestamp_sql = 'to_timestamp';
+		}
+
+		return $to_timestamp_sql;
+	}
+
+	protected function getSQLToEpochFunction( $sql ) {
+		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
+			$to_timestamp_sql = 'UNIX_TIMESTAMP('. $sql .')';
+		} else {
+			$to_timestamp_sql = 'EXTRACT( EPOCH FROM '. $sql .' )';
+		}
+
+		return $to_timestamp_sql;
+	}
+
+	protected function getSQLToTimeFunction( $sql ) {
+		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
+			$to_time_sql = 'TIME('. $sql .')';
+		} else {
+			$to_time_sql = $sql .'::time';
+		}
+
+		return $to_time_sql;
 	}
 
 	protected function getWhereClauseSQL( $columns, $args, $type, &$ph, $query_stub = NULL, $and = TRUE ) {
@@ -1680,13 +1712,23 @@ abstract class Factory {
 	}
 
 	//Call class specific validation function just before saving.
-	function isValid() {
+	function isValid( $ignore_warning = TRUE ) {
 		if ( method_exists($this, 'Validate') ) {
 			Debug::text('Calling Validate()', __FILE__, __LINE__, __METHOD__, 10);
-			$this->Validate();
+			$this->Validate( $ignore_warning );
 		}
 
 		return $this->Validator->isValid();
+	}
+
+	//Call class specific validation function just before saving.
+	function isWarning() {
+		if ( method_exists($this, 'validateWarning') ) {
+			Debug::text('Calling validateWarning()', __FILE__, __LINE__, __METHOD__, 10);
+			$this->validateWarning();
+		}
+
+		return $this->Validator->isWarning();
 	}
 
 	function getSequenceName() {
@@ -1707,6 +1749,10 @@ abstract class Factory {
 	//Execute SQL queries and handle paging properly for select statements.
 	function ExecuteSQL( $query, $ph = NULL, $limit = NULL, $page = NULL ) {
 		try {
+			if ( $ph === NULL ) { //Work around ADODB change that requires $ph === FALSE, otherwise it changes it to a array( 0 => NULL ) and causes SQL errors.
+				$ph = FALSE;
+			}
+			
 			//$start_time = microtime(TRUE);
 			if ($limit == NULL) {
 				$this->rs = $this->db->Execute($query, $ph);

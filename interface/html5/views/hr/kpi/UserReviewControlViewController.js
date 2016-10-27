@@ -58,7 +58,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 		this.kpi_group_api.getKPIGroup( false, false, false, {onResult: function( res ) {
 			res = res.getResult();
 
-			//Error: Uncaught TypeError: Cannot set property 'name' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=41499&tab=Reviews line 60 
+			//Error: Uncaught TypeError: Cannot set property 'name' of undefined in /interface/html5/#!m=Employee&a=edit&id=41499&tab=Reviews line 60 
 			if ( !res || !res[0] ) {
 				$this.kpi_group_array = [];
 				return;
@@ -218,36 +218,19 @@ UserReviewControlViewController = BaseViewController.extend( {
 
 		form_item_input.TDatePicker( {field: 'start_date'} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().date_format_example + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_review_column2, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_review_column2, '', null );
 
 		// End Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
 		form_item_input.TDatePicker( {field: 'end_date'} );
-
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().date_format_example + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab_review_column2, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab_review_column2, '', null );
 
 		// Due Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
 		form_item_input.TDatePicker( {field: 'due_date'} );
-
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().date_format_example + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Due Date' ), form_item_input, tab_review_column2, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Due Date' ), form_item_input, tab_review_column2, '', null );
 
 		//Tags
 		form_item_input = Global.loadWidgetByName( FormItemType.TAG_INPUT );
@@ -281,7 +264,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 		// Note
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 
-		form_item_input.TTextArea( {field: 'note', width: '100%', height: 70 } );
+		form_item_input.TTextArea( {field: 'note', width: '100%', height: 66 } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_review_column4, 'first_last', null, null, true );
 
@@ -328,17 +311,6 @@ UserReviewControlViewController = BaseViewController.extend( {
 		var form_item_label_div = form_item.find( '.edit-view-form-item-label-div' );
 		var form_item_label = form_item.find( '.edit-view-form-item-label' );
 		var form_item_input_div = form_item.find( '.edit-view-form-item-input-div' );
-
-//		if ( firstOrLastRecord === 'first' ) {
-//			form_item_label_div.addClass( 'edit-view-form-item-label-div-first-row' );
-//		} else if ( firstOrLastRecord === 'last' ) {
-//			form_item_label_div.addClass( 'edit-view-form-item-label-div-last-row' );
-//			form_item.addClass( 'edit-view-form-item-div-last-row' );
-//		} else if ( firstOrLastRecord === 'first_last' ) {
-//			form_item_label_div.addClass( 'edit-view-form-item-label-div-first-row' );
-//			form_item_label_div.addClass( 'edit-view-form-item-label-div-last-row' );
-//			form_item.addClass( 'edit-view-form-item-div-last-row' );
-//		}
 
 		if ( customLabelWidget ) {
 			form_item_label.parent().append( customLabelWidget );
@@ -437,7 +409,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 		}
 
 		column.append( form_item );
-		column.append( "<div class='clear-both-div'></div>" );
+		//column.append( "<div class='clear-both-div'></div>" );
 
 	},
 
@@ -641,7 +613,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScriptAsync( 'views/document/DocumentViewController.js', function() {
+		Global.loadScript( 'views/document/DocumentViewController.js', function() {
 			var tab_attachment = $this.edit_view_tab.find( '#tab_attachment' );
 			var firstColumn = tab_attachment.find( '.first-column-sub-view' );
 			Global.trackView( 'Sub' + 'Document' + 'View' );
@@ -848,7 +820,6 @@ UserReviewControlViewController = BaseViewController.extend( {
 
 			// Rating
 			if ( parseInt( data.type_id ) === 10 ) {
-
 				form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 				form_item_input.TTextInput( {field: 'rating', width: 40} );
 				form_item_input.setValue( data.rating ? data.rating : null );
@@ -862,10 +833,9 @@ UserReviewControlViewController = BaseViewController.extend( {
 				this.setWidgetEnableBaseOnParentController( form_item_input );
 
 			} else if ( parseInt( data.type_id ) === 20 ) {
-
 				form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 				form_item_input.TCheckbox( {field: 'rating'} );
-				form_item_input.setValue( data.rating ? data.rating : null );
+				form_item_input.setValue( data.rating ? ( data.rating >= 1 ? true : false ) : null ); //Rating is numeric, so make sure we pass true/false to TCheckbox.
 				widgets[form_item_input.getField()] = form_item_input;
 				row.children().eq( 2 ).append( form_item_input );
 
@@ -914,8 +884,9 @@ UserReviewControlViewController = BaseViewController.extend( {
 			} );
 
 		} else {
-			$this.setErrorTips( result );
 			$this.setErrorMenu();
+			$this.setErrorTips( result );
+
 		}
 	},
 

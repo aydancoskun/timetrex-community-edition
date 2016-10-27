@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -55,9 +55,68 @@ class PayrollDeduction_US_NC extends PayrollDeduction_US {
 														40 => TTi18n::gettext('Head of Household'),
 
 */
+	var $state_income_tax_rate_options = array(
+												20090101 => array(
+															10 => array(
+																	array( 'income' => 12750,	'rate' => 6,	'constant' => 0 ),
+																	array( 'income' => 60000,	'rate' => 7,	'constant' => 127.50 ),
+																	array( 'income' => 60000,	'rate' => 7.75,	'constant' => 577.50 ),
+																	),
+															20 => array(
+																	array( 'income' => 10625,	'rate' => 6,	'constant' => 0 ),
+																	array( 'income' => 50000,	'rate' => 7,	'constant' => 106.25 ),
+																	array( 'income' => 50000,	'rate' => 7.75,	'constant' => 481.25 ),
+																	),
+															30 => array(
+																	array( 'income' => 17000,	'rate' => 6,	'constant' => 0 ),
+																	array( 'income' => 80000,	'rate' => 7,	'constant' => 170 ),
+																	array( 'income' => 80000,	'rate' => 7.75,	'constant' => 770 ),
+																	),
+															),
+												20070101 => array(
+															10 => array(
+																	array( 'income' => 12750,	'rate' => 6,	'constant' => 0 ),
+																	array( 'income' => 60000,	'rate' => 7,	'constant' => 127.50 ),
+																	array( 'income' => 120000,	'rate' => 7.75,	'constant' => 577.50 ),
+																	array( 'income' => 120000,	'rate' => 8,	'constant' => 877.50 ),
+																	),
+															20 => array(
+																	array( 'income' => 10625,	'rate' => 6,	'constant' => 0 ),
+																	array( 'income' => 50000,	'rate' => 7,	'constant' => 106.25 ),
+																	array( 'income' => 100000,	'rate' => 7.75,	'constant' => 481.25 ),
+																	array( 'income' => 100000,	'rate' => 8,	'constant' => 731.25 ),
+																	),
+															30 => array(
+																	array( 'income' => 17000,	'rate' => 6,	'constant' => 0 ),
+																	array( 'income' => 80000,	'rate' => 7,	'constant' => 170 ),
+																	array( 'income' => 160000,	'rate' => 7.75,	'constant' => 770 ),
+																	array( 'income' => 160000,	'rate' => 8,	'constant' => 1170 ),
+																	),
+															),
+												20060101 => array(
+															10 => array(
+																	array( 'income' => 12750,	'rate' => 6,	'constant' => 0 ),
+																	array( 'income' => 60000,	'rate' => 7,	'constant' => 127.50 ),
+																	array( 'income' => 120000,	'rate' => 7.75,	'constant' => 577.50 ),
+																	array( 'income' => 120000,	'rate' => 8.25,	'constant' => 1177.50 ),
+																	),
+															20 => array(
+																	array( 'income' => 10625,	'rate' => 6,	'constant' => 0 ),
+																	array( 'income' => 50000,	'rate' => 7,	'constant' => 106.25 ),
+																	array( 'income' => 100000,	'rate' => 7.75,	'constant' => 481.25 ),
+																	array( 'income' => 100000,	'rate' => 8.25,	'constant' => 981.25 ),
+																	),
+															30 => array(
+																	array( 'income' => 17000,	'rate' => 6,	'constant' => 0 ),
+																	array( 'income' => 80000,	'rate' => 7,	'constant' => 170 ),
+																	array( 'income' => 160000,	'rate' => 7.75,	'constant' => 770 ),
+																	array( 'income' => 160000,	'rate' => 8.25,	'constant' => 1570 ),
+																),
+															),
+												);
 	var $state_options = array(
 								//Formula changed for 01-Jan-15
-								1420099200 => array(
+								20150101 => array(
 													'standard_deduction' => array(
 																				'10' => 7500.00,
 																				'20' => 15000.00,
@@ -77,7 +136,7 @@ class PayrollDeduction_US_NC extends PayrollDeduction_US {
 													'rate' => 5.75, //Flat 5.75%
 													),
 								//Formula changed for 01-Jan-14
-								1388563200 => array(
+								20140101 => array(
 													'standard_deduction' => array(
 																				'10' => 7500.00,
 																				'20' => 7500.00,
@@ -97,7 +156,7 @@ class PayrollDeduction_US_NC extends PayrollDeduction_US {
 													'rate' => 5.8, //Flat 5.8%
 													),
 								//No changes for 01-Jan-09
-								1136102400 => array(
+								20060101 => array(
 													'standard_deduction' => array(
 																				'10' => 3000.00,
 																				'20' => 3000.00,
@@ -117,8 +176,8 @@ class PayrollDeduction_US_NC extends PayrollDeduction_US {
 													)
 								);
 
-	function getStatePayPeriodDeductions() {
-		return $this->RoundNearestDollar( bcdiv($this->getStateTaxPayable(), $this->getAnnualPayPeriods() ) );
+	function getStatePayPeriodDeductionRoundedValue( $amount ) {
+		return $this->RoundNearestDollar( $amount );
 	}
 
 	function getStateAnnualTaxableIncome() {
@@ -168,7 +227,7 @@ class PayrollDeduction_US_NC extends PayrollDeduction_US {
 
 		}
 
-		if ( $this->getDate() >= strtotime('01-Jan-2014') ) {
+		if ( $this->getDate() >= 20140101 ) {
 			$allowance_arr = $retarr['allowance'][1];
 		} else {
 			if ( $this->getAnnualTaxableIncome() < $this->getStateAllowanceCutOff() ) {
@@ -191,7 +250,7 @@ class PayrollDeduction_US_NC extends PayrollDeduction_US {
 		$retval = 0;
 
 		if ( $annual_income > 0 ) {
-			if ( $this->getDate() >= strtotime('01-Jan-2014') ) {
+			if ( $this->getDate() >= 20140101 ) {
 				$retarr = $this->getDataFromRateArray($this->getDate(), $this->state_options);
 				if ( $retarr == FALSE ) {
 					return FALSE;

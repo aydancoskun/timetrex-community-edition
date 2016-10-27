@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -114,7 +114,7 @@ class UserDefaultFactory extends Factory {
 
 	function isUniqueCompany($company_id) {
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND deleted=0';
@@ -591,11 +591,6 @@ class UserDefaultFactory extends Factory {
 
 		$language_options = TTi18n::getLanguageArray();
 
-		$key = Option::getByValue($value, $language_options );
-		if ($key !== FALSE) {
-			$value = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'language',
 											$value,
 											TTi18n::gettext('Incorrect language'),
@@ -645,11 +640,6 @@ class UserDefaultFactory extends Factory {
 
 		$upf = TTnew( 'UserPreferenceFactory' );
 
-		$key = Option::getByValue($time_format, $upf->getOptions('time_format') );
-		if ($key !== FALSE) {
-			$time_format = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'time_format',
 											$time_format,
 											TTi18n::gettext('Incorrect time format'),
@@ -674,7 +664,6 @@ class UserDefaultFactory extends Factory {
 		$time_zone = Misc::trimSortPrefix( trim($time_zone) );
 
 		$upf = TTnew( 'UserPreferenceFactory' );
-
 		if ( $this->Validator->inArrayKey(	'time_zone',
 											$time_zone,
 											TTi18n::gettext('Incorrect time zone'),
@@ -700,12 +689,6 @@ class UserDefaultFactory extends Factory {
 		$time_unit_format = trim($time_unit_format);
 
 		$upf = TTnew( 'UserPreferenceFactory' );
-
-		$key = Option::getByValue($time_unit_format, $upf->getOptions('time_unit_format') );
-		if ($key !== FALSE) {
-			$time_unit_format = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'time_unit_format',
 											$time_unit_format,
 											TTi18n::gettext('Incorrect time units'),
@@ -755,12 +738,6 @@ class UserDefaultFactory extends Factory {
 		$value = trim($value);
 
 		$upf = TTnew( 'UserPreferenceFactory' );
-
-		$key = Option::getByValue($value, $upf->getOptions('start_week_day') );
-		if ($key !== FALSE) {
-			$value = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'start_week_day',
 											$value,
 											TTi18n::gettext('Incorrect day to start a week on'),
@@ -882,7 +859,7 @@ class UserDefaultFactory extends Factory {
 		return FALSE;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		if ( $this->getCompany() == FALSE ) {
 			$this->Validator->isTrue(		'company',
 											FALSE,

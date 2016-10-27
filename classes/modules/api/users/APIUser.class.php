@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -166,8 +166,10 @@ class APIUser extends APIFactory {
 			$company_id = $this->getCurrentCompanyObject()->getId();
 		}
 
+		$include_last_punch_time = ( isset($data['filter_columns']['max_punch_time_stamp']) ) ? TRUE : FALSE;
+
 		$ulf = TTnew( 'UserListFactory' );
-		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
+		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'], $include_last_punch_time );
 		Debug::Text('Record Count: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $ulf->getRecordCount() > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount() );
@@ -221,8 +223,9 @@ class APIUser extends APIFactory {
 	 * @param array $data user data
 	 * @return array
 	 */
-	function setUser( $data, $validate_only = FALSE ) {
+	function setUser( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
+		$ignore_warning = (bool)$ignore_warning;
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
@@ -246,7 +249,8 @@ class APIUser extends APIFactory {
 		//Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		if ( is_array($data) ) {
+		$validator = $save_result = FALSE;
+		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
 			foreach( $data as $key => $row ) {
@@ -301,7 +305,7 @@ class APIUser extends APIFactory {
 				}
 				//Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-				$is_valid = $primary_validator->isValid();
+				$is_valid = $primary_validator->isValid( $ignore_warning );
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
 					Debug::Text('Attempting to save data... AMF Message ID: '. $this->getAMFMessageID(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -396,11 +400,9 @@ class APIUser extends APIFactory {
 						}
 					}
 
-					if ( $validate_only == TRUE ) {
-						$lf->validate_only = TRUE;
-					}
+					$lf->Validator->setValidateOnly( $validate_only );
 
-					$is_valid = $lf->isValid();
+					$is_valid = $lf->isValid( $ignore_warning );
 					if ( $is_valid == TRUE ) {
 						Debug::Text('Saving data...', __FILE__, __LINE__, __METHOD__, 10);
 						if ( $validate_only == TRUE ) {
@@ -414,14 +416,8 @@ class APIUser extends APIFactory {
 
 				if ( $is_valid == FALSE ) {
 					Debug::Text('Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10);
-
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
-
-					if ( $primary_validator->isValid() == FALSE ) {
-						$validator[$key] = $primary_validator->getErrorsArray();
-					} else {
-						$validator[$key] = $lf->Validator->getErrorsArray();
-					}
+					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
 				} elseif ( $validate_only == TRUE ) {
 					//Always fail transaction when valididate only is used, as	is saved to different tables immediately.
 					$lf->FailTransaction();
@@ -434,15 +430,7 @@ class APIUser extends APIFactory {
 
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
-			if ( $validator_stats['valid_records'] > 0 AND $validator_stats['total_records'] == $validator_stats['valid_records'] ) {
-				if ( $validator_stats['total_records'] == 1 ) {
-					return $this->returnHandler( $save_result[$key] ); //Single valid record
-				} else {
-					return $this->returnHandler( TRUE, 'SUCCESS', TTi18n::getText('MULTIPLE RECORDS SAVED'), $save_result, $validator_stats ); //Multiple valid records
-				}
-			} else {
-				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
-			}
+			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
 
 		return $this->returnHandler( FALSE );
@@ -478,8 +466,9 @@ class APIUser extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
+		$validator = $save_result = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		if ( is_array($data) ) {
+		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
 			foreach( $data as $key => $id ) {
@@ -532,11 +521,7 @@ class APIUser extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					if ( $primary_validator->isValid() == FALSE ) {
-						$validator[$key] = $primary_validator->getErrorsArray();
-					} else {
-						$validator[$key] = $lf->Validator->getErrorsArray();
-					}
+					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
 				}
 
 				$lf->CommitTransaction();
@@ -546,15 +531,7 @@ class APIUser extends APIFactory {
 
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
-			if ( $validator_stats['valid_records'] > 0 AND $validator_stats['total_records'] == $validator_stats['valid_records'] ) {
-				if ( $validator_stats['total_records'] == 1 ) {
-					return $this->returnHandler( $save_result[$key] ); //Single valid record
-				} else {
-					return $this->returnHandler( TRUE, 'SUCCESS', TTi18n::getText('MULTIPLE RECORDS SAVED'), $save_result, $validator_stats ); //Multiple valid records
-				}
-			} else {
-				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
-			}
+			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
 
 		return $this->returnHandler( FALSE );
@@ -733,6 +710,30 @@ class APIUser extends APIFactory {
 	 */
 	function getCompanyUser( $data = NULL, $disable_paging = FALSE ) {
 		return $this->getUser( $data, $disable_paging );
+	}
+
+	function setUserFeedbackRating( $rating, $message = FALSE ) {
+		$ulf = TTnew( 'UserListFactory' );
+		$ulf->getByIdAndCompanyId( $this->getCurrentUserObject()->getId(), $this->getCurrentCompanyObject()->getId() );
+		if ( $ulf->getRecordCount() == 1 ) {
+			$u_obj = $ulf->getCurrent();
+
+			$u_obj->setFeedbackRating( $rating );
+			if ( $u_obj->isValid() ) {
+				$retval = $u_obj->Save( FALSE );
+				if ( $retval == TRUE ) {
+					$ttsc = new TimeTrexSoapClient();
+					$ttsc->sendUserFeedback( $rating, $message, $u_obj );
+
+					//Since we are updating the user record, the audit log will contain the rating change.
+					//TTLog::addEntry( $u_obj->getId(), 500, TTi18n::getText('Feedback Rating').': '. $rating .' '. TTi18n::getText('Message') .': '. $message, $u_obj->getId(), $u_obj->getTable() );
+				}
+
+				return $this->returnHandler( $retval );
+			}
+		}
+
+		return $this->returnHandler( FALSE );
 	}
 }
 ?>

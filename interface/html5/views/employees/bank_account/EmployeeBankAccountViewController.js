@@ -224,7 +224,7 @@ EmployeeBankAccountViewController = BaseViewController.extend( {
 
 	setDefaultMenu: function( doNotSetFocus ) {
 
-		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
 			return;
 		}
@@ -533,16 +533,14 @@ EmployeeBankAccountViewController = BaseViewController.extend( {
 				result_data = result_data[0];
 
 				if ( result_data.country === 'CA' ) {
-					$this.edit_view_form_item_dic['institution1'].css( 'display', 'none' );
-					$this.edit_view_form_item_dic['institution2'].css( 'display', 'block' );
+					$this.detachElement('institution1');
+					$this.attachElement('institution2');
 					$this.edit_view_form_item_dic['transit'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Bank Transit' ) + ': ' );
-
 					$this.bank_account_img_dic.find( 'img' ).attr( 'src', ServiceCaller.rootURL + LocalCacheData.getLoginData().base_url + 'images/check_zoom_sm_canadian.jpg' );
 				} else if ( result_data.country === 'US' ) {
-					$this.edit_view_form_item_dic['institution1'].css( 'display', 'block' );
-					$this.edit_view_form_item_dic['institution2'].css( 'display', 'none' );
+					$this.attachElement('institution1');
+					$this.detachElement('institution2');
 					$this.edit_view_form_item_dic['transit'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Routing Number' ) + ': ' );
-
 					$this.bank_account_img_dic.find( 'img' ).attr( 'src', ServiceCaller.rootURL + LocalCacheData.getLoginData().base_url + 'images/check_zoom_sm_us.jpg' );
 				}
 

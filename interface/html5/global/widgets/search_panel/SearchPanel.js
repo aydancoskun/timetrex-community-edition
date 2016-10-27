@@ -42,7 +42,6 @@
 		};
 
 		this.setSearchFlag = function( filter ) {
-
 			var basic_tab = this.find( "a[href='#basic_search']" );
 			var adv_tab = this.find( "a[href='#adv_search']" );
 
@@ -54,12 +53,14 @@
 				if ( key === 'country' && filter[key].value === -1 ) {
 					continue;
 				}
-
 				//For Documents view
 				if ( key === 'template' && filter[key].value === false ) {
 					continue;
 				}
-
+				// For Authorizations views
+				if ( key === 'hierarchy_level' && (filter[key].value === 1 || filter[key].value.value === 1) ) {
+					continue;
+				}
 				hasFilter = true
 			}
 
@@ -130,7 +131,7 @@
 					$( layout_selector ).append( '<option value="' + item.id + '">' + item.name + '</option>' )
 				}
 
-				$( $( layout_selector ).find( 'option' ) ).filter(function() {
+				$( $( layout_selector ).find( 'option' ) ).filter( function() {
 
 					//Saved layout id should always be number
 					return parseInt( $( this ).attr( 'value' ) ) === related_view_controller.select_layout.id;
@@ -180,7 +181,7 @@
 			var refresh_btn = $( this ).find( "#refreshBtn" );
 
 			refresh_btn.bind( 'click', function() {
-				refresh_btn.addClass( 'search-refresh-rotate' );
+				refresh_btn.addClass( 'button-rotate' );
 
 				related_view_controller.search();
 
@@ -258,7 +259,7 @@
 					trigger_change_event = true;
 
 				var delayCaller = setInterval( function() {
-					clearInterval( delayCaller )
+					clearInterval( delayCaller );
 					related_view_controller.setGridSize();
 				}, 1 );
 
@@ -294,8 +295,6 @@
 
 	};
 
-	$.fn.SearchPanel.defaults = {
-
-	};
+	$.fn.SearchPanel.defaults = {};
 
 })( jQuery );

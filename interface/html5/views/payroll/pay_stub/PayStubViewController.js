@@ -3,6 +3,7 @@ PayStubViewController = BaseViewController.extend( {
 	filtered_status_array: null,
 	user_status_array: null,
 	user_group_array: null,
+	type_array: null,
 
 	country_array: null,
 	province_array: null,
@@ -62,8 +63,15 @@ PayStubViewController = BaseViewController.extend( {
 		var $this = this;
 
 		this.initDropDownOption( 'filtered_status', 'status_id' );
+		this.initDropDownOption( 'type', 'type_id' );
 		this.initDropDownOption( 'status', 'user_status_id', this.user_api );
 		this.initDropDownOption( 'country', 'country', this.company_api );
+		var result = {};
+		for ( var i = 1; i <= 128; i++ ) {
+			result[i] = i;
+		}
+		$this.basic_search_field_ui_dic['run_id'].setSourceData( Global.buildRecordArray(result) );
+		$this.adv_search_field_ui_dic['run_id'].setSourceData( Global.buildRecordArray(result) );
 		this.user_group_api.getUserGroup( '', false, false, {onResult: function( res ) {
 			res = res.getResult();
 
@@ -328,7 +336,7 @@ PayStubViewController = BaseViewController.extend( {
 
 		var export_cheque_result = new (APIFactory.getAPIClass( 'APIPayStub' ))().getOptions( 'export_cheque', {async: false} );
 
-		//Error: Uncaught TypeError: Cannot read property 'getResult' of undefined in https://ondemand1.timetrex.com/interface/html5/#!m=PayStub line 317
+		//Error: Uncaught TypeError: Cannot read property 'getResult' of undefined in /interface/html5/#!m=PayStub line 317
 		if ( export_cheque_result ) {
 			export_cheque_result = export_cheque_result.getResult();
 			export_cheque_result = Global.buildRecordArray( export_cheque_result );
@@ -445,7 +453,7 @@ PayStubViewController = BaseViewController.extend( {
 
 	setDefaultMenu: function( doNotSetFocus ) {
 
-		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
 			return;
 		}
@@ -956,8 +964,8 @@ PayStubViewController = BaseViewController.extend( {
 			}
 
 		}
+
 		// set the cover
-		debugger;
 		if ( length > 0 && !is_add && pay_stub_status_id === 25 && this.show_cover ) {
 
 			this.cover = Global.loadWidgetByName( WidgetNamesDic.NO_RESULT_BOX );
@@ -1047,6 +1055,7 @@ PayStubViewController = BaseViewController.extend( {
 				form_item_name_input.AComboBox( {
 					api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
 					width: 132,
+					is_static_width: 132,
 					allow_multiple_selection: false,
 					layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 					show_search_inputs: true,
@@ -1238,7 +1247,6 @@ PayStubViewController = BaseViewController.extend( {
 				// amount
 				if ( ( data['type_id'] === type.toString() || data['type_id'] === type ) && type !== 40 ) {
 					if ( pay_stub_status_id === 25 ) {
-						debugger;
 						if ( pay_stub_amendment_id > 0 || user_expense_id > 0 ) {
 							form_item_amount_input.setReadOnly( true );
 						}
@@ -1434,10 +1442,12 @@ PayStubViewController = BaseViewController.extend( {
 	},
 
 
-	onSaveClick: function() {
+	onSaveClick: function( ignoreWarning ) {
 		var $this = this;
 		var record;
-//		this.is_add = false;
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
 		LocalCacheData.current_doing_context_action = 'save';
 		if ( this.is_mass_editing ) {
 			this.include_entries = false;
@@ -1464,7 +1474,7 @@ PayStubViewController = BaseViewController.extend( {
 			record = this.current_edit_record;
 			record = this.uniformVariable( record );
 		}
-
+		// when the user create a new pay stub record have them can send entries to api.
 		if ( this.include_entries ) {
 			var entries = $this.saveInsideEditorData();
 			if ( entries.length > 0 ) {
@@ -1472,7 +1482,7 @@ PayStubViewController = BaseViewController.extend( {
 			}
 		}
 
-		this.api['set' + this.api.key_name]( record, {onResult: function( result ) {
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {onResult: function( result ) {
 
 			$this.onSaveResult( result );
 
@@ -1598,8 +1608,12 @@ PayStubViewController = BaseViewController.extend( {
 		$this.initEditView();
 	},
 
-	onSaveAndContinue: function() {
+	onSaveAndContinue: function( ignoreWarning ) {
 		var $this = this;
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
+		this.is_changed = false;
 		this.is_add = false;
 		LocalCacheData.current_doing_context_action = 'save_and_continue';
 		var record = this.current_edit_record;
@@ -1611,7 +1625,7 @@ PayStubViewController = BaseViewController.extend( {
 			}
 		}
 
-		this.api['set' + this.api.key_name]( record, {onResult: function( result ) {
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {onResult: function( result ) {
 			$this.onSaveAndContinueResult( result );
 
 		}} );
@@ -1803,11 +1817,11 @@ PayStubViewController = BaseViewController.extend( {
 
 		this.current_edit_record[key] = c_value;
 		switch ( key ) {
-			case 'status_id':
-				if ( c_value === 40 || c_value === 100 ) {
-					this.include_entries = false;
-				}
-				break;
+//			case 'status_id':
+//				if ( c_value === 40 || c_value === 100 ) {
+//					this.include_entries = false;
+//				}
+//				break;
 			case 'country':
 				var widget = this.edit_view_ui_dic['province'];
 				widget.setValue( null );
@@ -2018,6 +2032,12 @@ PayStubViewController = BaseViewController.extend( {
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.filtered_status_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_pay_stub_column1 );
 
+		// Type
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( {field: 'type_id', set_empty: false} );
+		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_pay_stub_column1 );
+
 		// Currency
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
@@ -2043,6 +2063,11 @@ PayStubViewController = BaseViewController.extend( {
 			field: 'pay_period_id'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Period' ), form_item_input, tab_pay_stub_column2 );
+
+		// Payroll Run
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( {field: 'run_id', width: 20} );
+		this.addEditFieldToColumn( $.i18n._( 'Payroll Run' ), form_item_input, tab_pay_stub_column2 );
 
 		// Pay Start Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
@@ -2213,6 +2238,14 @@ PayStubViewController = BaseViewController.extend( {
 				adv_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
 				form_item_type: FormItemType.AWESOME_BOX} ),
+			new SearchField( {label: $.i18n._( 'Pay Stub Type' ),
+				in_column: 1,
+				field: 'type_id',
+				multiple: true,
+				basic_search: true,
+				adv_search: true,
+				layout_name: ALayoutIDs.OPTION_COLUMN,
+				form_item_type: FormItemType.AWESOME_BOX} ),
 			new SearchField( {label: $.i18n._( 'Employee Status' ),
 				in_column: 1,
 				field: 'user_status_id',
@@ -2229,6 +2262,14 @@ PayStubViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
+				form_item_type: FormItemType.AWESOME_BOX} ),
+			new SearchField( {label: $.i18n._( 'Payroll Run' ),
+				in_column: 1,
+				field: 'run_id',
+				multiple: true,
+				basic_search: true,
+				adv_search: true,
+				layout_name: ALayoutIDs.OPTION_COLUMN,
 				form_item_type: FormItemType.AWESOME_BOX} ),
 			new SearchField( {label: $.i18n._( 'Employee' ),
 				in_column: 1,
@@ -2258,7 +2299,7 @@ PayStubViewController = BaseViewController.extend( {
 				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX} ),
 			new SearchField( {label: $.i18n._( 'Group' ),
-				in_column: 1,
+				in_column: 2,
 				multiple: true,
 				field: 'group_id',
 				layout_name: ALayoutIDs.TREE_COLUMN,
@@ -2522,9 +2563,11 @@ PayStubViewController = BaseViewController.extend( {
 				}
 
 				if ( pay_period_ids.length === 1 ) {
-					filter.pay_period_id = pay_period_ids[0];
+					filter.pay_period_id = [pay_period_ids[0]];
 				} else if ( pay_period_ids.length > 1 ) {
 					filter.pay_period_id = pay_period_ids;
+				}else{
+					filter.pay_period_id = [];
 				}
 
 				IndexViewController.openWizard( 'GeneratePayStubWizard', filter, function() {

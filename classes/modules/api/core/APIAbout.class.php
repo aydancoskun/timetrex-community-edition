@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -166,7 +166,7 @@ class APIAbout extends APIFactory {
 
 		$current_company = $this->getCurrentCompanyObject();
 
-		$data = $this->getAboutData( $ytd, $all_companies );			
+		$data = $this->stripReturnHandler( $this->getAboutData( $ytd, $all_companies ) );
 
 		$ttsc = new TimeTrexSoapClient();
 		//We must ensure that the data is up to date
@@ -183,29 +183,15 @@ class APIAbout extends APIFactory {
 		$latest_tax_engine_version = $ttsc->isLatestTaxEngineVersion( $current_company->getId() );
 		$latest_tax_data_version = $ttsc->isLatestTaxDataVersion( $current_company->getId() );
 
-		$sslf = TTnew( 'SystemSettingListFactory' );
-		$sslf->getByName('new_version');
-		if ( $sslf->getRecordCount() == 1 ) {
-			$obj = $sslf->getCurrent();
-		} else {
-			$obj = TTnew( 'SystemSettingListFactory' );
-		}
-		$obj->setName( 'new_version' );
-
 		if( $latest_version == FALSE
 				OR $latest_tax_engine_version == FALSE
 				OR $latest_tax_data_version == FALSE ) {
-			$obj->setValue( 1 );
+			SystemSettingFactory::setSystemSetting( 'new_version', 1 );
 			$data['new_version'] = TRUE;
 		} else {
-			$obj->setValue( 0 );
+			SystemSettingFactory::setSystemSetting( 'new_version', 0 );
 			$data['new_version'] = FALSE;
 		}
-
-		if ( $obj->isValid() ) {
-			$obj->Save();
-		}
-
 		return $this->returnHandler( $data );
 
 	}

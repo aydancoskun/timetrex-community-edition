@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -43,6 +43,7 @@ class PayCodeFactory extends Factory {
 	protected $pk_sequence_name = 'pay_code_id_seq'; //PK Sequence name
 
 	protected $company_obj = NULL;
+	protected $pay_stub_entry_account_obj = NULL;
 
 	function _getFactoryOptions( $name ) {
 		$retval = NULL;
@@ -120,6 +121,10 @@ class PayCodeFactory extends Factory {
 										'deleted' => 'Deleted',
 										);
 		return $variable_function_map;
+	}
+
+	function getPayStubEntryAccountObject() {
+		return $this->getGenericObject( 'PayStubEntryAccountListFactory', $this->getPayStubEntryAccountID(), 'pay_stub_entry_account_obj' );
 	}
 
 	function getCompanyObject() {
@@ -342,7 +347,7 @@ class PayCodeFactory extends Factory {
 		return FALSE;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		if ( $this->getDeleted() == TRUE ) {
 			//Check to make sure there are no hours using this PayCode.
 			$udtlf = TTnew( 'UserDateTotalListFactory' );
@@ -508,7 +513,7 @@ class PayCodeFactory extends Factory {
 		}
 
 		$ph = array(
-					'dst_pay_code_id' => $dst_id,
+					'dst_pay_code_id' => (int)$dst_id,
 					);
 
 		$udtf = TTNew('UserDateTotalFactory');

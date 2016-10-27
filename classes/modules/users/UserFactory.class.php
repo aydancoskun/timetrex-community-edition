@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -55,7 +55,7 @@ class UserFactory extends Factory {
 	public $username_validator_regex = '/^[a-z0-9-_\.@]{1,250}$/i'; //Authentication class needs to access this.
 	protected $phoneid_validator_regex = '/^[0-9]{1,250}$/i';
 	protected $phonepassword_validator_regex = '/^[0-9]{1,250}$/i';
-	protected $name_validator_regex = '/^[a-zA-Z -\.\'|\x{0080}-\x{FFFF}]{1,250}$/iu';
+	protected $name_validator_regex = '/^[a-zA-Z- \.\'|\x{0080}-\x{FFFF}]{1,250}$/iu';
 	protected $address_validator_regex = '/^[a-zA-Z0-9-,_\/\.\'#\ |\x{0080}-\x{FFFF}]{1,250}$/iu';
 	protected $city_validator_regex = '/^[a-zA-Z0-9-,_\.\'#\ |\x{0080}-\x{FFFF}]{1,250}$/iu';
 
@@ -135,6 +135,7 @@ class UserFactory extends Factory {
 										'-1400-hierarchy_control_display' => TTi18n::gettext('Hierarchy'),
 										'-1401-hierarchy_level_display' => TTi18n::gettext('Hierarchy Superiors'),
 										'-1500-last_login_date' => TTi18n::gettext('Last Login Date'),
+										'-1510-max_punch_time_stamp' => TTi18n::gettext('Last Punch Time'),
 										'-2000-created_by' => TTi18n::gettext('Created By'),
 										'-2010-created_date' => TTi18n::gettext('Created Date'),
 										'-2020-updated_by' => TTi18n::gettext('Updated By'),
@@ -206,9 +207,7 @@ class UserFactory extends Factory {
 										'ethnic_group_id' => 'EthnicGroup',
 										'ethnic_group' => FALSE,
 										'user_name' => 'UserName',
-										'password' => 'Password',
 										'phone_id' => 'PhoneId',
-										'phone_password' => 'PhonePassword',
 										'employee_number' => 'EmployeeNumber',
 										'title_id' => 'Title',
 										'title' => FALSE,
@@ -255,6 +254,7 @@ class UserFactory extends Factory {
 										'home_email_is_valid' => 'HomeEmailIsValid',
 										'home_email_is_valid_key' => 'HomeEmailIsValidKey',
 										'home_email_is_valid_date' => 'HomeEmailIsValidDate',
+										'feedback_rating'	=> 'FeedbackRating',
 
 										'work_email' => 'WorkEmail',
 										'work_email_is_valid' => 'WorkEmailIsValid',
@@ -280,9 +280,13 @@ class UserFactory extends Factory {
 										'latitude' => 'Latitude',
 										'tag' => 'Tag',
 										'last_login_date' => 'LastLoginDate',
+										'max_punch_time_stamp' => FALSE,
 										'hierarchy_control_display' => FALSE,
 										'hierarchy_level_display' => FALSE,
 
+										'password' => 'Password', //Must go near the end, so we can validate based on other info.
+										'phone_password' => 'PhonePassword', //Must go near the end, so we can validate based on other info.
+										
 										//These must be defined, but they are ignored in setObjectFromArray() due to security risks.
 										'password_reset_key' => 'PasswordResetKey', 
 										'password_reset_date' => 'PasswordResetDate',
@@ -367,11 +371,6 @@ class UserFactory extends Factory {
 	}
 	function setStatus($status) {
 		$status = trim($status);
-
-		$key = Option::getByValue($status, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$status = $key;
-		}
 
 		$modify_status = FALSE;
 		if ( $this->getCurrentUserPermissionLevel() >= $this->getPermissionLevel() ) {
@@ -675,6 +674,24 @@ class UserFactory extends Factory {
 		return FALSE;
 	}
 
+	function getFeedbackRating() {
+		if ( isset( $this->data['feedback_rating'] ) ) {
+			return $this->data['feedback_rating'];
+		}
+
+		return FALSE;
+	}
+
+	function setFeedbackRating( $rating ) {
+		if ( $rating == 1 OR $rating == 0 OR $rating == -1 ) {
+			$this->data['feedback_rating'] = $rating;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
 	function isUniqueUserName($user_name) {
 		$ph = array(
 					'user_name' => trim(strtolower($user_name)),
@@ -796,8 +813,7 @@ class UserFactory extends Factory {
 		$ldap_authentication_type_id = 0;
 		if ( DEMO_MODE != TRUE AND function_exists('ldap_connect') AND !isset($config_vars['other']['enable_ldap']) OR ( isset($config_vars['other']['enable_ldap']) AND $config_vars['other']['enable_ldap'] == TRUE ) ) {
 			//Check company object to make sure LDAP is enabled.
-			$c_obj = $this->getCompanyObject();
-			if ( is_object($this->getCompanyObject()) ) {
+			if ( is_object( $this->getCompanyObject() ) ) {
 				$ldap_authentication_type_id = $this->getCompanyObject()->getLDAPAuthenticationType();
 				if ( $ldap_authentication_type_id > 0 ) {
 					$ldap = TTnew('TTLDAP');
@@ -831,7 +847,13 @@ class UserFactory extends Factory {
 		if ( $ldap_authentication_type_id != 2 AND $encrypted_password === $this->getPassword() ) {
 			//If the passwords match, confirm that the password hasn't exceeded its maximum age.
 			//Allow override passwords always.
-			if ( $check_password_policy == TRUE AND $this->checkPasswordAge() == FALSE ) {
+			if ( $check_password_policy == TRUE AND $this->isFirstLogin() == TRUE AND $this->isCompromisedPassword() == TRUE ) { //Need to check for compromised password, as last_login_date doesn't get updated until they can actually login fully.
+				Debug::Text('Password Policy: First login, password needs to be changed, denying access...', __FILE__, __LINE__, __METHOD__, 10);
+				return FALSE;
+			} elseif ( $check_password_policy == TRUE AND $this->isPasswordPolicyEnabled() == TRUE AND $this->isCompromisedPassword() == TRUE ) {
+				Debug::Text('Password Policy: Password has never changed, denying access...', __FILE__, __LINE__, __METHOD__, 10);
+				return FALSE;
+			} elseif ( $check_password_policy == TRUE AND $this->isPasswordPolicyEnabled() == TRUE AND $this->checkPasswordAge() == FALSE ) {
 				Debug::Text('Password Policy: Password exceeds maximum age, denying access...', __FILE__, __LINE__, __METHOD__, 10);
 				return FALSE;
 			} else {
@@ -862,7 +884,7 @@ class UserFactory extends Factory {
 
 		return FALSE;
 	}
-	function setPassword($password, $password_confirm = NULL ) {
+	function setPassword($password, $password_confirm = NULL, $force = FALSE ) {
 		$password = trim($password);
 		$password_confirm = ( $password_confirm !== NULL ) ? trim($password_confirm) : $password_confirm;
 
@@ -892,6 +914,22 @@ class UserFactory extends Factory {
 												TTi18n::gettext('Passwords don\'t match') )
 				AND
 				$this->Validator->isTrue(		'password',
+												( ( $force == FALSE AND stripos( $password, $this->getUserName() ) !== FALSE ) ? FALSE : TRUE ),
+												TTi18n::gettext('User Name must not be a part of the password') )
+				AND
+				$this->Validator->isTrue(		'password',
+												( ( $force == FALSE AND stripos( $this->getUserName(), $password ) !== FALSE ) ? FALSE : TRUE ),
+												TTi18n::gettext('Password must not be a part of the User Name') )
+				AND
+				$this->Validator->isTrue(		'password',
+												( ( $force == FALSE AND in_array( strtolower($password), array( strtolower($this->getFirstName()), strtolower($this->getMiddleName()), strtolower($this->getLastName()), strtolower($this->getCity()), strtolower($this->getWorkEmail()), strtolower($this->getHomeEmail()), $this->getHomePhone(), $this->getWorkPhone(), $this->getSIN(), $this->getPhoneID() ) ) == TRUE ) ? FALSE : TRUE ),
+												TTi18n::gettext('Password is too weak, it should not match any commonly known personal information') )
+				AND
+				$this->Validator->isTrue(		'password',
+												( ( $force == FALSE AND Misc::getPasswordStrength( $password ) <= 2 ) ? FALSE : TRUE ),
+												TTi18n::gettext('Password is too weak, add additional numbers or special/upper case characters') )
+				AND
+				$this->Validator->isTrue(		'password',
 												$modify_password,
 												TTi18n::gettext('Insufficient access to modify passwords for this employee')
 												)
@@ -901,7 +939,7 @@ class UserFactory extends Factory {
 
 			//When changing the password, we need to check if a Password Policy is defined.
 			$c_obj = $this->getCompanyObject();
-			if ( is_object( $c_obj ) AND $c_obj->getPasswordPolicyType() == 1 AND $this->getPermissionLevel() >= $c_obj->getPasswordMinimumPermissionLevel() AND $c_obj->getProductEdition() > 10 ) {
+			if ( $this->isPasswordPolicyEnabled() == TRUE ) {
 				Debug::Text('Password Policy: Minimum Length: '. $c_obj->getPasswordMinimumLength() .' Min. Strength: '. $c_obj->getPasswordMinimumStrength() .' ('.  Misc::getPasswordStrength( $password ) .') Age: '. $c_obj->getPasswordMinimumAge(), __FILE__, __LINE__, __METHOD__, 10);
 
 				if ( strlen( $password ) < $c_obj->getPasswordMinimumLength() ) {
@@ -915,7 +953,7 @@ class UserFactory extends Factory {
 					$update_password = FALSE;
 					$this->Validator->isTrue(		'password',
 													FALSE,
-													TTi18n::gettext('Password is too weak, add additional numbers or special characters') );
+													TTi18n::gettext('Password is too weak, add additional numbers or special/upper case characters') );
 				}
 
 				if ( $this->getPasswordUpdatedDate() != '' AND $this->getPasswordUpdatedDate() >= ( time() - ($c_obj->getPasswordMinimumAge() * 86400) ) ) {
@@ -951,16 +989,54 @@ class UserFactory extends Factory {
 		return FALSE;
 	}
 
+
+	function isPasswordPolicyEnabled() {
+		$c_obj = $this->getCompanyObject();
+		if ( DEMO_MODE == FALSE AND PRODUCTION == TRUE AND is_object( $c_obj ) AND $c_obj->getPasswordPolicyType() == 1 AND $this->getPermissionLevel() >= $c_obj->getPasswordMinimumPermissionLevel() AND $c_obj->getProductEdition() > 10 ) {
+			Debug::Text('Password Policy Enabled: Type: '. $c_obj->getPasswordPolicyType() .'('.$c_obj->getProductEdition().') Maximum Age: '. $c_obj->getPasswordMaximumAge() .' days Permission Level: '. $this->getPermissionLevel(), __FILE__, __LINE__, __METHOD__, 10);
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+	
+	function isFirstLogin() {
+		if ( DEMO_MODE == FALSE AND $this->getLastLoginDate() == '' ) {
+			Debug::Text('is First Login: TRUE', __FILE__, __LINE__, __METHOD__, 10);
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function isCompromisedPassword() {
+		$c_obj = $this->getCompanyObject();
+
+		//Check to see if the password was updated at the same time the user record was created originally, or if the password was updated by an administrator.
+		//  Either way the password should be considered compromised (someone else knows it) and should be changed.
+		if ( DEMO_MODE == FALSE
+				AND ( 	(int)$this->getPasswordUpdatedDate() <= ( (int)$this->getCreatedDate() + 3 )
+						OR ( (int)$this->getUpdatedBy() != (int)$this->getId() AND (int)$this->getPasswordUpdatedDate() >= ( $this->getUpdatedDate() - 3 ) AND (int)$this->getPasswordUpdatedDate() <= ( $this->getUpdatedDate() + 3 ) )
+					)
+			) {
+			Debug::Text('User hasnt ever changed their password... Last Login Date: '. TTDate::getDate('DATE+TIME', $this->getLastLoginDate() ), __FILE__, __LINE__, __METHOD__, 10);
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+	
 	function checkPasswordAge() {
 		$c_obj = $this->getCompanyObject();
 		//Always add 1 to the PasswordMaximumAge so if its set to 0 by mistake it will still allow the user to login after changing their password.
 		Debug::Text('Password Policy: Type: '. $c_obj->getPasswordPolicyType() .'('.$c_obj->getProductEdition().') Current Age: '. TTDate::getDays( (time() - $this->getPasswordUpdatedDate()) ) .'('.$this->getPasswordUpdatedDate().') Maximum Age: '. $c_obj->getPasswordMaximumAge() .' days Permission Level: '. $this->getPermissionLevel(), __FILE__, __LINE__, __METHOD__, 10);
-		if ( PRODUCTION == TRUE AND is_object( $c_obj ) AND $c_obj->getPasswordPolicyType() == 1 AND $this->getPermissionLevel() >= $c_obj->getPasswordMinimumPermissionLevel() AND (int)$this->getPasswordUpdatedDate() < ( time() - (($c_obj->getPasswordMaximumAge() + 1) * 86400) ) AND $c_obj->getProductEdition() > 10 ) {
+		if ( $this->isPasswordPolicyEnabled() == TRUE AND (int)$this->getPasswordUpdatedDate() < ( time() - (($c_obj->getPasswordMaximumAge() + 1) * 86400) ) ) {
 			Debug::Text('Password Policy: Password exceeds maximum age, denying access...', __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
 		}
 		return TRUE;
 	}
+	
 	function getPasswordUpdatedDate() {
 		if ( isset($this->data['password_updated_date']) ) {
 			return $this->data['password_updated_date'];
@@ -1062,8 +1138,10 @@ class UserFactory extends Factory {
 
 		return FALSE;
 	}
-	function setPhonePassword($phone_password) {
+	function setPhonePassword($phone_password, $force = FALSE ) {
 		$phone_password = trim($phone_password);
+
+		$is_new = $this->isNew( TRUE );
 
 		//Phone passwords are now displayed the administrators to make things easier.
 		//NOTE: Phone passwords are used for passwords on the timeclock as well, and need to be able to be cleared sometimes.
@@ -1075,11 +1153,19 @@ class UserFactory extends Factory {
 												TTi18n::gettext('Quick Punch password must be digits only'),
 												$this->phonepassword_validator_regex)
 				AND
-					$this->Validator->isLength(		'phone_password',
-													$phone_password,
-													TTi18n::gettext('Quick Punch password must be between 4 and 9 digits'),
-													4,
-													9) ) ) {
+				$this->Validator->isTrue(		'phone_password',
+												( ( $force == FALSE AND $is_new == TRUE AND ( $this->getPhoneId() == $phone_password ) ) ? FALSE : TRUE ),
+												TTi18n::gettext('Quick Punch password must be different then Quick Punch ID') )
+				AND
+				$this->Validator->isTrue(		'phone_password',
+												( ( $force == FALSE AND $is_new == TRUE AND ( $phone_password == '1234' OR $phone_password == '12345' OR strlen( count_chars( $phone_password, 3 ) ) == 1 ) ) ? FALSE : TRUE ),
+												TTi18n::gettext('Quick Punch password is too weak, please try something more secure') )
+				AND
+				$this->Validator->isLength(		'phone_password',
+												$phone_password,
+												TTi18n::gettext('Quick Punch password must be between 4 and 9 digits'),
+												4,
+												9) ) ) {
 
 			$this->data['phone_password'] = $phone_password;
 
@@ -2153,10 +2239,18 @@ class UserFactory extends Factory {
 		return FALSE;
 	}
 	function setBirthDate($epoch) {
-		if	(	( $epoch !== FALSE AND $epoch == '' )
-				OR $this->Validator->isDate(	'birth_date',
+		if	( ( $epoch !== FALSE AND $epoch == '' )
+				OR
+				(
+					$this->Validator->isDate(	'birth_date',
 												$epoch,
-												TTi18n::gettext('Birth date is invalid, try specifying the year with four digits.')) ) {
+												TTi18n::gettext('Birth date is invalid, try specifying the year with four digits'))
+					AND
+					$this->Validator->isTRUE(	'birth_date',
+												( TTDate::getMiddleDayEpoch( $epoch ) <= TTDate::getMiddleDayEpoch( time() ) ) ? TRUE : FALSE,
+												TTi18n::gettext('Birth date can not be in the future'))
+				)
+			) {
 
 			//Allow for negative epochs, for birthdates less than 1960's
 			$this->data['birth_date'] = ( $epoch != 0 AND $epoch != '' ) ? TTDate::getMiddleDayEpoch( $epoch ) : '' ; //Allow blank birthdate.
@@ -2176,7 +2270,7 @@ class UserFactory extends Factory {
 			if ( $uwlf->getRecordCount() >= 1 ) {
 				Debug::Text('No wage entries exist...', __FILE__, __LINE__, __METHOD__, 10);
 
-				$uwlf->getByUserIdAndGroupIDAndBeforeDate( $this->getID(), 0, $epoch );
+				$uwlf->getByUserIdAndGroupIDAndBeforeDate( $this->getID(), 0, $epoch, 1 );
 				if ( $uwlf->getRecordCount() == 0 ) {
 					Debug::Text('No wage entry on or before : '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 					return FALSE;
@@ -2494,7 +2588,7 @@ class UserFactory extends Factory {
 
 			$this->data['note'] = $value;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -2817,7 +2911,7 @@ class UserFactory extends Factory {
 		return FALSE;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		//When doing a mass edit of employees, user name is never specified, so we need to avoid this validation issue.
 		if ( $this->getUserName() == '' ) {
 			$this->Validator->isTrue(		'user_name',
@@ -2835,7 +2929,7 @@ class UserFactory extends Factory {
 		}
 
 		//When mass editing, don't require currency to be set.
-		if ( $this->validate_only == FALSE AND $this->getCurrency() == FALSE ) {
+		if ( $this->Validator->getValidateOnly() == FALSE AND $this->getCurrency() == FALSE ) {
 			$this->Validator->isTrue(		'currency_id',
 											FALSE,
 											TTi18n::gettext('Invalid currency'));
@@ -2849,13 +2943,13 @@ class UserFactory extends Factory {
 
 		//Need to require password on new employees as the database column is NOT NULL.
 		//However when mass editing, no IDs are set so this always fails during the only validation phase.
-		if ( $this->validate_only == FALSE AND $this->isNew( TRUE ) == TRUE AND ( $this->getPassword() == FALSE OR $this->getPassword() == '' ) ) {
+		if ( $this->Validator->getValidateOnly() == FALSE AND $this->isNew( TRUE ) == TRUE AND ( $this->getPassword() == FALSE OR $this->getPassword() == '' ) ) {
 			$this->Validator->isTrue(		'password',
 											FALSE,
 											TTi18n::gettext('Please specify a password'));
 		}
 
-		if ( $this->validate_only == FALSE AND $this->getEmployeeNumber() == FALSE AND $this->getStatus() == 10 ) {
+		if ( $this->Validator->getValidateOnly() == FALSE AND $this->getEmployeeNumber() == FALSE AND $this->getStatus() == 10 ) {
 			$this->Validator->isTrue(		'employee_number',
 											FALSE,
 											TTi18n::gettext('Employee number must be specified for ACTIVE employees') );
@@ -2894,6 +2988,40 @@ class UserFactory extends Factory {
 													FALSE,
 													TTi18n::gettext('Task is not assigned to this job') );
 					}
+				}
+			}
+		}
+
+		if ( $ignore_warning == FALSE ) {
+			if ( $this->getStatus() == 10 AND $this->getTerminationDate() != '' AND TTDate::getMiddleDayEpoch( $this->getTerminationDate() ) < TTDate::getMiddleDayEpoch( time() ) ) {
+				$this->Validator->Warning( 'termination_date', TTi18n::gettext('Employee is active but has a termination date in the past, perhaps their status should be Terminated?') );
+			}
+
+			if ( $this->getStatus() == 20 AND $this->getTerminationDate() == '' ) { //Terminated
+				$this->Validator->Warning( 'termination_date', TTi18n::gettext('Employee is Terminated, but no termination date is specified') );
+			}
+
+			if ( $this->getStatus() == 20 AND $this->getTerminationDate() != '' ) { //Terminated
+				if ( TTDate::getMiddleDayEpoch( $this->getTerminationDate() ) < TTDate::getMiddleDayEpoch( time() ) ) {
+					$this->Validator->Warning( 'termination_date', TTi18n::gettext('When setting a termination date retroactively, you may need to recalculate this employees timesheet') );
+				}
+				
+				if ( $this->isNew() == FALSE ) {
+					//Check to see if worked/absence time exist after termination
+					$udtlf = TTnew('UserDateTotalListFactory');
+					$udtlf->getByCompanyIDAndUserIdAndObjectTypeAndStartDateAndEndDate($this->getCompany(), $this->getID(), array(10,50), ( $this->getTerminationDate() + 86400 ), ( time() + ( 86400 * 365 ) ) );
+					if ( $udtlf->getRecordCount() > 0 ) {
+						$this->Validator->Warning( 'termination_date', TTi18n::gettext('Employee has time on their timesheet after their termination date that may be ignored (%1)', array( TTDate::getDate('DATE', $udtlf->getCurrent()->getDateStamp() ) ) ) );
+					}
+					unset($udtlf);
+
+					//Check to see if Pay Stub Amendments exists after termination date
+					$psalf = TTnew('PayStubAmendmentListFactory');
+					$psalf->getByUserIdAndAuthorizedAndStartDateAndEndDate( $this->getID(), TRUE, ( $this->getTerminationDate() + 86400 ), ( time() + ( 86400 * 365 ) ) );
+					if ( $psalf->getRecordCount() > 0 ) {
+						$this->Validator->Warning( 'termination_date', TTi18n::gettext('Employee has pay stub amendments effective after their termination date that may be ignored (%1)', array( TTDate::getDate('DATE', $psalf->getCurrent()->getEffectiveDate() ) ) ) );
+					}
+					unset($psalf);
 				}
 			}
 		}
@@ -3343,6 +3471,12 @@ class UserFactory extends Factory {
 			}
 			unset($default_company_contact_user_id);
 		}
+
+		//If status is set to anything other than ACTIVE, logout user.
+		if ( $this->getStatus() != 10 ) {
+			$authentication = TTNew('Authentication');
+			$authentication->logoutUser( $this->getID() );
+		}
 		
 		return TRUE;
 	}
@@ -3505,6 +3639,9 @@ class UserFactory extends Factory {
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = TTDate::getAPIDate( 'DATE', $this->$function() );
 							}
+							break;
+						case 'max_punch_time_stamp':
+							$data[$variable] = TTDate::getAPIDate( 'DATE+TIME', TTDate::strtotime( $this->getColumn( $variable ) ) );
 							break;
 						case 'birth_date_age':
 							$data[$variable] = (int)floor( TTDate::getYearDifference( TTDate::getBeginDayEpoch( $this->getBirthDate() ), TTDate::getEndDayEpoch( time() ) ) );

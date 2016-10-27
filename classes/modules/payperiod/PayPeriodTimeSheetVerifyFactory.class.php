@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -73,6 +73,9 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 										'-1110-start_date' => TTi18n::gettext('Start Date'),
 										'-1112-end_date' => TTi18n::gettext('End Date'),
 										'-1115-transaction_date' => TTi18n::gettext('Transaction Date'),
+										'-1118-window_start_date' => TTi18n::gettext('Window Start Date'),
+										'-1119-window_end_date' => TTi18n::gettext('Window End Date'),
+
 										'-1120-status' => TTi18n::gettext('Status'),
 
 										'-2000-created_by' => TTi18n::gettext('Created By'),
@@ -114,6 +117,8 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 										'start_date' => FALSE, //PayPeriod
 										'end_date' => FALSE, //PayPeriod
 										'transaction_date' => FALSE, //PayPeriod
+										'window_start_date' => FALSE,
+										'window_end_date' => FALSE,
 										'user_id' => 'User',
 										'first_name' => FALSE,
 										'last_name' => FALSE,
@@ -216,11 +221,6 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 	function setStatus($value) {
 		$value = trim($value);
 
-		$key = Option::getByValue($value, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$value = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'status',
 											$value,
 											TTi18n::gettext('Incorrect Status'),
@@ -257,7 +257,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return FALSE;
 	}
 	function setUserVerifiedDate($epoch = NULL) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ($epoch == NULL) {
 			$epoch = TTDate::getTime();
@@ -510,7 +510,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 
 		$pay_period_verify_type_id = $this->getVerificationType();
 		$is_timesheet_superior = $this->isHierarchySuperior( $current_user_id, $user_id );
-		Debug::text('Current User ID: '. $current_user_id .' User ID: '. $user_id .' Verification Type ID: '. $pay_period_verify_type_id .' TimeSheet Superior: '. (int)$is_timesheet_superior, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Current User ID: '. $current_user_id .' User ID: '. $user_id .' Verification Type ID: '. $pay_period_verify_type_id .' TimeSheet Superior: '. (int)$is_timesheet_superior .' Status: '. (int)$this->getStatus(), __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::text('Hire Date: '. TTDate::getDATE('DATE+TIME', $this->getUserObject()->getHireDate() ) .' Termination Date: '. TTDate::getDATE('DATE+TIME', $this->getUserObject()->getTerminationDate() ), __FILE__, __LINE__, __METHOD__, 10);
 
 		if (
@@ -661,13 +661,26 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return TRUE;
 	}
 	
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		$this->calcStatus();
-		
+
 		if ( $this->getStatus() == '' ) {
 			$this->Validator->isTrue(		'status',
 											FALSE,
 											TTi18n::gettext('Status is invalid'));
+		}
+
+		if ( $this->getDeleted() == FALSE AND $this->getStatus() != 55 ) { //Declined
+			//Check to make sure no critical severity exceptions exist.
+			//Make sure we ignore the 'V1 - TimeSheet Not Verified' exception, as that could be critical and prevent them from ever verifying their timesheet.
+			$elf = TTNew('ExceptionListFactory');
+			$elf->getByCompanyIDAndUserIdAndPayPeriodIdAndSeverityAndNotTypeID( $this->getUserObject()->getCompany(), $this->getUser(), $this->getPayPeriod(), array(30), array( 'V1' ) );
+			Debug::Text(' Critcal Severity Exceptions: '. $elf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+			if ( $elf->getRecordCount() > 0 ) {
+				$this->Validator->isTrue(	'exception',
+											FALSE,
+											TTi18n::gettext('Unable to verify this timesheet when critical severity exceptions exist in the pay period'));
+			}
 		}
 
 		return TRUE;
@@ -718,7 +731,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 			if ( $authorize_timesheet == TRUE ) {
 				$af = TTnew( 'AuthorizationFactory' );
 				$af->setCurrentUser( $this->getCurrentUser() );
-				$af->setObjectType('timesheet');
+				$af->setObjectType( 90 ); //TimeSheet
 				$af->setObject( $this->getId() );
 				$af->setAuthorized(TRUE);
 				if ( $af->isValid() ) {
@@ -817,6 +830,8 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 						case 'start_date':
 						case 'end_date':
 						case 'transaction_date':
+						case 'window_start_date':
+						case 'window_end_date':
 							$data[$variable] = TTDate::getAPIDate( 'DATE+TIME', TTDate::strtotime( $this->getColumn( $variable ) ) );
 							break;
 						case 'status':

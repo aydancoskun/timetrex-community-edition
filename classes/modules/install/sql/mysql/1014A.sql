@@ -181,6 +181,3 @@ ALTER TABLE user_group_tree ENGINE=InnoDB;
 ALTER TABLE accrual_policy_milestone ENGINE=InnoDB;
 ALTER TABLE currency ENGINE=InnoDB;
 ALTER TABLE policy_group_accrual_policy ENGINE=InnoDB;
-
-ALTER TABLE income_tax_rate ENGINE=InnoDB;
-ALTER TABLE income_tax_rate_us ENGINE=InnoDB;

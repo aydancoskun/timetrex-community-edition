@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -249,7 +249,7 @@ class CompanyDeductionFactory extends Factory {
 										//US - Custom Formulas
 										69 => TTi18n::gettext('Custom Formula'),
 
-										80 => TTi18n::gettext('US - Advance EIC Formula'),
+										//80 => TTi18n::gettext('US - Advance EIC Formula'), //Repealed as of 31-Dec-2010.
 										82 => TTi18n::gettext('US - Medicare Formula (Employee)'),
 										83 => TTi18n::gettext('US - Medicare Formula (Employer)'),
 										84 => TTi18n::gettext('US - Social Security Formula (Employee)'),
@@ -291,6 +291,10 @@ class CompanyDeductionFactory extends Factory {
 										130 => TTi18n::gettext('Birth Date (Anniversary)'),
 									);
 				break;
+			case 'apply_payroll_run_type':
+				$psf = TTnew('PayStubFactory');
+				$retval = $psf->getOptions('type');
+				break;
 			case 'look_back_unit':
 				$retval = array(
 										10 => TTi18n::gettext('Day(s)'),
@@ -307,6 +311,13 @@ class CompanyDeductionFactory extends Factory {
 										20 => TTi18n::gettext('Units/Hours'),
 										30 => TTi18n::gettext('YTD Amount'),
 										40 => TTi18n::gettext('YTD Units/Hours'),
+									);
+				break;
+			case 'tax_formula_type':
+				$retval = array(
+										0 => TTi18n::gettext('Based on Payroll Run Type'), //Best fit formula depending on payroll run type (Regular or Bonus/Correction)
+										10 => TTi18n::gettext('Always Regular (Non-Averaging)'),
+										20 => TTi18n::gettext('Always Special (Cummulative Averaging)'),
 									);
 				break;
 			case 'us_medicare_filing_status': //Medicare certificate
@@ -614,6 +625,7 @@ class CompanyDeductionFactory extends Factory {
 										'apply_frequency_day_of_month' => 'ApplyFrequencyDayOfMonth',
 										'apply_frequency_day_of_week' => 'ApplyFrequencyDayOfWeek',
 										'apply_frequency_quarter_month' => 'ApplyFrequencyQuarterMonth',
+										'apply_payroll_run_type_id' => 'ApplyPayrollRunType',
 										'pay_stub_entry_description' => 'PayStubEntryDescription',
 										'calculation_id' => 'Calculation',
 										'calculation' => FALSE,
@@ -721,11 +733,6 @@ class CompanyDeductionFactory extends Factory {
 	function setStatus($status) {
 		$status = trim($status);
 
-		$key = Option::getByValue($status, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$status = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'status_id',
 											$status,
 											TTi18n::gettext('Incorrect Status'),
@@ -733,7 +740,7 @@ class CompanyDeductionFactory extends Factory {
 
 			$this->data['status_id'] = $status;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -749,11 +756,6 @@ class CompanyDeductionFactory extends Factory {
 	function setType($type) {
 		$type = trim($type);
 
-		$key = Option::getByValue($type, $this->getOptions('type') );
-		if ($key !== FALSE) {
-			$type = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'type_id',
 											$type,
 											TTi18n::gettext('Incorrect Type'),
@@ -761,7 +763,7 @@ class CompanyDeductionFactory extends Factory {
 
 			$this->data['type_id'] = $type;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -858,7 +860,7 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 	function setStartDate($epoch) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ( $epoch == '' ) {
 			$epoch = NULL;
@@ -892,7 +894,7 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 	function setEndDate($epoch) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ( $epoch == '' ) {
 			$epoch = NULL;
@@ -914,21 +916,21 @@ class CompanyDeductionFactory extends Factory {
 	}
 
 	//Check if this date is within the effective date range
-	function isActiveDate( $epoch ) {
+	function isActiveDate( $ud_obj, $epoch ) {
 		$epoch = TTDate::getBeginDayEpoch( $epoch );
 
-		if ( $this->getStartDate() == '' AND $this->getEndDate() == '' ) {
+		if ( $ud_obj->getStartDate() == '' AND $ud_obj->getEndDate() == '' ) {
 			return TRUE;
 		}
 
-		if ( $epoch >= (int)$this->getStartDate()
-				AND ( $epoch <= (int)$this->getEndDate() OR $this->getEndDate() == '' ) ) {
+		if ( $epoch >= (int)$ud_obj->getStartDate()
+				AND ( $epoch <= (int)$ud_obj->getEndDate() OR $ud_obj->getEndDate() == '' ) ) {
 			Debug::text('Within Start/End Date.', __FILE__, __LINE__, __METHOD__, 10);
 
 			return TRUE;
 		}
 
-		Debug::text('Outside Start/End Date.', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Epoch: '. TTDate::getDate('DATE+TIME', $epoch) .' is outside Start: '. TTDate::getDate('DATE+TIME', $ud_obj->getStartDate()) .' and End Date: '. TTDate::getDate('DATE+TIME', $ud_obj->getEndDate()), __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 	}
@@ -1299,6 +1301,31 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 
+	function getApplyPayrollRunType() {
+		if ( isset($this->data['apply_payroll_run_type_id']) ) {
+			return (int)$this->data['apply_payroll_run_type_id'];
+		}
+
+		return FALSE;
+	}
+	function setApplyPayrollRunType($value) {
+		$value = trim($value);
+
+		if ( $value == 0
+				OR
+				$this->Validator->inArrayKey(	'apply_payroll_run_type_id',
+												$value,
+												TTi18n::gettext('Incorrect payroll run type'),
+												$this->getOptions('apply_payroll_run_type')) ) {
+
+			$this->data['apply_payroll_run_type_id'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
 	function inApplyFrequencyWindow( $pay_period_start_date, $pay_period_end_date, $hire_date = NULL, $termination_date = NULL, $birth_date = NULL ) {
 		if ( $this->getApplyFrequency() == FALSE OR $this->getApplyFrequency() == 10 ) { //Each pay period
 			return TRUE;
@@ -1339,6 +1366,14 @@ class CompanyDeductionFactory extends Factory {
 		return $retval;
 	}
 
+	function inApplyPayrollRunType( $type_id ) {
+		if ( $this->getApplyPayrollRunType() == 0 OR $type_id == $this->getApplyPayrollRunType() ) {
+			return TRUE;
+		}
+
+		Debug::Text('Apply Payroll Run Type: '. $this->getApplyPayrollRunType() .' Type: '. (int)$type_id, __FILE__, __LINE__, __METHOD__, 10);
+		return FALSE;
+	}
 
 	function getWorkedTimeByUserIdAndEndDate( $user_id, $start_date = NULL, $end_date = NULL ) {
 		if ( $user_id == '' ) {
@@ -1366,17 +1401,17 @@ class CompanyDeductionFactory extends Factory {
 		return $retval;
 	}
 
-	function isActiveLengthOfService( $u_obj, $epoch ) {
+	function isActiveLengthOfService( $ud_obj, $epoch ) {
 		$worked_time = 0;
 		if ( ( $this->getMinimumLengthOfServiceUnit() == 50 AND $this->getMinimumLengthOfService() > 0 )
 				OR ( $this->getMaximumLengthOfServiceUnit() == 50 AND $this->getMaximumLengthOfService() > 0 ) ) {
 			//Hour based length of service, get users hours up until this period.
-			$worked_time = TTDate::getHours( $this->getWorkedTimeByUserIdAndEndDate( $u_obj->getId(), $u_obj->getHireDate(), $epoch ) );
+			$worked_time = TTDate::getHours( $this->getWorkedTimeByUserIdAndEndDate( $ud_obj->getUser(), $ud_obj->getLengthOfServiceDate(), $epoch ) );
 			Debug::Text('  Worked Time: '. $worked_time .'hrs', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		$employed_days = TTDate::getDays( ($epoch - $u_obj->getHireDate()) );
-		Debug::Text('  Employed Days: '. $employed_days, __FILE__, __LINE__, __METHOD__, 10);
+		$employed_days = TTDate::getDays( ($epoch - $ud_obj->getLengthOfServiceDate() ) );
+		Debug::Text('  Employed Days: '. $employed_days .' Based On: '. TTDate::getDate('DATE+TIME', $ud_obj->getLengthOfServiceDate() ), __FILE__, __LINE__, __METHOD__, 10);
 
 		$minimum_length_of_service_result = FALSE;
 		$maximum_length_of_service_result = FALSE;
@@ -1481,11 +1516,6 @@ class CompanyDeductionFactory extends Factory {
 	function setCalculation($value) {
 		$value = trim($value);
 
-		$key = Option::getByValue($value, $this->getOptions('calculation') );
-		if ($key !== FALSE) {
-			$type = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'calculation_id',
 											$value,
 											TTi18n::gettext('Incorrect Calculation'),
@@ -1493,7 +1523,7 @@ class CompanyDeductionFactory extends Factory {
 
 			$this->data['calculation_id'] = $value;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -1662,6 +1692,23 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 
+	function getCompanyValue1Options() {
+		//Debug::Text('Calculation: '. $this->getCalculation(), __FILE__, __LINE__, __METHOD__, 10);
+		switch ( $this->getCalculation() ) {
+			case 100:
+			case 200:
+			case 300:
+				$options = $this->getOptions('tax_formula_type');
+				break;
+		}
+
+		if ( isset($options) ) {
+			return $options;
+		}
+
+		return FALSE;
+	}
+	
 	function getCompanyValue2() {
 		if ( isset($this->data['company_value2']) ) {
 			return $this->data['company_value2'];
@@ -2393,15 +2440,15 @@ class CompanyDeductionFactory extends Factory {
 
 				foreach ($cdpsealf as $obj) {
 					$id = $obj->getPayStubEntryAccount();
-					Debug::text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+					//Debug::text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
 					//Delete users that are not selected.
 					if ( !in_array($id, $ids) ) {
-						Debug::text('Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+						//Debug::text('Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 						$obj->Delete();
 					} else {
 						//Save ID's that need to be updated.
-						Debug::text('NOT Deleting : '. $id, __FILE__, __LINE__, __METHOD__, 10);
+						//Debug::text('NOT Deleting : '. $id, __FILE__, __LINE__, __METHOD__, 10);
 						$tmp_ids[] = $id;
 					}
 				}
@@ -2494,15 +2541,15 @@ class CompanyDeductionFactory extends Factory {
 				$cdpsealf->getByCompanyDeductionIdAndTypeId( $this->getId(), 20 );
 				foreach ($cdpsealf as $obj) {
 					$id = $obj->getPayStubEntryAccount();
-					Debug::text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+					//Debug::text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
 					//Delete users that are not selected.
 					if ( !in_array($id, $ids) ) {
-						Debug::text('Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+						//Debug::text('Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 						$obj->Delete();
 					} else {
 						//Save ID's that need to be updated.
-						Debug::text('NOT Deleting : '. $id, __FILE__, __LINE__, __METHOD__, 10);
+						//Debug::text('NOT Deleting : '. $id, __FILE__, __LINE__, __METHOD__, 10);
 						$tmp_ids[] = $id;
 					}
 				}
@@ -2563,15 +2610,15 @@ class CompanyDeductionFactory extends Factory {
 				$udlf->getByCompanyIdAndCompanyDeductionId( $this->getCompany(), $this->getId() );
 				foreach ($udlf as $obj) {
 					$id = $obj->getUser();
-					Debug::text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+					//Debug::text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
 					//Delete users that are not selected.
 					if ( !in_array($id, $ids) ) {
-						Debug::text('Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+						//Debug::text('Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 						$obj->Delete();
 					} else {
 						//Save ID's that need to be updated.
-						Debug::text('NOT Deleting : '. $id, __FILE__, __LINE__, __METHOD__, 10);
+						//Debug::text('NOT Deleting : '. $id, __FILE__, __LINE__, __METHOD__, 10);
 						$tmp_ids[] = $id;
 					}
 				}
@@ -2903,7 +2950,7 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL AND $this->getCalculation() == 69 ) {
 			$valid_formula = TTMath::ValidateFormula( TTMath::translateVariables( $this->getCompanyValue1(), TTMath::clearVariables( Misc::trimSortPrefix( $this->getOptions('formula_variables') ) ) ) );
 

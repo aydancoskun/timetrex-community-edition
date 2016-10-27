@@ -30,11 +30,21 @@
 
 .schedule-view .date-chooser-div .label {
     margin-right: 5px;
+    position: relative;
+    top: -2px;
 }
 
 .schedule-view .date-chooser-div .date-picker-div {
-    display: inline;
+    display: inline-block;
+    vertical-align: sub;
+    margin-right: 8px;
+    margin-left: 8px;
 
+}
+
+
+.schedule-view .date-chooser-div .date-picker-div .t-date-picker-div {
+    vertical-align: initial;
 }
 
 .schedule-view .schedule-mode-div {
@@ -162,7 +172,7 @@
 }
 
 .schedule-view .ui-jqgrid .ui-jqgrid-btable td {
-    padding-left: 0px;
+    padding-left: 0;
 }
 
 .schedule-view .schedule-drag-over {

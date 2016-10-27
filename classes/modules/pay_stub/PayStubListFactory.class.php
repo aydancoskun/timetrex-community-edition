@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -61,7 +61,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		$this->rs = $this->getCache($id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => $id,
+						'id' => (int)$id,
 						);
 
 			$query = '
@@ -91,7 +91,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 
 		$strict_order = TRUE;
 		if ( $order == NULL ) {
-			$order = array( 'a.transaction_date' => 'desc', 'a.advance' => 'asc', 'b.last_name' => 'asc' );
+			$order = array( 'a.transaction_date' => 'desc', 'a.run_id' => 'desc', 'b.last_name' => 'asc' );
 			$strict_order = FALSE;
 		}
 
@@ -99,7 +99,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		$pplf = new PayPeriodListFactory();
 
 		$ph = array(
-					'company_id' => $company_id
+					'company_id' => (int)$company_id
 					);
 
 		//Include deleted pay stubs, for re-calculating YTD amounts?
@@ -111,7 +111,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 					where	a.user_id = b.id
 						AND a.pay_period_id = c.id
 						AND b.company_id = ?
-						AND a.id in ('. $this->getListSQL($id, $ph) .')
+						AND a.id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 						';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict_order );
@@ -134,8 +134,8 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		$pplf = new PayPeriodListFactory();
 
 		$ph = array(
-					'id' => $id,
-					'company_id' => $company_id,
+					'id' => (int)$id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -190,8 +190,9 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -207,17 +208,17 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 	}
 
 	function getByUserIdAndCompanyId($user_id, $company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		if ( $user_id == '') {
+		if ( $user_id == '' ) {
 			return FALSE;
 		}
 
-		if ( $company_id == '') {
+		if ( $company_id == '' ) {
 			return FALSE;
 		}
 
 		$strict_order = TRUE;
 		if ( $order == NULL ) {
-			$order = array( 'a.transaction_date' => 'desc', 'a.advance' => 'asc' );
+			$order = array( 'a.transaction_date' => 'desc', 'a.run_id' => 'desc' );
 			$strict_order = FALSE;
 		}
 
@@ -225,7 +226,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		$pplf = new PayPeriodListFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -236,7 +237,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 					where	a.user_id = b.id
 						AND a.pay_period_id = c.id
 						AND b.company_id = ?
-						AND a.user_id in ('. $this->getListSQL($user_id, $ph) .')
+						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .')
 						AND a.deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict_order );
@@ -247,21 +248,21 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 	}
 
 	function getByUserIdAndCompanyIdAndPayPeriodId($user_id, $company_id, $pay_period_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		if ( $user_id == '') {
+		if ( $user_id == '' ) {
 			return FALSE;
 		}
 
-		if ( $company_id == '') {
+		if ( $company_id == '' ) {
 			return FALSE;
 		}
 
-		if ( $pay_period_id == '') {
+		if ( $pay_period_id == '' ) {
 			return FALSE;
 		}
 
 		$strict_order = TRUE;
 		if ( $order == NULL ) {
-			$order = array( 'a.transaction_date' => 'desc', 'a.advance' => 'asc', 'a.user_id' => 'asc' );
+			$order = array( 'a.transaction_date' => 'desc', 'a.run_id' => 'desc', 'a.user_id' => 'asc' );
 			$strict_order = FALSE;
 		}
 
@@ -269,7 +270,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		$pplf = new PayPeriodListFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -280,11 +281,11 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 					where	a.user_id = b.id
 						AND a.pay_period_id = c.id
 						AND b.company_id = ?
-						AND a.user_id in ('. $this->getListSQL($user_id, $ph) .')
+						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .')
 						';
 
 		if ( $pay_period_id != '' AND isset($pay_period_id[0]) AND !in_array(-1, (array)$pay_period_id) ) {
-			$query .= ' AND a.pay_period_id in ('. $this->getListSQL($pay_period_id, $ph) .') ';
+			$query .= ' AND a.pay_period_id in ('. $this->getListSQL( $pay_period_id, $ph, 'int' ) .') ';
 		}
 
 		$query .= '
@@ -298,7 +299,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 	}
 
 	function getByUserIdAndPayStubAmendmentId($user_id, $pay_stub_amendment_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		if ( $user_id == '') {
+		if ( $user_id == '' ) {
 			return FALSE;
 		}
 
@@ -310,8 +311,8 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		$pself = new PayStubEntryListFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
-					'psa_id' => $pay_stub_amendment_id,
+					'user_id' => (int)$user_id,
+					'psa_id' => (int)$pay_stub_amendment_id,
 					);
 
 		$query = '
@@ -332,14 +333,19 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 
 		return $this;
 	}
-	function getLastPayStubByUserIdAndStartDate($user_id, $start_date, $where = NULL, $order = NULL) {
-		if ( $user_id == '') {
+
+	function getLastPayStubByUserIdAndStartDateAndRun($user_id, $start_date, $run_id, $where = NULL, $order = NULL) {
+		if ( $user_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $run_id == '' ) {
 			return FALSE;
 		}
 
 		$strict_order = TRUE;
 		if ( $order == NULL ) {
-			$order = array( 'a.start_date' => 'desc' );
+			$order = array( 'a.start_date' => 'desc', 'a.run_id' => 'desc' );
 			$strict_order = FALSE;
 		}
 
@@ -348,6 +354,8 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 
 		$ph = array(
 					'start_date' => $this->db->BindTimeStamp( $start_date ),
+					'run_id' => (int)$run_id,
+					'start_date2' => $this->db->BindTimeStamp( $start_date ),
 					);
 
 		$query = '
@@ -357,8 +365,8 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 							'. $pplf->getTable() .' as c
 					where	a.user_id = b.id
 						AND a.pay_period_id = c.id
-						AND a.start_date < ?
-						AND a.user_id in ('. $this->getListSQL($user_id, $ph) .')
+						AND ( ( a.start_date = ? AND a.run_id < ? ) OR a.start_date < ? )
+						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .')
 						AND ( a.deleted = 0 AND c.deleted = 0)
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -369,14 +377,57 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByUserIdAndStartDateAndEndDate($user_id, $start_date, $end_date, $where = NULL, $order = NULL) {
-		if ( $user_id == '') {
+	function getNextPayStubByUserIdAndTransactionDateAndRun($user_id, $transaction_date, $run_id, $where = NULL, $order = NULL) {
+		if ( $user_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $run_id == '' ) {
 			return FALSE;
 		}
 
 		$strict_order = TRUE;
 		if ( $order == NULL ) {
-			$order = array( 'a.transaction_date' => 'asc', 'a.advance' => 'asc' );
+			$order = array( 'a.start_date' => 'desc', 'a.run_id' => 'desc' );
+			$strict_order = FALSE;
+		}
+
+		$ulf = new UserListFactory();
+		$pplf = new PayPeriodListFactory();
+
+		$ph = array(
+					'transaction_date' => $this->db->BindTimeStamp( $transaction_date ),
+					'run_id' => (int)$run_id,
+					'transaction_date2' => $this->db->BindTimeStamp( $transaction_date ),
+					);
+
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a,
+							'. $ulf->getTable() .' as b,
+							'. $pplf->getTable() .' as c
+					where	a.user_id = b.id
+						AND a.pay_period_id = c.id
+						AND ( ( a.transaction_date = ? AND a.run_id > ? ) OR a.transaction_date > ? )
+						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .')
+						AND ( a.deleted = 0 AND c.deleted = 0)
+					';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict_order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+	
+	function getByUserIdAndStartDateAndEndDate($user_id, $start_date, $end_date, $where = NULL, $order = NULL) {
+		if ( $user_id == '' ) {
+			return FALSE;
+		}
+
+		$strict_order = TRUE;
+		if ( $order == NULL ) {
+			$order = array( 'a.transaction_date' => 'asc', 'a.run_id' => 'asc' );
 			$strict_order = FALSE;
 		}
 
@@ -397,7 +448,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 						AND a.pay_period_id = c.id
 						AND a.transaction_date >= ?
 						AND a.transaction_date <= ?
-						AND a.user_id in ('. $this->getListSQL($user_id, $ph) .')
+						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .')
 						AND ( a.deleted = 0 AND c.deleted = 0)
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -409,13 +460,13 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 	}
 
 	function getByCompanyId($company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
+		if ( $company_id == '' ) {
 			return FALSE;
 		}
 
 		$strict_order = TRUE;
 		if ( $order == NULL ) {
-			$order = array( 'a.transaction_date' => 'desc', 'a.advance' => 'asc', 'b.last_name' => 'asc' );
+			$order = array( 'a.transaction_date' => 'desc', 'a.run_id' => 'desc', 'b.last_name' => 'asc' );
 			$strict_order = FALSE;
 		}
 
@@ -423,7 +474,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		$pplf = new PayPeriodListFactory();
 
 		$ph = array(
-					'company_id' => $company_id
+					'company_id' => (int)$company_id
 					);
 
 		$query = '
@@ -444,17 +495,17 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 	}
 
 	function getByCompanyIdAndId($company_id, $id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
+		if ( $company_id == '' ) {
 			return FALSE;
 		}
 
-		if ( $id == '') {
+		if ( $id == '' ) {
 			return FALSE;
 		}
 
 		$strict_order = TRUE;
 		if ( $order == NULL ) {
-			$order = array( 'a.transaction_date' => 'desc', 'a.advance' => 'asc', 'b.last_name' => 'asc' );
+			$order = array( 'a.transaction_date' => 'desc', 'a.run_id' => 'desc', 'b.last_name' => 'asc' );
 			$strict_order = FALSE;
 		}
 
@@ -462,7 +513,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		$pplf = new PayPeriodListFactory();
 
 		$ph = array(
-					'company_id' => $company_id
+					'company_id' => (int)$company_id
 					);
 
 		$query = '
@@ -473,7 +524,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 					where	a.user_id = b.id
 						AND a.pay_period_id = c.id
 						AND b.company_id = ?
-						AND a.id in ('. $this->getListSQL($id, $ph) .')
+						AND a.id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 						AND a.deleted = 0
 						';
 		$query .= $this->getWhereSQL( $where );
@@ -485,17 +536,17 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 	}
 
 	function getByUserIdAndId($user_id, $id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		if ( $user_id == '') {
+		if ( $user_id == '' ) {
 			return FALSE;
 		}
 
-		if ( $id == '') {
+		if ( $id == '' ) {
 			return FALSE;
 		}
 
 		$strict_order = TRUE;
 		if ( $order == NULL ) {
-			$order = array( 'a.transaction_date' => 'desc', 'a.advance' => 'asc' );
+			$order = array( 'a.transaction_date' => 'desc', 'a.run_id' => 'desc' );
 			$strict_order = FALSE;
 		}
 
@@ -503,7 +554,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		$pplf = new PayPeriodListFactory();
 
 		$ph = array(
-					'user_id' => $user_id
+					'user_id' => (int)$user_id,
 					);
 
 		$query = '
@@ -514,7 +565,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 					where	a.user_id = b.id
 						AND a.pay_period_id = c.id
 						AND b.id = ?
-						AND a.id in ('. $this->getListSQL($id, $ph) .')
+						AND a.id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 						AND a.deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict_order );
@@ -525,14 +576,14 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 	}
 
 	function getByPayPeriodId($id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
+		if ( $id == '' ) {
 			return FALSE;
 		}
 
 		$ulf = new UserListFactory();
 
 		$ph = array(
-					'id' => $id
+					'id' => (int)$id
 					);
 
 		$query = '
@@ -555,7 +606,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'id' => $id
+					'id' => (int)$id
 					);
 
 		$query = '
@@ -572,7 +623,6 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 	}
 
 	function getByCompanyIdAndPayPeriodId($company_id, $pay_period_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -583,7 +633,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 
 		$strict_order = TRUE;
 		if ( $order == NULL OR !is_array($order) ) {
-			$order = array( 'a.transaction_date' => 'desc', 'a.advance' => 'asc', 'b.last_name' => 'asc' );
+			$order = array( 'a.transaction_date' => 'desc', 'a.run_id' => 'desc', 'b.last_name' => 'asc' );
 			$strict_order = FALSE;
 		}
 
@@ -591,7 +641,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		$pplf = new PayPeriodListFactory();
 
 		$ph = array(
-					'company_id' => $company_id
+					'company_id' => (int)$company_id
 					);
 
 		$query = '
@@ -602,7 +652,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 					where	a.user_id = b.id
 						AND a.pay_period_id = c.id
 						AND b.company_id = ?
-						AND a.pay_period_id in ('. $this->getListSQL($pay_period_id, $ph) .')
+						AND a.pay_period_id in ('. $this->getListSQL( $pay_period_id, $ph, 'int' ) .')
 						AND a.deleted = 0';
 
 		$query .= $this->getWhereSQL( $where );
@@ -610,50 +660,211 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
-		//$this->rs = $this->db->Execute($query, $ph);
-
 		return $this;
 	}
-/*
-	function getByCompanyIdAndTransactionStartDateAndTransactionEndDate($company_id, $start_date, $end_date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+
+	function getByCompanyIdAndPayPeriodIdAndRun($company_id, $pay_period_id, $run, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
 
-		if ( $start_date == '') {
+		if ( $pay_period_id == '') {
 			return FALSE;
 		}
 
-		if ( $end_date == '') {
+		if ( $run == '') {
 			return FALSE;
 		}
 
 		$strict_order = TRUE;
 		if ( $order == NULL OR !is_array($order) ) {
-			$order = array( 'a.transaction_date' => 'desc', 'a.advance' => 'asc', 'b.last_name' => 'asc' );
+			$order = array( 'a.transaction_date' => 'desc', 'a.run_id' => 'desc', 'b.last_name' => 'asc' );
 			$strict_order = FALSE;
 		}
 
 		$ulf = new UserListFactory();
+		$pplf = new PayPeriodListFactory();
+
+		$ph = array(
+					'company_id' => (int)$company_id,
+					'pay_period_id' => (int)$pay_period_id,
+					'run' => (int)$run,
+					);
 
 		$query = '
 					select	a.*
 					from	'. $this->getTable() .' as a,
-							'. $ulf->getTable() .' as b
+							'. $ulf->getTable() .' as b,
+							'. $pplf->getTable() .' as c
 					where	a.user_id = b.id
-						AND b.company_id = '. $company_id .'
-						AND a.transaction_date >= '. $this->db->BindTimeStamp( TTDate::getBeginDayEpoch( $start_date ) ) .'
-						AND a.transaction_date <= '. $this->db->BindTimeStamp( TTDate::getBeginDayEpoch( $end_date ) ) .'
+						AND a.pay_period_id = c.id
+						AND b.company_id = ?
+						AND a.pay_period_id = ?
+						AND a.run_id = ?
 						AND a.deleted = 0';
 
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict_order );
 
-		$this->rs = $this->db->Execute($query);
+		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}
-*/
+
+	function getByCompanyIdAndPayPeriodIdAndStatusIdAndTransactionDateBeforeDate($company_id, $pay_period_id, $status_id, $date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $pay_period_id == '') {
+			return FALSE;
+		}
+
+		if ( $status_id == '') {
+			return FALSE;
+		}
+
+		if ( $date == '') {
+			return FALSE;
+		}
+
+		$strict_order = TRUE;
+		if ( $order == NULL OR !is_array($order) ) {
+			$order = array( 'a.transaction_date' => 'desc', 'a.run_id' => 'desc', 'b.last_name' => 'asc' );
+			$strict_order = FALSE;
+		}
+
+		$ulf = new UserListFactory();
+		$pplf = new PayPeriodListFactory();
+
+		$ph = array(
+					'company_id' => (int)$company_id,
+					'pay_period_id' => (int)$pay_period_id,
+					'transaction_date' => $this->db->BindTimeStamp( $date ),
+					);
+
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a,
+							'. $ulf->getTable() .' as b,
+							'. $pplf->getTable() .' as c
+					where	a.user_id = b.id
+						AND a.pay_period_id = c.id
+						AND b.company_id = ?
+						AND a.pay_period_id = ?
+						AND a.transaction_date < ?
+						AND a.status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .')
+						AND a.deleted = 0';
+
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict_order );
+
+		$this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+
+		return $this;
+	}
+
+	function getByCompanyIdAndPayPeriodIdAndStatusIdAndNotRun($company_id, $pay_period_id, $status_id, $run_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $pay_period_id == '') {
+			return FALSE;
+		}
+
+		if ( $status_id == '') {
+			return FALSE;
+		}
+		
+		if ( $run_id == '') {
+			return FALSE;
+		}
+
+		$strict_order = TRUE;
+		if ( $order == NULL OR !is_array($order) ) {
+			$order = array( 'a.transaction_date' => 'desc', 'a.run_id' => 'desc', 'b.last_name' => 'asc' );
+			$strict_order = FALSE;
+		}
+
+		$ulf = new UserListFactory();
+		$pplf = new PayPeriodListFactory();
+
+		$ph = array(
+					'company_id' => (int)$company_id,
+					'run_id' => (int)$run_id,
+					);
+
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a,
+							'. $ulf->getTable() .' as b,
+							'. $pplf->getTable() .' as c
+					where	a.user_id = b.id
+						AND a.pay_period_id = c.id
+						AND b.company_id = ?
+						AND a.run_id != ?
+						AND a.pay_period_id in ('. $this->getListSQL( $pay_period_id, $ph, 'int' ) .')
+						AND a.status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .')
+						AND a.deleted = 0';
+
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict_order );
+
+		$this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		
+		return $this;
+	}
+
+	function getPayRunStatusByCompanyIdAndPayPeriodId($company_id, $pay_period_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $pay_period_id == '') {
+			return FALSE;
+		}
+
+		$strict_order = TRUE;
+		if ( $order == NULL OR !is_array($order) ) {
+			$order = array( 'a.run_id' => 'desc', 'a.status_id' => 'asc' );
+			$strict_order = FALSE;
+		}
+
+		$ulf = new UserListFactory();
+		$pplf = new PayPeriodListFactory();
+
+		$ph = array(
+					'company_id' => (int)$company_id
+					);
+
+		$query = '
+					select	a.run_id,a.status_id,count(*) as total_pay_stubs
+					from	'. $this->getTable() .' as a,
+							'. $ulf->getTable() .' as b,
+							'. $pplf->getTable() .' as c
+					where	a.user_id = b.id
+						AND a.pay_period_id = c.id
+						AND b.company_id = ?
+						AND a.pay_period_id in ('. $this->getListSQL( $pay_period_id, $ph, 'int' ) .')
+						AND a.deleted = 0
+						GROUP BY a.run_id, a.status_id
+						';
+
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict_order );
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+
+		$this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		return $this;
+	}
+
 	function getByUserIdAndPayPeriodId($user_id, $pay_period_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
@@ -664,8 +875,8 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'pay_period_id' => $pay_period_id,
-					'user_id' => $user_id,
+					'pay_period_id' => (int)$pay_period_id,
+					'user_id' => (int)$user_id,
 					);
 
 		$query = '
@@ -673,43 +884,6 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 					from	'. $this->getTable() .'
 					where	pay_period_id = ?
 						AND user_id = ?
-						AND deleted = 0';
-		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
-
-		$this->ExecuteSQL( $query, $ph );
-
-		return $this;
-	}
-
-	function getByUserIdAndPayPeriodIdAndAdvance($user_id, $pay_period_id, $advance, $where = NULL, $order = NULL) {
-		if ( $user_id == '') {
-			return FALSE;
-		}
-
-		if ( $pay_period_id == '') {
-			return FALSE;
-		}
-
-		/*
-		//Advance is boolean, don't need this check.
-		if ( $advance == '') {
-			return FALSE;
-		}
-		*/
-
-		$ph = array(
-					'pay_period_id' => $pay_period_id,
-					'user_id' => $user_id,
-					'advance' => $this->toBool( $advance ),
-					);
-
-		$query = '
-					select	*
-					from	'. $this->getTable() .'
-					where	pay_period_id = ?
-						AND user_id = ?
-						AND advance = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -794,7 +968,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -901,7 +1075,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 									);
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 		if ( $order == NULL ) {
-			$order = array( 'a.transaction_date' => 'desc', 'b.last_name' => 'asc' );
+			$order = array( 'a.transaction_date' => 'desc', 'a.run_id' => 'desc', 'b.last_name' => 'asc' );
 			$strict = FALSE;
 		} else {
 			if ( isset($order['transaction_date']) ) {
@@ -909,6 +1083,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 			} else {
 				$order['transaction_date'] = 'desc';
 			}
+			$order['run_id'] = 'desc';
 
 			$strict = TRUE;
 		}
@@ -923,7 +1098,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		$cf = new CurrencyFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -988,8 +1163,11 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['country']) ) ?$this->getWhereClauseSQL( 'b.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['province']) ) ? $this->getWhereClauseSQL( 'b.province', $filter_data['province'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['city']) ) ? $this->getWhereClauseSQL( 'b.city', $filter_data['city'], 'text', $ph ) : NULL;
+
 		//Pay Stub Status.
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['run_id']) ) ? $this->getWhereClauseSQL( 'a.run_id', $filter_data['run_id'], 'numeric_list', $ph ) : NULL;
 
 		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
 			$ph[] = $this->db->BindTimeStamp( (int)$filter_data['start_date'] );
@@ -1014,5 +1192,38 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	static function getCurrentPayRun( $company_id, $pay_period_ids ) {
+		$retval = 1;
+		if ( is_array($pay_period_ids) AND count($pay_period_ids) > 0 ) {
+			$prev_pp_retval = $pp_retval = $retval;
+			foreach( $pay_period_ids as $pay_period_id ) {
+				$pslf = TTnew( 'PayStubListFactory' );
+				$pslf->getPayRunStatusByCompanyIdAndPayPeriodId(  $company_id, $pay_period_id );
+				if ( $pslf->getRecordCount() > 0 ) {
+					//Current Pay Run is the highest run with open pay stubs.
+					//If no open pay stubs exist, move on to the next run.
+					foreach( $pslf as $ps_obj ) {
+						Debug::Text('Pay Period ID: '. $pay_period_id .' Run ID: '. $ps_obj->getColumn('run_id') .' Status ID: '. $ps_obj->getColumn('status_id') .' Total Pay Stubs: '. $ps_obj->getColumn('total_pay_stubs'), __FILE__, __LINE__, __METHOD__, 10);
+						if ( $ps_obj->getColumn('status_id') == 25 ) {
+							$pp_retval = (int)$ps_obj->getColumn('run_id');
+							break;
+						} elseif ( $ps_obj->getColumn('status_id') == 40 ) {
+							$pp_retval = ( (int)$ps_obj->getColumn('run_id') + 1 );
+							break;
+						}
+					}
+				}
+
+				if ( isset($pp_retval) AND $pp_retval > $retval ) {
+					$retval = $pp_retval;
+				} else {
+					Debug::Text('  Skipping Run ID: '. $pp_retval, __FILE__, __LINE__, __METHOD__, 10);
+				}
+			}
+		}
+
+		Debug::Text('  Current Run ID: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		return $retval;
+	}
 }
 ?>

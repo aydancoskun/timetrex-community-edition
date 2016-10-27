@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -121,12 +121,8 @@ class KPIFactory extends Factory
 	}
 
 	function setStatus( $status ) {
-
 		$status = trim( $status );
-		$key = Option::getByValue( $status, $this->getOptions( 'status' ) );
-		if ( $key !== FALSE ) {
-			$status = $key;
-		}
+		
 		if ( $this->Validator->inArrayKey( 'status', $status, TTi18n::gettext( 'Incorrect Status' ), $this->getOptions( 'status' ) ) ) {
 			$this->data['status_id'] = $status;
 			Debug::Text( 'Setting status_id data...	  ' . $this->data['status_id'], __FILE__, __LINE__, __METHOD__, 10 );
@@ -147,12 +143,11 @@ class KPIFactory extends Factory
 	}
 
 	function setType( $type_id ) {
-
 		$type_id = trim( $type_id );
 		if ( $this->Validator->inArrayKey( 'type_id', $type_id, TTi18n::gettext( 'Type is invalid' ), $this->getOptions( 'type' ) ) ) {
 			$this->data['type_id'] = $type_id;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -256,7 +251,7 @@ class KPIFactory extends Factory
 				AND
 				( $this->Validator->isNumeric( 'minimum_rate', $value, TTi18n::gettext( 'Minimum Rating must only be digits' ) )
 					AND
-					$this->Validator->isLengthAfterDecimal( 'minimum_rate', $value, TTi18n::gettext( 'Invalid	 Minimum Rating ' ), 0, 2 ) ) )
+					$this->Validator->isLengthAfterDecimal( 'minimum_rate', $value, TTi18n::gettext( 'Invalid Minimum Rating' ), 0, 2 ) ) )
 		) {
 			$this->data['minimum_rate'] = $value;
 			Debug::Text( 'Setting minimum_rate data...	 ' . $this->data['minimum_rate'], __FILE__, __LINE__, __METHOD__, 10 );
@@ -317,7 +312,7 @@ class KPIFactory extends Factory
 	}
 
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 
 		if ( $this->getType() == 10 AND $this->getMinimumRate() != '' AND $this->getMaximumRate() != '' ) {
 			if ( $this->getMinimumRate() >= $this->getMaximumRate() ) {

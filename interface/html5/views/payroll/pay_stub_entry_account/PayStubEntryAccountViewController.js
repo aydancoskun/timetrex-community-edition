@@ -60,11 +60,11 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 
 	onTypeChange: function() {
 		if ( this.current_edit_record.type_id === 50 ) {
-			this.edit_view_form_item_dic['accrual_pay_stub_entry_account_id'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['accrual_type_id'].css( 'display', 'none' );
+			this.detachElement( 'accrual_pay_stub_entry_account_id' );
+			this.detachElement( 'accrual_type_id' );
 
 		} else {
-			this.edit_view_form_item_dic['accrual_pay_stub_entry_account_id'].css( 'display', 'block' );
+			this.attachElement( 'accrual_pay_stub_entry_account_id' );
 			this.onAccrualPayStubEntryAccountChange();
 		}
 
@@ -72,9 +72,9 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 	},
 	onAccrualPayStubEntryAccountChange: function() {
 		if ( this.current_edit_record.accrual_pay_stub_entry_account_id > 0 ) {
-			this.edit_view_form_item_dic['accrual_type_id'].css( 'display', 'block' );
+			this.attachElement( 'accrual_type_id' );
 		} else {
-			this.edit_view_form_item_dic['accrual_type_id'].css( 'display', 'none' );
+			this.detachElement( 'accrual_type_id' )
 		}
 
 		this.editFieldResize();

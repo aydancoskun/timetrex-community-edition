@@ -33,7 +33,6 @@
     top: 50%;
     left: 50%;
     margin: -315px 0 0 -500px;
-    height: auto;
     height: 600px;
     width: 1000px;
     font-size: 12px;
@@ -47,6 +46,17 @@
     -ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000')";
     /* For IE 5.5 - 7 */
     filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000');
+
+}
+
+.report-view-wizard {
+    left: 2%;
+    top: 10px;
+    margin: 0;
+    width: 96%;
+    height: auto;
+    position: absolute;
+    bottom: 10px;
 
 }
 
@@ -96,18 +106,18 @@
     height: 35px;
     width: 35px;
     cursor: pointer;
-    padding: 0px;
+    padding: 0;
 }
 
 .wizard .forward-btn, .install-wizard .forward-btn {
     background-image: url("../../global/widgets/ribbon/icons/next-35x35.png");
     background-color: transparent;
-    background-position: 0px 0px;
+    background-position: 0 0;
     border: medium none;
     height: 35px;
     width: 35px;
     cursor: pointer;
-    padding: 0px;
+    padding: 0;
 }
 
 .wizard .done-btn, .install-wizard .done-btn {
@@ -118,7 +128,7 @@
     height: 35px;
     width: 35px;
     cursor: pointer;
-    padding: 0px;
+    padding: 0;
 }
 
 .wizard .close-btn, .install-wizard .close-btn {
@@ -129,7 +139,7 @@
     height: 35px;
     width: 35px;
     cursor: pointer;
-    padding: 0px;
+    padding: 0;
 }
 
 .wizard .title, .install-wizard .title {
@@ -140,12 +150,43 @@
     top: -22px;
 }
 
+.report-view-wizard .close-icon{
+    color: #FFFFFF;
+    /*font-size: 12px;*/
+    right: 5px;
+    position: absolute;
+    top: -22px;
+    cursor: pointer;
+
+
+    /*cursor: pointer;*/
+    font-size: 0;
+    /*position: absolute;*/
+    /*right: 7px;*/
+    /*top: 11px;*/
+    background-image: url("../../global/widgets/ribbon/icons/cancel-35x35.png");
+    background-size: 15px;
+    width: 15px;
+    height: 15px;
+
+    /*-webkit-filter: grayscale(100%);*/
+    /*-moz-filter: grayscale(100%);*/
+    /*-ms-filter: grayscale(100%);*/
+    /*-o-filter: grayscale(100%);*/
+
+    /*filter: grayscale(100%);*/
+    /*filter: url(gray.svg#grayscale);*/
+
+    /*filter: gray;*/
+
+}
+
 .install-wizard .progress-bar {
-     border-bottom: 1px solid #999999;
-     position: relative;
-     /*top: 10px;*/
-     width: 100%;
-     padding-top: 10px;
+    border-bottom: 1px solid #999999;
+    position: relative;
+    /*top: 10px;*/
+    width: 100%;
+    padding-top: 10px;
 }
 
 .wizard .title-1-div, .install-wizard .title-1-div {
@@ -188,17 +229,12 @@
     display: none;
 }
 
-
 .install-wizard .edit-view-form-item-div .edit-view-form-item-label-div {
     background: none repeat scroll 0 0 #375a7c;
     border-right: 2px solid #ae0000;
     float: left;
-    height: 31px;
+    height: 32px;
     margin-right: 10px;
-}
-
-.install-wizard .edit-view-form-item-div .edit-view-form-item-label-div-first-row {
-    border-top-left-radius: 5px;
 }
 
 .install-wizard .requirements, .install-wizard .databaseConfig, .install-wizard .systemSettings, .install-wizard .company, .install-wizard .user {
@@ -206,7 +242,7 @@
     margin: 0 auto;
 }
 
-.install-wizard .requirements .s-header, .install-wizard .requirements .s-body, .install-wizard .requirements .s-label, .install-wizard .requirements .s-require  {
+.install-wizard .requirements .s-header, .install-wizard .requirements .s-body, .install-wizard .requirements .s-label, .install-wizard .requirements .s-require {
     width: 100%;
     clear: both;
 }
@@ -215,7 +251,6 @@
     overflow-y: auto;
     overflow-x: hidden;
 }
-
 
 .install-wizard .requirements .s-require .all-ok {
     background: none repeat scroll 0 0 #ffffff;
@@ -229,10 +264,24 @@
 
 .install-wizard .license, .install-wizard .databaseConfig,
 .install-wizard .user, .install-wizard .company,
-.install-wizard .systemSettings
-{
+.install-wizard .systemSettings {
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+.install-wizard .license > .t-text-area{
+    margin-bottom: 5px;
+}
+
+
+.install-wizard .license .t-checkbox{
+    vertical-align: middle;
+}
+
+
+.wizard-checkbox-label > .t-checkbox{
+    vertical-align: middle;
+    margin-right: 5px;
 }
 
 .install-wizard .edit-view-form-item-label-div {
@@ -240,7 +289,7 @@
 }
 
 /*.install-wizard .requirements .edit-view-form-item-label-div {*/
-    /*width: 400px;*/
+/*width: 400px;*/
 /*}*/
 
 .install-wizard .first-column {
@@ -329,6 +378,25 @@ progress::-moz-progress-bar {
     position: absolute;
     top: 101px;
     width: 100%;
+}
+
+.report-view-wizard > .content {
+    position: absolute;
+    height: auto;
+    top: 0;
+    bottom: 5px;
+    overflow: hidden;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box; /* Firefox */
+    -webkit-box-sizing: border-box; /* Safari */
+    width: 100%;
+}
+
+.report-view-wizard > .content > .iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background-color: #FFFFFF;
 }
 
 .install-wizard .content {
@@ -420,6 +488,7 @@ progress::-moz-progress-bar {
     float: left;
     min-width: 180px;
     margin-right: 10px;
+    padding-top: 4px;
 }
 
 .wizard .wizard-form-item-div .form-item-input-div {
@@ -455,13 +524,9 @@ progress::-moz-progress-bar {
     height: 300;
 }
 
-
-
-
 .wizard-content {
     display: none;
 }
-
 
 .content .wizard-content {
     display: block;
@@ -482,14 +547,12 @@ progress::-moz-progress-bar {
     width: 40%;
 }
 
-
 .wizard-content .wizard-item .wizard-item-label span {
     float: right;
     margin-left: 5px;
     margin-right: 7px;
     text-align: right;
 }
-
 
 .wizard-content .wizard-item .wizard-item-widget {
     float: left;
@@ -501,7 +564,6 @@ progress::-moz-progress-bar {
 
 }
 
-
 .wizard .progress-bar {
     border-bottom: 1px solid #999999;
     position: absolute;
@@ -510,3 +572,21 @@ progress::-moz-progress-bar {
 }
 
 
+.wizard-bg{
+    /*background: rgba(0, 0, 0, 0.6);*/
+    /*position: absolute;*/
+    /*top: 0;*/
+    /*width: 100%;*/
+    /*height: 100%;*/
+}
+
+.wizard-overlay {
+    background: rgba(0, 0, 0, 0.6);
+    /*width: 100%;*/
+    /*height: 100%;*/
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 49;
+}

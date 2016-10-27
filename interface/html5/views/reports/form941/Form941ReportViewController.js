@@ -78,11 +78,20 @@ Form941ReportViewController = ReportBaseViewController.extend( {
 			sub_menus: []
 		} );
 
-		var view = new RibbonSubMenu( {
+		var view_html = new RibbonSubMenu( {
 			label: $.i18n._( 'View' ),
-			id: ContextMenuIconName.view,
+			id: ContextMenuIconName.view_html,
 			group: editor_group,
 			icon: Icons.view,
+			permission_result: true,
+			permission: null
+		} );
+
+		var view_pdf = new RibbonSubMenu( {
+			label: $.i18n._( 'PDF' ),
+			id: ContextMenuIconName.view,
+			group: editor_group,
+			icon: Icons.print,
 			permission_result: true,
 			permission: null
 		} );
@@ -173,6 +182,13 @@ Form941ReportViewController = ReportBaseViewController.extend( {
 		switch ( id ) {
 			case ContextMenuIconName.view:
 				this.onViewClick();
+				break;
+			case ContextMenuIconName.view_html:
+
+				this.onViewClick('html');
+				break;
+			case ContextMenuIconName.view_html_new_window:
+				this.onViewClick('html', true);
 				break;
 			case ContextMenuIconName.export_excel:
 				this.onViewExcelClick();
@@ -603,10 +619,7 @@ Form941ReportViewController = ReportBaseViewController.extend( {
 
 		other.sick_wages = {include_pay_stub_entry_account: this.current_edit_record.sick_wages_include_pay_stub_entry_account,
 			exclude_pay_stub_entry_account: this.current_edit_record.sick_wages_exclude_pay_stub_entry_account};
-
-		other.eic = {include_pay_stub_entry_account: this.current_edit_record.eic_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.eic_exclude_pay_stub_entry_account};
-
+		
 		other.deposit_schedule = this.current_edit_record.deposit_schedule;
 		other.quarter_deposit = this.current_edit_record.quarter_deposit;
 		other.name = this.current_edit_record.name;
@@ -689,14 +702,6 @@ Form941ReportViewController = ReportBaseViewController.extend( {
 
 				this.current_edit_record.sick_wages_include_pay_stub_entry_account = res_Data.sick_wages.include_pay_stub_entry_account;
 				this.current_edit_record.sick_wages_exclude_pay_stub_entry_account = res_Data.sick_wages.exclude_pay_stub_entry_account;
-			}
-
-			if ( res_Data.eic ) {
-				this.edit_view_ui_dic.eic_exclude_pay_stub_entry_account.setValue( res_Data.eic.exclude_pay_stub_entry_account );
-				this.edit_view_ui_dic.eic_include_pay_stub_entry_account.setValue( res_Data.eic.include_pay_stub_entry_account );
-
-				this.current_edit_record.eic_include_pay_stub_entry_account = res_Data.eic.include_pay_stub_entry_account;
-				this.current_edit_record.eic_exclude_pay_stub_entry_account = res_Data.eic.exclude_pay_stub_entry_account;
 			}
 
 			if ( res_Data.quarter_deposit ) {

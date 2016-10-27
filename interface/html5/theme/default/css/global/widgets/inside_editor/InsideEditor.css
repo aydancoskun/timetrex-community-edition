@@ -23,6 +23,7 @@
 .inside-editor-render .cell {
     text-align: center;
     width: 15px;
+    position: relative;
 }
 
 .inside-editor-render .awesome-box-cell {
@@ -42,6 +43,7 @@
     padding-bottom: 5px;
     padding-top: 5px;
     border-bottom: 1px solid #c7c7c7;
+    position: relative;
 }
 
 .inside-editor .no-line {

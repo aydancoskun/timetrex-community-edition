@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -114,8 +114,6 @@ class AbsencePolicyFactory extends Factory {
 											'pay_code' => FALSE,
 											'pay_formula_policy_id' => 'PayFormulaPolicy',
 											'pay_formula_policy' => FALSE,
-
-											'pay_stub_entry_account_id' => 'PayStubEntryAccountId',
 											
 											'in_use' => FALSE,
 											'deleted' => 'Deleted',
@@ -169,41 +167,7 @@ class AbsencePolicyFactory extends Factory {
 
 		return FALSE;
 	}
-/*
-	function isPaid() {
-		if ( in_array( $this->getType(), $this->getOptions('paid_type') ) ) {
-			return TRUE;
-		}
-		return FALSE;
-	}
-	function getType() {
-		if ( isset($this->data['type_id']) ) {
-			return (int)$this->data['type_id'];
-		}
-
-		return FALSE;
-	}
-	function setType($value) {
-		$value = trim($value);
-
-		$key = Option::getByValue($value, $this->getOptions('type') );
-		if ($key !== FALSE) {
-			$value = $key;
-		}
-
-		if ( $this->Validator->inArrayKey(	'type',
-											$value,
-											TTi18n::gettext('Incorrect Type'),
-											$this->getOptions('type')) ) {
-
-			$this->data['type_id'] = $value;
-
-			return FALSE;
-		}
-
-		return FALSE;
-	}
-*/
+	
 	function isUniqueName($name) {
 		$ph = array(
 					'company_id' => $this->getCompany(),
@@ -334,7 +298,7 @@ class AbsencePolicyFactory extends Factory {
 		return FALSE;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		if ( $this->getDeleted() != TRUE ) {
 			if ( $this->getPayCode() == 0 ) {
 				$this->Validator->isTRUE(	'pay_code_id',

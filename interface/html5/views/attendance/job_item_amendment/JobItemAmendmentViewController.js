@@ -119,35 +119,22 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 
 		//Estimated Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'estimate_time', width: 150, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'estimate_time', mode: 'time_unit', need_parser_sec: true} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
 
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().time_unit_format_display + " </span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-
-		this.addEditFieldToColumn( $.i18n._( 'Estimated Time' ), form_item_input, tab_task_amendment_column1, '', widgetContainer, true, true );
+		this.addEditFieldToColumn( $.i18n._( 'Estimated Time' ), form_item_input, tab_task_amendment_column1, '', null, true, true );
 
 		//Billable Rate
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'billable_rate', width: 150} );
+		form_item_input.TTextInput( {field: 'billable_rate', width: 86} );
 		this.addEditFieldToColumn( $.i18n._( 'Billable Rate' ), form_item_input, tab_task_amendment_column1 );
 
 		//Minimum Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'minimum_time', width: 150, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'minimum_time', mode: 'time_unit', need_parser_sec: true} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().time_unit_format_display + " </span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-
-		this.addEditFieldToColumn( $.i18n._( 'Minimum Billable Time' ), form_item_input, tab_task_amendment_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Minimum Billable Time' ), form_item_input, tab_task_amendment_column1, '', null );
 
 		//Estimated Quantity
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -232,10 +219,12 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 			case 'job_id':
 				this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 				this.setJobItemValueWhenJobChanged( target.getValue( true ) );
+				this.edit_view_ui_dic['job_quick_search'].setCheckBox(true);
 				break;
 			case 'item_id':
 				this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 				this.setJobItemAmendmentDefaultData();
+				this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
 				break;
 			case 'job_quick_search':
 			case 'job_item_quick_search':
@@ -311,6 +300,8 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 				}
 
 			}} );
+			$this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
+			$this.edit_view_ui_dic['job_id'].setCheckBox( true );
 		} else if ( key === 'job_item_quick_search' ) {
 
 			args.filter_data = {manual_id: value};
@@ -328,6 +319,8 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 				}
 
 			}} );
+			this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
+			this.edit_view_ui_dic['job_item_id'].setCheckBox(true);
 		}
 
 	},
@@ -343,6 +336,8 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 		var job_item_widget = $this.edit_view_ui_dic['item_id'];
 		var current_item_id = job_item_widget.getValue();
 		job_item_widget.setSourceData( null );
+		job_item_widget.setCheckBox(true);
+		this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
 		var args = {};
 		args.filter_data = {job_id: $this.current_edit_record.job_id};
 		$this.edit_view_ui_dic['item_id'].setDefaultArgs( args );

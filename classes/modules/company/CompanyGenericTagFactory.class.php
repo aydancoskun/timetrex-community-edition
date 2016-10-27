@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -51,11 +51,12 @@ class CompanyGenericTagFactory extends Factory {
 			case 'object_type':
 				$retval = array(
 										//These could be names instead?
+										//These need to match table names, so PurgeDatabase can properly purge them.
 										100 => 'company',
 										110 => 'branch',
 										120 => 'department',
-										130 => 'stations',
-										140 => 'hierarchy',
+										130 => 'station',
+										140 => 'hierarchy_control',
 										150 => 'request',
 										160 => 'message',
 										170 => 'policy_group',
@@ -93,7 +94,7 @@ class CompanyGenericTagFactory extends Factory {
 										400 => 'schedule',
 										410 => 'recurring_schedule_template',
 
-										500 => 'report',
+										500 => 'user_report_data',
 										510 => 'report_schedule',
 
 										600 => 'job',
@@ -109,7 +110,7 @@ class CompanyGenericTagFactory extends Factory {
 										910 => 'invoice',
 										920 => 'invoice_transaction',
 
-										930 => 'expense',
+										930 => 'user_expense',
 
 										950 => 'job_application',
 									);
@@ -205,7 +206,7 @@ class CompanyGenericTagFactory extends Factory {
 
 			$this->data['object_type_id'] = $type;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;

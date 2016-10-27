@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -71,7 +71,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 			$query = '
 						select	*
 						from	'. $this->getTable() .'
-						where	id in ('. $this->getListSQL($id, $ph) .')
+						where	id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 							AND deleted = 0';
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
@@ -92,7 +92,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -119,8 +119,8 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
-					'id' => $id,
+					'company_id' => (int)$company_id,
+					'id' => (int)$id,
 					);
 
 		$query = '
@@ -148,8 +148,8 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
-					'accrual_id' => $accrual_id,
+					'company_id' => (int)$company_id,
+					'accrual_id' => (int)$accrual_id,
 					);
 
 		$query = '
@@ -177,14 +177,14 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
-						AND status_id in ('. $this->getListSQL($status_id, $ph) .')
+						AND status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .')
 						AND deleted = 0
 					ORDER BY ps_order ASC';
 		$query .= $this->getWhereSQL( $where );
@@ -205,14 +205,14 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
-						AND type_id in ('. $this->getListSQL($type_id, $ph) .')
+						AND type_id in ('. $this->getListSQL( $type_id, $ph, 'int' ) .')
 						AND deleted = 0
 					ORDER BY ps_order ASC';
 		$query .= $this->getWhereSQL( $where );
@@ -237,7 +237,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'name' => $name,
 					);
 
@@ -246,7 +246,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND lower(name) LIKE lower(?)
-						AND type_id in ('. $this->getListSQL($type_id, $ph) .')
+						AND type_id in ('. $this->getListSQL( $type_id, $ph, 'int' ) .')
 						AND deleted = 0
 					ORDER BY ps_order ASC';
 		$query .= $this->getWhereSQL( $where );
@@ -267,7 +267,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
-					where	type_id in ('. $this->getListSQL($type_id, $ph) .')
+					where	type_id in ('. $this->getListSQL( $type_id, $ph, 'int' ) .')
 						AND deleted = 0
 					ORDER BY ps_order ASC';
 		$query .= $this->getWhereSQL( $where );
@@ -288,9 +288,9 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'company_id2' => $company_id,
-					'type_id' => $type_id,
+					'type_id' => (int)$type_id,
 					);
 
 		$query = '
@@ -329,15 +329,15 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
-						AND status_id in ('. $this->getListSQL($status_id, $ph) .')
-						AND type_id in ('. $this->getListSQL($type_id, $ph) .')
+						AND status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .')
+						AND type_id in ('. $this->getListSQL( $type_id, $ph, 'int' ) .')
 						AND deleted = 0
 					ORDER BY ps_order ASC';
 		$query .= $this->getWhereSQL( $where );
@@ -357,7 +357,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		$psalf = new PayStubAmendmentListFactory();
 
 		$ph = array(
-					'pay_stub_account_id' => $id,
+					'pay_stub_account_id' => (int)$id,
 					);
 
 		$query = '
@@ -431,7 +431,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		$cdpseaf = new CompanyDeductionPayStubEntryAccountFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -606,13 +606,15 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 				$entry_name_list[$psea_obj->getType()][] = $psea_obj->getId();
 			}
 
-			foreach( $entry_name_list[40] as $key => $entry_name_id ) {
-				if ( isset($psea_type_map[$entry_name_id]) ) {
-					$tmp_entry_name_list[$entry_name_id] = $entry_name_list[$psea_type_map[$entry_name_id]];
+			if ( isset($entry_name_list[40]) ) {
+				foreach( $entry_name_list[40] as $key => $entry_name_id ) {
+					if ( isset($psea_type_map[$entry_name_id]) AND isset($entry_name_list[$psea_type_map[$entry_name_id]]) ) {
+						$tmp_entry_name_list[$entry_name_id] = $entry_name_list[$psea_type_map[$entry_name_id]];
+					}
 				}
-			}
 
-			return $tmp_entry_name_list;
+				return $tmp_entry_name_list;
+			}
 		}
 
 		return FALSE;

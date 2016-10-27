@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -336,7 +336,7 @@ class PayPeriodFactory extends Factory {
 		return FALSE;
 	}
 	function setStartDate($epoch) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ( $epoch != '' ) {
 			//Make sure all pay periods start at the first second of the day.
@@ -373,7 +373,7 @@ class PayPeriodFactory extends Factory {
 		return FALSE;
 	}
 	function setEndDate($epoch) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ( $epoch != '' ) {
 			//Make sure all pay periods end at the last second of the day.
@@ -404,7 +404,7 @@ class PayPeriodFactory extends Factory {
 		return FALSE;
 	}
 	function setTransactionDate($epoch) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ( $epoch != '' ) {
 			//Make sure all pay periods transact at noon.
@@ -437,7 +437,7 @@ class PayPeriodFactory extends Factory {
 		return FALSE;
 	}
 	function setAdvanceEndDate($epoch) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if	(	$epoch == FALSE
 				OR
@@ -466,7 +466,7 @@ class PayPeriodFactory extends Factory {
 		return FALSE;
 	}
 	function setAdvanceTransactionDate($epoch) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if	(	$epoch == FALSE
 				OR
@@ -532,7 +532,7 @@ class PayPeriodFactory extends Factory {
 		return FALSE;
 	}
 	function setTaintedDate($epoch = NULL) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ($epoch == NULL) {
 			$epoch = TTDate::getTime();
@@ -1000,9 +1000,9 @@ class PayPeriodFactory extends Factory {
 		return $total_pay_stubs;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		//Make sure we aren't trying to create a pay period with no dates...
-		if ( $this->isNew() == TRUE AND $this->validate_only == FALSE ) {
+		if ( $this->isNew() == TRUE AND $this->Validator->getValidateOnly() == FALSE ) {
 			Debug::text('New: Start Date: '. $this->getStartDate() .' End Date: '. $this->getEndDate(), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $this->getStartDate() == '' ) {
 				$this->Validator->isTrue(		'start_date',

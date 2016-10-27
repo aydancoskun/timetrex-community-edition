@@ -395,7 +395,7 @@
 
                 // if we only want time picker...
                 if ( o.timeOnly === true ) {
-                    $tp.prepend( '<div class="ui-widget-header ui-helper-clearfix ui-corner-all">' + '<div class="ui-datepicker-title">' + o.timeOnlyTitle + '</div>' + '</div>' );
+                    //$tp.prepend( '<div class="ui-widget-header ui-helper-clearfix ui-corner-all">' + '<div class="ui-datepicker-title">' + o.timeOnlyTitle + '</div>' + '</div>' );
                     $dp.find( '.ui-datepicker-header, .ui-datepicker-calendar' ).hide();
                 }
 
@@ -1331,7 +1331,9 @@
                         (tp_inst._defaults.amNames.join( '' )) + (tp_inst._defaults.pmNames.join( '' )) +
                         dateChars,
                     chr = String.fromCharCode( event.charCode === undefined ? event.keyCode : event.charCode );
-                return event.ctrlKey || (chr < ' ' || !dateChars || datetimeChars.indexOf( chr ) > -1);
+                //Kevin: event.ctrlKey || (chr < ' ' || !dateChars || datetimeChars.indexOf( chr ) > -1);
+                // Don't check time format.
+                return true;
             }
         }
 
@@ -1403,7 +1405,8 @@
         selectLocalTimeZone( tp_inst );
         var now = new Date();
         this._setTime( inst, now );
-        $( '.ui-datepicker-today', $dp ).click();
+        //Kevin related to issue 1813.
+        $( '.ui-datepicker-today', $dp ).is(':visible') && $( '.ui-datepicker-today', $dp ).click();
     };
 
     /*

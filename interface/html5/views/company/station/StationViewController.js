@@ -78,17 +78,19 @@ StationViewController = BaseViewController.extend( {
 
 		this.initDropDownOptions( options, function( result ) {
 
-			$this.user_group_api.getUserGroup( '', false, false, {onResult: function( res ) {
+			$this.user_group_api.getUserGroup( '', false, false, {
+				onResult: function( res ) {
 
-				res = res.getResult();
-				res = Global.buildTreeRecord( res );
-				$this.user_group_array = res;
+					res = res.getResult();
+					res = Global.buildTreeRecord( res );
+					$this.user_group_array = res;
 
-				if ( callBack ) {
-					callBack( result ); // First to initialize drop down options, and then to initialize edit view UI.
+					if ( callBack ) {
+						callBack( result ); // First to initialize drop down options, and then to initialize edit view UI.
+					}
+
 				}
-
-			}} );
+			} );
 
 		} );
 
@@ -178,6 +180,8 @@ StationViewController = BaseViewController.extend( {
 		var job_item_widget = $this.edit_view_ui_dic['job_item_id'];
 		var current_job_item_id = job_item_widget.getValue();
 		job_item_widget.setSourceData( null );
+		job_item_widget.setCheckBox(true);
+		this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
 		var args = {};
 		args.filter_data = {job_id: $this.current_edit_record.job_id};
 		$this.edit_view_ui_dic['job_item_id'].setDefaultArgs( args );
@@ -188,17 +192,19 @@ StationViewController = BaseViewController.extend( {
 
 			new_arg.filter_data.id = current_job_item_id;
 			new_arg.filter_columns = $this.edit_view_ui_dic['job_item_id'].getColumnFilter();
-			$this.job_item_api.getJobItem( new_arg, {onResult: function( task_result ) {
-				var data = task_result.getResult();
+			$this.job_item_api.getJobItem( new_arg, {
+				onResult: function( task_result ) {
+					var data = task_result.getResult();
 
-				if ( data.length > 0 ) {
-					job_item_widget.setValue( current_job_item_id );
-					$this.current_edit_record.job_item_id = current_job_item_id;
-				} else {
-					setDefaultData();
+					if ( data.length > 0 ) {
+						job_item_widget.setValue( current_job_item_id );
+						$this.current_edit_record.job_item_id = current_job_item_id;
+					} else {
+						setDefaultData();
+					}
+
 				}
-
-			}} )
+			} )
 
 		} else {
 			setDefaultData();
@@ -239,11 +245,13 @@ StationViewController = BaseViewController.extend( {
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.setJobItemValueWhenJobChanged( target.getValue( true ) );
+					this.edit_view_ui_dic['job_quick_search'].setCheckBox(true);
 				}
 				break;
 			case 'job_item_id':
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
+					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
 				}
 				break;
 			case 'job_quick_search':
@@ -320,26 +328,25 @@ StationViewController = BaseViewController.extend( {
 				tab_2_label.text( $.i18n._( 'TimeClock' ) );
 
 				if ( parseInt( this.current_edit_record['type_id'] ) !== 150 ) {
-					this.edit_view_form_item_dic['manual_command'].css( 'display', 'block' );
-					this.edit_view_form_item_dic['push_frequency'].css( 'display', 'block' );
-					this.edit_view_form_item_dic['partial_push_frequency'].css( 'display', 'block' );
+					this.attachElement('manual_command');
+					this.attachElement('push_frequency');
+					this.attachElement('partial_push_frequency');
 				} else {
-					this.edit_view_form_item_dic['manual_command'].css( 'display', 'none' );
-					this.edit_view_form_item_dic['push_frequency'].css( 'display', 'none' );
-					this.edit_view_form_item_dic['partial_push_frequency'].css( 'display', 'none' );
+					this.detachElement('manual_command');
+					this.detachElement('push_frequency');
+					this.detachElement('partial_push_frequency');
 				}
 
-				this.edit_view_form_item_dic['password'].css( 'display', 'block' );
-				this.edit_view_form_item_dic['port'].css( 'display', 'block' );
+				this.attachElement('password');
+				this.attachElement('port');
 
 			} else {
 				tab_2_label.text( $.i18n._( 'Mobile App' ) );
-
-				this.edit_view_form_item_dic['password'].css( 'display', 'none' );
-				this.edit_view_form_item_dic['port'].css( 'display', 'none' );
-				this.edit_view_form_item_dic['manual_command'].css( 'display', 'none' );
-				this.edit_view_form_item_dic['push_frequency'].css( 'display', 'none' );
-				this.edit_view_form_item_dic['partial_push_frequency'].css( 'display', 'none' );
+				this.detachElement('password');
+				this.detachElement('port');
+				this.detachElement('manual_command');
+				this.detachElement('push_frequency');
+				this.detachElement('partial_push_frequency');
 
 			}
 
@@ -357,13 +364,15 @@ StationViewController = BaseViewController.extend( {
 
 	initModeFlag: function() {
 		var $this = this;
-		this.api.getOptions( 'mode_flag', this.current_edit_record.type_id, true, {onResult: function( result ) {
-			var result_data = Global.buildRecordArray( result.getResult() );
+		this.api.getOptions( 'mode_flag', this.current_edit_record.type_id, true, {
+			onResult: function( result ) {
+				var result_data = Global.buildRecordArray( result.getResult() );
 
-			$this.edit_view_ui_dic['mode_flag'].setSourceData( result_data );
-			$this.edit_view_ui_dic['mode_flag'].setValue( $this.current_edit_record.mode_flag );
+				$this.edit_view_ui_dic['mode_flag'].setSourceData( result_data );
+				$this.edit_view_ui_dic['mode_flag'].setValue( $this.current_edit_record.mode_flag );
 
-		}} );
+			}
+		} );
 	},
 
 	setTabStatus: function() {
@@ -426,26 +435,31 @@ StationViewController = BaseViewController.extend( {
 		this.is_add = false;
 		LocalCacheData.current_doing_context_action = 'save_and_continue';
 		var $this = this;
+		this.is_changed = false;
 		var commandData = this.edit_view_ui_dic['manual_command'].getValue();
 		var commandId = this.current_edit_record.id;
-		this.api['set' + this.api.key_name]( this.current_edit_record, {onResult: function( result ) {
-			if ( isRun ) {
-				$this.api['runManualCommand']( commandData, commandId, {onResult: function( result_1 ) {
-					if ( result_1.isValid() ) {
-						var result_data = result_1.getResult();
-						TAlertManager.showAlert( result_data, $.i18n._( 'Manual Command Result' ) );
-						$this.onSaveAndContinueResult( result );
+		this.api['set' + this.api.key_name]( this.current_edit_record, {
+			onResult: function( result ) {
+				if ( isRun ) {
+					$this.api['runManualCommand']( commandData, commandId, {
+						onResult: function( result_1 ) {
+							if ( result_1.isValid() ) {
+								var result_data = result_1.getResult();
+								TAlertManager.showAlert( result_data, $.i18n._( 'Manual Command Result' ) );
+								$this.onSaveAndContinueResult( result );
 
-					} else {
-						TAlertManager.showErrorAlert( result );
-					}
+							} else {
+								TAlertManager.showErrorAlert( result );
+							}
 
-				}} );
-			} else {
-				$this.onSaveAndContinueResult( result );
+						}
+					} );
+				} else {
+					$this.onSaveAndContinueResult( result );
+				}
+
 			}
-
-		}} );
+		} );
 	},
 
 	onSaveDone: function( result ) {
@@ -471,21 +485,83 @@ StationViewController = BaseViewController.extend( {
 
 	},
 
+	setEditMenuEditIcon: function( context_btn, pId ) {
+
+		if ( !this.editPermissionValidate( pId ) ) {
+			context_btn.addClass( 'invisible-image' );
+		}
+
+		if ( !this.is_viewing || !this.editOwnerOrChildPermissionValidate( pId ) ) {
+			context_btn.addClass( 'disable-image' );
+		}
+	},
+
+	onEditClick: function( editId, noRefreshUI ) {
+		var $this = this;
+		var grid_selected_id_array = this.getGridSelectIdArray();
+		var grid_selected_length = grid_selected_id_array.length;
+		if ( Global.isSet( editId ) ) {
+			var selectedId = editId;
+		} else {
+			if ( this.is_viewing ) {
+				selectedId = this.current_edit_record.id;
+			} else if ( grid_selected_length > 0 ) {
+				selectedId = grid_selected_id_array[0];
+			} else {
+				return;
+			}
+		}
+		this.is_viewing = false;
+		this.is_edit = true;
+		this.is_add = false;
+		LocalCacheData.current_doing_context_action = 'edit';
+		if ( !this.edit_only_mode ) {
+			$this.openEditView();
+		} else {
+			$this.setEditViewWidgetsMode();
+		}
+		var filter = {};
+		filter.filter_data = {};
+		filter.filter_data.id = [selectedId];
+		this.api['get' + this.api.key_name]( filter, {
+			onResult: function( result ) {
+				var result_data = result.getResult();
+				if ( !result_data ) {
+					result_data = [];
+				}
+				result_data = result_data[0];
+				if ( !result_data ) {
+					TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
+					$this.onCancelClick();
+					return;
+				}
+				if ( $this.sub_view_mode && $this.parent_key ) {
+					result_data[$this.parent_key] = $this.parent_value;
+				}
+				$this.current_edit_record = result_data;
+				$this.initEditView();
+
+			}
+		} );
+
+	},
+
 	openEditView: function( id ) {
 		var $this = this;
 
 		if ( $this.edit_only_mode ) {
 
 			$this.initOptions( function( result ) {
-
-				$this.is_viewing = true;
 				if ( !$this.edit_view ) {
+					$this.is_viewing = true;
 					$this.initEditViewUI( $this.viewId, $this.edit_view_tpl );
 				}
-
 				$this.getStationData( id, function( result ) {
 					// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
 					$this.current_edit_record = result;
+					//if ( !$this.editPermissionValidate() || !$this.editOwnerOrChildPermissionValidate()) {
+					//	$this.is_viewing = true;
+					//}
 					$this.setEditViewWidgetsMode();
 					$this.initEditView();
 
@@ -508,17 +584,19 @@ StationViewController = BaseViewController.extend( {
 		filter.filter_data = {};
 		filter.filter_data.id = [id];
 
-		this.api['get' + this.api.key_name]( filter, {onResult: function( result ) {
-			var result_data = result.getResult();
+		this.api['get' + this.api.key_name]( filter, {
+			onResult: function( result ) {
+				var result_data = result.getResult();
 
-			if ( !result_data ) {
-				result_data = [];
+				if ( !result_data ) {
+					result_data = [];
+				}
+				result_data = result_data[0];
+
+				callBack( result_data );
+
 			}
-			result_data = result_data[0];
-
-			callBack( result_data );
-
-		}} );
+		} );
 
 	},
 
@@ -533,7 +611,6 @@ StationViewController = BaseViewController.extend( {
 			'tab_time_clock': $.i18n._( 'TimeClock' ),
 			'tab_audit': $.i18n._( 'Audit' )
 		} );
-
 
 		if ( !this.edit_only_mode ) {
 			this.navigation.AComboBox( {
@@ -908,44 +985,55 @@ StationViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Status' ),
+			new SearchField( {
+				label: $.i18n._( 'Status' ),
 				in_column: 1,
 				field: 'status_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Type' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Type' ),
 				in_column: 1,
 				field: 'type_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Station' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Station' ),
 				in_column: 1,
 				field: 'station_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Source' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Source' ),
 				in_column: 1,
 				field: 'source',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Description' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Description' ),
 				in_column: 2,
 				field: 'description',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Created By' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -953,9 +1041,11 @@ StationViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -963,10 +1053,10 @@ StationViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 		];
 	}
-
 
 } );
 

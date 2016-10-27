@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -75,8 +75,6 @@ function getJSONError() {
 }
 
 function unauthenticatedInvokeService( $class_name, $method, $arguments, $message_id, $api_auth ) {
-	global $obj;
-	
 	TTi18n::chooseBestLocale(); //Make sure we set the locale as best we can when not logged in
 
 	Debug::text('Handling UNAUTHENTICATED JSON Call To API Factory: '.  $class_name .' Method: '. $method .' Message ID: '. $message_id, __FILE__, __LINE__, __METHOD__, 10);
@@ -256,13 +254,17 @@ $argument_size = strlen( serialize($arguments) );
 if ( PRODUCTION == TRUE AND $argument_size > (1024 * 12) ) {
 	Debug::Text('Arguments too large to display... Size: '. $argument_size, __FILE__, __LINE__, __METHOD__, 10);
 } else {
-	Debug::Arr($arguments, 'Arguments: (Size: '. $argument_size .')', __FILE__, __LINE__, __METHOD__, 10);
+	if ( strtolower($method) == 'login' AND isset($arguments[0]) ) { //Make sure passwords arent displayed if logging is enabled.
+		Debug::Arr($arguments[0], '*Censored* Arguments: (Size: '. $argument_size .')', __FILE__, __LINE__, __METHOD__, 10);
+	} else {
+		Debug::Arr($arguments, 'Arguments: (Size: '. $argument_size .')', __FILE__, __LINE__, __METHOD__, 10);
+	}
 }
 unset($argument_size);
 
 $api_auth = TTNew('APIAuthentication'); //Used to handle error cases and display error messages.
 $session_id = getSessionID();
-if ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == '' AND $session_id != '' AND !in_array( strtolower($method), array('isloggedin', 'ping' ) ) ) { //When interface calls PING() on a regular basis we need to skip this check and pass it to APIAuthentication immediately to avoid updating the session time.
+if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == '' ) AND ( !isset($config_vars['other']['down_for_maintenance']) OR isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == '' ) AND $session_id != '' AND !in_array( strtolower($method), array('isloggedin', 'ping' ) ) ) { //When interface calls PING() on a regular basis we need to skip this check and pass it to APIAuthentication immediately to avoid updating the session time.
 	$authentication = new Authentication();
 
 	Debug::text('Session ID: '. $session_id .' Source IP: '. Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10);

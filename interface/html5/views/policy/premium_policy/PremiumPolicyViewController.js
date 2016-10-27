@@ -143,10 +143,10 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		//Minimum Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'minimum_time', width: 65, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'minimum_time', mode:'time_unit', need_parser_sec: true} );
 
 		var widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'> " + LocalCacheData.getLoginUserPreference().time_unit_format_display + " " + $.i18n._( '(Use 0 for no minimum)' ) + "</span>" );
+		var label = $( "<span class='widget-right-label'> " + $.i18n._( '(Use 0 for no minimum)' ) + "</span>" );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -154,10 +154,10 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		//Maximum Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'maximum_time', width: 65, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'maximum_time', mode:'time_unit', need_parser_sec: true} );
 
 		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + LocalCacheData.getLoginUserPreference().time_unit_format_display + " " + $.i18n._( '(Use 0 for no maximum)' ) + "</span>" );
+		label = $( "<span class='widget-right-label'> " + $.i18n._( '(Use 0 for no maximum)' ) + "</span>" );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -224,13 +224,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		form_item_input.TDatePicker( {field: 'start_date'} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().date_format_example + " " + $.i18n._( "(Leave blank for no start date)" ) + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_date_criteria_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_date_criteria_column1, '', null );
 
 		// End Date
 
@@ -238,77 +232,58 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		form_item_input.TDatePicker( {field: 'end_date'} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().date_format_example + " " + $.i18n._( "(Leave blank for no end date)" ) + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab_date_criteria_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab_date_criteria_column1, '', null );
 
 		// Start Time
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'start_time', width: 80} );
+		form_item_input = Global.loadWidgetByName( FormItemType.TIME_PICKER );
+		form_item_input.TTimePicker( {field: 'start_time'} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().time_format_display + " " + $.i18n._( "(Leave blank for no start time)" ) + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Start Time' ), form_item_input, tab_date_criteria_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Start Time' ), form_item_input, tab_date_criteria_column1, '', null );
 
 		// End Time
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'end_time', width: 80} );
+		form_item_input = Global.loadWidgetByName( FormItemType.TIME_PICKER );
+		form_item_input.TTimePicker( {field: 'end_time'} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().time_format_display + " " + $.i18n._( "(Leave blank for no end time)" ) + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'End Time' ), form_item_input, tab_date_criteria_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'End Time' ), form_item_input, tab_date_criteria_column1, '', null );
 
 		// Daily Time
 
 		// daily_trigger_time
 
 		var form_item_daily_trigger_time_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_daily_trigger_time_input.TTextInput( {field: 'daily_trigger_time1', width: 65, need_parser_sec: true} );
+		form_item_daily_trigger_time_input.TTextInput( {field: 'daily_trigger_time1', mode:'time_unit', need_parser_sec: true} );
 
 		var form_item_maximum_daily_trigger_time_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_maximum_daily_trigger_time_input.TTextInput( {field: 'maximum_daily_trigger_time', width: 65, need_parser_sec: true} );
+		form_item_maximum_daily_trigger_time_input.TTextInput( {field: 'maximum_daily_trigger_time', mode:'time_unit', need_parser_sec: true} );
 
 		widgetContainer = $( "<div class='widget-h-box'></div>" );
 
 		var label_1 = $( "<span class='widget-right-label'> " + $.i18n._( 'Active After' ) + ': ' + " </span>" );
 		var label_2 = $( "<span class='widget-right-label'> " + $.i18n._( 'Active Before' ) + ': ' + " </span>" );
-		var label_3 = $( "<span class='widget-right-label'> " + LocalCacheData.getLoginUserPreference().time_unit_format_display + " </span>" );
 
 		widgetContainer.append( label_1 );
 		widgetContainer.append( form_item_daily_trigger_time_input );
 		widgetContainer.append( label_2 );
 		widgetContainer.append( form_item_maximum_daily_trigger_time_input );
-		widgetContainer.append( label_3 );
 
 		this.addEditFieldToColumn( $.i18n._( 'Daily Time' ), [form_item_daily_trigger_time_input, form_item_maximum_daily_trigger_time_input], tab_date_criteria_column1, '', widgetContainer );
 
 		// Weekly Time
 		var form_item_weekly_trigger_time_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_weekly_trigger_time_input.TTextInput( {field: 'weekly_trigger_time', width: 65, need_parser_sec: true} );
+		form_item_weekly_trigger_time_input.TTextInput( {field: 'weekly_trigger_time', mode:'time_unit', need_parser_sec: true} );
 
 		var form_item_maximum_weekly_trigger_time_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_maximum_weekly_trigger_time_input.TTextInput( {field: 'maximum_weekly_trigger_time', width: 65, need_parser_sec: true} );
+		form_item_maximum_weekly_trigger_time_input.TTextInput( {field: 'maximum_weekly_trigger_time', mode:'time_unit', need_parser_sec: true} );
 
 		widgetContainer = $( "<div class='widget-h-box'></div>" );
 
 		label_1 = $( "<span class='widget-right-label'> " + $.i18n._( 'Active After' ) + ': ' + " </span>" );
 		label_2 = $( "<span class='widget-right-label'> " + $.i18n._( 'Active Before' ) + ': ' + " </span>" );
-		label_3 = $( "<span class='widget-right-label'> " + LocalCacheData.getLoginUserPreference().time_unit_format_display + " </span>" );
 
 		widgetContainer.append( label_1 );
 		widgetContainer.append( form_item_weekly_trigger_time_input );
 		widgetContainer.append( label_2 );
 		widgetContainer.append( form_item_maximum_weekly_trigger_time_input );
-		widgetContainer.append( label_3 );
 
 		this.addEditFieldToColumn( $.i18n._( 'Weekly Time' ), [form_item_weekly_trigger_time_input, form_item_maximum_weekly_trigger_time_input], tab_date_criteria_column1, '', widgetContainer );
 
@@ -334,7 +309,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		var form_item_sat_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_sat_checkbox.TCheckbox( {field: 'sat'} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
+		widgetContainer = $( "<div class=''></div>" );
 
 		var sun = $( "<span class='widget-top-label'> " + $.i18n._( 'Sun' ) + " <br> " + " </span>" );
 		var mon = $( "<span class='widget-top-label'> " + $.i18n._( 'Mon' ) + " <br> " + " </span>" );
@@ -605,36 +580,21 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		// Active After Daily Hours
 		// daily_trigger_time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'daily_trigger_time2', width: 65, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'daily_trigger_time2', mode:'time_unit', need_parser_sec: true} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().time_unit_format_display + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Active After Daily Hours' ), form_item_input, tab_meal_criteria_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Active After Daily Hours' ), form_item_input, tab_meal_criteria_column1, '', null );
 
 		// Maximum Time Without A Break
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'maximum_no_break_time', width: 65, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'maximum_no_break_time', mode:'time_unit', need_parser_sec: true} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().time_unit_format_display + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Maximum Time Without A Break' ), form_item_input, tab_meal_criteria_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Maximum Time Without A Break' ), form_item_input, tab_meal_criteria_column1, '', null );
 
 		// Minimum Time Recognized As Break
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'minimum_break_time', width: 65, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'minimum_break_time', mode:'time_unit', need_parser_sec: true} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().time_unit_format_display + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Minimum Time Recognized As Break' ), form_item_input, tab_meal_criteria_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Minimum Time Recognized As Break' ), form_item_input, tab_meal_criteria_column1, '', null );
 
 		// Tab4 start
 
@@ -648,25 +608,15 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		// Minimum Time Between Shifts
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'minimum_time_between_shift1', width: 65, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'minimum_time_between_shift1', mode:'time_unit', need_parser_sec: true} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().time_unit_format_display + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Minimum Time Between Shifts' ), form_item_input, tab_callback_criteria_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Minimum Time Between Shifts' ), form_item_input, tab_callback_criteria_column1, '', null );
 
 		//First Shift Must Be At Least
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'minimum_first_shift_time', width: 65, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'minimum_first_shift_time', mode:'time_unit', need_parser_sec: true} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().time_unit_format_display + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'First Shift Must Be At Least' ), form_item_input, tab_callback_criteria_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'First Shift Must Be At Least' ), form_item_input, tab_callback_criteria_column1, '', null );
 
 		// Tab5 start
 
@@ -680,25 +630,15 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		// Minimum Shift Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'minimum_shift_time', width: 65, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'minimum_shift_time', mode:'time_unit', need_parser_sec: true} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().time_unit_format_display + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Minimum Shift Time' ), form_item_input, tab_minimum_shift_time_criteria_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Minimum Shift Time' ), form_item_input, tab_minimum_shift_time_criteria_column1, '', null );
 
 		// Minimum Time-Off Between Shifts
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'minimum_time_between_shift2', width: 65, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'minimum_time_between_shift2', mode:'time_unit', need_parser_sec: true} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().time_unit_format_display + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Minimum Time-Off Between Shifts' ), form_item_input, tab_minimum_shift_time_criteria_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Minimum Time-Off Between Shifts' ), form_item_input, tab_minimum_shift_time_criteria_column1, '', null );
 
 	},
 
@@ -841,17 +781,17 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		if ( this.current_edit_record['pay_type_id'] === 10 || this.current_edit_record['pay_type_id'] === 42 ) {
 			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Rate' ) + ": " );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '1.5 for time and a half' ) + ')' );
-			this.edit_view_form_item_dic['wage_group_id'].css( 'display', 'block' );
+			this.attachElement( 'wage_group_id' );
 
 		} else if ( this.current_edit_record['pay_type_id'] === 20 ) {
 			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Premium' ) + ": " );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '0.75 for 75 cent/hr' ) + ')' );
-			this.edit_view_form_item_dic['wage_group_id'].css( 'display', 'none' );
+			this.detachElement( 'wage_group_id' );
 
 		} else if ( this.current_edit_record['pay_type_id'] === 30 || this.current_edit_record['pay_type_id'] === 32 || this.current_edit_record['pay_type_id'] === 40 ) {
 			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Hourly Rate' ) + ": " );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '10.00/hr' ) + ')' );
-			this.edit_view_form_item_dic['wage_group_id'].css( 'display', 'block' );
+			this.attachElement( 'wage_group_id' );
 		}
 
 		this.editFieldResize();
@@ -865,7 +805,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 		$( this.edit_view_tab.find( 'ul li' )[4] ).hide();
 		$( this.edit_view_tab.find( 'ul li' )[5] ).hide();
 
-		this.edit_view_form_item_dic['include_partial_punch'].css( 'display', 'block' );
+		this.attachElement( 'include_partial_punch' );
 
 		if ( this.current_edit_record['type_id'] === 10 ) {
 			$( this.edit_view_tab.find( 'ul li' )[1] ).show();
@@ -875,7 +815,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 			$( this.edit_view_tab.find( 'ul li' )[5] ).hide();
 		} else if ( this.current_edit_record['type_id'] === 20 ) {
 
-			this.edit_view_form_item_dic['include_partial_punch'].css( 'display', 'none' );
+			this.detachElement( 'include_partial_punch' );
 
 			$( this.edit_view_tab.find( 'ul li' )[1] ).hide();
 			$( this.edit_view_tab.find( 'ul li' )[2] ).show();
@@ -884,7 +824,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 			$( this.edit_view_tab.find( 'ul li' )[5] ).hide();
 		} else if ( this.current_edit_record['type_id'] === 30 ) {
 
-			this.edit_view_form_item_dic['include_partial_punch'].css( 'display', 'none' );
+			this.detachElement( 'include_partial_punch' );
 
 			$( this.edit_view_tab.find( 'ul li' )[1] ).hide();
 			$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
@@ -893,7 +833,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 			$( this.edit_view_tab.find( 'ul li' )[5] ).hide();
 		} else if ( this.current_edit_record['type_id'] === 40 ) {
 
-			this.edit_view_form_item_dic['include_partial_punch'].css( 'display', 'none' );
+			this.detachElement( 'include_partial_punch' );
 
 			$( this.edit_view_tab.find( 'ul li' )[1] ).hide();
 			$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
@@ -903,7 +843,7 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 		} else if ( this.current_edit_record['type_id'] === 50 ) {
 
-			this.edit_view_form_item_dic['include_partial_punch'].css( 'display', 'none' );
+			this.detachElement( 'include_partial_punch' );
 
 			$( this.edit_view_tab.find( 'ul li' )[1] ).hide();
 			$( this.edit_view_tab.find( 'ul li' )[2] ).show();

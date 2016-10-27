@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -64,6 +64,16 @@ class ExceptionPolicyFactory extends Factory {
 										'S4' => TTi18n::gettext('In Late'),
 										'S5' => TTi18n::gettext('Out Early'),
 										'S6' => TTi18n::gettext('Out Late'),
+
+										//'SS' => TTi18n::gettext('In Early (Level 2)'), //Allow for 2 or 3 levels of schedule exceptions.
+										//'ST' => TTi18n::gettext('In Late (Level 2)'),
+										//'SU' => TTi18n::gettext('Out Early (Level 2)'),
+										//'SV' => TTi18n::gettext('Out Late (Level 2)'),
+
+										//'SW' => TTi18n::gettext('In Early (Level 3)'), //Allow for 2 or 3 levels of schedule exceptions.
+										//'SX' => TTi18n::gettext('In Late (Level 3)'),
+										//'SY' => TTi18n::gettext('Out Early (Level 3)'),
+										//'SZ' => TTi18n::gettext('Out Late (Level 3)'),
 
 										'S7' => TTi18n::gettext('Over Daily Scheduled Time'),
 										'S8' => TTi18n::gettext('Under Daily Scheduled Time'),
@@ -482,7 +492,7 @@ class ExceptionPolicyFactory extends Factory {
 												'severity_id' => 25,
 												'email_notification_id' => 100,
 												'demerit' => 5,
-												'grace' => 0,
+												'grace' => 7200,
 												'is_enabled_grace' => $this->isEnabledGrace( $type_id ),
 												'watch_window' => 0,
 												'is_enabled_watch_window' => $this->isEnabledWatchWindow( $type_id )
@@ -769,11 +779,6 @@ class ExceptionPolicyFactory extends Factory {
 	function setSeverity($value) {
 		$value = trim($value);
 
-		$key = Option::getByValue($value, $this->getOptions('severity') );
-		if ($key !== FALSE) {
-			$value = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'severity',
 											$value,
 											TTi18n::gettext('Incorrect Severity'),
@@ -1023,7 +1028,7 @@ class ExceptionPolicyFactory extends Factory {
 		return FALSE;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		if ( $this->isUnique( $this->getExceptionPolicyControl(), $this->getType(), $this->getID() ) == FALSE ) {
 			$this->Validator->isTrue(		'type_id',
 											FALSE,

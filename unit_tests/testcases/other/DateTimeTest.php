@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -1189,5 +1189,19 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		}
 	}
 
+	function testReportDatesA() {
+		$uf = TTnew('UserFactory');
+		$uf->getUserPreferenceObject()->setDateFormat('m-d-y');
+
+		$pre_process_dates = TTDate::getReportDates( NULL, strtotime('03-Mar-2015 08:00AM'), FALSE, $uf ); //Sortable dates
+		//var_dump( $pre_process_dates );
+		$this->assertEquals( $pre_process_dates['date_stamp'], '2015-03-03' );
+
+		TTDate::setDateFormat('Y-m-d');
+		$this->assertEquals( TTDate::getReportDates( 'date_stamp', $pre_process_dates['date_stamp'], TRUE, $uf ), '2015-03-03' );
+
+		TTDate::setDateFormat('d-m-y');
+		$this->assertEquals( TTDate::getReportDates( 'date_stamp', $pre_process_dates['date_stamp'], TRUE, $uf ), '03-03-15' );
+	}
 }
 ?>

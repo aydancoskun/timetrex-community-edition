@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -45,7 +45,8 @@ class SchedulePolicyFactory extends Factory {
 	protected $company_obj = NULL;
 	protected $meal_policy_obj = NULL;
 	protected $break_policy_obj = NULL;
-	protected $absence_policy_obj = NULL;
+	protected $full_shift_absence_policy_obj = NULL;
+	protected $partial_shift_absence_policy_obj = NULL;
 
 	function _getFactoryOptions( $name ) {
 
@@ -55,9 +56,8 @@ class SchedulePolicyFactory extends Factory {
 				$retval = array(
 										'-1020-name' => TTi18n::gettext('Name'),
 										'-1025-description' => TTi18n::gettext('Description'),
-										//'-1030-meal_policy' => TTi18n::gettext('Meal Policy'),
-										'-1040-absence_policy' => TTi18n::gettext('Undertime Absence Policy'),
-										//'-1050-over_time_policy' => TTi18n::gettext('Overtime Policy'),
+										'-1040-full_shift_absence_policy' => TTi18n::gettext('Full Shift Undertime Absence Policy'),
+										'-1041-partial_shift_absence_policy' => TTi18n::gettext('Partial Shift Undertime Absence Policy'),
 										'-1060-start_stop_window' => TTi18n::gettext('Window'),
 
 										'-2000-created_by' => TTi18n::gettext('Created By'),
@@ -98,9 +98,11 @@ class SchedulePolicyFactory extends Factory {
 										'company_id' => 'Company',
 										'name' => 'Name',
 										'description' => 'Description',
-										
-										'absence_policy_id' => 'AbsencePolicyID',
-										'absence_policy' => FALSE,
+
+										'full_shift_absence_policy_id' => 'FullShiftAbsencePolicyID',
+										'full_shift_absence_policy' => FALSE,
+										'partial_shift_absence_policy_id' => 'PartialShiftAbsencePolicyID',
+										'partial_shift_absence_policy' => FALSE,
 
 										'meal_policy' => 'MealPolicy',
 										'break_policy' => 'BreakPolicy',
@@ -122,8 +124,11 @@ class SchedulePolicyFactory extends Factory {
 		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
 	}
 
-	function getAbsencePolicyObject() {
-		return $this->getGenericObject( 'AbsencePolicyListFactory', $this->getAbsencePolicyID(), 'absence_policy_obj' );
+	function getFullShiftAbsencePolicyObject() {
+		return $this->getGenericObject( 'AbsencePolicyListFactory', $this->getFullShiftAbsencePolicyID(), 'full_shift_absence_policy_obj' );
+	}
+	function getPartialShiftAbsencePolicyObject() {
+		return $this->getGenericObject( 'AbsencePolicyListFactory', $this->getPartialShiftAbsencePolicyID(), 'partial_shift_absence_policy_obj' );
 	}
 
 	function getMealPolicyObject( $meal_policy_id ) {
@@ -266,38 +271,7 @@ class SchedulePolicyFactory extends Factory {
 
 		return FALSE;
 	}
-/*
-	function getMealPolicyID() {
-		if ( isset($this->data['meal_policy_id']) ) {
-			return (int)$this->data['meal_policy_id'];
-		}
 
-		return 0; //Default to Defined By Policy Group.
-	}
-	function setMealPolicyID($id) {
-		$id = trim($id);
-
-		if ( $id == '' OR empty($id) ) {
-			$id = 0;
-		}
-
-		$mplf = TTnew( 'MealPolicyListFactory' );
-
-		if ( ( $id == 0 OR $id == -1 )
-				OR
-				$this->Validator->isResultSetWithRows(	'meal_policy',
-														$mplf->getByID($id),
-														TTi18n::gettext('Meal Policy is invalid')
-													) ) {
-
-			$this->data['meal_policy_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-*/
 	//Checks to see if we need to revert to the meal policies defined in the policy group, or use the ones defined in the schedule policy.
 	function isUsePolicyGroupMealPolicy() {
 		if ( in_array( 0, (array)$this->getMealPolicy() ) ) {
@@ -357,14 +331,14 @@ class SchedulePolicyFactory extends Factory {
 		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 165, $this->getID(), $ids, FALSE, TRUE ); //Use relaxed ID range.
 	}
 
-	function getAbsencePolicyID() {
-		if ( isset($this->data['absence_policy_id']) ) {
-			return (int)$this->data['absence_policy_id'];
+	function getFullShiftAbsencePolicyID() {
+		if ( isset($this->data['full_shift_absence_policy_id']) ) {
+			return (int)$this->data['full_shift_absence_policy_id'];
 		}
 
 		return FALSE;
 	}
-	function setAbsencePolicyID($id) {
+	function setFullShiftAbsencePolicyID($id) {
 		$id = trim($id);
 
 		if ( $id == '' OR empty($id) ) {
@@ -376,11 +350,42 @@ class SchedulePolicyFactory extends Factory {
 		if (
 				$id == NULL
 				OR
-				$this->Validator->isResultSetWithRows(	'absence_policy',
+				$this->Validator->isResultSetWithRows(	'full_shift_absence_policy',
 														$aplf->getByID($id),
-														TTi18n::gettext('Invalid Absence Policy ID')
+														TTi18n::gettext('Invalid Full Shift Absence Policy')
 														) ) {
-			$this->data['absence_policy_id'] = $id;
+			$this->data['full_shift_absence_policy_id'] = $id;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+	
+	function getPartialShiftAbsencePolicyID() {
+		if ( isset($this->data['partial_shift_absence_policy_id']) ) {
+			return (int)$this->data['partial_shift_absence_policy_id'];
+		}
+
+		return FALSE;
+	}
+	function setPartialShiftAbsencePolicyID($id) {
+		$id = trim($id);
+
+		if ( $id == '' OR empty($id) ) {
+			$id = NULL;
+		}
+
+		$aplf = TTnew( 'AbsencePolicyListFactory' );
+
+		if (
+				$id == NULL
+				OR
+				$this->Validator->isResultSetWithRows(	'partial_shift_absence_policy',
+														$aplf->getByID($id),
+														TTi18n::gettext('Invalid Partial Shift Absence Policy')
+														) ) {
+			$this->data['partial_shift_absence_policy_id'] = $id;
 
 			return TRUE;
 		}
@@ -453,7 +458,7 @@ class SchedulePolicyFactory extends Factory {
 		return FALSE;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		return TRUE;
 	}
 
@@ -512,7 +517,8 @@ class SchedulePolicyFactory extends Factory {
 
 					$function = 'get'.$function_stub;
 					switch( $variable ) {
-						case 'absence_policy':
+						case 'full_shift_absence_policy':
+						case 'partial_shift_absence_policy':
 							$data[$variable] = $this->getColumn($variable);
 							break;
 						default:

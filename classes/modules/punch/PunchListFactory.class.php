@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -78,8 +78,9 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -107,8 +108,9 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -139,7 +141,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -177,7 +179,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		//Status sorting MUST be desc first, otherwise transfer punches are completely out of order.
@@ -190,7 +192,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 					where	a.punch_control_id = b.id
 						AND b.user_id = d.id
 						AND d.company_id = ?
-						AND a.id in ('. $this->getListSQL($id, $ph) .')
+						AND a.id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 						AND ( a.deleted = 0 AND b.deleted = 0 )
 					ORDER BY a.time_stamp asc, a.status_id desc, a.punch_control_id asc
 					';
@@ -213,7 +215,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		//Status sorting MUST be desc first, otherwise transfer punches are completely out of order.
@@ -236,7 +238,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 					where	a.punch_control_id = b.id
 						AND b.user_id = d.id
 						AND d.company_id = ?
-						AND a.id in ('. $this->getListSQL($id, $ph) .')
+						AND a.id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 						AND ( a.deleted = 0 AND b.deleted = 0 )
 					ORDER BY a.time_stamp asc, a.status_id desc, a.punch_control_id asc
 					';
@@ -259,8 +261,8 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
-					'punch_control_id' => $punch_control_id,
-					'status_id' => $status_id
+					'punch_control_id' => (int)$punch_control_id,
+					'status_id' => (int)$status_id,
 					);
 
 		$query = '
@@ -293,7 +295,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'date_stamp' => $this->db->BindDate( $date_stamp ),
 					);
 
@@ -331,9 +333,9 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'date_stamp' => $this->db->BindDate( $date_stamp ),
-					'type_id' => $type_id,
+					'type_id' => (int)$type_id,
 					);
 
 		$query = '
@@ -367,7 +369,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
-					'user_id' => $user_id, 
+					'user_id' => (int)$user_id, 
 					'date_stamp' => $this->db->BindDate( $date_stamp ),
 					);
 
@@ -378,7 +380,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 					where	a.punch_control_id = b.id
 						AND b.user_id = ?
 						AND	b.date_stamp = ?
-						AND a.punch_control_id not in ('. $this->getListSQL($punch_control_id, $ph) .')
+						AND a.punch_control_id not in ('. $this->getListSQL( $punch_control_id, $ph, 'int' ) .')
 						AND ( a.deleted = 0 AND b.deleted = 0 )
 					ORDER BY a.time_stamp asc, a.status_id desc, a.punch_control_id asc
 					';
@@ -401,7 +403,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'time_stamp' => $this->db->BindTimeStamp($epoch),
 					);
 
@@ -449,7 +451,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'start_date_stamp' => $this->db->BindDate( $start_time_stamp ),
 					'end_date_stamp' => $this->db->BindDate( $end_time_stamp ),
 					'start_time_stamp2' => $this->db->BindTimeStamp( $start_time_stamp ),
@@ -546,7 +548,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'start_date_stamp' => $this->db->BindDate( $start_time_stamp ),
 					'end_date_stamp' => $this->db->BindDate( $end_time_stamp ),
 					'start_time_stamp2' => $this->db->BindTimeStamp( $start_time_stamp ),
@@ -623,7 +625,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'start_date_stamp' => $this->db->BindDate( $start_time_stamp ),
 					'end_date_stamp' => $this->db->BindDate( $end_time_stamp ),
 					'start_time_stamp2' => $this->db->BindTimeStamp( $start_time_stamp ),
@@ -735,7 +737,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'user_date_stamp' => $this->db->BindDate($user_date_stamp),
 					);
 
@@ -782,7 +784,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'start_date' => $this->db->BindDate($start_time),
 					'end_date' => $this->db->BindDate($epoch),
 					'start_time' => $this->db->BindTimeStamp($start_time),
@@ -834,7 +836,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'start_date' => $this->db->BindDate($start_time),
 					'end_date' => $this->db->BindDate($epoch),
 					'start_time' => $this->db->BindTimeStamp($start_time),
@@ -888,12 +890,12 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'date_stamp1' => $this->db->BindDate( ( TTDate::getMiddleDayEpoch($epoch) - 86400 ) ),
 					'date_stamp2' => $this->db->BindDate( ( TTDate::getMiddleDayEpoch($epoch) + 86400 ) ),
 					'time_stamp' => $this->db->BindTimeStamp($epoch),
-					'status_id' => $status_id,
-					//'type_id' => $type_id,
+					'status_id' => (int)$status_id,
+					//'type_id' => (int)$type_id,
 					);
 
 		//Narrow down the c.date_stamp column to speed this query up, as sometimes it can be so slow that connections timeout.
@@ -909,7 +911,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 						AND ( b.date_stamp >= ? AND b.date_stamp <= ? )
 						AND a.time_stamp <= ?
 						AND a.status_id = ?
-						AND a.type_id in ( '. $this->getListSQL($type_id, $ph) .' )
+						AND a.type_id in ( '. $this->getListSQL( $type_id, $ph, 'int' ) .' )
 						AND ( a.deleted = 0 AND b.deleted = 0 )
 					ORDER BY a.time_stamp desc
 					LIMIT 1
@@ -932,7 +934,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
-					'punch_id' => $punch_id,
+					'punch_id' => (int)$punch_id,
 					);
 
 		$query = '
@@ -963,7 +965,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
-					'punch_control_id' => $punch_control_id,
+					'punch_control_id' => (int)$punch_control_id,
 					);
 
 		$query = '
@@ -981,6 +983,68 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
+	}
+
+	function getMostCommonPunchDataByCompanyIdAndUserAndTypeAndStatusAndStartDateAndEndDate($company_id, $user_id, $type_id, $status_id, $start_date, $end_date) {
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $user_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $type_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $status_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $start_date == '' ) {
+			return FALSE;
+		}
+
+		if ( $end_date == '' ) {
+			return FALSE;
+		}
+
+		$uf = new UserFactory();
+		$pcf = new PunchControlFactory();
+
+		$ph = array(
+					'company_id' => (int)$company_id,
+					'user_id' => (int)$user_id,
+					'type_id' => (int)$type_id,
+					'status_id' => (int)$status_id,
+					'start_date' => $this->db->BindDate( $start_date ),
+					'end_date' => $this->db->BindDate( $end_date )
+					);
+
+		$query = '
+					SELECT	'. $this->getSQLToTimeFunction( 'a.time_stamp' ) .' as time_stamp
+					FROM	'. $this->getTable() .' as a,
+							'. $pcf->getTable() .' as b,
+							'. $uf->getTable() .' as d
+					WHERE	a.punch_control_id = b.id
+						AND b.user_id = d.id
+						AND d.company_id = ?
+						AND	b.user_id = ?
+						AND a.type_id = ?
+						AND a.status_id = ?
+						AND b.date_stamp >= ?
+						AND b.date_stamp <= ?
+						AND ( a.deleted = 0 AND b.deleted = 0 )
+					GROUP BY '. $this->getSQLToTimeFunction( 'a.time_stamp' ) .'
+					ORDER BY count(*) DESC
+					LIMIT 1';
+
+		$result = $this->db->GetRow($query, $ph);
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		
+		return $result;
 	}
 
 	function getByCompanyIDAndUserIdAndStartDateAndEndDate($company_id, $user_id, $start_date, $end_date) {
@@ -1004,8 +1068,8 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					'user_id' => $user_id,
+					'company_id' => (int)$company_id,
+					'user_id' => (int)$user_id,
 					'start_date' => $this->db->BindDate( $start_date ),
 					'end_date' => $this->db->BindDate( $end_date )
 					);
@@ -1042,7 +1106,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					);
 
 		//Status order matters, because if its a.status_id desc, OUT comes first, but if the last
@@ -1076,7 +1140,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
-					'pay_period_id' => $pay_period_id,
+					'pay_period_id' => (int)$pay_period_id,
 					);
 
 		$query = '
@@ -1177,7 +1241,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -1377,7 +1441,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 			$jigf = new JobItemGroupFactory();
 		}
 
-		$ph = array( 'company_id' => $company_id );
+		$ph = array( 'company_id' => (int)$company_id, );
 
 		//Make it so employees with 0 hours still show up!! Very important!
 		//Order dock hours first, so it can be deducted from regular time.
@@ -1529,7 +1593,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['include_job_item_id']) ) ? $this->getWhereClauseSQL( 'pcf.job_item_id', $filter_data['include_job_item_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['exclude_job_item_id']) ) ? $this->getWhereClauseSQL( 'pcf.job_item_id', $filter_data['exclude_job_item_id'], 'not_numeric_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'uf.id', array( 'company_id' => $company_id, 'object_type_id' => 200, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
+		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'uf.id', array( 'company_id' => (int)$company_id, 'object_type_id' => 200, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 
 
 		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
@@ -1563,25 +1627,25 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 			}
 		}
 
-		if ( !is_array($order) ) {
-			//Use Filter Data ordering if its set.
-			if ( isset($filter_data['sort_column']) AND $filter_data['sort_order']) {
-				$order = array(Misc::trimSortPrefix($filter_data['sort_column']) => $filter_data['sort_order']);
-			}
-		}
-
-		//$additional_order_fields = array('b.name', 'c.name', 'd.name', 'e.name');
 		$additional_order_fields = array('first_name', 'last_name', 'date_stamp', 'time_stamp', 'type_id', 'status_id', 'branch', 'department', 'default_branch', 'default_department', 'group', 'title');
 
 		$sort_column_aliases = array(
-									'status' => 'status_id',
-									'type' => 'type_id',
+									'status' => 'a.status_id',
+									'type' => 'a.type_id',
+									'group' => 'd.group_id',
+									'first_name' => 'd.first_name',
+									'last_name' => 'd.last_name',
+									'date_stamp' => 'b.date_stamp',
+									'station_station_id' => 'l.station_id',
+									'station_type' => 'l.type_id',
+									'station_source' => 'l.source',
+									'station_description' => 'l.description',
 									);
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 
 		if ( $order == NULL ) {
-			$order = array( 'b.pay_period_id' => 'asc', 'b.user_id' => 'asc', 'a.time_stamp' => 'asc', 'a.punch_control_id' => 'asc', 'a.status_id' => 'asc' );
+			$order = array( 'a.status_id' => 'asc', 'a.time_stamp' => 'asc', 'd.last_name' => 'asc', 'd.first_name' => 'asc' );
 			$strict = FALSE;
 		} else {
 			$strict = FALSE;
@@ -1592,14 +1656,6 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		if ( isset($filter_data['exclude_user_ids']) ) {
 			$filter_data['exclude_id'] = $filter_data['exclude_user_ids'];
 		}
-/*
-		if ( isset($filter_data['user_id']) ) {
-			$filter_data['id'] = $filter_data['user_id'];
-		}
-		if ( isset($filter_data['include_user_ids']) ) {
-			$filter_data['id'] = $filter_data['include_user_ids'];
-		}
-*/
 		if ( isset($filter_data['user_status_ids']) ) {
 			$filter_data['status_id'] = $filter_data['user_status_ids'];
 		}
@@ -1621,20 +1677,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		if ( isset($filter_data['punch_department_ids']) ) {
 			$filter_data['punch_department_id'] = $filter_data['punch_department_ids'];
 		}
-/*
-		if ( isset($filter_data['exclude_job_ids']) ) {
-			$filter_data['exclude_id'] = $filter_data['exclude_job_ids'];
-		}
-		if ( isset($filter_data['include_job_ids']) ) {
-			$filter_data['include_job_id'] = $filter_data['include_job_ids'];
-		}
-		if ( isset($filter_data['job_group_ids']) ) {
-			$filter_data['job_group_id'] = $filter_data['job_group_ids'];
-		}
-		if ( isset($filter_data['job_item_ids']) ) {
-			$filter_data['job_item_id'] = $filter_data['job_item_ids'];
-		}
-*/
+		
 		$uf = new UserFactory();
 		$pcf = new PunchControlFactory();
 		$uwf = new UserWageFactory();
@@ -1650,7 +1693,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -1781,75 +1824,75 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 			$query .= '	LEFT JOIN '. $jif->getTable() .' as s ON b.job_item_id = s.id';
 		}
 
-		$ph[] = $company_id;
+		$ph[] = (int)$company_id;
 		$query .= '	WHERE d.company_id = ?';
 
 		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query	.=	' AND d.id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
+			$query	.=	' AND d.id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph, 'int') .') ';
 		}
 		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query	.=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
+			$query	.=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph, 'int') .') ';
 		}
 		if ( isset($filter_data['exclude_id']) AND isset($filter_data['exclude_id'][0]) AND !in_array(-1, (array)$filter_data['exclude_id']) ) {
-			$query	.=	' AND d.id not in ('. $this->getListSQL($filter_data['exclude_id'], $ph) .') ';
+			$query	.=	' AND d.id not in ('. $this->getListSQL($filter_data['exclude_id'], $ph, 'int') .') ';
 		}
 		if ( isset($filter_data['user_id']) AND isset($filter_data['user_id'][0]) AND !in_array(-1, (array)$filter_data['user_id']) ) {
-			$query	.=	' AND b.user_id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
+			$query	.=	' AND b.user_id in ('. $this->getListSQL($filter_data['user_id'], $ph, 'int') .') ';
 		}
 
 		if ( isset($filter_data['user_status_id']) AND isset($filter_data['user_status_id'][0]) AND !in_array(-1, (array)$filter_data['user_status_id']) ) {
-			$query	.=	' AND d.status_id in ('. $this->getListSQL($filter_data['user_status_id'], $ph) .') ';
+			$query	.=	' AND d.status_id in ('. $this->getListSQL($filter_data['user_status_id'], $ph, 'int') .') ';
 		}
 		if ( isset($filter_data['group_id']) AND isset($filter_data['group_id'][0]) AND !in_array(-1, (array)$filter_data['group_id']) ) {
 			if ( isset($filter_data['include_subgroups']) AND (bool)$filter_data['include_subgroups'] == TRUE ) {
 				$uglf = new UserGroupListFactory();
 				$filter_data['group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['group_id'], TRUE);
 			}
-			$query	.=	' AND d.group_id in ('. $this->getListSQL($filter_data['group_id'], $ph) .') ';
+			$query	.=	' AND d.group_id in ('. $this->getListSQL($filter_data['group_id'], $ph, 'int') .') ';
 		}
 		if ( isset($filter_data['default_branch_id']) AND isset($filter_data['default_branch_id'][0]) AND !in_array(-1, (array)$filter_data['default_branch_id']) ) {
-			$query	.=	' AND d.default_branch_id in ('. $this->getListSQL($filter_data['default_branch_id'], $ph) .') ';
+			$query	.=	' AND d.default_branch_id in ('. $this->getListSQL($filter_data['default_branch_id'], $ph, 'int') .') ';
 		}
 		if ( isset($filter_data['default_department_id']) AND isset($filter_data['default_department_id'][0]) AND !in_array(-1, (array)$filter_data['default_department_id']) ) {
-			$query	.=	' AND d.default_department_id in ('. $this->getListSQL($filter_data['default_department_id'], $ph) .') ';
+			$query	.=	' AND d.default_department_id in ('. $this->getListSQL($filter_data['default_department_id'], $ph, 'int') .') ';
 		}
 		if ( isset($filter_data['title_id']) AND isset($filter_data['title_id'][0]) AND !in_array(-1, (array)$filter_data['title_id']) ) {
-			$query	.=	' AND d.title_id in ('. $this->getListSQL($filter_data['title_id'], $ph) .') ';
+			$query	.=	' AND d.title_id in ('. $this->getListSQL($filter_data['title_id'], $ph, 'int') .') ';
 		}
 		if ( isset($filter_data['branch_id']) AND isset($filter_data['branch_id'][0]) AND !in_array(-1, (array)$filter_data['branch_id']) ) {
-			$query	.=	' AND b.branch_id in ('. $this->getListSQL($filter_data['branch_id'], $ph) .') ';
+			$query	.=	' AND b.branch_id in ('. $this->getListSQL($filter_data['branch_id'], $ph, 'int') .') ';
 		}
 		if ( isset($filter_data['department_id']) AND isset($filter_data['department_id'][0]) AND !in_array(-1, (array)$filter_data['department_id']) ) {
-			$query	.=	' AND b.department_id in ('. $this->getListSQL($filter_data['department_id'], $ph) .') ';
+			$query	.=	' AND b.department_id in ('. $this->getListSQL($filter_data['department_id'], $ph, 'int') .') ';
 		}
 		if ( isset($filter_data['status_id']) AND isset($filter_data['status_id'][0]) AND !in_array(-1, (array)$filter_data['status_id']) ) {
-			$query	.=	' AND a.status_id in ('. $this->getListSQL($filter_data['status_id'], $ph) .') ';
+			$query	.=	' AND a.status_id in ('. $this->getListSQL($filter_data['status_id'], $ph, 'int') .') ';
 		}
 		if ( isset($filter_data['type_id']) AND isset($filter_data['type_id'][0]) AND !in_array(-1, (array)$filter_data['type_id']) ) {
-			$query	.=	' AND a.type_id in ('. $this->getListSQL($filter_data['type_id'], $ph) .') ';
+			$query	.=	' AND a.type_id in ('. $this->getListSQL($filter_data['type_id'], $ph, 'int') .') ';
 		}
 		if ( isset($filter_data['pay_period_ids']) AND isset($filter_data['pay_period_ids'][0]) AND !in_array(-1, (array)$filter_data['pay_period_ids']) ) {
-			$query .=	' AND b.pay_period_id in ('. $this->getListSQL($filter_data['pay_period_ids'], $ph) .') ';
+			$query .=	' AND b.pay_period_id in ('. $this->getListSQL($filter_data['pay_period_ids'], $ph, 'int') .') ';
 		}
 
 
 		//Use the job_id in the punch_control table so we can filter by '0' or No Job
 		if ( isset($filter_data['include_job_id']) AND isset($filter_data['include_job_id'][0]) AND !in_array(-1, (array)$filter_data['include_job_id']) ) {
-			$query	.=	' AND b.job_id in ('. $this->getListSQL($filter_data['include_job_id'], $ph) .') ';
+			$query	.=	' AND b.job_id in ('. $this->getListSQL($filter_data['include_job_id'], $ph, 'int') .') ';
 		}
 		if ( isset($filter_data['exclude_job_id']) AND isset($filter_data['exclude_job_id'][0]) AND !in_array(-1, (array)$filter_data['exclude_job_id']) ) {
-			$query	.=	' AND b.job_id not in ('. $this->getListSQL($filter_data['exclude_job_id'], $ph) .') ';
+			$query	.=	' AND b.job_id not in ('. $this->getListSQL($filter_data['exclude_job_id'], $ph, 'int') .') ';
 		}
 		if ( isset($filter_data['job_group_id']) AND isset($filter_data['job_group_id'][0]) AND !in_array(-1, (array)$filter_data['job_group_id']) ) {
 			if ( isset($filter_data['include_job_subgroups']) AND (bool)$filter_data['include_job_subgroups'] == TRUE ) {
 				$uglf = new UserGroupListFactory();
 				$filter_data['job_group_id'] = $uglf->getByCompanyIdAndGroupIdAndjob_subgroupsArray( $company_id, $filter_data['job_group_id'], TRUE);
 			}
-			$query	.=	' AND r.group_id in ('. $this->getListSQL($filter_data['job_group_id'], $ph) .') ';
+			$query	.=	' AND r.group_id in ('. $this->getListSQL($filter_data['job_group_id'], $ph, 'int') .') ';
 		}
 
 		if ( isset($filter_data['job_item_id']) AND isset($filter_data['job_item_id'][0]) AND !in_array(-1, (array)$filter_data['job_item_id']) ) {
-			$query	.=	' AND b.job_item_id in ('. $this->getListSQL($filter_data['job_item_id'], $ph) .') ';
+			$query	.=	' AND b.job_item_id in ('. $this->getListSQL($filter_data['job_item_id'], $ph, 'int') .') ';
 		}
 
 		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
@@ -1882,13 +1925,6 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
-		}
-
-		if ( !is_array($order) ) {
-			//Use Filter Data ordering if its set.
-			if ( isset($filter_data['sort_column']) AND $filter_data['sort_order']) {
-				$order = array(Misc::trimSortPrefix($filter_data['sort_column']) => $filter_data['sort_order']);
-			}
 		}
 
 		if ( !is_array($order) ) {
@@ -1991,7 +2027,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		//Tainted: Determine if the punch was manually created (without punching in/out) or modified by someone other than the person who punched in/out.
@@ -2242,7 +2278,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -118,14 +118,19 @@ class APIReport extends APIFactory {
 			if ( $validation_obj->isValid() == TRUE ) {
 				//return Misc::APIFileDownload( 'report.pdf', 'application/pdf', $this->getReportObject()->getOutput( $format ) );
 				$output_arr = $this->getReportObject()->getOutput( $format );
+
 				if ( isset($output_arr['file_name']) AND isset($output_arr['mime_type']) AND isset($output_arr['data']) ) {
 					//If using the SOAP API, return data base64 encoded so it can be decoded on the client side.
 					if ( defined('TIMETREX_SOAP_API') AND TIMETREX_SOAP_API == TRUE ) {
 						$output_arr['data'] = base64_encode( $output_arr['data'] );
 						return $this->returnHandler( $output_arr );
 					} else {
-						Misc::APIFileDownload( $output_arr['file_name'], $output_arr['mime_type'], $output_arr['data'] );
-						return NULL; //Don't send any additional data, so JSON encoding doesn't corrupt the download.
+						if ( $output_arr['mime_type'] === 'text/html' ) {
+							return $this->returnHandler( $output_arr['data'] );
+						} else {
+							Misc::APIFileDownload( $output_arr['file_name'], $output_arr['mime_type'], $output_arr['data'] );
+							return NULL; //Don't send any additional data, so JSON encoding doesn't corrupt the download.
+						}
 					}
 				} elseif ( isset($output_arr['api_retval']) ) { //Pass through validation errors.
 					Debug::Text('Report returned VALIDATION error, passing through...', __FILE__, __LINE__, __METHOD__, 10);

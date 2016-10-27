@@ -294,6 +294,33 @@ if ( $result !== FALSE ) {
 
 
 //
+//Add new punch for a specific employee
+//
+$punch_data = array(
+					'user_id' => 1023,
+
+					'type_id' => 10, //Normal
+					'status_id' => 20, //In
+
+					'time_stamp' => strtotime('19-Aug-2013 5:50PM'),
+
+					'branch_id' => 296, //Branch
+					'department_id' => 896, //Department
+					'job_id' => 610, //Job
+					'job_item_id' => 9, //Task
+					);
+
+$result = postToURL( buildURL( 'APIPunch', 'setPunch' ), array( $punch_data ) );
+if ( $result !== FALSE ) {
+	echo "Punch added successfully.<br>\n";
+	$insert_id = $result; //Get employees new ID on success.
+} else {
+	echo "Punch save failed.<br>\n";
+	print $result; //Show error messages
+}
+
+
+//
 //Get TimeSheet Summary report data in raw PHP native array format. 'csv' and 'pdf' are also valid formats.
 //
 $config = postToURL( buildURL( 'APITimesheetSummaryReport', 'getTemplate' ), array( 'by_employee+regular+overtime+premium+absence' ) );

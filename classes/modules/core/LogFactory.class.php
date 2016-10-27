@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -709,12 +709,6 @@ class LogFactory extends Factory {
 	function setAction($action) {
 		$action = trim($action);
 
-		//Use integer ID values instead.
-		$key = Option::getByValue($action, $this->getOptions('action') );
-		if ($key !== FALSE) {
-			Debug::text('Text Action: '. $action .' Key: '. $key, __FILE__, __LINE__, __METHOD__, 10);
-			$action = $key;
-		}
 		if ( $this->Validator->inArrayKey(	'action',
 											$action,
 											TTi18n::gettext('Incorrect Action'),
@@ -722,7 +716,7 @@ class LogFactory extends Factory {
 
 			$this->data['action_id'] = $action;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -759,7 +753,7 @@ class LogFactory extends Factory {
 	}
 
 	function setDate($epoch = NULL) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ($epoch == '') {
 			$epoch = TTDate::getTime();

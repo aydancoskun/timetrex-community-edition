@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -90,23 +90,15 @@ function moveUpgradeFiles( $upgrade_staging_latest_dir ) {
 }
 
 function setAutoUpgradeFailed( $value = 1 ) {
-	$sslf = new SystemSettingListFactory();
-	$sslf->getByName('auto_upgrade_failed');
-	if ( $sslf->getRecordCount() == 1 ) {
-		$obj = $sslf->getCurrent();
-	} else {
-		$obj = new SystemSettingListFactory();
-	}
-	$obj->setName( 'auto_upgrade_failed' );
-	$obj->setValue( $value );
-	if ( $obj->isValid() ) {
-		$obj->Save();
-	}
-
+	SystemSettingFactory::setSystemSetting( 'auto_upgrade_failed', $value );
 	if ( $value == 1 ) {
 		Debug::Text('ERROR: AutoUpgrade Failed, setting failed flag...', __FILE__, __LINE__, __METHOD__, 10);
 	} else {
 		Debug::Text('AutoUpgrade Success, clearing failed flag...', __FILE__, __LINE__, __METHOD__, 10);
+
+		//Clear other messages that likely aren't valid anymore.
+		SystemSettingFactory::setSystemSetting( 'valid_install_requirements', 1 );
+		SystemSettingFactory::setSystemSetting( 'new_version', 0 );
 	}
 
 	return TRUE;
@@ -388,7 +380,7 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 			@fclose($handle);
 
 			$install_obj->cleanCacheDirectory();
-			if ( $install_obj->checkAllRequirements( FALSE, array('php_cli_requirements', 'base_url', 'clean_cache') ) == 0 ) {
+			if ( $install_obj->checkAllRequirements( FALSE, array('file_checksums', 'php_cli_requirements', 'base_url', 'clean_cache') ) == 0 ) {
 				Debug::Text('New version available, attempting to download...', __FILE__, __LINE__, __METHOD__, 10);
 				echo "New version available, attempting to download...\n";
 				sleep(5); //Sleep for 5 seconds so it can be cancelled easy if needed.
@@ -404,29 +396,35 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 					Debug::Arr($file_url, 'File Upgrade URL: ', __FILE__, __LINE__, __METHOD__, 10);
 
 					if ( !is_soap_fault($file_url) AND $file_url !== FALSE AND $file_url != '' ) {
-						Debug::Text('Got File Upgrade URL, breaking retry loop...'. $i, __FILE__, __LINE__, __METHOD__, 10);
-						break;
-					} else {
-						echo "  Unable to obtain File Upgrade URL, retrying in 2 minutes: ". $i ."\n";
-						Debug::Text('Unable to obtain File Upgrade URL, retrying: '. $i, __FILE__, __LINE__, __METHOD__, 10);
-						sleep(120);
+						$file_url_size = Misc::getRemoteHTTPFileSize( $file_url );
+						if ( $file_url_size > 0 ) {
+							Debug::Text('Got File Upgrade URL and size, breaking retry loop...'. $i, __FILE__, __LINE__, __METHOD__, 10);
+							break;
+						} else {
+							Debug::Text('Unable to remote File Upgrade URL size, retrying: '. $i, __FILE__, __LINE__, __METHOD__, 10);
+						}
 					}
+
+					echo "  Unable to obtain File Upgrade URL, retrying in 2 minutes: ". $i ."\n";
+					Debug::Text('Unable to obtain File Upgrade URL, retrying: '. $i, __FILE__, __LINE__, __METHOD__, 10);
+					sleep(120);
 				}
 
 				if ( file_exists( $upgrade_file_name ) OR ( !is_soap_fault($file_url) AND $file_url !== FALSE AND $file_url != '' ) ) {
 					$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion() , 'page' => 'unattended_upgrade_download' ), 'pre_install.php'), 'r');
 					@fclose($handle);
-					if ( file_exists( $upgrade_file_name ) == FALSE OR filesize( $upgrade_file_name ) <= 0 ) {
+
+					if ( file_exists( $upgrade_file_name ) == FALSE OR filesize( $upgrade_file_name ) != $file_url_size ) {
 						$bytes_downloaded = @file_put_contents( $upgrade_file_name, fopen( $file_url, 'r') );
-						Debug::Text('Downloaded file: '. $upgrade_file_name .' Size: '. @filesize( $upgrade_file_name ) .' Bytes downloaded: '. $bytes_downloaded, __FILE__, __LINE__, __METHOD__, 10);
-						if ( $bytes_downloaded <= 0 OR @filesize( $upgrade_file_name ) <= 0 ) {
+						Debug::Text('Downloaded file: '. $upgrade_file_name .' Size: '. @filesize( $upgrade_file_name ) .' Bytes downloaded: '. $bytes_downloaded .' Remote Size: '. $file_url_size, __FILE__, __LINE__, __METHOD__, 10);
+						if ( $bytes_downloaded != $file_url_size OR @filesize( $upgrade_file_name ) <= 0 ) {
 							Debug::Text('ERROR: File did not download correctly...', __FILE__, __LINE__, __METHOD__, 10);
 							echo 'ERROR: File did not download correctly...'."\n";
 						} else {
 							echo 'Downloaded file: '. $upgrade_file_name .' Size: '. filesize( $upgrade_file_name ) ."\n";
 						}
 					} else {
-						Debug::Text('Upgrade file already exists... Current Size: '. filesize( $upgrade_file_name ), __FILE__, __LINE__, __METHOD__, 10);
+						Debug::Text('Upgrade file already exists... Current Size: '. filesize( $upgrade_file_name ) .' Remote Size: '. $file_url_size, __FILE__, __LINE__, __METHOD__, 10);
 						echo "Upgrade file already exists...\n";
 					}
 
@@ -551,7 +549,7 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 			} else {
 				Debug::Text('ERROR: Current system requirements check failed...', __FILE__, __LINE__, __METHOD__, 10);
 				echo "ERROR: Current system requirements check failed...\n";
-				echo '  Failed Requirements: '. implode(',', $install_obj->getFailedRequirements( FALSE, array('php_cli_requirements', 'base_url', 'clean_cache') ) )."\n";
+				echo '  Failed Requirements: '. implode(',', $install_obj->getFailedRequirements( FALSE, array('file_checksums', 'php_cli_requirements', 'base_url', 'clean_cache') ) )."\n";
 				setAutoUpgradeFailed();
 			}
 		} else {

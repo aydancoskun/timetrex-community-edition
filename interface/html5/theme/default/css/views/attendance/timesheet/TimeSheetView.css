@@ -29,11 +29,21 @@
 
 .time-sheet-view .date-chooser-div .label {
     margin-right: 5px;
+    position: relative;
+    top: -2px;
 }
 
 .time-sheet-view .date-chooser-div .date-picker-div {
-    display: inline;
+    display: inline-block;
+    vertical-align: sub;
+    height: 24px;
+    margin-right: 8px;
+    margin-left: 8px;
 
+}
+
+.time-sheet-view .date-chooser-div .date-picker-div .t-date-picker-div {
+    vertical-align: initial;
 }
 
 .time-sheet-view .employee-nav-div {
@@ -50,14 +60,14 @@
 
 .time-sheet-view .employee-nav-div .left-click {
     float: left;
-    margin-top: 6px;
+    margin-top: 8px;
     cursor: pointer;
 
 }
 
 .time-sheet-view .employee-nav-div .right-click {
     float: left;
-    margin-top: 6px;
+    margin-top: 8px;
     cursor: pointer;
 
 }
@@ -136,6 +146,10 @@
     font-weight: bold;
 }
 
+.time-sheet-view .total--bold {
+    font-weight: bold;
+}
+
 .time-sheet-view .punch-exceptions {
     font-weight: bold;
     position: absolute;
@@ -188,10 +202,11 @@
 .timesheet-drag-holder-div {
     background: #ae0000;
     padding: 5px;
+    -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
-    -o-user-select: none;
+    -ms-user-select: none;
     user-select: none;
     cursor: default;
 }
@@ -199,10 +214,11 @@
 .timesheet-drag-span {
     display: block;
     color: #ffffff;
+    -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
-    -o-user-select: none;
+    -ms-user-select: none;
     user-select: none;
     cursor: default;
 
@@ -226,14 +242,6 @@
     background-position: bottom;
 }
 
-.time-sheet-view .accumulated-total-grid-title {
-    background: #375979;
-    color: #FFFFFF;
-    height: 25px;
-    line-height: 25px;
-    text-align: center;
-    border-right: 1px solid #FFFFFF;
-}
 
 .time-sheet-view .verification-grid-title {
     background: #375979;
@@ -263,8 +271,73 @@
     cursor: pointer;
 }
 
+.time-sheet-view .action-chooser-div {
+    float: left;
+    margin-right: 10px;
+    margin-top: 5px;
+}
+
 .available-balance-info {
     position: relative;
     top: 2px;
     left: 5px;
+}
+
+.time-sheet-view-wage-container {
+    width: 100%;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+
+}
+
+.time-sheet-view-wage-hour-rate {
+    -webkit-box-flex: 1.5;
+    -webkit-flex: 1.5;
+    -ms-flex: 1.5;
+    flex: 1.5;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 2px;
+    color: #818181;
+}
+
+.time-sheet-view-wage-value {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    text-align: center;
+    padding-left: 1px;
+}
+
+.time-sheet-view-wage-amount {
+    -webkit-box-flex: 1.5;
+    -webkit-flex: 1.5;
+    -ms-flex: 1.5;
+    flex: 1.5;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 2px;
+    color: #818181;
+}
+
+.total--bold .time-sheet-view-wage-hour-rate {
+    font-weight: bold;
+}
+
+.total--bold .time-sheet-view-wage-amount {
+    font-weight: bold;
+}
+
+.total--bold .time-sheet-view-wage-value {
+    font-weight: bold;
+}
+
+.time-sheet-view .accumulated-time-grid .jqgrow > td:last-child .time-sheet-view-wage-amount,
+.time-sheet-view .premium-grid .jqgrow > td:last-child .time-sheet-view-wage-amount {
+    padding-right: 14px;
 }

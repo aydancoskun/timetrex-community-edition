@@ -304,8 +304,6 @@ KPIGroupViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		var close_icon;
-
 		//No navigation when edit only mode
 		if ( !this.edit_only_mode ) {
 			var navigation_div = this.edit_view.find( '.navigation-div' );
@@ -317,14 +315,12 @@ KPIGroupViewController = BaseViewController.extend( {
 
 			label.text( this.navigation_label );
 
-			close_icon = this.edit_view.find( '.close-icon' );
-
 			navigation_widget_div.append( this.navigation );
 		}
 
-		close_icon = this.edit_view.find( '.close-icon' );
-
-		close_icon.click( function() {
+		this.edit_view_close_icon = this.edit_view.find( '.close-icon' );
+		this.edit_view_close_icon.hide();
+		this.edit_view_close_icon.click( function() {
 			$this.onCloseIconClick();
 		} );
 
@@ -399,12 +395,9 @@ KPIGroupViewController = BaseViewController.extend( {
 		var $this = this;
 
 		$this.getDefaultDisplayColumns( function() {
-
 			$this.setSelectLayout();
-
 			$this.search();
-			//set right click menu to list view grid
-			$this.initRightClickMenu();
+
 
 		} );
 
@@ -502,31 +495,12 @@ KPIGroupViewController = BaseViewController.extend( {
 
 		this.showGridBorders();
 
+		$this.setGridSize();
+
 	},
 
-	setGridSize: function() {
-
-		if ( !this.grid || !this.grid.is( ':visible' ) ) {
-			return;
-		}
-
-		if ( !this.sub_view_mode ) {
-			if ( Global.bodyWidth() > Global.app_min_width ) {
-				this.grid.setGridWidth( Global.bodyWidth() - 14 );
-			} else {
-				this.grid.setGridWidth( Global.app_min_width - 14 );
-			}
-		} else {
-
-			this.grid.setGridWidth( $( this.el ).parent().width() - 10 );
-		}
-
-		if ( !this.sub_view_mode ) {
-			this.grid.setGridHeight( $( this.el ).height() - 90 );
-		} else {
-			this.grid.setGridHeight( $( this.el ).parent().height() );
-		}
-
+	_setGridSizeGridHeight: function(header_size) {
+		this._setGridSizeGroupheight( header_size );
 	},
 
 	getGridSelectIdArray: function() {

@@ -4,6 +4,7 @@
 		var opts = $.extend( {}, $.fn.TTextInput.defaults, options );
 		var $this = this;
 		var field;
+		var validation_field;
 		var error_string = '';
 		var error_tip_box;
 
@@ -31,21 +32,36 @@
 
 		var disable_keyup_event = false; //set to not send change event when mouseup
 
+		var mode;
+
+		var is_static_width;
+
+		var static_width;
+
 		var parseDateAsync = function( callBack ) {
 
 			parsed_value = -1;
 
 			ProgressBar.showOverlay();
-			api_date.parseTimeUnit( $this.val(), {onResult: function( result ) {
-				parsed_value = result.getResult();
+			if ( !api_date ) {
+				api_date = new (APIFactory.getAPIClass( 'APIDate' ))();
+			}
+			api_date.parseTimeUnit( $this.val(), {
+				onResult: function( result ) {
+					parsed_value = result.getResult();
 
-				if ( callBack ) {
-					callBack();
+					if ( callBack ) {
+						callBack();
+					}
+
+					ProgressBar.closeOverlay();
+
 				}
+			} );
+		};
 
-				ProgressBar.closeOverlay();
-
-			}} );
+		this.setPlaceHolder = function( val ) {
+			$this.attr( 'placeholder', val )
 		};
 
 		this.setNeedParsDate = function( val ) {
@@ -58,7 +74,7 @@
 			}
 			need_parser_sec = val;
 
-		}
+		};
 
 		this.getEnabled = function() {
 			return enabled;
@@ -72,11 +88,17 @@
 				if ( check_box ) {
 					check_box.hide();
 				}
+				if ( !this.getValue() ) {
+					this.val( $.i18n._( 'N/A' ) );
+				}
 			} else {
 				$this.removeAttr( 'readonly' );
 				$this.removeClass( 't-text-input-readonly' );
 				if ( check_box ) {
 					check_box.show();
+				}
+				if ( this.val() === $.i18n._( 'N/A' ) ) {
+					this.val( '' )
 				}
 			}
 
@@ -93,12 +115,14 @@
 		};
 
 		this.setCheckBox = function( val ) {
-			check_box.attr( 'checked', val )
+			if ( check_box ) {
+				check_box.children().eq( 0 )[0].checked = val;
+			}
 		};
 
 		this.isChecked = function() {
 			if ( check_box ) {
-				if ( check_box.attr( 'checked' ) || check_box[0].checked === true ) {
+				if ( check_box.children().eq( 0 )[0].checked === true ) {
 					return true;
 				}
 			}
@@ -111,10 +135,10 @@
 			mass_edit_mode = val;
 
 			if ( mass_edit_mode ) {
-				check_box = $( " <input type='checkbox' class='mass-edit-checkbox' />" );
+				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
+				'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 				check_box.change( function() {
-
 					if ( need_parser_date || need_parser_sec ) {
 						parseDateAsync( function() {
 							$this.trigger( 'formItemChange', [$this] );
@@ -123,7 +147,9 @@
 						$this.trigger( 'formItemChange', [$this] );
 					}
 				} );
-
+				if ( is_static_width && static_width.toString().indexOf( '%' ) > 0 ) {
+					$this.css( 'width', 'calc(' + static_width + ' - 25px)' );
+				}
 			} else {
 				if ( check_box ) {
 					check_box.remove();
@@ -141,6 +167,10 @@
 			return field;
 		};
 
+		this.getValidationField = function() {
+			return validation_field;
+		};
+
 		this.getInputValue = function() {
 
 			var val = $this.val();
@@ -150,8 +180,10 @@
 		this.getValue = function() {
 
 			var val = $this.val();
+			if ( val === $.i18n._( 'N/A' ) ) {
+				val = '';
+			}
 			if ( need_parser_date ) {
-
 				if ( parsed_value === -1 ) {
 					parsed_value = api_date.parseTimeUnit( val, {async: false} ).getResult();
 				}
@@ -170,9 +202,7 @@
 			if ( !val && val !== 0 ) {
 				val = '';
 			}
-
 			$this.val( val );
-
 			if ( need_parser_date ) {
 				parseDateAsync();
 			} else if ( need_parser_sec ) {
@@ -180,11 +210,15 @@
 				$this.val( Global.secondToHHMMSS( val ) );
 			}
 
+			this.autoResize();
 		};
 
-		this.setErrorStyle = function( errStr, show ) {
-			$( this ).addClass( 'error-tip' );
-
+		this.setErrorStyle = function( errStr, show, isWarning ) {
+			if ( isWarning ) {
+				$( this ).addClass( 'warning-tip' );
+			} else {
+				$( this ).addClass( 'error-tip' );
+			}
 			error_string = errStr;
 
 			if ( show ) {
@@ -203,7 +237,13 @@
 				error_tip_box = error_tip_box.ErrorTipBox()
 			}
 			error_tip_box.cancelRemove();
-			error_tip_box.show( this, error_string, sec )
+
+			if ( $( this ).hasClass( 'warning-tip' ) ) {
+				error_tip_box.show( this, error_string, sec, true );
+			} else {
+				error_tip_box.show( this, error_string, sec );
+			}
+
 		};
 
 		this.hideErrorTip = function() {
@@ -216,16 +256,40 @@
 
 		this.clearErrorStyle = function() {
 			$( this ).removeClass( 'error-tip' );
+			$( this ).removeClass( 'warning-tip' );
+			this.hideErrorTip();
 			error_string = '';
 		};
 
+		this.autoResize = function() {
+			var content_width, example_width;
+			if ( !is_static_width ) {
+				if ( mode === 'time' ) {
+					example_width = Global.calculateTextWidth( LocalCacheData.getLoginUserPreference().time_format_display, 12 );
+				} else if ( mode == 'time_unit' ) {
+					example_width = Global.calculateTextWidth( LocalCacheData.getLoginUserPreference().time_unit_format_display, 12 );
+				} else {
+					example_width = 156;
+				}
+				content_width = Global.calculateTextWidth( $this.getValue(), 12, example_width, 200 );
+
+			} else {
+				if ( static_width.toString().indexOf( '%' ) > 0 ) {
+					return;
+				}
+				example_width = static_width;
+				content_width = Global.calculateTextWidth( $this.getValue(), 12, example_width, static_width > 200 ? static_width : 200 );
+			}
+			$this.width( content_width + 'px' );
+		};
+
 		this.each( function() {
-
 			var o = $.meta ? $.extend( {}, opts, $( this ).data() ) : opts;
-
 			field = o.field;
+			if ( o.validation_field ) {
+				validation_field = o.validation_field;
+			}
 			hasKeyEvent = o.hasKeyEvent;
-
 			need_parser_date = o.need_parser_date;
 			need_parser_sec = o.need_parser_sec;
 
@@ -233,13 +297,26 @@
 				api_date = new (APIFactory.getAPIClass( 'APIDate' ))();
 			}
 
+			if ( o.mode ) {
+				mode = o.mode;
+			}
+
 			if ( o.width && ( o.width > 0 || o.width.indexOf( '%' ) > 0) ) {
 				$this.width( o.width );
+				static_width = o.width;
+				is_static_width = true;
 			}
 
 			if ( o.disable_keyup_event ) {
 				disable_keyup_event = o.disable_keyup_event;
 			}
+
+			if ( mode === 'time' ) {
+				$this.setPlaceHolder( LocalCacheData.getLoginUserPreference().time_format_display );
+			} else if ( mode === 'time_unit' ) {
+				$this.setPlaceHolder( LocalCacheData.getLoginUserPreference().time_unit_format_display );
+			}
+			$this.autoResize();
 
 			$( this ).keydown( function( e ) {
 
@@ -276,7 +353,7 @@
 				validate_timer = setTimeout( function() {
 
 					if ( check_box ) {
-						check_box.attr( 'checked', 'true' )
+						$this.setCheckBox( true );
 					}
 
 					if ( need_parser_date || need_parser_sec ) {
@@ -298,7 +375,7 @@
 				//TO make sure the value is set to currentEditRecord when user typing it, but not trigger validate
 				no_validate_timer = setTimeout( function() {
 					if ( check_box ) {
-						check_box.attr( 'checked', 'true' )
+						$this.setCheckBox( true );
 					}
 
 					if ( need_parser_date || need_parser_sec ) {
@@ -339,6 +416,7 @@
 				if ( disable_keyup_event ) {
 					$this.trigger( 'formItemChange', [$this] );
 				}
+				$this.autoResize();
 			} );
 
 			$( this ).focusin( function() {
@@ -377,8 +455,6 @@
 
 	};
 
-	$.fn.TTextInput.defaults = {
-
-	};
+	$.fn.TTextInput.defaults = {};
 
 })( jQuery );

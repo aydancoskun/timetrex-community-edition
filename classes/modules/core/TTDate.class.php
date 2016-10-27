@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -618,7 +618,7 @@ class TTDate {
 
 			//Parse failed.
 			if ( $epoch === FALSE OR $epoch === -1 ) {
-				Debug::text('  Parsing Date Failed! Returning FALSE: '. $formatted_date, __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text('  Parsing Date Failed! Returning FALSE: '. $formatted_date .' Format: '. self::$date_format, __FILE__, __LINE__, __METHOD__, 10);
 				$epoch = FALSE;
 			}
 
@@ -658,27 +658,25 @@ class TTDate {
 
 		if ( empty($format) ) {
 			Debug::text('Format is empty: '. $format, __FILE__, __LINE__, __METHOD__, 10);
-
 			$format = 'DATE';
 		}
 
-		//Debug::text('Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
-		//Debug::text('Format: '. $format .' Epoch: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
 		switch ( strtolower($format) ) {
 			case 'date':
-				$format = self::$date_format;
+				$php_format = self::$date_format;
 				break;
 			case 'time':
-				$format = self::$time_format;
+				$php_format = self::$time_format;
 				break;
 			case 'date+time':
-				$format = self::$date_format.' '.self::$time_format;
+				$php_format = self::$date_format.' '.self::$time_format;
 				break;
 			case 'epoch':
-				$format = 'U';
+				$php_format = 'U';
 				break;
-
 		}
+		//Debug::text('Format Name: '. $format .' Epoch: '. $epoch .' Format: '. $php_format, __FILE__, __LINE__, __METHOD__, 10);
+		
 
 		if ($epoch == '' OR $epoch == '-1') {
 			//$epoch = TTDate::getTime();
@@ -689,7 +687,7 @@ class TTDate {
 
 		//Debug::text('Epoch: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
 		//This seems to support pre 1970 dates..
-		return date($format, $epoch);
+		return date($php_format, $epoch);
 
 		//Support pre 1970 dates?
 		//return adodb_date($format, $epoch);
@@ -877,7 +875,7 @@ class TTDate {
 			$epoch = TTDate::getTime();
 		}
 
-		return date('z', $epoch);
+		return date('z', TTDate::getEndYearEpoch( $epoch ) );
 	}
 
 	public static function incrementDate( $epoch, $amount, $unit ) {
@@ -893,6 +891,9 @@ class TTDate {
 				break;
 			case 'day':
 				$retval = mktime( $date_arr['hours'], $date_arr['minutes'], 0, $date_arr['mon'], ($date_arr['mday'] + $amount), $date_arr['year'] );
+				break;
+			case 'week':
+				$retval = mktime( $date_arr['hours'], $date_arr['minutes'], 0, $date_arr['mon'], ($date_arr['mday'] + ( $amount * 7 ) ), $date_arr['year'] );
 				break;
 			case 'month':
 				$retval = mktime( $date_arr['hours'], $date_arr['minutes'], 0, ($date_arr['mon'] + $amount), $date_arr['mday'], $date_arr['year'] );
@@ -1314,17 +1315,17 @@ class TTDate {
 		//Debug::text('Date: '. TTDate::getDate('DATE+TIME', $epoch ) .' is in quarter: '. $quarter, __FILE__, __LINE__, __METHOD__, 10);
 		return $quarter;
 	}
-	public static function getYearQuarters( $epoch = NULL, $quarter = NULL ) {
+	public static function getYearQuarters( $epoch = NULL, $quarter = NULL, $day_of_month = 1 ) {
 		if ($epoch == NULL OR $epoch == '' OR !is_numeric($epoch) ) {
 			$epoch = self::getTime();
 		}
 
 		$year = TTDate::getYear( $epoch );
 		$quarter_dates = array(
-								1 => array( 'start' => mktime(0, 0, 0, 1, 1, $year ), 'end' => mktime(0, 0, -1, 4, 1, $year ) ),
-								2 => array( 'start' => mktime(0, 0, 0, 4, 1, $year ), 'end' => mktime(0, 0, -1, 7, 1, $year ) ),
-								3 => array( 'start' => mktime(0, 0, 0, 7, 1, $year ), 'end' => mktime(0, 0, -1, 10, 1, $year ) ),
-								4 => array( 'start' => mktime(0, 0, 0, 10, 1, $year ), 'end' => mktime(0, 0, -1, 13, 1, $year ) ),
+								1 => array( 'start' => mktime(0, 0, 0, 1, $day_of_month, $year ), 'end' => mktime(0, 0, -1, 4, ( $day_of_month > 30 ) ? 30 : $day_of_month, $year ) ),
+								2 => array( 'start' => mktime(0, 0, 0, 4, ( $day_of_month > 30 ) ? 30 : $day_of_month, $year ), 'end' => mktime(0, 0, -1, 7, $day_of_month, $year ) ),
+								3 => array( 'start' => mktime(0, 0, 0, 7, $day_of_month, $year ), 'end' => mktime(0, 0, -1, 10, ( $day_of_month > 30 ) ? 30 : $day_of_month, $year ) ),
+								4 => array( 'start' => mktime(0, 0, 0, 10, $day_of_month, $year ), 'end' => mktime(0, 0, -1, 13, $day_of_month, $year ) ),
 								);
 
 		if ( $quarter != '' ) {

@@ -139,14 +139,9 @@ OvertimePolicyViewController = BaseViewController.extend( {
 
 		// Active After
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'trigger_time', width: 149, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'trigger_time', mode:'time_unit', need_parser_sec: true} );
 
-		var widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().time_unit_format_display + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Active After' ), form_item_input, tab_overtime_policy_column1, '', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Active After' ), form_item_input, tab_overtime_policy_column1, '', null );
 
 		//Pay Code
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );

@@ -181,12 +181,12 @@ RecurringHolidayViewController = BaseViewController.extend( {
 
 	onSpecialDayChange: function() {
 
-		this.edit_view_form_item_dic['type_id'].css( 'display', 'none' );
-		this.edit_view_form_item_dic['week_interval'].css( 'display', 'none' );
-		this.edit_view_form_item_dic['day_of_week'].css( 'display', 'none' );
-		this.edit_view_form_item_dic['pivot_day_direction_id'].css( 'display', 'none' );
-		this.edit_view_form_item_dic['day_of_month'].css( 'display', 'none' );
-		this.edit_view_form_item_dic['month_int'].css( 'display', 'none' );
+		this.detachElement( 'type_id' );
+		this.detachElement( 'week_interval' );
+		this.detachElement( 'day_of_week' );
+		this.detachElement( 'pivot_day_direction_id' );
+		this.detachElement( 'day_of_month' );
+		this.detachElement( 'month_int' );
 
 		if ( Global.isFalseOrNull( this.current_edit_record['special_day'] ) ) {
 			this.current_edit_record['special_day'] = 0;
@@ -194,12 +194,12 @@ RecurringHolidayViewController = BaseViewController.extend( {
 
 		if ( parseInt( this.current_edit_record['special_day'] ) === 0 ) {
 
-			this.edit_view_form_item_dic['type_id'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['week_interval'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['day_of_week'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['pivot_day_direction_id'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['day_of_month'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['month_int'].css( 'display', 'block' );
+			this.attachElement( 'type_id' );
+			this.detachElement( 'week_interval' );
+			this.detachElement( 'day_of_week' );
+			this.detachElement( 'pivot_day_direction_id' );
+			this.attachElement( 'day_of_month' );
+			this.attachElement( 'month_int' );
 
 
 		}
@@ -213,24 +213,24 @@ RecurringHolidayViewController = BaseViewController.extend( {
 		if ( parseInt( this.current_edit_record['special_day'] ) === 0 ) {
 
 			if ( this.current_edit_record['type_id'] === 10 ) {
-				this.edit_view_form_item_dic['week_interval'].css( 'display', 'none' );
-				this.edit_view_form_item_dic['day_of_week'].css( 'display', 'none' );
-				this.edit_view_form_item_dic['pivot_day_direction_id'].css( 'display', 'none' );
-				this.edit_view_form_item_dic['day_of_month'].css( 'display', 'block' );
-				this.edit_view_form_item_dic['month_int'].css( 'display', 'block' );
+				this.detachElement( 'week_interval' );
+				this.detachElement( 'day_of_week' );
+				this.detachElement( 'pivot_day_direction_id' );
+				this.attachElement( 'day_of_month' );
+				this.attachElement( 'month_int' );
 
 			} else if ( this.current_edit_record['type_id'] === 20 ) {
-				this.edit_view_form_item_dic['week_interval'].css( 'display', 'block' );
-				this.edit_view_form_item_dic['day_of_week'].css( 'display', 'block' );
-				this.edit_view_form_item_dic['pivot_day_direction_id'].css( 'display', 'none' );
-				this.edit_view_form_item_dic['day_of_month'].css( 'display', 'none' );
-				this.edit_view_form_item_dic['month_int'].css( 'display', 'block' );
+				this.attachElement( 'week_interval' );
+				this.attachElement( 'day_of_week' );
+				this.detachElement( 'pivot_day_direction_id' );
+				this.detachElement( 'day_of_month' );
+				this.attachElement( 'month_int' );
 			} else if ( this.current_edit_record['type_id'] === 30 ) {
-				this.edit_view_form_item_dic['week_interval'].css( 'display', 'none' );
-				this.edit_view_form_item_dic['day_of_week'].css( 'display', 'block' );
-				this.edit_view_form_item_dic['pivot_day_direction_id'].css( 'display', 'block' );
-				this.edit_view_form_item_dic['day_of_month'].css( 'display', 'block' );
-				this.edit_view_form_item_dic['month_int'].css( 'display', 'block' );
+				this.detachElement( 'week_interval' );
+				this.attachElement( 'day_of_week' );
+				this.attachElement( 'pivot_day_direction_id' );
+				this.attachElement( 'day_of_month' );
+				this.attachElement( 'month_int' );
 			}
 		}
 

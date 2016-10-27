@@ -336,10 +336,16 @@ EmployeeViewController = BaseViewController.extend( {
 				}
 
 				$this.getEmployeeData( id, function( result ) {
-					// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
-					$this.current_edit_record = result;
-					$this.setEditViewWidgetsMode();
-					$this.initEditView();
+					//Error: Uncaught TypeError: Cannot read property 'user_id' of null in interface/html5/#!m=TimeSheet&date=20150915&user_id=42175&show_wage=0 line 79
+					if ( !result ) {
+						TAlertManager.showAlert( $.i18n._( 'Invalid employee id' ) );
+						$this.onCancelClick();
+					} else {
+						// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
+						$this.current_edit_record = result;
+						$this.setEditViewWidgetsMode();
+						$this.initEditView();
+					}
 
 				} );
 
@@ -410,57 +416,36 @@ EmployeeViewController = BaseViewController.extend( {
 		var option_result = [];
 		if ( this.hierarchyPermissionValidate() ) {
 
-			this.hierarchyControlAPI.getHierarchyControlOptions( {
-				onResult: function( res ) {
+			$this.hierarchyControlAPI.getOptions( 'object_type', {
+				onResult: function( res_1 ) {
 
-					$this.hierarchy_options_dic = {};
-					var data = res.getResult();
+					var data_1 = res_1.getResult();
+					if ( data_1 ) {
 
-					for ( var key in data ) {
-						var source = Global.buildRecordArray( data[key] );
-						$this.hierarchy_options_dic[key] = source;
-					}
-					$this.hierarchyControlAPI.getOptions( 'object_type', {
-						onResult: function( res_1 ) {
+						var array = [];
 
-							var data_1 = res_1.getResult();
-							if ( data_1 ) {
-
-								var array = [];
-
-								for ( var key in data_1 ) {
-									array.push( {id: key, value: data_1[key]} );
-								}
-
-								array.sort( function( a, b ) {
-
-									if ( parseInt( a["id"] ) < parseInt( b['id'] ) ) {
-										return true;
-									} else {
-										return false;
-									}
-
-								} );
-
-								$this.hierarchy_ui_model = array;
-
-							}
-
-							if ( data ) {
-								$this.show_hierarchy = true;
-							} else {
-								$this.show_hierarchy = false;
-							}
-
-							complete_count = complete_count + 1;
-
-							if ( complete_count === len ) {
-
-								callBack( option_result );
-							}
+						for ( var key in data_1 ) {
+							array.push( {id: key, value: data_1[key]} );
 						}
-					} );
 
+						array.sort( function( a, b ) {
+
+							if ( parseInt( a["id"] ) < parseInt( b['id'] ) ) {
+								return 1;
+							}
+							if ( parseInt( a["id"] ) > parseInt( b['id'] ) ) {
+								return -1;
+							}
+							return 0;
+
+						} );
+
+						$this.hierarchy_ui_model = array;
+					}
+					complete_count = complete_count + 1;
+					if ( complete_count === len ) {
+						callBack( option_result );
+					}
 				}
 			} );
 
@@ -518,7 +503,7 @@ EmployeeViewController = BaseViewController.extend( {
 	/* jshint ignore:start */
 	setDefaultMenu: function( doNotSetFocus ) {
 
-		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
 			return;
 		}
@@ -738,7 +723,7 @@ EmployeeViewController = BaseViewController.extend( {
 	initSubQualificationView: function() {
 		var $this = this;
 
-		Global.loadScriptAsync( 'views/hr/qualification/UserSkillViewController.js', function() {
+		Global.loadScript( 'views/hr/qualification/UserSkillViewController.js', function() {
 			var tab_qualifications = $this.edit_view_tab.find( '#tab_qualifications' );
 			var firstColumn = tab_qualifications.find( '.first-column-sub-view' ).find( '.first-sub-view' );
 			Global.trackView( 'Sub' + 'UserSkill' + 'View' );
@@ -746,7 +731,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 		} );
 
-		Global.loadScriptAsync( 'views/hr/qualification/UserEducationViewController.js', function() {
+		Global.loadScript( 'views/hr/qualification/UserEducationViewController.js', function() {
 			var tab_qualifications = $this.edit_view_tab.find( '#tab_qualifications' );
 			var firstColumn = tab_qualifications.find( '.first-column-sub-view' ).find( '.second-sub-view' );
 			Global.trackView( 'Sub' + 'UserEducation' + 'View' );
@@ -754,7 +739,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 		} );
 
-		Global.loadScriptAsync( 'views/hr/qualification/UserMembershipViewController.js', function() {
+		Global.loadScript( 'views/hr/qualification/UserMembershipViewController.js', function() {
 			var tab_qualifications = $this.edit_view_tab.find( '#tab_qualifications' );
 			var firstColumn = tab_qualifications.find( '.first-column-sub-view' ).find( '.third-sub-view' );
 			Global.trackView( 'Sub' + 'UserMembership' + 'View' );
@@ -762,7 +747,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 		} );
 
-		Global.loadScriptAsync( 'views/hr/qualification/UserLicenseViewController.js', function() {
+		Global.loadScript( 'views/hr/qualification/UserLicenseViewController.js', function() {
 			var tab_qualifications = $this.edit_view_tab.find( '#tab_qualifications' );
 			var firstColumn = tab_qualifications.find( '.first-column-sub-view' ).find( '.forth-sub-view' );
 			Global.trackView( 'Sub' + 'UserLicense' + 'View' );
@@ -770,7 +755,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 		} );
 
-		Global.loadScriptAsync( 'views/hr/qualification/UserLanguageViewController.js', function() {
+		Global.loadScript( 'views/hr/qualification/UserLanguageViewController.js', function() {
 			var tab_qualifications = $this.edit_view_tab.find( '#tab_qualifications' );
 			var firstColumn = tab_qualifications.find( '.first-column-sub-view' ).find( '.fifth-sub-view' );
 			Global.trackView( 'Sub' + 'UserLanguage' + 'View' );
@@ -847,6 +832,9 @@ EmployeeViewController = BaseViewController.extend( {
 		}
 
 		Global.loadViewSource( 'CompanyTaxDeduction', 'CompanyTaxDeductionViewController.js', function() {
+			if ( !$this.edit_view_tab ) {
+				return;
+			}
 			var tab_employee = $this.edit_view_tab.find( '#tab_tax' );
 			var firstColumn = tab_employee.find( '.first-column-sub-view' );
 			Global.trackView( 'Sub' + 'UserContact' + 'View' );
@@ -881,7 +869,10 @@ EmployeeViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScriptAsync( 'views/hr/kpi/UserReviewControlViewController.js', function() {
+		Global.loadScript( 'views/hr/kpi/UserReviewControlViewController.js', function() {
+			if ( !$this.edit_view_tab ) {
+				return;
+			}
 			var tab_employee = $this.edit_view_tab.find( '#tab_reviews' );
 			var firstColumn = tab_employee.find( '.first-column-sub-view' );
 
@@ -918,7 +909,10 @@ EmployeeViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScriptAsync( 'views/hr/recruitment/JobApplicationViewController.js', function() {
+		Global.loadScript( 'views/hr/recruitment/JobApplicationViewController.js', function() {
+			if ( !$this.edit_view_tab ) {
+				return;
+			}
 			var tab_applications = $this.edit_view_tab.find( '#tab_applications' );
 			var firstColumn = tab_applications.find( '.first-column-sub-view' );
 			Global.trackView( 'Sub' + 'JobApplication' + 'View' );
@@ -953,7 +947,10 @@ EmployeeViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScriptAsync( 'views/employees/user_contact/UserContactViewController.js', function() {
+		Global.loadScript( 'views/employees/user_contact/UserContactViewController.js', function() {
+			if ( !$this.edit_view_tab ) {
+				return;
+			}
 			var tab_employee = $this.edit_view_tab.find( '#tab_contacts' );
 			var firstColumn = tab_employee.find( '.first-column-sub-view' );
 
@@ -990,8 +987,10 @@ EmployeeViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScriptAsync( 'views/company/wage/WageViewController.js', function() {
-
+		Global.loadScript( 'views/company/wage/WageViewController.js', function() {
+			if ( !$this.edit_view_tab ) {
+				return;
+			}
 			var tab_employee = $this.edit_view_tab.find( '#tab_wage' );
 
 			var firstColumn = tab_employee.find( '.first-column-sub-view' );
@@ -1030,8 +1029,10 @@ EmployeeViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScriptAsync( 'views/policy/accrual_policy/AccrualPolicyUserModifierViewController.js', function() {
-
+		Global.loadScript( 'views/policy/accrual_policy/AccrualPolicyUserModifierViewController.js', function() {
+			if ( !$this.edit_view_tab ) {
+				return;
+			}
 			var tab_employee = $this.edit_view_tab.find( '#tab_accruals' );
 
 			var firstColumn = tab_employee.find( '.first-column-sub-view' );
@@ -1101,11 +1102,13 @@ EmployeeViewController = BaseViewController.extend( {
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.setJobItemValueWhenJobChanged( target.getValue( true ) );
+					this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
 				}
 				break;
 			case 'default_job_item_id':
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
+					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
 				}
 				break;
 			case 'job_quick_search':
@@ -1138,6 +1141,8 @@ EmployeeViewController = BaseViewController.extend( {
 		var job_item_widget = $this.edit_view_ui_dic['default_job_item_id'];
 		var current_job_item_id = job_item_widget.getValue();
 		job_item_widget.setSourceData( null );
+		job_item_widget.setCheckBox( true );
+		this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
 		var args = {};
 		args.filter_data = {
 			status_id: 10,
@@ -1351,24 +1356,20 @@ EmployeeViewController = BaseViewController.extend( {
 		}
 
 		if ( this.current_edit_record.id ) {
+			this.file_browser.show();
 			this.file_browser.setImage( ServiceCaller.userPhoto + '&object_id=' + this.current_edit_record.id );
-
 			if ( this.is_viewing ) {
 				this.file_browser.setEnable( false );
 			} else {
 				this.file_browser.setEnable( true );
 			}
-
+			$( '.upload-image-alert' ).remove();
 		} else {
-			this.file_browser.setImage( null );
-			this.file_browser.setEnable( false );
+			this.file_browser.hide();
+			var span = $( '<span class="upload-image-alert">' );
+			span.text( $.i18n._( 'Please save this record before uploading a photo' ) );
+			this.file_browser.parent().append( span );
 		}
-
-//		if ( ( !this.current_edit_record || !this.current_edit_record.id ) && PermissionManager.checkTopLevelPermission( 'Companies' ) && !this.is_mass_editing ) {
-//			this.edit_view_ui_dic['company_id'].setEnabled( true );
-//		} else {
-//			this.edit_view_ui_dic['company_id'].setEnabled( false );
-//		}
 
 		this.edit_view_ui_dic['company_id'].setEnabled( false );
 
@@ -1704,7 +1705,7 @@ EmployeeViewController = BaseViewController.extend( {
 					var found = false;
 					var new_record = result_data[0];
 
-					//Error: Uncaught TypeError: Cannot read property 'id' of undefined in https://ondemand1.timetrex.com/interface/html5/views/BaseViewController.js?v=7.4.3-20140924-084605 line 4851
+					//Error: Uncaught TypeError: Cannot read property 'id' of undefined in /interface/html5/views/BaseViewController.js?v=7.4.3-20140924-084605 line 4851
 					if ( new_record ) {
 						for ( var i = 0; i < len; i++ ) {
 							var record = grid_source_data[i];
@@ -2287,7 +2288,7 @@ EmployeeViewController = BaseViewController.extend( {
 			this.addEditFieldToColumn( $.i18n._( 'Default Job' ), [form_item_input, job_coder], tab_employee_column2, '', widgetContainer, true );
 
 			if ( !this.show_job_ui ) {
-				this.edit_view_form_item_dic.default_job_id.hide();
+				this.detachElement( 'default_job_id' );
 			}
 
 			//Job Item
@@ -2319,7 +2320,7 @@ EmployeeViewController = BaseViewController.extend( {
 			this.addEditFieldToColumn( $.i18n._( 'Default Task' ), [form_item_input, job_item_coder], tab_employee_column2, '', widgetContainer, true );
 
 			if ( !this.show_job_item_ui ) {
-				this.edit_view_form_item_dic.default_job_item_id.hide();
+				this.detachElement( 'default_job_item_id' );
 			}
 		}
 		//Group
@@ -2558,13 +2559,23 @@ EmployeeViewController = BaseViewController.extend( {
 		this.edit_view_tabs[2] = [];
 		this.edit_view_tabs[2].push( tab_hierarchy_column1 );
 
+		if ( this.hierarchyPermissionValidate() ) {
+			var res = this.hierarchyControlAPI.getHierarchyControlOptions( {async: false} );
+			$this.hierarchy_options_dic = {};
+			var data = res.getResult();
+			for ( var key in data ) {
+				$this.hierarchy_options_dic[key] = Global.buildRecordArray( data[key] );
+			}
+			if ( data ) {
+				$this.show_hierarchy = true;
+			} else {
+				$this.show_hierarchy = false;
+			}
+		}
 		if ( this.show_hierarchy ) {
-
 			this.edit_view_tab.find( '#tab_hierarchy' ).find( '.first-column' ).css( 'display', 'block' );
 			this.edit_view_tab.find( '#tab_hierarchy' ).find( '.hierarchy-div' ).css( 'display', 'none' );
-
 			var len = this.hierarchy_ui_model.length;
-
 			for ( var i = 0; i < len; i++ ) {
 				var ui_model = this.hierarchy_ui_model[i];
 				var options = this.hierarchy_options_dic[ui_model.id];
@@ -2574,7 +2585,6 @@ EmployeeViewController = BaseViewController.extend( {
 					form_item_input.setSourceData( options );
 					this.addEditFieldToColumn( ui_model.value, form_item_input, tab_hierarchy_column1 );
 				}
-
 			}
 
 		} else {
@@ -2871,16 +2881,11 @@ EmployeeViewController = BaseViewController.extend( {
 	onJobQuickSearch: function( key, value ) {
 		var args = {};
 		var $this = this;
-
 		if ( key === 'job_quick_search' ) {
-
 			args.filter_data = {manual_id: value, company_id: $this.select_company_id};
-
 			this.job_api.getJob( args, {
 				onResult: function( result ) {
-
 					var result_data = result.getResult();
-
 					if ( result_data.length > 0 ) {
 						$this.edit_view_ui_dic['default_job_id'].setValue( result_data[0].id );
 						$this.current_edit_record.default_job_id = result_data[0].id;
@@ -2894,6 +2899,8 @@ EmployeeViewController = BaseViewController.extend( {
 
 				}
 			} );
+			$this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
+			$this.edit_view_ui_dic['default_job_id'].setCheckBox( true );
 		} else if ( key === 'job_item_quick_search' ) {
 
 			args.filter_data = {manual_id: value, company_id: $this.select_company_id};
@@ -2912,6 +2919,8 @@ EmployeeViewController = BaseViewController.extend( {
 
 				}
 			} );
+			this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
+			this.edit_view_ui_dic['default_job_item_id'].setCheckBox( true );
 		}
 
 	},
@@ -2930,7 +2939,7 @@ EmployeeViewController = BaseViewController.extend( {
 		if ( this.grid ) {
 			display_columns = this.grid.getGridParam( 'colModel' );
 		}
-		//Fixed possible exception -- Error: Unable to get property 'length' of undefined or null reference in https://villa.timetrex.com/interface/html5/views/BaseViewController.js?v=7.4.3-20140924-090129 line 5031
+		//Fixed possible exception -- Error: Unable to get property 'length' of undefined or null reference in /interface/html5/views/BaseViewController.js?v=7.4.3-20140924-090129 line 5031
 		if ( display_columns ) {
 			var len = display_columns.length;
 
@@ -2955,7 +2964,10 @@ EmployeeViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScriptAsync( 'views/document/DocumentViewController.js', function() {
+		Global.loadScript( 'views/document/DocumentViewController.js', function() {
+			if ( !$this.edit_view_tab ) {
+				return;
+			}
 			var tab_contact_info = $this.edit_view_tab.find( '#tab_attachment' );
 			var firstColumn = tab_contact_info.find( '.first-column-sub-view' );
 			Global.trackView( 'Sub' + 'Document' + 'View' );

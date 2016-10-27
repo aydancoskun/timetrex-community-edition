@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -53,7 +53,7 @@ class AccrualPolicyFactory extends Factory {
 		switch( $name ) {
 			case 'type':
 				$retval = array(
-										10 => TTi18n::gettext('Standard'),
+										//10 => TTi18n::gettext('Standard'), //No longer required after v8.0
 										20 => TTi18n::gettext('Calendar Based'),
 										30 => TTi18n::gettext('Hour Based'),
 									);
@@ -62,6 +62,7 @@ class AccrualPolicyFactory extends Factory {
 				$retval = array(
 										10 => TTi18n::gettext('each Pay Period'),
 										20 => TTi18n::gettext('Annually'),
+										25 => TTi18n::gettext('Quarterly'),
 										30 => TTi18n::gettext('Monthly'),
 										40 => TTi18n::gettext('Weekly'),
 									);
@@ -129,7 +130,10 @@ class AccrualPolicyFactory extends Factory {
 											'apply_frequency_month' => 'ApplyFrequencyMonth',
 											'apply_frequency_day_of_month' => 'ApplyFrequencyDayOfMonth',
 											'apply_frequency_day_of_week' => 'ApplyFrequencyDayOfWeek',
+											'apply_frequency_quarter_month' => 'ApplyFrequencyQuarterMonth',
 											'apply_frequency_hire_date' => 'ApplyFrequencyHireDate',
+											'enable_opening_balance' => 'EnableOpeningBalance',
+											'enable_pro_rate_initial_period' => 'EnableProRateInitialPeriod',
 											'milestone_rollover_hire_date' => 'MilestoneRolloverHireDate',
 											'milestone_rollover_month' => 'MilestoneRolloverMonth',
 											'milestone_rollover_day_of_month' => 'MilestoneRolloverDayOfMonth',
@@ -187,11 +191,6 @@ class AccrualPolicyFactory extends Factory {
 	}
 	function setType($value) {
 		$value = trim($value);
-
-		$key = Option::getByValue($value, $this->getOptions('type') );
-		if ($key !== FALSE) {
-			$value = $key;
-		}
 
 		if ( $this->Validator->inArrayKey(	'type',
 											$value,
@@ -522,11 +521,62 @@ class AccrualPolicyFactory extends Factory {
 		return FALSE;
 	}
 
+	function getApplyFrequencyQuarterMonth() {
+		if ( isset($this->data['apply_frequency_quarter_month']) ) {
+			return $this->data['apply_frequency_quarter_month'];
+		}
+
+		return FALSE;
+	}
+	function setApplyFrequencyQuarterMonth($value) {
+		$value = trim($value);
+
+		if ( $value == 0
+				OR
+				(
+					$this->Validator->isGreaterThan(	'apply_frequency_quarter_month',
+												$value,
+												TTi18n::gettext('Incorrect frequency quarter month'),
+												1 )
+					AND
+					$this->Validator->isLessThan(	'apply_frequency_quarter_month',
+												$value,
+												TTi18n::gettext('Incorrect frequency quarter month'),
+												3 )
+				)
+				) {
+
+			$this->data['apply_frequency_quarter_month'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
 	function getApplyFrequencyHireDate() {
 		return $this->fromBool( $this->data['apply_frequency_hire_date'] );
 	}
 	function setApplyFrequencyHireDate($bool) {
 		$this->data['apply_frequency_hire_date'] = $this->toBool($bool);
+
+		return TRUE;
+	}
+
+	function getEnableProRateInitialPeriod() {
+		return $this->fromBool( $this->data['enable_pro_rate_initial_period'] );
+	}
+	function setEnableProRateInitialPeriod($bool) {
+		$this->data['enable_pro_rate_initial_period'] = $this->toBool($bool);
+
+		return TRUE;
+	}
+
+	function getEnableOpeningBalance() {
+		return $this->fromBool( $this->data['enable_opening_balance'] );
+	}
+	function setEnableOpeningBalance($bool) {
+		$this->data['enable_opening_balance'] = $this->toBool($bool);
 
 		return TRUE;
 	}
@@ -653,7 +703,7 @@ class AccrualPolicyFactory extends Factory {
 		return TTDate::getBeginDayEpoch( $retval ); //Some hire dates might be at noon, so make sure they are all at midnight.
 	}
 
-	function getCurrentMilestoneRolloverDate( $epoch, $u_obj = NULL ) {
+	function getCurrentMilestoneRolloverDate( $epoch, $u_obj = NULL, $use_previous_year_date = FALSE ) {
 		if ( !is_object($u_obj) ) {
 			return FALSE;
 		}
@@ -665,6 +715,11 @@ class AccrualPolicyFactory extends Factory {
 
 		if ( $rollover_date < $user_hire_date ) {
 			$rollover_date = $user_hire_date;
+		}
+
+		//If milestone rollover date comes after the current epoch, back date it by one year.
+		if ( $use_previous_year_date == TRUE AND $rollover_date > $epoch ) {
+			$rollover_date = mktime( 0, 0, 0, TTDate::getMonth($rollover_date), TTDate::getDayOfMonth($rollover_date), (TTDate::getYear($epoch) - 1) );
 		}
 
 		Debug::Text('Current Milestone Rollover Date: '. TTDate::getDate('DATE+TIME', $rollover_date) .' Hire Date: '. TTDate::getDate('DATE+TIME', $user_hire_date), __FILE__, __LINE__, __METHOD__, 10);
@@ -682,6 +737,9 @@ class AccrualPolicyFactory extends Factory {
 				break;
 			case 20: //Year
 				$retval = $accrual_rate;
+				break;
+			case 25: //Quarter
+				$retval = bcdiv( $accrual_rate, 4, 0);
 				break;
 			case 30: //Month
 				$retval = bcdiv( $accrual_rate, 12, 0);
@@ -704,7 +762,7 @@ class AccrualPolicyFactory extends Factory {
 
 	function inRolloverFrequencyWindow( $current_epoch, $offset, $u_obj, $pay_period_start_date = NULL ) {
 		//Use current_epoch mainly for Yearly cases where the rollover date is 01-Nov and the hire date is always right after it, 10-Nov in the next year.
-		$rollover_date = $this->getCurrentMilestoneRolloverDate( $current_epoch, $u_obj );
+		$rollover_date = $this->getCurrentMilestoneRolloverDate( $current_epoch, $u_obj, FALSE );
 		Debug::Text('Rollover Date: '. TTDate::getDate('DATE+TIME', $rollover_date ) .' Current Epoch: '. TTDate::getDate('DATE+TIME', $current_epoch ), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $rollover_date >= ($current_epoch - $offset) AND $rollover_date <= $current_epoch ) {
@@ -716,19 +774,13 @@ class AccrualPolicyFactory extends Factory {
 		return FALSE;
 	}
 
-	function inApplyFrequencyWindow( $current_epoch, $offset, $pay_period_end_date = NULL, $u_obj = NULL ) {
+	function getApplyFrequencyWindowDates( $current_epoch, $offset, $pay_period_dates = NULL, $u_obj = NULL ) {
 		$hire_date = $this->getMilestoneRolloverDate( $u_obj );
-
+		
 		$retval = FALSE;
 		switch( $this->getApplyFrequency() ) {
 			case 10: //Pay Period
-				if ( $pay_period_end_date == '' ) {
-					return FALSE;
-				}
-				if ( $pay_period_end_date >= ($current_epoch - $offset)
-						AND $pay_period_end_date <= $current_epoch ) {
-					$retval = TRUE;
-				}
+				$retval = array('start_date' => $pay_period_dates['start_date'], 'end_date' => $pay_period_dates['end_date'] );
 				break;
 			case 20: //Year
 				if ( $this->getApplyFrequencyHireDate() == TRUE ) {
@@ -737,13 +789,39 @@ class AccrualPolicyFactory extends Factory {
 				} else {
 					Debug::Text('Static Date', __FILE__, __LINE__, __METHOD__, 10);
 					$year_epoch = mktime( 0, 0, 0, $this->getApplyFrequencyMonth(), $this->getApplyFrequencyDayOfMonth(), TTDate::getYear( $current_epoch ) );
+					if ( $year_epoch < $u_obj->getHireDate() ) {
+						$year_epoch = strtotime('+1 year', $year_epoch);
+					}
 				}
 				Debug::Text('Year EPOCH: '. TTDate::getDate('DATE+TIME', $year_epoch), __FILE__, __LINE__, __METHOD__, 10);
 
-				if ( $year_epoch >= ($current_epoch - $offset)
-						AND $year_epoch <= $current_epoch ) {
-					$retval = TRUE;
+				$retval = array('start_date' => strtotime('-1 year', $year_epoch), 'end_date' => $year_epoch );
+				break;
+			case 25: //Quarter
+				$apply_frequency_day_of_month = $this->getApplyFrequencyDayOfMonth();
+
+				//Make sure if they specify the day of month to be 31, that is still works for months with 30, or 28-29 days, assuming 31 basically means the last day of the month
+				if ( $apply_frequency_day_of_month > TTDate::getDaysInMonth( $current_epoch ) ) {
+					$apply_frequency_day_of_month = TTDate::getDaysInMonth( $current_epoch );
+					Debug::Text('Apply frequency day of month exceeds days in this month, using last day of the month instead: '. $apply_frequency_day_of_month, __FILE__, __LINE__, __METHOD__, 10);
 				}
+
+				$tmp_epoch = TTDate::getBeginDayEpoch( $current_epoch - $offset );
+				$month_offset = ( $this->getApplyFrequencyQuarterMonth() - 1 );
+				$year_quarters = array_reverse( TTDate::getYearQuarters( $tmp_epoch, NULL, $apply_frequency_day_of_month ), TRUE );
+				foreach( $year_quarters as $quarter => $quarter_dates ) {
+					$tmp_quarter_end_date = ( TTDate::getEndDayEpoch( $quarter_dates['end'] ) + 1 );
+					//Debug::Text('Quarter: '. $quarter .' Month Offset: '. $month_offset .' Start: '. TTDate::getDate('DATE+TIME', $quarter_dates['start']) .' End: '. TTDate::getDate('DATE+TIME', $tmp_quarter_end_date), __FILE__, __LINE__, __METHOD__, 10);
+					if ( $tmp_epoch >= $quarter_dates['start'] AND $tmp_epoch <= $tmp_quarter_end_date ) {
+						$start_date_month_epoch = mktime(0, 0, 0, ( TTDate::getMonth( $quarter_dates['start'] ) - $month_offset ), 1, TTDate::getYear( $quarter_dates['start'] ) );
+						$end_date_month_epoch = mktime(0, 0, 0, ( TTDate::getMonth( $tmp_quarter_end_date ) - $month_offset ), 1, TTDate::getYear( $tmp_quarter_end_date ) );
+
+						$retval = array('start_date' => mktime(0, 0, 0, ( TTDate::getMonth( $start_date_month_epoch )), ( $this->getApplyFrequencyDayOfMonth() > TTDate::getDaysInMonth( $start_date_month_epoch ) ) ? TTDate::getDaysInMonth( $start_date_month_epoch ) : $this->getApplyFrequencyDayOfMonth(), TTDate::getYear( $start_date_month_epoch ) ),
+										'end_date' => mktime(0, 0, 0, ( TTDate::getMonth( $end_date_month_epoch ) ), ( $this->getApplyFrequencyDayOfMonth() > TTDate::getDaysInMonth( $end_date_month_epoch ) ) ? TTDate::getDaysInMonth( $end_date_month_epoch ) : $this->getApplyFrequencyDayOfMonth(), TTDate::getYear( $end_date_month_epoch ) ) );
+						unset($start_date_month_epoch, $end_date_month_epoch);
+						break;
+					}
+				}				
 				break;
 			case 30: //Month
 				$apply_frequency_day_of_month = $this->getApplyFrequencyDayOfMonth();
@@ -755,24 +833,65 @@ class AccrualPolicyFactory extends Factory {
 				}
 
 				$month_epoch = mktime( 0, 0, 0, TTDate::getMonth( $current_epoch ), $apply_frequency_day_of_month, TTDate::getYear( $current_epoch ) );
-				//Debug::Text('Day of Month: '. $this->getApplyFrequencyDayOfMonth() .' Month EPOCH: '. TTDate::getDate('DATE+TIME', $month_epoch) .' Current Month: '. TTDate::getMonth( $current_epoch ), __FILE__, __LINE__, __METHOD__, 10);
-				Debug::Text('Month EPOCH: '. TTDate::getDate('DATE+TIME', $month_epoch) .'('. $month_epoch .') Greater Than: '. TTDate::getDate('DATE+TIME', ($current_epoch - $offset)) .' Less Than: '.	 TTDate::getDate('DATE+TIME', $current_epoch) .'('. $current_epoch .')', __FILE__, __LINE__, __METHOD__, 10);
-
-				if ( $month_epoch >= ($current_epoch - $offset)
-						AND $month_epoch <= $current_epoch ) {
-					$retval = TRUE;
+				if ( $month_epoch < $u_obj->getHireDate() ) {
+					$month_epoch = strtotime('+1 month', $month_epoch);
 				}
+
+				Debug::Text('Month EPOCH: '. TTDate::getDate('DATE+TIME', $month_epoch) .'('. $month_epoch .')', __FILE__, __LINE__, __METHOD__, 10);
+				$retval = array('start_date' => strtotime('-1 month', $month_epoch), 'end_date' => $month_epoch );
 				break;
 			case 40: //Week
-				Debug::Text('Current Day Of Week: '. TTDate::getDayOfWeek($current_epoch - $offset), __FILE__, __LINE__, __METHOD__, 10);
-				if ( $this->getApplyFrequencyDayOfWeek() == TTDate::getDayOfWeek( ($current_epoch - $offset) ) ) {
-					$retval = TRUE;
-				}
+				$week_epoch = strtotime('this '. TTDate::getDayOfWeekByInt( $this->getApplyFrequencyDayOfWeek() ), ( $current_epoch ) );
+				Debug::Text('Current Day Of Week: '. TTDate::getDayOfWeekByInt( TTDate::getDayOfWeek($current_epoch) ) .' Accrual Day of Week: '. TTDate::getDayOfWeekByInt( $this->getApplyFrequencyDayOfWeek() ), __FILE__, __LINE__, __METHOD__, 10);
+				$retval = array('start_date' => strtotime('-1 week', $week_epoch), 'end_date' => $week_epoch );
 				break;
 		}
 
-		Debug::Text('RetVal: '. (int)$retval .' Offset: '. $offset, __FILE__, __LINE__, __METHOD__, 10);
+		if ( is_array($retval) ) {
+			Debug::Text('Epoch: '. TTDate::getDate('DATE+TIME', $current_epoch ) .' Window Start Date: '. TTDate::getDate('DATE', $retval['start_date'] ) .' End Date: '. TTDate::getDate('DATE', $retval['end_date'] ) .' Offset: '. $offset, __FILE__, __LINE__, __METHOD__, 10);
+		} else {
+			Debug::Text('Start Date: FALSE End Date: FALSE Offset: '. $offset, __FILE__, __LINE__, __METHOD__, 10);
+		}
+
 		return $retval;
+	}
+
+	function getProRateInitialFrequencyWindow( $input_amount, $current_epoch, $offset, $pay_period_dates = NULL, $u_obj = NULL ) {
+		$apply_frequency_dates = $this->getApplyFrequencyWindowDates( $current_epoch, $offset, $pay_period_dates, $u_obj );
+		if ( isset($apply_frequency_dates['start_date']) AND isset($apply_frequency_dates['end_date']) ) {
+			$pro_rate_multiplier = ( ( $apply_frequency_dates['end_date'] - $u_obj->getHireDate() ) / ( $apply_frequency_dates['end_date'] - $apply_frequency_dates['start_date'] ) );
+			if ( $pro_rate_multiplier <= 0 ) {
+				$pro_rate_multiplier = 1;
+			}
+			$amount = round( $input_amount * $pro_rate_multiplier ); //Round to nearest second.
+			Debug::Text('ProRated Amount: '. $amount .' ProRate Multiplier: '. $pro_rate_multiplier .' Input Amount: '. $input_amount, __FILE__, __LINE__, __METHOD__, 10);
+			return $amount;
+		}
+
+		return $input_amount;
+	}
+	function isInitialApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates = NULL, $u_obj = NULL ) {
+		$apply_frequency_dates = $this->getApplyFrequencyWindowDates( $current_epoch, $offset, $pay_period_dates, $u_obj );
+		if ( isset($apply_frequency_dates['start_date']) AND isset($apply_frequency_dates['end_date']) ) {
+			if ( $u_obj->getHireDate() >= $apply_frequency_dates['start_date'] AND $u_obj->getHireDate() <= $apply_frequency_dates['end_date'] ) {
+				Debug::Text('Initial apply frequency window...', __FILE__, __LINE__, __METHOD__, 10);
+				return TRUE;
+			}
+		}
+
+		Debug::Text('Not initial apply frequency window...', __FILE__, __LINE__, __METHOD__, 10);
+		return FALSE;
+	}
+
+	function inApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates = NULL, $u_obj = NULL ) {
+		$apply_frequency_dates = $this->getApplyFrequencyWindowDates( $current_epoch, $offset, $pay_period_dates, $u_obj );
+		if ( isset($apply_frequency_dates['start_date']) AND isset($apply_frequency_dates['end_date']) ) {
+			if ( $apply_frequency_dates['end_date'] >= ($current_epoch - $offset) AND $apply_frequency_dates['end_date'] <= $current_epoch ) {
+				return TRUE;
+			}
+		}
+		
+		return FALSE;
 	}
 
 	function getWorkedTimeByUserIdAndEndDate( $user_id, $start_date = NULL, $end_date = NULL ) {
@@ -962,15 +1081,6 @@ class AccrualPolicyFactory extends Factory {
 		$pp_end_date = $end_epoch;
 
 		$pplf = TTNew('PayPeriodListFactory');
-/*
-		$pplf->getByUserIdAndEndDate( $u_obj->getID(), $start_epoch );
-		if ( $pplf->getRecordCount() > 0 ) {
-			foreach( $pplf as $pp_obj ) {
-				$retarr[] = array('start_date' => $pp_obj->getStartDate(), 'end_date' => $pp_obj->getEndDate() );
-				$pp_end_date = $pp_obj->getEndDate();
-			}
-		}
-*/
 		$pplf->getByUserIdAndOverlapStartDateAndEndDate( $u_obj->getId(), $start_epoch, $end_epoch);
 		if ( $pplf->getRecordCount() > 0 ) {
 			foreach( $pplf as $pp_obj ) {
@@ -1107,11 +1217,12 @@ class AccrualPolicyFactory extends Factory {
 				//Hour based, apply frequency is real-time.
 				$in_apply_frequency_window = TRUE;
 			} else {
+				$pay_period_dates = FALSE;				
 				if ( $this->getApplyFrequency() == 10 ) {
-					$pay_period_dates = $this->getPayPeriodDatesFromArray( $pay_period_arr, ($epoch - $offset) );
+					$pay_period_dates = $this->getPayPeriodDatesFromArray( $pay_period_arr, ( $epoch - $offset ) );
 					if ( is_array( $pay_period_dates ) ) {
 						Debug::Text('   Pay Period Start Date: '. TTDate::getDate('DATE+TIME', $pay_period_dates['start_date'] ) .' End Date: '. TTDate::getDate('DATE+TIME', $pay_period_dates['end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
-						if ( $this->inApplyFrequencyWindow( $epoch, $offset, $pay_period_dates['end_date'] ) == TRUE ) {
+						if ( $this->inApplyFrequencyWindow( $epoch, $offset, $pay_period_dates ) == TRUE ) {
 							$in_apply_frequency_window = TRUE;
 
 							$pay_period_start_date = $pay_period_dates['start_date']; //Used for inRolloverFrequencyWindow
@@ -1127,6 +1238,14 @@ class AccrualPolicyFactory extends Factory {
 				} else {
 					//Debug::Text('  User is not in Apply Frequency Window.', __FILE__, __LINE__, __METHOD__, 10);
 					$in_apply_frequency_window = FALSE;
+				}
+				
+				if ( $in_apply_frequency_window == FALSE
+					AND $this->getEnableOpeningBalance() == TRUE
+					AND TTDate::getMiddleDayEpoch( $u_obj->getHireDate() ) == TTDate::getMiddleDayEpoch( $epoch )
+					AND $this->isInitialApplyFrequencyWindow( $epoch, $offset, $pay_period_dates, $u_obj ) == TRUE ) {
+					Debug::Text('  Epoch is users hire date, and opening balances is enabled...', __FILE__, __LINE__, __METHOD__, 10);
+					$in_apply_frequency_window = TRUE;
 				}
 			}
 
@@ -1153,12 +1272,8 @@ class AccrualPolicyFactory extends Factory {
 					}
 					if ( $alf->getRecordCount() == 0 ) {
 						//Get effective date, try to use the current milestone rollover date to make things more clear.
-						$current_milestone_rollover_date = $this->getCurrentMilestoneRolloverDate( $epoch, $u_obj );
-						//If milestone rollover date comes after the current epoch, back date it by one year.
-						if ( $current_milestone_rollover_date > $epoch ) {
-							$current_milestone_rollover_date = mktime( 0, 0, 0, TTDate::getMonth($current_milestone_rollover_date), TTDate::getDayOfMonth($current_milestone_rollover_date), (TTDate::getYear($epoch) - 1) );
-						}
-
+						$current_milestone_rollover_date = $this->getCurrentMilestoneRolloverDate( $epoch, $u_obj, TRUE ); //If milestone rollover date comes after the current epoch, back date it by one year.
+						
 						if ( $update_records == TRUE ) {
 							//Don't round to the nearest minute, as that can cause too much error on weekly frequencies.
 							$af = TTnew( 'AccrualFactory' );
@@ -1198,7 +1313,19 @@ class AccrualPolicyFactory extends Factory {
 					//Make sure we get updated balance after rollover adjustment was made.
 					if ( $accrual_balance < $milestone_obj->getMaximumTime() ) {
 						$accrual_amount = $this->calcAccrualAmount( $milestone_obj, 0, $annual_pay_periods);
-
+						
+						//Check if this is the initial period and pro-rate the accrual amount.
+						if (	$this->getType() == 20 //Calendar based only
+								AND
+								(
+									( $this->getEnableOpeningBalance() == FALSE AND $this->getEnableProRateInitialPeriod() == TRUE AND $this->isInitialApplyFrequencyWindow( $epoch, $offset, $pay_period_dates, $u_obj ) == TRUE )
+									OR
+									( $this->getEnableOpeningBalance() == TRUE AND $this->getEnableProRateInitialPeriod() == TRUE AND TTDate::getMiddleDayEpoch( $u_obj->getHireDate() ) == TTDate::getMiddleDayEpoch( $epoch ) )
+								)
+							) {
+							$accrual_amount = $this->getProRateInitialFrequencyWindow( $accrual_amount, $epoch, $offset, $pay_period_dates, $u_obj );
+						}
+						
 						if ( $accrual_amount > 0 ) {
 							$new_accrual_balance = bcadd( $accrual_balance, $accrual_amount);
 
@@ -1206,7 +1333,7 @@ class AccrualPolicyFactory extends Factory {
 							if ( $milestone_obj->getMaximumTime() > 0 AND $new_accrual_balance > $milestone_obj->getMaximumTime() ) {
 								$accrual_amount = bcsub( $milestone_obj->getMaximumTime(), $accrual_balance, 0 );
 							}
-							Debug::Text('   Min/Max Adjusted Accrual Amount: '. $accrual_amount .' Limits: Min: '. $milestone_obj->getMinimumTime() .' Max: '. $milestone_obj->getMaximumTime(), __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('   Min/Max Adjusted Accrual Amount: '. $accrual_amount .' Limits: Max: '. $milestone_obj->getMaximumTime(), __FILE__, __LINE__, __METHOD__, 10);
 
 							//Check to make sure there isn't an identical entry already made.
 							$alf = TTnew( 'AccrualListFactory' );
@@ -1247,6 +1374,8 @@ class AccrualPolicyFactory extends Factory {
 					Debug::Text('  DID NOT Find Matching Milestone.', __FILE__, __LINE__, __METHOD__, 10);
 				}
 				unset($milestone_obj);
+			} else {
+				Debug::Text('  NOT in apply frequency window...', __FILE__, __LINE__, __METHOD__, 10);
 			}
 		} else {
 			Debug::Text('  User is not active (Status: '. $u_obj->getStatus() .') or has only been employed: '. TTDate::getDays( ($epoch - $u_obj->getHireDate()) ) .' Days, not enough. Hire Date: '. TTDate::getDATE( 'DATE+TIME', $u_obj->getHireDate() ), __FILE__, __LINE__, __METHOD__, 10);
@@ -1346,11 +1475,13 @@ class AccrualPolicyFactory extends Factory {
 		return TRUE;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
+		/*
+		//They need to be able to delete accrual policies while still keeping records originally created by the accrual policy.
 		if ( $this->getDeleted() == TRUE ) {
 			//Check to make sure there are no hours using this accrual policy.
 			$alf = TTnew( 'AccrualListFactory' );
-			$alf->getByAccrualPolicyAccount( $this->getId() );
+			$alf->getByAccrualPolicyID( $this->getId(), 1 ); //Limit 1
 			if ( $alf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
 											FALSE,
@@ -1358,6 +1489,7 @@ class AccrualPolicyFactory extends Factory {
 
 			}
 		}
+		*/
 
 		return TRUE;
 	}
@@ -1368,6 +1500,14 @@ class AccrualPolicyFactory extends Factory {
 
 	function postSave() {
 		$this->removeCache( $this->getId() );
+
+		if ( $this->getDeleted() == TRUE ) {
+			Debug::Text('UnAssign Accruals records from Policy: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
+			$af = TTnew( 'AccrualFactory' );
+
+			$query = 'update '. $af->getTable() .' set accrual_policy_id = 0 where accrual_policy_id = '. (int)$this->getId();
+			$this->db->Execute($query);
+		}
 
 		return TRUE;
 	}

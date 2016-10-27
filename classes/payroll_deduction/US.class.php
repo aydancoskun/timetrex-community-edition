@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -175,7 +175,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	}
 
 	function setStateAllowance($value) {
-		$this->data['state_allowance'] = $value;
+		$this->data['state_allowance'] = (int)$value; //Don't allow fractions, like 1.5 allowances, as this can cause problems with rate lookups failing when its expecting 1 or 2, and it gets 1.5
 
 		return TRUE;
 	}
@@ -200,6 +200,26 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 		return FALSE;
 	}
 
+	//Default to 0 unless otherwise defined in a State specific class.
+	function getStateTaxPayable() {
+		return 0;
+	}
+
+	function getStatePayPeriodDeductionRoundedValue( $amount ) {
+		return $amount;
+	}
+
+	function getStatePayPeriodDeductions() {
+		if ( $this->getFormulaType() == 20 ) {
+			Debug::text('Formula Type: '. $this->getFormulaType() .' YTD Payable: '. $this->getStateTaxPayable() .' YTD Paid: '. $this->getYearToDateDeduction() .' Current PP: '. $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10);
+			$retval = $this->calcNonPeriodicDeduction( $this->getStateTaxPayable(), $this->getYearToDateDeduction(), $this->getAnnualPayPeriods(), $this->getCurrentPayPeriod() );
+		} else {
+			$retval = bcdiv( $this->getStateTaxPayable(), $this->getAnnualPayPeriods() );
+		}
+
+		Debug::text('State Pay Period Deductions: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		return $this->getStatePayPeriodDeductionRoundedValue( $retval );
+	}
 
 	//
 	// District
@@ -208,7 +228,15 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	//Generic district functions that handle straight percentages for any district unless otherwise overloaded.
 	//for custom formulas.
 	function getDistrictPayPeriodDeductions() {
-		return bcdiv($this->getDistrictTaxPayable(), $this->getAnnualPayPeriods() );
+		if ( $this->getFormulaType() == 20 ) {
+			Debug::text('Formula Type: '. $this->getFormulaType() .' YTD Payable: '. $this->getDistrictTaxPayable() .' YTD Paid: '. $this->getYearToDateDeduction() .' Current PP: '. $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10);
+			$retval = $this->calcNonPeriodicDeduction( $this->getDistrictTaxPayable(), $this->getYearToDateDeduction(), $this->getAnnualPayPeriods(), $this->getCurrentPayPeriod() );
+		} else {
+			$retval = bcdiv( $this->getDistrictTaxPayable(), $this->getAnnualPayPeriods() );
+		}
+
+		Debug::text('District Pay Period Deductions: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		return $retval;
 	}
 
 	function getDistrictAnnualTaxableIncome() {
@@ -367,9 +395,12 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	// Calculation Functions
 	//
 	function getAnnualTaxableIncome() {
-
-		$retval = bcmul( $this->getGrossPayPeriodIncome(), $this->getAnnualPayPeriods());
-
+		if ( $this->getFormulaType() == 20 ) {
+			Debug::text('Formula Type: '. $this->getFormulaType() .' YTD Gross: '. $this->getYearToDateGrossIncome() .' This Gross: '. $this->getGrossPayPeriodIncome() .' Current PP: '. $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10);
+			$retval = $this->calcNonPeriodicIncome( $this->getYearToDateGrossIncome(), $this->getGrossPayPeriodIncome(), $this->getAnnualPayPeriods(), $this->getCurrentPayPeriod() );
+		} else {
+			$retval = bcmul( $this->getGrossPayPeriodIncome(), $this->getAnnualPayPeriods() );
+		}
 		Debug::text('Annual Taxable Income: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $retval;
@@ -379,7 +410,15 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	// Federal Tax
 	//
 	function getFederalPayPeriodDeductions() {
-		return bcdiv( $this->getFederalTaxPayable(), $this->getAnnualPayPeriods() );
+		if ( $this->getFormulaType() == 20 ) {
+			Debug::text('Formula Type: '. $this->getFormulaType() .' YTD Payable: '. $this->getFederalTaxPayable() .' YTD Paid: '. $this->getYearToDateDeduction() .' Current PP: '. $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10);
+			$retval = $this->calcNonPeriodicDeduction( $this->getFederalTaxPayable(), $this->getYearToDateDeduction(), $this->getAnnualPayPeriods(), $this->getCurrentPayPeriod() );
+		} else {
+			$retval = bcdiv( $this->getFederalTaxPayable(), $this->getAnnualPayPeriods() );
+		}
+
+		Debug::text('Federal Pay Period Deductions: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		return $retval;
 	}
 
 	function getFederalTaxPayable() {
@@ -649,7 +688,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 
 		return 0;
 	}
-
+	
 	/*
 		Use this to get all useful values.
 	*/

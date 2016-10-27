@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -39,5 +39,61 @@
  * @package PayrollDeduction\CA
  */
 class PayrollDeduction_CA_NU extends PayrollDeduction_CA {
+	var $provincial_income_tax_rate_options = array(
+													20150101 => array(
+																	array( 'income' => 42622,	'rate' => 4.0,	'constant' => 0 ),
+																	array( 'income' => 85243,	'rate' => 7.0,	'constant' => 1279 ),
+																	array( 'income' => 138586,	'rate' => 9.0,	'constant' => 2984 ),
+																	array( 'income' => 138586,	'rate' => 11.5,	'constant' => 6448 ),
+																),
+													20140101 => array(
+																	array( 'income' => 41909,	'rate' => 4.0,	'constant' => 0 ),
+																	array( 'income' => 83818,	'rate' => 7.0,	'constant' => 1257 ),
+																	array( 'income' => 136270,	'rate' => 9.0,	'constant' => 2934 ),
+																	array( 'income' => 136270,	'rate' => 11.5,	'constant' => 6340 ),
+																),
+													20130101 => array(
+																	array( 'income' => 41535,	'rate' => 4.0,	'constant' => 0 ),
+																	array( 'income' => 83071,	'rate' => 7.0,	'constant' => 1246 ),
+																	array( 'income' => 135054,	'rate' => 9.0,	'constant' => 2907 ),
+																	array( 'income' => 135054,	'rate' => 11.5,	'constant' => 6284 ),
+																),
+													20120101 => array(
+																	array( 'income' => 40721,	'rate' => 4.0,	'constant' => 0 ),
+																	array( 'income' => 81442,	'rate' => 7.0,	'constant' => 1222 ),
+																	array( 'income' => 132406,	'rate' => 9.0,	'constant' => 2850 ),
+																	array( 'income' => 132406,	'rate' => 11.5,	'constant' => 6161 ),
+																),
+													20110101 => array(
+																	array( 'income' => 39612,	'rate' => 4.0,	'constant' => 0 ),
+																	array( 'income' => 79224,	'rate' => 7.0,	'constant' => 1188 ),
+																	array( 'income' => 128800,	'rate' => 9.0,	'constant' => 2773 ),
+																	array( 'income' => 128800,	'rate' => 11.5,	'constant' => 5993 ),
+																),
+													20100101 => array(
+																	array( 'income' => 39065,	'rate' => 4.0,	'constant' => 0 ),
+																	array( 'income' => 78130,	'rate' => 7.0,	'constant' => 1172 ),
+																	array( 'income' => 127021,	'rate' => 9.0,	'constant' => 2735 ),
+																	array( 'income' => 127021,	'rate' => 11.5,	'constant' => 5910 ),
+																),
+													20090101 => array(
+																	array( 'income' => 38832,	'rate' => 4.0,	'constant' => 0 ),
+																	array( 'income' => 77664,	'rate' => 7.0,	'constant' => 1165 ),
+																	array( 'income' => 126264,	'rate' => 9.0,	'constant' => 2718 ),
+																	array( 'income' => 126264,	'rate' => 11.5,	'constant' => 5875 ),
+																),
+													20080101 => array(
+																	array( 'income' => 37885,	'rate' => 4,	'constant' => 0 ),
+																	array( 'income' => 75770,	'rate' => 7,	'constant' => 1137 ),
+																	array( 'income' => 123184,	'rate' => 9,	'constant' => 2652 ),
+																	array( 'income' => 123184,	'rate' => 11.5,	'constant' => 5732 ),
+																),
+													20070101 => array(
+																	array( 'income' => 37178,	'rate' => 4.0,	'constant' => 0 ),
+																	array( 'income' => 74357,	'rate' => 7.0,	'constant' => 1115 ),
+																	array( 'income' => 120887,	'rate' => 9.0,	'constant' => 2602 ),
+																	array( 'income' => 120887,	'rate' => 11.5,	'constant' => 5625 ),
+																),
+													);
 }
 ?>

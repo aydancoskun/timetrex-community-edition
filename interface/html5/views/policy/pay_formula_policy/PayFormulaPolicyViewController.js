@@ -194,36 +194,36 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 		if ( this.current_edit_record['pay_type_id'] === 10 ) {
 			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Rate' ) + ": " );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '1.5 for time and a half' ) + ')' );
-			this.edit_view_form_item_dic['wage_group_id'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['wage_source_type_id'].css( 'display', 'block' );
+			this.attachElement( 'wage_group_id' );
+			this.attachElement( 'wage_source_type_id' );
 
 		} else if ( this.current_edit_record['pay_type_id'] === 30 || this.current_edit_record['pay_type_id'] === 40 ) {
 			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Hourly Rate' ) + ": " );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '10.00/hr' ) + ')' );
-			this.edit_view_form_item_dic['wage_group_id'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['wage_source_type_id'].css( 'display', 'block' );
+			this.attachElement( 'wage_group_id' );
+			this.attachElement( 'wage_source_type_id' );
 
 		} else if ( this.current_edit_record['pay_type_id'] === 50 ) {
 
 			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Premium' ) + ": " );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '0.75 for 75 cent/hr' ) + ')' );
-			this.edit_view_form_item_dic['wage_group_id'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['wage_source_type_id'].css( 'display', 'block' );
+			this.attachElement( 'wage_group_id' );
+			this.attachElement('wage_source_type_id'  );
 
 		} else if ( this.current_edit_record['pay_type_id'] === 32 ) {
 
 			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Hourly Rate' ) + ": " );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '10.00/hr' ) + ')' );
-			this.edit_view_form_item_dic['wage_group_id'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['wage_source_contributing_shift_policy_id'].css('display', 'none');
-			this.edit_view_form_item_dic['time_source_contributing_shift_policy_id'].css('display', 'none');
-			this.edit_view_form_item_dic['wage_source_type_id'].css( 'display', 'none' );
+			this.detachElement( 'wage_group_id' );
+			this.detachElement( 'wage_source_contributing_shift_policy_id' );
+			this.detachElement( 'time_source_contributing_shift_policy_id' );
+			this.detachElement( 'wage_source_type_id' );
 		} else if ( this.current_edit_record['pay_type_id'] === 42 ) {
 
 			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Hourly Rate' ) + ": " );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '10.00/hr' ) + ')' );
-			this.edit_view_form_item_dic['wage_group_id'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['wage_source_type_id'].css( 'display', 'block' );
+			this.attachElement( 'wage_group_id' );
+			this.attachElement( 'wage_source_type_id' );
 
 		}
 
@@ -232,35 +232,39 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 
 	onAccrualAccountChange: function() {
 		if ( this.current_edit_record['accrual_policy_account_id'] === false || typeof this.current_edit_record['accrual_policy_account_id'] === 'undefined' || this.current_edit_record['accrual_policy_account_id'] === 0 ) {
-			this.edit_view_form_item_dic['accrual_rate'].css('display', 'none');
+			this.detachElement( 'accrual_rate' );
 		} else {
-			this.edit_view_form_item_dic['accrual_rate'].css('display', 'block');
+			this.attachElement( 'accrual_rate' )
 		}
 		this.editFieldResize();
 	},
 
 	onWageSourceTypeChange: function() {
 		if ( this.current_edit_record['wage_source_type_id'] === 10 ) {
-			this.edit_view_form_item_dic['wage_source_contributing_shift_policy_id'].css('display', 'none');
-			this.edit_view_form_item_dic['time_source_contributing_shift_policy_id'].css('display', 'none');
+
+			this.detachElement( 'wage_source_contributing_shift_policy_id' );
+
+			this.detachElement( 'time_source_contributing_shift_policy_id' );
 
 			if ( this.current_edit_record['pay_type_id'] === 32 ) {
-				this.edit_view_form_item_dic['wage_group_id'].css( 'display', 'none' );
+				this.detachElement( 'wage_group_id' );
 			} else {
-				this.edit_view_form_item_dic['wage_group_id'].css('display', 'block');
+				this.attachElement( 'wage_group_id' );
 			}
 
 		} else if ( this.current_edit_record['wage_source_type_id'] === 20 ) {
-			this.edit_view_form_item_dic['wage_source_contributing_shift_policy_id'].css('display', 'none');
-			this.edit_view_form_item_dic['time_source_contributing_shift_policy_id'].css('display', 'none');
-			this.edit_view_form_item_dic['wage_group_id'].css('display', 'none');
+
+			this.detachElement( 'wage_source_contributing_shift_policy_id' );
+			this.detachElement( 'time_source_contributing_shift_policy_id' );
+			this.detachElement( 'wage_group_id' );
+
 		} else if ( this.current_edit_record['wage_source_type_id'] === 30 ) {
 
 			if ( this.edit_view_form_item_dic['wage_source_type_id'].css( 'display' ) === 'block' ) {
-				this.edit_view_form_item_dic['wage_source_contributing_shift_policy_id'].css('display', 'block');
-				this.edit_view_form_item_dic['time_source_contributing_shift_policy_id'].css('display', 'block');
+				this.attachElement( 'wage_source_contributing_shift_policy_id' );
+				this.attachElement( 'time_source_contributing_shift_policy_id' );
 			}
-			this.edit_view_form_item_dic['wage_group_id'].css('display', 'none');
+			this.detachElement( 'wage_group_id' );
 		}
 		this.editFieldResize();
 

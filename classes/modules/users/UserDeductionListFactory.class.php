@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -71,7 +71,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 			$query = '
 						select	*
 						from	'. $this->getTable() .'
-						where	id in ('. $this->getListSQL($id, $ph) .')
+						where	id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 							AND deleted = 0';
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
@@ -101,8 +101,8 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					'id' => $id,
+					'company_id' => (int)$company_id,
+					'id' => (int)$id,
 					);
 
 		$query = '
@@ -131,7 +131,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 		$uf = new UserFactory();
 
 		$ph = array(
-					'deduction_id' => $deduction_id,
+					'deduction_id' => (int)$deduction_id,
 					);
 
 		$query = '
@@ -160,7 +160,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 		$cdf = new CompanyDeductionFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -195,7 +195,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -205,7 +205,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 					where
 						a.user_id = b.id
 						AND b.company_id = ?
-						AND a.company_deduction_id in ('. $this->getListSQL($deduction_id, $ph) .')
+						AND a.company_deduction_id in ('. $this->getListSQL( $deduction_id, $ph, 'int' ) .')
 						AND ( a.deleted = 0 AND b.deleted = 0 )
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -228,7 +228,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 		$uf = new UserFactory();
 
 		$ph = array(
-					'deduction_id' => $deduction_id,
+					'deduction_id' => (int)$deduction_id,
 					);
 
 		$query = '
@@ -238,7 +238,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 					where
 						a.user_id = b.id
 						AND a.company_deduction_id = ?
-						AND a.user_id in ('. $this->getListSQL($user_id, $ph) .')
+						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .')
 						AND (a.deleted = 0 AND b.deleted = 0)
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -262,8 +262,8 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 		$cdf = new CompanyDeductionFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
-					'country_id' => $country_id,
+					'user_id' => (int)$user_id,
+					'country_id' => (int)$country_id,
 					);
 
 		$query = '
@@ -297,7 +297,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 		$cdf = new CompanyDeductionFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					);
 
 		$query = '
@@ -307,7 +307,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 					where
 						a.company_deduction_id = b.id
 						AND a.user_id = ?
-						AND b.pay_stub_entry_account_id in ('. $this->getListSQL($pse_account_id, $ph) .')
+						AND b.pay_stub_entry_account_id in ('. $this->getListSQL( $pse_account_id, $ph, 'int' ) .')
 						AND ( a.deleted = 0 AND b.deleted = 0 )
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -328,7 +328,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 		}
 
 		if ( $order == NULL ) {
-			$order = array( 'c.status_id' => 'asc', 'c.calculation_order' => 'asc', 'c.id' => 'asc' );
+			$order = array( 'cdf.status_id' => 'asc', 'cdf.calculation_order' => 'asc', 'cdf.id' => 'asc' );
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;
@@ -338,20 +338,45 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 		$cdf = new CompanyDeductionFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
-					select	a.*
-					from	'. $this->getTable() .' as a,
-							'. $uf->getTable() .' as b,
-							'. $cdf->getTable() .' as c
-					where
-						a.user_id = b.id
-						AND a.company_deduction_id = c.id
-						AND b.company_id = ?
-						AND a.user_id in ('. $this->getListSQL($user_id, $ph) .')
-						AND (a.deleted = 0 AND c.deleted = 0)
+					SELECT	a.id,
+							a.user_id,
+							a.company_deduction_id,
+
+							CASE WHEN a.length_of_service_date IS NULL THEN '. $this->getSQLToTimeStampFunction() .'( uf.hire_date ) ELSE a.length_of_service_date END as length_of_service_date,
+							CASE WHEN a.start_date IS NULL THEN cdf.start_date ELSE a.start_date END as start_date,
+							CASE WHEN a.end_date IS NULL THEN cdf.end_date ELSE a.end_date END as end_date,
+
+							a.user_value1,
+							a.user_value2,
+							a.user_value3,
+							a.user_value4,
+							a.user_value5,
+							a.user_value6,
+							a.user_value7,
+							a.user_value8,
+							a.user_value9,
+							a.user_value10,
+
+							a.created_date as created_date,
+							a.created_by as created_by,
+							a.updated_date as updated_date,
+							a.updated_by as updated_by,
+							a.deleted_date as deleted_date,
+							a.deleted_by as deleted_by,
+							a.deleted as deleted
+					FROM	'. $this->getTable() .' as a
+					LEFT JOIN '. $uf->getTable() .' as uf ON ( a.user_id = uf.id AND uf.deleted = 0 )
+					LEFT JOIN '. $cdf->getTable() .' as cdf ON ( a.company_deduction_id = cdf.id AND cdf.deleted = 0 )
+					WHERE
+						a.user_id = uf.id
+						AND a.company_deduction_id = cdf.id
+						AND uf.company_id = ?
+						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .')
+						AND (a.deleted = 0 AND cdf.deleted = 0)
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -375,20 +400,46 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 		}
 
 		$uf = new UserFactory();
+		$cdf = new CompanyDeductionFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					'user_id' => $user_id,
-					'id' => $id,
+					'company_id' => (int)$company_id,
+					'user_id' => (int)$user_id,
+					'id' => (int)$id,
 					);
 
 		$query = '
-					select	a.*
-					from	'. $this->getTable() .' as a,
-							'. $uf->getTable() .' as b
-					where
-						a.user_id = b.id
-						AND b.company_id = ?
+					SELECT	a.id,
+							a.user_id,
+							a.company_deduction_id,
+
+							CASE WHEN a.length_of_service_date IS NULL THEN '. $this->getSQLToTimeStampFunction() .'( uf.hire_date ) ELSE a.length_of_service_date END as length_of_service_date,
+							CASE WHEN a.start_date IS NULL THEN cdf.start_date ELSE a.start_date END as start_date,
+							CASE WHEN a.end_date IS NULL THEN cdf.end_date ELSE a.end_date END as end_date,
+
+							a.user_value1,
+							a.user_value2,
+							a.user_value3,
+							a.user_value4,
+							a.user_value5,
+							a.user_value6,
+							a.user_value7,
+							a.user_value8,
+							a.user_value9,
+							a.user_value10,
+
+							a.created_date as created_date,
+							a.created_by as created_by,
+							a.updated_date as updated_date,
+							a.updated_by as updated_by,
+							a.deleted_date as deleted_date,
+							a.deleted_by as deleted_by,
+							a.deleted as deleted
+					FROM	'. $this->getTable() .' as a
+					LEFT JOIN '. $uf->getTable() .' as uf ON ( a.user_id = uf.id AND uf.deleted = 0 )
+					LEFT JOIN '. $cdf->getTable() .' as cdf ON ( a.company_deduction_id = cdf.id AND cdf.deleted = 0 )
+					WHERE
+						uf.company_id = ?
 						AND a.user_id = ?
 						AND a.id = ?
 						AND a.deleted = 0
@@ -437,20 +488,46 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 		$cdf = new CompanyDeductionFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
-					select	a.*,
+					select	a.id,
+							a.user_id,
+							a.company_deduction_id,
+
+							CASE WHEN a.length_of_service_date IS NULL THEN '. $this->getSQLToTimeStampFunction() .'( uf.hire_date ) ELSE a.length_of_service_date END as length_of_service_date,
+							CASE WHEN a.start_date IS NULL THEN cdf.start_date ELSE a.start_date END as start_date,
+							CASE WHEN a.end_date IS NULL THEN cdf.end_date ELSE a.end_date END as end_date,
+
+							a.user_value1,
+							a.user_value2,
+							a.user_value3,
+							a.user_value4,
+							a.user_value5,
+							a.user_value6,
+							a.user_value7,
+							a.user_value8,
+							a.user_value9,
+							a.user_value10,
+
 							uf.first_name as first_name,
 							uf.last_name as last_name,
 							uf.country as country,
 							uf.province as province,
-
+							
 							cdf.name as name,
 							cdf.status_id as status_id,
 							cdf.type_id as type_id,
 							cdf.calculation_id as calculation_id,
+
+							a.created_date as created_date,
+							a.created_by as created_by,
+							a.updated_date as updated_date,
+							a.updated_by as updated_by,
+							a.deleted_date as deleted_date,
+							a.deleted_by as deleted_by,
+							a.deleted as deleted,
 
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
@@ -487,6 +564,8 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}

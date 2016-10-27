@@ -57,11 +57,20 @@ PayStubSummaryReportViewController = ReportBaseViewController.extend( {
 			sub_menus: []
 		} );
 
-		var view = new RibbonSubMenu( {
+		var view_html = new RibbonSubMenu( {
 			label: $.i18n._( 'View' ),
-			id: ContextMenuIconName.view,
+			id: ContextMenuIconName.view_html,
 			group: editor_group,
 			icon: Icons.view,
+			permission_result: true,
+			permission: null
+		} );
+
+		var view_pdf = new RibbonSubMenu( {
+			label: $.i18n._( 'PDF' ),
+			id: ContextMenuIconName.view,
+			group: editor_group,
+			icon: Icons.print,
 			permission_result: true,
 			permission: null
 		} );
@@ -283,6 +292,13 @@ PayStubSummaryReportViewController = ReportBaseViewController.extend( {
 		switch ( id ) {
 			case ContextMenuIconName.view:
 				this.onViewClick();
+				break;
+			case ContextMenuIconName.view_html:
+
+				this.onViewClick('html');
+				break;
+			case ContextMenuIconName.view_html_new_window:
+				this.onViewClick('html', true);
 				break;
 			case ContextMenuIconName.export_excel:
 				this.onViewExcelClick();

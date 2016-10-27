@@ -4,14 +4,13 @@
 		var opts = $.extend( {}, $.fn.TTextArea.defaults, options );
 		var $this = this;
 		var field;
-
 		var error_string = '';
 		var error_tip_box;
-
 		var mass_edit_mode = false;
 		var check_box = null;
-
 		var enabled = true;
+		var static_width;
+		var is_static_width = false;
 
 		this.getEnabled = function() {
 			return enabled;
@@ -32,12 +31,14 @@
 		};
 
 		this.setCheckBox = function( val ) {
-			check_box.attr( 'checked', val );
+			if ( check_box ) {
+				check_box.children().eq( 0 )[0].checked = val;
+			}
 		};
 
 		this.isChecked = function() {
 			if ( check_box ) {
-				if ( check_box.attr( 'checked' ) || check_box[0].checked === true ) {
+				if ( check_box.children().eq( 0 )[0].checked === true ) {
 					return true;
 				}
 			}
@@ -49,12 +50,17 @@
 			mass_edit_mode = val;
 
 			if ( mass_edit_mode ) {
-				check_box = $( " <input type='checkbox' class='mass-edit-checkbox' />" );
+				check_box = $( ' <div class="mass-edit-checkbox-wrapper textarea--mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
+				'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
 					$this.trigger( 'formItemChange', [$this] );
 				} );
+
+				if ( is_static_width && static_width.toString().indexOf( '%' ) > 0 ) {
+					$this.css( 'width', 'calc(' + static_width + ' - 25px)' );
+				}
 
 			} else {
 				if ( check_box ) {
@@ -75,9 +81,12 @@
 
 		};
 
-		this.setErrorStyle = function( errStr, show ) {
-			$( this ).addClass( 'error-tip' );
-
+		this.setErrorStyle = function( errStr, show, isWarning ) {
+			if ( isWarning ) {
+				$( this ).addClass( 'warning-tip' );
+			} else {
+				$( this ).addClass( 'error-tip' );
+			}
 			error_string = errStr;
 
 			if ( show ) {
@@ -95,7 +104,11 @@
 				error_tip_box = Global.loadWidgetByName( WidgetNamesDic.ERROR_TOOLTIP );
 				error_tip_box = error_tip_box.ErrorTipBox();
 			}
-			error_tip_box.show( this, error_string, sec );
+			if ( $( this ).hasClass( 'warning-tip' ) ) {
+				error_tip_box.show( this, error_string, sec, true );
+			} else {
+				error_tip_box.show( this, error_string, sec );
+			}
 		};
 
 		this.hideErrorTip = function() {
@@ -108,6 +121,8 @@
 
 		this.clearErrorStyle = function() {
 			$( this ).removeClass( 'error-tip' );
+			$( this ).removeClass( 'warning-tip' );
+			this.hideErrorTip();
 			error_string = '';
 		};
 
@@ -120,7 +135,7 @@
 		};
 
 		this.getValue = function() {
-			return    $this.val();
+			return $this.val();
 		};
 
 		this.setValue = function( val ) {
@@ -138,17 +153,20 @@
 
 			field = o.field;
 
-			if ( o.width && (o.width > 0 || o.width.indexOf( '%' ) > 0) ) {
+			if ( o.width && ( o.width > 0 || o.width.indexOf( '%' ) > 0) ) {
 				$this.width( o.width );
+				static_width = o.width;
+				is_static_width = true;
 			}
+
 			if ( o.height && (o.height > 0 || o.height.indexOf( '%' ) > 0) ) {
 				$this.height( o.height );
 			}
 
 			if ( o.rows > 0 ) {
-				$this.attr( 'rows',  o.rows );
-			}else{
-				$this.attr( 'rows',  3 );
+				$this.attr( 'rows', o.rows );
+			} else {
+				$this.attr( 'rows', 3 );
 			}
 
 			if ( o.style ) {
@@ -157,7 +175,7 @@
 
 			$( this ).change( function() {
 				if ( check_box ) {
-					check_box.attr( 'checked', 'true' );
+					$this.setCheckBox( true );
 				}
 
 				$this.trigger( 'formItemChange', [$this] );
@@ -215,8 +233,6 @@
 
 	};
 
-	$.fn.TTextArea.defaults = {
-
-	};
+	$.fn.TTextArea.defaults = {};
 
 })( jQuery );

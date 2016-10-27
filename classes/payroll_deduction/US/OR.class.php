@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -45,8 +45,94 @@
 */
 class PayrollDeduction_US_OR extends PayrollDeduction_US {
 	var $original_filing_status = NULL;
+
+	var $state_income_tax_rate_options = array(
+													20150101 => array(
+																10 => array(
+																		array( 'income' => 3350,	'rate' => 5,	'constant' => 0 ),
+																		array( 'income' => 8400,	'rate' => 7,	'constant' => 167.50 ),
+																		array( 'income' => 125000,	'rate' => 9,	'constant' => 521 ),
+																		array( 'income' => 125000,	'rate' => 9.9,	'constant' => 11015 ),
+																		),
+																20 => array(
+																		array( 'income' => 6700,	'rate' => 5,	'constant' => 0 ),
+																		array( 'income' => 16800,	'rate' => 7,	'constant' => 335 ),
+																		array( 'income' => 250000,	'rate' => 9,	'constant' => 1042 ),
+																		array( 'income' => 250000,	'rate' => 9.9,	'constant' => 22030 ),
+																		),
+																),
+													20140101 => array(
+																10 => array(
+																		array( 'income' => 3300,	'rate' => 5,	'constant' => 0 ),
+																		array( 'income' => 8250,	'rate' => 7,	'constant' => 165 ),
+																		array( 'income' => 125000,	'rate' => 9,	'constant' => 512 ),
+																		array( 'income' => 125000,	'rate' => 9.9,	'constant' => 11019 ),
+																		),
+																20 => array(
+																		array( 'income' => 6600,	'rate' => 5,	'constant' => 0 ),
+																		array( 'income' => 16500,	'rate' => 7,	'constant' => 330 ),
+																		array( 'income' => 250000,	'rate' => 9,	'constant' => 1023 ),
+																		array( 'income' => 250000,	'rate' => 9.9,	'constant' => 22038 ),
+																		),
+																),
+													20130101 => array(
+																10 => array(
+																		array( 'income' => 3250,	'rate' => 5,	'constant' => 0 ),
+																		array( 'income' => 8150,	'rate' => 7,	'constant' => 163 ),
+																		array( 'income' => 125000,	'rate' => 9,	'constant' => 506 ),
+																		array( 'income' => 125000,	'rate' => 9.9,	'constant' => 11022 ),
+																		),
+																20 => array(
+																		array( 'income' => 6500,	'rate' => 5,	'constant' => 0 ),
+																		array( 'income' => 16300,	'rate' => 7,	'constant' => 325 ),
+																		array( 'income' => 250000,	'rate' => 9,	'constant' => 1011 ),
+																		array( 'income' => 250000,	'rate' => 9.9,	'constant' => 22044 ),
+																		),
+																),
+													20120101 => array(
+																10 => array(
+																		array( 'income' => 3150,	'rate' => 5,	'constant' => 183 ),
+																		array( 'income' => 7950,	'rate' => 7,	'constant' => 341 ),
+																		array( 'income' => 50000,	'rate' => 9,	'constant' => 677 ),
+																		array( 'income' => 125000,	'rate' => 9,	'constant' => 494 ),
+																		array( 'income' => 125000,	'rate' => 9.9,	'constant' => 11028 ),
+																		),
+																20 => array(
+																		array( 'income' => 6300,	'rate' => 5,	'constant' => 183 ),
+																		array( 'income' => 15900,	'rate' => 7,	'constant' => 498 ),
+																		array( 'income' => 50000,	'rate' => 9,	'constant' => 1170 ),
+																		array( 'income' => 250000,	'rate' => 9,	'constant' => 987 ),
+																		array( 'income' => 250000,	'rate' => 9.9,	'constant' => 22056 ),
+																		),
+																),
+													20070101 => array(
+																10 => array(
+																		array( 'income' => 2850,	'rate' => 5,	'constant' => 0 ),
+																		array( 'income' => 7150,	'rate' => 7,	'constant' => 143 ),
+																		array( 'income' => 7150,	'rate' => 9,	'constant' => 444 ),
+																		),
+																20 => array(
+																		array( 'income' => 5700,	'rate' => 5,	'constant' => 0 ),
+																		array( 'income' => 14300,	'rate' => 7,	'constant' => 285 ),
+																		array( 'income' => 14300,	'rate' => 9,	'constant' => 887 ),
+																		),
+																),
+													20060101 => array(
+																10 => array(
+																		array( 'income' => 300,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 8030,	'rate' => 7,	'constant' => 0 ),
+																		array( 'income' => 8030,	'rate' => 9,	'constant' => 541 ),
+																		),
+																20 => array(
+																		array( 'income' => 2725,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 16065,	'rate' => 7,	'constant' => 0 ),
+																		array( 'income' => 16065,	'rate' => 9,	'constant' => 934 ),
+																	),
+																),
+												);
+
 	var $state_options = array(
-								1420099200 => array( //01-Jan-15
+								20150101 => array( //01-Jan-15
 												'standard_deduction' => array(
 																			'10' => 2145,
 																			'20' => 4295,
@@ -74,7 +160,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 																					 ),
 																	),
 												),
-								1388563200 => array( //01-Jan-14
+								20140101 => array( //01-Jan-14
 												'standard_deduction' => array(
 																			'10' => 2115,
 																			'20' => 4230,
@@ -102,7 +188,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 																					 ),
 																	),
 												),
-								1357027200 => array( //01-Jan-13
+								20130101 => array( //01-Jan-13
 												'standard_deduction' => array(
 																			'10' => 2080,
 																			'20' => 4160,
@@ -130,7 +216,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 																					 ),
 																	),
 												),
-								1325404800 => array( //01-Jan-12
+								20120101 => array( //01-Jan-12
 												'standard_deduction' => array(
 																			'10' => 2025,
 																			'20' => 4055,
@@ -158,7 +244,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 																					 ),
 																	),
 												),
-								1262332800 => array( //01-Jan-10
+								20100101 => array( //01-Jan-10
 												'standard_deduction' => array(
 																			'10' => 1950,
 																			'20' => 3900,
@@ -166,7 +252,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 												'allowance' => 177,
 												'federal_tax_maximum' => 5850
 												),
-								1230796800 => array( //01-Jan-09
+								20090101 => array( //01-Jan-09
 												'standard_deduction' => array(
 																			'10' => 1945,
 																			'20' => 3895,
@@ -174,7 +260,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 												'allowance' => 176,
 												'federal_tax_maximum' => 5850
 												),
-								1167638400 => array(
+								20070101 => array(
  													'standard_deduction' => array(
 																				'10' => 1870,
 																				'20' => 3740,
@@ -182,7 +268,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 													'allowance' => 165,
 													'federal_tax_maximum' => 5500
 													),
-								1136102400 => array(
+								20060101 => array(
  													'standard_deduction' => array(
 																				'10' => 0,
 																				'20' => 0,
@@ -217,17 +303,6 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 		}
 
 		return FALSE;
-	}
-
-	function getStatePayPeriodDeductions() {
-		//IF exemptions are 3 or more, change filing status to married.
-		$this->original_filing_status = $this->getStateFilingStatus();
-
-		if ( $this->getStateFilingStatus() == 10 AND $this->getStateAllowance() >= 3 ) {
-			Debug::text('Forcing to Married Filing Status from: '. $this->getStateAllowance(), __FILE__, __LINE__, __METHOD__, 10);
-			$this->setStateFilingStatus(20); //Married tax rates.
-		}
-		return bcdiv($this->getStateTaxPayable(), $this->getAnnualPayPeriods() );
 	}
 
 	function getStateAnnualTaxableIncome() {
@@ -300,6 +375,14 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 	}
 
 	function getStateTaxPayable() {
+		//IF exemptions are 3 or more, change filing status to married.
+		$this->original_filing_status = $this->getStateFilingStatus();
+
+		if ( $this->getStateFilingStatus() == 10 AND $this->getStateAllowance() >= 3 ) {
+			Debug::text('Forcing to Married Filing Status from: '. $this->getStateAllowance(), __FILE__, __LINE__, __METHOD__, 10);
+			$this->setStateFilingStatus(20); //Married tax rates.
+		}
+
 		$annual_income = $this->getStateAnnualTaxableIncome();
 
 		$retval = 0;
@@ -307,7 +390,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 		if ( $annual_income > 0 ) {
 			$rate = $this->getData()->getStateRate($annual_income);
 			$state_constant = $this->getData()->getStateConstant($annual_income);
-			if ( $this->getDate() >= 1325404800 AND $annual_income < 50000 )  { //01-Jan-2011
+			if ( $this->getDate() >= 20120101 AND $annual_income < 50000 )  { //01-Jan-2012 (was 2011?)
 				$state_array = $this->getDataFromRateArray($this->getDate(), $this->state_options);
 				$state_constant += $state_array['allowance'];
 			}

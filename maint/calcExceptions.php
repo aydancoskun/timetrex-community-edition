@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -48,8 +48,10 @@ require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR
 $execution_time = time();
 
 $flags = array(
+				//Since this needs to calculate 'undertime_absence', it pretty much needs to calculate all other policies too.
+				//Its less error prone if we calculate them all as well.
 				'meal' => FALSE,
-				'undertime_absence' => FALSE,
+				'undertime_absence' => TRUE, //Required to properly handle undertime absences when no shifts were worked. See comments in CalculatePolicy->calculateUnderTimeAbsencePolicy()
 				'break' => FALSE,
 				'holiday' => FALSE,
 				'schedule_absence' => FALSE,
@@ -69,27 +71,28 @@ $flags = array(
 				);
 
 $clf = new CompanyListFactory();
-$clf->getAll();
-
+$clf->getByStatusID( array(10,20,23), NULL, array('a.id' => 'asc') );
 $x = 0;
 if ( $clf->getRecordCount() > 0 ) {
 	foreach ( $clf as $c_obj ) {
-
 		if ( $c_obj->getStatus() != 30 ) {
 			$company_start_time = microtime(TRUE);
 			Debug::text('Company: '. $c_obj->getName() .'('.$c_obj->getId().')', __FILE__, __LINE__, __METHOD__,5);
 
+			TTDate::setTimeZone(); //Reset timezone to system defaults for each company.
+
 			//Recalculate at least the last two days.
-			$start_date = TTDate::getMiddleDayEpoch( $execution_time ) - (86400*2);
-			$end_date = TTDate::getMiddleDayEpoch( time() ) - (86400);
+			$start_date = TTDate::getMiddleDayEpoch( ( $execution_time - (86400 * 2) ) ) ;
+			$end_date = TTDate::getMiddleDayEpoch( ( $execution_time - 86400 ) ) ;
+			Debug::text('X:'. $x .' Start Date: '. TTDate::getDate('DATE+TIME', $start_date ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__,5);
 
 			//Get the last time cron ran this script.
 			$cjlf = new CronJobListFactory();
 			$cjlf->getByName( 'calcExceptions');
 			if ( $cjlf->getRecordCount() > 0 ) {
 				foreach( $cjlf as $cj_obj ) {
-					$tmp_start_date = $cj_obj->getLastRunDate();
-					if ( $tmp_start_date < $start_date ) {
+					$tmp_start_date = TTDate::getMiddleDayEpoch( $cj_obj->getLastRunDate() );
+					if ( $tmp_start_date != '' AND $tmp_start_date < $start_date ) {
 						$start_date = $tmp_start_date;
 						Debug::text('  CRON Job hasnt run in more then 48hrs, reducing Start Date to: '. TTDate::getDate('DATE+TIME', $start_date ) , __FILE__, __LINE__, __METHOD__,5);
 					}
@@ -104,7 +107,7 @@ if ( $clf->getRecordCount() > 0 ) {
 			if ( $ppslf->getRecordCount() > 0 ) {
 				foreach( $ppslf as $pps_obj ) {
 					$tmp_start_date = TTDate::getMiddleDayEpoch( $execution_time ) - $pps_obj->getMaximumShiftTime();
-					if ( $tmp_start_date < $start_date ) {
+					if ( $tmp_start_date != '' AND $tmp_start_date < $start_date ) {
 						$start_date = $tmp_start_date;
 						Debug::text('  Maximum Shift Time is greater then 48hrs, reducing Start Date to: '. TTDate::getDate('DATE+TIME', $start_date ) , __FILE__, __LINE__, __METHOD__,5);
 					}
@@ -117,8 +120,8 @@ if ( $clf->getRecordCount() > 0 ) {
 			$elf->getByCompanyIDAndTypeAndPayPeriodStatus($c_obj->getId(), 5, array(10,12,15,30), 1, NULL, NULL, array( 'a.date_stamp' => 'asc' ) ); //Limit 1
 			if ( $elf->getRecordCount() > 0 ) {
 				foreach( $elf as $e_obj ) {
-					$tmp_start_date = $e_obj->getDateStamp();
-					if ( $tmp_start_date < $start_date ) {
+					$tmp_start_date = TTDate::getMiddleDayEpoch( $e_obj->getDateStamp() );
+					if ( $tmp_start_date != '' AND $tmp_start_date < $start_date ) {
 						$start_date = $tmp_start_date;
 						Debug::text('  Pre-Mature exceptions occur before start date, reducing to: '. TTDate::getDate('DATE+TIME', $start_date ) .'('. $e_obj->getId().')', __FILE__, __LINE__, __METHOD__,5);
 					}

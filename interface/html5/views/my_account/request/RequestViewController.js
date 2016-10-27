@@ -66,8 +66,17 @@ RequestViewController = BaseViewController.extend( {
 
 	},
 
-	buildViewUI: function() {
+	needShowNavigation: function() {
+		if ( this.is_viewing && this.current_edit_record && Global.isSet( this.current_edit_record.id ) && this.current_edit_record.id ) {
+			return true;
+		} else {
+			return false;
+		}
+	},
 
+	buildViewUI: function() {
+		var pager_data = this.navigation && this.navigation.getPagerData && this.navigation.getPagerData();
+		var source_data = this.navigation && this.navigation.getSourceData && this.navigation.getSourceData();
 		this._super( 'buildEditViewUI' );
 
 		var $this = this;
@@ -87,6 +96,11 @@ RequestViewController = BaseViewController.extend( {
 		} );
 
 		this.setNavigation();
+
+		if ( pager_data && source_data ) {
+			this.navigation.setSourceData( source_data );
+			this.navigation.setPagerData( pager_data );
+		}
 
 		//Tab 0 first column start
 
@@ -176,8 +190,6 @@ RequestViewController = BaseViewController.extend( {
 
 		tab_audit_label.css( 'display', 'none' );
 
-		this.navigation = null;
-
 		//Tab 0 start
 
 		var tab_request = this.edit_view_tab.find( '#tab_request' );
@@ -211,7 +223,7 @@ RequestViewController = BaseViewController.extend( {
 
 		var data = this.grid.getGridParam( 'data' );
 
-		//Error: TypeError: data is undefined in https://ondemand1.timetrex.com/interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
+		//Error: TypeError: data is undefined in /interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
 		if ( !data ) {
 			return;
 		}
@@ -238,17 +250,6 @@ RequestViewController = BaseViewController.extend( {
 			'tab_audit': $.i18n._( 'Audit' )
 		} );
 
-		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIRequest' )),
-			id: this.script_name + '_navigation',
-			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.REQUESRT,
-			navigation_mode: true,
-			show_search_inputs: true
-		} );
-
-		this.setNavigation();
-
 		//Tab 0 start
 
 		var tab_request = this.edit_view_tab.find( '#tab_request' );
@@ -268,12 +269,9 @@ RequestViewController = BaseViewController.extend( {
 
 		// Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-
 		form_item_input.TDatePicker( {field: 'date_stamp'} );
-
 		var widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().date_format_example + "</span>" );
-
+		var label = $( "<span class='widget-right-label'> " + $.i18n._( '(Use the first or only date affected by this request)' ) + "</span>" );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_request_column1, '', widgetContainer );
@@ -300,7 +298,8 @@ RequestViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Employee' ),
+			new SearchField( {
+				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
@@ -308,41 +307,51 @@ RequestViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Type' ),
+			new SearchField( {
+				label: $.i18n._( 'Type' ),
 				in_column: 1,
 				field: 'type_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Start Date' ),
+			new SearchField( {
+				label: $.i18n._( 'Start Date' ),
 				in_column: 1,
 				field: 'start_date',
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.DATE_PICKER} ),
+				form_item_type: FormItemType.DATE_PICKER
+			} ),
 
-			new SearchField( {label: $.i18n._( 'End Date' ),
+			new SearchField( {
+				label: $.i18n._( 'End Date' ),
 				in_column: 1,
 				field: 'end_date',
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.DATE_PICKER} ),
+				form_item_type: FormItemType.DATE_PICKER
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Status' ),
+			new SearchField( {
+				label: $.i18n._( 'Status' ),
 				in_column: 2,
 				field: 'status_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -350,9 +359,11 @@ RequestViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -360,7 +371,8 @@ RequestViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 		];
 	},
 
@@ -501,7 +513,8 @@ RequestViewController = BaseViewController.extend( {
 						}
 						break;
 					case 'subject':
-						if ( this.is_edit ) {
+						// Error: Uncaught TypeError: Cannot read property '0' of null in /interface/html5/#!m=Request&a=view&id=13185&tab=Request line 505
+						if ( this.is_edit && this.messages ) {
 							widget.setValue( 'Re: ' + this.messages[0].subject );
 						} else if ( this.is_viewing ) {
 							widget.setValue( this.current_edit_record[key] );
@@ -565,33 +578,35 @@ RequestViewController = BaseViewController.extend( {
 		filter.filter_data.object_id = [this.current_edit_record.id];
 		filter.filter_data.object_type_id = this.current_edit_record.hierarchy_type_id;
 
-		this.authorization_api['get' + this.authorization_api.key_name]( filter, {onResult: function( result ) {
+		this.authorization_api['get' + this.authorization_api.key_name]( filter, {
+			onResult: function( result ) {
 
-			if ( !$this.edit_view ) {
-				return;
+				if ( !$this.edit_view ) {
+					return;
+				}
+
+				var result_data = result.getResult();
+
+				if ( Global.isArray( result_data ) ) {
+
+					$( $this.edit_view.find( '.grid-div' ) ).css( 'display', 'block' );
+
+					$this.showAuthorizationHistoryGridBorders();
+
+					result_data = Global.formatGridData( result_data, $this.authorization_api.key_name );
+
+					$this.authorization_history_grid.clearGridData();
+
+					$this.authorization_history_grid.setGridParam( {data: result_data} );
+					$this.authorization_history_grid.trigger( 'reloadGrid' );
+				} else {
+					$( $this.edit_view.find( '.grid-div' ) ).css( 'display', 'none' );
+				}
+
+				$this.initEmbeddedMessageData();
+
 			}
-
-			var result_data = result.getResult();
-
-			if ( Global.isArray( result_data ) ) {
-
-				$( $this.edit_view.find( '.grid-div' ) ).css( 'display', 'block' );
-
-				$this.showAuthorizationHistoryGridBorders();
-
-				result_data = Global.formatGridData( result_data, $this.authorization_api.key_name );
-
-				$this.authorization_history_grid.clearGridData();
-
-				$this.authorization_history_grid.setGridParam( {data: result_data} );
-				$this.authorization_history_grid.trigger( 'reloadGrid' );
-			} else {
-				$( $this.edit_view.find( '.grid-div' ) ).css( 'display', 'none' );
-			}
-
-			$this.initEmbeddedMessageData();
-
-		}} );
+		} );
 
 	},
 
@@ -614,7 +629,14 @@ RequestViewController = BaseViewController.extend( {
 		for ( var i = 0; i < len; i++ ) {
 			var view_column_data = display_columns[i];
 
-			var column_info = {name: view_column_data.value, index: view_column_data.value, label: view_column_data.label, width: 100, sortable: false, title: false};
+			var column_info = {
+				name: view_column_data.value,
+				index: view_column_data.value,
+				label: view_column_data.label,
+				width: 100,
+				sortable: false,
+				title: false
+			};
 			column_info_array.push( column_info );
 		}
 
@@ -695,31 +717,35 @@ RequestViewController = BaseViewController.extend( {
 	getAuthorizationHistoryDefaultDisplayColumns: function( callBack ) {
 
 		var $this = this;
-		this.authorization_api.getOptions( 'default_display_columns', {onResult: function( columns_result ) {
-			var columns_result_data = columns_result.getResult();
+		this.authorization_api.getOptions( 'default_display_columns', {
+			onResult: function( columns_result ) {
+				var columns_result_data = columns_result.getResult();
 
-			$this.authorization_history_default_display_columns = columns_result_data;
+				$this.authorization_history_default_display_columns = columns_result_data;
 
-			if ( callBack ) {
-				callBack();
+				if ( callBack ) {
+					callBack();
+				}
+
 			}
-
-		}} );
+		} );
 
 	},
 
 	getAuthorizationHistoryColumns: function( callBack ) {
 
 		var $this = this;
-		this.authorization_api.getOptions( 'columns', {onResult: function( columns_result ) {
-			var columns_result_data = columns_result.getResult();
-			$this.authorization_history_columns = Global.buildColumnArray( columns_result_data );
+		this.authorization_api.getOptions( 'columns', {
+			onResult: function( columns_result ) {
+				var columns_result_data = columns_result.getResult();
+				$this.authorization_history_columns = Global.buildColumnArray( columns_result_data );
 
-			if ( callBack ) {
-				callBack();
+				if ( callBack ) {
+					callBack();
+				}
+
 			}
-
-		}} );
+		} );
 
 	},
 
@@ -732,56 +758,60 @@ RequestViewController = BaseViewController.extend( {
 
 		var read_ids = [];
 
-		$this.message_control_api['getEmbeddedMessage']( args, {onResult: function( res ) {
+		$this.message_control_api['getEmbeddedMessage']( args, {
+			onResult: function( res ) {
 
-			if ( !$this.edit_view ) {
-				return;
-			}
+				if ( !$this.edit_view ) {
+					return;
+				}
 
-			var data = res.getResult();
+				var data = res.getResult();
 
-			if ( Global.isArray( data ) ) {
+				if ( Global.isArray( data ) ) {
 
-				$( $this.edit_view.find( '.separate' ) ).css( 'display', 'block' );
+					$( $this.edit_view.find( '.separate' ) ).css( 'display', 'block' );
 
-				$this.messages = data;
+					$this.messages = data;
 
-				var container = $( '<div></div>' );
+					var container = $( '<div></div>' );
 
-				for ( var key in data ) {
+					for ( var key in data ) {
 
-					var currentItem = data[key];
-					/* jshint ignore:start */
-					if ( currentItem.status_id == 10 ) {
-						read_ids.push( currentItem.id );
+						var currentItem = data[key];
+						/* jshint ignore:start */
+						if ( currentItem.status_id == 10 ) {
+							read_ids.push( currentItem.id );
+						}
+						/* jshint ignore:end */
+						var from = currentItem.from_first_name + ' ' + currentItem.from_last_name + '@' + currentItem.updated_date;
+						$this.edit_view_ui_dic['from'].setValue( from );
+						$this.edit_view_ui_dic['subject'].setValue( currentItem.subject );
+						$this.edit_view_ui_dic['body'].setValue( currentItem.body );
+
+						var cloneMessageControl = $( $this.edit_view_tab.find( '#tab_request' ).find( '.edit-view-tab' ).find( '.second-column' ) ).clone();
+
+						cloneMessageControl.css( 'display', 'block' ).appendTo( container );
 					}
-					/* jshint ignore:end */
-					var from = currentItem.from_first_name + ' ' + currentItem.from_last_name + '@' + currentItem.updated_date;
-					$this.edit_view_ui_dic['from'].setValue( from );
-					$this.edit_view_ui_dic['subject'].setValue( currentItem.subject );
-					$this.edit_view_ui_dic['body'].setValue( currentItem.body );
 
-					var cloneMessageControl = $( $this.edit_view_tab.find( '#tab_request' ).find( '.edit-view-tab' ).find( '.second-column' ) ).clone();
+					if ( read_ids.length > 0 ) {
+						$this.message_control_api['markRecipientMessageAsRead']( read_ids, {
+							onResult: function( res ) {
+							}
+						} );
+					}
 
-					cloneMessageControl.css( 'display', 'block' ).appendTo( container );
+					$this.edit_view_tab.find( '#tab_request' ).find( '.edit-view-tab' ).find( '.second-column' ).remove();
+					$this.edit_view_tab.find( '#tab_request' ).find( '.edit-view-tab' ).append( container.html() );
+
+				} else {
+
+					$( $this.edit_view.find( '.separate' ) ).css( 'display', 'none' );
 				}
 
-				if ( read_ids.length > 0 ) {
-					$this.message_control_api['markRecipientMessageAsRead']( read_ids, {onResult: function( res ) {
-					}} );
-				}
+				$this.setAuthorizationGridSize();
 
-				$this.edit_view_tab.find( '#tab_request' ).find( '.edit-view-tab' ).find( '.second-column' ).remove();
-				$this.edit_view_tab.find( '#tab_request' ).find( '.edit-view-tab' ).append( container.html() );
-
-			} else {
-
-				$( $this.edit_view.find( '.separate' ) ).css( 'display', 'none' );
 			}
-
-			$this.setAuthorizationGridSize();
-
-		}} );
+		} );
 	},
 
 	onEditClick: function( editId, noRefreshUI ) {
@@ -809,10 +839,10 @@ RequestViewController = BaseViewController.extend( {
 
 	setDefaultMenu: function( doNotSetFocus ) {
 
-        //Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
-        if (!this.context_menu_array) {
-            return;
-        }
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+		if ( !this.context_menu_array ) {
+			return;
+		}
 
 		if ( !Global.isSet( doNotSetFocus ) || !doNotSetFocus ) {
 			this.selectContextMenu();
@@ -1082,8 +1112,9 @@ RequestViewController = BaseViewController.extend( {
 			}
 
 		} else {
-			$this.setErrorTips( result );
 			$this.setErrorMenu();
+			$this.setErrorTips( result );
+
 		}
 	},
 
@@ -1104,7 +1135,6 @@ RequestViewController = BaseViewController.extend( {
 		// reset parent context menu if edit only mode
 		if ( !this.edit_only_mode ) {
 			this.setDefaultMenu();
-			this.initRightClickMenu();
 		} else {
 			this.setParentContextMenuAfterSubViewClose();
 		}
@@ -1164,15 +1194,20 @@ RequestViewController = BaseViewController.extend( {
 
 			record = this.uniformVariable( record );
 
-			this.message_control_api['validateMessageControl']( record, {onResult: function( result ) {
-				$this.validateResult( result );
+			this.message_control_api['validateMessageControl']( record, {
+				onResult: function( result ) {
+					$this.validateResult( result );
 
-			}} );
+				}
+			} );
 		}
 	},
 
-	onSaveClick: function() {
+	onSaveClick: function( ignoreWarning ) {
 		LocalCacheData.current_doing_context_action = 'save';
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
 		if ( this.is_add ) {
 			this._super( 'onSaveClick' );
 		} else if ( this.is_edit ) {
@@ -1181,9 +1216,11 @@ RequestViewController = BaseViewController.extend( {
 			this.is_add = false;
 			record = this.current_edit_record;
 			record = this.uniformVariable( record );
-			this.message_control_api['setMessageControl']( record, {onResult: function( result ) {
-				$this.onSaveResult( result );
-			}} );
+			this.message_control_api['setMessageControl']( record, false, ignoreWarning, {
+				onResult: function( result ) {
+					$this.onSaveResult( result );
+				}
+			} );
 		}
 
 	},
@@ -1311,22 +1348,24 @@ RequestViewController = BaseViewController.extend( {
 						temp_filter.filter_columns = {user_id: true, date_stamp: true};
 						temp_filter.filter_data.id = [selectedId];
 
-						this.api['get' + this.api.key_name]( temp_filter, {onResult: function( result ) {
-							var result_data = result.getResult();
+						this.api['get' + this.api.key_name]( temp_filter, {
+							onResult: function( result ) {
+								var result_data = result.getResult();
 
-							if ( !result_data ) {
-								result_data = [];
+								if ( !result_data ) {
+									result_data = [];
+								}
+
+								result_data = result_data[0];
+
+								filter.user_id = result_data.user_id;
+								filter.base_date = result_data.date_stamp;
+
+								Global.addViewTab( $this.viewId, 'Requests', window.location.href );
+								IndexViewController.goToView( 'TimeSheet', filter );
+
 							}
-
-							result_data = result_data[0];
-
-							filter.user_id = result_data.user_id;
-							filter.base_date = result_data.date_stamp;
-
-							Global.addViewTab( $this.viewId, 'Requests', window.location.href );
-							IndexViewController.goToView( 'TimeSheet', filter );
-
-						}} );
+						} );
 					}
 
 				}
@@ -1349,18 +1388,20 @@ RequestViewController = BaseViewController.extend( {
 						temp_filter.filter_columns = {user_id: true};
 						temp_filter.filter_data.id = [selectedId];
 
-						this.api['get' + this.api.key_name]( temp_filter, {onResult: function( result ) {
-							var result_data = result.getResult();
+						this.api['get' + this.api.key_name]( temp_filter, {
+							onResult: function( result ) {
+								var result_data = result.getResult();
 
-							if ( !result_data ) {
-								result_data = [];
+								if ( !result_data ) {
+									result_data = [];
+								}
+
+								result_data = result_data[0];
+
+								IndexViewController.openEditView( $this, 'Employee', result_data.user_id );
+
 							}
-
-							result_data = result_data[0];
-
-							IndexViewController.openEditView( $this, 'Employee', result_data.user_id );
-
-						}} );
+						} );
 					}
 
 				}
@@ -1374,7 +1415,7 @@ RequestViewController = BaseViewController.extend( {
 				if ( Global.isSet( this.current_edit_record ) ) {
 
 					include_users = [this.current_edit_record.user_id ? this.current_edit_record.user_id : LocalCacheData.loginUser.id];
-					filter.filter_data.include_user_ids = {value: include_users };
+					filter.filter_data.include_user_ids = {value: include_users};
 					;
 					filter.select_date = this.current_edit_record.date_stamp;
 
@@ -1393,25 +1434,27 @@ RequestViewController = BaseViewController.extend( {
 						temp_filter.filter_columns = {user_id: true, date_stamp: true};
 						temp_filter.filter_data.id = [selectedId];
 
-						this.api['get' + this.api.key_name]( temp_filter, {onResult: function( result ) {
-							var result_data = result.getResult();
+						this.api['get' + this.api.key_name]( temp_filter, {
+							onResult: function( result ) {
+								var result_data = result.getResult();
 
-							if ( !result_data ) {
-								result_data = [];
+								if ( !result_data ) {
+									result_data = [];
+								}
+
+								result_data = result_data[0];
+
+								include_users = [result_data.user_id];
+
+								filter.filter_data.include_user_ids = {value: include_users};
+
+								filter.select_date = result_data.date_stamp;
+
+								Global.addViewTab( $this.viewId, 'Requests', window.location.href );
+								IndexViewController.goToView( 'Schedule', filter );
+
 							}
-
-							result_data = result_data[0];
-
-							include_users = [result_data.user_id];
-
-							filter.filter_data.include_user_ids = {value: include_users };
-
-							filter.select_date = result_data.date_stamp;
-
-							Global.addViewTab( $this.viewId, 'Requests', window.location.href );
-							IndexViewController.goToView( 'Schedule', filter );
-
-						}} );
+						} );
 					}
 
 				}
@@ -1430,25 +1473,11 @@ RequestViewController = BaseViewController.extend( {
 			if ( !column.hasClass( 'v-box' ) ) {
 
 				if ( !did_clean ) {
-					column.find( '.edit-view-form-item-label-div-first-row' ).removeClass( 'edit-view-form-item-label-div-first-row' );
-					column.find( '.edit-view-form-item-label-div-last-row' ).removeClass( 'edit-view-form-item-label-div-last-row' );
-					column.find( '.edit-view-form-item-div-last-row' ).removeClass( 'edit-view-form-item-div-last-row' );
 					did_clean = true;
 				}
 
 				var child_length = column.children().length;
 				var parent_div = widget.parent().parent();
-
-				if ( child_length === 2 ) {
-					parent_div.children().eq( 0 ).addClass( 'edit-view-form-item-label-div-first-row' );
-					parent_div.children().eq( 0 ).addClass( 'edit-view-form-item-label-div-last-row' );
-					parent_div.addClass( 'edit-view-form-item-div-last-row' );
-				} else if ( parent_div.index() === 0 ) {
-					parent_div.children().eq( 0 ).addClass( 'edit-view-form-item-label-div-first-row' );
-				} else if ( parent_div.index() === child_length - 2 ) {
-					parent_div.children().eq( 0 ).addClass( 'edit-view-form-item-label-div-last-row' );
-					parent_div.addClass( 'edit-view-form-item-div-last-row' );
-				}
 
 				if ( Global.isSet( widget.setEnabled ) ) {
 					widget.setEnabled( true );
@@ -1497,14 +1526,16 @@ RequestViewController = BaseViewController.extend( {
 
 		this.setTabOVisibility( false );
 
-		this.edit_view_tab = this.edit_view_tab.tabs( {show: function( e, ui ) {
+		this.edit_view_tab = this.edit_view_tab.tabs( {
+			show: function( e, ui ) {
 
-			if ( !$this.edit_view_tab || !$this.edit_view_tab.is( ':visible' ) ) {
-				return;
+				if ( !$this.edit_view_tab || !$this.edit_view_tab.is( ':visible' ) ) {
+					return;
+				}
+
+				$this.onTabShow( e, ui )
 			}
-
-			$this.onTabShow( e, ui )
-		}} );
+		} );
 
 		this.edit_view_tab.bind( 'tabsselect', function( e, ui ) {
 			$this.onTabIndexChange( e, ui )
@@ -1514,24 +1545,12 @@ RequestViewController = BaseViewController.extend( {
 		this.initRightClickMenu( RightClickMenuType.EDITVIEW );
 
 		if ( this.is_add ) {
-
 			this.buildAddViewUI();
 		} else if ( this.is_viewing ) {
-
 			this.buildViewUI();
 		} else if ( this.is_edit ) {
-
 			this.buildEditViewUI();
 		}
-
-		//Calculated tab's height
-		this.edit_view_tab.resize( function() {
-
-			$this.setEditViewTabHeight();
-
-			$this.setAuthorizationGridSize();
-
-		} );
 
 		$this.setEditViewTabHeight();
 	},

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -182,6 +182,9 @@ switch ($object_type) {
 							Debug::Text('Upload Failed!: '. $upload->get_error(), __FILE__, __LINE__, __METHOD__, 10);
 							$error = $upload->get_error();
 						}
+					} else {
+						Debug::Text('Upload Failed!: Not enough disk space available...', __FILE__, __LINE__, __METHOD__, 10);
+						$error = TTi18n::gettext('File is too large to be uploaded at this time');
 					}
 				}
 
@@ -195,9 +198,12 @@ switch ($object_type) {
 						$dr_obj->setRemoteFileName($upload_file_arr['name']);
 						$dr_obj->setMimeType( $dr_obj->detectMimeType( $upload_file_arr['name'], $upload_file_arr['type'] ) );
 						if ( $dr_obj->isValid() ) {
-							$dr_obj->renameLocalFile(); //Just to make sure the file has been properly renamed.
-							$dr_obj->Save();
+							$dr_obj->Save( FALSE );
+							$dr_obj->renameLocalFile(); //Rename after save as finished successfully, otherwise a validation error will occur because the src file is gone.
+							unset($dr_obj);
 							break;
+						} else {
+							$error = TTi18n::gettext('File is invalid, unable to save');
 						}
 					} else {
 						Debug::Text('Object does not exist!', __FILE__, __LINE__, __METHOD__, 10);

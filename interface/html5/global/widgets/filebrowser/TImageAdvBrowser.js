@@ -26,16 +26,13 @@
 			enabled = val;
 
 			var btn = this.children().eq( 1 );
-
 			if ( !val ) {
-				btn.attr( 'disabled', true );
-				btn.removeClass( 'disable-element' ).addClass( 'disable-element' );
+				btn.hide();
 			} else {
-				btn.removeAttr( 'disabled' );
-				btn.removeClass( 'disable-element' );
+				btn.show();
 			}
 
-		}
+		};
 
 		this.clearErrorStyle = function() {
 
@@ -132,7 +129,6 @@
 			}
 
 			var browser = $( this ).children().eq( 1 );
-
 			browser.bind( 'click', function() {
 				IndexViewController.openWizard( 'UserPhotoWizard', null, function( form_data ) {
 
@@ -148,8 +144,9 @@
 			image = $( this ).children().eq( 0 );
 			image.load( function() {
 				$this.onImageLoad( this );
-
 			} );
+
+			image.hide();
 
 		} );
 

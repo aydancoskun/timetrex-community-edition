@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -179,8 +179,9 @@ class APIAbsencePolicy extends APIFactory {
 	 * @param array $data absence policy data
 	 * @return array
 	 */
-	function setAbsencePolicy( $data, $validate_only = FALSE ) {
+	function setAbsencePolicy( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
+		$ignore_warning = (bool)$ignore_warning;
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
@@ -200,7 +201,8 @@ class APIAbsencePolicy extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		if ( is_array($data) ) {
+		$validator = $save_result = FALSE;
+		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'AbsencePolicyListFactory' );
@@ -235,7 +237,7 @@ class APIAbsencePolicy extends APIFactory {
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-				$is_valid = $primary_validator->isValid();
+				$is_valid = $primary_validator->isValid( $ignore_warning );
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
 					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -244,7 +246,7 @@ class APIAbsencePolicy extends APIFactory {
 
 					$lf->setObjectFromArray( $row );
 
-					$is_valid = $lf->isValid();
+					$is_valid = $lf->isValid( $ignore_warning );
 					if ( $is_valid == TRUE ) {
 						Debug::Text('Saving data...', __FILE__, __LINE__, __METHOD__, 10);
 						if ( $validate_only == TRUE ) {
@@ -261,11 +263,7 @@ class APIAbsencePolicy extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					if ( $primary_validator->isValid() == FALSE ) {
-						$validator[$key] = $primary_validator->getErrorsArray();
-					} else {
-						$validator[$key] = $lf->Validator->getErrorsArray();
-					}
+					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
 				} elseif ( $validate_only == TRUE ) {
 					$lf->FailTransaction();
 				}
@@ -274,15 +272,7 @@ class APIAbsencePolicy extends APIFactory {
 				$lf->CommitTransaction();
 			}
 
-			if ( $validator_stats['valid_records'] > 0 AND $validator_stats['total_records'] == $validator_stats['valid_records'] ) {
-				if ( $validator_stats['total_records'] == 1 ) {
-					return $this->returnHandler( $save_result[$key] ); //Single valid record
-				} else {
-					return $this->returnHandler( TRUE, 'SUCCESS', TTi18n::getText('MULTIPLE RECORDS SAVED'), $save_result, $validator_stats ); //Multiple valid records
-				}
-			} else {
-				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
-			}
+			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
 
 		return $this->returnHandler( FALSE );
@@ -311,8 +301,9 @@ class APIAbsencePolicy extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
+		$validator = $save_result = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		if ( is_array($data) ) {
+		if ( is_array($data) AND $total_records > 0 ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'AbsencePolicyListFactory' );
@@ -358,25 +349,13 @@ class APIAbsencePolicy extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					if ( $primary_validator->isValid() == FALSE ) {
-						$validator[$key] = $primary_validator->getErrorsArray();
-					} else {
-						$validator[$key] = $lf->Validator->getErrorsArray();
-					}
+					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
 				}
 
 				$lf->CommitTransaction();
 			}
 
-			if ( $validator_stats['valid_records'] > 0 AND $validator_stats['total_records'] == $validator_stats['valid_records'] ) {
-				if ( $validator_stats['total_records'] == 1 ) {
-					return $this->returnHandler( $save_result[$key] ); //Single valid record
-				} else {
-					return $this->returnHandler( TRUE, 'SUCCESS', TTi18n::getText('MULTIPLE RECORDS SAVED'), $save_result, $validator_stats ); //Multiple valid records
-				}
-			} else {
-				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
-			}
+			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
 
 		return $this->returnHandler( FALSE );
@@ -469,8 +448,53 @@ class APIAbsencePolicy extends APIFactory {
 		$aplf->getByIdAndCompanyId( $absence_policy_id, $this->getCurrentCompanyObject()->getId() );
 		if ( $aplf->getRecordCount() > 0 ) {
 			$ap_obj = $aplf->getCurrent();
-
 			$pfp_obj = $ap_obj->getPayFormulaPolicyObject();
+			$pc_obj = $ap_obj->getPayCodeObject();
+			
+			//Get Wage Permission Hierarchy Children first, as this can be used for viewing, or editing.
+			$wage_permission_children_ids = array();
+			if ( $this->getPermissionObject()->Check('wage', 'view') == TRUE ) {
+				$wage_permission_children_ids = TRUE;
+			} elseif ( $this->getPermissionObject()->Check('wage', 'view') == FALSE ) {
+				if ( $this->getPermissionObject()->Check('wage', 'view_child') == FALSE ) {
+					$wage_permission_children_ids = array();
+				}
+				if ( $this->getPermissionObject()->Check('wage', 'view_own') ) {
+					$wage_permission_children_ids[] = $this->getCurrentUserObject()->getID();
+				}
+			}
+			if ( $wage_permission_children_ids === TRUE OR in_array( $user_id, (array)$wage_permission_children_ids) ) {
+				//Check for links to Pay Stub Account accruals, to get dollar amounts too.
+				if ( is_object( $ap_obj->getPayCodeObject() )
+						AND is_object( $ap_obj->getPayCodeObject()->getPayStubEntryAccountObject() ) ) {
+					$pself = TTnew('PayStubEntryListFactory');
+					$pay_stub_entry_account_data = $pself->getLastSumByUserIdAndEntryNameIdAndDate( (int)$user_id, $ap_obj->getPayCodeObject()->getPayStubEntryAccountObject()->getAccrual(), $epoch );
+					if ( isset($pay_stub_entry_account_data['ytd_amount']) AND $pay_stub_entry_account_data['ytd_amount'] !== NULL ) {
+						//Get all UserDateTotal records after the last pay stub date, so we can include dollar amounts that havne't appeared on pay stubs yet.
+						$udtlf = TTnew('UserDateTotalListFactory');
+						$udt_sum_arr = $udtlf->getSumByUserIDAndObjectTypeIDAndSourceObjecTIDAndPayCodeIDAndStartDateAndEndDate( (int)$user_id, 25, $ap_obj->getID(), $ap_obj->getPayCode(), TTDate::getBeginDayEpoch( strtotime( $pay_stub_entry_account_data['end_date'] ) + 7200 ), ( time() + ( 86400 * 365 ) ) );
+						Debug::Arr($udt_sum_arr, ' UDT Sum for Pay Code: '. $ap_obj->getPayCode() .' SRC Object ID: '. $ap_obj->getID() .' Start Date: '. TTDate::getDate('DATE+TIME', TTDate::getBeginDayEpoch( strtotime( $pay_stub_entry_account_data['end_date'] ) + 7200 ) ), __FILE__, __LINE__, __METHOD__, 10);
+
+						$uwlf = TTnew('UserWageListFactory');
+						$uwlf->getByUserIdAndGroupIDAndBeforeDate( (int)$user_id, $pfp_obj->getWageGroup(), $epoch, 1 );
+						if ( $uwlf->getRecordCount() > 0 ) {
+							$dollar_amount = ( TTDate::getHours( $amount ) * $pfp_obj->getHourlyRate( $uwlf->getCurrent()->getHourlyRate() ) * -1 );
+							$dollar_previous_amount = ( TTDate::getHours( $previous_amount ) * $pfp_obj->getHourlyRate( $uwlf->getCurrent()->getHourlyRate() ) );
+						} else {
+							$dollar_previous_amount = $dollar_amount = 0;
+						}
+
+						$available_dollar_balance = ( ( $pay_stub_entry_account_data['ytd_amount'] + $dollar_previous_amount ) - $udt_sum_arr['total_time_amount'] );
+
+						$dollar_retarr = array( 'available_dollar_balance' => Misc::MoneyFormat( $available_dollar_balance, FALSE ),
+												'current_dollar_amount' => Misc::MoneyFormat( $dollar_amount, FALSE ),
+												'remaining_dollar_balance' => Misc::MoneyFormat( ( $available_dollar_balance + $dollar_amount ), FALSE ),
+												);
+						Debug::Arr($dollar_retarr, 'Dollar Amount: '. $dollar_amount .' Previous: '. $dollar_previous_amount .' Dollar Accrual: ', __FILE__, __LINE__, __METHOD__, 10);
+					}
+				}
+			}
+
 			if ( is_object($pfp_obj) AND $pfp_obj->getAccrualPolicyAccount() != '' ) {
 				$aplf = new AccrualPolicyListFactory();
 				$aplf->getByPolicyGroupUserIdAndAccrualPolicyAccount( (int)$user_id, (int)$pfp_obj->getAccrualPolicyAccount() );
@@ -481,15 +505,20 @@ class APIAbsencePolicy extends APIFactory {
 					if ( $ulf->getRecordCount() == 1 ) {
 						$u_obj = $ulf->getCurrent();
 
-						$retval = FALSE;
+						$retarr = FALSE;
 						foreach( $aplf as $acp_obj ) {
 							Debug::Text('  Accrual Policy ID: '. $acp_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
 							//Pass $retval back into itself so additional balance can be calculated when accrual policy accounts are used in multiple policies.
-							$retval = $acp_obj->getAccrualBalanceWithProjection( $u_obj, $epoch, $amount, $previous_amount, $retval );
-							//Debug::Arr($retval, '  Retval: ', __FILE__, __LINE__, __METHOD__, 10);
+							$retarr = $acp_obj->getAccrualBalanceWithProjection( $u_obj, $epoch, $amount, $previous_amount, $retarr );
 						}
 
-						return $this->returnHandler( $retval );
+						if ( isset($dollar_retarr) ) {
+							$retarr = array_merge( $retarr, $dollar_retarr);
+						}
+
+						Debug::Arr($retarr, '  Projected Accrual Arr: ', __FILE__, __LINE__, __METHOD__, 10);
+
+						return $this->returnHandler( $retarr );
 					}
 				} else {
 					Debug::Text('No Accrual Policies to return projection for, just get current balance then...', __FILE__, __LINE__, __METHOD__, 10);
@@ -503,7 +532,11 @@ class APIAbsencePolicy extends APIFactory {
 									'projected_remaining_balance' => ( $available_balance - $amount ),
 									);
 
-					Debug::Arr($retarr, 'Current Accrual Arr: ', __FILE__, __LINE__, __METHOD__, 10);
+					if ( isset($dollar_retarr) ) {
+						$retarr = array_merge( $retarr, $dollar_retarr);
+					}
+									
+					Debug::Arr($retarr, '  Current Accrual Arr: ', __FILE__, __LINE__, __METHOD__, 10);
 					return $this->returnHandler( $retarr );
 				}
 			}

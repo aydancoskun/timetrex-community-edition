@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -258,12 +258,6 @@ class OverTimePolicyFactory extends Factory {
 										'pay_formula_policy_id' => 'PayFormulaPolicy',
 										'pay_formula_policy' => FALSE,
 
-										'rate' => 'Rate',
-										'wage_group_id' => 'WageGroup',
-										'accrual_rate' => 'AccrualRate',
-										'accrual_policy_id' => 'AccrualPolicyID',
-										'pay_stub_entry_account_id' => 'PayStubEntryAccountId',
-
 										'branch' => 'Branch',
 										'branch_selection_type_id' => 'BranchSelectionType',
 										'branch_selection_type' => FALSE,
@@ -341,11 +335,6 @@ class OverTimePolicyFactory extends Factory {
 	function setType($value) {
 		$value = trim($value);
 
-		$key = Option::getByValue($value, $this->getOptions('type') );
-		if ($key !== FALSE) {
-			$value = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'type',
 											$value,
 											TTi18n::gettext('Incorrect Type'),
@@ -353,7 +342,7 @@ class OverTimePolicyFactory extends Factory {
 
 			$this->data['type_id'] = $value;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -535,151 +524,6 @@ class OverTimePolicyFactory extends Factory {
 													) ) {
 
 			$this->data['pay_formula_policy_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-
-	function getHourlyRate( $hourly_rate ) {
-		return bcmul( $hourly_rate, $this->getRate() );
-	}
-
-	function getRate() {
-		if ( isset($this->data['rate']) ) {
-			return $this->data['rate'];
-		}
-
-		return FALSE;
-	}
-	function setRate($int) {
-		$int = trim($int);
-
-		if	( empty($int) ) {
-			$int = 0;
-		}
-
-		if	(	$this->Validator->isFloat(		'rate',
-												$int,
-												TTi18n::gettext('Incorrect Rate')) ) {
-			$this->data['rate'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getWageGroup() {
-		if ( isset($this->data['wage_group_id']) ) {
-			return (int)$this->data['wage_group_id'];
-		}
-
-		return FALSE;
-	}
-	function setWageGroup($id) {
-		$id = trim($id);
-
-		$wglf = TTnew( 'WageGroupListFactory' );
-
-		if ( $id == 0
-				OR
-				$this->Validator->isResultSetWithRows(	'wage_group',
-													$wglf->getByID($id),
-													TTi18n::gettext('Wage Group is invalid')
-													) ) {
-
-			$this->data['wage_group_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getAccrualRate() {
-		if ( isset($this->data['accrual_rate']) ) {
-			return $this->data['accrual_rate'];
-		}
-
-		return FALSE;
-	}
-	function setAccrualRate($int) {
-		$int = trim($int);
-
-		if	( empty($int) ) {
-			$int = 0;
-		}
-
-		if	(	$this->Validator->isFloat(		'accrual_rate',
-												$int,
-												TTi18n::gettext('Incorrect Accrual Rate')) ) {
-			$this->data['accrual_rate'] = $int;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getAccrualPolicyID() {
-		if ( isset($this->data['accrual_policy_id']) ) {
-			return (int)$this->data['accrual_policy_id'];
-		}
-
-		return FALSE;
-	}
-	function setAccrualPolicyID($id) {
-		$id = trim($id);
-
-		if ( $id == '' OR empty($id) ) {
-			$id = NULL;
-		}
-
-		$aplf = TTnew( 'AccrualPolicyListFactory' );
-
-		if ( $id == NULL
-				OR
-				$this->Validator->isResultSetWithRows(	'accrual_policy',
-													$aplf->getByID($id),
-													TTi18n::gettext('Accrual Policy is invalid')
-													) ) {
-
-			$this->data['accrual_policy_id'] = $id;
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-	function getPayStubEntryAccountId() {
-		if ( isset($this->data['pay_stub_entry_account_id']) ) {
-			return (int)$this->data['pay_stub_entry_account_id'];
-		}
-
-		return FALSE;
-	}
-	function setPayStubEntryAccountId($id) {
-		$id = trim($id);
-
-		Debug::text('Entry Account ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-
-		if ( $id == '' OR empty($id) ) {
-			$id = NULL;
-		}
-
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-
-		if (	$id == NULL
-				OR
-				$this->Validator->isResultSetWithRows(	'pay_stub_entry_account_id',
-														$psealf->getById($id),
-														TTi18n::gettext('Invalid Pay Stub Account')
-														) ) {
-			$this->data['pay_stub_entry_account_id'] = $id;
 
 			return TRUE;
 		}
@@ -945,7 +789,7 @@ class OverTimePolicyFactory extends Factory {
 		return TRUE;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		if ( $this->getDeleted() != TRUE ) {
 			if ( $this->getPayCode() == 0 ) {
 				$this->Validator->isTRUE(	'pay_code_id',
@@ -965,14 +809,7 @@ class OverTimePolicyFactory extends Factory {
 	}
 
 	function preSave() {
-		//Rate is still a NOT NULL column, so make sure its set no matter what
-		if ( $this->getRate() == '' ) {
-			$this->setRate( 0 );
-		}
-		//Accrual Rate is still a NOT NULL column, so make sure its set no matter what
-		if ( $this->getAccrualRate() == '' ) {
-			$this->setAccrualRate( 0 );
-		}
+		$this->data['rate'] = $this->data['accrual_rate'] = 0; //This is required until the schema removes the NOT NULL constraint.
 		
 		return TRUE;
 	}

@@ -464,7 +464,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScriptAsync( 'views/attendance/accrual/AccrualViewController.js', function() {
+		Global.loadScript( 'views/attendance/accrual/AccrualViewController.js', function() {
 
 			var tab_accrual = $this.edit_view_tab.find( '#tab_accrual' );
 			var firstColumn = tab_accrual.find( '.first-column-sub-view' );
@@ -502,7 +502,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScriptAsync( 'views/core/log/LogViewController.js', function() {
+		Global.loadScript( 'views/core/log/LogViewController.js', function() {
 
 			var tab = $this.edit_view_tab.find( '#' + tab_id );
 			var firstColumn = tab.find( '.first-column-sub-view' );

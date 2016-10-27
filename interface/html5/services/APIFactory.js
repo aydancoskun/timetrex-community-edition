@@ -169,6 +169,7 @@ var APIFactory = (function() {
 		'APINotification': 'services/core/APINotification',
 		'APIMisc': 'services/core/APIMisc',
 		'APICompanyGenericTag': 'services/company/APICompanyGenericTag',
+		'APIDashboard': 'services/core/APIDashboard',
 		'APIInstall': 'services/install/APIInstall'
 
 

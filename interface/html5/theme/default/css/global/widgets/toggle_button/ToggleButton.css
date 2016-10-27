@@ -18,7 +18,7 @@
     padding: 3px 5px;
     text-decoration: none;
     cursor: pointer;
-    margin: 0px;
+    margin: 0;
 
 }
 
@@ -35,14 +35,14 @@
 }
 
 .toggle-button-div .first {
-    border-top-right-radius: 0px;
-    border-bottom-right-radius: 0px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
 
 }
 
 .toggle-button-div .last {
-    border-top-left-radius: 0px;
-    border-bottom-left-radius: 0px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
 }
 
 .toggle-button-div .first-last {
@@ -50,7 +50,7 @@
 }
 
 .toggle-button-div .middle {
-    border-radius: 0px;
+    border-radius: 0;
 }
 
 .toggle-button-div .selected {

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -59,8 +59,9 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -81,7 +82,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 		}
 
 		$ph = array(
-					'user_id' => $id,
+					'user_id' => (int)$id,
 					);
 
 		$query = '
@@ -107,8 +108,8 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 		}
 
 		$ph = array(
-					'user_id' => $user_id,
-					'id' => $id,
+					'user_id' => (int)$user_id,
+					'id' => (int)$id,
 					);
 
 		$query = '
@@ -135,8 +136,8 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
-					'id' => $id,
+					'company_id' => (int)$company_id,
+					'id' => (int)$id,
 					);
 
 		$query = '
@@ -147,7 +148,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 
 		//Allow getting company wide data if user_id == ''
 		if ( $user_id != '' ) {
-			$ph[] = $user_id;
+			$ph[] = (int)$user_id;
 			$query .= '		AND user_id = ?';
 		} else {
 			$query .= '		AND ( user_id = 0 OR user_id IS NULL )';
@@ -182,7 +183,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 		}
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'script' => $script,
 					);
 
@@ -219,7 +220,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 		}
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					'script' => $script,
 					'default' => $this->toBool($default),
 					);
@@ -275,8 +276,9 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -302,8 +304,8 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
-					'id' => $id,
+					'company_id' => (int)$company_id,
+					'id' => (int)$id,
 					);
 
 		$query = '
@@ -340,7 +342,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'script' => $script
 					);
 
@@ -378,7 +380,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'script' => $script,
 					'default' => $this->toBool($default)
 					);
@@ -422,7 +424,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 		$uf = new UserFactory();
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '

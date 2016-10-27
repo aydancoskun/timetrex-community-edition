@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -1074,7 +1074,7 @@ class PunchControlFactory extends Factory {
 		return TRUE;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		Debug::text('Validating...', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Call this here so getShiftData can get the correct total time, before we call findUserDate.
@@ -1278,6 +1278,20 @@ class PunchControlFactory extends Factory {
 													FALSE,
 													TTi18n::gettext('Task is not assigned to this job') );
 					}
+				}
+			}
+		}
+
+		if ( $ignore_warning == FALSE ) {
+			//Check to see if timesheet is verified, if so show warning to notify the user.
+			if ( is_object( $this->getPayPeriodScheduleObject() )
+					AND $this->getPayPeriodScheduleObject()->getTimeSheetVerifyType() != 10 ) {
+				//Find out if timesheet is verified or not.
+				$pptsvlf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' );
+				$pptsvlf->getByPayPeriodIdAndUserId( $this->getPayPeriod(), $this->getUser() );
+				if ( $pptsvlf->getRecordCount() > 0 ) {
+					//Pay period is verified
+					$this->Validator->Warning( 'date_stamp', TTi18n::gettext('Pay period is already verified, saving these changes will require it to be reverified') );
 				}
 			}
 		}
@@ -1562,9 +1576,15 @@ class PunchControlFactory extends Factory {
 				} else {
 					Debug::text('No IN PunchObject!', __FILE__, __LINE__, __METHOD__, 10);
 					if ( is_object( $this->getPunchObject() ) AND $this->getPunchObject()->getStatus() == 10 ) {
-						Debug::text('  Using passed PunchObject instead...', __FILE__, __LINE__, __METHOD__, 10);
-						$udtf->setStartType( $this->getPunchObject()->getType() );
-						$udtf->setStartTimeStamp( $this->getPunchObject()->getTimeStamp() );
+						Debug::text('  Using passed PunchObject instead... Deleted: '. $this->getPunchObject()->getDeleted(), __FILE__, __LINE__, __METHOD__, 10);
+						//Make sure when deleting a punch we clear out the timestamp from the UDT record.
+						if ( $this->getPunchObject()->getDeleted() == TRUE ) {
+							$udtf->setStartType( NULL );
+							$udtf->setStartTimeStamp( NULL );
+						} else {
+							$udtf->setStartType( $this->getPunchObject()->getType() );
+							$udtf->setStartTimeStamp( $this->getPunchObject()->getTimeStamp() );
+						}
 					} else {
 						Debug::text('  ERROR: No PunchObject!', __FILE__, __LINE__, __METHOD__, 10);
 					}
@@ -1575,9 +1595,15 @@ class PunchControlFactory extends Factory {
 				} else {
 					Debug::text('No OUT PunchObject!', __FILE__, __LINE__, __METHOD__, 10);
 					if ( is_object( $this->getPunchObject() ) AND $this->getPunchObject()->getStatus() == 20 ) {
-						Debug::text('  Using passed PunchObject instead...', __FILE__, __LINE__, __METHOD__, 10);
-						$udtf->setEndType( $this->getPunchObject()->getType() );
-						$udtf->setEndTimeStamp( $this->getPunchObject()->getTimeStamp() );
+						Debug::text('  Using passed PunchObject instead... Deleted: '. $this->getPunchObject()->getDeleted(), __FILE__, __LINE__, __METHOD__, 10);
+						//Make sure when deleting a punch we clear out the timestamp from the UDT record.
+						if ( $this->getPunchObject()->getDeleted() == TRUE ) {
+							$udtf->setEndType( NULL );
+							$udtf->setEndTimeStamp( NULL );
+						} else {
+							$udtf->setEndType( $this->getPunchObject()->getType() );
+							$udtf->setEndTimeStamp( $this->getPunchObject()->getTimeStamp() );
+						}
 					} else {
 						Debug::text('  ERROR: No PunchObject!', __FILE__, __LINE__, __METHOD__, 10);
 					}
@@ -1585,16 +1611,6 @@ class PunchControlFactory extends Factory {
 
 				//Let smartReCalculate handle calculating totals/exceptions.
 				if ( $udtf->isValid() ) {
-					//Let recalculateDay() handle the recalcuating, otherwise we do it twice.
-					/*
-					$udtf->setEnableCalcException( $this->getEnableCalcException() );
-					$udtf->setEnablePreMatureException( $this->getEnablePreMatureException() );
-
-					$udtf->alternate_date_stamps = $this->old_date_stamps;
-					$udtf->Save( FALSE );
-					$udtf->calcSystemTotalTime();
-					unset($udtf);
-					*/
 					return $udtf->Save();
 				} else {
 					Debug::text('ERROR: Validation error saving UDT row!', __FILE__, __LINE__, __METHOD__, 10);

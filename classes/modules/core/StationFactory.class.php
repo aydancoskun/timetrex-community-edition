@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -194,7 +194,7 @@ class StationFactory extends Factory {
 
 												131072	=> TTi18n::gettext('QRCodes: Allow Multiple'), //For single-employee mode scanning.
 												262144	=> TTi18n::gettext('QRCodes: Allow MACROs'), //For single-employee mode scanning.
-												//1048576	=> TTi18n::gettext('Enable: External Barcode Reader'),
+												1048576	=> TTi18n::gettext('Disable: Time Synchronization'),
 												2097152 => TTi18n::gettext('Enable: Pre-Punch Message'),
 												4194304	=> TTi18n::gettext('Enable: Post-Punch Message'),
 
@@ -210,8 +210,8 @@ class StationFactory extends Factory {
 												8		=> TTi18n::gettext('Punch Mode: QRCode+Face Detection'),
 												16		=> TTi18n::gettext('Punch Mode: Facial Recognition'),
 												32		=> TTi18n::gettext('Punch Mode: Facial Recognition+QRCode'),
-												//64		=> TTi18n::gettext('Punch Mode: Barcode'),
-												//128		=> TTi18n::gettext('Punch Mode: iButton'),
+												//64		=> TTi18n::gettext('Punch Mode: Facial Recognition+Quick Punch'),
+												//128	
 												//256
 												//512
 												//1024
@@ -224,7 +224,7 @@ class StationFactory extends Factory {
 
 												131072	=> TTi18n::gettext('QRCodes: Allow Multiple'),
 												262144	=> TTi18n::gettext('QRCodes: Allow MACROs'),
-												//1048576	=> TTi18n::gettext('Enable: External Barcode Reader'),
+												1048576	=> TTi18n::gettext('Disable: Time Synchronization'),
 												2097152 => TTi18n::gettext('Enable: Pre-Punch Message'),
 												4194304	=> TTi18n::gettext('Enable: Post-Punch Message'),
 
@@ -409,11 +409,6 @@ class StationFactory extends Factory {
 	function setStatus($status) {
 		$status = trim($status);
 
-		$key = Option::getByValue($status, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$status = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'status_id',
 											$status,
 											TTi18n::gettext('Incorrect Status'),
@@ -437,6 +432,7 @@ class StationFactory extends Factory {
 	function setType($type) {
 		$type = trim($type);
 
+		//This needs to be stay as TimeTrex Client application still uses names rather than IDs.
 		$key = Option::getByValue($type, $this->getOptions('type') );
 		if ($key !== FALSE) {
 			$type = $key;
@@ -1457,7 +1453,7 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 	function setLastPunchTimeStamp($epoch = NULL) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ($epoch == NULL) {
 			$epoch = TTDate::getTime();
@@ -1484,7 +1480,7 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 	function setLastPollDate($epoch = NULL) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ($epoch == NULL) {
 			$epoch = TTDate::getTime();
@@ -1534,7 +1530,7 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 	function setLastPushDate($epoch = NULL) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ($epoch == NULL) {
 			$epoch = TTDate::getTime();
@@ -1584,7 +1580,7 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 	function setLastPartialPushDate($epoch = NULL) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ($epoch == NULL) {
 			$epoch = TTDate::getTime();
@@ -1810,7 +1806,7 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 	function setAllowedDate($epoch = NULL) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if ($epoch == NULL) {
 			$epoch = TTDate::getTime();
@@ -2050,6 +2046,8 @@ class StationFactory extends Factory {
 					} else {
 						$status_id = 20; //Enabled
 						if ( $station_id != '' ) {
+							$station_id = str_replace( ':', '', $station_id); //Some iOS6 devices return a MAC address looking ID. This conflicts with BASIC Authentication FCGI workaround as it uses ':' for the separator, see Global.inc.php for more details.
+
 							//Prevent stations from having the type_id appended to the end several times.
 							if ( substr( $station_id, ( strlen($type_id) * -1 ) ) != $type_id ) {
 								$station = $station_id.$type_id;
@@ -2125,7 +2123,7 @@ class StationFactory extends Factory {
 					$sf->setBranchSelectionType( 10 ); //All allowed
 					$sf->setDepartmentSelectionType( 10 ); //All allowed
 					
-					$sf->setModeFlag( array( 4, 4096 ) ); //Default QRCode (without face), Capture Images in KIOSK mode.
+					$sf->setModeFlag( array( 16, 4096 ) ); //Default Facial Recognition, Capture Images in KIOSK mode.
 
 					if ( is_object( $sf->getCompanyObject() ) AND is_object( $sf->getCompanyObject()->getUserDefaultObject() ) ) {
 						$sf->setTimeZone( $sf->getCompanyObject()->getUserDefaultObject()->getTimeZone() );
@@ -2165,17 +2163,23 @@ class StationFactory extends Factory {
 		return $retval;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		if ( is_object($this->getCompanyObject() ) AND $this->getCompanyObject()->getProductEdition() == 10 AND $this->getType() > 10 ) {
 			$this->Validator->isTrue(		'type_id',
 											FALSE,
 											TTi18n::gettext('Type is not available in %1 Community Edition, please contact our sales department for more information', APPLICATION_NAME ));
 		}
 
-		if ( $this->validate_only == FALSE AND $this->getDescription() == '' ) {
+		if ( $this->Validator->getValidateOnly() == FALSE AND $this->getDescription() == '' ) {
 			$this->Validator->isTrue(		'description',
 											FALSE,
 											TTi18n::gettext('Description must be specified'));
+		}
+
+		if ( $ignore_warning == FALSE ) {
+			if ( $this->getStatus() == 20 AND $this->isActiveForAnyEmployee() == FALSE ) {
+				$this->Validator->Warning( 'group', TTi18n::gettext('Employee Criteria denies access to all employees, if you save this record it will be marked as DISABLED') );
+			}
 		}
 																																												$obj_class = "\124\124\114\x69\x63\x65\x6e\x73\x65"; $obj_function = "\166\x61\154\x69\144\x61\164\145\114\x69\x63\145\x6e\x73\x65"; $obj_error_msg_function = "\x67\x65\x74\x46\x75\154\154\105\162\x72\x6f\x72\115\x65\x73\163\141\x67\x65"; @$obj = new $obj_class; $retval = $obj->{$obj_function}(NULL, array("\x73\x74\x61\x74\x69\x6f\x6e" => $this )); if ( $retval !== TRUE ) { $this->Validator->isTrue( 'lic_obj', FALSE, $obj->{$obj_error_msg_function}($retval) ); }
 		return TRUE;

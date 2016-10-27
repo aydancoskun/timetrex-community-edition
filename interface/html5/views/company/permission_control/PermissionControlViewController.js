@@ -153,7 +153,7 @@ PermissionControlViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScriptAsync( 'views/core/log/LogViewController.js', function() {
+		Global.loadScript( 'views/core/log/LogViewController.js', function() {
 			var tab = $this.edit_view_tab.find( '#' + tab_id );
 			var firstColumn = tab.find( '.first-column-sub-view' );
 			Global.trackView( 'Sub' + 'Log' + 'View', LocalCacheData.current_doing_context_action );

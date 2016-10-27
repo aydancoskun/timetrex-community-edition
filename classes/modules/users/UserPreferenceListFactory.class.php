@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -71,7 +71,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 			$query = '
 						select	*
 						from	'. $this->getTable() .'
-						where	id in ('. $this->getListSQL($id, $ph) .')
+						where	id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 							AND deleted = 0';
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
@@ -94,8 +94,9 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		$uf = new UserFactory();
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	distinct a.language
@@ -128,7 +129,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 			$query = '
 						select	*
 						from	'. $this->getTable() .'
-						where	user_id in ('. $this->getListSQL($id, $ph) .')
+						where	user_id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 							AND deleted = 0';
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
@@ -151,7 +152,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -180,8 +181,8 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					'id' => $id,
+					'company_id' => (int)$company_id,
+					'id' => (int)$id,
 					);
 
 		$query = '
@@ -211,8 +212,8 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		$uf = new UserFactory();
 
 		$ph = array(
-					'id' => $id,
-					'company_id' => $company_id,
+					'id' => (int)$id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -241,7 +242,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'created_date' => $date,
 					'updated_date' => $date,
 					'deleted_date' => $date,
@@ -292,7 +293,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		//If the user record is modified, we have to consider the identification record to be modified as well,
@@ -323,7 +324,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 				if ( isset($date) AND $date > 0 ) {
 					$query .= ' OR ';
 				}
-				$query	.=	' a.user_id in ('. $this->getListSQL($valid_user_ids, $ph) .') ';
+				$query	.=	' a.user_id in ('. $this->getListSQL( $valid_user_ids, $ph, 'int' ) .') ';
 			}
 
 			$query .= ' ) ';
@@ -390,7 +391,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		$utf = new UserTitleFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '

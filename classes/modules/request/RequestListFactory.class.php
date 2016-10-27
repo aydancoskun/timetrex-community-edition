@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -59,8 +59,9 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
@@ -87,8 +88,8 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'id' => $id,
-					'company_id' => $company_id,
+					'id' => (int)$id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -116,8 +117,9 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	a.*
@@ -152,8 +154,8 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					'user_id' => $user_id,
+					'company_id' => (int)$company_id,
+					'user_id' => (int)$user_id,
 					);
 
 		$query = '
@@ -200,8 +202,8 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					'user_id' => $user_id,
+					'company_id' => (int)$company_id,
+					'user_id' => (int)$user_id,
 					'start_date' => $this->db->BindDate( $start_date ),
 					'end_date' => $this->db->BindDate( $end_date ),
 					);
@@ -256,9 +258,9 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
-					'user_id' => $user_id,
-					'status_id' => $status_id,
+					'company_id' => (int)$company_id,
+					'user_id' => (int)$user_id,
+					'status_id' => (int)$status_id,
 					'start_date' => $this->db->BindDate( $start_date ),
 					'end_date' => $this->db->BindDate( $end_date ),
 					);
@@ -417,7 +419,7 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 
 		$ph = array(
 					'status' => $status,
-					'type_id' => $type_id
+					'type_id' => (int)$type_id,
 					);
 
 		$query = '
@@ -442,11 +444,6 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 	}
 
 	function getSumByPayPeriodIdAndStatus($pay_period_id, $status, $where = NULL, $order = NULL) {
-		$key = Option::getByValue($status, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$status = $key;
-		}
-
 		$af = new AuthorizationFactory();
 		$uf = new UserFactory();
 
@@ -458,7 +455,7 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 					select	a.pay_period_id as pay_period_id, count(*) as total
 					from	'. $this->getTable() .' as a
 					where	a.status_id = ?
-						AND a.pay_period_id in ('. $this->getListSQL($pay_period_id, $ph).')
+						AND a.pay_period_id in ('. $this->getListSQL( $pay_period_id, $ph, 'int' ).')
 						AND ( a.deleted = 0 )
 					GROUP By a.pay_period_id
 				';
@@ -471,16 +468,11 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 	}
 
 	function getSumByCompanyIDAndPayPeriodIdAndStatus($company_id, $pay_period_id, $status, $where = NULL, $order = NULL) {
-		$key = Option::getByValue($status, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$status = $key;
-		}
-
 		$af = new AuthorizationFactory();
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'status_id' => $status,
 					);
 
@@ -491,7 +483,7 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 					where	a.user_id = c.id
 						AND c.company_id = ?
 						AND	a.status_id = ?
-						AND a.pay_period_id in ('. $this->getListSQL($pay_period_id, $ph).')
+						AND a.pay_period_id in ('. $this->getListSQL( $pay_period_id, $ph, 'int' ).')
 						AND ( a.deleted = 0 )
 					GROUP By a.pay_period_id
 				';
@@ -504,17 +496,11 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 	}
 
 	function getSumByPayPeriodIdAndStatusAndBeforeDate($pay_period_id, $status, $before_date, $where = NULL, $order = NULL) {
-		$key = Option::getByValue($status, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$status = $key;
-		}
-
 		$af = new AuthorizationFactory();
-
 		$uf = new UserFactory();
 
 		$ph = array(
-					'pay_period_id' => $pay_period_id,
+					'pay_period_id' => (int)$pay_period_id,
 					'status_id' => $status,
 					'before_date' => $this->db->BindDate( $before_date ),
 					);
@@ -557,7 +543,7 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -612,7 +598,8 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 
 		if ( $order == NULL ) {
-			$order = array( 'status_id' => 'asc', 'type_id' => 'asc', 'date_stamp' => 'desc', );
+			//Sort by date_stamp ASC first, so most recent requests always appear at the top, then by type to try to keep similar requests together. 
+			$order = array( 'status_id' => 'asc', 'date_stamp' => 'asc', 'type_id' => 'asc', 'last_name' => 'asc' );
 			$strict = FALSE;
 		} else {
 			//Always sort by last name, first name after other columns
@@ -634,7 +621,7 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 		$huf = new HierarchyUserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		//Need to make this return DISTINCT records only, because if the same child is assigned to multiple hierarchies,
@@ -714,6 +701,12 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 			$ph[] = $this->db->BindDate( (int)TTDate::parseDateTime( $filter_data['end_date'] ) );
 			$query	.=	' AND a.date_stamp <= ?';
 		}
+
+		$query .= ( isset($filter_data['created_date_start']) ) ? $this->getWhereClauseSQL( 'a.created_date', $filter_data['created_date_start'], 'start_date', $ph ) : NULL;
+		$query .= ( isset($filter_data['created_date_end']) ) ? $this->getWhereClauseSQL( 'a.created_date', $filter_data['created_date_end'], 'end_date', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['updated_date_start']) ) ? $this->getWhereClauseSQL( 'a.updated_date', $filter_data['updated_date_start'], 'start_date', $ph ) : NULL;
+		$query .= ( isset($filter_data['updated_date_end']) ) ? $this->getWhereClauseSQL( 'a.updated_date', $filter_data['updated_date_end'], 'end_date', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -59,7 +59,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
 
 		$query = '
@@ -83,7 +83,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		$uf = new UserFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -113,8 +113,8 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		$uf = new UserFactory();
 
 		$ph = array(
-					'id' => $id,
-					'company_id' => $company_id,
+					'id' => (int)$id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -154,7 +154,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		$af = new AccrualFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -168,7 +168,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 					where	a.user_id = b.id
 						AND a.accrual_policy_account_id = c.id
 						AND b.company_id = ?
-						AND a.user_id in ('. $this->getListSQL( $user_id, $ph ) .')
+						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .')
 						AND EXISTS ( select 1 from '. $af->getTable() .' as af WHERE af.accrual_policy_account_id = a.accrual_policy_account_id AND a.user_id = af.user_id AND af.deleted = 0 )
 						AND ( a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
@@ -200,7 +200,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		$apaf = new AccrualPolicyAccountFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					'enable_pay_stub_balance_display' => (int)$enable_pay_stub_balance_display,
 					);
 
@@ -214,7 +214,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 						AND a.accrual_policy_account_id = c.id
 						AND b.company_id = ?
 						AND c.enable_pay_stub_balance_display = ?
-						AND a.user_id in ('. $this->getListSQL( $user_id, $ph ) .')
+						AND a.user_id in ('. $this->getListSQL( $user_id, $ph, 'int' ) .')
 						AND ( a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
@@ -234,8 +234,8 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		}
 
 		$ph = array(
-					'user_id' => $user_id,
-					'accrual_policy_account_id' => $accrual_policy_account_id,
+					'user_id' => (int)$user_id,
+					'accrual_policy_account_id' => (int)$accrual_policy_account_id,
 					);
 
 		$query = '
@@ -295,7 +295,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		$af = new AccrualFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '

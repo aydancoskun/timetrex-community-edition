@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -109,7 +109,8 @@ class APISchedule extends APIFactory {
 					$end_date = TTDate::getEndDayEpoch( $epoch );
 				} else {
 					$start_date = TTDate::getBeginDayEpoch( $epoch );
-					$end_date = TTDate::getBeginDayEpoch( ( TTDate::getMiddleDayEpoch( $epoch ) + 86400 ) );
+					//$end_date = TTDate::getBeginDayEpoch( ( TTDate::getMiddleDayEpoch( $epoch ) + 86400 ) );
+					$end_date = TTDate::getEndDayEpoch( ( TTDate::getMiddleDayEpoch( $epoch ) + 86400 ) );
 				}
 				break;
 			case 'week':
@@ -118,7 +119,8 @@ class APISchedule extends APIFactory {
 					$end_date = TTDate::getEndWeekEpoch( $epoch, $this->getCurrentUserPreferenceObject()->getStartWeekDay() );
 				} else {
 					$start_date = TTDate::getBeginDayEpoch( $epoch );
-					$end_date = TTDate::getBeginDayEpoch( ( TTDate::getMiddleDayEpoch( $epoch ) + (7 * 86400) ) );
+					//$end_date = TTDate::getBeginDayEpoch( ( TTDate::getMiddleDayEpoch( $epoch ) + (6 * 86400) ) );
+					$end_date = TTDate::getEndDayEpoch( ( TTDate::incrementDate( $epoch, 1, 'week' ) - 3600 ) );
 				}
 				break;
 			case 'month':
@@ -126,8 +128,10 @@ class APISchedule extends APIFactory {
 					$start_date = TTDate::getBeginWeekEpoch( TTDate::getBeginMonthEpoch( $epoch ), $this->getCurrentUserPreferenceObject()->getStartWeekDay() );
 					$end_date = TTDate::getEndWeekEpoch( TTDate::getEndMonthEpoch( $epoch ), $this->getCurrentUserPreferenceObject()->getStartWeekDay() );
 				} else {
+					//This should be 5 weeks from the base date.
 					$start_date = TTDate::getBeginDayEpoch( $epoch );
-					$end_date = TTDate::getBeginDayEpoch( ( TTDate::getMiddleDayEpoch( $epoch ) + (30 * 86400) ) );
+					$end_date = TTDate::getEndDayEpoch( TTDate::incrementDate( $epoch, 5, 'week' ) );
+					//$end_date = TTDate::getEndWeekEpoch( ( TTDate::getMiddleDayEpoch( $epoch ) + (30 * 86400) ), TTDate::getDayOfWeek( $epoch, $this->getCurrentUserPreferenceObject()->getStartWeekDay() ) ) + 1;
 				}
 				break;
 			case 'year':
@@ -135,8 +139,10 @@ class APISchedule extends APIFactory {
 					$start_date = TTDate::getBeginWeekEpoch( TTDate::getBeginMonthEpoch( $epoch ), $this->getCurrentUserPreferenceObject()->getStartWeekDay() );
 					$end_date = TTDate::getEndWeekEpoch( TTDate::getEndMonthEpoch( ( TTDate::getEndMonthEpoch( $epoch ) + (86400 * 2) ) ), $this->getCurrentUserPreferenceObject()->getStartWeekDay() );
 				} else {
+					//This should be 2 months from the base date.
 					$start_date = TTDate::getBeginDayEpoch( $epoch );
-					$end_date = TTDate::getBeginDayEpoch( ( TTDate::getMiddleDayEpoch( $epoch ) + (62 * 86400) ) );
+					//$end_date = TTDate::getBeginDayEpoch( ( TTDate::getMiddleDayEpoch( $epoch ) + (62 * 86400) ), TTDate::getDayOfWeek( $epoch, $this->getCurrentUserPreferenceObject()->getStartWeekDay() ) ) + 1;
+					$end_date = TTDate::getEndDayEpoch( TTDate::incrementDate( $epoch, 2, 'month' ) );
 				}
 				break;
 		}
@@ -186,6 +192,12 @@ class APISchedule extends APIFactory {
 		} elseif ( count($data['filter_data']['permission_children_ids']) > 0 ) {
 			//If schedule, view_open is allowed but they are also only allowed to see their subordinates (which they have some of), add "open" employee as if they are a subordinate.
 			$data['filter_data']['permission_children_ids'][] = 0;
+		}
+
+		//Pass items per page through to getScheduleArray()
+		//This must come before initializeFilterAndPager()
+		if ( isset($data['filter_items_per_page']) ) {
+			$data['filter_data']['filter_items_per_page'] = $data['filter_items_per_page'];
 		}
 
 		$data = $this->initializeFilterAndPager( $data );
@@ -332,8 +344,9 @@ class APISchedule extends APIFactory {
 	 * @param array $data schedule data
 	 * @return array
 	 */
-	function setSchedule( $data, $validate_only = FALSE, $overwrite = FALSE ) {
+	function setSchedule( $data, $validate_only = FALSE, $overwrite = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
+		$ignore_warning = (bool)$ignore_warning;
 
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
@@ -357,7 +370,8 @@ class APISchedule extends APIFactory {
 		//Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		if ( is_array($data) ) {
+		$validator = $save_result = FALSE;
+		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
 			foreach( $data as $key => $row ) {
@@ -408,7 +422,7 @@ class APISchedule extends APIFactory {
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-				$is_valid = $primary_validator->isValid();
+				$is_valid = $primary_validator->isValid( $ignore_warning );
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
 
 					if ( $overwrite == TRUE AND isset($row['user_id']) AND isset($row['start_time']) AND isset($row['end_time']) ) {
@@ -443,7 +457,7 @@ class APISchedule extends APIFactory {
 					$row['company_id'] = $this->getCurrentCompanyObject()->getId();	 //This prevents a validation error if company_id is FALSE.
 					$lf->setObjectFromArray( $row );
 
-					$is_valid = $lf->isValid();
+					$is_valid = $lf->isValid( $ignore_warning );
 					if ( $is_valid == TRUE ) {
 						Debug::Text('Saving data...', __FILE__, __LINE__, __METHOD__, 10);
 						$lf->setEnableTimeSheetVerificationCheck(TRUE); //Unverify timesheet if its already verified.
@@ -463,11 +477,7 @@ class APISchedule extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					if ( $primary_validator->isValid() == FALSE ) {
-						$validator[$key] = $primary_validator->getErrorsArray();
-					} else {
-						$validator[$key] = $lf->Validator->getErrorsArray();
-					}
+					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
 				} elseif ( $validate_only == TRUE ) {
 					$lf->FailTransaction();
 				}
@@ -480,15 +490,7 @@ class APISchedule extends APIFactory {
 
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
-			if ( $validator_stats['valid_records'] > 0 AND $validator_stats['total_records'] == $validator_stats['valid_records'] ) {
-				if ( $validator_stats['total_records'] == 1 ) {
-					return $this->returnHandler( $save_result[$key] ); //Single valid record
-				} else {
-					return $this->returnHandler( TRUE, 'SUCCESS', TTi18n::getText('MULTIPLE RECORDS SAVED'), $save_result, $validator_stats ); //Multiple valid records
-				}
-			} else {
-				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
-			}
+			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
 
 		return $this->returnHandler( FALSE );
@@ -520,8 +522,9 @@ class APISchedule extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
+		$validator = $save_result = FALSE;
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		if ( is_array($data) ) {
+		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
 			foreach( $data as $key => $id ) {
@@ -573,11 +576,7 @@ class APISchedule extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					if ( $primary_validator->isValid() == FALSE ) {
-						$validator[$key] = $primary_validator->getErrorsArray();
-					} else {
-						$validator[$key] = $lf->Validator->getErrorsArray();
-					}
+					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
 				}
 
 				$lf->CommitTransaction();
@@ -587,15 +586,7 @@ class APISchedule extends APIFactory {
 
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
-			if ( $validator_stats['valid_records'] > 0 AND $validator_stats['total_records'] == $validator_stats['valid_records'] ) {
-				if ( $validator_stats['total_records'] == 1 ) {
-					return $this->returnHandler( $save_result[$key] ); //Single valid record
-				} else {
-					return $this->returnHandler( TRUE, 'SUCCESS', TTi18n::getText('MULTIPLE RECORDS SAVED'), $save_result, $validator_stats ); //Multiple valid records
-				}
-			} else {
-				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
-			}
+			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
 		}
 
 		return $this->returnHandler( FALSE );

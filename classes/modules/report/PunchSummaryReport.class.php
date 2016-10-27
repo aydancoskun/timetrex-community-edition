@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -222,20 +222,20 @@ class PunchSummaryReport extends Report {
 										'-1677-out_station_source' => TTi18n::gettext('Out Station Source'),
 										'-1678-out_station_description' => TTi18n::gettext('Out Station Description'),
 										'-1720-note' => TTi18n::gettext('Note'),
-										'-1900-in_created_date' => TTi18n::gettext('In Created Date'),
-										'-1901-in_created_by' => TTi18n::gettext('In Created By'),
-										'-1905-in_updated_date' => TTi18n::gettext('In Updated Date'),
-										'-1906-in_updated_by' => TTi18n::gettext('In Updated By'),
-										'-1910-out_created_date' => TTi18n::gettext('Out Created Date'),
-										'-1911-out_created_by' => TTi18n::gettext('Out Created By'),
-										'-1915-out_updated_date' => TTi18n::gettext('Out Updated Date'),
-										'-1916-out_updated_by' => TTi18n::gettext('Out Updated By'),
-										'-1920-verified_time_sheet' => TTi18n::gettext('Verified TimeSheet'),
-										'-1925-verified_time_sheet_date' => TTi18n::gettext('Verified TimeSheet Date'),
-										'-1930-verified_time_sheet_tainted' => TTi18n::gettext('TimeSheet Verification Tainted'),
+										'-2100-in_created_date' => TTi18n::gettext('In Created Date'),
+										'-2101-in_created_by' => TTi18n::gettext('In Created By'),
+										'-2105-in_updated_date' => TTi18n::gettext('In Updated Date'),
+										'-2106-in_updated_by' => TTi18n::gettext('In Updated By'),
+										'-2110-out_created_date' => TTi18n::gettext('Out Created Date'),
+										'-2111-out_created_by' => TTi18n::gettext('Out Created By'),
+										'-2115-out_updated_date' => TTi18n::gettext('Out Updated Date'),
+										'-2116-out_updated_by' => TTi18n::gettext('Out Updated By'),
+										'-2120-verified_time_sheet' => TTi18n::gettext('Verified TimeSheet'),
+										'-2125-verified_time_sheet_date' => TTi18n::gettext('Verified TimeSheet Date'),
+										'-2130-verified_time_sheet_tainted' => TTi18n::gettext('TimeSheet Verification Tainted'),
 
-										'-1950-tainted' => TTi18n::gettext('Tainted'),
-										'-1951-tainted_status' => TTi18n::gettext('Tainted Status'),
+										'-2150-tainted' => TTi18n::gettext('Tainted'),
+										'-2151-tainted_status' => TTi18n::gettext('Tainted Status'),
 								);
 
 				if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
@@ -264,17 +264,17 @@ class PunchSummaryReport extends Report {
 										//Dynamic - Aggregate functions can be used
 
 										//Take into account wage groups. However hourly_rates for the same hour type, so we need to figure out an average hourly rate for each column?
-										'-2010-hourly_rate' => TTi18n::gettext('Hourly Rate'),
+										'-2510-hourly_rate' => TTi18n::gettext('Hourly Rate'),
 
-										'-2100-total_time' => TTi18n::gettext('Total Time'),
-										'-2110-total_time_wage' => TTi18n::gettext('Total Time Wage'),
-										'-2112-total_time_wage_burden' => TTi18n::gettext('Total Time Wage Burden'),
-										'-2114-total_time_wage_with_burden' => TTi18n::gettext('Total Time Wage w/Burden'),
+										'-2600-total_time' => TTi18n::gettext('Total Time'),
+										'-2610-total_time_wage' => TTi18n::gettext('Total Time Wage'),
+										'-2612-total_time_wage_burden' => TTi18n::gettext('Total Time Wage Burden'),
+										'-2614-total_time_wage_with_burden' => TTi18n::gettext('Total Time Wage w/Burden'),
 
-										'-2120-actual_total_time' => TTi18n::gettext('Actual Time'),
-										'-2120-actual_total_time_wage' => TTi18n::gettext('Actual Time Wage'),
-										'-2125-actual_total_time_diff' => TTi18n::gettext('Actual Time Difference'),
-										'-2127-actual_total_time_diff_wage' => TTi18n::gettext('Actual Time Difference Wage'),
+										'-2620-actual_total_time' => TTi18n::gettext('Actual Time'),
+										'-2620-actual_total_time_wage' => TTi18n::gettext('Actual Time Wage'),
+										'-2625-actual_total_time_diff' => TTi18n::gettext('Actual Time Difference'),
+										'-2627-actual_total_time_diff_wage' => TTi18n::gettext('Actual Time Difference Wage'),
 
 										'-3000-total_punch' => TTi18n::gettext('Total Punches'), //Group counter...
 										'-3001-total_tainted_punch' => TTi18n::gettext('Total Tainted Punches'), //Group counter...
@@ -711,39 +711,8 @@ class PunchSummaryReport extends Report {
 		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
 
-		if ( $this->getPermissionObject()->Check('punch', 'view') == FALSE OR $this->getPermissionObject()->Check('wage', 'view') == FALSE ) {
-			$hlf = TTnew( 'HierarchyListFactory' );
-			$permission_children_ids = $wage_permission_children_ids = $hlf->getHierarchyChildrenByCompanyIdAndUserIdAndObjectTypeID( $this->getUserObject()->getCompany(), $this->getUserObject()->getID() );
-			//Debug::Arr($permission_children_ids, 'Permission Children Ids:', __FILE__, __LINE__, __METHOD__, 10);
-		} else {
-			//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
-			$permission_children_ids = array();
-			$wage_permission_children_ids = array();
-		}
-		if ( $this->getPermissionObject()->Check('punch', 'view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('punch', 'view_child') == FALSE ) {
-				$permission_children_ids = array();
-			}
-			if ( $this->getPermissionObject()->Check('punch', 'view_own') ) {
-				$permission_children_ids[] = $this->getUserObject()->getID();
-			}
-
-			$filter_data['permission_children_ids'] = $permission_children_ids;
-		}
-		//Get Wage Permission Hierarchy Children first, as this can be used for viewing, or editing.
-		if ( $this->getPermissionObject()->Check('wage', 'view') == TRUE ) {
-			$wage_permission_children_ids = TRUE;
-		} elseif ( $this->getPermissionObject()->Check('wage', 'view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('wage', 'view_child') == FALSE ) {
-				$wage_permission_children_ids = array();
-			}
-			if ( $this->getPermissionObject()->Check('wage', 'view_own') ) {
-				$wage_permission_children_ids[] = $this->getUserObject()->getID();
-			}
-		}
-		//Debug::Text(' Permission Children: '. count($permission_children_ids) .' Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
-		//Debug::Arr($permission_children_ids, 'Permission Children: '. count($permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
-		//Debug::Arr($wage_permission_children_ids, 'Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
+		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'punch', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
+		$wage_permission_children_ids = $this->getPermissionObject()->getPermissionChildren( 'wage', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
 
 		$slf = TTnew( 'StationListFactory' );
 		$station_type_options = $slf->getOptions('type');
@@ -775,8 +744,10 @@ class PunchSummaryReport extends Report {
 				$pay_period_ids[$p_obj->getColumn('pay_period_id')] = TRUE;
 
 				if ( !isset($this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]) ) {
+					$enable_wages = $this->getPermissionObject()->isPermissionChild( $p_obj->getUser(), $wage_permission_children_ids );
+					
 					$hourly_rate = 0;
-					if ( $wage_permission_children_ids === TRUE OR in_array( $p_obj->getUser(), $wage_permission_children_ids) ) {
+					if ( $enable_wages ) {
 						$hourly_rate = $p_obj->getColumn( 'hourly_rate' );
 					}
 
@@ -796,6 +767,9 @@ class PunchSummaryReport extends Report {
 						'job_department' => $p_obj->getColumn('job_department'),
 						'job_group' => $p_obj->getColumn('job_group'),
 						'job_item' => $p_obj->getColumn('job_item'),
+						'job_item_manual_id' => $p_obj->getColumn('job_item_manual_id'),
+						'job_item_description' => $p_obj->getColumn('job_item_description'),
+						'job_item_group' => $p_obj->getColumn('job_item_group'),
 						'job_other_id1' => $p_obj->getColumn('job_other_id1'),
 						'job_other_id2' => $p_obj->getColumn('job_other_id2'),
 						'job_other_id3' => $p_obj->getColumn('job_other_id3'),

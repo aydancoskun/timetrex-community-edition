@@ -86,6 +86,14 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 				this.content_div.append( label );
 				this.content_div.append( file_browser );
+
+				file_browser.unbind( 'imageChange' ).bind( 'imageChange', function() {
+					if ( file_browser.getValue() ) {
+						Global.setWidgetEnabled( $this.back_btn, true );
+						Global.setWidgetEnabled( $this.next_btn, true );
+					}
+				} );
+
 				break;
 			case 3:
 				label = this.getLabel();
@@ -255,21 +263,17 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		filter_data.script = 'import_wizard' + this.stepsDataDic[1].import_class;
 		filter_data.deleted = false;
 		args.filter_data = filter_data;
-		new (APIFactory.getAPIClass( 'APIUserGenericData' ))().getUserGenericData( args, {onResult: function( result ) {
+		new (APIFactory.getAPIClass( 'APIUserGenericData' ))().getUserGenericData( args, {
+			onResult: function( result ) {
 			var res_data = result.getResult();
 			if ( $.type( res_data ) !== 'array' ) {
 				$this.saveNewMapping( '-Default-' );
 			} else {
 
 				res_data.sort( function( a, b ) {
-						if ( a.name > b.name ) {
-							return true;
-						} else {
-							return false;
-						}
+						return Global.compare( a, b, 'name' );
 
 					}
-
 				);
 
 				$this.saved_layout_array = res_data;
@@ -283,7 +287,8 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 			}
 
-		}} );
+			}
+		} );
 	},
 
 	getLayoutById: function( select_id ) {
@@ -311,10 +316,12 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 		TAlertManager.showConfirmAlert( $.i18n._( 'Are you sure you wish to continue?' ), null, function( flag ) {
 			if ( flag ) {
-				new (APIFactory.getAPIClass( 'APIUserGenericData' ))().deleteUserGenericData( select_id, {onResult: function( result ) {
+				new (APIFactory.getAPIClass( 'APIUserGenericData' ))().deleteUserGenericData( select_id, {
+					onResult: function( result ) {
 					$this.onSavedLayoutChange( $this.saved_layout_array[0].id );
 					$this.getSavedMapping();
-				}} );
+					}
+				} );
 			}
 		} );
 
@@ -326,9 +333,11 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 		select_layout.data = this.stepsDataDic[this.current_step].import_data_for_layout;
 
-		new (APIFactory.getAPIClass( 'APIUserGenericData' ))().setUserGenericData( select_layout, {onResult: function( result ) {
+		new (APIFactory.getAPIClass( 'APIUserGenericData' ))().setUserGenericData( select_layout, {
+			onResult: function( result ) {
 
-		}} );
+			}
+		} );
 	},
 
 	saveNewMapping: function( name ) {
@@ -341,14 +350,16 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		args.is_default = false;
 		args.data = this.stepsDataDic[this.current_step].import_data_for_layout;
 
-		new (APIFactory.getAPIClass( 'APIUserGenericData' ))().setUserGenericData( args, {onResult: function( result ) {
+		new (APIFactory.getAPIClass( 'APIUserGenericData' ))().setUserGenericData( args, {
+			onResult: function( result ) {
 			if ( !result.isValid() ) {
 				TAlertManager.showErrorAlert( result );
 			} else {
 				$this.getSavedMapping( result.getResult() );
 			}
 
-		}} );
+			}
+		} );
 	},
 
 	setSavedMappingOptions: function( array, select_layout_id ) {
@@ -442,31 +453,66 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		switch ( gridId ) {
 			case 'import_data':
 
-				var column_info = {name: 'map_column_name', index: 'map_column_name', label: $.i18n._('File Column'), width: 100, sortable: false, title: false,
+				var column_info = {
+					name: 'map_column_name',
+					index: 'map_column_name',
+					label: $.i18n._( 'File Column' ),
+					width: 100,
+					sortable: false,
+					title: false,
 					formatter: function( cell_value, related_data, row ) {
 						return $this.onTextInputRender( cell_value, related_data, row );
-					}};
+					}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'field', index: 'field', label: $.i18n._('Field'), width: 100, sortable: false, title: false,
+				column_info = {
+					name: 'field',
+					index: 'field',
+					label: $.i18n._( 'Field' ),
+					width: 100,
+					sortable: false,
+					title: false,
 					formatter: function( cell_value, related_data, row ) {
 						return $this.onFieldRender( cell_value, related_data, row );
-					}};
+					}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'default_value', index: 'default_value', label: $.i18n._('Default Value'), width: 100, sortable: false, title: false,
+				column_info = {
+					name: 'default_value',
+					index: 'default_value',
+					label: $.i18n._( 'Default Value' ),
+					width: 100,
+					sortable: false,
+					title: false,
 					formatter: function( cell_value, related_data, row ) {
 						return $this.onTextInputRender( cell_value, related_data, row );
-					}};
+					}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'parse_hint', index: 'parse_hint', label: $.i18n._('Parse Hint'), width: 100, sortable: false, title: false,
+				column_info = {
+					name: 'parse_hint',
+					index: 'parse_hint',
+					label: $.i18n._( 'Parse Hint' ),
+					width: 100,
+					sortable: false,
+					title: false,
 					formatter: function( cell_value, related_data, row ) {
 						return $this.onParseHintRender( cell_value, related_data, row );
-					}};
+					}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'row_1', index: 'row_1', label: $.i18n._('Sample Row'), width: 100, sortable: false, title: false};
+				column_info = {
+					name: 'row_1',
+					index: 'row_1',
+					label: $.i18n._( 'Sample Row' ),
+					width: 100,
+					sortable: false,
+					title: false
+				};
 				column_info_array.push( column_info );
 
 				break;
@@ -557,7 +603,8 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 		switch ( this.current_step ) {
 			case 1:
-				this.api_import.getImportObjects( {onResult: function( result ) {
+				this.api_import.getImportObjects( {
+					onResult: function( result ) {
 					var combo_box = current_step_ui['import_class'];
 					var array = Global.buildRecordArray( result.getResult() );
 					combo_box.setSourceData( array );
@@ -572,7 +619,8 @@ ImportCSVWizardController = BaseWizardController.extend( {
 					var example_label = current_step_ui.example_label;
 					example_label.text( $.i18n._( 'Download example' ) + ' ' + combo_box.getLabel() + ' ' + $.i18n._( 'CSV file' ) )
 					$this.setButtonsStatus(); // set button enabled or disabled
-				}} );
+					}
+				} );
 				break;
 			case 3:
 
@@ -593,19 +641,24 @@ ImportCSVWizardController = BaseWizardController.extend( {
 					return;
 				}
 
-				this.api_import.getOptions( 'parse_hint', {onResult: function( result ) {
+				this.api_import.getOptions( 'parse_hint', {
+					onResult: function( result ) {
 					$this.parse_hint_source = result.getResult();
 
-				}} );
+					}
+				} );
 
-				this.api_import.getOptions( 'columns', {onResult: function( result ) {
+				this.api_import.getOptions( 'columns', {
+					onResult: function( result ) {
 					$this.field_source = Global.buildRecordArray( result.getResult() );
 
-					$this.api_import.getRawData( 1, {onResult: function( getRawDataRes ) {
+						$this.api_import.getRawData( 1, {
+							onResult: function( getRawDataRes ) {
 						var raw_data = getRawDataRes.getResult();
 						raw_data = $this.buildMappingGridDataArray( raw_data[0] );
 
-						$this.api_import.generateColumnMap( {onResult: function( generateColumnMapRes ) {
+								$this.api_import.generateColumnMap( {
+									onResult: function( generateColumnMapRes ) {
 							$this.column_map_data = generateColumnMapRes.getResult();
 
 							var len = raw_data.length;
@@ -622,14 +675,8 @@ ImportCSVWizardController = BaseWizardController.extend( {
 							}
 
 							raw_data.sort( function( a, b ) {
-									if ( a.map_column_name > b.map_column_name ) {
-										return true;
-									} else {
-										return false;
-									}
-
+									return Global.compare( a, b, 'map_column_name' );
 								}
-
 							);
 
 							// use to set Sample row to same layout
@@ -644,14 +691,18 @@ ImportCSVWizardController = BaseWizardController.extend( {
 							$this.getSavedMapping();
 							$this.setButtonsStatus(); // set button enabled or disabled
 
-						}} );
-					}} );
+									}
+								} );
+							}
+						} );
 
-				}} );
+					}
+				} );
 
 				break;
 			case 4:
-				this.api_import.getOptions( 'import_options', {onResult: function( result ) {
+				this.api_import.getOptions( 'import_options', {
+					onResult: function( result ) {
 					var result_data = Global.buildRecordArray( result.getResult() );
 					var div = $( '<div style="text-align: left;margin-left: 15px;"></div>' );
 
@@ -663,7 +714,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 							check_box.setValue( current_step_data[item.value] );
 						}
 
-						var label = $( '<label style="display: block;">' + item.label + '</label>' );
+						var label = $( '<label class="wizard-checkbox-label" style="display: block;">' + item.label + '</label>' );
 						label.prepend( check_box );
 						$this.stepsWidgetDic[$this.current_step][item.value] = check_box;
 
@@ -673,15 +724,17 @@ ImportCSVWizardController = BaseWizardController.extend( {
 					$this.content_div.append( div );
 					$this.setButtonsStatus(); // set button enabled or disabled
 
-				}} );
+					}
+				} );
 				break;
 			case 5:
 				var import_data = this.stepsDataDic[3].import_data;
 				var import_options = this.stepsDataDic[4];
 
-				this.api_import.import( import_data, import_options, true, {onResult: function( result ) {
+				this.api_import.import( import_data, import_options, true, {
+					onResult: function( result ) {
 
-					if($this.current_step != 5){
+						if ( $this.current_step != 5 ) {
 						return;
 					}
 					if ( result.isValid() ) {
@@ -701,15 +754,17 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 					$this.setButtonsStatus(); // set button enabled or disabled
 
-				}} );
+					}
+				} );
 				break;
 			case 6:
 				import_data = this.stepsDataDic[3].import_data;
 				import_options = this.stepsDataDic[4];
 
-				this.api_import.import( import_data, import_options, false, {onResult: function( result ) {
+				this.api_import.import( import_data, import_options, false, {
+					onResult: function( result ) {
 
-					if($this.current_step != 6){
+						if ( $this.current_step != 6 ) {
 						return;
 					}
 					if ( result.isValid() ) {
@@ -721,7 +776,6 @@ ImportCSVWizardController = BaseWizardController.extend( {
 					} else {
 						var data_grid_error_source = $this.createErrorSource( result.getDetails() );
 
-
 						$this.showErrorGrid( $.i18n._( 'Import failed due to the following reasons:' ),
 							data_grid_error_source,
 							$.i18n._( 'Invalid records have been skipped, all other records have been imported successfully.' ),
@@ -730,7 +784,8 @@ ImportCSVWizardController = BaseWizardController.extend( {
 					}
 
 					$this.setButtonsStatus(); // set button enabled or disabled
-				}} );
+					}
+				} );
 				break;
 			default:
 				$this.setButtonsStatus(); // set button enabled or disabled
@@ -750,16 +805,44 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 		var columns = [];
 
-		var column_info = {name: 'rowIndex', index: 'rowIndex', label: $.i18n._( 'Row' ), width: 100, sortable: false, title: false};
+		var column_info = {
+			name: 'rowIndex',
+			index: 'rowIndex',
+			label: $.i18n._( 'Row' ),
+			width: 100,
+			sortable: false,
+			title: false
+		};
 		columns.push( column_info );
 
-		column_info = {name: 'row', index: 'row', label: $.i18n._( 'File Column' ), width: 100, sortable: false, title: false};
+		column_info = {
+			name: 'row',
+			index: 'row',
+			label: $.i18n._( 'File Column' ),
+			width: 100,
+			sortable: false,
+			title: false
+		};
 		columns.push( column_info );
 
-		column_info = {name: 'column', index: 'column', label: $.i18n._( 'Field' ), width: 100, sortable: false, title: false};
+		column_info = {
+			name: 'column',
+			index: 'column',
+			label: $.i18n._( 'Field' ),
+			width: 100,
+			sortable: false,
+			title: false
+		};
 		columns.push( column_info );
 
-		column_info = {name: 'message', index: 'message', label: $.i18n._( 'Message' ), width: 100, sortable: false, title: false};
+		column_info = {
+			name: 'message',
+			index: 'message',
+			label: $.i18n._( 'Message' ),
+			width: 100,
+			sortable: false,
+			title: false
+		};
 		columns.push( column_info );
 
 		this.content_div.append( grid );
@@ -792,7 +875,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 	createErrorSource: function( error_array ) {
 
-		//Error: Uncaught TypeError: Cannot read property 'import_data' of undefined in https://ondemand3.timetrex.com/interface/html5/#!m=TimeSheet&date=00070609&user_id=14372 line 773
+		//Error: Uncaught TypeError: Cannot read property 'import_data' of undefined in /interface/html5/#!m=TimeSheet&date=00070609&user_id=14372 line 773
 		if ( !this.stepsDataDic || !this.stepsDataDic[3] ) {
 			return;
 		}
@@ -802,7 +885,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		var error_row = {};
 
 		for ( var key in error_array ) {
-			var error_info = error_array[key];
+			var error_info = error_array[key]['error'];
 			for ( var error_key in error_info ) {
 				if ( !error_info.hasOwnProperty( error_key ) ) {
 					continue;
@@ -1061,7 +1144,8 @@ ImportCSVWizardController = BaseWizardController.extend( {
 				return;
 			}
 
-			$this.api_import.uploadFile( current_step_data.file_uploader, 'object_type=import&object_id=' + this.api_import.className, {onResult: function( upload_file_result ) {
+			$this.api_import.uploadFile( current_step_data.file_uploader, 'object_type=import&object_id=' + this.api_import.className, {
+				onResult: function( upload_file_result ) {
 
 				if ( upload_file_result.toLowerCase() !== 'true' ) {
 					TAlertManager.showAlert( upload_file_result );
@@ -1074,7 +1158,8 @@ ImportCSVWizardController = BaseWizardController.extend( {
 				$this.stepsDataDic[$this.current_step] = null;
 				$this.initCurrentStep();
 
-			}} );
+				}
+			} );
 
 		} else {
 
@@ -1199,6 +1284,5 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		}
 
 	}
-
 
 } );

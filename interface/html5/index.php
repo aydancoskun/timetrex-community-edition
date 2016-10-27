@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -34,7 +34,7 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-if ( isset($_GET['disable_db']) && $_GET['disable_db'] == 1 ) {
+if ( isset($_GET['disable_db']) AND $_GET['disable_db'] == 1 ) {
 	$disable_database_connection = TRUE;
 }
 
@@ -70,18 +70,23 @@ if ( ( !isset($disable_database_connection) OR ( isset($disable_database_connect
 if ( DEPLOYMENT_ON_DEMAND == FALSE AND isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == TRUE AND !isset($_GET['installer']) ) {
 	//Installer is enabled, check to see if any companies have been created, if not redirect to installer automatically, as they skipped it somehow.
 	//Check if Company table exists first, incase the installer hasn't run at all, this avoids a SQL error.
-	$install_obj = new Install();
-	if ( $install_obj->checkTableExists('company') == TRUE ) {
-		$clf = TTnew( 'CompanyListFactory' );
-		$clf->getAll();
-		if ( $clf->getRecordCount() == 0 ) {
-			Redirect::Page( URLBuilder::getURL( NULL, 'index.php?installer=1&disable_db=1&external_installer=1#!m=Install&a=license&external_installer=0' ) );
-//			Redirect::Page( URLBuilder::getURL( array('external_installer' => 1), '../install/install.php' ) );
+	$installer_url = 'index.php?installer=1&disable_db=1&external_installer=1#!m=Install&a=license&external_installer=0';
+	if ( isset($db) ) {
+		$install_obj = new Install();
+		$install_obj->setDatabaseConnection( $db );
+		if ( $install_obj->checkTableExists('company') == TRUE ) {
+			$clf = TTnew( 'CompanyListFactory' );
+			$clf->getAll();
+			if ( $clf->getRecordCount() == 0 ) {
+				Redirect::Page( URLBuilder::getURL( NULL, $installer_url ) );
+			}
+		} else {
+			Redirect::Page( URLBuilder::getURL( NULL, $installer_url ) );
 		}
 	} else {
-		Redirect::Page( URLBuilder::getURL( NULL, 'index.php?installer=1&disable_db=1&external_installer=1#!m=Install&a=license&external_installer=0' ) );
-//		Redirect::Page( URLBuilder::getURL( array('external_installer' => 1), '../install/install.php' ) );
+		Redirect::Page( URLBuilder::getURL( NULL, $installer_url ) );
 	}
+	unset($install_obj, $clf, $installer_url);
 }
 Misc::redirectMobileBrowser(); //Redirect mobile browsers automatically.
 Misc::redirectUnSupportedBrowser(); //Redirect unsupported web browsers automatically.
@@ -105,37 +110,58 @@ unset($authentication);
 		<meta name="Keywords" content="workforce management, time and attendance, payroll software, online timesheet software, open source payroll, online employee scheduling software, employee time clock software, online job costing software, workforce management, flexible scheduling solutions, easy scheduling solutions, track employee attendance, monitor employee attendance, employee time clock, employee scheduling, true real-time time sheets, accruals and time banks, payroll system, time management system" />
 		<meta name="Description" content="Workforce Management Software for tracking employee time and attendance, employee time clock software, employee scheduling software and payroll software all in a single package. Also calculate complex over time and premium time business policies and can identify labor costs attributed to branches and departments. Managers can now track and monitor their workforce easily." />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-		<script async src="framework/stacktrace.js"></script>
-		<link rel="stylesheet" type="text/css" href="theme/default/css/application.css?v=<?php echo APPLICATION_BUILD?>">
-		<link rel="stylesheet" type="text/css" href="theme/default/css/jquery-ui/jquery-ui.custom.css?v=<?php echo APPLICATION_BUILD?>">
-		<link rel="stylesheet" type="text/css" href="theme/default/css/ui.jqgrid.css?v=<?php echo APPLICATION_BUILD?>">
-		<link rel="stylesheet" type="text/css" href="theme/default/css/views/login/LoginView.css?v=<?php echo APPLICATION_BUILD?>">
-		<link rel="stylesheet" type="text/css" href="theme/default/css/global/widgets/ribbon/RibbonView.css?v=<?php echo APPLICATION_BUILD?>">
-		<link rel="stylesheet" type="text/css" href="theme/default/css/global/widgets/search_panel/SearchPanel.css?v=<?php echo APPLICATION_BUILD?>">
-		<link rel="stylesheet" type="text/css" href="theme/default/css/views/attendance/timesheet/TimeSheetView.css?v=<?php echo APPLICATION_BUILD?>">
-		<script src="framework/jquery.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script src="framework/jquery.form.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script src="framework/jqueryui/js/jquery-ui.custom.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script src="framework/jquery.i18n.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script src="framework/backbone/underscore-min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script src="framework/backbone/backbone-min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script src="global/APIGlobal.js.php?v=<?php echo APPLICATION_BUILD?><?php if ( isset($disable_database_connection) AND $disable_database_connection == TRUE ) { echo '&disable_db=1'; }?>"></script>
-		<script src="global/Global.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script async src="framework/rightclickmenu/rightclickmenu.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script async src="framework/rightclickmenu/jquery.ui.position.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script async src="services/APIFactory.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script src="global/LocalCacheData.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script>
-			Global.addCss( "right_click_menu/rightclickmenu.css" );
-			Global.addCss( "views/wizard/Wizard.css" );
+		<link rel="shortcut icon" type="image/ico" href="<?php echo Environment::getBaseURL();?>../favicon.ico">
+		<?php if ( file_exists('theme/default/css/login.composite.css') ) { //See tools/compile/Gruntfile.js to configure which files are included in the composites... ?>
+			<link rel="stylesheet" type="text/css" href="theme/default/css/login.composite.css?v=<?php echo APPLICATION_BUILD?>">
+			<script>
+				use_composite_css_files = true;
+			</script>
+		<?php } else { ?>
+			<link rel="stylesheet" type="text/css" href="theme/default/css/application.css?v=<?php echo APPLICATION_BUILD?>">
+			<link rel="stylesheet" type="text/css" href="theme/default/css/jquery-ui/jquery-ui.custom.css?v=<?php echo APPLICATION_BUILD?>">
+			<link rel="stylesheet" type="text/css" href="theme/default/css/ui.jqgrid.css?v=<?php echo APPLICATION_BUILD?>">
+			<link rel="stylesheet" type="text/css" href="theme/default/css/views/login/LoginView.css?v=<?php echo APPLICATION_BUILD?>">
+			<link rel="stylesheet" type="text/css" href="theme/default/css/global/widgets/ribbon/RibbonView.css?v=<?php echo APPLICATION_BUILD?>">
+			<link rel="stylesheet" type="text/css" href="theme/default/css/global/widgets/search_panel/SearchPanel.css?v=<?php echo APPLICATION_BUILD?>">
+			<link rel="stylesheet" type="text/css" href="theme/default/css/views/attendance/timesheet/TimeSheetView.css?v=<?php echo APPLICATION_BUILD?>">
+			<link rel="stylesheet" type="text/css" href="theme/default/css/views/attendance/schedule/ScheduleView.css?v=<?php echo APPLICATION_BUILD?>">
+			<link rel="stylesheet" type="text/css" href="theme/default/css/global/widgets/timepicker/TTimePicker.css?v=<?php echo APPLICATION_BUILD?>">
+			<link rel="stylesheet" type="text/css" href="theme/default/css/global/widgets/datepicker/TDatePicker.css?v=<?php echo APPLICATION_BUILD?>">
+            <link rel="stylesheet" type="text/css" href="theme/default/css/right_click_menu/rightclickmenu.css?v=<?php echo APPLICATION_BUILD?>">
+            <link rel="stylesheet" type="text/css" href="theme/default/css/views/wizard/Wizard.css?v=<?php echo APPLICATION_BUILD?>">
+            <link rel="stylesheet" type="text/css" href="theme/default/css/image_area_select/imgareaselect-default.css?v=<?php echo APPLICATION_BUILD?>">
+			<script>
+				use_composite_css_files = false;
+			</script>						
+		<?php } ?>
 
-			Global.addCss( "image_area_select/imgareaselect-default.css" );
-		</script>
+		<?php if ( file_exists('login.composite.js') ) { //See tools/compile/Gruntfile.js to configure which files are included in the composites... ?>
+			<script src="global/APIGlobal.js.php?v=<?php echo APPLICATION_BUILD?><?php if ( isset($disable_database_connection) AND $disable_database_connection == TRUE ) { echo '&disable_db=1'; }?>"></script>
+			<script src="login.composite.js?v=<?php echo APPLICATION_BUILD?>"></script>
+			<!-- <script async src="base.composite.js?v=<?php echo APPLICATION_BUILD?>"></script> -->
+			<script>
+				use_composite_js_files = true;
+				//Global.addCss( "universe.composite.css" );
+			</script>
+		<?php } else { ?>
+			<script src="global/APIGlobal.js.php?v=<?php echo APPLICATION_BUILD?><?php if ( isset($disable_database_connection) AND $disable_database_connection == TRUE ) { echo '&disable_db=1'; }?>"></script>
+			<script src="framework/jquery.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+			<script src="framework/jquery.form.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+			<script src="framework/backbone/underscore-min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+			<script src="framework/backbone/backbone-min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+			<script src="framework/jquery.masonry.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+			<script src="framework/interact.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+			<script src="global/Global.js?v=<?php echo APPLICATION_BUILD?>"></script>
+			<script src="global/LocalCacheData.js?v=<?php echo APPLICATION_BUILD?>"></script>
+			<script>
+				use_composite_js_files = false;
+			</script>
+		<?php } ?>
 	</head>
-
+	<?php
+	/*
 	<!--z-index
-
-	Alert: 100
+	Alert: 6001 need larger than validation
 	DatePicker:100
 	Awesomebox: 100
 	Progressbar: 100
@@ -143,23 +169,19 @@ unset($authentication);
 	right click menu: 100
 	validation: 6000 set by plugin
 
-
 	Wizard: 50
 	camera shooter in wizard 51
-
 
 	EditView : 40
 	Bottom minimize tab: 39
 
 	Login view:10
-
-	 -->
+	-->
+	*/
+	?>
 	<body class="login-bg" oncontextmenu="return true;">
-
 	<div class="need-hidden-element" ><a href="http://www.timetrex.com">Workforce Management</a><a href="http://www.timetrex.com/time_and_attendance.php">Time and Attendance</a></div>
-
 	<div id="topContainer" class="top-container"></div>
-
 	<div id="contentContainer" class="content-container">
 		<div class="loading-view">
 			<!--[if (gt IE 8)|!(IE)]><!-->
@@ -172,18 +194,24 @@ unset($authentication);
 			<!--<![endif]-->
 		</div>
 	</div>
-
 	<div class="need-hidden-element"><a href="http://www.timetrex.com/download.php">Download Time and Attendance Software</a></div>
-
 	<div id="bottomContainer" class="bottom-container" ondragstart="return false;">
-		<a id="copy_right_logo_link" class="copy-right-logo-link" target="_blank"><img id="copy_right_logo" class="copy-right-logo"></a>
-		<a id="copy_right_info" class="copy-right-info" target="_blank" style="display: none"></a>
-		<span id="copy_right_info_1" class="copy-right-info" style="display: none">
-		&nbsp;&nbsp;<?php /*REMOVING OR CHANGING THIS COPYRIGHT NOTICE IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT*/ echo COPYRIGHT_NOTICE;?>
-	</span>
+		<div class="copyright-container">
+			<a id="copy_right_logo_link" class="copy-right-logo-link" target="_blank"><img id="copy_right_logo" class="copy-right-logo"></a>
+			<a id="copy_right_info" class="copy-right-info" target="_blank" style="display: none"></a>
+			<span id="copy_right_info_1" class="copy-right-info" style="display: none">&nbsp;&nbsp;<?php /*REMOVING OR CHANGING THIS COPYRIGHT NOTICE IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT*/ echo COPYRIGHT_NOTICE;?></span>
+		</div>
+
+		<div id="feedbackContainer" class="feedback-container">
+			<span>Overall, how are you feeling about <?php echo APPLICATION_NAME; ?>?</span>
+			<img class="filter yay-filter" title="Yay!" data-feedback = 1 alt="happy"  >
+			<img class="filter meh-filter" title="Meh." data-feedback = 0 alt="neutral" >
+			<img class="filter grr-filter" title="Grr!" data-feedback = -1 alt="sad" >
+		</div>
 	</div>
 
 	<div id="overlay" class=""></div>
+
 	</body>
 
 	<iframe style="display: none" id="hideReportIFrame" name="hideReportIFrame"></iframe>
@@ -201,7 +229,7 @@ unset($authentication);
 
 		function setProgress() {
 			loading_bar_time = setInterval( function() {
-				var progress_bar = $( ".progress-bar" )
+				var progress_bar = $( ".progress-bar" );
 				var c_value = progress_bar.attr( "value" );
 
 				if ( c_value < 90 ) {
@@ -224,7 +252,6 @@ unset($authentication);
 			}
 		}
 
-
 		function hideElements(){
 			var elements = document.getElementsByClassName( 'need-hidden-element' );
 
@@ -234,7 +261,7 @@ unset($authentication);
 		}
 	</script>
 
-	<script src="framework/require.js" data-main="main.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script src="framework/require.js?v=<?php echo APPLICATION_BUILD?>" data-main="main.js?v=<?php echo APPLICATION_BUILD?>"></script>
 
 	<!-- <?php echo Misc::getInstanceIdentificationString( $primary_company, $system_settings );?>  -->
 	</html>

@@ -143,8 +143,8 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 		// Start Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TDatePicker( {field: 'filter_start_date'} );
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie: 25-Feb-01 (Leave blank for no start date)' ) + "</span>" );
+		var widgetContainer = $( "<div class='widget-h-box'></div>" );
+		var label = $( "<span class='widget-right-label'> " + $.i18n._( '(Leave blank for no start date)' ) + "</span>" );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_date_criteria_column1, '', widgetContainer );
@@ -155,29 +155,29 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 		form_item_input.TDatePicker( {field: 'filter_end_date'} );
 
 		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie: 25-Feb-01 (Leave blank for no end date)' ) + "</span>" );
+		label = $( "<span class='widget-right-label'> " + $.i18n._( '(Leave blank for no end date)' ) + "</span>" );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab_date_criteria_column1, '', widgetContainer );
 
 		// Start Time
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'filter_start_time', width: 80} );
+		form_item_input = Global.loadWidgetByName( FormItemType.TIME_PICKER );
+		form_item_input.TTimePicker( {field: 'filter_start_time'} );
 
 		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie: 8:09 PM (Leave blank for no start time)' ) + "</span>" );
+		label = $( "<span class='widget-right-label'> " + $.i18n._( '(Leave blank for no start time)' ) + "</span>" );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Start Time' ), form_item_input, tab_date_criteria_column1, '', widgetContainer );
 
 		// End Time
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'filter_end_time', width: 80} );
+		form_item_input = Global.loadWidgetByName( FormItemType.TIME_PICKER );
+		form_item_input.TTimePicker( {field: 'filter_end_time'} );
 
 		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie: 8:09 PM (Leave blank for no end time)' ) + "</span>" );
+		label = $( "<span class='widget-right-label'> " + $.i18n._( '(Leave blank for no end time)' ) + "</span>" );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -205,7 +205,7 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 		var form_item_sat_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_sat_checkbox.TCheckbox( {field: 'sat'} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
+		widgetContainer = $( "<div class=''></div>" );
 
 		var sun = $( "<span class='widget-top-label'> " + $.i18n._( 'Sun' ) + " <br> " + " </span>" );
 		var mon = $( "<span class='widget-top-label'> " + $.i18n._( 'Mon' ) + " <br> " + " </span>" );
@@ -555,9 +555,9 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 
 	onIncludeHolidayTypeChange: function() {
 		if ( this.current_edit_record['include_holiday_type_id'] === 10 ) {
-			this.edit_view_form_item_dic['holiday_policy'].css( 'display', 'none' );
+			this.detachElement( 'holiday_policy' );
 		} else {
-			this.edit_view_form_item_dic['holiday_policy'].css( 'display', 'block' );
+			this.attachElement( 'holiday_policy' );
 		}
 
 		this.editFieldResize();

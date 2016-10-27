@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -42,8 +42,9 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 	protected $table = 'recurring_schedule_template_control';
 	protected $pk_sequence_name = 'recurring_schedule_template_control_id_seq'; //PK Sequence name
 
+	protected $company_obj = NULL;
+	
 	function _getFactoryOptions( $name ) {
-
 		$retval = NULL;
 		switch( $name ) {
 			case 'columns':
@@ -93,6 +94,10 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 										'deleted' => 'Deleted',
 										);
 		return $variable_function_map;
+	}
+
+	function getCompanyObject() {
+		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
 	}
 
 	function getCompany() {
@@ -170,6 +175,46 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 		}
 
 		return FALSE;
+	}
+
+	function postSave() {
+		//
+		//**THIS IS DONE IN RecurringScheduleControlFactory, RecurringScheduleTemplateControlFactory, HolidayFactory postSave() as well.
+		//
+
+		//Loop through all RecurringScheduleControl rows associated with this template, so we can recalculate the recurring schedules for them.
+		$rsclf = TTNew('RecurringScheduleControlListFactory');
+		$rsclf->getByCompanyIdAndTemplateID( $this->getCompany(), $this->getId() );
+		if ( $rsclf->getRecordCount() > 0 ) {
+			Debug::text('Found RecurringScheduleControl records assigned to this template: '. $rsclf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+
+			foreach( $rsclf as $rsc_obj ) {
+				//Handle generating recurring schedule rows, so they are as real-time as possible.
+				$current_epoch = time();
+
+				$start_date = TTDate::getBeginWeekEpoch( $current_epoch );
+
+				$rsf = TTnew('RecurringScheduleFactory');
+				$rsf->setAMFMessageID( $this->getAMFMessageID() );
+				$rsf->StartTransaction();
+				$rsf->clearRecurringSchedulesFromRecurringScheduleControl( $rsc_obj->getID(), ( $current_epoch - (86400 * 720) ), ( $current_epoch + (86400 * 720) ) );
+				if ( $this->getDeleted() == FALSE ) {
+					//FIXME: Put a cap on this perhaps, as 3mths into the future so we don't spend a ton of time doing this
+					//if the user puts sets it to display 1-2yrs in the future. Leave creating the rest of the rows to the maintenance job?
+					//Since things may change we will want to delete all schedules with each change, but only add back in X weeks at most unless from a maintenance job.
+					$maximum_end_date = ( TTDate::getBeginWeekEpoch($current_epoch) + ( $rsc_obj->getDisplayWeeks() * ( 86400 * 7 ) ) );
+					if ( $rsc_obj->getEndDate() != '' AND $maximum_end_date > $rsc_obj->getEndDate() ) {
+						$maximum_end_date = $rsc_obj->getEndDate();
+					}
+					Debug::text('Recurring Schedule ID: '. $rsc_obj->getID() .' Start Date: '. TTDate::getDate('DATE+TIME', $start_date ) .' Maximum End Date: '. TTDate::getDate('DATE+TIME', $maximum_end_date ), __FILE__, __LINE__, __METHOD__, 10);
+
+					$rsf->addRecurringSchedulesFromRecurringScheduleControl( $rsc_obj->getCompany(), $rsc_obj->getID(), $start_date, $maximum_end_date );
+				}
+				$rsf->CommitTransaction();
+			}
+		}
+
+		return TRUE;
 	}
 
 	function setObjectFromArray( $data ) {

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -1309,13 +1309,12 @@ class PayrollExportReport extends TimesheetSummaryReport {
 										'overtime' => str_pad( NULL, 4, ' ', STR_PAD_RIGHT),
 										'overtime_amount' => str_pad( NULL, 6, ' ', STR_PAD_RIGHT),
 										'hour_code' => str_pad( NULL, 3, ' ', STR_PAD_RIGHT),
+										'date_week_end' => str_pad( NULL, 4, ' ', STR_PAD_RIGHT),
 										'tax_type' => str_pad( NULL, 1, ' ', STR_PAD_RIGHT),
 										'local_code' => str_pad( NULL, 6, ' ', STR_PAD_RIGHT),
 										'state_code' => str_pad( NULL, 2, ' ', STR_PAD_RIGHT),
 										'division_code' => str_pad( NULL, 4, ' ', STR_PAD_RIGHT),
-										//'temp_dept' => str_pad( ( isset($row[$temp_dept_column]) ) ? $row[$temp_dept_column] : $setup_data['accero']['temp_dept_value'], 4, ' ', STR_PAD_RIGHT),
-										//'pay_period_end_date' => date('md', $row['pay_period_end_date']),
-										//'date_week_end' => date('md', $row['date_week_end']),
+										'temp_dept' => str_pad( NULL, 4, ' ', STR_PAD_RIGHT),
 										);
 
 					foreach( $setup_data['accero']['columns'] as $column_id => $column_data ) {
@@ -1442,9 +1441,18 @@ class PayrollExportReport extends TimesheetSummaryReport {
 						$config['sort'][] = array( $export_column => 'asc' );
 					}
 
-					$config['columns'] += array_keys( Misc::trimSortPrefix( $this->getOptions('dynamic_columns') ) );
+					$dynamic_column_names = array_keys( Misc::trimSortPrefix( $this->getOptions('dynamic_columns') ) );
+					$config['columns'] += $dynamic_column_names;
+
+					//Force group by hourly_rates, so if there are multiple hourly rates with the same pay code its still split out.
+					foreach( $dynamic_column_names as $dynamic_column_name ) {
+						if ( substr( $dynamic_column_name, -12 ) == '_hourly_rate' ) { //Ends with
+							$config['group'][] = $dynamic_column_name;
+						}
+					}
+					unset($dynamic_column_names, $dynamic_column_name);
 				}
-				Debug::Arr($config, 'Job Detail Report Config: ', __FILE__, __LINE__, __METHOD__, 10);
+				//Debug::Arr($config, 'Job Detail Report Config: ', __FILE__, __LINE__, __METHOD__, 10);
 
 				//Get job data...
 				if ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCompanyObject() ) AND $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {

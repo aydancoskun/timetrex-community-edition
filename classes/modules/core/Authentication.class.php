@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -43,6 +43,8 @@ class Authentication {
 	protected $name = 'SessionID';
 	protected $idle = 14400; //Max IDLE time
 	protected $expire_session; //When TRUE, cookie is expired when browser closes.
+	protected $type_id = 800; //USER_NAME
+	protected $object_id = NULL;
 	protected $session_id = NULL;
 	protected $ip_address = NULL;
 	protected $created_date = NULL;
@@ -63,12 +65,110 @@ class Authentication {
 		return TRUE;
 	}
 
-	function getName() {
-		return $this->name;
+	function getNameByTypeId( $type_id ) {
+		if ( !is_numeric( $type_id ) ) {
+			$type_id = $this->getTypeIDByName( $type_id );
+		}
+
+		//Seperate session cookie names so if the user logs in with QuickPunch it doesn't log them out of the full interface for example.
+		$map = array(
+						100 => 'SessionID-JA', //Job Applicant
+						110 => 'SessionID-CC', //Client Contact
+
+						500 => 'SessionID-HW',
+						510 => 'SessionID-HW',
+						520 => 'SessionID-HW',
+
+						600 => 'SessionID-QP', //QuickPunch
+						610 => 'SessionID-PC', //ClientPC
+
+						700 => 'SessionID',
+						710 => 'SessionID',
+						800 => 'SessionID',
+						810 => 'SessionID',
+					);
+
+		if ( isset($map[$type_id]) ) {
+			return $map[$type_id];
+		}
+
+		return FALSE;
 	}
-	function setName($name) {
-		if ( !empty($name) ) {
-			$this->name = $name;
+
+	function getName( $type_id = FALSE ) {
+		if ( $type_id == '' ) {
+			$type_id = $this->getType();
+		}
+		return $this->getNameByTypeId( $type_id );
+		//return $this->name;
+	}
+
+	//Determine if the session type is for an actual user, so we know if we can create audit logs.
+	function isUser( $type_id = FALSE ) {
+		if ( $type_id == '' ) {
+			$type_id = $this->getType();
+		}
+
+		//If this is updated, modify PurgeDatabase.class.php for authentication table as well.
+		if ( in_array( $type_id, array( 100, 110 ) ) ) {
+			return FALSE;
+		}
+
+		return TRUE;
+	}
+
+	function getTypeIDByName( $type ) {
+		$type = strtolower( $type );
+
+		//SmallINT datatype, max of 32767
+		$map = array(
+					//
+					//Non-Users.
+					//
+					'job_applicant' => 100,
+					'client_contact' => 110,
+
+					//
+					//Users
+					//
+
+					//Other hardware.
+					'ibutton' => 500,
+					'barcode' => 510,
+					'finger_print' => 520,
+
+					//QuickPunch
+					//'phone_id' => 600,
+					'phone_id' => 800, //Make Phone_ID same as user_name for now, as that is how it used to work and this causes problems with the Mobile App.
+					'quick_punch_id' => 600,
+					'client_pc' => 610,
+
+					//SSO or alternitive methods
+					'http_auth' => 700,
+					'sso' => 710,
+
+					//Username/Passwords including two factor.
+					'user_name' => 800,
+					'user_name_two_factor' => 810,
+					);
+
+		if ( isset($map[$type]) ) {
+			return (int)$map[$type];
+		}
+
+		return FALSE;
+	}
+	
+	function getType() {
+		return $this->type_id;
+	}
+	function setType($type_id) {
+		if ( !is_numeric( $type_id ) ) {
+			$type_id = $this->getTypeIDByName( $type_id );
+		}
+
+		if ( is_int($type_id) ) {
+			$this->type_id = $type_id;
 
 			return TRUE;
 		}
@@ -150,23 +250,22 @@ class Authentication {
 		return FALSE;
 	}
 
-
 	//Duplicates existing session with a new SessionID. Useful for multiple logins with the same or different users.
-	function newSession( $user_id = NULL, $ip_address = NULL ) {
-		if ( $user_id == '' AND is_object($this->getObject()) ) {
-			$user_id = $this->getObject()->getId();
+	function newSession( $object_id = NULL, $ip_address = NULL ) {
+		if ( $object_id == '' AND $this->getObjectID() != '' ) {
+			$object_id = $this->getObjectID();
 		}
 
 		$new_session_id = $this->genSessionID();
-		Debug::text('Duplicating session to User ID: '. $user_id .' Original SessionID: '. $this->getSessionID() .' New Session ID: '. $new_session_id .' IP Address: '. $ip_address, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Duplicating session to User ID: '. $object_id .' Original SessionID: '. $this->getSessionID() .' New Session ID: '. $new_session_id .' IP Address: '. $ip_address, __FILE__, __LINE__, __METHOD__, 10);
 
 		$authentication = new Authentication();
+		$authentication->setType( $this->getType() );
 		$authentication->setSessionID( $new_session_id );
 		$authentication->setIPAddress( $ip_address );
 		$authentication->setCreatedDate();
 		$authentication->setUpdatedDate();
-
-		$authentication->setObject( $user_id );
+		$authentication->setObjectID( $object_id );
 
 		//Sets session cookie.
 		//$authentication->setCookie();
@@ -175,21 +274,18 @@ class Authentication {
 		$authentication->Write();
 
 		//$authentication->UpdateLastLoginDate(); //Don't do this when switching users.
-		//TTLog::addEntry( $authentication->getObject()->getID(), 100, TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('Type').': '. $type .' '.  TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.	TTi18n::getText('UserID').': '. $authentication->getObject()->getId(), $authentication->getObject()->getID(), 'authentication'); //Login
 
 		return $authentication->getSessionID();
 	}
-	function changeObject($user_id) {
-		$this->setObject( $user_id );
+	function changeObject($object_id) {
+		$this->getObjectById( $object_id );
 
 		$ph = array(
-					'user_id' => $user_id,
+					'object_id' => (int)$object_id,
 					'session_id' => $this->getSessionID(),
 					);
 
-		$query = 'update authentication set user_id = ?
-					where session_id = ?
-					';
+		$query = 'UPDATE authentication SET object_id = ? WHERE session_id = ?';
 
 		try {
 			$this->db->Execute($query, $ph);
@@ -199,6 +295,27 @@ class Authentication {
 
 		return TRUE;
 	}
+
+	function getObjectByID( $id ) {
+		if ( empty($id) ) {
+			return FALSE;
+		}
+
+		if ( $this->isUser() ) {
+			$ulf = TTnew( 'UserListFactory' );
+			$ulf->getByID( $id );
+			if ( $ulf->getRecordCount() == 1 ) {
+				$retval = $ulf->getCurrent();
+			}
+		}
+
+		if ( is_object($retval) ) {
+			return $retval;
+		}
+
+		return FALSE;
+	}
+
 	function getObject() {
 		if ( is_object($this->obj) ) {
 			return $this->obj;
@@ -206,10 +323,17 @@ class Authentication {
 
 		return FALSE;
 	}
-	function setObject($user_id) {
-		if ( !empty($user_id) ) {
+	function setObject($object) {
+		if ( is_object( $object ) ) {
+			$this->obj = $object;
+			return TRUE;
+		}
+
+		return FALSE;
+		/*
+		if ( !empty($object_id) ) {
 			$ulf = TTnew( 'UserListFactory' );
-			$ulf->getByID($user_id);
+			$ulf->getByID($object_id);
 			if ( $ulf->getRecordCount() == 1 ) {
 				foreach ($ulf as $user) {
 					$this->obj = $user;
@@ -217,6 +341,21 @@ class Authentication {
 					return TRUE;
 				}
 			}
+		}
+
+		return FALSE;
+		*/
+	}
+
+	function getObjectID() {
+		return $this->object_id;
+	}
+	function setObjectID($id) {
+		$id = (int)$id;
+		if ( $id > 0 ) {
+			$this->object_id = $id;
+
+			return TRUE;
 		}
 
 		return FALSE;
@@ -246,159 +385,7 @@ class Authentication {
 		return sha1( uniqid( dechex( mt_rand() ), TRUE ) );
 	}
 
-	function checkCompanyStatus( $user_name ) {
-		$ulf = TTnew( 'UserListFactory' );
-		$ulf->getByUserName( strtolower($user_name) );
-		if ( $ulf->getRecordCount() == 1 ) {
-			$u_obj = $ulf->getCurrent();
-			if ( is_object($u_obj) ) {
-				$clf = TTnew( 'CompanyListFactory' );
-				$clf->getById( $u_obj->getCompany() );
-				if ( $clf->getRecordCount() == 1 ) {
-					//Return the actual status so we can do multiple checks.
-					Debug::text('Company Status: '. $clf->getCurrent()->getStatus(), __FILE__, __LINE__, __METHOD__, 10);
-					return $clf->getCurrent()->getStatus();
-					//if ( $clf->getCurrent()->getStatus() == 10 ) {
-					//	return TRUE;
-					//}
-				}
-
-			}
-		}
-
-		return FALSE;
-	}
-
-	//Checks just the username, used in conjunction with HTTP Authentication/SSO.
-	function checkUsername($user_name ) {
-		//Use UserFactory to set name.
-		$ulf = TTnew( 'UserListFactory' );
-
-		$ulf->getByUserNameAndStatus( $user_name, 10 ); //Active
-		foreach ($ulf as $user) {
-			if ( strtolower( $user->getUsername() ) == strtolower(trim($user_name)) ) {
-				$this->setObject( $user->getID() );
-
-				return TRUE;
-			} else {
-				return FALSE;
-			}
-		}
-
-		return FALSE;
-	}
-
-	function checkPassword($user_name, $password) {
-		//Use UserFactory to set name.
-		$ulf = TTnew( 'UserListFactory' );
-
-		$ulf->getByUserNameAndStatus( $user_name, 10 ); //Active
-
-		foreach ($ulf as $user) {
-			if ( $user->checkPassword($password) ) {
-				$this->setObject( $user->getID() );
-
-				return TRUE;
-			} else {
-				return FALSE;
-			}
-		}
-
-		return FALSE;
-	}
-
-	function checkPhonePassword($phone_id, $password) {
-		//Use UserFactory to set name.
-		$ulf = TTnew( 'UserListFactory' );
-
-		$ulf->getByPhoneIdAndStatus($phone_id, 10 );
-
-		foreach ($ulf as $user) {
-			if ( $user->checkPhonePassword($password) ) {
-				$this->setObject( $user->getID() );
-
-				return TRUE;
-			} else {
-				return FALSE;
-			}
-		}
-
-		return FALSE;
-	}
-
-	function checkIButton($id) {
-		$uilf = TTnew( 'UserIdentificationListFactory' );
-		$uilf->getByTypeIdAndValue(10, $id);
-		if ( $uilf->getRecordCount() > 0 ) {
-			foreach( $uilf as $ui_obj ) {
-				if ( is_object( $ui_obj->getUserObject() ) AND $ui_obj->getUserObject()->getStatus() == 10 ) {
-					$this->setObject( $ui_obj->getUser() );
-					return TRUE;
-				}
-			}
-		}
-
-		return FALSE;
-	}
-
-	function checkBarcode($user_id, $employee_number) {
-		//Use UserFactory to set name.
-		$ulf = TTnew( 'UserListFactory' );
-
-		$ulf->getByIdAndStatus($user_id, 10 );
-
-		foreach ($ulf as $user) {
-			if ( $user->checkEmployeeNumber($employee_number) ) {
-				$this->setObject( $user->getID() );
-
-				return TRUE;
-			} else {
-				return FALSE;
-			}
-		}
-
-		return FALSE;
-	}
-
-	function checkFingerPrint($id) {
-		$ulf = TTnew( 'UserListFactory' );
-
-		$ulf->getByIdAndStatus($id, 10 );
-
-		foreach ($ulf as $user) {
-			//if ( $user->checkEmployeeNumber($id) ) {
-			if ( $user->getId() == $id ) {
-				$this->setObject( $user->getID() );
-
-				return TRUE;
-			} else {
-				return FALSE;
-			}
-		}
-
-		return FALSE;
-	}
-
-	function checkClientPC($user_name) {
-		//Use UserFactory to set name.
-		$ulf = TTnew( 'UserListFactory' );
-
-		$ulf->getByUserNameAndStatus(strtolower($user_name), 10 );
-
-		foreach ($ulf as $user) {
-			if ( $user->getUserName() == $user_name ) {
-				$this->setObject( $user->getID() );
-
-				return TRUE;
-			} else {
-				return FALSE;
-			}
-		}
-
-		return FALSE;
-	}
-
-	private function setCookie() {
+	private function setCookie( $type_id = FALSE ) {
 		if ( $this->getSessionID() ) {
 			$cookie_expires = ( time() + 7776000 ); //90 Days
 			if ( $this->getEnableExpireSession() === TRUE ) {
@@ -406,7 +393,7 @@ class Authentication {
 			}
 			Debug::text('Cookie Expires: '. $cookie_expires, __FILE__, __LINE__, __METHOD__, 10);
 
-			setcookie($this->getName(), NULL, ( time() + 9999999 ), Environment::getBaseURL(), NULL, Misc::isSSL( TRUE ) ); //Delete old directory cookie as it can cause a conflict if it stills exists.
+			setcookie( $this->getName(), NULL, ( time() + 9999999 ), Environment::getBaseURL(), NULL, Misc::isSSL( TRUE ) ); //Delete old directory cookie as it can cause a conflict if it stills exists.
 
 			//Set cookie in root directory so other interfaces can access it.
 			setcookie( $this->getName(), $this->getSessionID(), $cookie_expires, '/', NULL, Misc::isSSL( TRUE ) );
@@ -418,7 +405,7 @@ class Authentication {
 	}
 
 	private function destroyCookie() {
-		setcookie($this->getName(), NULL, ( time() + 9999999 ), '/', NULL, Misc::isSSL( TRUE ) );
+		setcookie( $this->getName(), NULL, ( time() + 9999999 ), '/', NULL, Misc::isSSL( TRUE ) );
 
 		return TRUE;
 	}
@@ -426,11 +413,10 @@ class Authentication {
 	private function UpdateLastLoginDate() {
 		$ph = array(
 					'last_login_date' => TTDate::getTime(),
-					'user_id' => (int)$this->getObject()->getID(),
+					'object_id' => (int)$this->getObjectID(),
 					);
 
-		$query = 'update users set last_login_date = ?
-					where id = ?';
+		$query = 'UPDATE users SET last_login_date = ? WHERE id = ?';
 
 		try {
 			$this->db->Execute($query, $ph);
@@ -447,9 +433,7 @@ class Authentication {
 					'session_id' => $this->getSessionID(),
 					);
 
-		$query = 'update authentication set updated_date = ?
-					where session_id = ?
-					';
+		$query = 'UPDATE authentication SET updated_date = ? WHERE session_id = ?';
 
 		try {
 			$this->db->Execute($query, $ph);
@@ -467,10 +451,7 @@ class Authentication {
 
 		//Can't use IdleTime here, as some users have different idle times.
 		//Assume none are longer then one day though.
-		$query = 'delete from authentication
-						where session_id = ?
-							OR (updated_date - created_date) > '. (86400 * 2) .'
-							OR ('. TTDate::getTime() .' - updated_date) > 86400';
+		$query = 'DELETE FROM authentication WHERE session_id = ? OR (updated_date - created_date) > '. (86400 * 2) .' OR ('. TTDate::getTime() .' - updated_date) > 86400';
 
 		try {
 			$this->db->Execute($query, $ph);
@@ -484,20 +465,14 @@ class Authentication {
 	private function Write() {
 		$ph = array(
 					'session_id' => $this->getSessionID(),
-					'user_id' => $this->getObject()->getID(),
+					'type_id' => (int)$this->getType(),
+					'object_id' => $this->getObjectID(),
 					'ip_address' => $this->getIPAddress(),
 					'created_date' => $this->getCreatedDate(),
 					'updated_date' => $this->getUpdatedDate()
 					);
 
-		$query = 'insert into authentication (session_id, user_id, ip_address, created_date, updated_date)
-						VALUES(
-								?,
-								?,
-								?,
-								?,
-								?
-							)';
+		$query = 'INSERT INTO authentication (session_id, type_id, object_id, ip_address, created_date, updated_date) VALUES( ?, ?, ?, ?, ?, ? )';
 		try {
 			$this->db->Execute($query, $ph);
 		} catch (Exception $e) {
@@ -511,6 +486,7 @@ class Authentication {
 		$ph = array(
 					'session_id' => $this->getSessionID(),
 					//'ip_address' => $this->getIPAddress(),
+					'type_id' => (int)$this->getType(),
 					'updated_date' => ( TTDate::getTime() - $this->getIdle() ),
 					);
 
@@ -518,13 +494,9 @@ class Authentication {
 		//When using SSL, don't check for IP address changing at all as we use secure cookies.
 		//When *not* using SSL, always require the same IP address for the session.
 		//However we need to still allow multiple sessions for the same user, using different IPs.
-		$query = 'select session_id, user_id, ip_address, created_date, updated_date from authentication
-					WHERE session_id = ?
-						AND updated_date >= ?
-						';
-		//AND ip_address = ?
+		$query = 'SELECT type_id, session_id, object_id, ip_address, created_date, updated_date FROM authentication WHERE session_id = ? AND type_id = ? AND updated_date >= ?';
 
-		//Debug::text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 		$result = $this->db->GetRow($query, $ph);
 
 		if ( count($result) > 0) {
@@ -538,12 +510,14 @@ class Authentication {
 					return FALSE;
 				}
 			}
+			$this->setType($result['type_id']);
 			$this->setSessionID($result['session_id']);
 			$this->setIPAddress($result['ip_address']);
 			$this->setCreatedDate($result['created_date']);
 			$this->setUpdatedDate($result['updated_date']);
+			$this->setObjectID($result['object_id']);
 
-			if ( $this->setObject($result['user_id']) ) {
+			if ( $this->setObject( $this->getObjectById( $this->getObjectID() ) ) ) {
 				return TRUE;
 			}
 		}
@@ -595,7 +569,7 @@ class Authentication {
 		return FALSE;
 	}
 
-	function Login($user_name, $password, $type = 'USER_NAME') {
+	function Login( $user_name, $password, $type = 'USER_NAME' ) {
 		//DO NOT lowercase username, because iButton values are case sensitive.
 		$user_name = html_entity_decode( trim($user_name) );
 		$password = html_entity_decode( $password );
@@ -604,7 +578,8 @@ class Authentication {
 		if ( $user_name == '' ) {
 			return FALSE;
 		}
-		
+
+		$type = strtolower($type);
 		Debug::text('Login Type: '. $type, __FILE__, __LINE__, __METHOD__, 10);
 		try {
 			//Prevent brute force attacks by IP address.
@@ -622,43 +597,56 @@ class Authentication {
 			}
 			unset($uf);
 
-			if ( strtolower($type) == 'user_name' ) {
-				if ( $this->checkCompanyStatus( $user_name ) == 10 ) { //Active
-					//Lowercase regular user_names here only.
-					$password_result = $this->checkPassword( $user_name, $password);
-				} else {
-					$password_result = FALSE; //No company by that user name.
-				}
-			} elseif (strtolower($type) == 'phone_id') {
-				//Can't check company status based on PHONE_ID as currently it only supports user_name.
-				$password_result = $this->checkPhonePassword($user_name, $password);
-			} elseif (strtolower($type) == 'ibutton') {
-				$password_result = $this->checkIButton($user_name);
-			} elseif (strtolower($type) == 'barcode') {
-				$password_result = $this->checkBarcode($user_name, $password);
-			} elseif (strtolower($type) == 'finger_print') {
-				$password_result = $this->checkFingerPrint( $user_name );
-			} elseif (strtolower($type) == 'client_pc') {
-				//This is for client application persistent connections, use:
-				//Login Type: client_pc
-				//Station Type: PC
+			switch ( $type ) {
+				case 'user_name':
+					if ( $password == '' ) {
+						return FALSE;
+					}
 
-				//$password_result = $this->checkClientPC( $user_name );
-				$password_result = $this->checkBarcode($user_name, $password);
-			} elseif (strtolower($type) == 'http_auth') {
-				if ( $this->checkCompanyStatus( $user_name ) == 10 ) { //Active
-					//Lowercase regular user_names here only.
-					$password_result = $this->checkUsername( $user_name );
-				} else {
-					$password_result = FALSE; //No company by that user name.
-				}
-			} else {
-				return FALSE;
+					if ( $this->checkCompanyStatus( $user_name ) == 10 ) { //Active
+						//Lowercase regular user_names here only.
+						$password_result = $this->checkPassword( $user_name, $password);
+					} else {
+						$password_result = FALSE; //No company by that user name.
+					}
+					break;
+				case 'phone_id': //QuickPunch ID/Password
+				case 'quick_punch_id':
+					$password_result = $this->checkPhonePassword($user_name, $password);
+					break;
+				case 'ibutton':
+					$password_result = $this->checkIButton($user_name);
+					break;
+				case 'barcode':
+					$password_result = $this->checkBarcode($user_name, $password);
+					break;
+				case 'finger_print':
+					$password_result = $this->checkFingerPrint( $user_name );
+					break;
+				case 'client_pc':
+					//This is for client application persistent connections, use:
+					//Login Type: client_pc
+					//Station Type: PC
+
+					//$password_result = $this->checkClientPC( $user_name );
+					$password_result = $this->checkBarcode($user_name, $password);
+					break;
+				case 'http_auth':
+					if ( $this->checkCompanyStatus( $user_name ) == 10 ) { //Active
+						//Lowercase regular user_names here only.
+						$password_result = $this->checkUsername( $user_name );
+					} else {
+						$password_result = FALSE; //No company by that user name.
+					}
+					break;
+				default:
+					return FALSE;
 			}
 
 			if ( $password_result === TRUE ) {
 				Debug::text('Login Succesful for User Name: '. $user_name, __FILE__, __LINE__, __METHOD__, 10);
 
+				$this->setType( $type );
 				$this->setSessionID( $this->genSessionID() );
 				$this->setIPAddress();
 				$this->setCreatedDate();
@@ -671,12 +659,14 @@ class Authentication {
 				$this->Write();
 
 				//Only update last_login_date when using user_name to login to the web interface.
-				if ( strtolower($type) == 'user_name' ) {
+				if ( $type == 'user_name' ) {
 					$this->UpdateLastLoginDate();
 				}
 
 				//Truncate SessionID for security reasons, so someone with access to the audit log can't steal sessions.
-				TTLog::addEntry( $this->getObject()->getID(), 100, TTi18n::getText('SourceIP').': '. $this->getIPAddress() .' '. TTi18n::getText('Type').': '. $type .' '.	TTi18n::getText('SessionID') .': '. $this->getSecureSessionID() .' '.	TTi18n::getText('UserID').': '. $this->getObject()->getId(), $this->getObject()->getID(), 'authentication'); //Login
+				if ( $this->isUser() == TRUE ) {
+					TTLog::addEntry( $this->getObjectID(), 100, TTi18n::getText('SourceIP').': '. $this->getIPAddress() .' '. TTi18n::getText('Type').': '. $type .' '.	TTi18n::getText('SessionID') .': '. $this->getSecureSessionID() .' '.	TTi18n::getText('ObjectID').': '. $this->getObjectID(), $this->getObjectID(), 'authentication'); //Login
+				}
 
 				$this->rl->delete(); //Clear failed password rate limit upon successful login.
 
@@ -698,16 +688,14 @@ class Authentication {
 		$this->destroyCookie();
 		$this->Delete();
 
-		if ( is_object( $this->getObject() ) ) {
-			TTLog::addEntry( $this->getObject()->getID(), 110, TTi18n::getText('SourceIP').': '. $this->getIPAddress() .' '.  TTi18n::getText('SessionID').': '. $this->getSecureSessionID() .' '. TTi18n::getText('UserID').': '. $this->getObject()->getId(), $this->getObject()->getID(), 'authentication');
+		if ( $this->isUser() == TRUE ) {
+			TTLog::addEntry( $this->getObjectID(), 110, TTi18n::getText('SourceIP').': '. $this->getIPAddress() .' '.  TTi18n::getText('SessionID').': '. $this->getSecureSessionID() .' '. TTi18n::getText('ObjectID').': '. $this->getObjectID(), $this->getObjectID(), 'authentication');
 		}
-
-		BreadCrumb::Delete();
 
 		return TRUE;
 	}
 
-	function Check($session_id = NULL, $touch_updated_date = TRUE ) {
+	function Check($session_id = NULL, $type = 'USER_NAME', $touch_updated_date = TRUE ) {
 		global $profiler;
 		$profiler->startTimer( "Authentication::Check()");
 
@@ -715,24 +703,26 @@ class Authentication {
 
 		//Support session_ids passed by cookie, post, and get.
 		if ( $session_id == '' ) {
+			$session_name = $this->getName( $type );
+
 			//There appears to be a bug with Flex when uploading files (upload_file.php) that sometimes the browser sends an out-dated sessionID in the cookie
 			//that differs from the sessionID sent in the POST variable. This causes a Flex I/O error because TimeTrex thinks the user isn't authenticated.
 			//To fix this check to see if BOTH a COOKIE and POST variable contain SessionIDs, and if so use the POST one.
-			if ( ( isset($_COOKIE[$this->getName()]) AND $_COOKIE[$this->getName()] != '' ) AND ( isset($_POST[$this->getName()]) AND $_POST[$this->getName()] != '' ) ) {
-				$session_id = $_POST[$this->getName()];
-			} elseif ( isset($_COOKIE[$this->getName()]) AND $_COOKIE[$this->getName()] != '' ) {
-				$session_id = $_COOKIE[$this->getName()];
-			} elseif ( isset($_POST[$this->getName()]) AND $_POST[$this->getName()] != '' ) {
-				$session_id = $_POST[$this->getName()];
-			} elseif ( isset($_GET[$this->getName()]) AND $_GET[$this->getName()] != '' ) {
-				$session_id = $_GET[$this->getName()];
+			if ( ( isset($_COOKIE[$session_name]) AND $_COOKIE[$session_name] != '' ) AND ( isset($_POST[$session_name]) AND $_POST[$session_name] != '' ) ) {
+				$session_id = $_POST[$session_name];
+			} elseif ( isset($_COOKIE[$session_name]) AND $_COOKIE[$session_name] != '' ) {
+				$session_id = $_COOKIE[$session_name];
+			} elseif ( isset($_POST[$session_name]) AND $_POST[$session_name] != '' ) {
+				$session_id = $_POST[$session_name];
+			} elseif ( isset($_GET[$session_name]) AND $_GET[$session_name] != '' ) {
+				$session_id = $_GET[$session_name];
 			} else {
 				$session_id = FALSE;
 			}
 		}
 
 		Debug::text('Session ID: '. $session_id .' IP Address: '. Misc::getRemoteIPAddress() .' URL: '. $_SERVER['REQUEST_URI'] .' Touch Updated Date: '. (int)$touch_updated_date, __FILE__, __LINE__, __METHOD__, 10);
-		//Checks session cookie, returns user_id;
+		//Checks session cookie, returns object_id;
 		if ( isset( $session_id ) ) {
 			/*
 				Bind session ID to IP address to aid in preventing session ID theft,
@@ -743,11 +733,11 @@ class Authentication {
 				Could also use "behind proxy IP address" if one is supplied.
 			*/
 			try {
+				$this->setType( $type );
 				$this->setSessionID( $session_id );
 				$this->setIPAddress();
 
 				if ( $this->Read() == TRUE ) {
-
 					//touch UpdatedDate in most cases, however when calling PING() we don't want to do this.
 					if ( $touch_updated_date !== FALSE ) {
 						$this->Update();
@@ -771,9 +761,10 @@ class Authentication {
 	function logoutCompany( $company_id ) {
 		$ph = array(
 					'company_id' => (int)$company_id,
+					'type_id' => (int)$this->getTypeIDByName( 'USER_NAME' ),
 					);
 
-		$query = 'delete from authentication as a USING users as b WHERE a.user_id = b.id AND b.company_id = ?';
+		$query = 'DELETE FROM authentication as a USING users as b WHERE a.object_id = b.id AND b.company_id = ? AND a.type_id = ?';
 					
 		try {
 			Debug::text('Logging out entire company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
@@ -786,15 +777,16 @@ class Authentication {
 	}
 
 	//When user resets password, logout all sessions for that user.
-	function logoutUser( $user_id ) {
+	function logoutUser( $object_id ) {
 		$ph = array(
-					'user_id' => (int)$user_id,
+					'object_id' => (int)$object_id,
+					'type_id' => (int)$this->getTypeIDByName( 'USER_NAME' ),
 					);
 
-		$query = 'delete from authentication as a WHERE a.user_id = ?';
+		$query = 'DELETE FROM authentication as a WHERE a.object_id = ? AND a.type_id = ?';
 
 		try {
-			Debug::text('Logging all user sessions: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text('Logging all user sessions: '. $object_id, __FILE__, __LINE__, __METHOD__, 10);
 			$this->db->Execute($query, $ph);
 		} catch (Exception $e) {
 			throw new DBError($e);
@@ -802,5 +794,164 @@ class Authentication {
 
 		return TRUE;
 	}
+
+	//
+	//Functions to help check crendentials.
+	//
+	function checkCompanyStatus( $user_name ) {
+		$ulf = TTnew( 'UserListFactory' );
+		$ulf->getByUserName( strtolower($user_name) );
+		if ( $ulf->getRecordCount() == 1 ) {
+			$u_obj = $ulf->getCurrent();
+			if ( is_object($u_obj) ) {
+				$clf = TTnew( 'CompanyListFactory' );
+				$clf->getById( $u_obj->getCompany() );
+				if ( $clf->getRecordCount() == 1 ) {
+					//Return the actual status so we can do multiple checks.
+					Debug::text('Company Status: '. $clf->getCurrent()->getStatus(), __FILE__, __LINE__, __METHOD__, 10);
+					return $clf->getCurrent()->getStatus();
+				}
+
+			}
+		}
+
+		return FALSE;
+	}
+
+	//Checks just the username, used in conjunction with HTTP Authentication/SSO.
+	function checkUsername($user_name ) {
+		//Use UserFactory to set name.
+		$ulf = TTnew( 'UserListFactory' );
+
+		$ulf->getByUserNameAndStatus( $user_name, 10 ); //Active
+		foreach ($ulf as $user) {
+			if ( strtolower( $user->getUsername() ) == strtolower(trim($user_name)) ) {
+				$this->setObjectID( $user->getID() );
+				$this->setObject( $user );
+
+				return TRUE;
+			} else {
+				return FALSE;
+			}
+		}
+
+		return FALSE;
+	}
+
+	function checkPassword($user_name, $password) {
+		//Use UserFactory to set name.
+		$ulf = TTnew( 'UserListFactory' );
+
+		$ulf->getByUserNameAndStatus( $user_name, 10 ); //Active
+
+		foreach ($ulf as $user) {
+			if ( $user->checkPassword($password) ) {
+				$this->setObjectID( $user->getID() );
+				$this->setObject( $user );
+
+				return TRUE;
+			} else {
+				return FALSE;
+			}
+		}
+
+		return FALSE;
+	}
+
+	function checkPhonePassword($phone_id, $password) {
+		//Use UserFactory to set name.
+		$ulf = TTnew( 'UserListFactory' );
+
+		$ulf->getByPhoneIdAndStatus($phone_id, 10 );
+
+		foreach ($ulf as $user) {
+			if ( $user->checkPhonePassword($password) ) {
+				$this->setObjectID( $user->getID() );
+				$this->setObject( $user );
+
+				return TRUE;
+			} else {
+				return FALSE;
+			}
+		}
+
+		return FALSE;
+	}
+
+	function checkIButton($id) {
+		$uilf = TTnew( 'UserIdentificationListFactory' );
+		$uilf->getByTypeIdAndValue(10, $id);
+		if ( $uilf->getRecordCount() > 0 ) {
+			foreach( $uilf as $ui_obj ) {
+				if ( is_object( $ui_obj->getUserObject() ) AND $ui_obj->getUserObject()->getStatus() == 10 ) {
+					$this->setObjectID( $ui_obj->getUser() );
+					$this->setObject( $ui_obj->getUserObject() );
+					return TRUE;
+				}
+			}
+		}
+
+		return FALSE;
+	}
+
+	function checkBarcode($object_id, $employee_number) {
+		//Use UserFactory to set name.
+		$ulf = TTnew( 'UserListFactory' );
+
+		$ulf->getByIdAndStatus($object_id, 10 );
+
+		foreach ($ulf as $user) {
+			if ( $user->checkEmployeeNumber($employee_number) ) {
+				$this->setObjectID( $user->getID() );
+				$this->setObject( $user );
+
+				return TRUE;
+			} else {
+				return FALSE;
+			}
+		}
+
+		return FALSE;
+	}
+
+	function checkFingerPrint($id) {
+		$ulf = TTnew( 'UserListFactory' );
+
+		$ulf->getByIdAndStatus($id, 10 );
+
+		foreach ($ulf as $user) {
+			if ( $user->getId() == $id ) {
+				$this->setObjectID( $user->getID() );
+				$this->setObject( $user );
+
+				return TRUE;
+			} else {
+				return FALSE;
+			}
+		}
+
+		return FALSE;
+	}
+
+	function checkClientPC($user_name) {
+		//Use UserFactory to set name.
+		$ulf = TTnew( 'UserListFactory' );
+
+		$ulf->getByUserNameAndStatus(strtolower($user_name), 10 );
+
+		foreach ($ulf as $user) {
+			if ( $user->getUserName() == $user_name ) {
+				$this->setObjectID( $user->getID() );
+				$this->setObject( $user );
+
+				return TRUE;
+			} else {
+				return FALSE;
+			}
+		}
+
+		return FALSE;
+	}
+
 }
 ?>

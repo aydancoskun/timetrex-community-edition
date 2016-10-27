@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -58,12 +58,6 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
 
 		$dd->createCurrency( $this->company_id, 10 );
-
-		//$dd->createPayStubAccount( $this->company_id );
-
-		////$this->createPayStubAccrualAccount();
-		//$dd->createPayStubAccountLink( $this->company_id );
-
 		$dd->createUserWageGroups( $this->company_id );
 
 		$this->user_id = $dd->createUser( $this->company_id, 100 );
@@ -150,7 +144,6 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
-					//$end_date = TTDate::getBeginYearEpoch( strtotime('01-Jan-07') );
 					$end_date = $start_date;
 				} else {
 					$end_date = $end_date + ( (86400*14) );
@@ -292,17 +285,12 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 		return FALSE;
 	}
-	function createAccrualPolicy( $company_id, $type, $accrual_policy_account_id ) {
+	function createAccrualPolicy( $company_id, $type, $accrual_policy_account_id, $contributing_shift_policy_id = 0 ) {
 		$apf = TTnew( 'AccrualPolicyFactory' );
 
 		$apf->setCompany( $company_id );
 
 		switch ( $type ) {
-			case 10: //Bank Time
-				$apf->setName( 'Bank Time' );
-				$apf->setType( 10 );
-				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
-				break;
 			case 20: //Calendar Based: Check minimum employed days
 				$apf->setName( 'Calendar: Minimum Employed' );
 				$apf->setType( 20 );
@@ -323,17 +311,6 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 				$apf->setMilestoneRolloverHireDate( TRUE );
 
 				$apf->setMinimumEmployedDays( 9999 );
-				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
-				break;
-			case 40: //Calendar Based: Pay Period with one milestone
-				$apf->setName( 'Calendar: 1 milestone' );
-				$apf->setType( 20 );
-
-				$apf->setApplyFrequency( 10 ); //Each Pay Period
-
-				$apf->setMilestoneRolloverHireDate( TRUE );
-
-				$apf->setMinimumEmployedDays( 0 );
 				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
 				break;
 			case 40: //Calendar Based: Pay Period with one milestone
@@ -456,6 +433,45 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 				$apf->setMinimumEmployedDays( 0 );
 				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
 				break;
+			case 350: //Calendar Based: Quarterly with 2 milestones
+				$apf->setName( 'Calendar: 2 milestone' );
+				$apf->setType( 20 );
+
+				$apf->setApplyFrequency( 25 ); //Quarterly
+				$apf->setApplyFrequencyDayOfMonth( 1 );
+				$apf->setApplyFrequencyQuarterMonth( 1 );
+
+				$apf->setMilestoneRolloverHireDate( TRUE );
+
+				$apf->setMinimumEmployedDays( 0 );
+				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				break;
+			case 360: //Calendar Based: Quarterly with 2 milestones
+				$apf->setName( 'Calendar: 2 milestone' );
+				$apf->setType( 20 );
+
+				$apf->setApplyFrequency( 25 ); //Quarterly
+				$apf->setApplyFrequencyDayOfMonth( 15 );
+				$apf->setApplyFrequencyQuarterMonth( 2 );
+
+				$apf->setMilestoneRolloverHireDate( TRUE );
+
+				$apf->setMinimumEmployedDays( 0 );
+				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				break;
+			case 370: //Calendar Based: Quarterly with 2 milestones
+				$apf->setName( 'Calendar: 2 milestone' );
+				$apf->setType( 20 );
+
+				$apf->setApplyFrequency( 25 ); //Quarterly
+				$apf->setApplyFrequencyDayOfMonth( 31 );
+				$apf->setApplyFrequencyQuarterMonth( 3 );
+
+				$apf->setMilestoneRolloverHireDate( TRUE );
+
+				$apf->setMinimumEmployedDays( 0 );
+				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				break;
 
 			case 400: //Calendar Based: Annually with 2 milestones
 				$apf->setName( 'Calendar: 2 milestone' );
@@ -507,6 +523,197 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 				$apf->setMinimumEmployedDays( 0 );
 				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
 				break;
+			case 1000: //Hour Based: 1 milestone, no maximums at all.
+				$apf->setName( 'Hour: 1 milestone (basic)' );
+				$apf->setType( 30 );
+
+				$apf->setMilestoneRolloverHireDate( TRUE );
+				$apf->setContributingShiftPolicy( $contributing_shift_policy_id );
+				
+				$apf->setMinimumEmployedDays( 0 );
+				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				break;
+			case 1010: //Hour Based: 1 milestone, maximum balance.
+				$apf->setName( 'Hour: 1 milestone (max. balance)' );
+				$apf->setType( 30 );
+
+				$apf->setMilestoneRolloverHireDate( TRUE );
+				$apf->setContributingShiftPolicy( $contributing_shift_policy_id );
+
+				$apf->setMinimumEmployedDays( 0 );
+				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				break;
+			case 1020: //Hour Based: 1 milestone, maximum balance.
+				$apf->setName( 'Hour: 1 milestone (max. annual)' );
+				$apf->setType( 30 );
+
+				$apf->setMilestoneRolloverHireDate( TRUE );
+				$apf->setContributingShiftPolicy( $contributing_shift_policy_id );
+
+				$apf->setMinimumEmployedDays( 0 );
+				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				break;
+
+			case 2000: //Calendar Based: Pay Period with one milestone - ProRate Initial Period
+				$apf->setName( 'Calendar: 1 milestone' );
+				$apf->setType( 20 );
+
+				$apf->setApplyFrequency( 10 ); //Each Pay Period
+
+				$apf->setMilestoneRolloverHireDate( TRUE );
+				$apf->setEnableProRateInitialPeriod( TRUE );
+
+				$apf->setMinimumEmployedDays( 0 );
+				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				break;
+			case 2001: //Calendar Based: Pay Period with one milestone - ProRate Initial Period
+				$apf->setName( 'Calendar: 1 milestone' );
+				$apf->setType( 20 );
+
+				$apf->setApplyFrequency( 10 ); //Each Pay Period
+
+				$apf->setMilestoneRolloverHireDate( TRUE );
+				$apf->setEnableProRateInitialPeriod( TRUE );
+
+				$apf->setMinimumEmployedDays( 15 );
+				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				break;
+			case 2010: //Calendar Based: Pay Period with one milestone - ProRate Initial Period
+				$apf->setName( 'Calendar: 1 milestone' );
+				$apf->setType( 20 );
+
+				$apf->setApplyFrequency( 40 ); //Weekly
+				$apf->setApplyFrequencyDayOfWeek( 3 ); //Wednesday
+
+				$apf->setMilestoneRolloverHireDate( TRUE );
+				$apf->setEnableProRateInitialPeriod( TRUE );
+
+				$apf->setMinimumEmployedDays( 0 );
+				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				break;
+			case 2020: //Calendar Based: Pay Period with one milestone - ProRate Initial Period
+				$apf->setName( 'Calendar: 1 milestone' );
+				$apf->setType( 20 );
+
+				$apf->setApplyFrequency( 30 ); //Monthly
+				$apf->setApplyFrequencyDayOfMonth( 1 );
+
+				$apf->setMilestoneRolloverHireDate( TRUE );
+				$apf->setEnableProRateInitialPeriod( TRUE );
+
+				$apf->setMinimumEmployedDays( 0 );
+				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				break;
+			case 2030: //Calendar Based: Pay Period with one milestone - ProRate Initial Period
+				$apf->setName( 'Calendar: 1 milestone' );
+				$apf->setType( 20 );
+
+				$apf->setApplyFrequency( 20 ); //Annually
+				$apf->setApplyFrequencyMonth( 1 );
+				$apf->setApplyFrequencyDayOfMonth( 1 );
+
+				$apf->setMilestoneRolloverHireDate( TRUE );
+				$apf->setEnableProRateInitialPeriod( TRUE );
+
+				$apf->setMinimumEmployedDays( 0 );
+				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				break;
+			case 2031: //Calendar Based: Pay Period with one milestone - ProRate Initial Period
+				$apf->setName( 'Calendar: 1 milestone' );
+				$apf->setType( 20 );
+
+				$apf->setApplyFrequency( 20 ); //Annually
+				$apf->setApplyFrequencyHireDate( TRUE );
+
+				$apf->setMilestoneRolloverHireDate( TRUE );
+				$apf->setEnableProRateInitialPeriod( TRUE );
+
+				$apf->setMinimumEmployedDays( 0 );
+				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				break;
+			case 2100: //Calendar Based: Pay Period with one milestone - Opening Balance
+				$apf->setName( 'Calendar: 1 milestone' );
+				$apf->setType( 20 );
+
+				$apf->setApplyFrequency( 10 ); //Each Pay Period
+
+				$apf->setMilestoneRolloverHireDate( TRUE );
+				$apf->setEnableOpeningBalance( TRUE );
+				$apf->setEnableProRateInitialPeriod( TRUE );
+
+				$apf->setMinimumEmployedDays( 0 );
+				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				break;
+			case 2101: //Calendar Based: Pay Period with one milestone - ProRate Initial Period
+				$apf->setName( 'Calendar: 1 milestone' );
+				$apf->setType( 20 );
+
+				$apf->setApplyFrequency( 10 ); //Each Pay Period
+
+				$apf->setMilestoneRolloverHireDate( TRUE );
+				$apf->setEnableOpeningBalance( TRUE );
+				$apf->setEnableProRateInitialPeriod( TRUE );
+
+				$apf->setMinimumEmployedDays( 15 );
+				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				break;
+			case 2110: //Calendar Based: Pay Period with one milestone - ProRate Initial Period
+				$apf->setName( 'Calendar: 1 milestone' );
+				$apf->setType( 20 );
+
+				$apf->setApplyFrequency( 40 ); //Weekly
+				$apf->setApplyFrequencyDayOfWeek( 3 ); //Wednesday
+
+				$apf->setMilestoneRolloverHireDate( TRUE );
+				$apf->setEnableOpeningBalance( TRUE );
+				$apf->setEnableProRateInitialPeriod( TRUE );
+
+				$apf->setMinimumEmployedDays( 0 );
+				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				break;
+			case 2120: //Calendar Based: Pay Period with one milestone - ProRate Initial Period
+				$apf->setName( 'Calendar: 1 milestone' );
+				$apf->setType( 20 );
+
+				$apf->setApplyFrequency( 30 ); //Monthly
+				$apf->setApplyFrequencyDayOfMonth( 1 );
+
+				$apf->setMilestoneRolloverHireDate( TRUE );
+				$apf->setEnableOpeningBalance( TRUE );
+				$apf->setEnableProRateInitialPeriod( TRUE );
+
+				$apf->setMinimumEmployedDays( 0 );
+				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				break;
+			case 2130: //Calendar Based: Pay Period with one milestone - ProRate Initial Period
+				$apf->setName( 'Calendar: 1 milestone' );
+				$apf->setType( 20 );
+
+				$apf->setApplyFrequency( 20 ); //Annually
+				$apf->setApplyFrequencyMonth( 1 );
+				$apf->setApplyFrequencyDayOfMonth( 1 );
+
+				$apf->setMilestoneRolloverHireDate( TRUE );
+				$apf->setEnableOpeningBalance( TRUE );
+				$apf->setEnableProRateInitialPeriod( TRUE );
+
+				$apf->setMinimumEmployedDays( 0 );
+				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				break;
+			case 2131: //Calendar Based: Pay Period with one milestone - ProRate Initial Period
+				$apf->setName( 'Calendar: 1 milestone' );
+				$apf->setType( 20 );
+
+				$apf->setApplyFrequency( 20 ); //Annually
+				$apf->setApplyFrequencyHireDate( TRUE );
+
+				$apf->setMilestoneRolloverHireDate( TRUE );
+				$apf->setEnableOpeningBalance( TRUE );
+				$apf->setEnableProRateInitialPeriod( TRUE );
+
+				$apf->setMinimumEmployedDays( 0 );
+				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
+				break;
 		}
 
 		if ( $apf->isValid() ) {
@@ -543,6 +750,18 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 					}
 					break;
 				case 40:
+				case 2000:
+				case 2001:
+				case 2010:
+				case 2020:
+				case 2030:
+				case 2031:
+				case 2100:
+				case 2101:
+				case 2110:
+				case 2120:
+				case 2130:
+				case 2131:					
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 0 );
 					$apmf->setLengthOfServiceUnit( 40 );
@@ -759,6 +978,9 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 				case 300:
 				case 310:
 				case 320:
+				case 350:
+				case 360:
+				case 370:
 				case 400:
 				case 410:
 				case 420:
@@ -811,6 +1033,48 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 						$apmf->Save();
 					}
 					break;
+				case 1000:
+					$apmf->setAccrualPolicy( $insert_id );
+					$apmf->setLengthOfService( 0 );
+					$apmf->setLengthOfServiceUnit( 40 );
+					$apmf->setAccrualRate( 1.0 );
+					$apmf->setAnnualMaximumTime( 0 );
+					$apmf->setMaximumTime( (3600*9999) );
+					$apmf->setRolloverTime( (3600*9999) );					
+
+					if ( $apmf->isValid() ) {
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						$apmf->Save();
+					}
+					break;
+				case 1010:
+					$apmf->setAccrualPolicy( $insert_id );
+					$apmf->setLengthOfService( 0 );
+					$apmf->setLengthOfServiceUnit( 40 );
+					$apmf->setAccrualRate( 1.0 );
+					$apmf->setAnnualMaximumTime( (3600*9999) );
+					$apmf->setMaximumTime( (3600*118) );
+					$apmf->setRolloverTime( (3600*9999) );					
+
+					if ( $apmf->isValid() ) {
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						$apmf->Save();
+					}
+					break;
+				case 1020:
+					$apmf->setAccrualPolicy( $insert_id );
+					$apmf->setLengthOfService( 0 );
+					$apmf->setLengthOfServiceUnit( 40 );
+					$apmf->setAccrualRate( 1.0 );
+					$apmf->setAnnualMaximumTime( (3600*112) );
+					$apmf->setMaximumTime( (3600*118) );
+					$apmf->setRolloverTime( (3600*9999) );					
+
+					if ( $apmf->isValid() ) {
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						$apmf->Save();
+					}
+					break;												
 			}
 
 			return $insert_id;
@@ -819,6 +1083,31 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		Debug::Text('Failed Creating Accrual Policy!', __FILE__, __LINE__, __METHOD__,10);
 
 		return FALSE;
+	}
+
+	function createPunches( $start_date, $end_date, $in_time, $out_time ) {
+		global $dd;
+		
+		for( $i=$start_date; $i < $end_date; $i+=(86400+3601) ) {
+			$i = TTDate::getBeginDayEpoch( $i );
+			
+			Debug::Text('Date: '. TTDate::getDate('DATE', $i) .' In: '. $in_time .' Out: '. $out_time, __FILE__, __LINE__, __METHOD__,10);
+			$dd->createPunchPair( 	$this->user_id,
+									strtotime( TTDate::getDate('DATE', $i ).' '. $in_time),
+									strtotime( TTDate::getDate('DATE', $i ).' '. $out_time),
+									array(
+												'in_type_id' => 10,
+												'out_type_id' => 10,
+												'branch_id' => 0,
+												'department_id' => 0,
+												'job_id' => 0,
+												'job_item_id' => 0,
+											),
+									TRUE
+									);
+		}
+
+		return TRUE;
 	}
 
 	function calcAccrualTime( $company_id, $accrual_policy_id, $start_date, $end_date, $day_multiplier = 1 ) {
@@ -870,7 +1159,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 			$accrual_balance = 0;
 		}
 
-		Debug::Text('&nbsp;&nbsp; Current Accrual Balance: '. $accrual_balance, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('   Current Accrual Balance: '. $accrual_balance, __FILE__, __LINE__, __METHOD__,10);
 
 		return $accrual_balance;
 	}
@@ -1116,7 +1405,8 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime('+2 years', $current_epoch) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, 434733 );
+		//$this->assertEquals( $accrual_balance, 434733 ); //Was this value before we added pro-rating/opening balance. The only difference was the first entry.
+		$this->assertEquals( $accrual_balance, 431964 );
 	}
 
 
@@ -1174,7 +1464,8 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime('+2 years', $current_epoch), 10 );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, 432000 );
+		//$this->assertEquals( $accrual_balance, 432000 ); //Was this value before we added pro-rating/opening balance. The only difference was the first entry.
+		$this->assertEquals( $accrual_balance, 420000 );
 	}
 
 	/**
@@ -1216,6 +1507,91 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
 		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 320, $accrual_policy_account_id );
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									array($this->user_id),
+									NULL,
+									array( $accrual_policy_id ) );
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime('+2 years', $current_epoch) );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( $accrual_balance, 432000 );
+	}
+
+
+	/**
+	 * @group AccrualPolicy_testQuarterlyCalendarAccrualA
+	 */
+	function testQuarterlyCalendarAccrualA() {
+		global $dd;
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 350, $accrual_policy_account_id );
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									array($this->user_id),
+									NULL,
+									array( $accrual_policy_id ) );
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime('+2 years', $current_epoch) );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( $accrual_balance, 432000 );
+	}
+
+	/**
+	 * @group AccrualPolicy_testQuarterlyCalendarAccrualB
+	 */
+	function testQuarterlyCalendarAccrualB() {
+		global $dd;
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 360, $accrual_policy_account_id );
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									array($this->user_id),
+									NULL,
+									array( $accrual_policy_id ) );
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime('+2 years', $current_epoch) );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( $accrual_balance, 432000 );
+	}
+
+	/**
+	 * @group AccrualPolicy_testQuarterlyCalendarAccrualC
+	 */
+	function testQuarterlyCalendarAccrualC() {
+		global $dd;
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 370, $accrual_policy_account_id );
 		$dd->createPolicyGroup( 	$this->company_id,
 									NULL,
 									NULL,
@@ -1444,6 +1820,343 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 	}
 	
 	/**
+	 * @group AccrualPolicy_testCalendarAccrualProRateA
+	 */
+	function testCalendarAccrualProRateA() {
+		global $dd;
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 2000, $accrual_policy_account_id );
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									array($this->user_id),
+									NULL,
+									array( $accrual_policy_id ) );
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( $accrual_balance, ( (111*3600)+(60*13)+20 ) ); //111:13:20
+	}
+
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualProRateB
+	 */
+	function testCalendarAccrualProRateB() {
+		global $dd;
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 2001, $accrual_policy_account_id );
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									array($this->user_id),
+									NULL,
+									array( $accrual_policy_id ) );
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( $accrual_balance, ( (110*3600)+(60*0) ) ); //110:00
+	}
+
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualProRateC
+	 */
+	function testCalendarAccrualProRateC() {
+		global $dd;
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 2010, $accrual_policy_account_id );
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									array($this->user_id),
+									NULL,
+									array( $accrual_policy_id ) );
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( $accrual_balance, ( (112*3600)+(60*31)+5 ) ); //112:31:05
+	}
+
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualProRateD
+	 */
+	function testCalendarAccrualProRateD() {
+		global $dd;
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 2020, $accrual_policy_account_id );
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									array($this->user_id),
+									NULL,
+									array( $accrual_policy_id ) );
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( $accrual_balance, ( (109*3600)+(60*34)+12 ) ); //109:34:12
+	}
+
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualProRateE
+	 */
+	function testCalendarAccrualProRateE() {
+		global $dd;
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 2030, $accrual_policy_account_id );
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									array($this->user_id),
+									NULL,
+									array( $accrual_policy_id ) );
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( $accrual_balance, ( (73*3600)+(60*5)+45 ) ); //73:05:45
+	}
+
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualProRateF
+	 */
+	function testCalendarAccrualProRateF() {
+		global $dd;
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 2031, $accrual_policy_account_id );
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									array($this->user_id),
+									NULL,
+									array( $accrual_policy_id ) );
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( $accrual_balance, ( (120*3600) ) ); //120:00:00
+	}
+
+
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualOpeningBalanceA
+	 */
+	function testCalendarAccrualOpeningBalanceA() {
+		global $dd;
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 2100, $accrual_policy_account_id );
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									array($this->user_id),
+									NULL,
+									array( $accrual_policy_id ) );
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( $accrual_balance, ( (112*3600)+(60*53)+20 ) ); //111:13:20
+	}
+
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualOpeningBalanceB
+	 */
+	function testCalendarAccrualOpeningBalanceB() {
+		global $dd;
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 2101, $accrual_policy_account_id );
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									array($this->user_id),
+									NULL,
+									array( $accrual_policy_id ) );
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( $accrual_balance, ( (110*3600)+(60*0) ) ); //110:00
+	}
+
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualOpeningBalanceC
+	 */
+	function testCalendarAccrualOpeningBalanceC() {
+		global $dd;
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 2110, $accrual_policy_account_id );
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									array($this->user_id),
+									NULL,
+									array( $accrual_policy_id ) );
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( $accrual_balance, ( (113*3600)+(60*17)+14 ) ); //113:17:14
+	}
+
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualOpeningBalanceD
+	 */
+	function testCalendarAccrualOpeningBalanceD() {
+		global $dd;
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 2120, $accrual_policy_account_id );
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									array($this->user_id),
+									NULL,
+									array( $accrual_policy_id ) );
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( $accrual_balance, ( (112*3600)+(60*54)+12 ) ); //112:54:12
+	}
+
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualOpeningBalanceE
+	 */
+	function testCalendarAccrualOpeningBalanceE() {
+		global $dd;
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 2130, $accrual_policy_account_id );
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									array($this->user_id),
+									NULL,
+									array( $accrual_policy_id ) );
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( $accrual_balance, ( (113*3600)+(60*5)+45 ) ); //113:05:45
+	}
+
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualOpeningBalanceF
+	 */
+	function testCalendarAccrualOpeningBalanceF() {
+		global $dd;
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 2131, $accrual_policy_account_id );
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									array($this->user_id),
+									NULL,
+									array( $accrual_policy_id ) );
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( $accrual_balance, ( (120*3600) ) ); //120:00:00
+	}
+	
+	/**
 	 * @group testAbsenceAccrualPolicyA
 	 */
 	function testAbsenceAccrualPolicyA() {
@@ -1595,5 +2308,679 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, (13 * -3600) );
 	}
 	
+	/**
+	 * @group AccrualPolicy_testHourAccrualA
+	 */
+	function testHourAccrualA() {
+		global $dd;
+
+		$policy_ids['pay_formula_policy'][100] = $dd->createPayFormulaPolicy( $this->company_id, 100 ); //Reg 1.0x
+
+		$policy_ids['pay_code'][100] = $dd->createPayCode( $this->company_id, 100, $policy_ids['pay_formula_policy'][100] ); //Regular
+
+		$policy_ids['contributing_pay_code_policy'][10] = $dd->createContributingPayCodePolicy( $this->company_id, 10, array( $policy_ids['pay_code'][100] ) ); //Regular
+		$policy_ids['contributing_pay_code_policy'][99] = $dd->createContributingPayCodePolicy( $this->company_id, 99, $policy_ids['pay_code'] ); //All Time
+
+		$policy_ids['contributing_shift_policy'][10] = $dd->createContributingShiftPolicy( $this->company_id, 10, $policy_ids['contributing_pay_code_policy'][10] ); //Regular
+
+		$policy_ids['regular'][10] = $dd->createRegularTimePolicy( $this->company_id, 10, $policy_ids['contributing_shift_policy'][10], $policy_ids['pay_code'][100] );
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = TTDate::getBeginYearEpoch( $hire_date+(86400*365*2) );
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 1000, $accrual_policy_account_id, $policy_ids['contributing_shift_policy'][10] );
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL, //Meal
+									NULL, //Exception
+									NULL, //Holiday
+									NULL, //OT
+									NULL, //Premium
+									NULL, //Round
+									array($this->user_id), //Users
+									NULL, //Break
+									array( $accrual_policy_id ), //Accrual
+									NULL, //Expense
+									NULL, //Absence
+									array($policy_ids['regular'][10]) //Regular
+									);
+
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (0*3600) );
+
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(0*86400+3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 8:00AM'),
+								strtotime($date_stamp.' 2:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (6*3600) );
+		
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 2:00PM'),
+								strtotime($date_stamp.' 6:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (10*3600) );
+		
+		//Add batch of punches
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(1*86400+3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$this->createPunches( $date_epoch, ($date_epoch+(10*86400+3601)), '8:00AM', '6:00PM' );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (110*3600) );
+		
+		
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(11*86400+3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 8:00AM'),
+								strtotime($date_stamp.' 2:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (116*3600) );
+
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 2:00PM'),
+								strtotime($date_stamp.' 6:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (120*3600) );
+	}
+
+	/**
+	 * @group AccrualPolicy_testHourAccrualB
+	 */
+	function testHourAccrualB() {
+		if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) {
+			return TRUE;
+		}
+
+		global $dd;
+
+		$policy_ids['pay_formula_policy'][100] = $dd->createPayFormulaPolicy( $this->company_id, 100 ); //Reg 1.0x
+
+		$policy_ids['pay_code'][100] = $dd->createPayCode( $this->company_id, 100, $policy_ids['pay_formula_policy'][100] ); //Regular
+
+		$policy_ids['contributing_pay_code_policy'][10] = $dd->createContributingPayCodePolicy( $this->company_id, 10, array( $policy_ids['pay_code'][100] ) ); //Regular
+		$policy_ids['contributing_pay_code_policy'][99] = $dd->createContributingPayCodePolicy( $this->company_id, 99, $policy_ids['pay_code'] ); //All Time
+
+		$policy_ids['contributing_shift_policy'][10] = $dd->createContributingShiftPolicy( $this->company_id, 10, $policy_ids['contributing_pay_code_policy'][10] ); //Regular
+
+		$policy_ids['regular'][10] = $dd->createRegularTimePolicy( $this->company_id, 10, $policy_ids['contributing_shift_policy'][10], $policy_ids['pay_code'][100] );
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = TTDate::getBeginYearEpoch( $hire_date+(86400*365*2) );
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 1000, $accrual_policy_account_id, $policy_ids['contributing_shift_policy'][10] );
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL, //Meal
+									NULL, //Exception
+									NULL, //Holiday
+									NULL, //OT
+									NULL, //Premium
+									NULL, //Round
+									array($this->user_id), //Users
+									NULL, //Break
+									array( $accrual_policy_id ), //Accrual
+									NULL, //Expense
+									NULL, //Absence
+									array($policy_ids['regular'][10]) //Regular
+									);
+
+		//Test UserModifier values.
+		$this->createAccrualPolicyUserModifier( $accrual_policy_id, $this->user_id, strtotime( '+10 months', $hire_date), 2 );
+
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (0*3600) );
+
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(0*86400+3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 8:00AM'),
+								strtotime($date_stamp.' 2:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (12*3600) );
+
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 2:00PM'),
+								strtotime($date_stamp.' 6:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (20*3600) );
+
+		//Add batch of punches
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(1*86400+3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$this->createPunches( $date_epoch, ($date_epoch+(10*86400+3601)), '8:00AM', '6:00PM' );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (220*3600) );
+
+
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(11*86400+3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 8:00AM'),
+								strtotime($date_stamp.' 2:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (232*3600) );
+
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 2:00PM'),
+								strtotime($date_stamp.' 6:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (240*3600) );
+	}
+
+	/**
+	 * @group AccrualPolicy_testHourAccrualMaximumBalanceA
+	 */
+	function testHourAccrualMaximumBalanceA() {
+		global $dd;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+
+		$policy_ids['pay_formula_policy'][100] = $dd->createPayFormulaPolicy( $this->company_id, 100 ); //Reg 1.0x
+		$policy_ids['pay_formula_policy'][910] = $this->createPayFormulaPolicy( $this->company_id, 910, $accrual_policy_account_id ); //Bank Accrual
+
+		$policy_ids['pay_code'][100] = $dd->createPayCode( $this->company_id, 100, $policy_ids['pay_formula_policy'][100] ); //Regular
+		$policy_ids['pay_code'][910] = $dd->createPayCode( $this->company_id, 910, $policy_ids['pay_formula_policy'][910] ); //Bank
+
+		$policy_ids['contributing_pay_code_policy'][10] = $dd->createContributingPayCodePolicy( $this->company_id, 10, array( $policy_ids['pay_code'][100] ) ); //Regular
+		$policy_ids['contributing_pay_code_policy'][99] = $dd->createContributingPayCodePolicy( $this->company_id, 99, $policy_ids['pay_code'] ); //All Time
+
+		$policy_ids['contributing_shift_policy'][10] = $dd->createContributingShiftPolicy( $this->company_id, 10, $policy_ids['contributing_pay_code_policy'][10] ); //Regular
+
+		$policy_ids['regular'][10] = $dd->createRegularTimePolicy( $this->company_id, 10, $policy_ids['contributing_shift_policy'][10], $policy_ids['pay_code'][100] );
+		$policy_ids['absence_policy'][10] = $dd->createAbsencePolicy( $this->company_id, 10, $policy_ids['pay_code'][910] );
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = TTDate::getBeginYearEpoch( $hire_date+(86400*365*2) );
+
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 1010, $accrual_policy_account_id, $policy_ids['contributing_shift_policy'][10] );
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL, //Meal
+									NULL, //Exception
+									NULL, //Holiday
+									NULL, //OT
+									NULL, //Premium
+									NULL, //Round
+									array($this->user_id), //Users
+									NULL, //Break
+									array( $accrual_policy_id ), //Accrual
+									NULL, //Expense
+									$policy_ids['absence_policy'], //Absence
+									array($policy_ids['regular'][10]) //Regular
+									);
+
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(0*86400+3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 8:00AM'),
+								strtotime($date_stamp.' 2:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (6*3600) );
+
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 2:00PM'),
+								strtotime($date_stamp.' 6:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (10*3600) );
+
+
+		//Add batch of punches
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(1*86400+3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$this->createPunches( $date_epoch, ($date_epoch+(10*86400+3601)), '8:00AM', '6:00PM' );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (110*3600) );
+
+
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(11*86400+3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 8:00AM'),
+								strtotime($date_stamp.' 2:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (116*3600) );
+
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 2:00PM'),
+								strtotime($date_stamp.' 6:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (118*3600) ); //Hit maximum balance.
+
+
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(12*86400+3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$dd->createAbsence( $this->user_id, $date_epoch, (5 * 3600), $policy_ids['absence_policy'][10] );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (113 * 3600) ); //Reduce maximum balance, so we can hit again below.
+
+
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(13*86400+3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 8:00AM'),
+								strtotime($date_stamp.' 2:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (118*3600) );
+
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 2:00PM'),
+								strtotime($date_stamp.' 6:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (118*3600) ); //Hit maximum balance.
+	}
+
+	/**
+	 * @group AccrualPolicy_testHourAccrualAnnualMaximumA
+	 */
+	function testHourAccrualAnnualMaximumA() {
+		global $dd;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+
+		$policy_ids['pay_formula_policy'][100] = $dd->createPayFormulaPolicy( $this->company_id, 100 ); //Reg 1.0x
+		$policy_ids['pay_formula_policy'][910] = $this->createPayFormulaPolicy( $this->company_id, 910, $accrual_policy_account_id ); //Bank Accrual
+
+		$policy_ids['pay_code'][100] = $dd->createPayCode( $this->company_id, 100, $policy_ids['pay_formula_policy'][100] ); //Regular
+		$policy_ids['pay_code'][910] = $dd->createPayCode( $this->company_id, 910, $policy_ids['pay_formula_policy'][910] ); //Bank
+
+		$policy_ids['contributing_pay_code_policy'][10] = $dd->createContributingPayCodePolicy( $this->company_id, 10, array( $policy_ids['pay_code'][100] ) ); //Regular
+		$policy_ids['contributing_pay_code_policy'][99] = $dd->createContributingPayCodePolicy( $this->company_id, 99, $policy_ids['pay_code'] ); //All Time
+
+		$policy_ids['contributing_shift_policy'][10] = $dd->createContributingShiftPolicy( $this->company_id, 10, $policy_ids['contributing_pay_code_policy'][10] ); //Regular
+
+		$policy_ids['regular'][10] = $dd->createRegularTimePolicy( $this->company_id, 10, $policy_ids['contributing_shift_policy'][10], $policy_ids['pay_code'][100] );
+		$policy_ids['absence_policy'][10] = $dd->createAbsencePolicy( $this->company_id, 10, $policy_ids['pay_code'][910] );
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		//$current_epoch = TTDate::getBeginYearEpoch( $hire_date+(86400*365*5) );
+		$current_epoch = TTDate::getBeginMonthEpoch( $hire_date-(86400*7)+(86400*365*5) );
+
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 1020, $accrual_policy_account_id, $policy_ids['contributing_shift_policy'][10] );
+		$dd->createPolicyGroup( 	$this->company_id,
+									NULL, //Meal
+									NULL, //Exception
+									NULL, //Holiday
+									NULL, //OT
+									NULL, //Premium
+									NULL, //Round
+									array($this->user_id), //Users
+									NULL, //Break
+									array( $accrual_policy_id ), //Accrual
+									NULL, //Expense
+									$policy_ids['absence_policy'], //Absence
+									array($policy_ids['regular'][10]) //Regular
+									);
+
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch )+(0*86400+3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 8:00AM'),
+								strtotime($date_stamp.' 2:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (6*3600) );
+
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 2:00PM'),
+								strtotime($date_stamp.' 6:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (10*3600) );
+
+
+		//Add batch of punches
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch )+(1*86400+3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$this->createPunches( $date_epoch, ($date_epoch+(10*86400+3601)), '8:00AM', '6:00PM' );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (110*3600) );
+
+
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch )+(11*86400+3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 8:00AM'),
+								strtotime($date_stamp.' 2:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (112*3600) );
+
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 2:00PM'),
+								strtotime($date_stamp.' 6:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (112*3600) ); //Hit maximum balance.
+		
+		
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch )+(12*86400+3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$dd->createAbsence( $this->user_id, $date_epoch, (5 * 3600), $policy_ids['absence_policy'][10] );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (107 * 3600) ); //Reduce maximum balance, so we can hit again below.
+
+
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch )+(13*86400+3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 8:00AM'),
+								strtotime($date_stamp.' 2:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (107*3600) );
+
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 2:00PM'),
+								strtotime($date_stamp.' 6:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (107*3600) ); //Hit maximum balance.
+
+		//
+		//Test immediately before employment anniversary date (shouldn't be any increases as maximum accrual limit is still in effect)
+		//
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch )+(34*86400+3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 8:00AM'),
+								strtotime($date_stamp.' 2:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (107*3600) );
+
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 2:00PM'),
+								strtotime($date_stamp.' 6:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (107*3600) );
+
+		//
+		//Test on employment anniversary date (limit should be reset now, so increases balance)
+		//
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch )+(35*86400+3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 10:00AM'),
+								strtotime($date_stamp.' 12:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (109*3600) );
+
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 12:00PM'),
+								strtotime($date_stamp.' 2:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (111*3600) );
+
+		//
+		//Test on the day after the employment anniversary date (limit should be reset now, so increases balance)
+		//
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch )+(36*86400+3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 8:00AM'),
+								strtotime($date_stamp.' 2:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (117*3600) );
+
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 2:00PM'),
+								strtotime($date_stamp.' 6:00PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+		$this->assertEquals( $accrual_balance, (118*3600) ); //Reached maximum balance here.
+	}
 }
 ?>

@@ -291,8 +291,9 @@ HierarchyControlViewController = BaseViewController.extend( {
 			} );
 
 		} else {
-			$this.setErrorTips( result );
 			$this.setErrorMenu();
+			$this.setErrorTips( result );
+
 		}
 	},
 

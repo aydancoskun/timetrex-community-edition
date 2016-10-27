@@ -22,7 +22,7 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 		this.viewId = 'RequestAuthorization';
 		this.script_name = 'RequestAuthorizationView';
 		this.table_name_key = 'request';
-		this.context_menu_name = $.i18n._( 'Requests(Authorization)' );
+		this.context_menu_name = $.i18n._( 'Request (Authorizations)' );
 		this.navigation_label = $.i18n._( 'Requests' ) + ':';
 		this.api = new (APIFactory.getAPIClass( 'APIRequest' ))();
 		this.message_control_api = new (APIFactory.getAPIClass( 'APIMessageControl' ))();
@@ -51,15 +51,12 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 		var $this = this;
 
 		this.initDropDownOption( 'type' );
-		this.api.getHierarchyLevelOptions( [-1], {onResult: function( res ) {
+		var res = this.api.getHierarchyLevelOptions( [-1], {async: false} );
 			var data = res.getResult();
 			$this['hierarchy_level_array'] = Global.buildRecordArray( data );
-
 			if ( Global.isSet( $this.basic_search_field_ui_dic['hierarchy_level'] ) ) {
 				$this.basic_search_field_ui_dic['hierarchy_level'].setSourceData( Global.buildRecordArray( data ) );
 			}
-
-		}} );
 
 	},
 
@@ -67,7 +64,7 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 		var data = this.grid.getGridParam( 'data' );
 
-		//Error: TypeError: data is undefined in https://ondemand1.timetrex.com/interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
+		//Error: TypeError: data is undefined in /interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
 		if ( !data ) {
 			return;
 		}
@@ -185,7 +182,7 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 		} );
 
 		var authorization_request = new RibbonSubMenu( {
-			label: $.i18n._( 'Request<br>Authorization' ),
+			label: $.i18n._( 'Request<br>Authorizations' ),
 			id: ContextMenuIconName.authorization_request,
 			group: objects_group,
 			icon: Icons.authorization_request,
@@ -195,7 +192,7 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 		} );
 
 		var authorization_timesheet = new RibbonSubMenu( {
-			label: $.i18n._( 'TimeSheet<br>Authorization' ),
+			label: $.i18n._( 'TimeSheet<br>Authorizations' ),
 			id: ContextMenuIconName.authorization_timesheet,
 			group: objects_group,
 			icon: Icons.authorization_timesheet,
@@ -204,7 +201,7 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 		} );
 
 		var authorization_expense = new RibbonSubMenu( {
-			label: $.i18n._( 'Expense<br>Authorization' ),
+			label: $.i18n._( 'Expense<br>Authorizations' ),
 			id: ContextMenuIconName.authorization_expense,
 			group: objects_group,
 			icon: Icons.authorization_expense,
@@ -246,7 +243,7 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 	setDefaultMenu: function( doNotSetFocus ) {
 
-        //Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+        //Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
         if (!this.context_menu_array) {
             return;
         }
@@ -606,8 +603,10 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 		/* jshint ignore:end */
 	},
 
-	onSaveClick: function() {
-
+	onSaveClick: function( ignoreWarning ) {
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
 		if ( this.is_edit ) {
 
 			var $this = this;
@@ -618,7 +617,7 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 			record = this.uniformVariable( record );
 
-			this.message_control_api['setMessageControl']( record, {onResult: function( result ) {
+			this.message_control_api['setMessageControl']( record, false, ignoreWarning, {onResult: function( result ) {
 
 				if ( result.isValid() ) {
 					$this.onViewClick( $this.current_edit_record.id );
@@ -635,7 +634,7 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 	onAuthorizationClick: function() {
 		var $this = this;
 
-		//Error: TypeError: $this.current_edit_record is null in https://ondemand1.timetrex.com/interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 629
+		//Error: TypeError: $this.current_edit_record is null in /interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 629
 		if ( !$this.current_edit_record ) {
 			return;
 		}
@@ -764,8 +763,9 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 			}
 
 		} else {
-			$this.setErrorTips( result );
 			$this.setErrorMenu();
+			$this.setErrorTips( result );
+
 		}
 	},
 
@@ -995,6 +995,11 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 		if ( !Global.isSet( filter.hierarchy_level ) ) {
 			filter['hierarchy_level'] = 1;
+			this.filter_data['hierarchy_level'] = {
+				field: 'hierarchy_level',
+				id: '',
+				value: this.basic_search_field_ui_dic['hierarchy_level'].getValue( true )
+			};
 		}
 
 		return filter;
@@ -1012,8 +1017,6 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 		var tab_audit_label = this.edit_view.find( 'a[ref=tab_audit]' );
 
 		tab_audit_label.css( 'display', 'none' );
-
-		this.navigation = null;
 
 		//Tab 0 start
 
@@ -1044,8 +1047,17 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 	},
 
-	buildViewUI: function() {
+	needShowNavigation: function() {
+		if ( this.is_viewing && this.current_edit_record && Global.isSet( this.current_edit_record.id ) && this.current_edit_record.id ) {
+			return true;
+		} else {
+			return false;
+		}
+	},
 
+	buildViewUI: function() {
+		var pager_data = this.navigation && this.navigation.getPagerData && this.navigation.getPagerData();
+		var source_data = this.navigation && this.navigation.getSourceData && this.navigation.getSourceData();
 		this._super( 'buildEditViewUI' );
 
 		var $this = this;
@@ -1065,6 +1077,11 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 		} );
 
 		this.setNavigation();
+
+		if ( pager_data && source_data ) {
+			this.navigation.setSourceData( source_data );
+			this.navigation.setPagerData( pager_data );
+		}
 
 		//Tab 0 first column start
 
@@ -1182,14 +1199,6 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 			this.buildEditViewUI();
 		}
 
-		//Calculated tab's height
-		this.edit_view_tab.resize( function() {
-
-			$this.setEditViewTabHeight();
-			$this.setAuthorizationGridSize();
-
-		} );
-
 		$this.setEditViewTabHeight();
 	},
 
@@ -1210,7 +1219,6 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 		// reset parent context menu if edit only mode
 		if ( !this.edit_only_mode ) {
 			this.setDefaultMenu();
-			this.initRightClickMenu();
 		} else {
 			this.setParentContextMenuAfterSubViewClose();
 		}

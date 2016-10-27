@@ -219,7 +219,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		var form_item_average_days_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_average_days_input.TTextInput( {field: 'average_days', width: 30} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
+		widgetContainer = $( "<div class='widget-h-box '></div>" );
 
 		label_1 = $( "<span class='widget-right-label'> " + $.i18n._( 'Worked Days Only' ) + ': ' + " </span>" );
 		label_2 = $( "<span class='widget-right-label'> " + $.i18n._( 'or' ) + " </span>" );
@@ -249,32 +249,22 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		// Holiday Time
 		// Minimum Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'minimum_time', width: 65, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'minimum_time', mode: 'time_unit', need_parser_sec: true} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().time_unit_format_display + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Holiday Time' ), form_item_input, tab_holiday_time_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Holiday Time' ), form_item_input, tab_holiday_time_column1, '', null, true );
 
 		// Maximum Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'maximum_time', width: 65, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'maximum_time', mode: 'time_unit', need_parser_sec: true} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'ie' ) + ' : ' + LocalCacheData.getLoginUserPreference().time_unit_format_display + "</span>" );
-
-		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Maximum Time' ), form_item_input, tab_holiday_time_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Maximum Time' ), form_item_input, tab_holiday_time_column1, '', null, true );
 
 		// Always Apply Over Time/Premium Policies
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( {field: 'force_over_time_policy'} );
 
 		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> (" + $.i18n._( 'Even if they are not eligible for holiday pay' ) + ")</span>" );
+		label = $( "<span class='widget-right-label '> (" + $.i18n._( 'Even if they are not eligible for holiday pay' ) + ")</span>" );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -371,47 +361,47 @@ HolidayPolicyViewController = BaseViewController.extend( {
 
 		if ( this.current_edit_record['type_id'] === 10 ) {
 
-			this.edit_view_form_item_dic['minimum_worked_days'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['minimum_worked_after_days'].css( 'display', 'none' );
+			this.detachElement( 'minimum_worked_days' );
+			this.detachElement( 'minimum_worked_after_days' );
 
-			this.edit_view_form_item_dic['average_time_days'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['average_time_worked_days'].css( 'display', 'none' );
+			this.detachElement( 'average_time_days' );
+			this.detachElement( 'average_time_worked_days' );
 			this.edit_view_form_item_dic['minimum_time'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Holiday Time' ) + ": " );
 
-			this.edit_view_form_item_dic['maximum_time'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['force_over_time_policy'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['round_interval_policy_id'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['eligible_contributing_shift_policy_id'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['contributing_shift_policy_id'].css( 'display', 'none' );
+			this.detachElement( 'maximum_time' );
+			this.detachElement( 'force_over_time_policy' );
+			this.detachElement( 'round_interval_policy_id' );
+			this.detachElement( 'eligible_contributing_shift_policy_id' );
+			this.detachElement( 'contributing_shift_policy_id' );
 
 		} else if ( this.current_edit_record['type_id'] === 20 ) {
-			this.edit_view_form_item_dic['minimum_worked_days'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['minimum_worked_after_days'].css( 'display', 'block' );
+			this.attachElement( 'minimum_worked_days' );
+			this.attachElement( 'minimum_worked_after_days' );
 
-			this.edit_view_form_item_dic['average_time_days'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['average_time_worked_days'].css( 'display', 'none' );
+			this.detachElement( 'average_time_days' );
+			this.detachElement( 'average_time_worked_days' );
 			this.edit_view_form_item_dic['minimum_time'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Holiday Time' ) + ": " );
 
-			this.edit_view_form_item_dic['maximum_time'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['force_over_time_policy'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['round_interval_policy_id'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['eligible_contributing_shift_policy_id'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['contributing_shift_policy_id'].css( 'display', 'none' );
+			this.detachElement( 'maximum_time' );
+			this.detachElement( 'force_over_time_policy' );
+			this.detachElement( 'round_interval_policy_id' );
+			this.attachElement( 'eligible_contributing_shift_policy_id' );
+			this.detachElement( 'contributing_shift_policy_id' );
 
 		} else if ( this.current_edit_record['type_id'] === 30 ) {
 
-			this.edit_view_form_item_dic['minimum_worked_days'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['minimum_worked_after_days'].css( 'display', 'block' );
+			this.attachElement( 'minimum_worked_days' );
+			this.attachElement( 'minimum_worked_after_days' );
 
-			this.edit_view_form_item_dic['average_time_days'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['average_time_worked_days'].css( 'display', 'block' );
+			this.attachElement( 'average_time_days' );
+			this.attachElement( 'average_time_worked_days' );
 			this.edit_view_form_item_dic['minimum_time'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Minimum Time' ) + ": " );
 
-			this.edit_view_form_item_dic['maximum_time'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['force_over_time_policy'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['round_interval_policy_id'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['eligible_contributing_shift_policy_id'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['contributing_shift_policy_id'].css( 'display', 'block' );
+			this.attachElement( 'maximum_time' );
+			this.attachElement( 'force_over_time_policy' );
+			this.attachElement( 'round_interval_policy_id' );
+			this.attachElement( 'eligible_contributing_shift_policy_id' );
+			this.attachElement( 'contributing_shift_policy_id' );
 
 		}
 
@@ -507,7 +497,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScriptAsync( 'views/policy/holiday/HolidayViewController.js', function() {
+		Global.loadScript( 'views/policy/holiday/HolidayViewController.js', function() {
 
 			var tab_holiday_policy = $this.edit_view_tab.find( '#tab_holidays' );
 			var firstColumn = tab_holiday_policy.find( '.first-column-sub-view' );

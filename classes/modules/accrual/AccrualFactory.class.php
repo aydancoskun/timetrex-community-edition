@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -91,6 +91,7 @@ class AccrualFactory extends Factory {
 										//'-1050-time_stamp' => TTi18n::gettext('Date'),
 										'-1050-date_stamp' => TTi18n::gettext('Date'), //Date stamp is combination of time_stamp and user_date.date_stamp columns.
 										'-1060-amount' => TTi18n::gettext('Amount'),
+										'-1070-note' => TTi18n::gettext('Note'),
 
 										'-1090-title' => TTi18n::gettext('Title'),
 										'-1099-user_group' => TTi18n::gettext('Group'),
@@ -145,6 +146,7 @@ class AccrualFactory extends Factory {
 										'date_stamp' => FALSE,
 										'time_stamp' => 'TimeStamp',
 										'amount' => 'Amount',
+										'note' => 'Note',
 										'deleted' => 'Deleted',
 										);
 		return $variable_function_map;
@@ -247,11 +249,6 @@ class AccrualFactory extends Factory {
 	function setType($value) {
 		$value = trim($value);
 
-		$key = Option::getByValue($value, $this->getOptions('type') );
-		if ($key !== FALSE) {
-			$value = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'type',
 											$value,
 											TTi18n::gettext('Incorrect Type'),
@@ -311,7 +308,7 @@ class AccrualFactory extends Factory {
 		return FALSE;
 	}
 	function setTimeStamp($epoch) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if	(	$this->Validator->isDate(		'times_tamp',
 												$epoch,
@@ -384,6 +381,32 @@ class AccrualFactory extends Factory {
 		return FALSE;
 	}
 
+	function getNote() {
+		if ( isset($this->data['note']) ) {
+			return $this->data['note'];
+		}
+
+		return FALSE;
+	}
+	function setNote($val) {
+		$val = trim($val);
+
+		if	(	$val == ''
+				OR
+				$this->Validator->isLength(		'note',
+												$val,
+												TTi18n::gettext('Note is too long'),
+												0,
+												1024) ) {
+
+			$this->data['note'] = $val;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+	
 	function getEnableCalcBalance() {
 		if ( isset($this->calc_balance) ) {
 			return $this->calc_balance;
@@ -397,8 +420,8 @@ class AccrualFactory extends Factory {
 		return TRUE;
 	}
 
-	function Validate() {
-		if ( $this->validate_only == FALSE ) { //Don't do the follow validation checks during Mass Edit.
+	function Validate( $ignore_warning = TRUE ) {
+		if ( $this->Validator->getValidateOnly() == FALSE ) { //Don't do the follow validation checks during Mass Edit.
 			if ( $this->getUser() == FALSE OR $this->getUser() == 0 ) {
 				$this->Validator->isTrue(		'user_id',
 												FALSE,

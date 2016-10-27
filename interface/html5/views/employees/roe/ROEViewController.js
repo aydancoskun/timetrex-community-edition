@@ -292,7 +292,7 @@ ROEViewController = BaseViewController.extend( {
 
 	setDefaultMenu: function( doNotSetFocus ) {
 
-		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in https://ondemand2001.timetrex.com/interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
 			return;
 		}
@@ -797,11 +797,8 @@ ROEViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Pay Period Type' ), form_item_input, tab_roe_column1 );
 
 		// First Day Worked
-
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-
 		form_item_input.TDatePicker( {field: 'first_date'} );
-
 		var widgetContainer = $( "<div class='widget-h-box'></div>" );
 		var label = $( "<span class='widget-right-label'> " + '(' + $.i18n._( 'Or first day since last ROE' ) + ')' + "</span>" );
 
@@ -815,33 +812,26 @@ ROEViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Last Day For Which Paid' ), form_item_input, tab_roe_column1 );
 
 		//Final Pay Period Ending Date
-
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TDatePicker( {field: 'pay_period_end_date'} );
 		this.addEditFieldToColumn( $.i18n._( 'Final Pay Period Ending Date' ), form_item_input, tab_roe_column1 );
 
 		// Expected Date of Recall
-
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TDatePicker( {field: 'recall_date'} );
 		this.addEditFieldToColumn( $.i18n._( 'Expected Date of Recall' ), form_item_input, tab_roe_column1 )
 
 		// Serial No
-
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( {field: 'serial', width: 100} );
-
 		widgetContainer = $( "<div class='widget-h-box'></div>" );
 		label = $( "<span class='widget-right-label'> " + '(' + $.i18n._( 'Optional' ) + ')' + "</span>" );
-
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Serial No' ), form_item_input, tab_roe_column1, '', widgetContainer );
 
 		// Comments
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( {field: 'comments', width: 400} );
 		this.addEditFieldToColumn( $.i18n._( 'Comments' ), form_item_input, tab_roe_column1 );
 
@@ -854,6 +844,16 @@ ROEViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( {field: 'generate_pay_stub'} );
 		this.addEditFieldToColumn( $.i18n._( 'Generate Final Pay Stub' ), form_item_input, tab_roe_column1, '' );
+		
+		//Final Pay Stub End Date
+		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
+		form_item_input.TDatePicker( {field: 'final_pay_stub_end_date'} );
+		this.addEditFieldToColumn( $.i18n._( 'Final Pay Stub End Date' ), form_item_input, tab_roe_column1 );
+
+		//Final Pay Stub Transaction Date
+		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
+		form_item_input.TDatePicker( {field: 'final_pay_stub_transaction_date'} );
+		this.addEditFieldToColumn( $.i18n._( 'Final Pay Stub Transaction Date' ), form_item_input, tab_roe_column1 );
 
 		// Insurable Absence Policies
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -1026,7 +1026,7 @@ ROEViewController = BaseViewController.extend( {
 
 	getFormSetupData: function( form_item ) {
 
-		//Error: TypeError: form_item is undefined in https://ondemand1.timetrex.com/interface/html5/framework/jquery.min.js?v=8.0.0-20141117-091433 line 2 > eval line 1015
+		//Error: TypeError: form_item is undefined in /interface/html5/framework/jquery.min.js?v=8.0.0-20141117-091433 line 2 > eval line 1015
 		if ( !form_item ) {
 			form_item = {};
 		}
@@ -1181,8 +1181,9 @@ ROEViewController = BaseViewController.extend( {
 			$this.onSaveDone( result );
 
 		} else {
-			$this.setErrorTips( result );
 			$this.setErrorMenu();
+			$this.setErrorTips( result );
+
 		}
 	},
 
@@ -1254,11 +1255,15 @@ ROEViewController = BaseViewController.extend( {
 						$this.edit_view_ui_dic['first_date'].setValue( result.first_date );
 						$this.edit_view_ui_dic['last_date'].setValue( result.last_date );
 						$this.edit_view_ui_dic['pay_period_end_date'].setValue( result.pay_period_end_date );
+						$this.edit_view_ui_dic['final_pay_stub_end_date'].setValue( result.final_pay_stub_end_date );
+						$this.edit_view_ui_dic['final_pay_stub_transaction_date'].setValue( result.final_pay_stub_transaction_date );
 						$this.edit_view_ui_dic['pay_period_type_id'].setValue( result.pay_period_type_id );
 
 						$this.current_edit_record.first_date = result.first_date;
 						$this.current_edit_record.last_date = result.last_date;
 						$this.current_edit_record.pay_period_end_date = result.pay_period_end_date;
+						$this.current_edit_record.final_pay_stub_end_date = result.final_pay_stub_end_date;
+						$this.current_edit_record.final_pay_stub_transaction_date = result.final_pay_stub_transaction_date;
 						$this.current_edit_record.pay_period_type_id = result.pay_period_type_id;
 
 						$this.current_edit_record[key] = c_value;

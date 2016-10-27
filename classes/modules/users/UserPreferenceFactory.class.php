@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -82,6 +82,29 @@ class UserPreferenceFactory extends Factory {
 				}
 				break;
 			// I18n: We use fewer calendar options for non-en langs, as otherwise strtotime chokes.
+			case 'date_format_example':
+				$retval = array(
+											'd-M-y'		=> TTi18n::gettext('dd-mmm-yy'),
+											'd-M-Y'		=> TTi18n::gettext('dd-mmm-yyyy'),
+											'dMY'		=> TTi18n::gettext('ddmmmyyyy'),
+											'd/m/Y'		=> 'dd/mm/yyyy',
+											'd/m/y'		=> 'dd/mm/yy',
+											'd-m-y'		=> 'dd-mm-yy',
+											'd-m-Y'		=> 'dd-mm-yyyy',
+											'm/d/y'		=> 'mm/dd/yy',
+											'm/d/Y'		=> 'mm/dd/yyyy',
+											'm-d-y'		=> 'mm-dd-yy',
+											'm-d-Y'		=> 'mm-dd-yyyy',
+											'Y-m-d'		=> 'yyyy-mm-dd',
+											'M-d-y'		=> TTi18n::gettext('mmm-dd-yy'),
+											'M-d-Y'		=> TTi18n::gettext('mmm-dd-yyyy'),
+											'l, F d Y'	=> TTi18n::gettext('mmmmmmmm dd yyyy'),
+											'D, F d Y'	=> TTi18n::gettext('mmmmmmmm dd yyyy'),
+											'D, M d Y'	=> TTi18n::gettext('mm dd yyyy'),
+											'D, d-M-Y'	=> TTi18n::gettext('dd-mmm-yy'),
+											'D, dMY'	=> TTi18n::gettext('ddmmmyyyy')
+									);
+				break;
 			case 'other_date_format':
 				$retval = array(
 											'd/m/Y'		=> '25/02/2001 (dd/mm/yyyy)',
@@ -132,9 +155,17 @@ class UserPreferenceFactory extends Factory {
 											'G:i'		=> TTi18n::gettext('20:09'),
 											'g:i A T'	=> TTi18n::gettext('8:09 PM GMT'),
 											'G:i T'		=> TTi18n::gettext('20:09 GMT'),
-											//'Gis'			=> TTi18n::gettext('200959'), //This sorts to the top
 									);
 				break;
+			case 'time_format_example':
+				$retval = array(
+											'g:i A'		=> TTi18n::gettext('HH:MM AM'),
+											'g:i a'		=> TTi18n::gettext('HH:MM am'),
+											'G:i'		=> TTi18n::gettext('HH:MM'),
+											'g:i A T'	=> TTi18n::gettext('HH:MM AM TZ'),
+											'G:i T'		=> TTi18n::gettext('HH:MM TZ'),
+									);
+				break;			
 			case 'moment_time_format':
 				$retval = array(
 
@@ -1233,6 +1264,29 @@ class UserPreferenceFactory extends Factory {
 										2 => TTi18n::gettext('Enabled (UnAuthenticated)'),
 									);
 				break;
+			case 'schedule_icalendar_type':
+				$retval = array(
+										0 => TTi18n::gettext('Disabled'),
+										1 => TTi18n::gettext('Enabled (Authenticated)'),
+										2 => TTi18n::gettext('Enabled (UnAuthenticated)'),
+									);
+				break;
+			case 'default_login_screen':
+				$retval = array(
+										'Home' => TTi18n::gettext('Dashboard'),
+										'TimeSheet' => TTi18n::gettext('TimeSheet'),
+										'Schedule' => TTi18n::gettext('Schedule'),
+									);
+
+				global $current_user;
+				if ( isset($current_user) AND is_object($current_user) ) {
+					$permission = new Permission();
+					if ( $permission->Check('report', 'enabled', $current_user->getId(), $current_user->getCompany() ) ) {
+						$retval['SavedReport'] = TTi18n::gettext('Saved Reports');
+					}
+				}
+
+				break;
 			case 'language':
 				$retval = TTi18n::getLanguageArray();
 
@@ -1326,7 +1380,6 @@ class UserPreferenceFactory extends Factory {
 										//Ignore when setting.
 										'language_display' => FALSE,
 										'date_format_display' => FALSE,
-										'date_format_example' => FALSE,
 										'time_format_display' => FALSE,
 										'time_zone_display' => FALSE,
 										'time_unit_format_display' => FALSE,
@@ -1355,6 +1408,7 @@ class UserPreferenceFactory extends Factory {
 										'schedule_icalendar_alarm1_modified' => 'ScheduleIcalendarAlarm1Modified',
 										'schedule_icalendar_alarm2_modified' => 'ScheduleIcalendarAlarm2Modified',
 										'enable_save_timesheet_state' => 'EnableSaveTimesheetState',
+										'default_login_screen' => 'DefaultLoginScreen',
 										'deleted' => 'Deleted',
 										);
 		return $variable_function_map;
@@ -1400,12 +1454,6 @@ class UserPreferenceFactory extends Factory {
 		$value = trim($value);
 
 		$language_options = TTi18n::getLanguageArray();
-
-		$key = Option::getByValue($value, $language_options );
-		if ($key !== FALSE) {
-			$value = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'language',
 											$value,
 											TTi18n::gettext('Incorrect language'),
@@ -1420,22 +1468,7 @@ class UserPreferenceFactory extends Factory {
 	}
 
 	function getDateFormatExample() {
-		$options = Misc::trimSortPrefix( $this->getOptions('date_format') );
-
-		if ( isset($options[$this->getDateFormat()]) ) {
-			//Split at the space
-			$split_str = explode(' ', $options[$this->getDateFormat()] );
-			if ( isset( $split_str[0] ) ) {
-				if ( strlen( $split_str[0] ) <= 8 ) {
-					return TTi18n::gettext($options[$this->getDateFormat()]);
-				} else {
-					return TTi18n::gettext($split_str[0]);
-				}
-			}
-			return TTi18n::gettext($options[$this->getDateFormat()]);
-		}
-
-		return FALSE;
+		return Option::getByKey( $this->getDateFormat(), Misc::trimSortPrefix( $this->getOptions('date_format_example') ) );
 	}
 
 	function getJSDateFormat() {
@@ -1457,10 +1490,6 @@ class UserPreferenceFactory extends Factory {
 	function setDateFormat($date_format) {
 		$date_format = trim($date_format);
 
-		$key = Option::getByValue($date_format, $this->getOptions('date_format') );
-		if ($key !== FALSE) {
-			$date_format = $key;
-		}
 		Debug::text('Date Format: '. $date_format .' Type: '. gettype($date_format), __FILE__, __LINE__, __METHOD__, 10);
 
 		if (	$date_format == ''
@@ -1479,13 +1508,7 @@ class UserPreferenceFactory extends Factory {
 	}
 
 	function getTimeFormatExample() {
-		$options = $this->getOptions('time_format');
-
-		if ( isset($options[$this->getTimeFormat()]) ) {
-			return $options[$this->getTimeFormat()];
-		}
-
-		return FALSE;
+		return Misc::trimSortPrefix( Option::getByKey( $this->getTimeFormat(), $this->getOptions('time_format_example') ) );
 	}
 	function getJSTimeFormat() {
 		$js_time_format = Option::getByKey($this->getTimeFormat(), $this->getOptions('js_time_format') );
@@ -1505,11 +1528,6 @@ class UserPreferenceFactory extends Factory {
 	}
 	function setTimeFormat($time_format) {
 		$time_format = trim($time_format);
-
-		$key = Option::getByValue($time_format, $this->getOptions('time_format') );
-		if ($key !== FALSE) {
-			$time_format = $key;
-		}
 
 		if ( $this->Validator->inArrayKey(	'time_format',
 											$time_format,
@@ -1616,11 +1634,6 @@ class UserPreferenceFactory extends Factory {
 	function setTimeUnitFormat($time_unit_format) {
 		$time_unit_format = trim($time_unit_format);
 
-		$key = Option::getByValue($time_unit_format, $this->getOptions('time_unit_format') );
-		if ($key !== FALSE) {
-			$time_unit_format = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'time_unit_format',
 											$time_unit_format,
 											TTi18n::gettext('Incorrect time units'),
@@ -1644,13 +1657,11 @@ class UserPreferenceFactory extends Factory {
 	function setItemsPerPage($items_per_page) {
 		$items_per_page = trim($items_per_page);
 
-		if	($items_per_page != '' AND $items_per_page >= 5 AND $items_per_page <= 2000) {
-
+		$min = ( PRODUCTION == FALSE ) ? 1 : 5; //Allow lower numbers to help with testing.
+		if	($items_per_page != '' AND $items_per_page >= $min AND $items_per_page <= 2000) {
 			$this->data['items_per_page'] = $items_per_page;
-
 			return TRUE;
 		} else {
-
 			$this->Validator->isTrue(		'items_per_page',
 											FALSE,
 											TTi18n::gettext('Items per page must be between 5 and 2000'));
@@ -1689,11 +1700,6 @@ class UserPreferenceFactory extends Factory {
 	function setTimeSheetView($value) {
 		$value = trim($value);
 
-		$key = Option::getByValue($value, $this->getOptions('timesheet_view') );
-		if ($key !== FALSE) {
-			$value = $key;
-		}
-
 		if ( $this->Validator->inArrayKey(	'timesheet_view',
 											$value,
 											TTi18n::gettext('Incorrect default TimeSheet view'),
@@ -1716,11 +1722,6 @@ class UserPreferenceFactory extends Factory {
 	}
 	function setStartWeekDay($value) {
 		$value = trim($value);
-
-		$key = Option::getByValue($value, $this->getOptions('start_week_day') );
-		if ($key !== FALSE) {
-			$value = $key;
-		}
 
 		if ( $this->Validator->inArrayKey(	'start_week_day',
 											$value,
@@ -2044,7 +2045,38 @@ class UserPreferenceFactory extends Factory {
 
 		return TRUE;
 	}
-	function Validate() {
+	
+	function getDefaultLoginScreen() { //Default: Home
+		if ( isset($this->data['default_login_screen']) ) {
+			return $this->data['default_login_screen'];
+		}
+
+		return FALSE;
+	}
+	function setDefaultLoginScreen($value) {
+		$value = trim($value);
+
+		if	(
+				$value == ''
+				OR
+				(
+					$this->Validator->isLength(		'default_login_screen',
+													$value,
+													TTi18n::gettext('Default login screen is too short or too long'),
+													0,
+													250)
+				)
+				) {
+
+			$this->data['default_login_screen'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+	
+	function Validate( $ignore_warning = TRUE ) {
 		if ( $this->getUser() == '' ) {
 			$this->Validator->isTRUE(	'user',
 										FALSE,
@@ -2159,8 +2191,6 @@ class UserPreferenceFactory extends Factory {
 
 						//Add the *_display element for each of the below fields.
 						case 'language_display':
-						case 'date_format_display':
-						case 'time_format_display':
 						case 'time_zone_display':
 						case 'time_unit_format_display':
 						case 'timesheet_view_display':
@@ -2169,12 +2199,13 @@ class UserPreferenceFactory extends Factory {
 								case 'language_display':
 									$function = 'getLanguage';
 									break;
-								case 'date_format_display':
-									$function = 'getDateFormat';
-									break;
-								case 'time_format_display':
-									$function = 'getTimeFormat';
-									break;
+								//Use Date/Time format example functions below instead.
+								//case 'date_format_display':
+								//	$function = 'getDateFormat';
+								//	break;
+								//case 'time_format_display':
+								//	$function = 'getTimeFormat';
+								//	break;
 								case 'time_zone_display':
 									$function = 'getTimeZone';
 									break;
@@ -2194,8 +2225,11 @@ class UserPreferenceFactory extends Factory {
 								$data[$variable.'_display'] = Option::getByKey( $this->$function(), Misc::trimSortPrefix( $this->getOptions( $variable ) ) );
 							}
 							break;
-						case 'date_format_example':
+						case 'date_format_display':						
 							$data[$variable] = $this->getDateFormatExample();
+							break;
+						case 'time_format_display':						
+							$data[$variable] = $this->getTimeFormatExample();
 							break;
 						default:
 							if ( method_exists( $this, $function ) ) {

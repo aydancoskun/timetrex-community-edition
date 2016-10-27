@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -61,7 +61,7 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 		$this->rs = $this->getCache($id);
 		if ( $this->rs === FALSE ) {
 			$ph = array(
-						'id' => $id,
+						'id' => (int)$id,
 						);
 
 			$query = '
@@ -97,7 +97,7 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -105,7 +105,7 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 					from	'. $this->getTable() .'
 					where
 						company_id = ?
-						AND id in ('. $this->getListSQL($id, $ph) .')
+						AND id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -132,8 +132,9 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 		//$pgppf = new PolicyGroupPremiumPolicyFactory();
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	a.*,
@@ -166,7 +167,7 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 		}
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '
@@ -174,7 +175,7 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 					from	'. $this->getTable() .'
 					where
 						company_id = ?
-						AND pay_code_id in ('. $this->getListSQL($id, $ph) .')
+						AND pay_code_id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -201,14 +202,15 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
 					from	'. $this->getTable() .' as a
 					where	company_id = ?
-						AND pay_formula_policy_id in ('. $this->getListSQL($pay_formula_policy_id, $ph) .')
+						AND pay_formula_policy_id in ('. $this->getListSQL( $pay_formula_policy_id, $ph, 'int' ) .')
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -235,14 +237,15 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => (int)$id,
 					);
+
 
 		$query = '
 					select	*
 					from	'. $this->getTable() .' as a
 					where	company_id = ?
-						AND contributing_shift_policy_id in ('. $this->getListSQL($contributing_shift_policy_id, $ph) .')
+						AND contributing_shift_policy_id in ('. $this->getListSQL( $contributing_shift_policy_id, $ph, 'int' ) .')
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -270,7 +273,7 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 		$ppf = new PremiumPolicyFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					);
 
 		$query = '
@@ -315,7 +318,7 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 		$ppf = new PremiumPolicyFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					);
 
 		//Add is_policy_group so we know which policies are assigned to policy groups directly.
@@ -337,7 +340,7 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 					from
 							'. $ppf->getTable() .' as e
 					where
-							e.id in ('. $this->getListSQL($id, $ph) .')
+							e.id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 							AND e.deleted = 0
 						';
 
@@ -367,7 +370,7 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 		$ppf = new PremiumPolicyFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
+					'user_id' => (int)$user_id,
 					);
 
 		//Make sure we don't include duplicate premium policies
@@ -390,7 +393,7 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 							from	'. $this->getTable() .' as z,
 									'. $cgmf->getTable() .' as c
 							WHERE	c.map_id = z.id AND c.object_type_id = 125
-									AND c.object_id in ('. $this->getListSQL($id, $ph) .')
+									AND c.object_id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 									AND z.deleted = 0
 					) as tmp
 						';
@@ -447,7 +450,7 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 		$spf = new SchedulePolicyFactory();
 
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = '

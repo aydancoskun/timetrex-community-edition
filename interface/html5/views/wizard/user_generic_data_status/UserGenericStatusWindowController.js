@@ -45,8 +45,6 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 		$this.getDefaultDisplayColumns( function() {
 			$this.setSelectLayout();
 			$this.search();
-			//set right click menu to list view grid
-			$this.initRightClickMenu();
 
 		} );
 	},
@@ -85,7 +83,7 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 		filter.filter_data.batch_id = this.batch_id;
 		filter.filter_items_per_page = 0; // Default to 0 to load user preference defined
 
-		this.api['getUserGenericStatus']( filter, {onResult: function( result ) {
+		this.api['getUserGenericStatus']( filter, true, {onResult: function( result ) {
 
 			var result_data = result.getResult();
 			result_data = Global.formatGridData( result_data, $this.api.key_name );

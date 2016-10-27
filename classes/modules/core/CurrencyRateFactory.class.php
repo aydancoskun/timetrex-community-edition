@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -142,7 +142,7 @@ class CurrencyRateFactory extends Factory {
 		return FALSE;
 	}
 	function setDateStamp($epoch) {
-		$epoch = trim($epoch);
+		$epoch = ( !is_int($epoch) ) ? trim($epoch) : $epoch; //Dont trim integer values, as it changes them to strings.
 
 		if	( $epoch != ''
 				AND
@@ -214,13 +214,13 @@ class CurrencyRateFactory extends Factory {
 		return FALSE;
 	}
 
-	function Validate() {
+	function Validate( $ignore_warning = TRUE ) {
 		if ( $this->getDeleted() == FALSE ) {
-			if ( $this->validate_only == FALSE AND $this->getDateStamp() == FALSE ) {
+			if ( $this->Validator->getValidateOnly() == FALSE AND $this->getDateStamp() == FALSE ) {
 				$this->Validator->isTrue(	'date_stamp',
 											FALSE,
 											TTi18n::gettext('Date not specified') );
-			} else if ( $this->validate_only == FALSE AND $this->isUnique() == FALSE ) {
+			} else if ( $this->Validator->getValidateOnly() == FALSE AND $this->isUnique() == FALSE ) {
 				$this->Validator->isTrue(	'date_stamp',
 											FALSE,
 											TTi18n::gettext('Currency rate already exists for this date') );

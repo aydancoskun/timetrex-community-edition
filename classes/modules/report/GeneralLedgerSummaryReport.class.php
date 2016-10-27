@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ * TimeTrex is a Workforce Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -21,7 +21,7 @@
  * 02110-1301 USA.
  *
  * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
- * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ * #292 West Kelowna, BC V4T 2E9, Canada or at email address info@timetrex.com.
  *
  * The interactive user interfaces in modified source and object code versions
  * of this program must display Appropriate Legal Notices, as required under
@@ -453,26 +453,8 @@ class GeneralLedgerSummaryReport extends Report {
 		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
 
-		if ( $this->getPermissionObject()->Check('pay_stub', 'view') == FALSE OR $this->getPermissionObject()->Check('wage', 'view') == FALSE ) {
-			$hlf = TTnew( 'HierarchyListFactory' );
-			$permission_children_ids = $wage_permission_children_ids = $hlf->getHierarchyChildrenByCompanyIdAndUserIdAndObjectTypeID( $this->getUserObject()->getCompany(), $this->getUserObject()->getID() );
-			Debug::Arr($permission_children_ids, 'Permission Children Ids:', __FILE__, __LINE__, __METHOD__, 10);
-		} else {
-			//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
-			$permission_children_ids = array();
-			$wage_permission_children_ids = array();
-		}
-		if ( $this->getPermissionObject()->Check('pay_stub', 'view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('pay_stub', 'view_child') == FALSE ) {
-				$permission_children_ids = array();
-			}
-			if ( $this->getPermissionObject()->Check('pay_stub', 'view_own') ) {
-				$permission_children_ids[] = $this->getUserObject()->getID();
-			}
-
-			$filter_data['permission_children_ids'] = $permission_children_ids;
-		}
-
+		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
+		
 		$this->enable_time_based_distribution = FALSE;
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 		$psealf->getByCompanyId( $this->getUserObject()->getCompany() );
@@ -1075,6 +1057,11 @@ class GeneralLedgerSummaryReport extends Report {
 
 			$gle = new GeneralLedgerExport();
 			$gle->setFileFormat( $format );
+			if ( strtolower( $format ) == 'csv' ) {
+				$ignore_balance_check = TRUE; //Dont be so strict on the balance, there may be cases where they just want the data out, even if it doesn't balance for other purposes.
+			} else {
+				$ignore_balance_check = FALSE; //Dont be so strict on the balance, there may be cases where they just want the data out, even if it doesn't balance for other purposes.
+			}
 
 			$prev_group_key = NULL;
 			$i = 0;
@@ -1106,7 +1093,7 @@ class GeneralLedgerSummaryReport extends Report {
 					}
 
 					Debug::Text('Starting new JE: Group Key: '. $group_key, __FILE__, __LINE__, __METHOD__, 10);
-					$je = new GeneralLedgerExport_JournalEntry();
+					$je = new GeneralLedgerExport_JournalEntry( $ignore_balance_check );
 					if ( isset($row['pay_stub_transaction_date']) ) {
 						$je->setDate( $row['pay_stub_transaction_date'] );
 					} elseif ( isset($row['transaction-date_stamp']) ) {
@@ -1126,7 +1113,7 @@ class GeneralLedgerSummaryReport extends Report {
 
 				if ( isset($row['debit_amount']) AND $row['debit_amount'] > 0 ) {
 					Debug::Text('Adding Debit Record for: '. $row['debit_amount'], __FILE__, __LINE__, __METHOD__, 10);
-					$record = new GeneralLedgerExport_Record();
+					$record = new GeneralLedgerExport_Record( $ignore_balance_check );
 					$record->setAccount( $row['account'] );
 					$record->setType( 'debit' );
 					$record->setAmount( $row['debit_amount'] );
@@ -1134,7 +1121,7 @@ class GeneralLedgerSummaryReport extends Report {
 				}
 				if ( isset($row['credit_amount']) AND $row['credit_amount'] > 0 ) {
 					Debug::Text('Adding Credit Record for: '. $row['credit_amount'], __FILE__, __LINE__, __METHOD__, 10);
-					$record = new GeneralLedgerExport_Record();
+					$record = new GeneralLedgerExport_Record( $ignore_balance_check );
 					$record->setAccount( $row['account'] );
 					$record->setType( 'credit' );
 					$record->setAmount( $row['credit_amount'] );

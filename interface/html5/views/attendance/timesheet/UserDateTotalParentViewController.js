@@ -141,7 +141,7 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScriptAsync( 'views/attendance/timesheet/UserDateTotalViewController.js', function() {
+		Global.loadScript( 'views/attendance/timesheet/UserDateTotalViewController.js', function() {
 			var tab = $this.edit_view_tab.find( '#' + tab_id );
 			var firstColumn = tab.find( '.first-column-sub-view' );
 			Global.trackView( 'Sub' + 'UserDateTotal' + 'View' );

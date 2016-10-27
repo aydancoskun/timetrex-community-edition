@@ -2,6 +2,8 @@ var LocalCacheData = function() {
 
 };
 
+LocalCacheData.view_layout_cache = {};
+
 LocalCacheData.i18nDic = null;
 
 LocalCacheData.notification_bar = null;
@@ -127,10 +129,9 @@ LocalCacheData.getLocalCache = function( key, format ) {
 		return LocalCacheData[key];
 
 	} else if ( !LocalCacheData[key] && sessionStorage[key] ) {
-
 		var result = sessionStorage.getItem( key );
 
-		if ( format === 'JSON' ) {
+		if ( result !== 'undefined' && format === 'JSON' ) {
 			result = JSON.parse( result )
 		}
 

@@ -67,9 +67,10 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 			{option_name: 'time_unit_format', field_name: null, api: this.api},
 			{option_name: 'time_zone', field_name: null, api: this.api},
 			{option_name: 'start_week_day', field_name: null, api: this.api},
-			{option_name: 'schedule_icalendar_type', field_name: null, api: this.api}
+			{option_name: 'schedule_icalendar_type', field_name: null, api: this.api},
+			{option_name: 'default_login_screen', field_name: null, api: this.api}
 
-		]
+		];
 
 		this.initDropDownOptions( options, function( result ) {
 			if ( callBack ) {
@@ -85,21 +86,25 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		filter.filter_data = {};
 		filter.filter_data.user_id = LocalCacheData.loginUser.id;
 
-		$this.api['get' + $this.api.key_name]( filter, {onResult: function( result ) {
+		$this.api['get' + $this.api.key_name]( filter, {
+			onResult: function( result ) {
 
-			var result_data = result.getResult();
-			
-			if ( Global.isArray( result_data ) && Global.isSet( result_data[0] ) ) {
-				callBack( result_data[0] );
-			} else {
-				$this.api['get' + $this.api.key_name + 'DefaultData']( {onResult: function( newResult ) {
-					var result_data = newResult.getResult();
-					callBack( result_data );
+				var result_data = result.getResult();
 
-				}} );
+				if ( Global.isArray( result_data ) && Global.isSet( result_data[0] ) ) {
+					callBack( result_data[0] );
+				} else {
+					$this.api['get' + $this.api.key_name + 'DefaultData']( {
+						onResult: function( newResult ) {
+							var result_data = newResult.getResult();
+							callBack( result_data );
+
+						}
+					} );
+				}
+
 			}
-
-		}} );
+		} );
 	},
 
 	setCurrentEditRecordData: function() {
@@ -201,29 +206,29 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 	onStatusChange: function() {
 
 		if ( this.current_edit_record.schedule_icalendar_type_id === 0 ) {
-			this.edit_view_form_item_dic['calendar_url'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm1_working'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm2_working'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm1_absence'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm2_absence'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm1_modified'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm2_modified'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['shifts_scheduled_to_work'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['shifts_scheduled_absent'].css( 'display', 'none' );
-			this.edit_view_form_item_dic['modified_shifts'].css( 'display', 'none' );
+			this.detachElement( 'calendar_url' );
+			this.detachElement( 'schedule_icalendar_alarm1_working' );
+			this.detachElement( 'schedule_icalendar_alarm2_working' );
+			this.detachElement( 'schedule_icalendar_alarm1_absence' );
+			this.detachElement( 'schedule_icalendar_alarm2_absence' );
+			this.detachElement( 'schedule_icalendar_alarm1_modified' );
+			this.detachElement( 'schedule_icalendar_alarm2_modified' );
+			this.detachElement( 'shifts_scheduled_to_work' );
+			this.detachElement( 'shifts_scheduled_absent' );
+			this.detachElement( 'modified_shifts' );
 
 		} else {
 			this.setCalendarURL();
-			this.edit_view_form_item_dic['calendar_url'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm1_working'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm2_working'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm1_absence'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm2_absence'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm1_modified'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['schedule_icalendar_alarm2_modified'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['shifts_scheduled_to_work'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['shifts_scheduled_absent'].css( 'display', 'block' );
-			this.edit_view_form_item_dic['modified_shifts'].css( 'display', 'block' );
+			this.attachElement( 'calendar_url' );
+			this.attachElement( 'schedule_icalendar_alarm1_working' );
+			this.attachElement( 'schedule_icalendar_alarm2_working' );
+			this.attachElement( 'schedule_icalendar_alarm1_absence' );
+			this.attachElement( 'schedule_icalendar_alarm2_absence' );
+			this.attachElement( 'schedule_icalendar_alarm1_modified' );
+			this.attachElement( 'schedule_icalendar_alarm2_modified' );
+			this.attachElement( 'shifts_scheduled_to_work' );
+			this.attachElement( 'shifts_scheduled_absent' );
+			this.attachElement( 'modified_shifts' );
 		}
 
 		this.editFieldResize();
@@ -234,17 +239,19 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		if ( !Global.isSet( widget ) ) {
 			widget = this.edit_view_ui_dic['calendar_url'];
 		}
-		this.api['getScheduleIcalendarURL']( this.current_edit_record.user_name, this.current_edit_record.schedule_icalendar_type_id, {onResult: function( result ) {
-			var result_data = result.getResult();
-			widget.setValue( ServiceCaller.rootURL + result_data );
+		this.api['getScheduleIcalendarURL']( this.current_edit_record.user_name, this.current_edit_record.schedule_icalendar_type_id, {
+			onResult: function( result ) {
+				var result_data = result.getResult();
+				widget.setValue( ServiceCaller.rootURL + result_data );
 
-			widget.unbind( 'click' ); // First unbind all click events, otherwise, when we change the schedule icalendar type this will trigger several times click events.
+				widget.unbind( 'click' ); // First unbind all click events, otherwise, when we change the schedule icalendar type this will trigger several times click events.
 
-			widget.click( function() {
-				window.open( widget.text() );
-			} );
+				widget.click( function() {
+					window.open( widget.text() );
+				} );
 
-		}} );
+			}
+		} );
 
 	},
 
@@ -286,38 +293,45 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 //		}
 	},
 
-	onSaveClick: function() {
-
+	onSaveClick: function( ignoreWarning ) {
 		var $this = this;
 		var record = this.current_edit_record;
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
 		LocalCacheData.current_doing_context_action = 'save';
-		this.api['set' + this.api.key_name]( record, {onResult: function( result ) {
-			if ( result.isValid() ) {
-				var result_data = result.getResult();
-				if ( result_data === true ) {
-					$this.refresh_id = $this.current_edit_record.id;
-				} else if ( result_data > 0 ) {
-					$this.refresh_id = result_data
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
+			onResult: function( result ) {
+				if ( result.isValid() ) {
+					var result_data = result.getResult();
+					if ( result_data === true ) {
+						$this.refresh_id = $this.current_edit_record.id;
+					} else if ( result_data > 0 ) {
+						$this.refresh_id = result_data
+					}
+
+					$.cookie( 'language', $this.current_edit_record.language, {
+						expires: 10000,
+						path: LocalCacheData.loginData.base_url
+					} );
+					LocalCacheData.setI18nDic( null );
+
+					Global.updateUserPreference( function() {
+						window.location.reload( true );
+					}, $.i18n._( 'Updating preferences, reloading' ) + '...' );
+
+					$this.current_edit_record = null;
+					$this.removeEditView();
+
+					IndexViewController.setNotificationBar( 'preference' );
+
+				} else {
+					$this.setErrorTips( result );
+					$this.setErrorMenu();
 				}
 
-				$.cookie( 'language', $this.current_edit_record.language, {expires: 10000, path: LocalCacheData.loginData.base_url} );
-				LocalCacheData.setI18nDic( null );
-
-				Global.updateUserPreference( function() {
-					window.location.reload( true );
-				}, $.i18n._( 'Updating preferences, reloading' ) + '...' );
-
-				$this.current_edit_record = null;
-				$this.removeEditView();
-
-				IndexViewController.setNotificationBar( 'preference' );
-
-			} else {
-				$this.setErrorTips( result );
-				$this.setErrorMenu();
 			}
-
-		}} );
+		} );
 	},
 
 	setEditMenuSaveIcon: function( context_btn, pId ) {
@@ -410,6 +424,12 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		form_item_input.TTextInput( {field: 'items_per_page', width: 50} );
 		this.addEditFieldToColumn( $.i18n._( 'Rows per page' ), form_item_input, tab_preferences_column1 );
 
+		// Default Login Screen
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( {field: 'default_login_screen'} );
+		form_item_input.setSourceData( Global.addFirstItemToArray( $this.default_login_screen_array ) );
+		this.addEditFieldToColumn( $.i18n._( 'Default Screen' ), form_item_input, tab_preferences_column1 );
+
 		// Save TimeSheet State
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( {field: 'enable_save_timesheet_state'} );
@@ -464,13 +484,13 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 
 		// Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'schedule_icalendar_type_id' } );
+		form_item_input.TComboBox( {field: 'schedule_icalendar_type_id'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.schedule_icalendar_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_schedule_synchornization_column1, '' );
 
 		// Calendar URL
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'calendar_url' } );
+		form_item_input.TText( {field: 'calendar_url'} );
 		form_item_input.addClass( 'link' );
 		this.addEditFieldToColumn( $.i18n._( 'Calendar URL' ), form_item_input, tab_schedule_synchornization_column1, '', null, true );
 
@@ -567,6 +587,5 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Alarm 2' ), form_item_input, tab_schedule_synchornization_column1, '', widgetContainer, true );
 
 	}
-
 
 } );

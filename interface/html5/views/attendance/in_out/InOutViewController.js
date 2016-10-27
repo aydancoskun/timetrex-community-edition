@@ -76,26 +76,6 @@ InOutViewController = BaseViewController.extend( {
 
 	},
 
-	setFocusToFirstInput: function() {
-		if ( !this.is_viewing ) {
-			for ( var key in this.edit_view_ui_dic ) {
-
-				if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
-					continue;
-				}
-				var widget = this.edit_view_ui_dic[key];
-
-				if ( widget.hasClass( 't-text-input' ) && widget.is( ':visible' ) === true && !widget.attr( 'readonly' ) ) {
-					widget.focus();
-					widget[0].select();
-
-					break;
-				}
-
-			}
-		}
-	},
-
 	jobUIValidate: function() {
 		if ( PermissionManager.validate( "job", 'enabled' ) &&
 			PermissionManager.validate( "punch", 'edit_job' ) ) {
@@ -204,7 +184,13 @@ InOutViewController = BaseViewController.extend( {
 			this.show_node_ui = false;
 		}
 
-		var result = new (APIFactory.getAPIClass( 'APICompany' ))().isBranchAndDepartmentAndJobAndJobItemEnabled( {async: false} );
+		var result = false;
+
+		// Error: Uncaught TypeError: (intermediate value).isBranchAndDepartmentAndJobAndJobItemEnabled is not a function on line 207
+		var company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
+		if ( company_api ) {
+			result = company_api.isBranchAndDepartmentAndJobAndJobItemEnabled( {async: false} );
+		}
 
 		//tried to fix Unable to get property 'getResult' of undefined or null reference, added if(!result)
 		if ( !result ) {
@@ -268,36 +254,48 @@ InOutViewController = BaseViewController.extend( {
 		var api_station = new (APIFactory.getAPIClass( 'APIStation' ))();
 
 		if ( station_id ) {
-			api_station.getCurrentStation( station_id, '10', {onResult: function( result ) {
-				doNext( result );
-			}} );
+			api_station.getCurrentStation( station_id, '10', {
+				onResult: function( result ) {
+					doNext( result );
+				}
+			} );
 		} else {
-			api_station.getCurrentStation( '', '10', {onResult: function( result ) {
-				doNext( result );
-			}} );
+			api_station.getCurrentStation( '', '10', {
+				onResult: function( result ) {
+					doNext( result );
+				}
+			} );
 		}
 
 		function doNext( result ) {
+
+			// Error: Uncaught TypeError: undefined is not a function in /interface/html5/#!m=TimeSheet&date=20150324&user_id=36135&sm=InOut line 285
+			if ( !$this.api || typeof $this.api['getUserPunch'] !== 'function' ) {
+				return;
+			}
+
 			var res_data = result.getResult();
 			$.cookie( 'StationID', res_data, {expires: 10000, path: LocalCacheData.cookie_path} );
 			LocalCacheData.setStationID( res_data );
 
-			$this.api.getUserPunch( {onResult: function( result ) {
-				var result_data = result.getResult();
+			$this.api.getUserPunch( {
+				onResult: function( result ) {
+					var result_data = result.getResult();
 
-				if ( !result.isValid() ) {
-					TAlertManager.showErrorAlert( result );
-					$this.onCancelClick();
-					return
+					if ( !result.isValid() ) {
+						TAlertManager.showErrorAlert( result );
+						$this.onCancelClick();
+						return
+					}
+
+					if ( Global.isSet( result_data ) ) {
+						callBack( result_data );
+					} else {
+						$this.onCancelClick();
+					}
+
 				}
-
-				if ( Global.isSet( result_data ) ) {
-					callBack( result_data );
-				} else {
-					$this.onCancelClick();
-				}
-
-			}} );
+			} );
 
 		}
 
@@ -345,11 +343,13 @@ InOutViewController = BaseViewController.extend( {
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.setJobItemValueWhenJobChanged( target.getValue( true ) );
+					this.edit_view_ui_dic['job_quick_search'].setCheckBox(true);
 				}
 				break;
 			case 'job_item_id':
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? (target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '') : '' );
+					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
 				}
 				break;
 
@@ -412,6 +412,8 @@ InOutViewController = BaseViewController.extend( {
 		var job_item_widget = $this.edit_view_ui_dic['job_item_id'];
 		var current_job_item_id = job_item_widget.getValue();
 		job_item_widget.setSourceData( null );
+		job_item_widget.setCheckBox(true);
+		this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
 		var args = {};
 		args.filter_data = {status_id: 10, job_id: $this.current_edit_record.job_id};
 		$this.edit_view_ui_dic['job_item_id'].setDefaultArgs( args );
@@ -422,17 +424,19 @@ InOutViewController = BaseViewController.extend( {
 
 			new_arg.filter_data.id = current_job_item_id;
 			new_arg.filter_columns = $this.edit_view_ui_dic['job_item_id'].getColumnFilter();
-			$this.job_item_api.getJobItem( new_arg, {onResult: function( task_result ) {
-				var data = task_result.getResult();
+			$this.job_item_api.getJobItem( new_arg, {
+				onResult: function( task_result ) {
+					var data = task_result.getResult();
 
-				if ( data.length > 0 ) {
-					job_item_widget.setValue( current_job_item_id );
-					$this.current_edit_record.job_item_id = current_job_item_id;
-				} else {
-					setDefaultData();
+					if ( data.length > 0 ) {
+						job_item_widget.setValue( current_job_item_id );
+						$this.current_edit_record.job_item_id = current_job_item_id;
+					} else {
+						setDefaultData();
+					}
+
 				}
-
-			}} )
+			} )
 
 		} else {
 			setDefaultData();
@@ -464,39 +468,47 @@ InOutViewController = BaseViewController.extend( {
 
 			args.filter_data = {manual_id: value, user_id: this.current_edit_record.user_id, status_id: "10"};
 
-			this.job_api.getJob( args, {onResult: function( result ) {
+			this.job_api.getJob( args, {
+				onResult: function( result ) {
 
-				var result_data = result.getResult();
+					var result_data = result.getResult();
 
-				if ( result_data.length > 0 ) {
-					$this.edit_view_ui_dic['job_id'].setValue( result_data[0].id );
-					$this.current_edit_record.job_id = result_data[0].id;
-					$this.setJobItemValueWhenJobChanged( result_data[0] );
+					if ( result_data.length > 0 ) {
+						$this.edit_view_ui_dic['job_id'].setValue( result_data[0].id );
+						$this.current_edit_record.job_id = result_data[0].id;
+						$this.setJobItemValueWhenJobChanged( result_data[0] );
 
-				} else {
-					$this.edit_view_ui_dic['job_id'].setValue( '' );
-					$this.current_edit_record.job_id = false;
-					$this.setJobItemValueWhenJobChanged( null );
+					} else {
+						$this.edit_view_ui_dic['job_id'].setValue( '' );
+						$this.current_edit_record.job_id = false;
+						$this.setJobItemValueWhenJobChanged( null );
+
+					}
 
 				}
-
-			}} );
+			} );
+			$this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
+			$this.edit_view_ui_dic['job_id'].setCheckBox( true );
 		} else if ( key === 'job_item_quick_search' ) {
 
 			args.filter_data = {manual_id: value, job_id: this.current_edit_record.job_id, status_id: "10"};
 
-			this.job_item_api.getJobItem( args, {onResult: function( result ) {
-				var result_data = result.getResult();
-				if ( result_data.length > 0 ) {
-					$this.edit_view_ui_dic['job_item_id'].setValue( result_data[0].id );
-					$this.current_edit_record.job_item_id = result_data[0].id;
+			this.job_item_api.getJobItem( args, {
+				onResult: function( result ) {
+					var result_data = result.getResult();
+					if ( result_data.length > 0 ) {
+						$this.edit_view_ui_dic['job_item_id'].setValue( result_data[0].id );
+						$this.current_edit_record.job_item_id = result_data[0].id;
 
-				} else {
-					$this.edit_view_ui_dic['job_item_id'].setValue( '' );
-					$this.current_edit_record.job_item_id = false;
+					} else {
+						$this.edit_view_ui_dic['job_item_id'].setValue( '' );
+						$this.current_edit_record.job_item_id = false;
+					}
+
 				}
-
-			}} );
+			} );
+			this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
+			this.edit_view_ui_dic['job_item_id'].setCheckBox(true);
 		}
 
 	},
@@ -531,40 +543,47 @@ InOutViewController = BaseViewController.extend( {
 
 		record = this.uniformVariable( record );
 
-		this.api.setUserPunch( record, true, {onResult: function( result ) {
-			$this.validateResult( result );
+		this.api.setUserPunch( record, true, {
+			onResult: function( result ) {
+				$this.validateResult( result );
 
-		}} );
+			}
+		} );
 	},
 
-	onSaveClick: function() {
-
+	onSaveClick: function( ignoreWarning ) {
 		var $this = this;
+		if ( !Global.isSet( ignoreWarning ) ) {
+			ignoreWarning = false;
+		}
 		var record = this.current_edit_record;
 		LocalCacheData.current_doing_context_action = 'save';
-		this.api.setUserPunch( record, {onResult: function( result ) {
+		this.api.setUserPunch( record, false, ignoreWarning, {
+			onResult: function( result ) {
 
-			if ( result.isValid() ) {
-				var result_data = result.getResult();
-				if ( result_data === true ) {
-					$this.refresh_id = $this.current_edit_record.id;
-				} else if ( result_data > 0 ) {
-					$this.refresh_id = result_data
+				if ( result.isValid() ) {
+					var result_data = result.getResult();
+					// Error: TypeError: $this.current_edit_record is null in /interface/html5/framework/jquery.min.js?v=8.0.6-20150417-082707 line 2 > eval line 550 
+					if ( result_data === true && $this.current_edit_record ) {
+						$this.refresh_id = $this.current_edit_record.id;
+					} else if ( result_data > 0 ) {
+						$this.refresh_id = result_data
+					}
+
+					$this.current_edit_record = null;
+					$this.removeEditView();
+
+					if ( LocalCacheData.current_open_primary_controller.viewId === 'TimeSheet' ) {
+						LocalCacheData.current_open_primary_controller.search();
+					}
+
+				} else {
+					$this.setErrorTips( result );
+					$this.setErrorMenu();
 				}
 
-				$this.current_edit_record = null;
-				$this.removeEditView();
-
-				if ( LocalCacheData.current_open_primary_controller.viewId === 'TimeSheet' ) {
-					LocalCacheData.current_open_primary_controller.search();
-				}
-
-			} else {
-				$this.setErrorTips( result );
-				$this.setErrorMenu();
 			}
-
-		}} );
+		} );
 	},
 
 	setErrorMenu: function() {
@@ -631,7 +650,6 @@ InOutViewController = BaseViewController.extend( {
 			'tab_audit': $.i18n._( 'Audit' )
 		} );
 
-
 		//Tab 0 start
 
 		var tab_punch = this.edit_view_tab.find( '#tab_punch' );
@@ -650,13 +668,14 @@ InOutViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 
 		form_item_input.TText( {
-			field: 'user_id_readonly'} );
+			field: 'user_id_readonly'
+		} );
 		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_punch_column1, '' );
 
 		// Time
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input = Global.loadWidgetByName( FormItemType.TIME_PICKER );
 
-		form_item_input.TTextInput( {field: 'punch_time'} );
+		form_item_input.TTimePicker( {field: 'punch_time'} );
 
 		this.addEditFieldToColumn( $.i18n._( 'Time' ), form_item_input, tab_punch_column1 );
 
@@ -676,7 +695,7 @@ InOutViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Transfer' ), form_item_input, tab_punch_column1, '', null, true );
 
 		if ( !this.show_transfer_ui ) {
-			this.edit_view_form_item_dic.transfer.hide();
+			this.detachElement('transfer');
 		}
 
 		// Punch
@@ -704,11 +723,12 @@ InOutViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'branch_id'} );
+			field: 'branch_id'
+		} );
 		this.addEditFieldToColumn( $.i18n._( 'Branch' ), form_item_input, tab_punch_column1, '', null, true );
 
 		if ( !this.show_branch_ui ) {
-			this.edit_view_form_item_dic.branch_id.hide();
+			this.detachElement('branch_id');
 		}
 
 		// Department
@@ -721,11 +741,12 @@ InOutViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.DEPARTMENT,
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'department_id'} );
+			field: 'department_id'
+		} );
 		this.addEditFieldToColumn( $.i18n._( 'Department' ), form_item_input, tab_punch_column1, '', null, true );
 
 		if ( !this.show_department_ui ) {
-			this.edit_view_form_item_dic.department_id.hide();
+			this.detachElement('department_id')
 		}
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
@@ -745,7 +766,8 @@ InOutViewController = BaseViewController.extend( {
 
 					if ( val ) job_coder.setValue( val.manual_id );
 				}),
-				field: 'job_id'} );
+				field: 'job_id'
+			} );
 
 			widgetContainer = $( "<div class='widget-h-box'></div>" );
 
@@ -758,7 +780,7 @@ InOutViewController = BaseViewController.extend( {
 			this.addEditFieldToColumn( $.i18n._( 'Job' ), [form_item_input, job_coder], tab_punch_column1, '', widgetContainer, true );
 
 			if ( !this.show_job_ui ) {
-				this.edit_view_form_item_dic.job_id.hide();
+				this.detachElement('job_id');
 			}
 
 			// Task
@@ -774,7 +796,8 @@ InOutViewController = BaseViewController.extend( {
 				setRealValueCallBack: (function( val ) {
 					if ( val ) job_item_coder.setValue( val.manual_id );
 				}),
-				field: 'job_item_id'} );
+				field: 'job_item_id'
+			} );
 
 			widgetContainer = $( "<div class='widget-h-box'></div>" );
 
@@ -787,7 +810,7 @@ InOutViewController = BaseViewController.extend( {
 			this.addEditFieldToColumn( $.i18n._( 'Task' ), [form_item_input, job_item_coder], tab_punch_column1, '', widgetContainer, true );
 
 			if ( !this.show_job_item_ui ) {
-				this.edit_view_form_item_dic.job_item_id.hide();
+				this.detachElement('job_item_id');
 			}
 
 		}
@@ -818,7 +841,7 @@ InOutViewController = BaseViewController.extend( {
 			this.addEditFieldToColumn( $.i18n._( 'Quantity' ), [good, bad], tab_punch_column1, '', widgetContainer, true );
 
 			if ( !this.show_bad_quantity_ui && !this.show_good_quantity_ui ) {
-				this.edit_view_form_item_dic.quantity.hide();
+				this.detachElement('quantity');
 			} else {
 				if ( !this.show_bad_quantity_ui ) {
 					bad_label.hide();
@@ -836,14 +859,14 @@ InOutViewController = BaseViewController.extend( {
 		//Note
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 
-		form_item_input.TTextArea( {field: 'note', width: '100%' } );
+		form_item_input.TTextArea( {field: 'note', width: '100%'} );
 
 		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_punch_column1, '', null, true, true );
 
 		form_item_input.parent().width( '45%' );
 
 		if ( !this.show_node_ui ) {
-			this.edit_view_form_item_dic.note.hide();
+			this.detachElement('note');
 		}
 
 	},
