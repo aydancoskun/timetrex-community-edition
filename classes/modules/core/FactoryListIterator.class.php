@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11830 $
- * $Id: FactoryListIterator.class.php 11830 2013-12-28 22:10:01Z mikeb $
- * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
+ * $Revision: 11809 $
+ * $Id: FactoryListIterator.class.php 11809 2013-12-26 19:03:25Z mikeb $
+ * $Date: 2013-12-26 11:03:25 -0800 (Thu, 26 Dec 2013) $
  */
 
 /**

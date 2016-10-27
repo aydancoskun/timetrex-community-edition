@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12091 $
- * $Id: PayStubTest.php 12091 2014-01-21 16:33:40Z mikeb $
- * $Date: 2014-01-21 08:33:40 -0800 (Tue, 21 Jan 2014) $
+ * $Revision: 12077 $
+ * $Id: PayStubTest.php 12077 2014-01-21 00:59:57Z mikeb $
+ * $Date: 2014-01-20 16:59:57 -0800 (Mon, 20 Jan 2014) $
  */
 require_once('PHPUnit/Framework/TestCase.php');
 

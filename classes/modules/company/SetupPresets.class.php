@@ -1463,7 +1463,7 @@ class SetupPresets extends Factory {
 			$cdf = TTnew( 'CompanyDeductionFactory' );
 
 			$data['id'] = $cdf->getNextInsertId();
-			Debug::Arr($data, 'zzCompany Deduction Data: ', __FILE__, __LINE__, __METHOD__, 10);
+			//Debug::Arr($data, 'zzzCompany Deduction Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			$cdf->setObjectFromArray( $data );
 			if ( $cdf->isValid() ) {

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12026 $
- * $Id: PayStubAmendmentFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
- * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
+ * $Revision: 12407 $
+ * $Id: PayStubAmendmentFactory.class.php 12407 2014-02-19 20:17:42Z mikeb $
+ * $Date: 2014-02-19 12:17:42 -0800 (Wed, 19 Feb 2014) $
  */
 require_once( 'Numbers/Words.php');
 
@@ -50,6 +50,7 @@ class PayStubAmendmentFactory extends Factory {
 	var $user_obj = NULL;
 	var $pay_stub_entry_account_link_obj = NULL;
 	var $pay_stub_entry_name_obj = NULL;
+	var $pay_stub_obj = NULL;
 	var $percent_amount_entry_name_obj = NULL;
 
 
@@ -195,7 +196,22 @@ class PayStubAmendmentFactory extends Factory {
 	function getUserObject() {
 		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
 	}
-	
+
+	function getPayStubObject() {
+		if ( is_object($this->pay_stub_obj) ) {
+			return $this->pay_stub_obj;
+		} else {
+			$pslf = TTnew( 'PayStubListFactory' );
+			$pslf->getByUserIdAndPayStubAmendmentId( $this->getUser(), $this->getID() );
+			if ( $pslf->getRecordCount() > 0 ) {
+				$this->pay_stub_obj = $pslf->getCurrent();
+				return $this->pay_stub_obj;
+			}
+
+			return FALSE;
+		}
+	}
+
 	function getPayStubEntryAccountLinkObject() {
 		if ( is_object($this->pay_stub_entry_account_link_obj) ) {
 			return $this->pay_stub_entry_account_link_obj;
@@ -825,6 +841,20 @@ class PayStubAmendmentFactory extends Factory {
 		return TRUE;
 	}
 
+	//Used to determine if the pay stub is changing the status, so we can ignore some validation checks.
+	function getEnablePayStubStatusChange() {
+		if ( isset($this->pay_stub_status_change) ) {
+			return $this->pay_stub_status_change;
+		}
+
+		return FALSE;
+	}
+	function setEnablePayStubStatusChange($bool) {
+		$this->pay_stub_status_change = $bool;
+
+		return TRUE;
+	}
+
 	static function releaseAllAccruals($user_id, $effective_date = NULL) {
 		Debug::Text('Release 100% of all accruals!', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1005,6 +1035,15 @@ class PayStubAmendmentFactory extends Factory {
 											TTi18n::gettext('Another Pay Stub Amendment already exists for the same employee, account, effective date and amount'));
 		}
 
+		//Check the status of any pay stub this is attached too. If its PAID then don't allow editing/deleting.
+		if ( $this->getEnablePayStubStatusChange() == FALSE
+				AND ( $this->getStatus() == 55
+					OR ( is_object( $this->getPayStubObject() ) AND $this->getPayStubObject()->getStatus() == 40) ) ) {
+			$this->Validator->isTrue(		'user_id',
+											FALSE,
+											TTi18n::gettext('Unable to modify Pay Stub Amendment that is currently be used by a Pay Stub marked PAID'));
+		}
+
 		//Don't allow these to be deleted in closed pay periods either.
 		//Make sure effective date isn't in a CLOSED pay period?
 		$pplf = TTNew('PayPeriodListFactory');
@@ -1020,6 +1059,7 @@ class PayStubAmendmentFactory extends Factory {
 												TTi18n::gettext('Pay Period that this effective date falls within is currently closed'));
 			}
 		}
+		unset($pplf, $pp_obj);
 
 		return TRUE;
 	}

@@ -865,8 +865,6 @@ class ScheduleSummaryReport extends Report {
 	}
 
 	function scheduleFooter() {
-		global $config_vars;
-
 		$margins = $this->pdf->getMargins();
 
 		//Don't scale footer text lines as they aren't that important anyways.
@@ -883,13 +881,7 @@ class ScheduleSummaryReport extends Report {
 
 		$company_obj = $this->getUserObject()->getCompanyObject();
 		if ( is_object( $company_obj ) AND $company_obj->getProductEdition() > 10 ) {
-			if ( $config_vars['other']['force_ssl'] == 1 ) {
-				$protocol = 'https';
-			} else {
-				$protocol = 'http';
-			}
-
-			$url = $protocol .'://'.Misc::getHostName().Environment::getBaseURL() .'ical/ical.php';
+			$url = Misc::getURLProtocol() .'://'.Misc::getHostName().Environment::getBaseURL() .'ical/ical.php';
 
 			$this->pdf->Cell( ($this->pdf->getPageWidth() - $margins['right'] - $margins['left']), 5, TTi18n::getText('Synchronize this schedule to your desktop/mobile phone calendar application').': '. $url, 1, 0, 'C', 0, NULL, 1 );
 			$this->pdf->Ln();

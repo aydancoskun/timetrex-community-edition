@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11143 $
- * $Id: install.php 11143 2013-10-14 19:57:15Z mikeb $
- * $Date: 2013-10-14 12:57:15 -0700 (Mon, 14 Oct 2013) $
+ * $Revision: 12458 $
+ * $Id: install.php 12458 2014-02-25 19:57:14Z mikeb $
+ * $Date: 2014-02-25 11:57:14 -0800 (Tue, 25 Feb 2014) $
  */
 
 /*
@@ -70,7 +70,7 @@ if ( version_compare( PHP_VERSION, 5, '<') == 1 ) {
 	$redir = FALSE;
 }
 if ( version_compare( PHP_VERSION, '5.5.99', '>') == 1 ) {
-	echo "You are currenting using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v5.4.x</b> or earlier!<br><br>\n";
+	echo "You are currenting using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v5.5.x</b> or earlier!<br><br>\n";
 	$redir = FALSE;
 }
 
@@ -81,10 +81,12 @@ if ( !is_writeable($templates_c_dir) ) {
 }
 
 echo " 6...";
-if ( extension_loaded( 'gettext' ) == FALSE ) {
-	echo "PHP GetText extension is not installed, TimeTrex requires GetText to be installed.<br><br>\n";
-	$redir = FALSE;
-}
+//No longer required as we can use Pear::Translation2 instead if needed. (ie: HHVM)
+//if ( extension_loaded( 'gettext' ) == FALSE ) {
+//	echo "PHP GetText extension is not installed, TimeTrex requires GetText to be installed.<br><br>\n";
+//	$redir = FALSE;
+//}
+
 
 echo " 7...";
 $test_template_c_sub_dir = $templates_c_dir . DIRECTORY_SEPARATOR . uniqid();

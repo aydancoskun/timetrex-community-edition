@@ -37,4 +37,6 @@ set_include_path( get_include_path() . PATH_SEPARATOR . '/usr/share/php'  );
 echo "Include Path: ". get_include_path() ."\n";
 
 $profiler = new Profiler( TRUE );
+
+TTi18n::setLocale(); //Initialize the locale, this prevents PHP warnings when using Translation2/HHVM.
 ?>

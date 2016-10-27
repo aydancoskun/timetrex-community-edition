@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12265 $
- * $Id: PayStubFactory.class.php 12265 2014-02-10 16:14:38Z mikeb $
- * $Date: 2014-02-10 08:14:38 -0800 (Mon, 10 Feb 2014) $
+ * $Revision: 12453 $
+ * $Id: PayStubFactory.class.php 12453 2014-02-25 16:10:34Z mikeb $
+ * $Date: 2014-02-25 08:10:34 -0800 (Tue, 25 Feb 2014) $
  */
 require_once( 'Numbers/Words.php');
 
@@ -814,7 +814,7 @@ class PayStubFactory extends Factory {
 					//Generate PS Amendment.
 					$psaf = TTnew( 'PayStubAmendmentFactory' );
 					$psaf->setUser( $pay_stub1_obj->getUser() );
-					$psaf->setStatus( 'ACTIVE' );
+					$psaf->setStatus( 50 ); //Active
 					$psaf->setType( 10 );
 					$psaf->setPayStubEntryNameId( $pay_stub_entry_id );
 
@@ -1119,6 +1119,7 @@ class PayStubFactory extends Factory {
 					$ps_amendment_obj = $psalf->getCurrent();
 					if ( $ps_amendment_obj->getStatus() != $ps_amendment_status_id ) {
 						Debug::Text('Changing Status of PS Amendment: '. $ps_amendment_id, __FILE__, __LINE__, __METHOD__, 10);
+						$ps_amendment_obj->setEnablePayStubStatusChange( TRUE ); //Tell PSA that its the pay stub changing the status, so we can ignore some validation checks.
 						$ps_amendment_obj->setStatus( $ps_amendment_status_id );
 						if ( $ps_amendment_obj->isValid() ) {
 							$ps_amendment_obj->Save();
@@ -2043,7 +2044,7 @@ class PayStubFactory extends Factory {
 
 		$email_body .= "\n";
 
-		$email_body .= TTi18n::gettext('Link:').' <a href="http://'. Misc::getHostName().Environment::getDefaultInterfaceBaseURL().'">'.APPLICATION_NAME.' '. TTi18n::gettext('Login') .'</a>';
+		$email_body .= TTi18n::gettext('Link:').' <a href="'. Misc::getURLProtocol() .'://'. Misc::getHostName().Environment::getDefaultInterfaceBaseURL().'">'.APPLICATION_NAME.' '. TTi18n::gettext('Login') .'</a>';
 
 		$email_body .= ( $replace_arr[6] != '' ) ? "\n\n\n".TTi18n::gettext('Company').': #company_name#'."\n" : NULL; //Always put at the end
 

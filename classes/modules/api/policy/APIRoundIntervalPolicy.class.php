@@ -81,7 +81,13 @@ class APIRoundIntervalPolicy extends APIFactory {
 						'punch_type_id' => 10,
 						'round_type_id' => 20,
 						'round_interval' => 900,
-						'grace' => 0
+						'grace' => 0,
+						
+						'condition_type_id' => 0,
+						'condition_static_time' => '8:00 AM',
+						'condition_static_total_time' => (8 * 3600),
+						'condition_start_window' => 900,
+						'condition_stop_window' => 900,
 					);
 
 		return $this->returnHandler( $data );

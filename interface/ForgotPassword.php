@@ -34,15 +34,15 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10987 $
- * $Id: ForgotPassword.php 10987 2013-09-20 20:14:20Z ipso $
- * $Date: 2013-09-20 13:14:20 -0700 (Fri, 20 Sep 2013) $
+ * $Revision: 12331 $
+ * $Id: ForgotPassword.php 12331 2014-02-13 18:57:19Z mikeb $
+ * $Date: 2014-02-13 10:57:19 -0800 (Thu, 13 Feb 2014) $
  */
 require_once('../includes/global.inc.php');
 
 //Debug::setVerbosity( 11 );
 
-$authenticate=FALSE;
+$authenticate = FALSE;
 require_once(Environment::getBasePath() .'includes/Interface.inc.php');
 
 $smarty->assign('title', TTi18n::gettext('Password Reset'));
@@ -63,15 +63,15 @@ extract	(FormVariables::GetVariables(
 $validator = new Validator();
 
 $action = Misc::findSubmitButton();
-Debug::Text('Action: '. $action, __FILE__, __LINE__, __METHOD__,10);
+Debug::Text('Action: '. $action, __FILE__, __LINE__, __METHOD__, 10);
 switch ($action) {
 	case 'change_password':
-		Debug::Text('Change Password: '. $key, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Change Password: '. $key, __FILE__, __LINE__, __METHOD__, 10);
 		
 		$ulf = TTnew( 'UserListFactory' );
 		$ulf->getByPasswordResetKey( $key );
 		if ( $ulf->getRecordCount() == 1 ) {
-			Debug::Text('FOUND Password reset key! ', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('FOUND Password reset key! ', __FILE__, __LINE__, __METHOD__, 10);
 
 			$user_obj = $ulf->getCurrent();
 			$user_name = $user_obj->getUserName();
@@ -84,40 +84,36 @@ switch ($action) {
 				$user_obj->setPasswordResetDate('');
 				if ( $user_obj->isValid() ) {
 					$user_obj->Save();
-					Debug::Text('Password Change succesful!', __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Password Change succesful!', __FILE__, __LINE__, __METHOD__, 10);
 
 					Redirect::Page( URLBuilder::getURL( array('password_reset' => 1 ), Environment::getDefaultInterfaceBaseURL() ) );
 				}
 			} else {
-				$validator->isTrue('password',FALSE, TTi18n::getText('Passwords do not match') );
+				$validator->isTrue('password', FALSE, TTi18n::getText('Passwords do not match') );
 			}
-
 		} else {
-			Debug::Text('DID NOT FIND Password reset key! ', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('DID NOT FIND Password reset key!', __FILE__, __LINE__, __METHOD__, 10);
 			$action = 'reset_password';
 		}
-
 		break;
 	case 'password_reset':
 		//Debug::setVerbosity( 11 );
-		Debug::Text('Key: '. $key, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Key: '. $key, __FILE__, __LINE__, __METHOD__, 10);
 		$ulf = TTnew( 'UserListFactory' );
 		$ulf->getByPasswordResetKey( $key );
 		if ( $ulf->getRecordCount() == 1 ) {
-			Debug::Text('FOUND Password reset key! ', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('FOUND Password reset key!', __FILE__, __LINE__, __METHOD__, 10);
 			$user_obj = $ulf->getCurrent();
 
 			$user_name = $user_obj->getUserName();
-
 		} else {
-			Debug::Text('DID NOT FIND Password reset key! ', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('DID NOT FIND Password reset key!', __FILE__, __LINE__, __METHOD__, 10);
 			$action = 'reset_password';
 		}
-
 		break;
 	case 'reset_password':
 		//Debug::setVerbosity( 11 );
-		Debug::Text('Email: '. $email, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Email: '. $email, __FILE__, __LINE__, __METHOD__, 10);
 
 		$ulf = TTnew( 'UserListFactory' );
 		$ulf->getByHomeEmailOrWorkEmail( $email );
@@ -128,11 +124,11 @@ switch ($action) {
 				//Check if company is using LDAP authentication, if so deny password reset.
 				if ( $user_obj->getCompanyObject()->getLDAPAuthenticationType() == 0 ) {
 					$user_obj->sendPasswordResetEmail();
-					Debug::Text('Found USER! ', __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Found USER! ', __FILE__, __LINE__, __METHOD__, 10);
 
 					Redirect::Page( URLBuilder::getURL( array('email_sent' => 1, 'email' => $email ), 'ForgotPassword.php' ) );
 				} else {
-					Debug::Text('LDAP Authentication is enabled, password reset is disabled! ', __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('LDAP Authentication is enabled, password reset is disabled! ', __FILE__, __LINE__, __METHOD__, 10);
 					$validator->isTrue('email', FALSE, TTi18n::getText('Please contact your administrator for instructions on changing your password.'). ' (LDAP)' );
 				}
 			} else {
@@ -140,7 +136,7 @@ switch ($action) {
 			}
 		} else {
 			//Error
-			Debug::Text('DID NOT FIND USER! Returned: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('DID NOT FIND USER! Returned: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			$validator->isTrue('email', FALSE, TTi18n::getText('Email address was not found in our database (a)') );
 		}
 		break;

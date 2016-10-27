@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11838 $
- * $Id: TTi18n.class.php 11838 2013-12-29 00:35:46Z mikeb $
- * $Date: 2013-12-28 16:35:46 -0800 (Sat, 28 Dec 2013) $
+ * $Revision: 12350 $
+ * $Id: TTi18n.class.php 12350 2014-02-14 21:19:25Z mikeb $
+ * $Date: 2014-02-14 13:19:25 -0800 (Fri, 14 Feb 2014) $
  */
 
 /*
@@ -85,7 +85,8 @@ class TTi18n {
 	static private function useGetTextExtension() {
 
 		//Force the use of GetText extension for now, as Translation2 is WAY to slow right now.
-		return TRUE;
+		//HHVM currently doesn't support getText extension though, so at least allow it to be used.
+		//return TRUE;
 
 		// Use a static for speed.
 		static $use_gettext = NULL;
@@ -96,16 +97,18 @@ class TTi18n {
 			//	2) we are running under apache
 			//	3) the apache prefork module is loaded.	 so we are not multi-threaded.
 			if ( extension_loaded( 'gettext' ) ) {
-				$sapi_name = php_sapi_name();
-
-				if ( $sapi_name == 'cli' ) {
-					$use_gettext = TRUE;
-				} elseif ( in_array( php_sapi_name(), array( 'apache', 'apache2handler' ) ) AND in_array( 'prefork', apache_get_modules() ) ) {
+				$use_gettext = TRUE;
+				
+				//Translation2 is too slow on Windows, force getText for now.
+				//$sapi_name = php_sapi_name();
+				//if ( $sapi_name == 'cli' ) {
+				//	$use_gettext = TRUE;
+				//} elseif ( in_array( php_sapi_name(), array( 'apache', 'apache2handler' ) ) AND in_array( 'prefork', apache_get_modules() ) ) {
 					//Only check apache_modules if we are using Apache.
-					$use_gettext = TRUE;
-				} else {
-					$use_gettext = FALSE;
-				}
+				//	$use_gettext = TRUE;
+				//} else {
+				//	$use_gettext = FALSE;
+				//}
 			}
 			// Note: We could also check for a config file setting that would override this.
 

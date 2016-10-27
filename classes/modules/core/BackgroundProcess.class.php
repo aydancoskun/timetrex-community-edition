@@ -130,7 +130,7 @@ class BackgroundProcess {
 		$last_process_number = 1;
 		if ( is_array($lock_files)	) {
 			foreach( $lock_files as $lock_file ) {
-				if ( preg_match('/'.$this->getLockFilePrefix().'\.lock\.([0-9]{1, '.$this->process_number_digits.'})/i', $lock_file, $matches) ) {
+				if ( preg_match('/'.$this->getLockFilePrefix().'\.lock\.([0-9]{1,'.$this->process_number_digits.'})/i', $lock_file, $matches) ) {
 					if ( isset($matches[0]) AND isset($matches[1]) AND $matches[1] != '' ) {
 						$process_numbers[] = (int)$matches[1];
 					}

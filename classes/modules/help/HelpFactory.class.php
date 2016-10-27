@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12026 $
- * $Id: HelpFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
- * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
+ * $Revision: 11942 $
+ * $Id: HelpFactory.class.php 11942 2014-01-09 00:50:10Z mikeb $
+ * $Date: 2014-01-08 16:50:10 -0800 (Wed, 08 Jan 2014) $
  */
 
 /**

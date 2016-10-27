@@ -26,6 +26,13 @@
  <exclude-pattern>*/GovernmentForms/country/grid.class.php</exclude-pattern> <!-- For some reason this appears to confuse the code sniffer -->
  <exclude-pattern>*/GovernmentForms/examples/country/us/941sb.php</exclude-pattern> <!-- For some reason this appears to confuse the code sniffer -->
 
+ <!-- Exclude 3rd party JS libraries -->
+ <exclude-pattern>*/html5/framework/*</exclude-pattern>
+ <exclude-pattern>*/client/*</exclude-pattern>
+
+ <exclude-pattern>*/test/*</exclude-pattern>
+
+
  <!-- Include some sniffs from all around the place -->
  <rule ref="Generic.PHP.DisallowShortOpenTag"/>
  <rule ref="Generic.PHP.ForbiddenFunctions"/>
@@ -49,6 +56,7 @@
 	<exclude-pattern>*/time_clock/APITimeClockUnAuthenticated.class.php</exclude-pattern>
 	<exclude-pattern>*/soap/TimeTrexSoapServerUnAuthenticated.class.php</exclude-pattern>
 	<exclude-pattern>*/client_station/APIClientStationUnAuthenticated.class.php</exclude-pattern>
+	<exclude-pattern>*/includes/*</exclude-pattern>
  </rule>
 
  <rule ref="Generic.Formatting.NoSpaceAfterCast"/>

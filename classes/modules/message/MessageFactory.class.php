@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12026 $
- * $Id: MessageFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
- * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
+ * $Revision: 12453 $
+ * $Id: MessageFactory.class.php 12453 2014-02-25 16:10:34Z mikeb $
+ * $Date: 2014-02-25 08:10:34 -0800 (Tue, 25 Feb 2014) $
  */
 
 /**
@@ -580,12 +580,7 @@ class MessageFactory extends Factory {
 			$email_body .= TTi18n::gettext('Subject:').' '. $this->getSubject()."\n";
 		}
 
-		$protocol = 'http';
-		if ( isset($config_vars['other']['force_ssl']) AND $config_vars['other']['force_ssl'] == 1 ) {
-			$protocol .= 's';
-		}
-
-		$email_body .= TTi18n::gettext('Link').': <a href="'. $protocol .'://'. Misc::getHostName().Environment::getDefaultInterfaceBaseURL().'">'. APPLICATION_NAME .' '. TTi18n::getText('Login') .'</a>';
+		$email_body .= TTi18n::gettext('Link').': <a href="'. Misc::getURLProtocol() .'://'. Misc::getHostName().Environment::getDefaultInterfaceBaseURL().'">'. APPLICATION_NAME .' '. TTi18n::getText('Login') .'</a>';
 
 		//Define subject/body variables here.
 		$search_arr = array(

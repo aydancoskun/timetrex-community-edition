@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12091 $
- * $Id: RoundIntervalPolicyListFactory.class.php 12091 2014-01-21 16:33:40Z mikeb $
- * $Date: 2014-01-21 08:33:40 -0800 (Tue, 21 Jan 2014) $
+ * $Revision: 12331 $
+ * $Id: RoundIntervalPolicyListFactory.class.php 12331 2014-02-13 18:57:19Z mikeb $
+ * $Date: 2014-02-13 10:57:19 -0800 (Thu, 13 Feb 2014) $
  */
 
 /**
@@ -215,7 +215,7 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 						';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
-		$query .= ' LIMIT 1'; //Don't limit to 1 now that we have conditional rounding.
+		//$query .= ' LIMIT 1'; //Don't limit to 1 now that we have conditional rounding.
 
 		$this->ExecuteSQL( $query, $ph );
 

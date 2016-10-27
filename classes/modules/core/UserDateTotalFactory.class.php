@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12026 $
- * $Id: UserDateTotalFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
- * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
+ * $Revision: 11974 $
+ * $Id: UserDateTotalFactory.class.php 11974 2014-01-11 01:01:29Z mikeb $
+ * $Date: 2014-01-10 17:01:29 -0800 (Fri, 10 Jan 2014) $
  */
 
 /**

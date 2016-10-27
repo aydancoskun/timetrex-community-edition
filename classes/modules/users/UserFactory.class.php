@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12026 $
- * $Id: UserFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
- * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
+ * $Revision: 12453 $
+ * $Id: UserFactory.class.php 12453 2014-02-25 16:10:34Z mikeb $
+ * $Date: 2014-02-25 08:10:34 -0800 (Tue, 25 Feb 2014) $
  */
 
 /**
@@ -2712,8 +2712,6 @@ class UserFactory extends Factory {
 	}
 
 	function sendPasswordResetEmail() {
-		global $config_vars;
-
 		if ( $this->getHomeEmail() != FALSE
 				OR $this->getWorkEmail() != FALSE ) {
 
@@ -2733,17 +2731,11 @@ class UserFactory extends Factory {
 			$this->setPasswordResetDate( time() );
 			$this->Save(FALSE);
 
-			if ( $config_vars['other']['force_ssl'] == 1 ) {
-				$protocol = 'https';
-			} else {
-				$protocol = 'http';
-			}
-
 			$subject = APPLICATION_NAME .' '. TTi18n::gettext('password reset requested at '). TTDate::getDate('DATE+TIME', time() ) .' '. TTi18n::gettext('from') .' '. $_SERVER['REMOTE_ADDR'];
 
 			$body = '<html><body>';
 			$body .= TTi18n::gettext('A password reset has been requested for') .' "'. $this->getUserName() .'", ';
-			$body .= ' <a href="'.$protocol .'://'.Misc::getHostName().Environment::getBaseURL() .'ForgotPassword.php?action:password_reset=1&key='. $this->getPasswordResetKey().'">'. TTi18n::gettext('please click here to reset your password now') .'</a>.';
+			$body .= ' <a href="'. Misc::getURLProtocol() .'://'.Misc::getHostName().Environment::getBaseURL() .'ForgotPassword.php?action:password_reset=1&key='. $this->getPasswordResetKey().'">'. TTi18n::gettext('please click here to reset your password now') .'</a>.';
 			$body .= '<br><br>';
 			$body .= TTi18n::gettext('If you did not request your password to be reset, you may ignore this email.');
 			$body .= '<br><br>';

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12179 $
- * $Id: OverTimePolicyFactory.class.php 12179 2014-01-30 18:27:00Z mikeb $
- * $Date: 2014-01-30 10:27:00 -0800 (Thu, 30 Jan 2014) $
+ * $Revision: 12175 $
+ * $Id: OverTimePolicyFactory.class.php 12175 2014-01-29 22:17:28Z mikeb $
+ * $Date: 2014-01-29 14:17:28 -0800 (Wed, 29 Jan 2014) $
  */
 
 /**

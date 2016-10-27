@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12265 $
- * $Id: ExceptionFactory.class.php 12265 2014-02-10 16:14:38Z mikeb $
- * $Date: 2014-02-10 08:14:38 -0800 (Mon, 10 Feb 2014) $
+ * $Revision: 12453 $
+ * $Id: ExceptionFactory.class.php 12453 2014-02-25 16:10:34Z mikeb $
+ * $Date: 2014-02-25 08:10:34 -0800 (Tue, 25 Feb 2014) $
  */
 
 /**
@@ -477,7 +477,7 @@ class ExceptionFactory extends Factory {
 				}
 
 				if ( isset($retarr) AND is_array($retarr) ) {
-					return $retarr;
+					return array_unique($retarr);
 				} else {
 					Debug::text(' No user objects to email too...', __FILE__, __LINE__, __METHOD__, 10);
 				}
@@ -499,8 +499,6 @@ class ExceptionFactory extends Factory {
 
 	*/
 	function emailException( $u_obj, $user_date_obj, $punch_obj = NULL, $schedule_obj = NULL, $ep_obj = NULL ) {
-		global $config_vars;
-
 		if ( !is_object( $u_obj ) ) {
 			return FALSE;
 		}
@@ -528,11 +526,6 @@ class ExceptionFactory extends Factory {
 
 		if ( is_array($email_to_arr) ) {
 			$reply_to = $email_to_arr[0];
-		}
-
-		$protocol = 'http';
-		if ( isset($config_vars['other']['force_ssl']) AND $config_vars['other']['force_ssl'] == 1 ) {
-			$protocol .= 's';
 		}
 
 		//Define subject/body variables here.
@@ -599,7 +592,7 @@ class ExceptionFactory extends Factory {
 		$exception_email_body .= ( $replace_arr[5] != '' ) ? TTi18n::gettext('Title').': #employee_title#'."\n" : NULL;
 
 		$exception_email_body .= "\n";
-		$exception_email_body .= TTi18n::gettext('Link:').' <a href="'. $protocol .'://'. Misc::getHostName().Environment::getDefaultInterfaceBaseURL().'">'.APPLICATION_NAME.' '. TTi18n::gettext('Login') .'</a>';
+		$exception_email_body .= TTi18n::gettext('Link:').' <a href="'. Misc::getURLProtocol() .'://'. Misc::getHostName().Environment::getDefaultInterfaceBaseURL().'">'.APPLICATION_NAME.' '. TTi18n::gettext('Login') .'</a>';
 
 		$exception_email_body .= ( $replace_arr[10] != '' ) ? "\n\n\n".TTi18n::gettext('Company').': #company_name#'."\n" : NULL; //Always put at the end
 
@@ -629,7 +622,7 @@ class ExceptionFactory extends Factory {
 		$retval = $mail->Send();
 
 		if ( $retval == TRUE ) {
-			TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Email Exception').': '. Option::getByKey( $ep_obj->getType(), $ep_obj->getOptions('type') ) .' To: '. implode(',', $email_to_arr), $u_obj->getID(), $this->getTable() ); //Make sure this log entry is assigned to the user triggering the exception so it can be viewed in the audit log.
+			TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Email Exception').': '. Option::getByKey( $ep_obj->getType(), $ep_obj->getOptions('type') ) .' To: '. implode(', ', $email_to_arr), $u_obj->getID(), $this->getTable() ); //Make sure this log entry is assigned to the user triggering the exception so it can be viewed in the audit log.
 		}
 
 		return TRUE;

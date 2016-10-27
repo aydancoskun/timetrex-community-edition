@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12265 $
- * $Id: Install.class.php 12265 2014-02-10 16:14:38Z mikeb $
- * $Date: 2014-02-10 08:14:38 -0800 (Mon, 10 Feb 2014) $
+ * $Revision: 12453 $
+ * $Id: Install.class.php 12453 2014-02-25 16:10:34Z mikeb $
+ * $Date: 2014-02-25 08:10:34 -0800 (Tue, 25 Feb 2014) $
  */
 
 /**
@@ -706,7 +706,7 @@ class Install {
 		$limit = (int)rtrim($raw_limit, 'M');
 		//Debug::text('Limit: '. $limit, __FILE__, __LINE__, __METHOD__, 9);
 
-		if ( $raw_limit == '' ) {
+		if ( $raw_limit == '' OR $raw_limit <= 0 ) {
 			return NULL;
 		}
 
@@ -966,15 +966,15 @@ class Install {
 	}
 
 	function getBaseURL() {
-		return 'http://'. Misc::getHostName( TRUE ).Environment::getBaseURL().'install/install.php'; //Check for a specific file, so we can be sure its not incorrect.
+		return Misc::getURLProtocol() .'://'. Misc::getHostName( TRUE ).Environment::getBaseURL().'install/install.php'; //Check for a specific file, so we can be sure its not incorrect.
 	}
 	function getRecommendedBaseURL() {
 		return str_replace('install', '', dirname( $_SERVER['SCRIPT_NAME'] ) );
 	}
 	function checkBaseURL() {
 		$url = $this->getBaseURL();
-		Debug::text('Checking Base URL: '. $url, __FILE__, __LINE__, __METHOD__, 9);
 		$headers = @get_headers($url);
+		Debug::Arr($headers, 'Checking Base URL: '. $url, __FILE__, __LINE__, __METHOD__, 9);
 		if ( isset($headers[0]) AND stripos($headers[0], '404') !== FALSE ) {
 			return 1; //Not found
 		} else {
@@ -982,6 +982,41 @@ class Install {
 		}
 	}
 	
+	function getPHPCLI() {
+		if ( isset($this->config_vars['path']['php_cli']) ) {
+			return $this->config_vars['path']['php_cli'];
+		}
+
+		return FALSE;
+	}
+	function checkPHPCLIBinary() {
+		if ( $this->getPHPCLI() != '' ) {
+			if ( is_executable( $this->getPHPCLI() ) ) {
+				return 0;
+			}
+		}
+
+		return 1;
+	}
+
+	function getPHPCLIRequirementsCommand() {
+		$command = $this->getPHPCLI() .' '. Environment::getBasePath() .'/tools/unattended_upgrade.php --config '. CONFIG_FILE .' --requirements_only';
+		return $command;
+	}
+	//Only check this if *not* being called from the CLI to prevent infinite loops.
+	function checkPHPCLIRequirements() {
+		if ( $this->checkPHPCLIBinary() === 0 ) {
+			$command = $this->getPHPCLIRequirementsCommand();
+			system( $command, $exit_code );
+			Debug::Arr($exit_code, 'PHP CLI Requirements Command: '. $command .' Output: ', __FILE__, __LINE__, __METHOD__, 10);
+			if ( $exit_code == 0 ) {
+				return 0;
+			}
+		}
+
+		return 1;
+	}
+
 	function checkPEAR() {
 		@include_once('PEAR.php');
 
@@ -1095,7 +1130,7 @@ class Install {
 			return 0;
 		}
 
-		return 1;
+		return 2;
 	}
 
 	function checkBCMATH() {
@@ -1114,6 +1149,7 @@ class Install {
 		return 1;
 	}
 
+	//No longer required, used pure PHP implemented TTDate::EasterDays() instead.
 	function checkCALENDAR() {
 		if ( function_exists('easter_date') ) {
 			return 0;
@@ -1300,7 +1336,7 @@ class Install {
 		$retarr[$this->checkSOAP()]++;
 		$retarr[$this->checkBCMATH()]++;
 		$retarr[$this->checkMBSTRING()]++;
-		$retarr[$this->checkCALENDAR()]++;
+		//$retarr[$this->checkCALENDAR()]++;
 		$retarr[$this->checkGETTEXT()]++;
 		$retarr[$this->checkGD()]++;
 		$retarr[$this->checkJSON()]++;
@@ -1311,7 +1347,16 @@ class Install {
 
 		//PEAR modules are bundled as of v1.2.0
 		if ( $post_install_requirements_only == FALSE ) {
-			$retarr[$this->checkBaseURL()]++;
+			if ( is_array($exclude_check) AND in_array('base_url', $exclude_check) == FALSE	) {
+				$retarr[$this->checkBaseURL()]++;
+			}
+			if ( is_array($exclude_check) AND in_array('php_cli', $exclude_check) == FALSE	) {
+				$retarr[$this->checkPHPCLIBinary()]++;
+			}
+			if ( is_array($exclude_check) AND in_array('php_cli_requirements', $exclude_check) == FALSE	) {
+				Debug::Arr($exclude_check, 'zzzRetArr: ', __FILE__, __LINE__, __METHOD__, 9);
+				$retarr[$this->checkPHPCLIRequirements()]++;
+			}
 			$retarr[$this->checkWritableConfigFile()]++;
 			$retarr[$this->checkWritableCacheDirectory()]++;
 			if ( is_array($exclude_check) AND in_array('clean_cache', $exclude_check) == FALSE	) {
@@ -1347,7 +1392,6 @@ class Install {
 	}
 
 	function getFailedRequirements( $post_install_requirements_only = FALSE, $exclude_check = FALSE ) {
-
 		$fail_all = FALSE;
 
 		$retarr[] = 'Require';
@@ -1359,7 +1403,6 @@ class Install {
 		if ( $fail_all == TRUE OR $this->checkDatabaseType() != 0 ) {
 			$retarr[] = 'DatabaseType';
 		}
-
 
 		if ( $fail_all == TRUE OR $this->checkSOAP() != 0 ) {
 			$retarr[] = 'SOAP';
@@ -1373,9 +1416,9 @@ class Install {
 			$retarr[] = 'MBSTRING';
 		}
 
-		if ( $fail_all == TRUE OR $this->checkCALENDAR() != 0 ) {
-			$retarr[] = 'CALENDAR';
-		}
+		//if ( $fail_all == TRUE OR $this->checkCALENDAR() != 0 ) {
+		//	$retarr[] = 'CALENDAR';
+		//}
 
 		if ( $fail_all == TRUE OR $this->checkGETTEXT() != 0 ) {
 			$retarr[] = 'GETTEXT';
@@ -1397,7 +1440,6 @@ class Install {
 			$retarr[] = 'MAIL';
 		}
 
-
 		//Bundled PEAR modules require the base PEAR package at least
 		if ( $fail_all == TRUE OR $this->checkPEAR() != 0 ) {
 			$retarr[] = 'PEAR';
@@ -1409,6 +1451,18 @@ class Install {
 					$retarr[] = 'BaseURL';
 				}
 			}
+			if ( is_array($exclude_check) AND in_array('php_cli', $exclude_check) == FALSE ) {
+				if ( $fail_all == TRUE OR $this->checkPHPCLIBinary() != 0 ) {
+					$retarr[] = 'PHPCLI';
+				}
+			}
+			if ( is_array($exclude_check) AND in_array('php_cli_requirements', $exclude_check) == FALSE ) {
+				Debug::Arr($exclude_check, 'zzz2RetArr: ', __FILE__, __LINE__, __METHOD__, 9);
+				if ( $fail_all == TRUE OR $this->checkPHPCLIRequirements() != 0 ) {
+					$retarr[] = 'PHPCLIReq';
+				}
+			}
+
 			if ( $fail_all == TRUE OR $this->checkWritableConfigFile() != 0 ) {
 				$retarr[] = 'WConfigFile';
 			}

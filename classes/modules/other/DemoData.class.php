@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12026 $
- * $Id: DemoData.class.php 12026 2014-01-15 22:23:00Z mikeb $
- * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
+ * $Revision: 12355 $
+ * $Id: DemoData.class.php 12355 2014-02-15 00:57:32Z mikeb $
+ * $Date: 2014-02-14 16:57:32 -0800 (Fri, 14 Feb 2014) $
  */
 
 
@@ -417,9 +417,9 @@ class DemoData {
 		return FALSE;
 	}
 	function getRandomLastName() {
-		$rand = array_rand( $this->first_names );
-		if ( isset($this->first_names[$rand]) ) {
-			return $this->first_names[$rand];
+		$rand = array_rand( $this->last_names );
+		if ( isset($this->last_names[$rand]) ) {
+			return $this->last_names[$rand];
 		}
 		return FALSE;
 	}
@@ -954,31 +954,6 @@ class DemoData {
 				$ripf->setGrace( (60 * 3) ); //3min
 				$ripf->setStrict( FALSE );
 				break;
-			case 30: //Day total
-				$ripf->setName( '15min [3]' );
-				$ripf->setPunchType( 120 ); //In
-				$ripf->setRoundType( 10 ); //Down
-				$ripf->setInterval( (60 * 15) ); //15mins
-				$ripf->setGrace( (60 * 3) ); //3min
-				$ripf->setStrict( FALSE );
-				break;
-			case 40: //Lunch total
-				$ripf->setName( '15min [4]' );
-				$ripf->setPunchType( 100 ); //In
-				$ripf->setRoundType( 10 ); //Down
-				$ripf->setInterval( (60 * 15) ); //15mins
-				$ripf->setGrace( (60 * 3) ); //3min
-				$ripf->setStrict( FALSE );
-				break;
-			case 50: //Break total
-				$ripf->setName( '15min [5]' );
-				$ripf->setPunchType( 110 ); //In
-				$ripf->setRoundType( 10 ); //Down
-				$ripf->setInterval( (60 * 15) ); //15mins
-				$ripf->setGrace( (60 * 3) ); //3min
-				$ripf->setStrict( FALSE );
-				break;
-
 		}
 
 		if ( $ripf->isValid() ) {
@@ -3440,10 +3415,13 @@ class DemoData {
 				$uf->setTitle( $user_title_id );
 				break;
 			case 999: //Random user
+				$next_available_employee_number = UserFactory::getNextAvailableEmployeeNumber( $company_id );
+				srand( $type.$next_available_employee_number ); //Re-seed random number otherwise all random users will be exactly the same.
+
 				$first_name = $this->getRandomFirstName();
 				$last_name = $this->getRandomLastName();
 				if ( $first_name != '' AND $last_name != '' ) {
-					$uf->setUserName( $first_name.'.'. $last_name . $this->getUserNamePostfix() );
+					$uf->setUserName( $first_name.'.'. $last_name .'_'. $next_available_employee_number .'_'. $this->getUserNamePostfix() );
 					$uf->setPassword( 'demo' );
 
 					$uf->setFirstName( $first_name );
@@ -3464,7 +3442,7 @@ class DemoData {
 					$uf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
 					$uf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
 					$uf->setHireDate( $hire_date );
-					$uf->setEmployeeNumber( rand(1000, 25000) );
+					$uf->setEmployeeNumber( $next_available_employee_number );
 
 					$uf->setDefaultBranch( $default_branch_id );
 					$uf->setDefaultDepartment( $default_department_id );
@@ -3757,7 +3735,14 @@ class DemoData {
 	}
 
 	function createUserPreference( $user_id ) {
-		$upf = TTnew( 'UserPreferenceFactory' );
+		$uplf = TTnew( 'UserPreferenceListFactory' );
+		$uplf->getByUserId( $user_id );
+		if ( $uplf->getRecordCount() > 0 ) {
+			$upf = $uplf->getCurrent();
+		} else {
+			$upf = TTnew( 'UserPreferenceFactory' );
+		}
+		
 		$upf->setUser( $user_id );
 		$upf->setLanguage('en');
 		$upf->setDateFormat( 'd-M-y' );
@@ -3777,6 +3762,69 @@ class DemoData {
 		Debug::Text('Failed Creating User Preference!', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
+	}
+
+	function createUserDefaults( $company_id ) {
+		//User Default settings, always do this last.
+		$udf = TTnew( 'UserDefaultFactory' );
+
+		$clf = TTNew('CompanyListFactory');
+		$clf->getById( $company_id );
+		if ( $clf->getRecordCount() > 0 ) {
+			$udf->setCompany( $company_id );
+			$udf->setCity( $clf->getCurrent()->getCity() );
+			$udf->setCountry( $clf->getCurrent()->getCountry() );
+			$udf->setProvince( $clf->getCurrent()->getProvince() );
+			$udf->setWorkPhone( $clf->getCurrent()->getWorkPhone() );
+		}
+
+		$udf->setLanguage( 'en' );
+		$udf->setItemsPerPage( 50 );
+
+		$udf->setDateFormat( 'd-M-y' );
+		$udf->setTimeFormat( 'g:i A' );
+		$udf->setTimeUnitFormat( 10 );
+		$udf->setStartWeekDay( 0 );
+		$udf->setTimeZone( 'PST8PDT' );
+
+		//Get Pay Period Schedule
+		$ppslf = TTNew('PayPeriodScheduleListFactory');
+		$ppslf->getByCompanyId( $company_id );
+		if ( $ppslf->getRecordCount() > 0 ) {
+			$udf->setPayPeriodSchedule( $ppslf->getCurrent()->getID() );
+		}
+
+		//Get Policy Group
+		$pglf = TTNew('PolicyGroupListFactory');
+		$pglf->getByCompanyId( $company_id );
+		if ( $pglf->getRecordCount() > 0 ) {
+			$udf->setPolicyGroup( $pglf->getCurrent()->getID() );
+		}
+
+		//Permissions
+		$pclf = TTnew('PermissionControlListFactory');
+		$pclf->getByCompanyIdAndLevel( $company_id, 1 );
+		if ( $pclf->getRecordCount() > 0 ) {
+			$udf->setPermissionControl( $pclf->getCurrent()->getID() );
+		}
+
+		//Currency
+		$clf = TTNew('CurrencyListFactory');
+		$clf->getByCompanyIdAndDefault( $company_id, TRUE);
+		if ( $clf->getRecordCount() > 0 ) {
+			$udf->setCurrency( $clf->getCurrent()->getID() );
+		}
+
+		$udf->setEnableEmailNotificationException( TRUE );
+		$udf->setEnableEmailNotificationMessage( TRUE );
+		$udf->setEnableEmailNotificationPayStub( TRUE );
+		$udf->setEnableEmailNotificationHome( TRUE );
+
+		if ( $udf->isValid() ) {
+			Debug::text('Adding User Default settings...', __FILE__, __LINE__, __METHOD__, 9);
+
+			return $udf->Save();
+		}
 	}
 
 	function createUserDeduction( $company_id, $user_id ) {
@@ -4067,7 +4115,7 @@ class DemoData {
 				$jif->setName( 'Framing' );
 				$jif->setDescription( 'Framing' );
 
-				$jif->setEstimateTime( (3600 * 500) );
+				$jif->setEstimateTime( (3600 * 50) );
 				$jif->setEstimateQuantity( 0 );
 				$jif->setEstimateBadQuantity( 0 );
 				$jif->setBadQuantityRate( 0 );
@@ -4082,7 +4130,7 @@ class DemoData {
 				$jif->setName( 'Sanding' );
 				$jif->setDescription( 'Sanding' );
 
-				$jif->setEstimateTime( (3600 * 300) );
+				$jif->setEstimateTime( (3600 * 30) );
 				$jif->setEstimateQuantity( 0 );
 				$jif->setEstimateBadQuantity( 0 );
 				$jif->setBadQuantityRate( 0 );
@@ -4097,7 +4145,7 @@ class DemoData {
 				$jif->setName( 'Painting' );
 				$jif->setDescription( 'Painting' );
 
-				$jif->setEstimateTime( (3600 * 400) );
+				$jif->setEstimateTime( (3600 * 40) );
 				$jif->setEstimateQuantity( 0 );
 				$jif->setEstimateBadQuantity( 0 );
 				$jif->setBadQuantityRate( 0 );
@@ -4112,7 +4160,7 @@ class DemoData {
 				$jif->setName( 'Land Scaping' );
 				$jif->setDescription( 'Land Scaping' );
 
-				$jif->setEstimateTime( (3600 * 600) );
+				$jif->setEstimateTime( (3600 * 35) );
 				$jif->setEstimateQuantity( 0 );
 				$jif->setEstimateBadQuantity( 0 );
 				$jif->setBadQuantityRate( 0 );
@@ -4127,7 +4175,7 @@ class DemoData {
 				$jif->setName( 'Data Entry' );
 				$jif->setDescription( '' );
 
-				$jif->setEstimateTime( (3600 * 600) );
+				$jif->setEstimateTime( (3600 * 45) );
 				$jif->setEstimateQuantity( 0 );
 				$jif->setEstimateBadQuantity( 0 );
 				$jif->setBadQuantityRate( 0 );
@@ -4142,7 +4190,7 @@ class DemoData {
 				$jif->setName( 'Accounting' );
 				$jif->setDescription( '' );
 
-				$jif->setEstimateTime( (3600 * 600) );
+				$jif->setEstimateTime( (3600 * 55) );
 				$jif->setEstimateQuantity( 0 );
 				$jif->setEstimateBadQuantity( 0 );
 				$jif->setBadQuantityRate( 0 );
@@ -4157,7 +4205,7 @@ class DemoData {
 				$jif->setName( 'Appraisals' );
 				$jif->setDescription( '' );
 
-				$jif->setEstimateTime( (3600 * 600) );
+				$jif->setEstimateTime( (3600 * 25) );
 				$jif->setEstimateQuantity( 0 );
 				$jif->setEstimateBadQuantity( 0 );
 				$jif->setBadQuantityRate( 0 );
@@ -4930,7 +4978,7 @@ class DemoData {
 				$jf->setDescription( rand(100, 9999). ' Main St' );
 
 				$jf->setStartDate( time() - (86400 * 14) );
-				$jf->setEndDate( time() + (86400 * 7) );
+				$jf->setEndDate( '' );
 
 				$jf->setEstimateTime( (3600 * 500) );
 				$jf->setEstimateQuantity( 0 );
@@ -4952,7 +5000,7 @@ class DemoData {
 				$jf->setName( 'House 2' );
 				$jf->setDescription( rand(100, 9999). ' Springfield Rd' );
 
-				$jf->setStartDate( time() - (86400 * 14) );
+				$jf->setStartDate( time() - (86400 * 13) );
 				$jf->setEndDate( time() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 750) );
@@ -4972,7 +5020,7 @@ class DemoData {
 				$jf->setName( 'House 3' );
 				$jf->setDescription( rand(100, 9999). ' Spall Ave' );
 
-				$jf->setStartDate( time() - (86400 * 14) );
+				$jf->setStartDate( time() - (86400 * 12) );
 				$jf->setEndDate( time() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 750) );
@@ -4992,7 +5040,7 @@ class DemoData {
 				$jf->setName( 'House 4' );
 				$jf->setDescription( rand(100, 9999). ' Dobbin St' );
 
-				$jf->setStartDate( time() - (86400 * 14) );
+				$jf->setStartDate( time() - (86400 * 11) );
 				$jf->setEndDate( time() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 750) );
@@ -5012,7 +5060,7 @@ class DemoData {
 				$jf->setName( 'House 5' );
 				$jf->setDescription( rand(100, 9999). ' Sussex Court' );
 
-				$jf->setStartDate( time() - (86400 * 14) );
+				$jf->setStartDate( time() - (86400 * 10) );
 				$jf->setEndDate( time() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 750) );
@@ -5032,7 +5080,7 @@ class DemoData {
 				$jf->setName( 'House 6' );
 				$jf->setDescription( rand(100, 9999). ' Georgia St' );
 
-				$jf->setStartDate( time() - (86400 * 14) );
+				$jf->setStartDate( time() - (86400 * 9) );
 				$jf->setEndDate( time() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 750) );
@@ -5051,7 +5099,7 @@ class DemoData {
 				$jf->setName( 'House 7' );
 				$jf->setDescription( rand(100, 9999). ' Gates Rd' );
 
-				$jf->setStartDate( time() - (86400 * 14) );
+				$jf->setStartDate( time() - (86400 * 8) );
 				$jf->setEndDate( time() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 750) );
@@ -5071,7 +5119,7 @@ class DemoData {
 				$jf->setName( 'House 8' );
 				$jf->setDescription( rand(100, 9999). ' Lakeshore Rd' );
 
-				$jf->setStartDate( time() - (86400 * 14) );
+				$jf->setStartDate( time() - (86400 * 7) );
 				$jf->setEndDate( time() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 750) );
@@ -5091,7 +5139,7 @@ class DemoData {
 				$jf->setName( 'House 9' );
 				$jf->setDescription( rand(100, 9999). ' Main St' );
 
-				$jf->setStartDate( time() - (86400 * 14) );
+				$jf->setStartDate( time() - (86400 * 6) );
 				$jf->setEndDate( time() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 750) );
@@ -5111,7 +5159,7 @@ class DemoData {
 				$jf->setName( 'House 10' );
 				$jf->setDescription( rand(100, 9999). ' Ontario St' );
 
-				$jf->setStartDate( time() - (86400 * 14) );
+				$jf->setStartDate( time() - (86400 * 5) );
 				$jf->setEndDate( time() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 750) );
@@ -5131,7 +5179,7 @@ class DemoData {
 				$jf->setName( 'Project A' );
 				$jf->setDescription( '' );
 
-				$jf->setStartDate( time() - (86400 * 14) );
+				$jf->setStartDate( time() - (86400 * 4) );
 				$jf->setEndDate( time() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 760) );
@@ -5152,7 +5200,7 @@ class DemoData {
 				$jf->setName( 'Project B' );
 				$jf->setDescription( '' );
 
-				$jf->setStartDate( time() - (86400 * 14) );
+				$jf->setStartDate( time() - (86400 * 3) );
 				$jf->setEndDate( time() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 760) );
@@ -5173,7 +5221,7 @@ class DemoData {
 				$jf->setName( 'Project C' );
 				$jf->setDescription( '' );
 
-				$jf->setStartDate( time() - (86400 * 14) );
+				$jf->setStartDate( time() - (86400 * 2) );
 				$jf->setEndDate( time() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 760) );
@@ -5194,7 +5242,7 @@ class DemoData {
 				$jf->setName( 'Project D' );
 				$jf->setDescription( '' );
 
-				$jf->setStartDate( time() - (86400 * 14) );
+				$jf->setStartDate( time() - (86400 * 1) );
 				$jf->setEndDate( time() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 760) );
@@ -5215,8 +5263,8 @@ class DemoData {
 				$jf->setName( 'Project E' );
 				$jf->setDescription( '' );
 
-				$jf->setStartDate( time() - (86400 * 14) );
-				$jf->setEndDate( time() + (86400 * 7) );
+				$jf->setStartDate( time() - (86400 * 15) );
+				$jf->setEndDate( time() + (86400 * 2) );
 
 				$jf->setEstimateTime( (3600 * 760) );
 				$jf->setEstimateQuantity( 0 );
@@ -5237,7 +5285,7 @@ class DemoData {
 				$jf->setDescription( '' );
 
 				$jf->setStartDate( time() - (86400 * 14) );
-				$jf->setEndDate( time() + (86400 * 7) );
+				$jf->setEndDate( time() + (86400 * 1) );
 
 				$jf->setEstimateTime( (3600 * 760) );
 				$jf->setEstimateQuantity( 0 );
@@ -6114,6 +6162,7 @@ class DemoData {
 			$ethnic_group_ids[] = $this->createEthnicGroup( $company_id, 40 );
 			$ethnic_group_ids[] = $this->createEthnicGroup( $company_id, 50 );
 
+			$this->createUserDefaults( $company_id );
 
 			//Users
 			$user_ids[] = $this->createUser( $company_id, 10, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids  );
@@ -6141,13 +6190,13 @@ class DemoData {
 			$current_user_id = $user_ids[] = $this->createUser( $company_id, 100, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[4], $user_title_ids[0], $ethnic_group_ids );
 
 			//Create random users.
+			Debug::Text('Creating random users: '. $this->getMaxRandomUsers(), __FILE__, __LINE__, __METHOD__, 10);
 			for( $i = 0; $i <= $this->getMaxRandomUsers(); $i++ ) {
 				$tmp_user_id = $this->createUser( $company_id, 999, 0, $branch_ids[($i % 2)], $department_ids[($i % 4)], $currency_ids[0], $user_group_ids[($i % 5)], $user_title_ids[($i % 9)], $ethnic_group_ids );
 				if ( $tmp_user_id != FALSE ) {
 					$user_ids[] = $tmp_user_id;
 				}
 			}
-
 			//Debug::Arr($user_ids, 'All User IDs:', __FILE__, __LINE__, __METHOD__, 10);
 
 			$ulf = TTnew( 'UserListFactory' );

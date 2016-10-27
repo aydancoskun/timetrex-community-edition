@@ -1453,10 +1453,12 @@ class Report {
 	function currencyConvertToBase() {
 		$this->profiler->startTimer( 'currencyConvertToBase' );
 
-		$currency_format_columns = array_keys( array_merge( (array)Misc::trimSortPrefix( $this->getOptions('column_format') ), $this->getCustomColumnFormatOptions() ), 'currency'	);
+		$all_currency_format_columns = array_keys( array_merge( (array)Misc::trimSortPrefix( $this->getOptions('column_format') ), $this->getCustomColumnFormatOptions() ), 'currency' );
 		$currency_convert_to_base = $this->getCurrencyConvertToBase();
 		$base_currency_obj = $this->getBaseCurrencyObject();
 
+		//Determine if any currency columns are actually being displayed, no point in converting if they don't.
+		$currency_format_columns = array_intersect_key( array_flip( $all_currency_format_columns ), (array)$this->getReportColumns() );
 		if ( empty( $currency_format_columns ) ) {
 			return TRUE;
 		}

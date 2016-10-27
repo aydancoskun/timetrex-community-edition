@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12265 $
- * $Id: CompanyFactory.class.php 12265 2014-02-10 16:14:38Z mikeb $
- * $Date: 2014-02-10 08:14:38 -0800 (Mon, 10 Feb 2014) $
+ * $Revision: 12429 $
+ * $Id: CompanyFactory.class.php 12429 2014-02-21 17:05:56Z mikeb $
+ * $Date: 2014-02-21 09:05:56 -0800 (Fri, 21 Feb 2014) $
  */
 
 /**
@@ -48,6 +48,7 @@ class CompanyFactory extends Factory {
 
 	protected $address_validator_regex = '/^[a-zA-Z0-9-,_\/\.\'#\ |\x{0080}-\x{FFFF}]{1,250}$/iu';
 	protected $city_validator_regex = '/^[a-zA-Z0-9-,_\.\'#\ |\x{0080}-\x{FFFF}]{1,250}$/iu';
+	protected $short_name_validator_regex = '/^[a-zA-Z0-9-]{1,15}$/iu'; //Short name must only allow characters available in domain names.
 
 	var $user_default_obj = NULL;
 	var $user_obj = NULL;
@@ -1897,11 +1898,21 @@ class CompanyFactory extends Factory {
 	function setShortName($name) {
 		$name = trim($name);
 
-		if	(	$this->Validator->isLength(		'short_name',
-												$name,
-												TTi18n::gettext('Short name is too short or too long'),
-												2,
-												15) ) {
+		//Short name must only allow characters available in domain names.
+		if	(	$name == ''
+				OR (
+					$this->Validator->isLength(		'short_name',
+													$name,
+													TTi18n::gettext('Short name is too short or too long'),
+													2,
+													15)
+					AND
+					$this->Validator->isRegEx(		'short_name',
+													$name,
+													TTi18n::gettext('Short name must not contain any special characters'),
+													$this->short_name_validator_regex)
+				)
+			) {
 
 			$this->data['short_name'] = $name;
 

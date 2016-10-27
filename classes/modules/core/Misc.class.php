@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12265 $
- * $Id: Misc.class.php 12265 2014-02-10 16:14:38Z mikeb $
- * $Date: 2014-02-10 08:14:38 -0800 (Mon, 10 Feb 2014) $
+ * $Revision: 12453 $
+ * $Id: Misc.class.php 12453 2014-02-25 16:10:34Z mikeb $
+ * $Date: 2014-02-25 08:10:34 -0800 (Tue, 25 Feb 2014) $
  */
 
 /**
@@ -1244,6 +1244,15 @@ class Misc {
 		return $retarr;
 	}
 
+	static function getURLProtocol() {
+		$retval = 'http';
+		if ( Misc::isSSL() == TRUE ) {
+			$retval .= 's';
+		}
+
+		return $retval;
+	}
+
 	static function getHostNameWithoutSubDomain( $host_name ) {
 		$split_host_name = explode('.', $host_name );
 		if ( count($split_host_name) > 2 ) {
@@ -1934,8 +1943,13 @@ class Misc {
 		return TRUE;
 	}
 
-	static function isSSL() {
-		if ( isset($_SERVER['HTTPS']) AND ( strtolower($_SERVER['HTTPS']) == 'on' OR $_SERVER['HTTPS'] == '1' ) ) {
+	static function isSSL( $ignore_force_ssl = FALSE ) {
+		global $config_vars;
+		
+		//ignore_force_ssl is used for things like cookies where we need to determine if SSL is *currently* in use, vs. if we want it to be used or not.
+		if ( $ignore_force_ssl == FALSE AND isset($config_vars['other']['force_ssl']) AND ( $config_vars['other']['force_ssl'] == TRUE ) ) {
+			return TRUE;
+		} elseif ( isset($_SERVER['HTTPS']) AND ( strtolower($_SERVER['HTTPS']) == 'on' OR $_SERVER['HTTPS'] == '1' ) ) {
 			return TRUE;
 		} elseif ( isset($_SERVER['SERVER_PORT']) AND ( $_SERVER['SERVER_PORT'] == '443' ) ) {
 			return TRUE;
@@ -2006,7 +2020,7 @@ class Misc {
 			$percent_chance = 100;
 		}
 
-		srand( hexdec( substr( $identifier, 0 , 10 ) ) );
+		srand( hexdec( substr( $identifier, 0, 10 ) ) );
 		$random_trigger = rand( 1, 100 );
 		if ( $force == TRUE OR $random_trigger <= $percent_chance ) {
 			$retval = TRUE;

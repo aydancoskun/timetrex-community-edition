@@ -540,7 +540,6 @@ class MessageControlFactory extends Factory {
 				if ( isset($retarr) ) {
 					Debug::Arr($retarr, 'Recipient Email Addresses: ', __FILE__, __LINE__, __METHOD__, 10);
 					return array_unique($retarr);
-
 				}
 			}
 		}
@@ -607,7 +606,7 @@ class MessageControlFactory extends Factory {
 		$email_body .= ( $replace_arr[4] != '' ) ? TTi18n::gettext('Group').': #from_employee_group#'."\n" : NULL;
 		$email_body .= ( $replace_arr[5] != '' ) ? TTi18n::gettext('Title').': #from_employee_title#'."\n" : NULL;
 
-		$email_body .= TTi18n::gettext('Link:').' <a href="http://'. Misc::getHostName().Environment::getDefaultInterfaceBaseURL().'">'.APPLICATION_NAME.' '. TTi18n::gettext('Login') .'</a>';
+		$email_body .= TTi18n::gettext('Link:').' <a href="'. Misc::getURLProtocol() .'://'. Misc::getHostName().Environment::getDefaultInterfaceBaseURL().'">'.APPLICATION_NAME.' '. TTi18n::gettext('Login') .'</a>';
 
 		$email_body .= ( $replace_arr[6] != '' ) ? "\n\n\n".TTi18n::gettext('Company').': #company_name#'."\n" : NULL; //Always put at the end
 
@@ -635,7 +634,7 @@ class MessageControlFactory extends Factory {
 		$retval = $mail->Send();
 
 		if ( $retval == TRUE ) {
-			TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Email Message to').': '. implode(',', $email_to_arr), NULL, $this->getTable() );
+			TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Email Message to').': '. implode(', ', $email_to_arr), NULL, $this->getTable() );
 			return TRUE;
 		}
 

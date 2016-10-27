@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12186 $
- * $Id: TimeTrexSoapClient.class.php 12186 2014-01-31 23:39:57Z mikeb $
- * $Date: 2014-01-31 15:39:57 -0800 (Fri, 31 Jan 2014) $
+ * $Revision: 12184 $
+ * $Id: TimeTrexSoapClient.class.php 12184 2014-01-31 23:15:19Z mikeb $
+ * $Date: 2014-01-31 15:15:19 -0800 (Fri, 31 Jan 2014) $
  */
 
 /**

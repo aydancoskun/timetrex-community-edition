@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12026 $
- * $Id: LogFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
- * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
+ * $Revision: 12387 $
+ * $Id: LogFactory.class.php 12387 2014-02-19 00:50:23Z mikeb $
+ * $Date: 2014-02-18 16:50:23 -0800 (Tue, 18 Feb 2014) $
  */
 
 /**
@@ -214,6 +214,7 @@ class LogFactory extends Factory {
 											'ethnic_group'						=> TTi18n::getText('Ethnic Group'),
 
 									);
+				asort( $retval ); //Sort by name so its easier to find objects.
 				break;
 			case 'columns':
 				$retval = array(

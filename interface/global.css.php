@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11830 $
- * $Id: global.css.php 11830 2013-12-28 22:10:01Z mikeb $
- * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
+ * $Revision: 11828 $
+ * $Id: global.css.php 11828 2013-12-27 22:47:49Z mikeb $
+ * $Date: 2013-12-27 14:47:49 -0800 (Fri, 27 Dec 2013) $
  */
 $disable_database_connection=TRUE;
 require_once('../includes/global.inc.php');

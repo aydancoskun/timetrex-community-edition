@@ -145,13 +145,13 @@
 								<td class="cellRightEditTable">
 									{if $install_obj->checkGETTEXT() == 0}
 										<span class="">{t}OK{/t}
-									{elseif $install_obj->checkGETTEXT() == 1}
+									{elseif $install_obj->checkGETTEXT() > 0}
 										<span class="tblDataWarning">{t}Warning: Not Installed. (GETTEXT extension must be enabled){/t}
 									{/if}
 									</span>
 								</td>
 							</tr>
-
+							{*
 							<tr>
 								<td class="cellLeftEditTable">
 									{t}CALENDAR Enabled:{/t}
@@ -165,6 +165,7 @@
 									</span>
 								</td>
 							</tr>
+							*}
 
 							<tr>
 								<td class="cellLeftEditTable">
@@ -326,6 +327,34 @@
 										<span class="">{t}OK{/t}
 									{else}
 										<span class="tblDataError"><b>{t escape="no" 1=$install_obj->getRecommendedBaseURL()}Warning: base_url in timetrex.ini.php is incorrect, perhaps it should be "%1" instead.{/t}</b>
+									{/if}
+									</span>
+								</td>
+							</tr>
+
+							<tr>
+								<td class="cellLeftEditTable">
+									{t}PHP CLI Executable:{/t}
+								</td>
+								<td class="cellRightEditTable">
+									{if $install_obj->checkPHPCLIBinary() == 0}
+										<span class="">{t}OK{/t}
+									{else}
+										<span class="tblDataError"><b>{t escape="no" 1=$install_obj->getPHPCLI()}Warning: PHP CLI (%1) does not exist or is not executable.{/t}</b>
+									{/if}
+									</span>
+								</td>
+							</tr>
+
+							<tr>
+								<td class="cellLeftEditTable">
+									{t}PHP CLI Requirements:{/t}
+								</td>
+								<td class="cellRightEditTable">
+									{if $install_obj->checkPHPCLIRequirements() == 0}
+										<span class="">{t}OK{/t}
+									{else}
+										<span class="tblDataError"><b>{t escape="no" 1=$install_obj->getPHPCLIRequirementsCommand()}Warning: PHP CLI requirements failed while executing <br>"%1"<br> Likely caused by having two PHP.INI files with different settings.{/t}</b>
 									{/if}
 									</span>
 								</td>

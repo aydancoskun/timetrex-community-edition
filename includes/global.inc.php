@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12265 $
- * $Id: global.inc.php 12265 2014-02-10 16:14:38Z mikeb $
- * $Date: 2014-02-10 08:14:38 -0800 (Mon, 10 Feb 2014) $
+ * $Revision: 12453 $
+ * $Id: global.inc.php 12453 2014-02-25 16:10:34Z mikeb $
+ * $Date: 2014-02-25 08:10:34 -0800 (Tue, 25 Feb 2014) $
  */
 //PHP v5.1.0 introduced $_SERVER['REQUEST_TIME'], but it doesn't include microseconds until v5.4.0.
 if ( !isset($_SERVER['REQUEST_TIME_FLOAT']) OR version_compare(PHP_VERSION, '5.4.0', '<') == TRUE ) {
@@ -61,8 +61,8 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '7.2.5' );
-define('APPLICATION_VERSION_DATE', @strtotime('12-Feb-2014') ); // Release date of version.
+define('APPLICATION_VERSION', '7.3.1' );
+define('APPLICATION_VERSION_DATE', @strtotime('27-Feb-2014') ); // Release date of version.
 
 if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') { define('OPERATING_SYSTEM', 'WIN'); } else { define('OPERATING_SYSTEM', 'LINUX'); }
 
@@ -194,11 +194,13 @@ if ( !isset($_SERVER['REQUEST_URI']) ) {
 }
 
 //HTTP Basic authentication doesn't work properly with CGI/FCGI unless we decode it this way.
-if ( ( PHP_SAPI == 'cgi' OR PHP_SAPI == 'cgi-fcgi' ) AND isset($_SERVER['HTTP_AUTHORIZATION']) ) {
+if ( isset($_SERVER['HTTP_AUTHORIZATION']) AND stripos( php_sapi_name(), 'cgi' ) !== FALSE ) {
 	//<IfModule mod_rewrite.c>
 	//RewriteEngine on
 	//RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]
 	//</IfModule>
+	//Or this instead:
+	//SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 	list($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) = explode(':', base64_decode( substr( $_SERVER['HTTP_AUTHORIZATION'], 6) ) );
 }
 
@@ -242,11 +244,11 @@ spl_autoload_register('__autoload'); //Registers the autoloader mainly for use w
 //The basis for the plugin system, instantiate all classes through this, allowing the class to be overloaded on the fly by a class in the plugin directory.
 //ie: $uf = TTNew( 'UserFactory' ); OR $uf = TTNew( 'UserFactory', $arg1, $arg2, $arg3 );
 function TTgetPluginClassName( $class_name ) {
-    global $config_vars;
+	global $config_vars;
 
-    //Check if the plugin system is enabled in the config.
-    if ( isset($config_vars['other']['enable_plugins']) AND $config_vars['other']['enable_plugins'] == 1 ) {
-        $plugin_class_name = $class_name.'Plugin';
+	//Check if the plugin system is enabled in the config.
+	if ( isset($config_vars['other']['enable_plugins']) AND $config_vars['other']['enable_plugins'] == 1 ) {
+		$plugin_class_name = $class_name.'Plugin';
 
 		//This improves performance greatly for classes with no plugins.
 		//But it may cause problems if the original class was somehow loaded before the plugin.
@@ -270,28 +272,29 @@ function TTgetPluginClassName( $class_name ) {
 				//Class file is already loaded.
 				$class_name = $plugin_class_name;
 			}
-		} else {
-			//Debug::Text('Plugin not found...', __FILE__, __LINE__, __METHOD__, 10);
 		}
-    } else {
-		//Debug::Text('Plugins disabled...', __FILE__, __LINE__, __METHOD__, 10);
+		//else {
+			//Debug::Text('Plugin not found...', __FILE__, __LINE__, __METHOD__, 10);
+		//}
 	}
-
+	//else {
+		//Debug::Text('Plugins disabled...', __FILE__, __LINE__, __METHOD__, 10);
+	//}
 
 	return $class_name;
 }
 function TTnew( $class_name ) { //Unlimited arguments are supported.
 	$class_name = TTgetPluginClassName( $class_name );
 
-    if ( func_num_args() > 1 ) {
-        $params = func_get_args();
-        array_shift( $params ); //Eliminate the class name argument.
+	if ( func_num_args() > 1 ) {
+		$params = func_get_args();
+		array_shift( $params ); //Eliminate the class name argument.
 
 		$reflection_class = new ReflectionClass($class_name);
 		return $reflection_class->newInstanceArgs($params);
-    } else {
+	} else {
 		return new $class_name();
-    }
+	}
 }
 
 //Function to force browsers to cache certain files.
@@ -364,7 +367,7 @@ function TTsaveRequestMetrics() {
 	} else {
 		$memory_usage = 0;
 	}
-	file_put_contents( $config_vars['other']['request_metrics_log'], ((microtime( TRUE )-$_SERVER['REQUEST_TIME_FLOAT'])*1000).' '. $memory_usage ."\n", FILE_APPEND ); //Write each response in MS to log for tracking performance
+	file_put_contents( $config_vars['other']['request_metrics_log'], ((microtime( TRUE ) - $_SERVER['REQUEST_TIME_FLOAT']) * 1000).' '. $memory_usage ."\n", FILE_APPEND ); //Write each response in MS to log for tracking performance
 }
 
 //This has to be first, always.

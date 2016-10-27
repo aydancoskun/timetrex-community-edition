@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12173 $
- * $Id: PunchFactory.class.php 12173 2014-01-29 16:58:10Z mikeb $
- * $Date: 2014-01-29 08:58:10 -0800 (Wed, 29 Jan 2014) $
+ * $Revision: 12331 $
+ * $Id: PunchFactory.class.php 12331 2014-02-13 18:57:19Z mikeb $
+ * $Date: 2014-02-13 10:57:19 -0800 (Thu, 13 Feb 2014) $
  */
 
 /**
@@ -485,313 +485,334 @@ class PunchFactory extends Factory {
 		$riplf = TTnew( 'RoundIntervalPolicyListFactory' );
 		$type_id = $riplf->getPunchTypeFromPunchStatusAndType( $this->getStatus(), $this->getType() );
 
-		Debug::text(' Round Interval Punch Type: '. $type_id .' User: '. $this->getUser(), __FILE__, __LINE__, __METHOD__, 10);
 		$riplf->getByPolicyGroupUserIdAndTypeId( $this->getUser(), $type_id );
-		if ( $riplf->getRecordCount() == 1 ) {
-			$round_policy_obj = $riplf->getCurrent();
-			Debug::text(' Found Rounding Policy: '. $round_policy_obj->getId() .' Punch Type: '. $round_policy_obj->getPunchType(), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text(' Round Interval Punch Type: '. $type_id .' User: '. $this->getUser() .' Total Records: '. $riplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		if ( $riplf->getRecordCount() > 0 ) {
+			//Loop over each rounding policy testing the conditionals and rounding the punch if necessary.
+			foreach( $riplf as $round_policy_obj ) {
+				Debug::text(' Found Rounding Policy: '. $round_policy_obj->getId() .' Punch Type: '. $round_policy_obj->getPunchType() .' Conditional Type: '. $round_policy_obj->getConditionType(), __FILE__, __LINE__, __METHOD__, 10);
 
-			//FIXME: It will only do proper total rounding if they edit the Lunch Out punch.
-			//We need to account for cases when they edit just the Lunch In Punch.
-			if ( $round_policy_obj->getPunchType() == 100 ) {
-				Debug::text('Lunch Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
+				//FIXME: It will only do proper total rounding if they edit the Lunch Out punch.
+				//We need to account for cases when they edit just the Lunch In Punch.
+				if ( $round_policy_obj->getPunchType() == 100 ) {
+					Debug::text('Lunch Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 
-				//On Lunch Punch In (back from lunch) do the total rounding.
-				if ( $this->getStatus() == 10 AND $this->getType() == 20 ) {
-					Debug::text('bLunch Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
-					//If strict is set, round to scheduled lunch time?
-					//Find Lunch Punch In.
+					//On Lunch Punch In (back from lunch) do the total rounding.
+					if ( $this->getStatus() == 10 AND $this->getType() == 20 ) {
+						Debug::text('bLunch Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
+						//If strict is set, round to scheduled lunch time?
+						//Find Lunch Punch In.
 
-					//Make sure we include both lunch and normal punches when searching for the previous punch, because with Punch Time detection meal policies
-					//the previous punch will never be lunch, just normal, but with Time Window meal policies it will be lunch. This is critical for Lunch rounding
-					//with Punch Time detection meal policies.
-					//There was a bug where if Lunch Total rounding is enabled, and auto-detect punches by Punch Time is also enabled,
-					//this won't round the Lunch In punch because the Lunch Out punch hasn't been designated until changePreviousPunchType() is called in PunchControlFactory::preSave().
-					//which doesn't happen until later.
-					$plf = TTnew( 'PunchListFactory' );
-					$plf->getPreviousPunchByUserIdAndStatusAndTypeAndEpoch( $this->getUser(), 20, array(10, 20), $epoch );
-					if ( $plf->getRecordCount() == 1 ) {
-						Debug::text('Found Lunch Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
+						//Make sure we include both lunch and normal punches when searching for the previous punch, because with Punch Time detection meal policies
+						//the previous punch will never be lunch, just normal, but with Time Window meal policies it will be lunch. This is critical for Lunch rounding
+						//with Punch Time detection meal policies.
+						//There was a bug where if Lunch Total rounding is enabled, and auto-detect punches by Punch Time is also enabled,
+						//this won't round the Lunch In punch because the Lunch Out punch hasn't been designated until changePreviousPunchType() is called in PunchControlFactory::preSave().
+						//which doesn't happen until later.
+						$plf = TTnew( 'PunchListFactory' );
+						$plf->getPreviousPunchByUserIdAndStatusAndTypeAndEpoch( $this->getUser(), 20, array(10, 20), $epoch );
+						if ( $plf->getRecordCount() == 1 ) {
+							Debug::text('Found Lunch Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 
-						$total_lunch_time = ( $epoch - $plf->getCurrent()->getTimeStamp() );
-						Debug::text('Total Lunch Time: '. $total_lunch_time, __FILE__, __LINE__, __METHOD__, 10);
+							$total_lunch_time = ( $epoch - $plf->getCurrent()->getTimeStamp() );
+							Debug::text('Total Lunch Time: '. $total_lunch_time, __FILE__, __LINE__, __METHOD__, 10);
 
-						//Set the ScheduleID
-						$has_schedule = $this->setScheduleID( $this->findScheduleID( $epoch ) );
-
-						if ( $has_schedule == TRUE AND $round_policy_obj->getGrace() > 0
-								AND is_object( $this->getScheduleObject()->getSchedulePolicyObject() )
-								AND is_object( $this->getScheduleObject()->getSchedulePolicyObject()->getMealPolicyObject() ) )	 {
-							Debug::text(' Applying Grace Period: ', __FILE__, __LINE__, __METHOD__, 10);
-							$total_lunch_time = TTDate::graceTime($total_lunch_time, $round_policy_obj->getGrace(), $this->getScheduleObject()->getSchedulePolicyObject()->getMealPolicyObject()->getAmount() );
-							Debug::text('After Grace: '. $total_lunch_time, __FILE__, __LINE__, __METHOD__, 10);
-						}
-
-						if ( $round_policy_obj->getInterval() > 0 )	 {
-							Debug::Text(' Rounding to interval: '. $round_policy_obj->getInterval(), __FILE__, __LINE__, __METHOD__, 10);
-							$total_lunch_time = TTDate::roundTime($total_lunch_time, $round_policy_obj->getInterval(), $round_policy_obj->getRoundType(), $round_policy_obj->getGrace() );
-							Debug::text('After Rounding: '. $total_lunch_time, __FILE__, __LINE__, __METHOD__, 10);
-						}
-
-						if (  $has_schedule == TRUE AND $round_policy_obj->getStrict() == TRUE
-								AND is_object( $this->getScheduleObject()->getSchedulePolicyObject() )
-								AND is_object( $this->getScheduleObject()->getSchedulePolicyObject()->getMealPolicyObject() ) ) {
-							Debug::Text(' Snap Time: Round Type: '. $round_policy_obj->getRoundType(), __FILE__, __LINE__, __METHOD__, 10);
-							if ( $round_policy_obj->getRoundType() == 10 ) {
-								Debug::Text(' Snap Time DOWN ', __FILE__, __LINE__, __METHOD__, 10);
-								$total_lunch_time = TTDate::snapTime($total_lunch_time, $this->getScheduleObject()->getSchedulePolicyObject()->getMealPolicyObject()->getAmount(), 'DOWN');
-							} elseif ( $round_policy_obj->getRoundType() == 30 ) {
-								Debug::Text(' Snap Time UP', __FILE__, __LINE__, __METHOD__, 10);
-								$total_lunch_time = TTDate::snapTime($total_lunch_time, $this->getScheduleObject()->getSchedulePolicyObject()->getMealPolicyObject()->getAmount(), 'UP');
-							} else {
-								Debug::Text(' Not Snaping Time', __FILE__, __LINE__, __METHOD__, 10);
+							//Test rounding condition, needs to happen after we attempt to get the schedule at least.
+							if ( $round_policy_obj->isConditionTrue( $total_lunch_time, FALSE ) == FALSE ) {
+								continue;
 							}
-						}
 
-						$epoch = ( $plf->getCurrent()->getTimeStamp() + $total_lunch_time );
-						Debug::text('Epoch after total rounding is: '. $epoch .' - '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__, 10);
+							//Set the ScheduleID
+							$has_schedule = $this->setScheduleID( $this->findScheduleID( $epoch ) );
+
+							if ( $has_schedule == TRUE AND $round_policy_obj->getGrace() > 0
+									AND is_object( $this->getScheduleObject()->getSchedulePolicyObject() )
+									AND is_object( $this->getScheduleObject()->getSchedulePolicyObject()->getMealPolicyObject() ) )	 {
+								Debug::text(' Applying Grace Period: ', __FILE__, __LINE__, __METHOD__, 10);
+								$total_lunch_time = TTDate::graceTime($total_lunch_time, $round_policy_obj->getGrace(), $this->getScheduleObject()->getSchedulePolicyObject()->getMealPolicyObject()->getAmount() );
+								Debug::text('After Grace: '. $total_lunch_time, __FILE__, __LINE__, __METHOD__, 10);
+							}
+
+							if ( $round_policy_obj->getInterval() > 0 )	 {
+								Debug::Text(' Rounding to interval: '. $round_policy_obj->getInterval(), __FILE__, __LINE__, __METHOD__, 10);
+								$total_lunch_time = TTDate::roundTime($total_lunch_time, $round_policy_obj->getInterval(), $round_policy_obj->getRoundType(), $round_policy_obj->getGrace() );
+								Debug::text('After Rounding: '. $total_lunch_time, __FILE__, __LINE__, __METHOD__, 10);
+							}
+
+							if (  $has_schedule == TRUE AND $round_policy_obj->getStrict() == TRUE
+									AND is_object( $this->getScheduleObject()->getSchedulePolicyObject() )
+									AND is_object( $this->getScheduleObject()->getSchedulePolicyObject()->getMealPolicyObject() ) ) {
+								Debug::Text(' Snap Time: Round Type: '. $round_policy_obj->getRoundType(), __FILE__, __LINE__, __METHOD__, 10);
+								if ( $round_policy_obj->getRoundType() == 10 ) {
+									Debug::Text(' Snap Time DOWN ', __FILE__, __LINE__, __METHOD__, 10);
+									$total_lunch_time = TTDate::snapTime($total_lunch_time, $this->getScheduleObject()->getSchedulePolicyObject()->getMealPolicyObject()->getAmount(), 'DOWN');
+								} elseif ( $round_policy_obj->getRoundType() == 30 ) {
+									Debug::Text(' Snap Time UP', __FILE__, __LINE__, __METHOD__, 10);
+									$total_lunch_time = TTDate::snapTime($total_lunch_time, $this->getScheduleObject()->getSchedulePolicyObject()->getMealPolicyObject()->getAmount(), 'UP');
+								} else {
+									Debug::Text(' Not Snaping Time', __FILE__, __LINE__, __METHOD__, 10);
+								}
+							}
+
+							$epoch = ( $plf->getCurrent()->getTimeStamp() + $total_lunch_time );
+							Debug::text('Epoch after total rounding is: '. $epoch .' - '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__, 10);
+
+						} else {
+							Debug::text('DID NOT Find Lunch Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
+						}
 
 					} else {
-						Debug::text('DID NOT Find Lunch Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('Skipping Lunch Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 					}
+				} elseif ( $round_policy_obj->getPunchType() == 110 ) { //Break Total
+					Debug::text('Break Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 
-				} else {
-					Debug::text('Skipping Lunch Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
-				}
-			} elseif ( $round_policy_obj->getPunchType() == 110 ) { //Break Total
-				Debug::text('Break Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
+					//On break Punch In (back from break) do the total rounding.
+					if ( $this->getStatus() == 10 AND $this->getType() == 30 ) {
+						Debug::text('bbreak Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
+						//If strict is set, round to scheduled break time?
+						//Find break Punch In.
 
-				//On break Punch In (back from break) do the total rounding.
-				if ( $this->getStatus() == 10 AND $this->getType() == 30 ) {
-					Debug::text('bbreak Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
-					//If strict is set, round to scheduled break time?
-					//Find break Punch In.
+						//Make sure we include both break and normal punches when searching for the previous punch, because with Punch Time detection meal policies
+						//the previous punch will never be break, just normal, but with Time Window meal policies it will be break. This is critical for break rounding
+						//with Punch Time detection meal policies.
+						$plf = TTnew( 'PunchListFactory' );
+						$plf->getPreviousPunchByUserIdAndStatusAndTypeAndEpoch( $this->getUser(), 20, array(10, 30), $epoch );
+						if ( $plf->getRecordCount() == 1 ) {
+							Debug::text('Found break Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 
-					//Make sure we include both break and normal punches when searching for the previous punch, because with Punch Time detection meal policies
-					//the previous punch will never be break, just normal, but with Time Window meal policies it will be break. This is critical for break rounding
-					//with Punch Time detection meal policies.
-					$plf = TTnew( 'PunchListFactory' );
-					$plf->getPreviousPunchByUserIdAndStatusAndTypeAndEpoch( $this->getUser(), 20, array(10, 30), $epoch );
-					if ( $plf->getRecordCount() == 1 ) {
-						Debug::text('Found break Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
+							$total_break_time = ( $epoch - $plf->getCurrent()->getTimeStamp() );
+							Debug::text('Total break Time: '. $total_break_time, __FILE__, __LINE__, __METHOD__, 10);
 
-						$total_break_time = ( $epoch - $plf->getCurrent()->getTimeStamp() );
-						Debug::text('Total break Time: '. $total_break_time, __FILE__, __LINE__, __METHOD__, 10);
+							//Test rounding condition, needs to happen after we attempt to get the schedule at least.
+							if ( $round_policy_obj->isConditionTrue( $total_break_time, FALSE ) == FALSE ) {
+								continue;
+							}
 
-						//Set the ScheduleID
-						$has_schedule = $this->setScheduleID( $this->findScheduleID( $epoch ) );
+							//Set the ScheduleID
+							$has_schedule = $this->setScheduleID( $this->findScheduleID( $epoch ) );
 
-						//Combine all break policies together.
-						$break_policy_time = 0;
-						if ( is_object($this->getScheduleObject()) AND is_object( $this->getScheduleObject()->getSchedulePolicyObject() ) ) {
-							$break_policy_ids = $this->getScheduleObject()->getSchedulePolicyObject()->getBreakPolicy();
-							if ( is_array($break_policy_ids) ) {
-								foreach( $break_policy_ids as $break_policy_id ) {
-									if ( is_object( $this->getScheduleObject()->getSchedulePolicyObject()->getBreakPolicyObject( $break_policy_id ) ) ) {
-										$break_policy_time += $this->getScheduleObject()->getSchedulePolicyObject()->getBreakPolicyObject( $break_policy_id )->getAmount();
+							//Combine all break policies together.
+							$break_policy_time = 0;
+							if ( is_object($this->getScheduleObject()) AND is_object( $this->getScheduleObject()->getSchedulePolicyObject() ) ) {
+								$break_policy_ids = $this->getScheduleObject()->getSchedulePolicyObject()->getBreakPolicy();
+								if ( is_array($break_policy_ids) ) {
+									foreach( $break_policy_ids as $break_policy_id ) {
+										if ( is_object( $this->getScheduleObject()->getSchedulePolicyObject()->getBreakPolicyObject( $break_policy_id ) ) ) {
+											$break_policy_time += $this->getScheduleObject()->getSchedulePolicyObject()->getBreakPolicyObject( $break_policy_id )->getAmount();
+										}
 									}
 								}
 							}
-						}
-						unset($break_policy_id, $break_policy_ids);
-						Debug::text('Break Policy Time: '. $break_policy_time, __FILE__, __LINE__, __METHOD__, 10);
+							unset($break_policy_id, $break_policy_ids);
+							Debug::text('Break Policy Time: '. $break_policy_time, __FILE__, __LINE__, __METHOD__, 10);
 
-						if ( $has_schedule == TRUE AND $round_policy_obj->getGrace() > 0 )	{
-							Debug::text(' Applying Grace Period: ', __FILE__, __LINE__, __METHOD__, 10);
-							$total_break_time = TTDate::graceTime($total_break_time, $round_policy_obj->getGrace(), $break_policy_time );
-							Debug::text('After Grace: '. $total_break_time, __FILE__, __LINE__, __METHOD__, 10);
-						}
-
-						if ( $round_policy_obj->getInterval() > 0 )	 {
-							Debug::Text(' Rounding to interval: '. $round_policy_obj->getInterval(), __FILE__, __LINE__, __METHOD__, 10);
-							$total_break_time = TTDate::roundTime($total_break_time, $round_policy_obj->getInterval(), $round_policy_obj->getRoundType(), $round_policy_obj->getGrace() );
-							Debug::text('After Rounding: '. $total_break_time, __FILE__, __LINE__, __METHOD__, 10);
-						}
-
-						if (  $has_schedule == TRUE AND $round_policy_obj->getStrict() == TRUE ) {
-							Debug::Text(' Snap Time: Round Type: '. $round_policy_obj->getRoundType(), __FILE__, __LINE__, __METHOD__, 10);
-							if ( $round_policy_obj->getRoundType() == 10 ) {
-								Debug::Text(' Snap Time DOWN ', __FILE__, __LINE__, __METHOD__, 10);
-								$total_break_time = TTDate::snapTime($total_break_time, $break_policy_time, 'DOWN');
-							} elseif ( $round_policy_obj->getRoundType() == 30 ) {
-								Debug::Text(' Snap Time UP', __FILE__, __LINE__, __METHOD__, 10);
-								$total_break_time = TTDate::snapTime($total_break_time, $break_policy_time, 'UP');
-							} else {
-								Debug::Text(' Not Snaping Time', __FILE__, __LINE__, __METHOD__, 10);
+							if ( $has_schedule == TRUE AND $round_policy_obj->getGrace() > 0 )	{
+								Debug::text(' Applying Grace Period: ', __FILE__, __LINE__, __METHOD__, 10);
+								$total_break_time = TTDate::graceTime($total_break_time, $round_policy_obj->getGrace(), $break_policy_time );
+								Debug::text('After Grace: '. $total_break_time, __FILE__, __LINE__, __METHOD__, 10);
 							}
-						}
 
-						$epoch = ( $plf->getCurrent()->getTimeStamp() + $total_break_time );
-						Debug::text('Epoch after total rounding is: '. $epoch .' - '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__, 10);
+							if ( $round_policy_obj->getInterval() > 0 )	 {
+								Debug::Text(' Rounding to interval: '. $round_policy_obj->getInterval(), __FILE__, __LINE__, __METHOD__, 10);
+								$total_break_time = TTDate::roundTime($total_break_time, $round_policy_obj->getInterval(), $round_policy_obj->getRoundType(), $round_policy_obj->getGrace() );
+								Debug::text('After Rounding: '. $total_break_time, __FILE__, __LINE__, __METHOD__, 10);
+							}
+
+							if (  $has_schedule == TRUE AND $round_policy_obj->getStrict() == TRUE ) {
+								Debug::Text(' Snap Time: Round Type: '. $round_policy_obj->getRoundType(), __FILE__, __LINE__, __METHOD__, 10);
+								if ( $round_policy_obj->getRoundType() == 10 ) {
+									Debug::Text(' Snap Time DOWN ', __FILE__, __LINE__, __METHOD__, 10);
+									$total_break_time = TTDate::snapTime($total_break_time, $break_policy_time, 'DOWN');
+								} elseif ( $round_policy_obj->getRoundType() == 30 ) {
+									Debug::Text(' Snap Time UP', __FILE__, __LINE__, __METHOD__, 10);
+									$total_break_time = TTDate::snapTime($total_break_time, $break_policy_time, 'UP');
+								} else {
+									Debug::Text(' Not Snaping Time', __FILE__, __LINE__, __METHOD__, 10);
+								}
+							}
+
+							$epoch = ( $plf->getCurrent()->getTimeStamp() + $total_break_time );
+							Debug::text('Epoch after total rounding is: '. $epoch .' - '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__, 10);
+
+						} else {
+							Debug::text('DID NOT Find break Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
+						}
 
 					} else {
-						Debug::text('DID NOT Find break Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('Skipping break Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 					}
 
-				} else {
-					Debug::text('Skipping break Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
-				}
+				} elseif ( $round_policy_obj->getPunchType() == 120 ) { //Day Total Rounding
+					Debug::text('Day Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
+					if ( $this->getStatus() == 20 AND $this->getType() == 10 ) { //Out, Type Normal
+						Debug::text('bDay Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 
-			} elseif ( $round_policy_obj->getPunchType() == 120 ) { //Day Total Rounding
-				Debug::text('Day Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
-				if ( $this->getStatus() == 20 AND $this->getType() == 10 ) { //Out, Type Normal
-					Debug::text('bDay Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
+						//If strict is set, round to scheduled time?
+						$plf = TTnew( 'PunchListFactory' );
+						$plf->getPreviousPunchByUserIdAndEpochAndNotPunchIDAndMaximumShiftTime( $this->getUser(), $epoch, $this->getId() );
+						if ( $plf->getRecordCount() == 1 ) {
+							Debug::text('Found Previous Punch In: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 
-					//If strict is set, round to scheduled time?
-					$plf = TTnew( 'PunchListFactory' );
-					$plf->getPreviousPunchByUserIdAndEpochAndNotPunchIDAndMaximumShiftTime( $this->getUser(), $epoch, $this->getId() );
-					if ( $plf->getRecordCount() == 1 ) {
-						Debug::text('Found Previous Punch In: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
+							//Get day total time prior to this punch control.
+							$pclf = TTnew( 'PunchControlListFactory' );
+							$pclf->getByUserDateId( $plf->getCurrent()->getPunchControlObject()->getUserDateID() );
+							if ( $pclf->getRecordCount() > 0 ) {
+								$day_total_time = ( $epoch - $plf->getCurrent()->getTimeStamp() );
+								Debug::text('aDay Total Time: '. $day_total_time .' Current Punch Control ID: '. $this->getPunchControlID(), __FILE__, __LINE__, __METHOD__, 10);
 
-						//Get day total time prior to this punch control.
-						$pclf = TTnew( 'PunchControlListFactory' );
-						$pclf->getByUserDateId( $plf->getCurrent()->getPunchControlObject()->getUserDateID() );
-						if ( $pclf->getRecordCount() > 0 ) {
-							$day_total_time = ( $epoch - $plf->getCurrent()->getTimeStamp() );
-							Debug::text('aDay Total Time: '. $day_total_time .' Current Punch Control ID: '. $this->getPunchControlID(), __FILE__, __LINE__, __METHOD__, 10);
-
-							foreach( $pclf as $pc_obj ) {
-								if ( $plf->getCurrent()->getPunchControlID() != $pc_obj->getID() ) {
-									Debug::text('Punch Control Total Time: '. $pc_obj->getTotalTime() .' ID: '. $pc_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
-									$day_total_time += $pc_obj->getTotalTime();
-								}
-							}
-
-							//Take into account paid meal/breaks when doing day total rounding...
-							$meal_and_break_adjustment = 0;
-							$udtlf = TTnew( 'UserDateTotalListFactory' );
-							$udtlf->getByUserDateIdAndStatusAndType( $plf->getCurrent()->getPunchControlObject()->getUserDateID(), 10, array(100, 110) );
-							if ( $udtlf->getRecordCount() > 0 ) {
-								foreach( $udtlf as $udt_obj ) {
-									$meal_and_break_adjustment += $udt_obj->getTotalTime();
-								}
-								Debug::text('Meal and Break Adjustment: '. $meal_and_break_adjustment .' Records: '. $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
-							}
-
-							$day_total_time += $meal_and_break_adjustment;
-							$original_day_total_time = $day_total_time;
-
-							Debug::text('cDay Total Time: '. $day_total_time, __FILE__, __LINE__, __METHOD__, 10);
-							if ( $day_total_time > 0 ) {
-								//Need to handle split shifts properly, so just like we get all punches for the user_date_id, get all schedules too.
-								$has_schedule = FALSE;
-								$schedule_day_total_time = 0;
-
-								$slf = TTnew('ScheduleListFactory');
-								$slf->getByUserDateId( $plf->getCurrent()->getPunchControlObject()->getUserDateID() );
-								if ( $slf->getRecordCount() > 0 ) {
-									$has_schedule = TRUE;
-									foreach( $slf as $s_obj ) {
-										//Because auto-deduct meal/break policies are already accounted for in the total schedule time, they will be automatically
-										//deducted once the punch is saved. So if we don't add them back in here they will be deducted twice.
-										//The above happens when adding new punches, but editing existing punches need to account for any already deducted meal/break time.
-										$schedule_day_total_time += ( $s_obj->getTotalTime() + abs($s_obj->getMealPolicyDeductTime( $s_obj->calcRawTotalTime(), 10 )) + abs($s_obj->getBreakPolicyDeductTime( $s_obj->calcRawTotalTime(), 10 )) + $meal_and_break_adjustment );
-									}
-									Debug::text('Before Grace: '. $day_total_time .' Schedule Day Total: '. $schedule_day_total_time, __FILE__, __LINE__, __METHOD__, 10);
-									$day_total_time = TTDate::graceTime($day_total_time, $round_policy_obj->getGrace(), $schedule_day_total_time );
-									Debug::text('After Grace: '. $day_total_time, __FILE__, __LINE__, __METHOD__, 10);
-								}
-								unset($slf, $s_obj);
-
-								if ( $round_policy_obj->getInterval() > 0 )	 {
-									Debug::Text(' Rounding to interval: '. $round_policy_obj->getInterval(), __FILE__, __LINE__, __METHOD__, 10);
-									$day_total_time = TTDate::roundTime($day_total_time, $round_policy_obj->getInterval(), $round_policy_obj->getRoundType(), $round_policy_obj->getGrace() );
-									Debug::text('After Rounding: '. $day_total_time, __FILE__, __LINE__, __METHOD__, 10);
-								}
-
-								if (  $has_schedule == TRUE AND $round_policy_obj->getStrict() == TRUE
-										AND $schedule_day_total_time > 0 ) {
-									Debug::Text(' Snap Time: Round Type: '. $round_policy_obj->getRoundType(), __FILE__, __LINE__, __METHOD__, 10);
-									if ( $round_policy_obj->getRoundType() == 10 ) {
-										Debug::Text(' Snap Time DOWN ', __FILE__, __LINE__, __METHOD__, 10);
-										$day_total_time = TTDate::snapTime($day_total_time, $schedule_day_total_time, 'DOWN');
-									} elseif ( $round_policy_obj->getRoundType() == 30 ) {
-										Debug::Text(' Snap Time UP', __FILE__, __LINE__, __METHOD__, 10);
-										$day_total_time = TTDate::snapTime($day_total_time, $schedule_day_total_time, 'UP');
-									} else {
-										Debug::Text(' Not Snaping Time', __FILE__, __LINE__, __METHOD__, 10);
+								foreach( $pclf as $pc_obj ) {
+									if ( $plf->getCurrent()->getPunchControlID() != $pc_obj->getID() ) {
+										Debug::text('Punch Control Total Time: '. $pc_obj->getTotalTime() .' ID: '. $pc_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+										$day_total_time += $pc_obj->getTotalTime();
 									}
 								}
+
+								//Take into account paid meal/breaks when doing day total rounding...
+								$meal_and_break_adjustment = 0;
+								$udtlf = TTnew( 'UserDateTotalListFactory' );
+								$udtlf->getByUserDateIdAndStatusAndType( $plf->getCurrent()->getPunchControlObject()->getUserDateID(), 10, array(100, 110) );
+								if ( $udtlf->getRecordCount() > 0 ) {
+									foreach( $udtlf as $udt_obj ) {
+										$meal_and_break_adjustment += $udt_obj->getTotalTime();
+									}
+									Debug::text('Meal and Break Adjustment: '. $meal_and_break_adjustment .' Records: '. $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+								}
+
+								$day_total_time += $meal_and_break_adjustment;
+								$original_day_total_time = $day_total_time;
 
 								Debug::text('cDay Total Time: '. $day_total_time, __FILE__, __LINE__, __METHOD__, 10);
+								if ( $day_total_time > 0 ) {
+									//Need to handle split shifts properly, so just like we get all punches for the user_date_id, get all schedules too.
+									$has_schedule = FALSE;
+									$schedule_day_total_time = 0;
 
-								$day_total_time_diff = ( $day_total_time - $original_day_total_time );
-								Debug::text('Day Total Diff: '. $day_total_time_diff, __FILE__, __LINE__, __METHOD__, 10);
+									//Test rounding condition, needs to happen after we attempt to get the schedule at least.
+									if ( $round_policy_obj->isConditionTrue( $day_total_time, FALSE ) == FALSE ) {
+										continue;
+									}
 
-								$epoch = ( $original_epoch + $day_total_time_diff );
+									$slf = TTnew('ScheduleListFactory');
+									$slf->getByUserDateId( $plf->getCurrent()->getPunchControlObject()->getUserDateID() );
+									if ( $slf->getRecordCount() > 0 ) {
+										$has_schedule = TRUE;
+										foreach( $slf as $s_obj ) {
+											//Because auto-deduct meal/break policies are already accounted for in the total schedule time, they will be automatically
+											//deducted once the punch is saved. So if we don't add them back in here they will be deducted twice.
+											//The above happens when adding new punches, but editing existing punches need to account for any already deducted meal/break time.
+											$schedule_day_total_time += ( $s_obj->getTotalTime() + abs($s_obj->getMealPolicyDeductTime( $s_obj->calcRawTotalTime(), 10 )) + abs($s_obj->getBreakPolicyDeductTime( $s_obj->calcRawTotalTime(), 10 )) + $meal_and_break_adjustment );
+										}
+										Debug::text('Before Grace: '. $day_total_time .' Schedule Day Total: '. $schedule_day_total_time, __FILE__, __LINE__, __METHOD__, 10);
+										$day_total_time = TTDate::graceTime($day_total_time, $round_policy_obj->getGrace(), $schedule_day_total_time );
+										Debug::text('After Grace: '. $day_total_time, __FILE__, __LINE__, __METHOD__, 10);
+									}
+									unset($slf, $s_obj);
+
+									if ( $round_policy_obj->getInterval() > 0 )	 {
+										Debug::Text(' Rounding to interval: '. $round_policy_obj->getInterval(), __FILE__, __LINE__, __METHOD__, 10);
+										$day_total_time = TTDate::roundTime($day_total_time, $round_policy_obj->getInterval(), $round_policy_obj->getRoundType(), $round_policy_obj->getGrace() );
+										Debug::text('After Rounding: '. $day_total_time, __FILE__, __LINE__, __METHOD__, 10);
+									}
+
+									if (  $has_schedule == TRUE AND $round_policy_obj->getStrict() == TRUE
+											AND $schedule_day_total_time > 0 ) {
+										Debug::Text(' Snap Time: Round Type: '. $round_policy_obj->getRoundType(), __FILE__, __LINE__, __METHOD__, 10);
+										if ( $round_policy_obj->getRoundType() == 10 ) {
+											Debug::Text(' Snap Time DOWN ', __FILE__, __LINE__, __METHOD__, 10);
+											$day_total_time = TTDate::snapTime($day_total_time, $schedule_day_total_time, 'DOWN');
+										} elseif ( $round_policy_obj->getRoundType() == 30 ) {
+											Debug::Text(' Snap Time UP', __FILE__, __LINE__, __METHOD__, 10);
+											$day_total_time = TTDate::snapTime($day_total_time, $schedule_day_total_time, 'UP');
+										} else {
+											Debug::Text(' Not Snaping Time', __FILE__, __LINE__, __METHOD__, 10);
+										}
+									}
+
+									Debug::text('cDay Total Time: '. $day_total_time, __FILE__, __LINE__, __METHOD__, 10);
+
+									$day_total_time_diff = ( $day_total_time - $original_day_total_time );
+									Debug::text('Day Total Diff: '. $day_total_time_diff, __FILE__, __LINE__, __METHOD__, 10);
+
+									$epoch = ( $original_epoch + $day_total_time_diff );
+								}
 							}
+						} else {
+							Debug::text('DID NOT Find Normal Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 						}
 					} else {
-						Debug::text('DID NOT Find Normal Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('Skipping Lunch Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
+					}
+				} else {
+					Debug::text('NOT Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
+
+					if ( $this->inScheduleStartStopWindow( $epoch, $this->getStatus() ) AND $round_policy_obj->getGrace() > 0 )	 {
+						Debug::text(' Applying Grace Period: ', __FILE__, __LINE__, __METHOD__, 10);
+						$epoch = TTDate::graceTime($epoch, $round_policy_obj->getGrace(), $this->getScheduleWindowTime() );
+						Debug::text('After Grace: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 					}
 
-				} else {
-					Debug::text('Skipping Lunch Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
-				}
-			} else {
-				Debug::text('NOT Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
+					//Test rounding condition, needs to happen after we attempt to get the schedule at least.
+					if ( $round_policy_obj->isConditionTrue( $epoch, $this->getScheduleWindowTime() ) == FALSE ) {
+						continue;
+					}
 
-				if ( $this->inScheduleStartStopWindow( $epoch, $this->getStatus() ) AND $round_policy_obj->getGrace() > 0 )	 {
-					Debug::text(' Applying Grace Period: ', __FILE__, __LINE__, __METHOD__, 10);
-					$epoch = TTDate::graceTime($epoch, $round_policy_obj->getGrace(), $this->getScheduleWindowTime() );
-					Debug::text('After Grace: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
-				}
+					$grace_time = $round_policy_obj->getGrace();
+					//If strict scheduling is enabled, handle grace times differently.
+					//Only apply them above if we are near the schedule start/stop time.
+					//This allows for grace time to apply if an employee punches in late,
+					//but afterwards not apply at all.
+					if ( $round_policy_obj->getStrict() == TRUE ) {
+						$grace_time = 0;
+					}
 
-				$grace_time = $round_policy_obj->getGrace();
-				//If strict scheduling is enabled, handle grace times differently.
-				//Only apply them above if we are near the schedule start/stop time.
-				//This allows for grace time to apply if an employee punches in late,
-				//but afterwards not apply at all.
-				if ( $round_policy_obj->getStrict() == TRUE ) {
-					$grace_time = 0;
-				}
+					if ( $round_policy_obj->getInterval() > 0 )	 {
+						Debug::Text(' Rounding to interval: '. $round_policy_obj->getInterval(), __FILE__, __LINE__, __METHOD__, 10);
+						$epoch = TTDate::roundTime($epoch, $round_policy_obj->getInterval(), $round_policy_obj->getRoundType(), $grace_time );
+						Debug::text('After Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
+					}
 
-				if ( $round_policy_obj->getInterval() > 0 )	 {
-					Debug::Text(' Rounding to interval: '. $round_policy_obj->getInterval(), __FILE__, __LINE__, __METHOD__, 10);
-					$epoch = TTDate::roundTime($epoch, $round_policy_obj->getInterval(), $round_policy_obj->getRoundType(), $grace_time );
-					Debug::text('After Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
-				}
-
-				//ONLY perform strict rounding on Normal punches, not break/lunch punches?
-				//Modify the UI to restrict this as well perhaps?
-				if ( $round_policy_obj->getStrict() == TRUE AND $this->getScheduleWindowTime() !== FALSE ) {
-					Debug::Text(' Snap Time: Round Type: '. $round_policy_obj->getRoundType(), __FILE__, __LINE__, __METHOD__, 10);
-					if ( $round_policy_obj->getRoundType() == 10 ) {
-						Debug::Text(' Snap Time DOWN ', __FILE__, __LINE__, __METHOD__, 10);
-						$epoch = TTDate::snapTime($epoch, $this->getScheduleWindowTime(), 'DOWN');
-					} elseif ( $round_policy_obj->getRoundType() == 30 ) {
-						Debug::Text(' Snap Time UP', __FILE__, __LINE__, __METHOD__, 10);
-						$epoch = TTDate::snapTime($epoch, $this->getScheduleWindowTime(), 'UP');
-					} else {
-						//If its an In Punch, snap up, if its out punch, snap down?
-						Debug::Text(' Average rounding type, automatically determining snap direction.', __FILE__, __LINE__, __METHOD__, 10);
-						if ( $this->getStatus() == 10 ) {
+					//ONLY perform strict rounding on Normal punches, not break/lunch punches?
+					//Modify the UI to restrict this as well perhaps?
+					if ( $round_policy_obj->getStrict() == TRUE AND $this->getScheduleWindowTime() !== FALSE ) {
+						Debug::Text(' Snap Time: Round Type: '. $round_policy_obj->getRoundType(), __FILE__, __LINE__, __METHOD__, 10);
+						if ( $round_policy_obj->getRoundType() == 10 ) {
+							Debug::Text(' Snap Time DOWN ', __FILE__, __LINE__, __METHOD__, 10);
+							$epoch = TTDate::snapTime($epoch, $this->getScheduleWindowTime(), 'DOWN');
+						} elseif ( $round_policy_obj->getRoundType() == 30 ) {
 							Debug::Text(' Snap Time UP', __FILE__, __LINE__, __METHOD__, 10);
 							$epoch = TTDate::snapTime($epoch, $this->getScheduleWindowTime(), 'UP');
 						} else {
-							Debug::Text(' Snap Time DOWN ', __FILE__, __LINE__, __METHOD__, 10);
-							$epoch = TTDate::snapTime($epoch, $this->getScheduleWindowTime(), 'DOWN');
+							//If its an In Punch, snap up, if its out punch, snap down?
+							Debug::Text(' Average rounding type, automatically determining snap direction.', __FILE__, __LINE__, __METHOD__, 10);
+							if ( $this->getStatus() == 10 ) {
+								Debug::Text(' Snap Time UP', __FILE__, __LINE__, __METHOD__, 10);
+								$epoch = TTDate::snapTime($epoch, $this->getScheduleWindowTime(), 'UP');
+							} else {
+								Debug::Text(' Snap Time DOWN ', __FILE__, __LINE__, __METHOD__, 10);
+								$epoch = TTDate::snapTime($epoch, $this->getScheduleWindowTime(), 'DOWN');
+							}
 						}
 					}
 				}
-			}
 
-			//In cases where employees transfer between jobs, then have rounding on just In or Out punches,
-			//its possible for a punch in to be at 3:04PM and a later Out punch at 3:07PM to be rounded down to 3:00PM,
-			//causing a conflict and the punch not to be saved at all.
-			//In these cases don't round the punch.
-			//Don't implement just yet...
-			/*
-			$plf = TTnew( 'PunchListFactory' );
-			$plf->getPreviousPunchByUserIdAndStatusAndTypeAndEpoch( $this->getUser(), 10, array(10, 20, 30), $original_epoch );
-			if ( $plf->getRecordCount() == 1 ) {
-				if ( $epoch <= $plf->getCurrent()->getTimeStamp() ) {
-					Debug::text(' Rounded TimeStamp is before previous punch, not rounding at all! Previous Punch: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ) .' Rounded Time: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
-					$epoch = $original_epoch;
+				//In cases where employees transfer between jobs, then have rounding on just In or Out punches,
+				//its possible for a punch in to be at 3:04PM and a later Out punch at 3:07PM to be rounded down to 3:00PM,
+				//causing a conflict and the punch not to be saved at all.
+				//In these cases don't round the punch.
+				//Don't implement just yet...
+				/*
+				$plf = TTnew( 'PunchListFactory' );
+				$plf->getPreviousPunchByUserIdAndStatusAndTypeAndEpoch( $this->getUser(), 10, array(10, 20, 30), $original_epoch );
+				if ( $plf->getRecordCount() == 1 ) {
+					if ( $epoch <= $plf->getCurrent()->getTimeStamp() ) {
+						Debug::text(' Rounded TimeStamp is before previous punch, not rounding at all! Previous Punch: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ) .' Rounded Time: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
+						$epoch = $original_epoch;
+					}
 				}
+				unset($plf, $p_obj);
+				*/
 			}
-			unset($plf, $p_obj);
-			*/
 		} else {
 			Debug::text(' NO Rounding Policy(s) Found', __FILE__, __LINE__, __METHOD__, 10);
 		}
@@ -1535,6 +1556,7 @@ class PunchFactory extends Factory {
 							//'user_full_name' => $user_obj->getFullName(),
 							//'time_stamp' => $epoch,
 							//'date_stamp' => $epoch,
+							'transfer' => FALSE,
 							'branch_id' => (int)$branch_id,
 							'department_id' => (int)$department_id,
 							'job_id' => $job_id,

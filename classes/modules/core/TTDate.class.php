@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11890 $
- * $Id: TTDate.class.php 11890 2014-01-03 05:31:27Z mikeb $
- * $Date: 2014-01-02 21:31:27 -0800 (Thu, 02 Jan 2014) $
+ * $Revision: 12432 $
+ * $Id: TTDate.class.php 12432 2014-02-23 00:04:18Z mikeb $
+ * $Date: 2014-02-22 16:04:18 -0800 (Sat, 22 Feb 2014) $
  */
 
 /**
@@ -1868,6 +1868,30 @@ class TTDate {
 		unset($time_arr, $date_arr);
 
 		return $epoch;
+	}
+
+	public static function getEasterDays($year) {
+		#First calculate the date of easter using Delambre's algorithm.
+		$a = ( $year % 19 );
+		$b = floor( ( $year / 100 ) );
+		$c = ( $year % 100 );
+		$d = floor( ( $b / 4 ) );
+		$e = ( $b % 4 );
+		$f = floor( ( ($b + 8) / 25 ) );
+		$g = floor( ( ($b - $f + 1) / 3 ) );
+		$h = ( (19 * $a + $b - $d - $g + 15) % 30 );
+		$i = floor( ($c / 4) );
+		$k = ( $c % 4 );
+		$l = ( (32 + 2 * $e + 2 * $i - $h - $k) % 7 );
+		$m = floor( ( ($a + 11 * $h + 22 * $l) / 451 ));
+		$n = ($h + $l - 7 * $m + 114);
+		$month = floor( ( $n / 31 ) );
+		$day = ( $n % 31 + 1 );
+
+		#Return the difference between the JulianDayCount for easter and March 21'st
+		#of the same year, in order to duplicate the functionality of the easter_days function
+		//return GregorianToJD($month, $day, $year) - GregorianToJD(3, 21, $year);
+		return round( TTDate::getDays( mktime( 0, 0, 0, $month, $day, $year ) - mktime( 0, 0, 0, 3, 21, $year ) ) );
 	}
 
 	// Function to return "13 mins ago" text from a given time.

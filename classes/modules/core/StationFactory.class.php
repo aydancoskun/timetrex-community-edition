@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12026 $
- * $Id: StationFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
- * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
+ * $Revision: 12006 $
+ * $Id: StationFactory.class.php 12006 2014-01-14 18:29:27Z mikeb $
+ * $Date: 2014-01-14 10:29:27 -0800 (Tue, 14 Jan 2014) $
  */
 include_once('Net/IPv4.php');
 

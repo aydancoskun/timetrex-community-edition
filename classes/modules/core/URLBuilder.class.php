@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11830 $
- * $Id: URLBuilder.class.php 11830 2013-12-28 22:10:01Z mikeb $
- * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
+ * $Revision: 11795 $
+ * $Id: URLBuilder.class.php 11795 2013-12-24 21:08:04Z mikeb $
+ * $Date: 2013-12-24 13:08:04 -0800 (Tue, 24 Dec 2013) $
  */
 
 /**

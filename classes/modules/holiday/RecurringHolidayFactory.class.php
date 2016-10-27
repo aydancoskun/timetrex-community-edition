@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12026 $
- * $Id: RecurringHolidayFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
- * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
+ * $Revision: 12350 $
+ * $Id: RecurringHolidayFactory.class.php 12350 2014-02-14 21:19:25Z mikeb $
+ * $Date: 2014-02-14 13:19:25 -0800 (Fri, 14 Feb 2014) $
  */
 
 /**
@@ -445,12 +445,14 @@ class RecurringHolidayFactory extends Factory {
 
 			//Use easter_days() instead, as easter_date returns incorrect values for some timezones/years (2010 and US/Eastern on Windows)
 			//$easter_epoch = easter_date(date('Y', $epoch));
-			$easter_epoch = mktime( 12, 0, 0, 3, ( 21 + easter_days( date('Y', $epoch) ) ), date('Y', $epoch) );
+			//$easter_epoch = mktime( 12, 0, 0, 3, ( 21 + easter_days( date('Y', $epoch) ) ), date('Y', $epoch) );
+			$easter_epoch = mktime( 12, 0, 0, 3, ( 21 + TTDate::getEasterDays( date('Y', $epoch) ) ), date('Y', $epoch) );
 
 			//Fix "cross-year" bug.
 			if ( $easter_epoch < $epoch ) {
 				//$easter_epoch = easter_date(date('Y', $epoch)+1);
-				$easter_epoch = mktime( 12, 0, 0, 3, ( 21 + easter_days( (date('Y', $epoch) + 1) ) ), ( date('Y', $epoch) + 1 ) );
+				//$easter_epoch = mktime( 12, 0, 0, 3, ( 21 + easter_days( (date('Y', $epoch) + 1) ) ), ( date('Y', $epoch) + 1 ) );
+				$easter_epoch = mktime( 12, 0, 0, 3, ( 21 + TTDate::getEasterDays( (date('Y', $epoch) + 1) ) ), ( date('Y', $epoch) + 1 ) );
 			}
 
 			if ( $this->getSpecialDay() == 1 ) {

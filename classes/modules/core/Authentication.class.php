@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12265 $
- * $Id: Authentication.class.php 12265 2014-02-10 16:14:38Z mikeb $
- * $Date: 2014-02-10 08:14:38 -0800 (Mon, 10 Feb 2014) $
+ * $Revision: 12453 $
+ * $Id: Authentication.class.php 12453 2014-02-25 16:10:34Z mikeb $
+ * $Date: 2014-02-25 08:10:34 -0800 (Tue, 25 Feb 2014) $
  */
 
 
@@ -395,6 +395,7 @@ class Authentication {
 		return FALSE;
 	}
 
+	/*
 	function isSSL() {
 		if ( isset($_SERVER['HTTPS']) AND ( $_SERVER['HTTPS'] == 'on' OR $_SERVER['HTTPS'] == 1 ) ) {
 			return TRUE;
@@ -402,6 +403,7 @@ class Authentication {
 
 		return FALSE;
 	}
+	*/
 
 	private function setCookie() {
 		if ( $this->getSessionID() ) {
@@ -411,10 +413,10 @@ class Authentication {
 			}
 			Debug::text('Cookie Expires: '. $cookie_expires, __FILE__, __LINE__, __METHOD__, 10);
 
-			setcookie($this->getName(), NULL, ( time() + 9999999 ), Environment::getBaseURL(), NULL, $this->isSSL() ); //Delete old directory cookie as it can cause a conflict if it stills exists.
+			setcookie($this->getName(), NULL, ( time() + 9999999 ), Environment::getBaseURL(), NULL, Misc::isSSL( TRUE ) ); //Delete old directory cookie as it can cause a conflict if it stills exists.
 
 			//Set cookie in root directory so other interfaces can access it.
-			setcookie( $this->getName(), $this->getSessionID(), $cookie_expires, '/', NULL, $this->isSSL() );
+			setcookie( $this->getName(), $this->getSessionID(), $cookie_expires, '/', NULL, Misc::isSSL( TRUE ) );
 
 			return TRUE;
 		}
@@ -423,7 +425,7 @@ class Authentication {
 	}
 
 	private function destroyCookie() {
-		setcookie($this->getName(), NULL, ( time() + 9999999 ), '/', NULL, $this->isSSL() );
+		setcookie($this->getName(), NULL, ( time() + 9999999 ), '/', NULL, Misc::isSSL( TRUE ) );
 
 		return TRUE;
 	}
@@ -534,10 +536,10 @@ class Authentication {
 
 		if ( count($result) > 0) {
 			if ( PRODUCTION == TRUE AND $result['ip_address'] != $this->getIPAddress() ) {
-				Debug::text('WARNING: IP Address has changed for existing session... Original IP: '. $result['ip_address'] .' Current IP: '. $this->getIPAddress() .' isSSL: '. (int)$this->isSSL(), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text('WARNING: IP Address has changed for existing session... Original IP: '. $result['ip_address'] .' Current IP: '. $this->getIPAddress() .' isSSL: '. (int)Misc::isSSL( TRUE ), __FILE__, __LINE__, __METHOD__, 10);
 				//When using SSL, we don't care if the IP address has changed, as the session should still be secure.
 				//This allows sessions to work across load balancing routers, or between mobile/wifi connections, which can change 100% of the IP address (so close matches are useless anyways)
-				if ( $this->isSSL() != TRUE ) {
+				if ( Misc::isSSL( TRUE ) != TRUE ) {
 					//When not using SSL there is no 100% method of preventing session hijacking, so just insist that IP addresses match exactly as its as close as we can get.
 					Debug::text('Not using SSL, IP addresses must match exactly...', __FILE__, __LINE__, __METHOD__, 10);
 					return FALSE;

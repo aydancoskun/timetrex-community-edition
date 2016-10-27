@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12026 $
- * $Id: BankAccountListFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
- * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
+ * $Revision: 11918 $
+ * $Id: BankAccountListFactory.class.php 11918 2014-01-07 16:32:27Z mikeb $
+ * $Date: 2014-01-07 08:32:27 -0800 (Tue, 07 Jan 2014) $
  */
 
 /**

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12265 $
- * $Id: PayStubListFactory.class.php 12265 2014-02-10 16:14:38Z mikeb $
- * $Date: 2014-02-10 08:14:38 -0800 (Mon, 10 Feb 2014) $
+ * $Revision: 12387 $
+ * $Id: PayStubListFactory.class.php 12387 2014-02-19 00:50:23Z mikeb $
+ * $Date: 2014-02-18 16:50:23 -0800 (Tue, 18 Feb 2014) $
  */
 
 /**
@@ -301,6 +301,41 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	function getByUserIdAndPayStubAmendmentId($user_id, $pay_stub_amendment_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+		if ( $user_id == '') {
+			return FALSE;
+		}
+
+		if ( $pay_stub_amendment_id == '') {
+			return FALSE;
+		}
+
+		$ulf = new UserListFactory();
+		$pself = new PayStubEntryListFactory();
+
+		$ph = array(
+					'user_id' => $user_id,
+					'psa_id' => $pay_stub_amendment_id,
+					);
+
+		$query = '
+					select	distinct a.*
+					from	'. $this->getTable() .' as a
+						LEFT JOIN '. $ulf->getTable() .' as b ON ( a.user_id = b.id )
+						LEFT JOIN '. $pself->getTable() .' as c ON ( a.id = c.pay_stub_id )
+					where a.user_id = ?
+						AND c.pay_stub_amendment_id = ?
+						';
+
+		$query .= '
+						AND ( a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0)';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		return $this;
+	}
 	function getLastPayStubByUserIdAndStartDate($user_id, $start_date, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;

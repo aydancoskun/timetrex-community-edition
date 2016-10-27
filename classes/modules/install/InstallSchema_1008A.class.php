@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11830 $
- * $Id: InstallSchema_1008A.class.php 11830 2013-12-28 22:10:01Z mikeb $
- * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
+ * $Revision: 11818 $
+ * $Id: InstallSchema_1008A.class.php 11818 2013-12-27 19:34:09Z mikeb $
+ * $Date: 2013-12-27 11:34:09 -0800 (Fri, 27 Dec 2013) $
  */
 
 /**

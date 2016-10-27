@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12265 $
- * $Id: ScheduleListFactory.class.php 12265 2014-02-10 16:14:38Z mikeb $
- * $Date: 2014-02-10 08:14:38 -0800 (Mon, 10 Feb 2014) $
+ * $Revision: 12226 $
+ * $Id: ScheduleListFactory.class.php 12226 2014-02-07 23:48:52Z mikeb $
+ * $Date: 2014-02-07 15:48:52 -0800 (Fri, 07 Feb 2014) $
  */
 
 /**

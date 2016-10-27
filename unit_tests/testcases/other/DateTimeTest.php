@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12091 $
- * $Id: DateTimeTest.php 12091 2014-01-21 16:33:40Z mikeb $
- * $Date: 2014-01-21 08:33:40 -0800 (Tue, 21 Jan 2014) $
+ * $Revision: 12355 $
+ * $Id: DateTimeTest.php 12355 2014-02-15 00:57:32Z mikeb $
+ * $Date: 2014-02-14 16:57:32 -0800 (Fri, 14 Feb 2014) $
  */
 require_once('PHPUnit/Framework/TestCase.php');
 
@@ -1185,6 +1185,15 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( TTDate::inApplyFrequencyWindow( 100, strtotime('01-Jan-2009'), strtotime('01-Jan-2010'), $frequency_criteria ), TRUE );
 		$this->assertEquals( TTDate::inApplyFrequencyWindow( 100, strtotime('01-Jan-2009'), strtotime('01-Jan-2011'), $frequency_criteria ), TRUE );
+	}
+
+	//Compare pure PHP implementation of EasterDays to PHP calendar extension.
+	function test_EasterDays() {
+		if ( function_exists('easter_days') ) {
+			for($i=2000; $i < 2050; $i++ ) {
+				$this->assertEquals( easter_days( $i ) , TTDate::getEasterDays( $i ) );
+			}
+		}
 	}
 }
 ?>

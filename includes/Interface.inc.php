@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12173 $
- * $Id: Interface.inc.php 12173 2014-01-29 16:58:10Z mikeb $
- * $Date: 2014-01-29 08:58:10 -0800 (Wed, 29 Jan 2014) $
+ * $Revision: 12172 $
+ * $Id: Interface.inc.php 12172 2014-01-29 16:52:58Z mikeb $
+ * $Date: 2014-01-29 08:52:58 -0800 (Wed, 29 Jan 2014) $
  */
 if ( !isset($disable_cache_control) ) {
 	//Turn caching off.
