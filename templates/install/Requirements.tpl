@@ -292,6 +292,17 @@
 									</span>
 								</td>
 							</tr>
+						</table>
+					</td>
+					<td valign="top">
+						<table class="editTable">
+							<tr>
+								<td colspan="2" class="cellLeftEditTable">
+									<div align="center">
+										{t}Other Requirements{/t}
+									</div>
+								</td>
+							</tr>
 
 							<tr>
 								<td class="cellLeftEditTable">
@@ -304,17 +315,6 @@
 										<span class="tblDataError">{t escape="no" 1=$install_obj->getMemoryLimit()}Warning: %1M (Set this to 128M or higher){/t}
 									{/if}
 									</span>
-								</td>
-							</tr>
-						</table>
-					</td>
-					<td valign="top">
-						<table class="editTable">
-							<tr>
-								<td colspan="2" class="cellLeftEditTable">
-									<div align="center">
-										{t}Other Requirements{/t}
-									</div>
 								</td>
 							</tr>
 

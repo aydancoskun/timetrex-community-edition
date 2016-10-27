@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12528 $
- * $Id: Install.class.php 12528 2014-03-03 23:20:02Z mikeb $
- * $Date: 2014-03-03 15:20:02 -0800 (Mon, 03 Mar 2014) $
+ * $Revision: 12620 $
+ * $Id: Install.class.php 12620 2014-03-13 17:11:59Z mikeb $
+ * $Date: 2014-03-13 10:11:59 -0700 (Thu, 13 Mar 2014) $
  */
 
 /**
@@ -1347,26 +1347,26 @@ class Install {
 
 		//PEAR modules are bundled as of v1.2.0
 		if ( $post_install_requirements_only == FALSE ) {
-			if ( is_array($exclude_check) AND in_array('base_url', $exclude_check) == FALSE	) {
+			if ( !is_array( $exclude_check ) OR ( is_array($exclude_check) AND in_array('base_url', $exclude_check) == FALSE ) ) {
 				$retarr[$this->checkBaseURL()]++;
 			}
-			if ( is_array($exclude_check) AND in_array('php_cli', $exclude_check) == FALSE	) {
+			if ( !is_array( $exclude_check ) OR ( is_array($exclude_check) AND in_array('php_cli', $exclude_check) == FALSE ) ) {
 				$retarr[$this->checkPHPCLIBinary()]++;
 			}
-			if ( is_array($exclude_check) AND in_array('php_cli_requirements', $exclude_check) == FALSE	) {
+			if ( !is_array( $exclude_check ) OR ( is_array($exclude_check) AND in_array('php_cli_requirements', $exclude_check) == FALSE ) ) {
 				$retarr[$this->checkPHPCLIRequirements()]++;
 			}
 			$retarr[$this->checkWritableConfigFile()]++;
 			$retarr[$this->checkWritableCacheDirectory()]++;
-			if ( is_array($exclude_check) AND in_array('clean_cache', $exclude_check) == FALSE	) {
+			if ( !is_array( $exclude_check ) OR ( is_array($exclude_check) AND in_array('clean_cache', $exclude_check) == FALSE ) ) {
 				$retarr[$this->checkCleanCacheDirectory()]++;
 			}
 			$retarr[$this->checkWritableStorageDirectory()]++;
 			$retarr[$this->checkWritableLogDirectory()]++;
-			if ( is_array($exclude_check) AND in_array('file_permissions', $exclude_check) == FALSE	 ) {
+			if ( !is_array( $exclude_check ) OR ( is_array($exclude_check) AND in_array('file_permissions', $exclude_check) == FALSE ) ) {
 				$retarr[$this->checkFilePermissions()]++;
 			}
-			if ( is_array($exclude_check) AND in_array('file_checksums', $exclude_check) == FALSE  ) {
+			if ( !is_array( $exclude_check ) OR ( is_array($exclude_check) AND in_array('file_checksums', $exclude_check) == FALSE ) ) {
 				$retarr[$this->checkFileChecksums()]++;
 			}
 		}

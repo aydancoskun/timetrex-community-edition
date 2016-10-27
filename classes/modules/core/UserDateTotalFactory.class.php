@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12549 $
- * $Id: UserDateTotalFactory.class.php 12549 2014-03-04 22:08:12Z mikeb $
- * $Date: 2014-03-04 14:08:12 -0800 (Tue, 04 Mar 2014) $
+ * $Revision: 12620 $
+ * $Id: UserDateTotalFactory.class.php 12620 2014-03-13 17:11:59Z mikeb $
+ * $Date: 2014-03-13 10:11:59 -0700 (Thu, 13 Mar 2014) $
  */
 
 /**
@@ -1171,7 +1171,7 @@ class UserDateTotalFactory extends Factory {
 						$week_modifier = 0; //0=Even, 1=Odd
 						if ( is_object( $this->getUserDateObject()->getPayPeriodObject() ) ) {
 							$week_modifier = ( TTDate::getWeek( TTDate::getMiddleDayEpoch( $this->getUserDateObject()->getPayPeriodObject()->getStartDate() ), $start_week_day_id) % 2 ); //Due to DST, use getMiddleDayEpoch()
-							//Debug::text(' Pay Period Start Date: '. $this->getUserDateObject()->getPayPeriodObject()->getStartDate() .' Start Week Day: '. $start_week_day_id, __FILE__, __LINE__, __METHOD__, 10);
+							//Debug::text(' Pay Period Start Date: '. TTDate::getDate('DATE+TIME', $this->getPayPeriodObject()->getStartDate() ).' Start Week Day: '. $start_week_day_id, __FILE__, __LINE__, __METHOD__, 10);
 						}
 						$current_week_modifier = ( TTDate::getWeek( $this->getUserDateObject()->getDateStamp(), $start_week_day_id ) % 2 );
 						Debug::text(' Current Week: '. $current_week_modifier .' Week Modifier: '. $week_modifier, __FILE__, __LINE__, __METHOD__, 10);
@@ -3443,9 +3443,6 @@ class UserDateTotalFactory extends Factory {
 
 			$remaining_break_time = $break_overall_total_time;
 
-			$multiple_break_policy_total_time = 0;
-			$total_break_time_accounted = 0;
-
 			$i = 0;
 			foreach( $bplf as $break_policy_obj ) {
 				$break_policy_time = 0;
@@ -3462,20 +3459,18 @@ class UserDateTotalFactory extends Factory {
 					//and just combines any breaks together that fall within the active after time.
 					//So it doesn't matter if the employee takes 1 break or 30, they are all combined into one after the active_after time.
 					//FIXME: Handle cases where one break policy includes multiples and another one does not. Currently the break time may be doubled up in this case.
-					$eligible_break_total_time = ( array_sum( $break_total_time_arr ) - $total_break_time_accounted );
-					$multiple_break_policy_total_time += $break_policy_obj->getAmount();
+					$eligible_break_total_time = array_sum( $break_total_time_arr );
 					Debug::text(' Including multiple breaks...', __FILE__, __LINE__, __METHOD__, 10);
 				} else {
 					$eligible_break_total_time = $break_total_time_arr[$i];
-					$multiple_break_policy_total_time = $break_policy_obj->getAmount();
 				}
 
-				Debug::text('Break Policy ID: '. $break_policy_obj->getId() .' Type ID: '. $break_policy_obj->getType() .' Break Total Time: '. $eligible_break_total_time .' Amount: '. $break_policy_obj->getAmount() .' Multi-Break Total Time: '. $multiple_break_policy_total_time .' Break Time Accounted: '. $total_break_time_accounted .' Daily Total Time: '. $daily_total_time, __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text('Break Policy ID: '. $break_policy_obj->getId() .' Type ID: '. $break_policy_obj->getType() .' Break Total Time: '. $eligible_break_total_time .' Amount: '. $break_policy_obj->getAmount() .' Daily Total Time: '. $daily_total_time, __FILE__, __LINE__, __METHOD__, 10);
 				switch ( $break_policy_obj->getType() ) {
 					case 10: //Auto-Deduct
 						Debug::text(' Break AutoDeduct...', __FILE__, __LINE__, __METHOD__, 10);
 						if ( $break_policy_obj->getIncludeBreakPunchTime() == TRUE ) {
-							$break_policy_time = ( bcsub( $multiple_break_policy_total_time, $eligible_break_total_time ) * -1 );
+							$break_policy_time = ( bcsub( $break_policy_obj->getAmount(), $eligible_break_total_time ) * -1 );
 							//If they take more then their alloted break, zero it out so time isn't added.
 							if ( $break_policy_time > 0 ) {
 								$break_policy_time = 0;
@@ -3487,8 +3482,8 @@ class UserDateTotalFactory extends Factory {
 					case 15: //Auto-Include
 						Debug::text(' Break AutoAdd...', __FILE__, __LINE__, __METHOD__, 10);
 						if ( $break_policy_obj->getIncludeBreakPunchTime() == TRUE ) {
-							if ( $eligible_break_total_time > $multiple_break_policy_total_time ) {
-								$break_policy_time = $multiple_break_policy_total_time;
+							if ( $eligible_break_total_time > $break_policy_obj->getAmount() ) {
+								$break_policy_time = $break_policy_obj->getAmount();
 							} else {
 								$break_policy_time = $eligible_break_total_time;
 							}
@@ -3509,7 +3504,6 @@ class UserDateTotalFactory extends Factory {
 
 				if ( $break_policy_time != 0 ) {
 					$break_policy_total_time = bcadd( $break_policy_total_time, $break_policy_time );
-					$total_break_time_accounted += $break_policy_time;
 
 					$udtf = TTnew( 'UserDateTotalFactory' );
 					$udtf->setUserDateID( $this->getUserDateID() );

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11942 $
- * $Id: AccrualPolicyMilestoneFactory.class.php 11942 2014-01-09 00:50:10Z mikeb $
- * $Date: 2014-01-08 16:50:10 -0800 (Wed, 08 Jan 2014) $
+ * $Revision: 12620 $
+ * $Id: AccrualPolicyMilestoneFactory.class.php 12620 2014-03-13 17:11:59Z mikeb $
+ * $Date: 2014-03-13 10:11:59 -0700 (Thu, 13 Mar 2014) $
  */
 
 /**
@@ -160,6 +160,33 @@ class AccrualPolicyMilestoneFactory extends Factory {
 			$this->data['accrual_policy_id'] = $id;
 
 			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	//If we just base LengthOfService on days, leap years and such can cause off-by-one errors.
+	//So we need to determine the exact dates when the milestones rollover and base it on that instead.
+	function getLengthOfServiceDate( $milestone_rollover_date ) {
+		switch ( $this->getLengthOfServiceUnit() ) {
+			case 10: //Days
+				$unit_str = 'Days';
+				break;
+			case 20: //Weeks
+				$unit_str = 'Weeks';
+				break;
+			case 30: //Months
+				$unit_str = 'Months';
+				break;
+			case 40: //Years
+				$unit_str = 'Years';
+				break;
+		}
+
+		if ( isset($unit_str) ) {
+			$retval = TTDate::getBeginDayEpoch( strtotime( '+'. $this->getLengthOfService() .' '. $unit_str, $milestone_rollover_date ) );
+			Debug::text('MileStone Rollover Days based on Length Of Service: '. TTDate::getDate('DATE+TIME', $retval), __FILE__, __LINE__, __METHOD__, 10);
+			return $retval;
 		}
 
 		return FALSE;

@@ -41,7 +41,7 @@
 
 //This must go above include for global.inc.php
 if ( in_array('--config', $argv) ) {
-	$_SERVER['TT_CONFIG_FILE'] = strtolower( trim($argv[(array_search('--config', $argv) + 1)]) );
+	$_SERVER['TT_CONFIG_FILE'] = trim($argv[(array_search('--config', $argv) + 1)]);
 }
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
@@ -52,9 +52,30 @@ if ( isset( $config_vars['other']['primary_company_id'] ) ) {
 	$company_id = 1;
 }
 $upgrade_staging_dir = Environment::getBasePath() . DIRECTORY_SEPARATOR . 'upgrade_staging' . DIRECTORY_SEPARATOR;
+$upgrade_staging_latest_dir = $upgrade_staging_dir . DIRECTORY_SEPARATOR . 'latest_version';
 $upgrade_file_name = Environment::getBasePath() . DIRECTORY_SEPARATOR . 'UPGRADE.ZIP';
 $php_cli = $config_vars['path']['php_cli'];
 
+function moveUpgradeFiles( $upgrade_staging_latest_dir ) {
+	$latest_file_list = Misc::getFileList( $upgrade_staging_latest_dir, NULL, TRUE );
+	if ( is_array($latest_file_list) ) {
+		foreach( $latest_file_list as $latest_file ) {
+			$new_file = str_replace( $upgrade_staging_latest_dir, Environment::getBasePath(), $latest_file  );
+
+			//Check if directory exists.
+			if ( !is_dir( dirname( $new_file ) ) ) {
+				Debug::Text('Creating new directory: '. dirname( $new_file ), __FILE__, __LINE__, __METHOD__, 10);
+				mkdir( dirname( $new_file ), 0755, TRUE ); //Read+Write+Execute for owner, Read/Execute for all others.
+			}
+			Debug::Text('Moving: '. $latest_file .' To: '. $new_file, __FILE__, __LINE__, __METHOD__, 10);
+			if ( rename( $latest_file, $new_file ) == FALSE ) {
+				Debug::Text('ERROR: FAILED TO MOVE: '. $latest_file .' To: '. $new_file, __FILE__, __LINE__, __METHOD__, 10);
+			}
+		}
+	}
+
+	return TRUE;
+}
 
 function CLIExit( $code = 0 ) {
 	Debug::Display();
@@ -180,7 +201,7 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 			- Move staging directory over top of main directory
 			- Run schema upgrade.
 			- Done.
-		 */
+		*/
 
 		Debug::Text('AutoUpgrade Stage2... Version: '. APPLICATION_VERSION, __FILE__, __LINE__, __METHOD__, 10);
 		if ( PRODUCTION == FALSE OR DEPLOYMENT_ON_DEMAND == TRUE ) {
@@ -189,6 +210,11 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 		}
 
 		$config_vars['other']['installer_enabled'] = TRUE;
+
+		echo "Performing any necessary corrections from previous version...\n";
+		//From v7.3.1 to 7.3.2 some files weren't getting copied if they were new in this version and created a new directory.
+		//So do the copy again in stage2 just in case.
+		moveUpgradeFiles( $upgrade_staging_latest_dir );
 
 		echo "Upgrading database schema...\n";
 		//Don't check file_checksums, as the script is run from the old version and therefore the checksum version match will fail everytime.
@@ -306,7 +332,7 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 
 				$file_url = $ttsc->getUpgradeFileURL( $force );
 				Debug::Arr($file_url, 'File Upgrade URL: ', __FILE__, __LINE__, __METHOD__, 10);
-				if ( !is_soap_fault($file_url) AND $file_url !== FALSE AND $file_url != '' ) {
+				if ( file_exists( $upgrade_file_name ) OR ( !is_soap_fault($file_url) AND $file_url !== FALSE AND $file_url != '' ) ) {
 					$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion() , 'page' => 'unattended_upgrade_download' ), 'pre_install.php'), "r");
 					@fclose($handle);
 					if ( !file_exists( $upgrade_file_name ) ) {
@@ -353,7 +379,6 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 							}
 
 							if ( isset($upgrade_staging_extract_dir) ) {
-								$upgrade_staging_latest_dir = $upgrade_staging_dir . DIRECTORY_SEPARATOR . 'latest_version';
 								rename( $upgrade_staging_extract_dir, $upgrade_staging_latest_dir );
 								Debug::Text('Upgrade Staging Extract Dir: '. $upgrade_staging_extract_dir .' Renaming to: '. $upgrade_staging_latest_dir, __FILE__, __LINE__, __METHOD__, 10);
 							} else {
@@ -377,34 +402,21 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 										$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion() , 'page' => 'unattended_upgrade_new_requirements' ), 'pre_install.php'), "r");
 										@fclose($handle);
 
-										$latest_file_list = Misc::getFileList( $upgrade_staging_latest_dir, NULL, TRUE );
-										if ( is_array($latest_file_list) ) {
-											foreach( $latest_file_list as $latest_file ) {
-												$new_file = str_replace( $upgrade_staging_latest_dir, Environment::getBasePath(), $latest_file  );
+										moveUpgradeFiles( $upgrade_staging_latest_dir );
 
-												//Check if directory exists.
-												if ( !file_exists( dirname( $latest_file ) ) ) {
-													Debug::Text('Creating new directory: '. dirname( $latest_file ), __FILE__, __LINE__, __METHOD__, 10);
-													mkdir( dirname( $latest_file ) );
-												}
-												Debug::Text('Moving: '. $latest_file .' To: '. $new_file, __FILE__, __LINE__, __METHOD__, 10);
-												rename( $latest_file, $new_file );
-											}
+										//Run separate process to finish stage2 of installer so it can be run with the new scripts.
+										//This allows us more flexibility if an error occurs to finish the install or have the latest version correct problems.
+										echo "Launching Stage 2...\n";
+										sleep(5);
+										$command = $php_cli .' '. __FILE__ .' --config '. CONFIG_FILE .' --stage2';
+										system( $command, $exit_code );
+										if ( $exit_code == 0 ) {
+											Debug::Text('Stage2 success!', __FILE__, __LINE__, __METHOD__, 10);
 
-											//Run separate process to finish stage2 of installer so it can be run with the new scripts.
-											//This allows us more flexibility if an error occurs to finish the install or have the latest version correct problems.
-											echo "Launching Stage 2...\n";
-											sleep(5);
-											$command = $php_cli .' '. __FILE__ .' --config '. CONFIG_FILE .' --stage2';
-											system( $command, $exit_code );
-											if ( $exit_code == 0 ) {
-												Debug::Text('Stage2 success!', __FILE__, __LINE__, __METHOD__, 10);
-
-												echo "Upgrade successfull!\n";
-												CLIExit(0);
-											} else {
-												Debug::Text('Stage2 failed... Exit Code: '. $exit_code, __FILE__, __LINE__, __METHOD__, 10);
-											}
+											echo "Upgrade successfull!\n";
+											CLIExit(0);
+										} else {
+											Debug::Text('Stage2 failed... Exit Code: '. $exit_code, __FILE__, __LINE__, __METHOD__, 10);
 										}
 									} else {
 										Debug::Text('ERROR: New version system requirements not met...', __FILE__, __LINE__, __METHOD__, 10);

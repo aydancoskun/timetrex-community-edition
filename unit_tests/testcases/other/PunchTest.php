@@ -5528,10 +5528,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getBeginWeekEpoch( time(), 1 ); //Start weeks on Monday so DST switchover does cause problems.
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time(), 1 ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5548,7 +5548,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 
-		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch, 1), TTDate::getEndDayEpoch($date_epoch2, 1) );
 		//print_r($punch_arr);
 		
 		$this->assertEquals( 2, count($punch_arr[$date_epoch][0]['shift_data']['punches']) );
@@ -5574,10 +5574,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getBeginWeekEpoch( time(), 1 );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time(), 1 ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5594,7 +5594,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 
-		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch, 1), TTDate::getEndDayEpoch($date_epoch2, 1) );
 		//print_r($punch_arr);
 
 		$this->assertEquals( 0, count($punch_arr[$date_epoch][0]['shift_data']['punches']) );
@@ -5617,10 +5617,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getBeginWeekEpoch( time(), 1 );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time(), 1 ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create two punch pairs with the minimum time between shifts, so they both fall on the same day, but are considered two separate shifts.
@@ -5652,7 +5652,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 
-		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch, 1), TTDate::getEndDayEpoch($date_epoch2, 1) );
 		//print_r($punch_arr);
 
 		$this->assertEquals( 2, count($punch_arr[$date_epoch][0]['shift_data']['punches']) );
@@ -5682,10 +5682,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getBeginWeekEpoch( time(), 1 );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time(), 1 ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create two punch pairs with LESS than the minimum time between shifts, so they both fall on the same day, but are considered ONE shift and therefore fails.
@@ -5718,7 +5718,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 
-		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch, 1), TTDate::getEndDayEpoch($date_epoch2, 1) );
 		//print_r($punch_arr);
 
 		$this->assertEquals( 2, count($punch_arr[$date_epoch][0]['shift_data']['punches']) );

@@ -16,7 +16,6 @@ if [ "$#" -eq 0 ] ; then
 	echo "Start: `date`"
 	for i in $results; do
 	   echo $i
-#	done | parallel -P 200% --load 100% --halt-on-error 2 phpunit -d max_execution_time=86400 --configuration config.xml --group {}
 	done | parallel -P 200% --load 100% --halt-on-error 2 $0 -v --group {}
 	if [ $? != 0 ] ; then
 	        echo "UNIT TESTS FAILED...";
@@ -28,7 +27,10 @@ elif [ "$1" == "-v" ] ; then
 	#Being called from itself, use quiet mode.
 	echo -n "Running: $@ :: ";
 	phpunit -d max_execution_time=86400 --configuration config.xml $@ | tail -n 3 | tr -s "\n" | tr "\n" " "
+	#Capture the exit status of PHPUNIT and make sure we return that. 
+	exit_code=${PIPESTATUS[0]};
 	echo ""
+	exit $exit_code;
 else
 	phpunit -d max_execution_time=86400 --configuration config.xml $@ 
 fi

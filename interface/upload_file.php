@@ -57,51 +57,51 @@ extract	(FormVariables::GetVariables(
 												'SessionID'
 												) ) );
 $object_type = trim( strtolower($object_type) );
-Debug::Text('Object Type: '. $object_type .' ID: '. $object_id .' Parent ID: '. $parent_id .' POST SessionID: '. $SessionID, __FILE__, __LINE__, __METHOD__,10);
+Debug::Text('Object Type: '. $object_type .' ID: '. $object_id .' Parent ID: '. $parent_id .' POST SessionID: '. $SessionID, __FILE__, __LINE__, __METHOD__, 10);
 
 $upload = new fileupload();
 switch ($object_type) {
-    case 'invoice_config':
-        if ( $permission->Check('invoice_config','add') OR $permission->Check('invoice_config','edit') OR $permission->Check('invoice_config','edit_child') OR $permission->Check('invoice_config','edit_own') ) {
-            $upload->set_max_filesize(1000000); //1mb or less
-            //$upload->set_acceptable_types( array('image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png') ); // comma separated string, or array
-            //$upload->set_max_image_size(600, 600);
-            $upload->set_overwrite_mode(1);
+	case 'invoice_config':
+		if ( $permission->Check('invoice_config', 'add') OR $permission->Check('invoice_config', 'edit') OR $permission->Check('invoice_config', 'edit_child') OR $permission->Check('invoice_config', 'edit_own') ) {
+			$upload->set_max_filesize(5000000); //5mb or less
+			//$upload->set_acceptable_types( array('image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png') ); // comma separated string, or array
+			//$upload->set_max_image_size(600, 600);
+			$upload->set_overwrite_mode(1);
 
-            $icf = TTnew( 'InvoiceConfigFactory' );
-            $icf->cleanStoragePath( $current_company->getId() );
+			$icf = TTnew( 'InvoiceConfigFactory' );
+			$icf->cleanStoragePath( $current_company->getId() );
 
-            $dir = $icf->getStoragePath( $current_company->getId() );
-            if ( isset($dir) ) {
-                @mkdir($dir, 0700, TRUE);
+			$dir = $icf->getStoragePath( $current_company->getId() );
+			if ( isset($dir) ) {
+				@mkdir($dir, 0700, TRUE);
 
-                $upload_result = $upload->upload("filedata", $dir);
-                //var_dump($upload ); //file data
-                if ($upload_result) {
-                    $success = $upload_result .' '. TTi18n::gettext('Successfully Uploaded');
-                } else {
-                    $error = $upload->get_error();
-                }
-            }
-            Debug::Text('Post Upload Operation...', __FILE__, __LINE__, __METHOD__,10);
-            if ( isset($success) AND $success != '' ) {
-                Debug::Text('Rename', __FILE__, __LINE__, __METHOD__,10);
-                //Submit filename to db.
-                //Rename file to just "logo" so its always consistent.
+				$upload_result = $upload->upload("filedata", $dir);
+				//var_dump($upload ); //file data
+				if ($upload_result) {
+					$success = $upload_result .' '. TTi18n::gettext('Successfully Uploaded');
+				} else {
+					$error = $upload->get_error();
+				}
+			}
+			Debug::Text('Post Upload Operation...', __FILE__, __LINE__, __METHOD__, 10);
+			if ( isset($success) AND $success != '' ) {
+				Debug::Text('Rename', __FILE__, __LINE__, __METHOD__, 10);
+				//Submit filename to db.
+				//Rename file to just "logo" so its always consistent.
 
-                $file_data_arr = $upload->get_file();
-                rename( $dir.'/'.$upload_result, $dir.'/logo'. $file_data_arr['extension'] );
+				$file_data_arr = $upload->get_file();
+				rename( $dir.'/'.$upload_result, $dir.'/logo'. $file_data_arr['extension'] );
 
-                //$post_js = 'window.opener.document.getElementById(\'logo\').src = \''. Environment::getBaseURL().'/send_file.php?object_type=invoice_config&rand='.time().'\'; window.opener.showLogo();';
-                //$post_js = 'window.opener.setLogo()';
-            } else {
-                Debug::Text('bUpload Failed!: '. $upload->get_error(), __FILE__, __LINE__, __METHOD__,10);
-            }
-        }
-        break;
+				//$post_js = 'window.opener.document.getElementById(\'logo\').src = \''. Environment::getBaseURL().'/send_file.php?object_type=invoice_config&rand='.time().'\'; window.opener.showLogo();';
+				//$post_js = 'window.opener.setLogo()';
+			} else {
+				Debug::Text('bUpload Failed!: '. $upload->get_error(), __FILE__, __LINE__, __METHOD__, 10);
+			}
+		}
+		break;
 	case 'document_revision':
-		Debug::Text('Document...', __FILE__, __LINE__, __METHOD__,10);
-		if ( $permission->Check('document','add') OR $permission->Check('document','edit') OR $permission->Check('document','edit_child') OR $permission->Check('document','edit_own') ) {
+		Debug::Text('Document...', __FILE__, __LINE__, __METHOD__, 10);
+		if ( $permission->Check('document', 'add') OR $permission->Check('document', 'edit') OR $permission->Check('document', 'edit_child') OR $permission->Check('document', 'edit_own') ) {
 			$df = TTnew( 'DocumentFactory' );
 			$drf = TTnew( 'DocumentRevisionFactory' );
 
@@ -110,25 +110,25 @@ switch ($object_type) {
 			$upload->set_overwrite_mode(3); //Do nothing
 
 			$dir = $drf->getStoragePath( $current_company->getId() );
-			Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
 			if ( isset($dir) ) {
 				@mkdir($dir, 0700, TRUE);
 
 				$upload_result = $upload->upload('filedata', $dir); //'filedata' is case sensitive
-				//Debug::Arr($_FILES, 'FILES Vars: ', __FILE__, __LINE__, __METHOD__,10);
+				//Debug::Arr($_FILES, 'FILES Vars: ', __FILE__, __LINE__, __METHOD__, 10);
 				if ($upload_result) {
-					Debug::Text('Upload Success: '. $upload_result, __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Upload Success: '. $upload_result, __FILE__, __LINE__, __METHOD__, 10);
 					$success = $upload_result .' '. TTi18n::gettext('Successfully Uploaded');
 					$upload_file_arr = $upload->get_file();
 				} else {
-					Debug::Text('Upload Failed!: '. $upload->get_error(), __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Upload Failed!: '. $upload->get_error(), __FILE__, __LINE__, __METHOD__, 10);
 					$error = $upload->get_error();
 				}
 			}
 
 			if ( isset($success) ) {
 				//Document Revision
-				Debug::Text('Upload File Name: '. $upload_file_arr['name'] .' Mime Type: '. $upload_file_arr['type'], __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Upload File Name: '. $upload_file_arr['name'] .' Mime Type: '. $upload_file_arr['type'], __FILE__, __LINE__, __METHOD__, 10);
 
 				$drlf = TTnew( 'DocumentRevisionListFactory' );
 				$drlf->getByIdAndCompanyId($object_id, $current_user->getCompany() );
@@ -143,17 +143,17 @@ switch ($object_type) {
 						break;
 					}
 				} else {
-					Debug::Text('Object does not exist!', __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Object does not exist!', __FILE__, __LINE__, __METHOD__, 10);
 				}
 			} else {
-				Debug::Text('bUpload Failed!: '. $upload->get_error(), __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('bUpload Failed!: '. $upload->get_error(), __FILE__, __LINE__, __METHOD__, 10);
 			}
 		}
 		break;
 	case 'company_logo':
-		Debug::Text('Company Logo...', __FILE__, __LINE__, __METHOD__,10);
-		if ( DEMO_MODE == FALSE AND ( $permission->Check('company','add') OR $permission->Check('company','edit') OR $permission->Check('company','edit_child') OR $permission->Check('company','edit_own') ) ) {
-			$upload->set_max_filesize(1000000); //1mb or less
+		Debug::Text('Company Logo...', __FILE__, __LINE__, __METHOD__, 10);
+		if ( DEMO_MODE == FALSE AND ( $permission->Check('company', 'add') OR $permission->Check('company', 'edit') OR $permission->Check('company', 'edit_child') OR $permission->Check('company', 'edit_own') ) ) {
+			$upload->set_max_filesize(5000000); //5mb or less
 			//Flex isn't sending proper MIME types?
 			//$upload->set_acceptable_types( array('image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png') ); // comma separated string, or array
 			$upload->set_overwrite_mode(1);
@@ -162,7 +162,7 @@ switch ($object_type) {
 			$cf->cleanStoragePath( $current_company->getId() );
 
 			$dir = $cf->getStoragePath( $current_company->getId() );
-			Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
 			if ( isset($dir) ) {
 				@mkdir($dir, 0700, TRUE);
 
@@ -175,11 +175,11 @@ switch ($object_type) {
 					$error = $upload->get_error();
 				}
 			}
-			Debug::Text('cUpload... Object Type: '. $object_type, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('cUpload... Object Type: '. $object_type, __FILE__, __LINE__, __METHOD__, 10);
 
-			Debug::Text('Post Upload Operation...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Post Upload Operation...', __FILE__, __LINE__, __METHOD__, 10);
 			if ( isset($success) AND $success != '' ) {
-				Debug::Text('Rename', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Rename', __FILE__, __LINE__, __METHOD__, 10);
 				//Submit filename to db.
 				//Rename file to just "logo" so its always consistent.
 
@@ -187,14 +187,14 @@ switch ($object_type) {
 				$file_data_arr = $upload->get_file();
 				rename( $dir.'/'.$upload_result, $dir.'/logo'. $file_data_arr['extension'] );
 			} else {
-				Debug::Text('bUpload Failed!: '. $upload->get_error(), __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('bUpload Failed!: '. $upload->get_error(), __FILE__, __LINE__, __METHOD__, 10);
 			}
 		}
 		break;
 	case 'user_photo':
-		Debug::Text('User Photo...', __FILE__, __LINE__, __METHOD__,10);
-		if ( DEMO_MODE == FALSE AND ( $permission->Check('user','add') OR $permission->Check('user','edit') OR $permission->Check('user','edit_child') OR $permission->Check('user','edit_own') ) ) {
-			$upload->set_max_filesize(1000000); //1mb or less
+		Debug::Text('User Photo...', __FILE__, __LINE__, __METHOD__, 10);
+		if ( DEMO_MODE == FALSE AND ( $permission->Check('user', 'add') OR $permission->Check('user', 'edit') OR $permission->Check('user', 'edit_child') OR $permission->Check('user', 'edit_own') ) ) {
+			$upload->set_max_filesize(25000000); //25mb or less
 			//Flex isn't sending proper MIME types?
 			//$upload->set_acceptable_types( array('image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png') ); // comma separated string, or array
 			$upload->set_overwrite_mode(1);
@@ -206,7 +206,7 @@ switch ($object_type) {
 				$uf->cleanStoragePath( $current_company->getId(), $object_id );
 
 				$dir = $uf->getStoragePath( $current_company->getId() );
-				Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
 				if ( isset($dir) ) {
 					@mkdir($dir, 0700, TRUE);
 
@@ -217,16 +217,16 @@ switch ($object_type) {
 						$error = $upload->get_error();
 					}
 				}
-				Debug::Text('cUpload... Object Type: '. $object_type, __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('cUpload... Object Type: '. $object_type, __FILE__, __LINE__, __METHOD__, 10);
 
-				Debug::Text('Post Upload Operation...', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Post Upload Operation...', __FILE__, __LINE__, __METHOD__, 10);
 				if ( isset($success) AND $success != '' ) {
-					Debug::Text('Rename', __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Rename', __FILE__, __LINE__, __METHOD__, 10);
 					//Submit filename to db.
 					$file_data_arr = $upload->get_file();
 					rename( $dir.'/'.$upload_result, $dir.'/'. $object_id.$file_data_arr['extension'] );
 				} else {
-					Debug::Text('bUpload Failed!: '. $upload->get_error(), __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('bUpload Failed!: '. $upload->get_error(), __FILE__, __LINE__, __METHOD__, 10);
 				}
 			} else {
 				$error = TTi18n::gettext('Invalid Object ID');
@@ -236,8 +236,8 @@ switch ($object_type) {
 		break;
 	case 'license':
 		if ( ( ( DEPLOYMENT_ON_DEMAND == FALSE AND $current_company->getId() == 1 ) OR ( isset($config_vars['other']['primary_company_id']) AND $current_company->getId() == $config_vars['other']['primary_company_id'] ) ) AND getTTProductEdition() > 10
-			AND ( $permission->Check('company','add') OR $permission->Check('company','edit') OR $permission->Check('company','edit_own') OR $permission->Check('company','edit_child') ) ) {
-			$upload->set_max_filesize(20000); //1mb or less
+			AND ( $permission->Check('company', 'add') OR $permission->Check('company', 'edit') OR $permission->Check('company', 'edit_own') OR $permission->Check('company', 'edit_child') ) ) {
+			$upload->set_max_filesize(20000); //20K or less
 			$upload->set_acceptable_types( array('text/plain','plain/text','application/octet-stream') ); // comma separated string, or array
 			$upload->set_overwrite_mode(1);
 
@@ -253,9 +253,9 @@ switch ($object_type) {
 					$error = $upload->get_error();
 				}
 			}
-			Debug::Text('Post Upload Operation...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Post Upload Operation...', __FILE__, __LINE__, __METHOD__, 10);
 			if ( isset($success) AND $success != '' ) {
-				Debug::Text('Rename', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Rename', __FILE__, __LINE__, __METHOD__, 10);
 
 				$file_data_arr = $upload->get_file();
 				$license_data = trim( file_get_contents( $dir.'/'.$upload_result ) );
@@ -267,7 +267,7 @@ switch ($object_type) {
 				}
 			}
 		} else {
-			Debug::Text('Permission denied for upload!', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Permission denied for upload!', __FILE__, __LINE__, __METHOD__, 10);
 		}
 		break;
 	case 'import':
@@ -281,26 +281,26 @@ switch ($object_type) {
 		$upload->set_overwrite_mode(1); //Overwrite
 
 		$dir = $import->getStoragePath();
-		Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
 		if ( isset($dir) ) {
 			@mkdir($dir, 0700, TRUE);
 
 			$upload_result = $upload->upload('filedata', $dir); //'filedata' is case sensitive
-			//Debug::Arr($_FILES, 'FILES Vars: ', __FILE__, __LINE__, __METHOD__,10);
+			//Debug::Arr($_FILES, 'FILES Vars: ', __FILE__, __LINE__, __METHOD__, 10);
 			if ($upload_result) {
 				$upload_file_arr = $upload->get_file();
 
 				//mime_content_type is being deprecated in PHP, and it doesn't work properly on Windows. So if its not available just accept any file type.
 				$mime_type = ( function_exists('mime_content_type') ) ? mime_content_type( $dir.'/'.$upload_file_arr['name'] ) : FALSE;
 				if ( $mime_type === FALSE OR in_array( $mime_type, array('text/plain','plain/text','text/comma-separated-values', 'text/csv', 'application/csv', 'text/anytext') ) ) {
-					Debug::Text('Upload Success: '. $upload_result, __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Upload Success: '. $upload_result, __FILE__, __LINE__, __METHOD__, 10);
 					$success = $upload_result .' '. TTi18n::gettext('Successfully Uploaded');
 				} else {
 					$error = TTi18n::gettext('ERROR: Uploaded file is not a properly formatted CSV file compatible with importing. You uploaded a file of type'). ': '. $mime_type;
 				}
 				unset($mime_type);
 			} else {
-				Debug::Text('Upload Failed!: '. $upload->get_error(), __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Upload Failed!: '. $upload->get_error(), __FILE__, __LINE__, __METHOD__, 10);
 				$error = $upload->get_error();
 			}
 		}
@@ -309,7 +309,7 @@ switch ($object_type) {
 			$import->setRemoteFileName( $upload_file_arr['name'] );
 			$import->renameLocalFile();
 		} else {
-			Debug::Text('bUpload Failed!: '. $upload->get_error(), __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('bUpload Failed!: '. $upload->get_error(), __FILE__, __LINE__, __METHOD__, 10);
 		}
 		break;
 	default:
@@ -322,7 +322,7 @@ if ( isset($success) ) {
 } else {
 	if ( isset($error) ) {
 		echo $error;
-		Debug::Text('Upload ERROR: '. $error, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Upload ERROR: '. $error, __FILE__, __LINE__, __METHOD__, 10);
 	} else {
 		if ( DEMO_MODE == TRUE ) {
 			echo TTi18n::gettext('ERROR: Uploading files is disabled in DEMO mode.');
