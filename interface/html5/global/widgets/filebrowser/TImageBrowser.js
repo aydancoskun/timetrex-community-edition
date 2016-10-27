@@ -144,6 +144,7 @@
 
 			browser = $( this ).find( '.browser' );
 			var image = $( this ).find( '.image' );
+			image.hide();
 			image.load( function() {
 				onImageLoad( this );
 
@@ -152,6 +153,7 @@
 			if ( accept_filter ) {
 				browser.attr( 'accept', accept_filter );
 			} else {
+				accept_filter = 'image/*';
 				browser.attr( 'accept', 'image/*' );
 			}
 
@@ -172,18 +174,21 @@
 					// If no files were selected, or no FileReader support, return
 					if ( !files.length || !window.FileReader ) return;
 
-					// Create a new instance of the FileReader
-					var reader = new FileReader();
+					if ( accept_filter === 'image/*' ) {
+						// Create a new instance of the FileReader
+						var reader = new FileReader();
 
-					// Read the local file as a DataURL
-					reader.readAsDataURL( files[0] );
+						// Read the local file as a DataURL
+						reader.readAsDataURL( files[0] );
 
-					// When loaded, set image data as background of div
-					reader.onloadend = function() {
-						var url = this.result;
-						image.attr( 'src', url )
+						// When loaded, set image data as background of div
+						reader.onloadend = function() {
+							var url = this.result;
+							image.attr( 'src', url )
 
+						}
 					}
+
 				}
 
 				$this.trigger( 'imageChange', [$this] );
@@ -196,8 +201,6 @@
 
 	};
 
-	$.fn.TImageBrowser.defaults = {
-
-	};
+	$.fn.TImageBrowser.defaults = {};
 
 })( jQuery );

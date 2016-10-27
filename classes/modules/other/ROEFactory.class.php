@@ -588,7 +588,11 @@ class ROEFactory extends Factory {
 					break;
 				}
 
-				$i++;
+				//Only count pay periods that are between the First Day worked and Last Day For Which Paid, thereby ignoring pay periods after the Last Day For Which Paid.
+				//This is important when displaying the maximum number of pay periods (ie: 27/53) and there is a gap between the Final Pay Period Ending Date and the Final Pay Stub End Date.
+				if ( $tmp_after_last_date == FALSE ) {
+					$i++;
+				}
 			}
 		}
 
@@ -702,11 +706,10 @@ class ROEFactory extends Factory {
 				$pslf = TTnew('PayStubListFactory');
 				$pslf->getByUserIdAndCompanyIdAndPayPeriodId( $this->getUserObject()->getId(), $this->getUserObject()->getCompany(), array( $pp_obj->getId() ) );
 				if ( $pslf->getRecordCount() > 0 ) {
-					Debug::Text('zzz1PS ID: '. $pslf->getCurrent()->getId() .' Start Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
-
+					Debug::Text('PS ID: '. $pslf->getCurrent()->getId() .' Start Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
 					return $pslf->getCurrent()->getEndDate();
 				} else {
-					Debug::Text('zzz2PayPeriod ID: '. $pp_obj->getId() .' Start Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Text('PayPeriod ID: '. $pp_obj->getId() .' Start Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
 					return $plf->getCurrent()->getEndDate();
 				}
 			}

@@ -200,7 +200,7 @@ class ContributingShiftPolicyFactory extends Factory {
 
 										'include_holiday_type_id' => 'IncludeHolidayType',
 										'holiday_policy' => 'HolidayPolicy',
-										
+
 										'in_use' => FALSE,
 										'deleted' => 'Deleted',
 										);
@@ -526,7 +526,7 @@ class ContributingShiftPolicyFactory extends Factory {
 		return TRUE;
 	}
 
-	
+
 	/*
 
 	Branch/Department/Job/Task filter functions
@@ -775,7 +775,7 @@ class ContributingShiftPolicyFactory extends Factory {
 
 		return TRUE;
 	}
-	
+
 	function getSun() {
 		if ( isset($this->data['sun']) ) {
 			return $this->fromBool( $this->data['sun'] );
@@ -949,7 +949,7 @@ class ContributingShiftPolicyFactory extends Factory {
 		Debug::text(' Not Holiday: User ID: '. $calculate_policy_obj->getUserObject()->getID() .' Date: '. TTDate::getDate('DATE', $epoch), __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
-	
+
 	function isHolidayRestricted() {
 		if ( $this->getIncludeHolidayType() == 20 OR $this->getIncludeHolidayType() == 25 OR $this->getIncludeHolidayType() == 30 ) {
 			return TRUE;
@@ -981,7 +981,7 @@ class ContributingShiftPolicyFactory extends Factory {
 		while( $i <= $out_epoch AND $last_iteration <= 1 ) {
 			//Debug::text(' I: '. TTDate::getDate('DATE+TIME', $i) .' Include Holiday Type: '. $this->getIncludeHolidayType(), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $this->getIncludeHolidayType() > 10 AND is_object( $calculate_policy_obj ) ) {
-				$is_holiday = $this->isHoliday( TTDate::getMiddleDayEpoch( $in_epoch ), $calculate_policy_obj );
+				$is_holiday = $this->isHoliday( TTDate::getMiddleDayEpoch( $i ), $calculate_policy_obj );
 			} else {
 				$is_holiday = FALSE;
 			}
@@ -1065,7 +1065,7 @@ class ContributingShiftPolicyFactory extends Factory {
 						//When dealing with partial punches, any overlap whatsoever activates the policy.
 						Debug::text(' Partial Punch Within Active Time!', __FILE__, __LINE__, __METHOD__, 10);
 						return TRUE;
-					} elseif ( $in_epoch >= $tmp_start_time_stamp AND $in_epoch <= $tmp_end_time_stamp ) {
+					} elseif ( $this->getIncludePartialShift() == FALSE AND $in_epoch >= $tmp_start_time_stamp AND $in_epoch <= $tmp_end_time_stamp ) {
 						//Non partial punches, they must punch in within the time window.
 						Debug::text(' Within Active Time!', __FILE__, __LINE__, __METHOD__, 10);
 						return TRUE;
@@ -1148,8 +1148,8 @@ class ContributingShiftPolicyFactory extends Factory {
 		Debug::text(' Not active FilterDayOfWeek!', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
-
-	function getPartialUserDateTotalObject( $udt_obj, $calculate_policy_obj = NULL ) {
+	
+	function getPartialUserDateTotalObject( $udt_obj, $udt_key, $calculate_policy_obj = NULL ) {
 		if ( !is_object($udt_obj) ) {
 			return FALSE;
 		}
@@ -1157,125 +1157,56 @@ class ContributingShiftPolicyFactory extends Factory {
 		Debug::text(' Checking for Active Time for '. $this->getName() .': In: '. TTDate::getDate('DATE+TIME', $udt_obj->getStartTimeStamp()) .' Out: '. TTDate::getDate('DATE+TIME', $udt_obj->getEndTimeStamp()), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $udt_obj->getStartTimeStamp() == '' OR $udt_obj->getEndTimeStamp() == '' ) {
 			Debug::text(' Empty time stamps, returning object untouched...', __FILE__, __LINE__, __METHOD__, 10);
-			return $udt_obj;
+			return array( $udt_key => $udt_obj );
 		}
 
-		if ( $this->getIncludePartialShift() == TRUE AND $this->isTimeRestricted() == TRUE AND $this->isActive( $udt_obj->getStartTimeStamp(), $udt_obj->getStartTimeStamp(), $udt_obj->getEndTimeStamp(), $calculate_policy_obj ) ) {
-			//Debug::text(' Contrib Shift ('.$this->getName().') Raw Start TimeStamp('. $this->getFilterStartTime(TRUE) .'): '. TTDate::getDate('DATE+TIME', $this->getFilterStartTime() ) .' Raw End TimeStamp: '. TTDate::getDate('DATE+TIME', $this->getFilterEndTime() ), __FILE__, __LINE__, __METHOD__, 10);
-			$start_time_stamp = TTDate::getTimeLockedDate( $this->getFilterStartTime(), $udt_obj->getStartTimeStamp() ); //Base the end time on day of the in_epoch.
-			$end_time_stamp = TTDate::getTimeLockedDate( $this->getFilterEndTime(), $udt_obj->getStartTimeStamp() ); //Base the end time on day of the in_epoch.
-			//Debug::text(' bChecking for Active Time with: In: '. TTDate::getDate('DATE+TIME', $start_time_stamp ) .' Out: '. TTDate::getDate('DATE+TIME', $end_time_stamp ), __FILE__, __LINE__, __METHOD__, 10);
+		$filter_start_time_stamp = TTDate::getTimeLockedDate( $this->getFilterStartTime(), $udt_obj->getStartTimeStamp() ); //Base the end time on day of the in_epoch.
+		$filter_end_time_stamp = TTDate::getTimeLockedDate( $this->getFilterEndTime(), $udt_obj->getStartTimeStamp() ); //Base the end time on day of the in_epoch.
+		//Debug::text(' bChecking for Active Time with: In: '. TTDate::getDate('DATE+TIME', $filter_start_time_stamp ) .' Out: '. TTDate::getDate('DATE+TIME', $filter_end_time_stamp ), __FILE__, __LINE__, __METHOD__, 10);
 
-			//Check if end timestamp is before start, if it is, move end timestamp to next day.
-			if ( $end_time_stamp < $start_time_stamp ) {
-				Debug::text(' Moving End TimeStamp to next day.', __FILE__, __LINE__, __METHOD__, 10);
-				$end_time_stamp = TTDate::getTimeLockedDate( $this->getFilterEndTime(), ( TTDate::getMiddleDayEpoch($end_time_stamp) + 86400 ) ); //Due to DST, jump ahead 1.5 days, then jump back to the time locked date.
-			}
-
-			//Handle the last second of the day, so punches that span midnight like 11:00PM to 6:00AM get a full 1 hour for the time before midnight, rather than 59mins and 59secs.
-			if ( TTDate::getHour( $end_time_stamp ) == 23 AND TTDate::getMinute( $end_time_stamp ) == 59 ) {
-				$end_time_stamp = ( TTDate::getEndDayEpoch( $end_time_stamp ) + 1 );
-				Debug::text(' End time stamp is within the last minute of day, make sure we include the last second of the day as well.', __FILE__, __LINE__, __METHOD__, 10);
-			}
-
-			if ( $start_time_stamp == $end_time_stamp ) {
-				Debug::text(' Start/End time filters match, nothing to do...', __FILE__, __LINE__, __METHOD__, 10);
-				return $udt_obj;
-			}
-
-			Debug::text(' Checking for Active Time with: In: '. TTDate::getDate('DATE+TIME', $start_time_stamp ) .' Out: '. TTDate::getDate('DATE+TIME', $end_time_stamp ), __FILE__, __LINE__, __METHOD__, 10);
-			if ( TTDate::isTimeOverLap( $udt_obj->getStartTimeStamp(), $udt_obj->getEndTimeStamp(), $start_time_stamp, $end_time_stamp) == TRUE ) {
-				Debug::text(' UDT Object needs to be split...', __FILE__, __LINE__, __METHOD__, 10);
-
-				$original_start_time_stamp = $udt_obj->getStartTimeStamp();
-				$original_end_time_stamp = $udt_obj->getEndTimeStamp();
-
-				//Take the existing UDT Object, modify it, then clone it up to twice to handle the before and after parts if necessary as new records.
-
-				//Handle original record by modifying it.
-				//This makes it so if it was already included in other Regular Time policies, it won't be included again, but the remaining fragments still could be.
-
-
-				//Check if start time overlaps, or end time overlaps, or both.
-				if ( $original_start_time_stamp < $start_time_stamp ) {
-					$udt_obj->setStartTimeStamp( $start_time_stamp );
-				}
-
-				if ( $original_end_time_stamp > $end_time_stamp ) {
-					$udt_obj->setEndTimeStamp( $end_time_stamp );
-				}
-
-				$udt_obj->setTotalTime( $udt_obj->calcTotalTime() );
-				$udt_obj->setIsPartialShift( TRUE );
-
-				$udt_obj->setEnableCalcSystemTotalTime(FALSE);
-				if ( $udt_obj->isValid() ) {
-					$udt_obj->preSave(); //Call this so TotalTime, TotalTimeAmount is calculated immediately, as we don't save these records until later.
-					Debug::text(' CURRENT: UDT Object times changed to: Start: '. TTDate::getDate('DATE+TIME', $udt_obj->getStartTimeStamp() ) .' End: '.  TTDate::getDate('DATE+TIME', $udt_obj->getEndTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
-				}
-
-				//Handle BEFORE remaining fragment
-				if ( $original_start_time_stamp < $start_time_stamp ) {
-					$before_udt_obj = clone $udt_obj; //Make sure we clone the object so we don't modify the original record for all subsequent accesses.
-
-					$before_udt_obj->setID( FALSE );
-
-					$before_udt_obj->setStartTimeStamp( $original_start_time_stamp );
-					$before_udt_obj->setEndTimeStamp( $start_time_stamp );
-
-					$before_udt_obj->setTotalTime( $before_udt_obj->calcTotalTime() );
-					$before_udt_obj->setIsPartialShift( TRUE );
-
-					$before_udt_obj->setEnableCalcSystemTotalTime(FALSE);
-					if ( $before_udt_obj->isValid() ) {
-						$before_udt_obj->preSave(); //Call this so TotalTime, TotalTimeAmount is calculated immediately, as we don't save these records until later.
-						Debug::text(' BEFORE: UDT Object times changed to: Start: '. TTDate::getDate('DATE+TIME', $before_udt_obj->getStartTimeStamp() ) .' End: '.  TTDate::getDate('DATE+TIME', $before_udt_obj->getEndTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
-						if ( !isset( $calculate_policy_obj->user_date_total[$calculate_policy_obj->user_date_total_insert_id] ) ) {
-							$calculate_policy_obj->user_date_total[$calculate_policy_obj->user_date_total_insert_id] = $before_udt_obj;
-						} else {
-							Debug::text('ERROR: Invalid UserDateTotal Entry!', __FILE__, __LINE__, __METHOD__, 10);
-						}
-						$calculate_policy_obj->user_date_total_insert_id--;
-					}
-				} else {
-					Debug::text(' No before remaining fragment...', __FILE__, __LINE__, __METHOD__, 10);
-				}
-				unset($before_udt_obj);
-
-				//Handle AFTER remaining fragment
-				if ( $original_end_time_stamp > $end_time_stamp ) {
-					$after_udt_obj = clone $udt_obj; //Make sure we clone the object so we don't modify the original record for all subsequent accesses.
-
-					$after_udt_obj->setID( FALSE );
-
-					$after_udt_obj->setStartTimeStamp( $end_time_stamp );
-					$after_udt_obj->setEndTimeStamp( $original_end_time_stamp );
-
-					$after_udt_obj->setTotalTime( $after_udt_obj->calcTotalTime() );
-					$after_udt_obj->setIsPartialShift( TRUE );
-
-					$after_udt_obj->setEnableCalcSystemTotalTime(FALSE);
-					if ( $after_udt_obj->isValid() ) {
-						$after_udt_obj->preSave(); //Call this so TotalTime, TotalTimeAmount is calculated immediately, as we don't save these records until later.
-						Debug::text(' AFTER: UDT Object times changed to: Start: '. TTDate::getDate('DATE+TIME', $after_udt_obj->getStartTimeStamp() ) .' End: '.  TTDate::getDate('DATE+TIME', $after_udt_obj->getEndTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
-						if ( !isset( $calculate_policy_obj->user_date_total[$calculate_policy_obj->user_date_total_insert_id] ) ) {
-							$calculate_policy_obj->user_date_total[$calculate_policy_obj->user_date_total_insert_id] = $after_udt_obj;
-						} else {
-							Debug::text('ERROR: Invalid UserDateTotal Entry!', __FILE__, __LINE__, __METHOD__, 10);
-						}
-						$calculate_policy_obj->user_date_total_insert_id--;
-					}
-				} else {
-					Debug::text(' No after remaining fragment...', __FILE__, __LINE__, __METHOD__, 10);
-				}
-				unset($after_udt_obj);
-
-				return $udt_obj;
-			}
+		//Check if end timestamp is before start, if it is, move end timestamp to next day.
+		if ( $filter_end_time_stamp < $filter_start_time_stamp ) {
+			Debug::text(' Moving End TimeStamp to next day.', __FILE__, __LINE__, __METHOD__, 10);
+			$filter_end_time_stamp = TTDate::getTimeLockedDate( $this->getFilterEndTime(), ( TTDate::getMiddleDayEpoch($filter_end_time_stamp) + 86400 ) ); //Due to DST, jump ahead 1.5 days, then jump back to the time locked date.
 		}
 
-		Debug::text(' No need to split UDT Object...', __FILE__, __LINE__, __METHOD__, 10);
-		return $udt_obj;
+		//Handle the last second of the day, so punches that span midnight like 11:00PM to 6:00AM get a full 1 hour for the time before midnight, rather than 59mins and 59secs.
+		if ( TTDate::getHour( $filter_end_time_stamp ) == 23 AND TTDate::getMinute( $filter_end_time_stamp ) == 59 ) {
+			$filter_end_time_stamp = ( TTDate::getEndDayEpoch( $filter_end_time_stamp ) + 1 );
+			Debug::text(' End time stamp is within the last minute of day, make sure we include the last second of the day as well.', __FILE__, __LINE__, __METHOD__, 10);
+		}
+
+		if ( $filter_start_time_stamp == $filter_end_time_stamp ) {
+			Debug::text(' Start/End time filters match, nothing to do...', __FILE__, __LINE__, __METHOD__, 10);
+			return array( $udt_key => $udt_obj );
+		}
+
+		$split_udt_time_stamps = TTDate::splitDateRangeAtMidnight( $udt_obj->getStartTimeStamp(), $udt_obj->getEndTimeStamp(), $filter_start_time_stamp, $filter_end_time_stamp );
+
+		$i = 0;
+		foreach( $split_udt_time_stamps as $split_udt_time_stamp ) {
+			if ( $i > 0 ) {
+				$udt_key = $calculate_policy_obj->user_date_total_insert_id;
+			}
+
+			$tmp_udt_obj = clone $udt_obj; //Make sure we clone the object so we don't modify the original record for all subsequent accesses.
+			$tmp_udt_obj->setStartTimeStamp( $split_udt_time_stamp['start_time_stamp'] );
+			$tmp_udt_obj->setEndTimeStamp( $split_udt_time_stamp['end_time_stamp'] );
+			$tmp_udt_obj->setTotalTime( $tmp_udt_obj->calcTotalTime() );
+			$tmp_udt_obj->setIsPartialShift( TRUE );
+			$tmp_udt_obj->setEnableCalcSystemTotalTime(FALSE);
+			if ( $tmp_udt_obj->isValid() ) {
+				$tmp_udt_obj->preSave(); //Call this so TotalTime, TotalTimeAmount is calculated immediately, as we don't save these records until later.
+			}
+
+			$retarr[$udt_key] = $tmp_udt_obj;
+
+			$calculate_policy_obj->user_date_total_insert_id--;
+
+			$i++;
+		}
+
+		return $retarr;
 	}
 
 	function checkIndividualDifferentialCriteria( $selection_type, $exclude_default_item, $current_item, $allowed_items, $default_item = NULL ) {
@@ -1306,7 +1237,7 @@ class ContributingShiftPolicyFactory extends Factory {
 		//Debug::text('    Returning FALSE!', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
-	
+
 	function isActiveDifferential( $udt_obj, $user_obj ) {
 		//Debug::Arr( array( $this->getBranchSelectionType(), (int)$this->getExcludeDefaultBranch(), $udt_obj->getBranch(), $user_obj->getDefaultBranch() ), ' Branch Selection: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1350,7 +1281,7 @@ class ContributingShiftPolicyFactory extends Factory {
 		return $retval;
 	}
 
-	
+
 	function Validate( $ignore_warning = TRUE ) {
 		if ( $this->getDeleted() != TRUE AND $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing.
 			if ( $this->getName() == '' ) {

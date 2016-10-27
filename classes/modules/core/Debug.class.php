@@ -430,8 +430,6 @@ class Debug {
 		if (self::$enable_log == TRUE AND self::$buffer_output == TRUE) {
 			global $config_vars;
 
-			$file_name = $config_vars['path']['log'] . DIRECTORY_SEPARATOR .'timetrex.log';
-
 			$eol = "\n";
 
 			if ( is_array( self::$debug_buffer ) ) {
@@ -442,7 +440,7 @@ class Debug {
 						$output .= $arr[1];
 					}
 				}
-				
+
 				$output .= '---------------[ '. @date('d-M-Y G:i:s O') .' ['. microtime(TRUE) .'] (PID: '.getmypid().') ]---------------'.$eol;
 
 				if ( isset($config_vars['debug']['enable_syslog']) AND $config_vars['debug']['enable_syslog'] == TRUE AND OPERATING_SYSTEM != 'WIN' ) {
@@ -452,6 +450,7 @@ class Debug {
 					syslog( self::getSyslogPriority( 0 ), $output ); //Used to strip_tags output, but that was likely causing problems with SQL queries with >= and <= in them.
 					closelog();
 				} elseif ( is_writable( $config_vars['path']['log'] ) ) {
+					$file_name = $config_vars['path']['log'] . DIRECTORY_SEPARATOR .'timetrex.log';
 					$fp = @fopen( $file_name, 'a' );
 					@fwrite($fp, $output ); //Used to strip_tags output, but that was likely causing problems with SQL queries with >= and <= in them.
 					@fclose($fp);
@@ -524,7 +523,7 @@ class Debug {
 		//When buffer exceeds maximum size, write it to the log and clear it.
 		//This will affect displaying large buffers though, but otherwise we may run out of memory.
 		//If we detect PHP errors, buffer up to 10x the maximum size to try and capture those errors.
-		if ( ( self::$php_errors == 0 AND self::$buffer_size >= self::$max_buffer_size ) OR ( self::$php_errors > 0 AND self::$buffer_size >= ( self::$max_buffer_size * 10 ) ) ) {
+		if ( ( self::$php_errors == 0 AND self::$buffer_size >= self::$max_buffer_size ) OR ( self::$php_errors > 0 AND self::$buffer_size >= ( self::$max_buffer_size * 100 ) ) ) {
 			self::$debug_buffer[] = array(1, 'DEBUG [L'. str_pad( $line, 4, 0, STR_PAD_LEFT) .'] ['. str_pad( self::getExecutionTime(), 5, 0, STR_PAD_LEFT) .'ms]: '. $method .'(): Maximum debug buffer size of: '. self::$max_buffer_size .' reached. Writing out buffer before continuing... Buffer ID: '. self::$buffer_id ."\n" );
 			self::writeToLog();
 			self::clearBuffer();

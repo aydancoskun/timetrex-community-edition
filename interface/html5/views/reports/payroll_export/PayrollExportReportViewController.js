@@ -309,6 +309,14 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 						$this.buildAdditionalInputBox( type );
 						$this.buildGrid( type );
 						break;
+					case 'cms_pbj':
+						$this.api.getOptions( 'cms_pbj_hour_column_options', {
+							onResult: function( result ) {
+								$this.buildAdditionalInputBox( type );
+								$this.buildGrid( type, result.getResult() );
+							}
+						} );
+						break;
 					default:
 						$this.buildGrid( type );
 						break;
@@ -343,15 +351,12 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 			case 'adp':
 			case 'adp_advanced':
 				columnOptions = Global.buildRecordArray( columnOptions.adp_hour_column_options );
-
 				for ( var i = 0; i < columnOptions.length; i++ ) {
-
 					if ( i !== columnOptions.length - 1 ) {
 						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
 					} else {
 						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
 					}
-
 				}
 
 				column_info = {
@@ -372,15 +377,12 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				break;
 			case 'adp_resource':
 				columnOptions = Global.buildRecordArray( columnOptions.adp_resource_hour_column_options );
-
 				for ( var i = 0; i < columnOptions.length; i++ ) {
-
 					if ( i !== columnOptions.length - 1 ) {
 						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
 					} else {
 						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
 					}
-
 				}
 
 				column_info = {
@@ -401,15 +403,12 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				break;
 			case 'accero':
 				columnOptions = Global.buildRecordArray( columnOptions.accero_hour_column_options );
-
 				for ( var i = 0; i < columnOptions.length; i++ ) {
-
 					if ( i !== columnOptions.length - 1 ) {
 						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
 					} else {
 						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
 					}
-
 				}
 
 				column_info = {
@@ -452,17 +451,13 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				hour_code_label = 'Chris21 Hours Code';
 				break;
 			case 'va_munis':
-
 				columnOptions = Global.buildRecordArray( columnOptions );
-
 				for ( i = 0; i < columnOptions.length; i++ ) {
-
 					if ( i !== columnOptions.length - 1 ) {
 						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
 					} else {
 						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
 					}
-
 				}
 
 				column_info = {
@@ -487,18 +482,45 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 			case 'sage_50':
 				hour_code_label = 'Item Number';
 				break;
+			case 'cms_pbj':
+				columnOptions = Global.buildRecordArray( columnOptions.cms_pbj_hour_column_options );
+				for ( var i = 0; i < columnOptions.length; i++ ) {
+					if ( i !== columnOptions.length - 1 ) {
+						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
+					} else {
+						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
+					}
+				}
+
+				column_info = {
+					name: 'hour_column',
+					index: 'hour_column',
+					label: $.i18n._( 'Export' ),
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
+				column_info_array.push( column_info );
+
+				hour_code_label = false;
+				break;			
 			case 'csv':
 			case 'csv_advanced':
 				hour_code_label = 'Hours Code';
 				break;
-
 		}
 
-		column_info = {
-			name: 'hour_code', index: 'hour_code', label: hour_code_label, width: 100, sortable: false, title: false,
-			editable: true, edittype: 'text'
-		};
-		column_info_array.push( column_info );
+		if ( hour_code_label !== false ) {
+			column_info = {
+				name: 'hour_code', index: 'hour_code', label: hour_code_label, width: 100, sortable: false, title: false,
+				editable: true, edittype: 'text'
+			};
+			column_info_array.push( column_info );
+		}
 
 		if ( !this.export_grid ) {
 			this.export_grid = grid;
@@ -524,11 +546,9 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 						$this.select_grid_last_row = id;
 					}
 				}
-
 			} );
 
 		} else {
-
 			this.export_grid.jqGrid( 'GridUnload' );
 			this.export_grid = null;
 
@@ -620,6 +640,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 					case 'accero':
 					case 'va_munis':
 					case 'sage_50':
+					case 'cms_pbj':
 						if ( !hour_column ) {
 							hour_column = '0';
 						}
@@ -1464,6 +1485,153 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				delete $this.edit_view_form_item_dic[code];
 
 				break;
+			case 'cms_pbj':
+				//Facility ID
+				var code = 'facility_code';
+				var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+				form_item_input.TComboBox( {field: code} );
+
+				var h_box = $( "<div class='h-box'></div>" );
+				var text_box = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+				text_box.css( 'margin-left', '10px' );
+				text_box.TTextInput( {field: code + '_text'} );
+				h_box.append( form_item_input );
+				h_box.append( text_box );
+
+				this.addEditFieldToColumn( $.i18n._( 'Facility ID' ), [form_item_input, text_box], tab3_column1, '', h_box, true );
+				this.setWidgetVisible( [form_item_input, text_box] );
+				form_item_input.bind( 'formItemChange', function( e, target ) {
+					if ( target.getValue() === 0 ) {
+						text_box.css( 'display', 'inline' );
+						text_box.setValue( $this.export_setup_data[code] );
+					} else {
+						text_box.css( 'display', 'none' );
+					}
+				} );
+
+				$this.api.getOptions( 'cms_pbj_facility_code_options', {
+					onResult: function( result ) {
+
+						var result_data = result.getResult();
+
+						form_item_input.setSourceData( Global.buildRecordArray( result_data ) );
+
+						form_item_input.setValue( $this.export_setup_data[code] );
+						form_item_input.trigger( 'formItemChange', [form_item_input, true] );
+
+					}
+				} );
+
+				$this.export_setup_ui_dic[code] = $this.edit_view_form_item_dic[code];
+				delete $this.edit_view_form_item_dic[code];
+
+				
+				//State
+				var code1 = 'state_code';
+				var form_item_input1 = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+				form_item_input1.TComboBox( {field: code1} );
+
+				h_box = $( "<div class='h-box'></div>" );
+				var text_box1 = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+				text_box1.css( 'margin-left', '10px' );
+				text_box1.TTextInput( {field: code1 + '_text'} );
+				h_box.append( form_item_input1 );
+				h_box.append( text_box1 );
+
+				this.addEditFieldToColumn( $.i18n._( 'State' ), [form_item_input1, text_box1], tab3_column1, '', h_box, true );
+				this.setWidgetVisible( [form_item_input1, text_box1] );
+				form_item_input1.bind( 'formItemChange', function( e, target ) {
+					if ( target.getValue() === 0 ) {
+						text_box1.css( 'display', 'inline' );
+						text_box1.setValue( $this.export_setup_data[code1] );
+					} else {
+						text_box1.css( 'display', 'none' );
+					}
+				} );
+
+				$this.api.getOptions( 'cms_obj_state_code_options', {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						form_item_input1.setSourceData( Global.buildRecordArray( result_data ) );
+						form_item_input1.setValue( $this.export_setup_data[code1] );
+						form_item_input1.trigger( 'formItemChange', [form_item_input1, true] );
+					}
+				} );
+
+				$this.export_setup_ui_dic[code1] = $this.edit_view_form_item_dic[code1];
+				delete $this.edit_view_form_item_dic[code1];
+
+
+				// Pay Type Code
+				var code2 = 'pay_type_code';
+				var form_item_input2 = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+				form_item_input2.TComboBox( {field: code2} );
+
+				h_box = $( "<div class='h-box'></div>" );
+				var text_box2 = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+				text_box2.css( 'margin-left', '10px' );
+				text_box2.TTextInput( {field: code2 + '_text'} );
+
+				h_box.append( form_item_input2 );
+				h_box.append( text_box2 );
+				this.addEditFieldToColumn( $.i18n._( 'Pay Type Code' ), [form_item_input2, text_box2], tab3_column1, '', h_box, true );
+				this.setWidgetVisible( [form_item_input2, text_box2] );
+				form_item_input2.bind( 'formItemChange', function( e, target ) {
+					if ( target.getValue() === 0 ) {
+						text_box2.css( 'display', 'inline' );
+						text_box2.setValue( $this.export_setup_data[code2] );
+					} else {
+						text_box2.css( 'display', 'none' );
+					}
+				} );
+
+				$this.api.getOptions( 'cms_pbj_pay_type_code_options', {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						form_item_input2.setSourceData( Global.buildRecordArray( result_data ) );
+						form_item_input2.setValue( $this.export_setup_data[code2] );
+						form_item_input2.trigger( 'formItemChange', [form_item_input2, true] );
+					}
+				} );
+
+				$this.export_setup_ui_dic[code2] = $this.edit_view_form_item_dic[code2];
+				delete $this.edit_view_form_item_dic[code2];
+
+				// Job Title Code
+				var code3 = 'job_title_code';
+				var form_item_input3 = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+				form_item_input3.TComboBox( {field: code3} );
+
+				h_box = $( "<div class='h-box'></div>" );
+				var text_box3 = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+				text_box3.css( 'margin-left', '10px' );
+				text_box3.TTextInput( {field: code3 + '_text'} );
+
+				h_box.append( form_item_input3 );
+				h_box.append( text_box3 );
+				this.addEditFieldToColumn( $.i18n._( 'Job Title Code' ), [form_item_input3, text_box3], tab3_column1, '', h_box, true );
+				this.setWidgetVisible( [form_item_input3, text_box3] );
+				form_item_input3.bind( 'formItemChange', function( e, target ) {
+					if ( target.getValue() === 0 ) {
+						text_box3.css( 'display', 'inline' );
+						text_box3.setValue( $this.export_setup_data[code3] );
+					} else {
+						text_box3.css( 'display', 'none' );
+					}
+				} );
+
+				$this.api.getOptions( 'cms_pbj_job_title_code_options', {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						form_item_input3.setSourceData( Global.buildRecordArray( result_data ) );
+						form_item_input3.setValue( $this.export_setup_data[code3] );
+						form_item_input3.trigger( 'formItemChange', [form_item_input3, true] );
+					}
+				} );
+				$this.export_setup_ui_dic[code3] = $this.edit_view_form_item_dic[code3];
+				delete $this.edit_view_form_item_dic[code3];
+
+				break;
 			case 'csv_advanced':
 				//Export Columns
 				code = 'csv_export_columns';
@@ -1536,7 +1704,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 			columns[item.column_id_key] = {};
 			columns[item.column_id_key].hour_code = item.hour_code;
 
-			if ( type === 'adp' || type === 'adp_advanced' || type === 'adp_resource' || type === 'accero' || type === 'va_munis' ) {
+			if ( type === 'adp' || type === 'adp_advanced' || type === 'adp_resource' || type === 'accero' || type === 'va_munis' || type === 'cms_pbj' ) {
 				columns[item.column_id_key].hour_column = item.hour_column;
 			}
 
@@ -1663,7 +1831,31 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 					} else {
 						other.customer_name = this.edit_view_ui_dic.customer_name.getValue();
 					}
+					break;
+				case 'cms_pbj':
+					if ( !this.edit_view_ui_dic.facility_code.getValue() ) {
+						other.facility_code = this.edit_view_ui_dic.facility_code_text.getValue();
+					} else {
+						other.facility_code = this.edit_view_ui_dic.facility_code.getValue();
+					}
 
+					if ( !this.edit_view_ui_dic.state_code.getValue() ) {
+						other.state_code = this.edit_view_ui_dic.state_code_text.getValue();
+					} else {
+						other.state_code = this.edit_view_ui_dic.state_code.getValue();
+					}
+
+					if ( !this.edit_view_ui_dic.pay_type_code.getValue() ) {
+						other.pay_type_code = this.edit_view_ui_dic.pay_type_code_text.getValue();
+					} else {
+						other.pay_type_code = this.edit_view_ui_dic.pay_type_code.getValue();
+					}
+
+					if ( !this.edit_view_ui_dic.job_title_code.getValue() ) {
+						other.job_title_code = this.edit_view_ui_dic.job_title_code_text.getValue();
+					} else {
+						other.job_title_code = this.edit_view_ui_dic.job_title_code.getValue();
+					}
 					break;
 				case 'csv_advanced':
 					other.csv_export_columns = this.edit_view_ui_dic.csv_export_columns.getValue();
@@ -1796,6 +1988,35 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 						other[other.export_type].customer_name = this.edit_view_ui_dic.customer_name.getValue();
 					}
 					break;
+				case 'cms_pbj':
+					if ( !this.edit_view_ui_dic.facility_code.getValue() ) {
+						other[other.export_type].facility_code = 0;
+						other[other.export_type].facility_code_value = this.edit_view_ui_dic.facility_code_text.getValue();
+					} else {
+						other[other.export_type].facility_code = this.edit_view_ui_dic.facility_code.getValue();
+					}
+
+					if ( !this.edit_view_ui_dic.state_code.getValue() ) {
+						other[other.export_type].state_code = 0;
+						other[other.export_type].state_code_value = this.edit_view_ui_dic.state_code_text.getValue();
+					} else {
+						other[other.export_type].state_code = this.edit_view_ui_dic.state_code.getValue();
+					}
+
+					if ( !this.edit_view_ui_dic.pay_type_code.getValue() ) {
+						other[other.export_type].pay_type_code = 0;
+						other[other.export_type].pay_type_code_value = this.edit_view_ui_dic.pay_type_code_text.getValue();
+					} else {
+						other[other.export_type].pay_type_code = this.edit_view_ui_dic.pay_type_code.getValue();
+					}
+
+					if ( !this.edit_view_ui_dic.job_title_code.getValue() ) {
+						other[other.export_type].job_title_code = 0;
+						other[other.export_type].job_title_code_value = this.edit_view_ui_dic.job_title_code_text.getValue();
+					} else {
+						other[other.export_type].job_title_code = this.edit_view_ui_dic.job_title_code.getValue();
+					}
+					break;				
 				case 'csv_advanced':
 					other[other.export_type].export_columns = this.edit_view_ui_dic.csv_export_columns.getValue();
 					break;

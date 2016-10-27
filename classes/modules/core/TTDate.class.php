@@ -306,7 +306,7 @@ class TTDate {
 			if ( strpos($seconds, '.') !== FALSE ) {
 				$seconds = bcadd( $seconds, 0, 0); //Using scale(0), drop everything after the decimal, as that is fractions of a second. Could try rounding this instead, but its difficult with large values.
 			}
-			
+
 			if ( $include_seconds == TRUE ) {
 				$retval = sprintf( '%02d:%02d:%02d', bcdiv( $seconds, 3600 ), bcmod( bcdiv( $seconds, 60 ), 60 ), bcmod( $seconds, 60 ) );
 			} else {
@@ -508,7 +508,7 @@ class TTDate {
 			Debug::Arr($str, 'Date is array or object, unable to parse...', __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
 		}
-		
+
 		//List of all formats that require custom parsing.
 		$custom_parse_formats = array(
 									'd-M-y',
@@ -704,7 +704,7 @@ class TTDate {
 				break;
 		}
 		//Debug::text('Format Name: '. $format .' Epoch: '. $epoch .' Format: '. $php_format, __FILE__, __LINE__, __METHOD__, 10);
-		
+
 
 		if ($epoch == '' OR $epoch == '-1') {
 			//$epoch = TTDate::getTime();
@@ -823,21 +823,31 @@ class TTDate {
 
 	}
 
+	public static function isMidnight( $epoch ) {
+		if ( TTDate::getHour( $epoch ) == 0 AND TTDate::getMinute( $epoch ) == 0 AND TTDate::getSecond( $epoch ) == 0 ) {
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
 	public static function doesRangeSpanMidnight( $start_epoch, $end_epoch, $match_midnight = FALSE ) {
+		if ( $start_epoch > $end_epoch ) { //If start_epoch is after end_epoch, just swap the two values.
+			$tmp = $start_epoch;
+			$start_epoch = $end_epoch;
+			$end_epoch = $tmp;
+		}
+
 		//Debug::text('Start Epoch: '. TTDate::getDate('DATE+TIME', $start_epoch) .'  End Epoch: '. TTDate::getDate('DATE+TIME', $end_epoch), __FILE__, __LINE__, __METHOD__, 10);
-		if ( self::getDayOfYear( $start_epoch ) != self::getDayOfYear( $end_epoch )
-			OR (
-					$match_midnight == TRUE
-					AND
-						(
-							//Match If both start and end time is exactly midnight
-							( $start_epoch == $end_epoch AND TTDate::getHour( $start_epoch ) == 0 ) )
-							OR
-							//Match if start time is exactly midnight
-							$start_epoch == TTDate::getBeginDayEpoch( $start_epoch )
-						)
-			) {
-			return TRUE; //Range spans midnight.
+		if ( abs( self::getDayOfYear( $end_epoch ) - self::getDayOfYear( $start_epoch ) ) > 1 ) { //More than one day is between the epochs.
+			return TRUE;
+		} else {
+			$end_epoch_midnight = TTDate::getBeginDayEpoch( $end_epoch );
+			if ( $start_epoch < $end_epoch_midnight AND $end_epoch > $end_epoch_midnight ) { //Epochs do span midnight.
+				return TRUE;
+			} elseif ( $match_midnight == TRUE AND ( self::isMidnight( $start_epoch ) == TRUE OR self::isMidnight( $end_epoch ) == TRUE ) ) {
+				return TRUE;
+			}
 		}
 
 		return FALSE;
@@ -1094,7 +1104,7 @@ class TTDate {
 
 		return $day_with_most_time;
 	}
-	
+
 	public static function getDayDifference($start_epoch, $end_epoch) {
 		if ( $start_epoch == '' OR $end_epoch == '' ) {
 			return FALSE;
@@ -1145,7 +1155,7 @@ class TTDate {
 		if ( $start_epoch == '' OR $end_epoch == '' ) {
 			return FALSE;
 		}
-		
+
 		if ( function_exists('date_diff') ) {
 			//If available, try to be as accurate as possible.
 			$diff = date_diff( new DateTime( '@'.$start_epoch ), new DateTime( '@'.$end_epoch ), FALSE );
@@ -1252,6 +1262,34 @@ class TTDate {
 		$quarter_dates = TTDate::getYearQuarters( $epoch, $quarter );
 
 		$retval = $quarter_dates['end'];
+
+		return $retval;
+	}
+
+	static function getFiscalYearFromEpoch( $epoch, $offset = 3 ) {
+		switch ( strtolower($offset) ) {
+			case 'us':
+				$offset = 3;
+				break;
+			case 'ca':
+				$offset = -3;
+				break;
+			default:
+				break;
+		}
+
+		//Offset is in months.
+		if ( $offset > 0 ) {
+			//Fiscal year is ahead, so it switches to 2016 when still in 2015.
+			$offset_str = '+'. $offset .' months';
+		} else {
+			//Fiscal year is behind, so its still 2015 when the year is in 2016.
+			$offset_str = $offset.' months';
+		}
+		$adjusted_epoch = strtotime( $offset_str, $epoch );
+
+		$retval = date('Y', $adjusted_epoch);
+		//Debug::text('Epoch: '. TTDate::getDate('DATE+TIME', $epoch) .' Adjusted Epoch: '. TTDate::getDate('DATE+TIME', $adjusted_epoch)  .' Retval: '. $retval .' Offset: '. $offset_str, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $retval;
 	}
@@ -1732,7 +1770,7 @@ class TTDate {
 	public static function getDateArray( $start_date, $end_date, $day_of_week = FALSE ) {
 		$start_date = TTDate::getMiddleDayEpoch( $start_date );
 		$end_date = TTDate::getMiddleDayEpoch( $end_date );
-		
+
 		$retarr = array();
 		for( $x = $start_date; $x <= $end_date; $x += 93600 ) {
 			$x = TTDate::getBeginDayEpoch($x);
@@ -1743,7 +1781,7 @@ class TTDate {
 
 		return $retarr;
 	}
-	
+
 	//Loop from filter start date to end date. Creating an array entry for each day.
 	public static function getCalendarArray($start_date, $end_date, $start_day_of_week = 0, $force_weeks = TRUE) {
 		if ( $start_date == '' OR $end_date == '' ) {
@@ -1838,7 +1876,7 @@ class TTDate {
 	}
 
 	//Date pair1
-	public static function getTimeOverLapDifference($start_date1, $end_date1, $start_date2, $end_date2) {		
+	public static function getTimeOverLapDifference($start_date1, $end_date1, $start_date2, $end_date2) {
 		$overlap_result = self::getTimeOverlap( $start_date1, $end_date1, $start_date2, $end_date2 );
 		if ( is_array($overlap_result) ) {
 			$retval = ( $overlap_result['end_date'] - $overlap_result['start_date'] );
@@ -1868,7 +1906,7 @@ class TTDate {
 		3. |-----------------------|
 		4. |------------------------------------------|
 		*/
-		
+
 		if	( ($start_date2 >= $start_date1 AND $end_date2 <= $end_date1) ) { //Case #1
 			//Debug::text(' Overlap on Case #1: ', __FILE__, __LINE__, __METHOD__, 10);
 			//$retval = ( $end_date2 - $start_date2 );
@@ -1979,12 +2017,83 @@ class TTDate {
 		return $retval;
 	}
 
+	static function splitDateRangeAtMidnight( $start_time_stamp, $end_time_stamp, $filter_start_time_stamp = FALSE, $filter_end_time_stamp = FALSE ) {
+		Debug::text('Splitting TimeStamps: Start: '. TTDate::getDate('DATE+TIME', $start_time_stamp ) .' End: '. TTDate::getDate('DATE+TIME', $end_time_stamp ) .' Filter: Start: '. TTDate::getDate('DATE+TIME', $filter_start_time_stamp ) .' End: '. TTDate::getDate('DATE+TIME', $filter_end_time_stamp ), __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( TTDate::isMidnight( $filter_start_time_stamp ) AND TTDate::isMidnight( $filter_end_time_stamp ) ) {
+			$filter_start_time_stamp = FALSE;
+			$filter_end_time_stamp = FALSE;
+		}
+
+		$filter_spans_midnight = FALSE;
+		if ( $filter_end_time_stamp < $filter_start_time_stamp OR TTDate::getDayOfYear( $filter_start_time_stamp ) != TTDate::getDayOfYear( $filter_end_time_stamp ) ) {
+			$filter_end_time_stamp = TTDate::getTimeLockedDate( $filter_end_time_stamp, ( TTDate::getMiddleDayEpoch( $filter_end_time_stamp ) + 86400 ) ); //Due to DST, jump ahead 1.5 days, then jump back to the time locked date.
+			$filter_spans_midnight = TRUE;
+			//Debug::text( '  Filter spans midnight...', __FILE__, __LINE__, __METHOD__, 10 );
+		}
+
+		$retarr = array();
+
+		$current_time_stamp = $start_time_stamp;
+		$next_filter_time_stamp = FALSE;
+
+		$x = 0;
+		while ( $current_time_stamp < $end_time_stamp ) {
+			if ( $filter_start_time_stamp != '' AND $filter_end_time_stamp != '' ) {
+				if ( $filter_spans_midnight == FALSE OR ( $filter_spans_midnight == TRUE AND $x % 2 == 1 ) ) {
+					$filter_start_time_stamp = TTDate::getTimeLockedDate( $filter_start_time_stamp, $current_time_stamp ); //Base the end time on day of the in_epoch.
+					$filter_end_time_stamp = TTDate::getTimeLockedDate( $filter_end_time_stamp, $current_time_stamp ); //Base the end time on day of the in_epoch.
+					if ( $filter_end_time_stamp < $filter_start_time_stamp ) {
+						if ( $current_time_stamp >= $filter_start_time_stamp ) {
+							$filter_end_time_stamp = TTDate::getTimeLockedDate( $filter_end_time_stamp, ( TTDate::getMiddleDayEpoch( $current_time_stamp ) + 86400 ) ); //Due to DST, jump ahead 1.5 days, then jump back to the time locked date.
+							//Debug::text( '  Moving Filter End TimeStamp to next day: Start: ' . TTDate::getDate( 'DATE+TIME', $filter_start_time_stamp ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $filter_end_time_stamp ), __FILE__, __LINE__, __METHOD__, 10 );
+						}
+					}
+				}
+
+				if ( $current_time_stamp < $filter_start_time_stamp ) {
+					$next_filter_time_stamp = $filter_start_time_stamp;
+				} elseif ( $current_time_stamp < $filter_end_time_stamp ) {
+					$next_filter_time_stamp = $filter_end_time_stamp;
+				} else {
+					$next_filter_time_stamp = $end_time_stamp;
+				}
+			}
+
+			//Debug::text('  bSplitting TimeStamps: Current: '. TTDate::getDate('DATE+TIME', $current_time_stamp ) .' Filter: Next: '. TTDate::getDate('DATE+TIME', $next_filter_time_stamp ), __FILE__, __LINE__, __METHOD__, 10);
+			if ( ( $next_filter_time_stamp == FALSE AND TTDate::doesRangeSpanMidnight( $current_time_stamp, $end_time_stamp ) == TRUE ) OR ( $next_filter_time_stamp != FALSE AND TTDate::doesRangeSpanMidnight( $current_time_stamp, $next_filter_time_stamp ) == TRUE) ) {
+				$next_time_stamp = ( TTDate::getEndDayEpoch( $current_time_stamp ) + 1 );
+				//Debug::text('   Range Spans Midnight: Start: '. TTDate::getDate('DATE+TIME', $current_time_stamp ) .' End: '. TTDate::getDate('DATE+TIME', $end_time_stamp ) .' Next: '. TTDate::getDate('DATE+TIME', $next_time_stamp ), __FILE__, __LINE__, __METHOD__, 10);
+			} else {
+				if ( $next_filter_time_stamp == FALSE OR $end_time_stamp < $next_filter_time_stamp ) {
+					$next_time_stamp = $end_time_stamp;
+				} else {
+					$next_time_stamp = $next_filter_time_stamp;
+				}
+				//Debug::text('   Range DOES NOT Span Midnight: Start: '. TTDate::getDate('DATE+TIME', $current_time_stamp ) .' End: '. TTDate::getDate('DATE+TIME', $end_time_stamp ) .' Next: '. TTDate::getDate('DATE+TIME', $next_time_stamp ), __FILE__, __LINE__, __METHOD__, 10);
+			}
+
+			$retarr[] = array( 'start_time_stamp' => $current_time_stamp, 'end_time_stamp' => $next_time_stamp );
+
+			$current_time_stamp = $next_time_stamp;
+
+			$x++;
+		}
+
+//		Debug::Arr( $retarr, 'Ranges split at midnight: ', __FILE__, __LINE__, __METHOD__, 10);
+//		foreach( $retarr as $timestamp_key => $timestamp_arr ) {
+//			Debug::text( ' aSplit: Key: '. $timestamp_key .' Start: '. TTDate::getDate('DATE+TIME', $timestamp_arr['start_time_stamp']) .' End: '. TTDate::getDate('DATE+TIME', $timestamp_arr['end_time_stamp']), __FILE__, __LINE__, __METHOD__, 10 );
+//		}
+
+		return $retarr;
+	}
+
 	public static function isConsecutiveDays( $date_array ) {
 		if ( is_array($date_array) AND count($date_array) > 1 ) {
 			sort($date_array);
 
 			$retval = FALSE;
-			
+
 			$prev_date = FALSE;
 			foreach( $date_array as $date ) {
 				if ( $prev_date != FALSE ) {
@@ -2014,13 +2123,13 @@ class TTDate {
 
 		return strtotime( $age.' years', $birth_date );
 	}
-	
+
 	public static function getTimeLockedDate($time_epoch, $date_epoch) {
 		//This causes unit tests to fail.
 		//if ( $time_epoch == '' OR $date_epoch == '' ) {
 			//return FALSE;
 		//}
-		
+
 		$time_arr = getdate($time_epoch);
 		$date_arr = getdate($date_epoch);
 
@@ -2246,7 +2355,7 @@ class TTDate {
 									'-1210-last_pay_period' => TTi18n::getText('Last Pay Period'), //Select one or more pay period schedules
 									'-1212-no_pay_period' => TTi18n::getText('No Pay Period'), //Data assigned to no pay periods or pay_period_id = 0
 									);
-			
+
 			$retarr = array_merge( $retarr, $pay_period_arr );
 			ksort($retarr);
 		}
@@ -2839,7 +2948,7 @@ class TTDate {
 		if ( $epoch === NULL ) {
 			return array();
 		}
-		
+
 		$column = Misc::trimSortPrefix( $column );
 
 		//Trim off a column_name_prefix, or everything before the "-"

@@ -2193,7 +2193,7 @@ class Report {
 			TTLog::addEntry( $this->getUserObject()->getId(), 500, TTi18n::getText('Emailed Report').': '. $this->title .' '. TTi18n::getText('To') .': '. $primary_email .' '. TTi18n::getText('CC') .': '. $secondary_email, NULL, 'user_report_data' );
 
 			$headers = array(
-								'From'	  => '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Reports') .'"<DoNotReply@'. Misc::getEmailDomain() .'>',
+								'From'	  => '"'. APPLICATION_NAME .'-'. TTi18n::gettext('Reports') .'" <'. Misc::getEmailLocalPart() .'@'. Misc::getEmailDomain() .'>',
 								'Subject' => $subject,
 								'Cc'	  => $secondary_email,
 							);
@@ -2760,7 +2760,7 @@ class Report {
 
 					foreach( $columns as $column => $tmp ) {
 						if ( isset($row[$column]) ) {
-							$value = $row[$column];
+							$value = htmlentities( $row[$column], ENT_QUOTES ); //avoid xss attacks in reports.
 						} else {
 							$value = ''; //This needs to be a space, otherwise cells won't be drawn and background colors won't be shown either.
 						}

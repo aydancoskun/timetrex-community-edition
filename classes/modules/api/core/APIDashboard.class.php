@@ -68,7 +68,7 @@ class APIDashboard extends APIFactory {
 						$retarr['timesheet_verification_summary'] = TTi18n::getText('TimeSheet Verifications'); //Own
 					}
 				}
-				
+
 				if ( $this->getPermissionObject()->Check('punch', 'enabled') AND ($this->getPermissionObject()->Check('punch', 'view_child') OR $this->getPermissionObject()->Check('punch', 'view')) ) {
 					$retarr['exception_summary_child'] = TTi18n::getText('Exceptions (Subordinates)');  //Current/Last week, Subordinates/All
 					if ( $this->getPermissionObject()->Check('report', 'enabled' ) AND $this->getPermissionObject()->Check('report', 'view_timesheet_summary' ) ) {
@@ -454,7 +454,7 @@ class APIDashboard extends APIFactory {
 					$permission_level = $pf->getLevel();
 				}
 				unset($pf, $pcf);
-				
+
 				//Notify user of new features.
 				if ( Misc::MajorVersionCompare( APPLICATION_VERSION, '9.0.0', '=' ) AND TTDate::getBeginDayEpoch( $this->getCurrentUserObject()->getLastLoginDate() ) <= APPLICATION_VERSION_DATE ) {
 					$retarr[] = '*<b>'.TTi18n::getText('Tip') .'</b>: '. TTi18n::getText('You can set the default screen that appears after login under MyAccount -> Preferences in the menu along the top of the screen.');
@@ -532,7 +532,7 @@ class APIDashboard extends APIFactory {
 					}
 				}
 				unset($ppslf, $pps_obj, $pplf, $pp_obj);
-				
+
 				//  Check for requests that changed status.
 				$rlf = TTNew('RequestListFactory');
 				$rlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentUserObject()->getCompany(), array( 'user_id' => $this->getCurrentUserObject()->getId(), 'status_id' => array(50,55), 'updated_date_start' => ( TTDate::getBeginDayEpoch( $current_epoch ) - ( 86400 * 2 ) ), 'updated_date_end' => TTDate::getEndDayEpoch( $current_epoch ) ) );
@@ -558,7 +558,7 @@ class APIDashboard extends APIFactory {
 					}
 				}
 				unset($api_result, $schedule_data, $date);
-				
+
 				//  Check for recent pay stubs.
 				$api = TTNew('APIPayStub');
 				$api_result = $this->stripReturnHandler( $api->getPayStub( array( 'filter_data' => array('status_id' => 40, 'include_user_ids' => array($this->getCurrentUserObject()->getId()), 'start_date' => TTDate::getBeginDayEpoch( $current_epoch - (86400 * 2) ), 'end_date' => TTDate::getEndDayEpoch( $current_epoch + (86400 * 5) ) ) ), FALSE) );
@@ -587,7 +587,7 @@ class APIDashboard extends APIFactory {
 					}
 				}
 				unset($pplf, $pp_obj);
-				
+
 				$content = '<style type=\'text/css\'>
 							.newsItemContainer{
 								display:table;
@@ -633,13 +633,13 @@ class APIDashboard extends APIFactory {
 					$content .= '<div class="item"><div class="newsItem">'. TTi18n::getText('Slow news day, nothing to see here yet') .'...</div></div>';
 					$content .= '</div><div align="center">&bull;</center>';
 				}
-				
+
 				return $this->returnHandler($content);
 				break;
 			case 'schedule_summary':
 			case 'schedule_summary_child':
 				$api = TTNew('APISchedule');
-				
+
 				$maximum_row_limit = ( isset($data['rows_per_page']) AND $data['rows_per_page'] > 0 ) ? $data['rows_per_page'] : $this->getCurrentUserPreferenceObject()->getItemsPerPage();
 				$parameters = $this->buildDefaultDashletParameters($display_columns, $data['rows_per_page']);
 				if ( $name == 'schedule_summary' ) {
@@ -714,13 +714,18 @@ class APIDashboard extends APIFactory {
 				break;
 			case 'exception_summary':
 			case 'exception_summary_child':
-				//Get pay period schedule that this user belongs to
 				$ppslf = TTnew('PayPeriodScheduleListFactory');
-				$ppslf->getByCompanyIdAndUserId($this->getCurrentCompanyObject()->getId(), $this->getCurrentUserObject()->getId());
-				if ( $ppslf->getRecordCount() > 0 ) {
-					$pay_period_schedule_id = $ppslf->getCurrent()->getId();
+				if ( $name == 'exception_summary_child' ) {
+					$ppslf->getByCompanyId($this->getCurrentCompanyObject()->getId() ); //Must be all PP schedules when showing subordinate exceptions.
+				} else {
+					$ppslf->getByCompanyIdAndUserId($this->getCurrentCompanyObject()->getId(), $this->getCurrentUserObject()->getId() ); //Just current users PP schedule.
+				}
+				$pay_period_schedule_id = $ppslf->getIDSByListFactory( $ppslf );
 
+				//Get pay period schedule that this user belongs to
+				if ( is_array( $pay_period_schedule_id ) AND count( $pay_period_schedule_id ) > 0 ) {
 					$pay_period_ids = array();
+
 					//Get last and this pay period IDs.
 					$pplf = TTnew('PayPeriodListFactory');
 					$pplf->getThisPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate($this->getCurrentCompanyObject()->getId(), $pay_period_schedule_id, time());
@@ -729,7 +734,7 @@ class APIDashboard extends APIFactory {
 							$pay_period_ids[] = $pp_obj->getId();
 						}
 					}
-					$pplf->getLastPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate($this->getCurrentCompanyObject()->getId(), array( $pay_period_schedule_id ), time());
+					$pplf->getLastPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate($this->getCurrentCompanyObject()->getId(), $pay_period_schedule_id, time());
 					if ( $pplf->getRecordCount() > 0 ) {
 						foreach ($pplf as $pp_obj) {
 							//Only show last pay period if its not closed.
@@ -792,7 +797,7 @@ class APIDashboard extends APIFactory {
 				$display_columns = $api->getOptions('default_display_columns');
 				//$display_columns[] = 'status_id';
 				$parameters = $this->buildDefaultDashletParameters($display_columns, $data['rows_per_page']);
-				//$parameters['filter_data'] = array('status_id' => 30);
+				$parameters['filter_data'] = array('status_id' => 10); //Only active employees.
 				$retarr = $api->getAccrualBalance($parameters);
 				break;
 			case 'custom_list':
@@ -877,7 +882,7 @@ class APIDashboard extends APIFactory {
 		}
 		unset($pcf, $pf);
 		Debug::Text('Permission Level: '. $permission_level, __FILE__, __LINE__, __METHOD__, 10);
-		
+
 		//Get available dashlets (as that performs permission checks), and only add ones that are available.
 		$dashlet_options = Misc::trimSortPrefix( $this->getOptions('dashlets') );
 
@@ -912,7 +917,7 @@ class APIDashboard extends APIFactory {
 		if ( $permission_level <= 10 ) {
 			( ( isset($dashlet_options['accrual_balance_summary']) ) ? $parameters[] = $this->createDefaultDashletData('accrual_balance_summary', TTi18n::getText('Accrual Balances') ) : NULL );
 		}
-		
+
 		if ( $enabled_timesheet_verification == TRUE ) {
 			if ( $permission_level == 10 ) {
 				( ( isset($dashlet_options['timesheet_verification_summary_child']) ) ? $parameters[] = $this->createDefaultDashletData('timesheet_verification_summary_child', TTi18n::getText('TimeSheet Verifications (Subordinates)') ) : NULL );
@@ -920,7 +925,7 @@ class APIDashboard extends APIFactory {
 				( ( isset($dashlet_options['timesheet_verification_summary']) ) ? $parameters[] = $this->createDefaultDashletData('timesheet_verification_summary', TTi18n::getText('TimeSheet Verifications') ) : NULL );
 			}
 		}
-		
+
 		if ( $permission_level >= 10 ) {
 			( ( isset($dashlet_options['user_active_shift_summary']) ) ? $parameters[] = $this->createDefaultDashletData('user_active_shift_summary', TTi18n::getText('Whos In/Out') ) : NULL );
 		}

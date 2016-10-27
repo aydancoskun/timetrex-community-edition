@@ -1633,7 +1633,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		return $this;
 	}
 
-	function getAffordableCareReportByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getAffordableCareReportByCompanyIdAndArrayCriteria( $company_id, $filter_data, $type, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		//$order = array( 'b.pay_period_id' => 'asc', 'b.user_id' => 'asc' );
 		//$order = array( 'b.pay_period_id' => 'asc', 'uf.last_name' => 'asc', 'b.date_stamp' => 'asc' );
 		/*
@@ -1669,10 +1669,20 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						'company_id' => (int)$company_id
 					);
 
-		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
-			$date_sql = 'month(	a.date_stamp )';
+		if ( $type == 'week' ) {
+			if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
+				$date_sql = 'week(	a.date_stamp )';
+			} else {
+				$date_sql = 'date_trunc(\'week\',	a.date_stamp )';
+			}
+		} elseif ( $type == 'month' ) {
+			if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
+				$date_sql = 'month(	a.date_stamp )';
+			} else {
+				$date_sql = 'date_trunc(\'month\',	a.date_stamp )';
+			}
 		} else {
-			$date_sql = 'date_trunc(\'month\',	a.date_stamp )';
+			$date_sql = 'a.date_stamp';
 		}
 
 		//Make it so employees with 0 hours still show up!! Very important!

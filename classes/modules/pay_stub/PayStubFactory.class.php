@@ -1296,10 +1296,10 @@ class PayStubFactory extends Factory {
 			return TRUE;
 		}
 
-		Debug::Text('Change Expense Statuses: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('Change Expense Statuses: Pay Stub Status: '. $this->getStatus(), __FILE__, __LINE__, __METHOD__, 10);
 
-		//Mark all PS amendments as 'PAID' if this status is paid.
-		//Mark as NEW if the PS is deleted?
+		//Mark all expenses as 'PAID' if this status is paid.
+		//Mark as ACTIVE if the expense is deleted?
 		if ( $this->getStatus() == 40 ) {
 			$user_expense_status_id = 40; //ReImbursed
 		} elseif ( $this->getDeleted() == FALSE ) {
@@ -1342,6 +1342,7 @@ class PayStubFactory extends Factory {
 					$user_expense_obj = $uelf->getCurrent();
 					if ( $user_expense_obj->getStatus() != $user_expense_status_id ) {
 						Debug::Text('Changing Status of User Expense: '. $user_expense_id, __FILE__, __LINE__, __METHOD__, 10);
+						$user_expense_obj->setEnablePayStubStatusChange( TRUE ); //Tell Expense that its the pay stub changing the status, so we can ignore some validation checks.
 						$user_expense_obj->setStatus( $user_expense_status_id );
 						if ( $user_expense_obj->isValid() ) {
 							$user_expense_obj->Save();
@@ -2143,7 +2144,7 @@ class PayStubFactory extends Factory {
 			return FALSE;
 		}
 
-		$from = $reply_to = '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Pay Stub') .'"<DoNotReply@'. Misc::getEmailDomain() .'>';
+		$from = $reply_to = '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Pay Stub') .'" <'. Misc::getEmailLocalPart() .'@'. Misc::getEmailDomain() .'>';
 		Debug::Text('From: '. $from, __FILE__, __LINE__, __METHOD__, 10);
 
 		$to = array_shift( $email_to_arr );
@@ -2219,9 +2220,9 @@ class PayStubFactory extends Factory {
 							'From'	  => $from,
 							'Subject' => $subject,
 							'Bcc'	  => $bcc,
-							'Reply-To' => $to,
-							'Return-Path' => $to,
-							'Errors-To' => $to,
+							//'Reply-To' => $to,
+							//'Return-Path' => $to,
+							//'Errors-To' => $to,
 						);
 
 		$body = '<html><body><pre>'.str_replace( $search_arr, $replace_arr, $email_body ).'</pre></body></html>';

@@ -145,7 +145,10 @@ class SugarCRM {
 				break;
 			case 'email':
 				//This query can take around 1 second to run.
-				$query = "leads.lead_source = 'Web Site' AND leads.assigned_user_id != 1 AND leads.id in ( SELECT eabr.bean_id FROM email_addr_bean_rel eabr LEFT JOIN email_addresses ea ON eabr.email_address_id = ea.id WHERE eabr.bean_module = 'Leads' AND ea.email_address = '".$search_value."' AND ( eabr.deleted = 0 AND ea.deleted = 0 ) )";
+				//Don't restrict the query to just specific lead_sources, as that can cause emails to be missed.
+				//$query = "leads.lead_source = 'Web Site' AND leads.assigned_user_id != 1 AND leads.id in ( SELECT eabr.bean_id FROM email_addr_bean_rel eabr LEFT JOIN email_addresses ea ON eabr.email_address_id = ea.id WHERE eabr.bean_module = 'Leads' AND ea.email_address = '".$search_value."' AND ( eabr.deleted = 0 AND ea.deleted = 0 ) )";
+				//$query = "( leads.lead_source = 'Web Site' OR leads.lead_source = 'Cold Call' ) AND leads.assigned_user_id != 1 AND leads.id in ( SELECT eabr.bean_id FROM email_addr_bean_rel eabr LEFT JOIN email_addresses ea ON eabr.email_address_id = ea.id WHERE eabr.bean_module = 'Leads' AND ea.email_address = '".$search_value."' AND ( eabr.deleted = 0 AND ea.deleted = 0 ) )";
+				$query = "leads.assigned_user_id != 1 AND leads.id in ( SELECT eabr.bean_id FROM email_addr_bean_rel eabr LEFT JOIN email_addresses ea ON eabr.email_address_id = ea.id WHERE eabr.bean_module = 'Leads' AND ea.email_address = '".$search_value."' AND ( eabr.deleted = 0 AND ea.deleted = 0 ) )";
 				break;
 			case 'any_phone':
 				$query = "( replace(replace(replace(replace(replace(leads.phone_work, ' ', ''), '.', ''), '-', ''), '(', ''), ')', '') = '". $search_value ."' OR replace(replace(replace(replace(replace(leads.phone_mobile, ' ', ''), '.', ''), '-', ''), '(', ''), ')', '') = '". $search_value ."' OR replace(replace(replace(replace(replace(leads.phone_home, ' ', ''), '.', ''), '-', ''), '(', ''), ')', '') = '". $search_value ."' OR replace(replace(replace(replace(replace(leads.phone_other, ' ', ''), '.', ''), '-', ''), '(', ''), ')', '') = '". $search_value ."' OR replace(replace(replace(replace(replace(leads.phone_fax, ' ', ''), '.', ''), '-', ''), '(', ''), ')', '') = '". $search_value ."' )";
@@ -375,11 +378,23 @@ class SugarCRMReturnHandler {
 		return FALSE;
 	}
 
+	function isFault() {
+		if ( get_class( $this->result_data ) == 'SoapFault' ) {
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
 	function isValid() {
-		if ( isset($this->result_data->error) AND $this->result_data->error->number == 0 ) {
-			return TRUE;
-		} elseif ( isset($this->result_data->number) AND $this->result_data->number == 0  ) { //For set_relationship()
-			return TRUE;
+		if ( $this->isFault() == TRUE AND is_soap_fault( $this->result_data ) ) {
+			trigger_error('SOAP Fault: (Code: '. $this->result_data->faultcode .', String: '. $this->result_data->faultstring .')', E_USER_NOTICE);
+		} else {
+			if ( isset( $this->result_data->error ) AND $this->result_data->error->number == 0 ) {
+				return TRUE;
+			} elseif ( isset( $this->result_data->number ) AND $this->result_data->number == 0 ) { //For set_relationship()
+				return TRUE;
+			}
 		}
 
 		return FALSE;

@@ -705,6 +705,8 @@ class UserDateTotalFactory extends Factory {
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jlf = TTnew( 'JobListFactory' );
+		} else {
+			$id = 0;
 		}
 
 		if (  $id == 0
@@ -737,6 +739,8 @@ class UserDateTotalFactory extends Factory {
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jilf = TTnew( 'JobItemListFactory' );
+		} else {
+			$id = 0;
 		}
 
 		if (  $id == 0
@@ -1716,7 +1720,7 @@ class UserDateTotalFactory extends Factory {
 		return TRUE;
 	}
 
-	function sortAccumulatedTimeByOrder($a, $b) {
+	static function sortAccumulatedTimeByOrder($a, $b) {
 		if ( $a['order'] == $b['order'] ) {
 			return strnatcmp( $a['label'], $b['label'] );
 		} else {
@@ -1921,31 +1925,33 @@ class UserDateTotalFactory extends Factory {
 					//$retval[$row['date_stamp']]['department_time']['department_'.$row['department_id']]['hourly_rate'] = ( $retval[$row['date_stamp']]['department_time']['department_'.$row['department_id']]['total_time_amount'] / ( ($retval[$row['date_stamp']]['department_time']['department_'.$row['department_id']]['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['department_time']['department_'.$row['department_id']]['total_time'] ) : 1 ) );
 					$section_ids['department'][] = (int)$row['department_id'];
 
-					//Job
-					$job_name = $row['job'];
-					if ( $job_name == '' ) {
-						$job_name = TTi18n::gettext('No Job');
-					}
-					if ( !isset($retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]) ) {
-						$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']] = array('label' => $job_name, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0, 'order' => $order );
-					}
-					$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time'] += $row['total_time'];
-					$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
-					//$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['hourly_rate'] = ( $retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time_amount'] / ( ($retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time'] ) : 1 ) );
-					$section_ids['job'][] = (int)$row['job_id'];
+					if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+						//Job
+						$job_name = $row['job'];
+						if ( $job_name == '' ) {
+							$job_name = TTi18n::gettext('No Job');
+						}
+						if ( !isset($retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]) ) {
+							$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']] = array('label' => $job_name, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0, 'order' => $order );
+						}
+						$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time'] += $row['total_time'];
+						$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
+						//$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['hourly_rate'] = ( $retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time_amount'] / ( ($retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time'] ) : 1 ) );
+						$section_ids['job'][] = (int)$row['job_id'];
 
-					//Job Item/Task
-					$job_item_name = $row['job_item'];
-					if ( $job_item_name == '' ) {
-						$job_item_name = TTi18n::gettext('No Task');
+						//Job Item/Task
+						$job_item_name = $row['job_item'];
+						if ( $job_item_name == '' ) {
+							$job_item_name = TTi18n::gettext('No Task');
+						}
+						if ( !isset($retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]) ) {
+							$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']] = array('label' => $job_item_name, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0, 'order' => $order );
+						}
+						$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time'] += $row['total_time'];
+						$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
+						//$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['hourly_rate'] = ( $retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time_amount'] / ( ($retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time'] ) : 1 ) );
+						$section_ids['job_item'][] = (int)$row['job_item_id'];
 					}
-					if ( !isset($retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]) ) {
-						$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']] = array('label' => $job_item_name, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0, 'order' => $order );
-					}
-					$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time'] += $row['total_time'];
-					$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
-					//$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['hourly_rate'] = ( $retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time_amount'] / ( ($retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time'] ) : 1 ) );					
-					$section_ids['job_item'][] = (int)$row['job_item_id'];
 
 					//Debug::text('ID: '. $row['id'] .' User Date ID: '. $row['date_stamp'] .' Total Time: '. $row['total_time'] .' Branch: '. $branch_name .' Job: '. $job_name, __FILE__, __LINE__, __METHOD__, 10);
 				}
@@ -1963,7 +1969,7 @@ class UserDateTotalFactory extends Factory {
 					} else {
 						foreach( $retval as $date_stamp => $day_data ) {
 							if ( isset($retval[$date_stamp]['accumulated_time']) ) {
-								uasort($retval[$date_stamp]['accumulated_time'], array( 'UserDateTotalFactory', 'sortAccumulatedTimeByOrder' ) ); //Sort by Order then label.
+								uasort($retval[$date_stamp]['accumulated_time'], array( 'self', 'sortAccumulatedTimeByOrder' ) ); //Sort by Order then label.
 							}
 						}
 					}
@@ -1971,7 +1977,7 @@ class UserDateTotalFactory extends Factory {
 
 				//Sort the accumulated time so its always in the same order.
 				if ( isset($retval['total']['accumulated_time']) ) {
-					uasort($retval['total']['accumulated_time'], array( 'UserDateTotalFactory', 'sortAccumulatedTimeByOrder' ) ); //Sort by Order then label.
+					uasort($retval['total']['accumulated_time'], array( 'self', 'sortAccumulatedTimeByOrder' ) ); //Sort by Order then label.
 				}
 
 				return $retval;

@@ -572,7 +572,7 @@ class MessageControlFactory extends Factory {
 			return FALSE;
 		}
 
-		$from = $reply_to = '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Message') .'"<DoNotReply@'. Misc::getEmailDomain() .'>';
+		$from = $reply_to = '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Message') .'" <'. Misc::getEmailLocalPart() .'@'. Misc::getEmailDomain() .'>';
 
 		global $current_user, $config_vars;
 		if ( is_object($current_user) AND $current_user->getWorkEmail() != '' ) {
@@ -625,9 +625,9 @@ class MessageControlFactory extends Factory {
 		$headers = array(
 							'From'		=> $from,
 							'Subject'	=> $subject,
-							'Reply-To'	=> $reply_to,
-							'Return-Path' => $reply_to,
-							'Errors-To' => $reply_to,
+							//'Reply-To'	=> $reply_to,
+							//'Return-Path' => $reply_to,
+							//'Errors-To' => $reply_to,
 						);
 
 		$body = '<html><body><pre>'.str_replace( $search_arr, $replace_arr, $email_body ).'</pre></body></html>';

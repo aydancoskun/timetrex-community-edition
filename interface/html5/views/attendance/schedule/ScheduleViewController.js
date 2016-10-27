@@ -5619,7 +5619,6 @@ ScheduleViewController = BaseViewController.extend( {
 				}
 				content_div.prepend( time_span );
 				break;
-
 		}
 
 		return content_div.get( 0 ).outerHTML;
@@ -5896,7 +5895,12 @@ ScheduleViewController = BaseViewController.extend( {
 	},
 
 	onCellFormat: function( cell_value, related_data, row ) {
-		cell_value = Global.decodeCellValue( cell_value );
+		//cell_value = Global.decodeCellValue( cell_value );
+		/**
+		 * FIXES BUG #1999: removed because it was double-encoding values in an attempt to avoid xss attacks.
+		 * the following functions handle the needed encoding using a pseudo div element and .outerHTML()
+		 * with this function in place, html encoded values come through to jqgrid double-encoded in the schedule view.
+		 **/
 		var $this = this;
 		switch ( this.getMode() ) {
 			case ScheduleViewControllerMode.WEEK:

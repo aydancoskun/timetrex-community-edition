@@ -359,11 +359,15 @@ abstract class APIFactory {
 	}
 
 	//Bridge to main class getOptions factory.
-	function getOptions( $name, $parent = NULL ) {
-		if ( method_exists($this->getMainClassObject(), 'getOptions') ) {
-			return $this->getMainClassObject()->getOptions($name, $parent);
+	function getOptions( $name = FALSE, $parent = NULL ) {
+		if ( $name != '' ) {
+			if ( method_exists($this->getMainClassObject(), 'getOptions') ) {
+				return $this->getMainClassObject()->getOptions($name, $parent);
+			} else {
+				Debug::Text('getOptions() function does not exist for object: '. get_class( $this->getMainClassObject() ), __FILE__, __LINE__, __METHOD__, 10);
+			}
 		} else {
-			Debug::Text('getOptions() function does not exist for object: '. get_class( $this->getMainClassObject() ), __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text('ERROR: Name not provided, unable to return data...', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return FALSE;

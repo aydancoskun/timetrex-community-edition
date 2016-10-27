@@ -733,6 +733,8 @@ class RecurringScheduleFactory extends Factory {
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jlf = TTnew( 'JobListFactory' );
+		} else {
+			$id = 0;
 		}
 
 		//Allow setting to Default (-1) so we can update it in real-time for the regular schedule view.
@@ -766,6 +768,8 @@ class RecurringScheduleFactory extends Factory {
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jilf = TTnew( 'JobItemListFactory' );
+		} else {
+			$id = 0;
 		}
 
 		//Allow setting to Default (-1) so we can update it in real-time for the regular schedule view.

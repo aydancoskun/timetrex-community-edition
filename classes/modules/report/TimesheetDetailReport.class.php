@@ -144,8 +144,9 @@ class TimesheetDetailReport extends Report {
 				break;
 			case 'date_columns':
 				$retval = array_merge(
-									TTDate::getReportDateOptions( NULL, TTi18n::getText('Date'), 13, TRUE ),
-									TTDate::getReportDateOptions( 'hire', TTi18n::getText('Hire Date'), 12, FALSE )
+									TTDate::getReportDateOptions( 'hire', TTi18n::getText('Hire Date'), 12, FALSE ),
+									TTDate::getReportDateOptions( 'termination', TTi18n::getText('Termination Date'), 13, FALSE ),
+									TTDate::getReportDateOptions( NULL, TTi18n::getText('Date'), 14, TRUE )
 								);
 				break;
 			case 'custom_columns':
@@ -220,25 +221,25 @@ class TimesheetDetailReport extends Report {
 										//'-1110-verified_time_sheet' => TTi18n::gettext('Verified TimeSheet'),
 										//'-1120-pending_request' => TTi18n::gettext('Pending Requests'),
 
-										'-1400-permission_control' => TTi18n::gettext('Permission Group'),
-										'-1410-pay_period_schedule' => TTi18n::gettext('Pay Period Schedule'),
-										'-1420-policy_group' => TTi18n::gettext('Policy Group'),
+										'-1150-permission_control' => TTi18n::gettext('Permission Group'),
+										'-1160-pay_period_schedule' => TTi18n::gettext('Pay Period Schedule'),
+										'-1170-policy_group' => TTi18n::gettext('Policy Group'),
 
 										//Handled in date_columns above.
 										//'-1430-pay_period' => TTi18n::gettext('Pay Period'),
 
-										'-1430-branch' => TTi18n::gettext('Branch'), //Need to keep legacy key as to no break saved reports.
-										'-1431-branch_manual_id' => TTi18n::gettext('Branch Code'),
-										'-1440-department' => TTi18n::gettext('Department'), //Need to keep legacy key as to no break saved reports.
-										'-1441-department_manual_id' => TTi18n::gettext('Department Code'),
+										'-1530-branch' => TTi18n::gettext('Branch'), //Need to keep legacy key as to no break saved reports.
+										'-1531-branch_manual_id' => TTi18n::gettext('Branch Code'),
+										'-1540-department' => TTi18n::gettext('Department'), //Need to keep legacy key as to no break saved reports.
+										'-1541-department_manual_id' => TTi18n::gettext('Department Code'),
 
-										'-1480-sin' => TTi18n::gettext('SIN/SSN'),
+										'-1580-sin' => TTi18n::gettext('SIN/SSN'),
 
-										'-1490-note' => TTi18n::gettext('Note'),
-										'-1495-tag' => TTi18n::gettext('Tags'),
+										'-1590-note' => TTi18n::gettext('Note'),
+										'-1595-tag' => TTi18n::gettext('Tags'),
 
-										'-1510-verified_time_sheet' => TTi18n::gettext('Verified TimeSheet'),
-										'-1515-verified_time_sheet_date' => TTi18n::gettext('Verified TimeSheet Date'),
+										'-1610-verified_time_sheet' => TTi18n::gettext('Verified TimeSheet'),
+										'-1615-verified_time_sheet_date' => TTi18n::gettext('Verified TimeSheet Date'),
 
 										'-2100-worked_hour_of_day' => TTi18n::gettext('Worked Hour Of Day'),
 							);
@@ -1023,7 +1024,8 @@ class TimesheetDetailReport extends Report {
 		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $ulf as $key => $u_obj ) {
-			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$this->getColumnDataConfig(), array( 'hire_date' => TRUE ) ) );
+			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$this->getColumnDataConfig(), array( 'province' => TRUE, 'hire_date' => TRUE, 'termination_date' => TRUE ) ) );
+			$this->tmp_data['user'][$u_obj->getId()]['user_province'] = $this->tmp_data['user'][$u_obj->getId()]['province']; //Used in Payroll Export for PBJ.
 
 			if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
 				$this->tmp_data['user'][$u_obj->getId()]['current_currency'] = Option::getByKey( $base_currency_obj->getId(), $currency_options );
@@ -1064,8 +1066,8 @@ class TimesheetDetailReport extends Report {
 		Debug::Text(' Branch Total Rows: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $blf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $blf as $key => $b_obj ) {
-			$this->tmp_data['default_branch'][$b_obj->getId()] = Misc::addKeyPrefix( 'default_branch_', (array)$b_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE, 'manual_id' => TRUE, 'other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE ) ) );
-			$this->tmp_data['branch'][$b_obj->getId()] = Misc::addKeyPrefix( 'branch_', (array)$b_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE, 'manual_id' => TRUE, 'other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE ) ) );
+			$this->tmp_data['default_branch'][$b_obj->getId()] = Misc::addKeyPrefix( 'default_branch_', (array)$b_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE, 'province' => TRUE, 'manual_id' => TRUE, 'other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE ) ) );
+			$this->tmp_data['branch'][$b_obj->getId()] = Misc::addKeyPrefix( 'branch_', (array)$b_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE, 'manual_id' => TRUE, 'province' => TRUE, 'other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE ) ) );
 			//For backwards compatibility with saved reports, use "branch" and "branch_name" as the same thing.
 			$this->tmp_data['branch'][$b_obj->getId()]['branch'] = $this->tmp_data['branch'][$b_obj->getId()]['branch_name'];
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
@@ -1077,8 +1079,8 @@ class TimesheetDetailReport extends Report {
 		Debug::Text(' Department Total Rows: '. $dlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $dlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $dlf as $key => $d_obj ) {
-			$this->tmp_data['default_department'][$d_obj->getId()] = Misc::addKeyPrefix( 'default_department_', (array)$d_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE, 'manual_id' => TRUE, 'other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE ) ) );
-			$this->tmp_data['department'][$d_obj->getId()] = Misc::addKeyPrefix( 'department_', (array)$d_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE, 'manual_id' => TRUE, 'other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE ) ) );
+			$this->tmp_data['default_department'][$d_obj->getId()] = Misc::addKeyPrefix( 'default_department_', (array)$d_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE, 'manual_id' => TRUE, 'province' => TRUE, 'other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE ) ) );
+			$this->tmp_data['department'][$d_obj->getId()] = Misc::addKeyPrefix( 'department_', (array)$d_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE, 'manual_id' => TRUE, 'province' => TRUE, 'other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE ) ) );
 
 			//For backwards compatibility with saved reports, use "branch" and "branch_name" as the same thing.
 			$this->tmp_data['department'][$d_obj->getId()]['department'] = $this->tmp_data['department'][$d_obj->getId()]['department_name'];
@@ -1185,6 +1187,12 @@ class TimesheetDetailReport extends Report {
 										$hire_date_columns = array();
 									}
 
+									if ( isset($this->tmp_data['user'][$user_id]['termination_date']) ) {
+										$termination_date_columns = TTDate::getReportDates( 'termination', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['termination_date'] ), FALSE, $this->getUserObject() );
+									} else {
+										$termination_date_columns = array();
+									}
+
 									$processed_data	 = array(
 															//'branch' => $branch,
 															//'department' => $department,
@@ -1261,9 +1269,9 @@ class TimesheetDetailReport extends Report {
 									}
 
 									if ( strpos($format, 'pdf_') === FALSE ) {
-										$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $tmp_default_branch, $tmp_default_department, $tmp_branch, $tmp_department, $row, $date_columns, $hire_date_columns, $processed_data );
+										$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $tmp_default_branch, $tmp_default_department, $tmp_branch, $tmp_department, $row, $date_columns, $hire_date_columns, $termination_date_columns, $processed_data );
 									} else {
-										$this->form_data['user_date_total'][$user_id]['data'][$date_stamp] = array_merge( $this->form_data['user_date_total'][$user_id]['data'][$date_stamp], $date_columns, $hire_date_columns, $processed_data );
+										$this->form_data['user_date_total'][$user_id]['data'][$date_stamp] = array_merge( $this->form_data['user_date_total'][$user_id]['data'][$date_stamp], $date_columns, $hire_date_columns, $termination_date_columns, $processed_data );
 										//$this->form_data[$user_id]['data'][] = array_merge( $row, $date_columns, $processed_data );
 									}
 								}

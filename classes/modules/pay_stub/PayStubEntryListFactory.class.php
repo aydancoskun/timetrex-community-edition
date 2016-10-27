@@ -1340,6 +1340,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		//Include pay periods with no pay stubs for ROEs.
 		//If the company has multiple pay period schedules, this will include pay periods from all schedules, even if the employee was never assigned
 		//to a different one. Therefore only include pay periods that have at least one user_date entry assigned to it.
+		// When checking pay period start_date, need to use >= and <=, otherwise if the pay stub starts and ends on the same date (PP start date), it won't match.
 		//FIXME: This doesnt handle the case where they may be added at a later date, then some time is manually added earlier, but still with a pay period have no time on it.
 		//  ROEFactory->getInsurablePayPeriodStartDate() should handle pay periods without any earnings instead.
 		// --AND EXISTS (select 1 from '. $udtf->getTable() .' as ud WHERE x.id = ud.pay_eriod_id AND y.id = ud.user_id )
@@ -1364,7 +1365,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 												LEFT JOIN '. $psaf->getTable() .' as d ON a.pay_stub_amendment_id = d.id
 										where
 											c.start_date >= ?
-											AND c.start_date < ?
+											AND c.start_date <= ?
 											AND b.user_id = ?
 											AND a.id != ?
 											AND	a.pay_stub_entry_name_id in ('. $this->getListSQL( $entry_name_id, $ph, 'int' ) .') ';
@@ -1384,7 +1385,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		$query .= '
 					where y.id = ?
 						AND x.start_date >= ?
-						AND x.start_date < ?
+						AND x.start_date <= ?
 						AND ( amount != 0 OR units != 0 )
 						AND x.deleted = 0
 				';
@@ -1748,11 +1749,11 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 							//$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => (int)$company_id, 'object_type_id' => 200, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 
 							if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
-								$ph[] = $this->db->BindTimeStamp( strtolower(trim($filter_data['start_date'])) );
+								$ph[] = $this->db->BindTimeStamp( $filter_data['start_date'] );
 								$query	.=	' AND bb.transaction_date >= ?';
 							}
 							if ( isset($filter_data['end_date']) AND !is_array($filter_data['end_date']) AND trim($filter_data['end_date']) != '' ) {
-								$ph[] = $this->db->BindTimeStamp( strtolower(trim($filter_data['end_date'])) );
+								$ph[] = $this->db->BindTimeStamp( $filter_data['end_date'] );
 								$query	.=	' AND bb.transaction_date <= ?';
 							}
 							/*

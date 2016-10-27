@@ -2474,6 +2474,71 @@ TimeSheetViewController = BaseViewController.extend( {
 
 	},
 
+	onGridDblClickRow: function() {
+		var len = this.context_menu_array.length;
+		var need_break = false;
+		for ( var i = 0; i < len; i++ ) {
+			if ( need_break ) {
+				break;
+			}
+			var context_btn = this.context_menu_array[i];
+			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
+			switch ( id ) {
+				case ContextMenuIconName.edit:
+					if ( context_btn.is( ':visible' ) && !context_btn.hasClass( 'disable-image' ) ) {
+						ProgressBar.showOverlay();
+						this.onEditClick();
+						return;
+					}
+					break;
+			}
+		}
+		for ( i = 0; i < len; i++ ) {
+			if ( need_break ) {
+				break;
+			}
+			context_btn = this.context_menu_array[i];
+			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
+			switch ( id ) {
+				case ContextMenuIconName.view:
+					need_break = true;
+					if ( context_btn.is( ':visible' ) && !context_btn.hasClass( 'disable-image' ) ) {
+						ProgressBar.showOverlay();
+						this.onViewClick();
+						return;
+					}
+					break;
+			}
+		}
+		for ( i = 0; i < len; i++ ) {
+			context_btn = this.context_menu_array[i];
+			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
+			switch ( id ) {
+				case ContextMenuIconName.add:
+					if ( context_btn.is( ':visible' ) && !context_btn.hasClass( 'disable-image' ) ) {
+						if ( this.isPunchCells() ) {
+							ProgressBar.showOverlay();
+							this.onAddClick();
+						}
+						return;
+					}
+					break;
+			}
+		}
+	},
+
+	isPunchCells: function() {
+		var result = false;
+		var cell = this.select_cells_Array && this.select_cells_Array.length > 0 && this.select_cells_Array[0];
+		var row = cell && this.timesheet_data_source[parseInt( cell.row_id ) - 1];
+		if ( row && row.type === TimeSheetViewController.PUNCH_ROW ) {
+			result = true;
+		} else if ( this.absence_select_cells_Array && this.absence_select_cells_Array.length > 0 ) {
+			result = true;
+		}
+		return result;
+	},
+
 	buildAccumulatedGrid: function() {
 
 		var grid_id = 'accumulated_time_grid';
@@ -3725,7 +3790,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			var cell_td = $( row_tr.find( 'td' )[info.cell_index] );
 			cell_td.addClass( 'ui-state-highlight' ).attr( 'aria-selected', true );
 
-			if ( info.punch ) {
+			if ( info.punch && info.punch.id ) {
 
 				if ( Global.isSet( info.punch.time_stamp ) ) { //date + time number
 					var date = Global.strToDate( info.punch.punch_date ).format( 'MM-DD-YYYY' );

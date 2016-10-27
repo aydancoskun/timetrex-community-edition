@@ -94,26 +94,32 @@ class PayrollExportReport extends TimesheetSummaryReport {
 			case 'export_type':
 				$retval = array(
 								0 => TTi18n::gettext('-- Please Choose --'),
-								'adp'				=> TTi18n::gettext('ADP'),
-								'adp_advanced'		=> TTi18n::gettext('ADP (Advanced)'),
-								'adp_resource'		=> TTi18n::gettext('ADP Resource/Pay eXpert'),
-								'paychex_preview'	=> TTi18n::gettext('Paychex Preview'),
-								'paychex_preview_advanced_job' => TTi18n::gettext('Paychex Preview (by Day/Job)'),
-								'paychex_online'	=> TTi18n::gettext('Paychex Online Payroll'),
-								'ceridian_insync'	=> TTi18n::gettext('Ceridian Insync'),
-								'millenium'			=> TTi18n::gettext('Millennium'),
-								'quickbooks'		=> TTi18n::gettext('QuickBooks Pro'),
-								//'quickbooks_advanced' => TTi18n::gettext('QuickBooks Pro (Advanced)'), //Break time out by day?
-								'surepayroll'		=> TTi18n::gettext('SurePayroll'),
-								'chris21'			=> TTi18n::gettext('Chris21'),
-								'va_munis'			=> TTi18n::gettext('MUNIS (VA)'),
-								'accero'			=> TTi18n::gettext('Accero'),
-								'compupay'			=> TTi18n::gettext('CompuPay'),
-								'sage_50'			=> TTi18n::gettext('Sage 50'),
-								'csv'				=> TTi18n::gettext('Generic Excel/CSV'),
-								'csv_advanced'		=> TTi18n::gettext('Generic Excel/CSV (Advanced)'),
+								'-0100-adp'				=> TTi18n::gettext('ADP'),
+								'-0110-adp_advanced'		=> TTi18n::gettext('ADP (Advanced)'),
+								'-0120-adp_resource'		=> TTi18n::gettext('ADP Resource/Pay eXpert'),
+								'-0200-paychex_preview'	=> TTi18n::gettext('Paychex Preview'),
+								'-0210-paychex_preview_advanced_job' => TTi18n::gettext('Paychex Preview (by Day/Job)'),
+								'-0220-paychex_online'	=> TTi18n::gettext('Paychex Online Payroll'),
+								'-0300-ceridian_insync'	=> TTi18n::gettext('Ceridian Insync'),
+								'-0400-millenium'			=> TTi18n::gettext('Millennium'),
+								'-0500-quickbooks'		=> TTi18n::gettext('QuickBooks Pro'),
+								//'-0510-quickbooks_advanced' => TTi18n::gettext('QuickBooks Pro (Advanced)'), //Break time out by day?
+								'-0600-surepayroll'		=> TTi18n::gettext('SurePayroll'),
+								'-0700-chris21'			=> TTi18n::gettext('Chris21'),
+								'-0800-va_munis'			=> TTi18n::gettext('MUNIS (VA)'),
+								'-0900-accero'			=> TTi18n::gettext('Accero'),
+								'-1000-compupay'			=> TTi18n::gettext('CompuPay'),
+								'-1100-sage_50'			=> TTi18n::gettext('Sage 50'),
+								'-9900-csv'				=> TTi18n::gettext('Generic Excel/CSV'),
+								'-9900-csv_advanced'		=> TTi18n::gettext('Generic Excel/CSV (Advanced)'),
 								//'other'			=> TTi18n::gettext('-- Other --'),
 								);
+
+				if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
+					$retval['-1200-cms_pbj'] = TTi18n::gettext('CMS Payroll Based Journal (PBJ)');
+				}
+				ksort($retval);
+				$retval = Misc::trimSortPrefix($retval);
 				break;
 			case 'export_policy':
 				$retval = array();
@@ -161,6 +167,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 								'accero'			=> TTi18n::gettext('Hours Code'),
 								'compupay'			=> TTi18n::gettext('Hours Code'),
 								'sage_50'			=> TTi18n::gettext('Item Number'),
+								'cms_pbj'			=> TTi18n::gettext('Export'),
 								'csv'				=> TTi18n::gettext('Hours Code'),
 								'csv_advanced'		=> TTi18n::gettext('Hours Code'),
 								);
@@ -290,9 +297,125 @@ class PayrollExportReport extends TimesheetSummaryReport {
 								'group' => TTi18n::gettext('Group'),
 								'title' => TTi18n::gettext('Title'),
 								'branch_name' => TTi18n::gettext('Punch Branch'),
-								'department_name' => TTi18n::gettext('Punch Department'),								
+								'department_name' => TTi18n::gettext('Punch Department'),
 								);
-				break;			
+				break;
+			case 'cms_pbj_hour_column_options':
+				$retval[$name] = array(
+								0 => TTi18n::gettext('No'),
+								1 => TTi18n::gettext('Yes'),
+								);
+				break;
+			case 'cms_pbj_facility_code_options':
+				$retval = array(
+								0 => TTi18n::gettext('-- Custom --'),
+								'-0010-default_branch_manual_id' => TTi18n::gettext('Default Branch: Code'),
+								'-0020-default_department_manual_id' => TTi18n::gettext('Default Department: Code'),
+								'-0030-branch_manual_id' => TTi18n::gettext('Branch: Code'),
+								'-0040-department_manual_id' => TTi18n::gettext('Department: Code'),
+								);
+
+				if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
+					$retval['-0200-job_name'] = TTi18n::gettext('Job: Name');
+					$retval['-0210-job_manual_id'] = TTi18n::gettext('Job: Code');
+					$retval['-0300-job_item_name'] = TTi18n::gettext('Task: Name');
+					$retval['-0310-job_item_manual_id'] = TTi18n::gettext('Task: Code');
+				}
+
+				$oflf = TTnew( 'OtherFieldListFactory' );
+
+				//Put a colon or underscore in the name, thats how we know it needs to be replaced.
+
+				//Get Branch other fields.
+				$default_branch_options = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), 4, '-1000-default_branch_', TTi18n::getText('Default Branch').': ' );
+				if (  !is_array($default_branch_options) ) {
+					$default_branch_options = array();
+				}
+				$default_department_options = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), 5, '-2000-default_department_', TTi18n::getText('Default Department').': ' );
+				if (  !is_array($default_department_options) ) {
+					$default_department_options = array();
+				}
+
+				$branch_options = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), 4, '-3000-branch_', TTi18n::getText('Branch').': ' );
+				if ( !is_array($branch_options) ) {
+					$branch_options = array();
+				}
+				$department_options = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), 5, '-4000-department_', TTi18n::getText('Department').': ' );
+				if ( !is_array($department_options) ) {
+					$department_options = array();
+				}
+
+				$retval = array_merge( $retval, (array)$default_branch_options, (array)$default_department_options, (array)$branch_options, (array)$department_options );
+				break;
+			case 'cms_pbj_pay_type_code_options':
+			case 'cms_pbj_job_title_code_options':
+				$retval = array(
+								0 => TTi18n::gettext('-- Custom --'),
+								'-0010-default_branch_manual_id' => TTi18n::gettext('Default Branch: Code'),
+								'-0020-default_department_manual_id' => TTi18n::gettext('Default Department: Code'),
+								'-0030-branch_manual_id' => TTi18n::gettext('Branch: Code'),
+								'-0040-department_manual_id' => TTi18n::gettext('Department: Code'),
+								);
+
+				if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
+					$retval['-0200-job_name'] = TTi18n::gettext('Job: Name');
+					$retval['-0210-job_manual_id'] = TTi18n::gettext('Job: Code');
+					$retval['-0300-job_item_name'] = TTi18n::gettext('Task: Name');
+					$retval['-0310-job_item_manual_id'] = TTi18n::gettext('Task: Code');
+				}
+
+				$oflf = TTnew( 'OtherFieldListFactory' );
+
+				//Put a colon or underscore in the name, thats how we know it needs to be replaced.
+
+				//Get Branch other fields.
+				$default_branch_options = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), 4, '-1000-default_branch_', TTi18n::getText('Default Branch').': ' );
+				if (  !is_array($default_branch_options) ) {
+					$default_branch_options = array();
+				}
+				$default_department_options = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), 5, '-2000-default_department_', TTi18n::getText('Default Department').': ' );
+				if (  !is_array($default_department_options) ) {
+					$default_department_options = array();
+				}
+
+				$branch_options = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), 4, '-3000-branch_', TTi18n::getText('Branch').': ' );
+				if ( !is_array($branch_options) ) {
+					$branch_options = array();
+				}
+				$department_options = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), 5, '-4000-department_', TTi18n::getText('Department').': ' );
+				if ( !is_array($department_options) ) {
+					$department_options = array();
+				}
+
+				$job_options = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), 20, '-5000-job_', TTi18n::getText('Job').': ' );
+				if ( !is_array($job_options) ) {
+					$job_options = array();
+				}
+				$job_item_options = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), 30, '-6000-job_item_', TTi18n::getText('Task').': ' );
+				if ( !is_array($job_item_options) ) {
+					$job_item_options = array();
+				}
+
+				$title_options = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), 12, '-7000-title_', TTi18n::getText('Title').': ' );
+				if ( !is_array($title_options) ) {
+					$title_options = array();
+				}
+
+				$user_options = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), 10, '-8000-user_', TTi18n::getText('Employee').': ' );
+				if ( !is_array($user_options) ) {
+					$user_options = array();
+				}
+
+				$retval = array_merge( $retval, (array)$default_branch_options, (array)$default_department_options, (array)$branch_options, (array)$department_options, (array)$job_options, (array)$job_item_options, (array)$title_options, (array)$user_options );
+				break;
+			case 'cms_obj_state_code_options':
+				$retval = array(
+								0 => TTi18n::gettext('-- Custom --'),
+								'-0010-default_branch_province' => TTi18n::gettext('Default Branch: Province/State'),
+								'-0020-branch_province' => TTi18n::gettext('Branch: Province/State'),
+								'-0030-user_province' => TTi18n::gettext('Employee: Province/State'),
+								);
+				break;
 			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
@@ -547,6 +670,8 @@ class PayrollExportReport extends TimesheetSummaryReport {
 						
 						$config['sort'][] = array('pay_period_end_date' => 'asc', 'employee_number' => 'asc', 'last_name' => 'asc', 'first_name' => 'asc');
 						break;
+					case 'cms_pbj':  //This is XML.
+						break;					
 					case 'csv':
 						//If this needs to be customized, they can just export any regular report. This could probably be removed completely except for the Hour Code mapping...
 						$config['columns'][] = 'full_name';
@@ -1678,7 +1803,6 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					}
 				}
 
-
 				$data = '';
 				if ( isset( $tmp_rows ) ) {
 					foreach( $tmp_rows as $employee_number => $detail_records ) {
@@ -1697,6 +1821,159 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 				unset($tmp_rows, $export_column_map, $column_id, $column_data, $rows, $row, $total_detail_records);
 				break;
+			case 'cms_pbj': //CMS PBJ export format: http://www.cms.gov/Medicare/Quality-Initiatives-Patient-Assessment-Instruments/NursingHomeQualityInits/Staffing-Data-Submission-PBJ.html
+				unset($rows); //Ignore any existing timesheet summary data, we will be using our own job data below.
+				Debug::Arr($setup_data, 'CMS PBJ Setup Data: ', __FILE__, __LINE__, __METHOD__, 10);
+
+				if ( isset($setup_data[$setup_data['export_type']]['facility_code']) AND strpos( $setup_data[$setup_data['export_type']]['facility_code'], '_' ) !== FALSE ) {
+					$config['columns'][] = $facility_code_column = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['facility_code'] );
+				}
+				if ( isset($setup_data[$setup_data['export_type']]['state_code']) AND strpos( $setup_data[$setup_data['export_type']]['state_code'], '_' ) !== FALSE ) {
+					$config['columns'][] = $state_code_column = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['state_code'] );
+				}
+				if ( isset($setup_data[$setup_data['export_type']]['pay_type_code']) AND strpos( $setup_data[$setup_data['export_type']]['pay_type_code'], '_' ) !== FALSE ) {
+					$config['columns'][] = $pay_type_code_column = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['pay_type_code'] );
+				}
+				if ( isset($setup_data[$setup_data['export_type']]['job_title_code']) AND strpos( $setup_data[$setup_data['export_type']]['job_title_code'], '_' ) !== FALSE ) {
+					$config['columns'][] = $job_title_code_column = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['job_title_code'] );
+				}
+				$config['columns'][] = 'employee_number';
+				$config['columns'][] = 'hire-date_stamp';
+				$config['columns'][] = 'termination-date_stamp';
+				$config['columns'][] = 'date_stamp';
+
+				if ( isset($setup_data[$setup_data['export_type']]['facility_code']) AND strpos( $setup_data[$setup_data['export_type']]['facility_code'], '_' ) !== FALSE ) {
+					$config['group'][] = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['facility_code'] );
+				}
+				if ( isset($setup_data[$setup_data['export_type']]['state_code']) AND strpos( $setup_data[$setup_data['export_type']]['state_code'], '_' ) !== FALSE ) {
+					$config['group'][] = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['state_code'] );
+				}
+				if ( isset($setup_data[$setup_data['export_type']]['pay_type_code']) AND strpos( $setup_data[$setup_data['export_type']]['pay_type_code'], '_' ) !== FALSE ) {
+					$config['group'][] = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['pay_type_code'] );
+				}
+				if ( isset($setup_data[$setup_data['export_type']]['job_title_code']) AND strpos( $setup_data[$setup_data['export_type']]['job_title_code'], '_' ) !== FALSE ) {
+					$config['group'][] = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['job_title_code'] );
+				}
+				$config['group'][] = 'employee_number';
+				$config['group'][] = 'hire-date_stamp';
+				$config['group'][] = 'termination-date_stamp';				
+				$config['group'][] = 'date_stamp';
+
+
+				if ( isset($setup_data[$setup_data['export_type']]['facility_code']) AND strpos( $setup_data[$setup_data['export_type']]['facility_code'], '_' ) !== FALSE ) {
+					$config['sort'][] = array( Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['facility_code'] ) => 'asc' );
+				}
+				if ( isset($setup_data[$setup_data['export_type']]['state_code']) AND strpos( $setup_data[$setup_data['export_type']]['state_code'], '_' ) !== FALSE ) {
+					$config['sort'][] = array( Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['state_code'] ) => 'asc' );
+				}
+				if ( isset($setup_data[$setup_data['export_type']]['pay_type_code']) AND strpos( $setup_data[$setup_data['export_type']]['pay_type_code'], '_' ) !== FALSE ) {
+					$config['sort'][] = array( Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['pay_type_code'] ) => 'asc' );
+				}
+				if ( isset($setup_data[$setup_data['export_type']]['job_title_code']) AND strpos( $setup_data[$setup_data['export_type']]['job_title_code'], '_' ) !== FALSE ) {
+					$config['sort'][] = array( Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['job_title_code'] ) => 'asc' );
+				}
+				$config['sort'][] = array('employee_number' => 'asc' );
+				$config['sort'][] = array('hire-date_stamp' => 'asc' );
+				$config['sort'][] = array('termination-date_stamp' => 'asc' );
+				$config['sort'][] = array('date_stamp' => 'asc' );
+				Debug::Arr($config, 'CMS PBJ Config Data: ', __FILE__, __LINE__, __METHOD__, 10);
+
+				if ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCompanyObject() ) AND $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
+					Debug::Text('Using Job Detail Report...', __FILE__, __LINE__, __METHOD__, 10);
+					$jar = TTNew('JobDetailReport');
+				} else {
+					Debug::Text('Using TimeSheet Detail Report...', __FILE__, __LINE__, __METHOD__, 10);
+					$jar = TTNew('TimesheetDetailReport');
+				}
+				$jar->setAMFMessageID( $this->getAMFMessageID() );
+				$jar->setUserObject( $this->getUserObject() );
+				$jar->setPermissionObject( $this->getPermissionObject() );
+				$jar->setConfig( $config );
+				$jar->setFilterConfig( $this->getFilterConfig() );
+				if ( isset($config['sort']) ) {
+					$jar->setSortConfig( $config['sort'] );
+				}
+				$jar->_getData();
+				$jar->_preProcess();
+				$jar->currencyConvertToBase();
+				$jar->calculateCustomColumns( 10 ); //Selections (these are pre-group)
+				$jar->calculateCustomColumns( 20 ); //Pre-Group
+				$jar->group();
+				$jar->calculateCustomColumns( 21 ); //Post-Group: things like round() functions normally need to be done post-group, otherwise they are rounding already rounded values.
+				$jar->sort();
+				//$jar->_postProcess( 'csv' ); //Minor post-processing.
+				$rows = $jar->data;
+				//Debug::Arr($rows, 'Raw Rows: ', __FILE__, __LINE__, __METHOD__, 10);
+
+				if ( !isset($setup_data[$setup_data['export_type']]['facility_code_value']) ) {
+					$setup_data[$setup_data['export_type']]['facility_code_value'] = NULL;
+				}
+				if ( !isset($setup_data[$setup_data['export_type']]['state_code_value']) ) {
+					$setup_data[$setup_data['export_type']]['state_code_value'] = NULL;
+				}
+				if ( !isset($setup_data[$setup_data['export_type']]['pay_type_code_value']) ) {
+					$setup_data[$setup_data['export_type']]['pay_type_code_value'] = NULL;
+				}
+				if ( !isset($setup_data[$setup_data['export_type']]['job_title_code_value']) ) {
+					$setup_data[$setup_data['export_type']]['job_title_code_value'] = NULL;
+				}
+
+				foreach($rows as $key => $row) {
+					//Combine all hours from the same code together.
+					foreach( $setup_data[$setup_data['export_type']]['columns'] as $column_id => $column_data ) {
+						if ( isset( $row[$column_id.'_time'] ) AND $column_data['hour_column'] == 1 ) {
+							if ( !isset($tmp_hour_codes['pbj_hours']) ) {
+								$tmp_hour_codes['pbj_hours'] = 0;
+							}
+							$tmp_hour_codes['pbj_hours'] = bcadd( $tmp_hour_codes['pbj_hours'], $row[$column_id.'_time'] ); //Use seconds for math here.
+						}
+					}
+
+					if ( isset($tmp_hour_codes) ) {
+						$rows[$key]['pbj_hours'] = $tmp_hour_codes['pbj_hours'];
+						unset($tmp_hour_codes);
+					} else {
+						$rows[$key]['pbj_hours'] = FALSE;
+					}
+					
+					$rows[$key]['pbj_job_title_code'] = ( isset($job_title_code_column) AND isset($row[$job_title_code_column]) ) ? $row[$job_title_code_column] : $setup_data[$setup_data['export_type']]['job_title_code_value'];
+					$rows[$key]['pbj_pay_type_code'] = ( isset($pay_type_code_column) AND isset($row[$pay_type_code_column]) ) ? $row[$pay_type_code_column] : $setup_data[$setup_data['export_type']]['pay_type_code_value'];
+				}
+				//Debug::Arr($rows, 'Calculated Rows: ', __FILE__, __LINE__, __METHOD__, 10);
+
+				require_once( Environment::getBasePath() .'/classes/GovernmentForms/GovernmentForms.class.php');
+				$gf = new GovernmentForms();
+				$pbj = $gf->getFormObject('CMS_PBJ', 'US');
+
+				foreach($rows as $key => $row) {
+					$facility_code = ( isset($facility_code_column) AND isset($row[$facility_code_column]) ) ? $row[$facility_code_column] : $setup_data[$setup_data['export_type']]['facility_code_value'];
+					$state_code = ( isset($state_code_column) AND isset($row[$state_code_column]) ) ? $row[$state_code_column] : $setup_data[$setup_data['export_type']]['state_code_value'];
+
+					//Debug::Text('Add Record: '. $row['employee_number'] .' Date: '. $row['date_stamp'], __FILE__, __LINE__, __METHOD__, 10);
+
+					if ( !isset($pbj->date) ) {
+						//Debug::Text('Facility Code: '. $facility_code .' State: '. $state_code, __FILE__, __LINE__, __METHOD__, 10);
+						$pbj->facility_code = $facility_code;
+						$pbj->state_code = $state_code;
+						$pbj->date = TTDate::parseDateTime( $row['date_stamp'] );
+					}
+					
+					//Make sure these are always set, so GovernmentForms->addRecords() overwrites them for every row.
+					if ( !isset($row['hire-date_stamp']) ) {
+						$row['hire-date_stamp'] = FALSE;
+					}
+					if ( !isset($row['termination-date_stamp']) ) {
+						$row['termination-date_stamp'] = FALSE;
+					}
+					
+					$pbj->addRecord( $row );
+				}
+				$gf->addForm( $pbj );
+
+				$file_name = 'pbj_'.date('Y_m_d').'.xml';
+				$mime_type = 'applications/octet-stream'; //Force file to download.
+				$data = $gf->output( 'XML' );
+				break;						
 			case 'csv': //Generic CSV.
 				$file_name = strtolower(trim($setup_data['export_type'])).'_'.date('Y_m_d').'.csv';
 
@@ -1896,6 +2173,10 @@ class PayrollExportReport extends TimesheetSummaryReport {
 		}
 
 		//Debug::Arr($data, 'Export Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		if ( is_array($data) ) { //If there is a XML or some validation error, return that to the user.
+			return $data;
+		}
+		
 		return array( 'file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $data );
 	}
 

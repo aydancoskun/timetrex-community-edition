@@ -823,7 +823,8 @@ abstract class Factory {
 					//Make sure we filter out any FALSE or NULL values from going into a SQL list.
 					//Replace them with "-1"'s so we keep the same number of place holders.
 					//This should hopefully prevent SQL errors if a FALSE creeps into the SQL list array.
-					if ( is_null($val) === FALSE AND $val !== '' AND strtolower($val) !== 'false' AND strtolower($val) !== 'true' AND ( is_numeric( $val ) OR is_string( $val ) ) ) {
+					//Check is_numeric/is_string before strtolower(), because if an array sneaks through it will cause a PHP warning.
+					if ( is_null($val) === FALSE AND $val !== '' AND ( is_numeric( $val ) OR is_string( $val ) ) AND strtolower($val) !== 'false' AND strtolower($val) !== 'true'  ) {
 						$val = $this->castInteger( $val, $cast );
 						if ( $val === FALSE ) {
 							$ph[] = -1;
@@ -1263,7 +1264,7 @@ abstract class Factory {
 				break;
 			case 'date_range': //Uses EPOCH values only, used for integer datatype columns
 			case 'date_range_include_blank': //Include NULL/Blank dates.
-			case 'date_range_datestamp': 
+			case 'date_range_datestamp':
 			case 'date_range_datestamp_include_blank': //Include NULL/Blank dates.
 			case 'date_range_timestamp': //Uses text timestamp values, used for timestamp datatype columns
 			case 'date_range_timestamp_include_blank': //Include NULL/Blank dates.
@@ -1437,7 +1438,7 @@ abstract class Factory {
 		return $columns;
 	}
 
-	function convertFlexArray( $array ) {
+	function convertFlexArray( $array ) { //This needs to stick around to handle saved search & layouts created in Flex and still in use.
 		//Flex doesn't appear to be consistent on the order the fields are placed into an assoc array, so
 		//handle this type of array too:
 		// array(
@@ -1757,7 +1758,7 @@ abstract class Factory {
 		if ( isset($this->pk_sequence_name) ) {
 			return $this->db->GenID( $this->pk_sequence_name );
 		}
-		
+
 		return FALSE;
 	}
 
@@ -1767,7 +1768,7 @@ abstract class Factory {
 			if ( $ph === NULL ) { //Work around ADODB change that requires $ph === FALSE, otherwise it changes it to a array( 0 => NULL ) and causes SQL errors.
 				$ph = FALSE;
 			}
-			
+
 			//$start_time = microtime(TRUE);
 			if ($limit == NULL) {
 				$this->rs = $this->db->Execute($query, $ph);

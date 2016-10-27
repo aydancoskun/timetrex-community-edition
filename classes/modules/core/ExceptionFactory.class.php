@@ -565,7 +565,7 @@ class ExceptionFactory extends Factory {
 			return FALSE;
 		}
 
-		$from = $reply_to = '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Exception') .'" <DoNotReply@'. Misc::getEmailDomain() .'>';
+		$from = $reply_to = '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Exception') .'" <'. Misc::getEmailLocalPart() .'@'. Misc::getEmailDomain() .'>';
 		Debug::Text('To: '. implode(',', $email_to_arr), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( is_array($email_to_arr) ) {
@@ -648,9 +648,9 @@ class ExceptionFactory extends Factory {
 		$headers = array(
 							'From'	  => $from,
 							'Subject' => $subject,
-							'Reply-To' => $reply_to,
-							'Return-Path' => $reply_to,
-							'Errors-To' => $reply_to,
+							//'Reply-To' => $reply_to,
+							//'Return-Path' => $reply_to,
+							//'Errors-To' => $reply_to,
 						);
 
 		$body = '<html><body><pre>'.str_replace( $search_arr, $replace_arr, $exception_email_body ).'</pre></body></html>';

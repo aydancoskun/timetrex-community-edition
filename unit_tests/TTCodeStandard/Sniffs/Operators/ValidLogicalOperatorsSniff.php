@@ -42,6 +42,8 @@ class TTCodeStandard_Sniffs_Operators_ValidLogicalOperatorsSniff implements PHP_
                 T_LOGICAL_AND,
                 T_LOGICAL_OR,
                 T_LOGICAL_XOR,
+                T_BOOLEAN_AND,
+                T_BOOLEAN_OR,
                );
 
     }//end register()

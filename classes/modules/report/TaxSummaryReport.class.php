@@ -88,7 +88,7 @@ class TaxSummaryReport extends Report {
 										'-3000-custom_filter' => TTi18n::gettext('Custom Filter'),
 
 										'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
-										
+
 										'-5000-columns' => TTi18n::gettext('Display Columns'),
 										'-5010-group' => TTi18n::gettext('Group By'),
 										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
@@ -161,8 +161,7 @@ class TaxSummaryReport extends Report {
 										'-1090-default_branch' => TTi18n::gettext('Default Branch'),
 										'-1100-default_department' => TTi18n::gettext('Default Department'),
 										'-1102-default_job' => TTi18n::gettext('Default Job'),
-										'-1104-default_job_item' => TTi18n::gettext('Default Task'), 
-										'-1106-ethnic_group' => TTi18n::gettext('Ethnicity'),
+										'-1104-default_job_item' => TTi18n::gettext('Default Task'),
 										'-1110-currency' => TTi18n::gettext('Currency'),
 										'-1200-permission_control' => TTi18n::gettext('Permission Group'),
 										'-1210-pay_period_schedule' => TTi18n::gettext('Pay Period Schedule'),
@@ -487,7 +486,7 @@ class TaxSummaryReport extends Report {
 
 				$deduction_include_psea_ids = array();
 				$deduction_exclude_psea_ids = array();
-				
+
 				Debug::Text('Multiple Tax/Deductions selected WITHOUT Tax/Deduction name', __FILE__, __LINE__, __METHOD__, 10);
 				$cdlf = TTnew( 'CompanyDeductionListFactory' );
 				$cdlf->getByCompanyIdAndId( $this->getUserObject()->getCompany(), $filter_data['company_deduction_id'] );
@@ -517,7 +516,7 @@ class TaxSummaryReport extends Report {
 				}
 			}
 			//Debug::Arr($user_deduction_data, 'User Deduction Maximum Amount Data: ', __FILE__, __LINE__, __METHOD__, 10);
-			
+
 			if ( !isset($filter_data['exclude_ytd_adjustment']) ) {
 				$filter_data['exclude_ytd_adjustment'] = FALSE;
 			}
@@ -583,7 +582,7 @@ class TaxSummaryReport extends Report {
 									$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_units'] = 0;
 								}
 								$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_units'] = bcadd( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_units'], Misc::calculateIncludeExcludeAmount( $pse_obj->getColumn('units'), $pay_stub_entry_name_id, $deduction_include_psea_ids, $deduction_exclude_psea_ids ) );
-								
+
 								if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_rate']) ) {
 									$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['subject_rate'] = 0;
 								}
@@ -700,7 +699,7 @@ class TaxSummaryReport extends Report {
 							$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'] = 0;
 						}
 						$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'] = bcadd( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'], Misc::calculateIncludeExcludeAmount( $pse_obj->getColumn('ytd_amount'), $pay_stub_entry_name_id, $deduction_include_psea_ids, $deduction_exclude_psea_ids ) );
-						
+
 						if ( isset($tax_withheld_psea_ids) AND is_array($tax_withheld_psea_ids) AND in_array($pay_stub_entry_name_id, $tax_withheld_psea_ids ) ) {
 							if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['tax_withheld']) ) {
 								$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['tax_withheld'] = 0;
@@ -759,7 +758,7 @@ class TaxSummaryReport extends Report {
 									} else {
 											$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages'] = 0;
 									}
-	
+
 									$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['taxable_wages_ytd'] = $user_deduction_data[$company_deduction_id][$user_id]['maximum_pay_stub_entry_amount'];
 									unset( $tmp_taxable_wages_ytd_diff, $tmp_taxable_wages_max_diff );
 								}
@@ -835,7 +834,7 @@ class TaxSummaryReport extends Report {
 			unset($this->tmp_data, $row, $date_columns, $processed_data, $level_1 );
 		}
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
-		
+
 		return TRUE;
 	}
 }

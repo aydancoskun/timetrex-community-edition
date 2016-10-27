@@ -1343,6 +1343,8 @@ class UserFactory extends Factory {
 		Debug::Text('Default Job ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jlf = TTnew( 'JobListFactory' );
+		} else {
+			$id = 0;
 		}
 
 		if (
@@ -1378,6 +1380,8 @@ class UserFactory extends Factory {
 		Debug::Text('Default Job Item ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jilf = TTnew( 'JobItemListFactory' );
+		} else {
+			$id = 0;
 		}
 
 		if (
@@ -2671,7 +2675,7 @@ class UserFactory extends Factory {
 			TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Employee email confirmation sent for').': '. $primary_email, NULL, $this->getTable() );
 
 			$headers = array(
-								'From'	  => '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Email Confirmation') .'"<DoNotReply@'. Misc::getEmailDomain() .'>',
+								'From'	  => '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Email Confirmation') .'" <'. Misc::getEmailLocalPart() .'@'. Misc::getEmailDomain() .'>',
 								'Subject' => $subject,
 								'X-TimeTrex-Email-Validate' => 'YES', //Help filter validation emails.
 							);
@@ -2727,7 +2731,7 @@ class UserFactory extends Factory {
 			TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Employee Password Reset By').': '. Misc::getRemoteIPAddress(), NULL, $this->getTable() );
 
 			$headers = array(
-								'From'	  => '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Password Reset') .'"<DoNotReply@'. Misc::getEmailDomain() .'>',
+								'From'	  => '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Password Reset') .'" <'. Misc::getEmailLocalPart() .'@'. Misc::getEmailDomain() .'>',
 								'Subject' => $subject,
 								'Cc'	  => Misc::formatEmailAddress( $secondary_email, $this ),
 							);

@@ -1087,7 +1087,8 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 	function createPunches( $start_date, $end_date, $in_time, $out_time ) {
 		global $dd;
-		
+
+		Debug::Text('Start Date: '. TTDate::getDate('DATE', $start_date) .'('.$start_date.') End: '. TTDate::getDate('DATE', $end_date) .'('. $end_date .')', __FILE__, __LINE__, __METHOD__,10);
 		for( $i=$start_date; $i < $end_date; $i+=(86400+3601) ) {
 			$i = TTDate::getBeginDayEpoch( $i );
 			
@@ -2383,9 +2384,9 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, (10*3600) );
 		
 		//Add batch of punches
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(1*86400+3601) );
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
-		$this->createPunches( $date_epoch, ($date_epoch+(10*86400+3601)), '8:00AM', '6:00PM' );
+		$this->createPunches( $date_epoch, ( TTDate::getMiddleDayEpoch($date_epoch) + (9 * 86400) ), '8:00AM', '6:00PM' ); //Create 10 days worth of punches.
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, (110*3600) );
 		
@@ -2509,7 +2510,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		//Add batch of punches
 		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(1*86400+3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
-		$this->createPunches( $date_epoch, ($date_epoch+(10*86400+3601)), '8:00AM', '6:00PM' );
+		$this->createPunches( $date_epoch, ( TTDate::getMiddleDayEpoch($date_epoch) + (9 * 86400) ), '8:00AM', '6:00PM' ); //Create 10 days worth of punches.
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, (220*3600) );
 
@@ -2628,7 +2629,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		//Add batch of punches
 		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(1*86400+3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
-		$this->createPunches( $date_epoch, ($date_epoch+(10*86400+3601)), '8:00AM', '6:00PM' );
+		$this->createPunches( $date_epoch, ( TTDate::getMiddleDayEpoch($date_epoch) + (9 * 86400) ), '8:00AM', '6:00PM' ); //Create 10 days worth of punches.
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, (110*3600) );
 
@@ -2790,7 +2791,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		//Add batch of punches
 		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch )+(1*86400+3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
-		$this->createPunches( $date_epoch, ($date_epoch+(10*86400+3601)), '8:00AM', '6:00PM' );
+		$this->createPunches( $date_epoch, ( TTDate::getMiddleDayEpoch($date_epoch) + (9 * 86400) ), '8:00AM', '6:00PM' ); //Create 10 days worth of punches.		
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, (110*3600) );
 

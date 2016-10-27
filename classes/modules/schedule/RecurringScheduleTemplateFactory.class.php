@@ -487,6 +487,8 @@ class RecurringScheduleTemplateFactory extends Factory {
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jlf = TTnew( 'JobListFactory' );
+		} else {
+			$id = 0;
 		}
 
 		if (  $id == 0 OR $id == -1
@@ -519,6 +521,8 @@ class RecurringScheduleTemplateFactory extends Factory {
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jilf = TTnew( 'JobItemListFactory' );
+		} else {
+			$id = 0;
 		}
 
 		if (  $id == 0 OR $id == -1

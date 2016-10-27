@@ -202,148 +202,65 @@ SavedReportViewController = BaseViewController.extend( {
 	onViewClick: function( editId, noRefreshUI ) {
 		var grid_selected_id_array = this.getGridSelectIdArray();
 		var id = grid_selected_id_array[0];
-		var report_name = this.grid.jqGrid( 'getCell', id, 'script_name' );
+		var report_name = this.getRecordFromGridById( id ).script; //Must use 'script' instead of 'script_name' so it doesn't change with different languages.
+
 		LocalCacheData.current_doing_context_action = 'view';
 		LocalCacheData.default_edit_id_for_next_open_edit_view = id;
 
-		//FIXME: Don't use report name that users see, use script_name instead as it won't change.
 		switch ( report_name ) {
-			case 'Accrual Balance Summary':
-			case 'Accrual Balance Summary Report':
-				IndexViewController.openReport( this, 'AccrualBalanceSummaryReport' );
+			case 'AccrualBalanceSummaryReport':
+			case 'ActiveShiftReport':
+			case 'AuditTrailReport':
+			case 'Form1099MiscReport':
+			case 'Form940Report':
+			case 'Form941Report':
+			case 'FormW2Report':
+			case 'GeneralLedgerSummaryReport':
+			case 'InvoiceTransactionSummaryReport':
+			case 'JobInformationReport':
+			case 'JobItemInformationReport':
+			case 'JobSummaryReport':
+			case 'KPIReport':
+			case 'PayrollExportReport':
+			case 'PayStubSummaryReport':
+			case 'PunchSummaryReport':
+			case 'RemittanceSummaryReport':
+			case 'ScheduleSummaryReport':
+			case 'T4ASummaryReport':
+			case 'T4SummaryReport':
+			case 'TaxSummaryReport':
+			case 'TimesheetDetailReport':
+			case 'TimesheetSummaryReport':
+			case 'UserQualificationReport':
+			case 'UserRecruitmentDetailReport':
+			case 'UserRecruitmentSummaryReport':
+			case 'UserSummaryReport':
+				//Leave report_name alone, as it should match exactly.
 				break;
-			case 'Form W2':
-			case 'Form W2 Report':
-				IndexViewController.openReport( this, 'FormW2Report' );
+			case 'UserExpenseReport':
+				report_name = 'ExpenseSummaryReport';
 				break;
-			case 'Exception Summary':
-			case 'Exception Summary Report':
-				IndexViewController.openReport( this, 'ExceptionSummaryReport' );
+			case 'ExceptionReport':
+				report_name = 'ExceptionSummaryReport';
 				break;
-			case 'Audit Trail':
-			case 'Audit Trail Report':
-				IndexViewController.openReport( this, 'AuditTrailReport' );
+			case 'JobDetailReport':
+				report_name = 'JobAnalysisReport';
 				break;
-			case 'T4 Summary':
-			case 'T4 Summary Report':
-				IndexViewController.openReport( this, 'T4SummaryReport' );
-				break;
-			case 'T4A Summary':
-			case 'T4A Summary Report':
-				IndexViewController.openReport( this, 'T4ASummaryReport' );
-				break;
-			case 'Remittance Summary':
-			case 'Remittance Summary Report':
-				IndexViewController.openReport( this, 'RemittanceSummaryReport' );
-				break;
-			case 'TimeSheet Summary':
-			case 'TimeSheet Summary Report':
-				IndexViewController.openReport( this, 'TimesheetSummaryReport' );
-				break;
-			case 'Punch Summary':
-			case 'Punch Summary Report':
-				IndexViewController.openReport( this, 'PunchSummaryReport' );
-				break;
-			case 'Schedule Summary':
-			case 'Schedule Summary Report':
-				IndexViewController.openReport( this, 'ScheduleSummaryReport' );
-				break;
-			case 'Pay Stub Summary':
-			case 'Pay Stub Summary Report':
-				IndexViewController.openReport( this, 'PayStubSummaryReport' );
-				break;
-			case 'General Ledger Summary':
-			case 'General Ledger Summary Report':
-				IndexViewController.openReport( this, 'GeneralLedgerSummaryReport' );
-				break;
-			case 'Form 941':
-			case 'Form 941 Report':
-				IndexViewController.openReport( this, 'Form941Report' );
-				break;
-			case 'Tax Summary':
-			case 'Tax Summary Report':
-				IndexViewController.openReport( this, 'TaxSummaryReport' );
-				break;
-			case 'Form 940':
-			case 'Form 940 Report':
-				IndexViewController.openReport( this, 'Form940Report' );
-				break;
-			case 'Form 1099-Misc':
-			case 'Form 1099-Misc Report':
-				IndexViewController.openReport( this, 'Form1099MiscReport' );
-				break;
-			case 'Invoice Transaction':
-			case 'Invoice Transaction Report':
-				IndexViewController.openReport( this, 'InvoiceTransactionSummaryReport' );
-				break;
-			case 'TimeSheet Detail':
-			case 'TimeSheet Detail Report':
-				IndexViewController.openReport( this, 'TimesheetDetailReport' );
-				break;
-			case 'Affordable Care':
-			case 'Affordable Care Report':
-				if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-					IndexViewController.openReport( this, 'AffordableCareReport' );
-				} else {
+			case 'AffordableCareReport':
+				if ( LocalCacheData.getCurrentCompany().product_edition_id == 10 ) {
 					TAlertManager.showAlert( Global.getUpgradeMessage() );
+					report_name = null;
 				}
-				break;
-			case 'Job Detail':
-			case 'Job Detail Report':
-			case 'Job Analysis':
-			case 'Job Analysis Report':
-				IndexViewController.openReport( this, 'JobAnalysisReport' );
-				break;
-			case 'Job Summary':
-			case 'Job Summary Report':
-				IndexViewController.openReport( this, 'JobSummaryReport' );
-				break;
-			case 'Job Information':
-			case 'Job Information Report':
-			case 'Job Report':
-				IndexViewController.openReport( this, 'JobInformationReport' );
-				break;
-			case 'Task Information':
-			case 'Task Information Report':
-			case 'Job Item Report':
-				IndexViewController.openReport( this, 'JobItemInformationReport' );
-				break;
-			case 'Employee Summary':
-			case 'Employee Summary Report':
-				IndexViewController.openReport( this, 'UserSummaryReport' );
-				break;
-			case 'Qualification Summary':
-			case 'Qualification Summary Report':
-				IndexViewController.openReport( this, 'UserQualificationReport' );
-				break;
-			case 'Recruitment Detail':
-			case 'Recruitment Detail Report':
-				IndexViewController.openReport( this, 'UserRecruitmentDetailReport' );
-				break;
-			case 'Recruitment Summary':
-			case 'Recruitment Summary Report':
-				IndexViewController.openReport( this, 'UserRecruitmentSummaryReport' );
-				break;
-			case 'Review Summary':
-			case 'Review Summary Report':
-				IndexViewController.openReport( this, 'KPIReport' );
-				break;
-			case 'Expense Summary':
-			case 'Expense Summary Report':
-				IndexViewController.openReport( this, 'ExpenseSummaryReport' );
-				break;
-			case 'Payroll Export':
-			case 'Payroll Export Report':
-				IndexViewController.openReport( this, 'PayrollExportReport' );
-				break;
-			case 'Whos In Summary':
-			case 'Whos In Summary Report':
-				IndexViewController.openReport( this, 'ActiveShiftReport' );
 				break;
 			default:
 				ProgressBar.closeOverlay();
 				Global.log( 'ERROR: Saved Report name not defined: ' + report_name );
+				report_name = null;
 				break;
+		}
+
+		if ( Global.isSet( report_name ) && report_name ) {
+			IndexViewController.openReport(this, report_name);
 		}
 	},
 
@@ -571,6 +488,31 @@ SavedReportViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize( 0 );
+	},
+
+	getFilterColumnsFromDisplayColumns: function() {
+		var column_filter = {};
+		column_filter.id = true;
+		column_filter.is_owner = true;
+		column_filter.is_child = true;
+		column_filter.script = true; //Include script column so onViewClick() knows which view to open for saved reports.
+
+		// Error: Unable to get property 'getGridParam' of undefined or null reference
+		var display_columns = [];
+		if ( this.grid ) {
+			display_columns = this.grid.getGridParam( 'colModel' );
+		}
+
+		if ( display_columns ) {
+			var len = display_columns.length;
+
+			for ( var i = 0; i < len; i++ ) {
+				var column_info = display_columns[i];
+				column_filter[column_info.name] = true;
+			}
+		}
+
+		return column_filter;
 	},
 
 	onAddClick: function( reportData ) {

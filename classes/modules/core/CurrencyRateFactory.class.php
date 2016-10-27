@@ -181,7 +181,12 @@ class CurrencyRateFactory extends Factory {
 	}
 
 	function getReverseConversionRate() {
-		return bcdiv( 1, $this->getConversionRate() );
+		$rate = $this->getConversionRate();
+		if ( $rate != 0 ) { //Prevent division by 0.
+			return bcdiv( 1, $rate );
+		}
+
+		return FALSE;
 	}
 
 	function getConversionRate() {

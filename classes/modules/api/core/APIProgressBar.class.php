@@ -49,8 +49,12 @@ class APIProgressBar {
 		return TRUE;
 	}
 
-	function get( $key ) {
-		return $this->obj->get( $key );
+	function get( $key = FALSE ) {
+		if ( $key != '' ) {
+			return $this->obj->get( $key );
+		}
+
+		return FALSE;
 	}
 
 	function test( $key, $total_iterations = 10 ) {

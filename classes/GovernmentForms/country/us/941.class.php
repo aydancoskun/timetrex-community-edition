@@ -1204,7 +1204,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 
 	function calcL5E( $value = NULL, $schema = NULL ) {
 		$this->l5e = ( $this->l5a2 + $this->l5b2 + $this->l5c2 + $this->l5d2 );
-		
+
 		if ( $this->l5e > 0 ) {
 			$this->l4 = TRUE;
 		} else {
@@ -1234,11 +1234,13 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 	}
 
 	function calcL12( $value, $schema ) {
-		if ( $this->l10 > $this->l11 ) {
+		if ( $this->l11 > 0 AND $this->l10 > $this->l11 ) {
 			$this->l12 = ( $this->l10 - $this->l11 );
+
 			return $this->l12;
 		}
 	}
+
 	function calcL13( $value, $schema ) {
 		if ( $this->l11 > $this->l10 ) {
 			$this->l13 = ( $this->l11 - $this->l10 );

@@ -2807,6 +2807,7 @@ class PermissionFactory extends Factory {
 										'company' => array('add', 'delete', 'delete_own', 'undelete', 'view', 'edit', 'login_other_user'),
 										'schedule' => array('edit_job', 'edit_job_item'),
 										'punch' => array('edit_job', 'edit_job_item', 'edit_quantity', 'edit_bad_quantity'),
+										'absence' => array('edit_job', 'edit_job_item'),
 										'job_item' => 'ALL',
 										'invoice_config' => 'ALL',
 										'client' => 'ALL',

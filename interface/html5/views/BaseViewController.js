@@ -4874,18 +4874,13 @@ BaseViewController = Backbone.View.extend( {
 
 	onGridDblClickRow: function() {
 		var len = this.context_menu_array.length;
-
 		var need_break = false;
-
 		for ( var i = 0; i < len; i++ ) {
-
 			if ( need_break ) {
 				break;
 			}
-
 			var context_btn = this.context_menu_array[i];
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-
 			switch ( id ) {
 				case ContextMenuIconName.edit:
 					if ( context_btn.is( ':visible' ) && !context_btn.hasClass( 'disable-image' ) ) {
@@ -4896,16 +4891,12 @@ BaseViewController = Backbone.View.extend( {
 					break;
 			}
 		}
-
 		for ( i = 0; i < len; i++ ) {
-
 			if ( need_break ) {
 				break;
 			}
-
 			context_btn = this.context_menu_array[i];
 			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-
 			switch ( id ) {
 				case ContextMenuIconName.view:
 					need_break = true;
@@ -4917,12 +4908,9 @@ BaseViewController = Backbone.View.extend( {
 					break;
 			}
 		}
-
 		for ( i = 0; i < len; i++ ) {
-
 			context_btn = this.context_menu_array[i];
 			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-
 			switch ( id ) {
 				case ContextMenuIconName.add:
 					if ( context_btn.is( ':visible' ) && !context_btn.hasClass( 'disable-image' ) ) {

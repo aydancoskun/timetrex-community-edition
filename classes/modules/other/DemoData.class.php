@@ -863,10 +863,10 @@ class DemoData {
 	}
 
 	function createPayStubAccount( $company_id ) {
-		//$retval = PayStubEntryAccountFactory::addPresets( $company_id );		
+		//$retval = PayStubEntryAccountFactory::addPresets( $company_id );
 		$sp = TTNew('SetupPresets');
 		$sp->setCompany( $company_id );
-		
+
 		$retval = $sp->PayStubAccounts();
 		$retval = $sp->PayStubAccounts( 'us' );
 		$retval = $sp->PayStubAccounts( 'us', 'ny' );
@@ -935,10 +935,10 @@ class DemoData {
 		//$retval = CompanyDeductionFactory::addPresets( $company_id );
 		$sp = TTNew('SetupPresets');
 		$sp->setCompany( $company_id );
-		
-		$retval = $sp->CompanyDeductions();		
-		$retval = $sp->CompanyDeductions( 'us' );		
-		$retval = $sp->CompanyDeductions( 'us', 'ny' );		
+
+		$retval = $sp->CompanyDeductions();
+		$retval = $sp->CompanyDeductions( 'us' );
+		$retval = $sp->CompanyDeductions( 'us', 'ny' );
 		if ( $retval == TRUE ) {
 			Debug::Text('Created Company Deductions!', __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
@@ -1550,7 +1550,7 @@ class DemoData {
 		return FALSE;
 	}
 
-	function createContributingShiftPolicy( $company_id, $type, $contributing_pay_code_policy_id ) {
+	function createContributingShiftPolicy( $company_id, $type, $contributing_pay_code_policy_id, $holiday_policy_id = NULL ) {
 		$cspf = TTnew( 'ContributingShiftPolicyFactory' );
 		$cspf->setCompany( $company_id );
 
@@ -1611,11 +1611,54 @@ class DemoData {
 
 				$cspf->setIncludeHolidayType(10); //Have no effect
 				break;
+			case 100:
+				$cspf->setName('Holiday (Midnight to Midnight)');
+				$cspf->setContributingPayCodePolicy( $contributing_pay_code_policy_id );
+
+				$cspf->setFilterStartTime( strtotime('12:00AM') );
+				$cspf->setFilterEndTime( strtotime('11:59:59PM') );
+
+				$cspf->setMon( FALSE );
+				$cspf->setTue( FALSE );
+				$cspf->setWed( FALSE );
+				$cspf->setThu( FALSE );
+				$cspf->setFri( FALSE );
+				$cspf->setSat( FALSE );
+				$cspf->setSun( FALSE );
+
+				$cspf->setIncludeHolidayType(20); //Always on Holidays (eligible or not)
+				$cspf->setIncludePartialShift( TRUE );
+				break;
+			case 110:
+				$cspf->setName('Holiday (1PM to 5PM)');
+				$cspf->setContributingPayCodePolicy( $contributing_pay_code_policy_id );
+
+				$cspf->setFilterStartTime( strtotime('1:00PM') );
+				$cspf->setFilterEndTime( strtotime('5:00PM') );
+
+				$cspf->setMon( FALSE );
+				$cspf->setTue( FALSE );
+				$cspf->setWed( FALSE );
+				$cspf->setThu( FALSE );
+				$cspf->setFri( FALSE );
+				$cspf->setSat( FALSE );
+				$cspf->setSun( FALSE );
+
+				$cspf->setIncludeHolidayType(20); //Always on Holidays (eligible or not)
+				$cspf->setIncludePartialShift( TRUE );
+				break;
 		}
 
 		if ( $cspf->isValid() ) {
-			$insert_id = $cspf->Save();
+			$insert_id = $cspf->Save(FALSE);
 			Debug::Text('Contributing Shift Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+
+			if ( $holiday_policy_id != '' ) {
+				$cspf->setHolidayPolicy( $holiday_policy_id );
+				if ( $cspf->isValid() ) {
+					$cspf->Save();
+				}
+			}
 
 			return $insert_id;
 		}
@@ -3798,7 +3841,7 @@ class DemoData {
 				break;
 			case 100: //Administrator
 				$hire_date = strtotime('01-Jan-2001'); //Force consistent hire date for the administrator, so other unit tests can rely on it.
-				
+
 				$uf->setUserName( 'demoadmin'. $this->getUserNamePostfix() );
 
 				//Set Phone ID/Password to test web quickpunch
@@ -4053,7 +4096,7 @@ class DemoData {
 				return $insert_id;
 			}
 
-			
+
 		}
 
 		Debug::Text('Failed Creating Job Applicant Employment!', __FILE__, __LINE__, __METHOD__, 10);
@@ -4161,7 +4204,7 @@ class DemoData {
 		} else {
 			$upf = TTnew( 'UserPreferenceFactory' );
 		}
-		
+
 		$upf->setUser( $user_id );
 		$upf->setLanguage('en');
 		$upf->setDateFormat( 'd-M-y' );
@@ -6120,7 +6163,7 @@ class DemoData {
 		}
 
 		Debug::Text('No Schedule to Delete: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-		
+
 		return FALSE;
 	}
 
@@ -6311,7 +6354,7 @@ class DemoData {
 					Debug::Text(' No existing Absence...', __FILE__, __LINE__, __METHOD__, 10);
 				}
 			}
-			
+
 			$udtf->setUser( $user_id );
 			$udtf->setDateStamp( $date_stamp );
 			$udtf->setObjectType( 50 ); //Absence Time (Taken)
@@ -6346,7 +6389,7 @@ class DemoData {
 
 				return $retval;
 			}
-			
+
 			Debug::Text(' Failed creating Absence...', __FILE__, __LINE__, __METHOD__, 10);
 		} else {
 			Debug::Text(' Failed creating Absence, Absence policy does not exist...', __FILE__, __LINE__, __METHOD__, 10);
@@ -6478,7 +6521,7 @@ class DemoData {
 			if ( isset($data['bad_quantity']) ) {
 				$pcf->setBadQuantity( $data['bad_quantity'] );
 			}
-			
+
 			$pcf->setEnableCalcUserDateID( TRUE );
 			$pcf->setEnableCalcTotalTime( TRUE ); //This always needs to be called.
 			$pcf->setEnableCalcSystemTotalTime( $calc_total_time ); //This is optional
@@ -6682,7 +6725,7 @@ class DemoData {
 
 			//Company Deductions
 			$this->createCompanyDeduction( $company_id );
-		
+
 			//Wage Groups
 			$wage_group_ids[] = $this->createUserWageGroups( $company_id );
 

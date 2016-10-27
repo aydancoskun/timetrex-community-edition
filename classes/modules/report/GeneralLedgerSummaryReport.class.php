@@ -101,7 +101,7 @@ class GeneralLedgerSummaryReport extends Report {
 										'-2210-pay_stub_run_id' => TTi18n::gettext('Payroll Run'),
 
 										'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
-										
+
 										'-5000-columns' => TTi18n::gettext('Display Columns'), //No Columns for this report.
 										'-5010-group' => TTi18n::gettext('Group By'),
 										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
@@ -461,7 +461,7 @@ class GeneralLedgerSummaryReport extends Report {
 		$filter_data = $this->getFilterConfig();
 
 		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
-		
+
 		$this->enable_time_based_distribution = FALSE;
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 		$psealf->getByCompanyId( $this->getUserObject()->getCompany() );
@@ -573,7 +573,7 @@ class GeneralLedgerSummaryReport extends Report {
 
 				if ( isset($psea_arr[$pse_obj->getPayStubEntryNameId()]) ) {
 					//Debug::Text('Pay Stub ID: '. $pse_obj->getPayStub() .' PSE ID: '. $pse_obj->getPayStubEntryNameId() .' Amount: '. $pse_obj->getAmount(), __FILE__, __LINE__, __METHOD__, 10);
-					
+
 					if ( isset($psea_arr[$pse_obj->getPayStubEntryNameId()]['debit_account'])
 							AND $psea_arr[$pse_obj->getPayStubEntryNameId()]['debit_account'] != '' ) {
 
@@ -696,7 +696,7 @@ class GeneralLedgerSummaryReport extends Report {
 		}
 
 		$job_code_map = array( 0 => 0 ); //Make sure this always exists to prevent PHP warnings.
-		$job_item_code_map = array( 0 => 0 ); //Make sure this always exists to prevent PHP warnings.		  
+		$job_item_code_map = array( 0 => 0 ); //Make sure this always exists to prevent PHP warnings.
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jlf = TTnew( 'JobListFactory' );
 			$job_options = $jlf->getByCompanyIdArray( $this->getUserObject()->getCompany() );
@@ -723,7 +723,7 @@ class GeneralLedgerSummaryReport extends Report {
 		$key = 0;
 		if ( isset($this->tmp_data['pay_stub_entry']) ) {
 			foreach( $this->tmp_data['pay_stub_entry'] as $user_id => $level_1 ) {
-				if ( isset($this->tmp_data['user'][$user_id]) ) {					
+				if ( isset($this->tmp_data['user'][$user_id]) ) {
 					foreach( $level_1 as $date_stamp => $level_2 ) {
 						foreach( $level_2 as $run_id => $row ) {
 							$replace_arr = array(
@@ -1080,6 +1080,10 @@ class GeneralLedgerSummaryReport extends Report {
 			$prev_group_key = NULL;
 			$i = 0;
 			foreach( $this->form_data as $row ) {
+				if ( !isset($row['account']) ) { //If the user didn't include the Account column, skip that row completely.
+					continue;
+				}
+
 				$group_key = 0;
 				if ( $enable_grouping == TRUE ) {
 					$comment = array();
@@ -1146,7 +1150,9 @@ class GeneralLedgerSummaryReport extends Report {
 				$prev_group_key = $group_key;
 				$i++;
 			}
-			$gle->setJournalEntry($je); //Handle last JE here
+			if ( isset($je) ) {
+				$gle->setJournalEntry( $je ); //Handle last JE here
+			}
 
 			if ( $gle->compile() == TRUE ) {
 				$data = $gle->getCompiledData();

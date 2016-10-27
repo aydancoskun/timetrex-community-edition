@@ -1459,6 +1459,19 @@ class Misc {
 		return $domain;
 	}
 
+	static function getEmailLocalPart() {
+		global $config_vars;
+
+		if ( isset($config_vars['other']['email_local_part']) AND $config_vars['other']['email_local_part'] != '' ) {
+			$local_part = $config_vars['other']['email_local_part'];
+		} else {
+			Debug::Text( 'No Email Local Part set, falling back to default...', __FILE__, __LINE__, __METHOD__, 10);
+			$local_part = 'DoNotReply';
+		}
+
+		return $local_part;
+	}
+
 	//Checks if the domain the user is seeing in their browser matches the configured domain that should be used.
 	//If not we can then do a redirect.
 	static function checkValidDomain() {

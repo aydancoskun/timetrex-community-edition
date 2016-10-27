@@ -117,7 +117,8 @@ class InstallSchema_1054A extends InstallSchema_Base {
 									foreach( $udlf as $ud_obj ) {
 										$ud_obj->setUserValue1( ( isset($filing_status[$ud_obj->getUser()]) ) ? $filing_status[$ud_obj->getUser()] : 10 ); //Default to single.
 										$ud_obj->setUserValue2( '' );
-										//$ud_obj->setDeleted( TRUE );
+
+										$ud_obj->ignore_column_list = TRUE; //Prevents SQL errors due to new columns being added later on.
 										if ( $ud_obj->isValid() ) {
 											$ud_obj->Save();
 										}

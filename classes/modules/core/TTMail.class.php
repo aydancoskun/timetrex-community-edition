@@ -88,6 +88,8 @@ class TTMail {
 
 			if ( $delivery_method == 'mail' ) {
 				$this->mail_obj = Mail::factory('mail');
+			} elseif ( $delivery_method == 'sendmail' ) {
+				$this->mail_obj = Mail::factory('sendmail');
 			} elseif ( $delivery_method == 'smtp' ) {
 				$smtp_config = $this->getSMTPConfig();
 
@@ -114,7 +116,7 @@ class TTMail {
 	function getDeliveryMethod() {
 		global $config_vars;
 
-		$possible_values = array( 'mail', 'soap', 'smtp' );
+		$possible_values = array( 'mail', 'soap', 'smtp', 'sendmail' );
 		if ( isset( $config_vars['mail']['delivery_method'] ) AND in_array( strtolower( trim($config_vars['mail']['delivery_method']) ), $possible_values ) ) {
 			return $config_vars['mail']['delivery_method'];
 		}
@@ -205,6 +207,15 @@ class TTMail {
 		return TRUE;
 	}
 
+	//Extracts just the email address part from a string that may contain the name part, etc...
+	function parseEmailAddress( $address ) {
+		if ( preg_match('/(?<=[<\[]).*?(?=[>\]]$)/', $address, $match) ) {
+			return $match[0];
+		}
+
+		return $address;
+	}
+
 	function Send( $force = FALSE ) {
 		Debug::Arr($this->getTo(), 'Attempting to send email To: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -246,7 +257,20 @@ class TTMail {
 			//Debug::Arr($this->getMIMEHeaders(), 'Sending Email To: '. $recipient, __FILE__, __LINE__, __METHOD__, 10);
 			switch ( $this->getDeliveryMethod() ) {
 				case 'smtp':
+				case 'sendmail':
 				case 'mail':
+					if ( $this->getDeliveryMethod() == 'mail' ) {
+						//Make sure the envelope from header matches the From header
+						//Required to prevent spam filtering due to email mismatch/forgery (EDT_SDHA_ADR_FRG)
+						$headers = $this->getMIMEHeaders();
+						if ( isset($headers['Return-Path']) ) {
+							$this->getMailObject()->_params = '-f'. $this->parseEmailAddress( $headers['Return-Path'] );
+						} elseif ( isset($headers['From']) ) {
+							$this->getMailObject()->_params = '-f'. $this->parseEmailAddress( $headers['From'] );
+						}
+						unset($headers);
+					}
+					
 					$send_retval = $this->getMailObject()->send( $recipient, $this->getMIMEHeaders(), $this->getBody() );
 					if ( PEAR::isError($send_retval) ) {
 						Debug::Text('Send Email Failed... Error: '. $send_retval->getMessage(), __FILE__, __LINE__, __METHOD__, 10);

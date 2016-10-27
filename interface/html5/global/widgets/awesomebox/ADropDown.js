@@ -580,7 +580,6 @@
 			static_source_data = val;
 
 			if ( !tree_mode ) {
-
 				unselect_grid.clearGridData();
 				unselect_grid.setGridParam( {data: val} );
 				unselect_grid.trigger( 'reloadGrid' );
@@ -806,6 +805,7 @@
 				}
 			} );
 			scroll_position > 0 && unselect_grid.parent().parent().scrollTop( scroll_position );
+			this.setGridsHeight()
 		};
 
 		this.setGridsHeight = function() {
@@ -1387,7 +1387,10 @@
 			//don't refresh select grid if it's calling from onDropDownsearch whcih doing search in search input
 			if ( !searchResult ) {
 				select_grid.clearGridData();
-				select_grid.setGridParam( {data: val} );
+				//FIXES BUG #1998: The api call returns true when the data it's looking for is deleted. This causes the grid to add a blank row to the unselected side when clear is clicked.
+				 if ( typeof val === 'object' ) {
+					 select_grid.setGridParam( {data: val} );
+				 }
 				select_grid.trigger( 'reloadGrid' );
 			}
 			if ( !tree_mode ) {

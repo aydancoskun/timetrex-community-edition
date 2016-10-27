@@ -334,6 +334,42 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	function getByUserIdAndUserExpenseId($user_id, $user_expense_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+		if ( $user_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $user_expense_id == '') {
+			return FALSE;
+		}
+
+		$ulf = new UserListFactory();
+		$pself = new PayStubEntryListFactory();
+
+		$ph = array(
+				'user_id' => (int)$user_id,
+				'user_expense_id' => (int)$user_expense_id,
+		);
+
+		$query = '
+					select	distinct a.*
+					from	'. $this->getTable() .' as a
+						LEFT JOIN '. $ulf->getTable() .' as b ON ( a.user_id = b.id )
+						LEFT JOIN '. $pself->getTable() .' as c ON ( a.id = c.pay_stub_id )
+					where a.user_id = ?
+						AND c.user_expense_id = ?
+						';
+
+		$query .= '
+						AND ( a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0)';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		return $this;
+	}
+
 	function getLastPayStubByUserIdAndStartDateAndRun($user_id, $start_date, $run_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '' ) {
 			return FALSE;

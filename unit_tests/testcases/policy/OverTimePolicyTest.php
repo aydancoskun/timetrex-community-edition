@@ -252,11 +252,11 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		if ( $ppslf->getRecordCount() > 0 ) {
 			$pps_obj = $ppslf->getCurrent();
 
-
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
 					//$end_date = TTDate::getBeginYearEpoch( strtotime('01-Jan-07') );
-					$end_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() )-(86400*(7*6) ) ) );
+					//$end_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() )-(86400*(7*6) ) ) );
+					$end_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginWeekEpoch( time() )-(86400*(7*52) ) ) ); //Go back 52 weeks.
 				} else {
 					$end_date = $end_date + ( (86400*14) );
 				}
@@ -627,7 +627,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 
 												'quantity' => $udt_obj->getQuantity(),
 												'bad_quantity' => $udt_obj->getBadQuantity(),
-												
+
 												'hourly_rate' => $udt_obj->getHourlyRate(),
 												//Override only shows for SYSTEM override columns...
 												//Need to check Worked overrides too.
@@ -638,7 +638,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 
 		return $date_totals;
 	}
-	
+
 	function createPayCode( $company_id, $type, $pay_formula_policy_id = 0 ) {
 		$pcf = TTnew( 'PayCodeFactory' );
 		$pcf->setCompany( $company_id );
@@ -781,7 +781,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$pfplf->getById( $id );
 		if ( $pfplf->getRecordCount() == 1 ) {
 			$pfpf = $pfplf->getCurrent();
-			
+
 			$pfpf->setWageSourceContributingShiftPolicy( $wage_source_contributing_shift_policy_id );
 			$pfpf->setTimeSourceContributingShiftPolicy( $time_source_contributing_shift_policy_id );
 			$pfpf->setAccrualPolicyAccount( $accrual_policy_account_id );
@@ -865,7 +865,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 				$pfpf->setAccrualPolicyAccount( $accrual_policy_account_id );
 				$pfpf->setAccrualRate( 1.0 );
 				break;
-			
+
 			case 1200: //Overtime averaging.
 				$pfpf->setName( 'OverTime Avg (1.5x)' );
 				$pfpf->setPayType( 10 ); //Pay Multiplied By Factor
@@ -1520,7 +1520,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 200, $policy_ids['pay_formula_policy'][0] );
 		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 210, $policy_ids['pay_formula_policy'][1] );
 		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 220, $policy_ids['pay_formula_policy'][2] );
-		
+
 		$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 200, $this->policy_ids['contributing_shift_policy'][12], $policy_ids['pay_code'][0] );
 		$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 210, $this->policy_ids['contributing_shift_policy'][12], $policy_ids['pay_code'][1] );
 		$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 220, $this->policy_ids['contributing_shift_policy'][12], $policy_ids['pay_code'][2] );
@@ -2069,7 +2069,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 										),
 								TRUE
 								);
-								
+
 		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][10] ), (-2.5 * 3600) );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
@@ -2110,7 +2110,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( count($udt_arr[$date_epoch]), 4 );
 
 		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][10] ), (-2.5 * 3600) );
-		
+
 		return TRUE;
 	}
 
@@ -2228,7 +2228,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//Delete absence in the middle of the week and confirm balance is still correct.
 		$dd->deleteAbsence( $absence_id );
 		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][10] ), (0 * 3600) );
-		
+
 		return TRUE;
 	}
 
@@ -2444,7 +2444,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//Delete absence in the middle of the week and confirm balance is still correct.
 		$dd->deleteAbsence( $absence_id );
 		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][10] ), (0 * 3600) );
-		
+
 		return TRUE;
 	}
 
@@ -2625,7 +2625,71 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
-	
+
+
+	/**
+	 * @group OvertimePolicy_testNoOverTimePolicyWithAbsence
+	 */
+	function testNoOverTimePolicyWithAbsence() {
+		//This is mainly to test for a bug that occurs when no UDT records are returned to calculateOverTimePolicy
+		global $dd;
+
+		$policy_ids['pay_formula_policy'][]  = $this->createPayFormulaPolicy( $this->company_id, 200 ); //OT1.5
+		$policy_ids['pay_formula_policy'][]  = $this->createPayFormulaPolicy( $this->company_id, 210 ); //OT2.0
+		$policy_ids['pay_formula_policy'][]  = $this->createPayFormulaPolicy( $this->company_id, 220 ); //OT2.5
+
+		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 100, $policy_ids['pay_formula_policy'][0] );
+		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 110, $policy_ids['pay_formula_policy'][1] );
+		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 120, $policy_ids['pay_formula_policy'][2] );
+
+		$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 100, $this->policy_ids['contributing_shift_policy'][12], $policy_ids['pay_code'][0] );
+		$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 110, $this->policy_ids['contributing_shift_policy'][12], $policy_ids['pay_code'][1] );
+		$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 120, $this->policy_ids['contributing_shift_policy'][12], $policy_ids['pay_code'][2] );
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   NULL, //Holiday
+								   $policy_ids['overtime'], //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   array($this->absence_policy_id), //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][10] ), (0 * 3600) );
+
+		$absence_id = $dd->createAbsence( $this->user_id, $date_epoch, (4 * 3600), $this->absence_policy_id );
+		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][10] ), (-4 * 3600) );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], 0 );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (4*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['hourly_rate'], 0 );
+		//Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 25 ); //Absence Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //PTO/Vacation
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (4*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['hourly_rate'], 21.50 );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
+
+		return TRUE;
+	}
+
 	/**
 	 * @group OvertimePolicy_testWeeklyOverTimeWithAbsencePolicyA
 	 */
@@ -2709,7 +2773,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//print_r($udt_arr);
-		
+
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
 		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], 0 );
@@ -3495,7 +3559,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(3*86400+3601) ) ;
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		
+
 		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][10] ), (0 * 3600) );
 		//$dd->createAbsence( $this->user_id, $date_epoch, (12 * 3600), $this->absence_policy_id );
 		$schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
@@ -3541,7 +3605,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 																	'start_time' => '8:00AM',
 																	'end_time' => '9:00PM',
 																	) );
-		
+
 		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][10] ), (-24 * 3600) );
 
 
@@ -3576,7 +3640,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 																	'start_time' => '8:00AM',
 																	'end_time' => '9:00PM',
 																	) );
-		
+
 		//$dd->createAbsence( $this->user_id, $date_epoch, (12 * 3600), $this->absence_policy_id );
 		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][10] ), (-36 * 3600) );
 
@@ -3600,11 +3664,11 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][10] ), (-36 * 3600) );
 
-		
+
 		//Delete scheduled absence in the middle of the week and confirm balance is still correct.
 		$dd->deleteSchedule( $schedule_id );
 		$this->assertEquals( $this->getCurrentAccrualBalance( $this->user_id, $this->policy_ids['accrual_policy_account'][10] ), (-24 * 3600) );
-		
+
 		return TRUE;
 	}
 
@@ -3622,7 +3686,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 300, $policy_ids['pay_formula_policy'][0] );
 		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 310, $policy_ids['pay_formula_policy'][1] );
 		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 320, $policy_ids['pay_formula_policy'][2] );
-		
+
 		$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 300, $this->policy_ids['contributing_shift_policy'][12], $policy_ids['pay_code'][0] );
 		$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 310, $this->policy_ids['contributing_shift_policy'][12], $policy_ids['pay_code'][1] );
 		$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 320, $this->policy_ids['contributing_shift_policy'][12], $policy_ids['pay_code'][2] );
@@ -4647,7 +4711,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 100, $policy_ids['pay_formula_policy'][0] );
 		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 110, $policy_ids['pay_formula_policy'][1] );
 		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 120, $policy_ids['pay_formula_policy'][2] );
-		
+
 		//Weekly
 		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 230, $policy_ids['pay_formula_policy'][0] );
 		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 240, $policy_ids['pay_formula_policy'][1] );
@@ -5440,7 +5504,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//$this->assertEquals( $udt_arr[$date_epoch][3]['pay_code_id'], $policy_ids['pay_code'][0] ); //Daily >8
 		$this->assertEquals( $udt_arr[$date_epoch][3]['pay_code_id'], $policy_ids['pay_code'][2] ); //Weekly >39
 		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], (1*3600) );
-		
+
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 4 );
 
@@ -6923,7 +6987,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], (2*3600) );
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 4 );
-		
+
 		return TRUE;
 	}
 
@@ -7270,7 +7334,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 
 		//Holiday
 		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 500, $policy_ids['pay_formula_policy'][0] );
-		
+
 		$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 100, $this->policy_ids['contributing_shift_policy'][12], $policy_ids['pay_code'][0] );
 		$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 110, $this->policy_ids['contributing_shift_policy'][12], $policy_ids['pay_code'][1] );
 		$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 120, $this->policy_ids['contributing_shift_policy'][12], $policy_ids['pay_code'][2] );
@@ -7431,13 +7495,13 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][4]['object_type_id'], 30 ); //Overtime
 		$this->assertEquals( $udt_arr[$date_epoch][4]['pay_code_id'], $policy_ids['pay_code'][0] );
 		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], (1*3600) );
-		
+
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 5 );
 		return TRUE;
 	}
-	
-	
+
+
 	/**
 	 * @group OvertimePolicy_testQuantityWithOverTimePolicy
 	 */
@@ -7530,7 +7594,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][3]['pay_code_id'], $policy_ids['pay_code'][1] );
 		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], (1*3600) );
 		$this->assertEquals( $udt_arr[$date_epoch][3]['quantity'], 1.08 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['bad_quantity'], 0.25 );		
+		$this->assertEquals( $udt_arr[$date_epoch][3]['bad_quantity'], 0.25 );
 		//Overtime3
 		$this->assertEquals( $udt_arr[$date_epoch][2]['object_type_id'], 30 ); //Overtime
 		$this->assertEquals( $udt_arr[$date_epoch][2]['pay_code_id'], $policy_ids['pay_code'][2] );
@@ -7610,7 +7674,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 5 );
-		
+
 		return TRUE;
 	}
 
@@ -9079,7 +9143,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		//Test where combined_rate is different for the differential OT policies.
 		//
-		
+
 		//Daily
 		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 100, $policy_ids['pay_formula_policy'][0] );
 		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 110, $policy_ids['pay_formula_policy'][1] );
@@ -11667,7 +11731,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 4 );
 
-	
+
 		//
 		//Day of Week: 3
 		//
@@ -12747,7 +12811,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], (1*3600) );
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 4 );
-		
+
 		return TRUE;
 	}
 
@@ -13161,7 +13225,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		//Since its averaging, make sure the hourly rate changed on all previous days as well.
 		//
 
-		
+
 		//Day 1
 		$date_epoch = TTDate::getBeginWeekEpoch( time() );
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
@@ -13241,7 +13305,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][2]['hourly_rate'], (1*20.00) );
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 3 );
-		
+
 		//Day 5
 		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(4*86400+3601) );
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
@@ -13264,7 +13328,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $udt_arr[$date_epoch][3]['pay_code_id'], $policy_ids['pay_code'][3] ); //Overtime1
 		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], (1*3600) );
 		$this->assertEquals( $udt_arr[$date_epoch][3]['hourly_rate'], (1*25.00) );
-		
+
 		return TRUE;
 	}
 

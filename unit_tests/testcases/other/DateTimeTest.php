@@ -286,7 +286,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcmul(PHP_INT_MAX,PHP_INT_MAX), 0.99999) ), '9223372036854775807:00:49' );
 		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcmul(PHP_INT_MAX,PHP_INT_MAX), 0.00001) ), '9223372036854775807:00:49' );
 
-		
+
 		TTDate::setTimeUnitFormat(12);
 		$this->assertEquals( TTDate::getTimeUnit( -3600 ),  '-01:00:00' );
 		$this->assertEquals( TTDate::getTimeUnit( -3661 ),  '-01:01:01' );
@@ -299,10 +299,10 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::getTimeUnit( -3600000660 ), '-1000000:11:00' );
 		//$this->assertEquals( TTDate::getTimeUnit( ( ( PHP_INT_MAX + PHP_INT_MAX ) * -1 ) ), 		'ERR(FLOAT)' );
 		$this->assertEquals( TTDate::getTimeUnit( bcmul( bcadd(PHP_INT_MAX,PHP_INT_MAX), -1 ) ),	'-5124095576030431:00:14' );
-		
+
 		$this->assertEquals( TTDate::getTimeUnit( bcmul( bcmul(PHP_INT_MAX,PHP_INT_MAX), -1 ) ),	'-9223372036854775807:00:49' );
 
-		
+
 		TTDate::setTimeUnitFormat(23);
 		$this->assertEquals( TTDate::getTimeUnit( 3600 ),  '1.000' );
 		$this->assertEquals( TTDate::getTimeUnit( 3660 ),  '1.0167' );
@@ -312,7 +312,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::getTimeUnit( 3600660 ), '1,000.1833' );
 		$this->assertEquals( TTDate::getTimeUnit( 36000660 ), '10,000.1833' );
 		$this->assertEquals( TTDate::getTimeUnit( 360000660 ), '100,000.1833' );
-		$this->assertEquals( TTDate::getTimeUnit( 3600000660 ), '1,000,000.1833' );		
+		$this->assertEquals( TTDate::getTimeUnit( 3600000660 ), '1,000,000.1833' );
 		$this->assertEquals( TTDate::getTimeUnit( ( PHP_INT_MAX + PHP_INT_MAX ) ),  				'5,124,095,576,030,431.0000' ); //This is passing a float that is losing precision.
 		$this->assertEquals( TTDate::getTimeUnit( bcadd(PHP_INT_MAX, PHP_INT_MAX ) ), 				'5,124,095,576,030,431.0000' );
 		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcadd(PHP_INT_MAX, PHP_INT_MAX ), 660 ) ), '5,124,095,576,030,431.0000' );
@@ -593,7 +593,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 
 		TTDate::setTimeFormat('g:i A');
 		$this->assertEquals( TTDate::parseDateTime(1162670400), (int)1162670400 );
-		
+
 		$this->assertEquals( TTDate::parseDateTime(600), 600 ); //Test small epochs that may conflict with 24hr time that just has the time and not a date.
 		$this->assertEquals( TTDate::parseDateTime(1800), 1800 );  //Test small epochs that may conflict with 24hr time that just has the time and not a date.
 
@@ -648,7 +648,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:01 AM'), (60 * 5), 30, (60 * 2) ), strtotime('15-Apr-07 8:00 AM') );
 
 	}
-	
+
 	function test_graceTime() {
 		$this->assertEquals( (int)TTDate::graceTime( strtotime('15-Apr-07 7:58 AM'), (60 * 5), strtotime('15-Apr-07 8:00 AM') ), strtotime('15-Apr-07 8:00 AM') );
 		$this->assertEquals( (int)TTDate::graceTime( strtotime('15-Apr-07 7:58:23 AM'), (60 * 5), strtotime('15-Apr-07 8:00 AM') ), strtotime('15-Apr-07 8:00 AM') );
@@ -700,6 +700,42 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $test5_result[1230796800], 36420);
 		$this->assertEquals( $test5_result[1230883200], 86400);
 		$this->assertEquals( $test5_result[1230969600], 22320);
+	}
+
+	function test_calculateFiscalYearFromEpoch() {
+		/*
+		For example, the United States government fiscal year for 2016 is:
+
+		1st quarter: 1 October 2015 – 31 December 2015
+		2nd quarter: 1 January 2016 – 31 March 2016
+		3rd quarter: 1 April 2016 – 30 June 2016
+		4th quarter: 1 July 2016 – 30 September 2016
+		*/
+
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('30-Sep-2015 12:00AM'), 		'US' ), 2015 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Oct-2015 12:00AM'), 		'US' ), 2016 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Jan-2016 8:00AM'), 		'US' ), 2016 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('29-Sep-2016 12:00AM'), 		'US' ), 2016 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('30-Sep-2016 12:00AM'), 		'US' ), 2016 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('30-Sep-2016 11:59:59PM'), 	'US' ), 2016 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Oct-2016 12:00AM'), 		'US' ), 2017 );
+
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('30-Sep-2016 12:00AM'), 		'US' ), 2016 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Oct-2016 12:00AM'), 		'US' ), 2017 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Jan-2017 8:00AM'), 		'US' ), 2017 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('29-Sep-2017 12:00AM'), 		'US' ), 2017 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('30-Sep-2017 12:00AM'), 		'US' ), 2017 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('30-Sep-2017 11:59:59PM'), 	'US' ), 2017 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Oct-2017 12:00AM'), 		'US' ), 2018 );
+
+		/*
+		In Canada,[9] the government's financial year runs from 1 April to 31 March (Example 1 April 2015 to 31 March 2016 for the current financial year).
+		 */
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('31-Mar-2015 12:00AM'), 		'CA' ), 2014 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Apr-2015 12:00AM'), 		'CA' ), 2015 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('31-Dec-2015 8:00AM'), 		'CA' ), 2015 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('31-Mar-2016 11:59AM'), 		'CA' ), 2015 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Apr-2016 12:00AM'), 		'CA' ), 2016 );
 	}
 
 	function test_getWeek() {
@@ -1068,7 +1104,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 
 	function test_DST() {
 		TTDate::setTimeZone('PST8PDT'); //Force to timezone with DST.
-		
+
 		$this->assertEquals( TTDate::doesRangeSpanDST( strtotime('03-Nov-12 10:00PM'), strtotime('04-Nov-12 1:59AM') ), FALSE );
 		$this->assertEquals( TTDate::doesRangeSpanDST( strtotime('03-Nov-12 10:00PM'), strtotime('04-Nov-12 2:00AM') ), TRUE );
 		$this->assertEquals( TTDate::doesRangeSpanDST( strtotime('03-Nov-12 10:00PM'), strtotime('04-Nov-12 2:01AM') ), TRUE );
@@ -1274,7 +1310,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 	function testTimeZones() {
 		$upf = new UserPreferenceFactory();
 		$zones = $upf->getOptions('time_zone');
-		
+
 		foreach( $zones as $zone => $name ) {
 			$retval = TTDate::setTimeZone( Misc::trimSortPrefix( $zone ) );
 			$this->assertEquals( $retval, TRUE );
@@ -1294,6 +1330,147 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 
 		TTDate::setDateFormat('d-m-y');
 		$this->assertEquals( TTDate::getReportDates( 'date_stamp', $pre_process_dates['date_stamp'], TRUE, $uf ), '03-03-15' );
+	}
+
+	function testDoesRangeSpanMidnight() {
+		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('01-Jan-2016 5:00PM'), FALSE ), FALSE );
+		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('01-Jan-2016 11:59:59PM'), FALSE ), FALSE );
+		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('01-Jan-2016 12:00:00AM'), FALSE ), FALSE );
+		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('02-Jan-2016 12:00:00AM'), FALSE ), FALSE );
+		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('02-Jan-2016 1:00:00AM'), FALSE ), TRUE );
+		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime('02-Jan-2016 1:00:00AM'), strtotime('01-Jan-2016 8:00AM'), FALSE ), TRUE );
+		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('03-Jan-2016 1:00:00AM'), FALSE ), TRUE );
+		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime('01-Jan-2016 2:00:00AM'), strtotime('01-Jan-2016 2:00:00AM'), FALSE ), FALSE );
+
+		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime('02-Jan-2016 12:00:00AM'), strtotime('02-Jan-2016 1:00:00AM'), FALSE ), FALSE );
+		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime('01-Jan-2016 12:00:00AM'), strtotime('03-Jan-2016 12:00:00AM'), FALSE ), TRUE );
+		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime('01-Jan-2016 12:00AM'), strtotime('02-Jan-2016 8:00:00AM'), FALSE ), TRUE );
+		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime('01-Jan-2016 12:00AM'), strtotime('03-Jan-2016 8:00:00AM'), FALSE ), TRUE );
+
+
+		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime('02-Jan-2016 12:00AM'), strtotime('02-Jan-2016 1:00:00AM'), TRUE ), TRUE );
+		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime('02-Jan-2016 12:00AM'), strtotime('02-Jan-2016 12:00:00AM'), TRUE ), TRUE );
+		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime('02-Jan-2016 12:00AM'), strtotime('03-Jan-2016 12:00:00AM'), TRUE ), TRUE );
+		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime('01-Jan-2016 12:00AM'), strtotime('03-Jan-2016 8:00:00AM'), TRUE ), TRUE );
+		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('02-Jan-2016 12:00:00AM'), TRUE ), TRUE );
+		$this->assertEquals( TTDate::doesRangeSpanMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('03-Jan-2016 8:00:00AM'), TRUE ), TRUE );
+	}
+
+	function testsplitDateRange() {
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('02-Jan-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('01-Jan-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('02-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('02-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('02-Jan-2016 8:00AM') );
+		$this->assertEquals( count($split_range_arr), 2 );
+
+
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('03-Jan-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('01-Jan-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('02-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('02-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('03-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime('03-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime('03-Jan-2016 8:00AM') );
+		$this->assertEquals( count($split_range_arr), 3 );
+
+
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('04-Jan-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('01-Jan-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('02-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('02-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('03-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime('03-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime('04-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[3]['start_time_stamp'], strtotime('04-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime('04-Jan-2016 8:00AM') );
+		$this->assertEquals( count($split_range_arr), 4 );
+
+
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('01-Jan-2016 8:00PM'), strtotime('01-Jan-2016 7:00AM'), strtotime('01-Jan-2016 3:00PM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('01-Jan-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('01-Jan-2016 3:00PM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('01-Jan-2016 3:00PM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('01-Jan-2016 8:00PM') );
+		$this->assertEquals( count($split_range_arr), 2 );
+
+
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('01-Jan-2016 8:00PM'), strtotime('01-Jan-2016 3:00PM'), strtotime('01-Jan-2016 9:00PM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('01-Jan-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('01-Jan-2016 3:00PM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('01-Jan-2016 3:00PM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('01-Jan-2016 8:00PM') );
+		$this->assertEquals( count($split_range_arr), 2 );
+
+
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('01-Jan-2016 8:00PM'), strtotime('01-Jan-2016 9:00AM'), strtotime('01-Jan-2016 7:00PM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('01-Jan-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('01-Jan-2016 9:00AM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('01-Jan-2016 9:00AM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('01-Jan-2016 7:00PM') );
+		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime('01-Jan-2016 7:00PM') );
+		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime('01-Jan-2016 8:00PM') );
+		$this->assertEquals( count($split_range_arr), 3 );
+
+
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('01-Jan-2016 3:00PM'), strtotime('01-Jan-2016 11:00PM'), strtotime('01-Jan-2016 12:00AM'), strtotime('02-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('01-Jan-2016 3:00PM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('01-Jan-2016 11:00PM') );
+		$this->assertEquals( count($split_range_arr), 1 );
+
+
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('02-Jan-2016 8:00AM'), strtotime('01-Jan-2016 11:00PM'), strtotime('02-Jan-2016 1:00AM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('01-Jan-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('01-Jan-2016 11:00PM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('01-Jan-2016 11:00PM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('02-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime('02-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime('02-Jan-2016 1:00AM') );
+		$this->assertEquals( $split_range_arr[3]['start_time_stamp'], strtotime('02-Jan-2016 1:00AM') );
+		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime('02-Jan-2016 8:00AM') );
+		$this->assertEquals( count($split_range_arr), 4 );
+
+
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('04-Jan-2016 8:00AM'), strtotime('01-Jan-2016 11:00PM'), strtotime('02-Jan-2016 1:00AM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('01-Jan-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('01-Jan-2016 11:00PM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('01-Jan-2016 11:00PM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('02-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime('02-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime('02-Jan-2016 1:00AM') );
+		$this->assertEquals( $split_range_arr[3]['start_time_stamp'], strtotime('02-Jan-2016 1:00AM') );
+		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime('02-Jan-2016 11:00PM') );
+		$this->assertEquals( $split_range_arr[4]['start_time_stamp'], strtotime('02-Jan-2016 11:00PM') );
+		$this->assertEquals( $split_range_arr[4]['end_time_stamp'], strtotime('03-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[5]['start_time_stamp'], strtotime('03-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[5]['end_time_stamp'], strtotime('03-Jan-2016 11:00PM') );
+		$this->assertEquals( $split_range_arr[6]['start_time_stamp'], strtotime('03-Jan-2016 11:00PM') );
+		$this->assertEquals( $split_range_arr[6]['end_time_stamp'], strtotime('04-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[7]['start_time_stamp'], strtotime('04-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[7]['end_time_stamp'], strtotime('04-Jan-2016 8:00AM') );
+		$this->assertEquals( count($split_range_arr), 8 );
+
+
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('03-Jan-2016 8:00PM'), strtotime('01-Jan-2016 9:00AM'), strtotime('01-Jan-2016 7:00PM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('01-Jan-2016 8:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('01-Jan-2016 9:00AM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('01-Jan-2016 9:00AM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('01-Jan-2016 7:00PM') );
+		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime('01-Jan-2016 7:00PM') );
+		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime('02-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[3]['start_time_stamp'], strtotime('02-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime('02-Jan-2016 9:00AM') );
+		$this->assertEquals( $split_range_arr[4]['start_time_stamp'], strtotime('02-Jan-2016 9:00AM') );
+		$this->assertEquals( $split_range_arr[4]['end_time_stamp'], strtotime('02-Jan-2016 7:00PM') );
+		$this->assertEquals( $split_range_arr[5]['start_time_stamp'], strtotime('02-Jan-2016 7:00PM') );
+		$this->assertEquals( $split_range_arr[5]['end_time_stamp'], strtotime('03-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[6]['start_time_stamp'], strtotime('03-Jan-2016 12:00AM') );
+		$this->assertEquals( $split_range_arr[6]['end_time_stamp'], strtotime('03-Jan-2016 9:00AM') );
+		$this->assertEquals( $split_range_arr[7]['start_time_stamp'], strtotime('03-Jan-2016 9:00AM') );
+		$this->assertEquals( $split_range_arr[7]['end_time_stamp'], strtotime('03-Jan-2016 7:00PM') );
+		$this->assertEquals( $split_range_arr[8]['start_time_stamp'], strtotime('03-Jan-2016 7:00PM') );
+		$this->assertEquals( $split_range_arr[8]['end_time_stamp'], strtotime('03-Jan-2016 8:00PM') );
+		$this->assertEquals( count($split_range_arr), 9 );
 	}
 }
 ?>

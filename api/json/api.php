@@ -140,7 +140,7 @@ function authenticatedInvokeService(  $class_name, $method, $arguments, $message
 		$current_company = $clf->getByID( $current_user->getCompany() )->getCurrent();
 
 		if ( is_object( $current_company ) ) {
-			Debug::text('Current User: '. $current_user->getFullName() .' (User ID: '. $current_user->getID() .') Company: '. $current_company->getName() .' (Company ID: '. $current_company->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text('Current User: '. $current_user->getUserName() .' (User ID: '. $current_user->getID() .') Company: '. $current_company->getName() .' (Company ID: '. $current_company->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
 			
 			//Debug::text('Handling JSON Call To API Factory: '.  $class_name .' Method: '. $method .' Message ID: '. $message_id .' UserName: '. $current_user->getUserName(), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $class_name != '' AND class_exists( $class_name ) ) {
