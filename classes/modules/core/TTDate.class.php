@@ -368,7 +368,11 @@ class TTDate {
 
 		//Get rid of any spaces or commas.
 		//ie: 1, 100 :10 should still parse correctly
-		$time_unit = trim( str_replace( array(',', ' ', '"'), '', $time_unit) );
+		//FIXME: comma can be thousands separator or decimal separate depending on locale. Will need to use TTI18n to determine how to display/parse this properly.
+		//       Once we start using the INTL class, we can create a TTi18n::getDecimalSeparator() and TTi18n::getThousandsSeparator().
+		$thousands_separator = ',';
+		$decimal_separator = '.';
+		$time_unit = trim( str_replace( array( $thousands_separator, ' ', '"' ), '', $time_unit) );
 		//Debug::text('Time Unit: '. $time_unit .' Enable Rounding: '. (int)$enable_rounding, __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::text('Time Unit Format: '. self::$time_unit_format, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -376,7 +380,7 @@ class TTDate {
 		switch ($format) {
 			case 10: //hh:mm
 			case 12: //hh:mm:ss
-				if ( strpos( $time_unit, '.') !== FALSE AND strpos( $time_unit, ':') === FALSE ) { //Hybrid mode, they passed a decimal format HH:MM, try to handle properly.
+				if ( strpos( $time_unit, $decimal_separator ) !== FALSE AND strpos( $time_unit, ':') === FALSE ) { //Hybrid mode, they passed a decimal format HH:MM, try to handle properly.
 					$time_unit = TTDate::getTimeUnit( self::parseTimeUnit( $time_unit, 20 ), $format );
 				}
 
@@ -407,7 +411,7 @@ class TTDate {
 			case 20: //hours
 			case 22: //hours [Precise]
 			case 23: //hours [Super Precise]
-				if ( strpos( $time_unit, ':') !== FALSE AND strpos( $time_unit, '.') === FALSE ) { //Hybrid mode, they passed a HH:MM format as a decimal, try to handle properly.
+				if ( strpos( $time_unit, ':' ) !== FALSE AND strpos( $time_unit, $decimal_separator ) === FALSE ) { //Hybrid mode, they passed a HH:MM format as a decimal, try to handle properly.
 					$time_unit = TTDate::getTimeUnit( self::parseTimeUnit( $time_unit, 10 ), $format );
 				}
 

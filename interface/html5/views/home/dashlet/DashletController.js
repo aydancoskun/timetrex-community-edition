@@ -56,50 +56,54 @@ DashletController = Backbone.View.extend( {
 		}
 		// remove first
 		interact( '#' + $( this.el ).attr( 'id' ) ).unset();
-		interact( '#' + $( this.el ).attr( 'id' ) )
-			.resizable( {
-				edges: {left: true, right: true, bottom: true, top: true}
-			} )
-			.on( 'resizestart', function( event ) {
 
-			} )
-			.on( 'resizemove', function( event ) {
+		//BUG#2070 - Break resizable for mobile because it negatively impacts usability
+		if ( Global.detectMobileBrowser() == false ) {
+			interact('#' + $(this.el).attr('id'))
+				.resizable({
+					edges: {left: true, right: true, bottom: true, top: true}
+				})
+				.on('resizestart', function (event) {
 
-				var target = event.target;
-				var xUnit = parseInt( event.rect.width / 20 );
-				var yUnit = parseInt( event.rect.height / 20 );
-				var left = parseFloat( $( target ).css( 'left' ) );
-				var top = parseFloat( $( target ).css( 'top' ) );
-				if ( xUnit > 1 ) {
-					var percentage_width = ((xUnit * 20) / $this.homeViewController.dashboard_container.width() * 100);
-					if ( Math.abs( percentage_width - 33 ) < 2 ) {
-						percentage_width = 33;
+				})
+				.on('resizemove', function (event) {
+
+					var target = event.target;
+					var xUnit = parseInt(event.rect.width / 20);
+					var yUnit = parseInt(event.rect.height / 20);
+					var left = parseFloat($(target).css('left'));
+					var top = parseFloat($(target).css('top'));
+					if (xUnit > 1) {
+						var percentage_width = ((xUnit * 20) / $this.homeViewController.dashboard_container.width() * 100);
+						if (Math.abs(percentage_width - 33) < 2) {
+							percentage_width = 33;
+						}
+						var currentWidth = $(target).width();
+						target.style.width = percentage_width + '%';
+						var newWidth = $(target).width();
+						var widthChanged = newWidth - currentWidth;
+						if (event.edges.left) {
+							$(target).css('left', left - widthChanged);
+						}
 					}
-					var currentWidth = $( target ).width();
-					target.style.width = percentage_width + '%';
-					var newWidth = $( target ).width();
-					var widthChanged = newWidth - currentWidth;
-					if ( event.edges.left ) {
-						$( target ).css( 'left', left - widthChanged );
+					if (yUnit > 1) {
+						var height = (yUnit * 20);
+						var currentHeight = $(target).height();
+						target.style.height = height + 'px';
+						var newHeight = $(target).height();
+						var heightChanged = newHeight - currentHeight;
+						if (event.edges.top) {
+							$(target).css('top', top - heightChanged);
+						}
 					}
-				}
-				if ( yUnit > 1 ) {
-					var height = (yUnit * 20);
-					var currentHeight = $( target ).height();
-					target.style.height = height + 'px';
-					var newHeight = $( target ).height();
-					var heightChanged = newHeight - currentHeight;
-					if ( event.edges.top ) {
-						$( target ).css( 'top', top - heightChanged );
-					}
-				}
-				$this.setGridSize();
-			} )
-			.on( 'resizeend', function( event ) {
-				$this.addIframeBack();
-				$this.homeViewController.updateLayout();
-				$this.saveSize();
-			} );
+					$this.setGridSize();
+				})
+				.on('resizeend', function (event) {
+					$this.addIframeBack();
+					$this.homeViewController.updateLayout();
+					$this.saveSize();
+				});
+		}
 
 		this.homeViewController.dashboard_container.parent().scroll( function() {
 			if ( Global.isScrolledIntoView( $( $this.el ) ) && !$this.initComplete ) {
@@ -169,7 +173,7 @@ DashletController = Backbone.View.extend( {
 				} );
 			}
 			$this.initComplete = true;
-		}
+		}//if not android
 	},
 
 	onViewClick: function() {

@@ -594,6 +594,20 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 	},
 
+	parseToUserId: function ( id ) {
+		if ( !id ) {
+			return false;
+		}
+
+		id = id.toString();
+
+		if ( id.indexOf( '_' ) > 0 ) {
+			return id.split( '_' )[1];
+		}
+
+		return id;
+	},
+
 	parseToRecordId: function( id ) {
 
 		if ( !id ) {
@@ -639,6 +653,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 			}
 		}
 
+		user_id = this.parseToUserId( selectedId );
 		selectedId = this.parseToRecordId( selectedId );
 
 		filter.filter_data = {};
@@ -651,8 +666,14 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				if ( !result_data ) {
 					result_data = [];
 				}
+				var index = 0;
 
-				result_data = result_data[0];
+				for ( var i = 0; i < result_data.length; i++ ) {
+					if ( result_data[i].id == id && result_data[i].user_id == user_id ) {
+						index = i;
+					}
+				}
+				result_data = result_data[index];
 
 				if ( !result_data ) {
 					TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
@@ -733,6 +754,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		var $this = this;
 		var grid_selected_id_array = this.getGridSelectIdArray();
 		var grid_selected_length = grid_selected_id_array.length;
+		var selectedId;
 		if ( Global.isSet( editId ) ) {
 			var selectedId = editId;
 		} else {
@@ -753,6 +775,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		$this.openEditView();
 		var filter = {};
 
+		var user_id = this.parseToUserId( selectedId );
 		selectedId = this.parseToRecordId( selectedId );
 
 		filter.filter_data = {};
@@ -760,22 +783,23 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 		this.api['get' + this.api.key_name]( filter, {
 			onResult: function( result ) {
-				$this.onEditClickResult( result );
-
+				$this.onEditClickResult( result, selectedId, user_id );
 			}
 		} );
 
 	},
 
-	onEditClickResult: function( result ) {
+	onEditClickResult: function( result , id, user_id) {
 		var $this = this;
 		var result_data = result.getResult();
+		var index = 0;
 
-		if ( !result_data ) {
-
+		for ( var i = 0; i < result_data.length; i++) {
+			if ( result_data[i].id == id && result_data[i].user_id == user_id ) {
+				index = i;
+			}
 		}
-
-		result_data = result_data[0];
+		result_data = result_data[index];
 
 		if ( !result_data ) {
 			TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
@@ -1022,6 +1046,31 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 				break;
 		}
+	},
+
+	getRightArrowClickSelectedIndex:function (selected_index) {
+		if ( selected_index == 0 ) {
+			//selected_index is wrong because of the underscore in id.
+			var source_data = this.navigation.getSourceData();
+			var hash_arr = window.location.hash.split('&');
+			var hash_id = '0_0';
+			for ( var i = 0; i < hash_arr.length; i++ ) {
+				if ( hash_arr[i].indexOf('id=') != -1 ) {
+					hash_id = hash_arr[i].substring(3);
+				}
+			}
+
+			if ( hash_id.indexOf('_') != -1 ) {
+				for (var i = 0; i < source_data.length; i++) {
+					if (hash_id == source_data[i].id) {
+						selected_index = i;
+						break; //exit loop
+					}
+				}
+			}
+		}
+
+		return selected_index;
 	},
 
 	setDefaultMenu: function( doNotSetFocus ) {

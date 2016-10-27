@@ -477,13 +477,13 @@ class GovernmentForms_CA_T4Sum extends GovernmentForms_CA {
 
 	function calcL80( $value, $schema ) {
 		//Subtotal: 16 + 27 + 18 + 19 + 22
-		$this->l80 = $this->l16 + $this->l27 + $this->l18 + $this->l19 + $this->l22;
+		$this->l80 = ( $this->l16 + $this->l27 + $this->l18 + $this->l19 + $this->l22 );
 		return $this->l80;
 	}
 
 	function calcL82Diff( $value, $schema ) {
 		//Subtotal: 80 - 82
-		$this->l82_diff = $this->l80 - $this->l82;
+		$this->l82_diff = ( $this->l80 - $this->l82 );
 
 		if ( $this->l82_diff > 0 ) {
 			$this->l86 = $this->amount_enclosed = $this->l82_diff;
@@ -501,47 +501,51 @@ class GovernmentForms_CA_T4Sum extends GovernmentForms_CA {
 			return FALSE; //No XML object to append too. Needs T619 form first.
 		}
 
-		$xml->Return->T4->addChild('T4Summary');
+		if ( isset($xml->Return) AND isset($xml->Return->T4) ) {
+			$xml->Return->T4->addChild( 'T4Summary' );
 
-		$xml->Return->T4->T4Summary->addChild('bn', $this->formatPayrollAccountNumber( $this->payroll_account_number ) );
-		$xml->Return->T4->T4Summary->addChild('tx_yr', $this->year );
-		$xml->Return->T4->T4Summary->addChild('slp_cnt', $this->l88 );
-		$xml->Return->T4->T4Summary->addChild('rpt_tcd', 'O' ); //Report Type Code: O = Originals, A = Amendment, C = Cancel
+			$xml->Return->T4->T4Summary->addChild( 'bn', $this->formatPayrollAccountNumber( $this->payroll_account_number ) );
+			$xml->Return->T4->T4Summary->addChild( 'tx_yr', $this->year );
+			$xml->Return->T4->T4Summary->addChild( 'slp_cnt', $this->l88 );
+			$xml->Return->T4->T4Summary->addChild( 'rpt_tcd', 'O' ); //Report Type Code: O = Originals, A = Amendment, C = Cancel
 
-		$xml->Return->T4->T4Summary->addChild('EMPR_NM'); //Employer name
-		$xml->Return->T4->T4Summary->EMPR_NM->addChild('l1_nm', substr( Misc::stripHTMLSpecialChars( $this->company_name ), 0, 30) );
+			$xml->Return->T4->T4Summary->addChild( 'EMPR_NM' ); //Employer name
+			$xml->Return->T4->T4Summary->EMPR_NM->addChild( 'l1_nm', substr( Misc::stripHTMLSpecialChars( $this->company_name ), 0, 30 ) );
 
-		$xml->Return->T4->T4Summary->addChild('EMPR_ADDR'); //Employer Address
-		$xml->Return->T4->T4Summary->EMPR_ADDR->addChild('addr_l1_txt', Misc::stripHTMLSpecialChars( $this->company_address1 ) );
-		if ( $this->company_address2 != '' ) { $xml->Return->T4->T4Summary->EMPR_ADDR->addChild('addr_l2_txt', Misc::stripHTMLSpecialChars( $this->company_address2 ) ); }
-		$xml->Return->T4->T4Summary->EMPR_ADDR->addChild('cty_nm', $this->company_city );
-		$xml->Return->T4->T4Summary->EMPR_ADDR->addChild('prov_cd', $this->company_province );
-		$xml->Return->T4->T4Summary->EMPR_ADDR->addChild('cntry_cd', 'CAN' );
-		$xml->Return->T4->T4Summary->EMPR_ADDR->addChild('pstl_cd', $this->company_postal_code );
+			$xml->Return->T4->T4Summary->addChild( 'EMPR_ADDR' ); //Employer Address
+			$xml->Return->T4->T4Summary->EMPR_ADDR->addChild( 'addr_l1_txt', Misc::stripHTMLSpecialChars( $this->company_address1 ) );
+			if ( $this->company_address2 != '' ) {
+				$xml->Return->T4->T4Summary->EMPR_ADDR->addChild( 'addr_l2_txt', Misc::stripHTMLSpecialChars( $this->company_address2 ) );
+			}
+			$xml->Return->T4->T4Summary->EMPR_ADDR->addChild( 'cty_nm', $this->company_city );
+			$xml->Return->T4->T4Summary->EMPR_ADDR->addChild( 'prov_cd', $this->company_province );
+			$xml->Return->T4->T4Summary->EMPR_ADDR->addChild( 'cntry_cd', 'CAN' );
+			$xml->Return->T4->T4Summary->EMPR_ADDR->addChild( 'pstl_cd', $this->company_postal_code );
 
-		$xml->Return->T4->T4Summary->addChild('CNTC'); //Contact Name
-		$xml->Return->T4->T4Summary->CNTC->addChild('cntc_nm', $this->l76 );
-		$phone_arr = $this->filterL78( $this->l78 );
-		if ( is_array($phone_arr) ) {
-			$xml->Return->T4->T4Summary->CNTC->addChild('cntc_area_cd', $phone_arr[0] );
-			$xml->Return->T4->T4Summary->CNTC->addChild('cntc_phn_nbr', $phone_arr[1].'-'.$phone_arr[2] );
-			//$xml->Return->T4->T4Summary->CNTC->addChild('cntc_extn_nbr', '' );
+			$xml->Return->T4->T4Summary->addChild( 'CNTC' ); //Contact Name
+			$xml->Return->T4->T4Summary->CNTC->addChild( 'cntc_nm', $this->l76 );
+			$phone_arr = $this->filterL78( $this->l78 );
+			if ( is_array( $phone_arr ) ) {
+				$xml->Return->T4->T4Summary->CNTC->addChild( 'cntc_area_cd', $phone_arr[0] );
+				$xml->Return->T4->T4Summary->CNTC->addChild( 'cntc_phn_nbr', $phone_arr[1] . '-' . $phone_arr[2] );
+				//$xml->Return->T4->T4Summary->CNTC->addChild('cntc_extn_nbr', '' );
+			}
+
+
+			//$xml->Return->T4->T4Summary->addChild('PPRTR_SIN');
+			//$xml->Return->T4->T4Summary->PPRTR_SIN->addChild('pprtr_1_sin', '' ); //Required
+			//$xml->TReturn->4->T4Summary->PPRTR_SIN->addChild('pprtr_2_sin', '' );
+
+			$xml->Return->T4->T4Summary->addChild( 'T4_TAMT' );
+			$xml->Return->T4->T4Summary->T4_TAMT->addChild( 'tot_empt_incamt', $this->MoneyFormat( $this->l14, FALSE ) );
+			$xml->Return->T4->T4Summary->T4_TAMT->addChild( 'tot_empe_cpp_amt', $this->MoneyFormat( $this->l16, FALSE ) );
+			$xml->Return->T4->T4Summary->T4_TAMT->addChild( 'tot_empe_eip_amt', $this->MoneyFormat( $this->l18, FALSE ) );
+			$xml->Return->T4->T4Summary->T4_TAMT->addChild( 'tot_rpp_cntrb_amt', $this->MoneyFormat( $this->l20, FALSE ) );
+			$xml->Return->T4->T4Summary->T4_TAMT->addChild( 'tot_itx_ddct_amt', $this->MoneyFormat( $this->l22, FALSE ) );
+			$xml->Return->T4->T4Summary->T4_TAMT->addChild( 'tot_padj_amt', $this->MoneyFormat( $this->l52, FALSE ) );
+			$xml->Return->T4->T4Summary->T4_TAMT->addChild( 'tot_empr_cpp_amt', $this->MoneyFormat( $this->l27, FALSE ) );
+			$xml->Return->T4->T4Summary->T4_TAMT->addChild( 'tot_empr_eip_amt', $this->MoneyFormat( $this->l19, FALSE ) );
 		}
-
-
-		//$xml->Return->T4->T4Summary->addChild('PPRTR_SIN');
-		//$xml->Return->T4->T4Summary->PPRTR_SIN->addChild('pprtr_1_sin', '' ); //Required
-		//$xml->TReturn->4->T4Summary->PPRTR_SIN->addChild('pprtr_2_sin', '' );
-
-		$xml->Return->T4->T4Summary->addChild('T4_TAMT');
-		$xml->Return->T4->T4Summary->T4_TAMT->addChild('tot_empt_incamt', $this->MoneyFormat( $this->l14, FALSE ) );
-		$xml->Return->T4->T4Summary->T4_TAMT->addChild('tot_empe_cpp_amt', $this->MoneyFormat( $this->l16, FALSE ) );
-		$xml->Return->T4->T4Summary->T4_TAMT->addChild('tot_empe_eip_amt', $this->MoneyFormat( $this->l18, FALSE ) );
-		$xml->Return->T4->T4Summary->T4_TAMT->addChild('tot_rpp_cntrb_amt', $this->MoneyFormat( $this->l20, FALSE ) );
-		$xml->Return->T4->T4Summary->T4_TAMT->addChild('tot_itx_ddct_amt', $this->MoneyFormat( $this->l22, FALSE ) );
-		$xml->Return->T4->T4Summary->T4_TAMT->addChild('tot_padj_amt', $this->MoneyFormat( $this->l52, FALSE ) );
-		$xml->Return->T4->T4Summary->T4_TAMT->addChild('tot_empr_cpp_amt', $this->MoneyFormat( $this->l27, FALSE ) );
-		$xml->Return->T4->T4Summary->T4_TAMT->addChild('tot_empr_eip_amt', $this->MoneyFormat( $this->l19, FALSE ) );
 
 		return TRUE;
 	}

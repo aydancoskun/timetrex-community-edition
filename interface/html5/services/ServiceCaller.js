@@ -268,7 +268,7 @@ var ServiceCaller = Backbone.Model.extend( {
 		var api_stack = {
 			api: className + '.' + function_name,
 			args: apiArgs.json,
-			api_called_date: api_called_date.format( 'hh:mm:ss' ) + '.' + api_called_date.getMilliseconds()
+			api_called_date: api_called_date.toISOString()
 		};
 
 		if ( LocalCacheData.api_stack.length === 8 ) {

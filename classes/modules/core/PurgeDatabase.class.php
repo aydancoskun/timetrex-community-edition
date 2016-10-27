@@ -1062,6 +1062,40 @@ class PurgeDatabase {
 					Debug::Text('Table not found for purging: '. $table, __FILE__, __LINE__, __METHOD__, 10);
 				}
 			}
+
+			//
+			//Purge saved punch images.
+			//
+			if ( getTTProductEdition() > 10 ) {
+				Debug::Text('Purging Punch Images...', __FILE__, __LINE__, __METHOD__, 10);
+
+				$plf = new PunchListFactory();
+				$total_records = -1;
+				$x = 0;
+				$i = 0;
+				while ( $total_records == -1 OR ( $total_records > 0 AND $x <= 10 ) ) { //Limit to 10 batches in total.
+					$plf->getByHasImageAndCreatedDate( TRUE, ( time() - ( 86400 * 120 ) ), 10000 ); //Expire Days: 120 -- Limit to 10000 at a time.
+					$total_records = $plf->getRecordCount();
+					Debug::text('Batch: '. $x .' Punches with images older than X days: '. $plf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+					if ( $plf->getRecordCount() > 0 ) {
+						foreach( $plf as $p_obj ) {
+							Debug::text('  Punch ID: '. $p_obj->getID() .' Date: '. TTDate::getDate('DATE+TIME', $p_obj->getTimeStamp() ) .' Image File Name: '. $p_obj->getImageFileName(), __FILE__, __LINE__, __METHOD__, 10);
+							$query = 'UPDATE '. $plf->getTable() .' SET has_image = 0 WHERE id = '. (int)$p_obj->getID();
+							if ( $plf->db->Execute( $query ) !== FALSE ) {
+								$p_obj->cleanStoragePath();
+							} else {
+								Debug::text('  ERROR: Update query to purge has_image failed... ID: '. $p_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
+							}
+							$i++;
+						}
+					}
+
+					$x++;
+				}
+				Debug::text('  Deleted Punch Images: '. $i, __FILE__, __LINE__, __METHOD__, 10);
+				unset($plf, $p_obj, $total_records, $x, $i, $query);
+			}
+
 			//$db->FailTrans();
 			$db->CompleteTrans();
 		}

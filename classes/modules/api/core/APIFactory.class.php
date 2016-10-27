@@ -161,6 +161,22 @@ abstract class APIFactory {
 	}
 
 	function initializeFilterAndPager( $data, $disable_paging = FALSE ) {
+		//If $data is not an array, it will trigger PHP errors, so force it that way and report an error so we can troubleshoot if needed.
+		//This will avoid the PHP fatal errors that look like the below, but it doesn't actually fix the root cause, which is currently unknown.
+		//		DEBUG [L0228] [00014ms] Array: [Function](): Arguments: (Size: 114)
+		//		array(4) {
+		//					["POST_/api/json/api_php?Class"]=> string(18) "APIUserGenericData"
+		//					["Method"]=> string(18) "getUserGenericData"
+		//					["v"]=> string(1) "2"
+		//					["MessageID"]=> string(26) "5dd90933-f97c-9001-9efe-e2"
+		//		}
+		//		DEBUG [L0139] [00030ms] Array: Debug::ErrorHandler(): Raw POST Request:
+		//		string(114) "POST /api/json/api.php?Class=APIUserGenericData&Method=getUserGenericData&v=2&MessageID=5dd90933-f97c-9001-9efe-e2"
+		if ( is_array($data) == FALSE ) {
+			Debug::Arr($data, 'ERROR: Input data is not an array: ', __FILE__, __LINE__, __METHOD__, 10);
+			$data = array();
+		}
+
 		//Preset values for LF search function.
 		$data = Misc::preSetArrayValues( $data, array( 'filter_data', 'filter_columns', 'filter_items_per_page', 'filter_page', 'filter_sort' ), NULL );
 

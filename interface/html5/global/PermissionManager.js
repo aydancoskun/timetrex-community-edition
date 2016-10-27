@@ -59,6 +59,12 @@ var PermissionManager = (function() {
 			return true;
 		}
 
+		//TypeError: Cannot read property 'product_edition_id' of null
+		//BUG#2066 - fail gracefully
+		if ( Global.isSet(LocalCacheData) == false || Global.isSet(LocalCacheData.getCurrentCompany()) == false) {
+			return false;
+		}
+
 		switch ( viewId ) {
 			case 'PaymentGateway':
 				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {

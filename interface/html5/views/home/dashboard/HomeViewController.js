@@ -527,6 +527,11 @@ HomeViewController = Backbone.View.extend( {
 				}
 			} );
 		}
+
+		//BUG#2070 - Break sortable for mobile because it negatively impacts usability
+		if ( Global.detectMobileBrowser() ) {
+			this.dashboard_container.sortable({disabled:true}) ;
+		}
 	},
 
 	showNoResultCover: function() {

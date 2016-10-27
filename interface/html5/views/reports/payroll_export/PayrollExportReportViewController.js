@@ -338,6 +338,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 		} );
 
 	},
+
 	/* jshint ignore:start */
 	buildGrid: function( type, columnOptions ) {
 
@@ -1521,7 +1522,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				form_item_input.bind( 'formItemChange', function( e, target ) {
 					if ( target.getValue() === 0 ) {
 						text_box.css( 'display', 'inline' );
-						text_box.setValue( $this.export_setup_data[code] );
+						text_box.setValue( $this.export_setup_data.facility_code_text );
 					} else {
 						text_box.css( 'display', 'none' );
 					}
@@ -1561,7 +1562,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				form_item_input1.bind( 'formItemChange', function( e, target ) {
 					if ( target.getValue() === 0 ) {
 						text_box1.css( 'display', 'inline' );
-						text_box1.setValue( $this.export_setup_data[code1] );
+						text_box1.setValue( $this.export_setup_data.state_code_text );
 					} else {
 						text_box1.css( 'display', 'none' );
 					}
@@ -1597,7 +1598,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				form_item_input2.bind( 'formItemChange', function( e, target ) {
 					if ( target.getValue() === 0 ) {
 						text_box2.css( 'display', 'inline' );
-						text_box2.setValue( $this.export_setup_data[code2] );
+						text_box2.setValue( $this.export_setup_data.pay_type_code_text );
 					} else {
 						text_box2.css( 'display', 'none' );
 					}
@@ -1632,7 +1633,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				form_item_input3.bind( 'formItemChange', function( e, target ) {
 					if ( target.getValue() === 0 ) {
 						text_box3.css( 'display', 'inline' );
-						text_box3.setValue( $this.export_setup_data[code3] );
+						text_box3.setValue( $this.export_setup_data.job_title_code_text );
 					} else {
 						text_box3.css( 'display', 'none' );
 					}
@@ -1931,6 +1932,16 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				break;
 			case 'csv_advanced':
 				other[other.export_type].export_columns = this.edit_view_ui_dic.csv_export_columns.getValue();
+				break;
+			case 'cms_pbj':
+				other[other.export_type].facility_code = this.edit_view_ui_dic.facility_code.getValue();
+				other[other.export_type].facility_code_text = this.edit_view_ui_dic.facility_code_text.getValue();
+				other[other.export_type].state_code = this.edit_view_ui_dic.state_code.getValue();
+				other[other.export_type].state_code_text = this.edit_view_ui_dic.state_code_text.getValue();
+				other[other.export_type].pay_type_code = this.edit_view_ui_dic.pay_type_code.getValue();
+				other[other.export_type].pay_type_code_text = this.edit_view_ui_dic.pay_type_code_text.getValue();
+				other[other.export_type].job_title_code = this.edit_view_ui_dic.job_title_code.getValue();
+				other[other.export_type].job_title_code_text = this.edit_view_ui_dic.job_title_code_text.getValue();
 				break;
 		}
 

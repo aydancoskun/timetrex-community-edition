@@ -1967,7 +1967,7 @@ class DemoData {
 												),
 									'S2' => array(
 												'active' => TRUE,
-												'severity_id' => 30,
+												'severity_id' => 20,
 												),
 									'S3' => array(
 												'active' => TRUE,
@@ -1997,33 +1997,41 @@ class DemoData {
 												),
 									'S7' => array(
 												'active' => TRUE,
-												'severity_id' => 30,
+												'severity_id' => 20,
 												),
 									'S8' => array(
 												'active' => TRUE,
 												'severity_id' => 10,
 												),
+									'L3' => array(
+											'active' => TRUE,
+											'severity_id' => 20,
+									),
+
+									//Switch all critical exceptions to HIGH so timesheets can be verified.
 									'M1' => array(
 												'active' => TRUE,
-												'severity_id' => 30,
+												'severity_id' => 25,
 												),
 									'M2' => array(
 												'active' => TRUE,
-												'severity_id' => 30,
-												),
-									'L3' => array(
-												'active' => TRUE,
-												'severity_id' => 30,
+												'severity_id' => 25,
 												),
 									'M3' => array(
 												'active' => TRUE,
-												'severity_id' => 30,
+												'severity_id' => 25,
 												),
-
+									'M4' => array(
+												'active' => TRUE,
+												'severity_id' => 25,
+												),
+									'V1' => array(
+												'active' => TRUE,
+												'severity_id' => 20,
+												),
 									);
 
 			if ( count($data['exceptions']) > 0 ) {
-
 				foreach ($data['exceptions'] as $code => $exception_data) {
 					Debug::Text('Looping Code: '. $code, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -2241,6 +2249,7 @@ class DemoData {
 		$ppsf->setDescription( 'Pay every two weeks' );
 		$ppsf->setType( 20 );
 		$ppsf->setStartWeekDay( 0 );
+		$ppsf->setTimeZone( TTDate::getTimeZone() );
 
 		//$anchor_date = TTDate::getBeginWeekEpoch( (time()-(86400 * 42)) ); //Start 6 weeks ago
 		$anchor_date = TTDate::getBeginWeekEpoch( (time() - (86400 * 14)) ); //Start 6 weeks ago
@@ -2254,6 +2263,11 @@ class DemoData {
 		$ppsf->setShiftAssignedDay( 10 ); //Day the shift starts on.
 		$ppsf->setNewDayTriggerTime( (4 * 3600) );
 		$ppsf->setMaximumShiftTime( (16 * 3600) );
+
+		//Make sure timesheet verifications are enabled.
+		$ppsf->setTimeSheetVerifyType( 40 ); //Employee & Supervisor
+		$ppsf->setTimeSheetVerifyBeforeEndDate( 999 );
+		$ppsf->setTimeSheetVerifyBeforeTransactionDate( -999 );
 
 		if ( $ppsf->isValid() ) {
 			$insert_id = $ppsf->Save(FALSE);
@@ -2723,54 +2737,22 @@ class DemoData {
 	}
 
 
-	function createUserExpense( $user_id, $expense_policy_id, $default_branch_id = 0, $default_department_id = 0, $default_currency_id = 0, $job_id = 0, $job_item_id = 0, $parent_id = NULL, $status_id = 20 ) {
+	function createUserExpense( $user_id, $expense_policy_id, $default_branch_id = 0, $default_department_id = 0, $default_currency_id = 0, $job_id = 0, $job_item_id = 0, $reimburse = TRUE ) {
 		$uef = TTnew( 'UserExpenseFactory' );
-		$uef->setExpensePolicy( $expense_policy_id );
-		$uef->setGrossAmount( rand(1, 10) * 100 );
-		$expenses = $uef->calcRelatedExpenses('', '');
-		if ( is_array($expenses) ) {
-			$uef->setReimburseAmount( $expenses['reimburse_amount'] );
-			$uef->setNetAmount( $expenses['net_amount'] );
-		}
-
-		$uef->setParent( $parent_id );
+		$uef->setStatus( 20 ); //Pending authorization.
 		$uef->setUser( $user_id );
+		$uef->setExpensePolicy( $expense_policy_id );
 		$uef->setBranch( $default_branch_id );
 		$uef->setDepartment( $default_department_id );
-		$uef->setCurrency( $default_currency_id );
 		$uef->setJob( $job_id );
 		$uef->setJobItem( $job_item_id );
-		$uef->setStatus( $status_id );
+		$uef->setCurrency( $default_currency_id );
 		$uef->setPaymentMethod( ( rand(2, 8) * 5 ) );
-		$uef->setCurrencyRate('');
 		$uef->setIncurredDate( ( time() - ( 86400 * rand(7, 10) ) ) );
-		$uef->setEffectiveDate('');
-		$uef->setReimbursable( FALSE );
-		$uef->setDescription('');
-		$uef->setAuthorizationLevel('');
-		if ( $status_id == 50 ) {
-			$uef->setAuthorized(TRUE);
-		} else {
-			$uef->setAuthorized(FALSE);
-		}
-
+		$uef->setReimbursable( $reimburse );
+		$uef->setGrossAmount( rand(1, 10) * 100 );
 		if ( $uef->isValid() ) {
 			$insert_id = $uef->Save();
-			if ( isset( $expenses['taxes'] ) AND empty( $expenses['taxes'] ) == FALSE ) {
-				foreach( $expenses['taxes'] as $expense ) {
-					if ( is_array( $expense ) AND empty( $expense ) == FALSE ) {
-						// insert related expense
-						$uef->setParent( $insert_id );
-						$uef->setUser( $user_id );
-						$uef->setExpensePolicy( $expense['expense_policy_id'] );
-						$uef->setGrossAmount( 0 );
-						$uef->setNetAmount( Misc::MoneyFormat($expense['amount']) ); //Use NetAmount for taxes so it equals the gross amount of the parent.
-						if ( $uef->isValid() ) {
-							$uef->Save();
-						}
-					}
-				}
-			}
 			Debug::Text('User Expense ID: '. $insert_id .' User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			return $insert_id;
@@ -4486,24 +4468,24 @@ class DemoData {
 		$rf->setDateStamp( $date_stamp );
 
 		switch( $type ) {
-			case 10:
+			case 10: //Try to match setType()
+				$rf->setType( 10 ); //Schedule Request
+				$rf->setStatus( 30 );
+				$rf->setMessage( 'Sorry, I forgot to punch out today. I left at 5:00PM' );
+				$rf->setCreatedBy( $user_id );
+
+				break;
+			case 30: //Try to match setType()
 				$rf->setType( 30 ); //Vacation Request
 				$rf->setStatus( 30 );
 				$rf->setMessage( 'I would like to request 1 week vacation starting this friday.' );
 				$rf->setCreatedBy( $user_id );
 
 				break;
-			case 20:
+			case 40: //Try to match setType()
 				$rf->setType( 40 ); //Schedule Request
 				$rf->setStatus( 30 );
 				$rf->setMessage( 'I would like to leave at 1pm this friday.' );
-				$rf->setCreatedBy( $user_id );
-
-				break;
-			case 30:
-				$rf->setType( 10 ); //Schedule Request
-				$rf->setStatus( 30 );
-				$rf->setMessage( 'Sorry, I forgot to punch out today. I left at 5:00PM' );
 				$rf->setCreatedBy( $user_id );
 
 				break;
@@ -4517,6 +4499,48 @@ class DemoData {
 		}
 
 		Debug::Text('Failed Creating Request!', __FILE__, __LINE__, __METHOD__, 10);
+
+		return FALSE;
+	}
+
+	function createAuthorization( $object_type_id, $object_id, $user_id, $authorize = TRUE ) {
+		$af = TTnew( 'AuthorizationFactory' );
+		$af->setObjectType( $object_type_id );
+		$af->setObject( $object_id );
+		$af->setAuthorized( $authorize );
+		$af->setCurrentUser( $user_id );
+		$af->setCreatedBy( $user_id );
+		$af->setUpdatedBy( $user_id );
+
+		if ( $af->isValid() ) {
+			$insert_id = $af->Save();
+			Debug::Text('Authorization ID: '. $insert_id .' Object ID: '. $object_id .' Object Type: '. $object_type_id, __FILE__, __LINE__, __METHOD__, 10);
+
+			return $insert_id;
+		}
+
+		Debug::Text('Failed Creating Authorization!', __FILE__, __LINE__, __METHOD__, 10);
+
+		return FALSE;
+	}
+
+	function createTimeSheetVerification( $user_id, $pay_period_id, $current_user_id ) {
+		$pptsvf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' );
+		$pptsvf->setCurrentUser( $current_user_id );
+		$pptsvf->setUser( $user_id );
+		$pptsvf->setPayPeriod( $pay_period_id );
+
+		$pptsvf->setCreatedBy( $current_user_id );
+		$pptsvf->setUpdatedBy( $current_user_id );
+
+		if ( $pptsvf->isValid() ) {
+			$insert_id = $pptsvf->Save();
+			Debug::Text('TimeSheet Verification ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+
+			return $insert_id;
+		}
+
+		Debug::Text('Failed Creating TimeSheet Verification!', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 	}
@@ -6770,29 +6794,28 @@ class DemoData {
 			$this->createUserDefaults( $company_id );
 
 			//Users
-			$user_ids[] = $this->createUser( $company_id, 10, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 11, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 12, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 13, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 14, 0, $branch_ids[0], $department_ids[1], $currency_ids[1], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 15, 0, $branch_ids[0], $department_ids[0], $currency_ids[1], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 16, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 17, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 18, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 19, 0, $branch_ids[0], $department_ids[1], $currency_ids[2], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 20, 0, $branch_ids[0], $department_ids[1], $currency_ids[2], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 21, 0, $branch_ids[1], $department_ids[1], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 22, 0, $branch_ids[1], $department_ids[1], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 23, 0, $branch_ids[1], $department_ids[2], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 24, 0, $branch_ids[1], $department_ids[2], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 25, 0, $branch_ids[1], $department_ids[2], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 26, 0, $branch_ids[1], $department_ids[1], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 27, 0, $branch_ids[1], $department_ids[3], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 28, 0, $branch_ids[1], $department_ids[3], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 29, 0, $branch_ids[1], $department_ids[3], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 30, 0, $branch_ids[1], $department_ids[0], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids  );
-			$user_ids[] = $this->createUser( $company_id, 40, 0, $branch_ids[1], $department_ids[0], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids  );
-			$current_user_id = $user_ids[] = $this->createUser( $company_id, 100, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[4], $user_title_ids[0], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 10, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 11, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 12, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 13, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 14, 0, $branch_ids[0], $department_ids[1], $currency_ids[1], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 15, 0, $branch_ids[0], $department_ids[0], $currency_ids[1], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 16, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 17, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 18, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 19, 0, $branch_ids[0], $department_ids[1], $currency_ids[2], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 20, 0, $branch_ids[0], $department_ids[1], $currency_ids[2], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 21, 0, $branch_ids[1], $department_ids[1], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 22, 0, $branch_ids[1], $department_ids[1], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 23, 0, $branch_ids[1], $department_ids[2], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 24, 0, $branch_ids[1], $department_ids[2], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 25, 0, $branch_ids[1], $department_ids[2], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 26, 0, $branch_ids[1], $department_ids[1], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 27, 0, $branch_ids[1], $department_ids[3], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 28, 0, $branch_ids[1], $department_ids[3], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 29, 0, $branch_ids[1], $department_ids[3], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 30, 0, $branch_ids[1], $department_ids[0], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 40, 0, $branch_ids[1], $department_ids[0], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids );
 
 			//Create random users.
 			Debug::Text('Creating random users: '. $this->getMaxRandomUsers(), __FILE__, __LINE__, __METHOD__, 10);
@@ -6803,6 +6826,10 @@ class DemoData {
 				}
 			}
 			//Debug::Arr($user_ids, 'All User IDs:', __FILE__, __LINE__, __METHOD__, 10);
+
+			//Put this at the very end so its always created last after any random users. That way is can be easily popped off the end if needed.
+			$current_user_id = $user_ids[] = $this->createUser( $company_id, 100, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[4], $user_title_ids[0], $ethnic_group_ids );
+			ksort($user_ids);
 
 			$ulf = TTnew( 'UserListFactory' );
 			$ulf->getById( $current_user_id );
@@ -6861,14 +6888,14 @@ class DemoData {
 			$policy_ids['overtime'][] = $this->createOverTimePolicy( $company_id, 30, $policy_ids['contributing_shift_policy'][10], $policy_ids['pay_code'][200] );
 
 			if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
-				$policy_ids['expense'][] = $this->createExpensePolicy( $company_id, 100 ); // Tax(Percent) - HST
-				$policy_ids['expense'][] = $this->createExpensePolicy( $company_id, 110 ); // Tax(Percent) - VAT
-				$policy_ids['expense'][] = $this->createExpensePolicy( $company_id, 120 ); // Tax(Flat Amount) - Improvement Fee
+				$policy_ids['expense_tax'][] = $this->createExpensePolicy( $company_id, 100 ); // Tax(Percent) - HST
+				$policy_ids['expense_tax'][] = $this->createExpensePolicy( $company_id, 110 ); // Tax(Percent) - VAT
+				$policy_ids['expense_tax'][] = $this->createExpensePolicy( $company_id, 120 ); // Tax(Flat Amount) - Improvement Fee
 
-				$policy_ids['expense'][] = $this->createExpensePolicy( $company_id, 10, array( $policy_ids['expense'][1] ) ); // Flat Amount
-				$policy_ids['expense'][] = $this->createExpensePolicy( $company_id, 20, array( $policy_ids['expense'][0], $policy_ids['expense'][1] ) ); // Percent
+				$policy_ids['expense'][] = $this->createExpensePolicy( $company_id, 10, array( $policy_ids['expense_tax'][1] ) ); // Flat Amount
+				$policy_ids['expense'][] = $this->createExpensePolicy( $company_id, 20, array( $policy_ids['expense_tax'][0], $policy_ids['expense_tax'][1] ) ); // Percent
 				$policy_ids['expense'][] = $this->createExpensePolicy( $company_id, 30 ); // Per Unit - No Tax
-				$policy_ids['expense'][] = $this->createExpensePolicy( $company_id, 40, array( $policy_ids['expense'][0], $policy_ids['expense'][2] ) ); // Flat Amount
+				$policy_ids['expense'][] = $this->createExpensePolicy( $company_id, 40, array( $policy_ids['expense_tax'][0], $policy_ids['expense_tax'][2] ) ); // Flat Amount
 			} else {
 				$policy_ids['expense'] = array();
 			}
@@ -6890,10 +6917,8 @@ class DemoData {
 			$this->createTaxForms( $company_id, $current_user->getId() );
 
 			$hierarchy_user_ids = $user_ids;
-
 			$root_user_id = array_pop( $hierarchy_user_ids );
-
-			unset($hierarchy_user_ids[0], $hierarchy_user_ids[1] );
+			//unset($hierarchy_user_ids[0], $hierarchy_user_ids[1] );  //Have supervisors be subordinates for themselves too.
 
 			//Create authorization hierarchy
 			$hierarchy_control_id = $this->createAuthorizationHierarchyControl( $company_id, $hierarchy_user_ids );
@@ -6904,9 +6929,10 @@ class DemoData {
 			}
 
 			//Admin user at the top
-			$this->createAuthorizationHierarchyLevel( $company_id, $hierarchy_control_id, $root_user_id, 1 );
+			$this->createAuthorizationHierarchyLevel( $company_id, $hierarchy_control_id, $current_user->getID(), 1 );
 			$this->createAuthorizationHierarchyLevel( $company_id, $hierarchy_control_id, $user_ids[0], 2 );
 			$this->createAuthorizationHierarchyLevel( $company_id, $hierarchy_control_id, $user_ids[1], 3 );
+			$superior_user_ids = array( $root_user_id, $user_ids[0], $user_ids[1] ); //Create an array of supervisor user_ids in level order so we can use them in createAuthorizations() lower down.
 			//unset($hierarchy_user_ids, $root_user_id); //Keep $hierarchy_user_ids so they can be used further down to help with createRequests()
 
 			//Pay Period Schedule
@@ -7071,25 +7097,39 @@ class DemoData {
 			}
 
 			if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[2], $policy_ids['expense'][3], $branch_ids[0], $department_ids[1], $currency_ids[0], $job_ids[1], $task_ids[1] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[3], $policy_ids['expense'][3], $branch_ids[0], $department_ids[2], $currency_ids[1], $job_ids[1], $task_ids[0] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[4], $policy_ids['expense'][3], $branch_ids[0], $department_ids[0], $currency_ids[0], $job_ids[1], $task_ids[2] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[5], $policy_ids['expense'][3], $branch_ids[0], $department_ids[0], $currency_ids[0], $job_ids[2], $task_ids[2] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[6], $policy_ids['expense'][3], $branch_ids[0], $department_ids[0], $currency_ids[0], $job_ids[2], $task_ids[2] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[7], $policy_ids['expense'][3], $branch_ids[0], $department_ids[0], $currency_ids[0], $job_ids[2], $task_ids[2] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[8], $policy_ids['expense'][3], $branch_ids[0], $department_ids[0], $currency_ids[0], $job_ids[3], $task_ids[1] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[9], $policy_ids['expense'][3], $branch_ids[1], $department_ids[0], $currency_ids[0], $job_ids[4], $task_ids[1] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[10], $policy_ids['expense'][3], $branch_ids[1], $department_ids[1], $currency_ids[0], $job_ids[4], $task_ids[1] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[11], $policy_ids['expense'][3], $branch_ids[1], $department_ids[1], $currency_ids[0], $job_ids[5], $task_ids[0] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[12], $policy_ids['expense'][4], $branch_ids[1], $department_ids[1], $currency_ids[0], $job_ids[6], $task_ids[0] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[13], $policy_ids['expense'][4], $branch_ids[1], $department_ids[2], $currency_ids[0], $job_ids[7], $task_ids[0] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[14], $policy_ids['expense'][4], $branch_ids[1], $department_ids[2], $currency_ids[0], $job_ids[7], $task_ids[4] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[15], $policy_ids['expense'][4], $branch_ids[1], $department_ids[2], $currency_ids[0], $job_ids[8], $task_ids[4] );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[16], $policy_ids['expense'][4], $branch_ids[1], $department_ids[3], $currency_ids[0], $job_ids[8], $task_ids[4], NULL, 50 );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[17], $policy_ids['expense'][4], $branch_ids[1], $department_ids[3], $currency_ids[0], $job_ids[9], $task_ids[1], NULL, 50 );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[18], $policy_ids['expense'][4], $branch_ids[1], $department_ids[3], $currency_ids[0], $job_ids[10], $task_ids[3], NULL, 50 );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[19], $policy_ids['expense'][4], $branch_ids[1], $department_ids[3], $currency_ids[0], $job_ids[0], $task_ids[3], NULL, 50 );
-				$user_expense_ids[] = $this->createUserExpense( $user_ids[20], $policy_ids['expense'][4], $branch_ids[1], $department_ids[3], $currency_ids[0], $job_ids[0], $task_ids[3], NULL, 50 );
+				$user_expense_ids[] = $this->createUserExpense( $user_ids[2], $policy_ids['expense'][0], $branch_ids[0], $department_ids[1], $currency_ids[0], $job_ids[1], $task_ids[1] );
+				$user_expense_ids[] = $this->createUserExpense( $user_ids[3], $policy_ids['expense'][0], $branch_ids[0], $department_ids[2], $currency_ids[1], $job_ids[1], $task_ids[0] );
+				$user_expense_ids[] = $this->createUserExpense( $user_ids[4], $policy_ids['expense'][0], $branch_ids[0], $department_ids[0], $currency_ids[0], $job_ids[1], $task_ids[2] );
+				$user_expense_ids[] = $this->createUserExpense( $user_ids[5], $policy_ids['expense'][0], $branch_ids[0], $department_ids[0], $currency_ids[0], $job_ids[2], $task_ids[2] );
+				$user_expense_ids[] = $this->createUserExpense( $user_ids[6], $policy_ids['expense'][1], $branch_ids[0], $department_ids[0], $currency_ids[0], $job_ids[2], $task_ids[2] );
+				$user_expense_ids[] = $this->createUserExpense( $user_ids[7], $policy_ids['expense'][1], $branch_ids[0], $department_ids[0], $currency_ids[0], $job_ids[2], $task_ids[2] );
+				$user_expense_ids[] = $this->createUserExpense( $user_ids[8], $policy_ids['expense'][1], $branch_ids[0], $department_ids[0], $currency_ids[0], $job_ids[3], $task_ids[1] );
+				$user_expense_ids[] = $this->createUserExpense( $user_ids[9], $policy_ids['expense'][1], $branch_ids[1], $department_ids[0], $currency_ids[0], $job_ids[4], $task_ids[1] );
+				$user_expense_ids[] = $this->createUserExpense( $user_ids[10], $policy_ids['expense'][2], $branch_ids[1], $department_ids[1], $currency_ids[0], $job_ids[4], $task_ids[1] );
+				$user_expense_ids[] = $this->createUserExpense( $user_ids[11], $policy_ids['expense'][2], $branch_ids[1], $department_ids[1], $currency_ids[0], $job_ids[5], $task_ids[0] );
+				$user_expense_ids[] = $this->createUserExpense( $user_ids[12], $policy_ids['expense'][2], $branch_ids[1], $department_ids[1], $currency_ids[0], $job_ids[6], $task_ids[0] );
+				$user_expense_ids[] = $this->createUserExpense( $user_ids[13], $policy_ids['expense'][2], $branch_ids[1], $department_ids[2], $currency_ids[0], $job_ids[7], $task_ids[0] );
+				$user_expense_ids[] = $this->createUserExpense( $user_ids[14], $policy_ids['expense'][2], $branch_ids[1], $department_ids[2], $currency_ids[0], $job_ids[7], $task_ids[4] );
+				$user_expense_ids[] = $this->createUserExpense( $user_ids[15], $policy_ids['expense'][3], $branch_ids[1], $department_ids[2], $currency_ids[0], $job_ids[8], $task_ids[4] );
+
+				$user_expense_ids[] = $this->createUserExpense( $user_ids[16], $policy_ids['expense'][3], $branch_ids[1], $department_ids[3], $currency_ids[0], $job_ids[8], $task_ids[4]);
+				$user_expense_ids[] = $this->createUserExpense( $user_ids[17], $policy_ids['expense'][3], $branch_ids[1], $department_ids[3], $currency_ids[0], $job_ids[9], $task_ids[1]);
+				$user_expense_ids[] = $this->createUserExpense( $user_ids[18], $policy_ids['expense'][3], $branch_ids[1], $department_ids[3], $currency_ids[0], $job_ids[10], $task_ids[3]);
+				$user_expense_ids[] = $this->createUserExpense( $user_ids[19], $policy_ids['expense'][3], $branch_ids[1], $department_ids[3], $currency_ids[0], $job_ids[0], $task_ids[3]);
+				$user_expense_ids[] = $this->createUserExpense( $user_ids[20], $policy_ids['expense'][3], $branch_ids[1], $department_ids[3], $currency_ids[0], $job_ids[0], $task_ids[3]);
+
+				//Authorize random expenses.
+				foreach( $user_expense_ids as $user_expense_id ) {
+					if ( rand( 0, 99 ) < 85 ) { //85% chance
+						$this->createAuthorization( 200, $user_expense_id, $superior_user_ids[2], TRUE );
+						if ( rand( 0, 99 ) < 85 ) { //85% chance
+							$this->createAuthorization( 200, $user_expense_id, $superior_user_ids[1], TRUE );
+							if ( rand( 0, 99 ) < 50 ) { //50% chance
+								$this->createAuthorization( 200, $user_expense_id, $superior_user_ids[0], TRUE );
+							}
+						}
+					}
+				}
 			} else {
 				$user_expense_ids[] = 0;
 			}
@@ -7457,27 +7497,38 @@ class DemoData {
 
 							if ( $punch_date >= $exception_cutoff_date
 									AND in_array( $user_id, $hierarchy_user_ids ) //Make sure requests are only created when supervisors exist.
-									AND rand(0, 20) == 0 ) {
+									AND ( $i % 20 ) == 0 ) {
 								//Create request
-								$this->createRequest( 20, $user_id, $date_stamp );
+								$request_id = $this->createRequest( 40, $user_id, $date_stamp );
+								if ( rand( 0, 99 ) < 50 ) { //50% chance
+									$this->createAuthorization( 1020, $request_id, $superior_user_ids[2], TRUE );
+									$this->createAuthorization( 1020, $request_id, $superior_user_ids[1], TRUE );
+									$this->createAuthorization( 1020, $request_id, $superior_user_ids[0], TRUE );
+								}
 							}
 							if ( $punch_date >= $exception_cutoff_date
 									AND in_array( $user_id, $hierarchy_user_ids ) //Make sure requests are only created when supervisors exist.
-									AND rand(0, 16) == 0 ) {
+									AND ( $i % 16 ) == 0 ) {
 								//Create request
-								$this->createRequest( 20, $user_id, $date_stamp );
+								$request_id = $this->createRequest( 30, $user_id, $date_stamp );
+								if ( rand( 0, 99 ) < 50 ) { //50% chance
+									$this->createAuthorization( 1020, $request_id, $superior_user_ids[2], TRUE );
+									$this->createAuthorization( 1020, $request_id, $superior_user_ids[1], TRUE );
+								}
 							}
-
 						} else {
 							$first_punch_in = '08:00AM';
 							if ( $punch_date >= $exception_cutoff_date
 									AND in_array( $user_id, $hierarchy_user_ids ) //Make sure requests are only created when supervisors exist.
-									AND ($i % 10) == 0 ) {
+									AND ( $i % 10 ) == 0 ) {
 								//Don't punch out to generate exception.
 								$last_punch_out = NULL;
 
 								//Forgot to punch out request
-								$this->createRequest( 30, $user_id, $date_stamp );
+								$request_id = $this->createRequest( 10, $user_id, $date_stamp );
+								if ( rand( 0, 99 ) < 50 ) { //50% chance
+									$this->createAuthorization( 1010, $request_id, $superior_user_ids[2], TRUE );
+								}
 							} else {
 								$last_punch_out = strtotime($date_stamp.' 5:00PM');
 							}
@@ -7541,7 +7592,6 @@ class DemoData {
 														),
 													TRUE
 												);
-
 					}
 
 					//Recalculate entire day. Performance optimization.
@@ -7560,6 +7610,22 @@ class DemoData {
 			if ( $pplf->getRecordCount() > 0 ) {
 				foreach( $pplf as $pp_obj ) {
 					foreach( $user_ids as $user_id ) {
+						if ( !in_array( $user_id, $superior_user_ids ) ) {
+							//Verify timesheets at random for each regular user/pay period.
+							if ( rand( 0, 99 ) < 85 ) { //85% chance
+								$timesheet_verification_id = $this->createTimeSheetVerification( $user_id, $pp_obj->getId(), $user_id );
+								if ( rand( 0, 99 ) < 85 ) { //85% chance
+									$this->createAuthorization( 90, $timesheet_verification_id, $superior_user_ids[2], TRUE );
+									if ( rand( 0, 99 ) < 85 ) { //85% chance
+										$this->createAuthorization( 90, $timesheet_verification_id, $superior_user_ids[1], TRUE );
+										if ( rand( 0, 99 ) < 25 ) { //25% chance
+											$this->createAuthorization( 90, $timesheet_verification_id, $superior_user_ids[0], TRUE );
+										}
+									}
+								}
+							}
+						}
+
 						$cps = new CalculatePayStub();
 						$cps->setUser( $user_id );
 						$cps->setPayPeriod( $pp_obj->getId() );
@@ -7568,7 +7634,6 @@ class DemoData {
 				}
 			}
 			unset($pplf, $pp_obj, $user_id);
-
 		}
 
 		////$cf->FailTransaction();

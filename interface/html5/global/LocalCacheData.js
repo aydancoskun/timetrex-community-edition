@@ -122,12 +122,46 @@ LocalCacheData.setLocalCache = function( key, val, format ) {
 
 	LocalCacheData[key] = val;
 };
+/**
+ * BUG#2066
+ * JavaScript was reporting: TypeError: Cannot read property 'product_edition_id' of null
+ *
+ * This appears to be caused by a person closing the browser and reopening it with a "return to where I was" option active.
+ * The browser is trying to load local cache data and it may be incomplete in this scenario, which generates the error. We could not reproduce this reliably.
+ * To fix it, we created LocalCacheData.getRequiredLocalCache(), and called it for mission critical cache chunks instead of LocalCacheData.getLocalCache()
+ */
+LocalCacheData.getRequiredLocalCache = function( key, format ) {
+	var result = LocalCacheData.getLocalCache( key, format );
+	if ( result == null ) {
+		//There are 2 cases where result can be null.
+		//  First is the cache going dead.
+		//  Second is that a required local cache item is not yet loaded because most of the required data isn't set yet.
+		//  In the second case we need to fail gracefully to show the error and stack trace on the console.
+		try {
+			Global.sendErrorReport( 'ERROR: Unable to get required local cache data: '+ key, window.location, '', '', '' );
+			TAlertManager.showConfirmAlert($.i18n._('Local cache has expired. Click Yes to reload.'), $.i18n._('ERROR'), function(choice) {
+				if ( choice ) {
+					window.location.reload();
+				}
+			} );
+		} catch ( e ) {
+			// Early page loads won't have Global or TAlertManager
+			console.debug('ERROR: Unable to get required local cache data: '+ key);
+			console.debug('ERROR: Unable to report error to server: '+ key);
+			console.debug(e.stack);
+			if ( confirm('Local cache has expired. Click OK to reload.') ) {
+				window.location.reload();
+			}
+		}
+	}
+	return result;
+};
 
 LocalCacheData.getLocalCache = function( key, format ) {
+	//BUG#2066 - For testing bad cache. See getrequiredlocalcache
+	//if(key == 'current_company'){return null}
 	if ( LocalCacheData[key] ) {
-
 		return LocalCacheData[key];
-
 	} else if ( !LocalCacheData[key] && sessionStorage[key] ) {
 		var result = sessionStorage.getItem( key );
 
@@ -193,7 +227,7 @@ LocalCacheData.setCopyRightInfo = function( val ) {
 };
 
 LocalCacheData.getApplicationName = function() {
-	return LocalCacheData.getLocalCache( 'applicationName' );
+	return LocalCacheData.getRequiredLocalCache( 'applicationName' );
 };
 
 LocalCacheData.setApplicationName = function( val ) {
@@ -201,15 +235,16 @@ LocalCacheData.setApplicationName = function( val ) {
 };
 
 LocalCacheData.getCurrentCompany = function() {
-	return LocalCacheData.getLocalCache( 'current_company', 'JSON' );
+	return LocalCacheData.getRequiredLocalCache( 'current_company', 'JSON' );
 };
 
 LocalCacheData.setCurrentCompany = function( val ) {
-
 	LocalCacheData.setLocalCache( 'current_company', val, 'JSON' );
 };
 
 LocalCacheData.getLoginUser = function() {
+	//Can't be set to required as the data is chekced for null to trigger cache load.
+	//See loginViewController.onLoginSuccess()
 	return LocalCacheData.getLocalCache( 'loginUser', 'JSON' );
 };
 
@@ -226,7 +261,7 @@ LocalCacheData.setCurrentCurrencySymbol = function( val ) {
 };
 
 LocalCacheData.getLoginUserPreference = function() {
-	return LocalCacheData.getLocalCache( 'loginUserPreference', 'JSON' );
+	return LocalCacheData.getRequiredLocalCache( 'loginUserPreference', 'JSON' );
 };
 
 LocalCacheData.setLoginUserPreference = function( val ) {
@@ -234,7 +269,7 @@ LocalCacheData.setLoginUserPreference = function( val ) {
 };
 
 LocalCacheData.getPermissionData = function() {
-	return LocalCacheData.getLocalCache( 'permissionData', 'JSON' );
+	return LocalCacheData.getRequiredLocalCache( 'permissionData', 'JSON' );
 };
 
 LocalCacheData.setPermissionData = function( val ) {
@@ -242,7 +277,7 @@ LocalCacheData.setPermissionData = function( val ) {
 };
 
 LocalCacheData.getUniqueCountryArray = function() {
-	return LocalCacheData.getLocalCache( 'uniqueCountryArray', 'JSON' );
+	return LocalCacheData.getRequiredLocalCache( 'uniqueCountryArray', 'JSON' );
 };
 
 LocalCacheData.setUniqueCountryArray = function( val ) {
@@ -279,7 +314,7 @@ LocalCacheData.setSessionID = function( val ) {
 };
 
 LocalCacheData.getLoginData = function() {
-	return LocalCacheData.getLocalCache( 'loginData', 'JSON' );
+	return LocalCacheData.getRequiredLocalCache( 'loginData', 'JSON' );
 };
 
 LocalCacheData.setLoginData = function( val ) {

@@ -462,6 +462,45 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	function getByHasImageAndCreatedDate($has_image, $date_stamp, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
+		$has_image = (bool)$has_image;
+
+		if ( $date_stamp == '') {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'time_stamp' => 'asc', 'status_id' => 'desc', 'punch_control_id' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$pcf = new PunchControlFactory();
+
+		$ph = array(
+				'has_image' => (int)$has_image,
+				'date_stamp' => (int)$date_stamp,
+		);
+
+		$query = '
+					select	a.*,
+							b.user_id as user_id
+					from	'. $this->getTable() .' as a
+							LEFT JOIN '. $pcf->getTable() .' as b ON ( a.punch_control_id = b.id )
+					where	a.has_image = ?
+						AND	a.created_date < ?
+						AND ( a.deleted = 0 AND b.deleted = 0 )
+					';
+
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		return $this;
+	}
+
 	function getShiftPunchesByUserIDAndEpoch( $user_id, $epoch, $punch_control_id = 0, $maximum_shift_time = NULL ) {
 		if ( $user_id == '') {
 			return FALSE;

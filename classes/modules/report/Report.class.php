@@ -1121,7 +1121,7 @@ class Report {
 		}
 
 		//Make sure any group/sub_total columns are also being displayed.
-		if ( isset($config['group']) AND is_array($config['group']) ) {
+		if ( isset($config['group']) AND is_array($config['group']) AND isset($config['columns']) AND is_array( $config['columns'] ) ) {
 			$group_diff = array_diff( $config['group'], array_keys( $config['columns'] ) );
 			if ( is_array($group_diff) AND count($group_diff) > 0 ) {
 				foreach( $group_diff as $group_bad_column ) {

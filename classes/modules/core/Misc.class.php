@@ -1140,6 +1140,8 @@ class Misc {
 					}
 				}
 			}
+		} else {
+			Debug::Arr($arr, 'ERROR: Unable to initialize preset array values! Current variable is: ', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return $arr;

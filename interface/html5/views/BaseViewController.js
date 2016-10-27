@@ -3232,9 +3232,14 @@ BaseViewController = Backbone.View.extend( {
 		this.setNavigationArrowsEnabled();
 	},
 
+	//exists for RecurringScheduleControlView due to the unique way we handle the ids there.
+	getRightArrowClickSelectedIndex:function (selected_index) {
+		return selected_index;
+	},
+
 	onRightArrowClick: function() {
 		var $this = this;
-		var selected_index = this.navigation.getSelectIndex();
+		var selected_index = this.getRightArrowClickSelectedIndex( this.navigation.getSelectIndex() );
 		var source_data = this.navigation.getSourceData();
 		var current_pager_data = this.navigation.getPagerData();
 		var next_select_item;

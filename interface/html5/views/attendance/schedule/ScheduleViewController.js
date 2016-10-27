@@ -1405,7 +1405,6 @@ ScheduleViewController = BaseViewController.extend( {
 				}
 
 				if ( target_row ) {
-
 					if ( target_row.type === ScheduleViewControllerRowType.DATE ) {
 						break;
 					}
@@ -1416,7 +1415,12 @@ ScheduleViewController = BaseViewController.extend( {
 						//Error: TypeError: colModel[target_cell_index] is undefined in /interface/html5/framework/jquery.min.js?v=8.0.0-20141230-153210 line 2 > eval line 1443
 						if ( colModel ) {
 							if ( $this.getMode() === ScheduleViewControllerMode.MONTH ) {
-								date_stamp = $this.getCellRelatedDate( target_row_index, colModel, target_cell_index, colModel[target_cell_index].name ).format();
+								//Error: "TypeError: Cannot read property 'format' of null"
+								// when user drags a scedule to a non-date grid element we need to quietly fail
+								var related_date = $this.getCellRelatedDate( target_row_index, colModel, target_cell_index, colModel[target_cell_index].name );
+								if ( related_date ) {
+									date_stamp = related_date.format();
+								}
 							} else {
 								date_stamp = Global.strToDate( colModel[target_cell_index].name, $this.full_format ).format();
 							}
@@ -2316,7 +2320,6 @@ ScheduleViewController = BaseViewController.extend( {
 
 		this.api['set' + this.api.key_name]( record, false, false, ignoreWarning, {
 			onResult: function( result ) {
-
 				if ( result.isValid() ) {
 					var result_data = result.getResult();
 					if ( result_data === true ) {
@@ -2329,18 +2332,9 @@ ScheduleViewController = BaseViewController.extend( {
 					$this.removeEditView();
 
 				} else {
-
-					if ( $this.is_mass_adding || ($.type( record ) === 'array' && record.length > 1) ) {
-
-						TAlertManager.showErrorAlert( result );
-						$this.search();
-
-						$this.removeEditView();
-
-					} else {
-						$this.setErrorTips( result );
-						$this.setErrorMenu();
-					}
+					//BUG#2073 - Pulled out the error message box that was showing the result array as its "toString" representation. ([object][object]);
+					$this.setErrorTips( result );
+					$this.setErrorMenu();
 				}
 
 			}

@@ -83,7 +83,7 @@ class System_SharedMemory_Sqlite extends System_SharedMemory_Common
      *
      * @access public
      */
-    function System_SharedMemory_Sqlite($options)
+    function __construct($options)
     {
         $this->_options = $this->_default($options, array
         (

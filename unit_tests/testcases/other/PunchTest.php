@@ -2492,6 +2492,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 
 		TTDate::setTimeZone('MST7MDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		//After the timezone has been changed, re-get the date_epoch2 so it matches in the correct timezone.
+		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
+
 
 		//Edit punch to move out time into next day.
 		$dd->editPunch($punch_arr[$date_epoch][0]['shift_data']['punches'][1]['id'],
@@ -4206,7 +4210,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
-		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
 		$this->createSchedule( $this->user_id, $date_epoch, array(
 																	'schedule_policy_id' => $schedule_policy_id,
 																	'start_time' => ' 8:00AM',

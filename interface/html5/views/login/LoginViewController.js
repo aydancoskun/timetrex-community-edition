@@ -43,7 +43,7 @@ LoginViewController = BaseViewController.extend( {
 				var auto_login_timer = setInterval( function() {
 					if ( timeout_count == 100 ) {
 						clearInterval( auto_login_timer );
-						TAlertManager.showAlert( $.i18n._( 'Resource load error!' ) );
+						TAlertManager.showAlert( $.i18n._( 'The network connection was lost. Please check your network connection then try again.' ) );
 						return;
 					}
 					timeout_count = timeout_count + 1;
@@ -116,7 +116,7 @@ LoginViewController = BaseViewController.extend( {
 					var auto_login_timer = setInterval( function() {
 						if ( timeout_count == 100 ) {
 							clearInterval( auto_login_timer );
-							TAlertManager.showAlert( $.i18n._( 'Resource load error!' ) );
+							TAlertManager.showAlert( $.i18n._( 'The network connection was lost. Please check your network connection then try again.' ) );
 							return;
 						}
 						timeout_count = timeout_count + 1;

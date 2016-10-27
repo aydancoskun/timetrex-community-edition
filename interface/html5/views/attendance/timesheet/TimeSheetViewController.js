@@ -3841,7 +3841,6 @@ TimeSheetViewController = BaseViewController.extend( {
 		var cells_array = [];
 		$this.absence_model = false;
 		var date;
-
 		if ( grid_id === 'timesheet_grid' ) {
 
 			cells_array = $this.select_cells_Array;
@@ -3946,6 +3945,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 		}
 
+		if ( date == null ) {
+			return false;
+		}
 		var info;
 		var row_tr;
 		var cell_td;
@@ -4055,7 +4057,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			//If the click is inside the existing selection, truncate the existing selection to the click.
 			//Check in ScheduleViewController.js for related change
-			if ( cells_array[cells_array.length - 1].cell_index >= cell_index && cells_array[0].cell_index <= cell_index &&  cells_array[cells_array.length - 1].row_id >= row_id && cells_array[0].row_id <= row_id ) {
+			//Make sure to check for cells_array and cells_array.length before the other checks or when the user clicks into another grid while holding shift, it throws the following error:
+			//Cannot read property 'cell_index' of undefined
+			if ( cells_array && cells_array.length > 0 && cells_array[cells_array.length - 1].cell_index && cells_array[0].cell_index && cells_array[cells_array.length - 1].cell_index >= cell_index && cells_array[0].cell_index <= cell_index &&  cells_array[cells_array.length - 1].row_id >= row_id && cells_array[0].row_id <= row_id ) {
 				end_row_index = row_id;
 				end_cell_index = cell_index;
 			}
@@ -5537,9 +5541,13 @@ TimeSheetViewController = BaseViewController.extend( {
 		} else {
 			this.wage_btn.setValue( LocalCacheData.last_timesheet_selected_show_wage );
 		}
-		if ( LocalCacheData.all_url_args.show_wage ) {
+
+		//Error: TypeError: Cannot read property 'show_wage' of null
+		//just need to check that the variable exists before checking properties for the case of the LocalCacheData being empty
+		if ( Global.isSet(LocalCacheData.all_url_args) && LocalCacheData.all_url_args.show_wage ) {
 			this.wage_btn.setValue( LocalCacheData.all_url_args.show_wage === '1' ? true : false );
 		}
+
 		//replace select layout filter_data to filter set in onNavigation function when goto view from navigation context group
 		if ( LocalCacheData.default_filter_for_next_open_view ) {
 			this.employee_nav.setValue( LocalCacheData.default_filter_for_next_open_view.user_id );

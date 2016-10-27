@@ -1,4 +1,4 @@
-Version: 9.1.1 Generated: Thu Jun 23 09:39:46 PDT 2016
+Version: 9.1.2 Generated: Wed Jun 29 12:47:35 PDT 2016
 6cbf232b27b656f37027eea596274f89ad61e25a  ./install_cron.sh
 e403c92805939a49ddb6d386bb38c4285a0a0812  ./templates/sm_header.tpl
 55018f3544114e3dbe1cc648ed3230e202abfaa5  ./templates/ConfirmEmail.tpl
@@ -18,7 +18,7 @@ f16386a3b3ba7be283a6520ac356f1142bcc2e12  ./templates/form_errors.tpl
 12b8d299e7d304b48f527992d118fdebe300dd3a  ./templates/pager.tpl
 a3101e67e005ea99b70816cff4655e2fc083f81b  ./templates/list_tabs.tpl
 415d3ca9781cde1f6bba05d2ff2e3b11bfa8da0d  ./templates/column_sort.tpl
-c754643c4163ef62eb3dd11103f0701c5d9c6d84  ./templates/ForgotPassword.tpl
+edbab3b5bf6aab905c2ec670c9249f8f5c5330f8  ./templates/ForgotPassword.tpl
 0a7e2558d5059a22056e4e7111ffc54641395e7f  ./templates/footer.tpl
 556b242178b4fafb81a55cfe6d2584681d250f11  ./templates/DownForMaintenance.tpl
 ff09489b8d8e56e9740538eab5464a7b12fb7b6f  ./templates/data_saved.tpl
@@ -67,6 +67,7 @@ b2aeede333e7df16a69f433e1d373f2fcaaa5146  ./tools/import/import.php
 f2069d86a2ea0714d44337f5bdbe63a61dd988f2  ./tools/export/export_report.php
 b164de79f0f1be4193924715a57bae3bb698bb1f  ./tools/export/export_pay_stubs.php
 5e9cc446d477b6320ca484dffddfe702503c44c9  ./tools/unattended_install.php
+e1c709d338ee59555f424750ebe51348866bec0a  ./tools/cleanup_storage_dir.php
 38dfb0f75cfb4faa53641334c3f45d669971109c  ./tools/generate_payroll_deduction_test_csv.php
 92b9d3598a8cd60729ae79bc001d65dfbf7b9746  ./files.delete
 78e50e186b04c8fe1defaa098f1c192181b3d837  ./LICENSE
@@ -342,7 +343,7 @@ c71570c66f508086bb31b3d69e99850b24e957d4  ./classes/GovernmentForms/country/us/t
 f6566148e9dbdc1815f844829e64ccc097c10252  ./classes/GovernmentForms/country/us/templates/940.pdf
 6063faa5d66d0a13f665183c2895854130ac8829  ./classes/GovernmentForms/country/us/templates/941sb.pdf
 ee0231f559b47e379cea2896e9f38b91215d6d03  ./classes/GovernmentForms/country/us/w2.class.php
-3aebc5c9c5b0aab26a5730de3b1f98b5dad49716  ./classes/GovernmentForms/country/us/cms_pbj.class.php
+0a8e85023255299ef1f9aeffb45d9969a2b00189  ./classes/GovernmentForms/country/us/cms_pbj.class.php
 e69314d17c063b4e5c306c41f569331d86a1fc53  ./classes/GovernmentForms/country/us/941sb.class.php
 f4e7eb7f54442da5598740c7fe1ee5d8dae028c8  ./classes/GovernmentForms/country/us/return1040.class.php
 1b524a9f8802a456ef33434072691ecad638ef0a  ./classes/GovernmentForms/country/us/1099misc.class.php
@@ -400,7 +401,7 @@ b48f15c5393ab96ee6a3b5c8d8500df6afd06990  ./classes/GovernmentForms/country/ca/s
 374a670878bcae4fee52828438aeede733d915d5  ./classes/GovernmentForms/country/ca/schema/rrsp-reer.xsd
 eead4ba3fb6a357fffc20ce2f5467b7a9bf8d046  ./classes/GovernmentForms/country/ca/schema/standarddatatypes.xsd
 6578ee0d52b3b008658ea9d82cff42cb539dd23b  ./classes/GovernmentForms/country/ca/t4asum.class.php
-b333fc6d2186fe25907bd157904e5b9b7b389ba5  ./classes/GovernmentForms/country/ca/t4sum.class.php
+8adcca39dc74ec2783f99b0d4aa2328bc7020312  ./classes/GovernmentForms/country/ca/t4sum.class.php
 e6e1974c6c2e3859b5596409e40269b5ba1a09f0  ./classes/GovernmentForms/country/ca/CA.class.php
 c403ffe2b0c62200fc575951567d145f9edc1978  ./classes/GovernmentForms/country/ca/t4.class.php
 1828f5ffbaf57b6ff0766ff1db2c54bdf75d405b  ./classes/GovernmentForms/GovernmentForms.class.php
@@ -429,7 +430,6 @@ a91c38a9b9fe87fab9f2144425dc48a61ea37ef8  ./classes/adodb/drivers/adodb-postgres
 a4757fed25384de2335213ff0dff286e2a6ea5cf  ./classes/adodb/drivers/adodb-ado5.inc.php
 d484d98ab0a3ace7ab566cc3e2b36cca99993f1e  ./classes/adodb/drivers/adodb-sqlite.inc.php
 0687cd041e51477986a05b619ea2b0b19fdf5f7b  ./classes/adodb/drivers/adodb-text.inc.php
-eb8f02422e842997f5dd3d35606309efba121cb0  ./classes/adodb/drivers/adodb-sqlite.inc.php.bak
 b0f6aa2991baacb8b02ae4d869d7883389a4779e  ./classes/adodb/drivers/adodb-mysqlt.inc.php
 a3af8b7491a769f63fa56d56be6620ce6a36087d  ./classes/adodb/drivers/adodb-mysqlpo.inc.php
 db548c83cf18e66dd8e2e8449f669fcd2fb1bf25  ./classes/adodb/drivers/adodb-sqlitepo.inc.php
@@ -1177,7 +1177,7 @@ b98acade4071660f8153ca956c0efad156cf6367  ./classes/pear/Image/Transform/Driver/
 568213384564ece77db356216d470f5bcf06f18f  ./classes/pear/Image/Transform.php
 5d09d3ee18e800bba520542b1a5844e6a29ab9cb  ./classes/pear/Image/Color.php
 bf14284d37e070c2f41615587333135a238daf7f  ./classes/pear/PEAR.php
-309418c883caa2c806ac1d08c57085a5de55c7e3  ./classes/pear/HTTP/Download/Archive.php
+62bd9811ee8149adf9ff0f4c2b424bf5cd0b5ffa  ./classes/pear/HTTP/Download/Archive.php
 4fc9af1528f85e92b43e76f92afa7f067efa057b  ./classes/pear/HTTP/Download/PgLOB.php
 08f09775f1fa0f13d4a0a033f1c5ae925758bc3e  ./classes/pear/HTTP/Request/Listener.php
 6ab8d7ac70694880104b210b7eb404a7efa64768  ./classes/pear/HTTP/Header.php
@@ -1219,18 +1219,18 @@ d545c0587a4d19395459214b02d85a3529af1f01  ./classes/pear/Date/Calc.php
 cb43c1557c8888c94641a3bf39a074f8ece38eef  ./classes/pear/Date/Human.php
 509faa232b21c522affc16d273dc92bc09157f46  ./classes/pear/Date/TimeZone.php
 91e6ed86548216da876a7993adddbbcf0af8d122  ./classes/pear/Date/Span.php
-f93378f8a22fb831fccf982f97aba31a020b1de1  ./classes/pear/System/SharedMemory/File.php
+cffd2b84f8b98d54b3c1be984275d47180ab6a5a  ./classes/pear/System/SharedMemory/File.php
 d51bae5e3744296c925e2fb4227a051cffc5066f  ./classes/pear/System/SharedMemory/Common.php
-273bef41cf40d1131be0485d01101f5093c453b9  ./classes/pear/System/SharedMemory/Sqlite.php
+9faceaba27cf8b9003bfb06bc83c1e24f8651dca  ./classes/pear/System/SharedMemory/Sqlite.php
 ff0630a84f265e569161285b2fbbd01994467723  ./classes/pear/System/SharedMemory/Eaccelerator.php
-226e4fa8e8b582472514206d1eb433f70784e169  ./classes/pear/System/SharedMemory/Shmop.php
-784081a65f3f3d3da48d0f19ed9fca924d8c82f8  ./classes/pear/System/SharedMemory/Systemv.php
+18c4f2c325730e4a17b135e0f9d5b0377a506a44  ./classes/pear/System/SharedMemory/Shmop.php
+2aa3795900fadab5ac81f81a94e4b0d7a9059f56  ./classes/pear/System/SharedMemory/Systemv.php
 400704331833da889b324c9645907d48831a5844  ./classes/pear/System/SharedMemory/Apc.php
-92d474de5c945accf179edbbdcb00349cf2f8614  ./classes/pear/System/SharedMemory/Redis.php
+b1cd6f374bda66f749d749d02ff64e85a7b0304a  ./classes/pear/System/SharedMemory/Redis.php
 85b907697f8f4090f468f5b88b24ebc7bb7bd33f  ./classes/pear/System/SharedMemory/Mmcache.php
 d30456f087470bb3c3dc62570fc312fae4c83d28  ./classes/pear/System/SharedMemory/Apachenote.php
-589be2a1ed65531c0503d5ca4804040e4af3c72f  ./classes/pear/System/SharedMemory/Memcache.php
-3d26013a4551eaebd7307ed7f260bf1853d37cfa  ./classes/pear/System/SharedMemory/Sharedance.php
+bea683438e2074cc8ca2a4d22bc9d990f4c9a704  ./classes/pear/System/SharedMemory/Memcache.php
+e228312316d11b151fca8c3fe9f3c41b77a3180d  ./classes/pear/System/SharedMemory/Sharedance.php
 bc8666537017b25537acc86ad209bda61aca5038  ./classes/pear/System/SharedMemory.php
 357cd8460b7e9996b8deafb7bdb318fca6e54d2e  ./classes/pear/README.txt
 de8f61c4ab6234efa6bcdae0e3b454e1c2e3fd70  ./classes/pear/File/Gettext/MO.php
@@ -1262,7 +1262,7 @@ b87de738a3c809e6352bf596da5e25f1a5c40c52  ./classes/pear/Net/Curl.php
 ae4997bb20c5daab542e1c55005ba293f4b2fd2d  ./classes/pear/Config/Container/IniFile.php
 1658eb95f4006ec889ca071bbfa2fafce9d6844c  ./classes/pear/Config/Container/PHPArray.php
 676dc389af9513d026b9daf72da21ec11cea4428  ./classes/pear/Config/Container/GenericConf.php
-d4e11585f71c41aba57ba48cb417895e2befafe9  ./classes/pear/Config/Container/XML.php
+fa81c974e92020a297e7226dc42bbd1112ebea0b  ./classes/pear/Config/Container/XML.php
 95f12dbf9ffe9e358d7541b2cf1c95e19101f097  ./classes/pear/Config/Container/PHPConstants.php
 99da470261d9ca0834f620319b605d34d06283fc  ./classes/pear/Config/Container/Apache.php
 50a8bbc25d791d30d8463100783969aac3c2f584  ./classes/pear/Config/Container/IniCommented.php
@@ -1313,7 +1313,7 @@ ca146a52805897ec57ef46b1d7169a0e8ba32299  ./classes/pear/I18Nv2.php
 e2c63ab361b0c92a69363decaf45ac05c0119a8a  ./classes/pear/Mail/mock.php
 ec2bc9a13dc0d5858dee8007820a9eb2388d240d  ./classes/pear/Mail/mimeDecode.php
 c550297d83f6a502c094209606ac261085a4186c  ./classes/pear/Mail/sendmail.php
-57bdea2e39605f114980859f03cec1b593ee8b92  ./classes/pear/Mail/smtp.php
+e3bd4e173b0b78284d6243acfc2d1ad5ea1b8749  ./classes/pear/Mail/smtp.php
 3eaaae0fed427857a5c88af4e08862b560fb9972  ./classes/pear/Mail/mail.php
 8953eafda6754758a416a9dc74c585fa104ca70a  ./classes/pear/Mail/mimePart.php
 6bfe729c6ade77fe7e81a76e60c01c42b49b0aff  ./classes/pear/Mail/RFC822.php
@@ -1485,9 +1485,9 @@ e167348728f4b25761d2b06666f8ee1367aa6691  ./classes/modules/report/Form941Report
 85ec29fbcc8a1c4459d124a8df6046d6b3c4634f  ./classes/modules/report/KPIReport.class.php
 da988c2fb3cb467e7af707bf7d1f149edd745a4b  ./classes/modules/report/ROEReport.class.php
 1b180b554417b4e58734f00ac834b3da2dbf2d36  ./classes/modules/report/UserSummaryReport.class.php
-6bd45b5c4f34f15ba764c8c4825381ff88e26b1d  ./classes/modules/report/Report.class.php
+adee78b745f9bedf5266fde71b0da8a3806d03de  ./classes/modules/report/Report.class.php
 410071b1b955411ad4647fa6fb76d21826f6df6d  ./classes/modules/report/PayStubSummaryReport.class.php
-8a535f34e88c4d5daa4b4ed3b0beab7cbc6d8aec  ./classes/modules/report/T4SummaryReport.class.php
+2fc5c8219d451c5a62e1a5b48a47b59217712b3b  ./classes/modules/report/T4SummaryReport.class.php
 e6e6d8e3dbd4002ebe8149fbe953176033fb6d57  ./classes/modules/report/AuditTrailReport.class.php
 c5e0c4ebbd65230dedf79d3b19da34d531273af5  ./classes/modules/report/ActiveShiftReport.class.php
 93fc1f204e0be2f90c03fabc5005c8b1347e364a  ./classes/modules/message/MessageFactory.class.php
@@ -1499,7 +1499,7 @@ f83449337e2cb1295fae843560db76f0a335c833  ./classes/modules/message/MessageRecip
 0c1b24499ad981ff4ad3235dbd4f7128805c313e  ./classes/modules/message/MessageRecipientListFactory.class.php
 e3dac732ffb9765e0962d26c1818d022b168b426  ./classes/modules/message/MessageControlListFactory.class.php
 ff0a46c44c81f9f135ba780075888e211c88a1df  ./classes/modules/punch/PunchFactory.class.php
-07eefaf90bbf28d80d248fffc99b97482d56b432  ./classes/modules/punch/PunchListFactory.class.php
+fd5aed98ae7c41457805687912d82b137942fff0  ./classes/modules/punch/PunchListFactory.class.php
 77199051f888c6349559171df772ba6250ceacca  ./classes/modules/punch/PunchControlFactory.class.php
 dc2cf67e2e6684b287d69a10ec97f481a27044e4  ./classes/modules/punch/PunchControlListFactory.class.php
 21d212ba864e7f1ff40f72df071ec1f8e4a9e649  ./classes/modules/install/InstallSchema_1018A.class.php
@@ -1686,7 +1686,7 @@ a0446ff7e4b6232086a594fc56ed6255a892c047  ./classes/modules/install/InstallSchem
 4d841420c2adbf5f4dd2d8dcd806b5ce6513aea9  ./classes/modules/install/InstallSchema_1042A.class.php
 fde157af57eb542c07a059b7f5aa16641e8520d1  ./classes/modules/install/InstallSchema_1032A.class.php
 06bd0c300faf9abd520b21beaa37b0dce9280829  ./classes/modules/install/InstallSchema_1026A.class.php
-05508f4902cc7bcce4a8fb53ad3c427fef534581  ./classes/modules/install/Install.class.php
+b11641a8d559cebb340cb91ef49d5ec8feae0416  ./classes/modules/install/Install.class.php
 bcb5b4d4360db0ddfd584e498386b3db09c89c63  ./classes/modules/install/InstallSchema_1035A.class.php
 312a1e7abc7bbcf37c94c0706aba7d461cffd51c  ./classes/modules/install/InstallSchema_1014A.class.php
 c89a53427252272c7f5ef8337cb2130028a0b6ba  ./classes/modules/install/InstallSchema_1001A.class.php
@@ -1738,7 +1738,7 @@ ac634dcca5a329c98e87b7c8b95afb2e16bba923  ./classes/modules/qualification/Qualif
 176a9804c61b6544d7adf4eb0a96f6215a734a8b  ./classes/modules/other/EFT.class.php
 9eaf580007c1871154b39b8c73961e1feaee7ea8  ./classes/modules/other/Telnet.class.php
 da82ece46ca3cd06f5c59a1bcd2bc3a8dd98cdab  ./classes/modules/other/SugarCRM.class.php
-08e91d9d006cec3be4fc8f587de6f4a06f6e8957  ./classes/modules/other/DemoData.class.php
+4d640fcdde53bc3e804792b204c9317180c66437  ./classes/modules/other/DemoData.class.php
 6dccafd31c9cb6f81bac8f51037d2ff4eeda27ca  ./classes/modules/other/Redis_Cache_Lite.class.php
 bbe86e4cb9cab4e45f6b09e645f85524a4b08815  ./classes/modules/other/ROEFactory.class.php
 38cf64bc451b189801a218b0b39c625f2ba0aae4  ./classes/modules/other/ROEListFactory.class.php
@@ -1915,8 +1915,8 @@ bbb737deaa7503d5a2531ae23ed4bede58ee8748  ./classes/modules/users/UserDeductionF
 743260c623f5cd476a1b0fd748b272603dbd2153  ./classes/modules/users/UserDefaultCompanyDeductionListFactory.class.php
 90dd036c78ff91da8432330bb0ada26d68ec9590  ./classes/modules/users/BankAccountFactory.class.php
 07aca24bf43aa4a84308ed690c3458c2d7c2ae28  ./classes/modules/core/PermissionUserListFactory.class.php
-7760a4301909b1c0f4cb23ae098fdbcb5240bf06  ./classes/modules/core/CalculatePolicy.class.php
-02a023f660ab34e11df5214195bebf3794dfe307  ./classes/modules/core/Authentication.class.php
+c9a9742b96e3860952b94216dea9d7a35b79923c  ./classes/modules/core/CalculatePolicy.class.php
+555c029593390ac01cb6a5b053cbabf01d20878c  ./classes/modules/core/Authentication.class.php
 40dcfb6717d39173809fa7ba01d0d3becda29b72  ./classes/modules/core/StationUserGroupFactory.class.php
 458fcd5bb5237c673022937beb7fc29bdfe3dd60  ./classes/modules/core/Group.class.php
 cd48b05cb4ca3ad0ee61f61a5f4ec08f3a716e45  ./classes/modules/core/LogDetailListFactory.class.php
@@ -1937,7 +1937,7 @@ bcf4132fa73c4888dc3aa44d8722baaec78c0244  ./classes/modules/core/FastTree.class.
 826c96b772e93c83bb2e369b534423ce33b8490c  ./classes/modules/core/TTLog.class.php
 a7d02c2d0c9e5cc5cc66c14ac51fd2898cf67d85  ./classes/modules/core/ExceptionFactory.class.php
 2c17a0809836d315152b27d3985564f2f53eb3e3  ./classes/modules/core/Redirect.class.php
-67a83ce6ec8256a0114fbaf518c98a80678f634b  ./classes/modules/core/PurgeDatabase.class.php
+a86d77e0ef64fd525b4e0e30b6921e957f20ea1b  ./classes/modules/core/PurgeDatabase.class.php
 65a47faf550af3996185ce24ad4c49c32170ad0e  ./classes/modules/core/LogFactory.class.php
 26585029e84ddfafa53cbdb63f830768d00d8fc8  ./classes/modules/core/PermissionControlFactory.class.php
 be0092b07d781865e67dfccba3bffe53f74dae1f  ./classes/modules/core/StationIncludeUserFactory.class.php
@@ -1949,7 +1949,7 @@ e4dfec2a12839b3918690268da783bb75890ecc1  ./classes/modules/core/FactoryListIter
 bf58f9db67dfe6f039adea3d9c270c8cead33888  ./classes/modules/core/UserDateListFactory.class.php
 85caf5e4253d1f0645a80610c86e151ff8e6b1d2  ./classes/modules/core/Pager.class.php
 0d87e78e9384f985fea4f70ac0f3098eb6cac969  ./classes/modules/core/UserDateTotalListFactory.class.php
-891a7f40f1dfea4ab64dcd019313d98400944a3d  ./classes/modules/core/TTDate.class.php
+ffee086d1b3528c8d626d5fd07daf7638f60b966  ./classes/modules/core/TTDate.class.php
 ed66486e7b32705fa262976288e44eee6dfc998b  ./classes/modules/core/AuthorizationListFactory.class.php
 1fd6ef651a72e57695f837cd123bfeb78180303a  ./classes/modules/core/UserDateTotalFactory.class.php
 a04036866bca807077be4265ea8820f9f6459b4a  ./classes/modules/core/Profiler.class.php
@@ -1958,17 +1958,17 @@ a04036866bca807077be4265ea8820f9f6459b4a  ./classes/modules/core/Profiler.class.
 e1b5dcd4eb7e2b1502ad361f5595b695c3d05bfd  ./classes/modules/core/StationIncludeUserListFactory.class.php
 efb6ca03a07e250c3c89566406e9722589edc0d3  ./classes/modules/core/Sort.class.php
 718243e74ee18175fbefe47d45842f79a980111f  ./classes/modules/core/AJAX_Server.class.php
-8d71124a15c290b56e8179a7d0b04c4991e2c114  ./classes/modules/core/LogListFactory.class.php
+01e98172d54747f4631a1258768a67f5249fc3bf  ./classes/modules/core/LogListFactory.class.php
 37f00229f9406bdfa0d3572a01a5dbee01de9d25  ./classes/modules/core/ProgressBar.class.php
 f0d3d005194125aaac00f746663bbf84f4c36c1c  ./classes/modules/core/UnitConvert.class.php
 2f75cc5975555b7022aca5304c4f4baa2c854541  ./classes/modules/core/GeneralLedgerExport.class.php
 03983c77ebd1e1d7a0eca6efa2fbe0646e44fd20  ./classes/modules/core/PermissionUserFactory.class.php
 61d4d40d15c9eb0bc5a4ad2860c62b42b90555d8  ./classes/modules/core/Option.class.php
-5ec16cb6c896a4b569ef6b019a2cbceb45069772  ./classes/modules/core/Misc.class.php
+b07262085ba81d5a89456ea897dfeae072962806  ./classes/modules/core/Misc.class.php
 3ff7d96cffd43bbe83e8cf972c53f7d7bfee059a  ./classes/modules/core/SharedMemory.class.php
 d6c8c87be0e23d1fd3bfb443c34ec10839a587b7  ./classes/modules/core/BreadCrumb.class.php
 22846c6523c060ca09a49f727aa459819f944018  ./classes/modules/core/TTPDF.class.php
-877069772d6e9b3abc2ccdff6c996321c54b9446  ./classes/modules/core/StationFactory.class.php
+6d7b46b8bf2c840f068608d00157934d6c63125c  ./classes/modules/core/StationFactory.class.php
 95d9ca9ec17f5d24fcacae5c63c81023f47d3bce  ./classes/modules/core/BackgroundProcess.class.php
 941161a8aff97b92f5c9f69e5daa3fc68802b4ab  ./classes/modules/core/Debug.class.php
 2bd63ca5e144fc81ca7d98d92441aed9b1419390  ./classes/modules/core/StationUserFactory.class.php
@@ -1981,7 +1981,7 @@ fa2139364ef32c2da8b08c92e65dbf5a81f234ef  ./classes/modules/core/CurrencyFactory
 3cae5cdb65f25c29945a0dcf9197d39be2bf7c14  ./classes/modules/core/TTi18n.class.php
 545a8e756dd60cc1f58e7bca7d1d43d5f05e0892  ./classes/modules/core/StationDepartmentFactory.class.php
 22e1e5505bda640d5f440ad648ca19ce082b0ca5  ./classes/modules/core/StationDepartmentListFactory.class.php
-963d222b89559b49f53832494dddc44756ec78fb  ./classes/modules/core/AuthorizationFactory.class.php
+7d08c8dba5d3d25c4a3dce3786e7f91a3a1ed9e7  ./classes/modules/core/AuthorizationFactory.class.php
 6ece3e09f7abad643bf4cc8295cb9fd2e40a7131  ./classes/modules/core/UserDateFactory.class.php
 fc6713b3f2c69f5535982780ec4f58b39a45bb5a  ./classes/modules/core/ExceptionListFactory.class.php
 65c1a846dcb11ea865e1393b6245728548012573  ./classes/modules/core/FormVariables.class.php
@@ -2114,8 +2114,8 @@ acb13515c365a81aae43e2da7a78656ecde84631  ./classes/modules/api/client/TimeTrexC
 db73abede617fe480fcaad60e11b509b9e052031  ./classes/modules/api/core/APIPermissionControl.class.php
 05ef7b498868f9f58bbd73d46b7e75c44164348b  ./classes/modules/api/core/APIProgressBar.class.php
 d5835d67545ddfcc5e9b61bb6184c9fa77028a35  ./classes/modules/api/core/APIPermission.class.php
-35c176c728a0d521d89d123dd5c005c2fa6e949a  ./classes/modules/api/core/APIStation.class.php
-2df4cb72269c366bac9fa444044dbb0e294017f6  ./classes/modules/api/core/APIFactory.class.php
+786fa7b3d2b1e65bed0ace53ad91bf6cbb59f8d4  ./classes/modules/api/core/APIStation.class.php
+ea98b57ffeca658a9baf36d6190cb0912e014a02  ./classes/modules/api/core/APIFactory.class.php
 5ac76b9047acbf89d78e53f09f0b3cf57238985f  ./classes/modules/api/core/APIEnvironment.class.php
 79dc4e2da2db84b9854623e378bfec433f4d5563  ./classes/modules/api/core/APICurrency.class.php
 410290d072f6f0aa75c1bc69af42f56409b01d3b  ./classes/modules/api/core/APIUserDateTotal.class.php
@@ -2275,7 +2275,7 @@ da39a3ee5e6b4b0d3255bfef95601890afd80709  ./interface/ping.html
 fe2f2dc7edf87881c7d99bf637e0e19e90411030  ./interface/install/MaintenanceJobs.php
 fed22d1f9f653a738fc48c575dce7d283890bd4a  ./interface/install/License.php
 c31cbb5af7eb86cc4eaec4e750b428b2fe3d036e  ./interface/install/DatabaseSchema.php
-594e85d6e8817f916cbf90fa99b68862240efb1d  ./interface/install/install.php
+13b2cf4e5762176bca6f802f5a73018f1141c371  ./interface/install/install.php
 d0e24a70fe96240583ab003f5163bea8102f9006  ./interface/install/Done.php
 89dd6d973449e3455c29da6977f1d322bc55542b  ./interface/install/Requirements.php
 42ce802deb96230ab8907c9f5ca2d29b2c3f43dc  ./interface/install/DatabaseConfig.php
@@ -2335,7 +2335,7 @@ f58833f7ffdb274e37b6e01426e2cf69c051b43c  ./interface/locale/pt_PT/LC_MESSAGES/m
 a6cb563b6fe53ab04a36e45eb49059e85c0eb853  ./interface/ajax_server.php
 3deeb81f416157f9b4ab1eb53741c73174bdcd36  ./interface/html5/portal/recruitment/index.php
 33f0b7e700ad0e480c5f0362b0a735888a7dbab0  ./interface/html5/portal/recruitment/IndexController.js
-fbab5a4dbce9fd86730ba6abd7f230c26ca21e0c  ./interface/html5/portal/recruitment/main.js
+d27c2ee791c737bec6fd6b0776776ff728493ae8  ./interface/html5/portal/recruitment/main.js
 a9d60ecef778e00777504333b1b6976d177a1325  ./interface/html5/model/ResponseObject.js
 ddf1f730e48419d7a2deb48fab9d39b43a00c26c  ./interface/html5/model/RibbonMenu.js
 57f8917614ad671b677500646fe6a261bd4dd2df  ./interface/html5/model/Base.js
@@ -2352,7 +2352,7 @@ ecf1945cc4fc49bb1195ba173f0560aed311ad87  ./interface/html5/model/RibbonSubMenuG
 fade28aedca9bfc4ae8211a7875ad063da737bb8  ./interface/html5/framework/jquery.ba-resize.js
 f28540d976d6ceea1dab2834427a5fab772e5a50  ./interface/html5/framework/jquery.min.js
 e22d9cc934a773091d17df571308464bfa7e78a9  ./interface/html5/framework/jquery.cookie.js
-3aaec741b7937ae5ac2a6db62a25a26bc9e4015f  ./interface/html5/framework/interact.min.js
+064137f4c3f6e3ae9e80a2e05f2a871fbe32309c  ./interface/html5/framework/interact.min.js
 6bd69b2e3df5bbebd33a99c8fb6f916ff77e612d  ./interface/html5/framework/r.js
 a700b9a8465441cb6da31eff6751edb475236d07  ./interface/html5/framework/require.js
 66151eb0600640b98f8ee73f9c2a021aedda7270  ./interface/html5/framework/jquery.tablednd.js
@@ -2383,8 +2383,8 @@ cc94fafa1b247febdff640b00e3e70662c67811c  ./interface/html5/framework/jquery.for
 3ffe70b370c0221a9d9324563b5b76d28f4fce96  ./interface/html5/framework/backbone/backbone-min.js
 a325c60e0f737d79d84f0f95051feb0036bfdbb3  ./interface/html5/global/ProgressBarManager.js
 3e5b24289252273c20cae7974e0f6465b7c1e0b6  ./interface/html5/global/APIGlobal.js.php
-2d5e832dc7554837f76d58e758736c0fe51e0a6d  ./interface/html5/global/PermissionManager.js
-9f4089ad9d46cfb9a4b01909492e6a5c300f94c0  ./interface/html5/global/LocalCacheData.js
+07e0a14087a5a385b29e1b494691089f974f6c98  ./interface/html5/global/PermissionManager.js
+ac608d19f0dd8cd1b76f10f2c4554089af8c28c3  ./interface/html5/global/LocalCacheData.js
 25ea038bd468a0d2b7be78d8b4af16207c8ad139  ./interface/html5/global/widgets/checkbox/TCheckbox.html
 639e24919fd0df389ac5eea9e03039e860dfe179  ./interface/html5/global/widgets/checkbox/TCheckbox.js
 c454ca610094e76373628e67cbb0f21d1f226854  ./interface/html5/global/widgets/wizard_form_item/WizardFormItem.html
@@ -2458,8 +2458,8 @@ b5bc2063f48d9ae28aa481c54c745c23b35cd6e6  ./interface/html5/global/widgets/fileb
 e6b1e4b867d178ec1fe00c2c4d85405ca326f5d5  ./interface/html5/global/widgets/datepicker/TDatePicker.js
 0b33def5f29552cbd996d47e4aec25b251b79c1b  ./interface/html5/global/widgets/datepicker/TDatePicker.html
 59d3e1d9031e4b6a4c79b459d8d744f6ac6712d0  ./interface/html5/global/widgets/datepicker/TRangePicker.html
-c3941608d9faef636eeb47bcb24c79c9e56fe72d  ./interface/html5/global/widgets/feedback/TFeedback.js
-a2f305610b5c5dbe5c4dce97d33abd2fab22ee5c  ./interface/html5/global/widgets/feedback/Feedback.html
+347e0fbd7208ee3e47b2ce02de7b7ff898b8ecb6  ./interface/html5/global/widgets/feedback/TFeedback.js
+f7f7ae841371bdf9e34c8058301aa50fd7f11a86  ./interface/html5/global/widgets/feedback/Feedback.html
 9878c94763aacfd884470fae64222d3fb747fd2e  ./interface/html5/global/widgets/top_alert/NotificationBox.html
 d0f4cffc354a7dc1fc98a824c8262f5de931aa09  ./interface/html5/global/widgets/top_alert/TopNotification.js
 3d8f9b889ea2e3751a25c00461f47e06208f096a  ./interface/html5/global/widgets/top_alert/NotificationRow.html
@@ -2471,7 +2471,7 @@ d396f28d6847b60ad2e632a843a0e72074f86e36  ./interface/html5/global/widgets/texta
 5255201570314b66976df90718a2da59e3ec6bb9  ./interface/html5/global/widgets/message_box/NoHierarchyBox.js
 1ee328c0a7867ccd92e938220c8948b1befc1646  ./interface/html5/global/widgets/message_box/NoResultBox.js
 4f4c4c7ea5309350e8415aefce29208726ca33ec  ./interface/html5/global/widgets/message_box/NoResultBox.html
-62419e116ce34ba406d21b180199f1cf8469c114  ./interface/html5/global/Global.js
+344a80eb999704be66841d08f20c45124eea6dc9  ./interface/html5/global/Global.js
 df7afd64375c142965119a76b1173f25575eeb08  ./interface/html5/global/TAlertManager.js
 05f013e90b588a0957aa8d70a9ffb2f3f82b4efd  ./interface/html5/global/CookieSetting.js
 233cdffe5216bf9492de0690531c42e498e7cc4f  ./interface/html5/global/ContextMenuConstant.js
@@ -2745,8 +2745,8 @@ c9126fcba8b9a3ba0237eeaf59b5c89b607c2664  ./interface/html5/views/my_account/mes
 21eeebe2620d40cde456a375828dade37e916f8d  ./interface/html5/views/my_account/request_authorization/RequestAuthorizationView.html
 29343bb6c1e0f63d1ddfcf1cb02b9b5c991e6a7c  ./interface/html5/views/my_account/request_authorization/RequestAuthorizationEditView.html
 7bccfc70016041ff98508f4df35d48d173cebdb2  ./interface/html5/views/home/dashboard/HomeView.html
-206db0a98de662f8ba2614111804e71880ecaa82  ./interface/html5/views/home/dashboard/HomeViewController.js
-da18bbca587a872c870ecc6d4909086e9df180df  ./interface/html5/views/home/dashlet/DashletController.js
+cd8247155758539c64681ea5329b9a4d6983226d  ./interface/html5/views/home/dashboard/HomeViewController.js
+530a781fb5e40ef122fb7623859dee39e6ab59b3  ./interface/html5/views/home/dashlet/DashletController.js
 15bf3e3ce60e433256390c8dcd3306861bfc6702  ./interface/html5/views/home/dashlet/Dashlet.html
 01bb7529966be752474b8b4385fd36acedfbebaa  ./interface/html5/views/attendance/exceptions/ExceptionEditView.html
 93bcba22365a5bd77a53727b2a3b733ded94f32d  ./interface/html5/views/attendance/exceptions/ExceptionView.html
@@ -2763,7 +2763,7 @@ c5dcbdb6e1ea404417760bc3efc687743767bc35  ./interface/html5/views/attendance/rec
 fc6caa459475d97e0e0e95e0efb79383312e9429  ./interface/html5/views/attendance/timesheet/UserDateTotalParentEditView.html
 307dcd0dfff7a62b1277704f3a615f9d9ab26871  ./interface/html5/views/attendance/timesheet/TimeSheetEditView.html
 360e843d43a5ca1b2681aac56a16c5be8933c16a  ./interface/html5/views/attendance/timesheet/UserDateTotalEditView.html
-9b78e3125a84281fd154ce2c549e0c111f37de27  ./interface/html5/views/attendance/timesheet/TimeSheetViewController.js
+be7622d93e53b541592df458c5657c8e6842bdc2  ./interface/html5/views/attendance/timesheet/TimeSheetViewController.js
 6741eabf0ed2d7c0f6fd8c3cd9a18011787fbc0d  ./interface/html5/views/attendance/timesheet/UserDateTotalParentView.html
 e5f5aa6fceaf9ee60cbeeecf2d61277ead941db7  ./interface/html5/views/attendance/timesheet/TimeSheetView.html
 cce83e87bcf352892dd243f7050a57c739f3f2d4  ./interface/html5/views/attendance/timesheet/UserDateTotalViewController.js
@@ -2771,7 +2771,7 @@ cce83e87bcf352892dd243f7050a57c739f3f2d4  ./interface/html5/views/attendance/tim
 8fd51875d0d3c1fac1a773b73d53dcf18a781ca7  ./interface/html5/views/attendance/timesheet/UserDateTotalParentViewController.js
 dd2ec1e4cac41748fb2f5a2fedcea1b638ad2f85  ./interface/html5/views/attendance/recurring_schedule_control/RecurringScheduleControlView.html
 344b3b05709ab4f92dab06e8808d539cf8197920  ./interface/html5/views/attendance/recurring_schedule_control/RecurringScheduleControlEditView.html
-2d19200aa5e23a973592bc93db6ced17c6c57d61  ./interface/html5/views/attendance/recurring_schedule_control/RecurringScheduleControlViewController.js
+ffca0fa09f445b9b6fde389bcf3a42964d6cc736  ./interface/html5/views/attendance/recurring_schedule_control/RecurringScheduleControlViewController.js
 1ca70ee91e4c7ed8b1dc012555eae5f34b8f56c4  ./interface/html5/views/attendance/accrual/AccrualEditView.html
 8478efb1cf0a30a0ae4c97157997c71abc5a833d  ./interface/html5/views/attendance/accrual/SubAccrualView.html
 a8af01f0254774a6a824ef59a3cbdf15937e91c5  ./interface/html5/views/attendance/accrual/AccrualViewController.js
@@ -2783,7 +2783,7 @@ f79f50f66d80d82dda6389a1b98a1c87c03a0c22  ./interface/html5/views/attendance/sch
 5fd60175b84af262510c06064e70e1d65a4eff47  ./interface/html5/views/attendance/schedule/ScheduleShiftEditView.html
 6e6a85a62c3d953cd29b8a827603386311bd6de1  ./interface/html5/views/attendance/schedule/ScheduleShiftView.html
 f9e25d6810cf9c7f5956235970c9fb0ea4b5ec53  ./interface/html5/views/attendance/schedule/ScheduleEditView.html
-c4580deae09da644d78e948ccd8b92f4b1933815  ./interface/html5/views/attendance/schedule/ScheduleViewController.js
+e6c835abfa971fc507ebcab09128c2346ca270bf  ./interface/html5/views/attendance/schedule/ScheduleViewController.js
 1085bb39363be6da14448bbfc121d6ba4b127131  ./interface/html5/views/attendance/schedule/ScheduleShiftViewController.js
 572c5a5d1b4b8718bf3c21af10f570bbbeba19a0  ./interface/html5/views/attendance/punches/PunchesEditView.html
 17138595250aa2ab9e183c9951e5c8c9a0815c35  ./interface/html5/views/attendance/punches/PunchesView.html
@@ -2796,9 +2796,9 @@ da39a3ee5e6b4b0d3255bfef95601890afd80709  ./interface/html5/views/attendance/in_
 9b39c3a7430e89cd0ca2c878d37e53ae258bdce5  ./interface/html5/views/attendance/accrual_balance/AccrualBalanceView.html
 997500bc6080b0262b350921f2d010d3fcef2426  ./interface/html5/views/help/AboutViewController.js
 9241c89c03619457cfe2b7d3416894232b4b6a29  ./interface/html5/views/help/AboutEditView.html
-85463eb242fa47bfea19197c6a3d987fb0e51d22  ./interface/html5/views/login/LoginViewController.js
+b30c3e8e92fe6668b197383ce42746313185c68b  ./interface/html5/views/login/LoginViewController.js
 199f6b6f66cbccee2b8a292f36ebce79b0ddb836  ./interface/html5/views/login/LoginView.html
-8c108082a8c681bc341635dc357921febffd1583  ./interface/html5/views/BaseViewController.js
+3e0caa3ed479d7a0ec63add8f816943c8b3fe25d  ./interface/html5/views/BaseViewController.js
 07c864a4051fcd939a431c0e5fbe2eac4aa71ae8  ./interface/html5/views/core/log/LogEditView.html
 4374c6190cc9e37eea82c44ffd921274654a5bd7  ./interface/html5/views/core/log/SubLogView.html
 87180e4d007073ad3cef9bb912e4ad698f86d386  ./interface/html5/views/core/log/LogViewController.js
@@ -2840,7 +2840,7 @@ addab9c838b06e78a247986c997bfa62bc79e244  ./interface/html5/views/reports/schedu
 f9231277a48cdf5a532c038642d0bb9fd20a0039  ./interface/html5/views/reports/review_summary/KPIReportView.html
 5c5a2a2311436d290c3c181d975c3073cae55619  ./interface/html5/views/reports/timesheet_summary/TimesheetSummaryReportViewController.js
 bd4c08d005c7c8600d2e783eee5bc46fb8195e77  ./interface/html5/views/reports/timesheet_summary/TimesheetSummaryReportView.html
-6c73767e5fc6cdeecebddc1b59b027102ef3f23d  ./interface/html5/views/reports/payroll_export/PayrollExportReportViewController.js
+a26495ebd54cc871e4d7aeedf32af0ba727acd62  ./interface/html5/views/reports/payroll_export/PayrollExportReportViewController.js
 306f17d27901ad4eb816d182fc60b5959cb1842f  ./interface/html5/views/reports/payroll_export/PayrollExportReportView.html
 4485348086bf8c69dd8ffdfdb39938905a00c97b  ./interface/html5/views/reports/qualification_summary/UserQualificationReportView.html
 72270c9cd792b35b297f3cf49abae900e5b57f6c  ./interface/html5/views/reports/qualification_summary/UserQualificationReportViewController.js
@@ -3242,7 +3242,7 @@ e899ef436482782187e11072670a1bfa9021b348  ./interface/html5/theme/default/css/gl
 35151ed9eb777ff54d29b1e0898bfb986327983c  ./interface/html5/theme/default/css/global/widgets/datepicker/TDatePicker.css
 2c92deab547df23ec51981336dbd3d5f9c6ae965  ./interface/html5/theme/default/css/global/widgets/timepicker/TTimePicker.css
 d0080ce5a51aceff0779613f096e92b5dc0cdcce  ./interface/html5/theme/default/css/global/widgets/message_box/NoResultBox.css
-5aa2fb39674c73d68503f20dd0dd7dc68643e022  ./interface/html5/theme/default/css/application.css
+bdbfd9b87def5a86bee248f430d09f8851d3b250  ./interface/html5/theme/default/css/application.css
 3c509a6ce16cd48afe66651588a49325e85dd3c6  ./interface/html5/theme/default/css/views/wizard/login_user/LoginUserView.css
 a648ff0bb233cbac14cc6294406d2443ed20a5a7  ./interface/html5/theme/default/css/views/wizard/user_generic_data_status/UserGenericStatusWindow.css
 ebeb5250c905e2234e849588e1da05a8f9f96da9  ./interface/html5/theme/default/css/views/wizard/Wizard.css
@@ -3252,7 +3252,7 @@ ce1d36076f11b8966b4c5752b7f7a227993170d6  ./interface/html5/theme/default/css/vi
 272f5e420e6010c3385eeb1d8f7ceb97d7a3611b  ./interface/html5/theme/default/css/views/login/images/seo.png
 6efc3d66683461dd179888584a57208d29a16b65  ./interface/html5/theme/default/css/views/login/LoginView.css
 be84ba9dd0bb4cd009a5cbda70545aaab07329c1  ./interface/html5/theme/default/css/gray.svg
-79e5633b541df68e46798d0c7d6b2b9679dd1a2e  ./interface/html5/services/ServiceCaller.js
+eb8c5608def499bd822321bae71f98a7ea4bd278  ./interface/html5/services/ServiceCaller.js
 f7acb4fdad6c37b012712b98a4eec5bf525faba6  ./interface/html5/services/payperiod/APIPayPeriodSchedule.js
 539be8749124c94ea5b7dee4289989383f5d118d  ./interface/html5/services/payroll/APIPayStubEntryAccount.js
 8977adfa49460e5aa7d69617a984b893e1e469be  ./interface/html5/services/payroll/APIPayStubAmendment.js
@@ -3375,7 +3375,7 @@ ea156a35c8dfa55d7bb503058f9463a5fb439b38  ./interface/html5/services/reports/API
 d46b1b91954df6a9cc9bdad17e24204389807b45  ./interface/html5/services/reports/APIScheduleSummaryReport.js
 d9cc7c4576c4239bd738b538495b4f0188c22616  ./interface/html5/services/reports/APIFormW2Report.js
 a2d6c6f4ae652ef4cc2525962fbf4ac7548d7313  ./interface/html5/IndexController.js
-c2b8112502114f16447f07700a00d9520cebdfab  ./interface/html5/main.js
+d09a2bee5dbf4817813aee40e918819adcfac0c9  ./interface/html5/main.js
 f3b1cc4dedb0df09b5e441fc7f187d51d33de965  ./interface/html5/.jshintrc
 1beaa9c099ccecb11890d915022fafdd1bbbaabe  ./interface/flex/index.php
 f01779969b99491f269039ad1092cfde6f31aa33  ./interface/DownForMaintenance.php
@@ -3385,7 +3385,7 @@ f5d1665224b3b8296e8b687c8c1a538764e2a9c9  ./interface/Login.php
 f9bc72aebd6775ff6b5041328fedde29fdc5c7e6  ./unit_tests/run.sh
 e7a44eb4c7e75c30d9a9638fb743bf1ae9faaee6  ./unit_tests/BootStrap.php
 5e1eb3f8f1cce335ff6b7ac72c8303fbfc076dc9  ./unit_tests/config.xml
-4606284399eaf2dddabd60cbe02e0785f90193d3  ./unit_tests/coding_standard_check.sh
+a3a3a9b6e91d359a21b01cf4bb88d4151f7aed67  ./unit_tests/coding_standard_check.sh
 2311d8be90ad462e19f62f8712030ac926c6af0e  ./unit_tests/beautifier.php
 fef12a14b9f51978db4a9197ef039e94ad30647b  ./unit_tests/TTCodeStandard/Sniffs/Operators/ValidLogicalOperatorsSniff.php
 4472b0c85b5d43e27def3442462f45f63809a7c6  ./unit_tests/TTCodeStandard/Sniffs/CodeAnalysis/VariableAnalysisSniff.php
@@ -3434,11 +3434,11 @@ e1d5b4fbc38f484532effc5471d7ee19c396e638  ./unit_tests/testcases/payroll_deducti
 3e4fd58119ae5228ee1686899763b437c7846748  ./unit_tests/testcases/other/PunchDetectionTest.php
 9bc5776d25aad1d3db4ec5279d5989323d9eaed5  ./unit_tests/testcases/other/ScheduleTest.php
 e3a140213029726f89308ca5917d63c704686060  ./unit_tests/testcases/other/PayPeriodScheduleTest.php
-fc5407803663fd2dbc1e444c59cb9719499caca1  ./unit_tests/testcases/other/DateTimeTest.php
+0fff545227b5779c6fa1543bfb9e03463c42f32d  ./unit_tests/testcases/other/DateTimeTest.php
 f7a88b7a88992767d48ebded486eccd9fb9684d3  ./unit_tests/testcases/other/ExceptionTest.php
 41eafdfedda02212c5a8017b64eaae4254dbb2a2  ./unit_tests/testcases/other/PermissionTest.php
 de25439f65cb06313215174a2f9bef55dfaa07ee  ./unit_tests/testcases/other/MiscTest.php
-1faaa1dd2e84bede74b3af21fc35466ba754dc1c  ./unit_tests/testcases/other/PunchTest.php
+aa520d088f7aaaaa1c9c64149596356ce053292a  ./unit_tests/testcases/other/PunchTest.php
 acb2d4aaa809ea43bcdc9ddd2444e704888ee219  ./unit_tests/testcases/other/SQLTest.php
 41bfdcfdeb7948852e9629d8b71d69ec740267fc  ./unit_tests/testcases/other/BrowserTest.php
 16cb039e8352595caccc78acd46b43e179b8e6b5  ./unit_tests/testcases/other/DependencyTreeTest.php
@@ -3458,7 +3458,7 @@ b22a5ab879c9621649d7e3c0b06b1da2e98836c7  ./index.html
 3b5aa25fdf1992bd2ddfd83cde8dffdbbbfc2cf7  ./UPGRADE.txt
 c2d41f64b4aa2d9d250f968520016b26331ce9f7  ./includes/Database.inc.php
 a9876882e44025c88ce5e92c9709c8817b4ff3fa  ./includes/CLI.inc.php
-a212fb4bb49ca5457df4375eda81246ad3a62a48  ./includes/global.inc.php
+64b26a8360153f5c53dcbe3b6e9c258562299d21  ./includes/global.inc.php
 6c4e3d1b3c584883599f9704c2e3f2cf747d14f6  ./includes/ClassMap.inc.php
 c2f264ce24342c98fa50147ddb144fe1879f2ba7  ./includes/Interface.inc.php
 3de61e7b2607013137e333f61af72cea20b4b610  ./includes/TableMap.inc.php

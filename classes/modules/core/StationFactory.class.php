@@ -2025,6 +2025,7 @@ class StationFactory extends Factory {
 
 			switch ( $type_id ) {
 				case 10: //PC
+				case 26: //Mobile Web Browser
 					$status_id = 20; //Enabled, but will be set disabled automatically by isActiveForAnyEmployee()
 					$station = NULL; //Using NULL means we generate our own.
 					$description = substr( $_SERVER['HTTP_USER_AGENT'], 0, 250);

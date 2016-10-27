@@ -72,7 +72,7 @@ class System_SharedMemory_Memcache extends System_SharedMemory_Common
      *
      * @access public
      */
-    function System_SharedMemory_Memcache($options)
+    function __construct($options)
     {
         extract($this->_default($options, array
         (

@@ -4,8 +4,28 @@
 	<title>{$APPLICATION_NAME} - Login</title>
 	<link rel="stylesheet" type="text/css" href="{$BASE_URL}global.css.php">
 	<meta name="referrer" content="never"> {* Don't send referrer to prevent password reset link from leaking. *}
-</head>
 
+	<script>
+		{literal}
+
+		var submitcount = new Array();
+		function singleSubmitHandler( button ) {
+			button_name = button.name;
+			if ( submitcount[button_name] == undefined ) {
+				submitcount[button_name] = 0;
+			}
+
+			if ( submitcount[button_name] == 0 ) {
+				submitcount[button_name]++;
+				return true;
+			} else {
+				alert('You have already submitted this form! Please wait...');
+				return false;
+			}
+		}
+		{/literal}
+	</script>
+</head>
 <div id="container">
 
 <div id="rowHeaderLogin"><a href="{$BASE_URL}"><img src="{$BASE_URL}/send_file.php?object_type=primary_company_logo" style="width:auto; height:42px;" alt="{$ORGANIZATION_NAME}"></a></div>
@@ -41,7 +61,7 @@
 
 		<div id="contentBoxThree"></div>
 		<div id="contentBoxFour">
-			<input type="submit" class="button" name="action:change_password" value="{t}Change Password{/t}">
+			<input id='submit_button' type="submit" class="button" name="action:change_password" value="{t}Change Password{/t}"  onClick="return singleSubmitHandler(this)">
 		</div>
 
 	{elseif $email_sent == 1}
@@ -72,7 +92,7 @@
 
 		<div id="contentBoxThree"></div>
 		<div id="contentBoxFour">
-			<input type="submit" class="button" name="action:reset_password" value="{t}Reset Password{/t}">
+			<input id="submit_button" type="submit" class="button" name="action:reset_password" value="{t}Reset Password{/t}"  onClick="return singleSubmitHandler(this)">
 		</div>
 
 	{/if}

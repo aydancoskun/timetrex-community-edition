@@ -72,7 +72,7 @@ class System_SharedMemory_Redis extends System_SharedMemory_Common
      *
      * @access public
      */
-    function System_SharedMemory_Redis($options)
+    function __construct($options)
     {
         extract($this->_default($options, array
         (
@@ -140,8 +140,9 @@ class System_SharedMemory_Redis extends System_SharedMemory_Common
      * @return bool true on success
      * @access public
      */
-    function set($name, $value, $ttl = 0)
+    function set($name, $value, $ttl = NULL)
     {
+		//$ttl must default to NULL in PHP7, otherwise all set() calls will return FALSE.
 		try {
 			return $this->_mc->set($name, serialize( $value ), $ttl);
 		} catch ( Exception $e ) {

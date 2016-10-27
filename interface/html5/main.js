@@ -186,6 +186,7 @@ require( [
 
 		var api_authentication = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
 
+		//BUG-2065 see also: require.onError()
 		window.onerror = function() {
 			if ( !arguments || arguments.length < 1 ) {
 				Global.sendErrorReport( 'No error parameters when window.onerror', ServiceCaller.rootURL, '', '', '' );
@@ -270,7 +271,7 @@ require( [
 				target_class: $( e.target ).attr( 'class' ) ? $( e.target ).attr( 'class' ) : '',
 				target_id: $( e.target ).attr( 'id' ) ? $( e.target ).attr( 'id' ) : '',
 				html: e.target.outerHTML,
-				ui_clicked_date: ui_clicked_date.format( 'hh:mm:ss' ) + '.' + ui_clicked_date.getMilliseconds()
+				ui_clicked_date: ui_clicked_date.toISOString(),
 			};
 			if ( LocalCacheData.ui_click_stack.length === 8 ) {
 				LocalCacheData.ui_click_stack.pop();
@@ -586,3 +587,33 @@ require( [
 
 } );
 
+/**
+ * FIXES: BUG-2065 "Uncaught Error: Script error for ..."
+ *
+ * REASON FOR BUG: The internet going out momentarily
+ * 	after the initial scripts have loaded and have begun
+ * 	loading the chain of javascript-loaded scripts causes
+ * 	requirejs to throw the Script Errors because it's unable
+ * 	to reach the files it's being told to load.
+ *
+ * TO REPRODUCE: in chrome, throttle the internet down then
+ * 	turn off the internet once the reload button shows on
+ * 	the login screen (and the stop button hides). This ensures
+ * 	that requirejs has been loaded and is loading other scripts.
+ */
+require.onError = function( err ) {
+	if ( err.message.indexOf( 'Script error for' ) != -1 ) {
+		if ( require.script_error_shown == undefined ) {
+			require.script_error_shown = 1;
+			//There is no pretty errorbox at this time. You may only have basic javascript.
+			if ( confirm( "Unable to download required data. Your internet connection may have failed press Ok to reload." ) ) {
+				//For testing, so that there's time to turn internet back on after confirm is clicked.
+				//window.setTimeout(function(){window.location.reload()},5000);
+				window.location.reload();
+			}
+		}
+		console.debug( err.message );
+		//Stop error from bubbling up.
+		delete err;
+	}
+}

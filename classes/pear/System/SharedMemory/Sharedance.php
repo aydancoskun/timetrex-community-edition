@@ -81,7 +81,7 @@ class System_SharedMemory_Sharedance extends System_SharedMemory_Common
      *
      * @access public
      */
-    function System_SharedMemory_Sharedance($options)
+    function __construct($options)
     {
         $this->_options = ($this->_default($options, array
         (

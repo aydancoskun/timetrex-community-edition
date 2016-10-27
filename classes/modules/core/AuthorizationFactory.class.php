@@ -281,7 +281,7 @@ class AuthorizationFactory extends Factory {
 		$id = trim($id);
 
 		if (	$this->Validator->isResultSetWithRows(	'object',
-														$this->getObjectHandler()->getByID($id),
+														( is_object( $this->getObjectHandler() ) ) ? $this->getObjectHandler()->getByID($id) : FALSE,
 														TTi18n::gettext('Object ID is invalid')
 														) ) {
 			$this->data['object_id'] = $id;

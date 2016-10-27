@@ -906,43 +906,43 @@ class T4SummaryReport extends Report {
 				}
 			}
 			$this->getFormObject()->addForm( $t4 );
+
+			//Handle T4Summary
+			$t4s = $this->getT4SumObject();
+			$t4s->setStatus( $setup_data['status_id'] );
+			$t4s->year = $t4->year;
+			$t4s->payroll_account_number = $t4->payroll_account_number;
+			$t4s->company_name = $t4->company_name;
+			$t4s->company_address1 = ( isset( $setup_data['address1'] ) AND $setup_data['address1'] != '' ) ? $setup_data['address1'] : $current_company->getAddress1();
+			$t4s->company_address2 = ( isset( $setup_data['address2'] ) AND $setup_data['address2'] != '' ) ? $setup_data['address2'] : $current_company->getAddress2();
+			$t4s->company_city = ( isset( $setup_data['city'] ) AND $setup_data['city'] != '' ) ? $setup_data['city'] : $current_company->getCity();
+			$t4s->company_province = ( isset( $setup_data['province'] ) AND ( $setup_data['province'] != '' AND $setup_data['province'] != 0 ) ) ? $setup_data['province'] : $current_company->getProvince();
+			$t4s->company_postal_code = ( isset( $setup_data['postal_code'] ) AND $setup_data['postal_code'] != '' ) ? $setup_data['postal_code'] : $current_company->getPostalCode();
+
+			$t4s->l76 = $this->getUserObject()->getFullName(); //Contact name.
+			$t4s->l78 = $current_company->getWorkPhone();
+
+			$t4->sumRecords();
+			$total_row = $t4->getRecordsTotal();
+			//$total_row = Misc::ArrayAssocSum( $this->form_data );
+			$t4s->l88 = count( $this->form_data );
+			$t4s->l14 = ( isset( $total_row['l14'] ) ) ? $total_row['l14'] : NULL;
+			$t4s->l22 = ( isset( $total_row['l22'] ) ) ? $total_row['l22'] : NULL;
+			$t4s->l16 = ( isset( $total_row['l16'] ) ) ? $total_row['l16'] : NULL;
+			$t4s->l18 = ( isset( $total_row['l18'] ) ) ? $total_row['l18'] : NULL;
+			$t4s->l27 = ( isset( $total_row['l27'] ) ) ? $total_row['l27'] : NULL;
+			$t4s->l19 = ( isset( $total_row['l19'] ) ) ? $total_row['l19'] : NULL;
+			$t4s->l20 = ( isset( $total_row['l20'] ) ) ? $total_row['l20'] : NULL;
+			$t4s->l52 = ( isset( $total_row['l52'] ) ) ? $total_row['l52'] : NULL;
+
+			if ( isset( $setup_data['remittances_paid'] ) AND $setup_data['remittances_paid'] != '' ) {
+				$t4s->l82 = (float)$setup_data['remittances_paid'];
+			} else {
+				$total_deductions = Misc::MoneyFormat( Misc::sumMultipleColumns( $total_row, array('l16', 'l27', 'l18', 'l19', 'l22') ), FALSE );
+				$t4s->l82 = $total_deductions;
+			}
+			$this->getFormObject()->addForm( $t4s );
 		}
-
-		//Handle T4Summary
-		$t4s = $this->getT4SumObject();
-		$t4s->setStatus( $setup_data['status_id'] );
-		$t4s->year = $t4->year;
-		$t4s->payroll_account_number = $t4->payroll_account_number;
-		$t4s->company_name = $t4->company_name;
-		$t4s->company_address1 = ( isset($setup_data['address1']) AND $setup_data['address1'] != '' ) ? $setup_data['address1'] : $current_company->getAddress1();
-		$t4s->company_address2 = ( isset($setup_data['address2']) AND $setup_data['address2'] != '' ) ? $setup_data['address2'] : $current_company->getAddress2();
-		$t4s->company_city = ( isset($setup_data['city']) AND $setup_data['city'] != '' ) ? $setup_data['city'] : $current_company->getCity();
-		$t4s->company_province = ( isset($setup_data['province']) AND ( $setup_data['province'] != '' AND $setup_data['province'] != 0 ) ) ? $setup_data['province'] : $current_company->getProvince();
-		$t4s->company_postal_code = ( isset($setup_data['postal_code']) AND $setup_data['postal_code'] != '' ) ? $setup_data['postal_code'] : $current_company->getPostalCode();
-
-		$t4s->l76 = $this->getUserObject()->getFullName(); //Contact name.
-		$t4s->l78 = $current_company->getWorkPhone();
-
-		$t4->sumRecords();
-		$total_row = $t4->getRecordsTotal();
-		//$total_row = Misc::ArrayAssocSum( $this->form_data );
-		$t4s->l88 = count($this->form_data);
-		$t4s->l14 = ( isset($total_row['l14']) ) ? $total_row['l14'] : NULL;
-		$t4s->l22 = ( isset($total_row['l22']) ) ? $total_row['l22'] : NULL;
-		$t4s->l16 = ( isset($total_row['l16']) ) ? $total_row['l16'] : NULL;
-		$t4s->l18 = ( isset($total_row['l18']) ) ? $total_row['l18'] : NULL;
-		$t4s->l27 = ( isset($total_row['l27']) ) ? $total_row['l27'] : NULL;
-		$t4s->l19 = ( isset($total_row['l19']) ) ? $total_row['l19'] : NULL;
-		$t4s->l20 = ( isset($total_row['l20']) ) ? $total_row['l20'] : NULL;
-		$t4s->l52 = ( isset($total_row['l52']) ) ? $total_row['l52'] : NULL;
-
-		if ( isset($setup_data['remittances_paid']) AND $setup_data['remittances_paid'] != '' ) {
-			$t4s->l82 = (float)$setup_data['remittances_paid'];
-		} else {
-			$total_deductions = Misc::MoneyFormat( Misc::sumMultipleColumns( $total_row, array('l16', 'l27', 'l18', 'l19', 'l22') ), FALSE );
-			$t4s->l82 = $total_deductions;
-		}
-		$this->getFormObject()->addForm( $t4s );
 
 		if ( $format == 'efile_xml' ) {
 			$output_format = 'XML';

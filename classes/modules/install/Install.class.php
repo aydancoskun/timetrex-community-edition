@@ -738,7 +738,7 @@ class Install {
 		Debug::text('Comparing with Version: '. $php_version, __FILE__, __LINE__, __METHOD__, 9);
 
 		$min_version = '5.0.0';
-		$max_version = '5.6.99'; //Change install.php as well, as some versions break backwards compatibility, so we need early checks as well.
+		$max_version = '7.0.99'; //Change install.php as well, as some versions break backwards compatibility, so we need early checks as well.
 
 		$unsupported_versions = array('');
 

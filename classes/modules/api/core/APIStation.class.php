@@ -77,6 +77,12 @@ class APIStation extends APIFactory {
 	 * @return string
 	 */
 	function getCurrentStation( $station_id = NULL, $type_id = 10 ) {
+		//This is normally just called from the main web interface, so if it is try to detect a mobile web browser and switch the type automatically.
+		if ( $type_id == 10 AND Misc::detectMobileBrowser() == TRUE ) {
+			$type_id = 26; //Mobile device web browser
+			Debug::text('Mobile Station device...', __FILE__, __LINE__, __METHOD__, 10);
+		}
+
 		$sf = TTNew('StationFactory');
 		$retval = $sf->getOrCreateStation( $station_id, $this->getCurrentCompanyObject()->getID(), $type_id, $this->getPermissionObject(), $this->getCurrentUserObject() );
 

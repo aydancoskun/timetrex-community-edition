@@ -283,7 +283,7 @@ require( [
 					target_class: $( e.target ).attr( 'class' ) ? $( e.target ).attr( 'class' ) : '',
 					target_id: $( e.target ).attr( 'id' ) ? $( e.target ).attr( 'id' ) : '',
 					html: e.target.outerHTML,
-					ui_clicked_date: ui_clicked_date.format( 'hh:mm:ss' ) + '.' + ui_clicked_date.getMilliseconds()
+					ui_clicked_date: ui_clicked_date.toISOString(),
 				};
 				if ( LocalCacheData.ui_click_stack.length === 8 ) {
 					LocalCacheData.ui_click_stack.pop();

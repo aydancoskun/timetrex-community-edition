@@ -196,14 +196,15 @@ class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
 								39=Housekeeping Service Worker (opt
 								40=Other Service Worker (optional)
 								*/
-								$xml->staffingHours->staffHours[$e]->workDays->workDay[$d]->hourEntries->hourEntry[$h]->addChild('jobTitleCode', (int)$this->pbj_job_title_code ); //Default to Exempt.
+								$xml->staffingHours->staffHours[$e]->workDays->workDay[$d]->hourEntries->hourEntry[$h]->addChild('jobTitleCode', (int)$this->pbj_job_title_code );
 
 								/*
 								1=Exempt
 								2=Non-Exempt
 								3=Contract
 								*/
-								$xml->staffingHours->staffHours[$e]->workDays->workDay[$d]->hourEntries->hourEntry[$h]->addChild('payTypeCode', ( (int)$this->pbj_pay_type_code == 0 ) ? 1 : (int)$this->pbj_pay_type_code  );
+								//Default to Non-Exempt as that is most common.
+								$xml->staffingHours->staffHours[$e]->workDays->workDay[$d]->hourEntries->hourEntry[$h]->addChild('payTypeCode', ( (int)$this->pbj_pay_type_code == 0 ) ? 2 : (int)$this->pbj_pay_type_code  );
 
 								$h++;
 							}

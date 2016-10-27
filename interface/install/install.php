@@ -61,12 +61,12 @@ $templates_c_dir = dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPA
 
 echo " 4...";
 $redir = TRUE;
-if ( version_compare( PHP_VERSION, 5, '<') == 1 ) {
-	echo "You are currenting using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v5</b> or greater!<br><br>\n";
+if ( version_compare( PHP_VERSION, '5.0.0', '<') == 1 ) {
+	echo "You are currenting using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v5.4</b> or greater!<br><br>\n";
 	$redir = FALSE;
 }
-if ( version_compare( PHP_VERSION, '5.6.99', '>') == 1 ) {
-	echo "You are currenting using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v5.5.x</b> or earlier!<br><br>\n";
+if ( version_compare( PHP_VERSION, '7.0.99', '>') == 1 ) {
+	echo "You are currenting using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v7.0.x</b> or earlier!<br><br>\n";
 	$redir = FALSE;
 }
 

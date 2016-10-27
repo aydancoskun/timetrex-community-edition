@@ -81,10 +81,17 @@ Global.sendErrorReport = function() {
 		return;
 	}
 	var error;
+
+	//BUG#2066 - allow this function to be called earlier.
+	var script_name = "~unknown~";
+	if ( Global.isSet(LocalCacheData) && Global.isSet(LocalCacheData.current_open_primary_controller) && Global.isSet(LocalCacheData.current_open_primary_controller.script_name) ) {
+		script_name = LocalCacheData.current_open_primary_controller.script_name;
+	}
+
 	if ( login_user ) {
-		error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\n Uncaught Error From: ' + LocalCacheData.current_open_primary_controller.script_name + '\n\n' + 'Error: ' + error_string + ' in ' + from_file + ' line ' + line + ' ' + '\n\nUser: ' + login_user.user_name + ' ' + '\n\nURL: ' + window.location.href + ' ' + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie;
+		error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\n Uncaught Error From: ' + script_name + '\n\n' + 'Error: ' + error_string + ' in ' + from_file + ' line ' + line + ' ' + '\n\nUser: ' + login_user.user_name + ' ' + '\n\nURL: ' + window.location.href + ' ' + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie;
 	} else {
-		error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\n Uncaught Error From: ' + LocalCacheData.current_open_primary_controller.script_name + '\n\n' + 'Error: ' + error_string + ' in ' + from_file + ' line ' + line + ' ' + '\n\nUser: ' + '\n\nURL: ' + window.location.href + ' ' + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie;
+		error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\n Uncaught Error From: ' + script_name + '\n\n' + 'Error: ' + error_string + ' in ' + from_file + ' line ' + line + ' ' + '\n\nUser: ' + '\n\nURL: ' + window.location.href + ' ' + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie;
 
 	}
 
@@ -106,6 +113,8 @@ Global.sendErrorReport = function() {
 		var trace = error_stack.stack;
 		error = error + '\n\n\n' + 'Function called stacks: ' + trace;
 	}
+
+	Global.log( 'ERROR: '+ error );
 
 	if ( Global.isCanvasSupported() && ie > 9 ) {
 		html2canvas( [document.body], {
@@ -487,14 +496,20 @@ Global.secondToHHMMSS = function( sec_num, force_time_unit ) {
 	if ( typeof sec_num === 'undefined' || sec_num === null || sec_num === false ) {
 		return null;
 	}
+	
 	if ( sec_num < 0 ) {
 		sec_num = (-sec_num);
 		add_minus = true;
 	}
-	var time_unit = LocalCacheData.getLoginUserPreference().time_unit_format.toString();
+
+	//FIXES BUG#2071 - don't check the local cache data for default value, or it will fail and cause errors when unauthenticated. For example in the installer.
+	var time_unit;
 	if ( force_time_unit ) {
 		time_unit = force_time_unit;
+	} else {
+		time_unit = LocalCacheData.getLoginUserPreference().time_unit_format.toString();
 	}
+
 	var hours = (sec_num / 3600);
 	var minutes = ((sec_num - (hours * 3600)) / 60);
 	var seconds = (sec_num - (hours * 3600) - (minutes * 60)).toFixed( 0 );
@@ -3049,3 +3064,6 @@ Global.sendAnalytics = function( track_address ) {
 	}
 };
 
+Global.detectMobileBrowser = function() {
+	return /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
+}

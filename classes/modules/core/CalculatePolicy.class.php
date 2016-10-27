@@ -158,6 +158,10 @@ class CalculatePolicy {
 		if ( is_object($obj) ) {
 			$this->user_obj = $obj;
 
+			//If the currently logged in administrator is timezone GMT, and he edits an absence for a user in timezone PST
+			//the date_stamp in epoch format is set in GMT timezone, then here the timezone switches to PST
+			//and changes the date that is calculated.
+
 			//Need to set the timezone as soon as the user object is specified, so when addPendingDates() is called they are in the proper timezone too.
 			$this->setTimeZone();
 
@@ -215,7 +219,13 @@ class CalculatePolicy {
 		//FIXME: How do we handle the employee moving between stations that themselves are in different timezones from the users default timezone?
 		//How do we apply time based premium policies in that case?
 		if ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getUserPreferenceObject() ) ) {
-			$this->original_time_zone = TTDate::getTimeZone();
+			//If setTimeZone() is called multiple times for some reason, the original timezone will be incorrect.
+			//So make sure we only set it once, as even if recalculating many employees at once the entire CalculatePolicy object should be re-initialized.
+			//The bug can be replicated by setting current user to PST8PDT, then Mass Edit two IN punches for a user in MST7MDT timezone, and first punch time will be correct, the 2nd punch incorrect.
+			if ( !isset($this->original_time_zone) OR $this->original_time_zone == '' ) { //original_time_zone defaults to NULL which causes isset() to be FALSE.
+				$this->original_time_zone = TTDate::getTimeZone();
+			}
+
 			return TTDate::setTimeZone( $this->getUserObject()->getUserPreferenceObject()->getTimeZone() );
 		}
 
@@ -2212,6 +2222,8 @@ class CalculatePolicy {
 
 			foreach( $rtplf as $rtp_obj ) {
 				//FIXME: Check contributing shift start/end date so we can quickly filter out regular time policies that may never apply. Similar to what we do with premium policies.
+				//FIXME: There is a bug that if a Schedule Policy includes the same Regular Time policy that is included in the Policy Group (included twice essentially), even if its not used in the employees scheduled shift, it will prevent that Regular Time policy from being used.
+				//       because is_policy_group=0 and it won't be in the schedule_policy_regular_time_policy_ids.
 				if (
 						(
 							( (int)$rtp_obj->getColumn('is_policy_group') == 1 AND !in_array( $rtp_obj->getId(), $schedule_policy_exclude_regular_time_policy_ids ) )
@@ -2309,7 +2321,7 @@ class CalculatePolicy {
 
 			if ( !isset($this->contributing_shift_policy[$otp_obj->getContributingShiftPolicy()]) ) {
 				Debug::text('  ERROR: Contributing Shift Policy for OverTime Policy: '. $otp_obj->getName() .' does not exist...', __FILE__, __LINE__, __METHOD__, 10);
-				continue;
+				return FALSE;
 			}
 
 			$user_date_total_rows = $this->compactMealAndBreakUserDateTotalObjects( $this->filterUserDateTotalDataByContributingShiftPolicy( $date_stamp, $date_stamp, $this->contributing_shift_policy[$otp_obj->getContributingShiftPolicy()], array( 20, 25, 100, 110 ) ) );
@@ -8287,11 +8299,8 @@ class CalculatePolicy {
 			return FALSE;
 		}
 
-		//If the currently logged in administrator is timezone GMT, and he edits an absence for a user in timezone PST
-		//the date_stamp in epoch format is set in GMT timezone, then here the timezone switches to PST
-		//and changes the date that is calculated.
-
-		$this->setTimeZone(); //Set timezone to users timezone so dates/times are all calculated in the users timezone.
+		//This is set in setUserObject(), and shouldn't need to be called twice. See setTimeZone() for more information.
+		//$this->setTimeZone(); //Set timezone to users timezone so dates/times are all calculated in the users timezone.
 
 		//Start transaction to keep data consistent during the entire calculation process.
 		//This may cause deadlocks if the date ranges are too long though.

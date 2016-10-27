@@ -362,7 +362,7 @@ class Authentication {
 	}
 
 	function getSecureSessionID() {
-		return substr_replace( $this->getSessionID(), '...', ( strlen( $this->getSessionID() ) / 3 ), ( strlen( $this->getSessionID() ) / 3 ) );
+		return substr_replace( $this->getSessionID(), '...', (int)( strlen( $this->getSessionID() ) / 3 ), (int)( strlen( $this->getSessionID() ) / 3 ) );
 	}
 
 	function getSessionID() {
