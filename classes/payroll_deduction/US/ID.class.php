@@ -41,6 +41,28 @@
 class PayrollDeduction_US_ID extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+												20160101 => array( //01-Jan-2016 (Guide updated June 2016, but it was retroactive.)
+														10 => array(
+																array( 'income' => 2250,	'rate' => 0,	'constant' => 0 ),
+																array( 'income' => 3704,	'rate' => 1.6,	'constant' => 0 ),
+																array( 'income' => 5158,	'rate' => 3.6,	'constant' => 23 ),
+																array( 'income' => 6612,	'rate' => 4.1,	'constant' => 75 ),
+																array( 'income' => 8066,	'rate' => 5.1,	'constant' => 135 ),
+																array( 'income' => 9520,	'rate' => 6.1,	'constant' => 209 ),
+																array( 'income' => 13155,	'rate' => 7.1,	'constant' => 298 ),
+																array( 'income' => 13155,	'rate' => 7.4,	'constant' => 556 ),
+																),
+														20 => array(
+																array( 'income' => 8550,	'rate' => 0,	'constant' => 0 ),
+																array( 'income' => 11458,	'rate' => 1.6,	'constant' => 0 ),
+																array( 'income' => 14366,	'rate' => 3.6,	'constant' => 47 ),
+																array( 'income' => 17274,	'rate' => 4.1,	'constant' => 152 ),
+																array( 'income' => 20182,	'rate' => 5.1,	'constant' => 271 ),
+																array( 'income' => 23090,	'rate' => 6.1,	'constant' => 419 ),
+																array( 'income' => 30360,	'rate' => 7.1,	'constant' => 596 ),
+																array( 'income' => 30360,	'rate' => 7.4,	'constant' => 1112 ),
+																),
+														),
 												20140601 => array(
 															10 => array(
 																	array( 'income' => 2250,	'rate' => 0,	'constant' => 0 ),
@@ -182,6 +204,9 @@ class PayrollDeduction_US_ID extends PayrollDeduction_US {
 												);
 		
 	var $state_options = array(
+								20160101 => array( //01-Jan-2016 (Guide updated June 2016, but it was retroactive.)
+												   'allowance' => 4050
+													),
 								20140601 => array( //01-Jun-2014
 													'allowance' => 3950
 													),

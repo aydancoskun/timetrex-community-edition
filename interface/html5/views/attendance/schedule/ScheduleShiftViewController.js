@@ -40,12 +40,98 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true; //Hide some context menus
 
+		this.initPermission()
 		this.render();
 		this.buildContextMenu();
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
 
+	},
+
+	jobUIValidate: function( p_id ) {
+
+		if ( !p_id ) {
+			p_id = this.permission_id;
+		}
+
+		if ( PermissionManager.validate( "job", 'enabled' ) &&
+			PermissionManager.validate( p_id, 'edit_job' ) &&
+			( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+			return true;
+		}
+		return false;
+	},
+
+	jobItemUIValidate: function( p_id ) {
+
+		if ( !p_id ) {
+			p_id = 'schedule';
+		}
+
+		if ( PermissionManager.validate( "job_item", 'enabled' ) &&
+			PermissionManager.validate( p_id, 'edit_job_item' ) ) {
+			return true;
+		}
+		return false;
+	},
+
+	branchUIValidate: function( p_id ) {
+
+		if ( !p_id ) {
+			p_id = 'schedule';
+		}
+
+		if ( PermissionManager.validate( p_id, 'edit_branch' ) ) {
+			return true;
+		}
+		return false;
+	},
+
+	departmentUIValidate: function( p_id ) {
+
+		if ( !p_id ) {
+			p_id = 'schedule';
+		}
+
+		if ( PermissionManager.validate( p_id, 'edit_department' ) ) {
+			return true;
+		}
+		return false;
+	},
+
+	initPermission: function(){
+		this._super( 'initPermission' );
+
+		if ( PermissionManager.validate( this.permission_id, 'view' ) || PermissionManager.validate( this.permission_id, 'view_child' ) ) {
+			this.show_search_tab = true;
+		} else {
+			this.show_search_tab = false;
+		}
+
+		if ( this.jobUIValidate() ) {
+			this.show_job_ui = true;
+		} else {
+			this.show_job_ui = false;
+		}
+
+		if ( this.jobItemUIValidate() ) {
+			this.show_job_item_ui = true;
+		} else {
+			this.show_job_item_ui = false;
+		}
+
+		if ( this.branchUIValidate() ) {
+			this.show_branch_ui = true;
+		} else {
+			this.show_branch_ui = false;
+		}
+
+		if ( this.departmentUIValidate() ) {
+			this.show_department_ui = true;
+		} else {
+			this.show_department_ui = false;
+		}
 	},
 
 	initOptions: function() {
@@ -241,7 +327,12 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'branch_id'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Branch' ), form_item_input, tab_schedule_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Branch' ), form_item_input, tab_schedule_column1, '', null, true );
+
+		if ( !this.show_branch_ui ) {
+			this.detachElement( 'branch_id' );
+
+		}
 
 		// Department
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -254,7 +345,11 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'department_id'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Department' ), form_item_input, tab_schedule_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Department' ), form_item_input, tab_schedule_column1, '', null, true );
+
+		if ( !this.show_department_ui ) {
+			this.detachElement( 'department_id' );
+		}
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 			//Job
@@ -281,7 +376,11 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 			widgetContainer.append( job_coder );
 			widgetContainer.append( form_item_input );
-			this.addEditFieldToColumn( $.i18n._( 'Job' ), [form_item_input, job_coder], tab_schedule_column1, '', widgetContainer );
+			this.addEditFieldToColumn( $.i18n._( 'Job' ), [form_item_input, job_coder], tab_schedule_column1, '', widgetContainer, true );
+
+			if ( !this.show_job_ui ) {
+				this.detachElement( 'job_id' );
+			}
 
 			// Task
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -307,8 +406,11 @@ ScheduleShiftViewController = BaseViewController.extend( {
 
 			widgetContainer.append( job_item_coder );
 			widgetContainer.append( form_item_input );
-			this.addEditFieldToColumn( $.i18n._( 'Task' ), [form_item_input, job_item_coder], tab_schedule_column1, '', widgetContainer );
+			this.addEditFieldToColumn( $.i18n._( 'Task' ), [form_item_input, job_item_coder], tab_schedule_column1, '', widgetContainer, true );
 
+			if ( !this.show_job_item_ui ) {
+				this.detachElement( 'job_item_id' );
+			}
 		}
 
 		//Note

@@ -475,7 +475,7 @@ class APIAuthentication extends APIFactory {
 			);
 	}
 
-	//Function that Flex can call when an irrecoverable error or uncaught exception is triggered.
+	//Function that HTML5 interface can call when an irrecoverable error or uncaught exception is triggered.
 	function sendErrorReport( $data = NULL, $screenshot = NULL ) {
 		$rl = TTNew('RateLimit');
 		$rl->setID( 'error_report_'. Misc::getRemoteIPAddress() );
@@ -499,7 +499,7 @@ class APIAuthentication extends APIFactory {
 
 		$data = 'IP Address: '. Misc::getRemoteIPAddress() ."\nServer Version: ". APPLICATION_BUILD ."\n\n". $data;
 
-		Misc::sendSystemMail( $subject, $data, $attachments, TRUE ); //Always force these emails to be sent, even when PRODUCTION=FALSE
+		Misc::sendSystemMail( $subject, $data, $attachments ); //Do not send if PRODUCTION=FALSE.
 
 		//return APPLICATION_BUILD so JS can check if its correct and notify the user to refresh/clear cache.
 		return APPLICATION_BUILD;

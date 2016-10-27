@@ -66,7 +66,6 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 										'l5b' => array( 'stripNonFloat', 'isNumeric'),
 										'l5c' => array( 'stripNonFloat', 'isNumeric'),
 										'l5d' => array( 'stripNonFloat', 'isNumeric'),
-										'l7' => array( 'stripNonFloat', 'isNumeric'),
 										'l9' => array( 'stripNonFloat', 'isNumeric'),
 										'l11' => array( 'stripNonFloat', 'isNumeric'),
 										'l16_month_1' => array( 'stripNonFloat', 'isNumeric'),
@@ -641,7 +640,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 								'l7' => array(
 												'page' => 1,
 												'template_page' => 1,
-												'function' => 'drawSplitDecimalFloat',
+												'function' => array('calcL7', 'drawSplitDecimalFloat'),
 												'coordinates' => array(
 																	array(
 																		'x' => 446,
@@ -881,7 +880,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 																		),
 																	'c' => array(
 																		'x' => 117,
-																		'y' => 308,
+																		'y' => 306,
 																		'h' => 6,
 																		'w' => 10,
 																		'halign' => 'C',
@@ -1220,13 +1219,19 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 	}
 
 
-	//This should actually be passed in, as its essentially the difference between the Social Security and Medicare amounts that
-	//this form calculates and what was actually calculated on the pay stubs.
-	//function calcL7( $value, $schema ) {
-	//	$this->l7a = ( $this->l5e - ( $this->l5a2 + $this->l5b2 + $this->l5c2 + $this->l5d2 ) );
-	//	//Debug::Text('Raw: L7A: '. $this->l7a, __FILE__, __LINE__, __METHOD__,10);
-	//	return $this->l7a;
-	//}
+	//This requires 'l7z' to be passed in as a total of all the amounts actually deducted from the employee.
+	//So we can compare that with the calculated amounts that should have been deducted, the result of which is l7.
+	function calcL7( $value, $schema ) {
+		$this->l7 = ( $this->l7z > 0 ) ? ( $this->l7z - $this->l5e ) : 0;
+		Debug::Text('Raw: L7: '. $this->l7 .' L5e: '. $this->l5e .' L7z: '. $this->l7z, __FILE__, __LINE__, __METHOD__,10);
+
+		if ( abs($this->l7) > 100 ) { //As a precaution, check to see if cents adjustment exceeds $100, if it does assume its wrong and zero it out.
+			Debug::Text('L7 seems incorrect, ignoring it...', __FILE__, __LINE__, __METHOD__, 10);
+			$this->l7 = 0;
+		}
+
+		return $this->l7;
+	}
 
 	function calcL10( $value, $schema ) {
 		$this->l10 = ( $this->l6 + $this->l7 + $this->l8 + $this->l9 );

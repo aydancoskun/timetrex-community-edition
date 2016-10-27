@@ -652,7 +652,7 @@ class Form941Report extends Report {
 
 						//Separate data used for reporting, grouping, sorting, from data specific used for the Form.
 						if ( !isset($this->form_data['pay_period'][$quarter_month][$date_stamp]) ) {
-							$this->form_data['pay_period'][$quarter_month][$date_stamp] = Misc::preSetArrayValues( array(), array('l2', 'l3', 'l5a', 'l5b', 'l5c', 'l5d', 'l7', 'l9', 'l5a2', 'l5b2', 'l5c2', 'l5d', 'l8', 'l10' ), 0 );
+							$this->form_data['pay_period'][$quarter_month][$date_stamp] = Misc::preSetArrayValues( array(), array('l2', 'l3', 'l5a', 'l5b', 'l5c', 'l5d', 'l7', 'l9', 'medicare_tax', 'social_security_tax', 'l5a2', 'l5b2', 'l5c2', 'l5d', 'l8', 'l10' ), 0 );
 						}
 						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l2'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l2'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['wages'] );
 						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l3'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l3'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income_tax'] );
@@ -664,6 +664,7 @@ class Form941Report extends Report {
 						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5f'] = 0; //Not implemented currently.
 
 						//Calculated fields, make sure we don't use += on these.
+						//Calculate amounts for Schedule B.
 						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5a2'] = bcmul( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5a'], $this->getF941Object()->social_security_rate );
 						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5b2'] = bcmul( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5b'], $this->getF941Object()->social_security_rate );
 						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5c2'] = bcmul( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5c'], $this->getF941Object()->medicare_rate );
@@ -673,7 +674,11 @@ class Form941Report extends Report {
 
 						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l6'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l3'], bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5e'], $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5f'] ) );
 
-						//Calculate amounts for Schedule B.
+						//Total up Social Security / Medicare Taxes withheld from the employee only, then double them for the employer portion, this helps calculate l7 further down.
+						// The form setup for Medicare Taxes Witheld should only ever be setup for whatever the employee had withheld, now employee and employer.
+						$this->form_data['pay_period'][$quarter_month][$date_stamp]['social_security_tax'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['social_security_tax'], bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'], 2) );
+						$this->form_data['pay_period'][$quarter_month][$date_stamp]['medicare_tax'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['medicare_tax'], bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax'], 2 ) );
+
 						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l10'] = $this->form_data['pay_period'][$quarter_month][$date_stamp]['l6']; //Add L6 -> L9 if they are implemented later.
 					}
 				}
@@ -805,6 +810,9 @@ class Form941Report extends Report {
 			$f941->l5b = $this->form_data['total']['l5b'];
 			$f941->l5c = $this->form_data['total']['l5c'];
 			$f941->l5d = $this->form_data['total']['l5d'];
+
+			Debug::Text('L7 - Social Security Tax Total: '. $this->form_data['total']['social_security_tax'] .' Medicare Tax Total: '. $this->form_data['total']['medicare_tax'], __FILE__, __LINE__, __METHOD__, 10);
+			$f941->l7z = bcadd( $this->form_data['total']['social_security_tax'], $this->form_data['total']['medicare_tax'] ); //Input value used to calculate L7 itself.
 
 			if ( isset($setup_data['quarter_deposit']) AND $setup_data['quarter_deposit'] != ''	 ) {
 				$f941->l11 = Misc::MoneyFormat($setup_data['quarter_deposit'], FALSE);

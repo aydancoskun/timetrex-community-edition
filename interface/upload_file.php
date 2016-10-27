@@ -444,7 +444,8 @@ switch ($object_type) {
 				$license = new TTLicense();
 				$retval = $license->getLicenseFile( TRUE, $license_data ); //Download updated license file if one exists.
 				if ( $retval === FALSE ) {
-					$error = TTi18n::gettext('Invalid License File');
+					$error = TTi18n::gettext('Invalid license file or unable to activate license');
+					unset($success);
 				}
 			}
 		} else {

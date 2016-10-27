@@ -501,7 +501,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getShiftPunchesByUserIDAndEpoch( $user_id, $epoch, $punch_control_id = 0, $maximum_shift_time = NULL ) {
+	function getShiftPunchesByUserIDAndEpoch( $user_id, $epoch, $punch_control_id = 0, $maximum_shift_time = NULL, $ignore_future_punches = FALSE ) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
@@ -519,7 +519,12 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		// Punch Pair: 10-Mar-09 @ 11:30PM -> 11-Mar-09 @ 2:30PM. If the maximum shift time ends at 11:45PM
 		// we need to include the out punch as well.
 		$start_time_stamp = ($epoch - $maximum_shift_time);
-		$end_time_stamp = ($epoch + $maximum_shift_time);
+		if ( $ignore_future_punches == TRUE ) {
+			Debug::Text('Ignoring Future Punches...', __FILE__, __LINE__, __METHOD__, 10);
+			$end_time_stamp = $epoch;
+		} else {
+			$end_time_stamp = ( $epoch + $maximum_shift_time );
+		}
 
 		$pcf = new PunchControlFactory();
 
@@ -563,6 +568,9 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		*/
 
 		//This query removes the sub-query and is optimized for MySQL.
+		//Order by time_stamp asc, status_id desc, so when transfer punches exist at the same time, the out punch comes first, then the in punch (proper order on the timesheet).
+		// Ordering by timestamp first means only if identical times exist it will matter anyways.
+		// This is needed when handing getDefaultPunchSettings() when there are auto-punch schedule shifts in the future, and transfer punches in the past.
 		$query = '
 					select distinct a.*
 					from '. $this->getTable() .' as a
@@ -582,9 +590,8 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 
 						) as z ON a.punch_control_id = z.punch_control_id
 					WHERE a.deleted = 0
-					ORDER BY a.time_stamp asc, a.punch_control_id, a.status_id asc
+					ORDER BY a.time_stamp asc, a.status_id desc, a.punch_control_id, a.id
 					';
-
 
 		//$query .= $this->getSortSQL( $order );
 
@@ -2245,6 +2252,8 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 
 		$query .= ( isset($filter_data['branch_id']) ) ? $this->getWhereClauseSQL( 'b.branch_id', $filter_data['branch_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['department_id']) ) ? $this->getWhereClauseSQL( 'b.department_id', $filter_data['department_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['created_by'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( 'a.updated_by', $filter_data['updated_by'], 'numeric_list', $ph ) : NULL;
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$query .= ( isset($filter_data['job_id']) ) ? $this->getWhereClauseSQL( 'b.job_id', $filter_data['job_id'], 'numeric_list', $ph ) : NULL;

@@ -17,6 +17,15 @@ html, body {
     user-select: none;
 }
 
+.dataError{
+    -webkit-touch-callout: text;
+    -webkit-user-select: text;
+    -khtml-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+
 /* Prevent the text contents of draggable elements from being selectable. */
 [draggable] {
     -webkit-touch-callout: none;

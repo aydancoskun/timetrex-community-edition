@@ -89,6 +89,18 @@ if ( !isset($config_vars['other']['disable_cache_purging'])
 		Debug::Text('Cache directory is invalid: '. TTDate::getDate('DATE+TIME', time() ), __FILE__, __LINE__, __METHOD__, 10);
 	}
 }
+
+//
+//Check for severely out of date versions and take out of production mode if necessary.
+//
+if ( PRODUCTION == TRUE AND DEPLOYMENT_ON_DEMAND == FALSE AND ( (time() - (int)APPLICATION_VERSION_DATE) > (86400 * 455) ) ) {
+	Debug::Text('ERROR: Application version is severely out of date, changing production mode... ', __FILE__, __LINE__, __METHOD__, 10);
+	$install_obj = new Install();
+	$tmp_config_vars['debug']['production'] = 'FALSE';
+	$write_config_result = $install_obj->writeConfigFile( $tmp_config_vars );
+	unset($install_obj, $tmp_config_vars, $write_config_result);
+}
+
 Debug::writeToLog();
 Debug::Display();
 ?>

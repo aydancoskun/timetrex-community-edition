@@ -623,10 +623,10 @@ class UserWageFactory extends Factory {
 		$total_pay_period_days = ceil( TTDate::getDayDifference( $pp_start_date, $pp_end_date) );
 
 		if ( $prev_wage_effective_date == 0 ) {
-			//ProRate salary to termination date if its in the middle of a pay period.
-			if ( $termination_date != '' AND $termination_date > 0 AND $termination_date < $pp_end_date ) {
+			//ProRate salary to termination date if its in the middle of a pay period. Be sure to assume termination date is at the end of the day (inclusive), not beginning.
+			if ( $termination_date != '' AND $termination_date > 0 AND TTDate::getMiddleDayEpoch( $termination_date ) < TTDate::getMiddleDayEpoch( $pp_end_date ) ) {
 				Debug::text(' Setting PP end date to Termination Date: '. TTDate::GetDate('DATE', $termination_date), __FILE__, __LINE__, __METHOD__, 10);
-				$pp_end_date = $termination_date;
+				$pp_end_date = TTDate::getEndDayEpoch( $termination_date );
 			}
 
 			Debug::text(' Using Pay Period End Date: '. TTDate::GetDate('DATE', $pp_end_date), __FILE__, __LINE__, __METHOD__, 10);
@@ -654,10 +654,10 @@ class UserWageFactory extends Factory {
 		$total_pay_period_days = ceil( TTDate::getDayDifference( $pp_start_date, $pp_end_date) );
 
 		if ( $prev_wage_effective_date == 0 ) {
-			//ProRate salary to termination date if its in the middle of a pay period.
-			if ( $termination_date != '' AND $termination_date > 0 AND $termination_date < $pp_end_date ) {
+			//ProRate salary to termination date if its in the middle of a pay period. Be sure to assume termination date is at the end of the day (inclusive), not beginning.
+			if ( $termination_date != '' AND $termination_date > 0 AND TTDate::getMiddleDayEpoch( $termination_date ) < TTDate::getMiddleDayEpoch( $pp_end_date ) ) {
 				//Debug::text(' Setting PP end date to Termination Date: '. TTDate::GetDate('DATE', $termination_date), __FILE__, __LINE__, __METHOD__, 10);
-				$pp_end_date = $termination_date;
+				$pp_end_date = TTDate::getEndDayEpoch( $termination_date );
 			}
 			$total_wage_effective_days = ceil( TTDate::getDayDifference( $wage_effective_date, $pp_end_date) );
 

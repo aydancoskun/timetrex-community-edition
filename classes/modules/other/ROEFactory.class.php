@@ -65,7 +65,8 @@ class ROEFactory extends Factory {
 											'M'		=> TTi18n::gettext('(M) Dismissal'),
 											'N'		=> TTi18n::gettext('(N) Leave of Absence'),
 											'P'		=> TTi18n::gettext('(P) Parental'),
-											'K'		=> TTi18n::gettext('(K) Other')
+											'K'		=> TTi18n::gettext('(K) Other'),
+											'Z'		=> TTi18n::gettext('(Z) Compassionate Care/Parents of Critically Ill Children'),
 									);
 				break;
 			case 'columns':

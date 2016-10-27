@@ -56,8 +56,8 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '9.1.2' );
-define('APPLICATION_VERSION_DATE', @strtotime('28-Jun-2016') ); // Release date of version.
+define('APPLICATION_VERSION', '9.1.3' );
+define('APPLICATION_VERSION_DATE', @strtotime('12-Aug-2016') ); // Release date of version.
 
 if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'WIN' ) { define('OPERATING_SYSTEM', 'WIN' ); } else { define('OPERATING_SYSTEM', 'LINUX' ); }
 
@@ -423,8 +423,10 @@ Debug::setVerbosity( (int)$config_vars['debug']['verbosity'] );
 
 if ( Debug::getEnable() == TRUE AND Debug::getEnableDisplay() == TRUE ) {
 	ini_set( 'display_errors', 1 );
+	ini_set( 'display_startup_errors', 1 );
 } else {
 	ini_set( 'display_errors', 0 );
+	ini_set( 'display_startup_errors', 0 );
 }
 
 //Register PHP error handling functions as early as possible.

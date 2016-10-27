@@ -799,15 +799,15 @@ InstallWizardController = BaseWizardController.extend( {
 				form_item_input.TTextInput( {field: 'database_name', width: 200} );
 				this.addEditFieldToColumn( $.i18n._( 'Database Name' ), form_item_input, databaseConfig_column1 );
 
-				// User Name for Payroll and Time Management
+				// Database User Name
 				form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 				form_item_input.TTextInput( {field: 'user', width: 200} );
-				this.addEditFieldToColumn( $.i18n._( 'User Name for Payroll and Time Management' ), form_item_input, databaseConfig_column1 );
+				this.addEditFieldToColumn( $.i18n._( 'Database User Name' ), form_item_input, databaseConfig_column1 );
 
-				// Password for Payroll and Time Management
+				// Database Password
 				form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 				form_item_input.TTextInput( {field: 'password', width: 200} );
-				this.addEditFieldToColumn( $.i18n._( 'Password for Payroll and Time Management' ), form_item_input, databaseConfig_column1 );
+				this.addEditFieldToColumn( $.i18n._( 'Database Password' ), form_item_input, databaseConfig_column1 );
 
 				var databaseConfig_column2 = databaseConfig.find( '.second-column' );
 				databaseConfig_column2.empty();
@@ -831,66 +831,10 @@ InstallWizardController = BaseWizardController.extend( {
 				this.addEditFieldToColumn( $.i18n._( 'Privileged Database User Password' ), form_item_input, databaseConfig_column2 );
 
 				var ribbon_button_box = this.getRibbonButtonBox();
-				var ribbon_btn = $( '<li><button class="ribbon-sub-menu-icon" id="testConnection">' + $.i18n._( 'Test Connnection' ) + '</button></li>' );
+				var ribbon_btn = $( '<li><button class="ribbon-sub-menu-icon" id="testConnection">' + $.i18n._( 'Test Connection' ) + '</button></li>' );
+				var $this = this;
 				ribbon_btn.unbind( 'click' ).bind( 'click', function() {
-					$data = {};
-					for ( var key in $this.stepsWidgetDic[$this.current_step] ) {
-						var widget = $this.stepsWidgetDic[$this.current_step][key];
-						$data[key] = widget.getValue();
-					}
-					ProgressBar.showOverlay();
-					$this.api.testConnection( $data, {
-						onResult: function( res ) {
-							if ( res.isValid() ) {
-								var result = res.getResult();
-								var step_title_htm = '';
-								if ( result.database_engine == false ) {
-									step_title_htm = step_title_htm
-									+ '<p style="background-color: #ff0000">'
-									+ $.i18n._( 'Your MySQL database does not support the' ) + ' '
-									+ '<b>' + $.i18n._( 'InnoDB' ) + '</b>' + ' '
-									+ $.i18n._( 'storage engine which is required for' ) + ' '
-									+ $.i18n._( stepData.application_name ) + ' '
-									+ $.i18n._( 'to use transactions and ensure data integrity. Please add' ) + ' '
-									+ '<b>' + $.i18n._( 'InnoDB' ) + '</b>' + ' '
-									+ $.i18n._( 'support to MySQL before continuing.' )
-									+ '</p>';
-								}
-								if ( result.test_connection !== null ) {
-									if ( result.test_connection === true ) {
-										step_title_htm = step_title_htm
-										+ '<p>'
-										+ $.i18n._( 'Connection test to your database as a non-privileged user has' ) + ' '
-										+ '<b>' + $.i18n._( 'SUCCEEDED' ) + '</b>' + '!' + ' '
-										+ $.i18n._( 'You may continue.' )
-										+ '</p>';
-									} else if ( result.test_connection === false ) {
-										step_title_htm = step_title_htm
-										+ '<p style="background-color: #ff0000">'
-										+ $.i18n._( 'Connection test to your database as a non-privileged user has' ) + ' '
-										+ '<b>' + $.i18n._( 'FAILED' ) + '</b>' + '!' + ' '
-										+ $.i18n._( 'Please correct them and try again.' )
-										+ '</p>';
-									}
-								}
-
-								if ( result.test_priv_connection !== null ) {
-									if ( result.test_priv_connection === false ) {
-										step_title_htm = step_title_htm
-										+ '<p style="background-color: #ff0000">'
-										+ $.i18n._( 'Connection test to your database as a privileged user has' ) + ' '
-										+ '<b>' + $.i18n._( 'FAILED' ) + '</b>' + '!' + ' '
-										+ $.i18n._( 'Please correct the user name/password and try again.' )
-										+ '</p>';
-									}
-								}
-
-								TAlertManager.showAlert( step_title_htm );
-
-							}
-						}
-					} );
-
+					$this.onTestDatabaseConnectionClick($this, true)
 				} );
 
 				ribbon_button_box.children().eq( 0 ).append( ribbon_btn );
@@ -1012,6 +956,83 @@ InstallWizardController = BaseWizardController.extend( {
 		}
 	},
 
+	/**
+	 * tests database connection:
+	 * @param $this
+	 * @param deferred (optional)
+	 */
+	onTestDatabaseConnectionClick: function($this, showTrue) {
+		$data = {};
+		for ( var key in $this.stepsWidgetDic[$this.current_step] ) {
+			var widget = $this.stepsWidgetDic[$this.current_step][key];
+			$data[key] = widget.getValue();
+		}
+		ProgressBar.showOverlay();
+		res = $this.api.testConnection( $data, {async:false} );
+
+		if ( res.isValid() ) {
+			var result = res.getResult();
+			var step_title_htm = '';
+			if ( result.database_engine == false ) {
+				step_title_htm = step_title_htm
+					+ '<p style="background-color: #ff0000">'
+					+ $.i18n._( 'Your MySQL database does not support the' ) + ' '
+					+ '<b>' + $.i18n._( 'InnoDB' ) + '</b>' + ' '
+					+ $.i18n._( 'storage engine which is required for' ) + ' '
+					+ $.i18n._( stepData.application_name ) + ' '
+					+ $.i18n._( 'to use transactions and ensure data integrity. Please add' ) + ' '
+					+ '<b>' + $.i18n._( 'InnoDB' ) + '</b>' + ' '
+					+ $.i18n._( 'support to MySQL before continuing.' )
+					+ '</p>';
+				//set next button enabled.
+				TAlertManager.showAlert( step_title_htm );
+				return false
+			}
+			if ( result.test_connection !== null ) {
+				if ( result.test_connection === true ) {
+					step_title_htm = step_title_htm
+						+ '<p>'
+						+ $.i18n._('Connection test to your database as a non-privileged user has') + ' '
+						+ '<b>' + $.i18n._('SUCCEEDED') + '</b>' + '!' + ' '
+						+ $.i18n._('You may continue.')
+						+ '</p>';
+					if (showTrue) {
+						TAlertManager.showAlert(step_title_htm);
+					}
+					return true;
+
+				} else if ( result.test_connection === false ) {
+					step_title_htm = step_title_htm
+						+ '<p style="background-color: #ff0000">'
+						+ $.i18n._( 'Connection test to your database as a non-privileged user has' ) + ' '
+						+ '<b>' + $.i18n._( 'FAILED' ) + '</b>' + '!' + ' '
+						+ $.i18n._( 'Please correct them and try again.' )
+						+ '</p>';
+
+					TAlertManager.showAlert( step_title_htm );
+					return false;
+				}
+			}
+
+			if ( result.test_priv_connection !== null ) {
+				if ( result.test_priv_connection === false ) {
+					step_title_htm = step_title_htm
+						+ '<p style="background-color: #ff0000">'
+						+ $.i18n._( 'Connection test to your database as a privileged user has' ) + ' '
+						+ '<b>' + $.i18n._( 'FAILED' ) + '</b>' + '!' + ' '
+						+ $.i18n._( 'Please correct the user name/password and try again.' )
+						+ '</p>';
+
+					return false;
+					TAlertManager.showAlert( step_title_htm );
+				}
+			}
+
+
+		}
+
+	},
+
 	onFormItemChange: function( target ) {
 		var widgets = this.stepsWidgetDic[this.current_step];
 
@@ -1105,6 +1126,7 @@ InstallWizardController = BaseWizardController.extend( {
 					$data[key] = widget.getValue();
 				}
 
+				if ( this.onTestDatabaseConnectionClick(this, false) ) {
 				TAlertManager.showConfirmAlert( $.i18n._( 'Installing/Upgrading the TimeTrex database may take up to 10 minutes. Please do not stop the process in any way, including pressing STOP or BACK in your web browser, doing so may leave your database in an unusable state.' ), null, function( result ) {
 					if ( result ) {
 						$this.api.createDatabase( $data, {
@@ -1123,6 +1145,7 @@ InstallWizardController = BaseWizardController.extend( {
 						} );
 					}
 				} );
+					}
 				break;
 			case 'postUpgrade':
 				this.current_step = 'installDone';

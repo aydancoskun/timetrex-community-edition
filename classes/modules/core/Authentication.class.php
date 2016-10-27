@@ -746,7 +746,12 @@ class Authentication {
 				if ( $this->Read() == TRUE ) {
 					//touch UpdatedDate in most cases, however when calling PING() we don't want to do this.
 					if ( $touch_updated_date !== FALSE ) {
-						$this->Update();
+						//Reduce contention and traffic on the session table by only touching the updated_date every 60 +/- rand() seconds.
+						//Especially helpful for things like the dashboard that trigger many async calls.
+						if ( ( time() - $this->getUpdatedDate() ) > ( 60 + ( rand( 0, 30 ) - 15 ) ) ) {
+							Debug::text('  Touching updated date due to more than 60s...', __FILE__, __LINE__, __METHOD__, 10);
+							$this->Update();
+						}
 					}
 
 					$profiler->stopTimer( "Authentication::Check()");

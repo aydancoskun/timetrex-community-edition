@@ -236,6 +236,51 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * @group PayStub_testProRateSalary
+	 */
+	//Test basic salary calculation.
+	function testProRateSalaryCalculation() {
+		//Hire Date should be assumed to be the beginning of the day. (inclusive)
+		//Termination Date should be assumed to be the end of the day. (inclusive)
+		//Wage Effective Date is also assumed to be the beginning of the day (inclusive).
+		//
+		//So if an employee is hired and terminated on the same day, and is salary, they should get one day pay.
+
+		//proRateSalary($salary, $wage_effective_date, $prev_wage_effective_date, $pp_start_date, $pp_end_date, $termination_date )
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016'), FALSE, strtotime('01-Aug-2016'), strtotime('13-Aug-2016'), FALSE );
+		$this->assertEquals( $pro_rated_salary, '1000.00' );
+
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016'), FALSE, strtotime('01-Aug-2016'), strtotime('13-Aug-2016'), strtotime('13-Aug-2016') );
+		$this->assertEquals( $pro_rated_salary, '1000.00' );
+
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('13-Aug-2016 11:59:59PM'), strtotime('13-Aug-2016 9:00AM') );
+		$this->assertEquals( $pro_rated_salary, '1000.00' );
+
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), strtotime('10-Aug-2016 9:00AM') );
+		$this->assertEquals( $pro_rated_salary, '1000.00' );
+
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('02-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), strtotime('10-Aug-2016 9:00AM') );
+		$this->assertEquals( $pro_rated_salary, '900.00' );
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('06-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), strtotime('10-Aug-2016 9:00AM') );
+		$this->assertEquals( $pro_rated_salary, '500.00' );
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('10-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), strtotime('10-Aug-2016 9:00AM') );
+		$this->assertEquals( $pro_rated_salary, '100.00' );
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('11-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), strtotime('10-Aug-2016 9:00AM') );
+		$this->assertEquals( $pro_rated_salary, '0.00' );
+
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), strtotime('09-Aug-2016 9:00AM') );
+		$this->assertEquals( $pro_rated_salary, '900.00' );
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), strtotime('05-Aug-2016 9:00AM') );
+		$this->assertEquals( $pro_rated_salary, '500.00' );
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), strtotime('01-Aug-2016 9:00AM') );
+		$this->assertEquals( $pro_rated_salary, '100.00' );
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), strtotime('31-Jul-2016 9:00AM') );
+		$this->assertEquals( $pro_rated_salary, '0.00' );
+
+		return TRUE;
+	}
+
+	/**
 	 * @group PayStub_testSinglePayStub
 	 */
 	function testSinglePayStub() {

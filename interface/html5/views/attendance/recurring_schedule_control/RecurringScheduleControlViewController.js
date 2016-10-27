@@ -669,7 +669,10 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				var index = 0;
 
 				for ( var i = 0; i < result_data.length; i++ ) {
-					if ( result_data[i].id == id && result_data[i].user_id == user_id ) {
+					//FIXES: js error id is undefined.
+					//weird because id is always set as a filter. we don't need it in this if.
+					//if ( result_data[i].id == id && result_data[i].user_id == user_id ) {
+					if ( result_data[i].user_id == user_id ) {
 						index = i;
 					}
 				}

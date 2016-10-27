@@ -1226,7 +1226,8 @@ class Install {
 	}
 	function checkPHPCLIBinary() {
 		if ( $this->getPHPCLI() != '' ) {
-			if ( is_executable( $this->getPHPCLI() ) ) {
+			//Sometimes the user may mistaken make the PHP CLI the directory, rather than the executeable itself. Make sure we catch that case.
+			if ( is_dir( $this->getPHPCLI() ) == FALSE AND is_executable( $this->getPHPCLI() ) == TRUE ) {
 				return 0;
 			}
 		}
@@ -1487,7 +1488,7 @@ class Install {
 	}
 
 	function checkWritableCacheDirectory() {
-		if ( isset($this->config_vars['cache']['dir']) AND is_writable($this->config_vars['cache']['dir']) ) {
+		if ( isset($this->config_vars['cache']['dir']) AND is_dir($this->config_vars['cache']['dir']) AND is_writable($this->config_vars['cache']['dir']) ) {
 			return 0;
 		}
 
@@ -1557,7 +1558,7 @@ class Install {
 	}
 
 	function checkWritableStorageDirectory() {
-		if ( isset($this->config_vars['path']['storage']) AND is_writable($this->config_vars['path']['storage']) ) {
+		if ( isset($this->config_vars['path']['storage']) AND is_dir($this->config_vars['path']['storage']) AND is_writable($this->config_vars['path']['storage']) ) {
 			return 0;
 		}
 
@@ -1565,7 +1566,7 @@ class Install {
 	}
 
 	function checkWritableLogDirectory() {
-		if ( isset($this->config_vars['path']['log']) AND is_writable($this->config_vars['path']['log']) ) {
+		if ( isset($this->config_vars['path']['log']) AND is_dir($this->config_vars['path']['log']) AND is_writable($this->config_vars['path']['log']) ) {
 			return 0;
 		}
 

@@ -254,8 +254,8 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 		*/
 
 		Debug::Text('AutoUpgrade Stage2... Version: '. APPLICATION_VERSION, __FILE__, __LINE__, __METHOD__, 10);
-		if ( PRODUCTION == FALSE OR DEPLOYMENT_ON_DEMAND == TRUE ) {
-			echo "ERROR: Not doing full upgrade when PRODUCTION or ONDEMAND mode is disabled...\n";
+		if ( $force == FALSE AND ( PRODUCTION == FALSE OR DEPLOYMENT_ON_DEMAND == TRUE ) ) { //Allow FORCE=TRUE to override this.
+			echo "ERROR: Not doing full upgrade when PRODUCTION mode is disabled, or in ONDEMAND mode... Use FORCE argument to override.\n";
 			CLIExit(1);
 		}
 
@@ -355,8 +355,8 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 
 	//Stage 1, Full upgrade, including downloading the file.
 	if ( in_array('--schema_only', $argv) == FALSE AND in_array('--stage2', $argv) == FALSE ) {
-		if ( PRODUCTION == FALSE OR DEPLOYMENT_ON_DEMAND == TRUE ) {
-			echo "ERROR: Not doing full upgrade when PRODUCTION mode is disabled, or in ONDEMAND mode...\n";
+		if ( $force == FALSE AND ( PRODUCTION == FALSE OR DEPLOYMENT_ON_DEMAND == TRUE ) ) { //Allow FORCE=TRUE to override this.
+			echo "ERROR: Not doing full upgrade when PRODUCTION mode is disabled, or in ONDEMAND mode... Use FORCE argument to override.\n";
 			CLIExit(1);
 		}
 

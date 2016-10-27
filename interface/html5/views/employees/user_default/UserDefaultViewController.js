@@ -569,7 +569,7 @@ UserDefaultViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {field: 'start_week_day'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.start_week_day_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Start Weeks on' ), form_item_input, tab_employee_preference_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Calendar Starts On' ), form_item_input, tab_employee_preference_column1 );
 
 		// Rows per page
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );

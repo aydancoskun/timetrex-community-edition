@@ -2321,6 +2321,13 @@ class UserFactory extends Factory {
 		return FALSE;
 	}
 	function setHireDate($epoch) {
+		//Hire Date should be assumed to be the beginning of the day. (inclusive)
+		//Termination Date should be assumed to be the end of the day. (inclusive)
+		//So if an employee is hired and terminated on the same day, and is salary, they should get one day pay.
+		//FIXME: Save hire date as getMiddleDayEpoch(), but change all use cases to force it to beginning of the day when comparisons are made on it.
+		//       Save termination date as getMiddleDayEpoch(), but change all use cases to force it to use the end of the day when comparisons are made on it.
+		//		 Alternatively, switch it to use date_stamp datatype, and use >= or <= operators.
+
 		//( $epoch !== FALSE AND $epoch == '' ) //Check for strict FALSE causes data from UserDefault to fail if its not set.
 		if	(	( $epoch == '' )
 				OR
@@ -2352,6 +2359,13 @@ class UserFactory extends Factory {
 		return FALSE;
 	}
 	function setTerminationDate($epoch) {
+		//Hire Date should be assumed to be the beginning of the day. (inclusive)
+		//Termination Date should be assumed to be the end of the day. (inclusive)
+		//So if an employee is hired and terminated on the same day, and is salary, they should get one day pay.
+		//FIXME: Save hire date as getMiddleDayEpoch(), but change all use cases to force it to beginning of the day when comparisons are made on it.
+		//       Save termination date as getMiddleDayEpoch(), but change all use cases to force it to use the end of the day when comparisons are made on it.
+		//		 Alternatively, switch it to use date_stamp datatype, and use >= or <= operators.
+
 		if	(	( $epoch == '' )
 				OR
 				$this->Validator->isDate(		'termination_date',

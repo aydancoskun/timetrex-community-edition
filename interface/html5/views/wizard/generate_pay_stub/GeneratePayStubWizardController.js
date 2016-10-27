@@ -102,7 +102,7 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 					field: 'run_id',
 					width: 20
 				} );
-				form_item_label.text( $.i18n._( 'Payroll Run' ) + ' #: ' );
+				form_item_label.text( $.i18n._( 'Payroll Run' ) + ': ' );
 				form_item_input_div.append( textInput );
 				this.content_div.append( form_item );
 				this.stepsWidgetDic[this.current_step][textInput.getField()] = textInput;

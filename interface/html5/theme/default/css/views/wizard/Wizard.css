@@ -214,6 +214,11 @@
     height: calc(100% - 90px)
 }
 
+.install-wizard .requirements {
+    height: auto;
+}
+
+
 .install-wizard .user {
     height: calc(100% - 120px)
 }
@@ -260,6 +265,7 @@
     min-width: 135px;
     padding-right: 7px;
     text-align: right;
+    line-height:15px;
 }
 
 .install-wizard .edit-view-form-item-div .edit-view-form-item-input-div {
@@ -398,10 +404,11 @@ progress::-moz-progress-bar {
 
 .wizard .ribbon-button-bar {
     border-top: 1px solid #999999;
-    bottom: 5px;
+    bottom: 4em;
     padding-top: 5px;
-    position: absolute;
+    position: fixed;
     width: 100%;
+    background:#f8f8f8;
 }
 
 .wizard .menu ul {

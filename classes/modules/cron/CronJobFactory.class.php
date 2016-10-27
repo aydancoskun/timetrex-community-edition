@@ -387,6 +387,12 @@ class CronJobFactory extends Factory {
 			//Even if the file does not exist, we still need to "pretend" the cron job ran (set last ran date) so we don't
 			//display the big red error message saying that NO jobs have run in the last 24hrs.
 			if ( file_exists( $script ) ) {
+				if ( DEPLOYMENT_ON_DEMAND == TRUE ) { //In cases where many instances may be triggering jobs at the same time, add a random sleep to stagger them.
+					$sleep_timer = rand(0, 120);
+					Debug::text(' Random Sleep: '. $sleep_timer, __FILE__, __LINE__, __METHOD__, 10);
+					sleep( $sleep_timer );
+				}
+
 				$command = '"'. $php_cli .'" "'. $script .'"';
 				//if ( OPERATING_SYSTEM == 'WIN' ) {
 					//Windows requires quotes around the entire command, and each individual section with that might have spaces.

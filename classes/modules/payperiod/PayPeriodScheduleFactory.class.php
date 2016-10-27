@@ -1620,7 +1620,7 @@ class PayPeriodScheduleFactory extends Factory {
 
 	//Returns shift data according to the pay period schedule criteria for use
 	//in determining which day punches belong to.
-	function getShiftData( $date_stamp = NULL, $user_id = NULL, $epoch = NULL, $filter = NULL, $tmp_punch_control_obj = NULL, $maximum_shift_time = NULL, $new_shift_trigger_time = NULL, $plf = NULL ) {
+	function getShiftData( $date_stamp = NULL, $user_id = NULL, $epoch = NULL, $filter = NULL, $tmp_punch_control_obj = NULL, $maximum_shift_time = NULL, $new_shift_trigger_time = NULL, $plf = NULL, $ignore_future_punches = FALSE ) {
 		global $profiler;
 		$profiler->startTimer( 'PayPeriodScheduleFactory::getShiftData()' );
 
@@ -1659,12 +1659,14 @@ class PayPeriodScheduleFactory extends Factory {
 				// The above scenario when adding the last 6:00AM punch on the next day will only look back 14hrs and not find the first
 				// punch pair, therefore allowing more than 14hrs on the same day.
 				// So we need to extend the maximum shift time just when searching for punches and let getShiftData() sort out the proper maximum shift time itself.
-				$plf->getShiftPunchesByUserIDAndEpoch( $user_id, $epoch, $punch_control_id, ( $maximum_shift_time * 2 ) );
+				//
+				// $ignore_future_punches is used for getPunchDefaultSettings(), so we can ignore auto-punch shifts that may have been entered in the future already that cause the default settings to be incorrect.
+				$plf->getShiftPunchesByUserIDAndEpoch( $user_id, $epoch, $punch_control_id, ( $maximum_shift_time * 2 ), $ignore_future_punches );
 				unset($punch_control_id);
 			}
 		}
 
-		Debug::text('Punch Rows: '. $plf->getRecordCount() .' UserID: '. $user_id .' Date: '. TTDate::getDate('DATE+TIME', $epoch) .'('.$epoch.') MaximumShiftTime: '. $maximum_shift_time .' NewShiftTrigger: '. $new_shift_trigger_time .' Filter: '. $filter, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Punch Rows: '. $plf->getRecordCount() .' UserID: '. $user_id .' Date: '. TTDate::getDate('DATE+TIME', $epoch) .'('.$epoch.') MaximumShiftTime: '. $maximum_shift_time .' NewShiftTrigger: '. $new_shift_trigger_time .' Filter: '. $filter .' Ignore Future Punches: '. (int)$ignore_future_punches, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $plf->getRecordCount() > 0 ) {
 			$shift = 0;
 			$i = 0;

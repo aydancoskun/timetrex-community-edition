@@ -620,7 +620,7 @@ CompanyViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'support_contact'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Primary Support contact' ), form_item_input, tab_company_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Primary Support Contact' ), form_item_input, tab_company_column2 );
 
 		//Direct Deposit (EFT)
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );

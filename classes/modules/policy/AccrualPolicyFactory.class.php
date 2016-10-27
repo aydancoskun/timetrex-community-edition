@@ -555,7 +555,11 @@ class AccrualPolicyFactory extends Factory {
 	}
 
 	function getApplyFrequencyHireDate() {
-		return $this->fromBool( $this->data['apply_frequency_hire_date'] );
+		if ( isset($this->data['apply_frequency_hire_date']) ) {
+			return $this->fromBool( $this->data['apply_frequency_hire_date'] );
+		}
+
+		return FALSE;
 	}
 	function setApplyFrequencyHireDate($bool) {
 		$this->data['apply_frequency_hire_date'] = $this->toBool($bool);
@@ -564,7 +568,11 @@ class AccrualPolicyFactory extends Factory {
 	}
 
 	function getEnableProRateInitialPeriod() {
-		return $this->fromBool( $this->data['enable_pro_rate_initial_period'] );
+		if ( isset( $this->data['enable_pro_rate_initial_period'] ) ) {
+			return $this->fromBool( $this->data['enable_pro_rate_initial_period'] );
+		}
+
+		return FALSE;
 	}
 	function setEnableProRateInitialPeriod($bool) {
 		$this->data['enable_pro_rate_initial_period'] = $this->toBool($bool);
@@ -573,7 +581,11 @@ class AccrualPolicyFactory extends Factory {
 	}
 
 	function getEnableOpeningBalance() {
-		return $this->fromBool( $this->data['enable_opening_balance'] );
+		if ( isset($this->data['enable_opening_balance']) ) {
+			return $this->fromBool( $this->data['enable_opening_balance'] );
+		}
+
+		return FALSE;
 	}
 	function setEnableOpeningBalance($bool) {
 		$this->data['enable_opening_balance'] = $this->toBool($bool);
@@ -582,7 +594,11 @@ class AccrualPolicyFactory extends Factory {
 	}
 
 	function getMilestoneRolloverHireDate() {
-		return $this->fromBool( $this->data['milestone_rollover_hire_date'] );
+		if ( isset($this->data['milestone_rollover_hire_date']) ) {
+			return $this->fromBool( $this->data['milestone_rollover_hire_date'] );
+		}
+
+		return FALSE;
 	}
 	function setMilestoneRolloverHireDate($bool) {
 		$this->data['milestone_rollover_hire_date'] = $this->toBool($bool);
@@ -1493,6 +1509,12 @@ class AccrualPolicyFactory extends Factory {
 											FALSE,
 											TTi18n::gettext('Please specify a name') );
 			}
+		}
+
+		if ( $this->getEnableOpeningBalance() == TRUE AND $this->getMinimumEmployedDays() != 0 ) {
+			$this->Validator->isTRUE(	'minimum_employed_days',
+										 FALSE,
+										 TTi18n::gettext('Minimum Employed Days must be set to 0 when Opening Balance is Enabled') );
 		}
 
 		/*

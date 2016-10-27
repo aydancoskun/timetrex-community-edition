@@ -3034,14 +3034,14 @@ class PayStubFactory extends Factory {
 				$prev_type = NULL;
 				$description_subscript_counter = 1;
 				foreach ($pself as $pay_stub_entry) {
-
 					//Debug::text('Pay Stub Entry Account ID: '.$pay_stub_entry->getPayStubEntryNameId(), __FILE__, __LINE__, __METHOD__, 10);
 					$description_subscript = NULL;
 
 					$pay_stub_entry_name_obj = $psealf->getById( $pay_stub_entry->getPayStubEntryNameId() )->getCurrent();
 
 					//Use this to put the total for each type at the end of the array.
-					if ( $prev_type == 40 OR $pay_stub_entry_name_obj->getType() != 40 ) {
+					//Check for prev_type=NULL/!isset($type) in case there are only Total Gross entries for $0.
+					if ( $prev_type == 40 OR $pay_stub_entry_name_obj->getType() != 40 OR ( $prev_type == NULL AND !isset($type) ) ) {
 						$type = $pay_stub_entry_name_obj->getType();
 					}
 					//Debug::text('Pay Stub Entry Name ID: '. $pay_stub_entry_name_obj->getId() .' Type ID: '. $pay_stub_entry_name_obj->getType() .' Type: '. $type, __FILE__, __LINE__, __METHOD__, 10);
@@ -3135,6 +3135,10 @@ class PayStubFactory extends Factory {
 					$total_pay_stub_rows += ( isset($pay_stub_entries[30]) ) ? ( ceil( count($pay_stub_entries[30]) / 2 ) + 2 ) : 0;
 				}
 
+				if ( $total_pay_stub_rows == 0 ) {
+					$total_pay_stub_rows = 1; //Prevent division by 0 on empty pay stubs.
+				}
+
 				$default_line_item_font_size = ( 335 / $total_pay_stub_rows );
 				if ( $default_line_item_font_size > 12 ) {
 					$default_line_item_font_size = 12;
@@ -3145,17 +3149,19 @@ class PayStubFactory extends Factory {
 
 				$block_adjust_y = 30;
 
+				//Set Default cell height/width outside of the earnings, especially important if a pay stub has no earnings.
+				$cell_height = 10;
+				$column_widths['ytd_amount'] = ( ($max_widths['ytd_amount'] * 2) < 25 ) ? 25 : ($max_widths['ytd_amount'] * 2);
+				$column_widths['amount'] = ( ($max_widths['amount'] * 2) < 20 ) ? 20 : ($max_widths['amount'] * 2);
+				$column_widths['rate'] = ( ($max_widths['rate'] * 2) < 5 ) ? 5 : ($max_widths['rate'] * 2);
+				$column_widths['units'] = ( ($max_widths['units'] * 2) < 17 ) ? 17 : ($max_widths['units'] * 2);
+				$column_widths['name'] = (175 - ($column_widths['ytd_amount'] + $column_widths['amount'] + $column_widths['rate'] + $column_widths['units']));
+				//Debug::Arr($column_widths, 'Column Widths: ', __FILE__, __LINE__, __METHOD__, 10);
+
 				//
 				//Earnings
 				//
 				if ( isset($pay_stub_entries[10]) ) {
-					$column_widths['ytd_amount'] = ( ($max_widths['ytd_amount'] * 2) < 25 ) ? 25 : ($max_widths['ytd_amount'] * 2);
-					$column_widths['amount'] = ( ($max_widths['amount'] * 2) < 20 ) ? 20 : ($max_widths['amount'] * 2);
-					$column_widths['rate'] = ( ($max_widths['rate'] * 2) < 5 ) ? 5 : ($max_widths['rate'] * 2);
-					$column_widths['units'] = ( ($max_widths['units'] * 2) < 17 ) ? 17 : ($max_widths['units'] * 2);
-					$column_widths['name'] = (175 - ($column_widths['ytd_amount'] + $column_widths['amount'] + $column_widths['rate'] + $column_widths['units']));
-					//Debug::Arr($column_widths, 'Column Widths: ', __FILE__, __LINE__, __METHOD__, 10);
-
 					//Earnings Header
 					$pdf->SetFont('', 'B', $default_line_item_font_size);
 					$cell_height = $pdf->getStringHeight(10, 'Z');

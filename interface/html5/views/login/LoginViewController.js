@@ -364,7 +364,6 @@ LoginViewController = BaseViewController.extend( {
 	},
 
 	goToView: function() {
-
 		TAlertManager.closeBrowserBanner();
 		this.doing_login = false;
 
@@ -398,7 +397,9 @@ LoginViewController = BaseViewController.extend( {
 				domain: Global.getHost()
 			} );
 		} else {
-			if ( LocalCacheData.getLoginUserPreference().default_login_screen ) {
+			if (Global.getDeepLink() != false){
+				TopMenuManager.goToView(Global.getDeepLink());
+			}else if ( LocalCacheData.getLoginUserPreference().default_login_screen ) {
 				TopMenuManager.goToView( LocalCacheData.getLoginUserPreference().default_login_screen );
 			} else {
 				TopMenuManager.goToView( 'Home' );

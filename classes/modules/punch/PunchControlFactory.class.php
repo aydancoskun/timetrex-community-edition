@@ -229,7 +229,7 @@ class PunchControlFactory extends Factory {
 			if ( $raw === TRUE ) {
 				return $this->data['date_stamp'];
 			} else {
-				return TTDate::strtotime( $this->data['date_stamp'] );
+				return TTDate::getMiddleDayEpoch( TTDate::strtotime( $this->data['date_stamp'] ) );
 			}
 		}
 
@@ -1992,7 +1992,9 @@ class PunchControlFactory extends Factory {
 		if ( $this->getEnableCalcSystemTotalTime() == TRUE AND is_object( $this->getUserObject() ) ) {
 			//old_date_stamps can contain other dates from calcUserDate() as well.
 			$this->old_date_stamps[] = $this->getDateStamp(); //Make sure the current date is calculated
-			$this->old_date_stamps[] = $this->getOldDateStamp(); //Make sure the old date is calculated
+			if ( $this->getOldDateStamp() != '' ) {
+				$this->old_date_stamps[] = $this->getOldDateStamp(); //Make sure the old date is calculated
+			}
 			UserDateTotalFactory::reCalculateDay( $this->getUserObject(), $this->old_date_stamps, $this->getEnableCalcException(), $this->getEnablePreMatureException() );
 		}
 

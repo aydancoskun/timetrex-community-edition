@@ -75,9 +75,13 @@ Global.sendErrorReport = function() {
 	var error_stack = arguments[4];
 
 	var login_user = LocalCacheData.getLoginUser();
+	/*
+	 * JavaScript exception ignore list
+	 */
 	if ( error_string.indexOf( "TypeError: 'null' is not an object" ) >= 0 ||
 		error_string.indexOf( "NS_ERROR_" ) >= 0 ||
-		error_string.indexOf( "NS_ERROR_OUT_OF_MEMORY" ) >= 0 ) {
+		error_string.indexOf( "NS_ERROR_OUT_OF_MEMORY" ) >= 0 ||
+		error_string.indexOf( "NPObject" ) >= 0 ) { //Error calling method on NPObject - likely caused by an extension or plugin in the browser
 		return;
 	}
 	var error;
@@ -3067,3 +3071,23 @@ Global.sendAnalytics = function( track_address ) {
 Global.detectMobileBrowser = function() {
 	return /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
 }
+
+/**
+ * Allowing deep linking
+ * @type {boolean}
+ */
+Global.deeplink = false;
+
+Global.getDeepLink = function() {
+	return Global.deeplink;
+};
+
+/**
+ * Retrieves the deeplink from the current url.
+ */
+Global.setDeepLink = function() {
+	var newDeepLink = window.location.href.split( '#!m=' )[1];
+	if(newDeepLink != 'Login' && newDeepLink != undefined) {
+		Global.deeplink = newDeepLink;
+	}
+};

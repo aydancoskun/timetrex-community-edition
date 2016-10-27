@@ -656,7 +656,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 				$apf->setEnableOpeningBalance( TRUE );
 				$apf->setEnableProRateInitialPeriod( TRUE );
 
-				$apf->setMinimumEmployedDays( 15 );
+				$apf->setMinimumEmployedDays( 0 );
 				$apf->setAccrualPolicyAccount( $accrual_policy_account_id );
 				break;
 			case 2110: //Calendar Based: Pay Period with one milestone - ProRate Initial Period
@@ -2142,7 +2142,8 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, ( (110*3600)+(60*0) ) ); //110:00
+		//Pro-Rate part of the first accrual balance.
+		$this->assertEquals( $accrual_balance, ( (112*3600)+(3086) ) ); //112:51.432
 	}
 
 	/**

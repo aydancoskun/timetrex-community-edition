@@ -230,7 +230,7 @@ class PunchFactory extends Factory {
 	}
 	*/
 
-	function getPreviousPunchObject( $epoch, $user_id = FALSE ) {
+	function getPreviousPunchObject( $epoch, $user_id = FALSE, $ignore_future_punches = FALSE ) {
 		if ( $user_id == '' ) {
 			$user_id = $this->getUser();
 		}
@@ -250,7 +250,7 @@ class PunchFactory extends Factory {
 				$pps_obj = TTnew('PayPeriodScheduleFactory');
 				$maximum_shift_time = ( 3600 * 16 );
 			}
-			$shift_data = $pps_obj->getShiftData( NULL, $user_id, $epoch, 'nearest_shift' );
+			$shift_data = $pps_obj->getShiftData( NULL, $user_id, $epoch, 'nearest_shift', NULL, NULL, NULL, NULL, $ignore_future_punches );
 
 			$last_punch_id = FALSE;
 			if ( isset($shift_data) AND is_array($shift_data) ) {
@@ -1379,7 +1379,7 @@ class PunchFactory extends Factory {
 
 	//Run this function on the previous punch object normally.
 	function inBreakPolicyWindow( $current_epoch, $previous_epoch, $previous_punch_status = NULL ) {
-		Debug::Text(' Checking if we are in break policy window/punch time... Current: '. TTDate::getDate('DATe+TIME', $current_epoch) .' Previous: '. TTDate::getDate('DATe+TIME', $previous_epoch), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text(' Checking if we are in break policy window/punch time... Current: '. TTDate::getDate('DATE+TIME', $current_epoch) .' Previous: '. TTDate::getDate('DATE+TIME', $previous_epoch), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $current_epoch == '' ) {
 			return FALSE;
@@ -1493,12 +1493,12 @@ class PunchFactory extends Factory {
 		$transfer = FALSE;
 		$is_previous_punch = FALSE;
 
-		$prev_punch_obj = $this->getPreviousPunchObject( $epoch, $user_obj->getId() );
+		$prev_punch_obj = $this->getPreviousPunchObject( $epoch, $user_obj->getId(), TRUE ); //Ignore future punches, so auto-punch shifts in the future don't mess up default punch settings.
 		if ( is_object( $prev_punch_obj ) ) {
 			$is_previous_punch = TRUE;
 			
 			$prev_punch_obj->setUser( $user_obj->getId() );
-			Debug::Text(' Found Previous Punch within Continuous Time from now: '. TTDate::getDate('DATe+TIME', $prev_punch_obj->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text(' Found Previous Punch within Continuous Time from now: '. TTDate::getDate('DATE+TIME', $prev_punch_obj->getTimeStamp() ) .' ID: '. $prev_punch_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
 
 			//Due to split shifts or multiple schedules on a single day that are close to one another, we have to be smarter about how we default punch settings.
 			//We only base default punch settings on the previous punch if it was *NOT* a Normal Out punch, with the idea that the employee

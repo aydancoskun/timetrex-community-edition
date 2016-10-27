@@ -2012,6 +2012,44 @@ class Misc {
 		return $email;
 	}
 
+	//Parses an RFC822 Email Address ( "John Doe" <john.doe@mydomain.com> ) into its separate components.
+	static function parseRFC822EmailAddress($input) {
+		if ( strstr( $input, '<>' ) !== FALSE ) { //Check for <> together, as that means no email address is specified.
+			return FALSE;
+		}
+
+		if ( function_exists('imap_rfc822_parse_adrlist') ) {
+			$parsed_data = @imap_rfc822_parse_adrlist( $input, 'unknown.local' );
+			//Debug::Arr( $parsed_data, 'Parsed Email Data From: ' . $input, __FILE__, __LINE__, __METHOD__, 10 );
+			if ( is_array( $parsed_data ) AND count($parsed_data) > 0 ) {
+				$parsed_data = $parsed_data[0];
+				if ( $parsed_data->host != 'unknown.local' ) {
+					$retarr['email'] = $parsed_data->mailbox . '@' . $parsed_data->host;
+
+					if ( isset( $parsed_data->personal ) ) {
+						$retarr['full_name'] = $parsed_data->personal;
+
+						$split_name = explode( ' ', $parsed_data->personal );
+						if ( $split_name !== FALSE ) {
+							if ( isset( $split_name[0] ) ) {
+								$retarr['first_name'] = $split_name[0];
+							}
+							if ( isset( $split_name[( count($split_name) - 1 )] ) ) {
+								$retarr['last_name'] = $split_name[( count($split_name) - 1 )];
+							}
+						}
+					}
+
+					return $retarr;
+				}
+			}
+		} else {
+			Debug::Text('ERROR: PHP IMAP extension is not installed...', __FILE__, __LINE__, __METHOD__, 10 );
+		}
+
+		return FALSE;
+	}
+
 	static function sendSystemMail( $subject, $body, $attachments = NULL, $force = FALSE ) {
 		if ( $subject == '' OR $body == '' ) {
 			return FALSE;

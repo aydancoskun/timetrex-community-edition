@@ -187,6 +187,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 		}
 
+		Global.setDeepLink();
 		var timeout_count;
 		if ( view_id !== 'Login' && !LocalCacheData.getLoginUser() ) {
 			Global.setURLToBrowser( Global.getBaseURL() + '#!m=Login' );

@@ -693,7 +693,7 @@ StationViewController = BaseViewController.extend( {
 			set_empty: true,
 			field: 'department_id'
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Department' ), form_item_input, tab_station_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Default Department' ), form_item_input, tab_station_column1, '' );
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 			//Job

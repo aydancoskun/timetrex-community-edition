@@ -392,19 +392,20 @@ class APIPunch extends APIFactory {
 			unset($pplf, $pay_period_ids);
 		}
 
-		$blf = TTnew( 'PunchListFactory' );
-		if ( DEPLOYMENT_ON_DEMAND == TRUE ) { $blf->setQueryStatementTimeout( 60000 ); }
-		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
-		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
-		if ( $blf->getRecordCount() > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $blf->getRecordCount() );
+		/** @var PunchListFactory $plf */
+		$plf = TTnew( 'PunchListFactory' );
+		if ( DEPLOYMENT_ON_DEMAND == TRUE ) { $plf->setQueryStatementTimeout( 60000 ); }
+		$plf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
+		Debug::Text('Record Count: '. $plf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		if ( $plf->getRecordCount() > 0 ) {
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $plf->getRecordCount() );
 
-			$this->setPagerObject( $blf );
+			$this->setPagerObject( $plf );
 
-			foreach( $blf as $b_obj ) {
-				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
+			foreach( $plf as $p_obj ) {
+				$retarr[] = $p_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $blf->getCurrentRow() );
+				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $plf->getCurrentRow() );
 			}
 
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );

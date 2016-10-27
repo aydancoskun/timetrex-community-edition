@@ -855,7 +855,7 @@ ROEViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TDatePicker( {field: 'final_pay_stub_end_date'} );
 		var widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'> " + '(' + $.i18n._( 'May be after Final Pay Period Ending Date if vacation/severence is paid seperately' ) + ')' + "</span>" );
+		var label = $( "<span class='widget-right-label'> " + '(' + $.i18n._( 'May be after Final Pay Period Ending Date if vacation/severence is paid separately' ) + ')' + "</span>" );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Final Pay Stub End Date' ), form_item_input, tab_roe_column1, '', widgetContainer );

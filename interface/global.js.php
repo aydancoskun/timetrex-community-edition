@@ -830,16 +830,23 @@ function confirmSubmit(text) {
 
 var submitcount = new Array();
 function singleSubmitHandler( button ) {
-	button_name = button.name;
-	if ( isUndefined( submitcount[button_name] ) ) {
-		submitcount[button_name] = 0;
-	}
+	if ( submitcount.length == 0 ) {
+		button_name = button.name;
+		if (isUndefined(submitcount[button_name])) {
+			submitcount[button_name] = 0;
+		}
 
-	if ( submitcount[button_name] == 0 ) {
-		submitcount[button_name]++;
-		return true;
+		if (submitcount[button_name] == 0) {
+			submitcount[button_name]++;
+			return true;
+		} else {
+			alert('<?php echo TTi18n::gettext( 'You have already submitted this form! Please wait...' ); ?>');
+			return false;
+		}
 	} else {
-		alert('<?php echo TTi18n::gettext('You have already submitted this form! Please wait...'); ?>');
+		window.setTimeout( function() {
+			submitcount = new Array();
+		}, 500 );
 		return false;
 	}
 }

@@ -1726,7 +1726,6 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 	function getAPIEmailAddressDataByArrayCriteria( $filter_data = NULL, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		$ph = array();
 
-		$uf = new UserFactory();
 		$cf = new CompanyFactory();
 		$pcf = new PermissionControlFactory();
 		$puf = new PermissionUserFactory();
@@ -1738,10 +1737,16 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 							cf.name as company_name,
 							cf.status_id as company_status_id,
 							g.level as permission_level,
+							cf.created_date as company_created_date,
+							cf.updated_date as company_updated_date,
+							h.company_last_login_date,
+							a.id,
 							a.status_id,
 							a.first_name,
 							a.last_name,
 							a.user_name,
+							a.country,
+							a.province,
 							a.work_email,
 							a.home_email,
 							a.birth_date,
@@ -1757,6 +1762,10 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 						FROM '. $puf->getTable() .' as g1, '. $pcf->getTable() .' as g2
 						WHERE ( g1.permission_control_id = g2.id AND g2.deleted = 0)
 					) as g ON ( a.id = g.user_id )
+					LEFT JOIN
+					(
+					SELECT company_id, max(last_login_date) as company_last_login_date FROM '. $this->getTable() .' as h1 WHERE h1.deleted = 0 GROUP BY h1.company_id
+					) as h ON ( a.company_id = h.company_id )
 					where ( 1 = 1 )
 				';
 
