@@ -219,7 +219,10 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
 		var current_step_data = this.stepsDataDic[this.current_step];
 		//Error: Uncaught TypeError: Cannot read property 'hide' of undefined in /interface/html5/index.php#!m=PayStub line 221
-		if ( !current_step_ui ) {
+		if ( !current_step_ui ||
+			!current_step_ui['run_id_row'] ||
+			!current_step_ui['carry_forward_to_date_row'] ||
+			!current_step_ui['transaction_date_row']) {
 			return;
 		}
 		current_step_ui['run_id_row'].hide();

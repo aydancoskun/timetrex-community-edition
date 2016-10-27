@@ -51,9 +51,13 @@ class RateLimit {
 	protected $memory = NULL;
 
 	function __construct() {
-		$this->memory = new SharedMemory();
-
-		return TRUE;
+		try {
+			$this->memory = new SharedMemory();
+			return TRUE;
+		} catch ( Exception $e ) {
+			Debug::text('ERROR: Caught Exception: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 9);
+			return FALSE;
+		}
 	}
 
 	function getID() {
@@ -97,10 +101,28 @@ class RateLimit {
 	}
 
 	function setRateData( $data ) {
-		return $this->memory->set( $this->group.$this->getID(), $data );
+		if ( is_object($this->memory) ) {
+			try {
+				return $this->memory->set( $this->group.$this->getID(), $data );
+			} catch ( Exception $e ) {
+				Debug::text('ERROR: Caught Exception: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 9);
+				return FALSE;
+			}
+		}
+
+		return FALSE;
 	}
 	function getRateData() {
-		return $this->memory->get( $this->group.$this->getID() );
+		if ( is_object($this->memory) ) {
+			try {
+				return $this->memory->get( $this->group.$this->getID() );
+			} catch ( Exception $e ) {
+				Debug::text('ERROR: Caught Exception: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 9);
+				return FALSE;
+			}
+		}
+		
+		return FALSE;
 	}
 
 	function getAttempts() {
@@ -139,7 +161,16 @@ class RateLimit {
 	}
 
 	function delete() {
-		return $this->memory->delete( $this->group.$this->getID() );
+		if ( is_object($this->memory) ) {
+			try {
+				return $this->memory->delete( $this->group.$this->getID() );
+			} catch ( Exception $e ) {
+				Debug::text('ERROR: Caught Exception: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 9);
+				return FALSE;
+			}
+		}
+
+		return FALSE;
 	}
 }
 ?>

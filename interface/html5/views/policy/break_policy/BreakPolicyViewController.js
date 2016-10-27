@@ -40,14 +40,14 @@ BreakPolicyViewController = BaseViewController.extend( {
 			'tab_audit': $.i18n._( 'Audit' )
 		} );
 
-
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIBreakPolicy' )),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.BREAK_POLICY,
 			navigation_mode: true,
-			show_search_inputs: true} );
+			show_search_inputs: true
+		} );
 
 		this.setNavigation();
 
@@ -73,7 +73,7 @@ BreakPolicyViewController = BaseViewController.extend( {
 
 		// Description
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
-		form_item_input.TTextArea( { field: 'description', width: '100%' } );
+		form_item_input.TTextArea( {field: 'description', width: '100%'} );
 		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_break_policy_column1, '', null, null, true );
 
 		form_item_input.parent().width( '45%' );
@@ -104,7 +104,7 @@ BreakPolicyViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'auto_detect_type_id', set_empty: false } );
+		form_item_input.TComboBox( {field: 'auto_detect_type_id', set_empty: false} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.auto_detect_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Auto-Detect Breaks By' ), form_item_input, tab_break_policy_column1 );
 
@@ -129,7 +129,7 @@ BreakPolicyViewController = BaseViewController.extend( {
 		// Window Length
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'window_length', width: 149, need_parser_sec: true} );
+		form_item_input.TTextInput( {field: 'window_length', mode: 'time_unit', need_parser_sec: true} );
 
 		this.addEditFieldToColumn( $.i18n._( 'Window Length' ), form_item_input, tab_break_policy_column1, '', null, true );
 
@@ -151,7 +151,8 @@ BreakPolicyViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.PAY_CODE,
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'pay_code_id'} );
+			field: 'pay_code_id'
+		} );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Code' ), form_item_input, tab_break_policy_column1 );
 
 		//Pay Formula Policy
@@ -167,7 +168,7 @@ BreakPolicyViewController = BaseViewController.extend( {
 			added_items: [
 				{value: 0, label: $.i18n._( '-- Defined By Pay Code --' )}
 			]
-			} );
+		} );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Formula Policy' ), form_item_input, tab_break_policy_column1 );
 
 	},
@@ -177,24 +178,29 @@ BreakPolicyViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Name' ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
 				field: 'name',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Type' ),
+			new SearchField( {
+				label: $.i18n._( 'Type' ),
 				in_column: 1,
 				field: 'type_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Pay Code' ),
+			new SearchField( {
+				label: $.i18n._( 'Pay Code' ),
 				in_column: 1,
 				field: 'pay_code_id',
 				layout_name: ALayoutIDs.PAY_CODE,
@@ -202,9 +208,11 @@ BreakPolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Pay Formula Policy' ),
+			new SearchField( {
+				label: $.i18n._( 'Pay Formula Policy' ),
 				in_column: 1,
 				field: 'pay_formula_policy_id',
 				layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
@@ -212,9 +220,11 @@ BreakPolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -222,9 +232,11 @@ BreakPolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -232,7 +244,8 @@ BreakPolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )];
+				form_item_type: FormItemType.AWESOME_BOX
+			} )];
 	},
 
 	onFormItemChange: function( target, doNotValidate ) {
@@ -268,8 +281,8 @@ BreakPolicyViewController = BaseViewController.extend( {
 		}
 	},
 
-	setEditViewDataDone: function(){
-		this._super('setEditViewDataDone');
+	setEditViewDataDone: function() {
+		this._super( 'setEditViewDataDone' );
 		this.onTypeChange();
 		this.onAutoDetectTypeChange();
 		this.editFieldResize( 0 );
@@ -311,10 +324,6 @@ BreakPolicyViewController = BaseViewController.extend( {
 
 		this.editFieldResize();
 	}
-
-
-
-
 
 } );
 

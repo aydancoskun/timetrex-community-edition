@@ -29,8 +29,8 @@ CREATE TABLE recurring_schedule (
 	recurring_schedule_control_id integer NOT NULL,
 	date_stamp date NOT NULL,
 	status_id smallint DEFAULT 10 NOT NULL,
-	start_time timestamp NOT NULL,
-	end_time timestamp NOT NULL,
+	start_time timestamp DEFAULT 0 NOT NULL,
+	end_time timestamp DEFAULT 0 NOT NULL,
 	schedule_policy_id integer DEFAULT 0 NOT NULL,
 	absence_policy_id integer DEFAULT 0 NOT NULL,
 	branch_id integer DEFAULT 0 NOT NULL,
@@ -79,12 +79,12 @@ ALTER TABLE roe ADD COLUMN final_pay_stub_transaction_date integer;
 UPDATE roe SET final_pay_stub_end_date = pay_period_end_date;
 UPDATE roe SET final_pay_stub_transaction_date = pay_period_end_date;
 
---Set all PAID/INUSE PSAs that are not actually assigned to pay stub as ACTIVE.
-UPDATE pay_stub_amendment SET status_id = 50 WHERE id IN ( SELECT a.id FROM pay_stub_amendment as a LEFT JOIN pay_stub_entry as c ON ( c.pay_stub_amendment_id = a.id AND c.deleted = 0 ) LEFT JOIN pay_stub as b ON ( a.user_id = b.user_id AND from_unixtime(a.effective_date) >= b.start_date AND from_unixtime(a.effective_date) <= b.end_date AND b.deleted = 0 ) WHERE a.status_id in (52,55) AND b.id IS NULL AND c.id IS NULL AND a.deleted = 0 );
---Set all ACTIVE/INUSE PSAs to PAID if they are assigned to a pay stub.
-UPDATE pay_stub_amendment SET status_id = 55 WHERE id IN ( SELECT a.id FROM pay_stub_amendment as a, pay_stub_entry as b, pay_stub as c WHERE a.id = b.pay_stub_amendment_id AND b.pay_stub_id = c.id AND a.status_id in (50,52) AND c.status_id in (40,100) AND (a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0) );
---Delete all PSAs with an amount of 0 that could have been assigned to a pay stub but weren't. (PSA was created after pay stub was was, and the pay stub was not regenerated)
-UPDATE pay_stub_amendment SET deleted = 1, deleted_date = unix_timestamp( now() ), deleted_by = 0 WHERE id IN ( SELECT a.id FROM pay_stub_amendment as a, pay_stub as b WHERE a.user_id = b.user_id AND from_unixtime(a.effective_date) >= b.start_date AND from_unixtime(a.effective_date) <= b.end_date AND b.status_id in (40,100) AND a.status_id IN (50,52) AND a.amount = 0 ) AND deleted = 0;
+--Set all PAID/INUSE PSAs that are not actually assigned to pay stub as ACTIVE;
+UPDATE pay_stub_amendment SET status_id = 50 WHERE id IN ( SELECT * FROM ( SELECT a.id FROM pay_stub_amendment as a LEFT JOIN pay_stub_entry as c ON ( c.pay_stub_amendment_id = a.id AND c.deleted = 0 ) LEFT JOIN pay_stub as b ON ( a.user_id = b.user_id AND from_unixtime(a.effective_date) >= b.start_date AND from_unixtime(a.effective_date) <= b.end_date AND b.deleted = 0 ) WHERE a.status_id in (52,55) AND b.id IS NULL AND c.id IS NULL AND a.deleted = 0 ) as x );
+--Set all ACTIVE/INUSE PSAs to PAID if they are assigned to a pay stub;
+UPDATE pay_stub_amendment SET status_id = 55 WHERE id IN ( SELECT * FROM ( SELECT a.id FROM pay_stub_amendment as a, pay_stub_entry as b, pay_stub as c WHERE a.id = b.pay_stub_amendment_id AND b.pay_stub_id = c.id AND a.status_id in (50,52) AND c.status_id in (40,100) AND (a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0) ) as x );
+--Delete all PSAs with an amount of 0 that could have been assigned to a pay stub but weren't. (PSA was created after pay stub was was, and the pay stub was not regenerated);
+UPDATE pay_stub_amendment SET deleted = 1, deleted_date = unix_timestamp( now() ), deleted_by = 0 WHERE id IN ( SELECT * FROM ( SELECT a.id FROM pay_stub_amendment as a, pay_stub as b WHERE a.user_id = b.user_id AND from_unixtime(a.effective_date) >= b.start_date AND from_unixtime(a.effective_date) <= b.end_date AND b.status_id in (40,100) AND a.status_id IN (50,52) AND a.amount = 0 ) as x ) AND deleted = 0;
 
 ALTER TABLE accrual_policy ADD COLUMN apply_frequency_quarter_month smallint DEFAULT 1;
 ALTER TABLE accrual_policy ADD COLUMN enable_pro_rate_initial_period smallint DEFAULT 0;

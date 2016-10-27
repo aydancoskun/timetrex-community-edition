@@ -713,8 +713,7 @@ ROEViewController = BaseViewController.extend( {
 			if ( Global.isSet( widget ) ) {
 				switch ( key ) {
 					case 'country': //popular case
-						this.eSetProvince( this.current_edit_record[key] );
-						widget.setValue( this.current_edit_record[key] );
+						this.setCountryValue( widget, key );
 						break;
 					default:
 						widget.setValue( this.current_edit_record[key] );
@@ -801,7 +800,6 @@ ROEViewController = BaseViewController.extend( {
 		form_item_input.TDatePicker( {field: 'first_date'} );
 		var widgetContainer = $( "<div class='widget-h-box'></div>" );
 		var label = $( "<span class='widget-right-label'> " + '(' + $.i18n._( 'Or first day since last ROE' ) + ')' + "</span>" );
-
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'First Day Worked' ), form_item_input, tab_roe_column1, '', widgetContainer );
@@ -809,12 +807,20 @@ ROEViewController = BaseViewController.extend( {
 		// Last Day For Which Paid
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TDatePicker( {field: 'last_date'} );
-		this.addEditFieldToColumn( $.i18n._( 'Last Day For Which Paid' ), form_item_input, tab_roe_column1 );
+		var widgetContainer = $( "<div class='widget-h-box'></div>" );
+		var label = $( "<span class='widget-right-label'> " + '(' + $.i18n._( 'Last day worked or received insurable earnings' ) + ')' + "</span>" );
+		widgetContainer.append( form_item_input );
+		widgetContainer.append( label );		
+		this.addEditFieldToColumn( $.i18n._( 'Last Day For Which Paid' ), form_item_input, tab_roe_column1, '', widgetContainer );
 
 		//Final Pay Period Ending Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TDatePicker( {field: 'pay_period_end_date'} );
-		this.addEditFieldToColumn( $.i18n._( 'Final Pay Period Ending Date' ), form_item_input, tab_roe_column1 );
+		var widgetContainer = $( "<div class='widget-h-box'></div>" );
+		var label = $( "<span class='widget-right-label'> " + '(' + $.i18n._( 'Pay period end date after Last Day For Which Paid' ) + ')' + "</span>" );
+		widgetContainer.append( form_item_input );
+		widgetContainer.append( label );
+		this.addEditFieldToColumn( $.i18n._( 'Final Pay Period Ending Date' ), form_item_input, tab_roe_column1, '', widgetContainer );
 
 		// Expected Date of Recall
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
@@ -844,11 +850,15 @@ ROEViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( {field: 'generate_pay_stub'} );
 		this.addEditFieldToColumn( $.i18n._( 'Generate Final Pay Stub' ), form_item_input, tab_roe_column1, '' );
-		
+
 		//Final Pay Stub End Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TDatePicker( {field: 'final_pay_stub_end_date'} );
-		this.addEditFieldToColumn( $.i18n._( 'Final Pay Stub End Date' ), form_item_input, tab_roe_column1 );
+		var widgetContainer = $( "<div class='widget-h-box'></div>" );
+		var label = $( "<span class='widget-right-label'> " + '(' + $.i18n._( 'May be after Final Pay Period Ending Date if vacation/severence is paid seperately' ) + ')' + "</span>" );
+		widgetContainer.append( form_item_input );
+		widgetContainer.append( label );
+		this.addEditFieldToColumn( $.i18n._( 'Final Pay Stub End Date' ), form_item_input, tab_roe_column1, '', widgetContainer );
 
 		//Final Pay Stub Transaction Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
@@ -1162,37 +1172,43 @@ ROEViewController = BaseViewController.extend( {
 	},
 
 	onSaveResult: function( result ) {
-
-		var $this = this;
+		this._super( 'onSaveResult', result );
 		if ( result.isValid() ) {
-			var result_data = result.getResult();
-			if ( !this.edit_only_mode ) {
-				if ( result_data === true ) {
-					$this.refresh_id = $this.current_edit_record.id;
-				} else if ( result_data > 0 ) {
-					$this.refresh_id = result_data;
-				}
-
-				$this.search();
-			}
-
-			$this.removeEditView();
-
-			$this.onSaveDone( result );
-
-		} else {
-			$this.setErrorMenu();
-			$this.setErrorTips( result );
-
+			this.showStatusReport( result, this.refresh_id );
 		}
 	},
 
-	onSaveDone: function( result ) {
-		var user_ids = this.current_edit_record.user_id;
+	onSaveAndNewResult: function( result ) {
+		this._super( 'onSaveAndNewResult', result );
+		if ( result.isValid() ) {
+			this.showStatusReport( result, this.refresh_id );
+		}
+	},
+
+	onSaveAndContinueResult: function( result ) {
+		this._super( 'onSaveAndContinueResult', result );
+		if ( result.isValid() ) {
+			this.showStatusReport( result, this.refresh_id );
+		}
+	},
+
+	onSaveAndNextResult: function( result ) {
+		this._super( 'onSaveAndNextResult', result );
+		if ( result.isValid() ) {
+			this.showStatusReport( result, this.refresh_id );
+		}
+	},
+
+	onSaveAndCopyResult: function( result ) {
+		this._super( 'onSaveAndCopyResult', result );
+		if ( result.isValid() ) {
+			this.showStatusReport( result, this.refresh_id );
+		}
+	},
+
+	showStatusReport: function( result, id ) {
+		var user_ids = id;
 		var user_generic_status_batch_id = result.getAttributeInAPIDetails( 'user_generic_status_batch_id' );
-
-		this.current_edit_record = null;
-
 		if ( user_generic_status_batch_id && user_generic_status_batch_id > 0 ) {
 			UserGenericStatusWindowController.open( user_generic_status_batch_id, user_ids );
 		}
@@ -1244,9 +1260,7 @@ ROEViewController = BaseViewController.extend( {
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 		var key = target.getField();
-
 		var c_value = target.getValue();
-
 		switch ( key ) {
 			case 'user_id':
 				this.api['get' + this.api.key_name + 'DefaultData']( c_value, {
@@ -1258,6 +1272,8 @@ ROEViewController = BaseViewController.extend( {
 						$this.edit_view_ui_dic['final_pay_stub_end_date'].setValue( result.final_pay_stub_end_date );
 						$this.edit_view_ui_dic['final_pay_stub_transaction_date'].setValue( result.final_pay_stub_transaction_date );
 						$this.edit_view_ui_dic['pay_period_type_id'].setValue( result.pay_period_type_id );
+						$this.edit_view_ui_dic['release_accruals'].setValue( result.release_accruals );
+						$this.edit_view_ui_dic['generate_pay_stub'].setValue( result.generate_pay_stub );
 
 						$this.current_edit_record.first_date = result.first_date;
 						$this.current_edit_record.last_date = result.last_date;
@@ -1265,8 +1281,12 @@ ROEViewController = BaseViewController.extend( {
 						$this.current_edit_record.final_pay_stub_end_date = result.final_pay_stub_end_date;
 						$this.current_edit_record.final_pay_stub_transaction_date = result.final_pay_stub_transaction_date;
 						$this.current_edit_record.pay_period_type_id = result.pay_period_type_id;
-
+						$this.current_edit_record.release_accruals = result.release_accruals;
+						$this.current_edit_record.generate_pay_stub = result.generate_pay_stub;
 						$this.current_edit_record[key] = c_value;
+						if ( !doNotValidate ) {
+							$this.validate();
+						}
 					}
 				} );
 				break;

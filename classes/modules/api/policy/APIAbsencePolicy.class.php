@@ -245,6 +245,7 @@ class APIAbsencePolicy extends APIFactory {
 					$row['company_id'] = $this->getCurrentCompanyObject()->getId();
 
 					$lf->setObjectFromArray( $row );
+					$lf->Validator->setValidateOnly( $validate_only );
 
 					$is_valid = $lf->isValid( $ignore_warning );
 					if ( $is_valid == TRUE ) {
@@ -451,6 +452,13 @@ class APIAbsencePolicy extends APIFactory {
 			$pfp_obj = $ap_obj->getPayFormulaPolicyObject();
 			$pc_obj = $ap_obj->getPayCodeObject();
 			
+			$accrual_rate = ( is_object( $pfp_obj ) ) ? $pfp_obj->getAccrualRate() : (-1);
+
+			Debug::Text('Before Accrual Rate: Amount: '. $amount .' Prev Amount: '. $previous_amount, __FILE__, __LINE__, __METHOD__, 10);
+			$amount = ( $amount * $accrual_rate );
+			$previous_amount = ( $previous_amount * $accrual_rate );
+			Debug::Text('After Accrual Rate: Amount: '. $amount .' Prev Amount: '. $previous_amount, __FILE__, __LINE__, __METHOD__, 10);
+
 			//Get Wage Permission Hierarchy Children first, as this can be used for viewing, or editing.
 			$wage_permission_children_ids = array();
 			if ( $this->getPermissionObject()->Check('wage', 'view') == TRUE ) {
@@ -466,7 +474,8 @@ class APIAbsencePolicy extends APIFactory {
 			if ( $wage_permission_children_ids === TRUE OR in_array( $user_id, (array)$wage_permission_children_ids) ) {
 				//Check for links to Pay Stub Account accruals, to get dollar amounts too.
 				if ( is_object( $ap_obj->getPayCodeObject() )
-						AND is_object( $ap_obj->getPayCodeObject()->getPayStubEntryAccountObject() ) ) {
+						AND is_object( $ap_obj->getPayCodeObject()->getPayStubEntryAccountObject() )
+						AND is_object( $pfp_obj ) ) {
 					$pself = TTnew('PayStubEntryListFactory');
 					$pay_stub_entry_account_data = $pself->getLastSumByUserIdAndEntryNameIdAndDate( (int)$user_id, $ap_obj->getPayCodeObject()->getPayStubEntryAccountObject()->getAccrual(), $epoch );
 					if ( isset($pay_stub_entry_account_data['ytd_amount']) AND $pay_stub_entry_account_data['ytd_amount'] !== NULL ) {
@@ -478,13 +487,13 @@ class APIAbsencePolicy extends APIFactory {
 						$uwlf = TTnew('UserWageListFactory');
 						$uwlf->getByUserIdAndGroupIDAndBeforeDate( (int)$user_id, $pfp_obj->getWageGroup(), $epoch, 1 );
 						if ( $uwlf->getRecordCount() > 0 ) {
-							$dollar_amount = ( TTDate::getHours( $amount ) * $pfp_obj->getHourlyRate( $uwlf->getCurrent()->getHourlyRate() ) * -1 );
+							$dollar_amount = ( TTDate::getHours( $amount ) * $pfp_obj->getHourlyRate( $uwlf->getCurrent()->getHourlyRate() ) );
 							$dollar_previous_amount = ( TTDate::getHours( $previous_amount ) * $pfp_obj->getHourlyRate( $uwlf->getCurrent()->getHourlyRate() ) );
 						} else {
 							$dollar_previous_amount = $dollar_amount = 0;
 						}
 
-						$available_dollar_balance = ( ( $pay_stub_entry_account_data['ytd_amount'] + $dollar_previous_amount ) - $udt_sum_arr['total_time_amount'] );
+						$available_dollar_balance = ( ( $pay_stub_entry_account_data['ytd_amount'] - $dollar_previous_amount ) - $udt_sum_arr['total_time_amount'] );
 
 						$dollar_retarr = array( 'available_dollar_balance' => Misc::MoneyFormat( $available_dollar_balance, FALSE ),
 												'current_dollar_amount' => Misc::MoneyFormat( $dollar_amount, FALSE ),
@@ -520,16 +529,16 @@ class APIAbsencePolicy extends APIFactory {
 
 						return $this->returnHandler( $retarr );
 					}
-				} else {
+				} elseif ( is_object( $pfp_obj->getAccrualPolicyAccountObject() ) ) {
 					Debug::Text('No Accrual Policies to return projection for, just get current balance then...', __FILE__, __LINE__, __METHOD__, 10);
-					$available_balance = $pfp_obj->getAccrualPolicyAccountObject()->getCurrentAccrualBalance( (int)$user_id );
+					$available_balance = ( $pfp_obj->getAccrualPolicyAccountObject()->getCurrentAccrualBalance( (int)$user_id ) - $previous_amount );
 
 					$retarr = array(
 									'available_balance' => $available_balance,
 									'current_time' => $amount,
-									'remaining_balance' => ( $available_balance - $amount ),
+									'remaining_balance' => ( $available_balance + $amount ),
 									'projected_balance' => $available_balance,
-									'projected_remaining_balance' => ( $available_balance - $amount ),
+									'projected_remaining_balance' => ( $available_balance + $amount ),
 									);
 
 					if ( isset($dollar_retarr) ) {
@@ -538,6 +547,8 @@ class APIAbsencePolicy extends APIFactory {
 									
 					Debug::Arr($retarr, '  Current Accrual Arr: ', __FILE__, __LINE__, __METHOD__, 10);
 					return $this->returnHandler( $retarr );
+				} else {
+					return $this->returnHandler( FALSE );
 				}
 			}
 		}

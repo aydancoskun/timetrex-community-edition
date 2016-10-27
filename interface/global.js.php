@@ -45,9 +45,12 @@ if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other
 	$authenticate = FALSE;
 }
 require_once('..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR.'Interface.inc.php');
+
+header('Content-Type: application/javascript; charset=UTF-8');
 //Use session created date or login date.
 //So this file is updated each time they login.
 forceCacheHeaders( NULL, $authentication->getCreatedDate() );
+
 
 $pplf = TTnew( 'PayPeriodListFactory' );
 $js_calendar_pay_period_dates = $pplf->getJSCalendarPayPeriodArray()

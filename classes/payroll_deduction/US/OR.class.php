@@ -47,6 +47,20 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 	var $original_filing_status = NULL;
 
 	var $state_income_tax_rate_options = array(
+													20160101 => array(
+																10 => array(
+																		array( 'income' => 3350,	'rate' => 5,	'constant' => 0 ),
+																		array( 'income' => 8450,	'rate' => 7,	'constant' => 167.50 ),
+																		array( 'income' => 125000,	'rate' => 9,	'constant' => 524.50 ),
+																		array( 'income' => 125000,	'rate' => 9.9,	'constant' => 11014 ),
+																		),
+																20 => array(
+																		array( 'income' => 6700,	'rate' => 5,	'constant' => 0 ),
+																		array( 'income' => 16900,	'rate' => 7,	'constant' => 335 ),
+																		array( 'income' => 250000,	'rate' => 9,	'constant' => 1049 ),
+																		array( 'income' => 250000,	'rate' => 9.9,	'constant' => 22028 ),
+																		),
+																),
 													20150101 => array(
 																10 => array(
 																		array( 'income' => 3350,	'rate' => 5,	'constant' => 0 ),
@@ -132,6 +146,34 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 												);
 
 	var $state_options = array(
+								20160101 => array( //01-Jan-16
+												'standard_deduction' => array(
+																			'10' => 2155,
+																			'20' => 4315,
+																			),
+												'allowance' => 195,
+												'federal_tax_maximum' => 6500,
+												'phase_out' => array(
+																		'10' => array(
+																						50000  => 6500,
+																						125000 => 6500,
+																						130000 => 5200,
+																						135000 => 3900,
+																						140000 => 2600,
+																						145000 => 1300,
+																						145000 => 0,
+																					 ),
+																		'20' => array(
+																						 50000 => 6500,
+																						250000 => 6500,
+																						260000 => 5200,
+																						270000 => 3900,
+																						280000 => 2600,
+																						290000 => 1300,
+																						290000 => 0,
+																					 ),
+																	),
+												),
 								20150101 => array( //01-Jan-15
 												'standard_deduction' => array(
 																			'10' => 2145,
@@ -141,7 +183,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 												'federal_tax_maximum' => 6450,
 												'phase_out' => array(
 																		'10' => array(
-																						50000 =>  6450,
+																						 50000 => 6450,
 																						125000 => 6450,
 																						130000 => 5150,
 																						135000 => 3850,
@@ -150,7 +192,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 																						145000 => 0,
 																					 ),
 																		'20' => array(
-																						50000 =>  6450,
+																						50000  => 6450,
 																						250000 => 6450,
 																						260000 => 5150,
 																						270000 => 3850,
@@ -169,7 +211,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 												'federal_tax_maximum' => 6350,
 												'phase_out' => array(
 																		'10' => array(
-																						50000 =>  6350,
+																						50000  => 6350,
 																						125000 => 6350,
 																						130000 => 5050,
 																						135000 => 3800,
@@ -178,7 +220,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 																						145000 => 0,
 																					 ),
 																		'20' => array(
-																						50000 =>  6350,
+																						50000  => 6350,
 																						250000 => 6350,
 																						260000 => 5050,
 																						270000 => 3800,
@@ -197,7 +239,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 												'federal_tax_maximum' => 6250,
 												'phase_out' => array(
 																		'10' => array(
-																						50000 =>  6250,
+																						50000  => 6250,
 																						125000 => 6250,
 																						130000 => 5000,
 																						135000 => 3750,
@@ -206,7 +248,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 																						145000 => 0,
 																					 ),
 																		'20' => array(
-																						50000 =>  6250,
+																						50000  => 6250,
 																						250000 => 6250,
 																						260000 => 5000,
 																						270000 => 3750,
@@ -225,7 +267,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 												'federal_tax_maximum' => 6100,
 												'phase_out' => array(
 																		'10' => array(
-																						50000 =>  6100,
+																						50000  => 6100,
 																						125000 => 6100,
 																						130000 => 4850,
 																						135000 => 3650,
@@ -234,7 +276,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 																						145000 => 0,
 																					 ),
 																		'20' => array(
-																						50000 =>  6100,
+																						50000  => 6100,
 																						250000 => 6100,
 																						260000 => 4850,
 																						270000 => 3650,
@@ -261,7 +303,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 												'federal_tax_maximum' => 5850
 												),
 								20070101 => array(
- 													'standard_deduction' => array(
+													'standard_deduction' => array(
 																				'10' => 1870,
 																				'20' => 3740,
 																				),
@@ -269,7 +311,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 													'federal_tax_maximum' => 5500
 													),
 								20060101 => array(
- 													'standard_deduction' => array(
+													'standard_deduction' => array(
 																				'10' => 0,
 																				'20' => 0,
 																				),
@@ -283,9 +325,9 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 			return 0;
 		}
 
-		$total_rates = count($input_arr) - 1;
-		$prev_bracket=0;
-		$i=0;
+		$total_rates = ( count($input_arr) - 1 );
+		$prev_bracket = 0;
+		$i = 0;
 		foreach( $input_arr as $bracket => $value ) {
 			Debug::text('Bracket: '. $bracket .' Value: '.$value, __FILE__, __LINE__, __METHOD__, 10);
 

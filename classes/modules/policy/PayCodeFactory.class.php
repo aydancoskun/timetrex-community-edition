@@ -407,8 +407,8 @@ class PayCodeFactory extends Factory {
 			}
 
 		} else {
-			if ( $this->isNew() == TRUE ) {
-				if ( $this->getName() == '' ) {
+			if ( $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing.
+				if ( $this->getName() === FALSE ) {
 					$this->Validator->isTRUE(	'name',
 												FALSE,
 												TTi18n::gettext('Please specify a name') );

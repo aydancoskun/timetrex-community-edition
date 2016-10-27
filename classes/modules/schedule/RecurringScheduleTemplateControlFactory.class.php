@@ -92,6 +92,7 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 										'description' => 'Description',
 										'in_use' => FALSE,
 										'deleted' => 'Deleted',
+										'created_by' => 'CreatedBy',
 										);
 		return $variable_function_map;
 	}
@@ -234,7 +235,7 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 				}
 			}
 
-			$this->setCreatedAndUpdatedColumns( $data );
+			$this->setCreatedAndUpdatedColumns( $data, $variable_function_map );
 
 			return TRUE;
 		}

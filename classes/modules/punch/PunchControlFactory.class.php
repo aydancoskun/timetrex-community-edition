@@ -1283,6 +1283,11 @@ class PunchControlFactory extends Factory {
 		}
 
 		if ( $ignore_warning == FALSE ) {
+			//Warn users if they are trying to insert punches too far in the future.
+			if ( $this->getDateStamp() != FALSE AND $this->getDateStamp() > (time() + (86400 * 366 ) ) ) {
+				$this->Validator->Warning( 'date_stamp', TTi18n::gettext('Date is more than one year in the future') );
+			}
+
 			//Check to see if timesheet is verified, if so show warning to notify the user.
 			if ( is_object( $this->getPayPeriodScheduleObject() )
 					AND $this->getPayPeriodScheduleObject()->getTimeSheetVerifyType() != 10 ) {

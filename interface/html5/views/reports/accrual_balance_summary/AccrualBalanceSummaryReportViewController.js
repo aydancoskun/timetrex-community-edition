@@ -5,7 +5,7 @@ AccrualBalanceSummaryReportViewController = ReportBaseViewController.extend( {
 		this.script_name = 'AccrualBalanceSummaryReport';
 		this.viewId = 'AccrualBalanceSummaryReport';
 		this.context_menu_name = $.i18n._( 'Accrual Balance Summary' );
-		this.navigation_label = $.i18n._( 'Saved Report' );
+		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'AccrualBalanceSummaryReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIAccrualBalanceSummaryReport' ))();
 		this.buildContextMenu();
@@ -107,7 +107,7 @@ AccrualBalanceSummaryReportViewController = ReportBaseViewController.extend( {
 		other.show_duplicate_values = this.current_edit_record.show_duplicate_values;
 		other.accrual_policy_account_id = this.current_edit_record.accrual_policy_account_id;
 
-		if ( this.current_saved_report ) {
+		if ( this.current_saved_report && Global.isSet(this.current_saved_report.name) ) {
 			other.report_name = _.escape( this.current_saved_report.name );
 		}
 

@@ -47,6 +47,56 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 */
 
 	var $state_income_tax_rate_options = array(
+												20160101 => array(
+															10 => array(
+																	array( 'income' => 7850,	'rate' => 1.1,	'constant' => 0 ),
+																	array( 'income' => 18610,	'rate' => 2.2,	'constant' => 86.35 ),
+																	array( 'income' => 29372,	'rate' => 4.4,	'constant' => 323.07 ),
+																	array( 'income' => 40773,	'rate' => 6.6,	'constant' => 796.60 ),
+																	array( 'income' => 51530,	'rate' => 8.8,	'constant' => 1549.07 ),
+																	array( 'income' => 263222,	'rate' => 10.23,'constant' => 2495.69 ),
+																	array( 'income' => 315866,	'rate' => 11.33,'constant' => 24151.78 ),
+																	array( 'income' => 526443,	'rate' => 12.43,'constant' => 30116.35 ),
+																	array( 'income' => 1000000,	'rate' => 13.53,'constant' => 56291.07 ),
+																	array( 'income' => 1000000,	'rate' => 14.63,'constant' => 120363.33 ),
+																	),
+															20 => array(
+																	array( 'income' => 7850,	'rate' => 1.1,	'constant' => 0 ),
+																	array( 'income' => 18610,	'rate' => 2.2,	'constant' => 86.35 ),
+																	array( 'income' => 29372,	'rate' => 4.4,	'constant' => 323.07 ),
+																	array( 'income' => 40773,	'rate' => 6.6,	'constant' => 796.60 ),
+																	array( 'income' => 51530,	'rate' => 8.8,	'constant' => 1549.07 ),
+																	array( 'income' => 263222,	'rate' => 10.23,'constant' => 2495.69 ),
+																	array( 'income' => 315866,	'rate' => 11.33,'constant' => 24151.78 ),
+																	array( 'income' => 526443,	'rate' => 12.43,'constant' => 30116.35 ),
+																	array( 'income' => 1000000,	'rate' => 13.53,'constant' => 56291.07 ),
+																	array( 'income' => 1000000,	'rate' => 14.63,'constant' => 120363.33 ),
+																	),
+															30 => array(
+																	array( 'income' => 15700,	'rate' => 1.1,	'constant' => 0 ),
+																	array( 'income' => 37220,	'rate' => 2.2,	'constant' => 172.70 ),
+																	array( 'income' => 58744,	'rate' => 4.4,	'constant' => 646.14 ),
+																	array( 'income' => 81546,	'rate' => 6.6,	'constant' => 1593.20 ),
+																	array( 'income' => 103060,	'rate' => 8.8,	'constant' => 3098.13 ),
+																	array( 'income' => 526444,	'rate' => 10.23,'constant' => 4991.36 ),
+																	array( 'income' => 631732,	'rate' => 11.33,'constant' => 48303.54 ),
+																	array( 'income' => 1000000,	'rate' => 12.43,'constant' => 60232.67 ),
+																	array( 'income' => 1052886,	'rate' => 13.53,'constant' => 106008.38 ),
+																	array( 'income' => 1052886,	'rate' => 14.63,'constant' => 113163.86 ),
+																	),
+															40 => array(
+																	array( 'income' => 15700,	'rate' => 1.1,	'constant' => 0 ),
+																	array( 'income' => 37220,	'rate' => 2.2,	'constant' => 172.70 ),
+																	array( 'income' => 58744,	'rate' => 4.4,	'constant' => 646.14 ),
+																	array( 'income' => 81546,	'rate' => 6.6,	'constant' => 1593.20 ),
+																	array( 'income' => 103060,	'rate' => 8.8,	'constant' => 3098.13 ),
+																	array( 'income' => 526444,	'rate' => 10.23,'constant' => 4991.36 ),
+																	array( 'income' => 631732,	'rate' => 11.33,'constant' => 48303.54 ),
+																	array( 'income' => 1000000,	'rate' => 12.43,'constant' => 60232.67 ),
+																	array( 'income' => 1052886,	'rate' => 13.53,'constant' => 106008.38 ),
+																	array( 'income' => 1052886,	'rate' => 14.63,'constant' => 113163.86 ),
+																	),
+															),
 												20150101 => array(
 															10 => array(
 																	array( 'income' => 7749,	'rate' => 1.1,	'constant' => 0 ),
@@ -54,11 +104,11 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 28995,	'rate' => 4.4,	'constant' => 318.92 ),
 																	array( 'income' => 40250,	'rate' => 6.6,	'constant' => 786.38 ),
 																	array( 'income' => 50869,	'rate' => 8.8,	'constant' => 1529.21 ),
-																	array( 'income' => 259844,	'rate' => 10.23,	'constant' => 2463.68 ),
-																	array( 'income' => 311812,	'rate' => 11.33,	'constant' => 23841.82 ),
-																	array( 'income' => 519687,	'rate' => 12.43,	'constant' => 29729.79 ),
-																	array( 'income' => 1000000,	'rate' => 13.53,	'constant' => 55568.65 ),
-																	array( 'income' => 1000000,	'rate' => 14.63,	'constant' => 120555.00 ),
+																	array( 'income' => 259844,	'rate' => 10.23,'constant' => 2463.68 ),
+																	array( 'income' => 311812,	'rate' => 11.33,'constant' => 23841.82 ),
+																	array( 'income' => 519687,	'rate' => 12.43,'constant' => 29729.79 ),
+																	array( 'income' => 1000000,	'rate' => 13.53,'constant' => 55568.65 ),
+																	array( 'income' => 1000000,	'rate' => 14.63,'constant' => 120555.00 ),
 																	),
 															20 => array(
 																	array( 'income' => 7749,	'rate' => 1.1,	'constant' => 0 ),
@@ -66,11 +116,11 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 28995,	'rate' => 4.4,	'constant' => 318.92 ),
 																	array( 'income' => 40250,	'rate' => 6.6,	'constant' => 786.38 ),
 																	array( 'income' => 50869,	'rate' => 8.8,	'constant' => 1529.21 ),
-																	array( 'income' => 259844,	'rate' => 10.23,	'constant' => 2463.68 ),
-																	array( 'income' => 311812,	'rate' => 11.33,	'constant' => 23841.82 ),
-																	array( 'income' => 519687,	'rate' => 12.43,	'constant' => 29729.79 ),
-																	array( 'income' => 1000000,	'rate' => 13.53,	'constant' => 55568.65 ),
-																	array( 'income' => 1000000,	'rate' => 14.63,	'constant' => 120555.00 ),
+																	array( 'income' => 259844,	'rate' => 10.23,'constant' => 2463.68 ),
+																	array( 'income' => 311812,	'rate' => 11.33,'constant' => 23841.82 ),
+																	array( 'income' => 519687,	'rate' => 12.43,'constant' => 29729.79 ),
+																	array( 'income' => 1000000,	'rate' => 13.53,'constant' => 55568.65 ),
+																	array( 'income' => 1000000,	'rate' => 14.63,'constant' => 120555.00 ),
 																	),
 															30 => array(
 																	array( 'income' => 15498,	'rate' => 1.1,	'constant' => 0 ),
@@ -78,11 +128,11 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 57990,	'rate' => 4.4,	'constant' => 637.85 ),
 																	array( 'income' => 80500,	'rate' => 6.6,	'constant' => 1572.76 ),
 																	array( 'income' => 101738,	'rate' => 8.8,	'constant' => 3058.42 ),
-																	array( 'income' => 519688,	'rate' => 10.23,	'constant' => 4927.36 ),
-																	array( 'income' => 623624,	'rate' => 11.33,	'constant' => 47683.65 ),
-																	array( 'income' => 1000000,	'rate' => 12.43,	'constant' => 59459.60 ),
-																	array( 'income' => 1039000,	'rate' => 13.53,	'constant' => 106243.14 ),
-																	array( 'income' => 1039000,	'rate' => 14.63,	'constant' => 111570.44 ),
+																	array( 'income' => 519688,	'rate' => 10.23,'constant' => 4927.36 ),
+																	array( 'income' => 623624,	'rate' => 11.33,'constant' => 47683.65 ),
+																	array( 'income' => 1000000,	'rate' => 12.43,'constant' => 59459.60 ),
+																	array( 'income' => 1039000,	'rate' => 13.53,'constant' => 106243.14 ),
+																	array( 'income' => 1039000,	'rate' => 14.63,'constant' => 111570.44 ),
 																	),
 															40 => array(
 																	array( 'income' => 15498,	'rate' => 1.1,	'constant' => 0 ),
@@ -90,11 +140,11 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 57990,	'rate' => 4.4,	'constant' => 637.85 ),
 																	array( 'income' => 80500,	'rate' => 6.6,	'constant' => 1572.76 ),
 																	array( 'income' => 101738,	'rate' => 8.8,	'constant' => 3058.42 ),
-																	array( 'income' => 519688,	'rate' => 10.23,	'constant' => 4927.36 ),
-																	array( 'income' => 623624,	'rate' => 11.33,	'constant' => 47683.65 ),
-																	array( 'income' => 1000000,	'rate' => 12.43,	'constant' => 59459.60 ),
-																	array( 'income' => 1039000,	'rate' => 13.53,	'constant' => 106243.14 ),
-																	array( 'income' => 1039000,	'rate' => 14.63,	'constant' => 111570.44 ),
+																	array( 'income' => 519688,	'rate' => 10.23,'constant' => 4927.36 ),
+																	array( 'income' => 623624,	'rate' => 11.33,'constant' => 47683.65 ),
+																	array( 'income' => 1000000,	'rate' => 12.43,'constant' => 59459.60 ),
+																	array( 'income' => 1039000,	'rate' => 13.53,'constant' => 106243.14 ),
+																	array( 'income' => 1039000,	'rate' => 14.63,'constant' => 111570.44 ),
 																	),
 															),
 												20140101 => array(
@@ -104,11 +154,11 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 28371,	'rate' => 4.4,	'constant' => 312.07 ),
 																	array( 'income' => 39384,	'rate' => 6.6,	'constant' => 769.45 ),
 																	array( 'income' => 49774,	'rate' => 8.8,	'constant' => 1496.31 ),
-																	array( 'income' => 254250,	'rate' => 10.23,	'constant' => 2410.63 ),
-																	array( 'income' => 305100,	'rate' => 11.33,	'constant' => 23328.52 ),
-																	array( 'income' => 508500,	'rate' => 12.43,	'constant' => 29089.83 ),
-																	array( 'income' => 1000000,	'rate' => 13.53,	'constant' => 54372.45 ),
-																	array( 'income' => 1000000,	'rate' => 14.63,	'constant' => 120872.40 ),
+																	array( 'income' => 254250,	'rate' => 10.23,'constant' => 2410.63 ),
+																	array( 'income' => 305100,	'rate' => 11.33,'constant' => 23328.52 ),
+																	array( 'income' => 508500,	'rate' => 12.43,'constant' => 29089.83 ),
+																	array( 'income' => 1000000,	'rate' => 13.53,'constant' => 54372.45 ),
+																	array( 'income' => 1000000,	'rate' => 14.63,'constant' => 120872.40 ),
 																	),
 															20 => array(
 																	array( 'income' => 7582,	'rate' => 1.1,	'constant' => 0 ),
@@ -116,11 +166,11 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 28371,	'rate' => 4.4,	'constant' => 312.07 ),
 																	array( 'income' => 39384,	'rate' => 6.6,	'constant' => 769.45 ),
 																	array( 'income' => 49774,	'rate' => 8.8,	'constant' => 1496.31 ),
-																	array( 'income' => 254250,	'rate' => 10.23,	'constant' => 2410.63 ),
-																	array( 'income' => 305100,	'rate' => 11.33,	'constant' => 23328.52 ),
-																	array( 'income' => 508500,	'rate' => 12.43,	'constant' => 29089.83 ),
-																	array( 'income' => 1000000,	'rate' => 13.53,	'constant' => 54372.45 ),
-																	array( 'income' => 1000000,	'rate' => 14.63,	'constant' => 120872.40 ),
+																	array( 'income' => 254250,	'rate' => 10.23,'constant' => 2410.63 ),
+																	array( 'income' => 305100,	'rate' => 11.33,'constant' => 23328.52 ),
+																	array( 'income' => 508500,	'rate' => 12.43,'constant' => 29089.83 ),
+																	array( 'income' => 1000000,	'rate' => 13.53,'constant' => 54372.45 ),
+																	array( 'income' => 1000000,	'rate' => 14.63,'constant' => 120872.40 ),
 																	),
 															30 => array(
 																	array( 'income' => 15164,	'rate' => 1.1,	'constant' => 0 ),
@@ -128,11 +178,11 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 56742,	'rate' => 4.4,	'constant' => 624.14 ),
 																	array( 'income' => 78768,	'rate' => 6.6,	'constant' => 1538.90 ),
 																	array( 'income' => 99548,	'rate' => 8.8,	'constant' => 2992.62 ),
-																	array( 'income' => 508500,	'rate' => 10.23,	'constant' => 4821.26 ),
-																	array( 'income' => 610200,	'rate' => 11.33,	'constant' => 46657.05 ),
-																	array( 'income' => 1000000,	'rate' => 12.43,	'constant' => 58179.66 ),
-																	array( 'income' => 1017000,	'rate' => 13.53,	'constant' => 106631.80 ),
-																	array( 'income' => 1017000,	'rate' => 14.63,	'constant' => 108931.90 ),
+																	array( 'income' => 508500,	'rate' => 10.23,'constant' => 4821.26 ),
+																	array( 'income' => 610200,	'rate' => 11.33,'constant' => 46657.05 ),
+																	array( 'income' => 1000000,	'rate' => 12.43,'constant' => 58179.66 ),
+																	array( 'income' => 1017000,	'rate' => 13.53,'constant' => 106631.80 ),
+																	array( 'income' => 1017000,	'rate' => 14.63,'constant' => 108931.90 ),
 																	),
 															40 => array(
 																	array( 'income' => 15174,	'rate' => 1.1,	'constant' => 0 ),
@@ -140,11 +190,11 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 46346,	'rate' => 4.4,	'constant' => 624.03 ),
 																	array( 'income' => 57359,	'rate' => 6.6,	'constant' => 1081.37 ),
 																	array( 'income' => 67751,	'rate' => 8.8,	'constant' => 1808.23 ),
-																	array( 'income' => 345780,	'rate' => 10.23,	'constant' => 2722.73 ),
-																	array( 'income' => 414936,	'rate' => 11.33,	'constant' => 31165.10 ),
-																	array( 'income' => 691560,	'rate' => 12.43,	'constant' => 39000.47 ),
-																	array( 'income' => 1000000,	'rate' => 13.53,	'constant' => 73384.83 ),
-																	array( 'income' => 1000000,	'rate' => 14.63,	'constant' => 115116.76 ),
+																	array( 'income' => 345780,	'rate' => 10.23,'constant' => 2722.73 ),
+																	array( 'income' => 414936,	'rate' => 11.33,'constant' => 31165.10 ),
+																	array( 'income' => 691560,	'rate' => 12.43,'constant' => 39000.47 ),
+																	array( 'income' => 1000000,	'rate' => 13.53,'constant' => 73384.83 ),
+																	array( 'income' => 1000000,	'rate' => 14.63,'constant' => 115116.76 ),
 																	),
 															),
 												20130101 => array(
@@ -154,11 +204,11 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 27897,	'rate' => 4.4,	'constant' => 306.87 ),
 																	array( 'income' => 38726,	'rate' => 6.6,	'constant' => 756.59 ),
 																	array( 'income' => 48942,	'rate' => 8.8,	'constant' => 1471.30 ),
-																	array( 'income' => 250000,	'rate' => 10.23,	'constant' => 2370.31 ),
-																	array( 'income' => 300000,	'rate' => 11.33,	'constant' => 22938.54 ),
-																	array( 'income' => 500000,	'rate' => 12.43,	'constant' => 28603.54 ),
-																	array( 'income' => 1000000,	'rate' => 13.53,	'constant' => 53463.54 ),
-																	array( 'income' => 1000000,	'rate' => 14.63,	'constant' => 121113.54 ),
+																	array( 'income' => 250000,	'rate' => 10.23,'constant' => 2370.31 ),
+																	array( 'income' => 300000,	'rate' => 11.33,'constant' => 22938.54 ),
+																	array( 'income' => 500000,	'rate' => 12.43,'constant' => 28603.54 ),
+																	array( 'income' => 1000000,	'rate' => 13.53,'constant' => 53463.54 ),
+																	array( 'income' => 1000000,	'rate' => 14.63,'constant' => 121113.54 ),
 																	),
 															20 => array(
 																	array( 'income' => 7455,	'rate' => 1.1,	'constant' => 0 ),
@@ -166,11 +216,11 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 27897,	'rate' => 4.4,	'constant' => 306.87 ),
 																	array( 'income' => 38726,	'rate' => 6.6,	'constant' => 756.59 ),
 																	array( 'income' => 48942,	'rate' => 8.8,	'constant' => 1471.30 ),
-																	array( 'income' => 250000,	'rate' => 10.23,	'constant' => 2370.31 ),
-																	array( 'income' => 300000,	'rate' => 11.33,	'constant' => 22938.54 ),
-																	array( 'income' => 500000,	'rate' => 12.43,	'constant' => 28603.54 ),
-																	array( 'income' => 1000000,	'rate' => 13.53,	'constant' => 53463.54 ),
-																	array( 'income' => 1000000,	'rate' => 14.63,	'constant' => 121113.54 ),
+																	array( 'income' => 250000,	'rate' => 10.23,'constant' => 2370.31 ),
+																	array( 'income' => 300000,	'rate' => 11.33,'constant' => 22938.54 ),
+																	array( 'income' => 500000,	'rate' => 12.43,'constant' => 28603.54 ),
+																	array( 'income' => 1000000,	'rate' => 13.53,'constant' => 53463.54 ),
+																	array( 'income' => 1000000,	'rate' => 14.63,'constant' => 121113.54 ),
 																	),
 															30 => array(
 																	array( 'income' => 14910,	'rate' => 1.1,	'constant' => 0 ),
@@ -178,10 +228,10 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 55794,	'rate' => 4.4,	'constant' => 613.73 ),
 																	array( 'income' => 77452,	'rate' => 6.6,	'constant' => 1513.18 ),
 																	array( 'income' => 97884,	'rate' => 8.8,	'constant' => 2942.61 ),
-																	array( 'income' => 500000,	'rate' => 10.23,	'constant' => 4740.63 ),
-																	array( 'income' => 600000,	'rate' => 11.33,	'constant' => 45877.10 ),
-																	array( 'income' => 1000000,	'rate' => 12.43,	'constant' => 57207.10 ),
-																	array( 'income' => 1000000,	'rate' => 14.63,	'constant' => 106927.10 ),
+																	array( 'income' => 500000,	'rate' => 10.23,'constant' => 4740.63 ),
+																	array( 'income' => 600000,	'rate' => 11.33,'constant' => 45877.10 ),
+																	array( 'income' => 1000000,	'rate' => 12.43,'constant' => 57207.10 ),
+																	array( 'income' => 1000000,	'rate' => 14.63,'constant' => 106927.10 ),
 																	),
 															40 => array(
 																	array( 'income' => 14920,	'rate' => 1.1,	'constant' => 0 ),
@@ -189,11 +239,11 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 45571,	'rate' => 4.4,	'constant' => 613.60 ),
 																	array( 'income' => 56400,	'rate' => 6.6,	'constant' => 1063.28 ),
 																	array( 'income' => 66618,	'rate' => 8.8,	'constant' => 1777.99 ),
-																	array( 'income' => 340000,	'rate' => 10.23,	'constant' => 2677.17 ),
-																	array( 'income' => 408000,	'rate' => 11.33,	'constant' => 30644.15 ),
-																	array( 'income' => 680000,	'rate' => 12.43,	'constant' => 38348.55 ),
-																	array( 'income' => 1000000,	'rate' => 13.53,	'constant' => 72158.15 ),
-																	array( 'income' => 1000000,	'rate' => 14.63,	'constant' => 115454.15 ),
+																	array( 'income' => 340000,	'rate' => 10.23,'constant' => 2677.17 ),
+																	array( 'income' => 408000,	'rate' => 11.33,'constant' => 30644.15 ),
+																	array( 'income' => 680000,	'rate' => 12.43,'constant' => 38348.55 ),
+																	array( 'income' => 1000000,	'rate' => 13.53,'constant' => 72158.15 ),
+																	array( 'income' => 1000000,	'rate' => 14.63,'constant' => 115454.15 ),
 																	),
 															),
 												20120101 => array(
@@ -203,8 +253,8 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 27377,	'rate' => 4.4,	'constant' => 301.14 ),
 																	array( 'income' => 38004,	'rate' => 6.6,	'constant' => 742.50 ),
 																	array( 'income' => 48029,	'rate' => 8.8,	'constant' => 1443.88 ),
-																	array( 'income' => 1000000,	'rate' => 10.23,	'constant' => 2326.08 ),
-																	array( 'income' => 1000000,	'rate' => 11.33,	'constant' => 99712.71 ),
+																	array( 'income' => 1000000,	'rate' => 10.23,'constant' => 2326.08 ),
+																	array( 'income' => 1000000,	'rate' => 11.33,'constant' => 99712.71 ),
 																	),
 															20 => array(
 																	array( 'income' => 7316,	'rate' => 1.1,	'constant' => 0 ),
@@ -212,8 +262,8 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 27377,	'rate' => 4.4,	'constant' => 301.14 ),
 																	array( 'income' => 38004,	'rate' => 6.6,	'constant' => 742.50 ),
 																	array( 'income' => 48029,	'rate' => 8.8,	'constant' => 1443.88 ),
-																	array( 'income' => 1000000,	'rate' => 10.23,	'constant' => 2326.08 ),
-																	array( 'income' => 1000000,	'rate' => 11.33,	'constant' => 99712.71 ),
+																	array( 'income' => 1000000,	'rate' => 10.23,'constant' => 2326.08 ),
+																	array( 'income' => 1000000,	'rate' => 11.33,'constant' => 99712.71 ),
 																	),
 															30 => array(
 																	array( 'income' => 14632,	'rate' => 1.1,	'constant' => 0 ),
@@ -221,8 +271,8 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 54754,	'rate' => 4.4,	'constant' => 602.27 ),
 																	array( 'income' => 76008,	'rate' => 6.6,	'constant' => 1485.00 ),
 																	array( 'income' => 96058,	'rate' => 8.8,	'constant' => 2887.76 ),
-																	array( 'income' => 1000000,	'rate' => 10.23,	'constant' => 4652.16 ),
-																	array( 'income' => 1000000,	'rate' => 11.33,	'constant' => 97125.43 ),
+																	array( 'income' => 1000000,	'rate' => 10.23,'constant' => 4652.16 ),
+																	array( 'income' => 1000000,	'rate' => 11.33,'constant' => 97125.43 ),
 																	),
 															40 => array(
 																	array( 'income' => 14642,	'rate' => 1.1,	'constant' => 0 ),
@@ -230,8 +280,8 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 44721,	'rate' => 4.4,	'constant' => 602.16 ),
 																	array( 'income' => 55348,	'rate' => 6.6,	'constant' => 1043.44 ),
 																	array( 'income' => 65376,	'rate' => 8.8,	'constant' => 1744.82 ),
-																	array( 'income' => 1000000,	'rate' => 10.23,	'constant' => 2627.28 ),
-																	array( 'income' => 1000000,	'rate' => 11.33,	'constant' => 98239.32 ),
+																	array( 'income' => 1000000,	'rate' => 10.23,'constant' => 2627.28 ),
+																	array( 'income' => 1000000,	'rate' => 11.33,'constant' => 98239.32 ),
 																	),
 															),
 												20110101 => array(
@@ -241,8 +291,8 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 26657,	'rate' => 4.4,	'constant' => 293.21 ),
 																	array( 'income' => 37005,	'rate' => 6.6,	'constant' => 722.96 ),
 																	array( 'income' => 46766,	'rate' => 8.8,	'constant' => 1405.93 ),
-																	array( 'income' => 1000000,	'rate' => 10.23,	'constant' => 2264.90 ),
-																	array( 'income' => 1000000,	'rate' => 11.33,	'constant' => 99780.74 ),
+																	array( 'income' => 1000000,	'rate' => 10.23,'constant' => 2264.90 ),
+																	array( 'income' => 1000000,	'rate' => 11.33,'constant' => 99780.74 ),
 																	),
 															20 => array(
 																	array( 'income' => 7124,	'rate' => 1.1,	'constant' => 0 ),
@@ -250,8 +300,8 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 26657,	'rate' => 4.4,	'constant' => 293.21 ),
 																	array( 'income' => 37005,	'rate' => 6.6,	'constant' => 722.96 ),
 																	array( 'income' => 46766,	'rate' => 8.8,	'constant' => 1405.93 ),
-																	array( 'income' => 1000000,	'rate' => 10.23,	'constant' => 2264.90 ),
-																	array( 'income' => 1000000,	'rate' => 11.33,	'constant' => 99780.74 ),
+																	array( 'income' => 1000000,	'rate' => 10.23,'constant' => 2264.90 ),
+																	array( 'income' => 1000000,	'rate' => 11.33,'constant' => 99780.74 ),
 																	),
 															30 => array(
 																	array( 'income' => 14248,	'rate' => 1.1,	'constant' => 0 ),
@@ -259,8 +309,8 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 53314,	'rate' => 4.4,	'constant' => 586.43 ),
 																	array( 'income' => 74010,	'rate' => 6.6,	'constant' => 1445.93 ),
 																	array( 'income' => 93532,	'rate' => 8.8,	'constant' => 2811.87 ),
-																	array( 'income' => 1000000,	'rate' => 10.23,	'constant' => 4529.81 ),
-																	array( 'income' => 1000000,	'rate' => 11.33,	'constant' => 97261.49 ),
+																	array( 'income' => 1000000,	'rate' => 10.23,'constant' => 4529.81 ),
+																	array( 'income' => 1000000,	'rate' => 11.33,'constant' => 97261.49 ),
 																	),
 															40 => array(
 																	array( 'income' => 14257,	'rate' => 1.1,	'constant' => 0 ),
@@ -268,8 +318,8 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 43545,	'rate' => 4.4,	'constant' => 586.34 ),
 																	array( 'income' => 53893,	'rate' => 6.6,	'constant' => 1016.00 ),
 																	array( 'income' => 63657,	'rate' => 8.8,	'constant' => 1698.97 ),
-																	array( 'income' => 1000000,	'rate' => 10.23,	'constant' => 2558.20 ),
-																	array( 'income' => 1000000,	'rate' => 11.33,	'constant' => 98346.09 ),
+																	array( 'income' => 1000000,	'rate' => 10.23,'constant' => 2558.20 ),
+																	array( 'income' => 1000000,	'rate' => 11.33,'constant' => 98346.09 ),
 																	),
 															),
 												20100101 => array(
@@ -356,7 +406,7 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 37233,	'rate' => 6.25,	'constant' => 728.34 ),
 																	array( 'income' => 47055,	'rate' => 8.25,	'constant' => 1379.09 ),
 																	array( 'income' => 1000000,	'rate' => 9.55,	'constant' => 2189.41 ),
-																	array( 'income' => 1000000,	'rate' => 10.55,	'constant' => 93195.66 ),
+																	array( 'income' => 1000000,	'rate' => 10.55,'constant' => 93195.66 ),
 																	),
 															20 => array(
 																	array( 'income' => 7168,	'rate' => 1.25,	'constant' => 0 ),
@@ -365,7 +415,7 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 37233,	'rate' => 6.25,	'constant' => 728.34 ),
 																	array( 'income' => 47055,	'rate' => 8.25,	'constant' => 1379.09 ),
 																	array( 'income' => 1000000,	'rate' => 9.55,	'constant' => 2189.41 ),
-																	array( 'income' => 1000000,	'rate' => 10.55,	'constant' => 93195.66 ),
+																	array( 'income' => 1000000,	'rate' => 10.55,'constant' => 93195.66 ),
 																	),
 															30 => array(
 																	array( 'income' => 14336,	'rate' => 1.25,	'constant' => 0 ),
@@ -374,7 +424,7 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 74466,	'rate' => 6.25,	'constant' => 1456.67 ),
 																	array( 'income' => 94110,	'rate' => 8.25,	'constant' => 2758.17 ),
 																	array( 'income' => 1000000,	'rate' => 9.55,	'constant' => 4378.80 ),
-																	array( 'income' => 1000000,	'rate' => 10.55,	'constant' => 90891.30 ),
+																	array( 'income' => 1000000,	'rate' => 10.55,'constant' => 90891.30 ),
 																	),
 															40 => array(
 																	array( 'income' => 14345,	'rate' => 1.25,	'constant' => 0 ),
@@ -383,7 +433,7 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 																	array( 'income' => 54225,	'rate' => 6.25,	'constant' => 1038.86 ),
 																	array( 'income' => 64050,	'rate' => 8.25,	'constant' => 1689.55 ),
 																	array( 'income' => 1000000,	'rate' => 9.55,	'constant' => 2500.11 ),
-																	array( 'income' => 1000000,	'rate' => 10.55,	'constant' => 91883.34 ),
+																	array( 'income' => 1000000,	'rate' => 10.55,'constant' => 91883.34 ),
 																	),
 															),
 												20090101 => array(
@@ -541,6 +591,31 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 												);
 
 	var $state_options = array(
+								20160101 => array( //01-Jan-16
+													//Standard Deduction Table
+													'standard_deduction' => array(
+																				//First entry is 0,1 allowance, second is for 2 or more.
+																				'10' => array(4044.00, 4044.00),
+																				'20' => array(4044.00, 4044.00),
+																				'30' => array(4044.00, 8088.00),
+																				'40' => array(8088.00, 8088.00),
+																				),
+													//Exemption Allowance Table
+													'allowance' => array(
+																				'10' => 119.90,
+																				'20' => 119.90,
+																				'30' => 119.90,
+																				'40' => 119.90,
+																				),
+													//Low Income Exemption Table
+													'minimum_income' => array(
+																				//First entry is 0,1 allowance, 2nd is 2 or more.
+																				'10' => array(13419.00, 13419.00),
+																				'20' => array(13419.00, 13419.00),
+																				'30' => array(13419.00, 26838.00),
+																				'40' => array(26838.00, 26838.00),
+																				),
+													),		
 								20150101 => array( //01-Jan-15
 													//Standard Deduction Table
 													'standard_deduction' => array(
@@ -773,7 +848,11 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 
 		}
 
-		$deduction_arr = $retarr['standard_deduction'][$this->getStateFilingStatus()];
+		if ( isset($retarr['standard_deduction'][$this->getStateFilingStatus()]) ) {
+			$deduction_arr = $retarr['standard_deduction'][$this->getStateFilingStatus()];
+		} else {
+			$deduction_arr = $retarr['standard_deduction'][10];
+		}
 
 		$deduction = 0;
 		if ( $this->getStateAllowance() == 0 OR $this->getStateAllowance() == 1 ) {
@@ -792,7 +871,11 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 			return FALSE;
 		}
 
-		$allowance = $retarr['allowance'][$this->getStateFilingStatus()];
+		if ( isset($retarr['allowance'][$this->getStateFilingStatus()]) ) {
+			$allowance = $retarr['allowance'][$this->getStateFilingStatus()];
+		} else {
+			$allowance = 0;
+		}
 
 		$retval = 0;
 		if ( $this->getStateAllowance() == 0 ) {

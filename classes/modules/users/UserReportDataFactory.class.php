@@ -162,7 +162,7 @@ class UserReportDataFactory extends Factory {
 
 		if ( $this->Validator->isResultSetWithRows(	'user',
 															$ulf->getByID($id),
-															TTi18n::gettext('Invalid User')
+															TTi18n::gettext('Invalid Employee')
 															) ) {
 			$this->data['user_id'] = $id;
 
@@ -255,14 +255,13 @@ class UserReportDataFactory extends Factory {
 		$name = trim($name);
 		if (	$this->Validator->isLength(	'name',
 											$name,
-											TTi18n::gettext('Invalid name'),
+											TTi18n::gettext('Name is too short or too long'),
 											1, 100)
 				AND
 				$this->Validator->isTrue(		'name',
 												$this->isUniqueName($name),
 												TTi18n::gettext('Name already exists'))
-
-						) {
+				) {
 
 			$this->data['name'] = $name;
 
@@ -320,10 +319,10 @@ class UserReportDataFactory extends Factory {
 	}
 
 	function Validate( $ignore_warning = TRUE ) {
-		if ( $this->getName() == '' ) {
+		if ( $this->Validator->hasError('name') == FALSE AND $this->getName() == '' ) {
 			$this->Validator->isTRUE(	'name',
 										FALSE,
-										TTi18n::gettext('Invalid name'));
+										TTi18n::gettext('Name must be specified'));
 		}
 
 		return TRUE;

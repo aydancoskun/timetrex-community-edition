@@ -41,6 +41,22 @@
 class PayrollDeduction_US_MN extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+												20160101 => array(
+															10 => array(
+																	array( 'income' => 2250,	'rate' => 0,	'constant' => 0 ),
+																	array( 'income' => 27430,	'rate' => 5.35,	'constant' => 0 ),
+																	array( 'income' => 84990,	'rate' => 7.05,	'constant' => 1347.13 ),
+																	array( 'income' => 157900,	'rate' => 7.85,	'constant' => 5405.11 ),
+																	array( 'income' => 157900,	'rate' => 9.85,	'constant' => 11128.55 ),
+																	),
+															20 => array(
+																	array( 'income' => 8550,	'rate' => 0,	'constant' => 0 ),
+																	array( 'income' => 45370,	'rate' => 5.35,	'constant' => 0 ),
+																	array( 'income' => 154820,	'rate' => 7.05,	'constant' => 1969.87 ),
+																	array( 'income' => 267970,	'rate' => 7.85,	'constant' => 9686.10 ),
+																	array( 'income' => 267970,	'rate' => 9.85,	'constant' => 18568.38 ),
+																	),
+															),
 												20150101 => array(
 															10 => array(
 																	array( 'income' => 2300,	'rate' => 0,	'constant' => 0 ),
@@ -188,6 +204,9 @@ class PayrollDeduction_US_MN extends PayrollDeduction_US {
 												);
 
 	var $state_options = array(
+								20160101 => array( //01-Jan-16
+													'allowance' => 4050
+													),
 								20150101 => array( //01-Jan-15
 													'allowance' => 4000
 													),

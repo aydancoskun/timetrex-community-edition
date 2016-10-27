@@ -212,7 +212,6 @@ AccrualViewController = BaseViewController.extend( {
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_accrual_column1, '', null, null, true );
 
-
 	},
 
 	buildSearchFields: function() {
@@ -808,46 +807,6 @@ AccrualViewController = BaseViewController.extend( {
 		} );
 	},
 
-//	removeEditView: function() {
-//
-//		if ( this.edit_view ) {
-//			this.edit_view.remove();
-//		}
-//		this.edit_view = null;
-//		this.edit_view_tab = null;
-//		this.is_mass_editing = false;
-//		this.is_viewing = false;
-//		this.is_edit = false;
-//		this.is_changed = false;
-//		this.mass_edit_record_ids = [];
-//		this.edit_view_tab_selected_index = 0;
-//		LocalCacheData.current_doing_context_action = '';
-//		//If there is a action in url, add it back. So we have correct url when set tabs urls
-//		if ( LocalCacheData.all_url_args && LocalCacheData.all_url_args.a ) {
-//			LocalCacheData.current_doing_context_action = LocalCacheData.all_url_args.a;
-//		}
-//
-//		if ( this.current_edit_record ) {
-//			this.current_edit_record = null;
-//		}
-//
-//		// reset parent context menu if edit only mode
-//		if ( !this.edit_only_mode ) {
-//			this.setDefaultMenu();
-//			this.initRightClickMenu();
-//		} else {
-//			this.setParentContextMenuAfterSubViewClose();
-//
-//		}
-//
-//		this.reSetURL();
-//
-//		this.sub_log_view_controller = null;
-//		this.edit_view_ui_dic = {};
-//		this.edit_view_form_item_dic = {};
-//		this.edit_view_error_ui_dic = {};
-//	},
-
 	setDefaultMenu: function( doNotSetFocus ) {
 
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
@@ -1062,11 +1021,6 @@ AccrualViewController = BaseViewController.extend( {
 	},
 
 	onAddResult: function( result ) {
-
-		if ( Global.isSet( this.is_trigger_add ) && this.is_trigger_add ) {
-			this.is_trigger_add = false;
-		}
-
 		var $this = this;
 		var result_data = result.getResult();
 
@@ -1242,7 +1196,6 @@ AccrualViewController = BaseViewController.extend( {
 				if ( callBack ) {
 					callBack( result );
 				}
-
 				// when call this from save and new result, we don't call auto open, because this will call onAddClick twice
 				if ( set_default_menu ) {
 					$this.autoOpenEditViewIfNecessary();
@@ -1250,6 +1203,7 @@ AccrualViewController = BaseViewController.extend( {
 
 				if ( Global.isSet( $this.is_trigger_add ) && $this.is_trigger_add ) {
 					$this.onAddClick();
+					$this.is_trigger_add = false;
 				}
 				$this.searchDone();
 

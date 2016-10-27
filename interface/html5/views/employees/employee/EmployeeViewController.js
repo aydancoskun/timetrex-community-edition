@@ -343,7 +343,7 @@ EmployeeViewController = BaseViewController.extend( {
 					} else {
 						// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
 						$this.current_edit_record = result;
-						$this.setEditViewWidgetsMode();
+
 						$this.initEditView();
 					}
 
@@ -356,9 +356,7 @@ EmployeeViewController = BaseViewController.extend( {
 				this.initEditViewUI( $this.viewId, $this.edit_view_tpl );
 			}
 
-			this.setEditViewWidgetsMode();
 		}
-
 	},
 
 	getEmployeeData: function( id, callBack ) {
@@ -1312,8 +1310,7 @@ EmployeeViewController = BaseViewController.extend( {
 						widget.setValue( this.current_edit_record[key] );
 						break;
 					case 'country':
-						this.eSetProvince( this.current_edit_record[key] );
-						widget.setValue( this.current_edit_record[key] );
+						this.setCountryValue(widget, key);
 						break;
 					case 'hierarchy_control':
 						if ( this.show_hierarchy ) {
@@ -1371,14 +1368,50 @@ EmployeeViewController = BaseViewController.extend( {
 			this.file_browser.parent().append( span );
 		}
 
-		this.edit_view_ui_dic['company_id'].setEnabled( false );
+		// Error: TypeError: this.edit_view_ui_dic.company_id is undefined in interface/html5/framework/jquery.min.js?v=9.0.5-20151222-162143 line 2 > eval line 1374
+		this.edit_view_ui_dic['company_id'] && this.edit_view_ui_dic['company_id'].setEnabled( false );
 
 		this.collectUIDataToCurrentEditRecord();
+		this.setEmailIcon();
+
 		this.setEditViewDataDone();
 
 	},
 	/* jshint ignore:end */
 
+	setEmailIcon: function() {
+		var $this = this;
+		$( '.employee-email-icon' ).remove();
+		var work_email = $( '<img title="' + $.i18n._( 'ReValidate Email Address' ) + '" class="employee-email-icon work-email" src="theme/default/images/email16x16.png">' );
+		var home_email = $( '<img title="' + $.i18n._( 'ReValidate Email Address' ) + '" class="employee-email-icon home-email" src="theme/default/images/email16x16.png">' );
+		if ( this.current_edit_record.hasOwnProperty( 'work_email_is_valid' ) && !this.current_edit_record.work_email_is_valid ) {
+			this.edit_view_form_item_dic.work_email.children().eq( 1 ).append( work_email );
+			work_email.on( 'click', function() {
+				checkEmail( 'work_email' );
+			} );
+		} else {
+
+		}
+
+		if ( this.current_edit_record.hasOwnProperty( 'home_email_is_valid' ) && !this.current_edit_record.home_email_is_valid ) {
+			this.edit_view_form_item_dic.home_email.children().eq( 1 ).append( home_email );
+			home_email.on( 'click', function() {
+				checkEmail( 'home_email' );
+			} );
+		}
+
+		function checkEmail() {
+			$this.api.sendValidationEmail( $this.current_edit_record.id, {
+				onResult: function( result ) {
+					if ( result.isValid() ) {
+						TAlertManager.showAlert( $.i18n._( 'Validation email sent...' ) );
+					} else {
+						TAlertManager.showAlert( $.i18n._( 'No validation email sent...' ) );
+					}
+				}
+			} );
+		}
+	},
 
 	onSaveDone: function( result ) {
 		if ( this.edit_only_mode && LocalCacheData.current_open_primary_controller.viewId === 'TimeSheet' ) {
@@ -1386,7 +1419,7 @@ EmployeeViewController = BaseViewController.extend( {
 		}
 	},
 
-	onCopyAsNewClick: function() {
+	_continueDoCopyAsNew: function() {
 		var $this = this;
 		this.is_add = true;
 
@@ -1398,6 +1431,7 @@ EmployeeViewController = BaseViewController.extend( {
 			navigation_div.css( 'display', 'none' );
 			this.setEditMenu();
 			this.setTabStatus();
+			this.is_changed = false;
 			ProgressBar.closeOverlay();
 
 		} else {
@@ -2522,13 +2556,13 @@ EmployeeViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'work_email', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'Work Email' ), form_item_input, tab_contact_info_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Work Email' ), form_item_input, tab_contact_info_column2, '', null, true );
 
 		//Fax
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'home_email', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'Home Email' ), form_item_input, tab_contact_info_column2 );
+		this.addEditFieldToColumn( $.i18n._( 'Home Email' ), form_item_input, tab_contact_info_column2, '', null, true );
 
 		//Birth Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
@@ -2882,7 +2916,7 @@ EmployeeViewController = BaseViewController.extend( {
 		var args = {};
 		var $this = this;
 		if ( key === 'job_quick_search' ) {
-			args.filter_data = {manual_id: value, company_id: $this.select_company_id};
+			args.filter_data = {manual_id: value, company_id: $this.select_company_id, user_id: this.current_edit_record.id, status_id: "10"};
 			this.job_api.getJob( args, {
 				onResult: function( result ) {
 					var result_data = result.getResult();
@@ -2903,7 +2937,7 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.edit_view_ui_dic['default_job_id'].setCheckBox( true );
 		} else if ( key === 'job_item_quick_search' ) {
 
-			args.filter_data = {manual_id: value, company_id: $this.select_company_id};
+			args.filter_data = {manual_id: value, company_id: $this.select_company_id, status_id: "10"};
 
 			this.job_item_api.getJobItem( args, {
 				onResult: function( result ) {

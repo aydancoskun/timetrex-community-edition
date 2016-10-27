@@ -894,7 +894,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 									array($this->policy_ids['regular'][10]) //Regular
 									);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getBeginDayEpoch( ( time() - 86400 ) ); //This needs to be before today, as CalculatePolicy() restricts full shift undertime to only previous days.
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct

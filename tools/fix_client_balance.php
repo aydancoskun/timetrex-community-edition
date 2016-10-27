@@ -37,27 +37,53 @@
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
 
-if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
+if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	$help_output = "Usage: fix_client_balance.php [company_id]\n";
 	echo $help_output;
 } else {
 	//Rebuilt Hierarhcy Tree if a transation fails using MyISAM or something
-	$company_id = $argv[1];
-
-	if ( $company_id != '' ) {
-		$cbf = new ClientBalanceFactory();
-		$cbf->StartTransaction();
-
-		$clf = new ClientListFactory();
-		$clf->getByCompanyId( $company_id );
-		foreach( $clf as $c_obj ) {
-			$cbf->reCalculateBalance( $c_obj->getId(), $c_obj->getCompany() );
-			//break;
-		}
-
-		//$cbf->FailTransaction();
-		$cbf->CommitTransaction();
+	if ( isset($argv[1]) ) {
+		$company_id = $argv[1];
 	}
+
+	//Force flush after each output line.
+	ob_implicit_flush( TRUE );
+	ob_end_flush();
+
+	$clf = new CompanyListFactory();
+	if ( isset($company_id) AND $company_id != '' ) {
+		$clf->getByCompanyId( $company_id );
+	} else {
+		$clf->getAll();
+	}
+	if ( $clf->getRecordCount() > 0 ) {
+		foreach ( $clf as $c_obj ) {
+			echo 'Company: '. $c_obj->getName() ."...\n";
+
+			$cbf = new ClientBalanceFactory();
+			$cbf->StartTransaction();
+
+			$tmp_clf = new ClientListFactory();
+			$tmp_clf->getByCompanyId( $c_obj->getId() );
+
+			$max = $tmp_clf->getRecordCount();
+			$i = 0;
+			foreach( $tmp_clf as $tmp_c_obj ) {
+				//if ( !in_array( $tmp_c_obj->getId(), array(195,1249,1800) ) ) {
+				//	continue;
+				//}
+
+				echo '  '. $i .'/'. $max .' Recalculating: '. $tmp_c_obj->getCompanyName() ."...\n";
+				$cbf->reCalculateBalance( $tmp_c_obj->getId(), $tmp_c_obj->getCompany() );
+
+				$i++;
+			}
+
+			//$cbf->FailTransaction();
+			$cbf->CommitTransaction();
+		}
+	}
+
 }
 //Debug::Display();
 ?>

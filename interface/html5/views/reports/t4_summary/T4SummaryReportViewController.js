@@ -8,7 +8,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 		this.script_name = 'T4SummaryReport';
 		this.viewId = 'T4SummaryReport';
 		this.context_menu_name = $.i18n._( 'T4 Summary' );
-		this.navigation_label = $.i18n._( 'Saved Report' );
+		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
 		this.view_file = 'T4SummaryReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIT4SummaryReport' ))();
 		this.include_form_setup = true;
@@ -173,7 +173,8 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 			{option_name: 'chart_type'},
 			{option_name: 'templates'},
 			{option_name: 'setup_fields'},
-			{option_name: 'type'}
+			{option_name: 'type'},
+			{option_name: 'auto_refresh'}
 		];
 
 		this.initDropDownOptions( options, function( result ) {

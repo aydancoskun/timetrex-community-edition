@@ -5,7 +5,7 @@ GeneralLedgerSummaryReportViewController = ReportBaseViewController.extend( {
 		this.script_name = 'GeneralLedgerSummaryReport';
 		this.viewId = 'GeneralLedgerSummaryReport';
 		this.context_menu_name = $.i18n._( 'General Ledger Summary' );
-		this.navigation_label = $.i18n._( 'Saved Report' );
+		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
 		this.view_file = 'GeneralLedgerSummaryReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIGeneralLedgerSummaryReport' ))();
 		this.buildContextMenu();

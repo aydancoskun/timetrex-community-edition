@@ -831,15 +831,11 @@ class Validator {
 
 
 	final function isError( $label = NULL ) {
-		if ( $this->num_errors > 0 ) {
+		if ( $label != NULL ) {
+			return $this->hasError( $label );
+		} elseif ( $this->num_errors > 0 ) {
 			Debug::Arr($this->errors, 'Errors', __FILE__, __LINE__, __METHOD__, $this->verbosity);
 			return TRUE;
-		} elseif ( $label != NULL ) {
-			if ( isset( $this->errors[$label] ) ) {
-				return TRUE;
-			} else {
-				return FALSE;
-			}
 		}
 
 		return FALSE;
@@ -885,15 +881,11 @@ class Validator {
 	}
 	
 	final function isWarning( $label = NULL ) {
-		if ( $this->num_warnings > 0 ) {
+		if ( $label != NULL ) {
+			return $this->hasWarning( $label );
+		} elseif ( $this->num_warnings > 0 ) {
 			Debug::Arr($this->warnings, 'Warnings', __FILE__, __LINE__, __METHOD__, $this->verbosity);
 			return TRUE;
-		} elseif ( $label != NULL ) {
-			if ( isset( $this->warnings[$label] ) ) {
-				return TRUE;
-			} else {
-				return FALSE;
-			}
 		}
 
 		return FALSE;

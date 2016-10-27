@@ -127,10 +127,27 @@ class InstallSchema_Base {
 		return FALSE;
 	}
 
+	function removeSchemaSQLFileComments( $sql ) {
+		$retval = '';
+
+		$split_sql = explode("\n", $sql);
+		if ( is_array($split_sql) ) {
+			foreach( $split_sql as $sql_line ) {
+				if ( substr( trim($sql_line), 0, 2 ) != '--') {
+					$retval .= $sql_line."\n"; //Make sure the newlines are put back in the proper place, otherwise it can other SQL parse errors.
+				} else {
+					Debug::text('Skipping SQL Comment: '. $sql_line, __FILE__, __LINE__, __METHOD__, 9);
+				}
+			}
+		}
+
+		return $retval;
+	}
+
 	private function _InstallSchema() {
 		//Run the actual SQL queries here
 
-		$sql = $this->getSchemaSQLFileData();
+		$sql = $this->removeSchemaSQLFileComments( $this->getSchemaSQLFileData() );
 		if ( $sql == FALSE ) {
 			return FALSE;
 		}
@@ -224,7 +241,6 @@ class InstallSchema_Base {
 	}
 
 	function InstallSchema() {
-
 		$this->getDatabaseConnection()->StartTrans();
 
 		Debug::text('Installing Schema Version: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
@@ -248,51 +264,6 @@ class InstallSchema_Base {
 		$this->getDatabaseConnection()->FailTrans();
 
 		return FALSE;
-	}
-
-	function updateCompanyDeductionForTaxYear( $date ) {
-		require_once( Environment::getBasePath(). DIRECTORY_SEPARATOR . 'classes'. DIRECTORY_SEPARATOR .'payroll_deduction'. DIRECTORY_SEPARATOR .'PayrollDeduction.class.php');
-
-		$db_conn = $this->getDatabaseConnection();
-
-		if ( $db_conn == FALSE ) {
-			Debug::text('ERROR: No database connection!', __FILE__, __LINE__, __METHOD__, 9);
-			return FALSE;
-		}
-
-		$clf = TTnew( 'CompanyListFactory' );
-		$clf->getAll();
-		if ( $clf->getRecordCount() > 0 ) {
-			foreach( $clf as $c_obj ) {
-				Debug::text('Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
-				if ( $c_obj->getStatus() != 30 ) {
-					$cdlf = TTnew('CompanyDeductionListFactory');
-					$cdlf->getAPISearchByCompanyIdAndArrayCriteria( $c_obj->getID(), array( 'calculation_id' => array(100,200), 'country' => 'CA' ) );
-					if ( $cdlf->getRecordCount() > 0 ) {
-						foreach( $cdlf as $cd_obj ) {
-							$pd_obj = new PayrollDeduction( $cd_obj->getCountry(), $cd_obj->getProvince() );
-							$pd_obj->setDate( $date );
-
-							Debug::text('Updating claim amounts based on Date: '. TTDate::getDate('DATE', $date ), __FILE__, __LINE__, __METHOD__, 9);
-							if ( $cd_obj->getCalculation() == 100 ) { //Federal
-								$pd_obj->setFederalTotalClaimAmount( $cd_obj->getUserValue1() );
-								$claim_amount = $pd_obj->getFederalTotalClaimAmount();
-							} elseif ( $cd_obj->getCalculation() == 200 ) { //Provincial
-								$pd_obj->setProvincialTotalClaimAmount( $cd_obj->getUserValue1() );
-								$claim_amount = $pd_obj->getProvincialTotalClaimAmount();
-							}
-
-							//Use a SQL query instead of modifying the CompanyDeduction class, as that can cause errors when we add columns to the table later on.
-							$query = 'UPDATE '. $cd_obj->getTable() .' set user_value1 = '. (float)$claim_amount .' where id = '. (int)$cd_obj->getId();
-							$db_conn->Execute($query);
-						}
-					}
-				}
-			}
-		}
-
-		Debug::text('Done updating claim amounts...', __FILE__, __LINE__, __METHOD__, 9);
-		return TRUE;
 	}
 }
 ?>

@@ -639,7 +639,8 @@ class CalculatePayStub extends PayStubFactory {
 		$udlf = TTnew( 'UserDeductionListFactory' );
 		$udlf->getByCompanyIdAndUserId( $this->getUserObject()->getCompany(), $this->getUserObject()->getId() );
 
-		if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE AND $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
+		//Only include expenses when calculating in-cycle payroll runs, as we currently can't tell if they have already been included on a pay stub or not.
+		if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE AND $this->getType() == 10 AND $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
 			$uelf = TTnew( 'UserExpenseListFactory' );
 			$uelf->getByUserIdAndAuthorizedAndStartDateAndEndDate( $this->getUser(), TRUE, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() );
 			Debug::text('Total User Expenses: '. $uelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
@@ -659,22 +660,21 @@ class CalculatePayStub extends PayStubFactory {
 						//Determine if this deduction is valid based on min/max length of service.
 						//Determine if this deduction is valid based on min/max user age.
 						//Determine if the Payroll Run Type matches.
-						if ( $ud_obj->getCompanyDeductionObject()->isActiveDate( $ud_obj, $pay_stub->getPayPeriodObject()->getEndDate() ) == TRUE
+						if ( $ud_obj->getCompanyDeductionObject()->isActiveDate( $ud_obj, $pay_stub->getPayPeriodObject()->getEndDate(), $pay_stub->getTransactionDate() ) == TRUE
 								AND $ud_obj->getCompanyDeductionObject()->isActiveLengthOfService( $ud_obj, $pay_stub->getPayPeriodObject()->getEndDate() ) == TRUE
-								AND $ud_obj->getCompanyDeductionObject()->isActiveUserAge( $this->getUserObject(), $pay_stub->getPayPeriodObject()->getEndDate() ) == TRUE
+								AND $ud_obj->getCompanyDeductionObject()->isActiveUserAge( $this->getUserObject()->getBirthDate(), $pay_stub->getPayPeriodObject()->getEndDate(), $pay_stub->getTransactionDate() ) == TRUE
 								AND $ud_obj->getCompanyDeductionObject()->inApplyFrequencyWindow( $pay_stub->getPayPeriodObject()->getStartDate(), $pay_stub->getPayPeriodObject()->getEndDate(), $this->getUserObject()->getHireDate(), $this->getUserObject()->getTerminationDate(), $this->getUserObject()->getBirthDate() ) == TRUE
-								AND $ud_obj->getCompanyDeductionObject()->inApplyPayrollRunType( $this->getType() )
-								) {
+								AND $ud_obj->getCompanyDeductionObject()->inApplyPayrollRunType( $this->getType() ) ) {
 
-								$amount = $ud_obj->getDeductionAmount( $this->getUserObject()->getId(), $pay_stub, $this->getPayPeriodObject(), $this->getType() );
-								Debug::text('User Deduction: '. $ud_obj->getCompanyDeductionObject()->getName() .' Amount: '. $amount .' Calculation Order: '. $ud_obj->getCompanyDeductionObject()->getCalculationOrder(), __FILE__, __LINE__, __METHOD__, 10);
+							$amount = $ud_obj->getDeductionAmount( $this->getUserObject()->getId(), $pay_stub, $this->getPayPeriodObject(), $this->getType(), $this->getRun() );
+							Debug::text('User Deduction: '. $ud_obj->getCompanyDeductionObject()->getName() .' Amount: '. $amount .' Calculation Order: '. $ud_obj->getCompanyDeductionObject()->getCalculationOrder(), __FILE__, __LINE__, __METHOD__, 10);
 
-								//Allow negative amounts, so they can reduce previously calculated deductions or something.
-								if ( isset($amount) AND $amount != 0 ) {
-									$pay_stub->addEntry( $ud_obj->getCompanyDeductionObject()->getPayStubEntryAccount(), $amount, NULL, NULL, $ud_obj->getCompanyDeductionObject()->getPayStubEntryDescription() );
-								} else {
-									Debug::text('Amount is 0, skipping...', __FILE__, __LINE__, __METHOD__, 10);
-								}
+							//Allow negative amounts, so they can reduce previously calculated deductions or something.
+							if ( isset($amount) AND $amount != 0 ) {
+								$pay_stub->addEntry( $ud_obj->getCompanyDeductionObject()->getPayStubEntryAccount(), $amount, NULL, NULL, $ud_obj->getCompanyDeductionObject()->getPayStubEntryDescription() );
+							} else {
+								Debug::text('Amount is 0, skipping...', __FILE__, __LINE__, __METHOD__, 10);
+							}
 						}
 						unset($amount, $ud_obj);
 					} elseif ( $data_arr['type'] == 'PayStubAmendmentListFactory' ) {

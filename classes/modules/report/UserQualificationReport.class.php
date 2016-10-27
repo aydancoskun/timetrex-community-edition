@@ -279,6 +279,8 @@ class UserQualificationReport extends Report {
 					foreach($columns as $column => $name ) {
 						if ( strpos($column, 'amount') !== FALSE OR strpos($column, 'wage') !== FALSE OR strpos($column, 'hourly_rate') !== FALSE ) {
 							$retval[$column] = 'currency';
+						} elseif ( strpos($column, 'total_user') !== FALSE ) {
+							$retval[$column] = 'numeric';
 						}
 					}
 				}

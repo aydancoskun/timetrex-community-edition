@@ -75,7 +75,13 @@ class UserSummaryReport extends Report {
 				$retval = array(
 										//Static Columns - Aggregate functions can't be used on these.
 										'-1000-template' => TTi18n::gettext('Template'),
-										'-1010-time_period' => TTi18n::gettext('Time Period'), //Employed within this start/end date.
+										'-1010-time_period' => TTi18n::gettext('Employed Time Period'), //Employed within this start/end date.
+										'-1020-hire_time_period' => TTi18n::gettext('Hired Time Period'), //Hired within this start/end date.
+										'-1030-termination_time_period' => TTi18n::gettext('Terminated Time Period'), //Terminated within this start/end date.
+										'-1040-birth_time_period' => TTi18n::gettext('Birth Date Time Period'), //Born within this start/end date
+										'-1090-last_login_time_period' => TTi18n::gettext('Last Login Time Period'), //Last login within this start/end date.
+										'-1095-password_time_period' => TTi18n::gettext('Password Time Period'), //Password change within this start/end date.
+										//'-1098-last_wage_time_period' => TTi18n::gettext('Last Wage Time Period'), //Wage change effective within this start/end date.
 
 										'-2010-user_status_id' => TTi18n::gettext('Employee Status'),
 										'-2020-user_group_id' => TTi18n::gettext('Employee Group'),
@@ -273,6 +279,8 @@ class UserSummaryReport extends Report {
 							$retval[$column] = 'currency';
 						} elseif ( strpos($column, 'labor_burden_percent') !== FALSE ) {
 							$retval[$column] = 'percent';
+						} elseif ( strpos($column, 'total_user') !== FALSE ) {
+							$retval[$column] = 'numeric';
 						}
 					}
 				}
@@ -830,7 +838,7 @@ class UserSummaryReport extends Report {
 				$this->tmp_data['user'][$u_obj->getId()]['currency_rate'] = $u_obj->getColumn('currency_rate');
 			}
 			
-			$this->tmp_data['user'][$u_obj->getId()]['employee_number'] = isset($columns['employee_number']) ? $this->tmp_data['user'][$u_obj->getId()]['employee_number']: $u_obj->getEmployeeNumber();
+			$this->tmp_data['user'][$u_obj->getId()]['employee_number'] = isset($columns['employee_number']) ? $this->tmp_data['user'][$u_obj->getId()]['employee_number'] : $u_obj->getEmployeeNumber();
 			if ( isset($columns['employee_number_barcode']) ) {
 				$this->tmp_data['user'][$u_obj->getId()]['employee_number_barcode'] = new ReportCellBarcode( $this, 'U'.$this->tmp_data['user'][$u_obj->getId()]['employee_number'] );
 			}
@@ -972,7 +980,7 @@ class UserSummaryReport extends Report {
 		$columns = $this->getColumnDataConfig();
 		foreach( $columns as $column => $value ) {
 			foreach( $enable_date_columns as $enable_date_column => $enable_date_column_value ) {
-				Debug::Text('Checking for Column: '. $enable_date_column .' In: '. $column, __FILE__, __LINE__, __METHOD__, 10);
+				//Debug::Text('Checking for Column: '. $enable_date_column .' In: '. $column, __FILE__, __LINE__, __METHOD__, 10);
 				if ( strpos( $column, $enable_date_column.'-' ) !== FALSE ) {
 					$enable_date_columns[$enable_date_column] = TRUE;
 				}

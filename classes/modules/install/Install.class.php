@@ -273,7 +273,7 @@ class Install {
 					unset($tmp_base_url);
 				}
 
-				//Check for bug instroducd in v7.4.5 that removed all backslashes from paths, to attempt to put them back automatically.
+				//Check for bug introduced in v7.4.5 that removed all backslashes from paths, to attempt to put them back automatically.
 				//This should be able to be removed by v8.0.
 				if ( PRODUCTION == FALSE OR OPERATING_SYSTEM == 'WIN' ) {
 					if ( !isset($new_config_vars['path']['php_cli']) AND isset($config_vars['path']['php_cli']) AND strpos( $config_vars['path']['php_cli'], '\\' ) === FALSE  ) {
@@ -1435,6 +1435,15 @@ class Install {
 		return 1;
 	}
 
+	function checkOpenSSL() {
+		//FIXME: Automated installer on OSX/Linux doesnt compile SSL into PHP.
+		if ( function_exists('openssl_encrypt') OR strtoupper( substr(PHP_OS, 0, 3) ) !== 'WIN' ) {
+			return 0;
+		}
+
+		return 1;
+	}
+
 	function checkGD() {
 		if ( function_exists('imagefontheight') ) {
 			return 0;
@@ -1642,6 +1651,7 @@ class Install {
 		$retarr[$this->checkSimpleXML()]++;
 		$retarr[$this->checkZIP()]++;
 		$retarr[$this->checkMAIL()]++;
+		$retarr[$this->checkOpenSSL()]++;
 
 		$retarr[$this->checkPEAR()]++;
 
@@ -1740,13 +1750,18 @@ class Install {
 			$retarr[] = 'SIMPLEXML';
 		}
 
+		if ( $fail_all == TRUE OR $this->checkZIP() != 0 ) {
+			$retarr[] = 'ZIP';
+		}
+
 		if ( $fail_all == TRUE OR $this->checkMAIL() != 0 ) {
 			$retarr[] = 'MAIL';
 		}
 
-		if ( $fail_all == TRUE OR $this->checkZIP() != 0 ) {
-			$retarr[] = 'ZIP';
+		if ( $fail_all == TRUE OR $this->checkOpenSSL() != 0 ) {
+			$retarr[] = 'OPENSSL';
 		}
+
 
 		//Bundled PEAR modules require the base PEAR package at least
 		if ( $fail_all == TRUE OR $this->checkPEAR() != 0 ) {

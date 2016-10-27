@@ -71,14 +71,21 @@ class APIROE extends APIFactory {
 		$company_obj = $this->getCurrentCompanyObject();
 
 		if ( $user_id > 0 ) {
-			//Debug::Text('Current User Id: '.$user_id, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text('Getting roe default data... User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 			$rf = new ROEFactory();
-			$first_date = $rf->calculateFirstDate( $user_id );
-			$last_date = $rf->calculateLastDate( $user_id );
-			$pay_period = $rf->calculatePayPeriodType( $user_id, $last_date );
-			$final_pay_stub_end_date = $rf->calculateFinalPayStubEndDate( $user_id, time() );
-
-			Debug::Text('Getting roe default data...', __FILE__, __LINE__, __METHOD__, 10);
+			$rf->setUser( $user_id );
+			$first_date = $rf->calculateFirstDate();
+			$last_date = $rf->calculateLastDate();
+			$pay_period = $rf->calculatePayPeriodType( $last_date );
+			$final_pay_stub_end_date = $rf->calculateFinalPayStubEndDate();
+			$final_pay_stub_transaction_date = $rf->calculateFinalPayStubTransactionDate();
+			if ( $rf->isFinalPayStubExists() == TRUE ) {
+				$release_accruals = FALSE;
+				$generate_pay_stub = FALSE;
+			} else {
+				$release_accruals = TRUE;
+				$generate_pay_stub = TRUE;
+			}
 
 			$data = array(
 				'company_id' => $company_obj->getId(),
@@ -88,9 +95,9 @@ class APIROE extends APIFactory {
 				'last_date' => TTDate::getAPIDate('DATE', $last_date),
 				'pay_period_end_date' => TTDate::getAPIDate('DATE', $pay_period['pay_period_end_date']),
 				'final_pay_stub_end_date' => ( $final_pay_stub_end_date > time() ) ? TTDate::getAPIDate('DATE', time() ) : TTDate::getAPIDate('DATE', $final_pay_stub_end_date ),
-				'final_pay_stub_transaction_date' => TTDate::getAPIDate('DATE', time() ),
-				'release_accruals' => TRUE,
-				'generate_pay_stub' => TRUE,
+				'final_pay_stub_transaction_date' => TTDate::getAPIDate('DATE', $final_pay_stub_transaction_date ),
+				'release_accruals' => $release_accruals,
+				'generate_pay_stub' => $generate_pay_stub,
 			);
 		} else {
 			$data = array(
@@ -100,6 +107,7 @@ class APIROE extends APIFactory {
 			);
 		}
 
+		Debug::Arr($data, 'zzz9Getting roe default data... User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->returnHandler( $data );
 	}
 

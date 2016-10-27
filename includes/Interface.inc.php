@@ -34,9 +34,20 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
+//CSP headers break many things at this stage, unless "unsafe" is used for almost everything.
+//Header('Content-Security-Policy: default-src *; script-src \'self\' *.google-analytics.com *.google.com');
+header('Content-Security-Policy: default-src * \'unsafe-inline\'; script-src \'unsafe-eval\' \'unsafe-inline\' \'self\' *.timetrex.com *.google-analytics.com *.google.com; img-src \'self\' *.timetrex.com *.google-analytics.com *.google.com data:');
+
 //Help prevent XSS or frame clickjacking.
 Header('X-XSS-Protection: 1; mode=block');
 Header('X-Frame-Options: SAMEORIGIN');
+
+//Reduce MIME-TYPE security risks.
+header('X-Content-Type-Options: nosniff');
+
+if ( isset($config_vars['other']['force_ssl']) AND ( $config_vars['other']['force_ssl'] == TRUE ) AND Misc::isSSL(TRUE) == TRUE ) {
+	header('Strict-Transport-Security: max-age=31536000; includeSubdomains');
+}
 
 if ( !isset($disable_cache_control) ) {
 	//Turn caching off.
@@ -53,9 +64,7 @@ if ( !isset($disable_cache_control) ) {
 }
 
 //Do not overwrite a previously sent content-type header, this breaks WAP.
-if ( !isset($enable_wap) ) {
-	header('Content-Type: text/html; charset=UTF-8');
-}
+header('Content-Type: text/html; charset=UTF-8');
 
 //Skip this step if disable_database_connection is enabled or the user is going through the installer still
 $clf = new CompanyListFactory();
@@ -85,10 +94,7 @@ if ( isset($authenticate) AND $authenticate === FALSE ) {
 	Debug::text('Bypassing Authentication', __FILE__, __LINE__, __METHOD__, 10);
 	TTi18n::chooseBestLocale();
 } else {
-	//Increase timeout on WAP devices, so they don't have to login as often.
-	if ( isset($enable_wap) AND $enable_wap == TRUE ) {
-		$authentication->setIdle( 32400 ); //9hrs
-	} elseif ( isset($config_vars['other']['web_session_timeout']) AND $config_vars['other']['web_session_timeout'] != '' ) {
+	if ( isset($config_vars['other']['web_session_timeout']) AND $config_vars['other']['web_session_timeout'] != '' ) {
 		$authentication->setIdle( (int)$config_vars['other']['web_session_timeout'] );
 	}
 
@@ -204,21 +210,7 @@ if ( isset($authenticate) AND $authenticate === FALSE ) {
 		$profiler->stopTimer( 'Interface.inc - Post-Authentication' );
 	} else {
 		Debug::text('User NOT Authenticated!', __FILE__, __LINE__, __METHOD__, 10);
-
-		if ( isset($enable_wap) AND $enable_wap == TRUE ) {
-			Redirect::Page( URLBuilder::getURL(NULL, Environment::GetBaseURL().'wap/wap_login.php') );
-		} elseif ( isset($enable_iphone) AND $enable_iphone == TRUE ) {
-			Redirect::Page( URLBuilder::getURL(NULL, Environment::GetBaseURL().'iphone/login/login.php') );
-		} else {
-			if ( isset($config_vars['other']['default_interface']) AND strtolower(trim($config_vars['other']['default_interface'])) == 'html' ) {
-				Redirect::Page( URLBuilder::getURL(NULL, Environment::GetBaseURL().'Login_legacy.php') );
-			} elseif ( isset($config_vars['other']['default_interface']) AND strtolower(trim($config_vars['other']['default_interface'])) == 'html5' ) {
-				Redirect::Page( URLBuilder::getURL(NULL, Environment::GetBaseURL().'html5/') );
-			} else {
-				Redirect::Page( URLBuilder::getURL(NULL, Environment::GetBaseURL().'flex/') );
-			}
-		}
-
+		Redirect::Page( URLBuilder::getURL(NULL, Environment::GetBaseURL().'html5/') );
 		//exit;
 	}
 }

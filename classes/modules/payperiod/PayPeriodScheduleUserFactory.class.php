@@ -42,7 +42,15 @@ class PayPeriodScheduleUserFactory extends Factory {
 	protected $table = 'pay_period_schedule_user';
 	protected $pk_sequence_name = 'pay_period_schedule_user_id_seq'; //PK Sequence name
 
-	var $user_obj = NULL;
+	protected $user_obj = NULL;
+	protected $pay_period_schedule_obj = NULL;
+
+	function getUserObject() {
+		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
+	}
+	function getPayPeriodScheduleObject() {
+		return $this->getGenericObject( 'PayPeriodScheduleListFactory', $this->getPayPeriodSchedule(), 'pay_period_schedule_obj' );
+	}
 
 	function getPayPeriodSchedule() {
 		return (int)$this->data['pay_period_schedule_id'];
@@ -65,27 +73,12 @@ class PayPeriodScheduleUserFactory extends Factory {
 		return FALSE;
 	}
 
-	function getUserObject() {
-		if ( is_object($this->user_obj) ) {
-			return $this->user_obj;
-		} else {
-			$ulf = TTnew( 'UserListFactory' );
-			$ulf->getById( $this->getUser() );
-			if ( $ulf->getRecordCount() == 1 ) {
-				$this->user_obj = $ulf->getCurrent();
-				return $this->user_obj;
-			}
-
-			return FALSE;
-		}
-	}
 	function isUniqueUser($id) {
 		$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
 
 		$ph = array(
 					'id' => (int)$id,
 					);
-
 
 		$query = 'select a.id from '. $this->getTable() .' as a, '. $ppslf->getTable() .' as b where a.pay_period_schedule_id = b.id AND a.user_id = ? AND b.deleted=0';
 		$user_id = $this->db->GetOne($query, $ph);
@@ -127,7 +120,7 @@ class PayPeriodScheduleUserFactory extends Factory {
 
 		return FALSE;
 	}
-
+	
 	//This table doesn't have any of these columns, so overload the functions.
 	function getDeleted() {
 		return FALSE;

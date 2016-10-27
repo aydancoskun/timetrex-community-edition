@@ -98,25 +98,20 @@ if (!Array.pop && !Array.prototype.pop) {
 		return this.splice(this.length - 1, 1)[0];
 	}
 }
-/*
-	From IE7, version 0.9 (alpha) (2005-08-19)
-	Copyright: 2004-2005, Dean Edwards (http://dean.edwards.name/)
-*/
-if (!DOMParser.parseFromString && window.ActiveXObject)
-{
-function DOMParser() {/* empty constructor */};
-DOMParser.prototype = {
-	parseFromString: function(str, contentType) {
-		var xmlDocument = new ActiveXObject('Microsoft.XMLDOM');
-		xmlDocument.loadXML(str);
-		return xmlDocument;
-	}
-};
+if (window.ActiveXObject && window['DOMParser'] == 'undefined') {
+	window.DOMParser = new function() {};
+	DOMParser.prototype = {
+		parseFromString: function(str, contentType) {
+			var xmlDocument = new ActiveXObject('Microsoft.XMLDOM');
+			xmlDocument.loadXML(str);
+			return xmlDocument;
+		}
+	};
 
-function XMLSerializer() {/* empty constructor */};
-XMLSerializer.prototype = {
-	serializeToString: function(root) {
-		return root.xml || root.outerHTML;
-	}
-};
+	window.XMLSerializer = new function() {};
+	XMLSerializer.prototype = {
+		serializeToString: function(root) {
+			return root.xml || root.outerHTML;
+		}
+	};
 }

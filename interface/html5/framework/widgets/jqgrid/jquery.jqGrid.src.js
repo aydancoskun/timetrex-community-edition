@@ -2978,9 +2978,17 @@
                                     var item = data[i];
 
                                     if ( Global.isSet( item.id ) ) {
-                                        $( ts ).jqGrid( "setSelection", item.id, true, e );
+                                        if(i === endIndex - 1){
+                                            $( ts ).jqGrid( "setSelection", item.id, true, e );
+                                        }else{
+                                            $( ts ).jqGrid( "setSelection", item.id, false, e );
+                                        }
                                     } else {
-                                        $( ts ).jqGrid( "setSelection", i + 1, true, e );
+                                        if(i === endIndex - 1){
+                                            $( ts ).jqGrid( "setSelection", i + 1, true, e );
+                                        }else{
+                                            $( ts ).jqGrid( "setSelection", i + 1, false, e );
+                                        }
                                     }
 
                                 }

@@ -461,7 +461,9 @@ class RecurringScheduleControlFactory extends Factory {
 		//
 
 		//Handle generating recurring schedule rows, so they are as real-time as possible.
-		$current_epoch = time();
+		//In case an issue arises (like holiday not appearing or something) and they need to recalculate schedules, always start from the prior week.
+		//  so we at least have a chance of recalculating retroactively to some degree.
+		$current_epoch = TTDate::getBeginWeekEpoch( TTDate::getBeginWeekEpoch( time() ) - 86400 );
 
 		$rsf = TTnew('RecurringScheduleFactory');
 		$rsf->StartTransaction();

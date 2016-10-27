@@ -26,14 +26,10 @@
 }
 
 .user-generic-data-status .content {
-    height: 500px;
     margin-top: 10px;
     padding: 0;
     position: relative;
     top: 0;
     width: 100%;
-    padding-left: 5px;
+    height: calc(100% - 85px);
 }
-
-.user-generic-data-status .bott
-

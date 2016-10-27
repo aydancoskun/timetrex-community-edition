@@ -149,12 +149,19 @@ class UserReviewFactory extends Factory {
 		if ( $value == '' ) {
 			$value = NULL;
 		}
-		if ( (
-				$value == NULL
+		if ( 	$value == NULL
 				OR
-				( $this->Validator->isNumeric(	'rating',
+				(
+				$this->Validator->isNumeric(	'rating',
 													$value,
 													TTi18n::gettext('Rating must only be digits')
+										)
+				AND
+				$this->Validator->isLengthBeforeDecimal( 'rating',
+														$value,
+														TTi18n::gettext('Invalid Rating'),
+														0,
+														7
 										)
 				AND
 				$this->Validator->isLengthAfterDecimal( 'rating',
@@ -162,7 +169,8 @@ class UserReviewFactory extends Factory {
 														TTi18n::gettext('Invalid Rating'),
 														0,
 														2
-										) ) )
+										)
+				)
 			) {
 
 			$this->data['rating'] = $value;

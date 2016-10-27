@@ -59,7 +59,7 @@
 .schedule-view .schedule-content-div {
     text-align: center;
     cursor: default;
-    height: 24px;
+    min-height: 24px;
 }
 
 .schedule-view .month-date-cell {

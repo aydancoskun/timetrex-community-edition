@@ -62,7 +62,7 @@ if ( isset($_GET['Class']) AND $_GET['Class'] != '' ) {
 //$class_factory = ( isset($_GET['Class']) AND $_GET['Class'] != '' ) ? $_GET['Class'] : 'Authentication'; //Default to APIAuthentication class if none is specified.
 //$class_name = TTgetPluginClassName( $class_prefix.$class_factory );
 
-$soap_server = new SoapServer( NULL, array('uri' => 'urn:api') );
+$soap_server = new SoapServer( NULL, array('uri' => 'urn:api', 'encoding' => 'UTF-8' ) );
 if ( isset($_GET['SessionID']) AND $_GET['SessionID'] != '' ) {
 	$authentication = new Authentication();
 

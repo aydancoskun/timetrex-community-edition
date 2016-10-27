@@ -120,7 +120,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 		form_item_input.TDatePicker( {field: 'end_date'} );
 		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'>"+ $.i18n._( '(Leave blank for no start date)' ) + "</span>" );
+		var label = $( "<span class='widget-right-label'>" + $.i18n._( '(Leave blank for no end date)' ) + "</span>" );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -587,9 +587,9 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		this._super( 'setEditViewDataDone' );
 
 		if ( this.is_mass_editing ) {
-			this.detachElement('user');
+			this.detachElement( 'user' );
 		} else {
-			this.attachElement('user');
+			this.attachElement( 'user' );
 		}
 
 	},
@@ -794,7 +794,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		$this.initEditView();
 	},
 
-	onCopyAsNewClick: function() {
+	_continueDoCopyAsNew: function() {
 
 		var $this = this;
 		this.is_add = true;
@@ -808,6 +808,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 			navigation_div.css( 'display', 'none' );
 			this.setEditMenu();
 			this.setTabStatus();
+			this.is_changed = false;
 			ProgressBar.closeOverlay();
 
 		} else {
@@ -845,23 +846,25 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		$this.is_add = false;
 		if ( $this.edit_view ) {
 			copyIds.push( $this.current_edit_record.id );
+			if ( this.is_changed ) {
+				TAlertManager.showConfirmAlert( Global.modify_alert_message, null, function( flag ) {
+					if ( flag === true ) {
+						$this.is_changed = false;
+						$this._continueDoCopy( copyIds );
+					}
+					ProgressBar.closeOverlay();
+				} );
+			} else {
+				$this._continueDoCopy( copyIds );
+			}
 		} else {
 			var ids = $this.getGridSelectIdArray().slice();
-
 			for ( var i = 0; i < ids.length; i++ ) {
 				var record_id = ids[i].split( '_' )[0];
 				copyIds.push( record_id );
-
 			}
+			$this._continueDoCopy( copyIds );
 		}
-
-		ProgressBar.showOverlay();
-		$this.api['copy' + $this.api.key_name]( copyIds, {
-			onResult: function( result ) {
-				$this.onCopyResult( result )
-
-			}
-		} );
 	},
 
 	onDeleteAndNextClick: function() {

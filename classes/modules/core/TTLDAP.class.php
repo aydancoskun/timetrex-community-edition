@@ -251,7 +251,11 @@ class TTLDAP {
 			$ldap = NewADOConnection( 'ldap' );
 			$ldap->port = $this->getPort(); //If port is 636, use SSL instead.
 
-			Debug::Text('LDAP: Host: '. $this->getHost() .' Port: '. $this->getPort() .' Bind User Name: '. $this->getBindUserName() .' Bind Password: '. $this->getBindPassword() .' Bind DN: '. $this->getBindDN( $user_name ) .' Base DN: '. $this->getBaseDN() .' Bind Authentication Mode: '. (int)$this->isBindAuthentication() .' Password: '. $password, __FILE__, __LINE__, __METHOD__, 10);
+			//In order to use LDAP over SSL with a invalid certificate, /etc/ldap/ldap.conf or C:\OpenLDAP\sysconf\ldap.conf must exist with the following line:
+			//   TLS_REQCERT ALLOW
+			// PHP-FPM/Apache must then be restarted. This will prevent certification validation from happening.
+
+			Debug::Text('LDAP: Host: '. $this->getHost() .' Port: '. $this->getPort() .' Bind User Name: '. $this->getBindUserName() .' Bind Password: '. $this->getBindPassword() .' Bind DN: '. $this->getBindDN( $user_name ) .' Base DN: '. $this->getBaseDN() .' Bind Authentication Mode: '. (int)$this->isBindAuthentication() .' Password: ****', __FILE__, __LINE__, __METHOD__, 10);
 			try {
 				//Poor mans timeout if we aren't using PHP v5.3 (which supports a built-in LDAP timeout setting)
 				$fp = @fsockopen( str_ireplace('ldaps://', '', $this->getHost() ), $this->getPort(), $errno, $errstr, 3);

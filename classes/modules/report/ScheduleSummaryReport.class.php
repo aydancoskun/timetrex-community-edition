@@ -71,6 +71,10 @@ class ScheduleSummaryReport extends Report {
 				//Regular employee printing timesheet for themselves. Force specific config options.
 				//Get current pay period from config, then overwrite it with
 				$filter_config = $this->getFilterConfig();
+				if ( !isset($filter_config['start_date']) OR !isset($filter_config['end_date']) ) {
+					$filter_config['start_date'] = TTDate::getBeginWeekEpoch( time() );
+					$filter_config['end_date'] = TTDate::getEndWeekEpoch( time() );
+				}
 				$this->setFilterConfig( array( 'include_user_id' => array($user_id), 'time_period' => $filter_config['time_period'], 'start_date' => $filter_config['start_date'], 'end_date' => $filter_config['end_date'] ) );
 			} else {
 				Debug::Text('Supervisor employee not restricting schedule...', __FILE__, __LINE__, __METHOD__, 10);
@@ -290,6 +294,8 @@ class ScheduleSummaryReport extends Report {
 							$retval[$column] = 'currency';
 						} elseif ( strpos($column, '_time') OR strpos($column, '_policy') ) {
 							$retval[$column] = 'time_unit';
+						} elseif ( strpos($column, 'total_shift') !== FALSE ) {
+							$retval[$column] = 'numeric';
 						}
 					}
 				}
@@ -832,7 +838,7 @@ class ScheduleSummaryReport extends Report {
 		$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(16) );
 		if ( $new_page == TRUE ) {
 			$this->pdf->Cell(0, $this->_pdf_scaleSize(5), TTi18n::getText('Schedule'), 0, 0, 'C');
-			$this->pdf->Ln( $this->_pdf_scaleSize(2) );
+			$this->pdf->Ln( $this->_pdf_scaleSize(6) );
 		}
 
 		$config = $this->getFilterConfig();
@@ -878,9 +884,12 @@ class ScheduleSummaryReport extends Report {
 				$this->pdf->setY( $this->pdf->getY() + 2);
 			}
 			$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(8) );
-			$this->pdf->Cell(0, $this->_pdf_scaleSize(4), implode('                        ', $label ), 0, 0, 'C');
+			$this->pdf->Cell(0, $this->_pdf_scaleSize(4), implode( str_repeat(' ', 24 ), $label ), 0, 0, 'C', 0, NULL, 1);
 			$this->pdf->Ln();
+		} else {
+			$this->pdf->Ln( $this->_pdf_scaleSize(2) );
 		}
+
 
 		return TRUE;
 	}
@@ -936,7 +945,6 @@ class ScheduleSummaryReport extends Report {
 		$this->scheduleFooterWeek();
 		$this->scheduleFooter();
 		$this->pdf->AddPage();
-		//$this->pdf->setXY( 0, 0 );
 		return TRUE;
 	}
 
@@ -944,7 +952,7 @@ class ScheduleSummaryReport extends Report {
 		$margins = $this->pdf->getMargins();
 
 		if ( ($this->pdf->getY() + $height) > ($this->pdf->getPageHeight() - $margins['bottom'] - $margins['top'] - 10) ) {
-			//Debug::Text('Detected Page Break needed...', __FILE__, __LINE__, __METHOD__, 10);
+			//Debug::Text('Detected Page Break needed... Y: '. $this->pdf->getY() .' Height: '. $height .' Page Height: '. ($this->pdf->getPageHeight() - $margins['bottom'] - $margins['top'] - 10), __FILE__, __LINE__, __METHOD__, 10);
 			$this->scheduleAddPage();
 
 			return TRUE;
@@ -957,7 +965,7 @@ class ScheduleSummaryReport extends Report {
 			$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(8) );
 
 			if ( $format != 'pdf_schedule' AND $format != 'pdf_schedule_print' ) {
-				$this->pdf->Cell($column_widths['label'], 4, TTi18n::getText('Employee'), 1, 0, 'C', 0, NULL, 1);
+				$this->pdf->Cell($column_widths['label'], $this->_pdf_scaleSize(4), TTi18n::getText('Employee'), 1, 0, 'C', 0, NULL, 1);
 			}
 
 			$calendar_header = TTDate::getDayOfWeekArrayByStartWeekDay( $start_week_day );
@@ -987,11 +995,11 @@ class ScheduleSummaryReport extends Report {
 			$i = 0;
 			foreach( $calendar_array as $calendar_day ) {
 				if ( ( $i == 0 AND $new_page == TRUE ) OR $calendar_day['isNewMonth'] == TRUE ) {
-					$this->pdf->Cell( ($column_widths['day'] * 0.75), $this->_pdf_scaleSize(4), $calendar_day['month_name'], 'TBL', 0, 'L', 1);
+					$this->pdf->Cell( ($column_widths['day'] * 0.75), $this->_pdf_scaleSize(4), $calendar_day['month_name'], 'TBL', 0, 'L', 1, NULL, 1);
 				} else {
 					$this->pdf->Cell( ($column_widths['day'] * 0.75), $this->_pdf_scaleSize(4), '', 'TBL', 0, 'L', 1);
 				}
-				$this->pdf->Cell( ($column_widths['day'] * 0.25), $this->_pdf_scaleSize(4), $calendar_day['day_of_month'], 'TBR', 0, 'R', 1);
+				$this->pdf->Cell( ($column_widths['day'] * 0.25), $this->_pdf_scaleSize(4), $calendar_day['day_of_month'], 'TBR', 0, 'R', 1, NULL, 1);
 
 				$i++;
 			}
@@ -1199,7 +1207,7 @@ class ScheduleSummaryReport extends Report {
 							$user_data = $this->form_data['user'][$user_id];
 
 							$i = 0;
-							$row_height = 5;
+							$row_height = $this->_pdf_fontSize(5);
 							if ( $this->scheduleCheckPageBreak( (($row_height * $max_lines_per_day) + 5), TRUE ) == TRUE ) {
 								$this->scheduleHeader();
 								$this->scheduleDayOfWeekNameHeader( $start_week_day, $column_widths, $format );
@@ -1455,10 +1463,13 @@ class ScheduleSummaryReport extends Report {
 											}
 											$page_break = TRUE;
 										} else {
-											$page_break = ( $x == 0 ) ? TRUE : $this->scheduleCheckPageBreak( 30, TRUE );
+											$page_break = ( $x == 0 ) ? TRUE : $this->scheduleCheckPageBreak( $this->_pdf_scaleSize(30), TRUE );
 											//Debug::Arr($this->form_data, 'zabUser Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 										}
 
+										//If we are within 30mm of end of page, where a scheduleHeader/DayOfWeekHeader will just barely fit
+										// but no data will be able to fit after it on the page, just start a new page instead.
+										$this->scheduleCheckPageBreak( $this->_pdf_scaleSize(30), TRUE );
 										$this->scheduleHeader( $branch, $department, $job, $job_item, NULL, $page_break );
 										$this->scheduleDayOfWeekNameHeader( $start_week_day, $column_widths, $format );
 
@@ -1485,8 +1496,7 @@ class ScheduleSummaryReport extends Report {
 													}
 
 													//Handle page break.
-													$page_break_height = 5;
-													if ( $this->scheduleCheckPageBreak( $page_break_height, TRUE ) == TRUE ) {
+													if ( $this->scheduleCheckPageBreak( $this->_pdf_scaleSize(5), TRUE ) == TRUE ) {
 														$this->scheduleHeader( $branch, $department, $job, $job_item );
 														$this->scheduleDayOfWeekNameHeader( $start_week_day, $column_widths, $format );
 														$this->scheduleWeekHeader( $calendar_week_array, $column_widths, $format, TRUE );
@@ -1566,7 +1576,7 @@ class ScheduleSummaryReport extends Report {
 
 								$s = 0;
 								//Handle page break.
-								if ( $this->scheduleCheckPageBreak( 5, TRUE ) == TRUE ) {
+								if ( $this->scheduleCheckPageBreak( $this->_pdf_scaleSize(5), TRUE ) == TRUE ) {
 									$this->scheduleFooterWeek( $column_widths );
 									$this->scheduleHeader();
 									$this->scheduleDayOfWeekNameHeader( $start_week_day, $column_widths, $format );
@@ -1635,7 +1645,7 @@ class ScheduleSummaryReport extends Report {
 									$this->scheduleWeekHeader( $calendar_week_array, $column_widths, $format );
 
 									//Handle page break.
-									$page_break_height = 5;
+									$page_break_height = $this->_pdf_scaleSize(5);
 									if ( $this->scheduleCheckPageBreak( $page_break_height, TRUE ) == TRUE ) {
 										$this->scheduleHeader();
 										$this->scheduleDayOfWeekNameHeader( $start_week_day, $column_widths, $format );

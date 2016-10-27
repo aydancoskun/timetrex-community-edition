@@ -15,11 +15,10 @@
 
 		this.getColumnModel = function() {
 			return column_model;
-		}
+		};
 
 		this.setSortStyle = function( sort_type, index ) {
-//			  alert(this.attr('id'));
-			var sortIcon = $( "<img class='t-grid-header-sort-icon' />" )
+			var sortIcon = $( "<img class='t-grid-header-sort-icon' />" );
 
 			if ( sort_type === 'asc' ) {
 
@@ -37,11 +36,11 @@
 				this.append( sortNumberSpan );
 			}
 
-		}
+		};
 
 		this.getWidth = function() {
 			return $( this ).parent().width();
-		}
+		};
 
 		this.cleanSortStyle = function() {
 			var sortIcon = this.find( 'img' );
@@ -54,7 +53,7 @@
 			if ( sort_number.length > 0 ) {
 				$( sort_number ).remove();
 			}
-		}
+		};
 
 		//For multiple items like .xxx could contains a few widgets.
 		this.each( function() {

@@ -294,6 +294,13 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 			return FALSE;
 		}
 
+		if ( $order == NULL ) {
+			$order = array( 'calculation_order' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
 		$ph = array(
 					'company_id' => (int)$company_id,
 					);
@@ -304,8 +311,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 					where	company_id = ?
 						AND status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .')
 						AND type_id in ('. $this->getListSQL( $type_id, $ph, 'int' ) .')
-						AND deleted = 0
-					ORDER BY calculation_order ASC';
+						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
@@ -518,7 +524,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$query .= ( isset($filter_data['pay_stub_entry_name_id']) ) ? $this->getWhereClauseSQL( 'a.pay_stub_entry_account_id', $filter_data['pay_stub_entry_name_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
-		$query .= ( isset($filter_data['country']) ) ?$this->getWhereClauseSQL( 'a.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['country']) ) ? $this->getWhereClauseSQL( 'a.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['province']) ) ? $this->getWhereClauseSQL( 'a.province', $filter_data['province'], 'upper_text_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;

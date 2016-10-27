@@ -713,11 +713,11 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
 		$pd_obj->setAnnualPayPeriods( 12 );
-		$pd_obj->setFormulaType( 20 ); //Periodic
+		$pd_obj->setFormulaType( 20 ); //NonPeriodic
 		$pd_obj->setFederalTotalClaimAmount( 11038 );
 		$pd_obj->setProvincialTotalClaimAmount( 0 );
-		$pd_obj->setEIExempt( FALSE );
-		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setEIExempt( TRUE ); //EI/CPP exempt so we don't have to track YTD amounts.
+		$pd_obj->setCPPExempt( TRUE );
 		$pd_obj->setFederalTaxExempt( FALSE );
 		$pd_obj->setProvincialTaxExempt( FALSE );
 		$pd_obj->setYearToDateCPPContribution( 0 );
@@ -734,7 +734,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '640.71' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '683.34' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
@@ -746,7 +746,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '640.71' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '683.34' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
@@ -758,7 +758,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '640.71' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '683.34' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
@@ -770,7 +770,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '640.71' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '683.34' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
@@ -782,7 +782,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '640.71' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '683.34' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
@@ -794,7 +794,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '640.71' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '683.34' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
@@ -806,7 +806,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '640.71' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '683.34' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
@@ -818,7 +818,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '640.71' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '683.34' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
@@ -830,7 +830,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '640.71' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '683.34' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
@@ -842,7 +842,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '640.71' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '683.34' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
@@ -854,7 +854,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '640.71' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '683.34' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
@@ -866,13 +866,13 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '640.71' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '683.34' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
 
 		$this->assertEquals( $ytd_gross_income, 60000 );
-		$this->assertEquals( $ytd_deduction, 7688.4675 );
+		$this->assertEquals( $ytd_deduction, 8200.05 );
 
 		//Actual Income/Deductions for the year.
 		$pd_obj->setDate(strtotime('01-Dec-2015'));
@@ -882,7 +882,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( 0 );
 		$pd_obj->setGrossPayPeriodIncome( 60000 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '60000' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '7688.47' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '8200.05' );
 	}
 
 	function testCA_2015_Federal_Periodic_FormulaB() {
@@ -1243,6 +1243,1052 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '4429.05' );
 	}
 
+	function testCA_2015_Federal_NonPeriodic_FormulaC() {
+		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+
+		//
+		// Full test with EI/CPP YTD amounts.
+		//
+
+		$pd_obj = new PayrollDeduction('CA', 'PE');
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setAnnualPayPeriods( 26 );
+		$pd_obj->setFormulaType( 10 ); //Periodic
+		$pd_obj->setFederalTotalClaimAmount( 11327 );
+		$pd_obj->setProvincialTotalClaimAmount( 0 );
+		$pd_obj->setEIExempt( FALSE );
+		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+
+		$current_pay_period = 1;
+		$ytd_gross_income = 0;
+		$ytd_deduction = 0;
+		$ytd_cpp = 0;
+		$ytd_ei = 0;
+
+		//PP1
+		$pd_obj->setDate(strtotime('08-Jan-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP2
+		$pd_obj->setDate(strtotime('22-Jan-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP3
+		$pd_obj->setDate(strtotime('05-Feb-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei ); 
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP4
+		$pd_obj->setDate(strtotime('19-Feb-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei ); 
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP5
+		$pd_obj->setDate(strtotime('05-Mar-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei ); 
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP6
+		$pd_obj->setDate(strtotime('19-Mar-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei ); 
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP7
+		$pd_obj->setDate(strtotime('02-Apr-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei ); 
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP8
+		$pd_obj->setDate(strtotime('16-Apr-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei ); 
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP9
+		$pd_obj->setDate(strtotime('30-Apr-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP10
+		$pd_obj->setDate(strtotime('14-May-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP11
+		$pd_obj->setDate(strtotime('28-May-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei ); 
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP12
+		$pd_obj->setDate(strtotime('11-Jun-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei ); 
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP13
+		$pd_obj->setDate(strtotime('25-Jun-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei ); 
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP14
+		$pd_obj->setDate(strtotime('09-Jul-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei ); 
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP15
+		$pd_obj->setDate(strtotime('23-Jul-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei ); 
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP16
+		$pd_obj->setDate(strtotime('06-Aug-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei ); 
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP17
+		$pd_obj->setDate(strtotime('20-Aug-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP18
+		$pd_obj->setDate(strtotime('03-Sep-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei ); 
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP19
+		$pd_obj->setDate(strtotime('17-Sep-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei ); 
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP20
+		$pd_obj->setDate(strtotime('01-Oct-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei ); 
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP21
+		$pd_obj->setDate(strtotime('15-Oct-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei ); 
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP22
+		$pd_obj->setDate(strtotime('29-Oct-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei ); 
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP23
+		$pd_obj->setDate(strtotime('12-Nov-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei ); 
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP24
+		$pd_obj->setDate(strtotime('26-Nov-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP25 (A)
+		$pd_obj->setFormulaType( 10 ); //NonPeriodic
+		$pd_obj->setDate(strtotime('10-Dec-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei ); 
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		//$current_pay_period++; //(Multiple runs in this pay period)
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP25 (B)
+		$pd_obj->setFormulaType( 20 ); //NonPeriodic
+		$pd_obj->setDate(strtotime('10-Dec-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 2 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei ); 
+		$pd_obj->setGrossPayPeriodIncome( 150.00 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '150.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '31.19' ); //12.31?
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP26
+		$pd_obj->setFormulaType( 10 ); //Periodic
+		$pd_obj->setDate(strtotime('24-Dec-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		$this->assertEquals( $ytd_gross_income, 33431.04 );
+		$this->assertEquals( $this->mf($ytd_deduction), 2837.42 );
+
+		//Actual Income/Deductions for the year.
+		$pd_obj->setFormulaType( 10 ); //Periodic
+		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setAnnualPayPeriods( 1 );
+		$pd_obj->setCurrentPayPeriod( 1 );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( 0 );
+		$pd_obj->setYearToDateDeduction( 0 );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+		$pd_obj->setGrossPayPeriodIncome( 33431.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '33431.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '2827.19' );
+
+		//Actual Income/Deductions for the year.
+		$pd_obj->setFormulaType( 20 ); //NonPeriodic
+		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setAnnualPayPeriods( 1 );
+		$pd_obj->setCurrentPayPeriod( 1 );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( 0 );
+		$pd_obj->setYearToDateDeduction( 0 );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+		$pd_obj->setGrossPayPeriodIncome( 33431.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '33431.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '2801.20' );
+	}
+
+	function testCA_2015_Federal_NonPeriodic_FormulaC2() {
+		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+
+		//
+		// Full test with EI/CPP YTD amounts.
+		//
+
+		$pd_obj = new PayrollDeduction('CA', 'PE');
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setAnnualPayPeriods( 26 );
+		$pd_obj->setFormulaType( 10 ); //Periodic
+		$pd_obj->setFederalTotalClaimAmount( 11327 );
+		$pd_obj->setProvincialTotalClaimAmount( 0 );
+		$pd_obj->setEIExempt( FALSE );
+		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+
+		$current_pay_period = 1;
+		$ytd_gross_income = 0;
+		$ytd_deduction = 0;
+		$ytd_cpp = 0;
+		$ytd_ei = 0;
+
+		//PP1
+		$pd_obj->setDate(strtotime('08-Jan-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP2
+		$pd_obj->setDate(strtotime('22-Jan-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP3
+		$pd_obj->setDate(strtotime('05-Feb-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP4
+		$pd_obj->setDate(strtotime('19-Feb-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP5
+		$pd_obj->setDate(strtotime('05-Mar-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP6
+		$pd_obj->setDate(strtotime('19-Mar-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP7
+		$pd_obj->setDate(strtotime('02-Apr-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP8
+		$pd_obj->setDate(strtotime('16-Apr-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP9
+		$pd_obj->setDate(strtotime('30-Apr-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP10
+		$pd_obj->setDate(strtotime('14-May-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP11
+		$pd_obj->setDate(strtotime('28-May-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP12
+		$pd_obj->setDate(strtotime('11-Jun-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP13
+		$pd_obj->setDate(strtotime('25-Jun-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP14
+		$pd_obj->setDate(strtotime('09-Jul-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP15
+		$pd_obj->setDate(strtotime('23-Jul-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP16
+		$pd_obj->setDate(strtotime('06-Aug-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP17
+		$pd_obj->setDate(strtotime('20-Aug-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP18
+		$pd_obj->setDate(strtotime('03-Sep-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP19
+		$pd_obj->setDate(strtotime('17-Sep-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP20
+		$pd_obj->setDate(strtotime('01-Oct-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP21
+		$pd_obj->setDate(strtotime('15-Oct-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP22
+		$pd_obj->setDate(strtotime('29-Oct-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP23
+		$pd_obj->setDate(strtotime('12-Nov-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP24
+		$pd_obj->setDate(strtotime('26-Nov-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//
+		// Do the A/B pay period in reverse order from testCA_2015_Federal_NonPeriodic_FormulaC, to make sure it works out the same either way.
+		//
+
+		//PP25 (A)
+		$pd_obj->setFormulaType( 20 ); //NonPeriodic
+		$pd_obj->setDate(strtotime('10-Dec-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 150.00 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '150.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '0.00' ); //12.31?
+		//$current_pay_period++; //(Multiple runs in this pay period)
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP25 (B)
+		$pd_obj->setFormulaType( 10 ); //NonPeriodic
+		$pd_obj->setDate(strtotime('10-Dec-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 2 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' ); 
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		//PP26
+		$pd_obj->setFormulaType( 10 ); //Periodic
+		$pd_obj->setDate(strtotime('24-Dec-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setYearToDateCPPContribution( $ytd_cpp );
+		$pd_obj->setYearToDateEIContribution( $ytd_ei );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+		$ytd_cpp += $pd_obj->getEmployeeCPP();
+		$ytd_ei += $pd_obj->getEmployeeEI();
+
+		$this->assertEquals( $ytd_gross_income, 33431.04 );
+		$this->assertEquals( $this->mf($ytd_deduction), 2806.23 );
+
+		//Actual Income/Deductions for the year.
+		$pd_obj->setFormulaType( 10 ); //Periodic
+		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setAnnualPayPeriods( 1 );
+		$pd_obj->setCurrentPayPeriod( 1 );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( 0 );
+		$pd_obj->setYearToDateDeduction( 0 );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );		
+		$pd_obj->setGrossPayPeriodIncome( 33431.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '33431.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '2827.19' );
+
+		//Actual Income/Deductions for the year.
+		$pd_obj->setFormulaType( 20 ); //NonPeriodic
+		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setAnnualPayPeriods( 1 );
+		$pd_obj->setCurrentPayPeriod( 1 );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( 0 );
+		$pd_obj->setYearToDateDeduction( 0 );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );				
+		$pd_obj->setGrossPayPeriodIncome( 33431.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '33431.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '2801.20' );
+	}
+
 	function testCA_2015_Province_Periodic_FormulaB() {
 		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
 
@@ -1588,7 +2634,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		$this->assertEquals( $ytd_gross_income, 42000 );
-		$this->assertEquals( $ytd_deduction, 2233.9999999992 );
+		$this->assertEquals( $ytd_deduction, 2234 );
 
 		//Actual Income/Deductions for the year.
 		$pd_obj->setDate(strtotime('01-Dec-2015'));
@@ -2305,7 +3351,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		$this->assertEquals( $ytd_gross_income, 45000 );
-		$this->assertEquals( $ytd_deduction, 2464.9999999992001 );
+		$this->assertEquals( $ytd_deduction, 2465 );
 
 		//Actual Income/Deductions for the year.
 		$pd_obj->setDate(strtotime('01-Dec-2015'));

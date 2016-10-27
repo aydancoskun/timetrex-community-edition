@@ -477,7 +477,7 @@ WageViewController = BaseViewController.extend( {
 						$this.refresh_id = result_data;
 					}
 					$this.search();
-					$this.current_edit_record = null;
+
 					$this.removeEditView();
 				} else {
 					$this.setErrorMenu();

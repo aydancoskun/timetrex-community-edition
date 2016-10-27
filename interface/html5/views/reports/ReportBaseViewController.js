@@ -66,11 +66,18 @@ ReportBaseViewController = BaseViewController.extend( {
 
 	},
 
-	openEditView: function() {
+	getDefaultReport: function( data ) {
+		var item = _.find( data, function( item ) {
+			return item.is_default === true;
+		} );
+		data && data.length > 0 && !item && (item = data[0]);
 
+		return item;
+	},
+
+	openEditView: function() {
 		var $this = this;
 		$this.initOptions( function() {
-
 			// Always need override
 			$this.processFilterField();
 			if ( !$this.edit_view ) {
@@ -78,19 +85,19 @@ ReportBaseViewController = BaseViewController.extend( {
 			}
 
 			$this.do_validate_after_create_ui = true;
-
 			$this.getReportData( function( result ) {
 				// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
-
-				var edit_item = result[0];
+				var edit_item;
+				// Use default
 				if ( LocalCacheData.default_edit_id_for_next_open_edit_view ) {
 					for ( var i = 0; i < result.length; i++ ) {
 						if ( result[i].id === parseInt( LocalCacheData.default_edit_id_for_next_open_edit_view ) ) {
 							edit_item = result[i];
 						}
 					}
-
 					LocalCacheData.default_edit_id_for_next_open_edit_view = null;
+				} else {
+					edit_item = $this.getDefaultReport( result );
 				}
 
 				if ( result && result.length > 0 ) {
@@ -103,7 +110,6 @@ ReportBaseViewController = BaseViewController.extend( {
 
 				$this.current_edit_record = {};
 				$this.visible_report_values = {};
-				$this.setEditViewWidgetsMode();
 				$this.initEditView();
 
 			} );
@@ -206,7 +212,6 @@ ReportBaseViewController = BaseViewController.extend( {
 		];
 
 		this.initDropDownOptions( options, function( result ) {
-
 			callBack( result ); // First to initialize drop down options, and then to initialize edit view UI.
 		} );
 
@@ -240,31 +245,9 @@ ReportBaseViewController = BaseViewController.extend( {
 		}
 
 		this.navigation.setValue( this.current_saved_report );
-
-//		for ( var key in this.edit_view_ui_dic ) {
-//			if ( this.edit_view_ui_dic.hasOwnProperty( key ) ) {
-//				var widget = this.edit_view_ui_dic[key];
-//				//Set all UI field to current edit reocrd, we need validate all UI fielld when save and validate
-//				if ( !Global.isSet( $this.current_edit_record[key] ) && !this.is_mass_editing ) {
-//
-//					var value = widget.getValue();
-//					if ( !value || value === '0' || (Global.isArray( value ) && value.length === 0) ) {
-//						$this.current_edit_record[key] = false;
-//					} else {
-//						$this.current_edit_record[key] = value;
-//					}
-//
-//				}
-//			}
-//
-//		}
-
 		this.setUIWidgetFieldsToCurrentEditRecord();
-
 		this.setNavigationArrowsStatus();
-
 		// Create this function alone because of the column value of view is different from each other, some columns need to be handle specially. and easily to rewrite this function in sub-class.
-
 		this.setCurrentEditRecordData();
 
 		//Init *Please save this record before modifying any related data* box
@@ -680,8 +663,7 @@ ReportBaseViewController = BaseViewController.extend( {
 						widget.setValue( this.current_edit_record[key] );
 						break;
 					case 'country': //popular case
-						this.eSetProvince( this.current_edit_record[key] );
-						widget.setValue( this.current_edit_record[key] );
+						this.setCountryValue(widget, key);
 						break;
 					default:
 						widget.setValue( this.current_edit_record[key] );
@@ -798,11 +780,11 @@ ReportBaseViewController = BaseViewController.extend( {
 		var membership_renewal_date;
 		var license_expiry_date;
 
-		if ( this.visible_report_widgets && this.visible_report_widgets[key] ) {
+		if ( this.visible_report_widgets && (this.visible_report_widgets[key] || key === 'start_date' || key === 'end_date' || key === 'pay_period_id' || key === 'pay_period_schedule_id') ) {
 			if ( key === 'sort' ) {
 				this.visible_report_values[key] = target.getValue( true );
 
-			} else if ( key === 'time_period' ) {
+			} else if ( key.indexOf( 'time_period' ) >= 0 ) {
 
 				time_period = target.getValue();
 
@@ -816,7 +798,7 @@ ReportBaseViewController = BaseViewController.extend( {
 				this.onFormItemChangeProcessFilterField( target, key );
 
 			} else if ( key === 'start_date' || key === 'end_date' || key === 'pay_period_id' || key === 'pay_period_schedule_id' ) {
-				time_period = this.visible_report_values['time_period'];
+				time_period = this.visible_report_values[target.attr( 'time_period_key' ) ? target.attr( 'time_period_key' ) : 'time_period'];
 				time_period[key] = target.getValue();
 
 			} else if ( key === 'membership_renewal_date' ) {
@@ -851,7 +833,7 @@ ReportBaseViewController = BaseViewController.extend( {
 				if ( target.hasClass( 't-checkbox' ) ) {
 					this.visible_report_values[key] = target.getValue();
 				} else {
-					var value = target.getValue()
+					var value = target.getValue();
 					if ( value && ($.type( value ) !== 'array' || value.length > 0) ) {
 						this.visible_report_values[key] = target.getValue();
 					} else {
@@ -879,7 +861,7 @@ ReportBaseViewController = BaseViewController.extend( {
 
 		}
 
-		if ( this.include_form_setup && this.edit_view_tab_selected_index === 3 ) {
+		if ( doNotDoValidate && this.include_form_setup && this.edit_view_tab_selected_index === 3 ) {
 			this.form_setup_changed = true;
 		}
 
@@ -976,7 +958,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			}
 
 			//Add widget first
-			if ( field === 'time_period' ||
+			if ( field.indexOf( 'time_period' ) >= 0 ||
 				field === 'membership_renewal_date' ||
 				field === 'skill_expiry_date' ||
 				field == 'license_expiry_date' ) {
@@ -990,9 +972,8 @@ ReportBaseViewController = BaseViewController.extend( {
 			//Then set Value
 			if ( value ) {
 
-				if ( field === 'time_period' ) {
-
-					widget.setValue( value.time_period );
+				if ( field.indexOf( 'time_period' ) >= 0 ) {
+					widget.setValue( value['time_period'] ); //inside time_period field, the key always be tiem_period
 					$this.onTimePeriodChange( widget, value );
 				} else if ( field === 'membership_renewal_date' ) {
 					widget.setValue( value.time_period );
@@ -1034,9 +1015,7 @@ ReportBaseViewController = BaseViewController.extend( {
 		}
 
 		this.setEditViewWidgetsMode();
-
 		this.need_refresh_display_columns = false;
-
 		this.editFieldResize( 0 );
 
 	},
@@ -1152,11 +1131,9 @@ ReportBaseViewController = BaseViewController.extend( {
 	/* jshint ignore:end */
 	cleanUI: function() {
 		for ( var key in this.edit_view_form_item_dic ) {
-
 			if ( !this.edit_view_form_item_dic.hasOwnProperty( key ) ) {
 				continue;
 			}
-
 			var html_item = this.edit_view_form_item_dic[key];
 			html_item.remove();
 		}
@@ -1171,11 +1148,8 @@ ReportBaseViewController = BaseViewController.extend( {
 
 			clear_both_div.remove();
 		}
-
 		$( '.errortip-box' ).remove();
-
 		$( '.errortip-box' ).remove();
-
 	},
 
 	removeEditView: function() {
@@ -1190,185 +1164,192 @@ ReportBaseViewController = BaseViewController.extend( {
 	//Get Widget base on field
 	getUIWidget: function( field ) {
 		var widget;
-		switch ( field ) {
-			case 'columns':
-			case 'sub_total':
-			case 'group':
-			case 'user_review_control_type_id':
-			case 'user_review_control_status_id':
-			case 'severity_id':
-			case 'term_id':
-			case 'kpi_type_id':
-			case 'kpi_status_id':
-			case 'fluency_id':
-			case 'qualification_type_id':
-			case 'proficiency_id':
-			case 'competency_id':
-			case 'ownership_id':
-			case 'invoice_status_id':
-			case 'user_status_id':
-			case 'pay_stub_status_id':
-			case 'filter':
-			case 'pay_period_time_sheet_verify_status_id':
-			case 'job_status_id':
-			case 'job_item_status_id':
-			case 'client_status_id':
-			case 'product_type_id':
-			case 'custom_filter':
-			case 'log_action_id':
-			case 'log_table_name_id':
-			case 'accrual_type_id':
-			case 'accrual_policy_type_id':
-			case 'exception_policy_severity_id':
-			case 'exception_policy_type_id':
-			case 'expense_policy_require_receipt_id':
-			case 'expense_policy_type_id':
-			case 'user_expense_payment_method_id':
-			case 'user_expense_status_id':
-			case 'job_applicant_sex_id':
-			case 'job_applicant_status_id':
-			case 'job_application_status_id':
-			case 'job_application_type_id':
-			case 'job_vacancy_employment_status_id':
-			case 'job_vacancy_level_id':
-			case 'job_vacancy_status_id':
-			case 'job_vacancy_type_id':
-			case 'job_vacancy_wage_type_id':
-			case 'pay_stub_run_id':
-			case 'pay_stub_type_id':
-				widget = this.getSimpleTComboBox( field );
-				break;
-			case 'sort':
-				widget = this.getSortComboBox( field );
-				break;
-			case 'license_expiry_date':
-			case 'membership_renewal_date':
-			case 'skill_expiry_date':
-				widget = this.getComboBox( field );
-				break;
-			case 'user_group_id':
-			case 'qualification_group_id':
-			case 'kpi_group_id':
-			case 'job_group_id':
-			case 'job_item_group_id':
-			case 'client_group_id':
-			case 'product_group_id':
-				widget = this.getTreeModeAComboBox( field );
-				break;
-			case 'time_period':
-				widget = this.getSimpleTComboBox( field, false );
-				break;
-			case 'user_tag':
-			case 'review_tag':
-			case 'job_tag':
-			case 'job_item_tag':
-				widget = this.getTag( field );
-				break;
-			case 'include_user_id':
-			case 'exclude_user_id':
-			case 'client_sales_contact_id':
-			case 'created_by_id':
-			case 'updated_by_id':
-			case 'include_reviewer_user_id':
-			case 'exclude_reviewer_user_id':
-			case 'job_applicant_interviewer_user_id':
-			case 'job_application_interviewer_user_id':
-				widget = this.getTComboBox( field, ALayoutIDs.USER, (APIFactory.getAPIClass( 'APIUser' )) );
-				break;
-			case 'user_title_id':
-				widget = this.getTComboBox( field, ALayoutIDs.USER_TITLE, (APIFactory.getAPIClass( 'APIUserTitle' )) );
-				break;
-			case 'default_branch_id':
-			case 'schedule_branch_id':
-			case 'punch_branch_id':
 
-				widget = this.getTComboBox( field, ALayoutIDs.BRANCH, (APIFactory.getAPIClass( 'APIBranch' )) );
-				break;
-			case 'default_department_id':
-			case 'schedule_department_id':
-			case 'punch_department_id':
-				widget = this.getTComboBox( field, ALayoutIDs.DEPARTMENT, (APIFactory.getAPIClass( 'APIDepartment' )) );
-				break;
-			case 'include_job_id':
-			case 'exclude_job_id':
-				widget = this.getTComboBox( field, ALayoutIDs.JOB, (APIFactory.getAPIClass( 'APIJob' )) );
-				break;
-			case 'include_job_item_id':
-			case 'exclude_job_item_id':
-				widget = this.getTComboBox( field, ALayoutIDs.JOB_ITEM, (APIFactory.getAPIClass( 'APIJobItem' )) );
-				break;
-			case 'absence_policy_id':
-				widget = this.getTComboBox( field, ALayoutIDs.ABSENCES_POLICY, (APIFactory.getAPIClass( 'APIAbsencePolicy' )) );
-				break;
-			case 'currency_id':
-				widget = this.getTComboBox( field, ALayoutIDs.CURRENCY, (APIFactory.getAPIClass( 'APICurrency' )) );
-				break;
-			case 'include_no_data_rows':
-			case 'exclude_ytd_adjustment':
-			case 'show_child_expenses':
-				widget = this.getCheckBox( field );
-				break;
-			case 'accrual_policy_id':
-				widget = this.getTComboBox( field, ALayoutIDs.ACCRUAL_POLICY, (APIFactory.getAPIClass( 'APIAccrualPolicy' )) );
-				break;
-			case 'pay_period_id':
-				widget = this.getTComboBox( field, ALayoutIDs.PAY_PERIOD, (APIFactory.getAPIClass( 'APIPayPeriod' )) );
-				break;
-			case 'job_id':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+		if ( field.indexOf( 'time_period' ) >= 0 ) {
+			widget = this.getSimpleTComboBox( field, false );
+		} else {
+
+			switch ( field ) {
+				case 'columns':
+				case 'sub_total':
+				case 'group':
+				case 'user_review_control_type_id':
+				case 'user_review_control_status_id':
+				case 'severity_id':
+				case 'term_id':
+				case 'kpi_type_id':
+				case 'kpi_status_id':
+				case 'fluency_id':
+				case 'qualification_type_id':
+				case 'proficiency_id':
+				case 'competency_id':
+				case 'ownership_id':
+				case 'invoice_status_id':
+				case 'user_status_id':
+				case 'pay_stub_status_id':
+				case 'filter':
+				case 'pay_period_time_sheet_verify_status_id':
+				case 'job_status_id':
+				case 'job_item_status_id':
+				case 'client_status_id':
+				case 'product_type_id':
+				case 'custom_filter':
+				case 'log_action_id':
+				case 'log_table_name_id':
+				case 'accrual_type_id':
+				case 'accrual_policy_type_id':
+				case 'exception_policy_severity_id':
+				case 'exception_policy_type_id':
+				case 'expense_policy_require_receipt_id':
+				case 'expense_policy_type_id':
+				case 'user_expense_payment_method_id':
+				case 'user_expense_status_id':
+				case 'job_applicant_sex_id':
+				case 'job_applicant_status_id':
+				case 'job_application_status_id':
+				case 'job_application_type_id':
+				case 'job_vacancy_employment_status_id':
+				case 'job_vacancy_level_id':
+				case 'job_vacancy_status_id':
+				case 'job_vacancy_type_id':
+				case 'job_vacancy_wage_type_id':
+				case 'pay_stub_run_id':
+				case 'pay_stub_type_id':
+					widget = this.getSimpleTComboBox( field );
+					break;
+				case 'sort':
+					widget = this.getSortComboBox( field );
+					break;
+				case 'license_expiry_date':
+				case 'membership_renewal_date':
+				case 'skill_expiry_date':
+					widget = this.getComboBox( field );
+					break;
+				case 'user_group_id':
+				case 'qualification_group_id':
+				case 'kpi_group_id':
+				case 'job_group_id':
+				case 'job_item_group_id':
+				case 'client_group_id':
+				case 'product_group_id':
+					widget = this.getTreeModeAComboBox( field );
+					break;
+				case 'user_tag':
+				case 'review_tag':
+				case 'job_tag':
+				case 'job_item_tag':
+					widget = this.getTag( field );
+					break;
+				case 'include_user_id':
+				case 'exclude_user_id':
+				case 'client_sales_contact_id':
+				case 'created_by_id':
+				case 'updated_by_id':
+				case 'include_reviewer_user_id':
+				case 'exclude_reviewer_user_id':
+				case 'job_applicant_interviewer_user_id':
+				case 'job_application_interviewer_user_id':
+					widget = this.getTComboBox( field, ALayoutIDs.USER, (APIFactory.getAPIClass( 'APIUser' )) );
+					break;
+				case 'user_title_id':
+					widget = this.getTComboBox( field, ALayoutIDs.USER_TITLE, (APIFactory.getAPIClass( 'APIUserTitle' )) );
+					break;
+				case 'default_branch_id':
+				case 'schedule_branch_id':
+				case 'punch_branch_id':
+
+					widget = this.getTComboBox( field, ALayoutIDs.BRANCH, (APIFactory.getAPIClass( 'APIBranch' )) );
+					break;
+				case 'default_department_id':
+				case 'schedule_department_id':
+				case 'punch_department_id':
+					widget = this.getTComboBox( field, ALayoutIDs.DEPARTMENT, (APIFactory.getAPIClass( 'APIDepartment' )) );
+					break;
+				case 'default_job_id':
+				case 'punch_job_id':
+				case 'include_job_id':
+				case 'exclude_job_id':
 					widget = this.getTComboBox( field, ALayoutIDs.JOB, (APIFactory.getAPIClass( 'APIJob' )) );
-				}
-				break;
-			case 'job_item_id':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+					break;
+				case 'default_job_item_id':
+				case 'punch_job_item_id':
+				case 'include_job_item_id':
+				case 'exclude_job_item_id':
 					widget = this.getTComboBox( field, ALayoutIDs.JOB_ITEM, (APIFactory.getAPIClass( 'APIJobItem' )) );
-				}
-				break;
-			case 'expense_policy_id':
-				widget = this.getTComboBox( field, ALayoutIDs.EXPENSE_POLICY, (APIFactory.getAPIClass( 'APIExpensePolicy' )) );
-				break;
-			case 'pay_stub_entry_account_id':
-				widget = this.getTComboBox( field, ALayoutIDs.PAY_STUB_ACCOUNT, (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )) );
-				break;
-			case 'product_id':
-			case 'exclude_product_id':
-			case 'include_product_id':
-				widget = this.getTComboBox( field, ALayoutIDs.PRODUCT, (APIFactory.getAPIClass( 'APIProduct' )) );
-				break;
-			case 'job_client_id':
-			case 'exclude_client_id':
-			case 'include_client_id':
-				widget = this.getTComboBox( field, ALayoutIDs.CLIENT, (APIFactory.getAPIClass( 'APIClient' )) );
-				break;
-			case 'company_deduction_id':
-				widget = this.getTComboBox( field, ALayoutIDs.COMPANY_DEDUCTION, (APIFactory.getAPIClass( 'APICompanyDeduction' )) );
-				break;
-			case 'qualification_id':
-				widget = this.getTComboBox( field, ALayoutIDs.QUALIFICATION, (APIFactory.getAPIClass( 'APIQualification' )) );
-				break;
-			case 'kpi_id':
-				widget = this.getTComboBox( field, ALayoutIDs.KPI, (APIFactory.getAPIClass( 'APIKPI' )) );
-				break;
-			case 'job_applicant_id':
-				widget = this.getTComboBox( field, ALayoutIDs.JOB_APPLICANT, (APIFactory.getAPIClass( 'APIJobApplicant' )) );
-				break;
-			case 'job_vacancy_id':
-				widget = this.getTComboBox( field, ALayoutIDs.JOB_VACANCY, (APIFactory.getAPIClass( 'APIJobVacancy' )) );
-				break;
-			case 'accrual_policy_account_id':
-				widget = this.getTComboBox( field, ALayoutIDs.ACCRUAL_POLICY_ACCOUNT, (APIFactory.getAPIClass( 'APIAccrualPolicyAccount' )) );
-				break;
+					break;
+				case 'absence_policy_id':
+					widget = this.getTComboBox( field, ALayoutIDs.ABSENCES_POLICY, (APIFactory.getAPIClass( 'APIAbsencePolicy' )) );
+					break;
+				case 'currency_id':
+					widget = this.getTComboBox( field, ALayoutIDs.CURRENCY, (APIFactory.getAPIClass( 'APICurrency' )) );
+					break;
+				case 'include_no_data_rows':
+				case 'exclude_ytd_adjustment':
+				case 'show_child_expenses':
+					widget = this.getCheckBox( field );
+					break;
+				case 'accrual_policy_id':
+					widget = this.getTComboBox( field, ALayoutIDs.ACCRUAL_POLICY, (APIFactory.getAPIClass( 'APIAccrualPolicy' )) );
+					break;
+				case 'pay_period_id':
+					widget = this.getTComboBox( field, ALayoutIDs.PAY_PERIOD, (APIFactory.getAPIClass( 'APIPayPeriod' )) );
+					break;
+				case 'job_id':
+					if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+						widget = this.getTComboBox( field, ALayoutIDs.JOB, (APIFactory.getAPIClass( 'APIJob' )) );
+					}
+					break;
+				case 'job_item_id':
+					if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+						widget = this.getTComboBox( field, ALayoutIDs.JOB_ITEM, (APIFactory.getAPIClass( 'APIJobItem' )) );
+					}
+					break;
+				case 'expense_policy_id':
+					widget = this.getTComboBox( field, ALayoutIDs.EXPENSE_POLICY, (APIFactory.getAPIClass( 'APIExpensePolicy' )) );
+					break;
+				case 'pay_stub_entry_account_id':
+					widget = this.getTComboBox( field, ALayoutIDs.PAY_STUB_ACCOUNT, (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )) );
+					break;
+				case 'product_id':
+				case 'exclude_product_id':
+				case 'include_product_id':
+					widget = this.getTComboBox( field, ALayoutIDs.PRODUCT, (APIFactory.getAPIClass( 'APIProduct' )) );
+					break;
+				case 'job_client_id':
+				case 'exclude_client_id':
+				case 'include_client_id':
+					widget = this.getTComboBox( field, ALayoutIDs.CLIENT, (APIFactory.getAPIClass( 'APIClient' )) );
+					break;
+				case 'company_deduction_id':
+					widget = this.getTComboBox( field, ALayoutIDs.COMPANY_DEDUCTION, (APIFactory.getAPIClass( 'APICompanyDeduction' )) );
+					break;
+				case 'qualification_id':
+					widget = this.getTComboBox( field, ALayoutIDs.QUALIFICATION, (APIFactory.getAPIClass( 'APIQualification' )) );
+					break;
+				case 'kpi_id':
+					widget = this.getTComboBox( field, ALayoutIDs.KPI, (APIFactory.getAPIClass( 'APIKPI' )) );
+					break;
+				case 'job_applicant_id':
+					widget = this.getTComboBox( field, ALayoutIDs.JOB_APPLICANT, (APIFactory.getAPIClass( 'APIJobApplicant' )) );
+					break;
+				case 'job_vacancy_id':
+					widget = this.getTComboBox( field, ALayoutIDs.JOB_VACANCY, (APIFactory.getAPIClass( 'APIJobVacancy' )) );
+					break;
+				case 'accrual_policy_account_id':
+					widget = this.getTComboBox( field, ALayoutIDs.ACCRUAL_POLICY_ACCOUNT, (APIFactory.getAPIClass( 'APIAccrualPolicyAccount' )) );
+					break;
 
-			default:
+				default:
 
-				if ( !Global.isSet( ReportBaseViewController.ReportMissedField ) ) {
-					ReportBaseViewController.ReportMissedField = {};
-				}
+					if ( !Global.isSet( ReportBaseViewController.ReportMissedField ) ) {
+						ReportBaseViewController.ReportMissedField = {};
+					}
 
-				ReportBaseViewController.ReportMissedField[field] = true;
+					ReportBaseViewController.ReportMissedField[field] = true;
 
-				break;
+					break;
 
+			}
 		}
 
 		return widget;
@@ -1487,7 +1468,6 @@ ReportBaseViewController = BaseViewController.extend( {
 			case 'kpi_group_id':
 				new (APIFactory.getAPIClass( 'APIKPIGroup' ))().getKPIGroup( '', false, false, {
 					onResult: function( res ) {
-
 						res = res.getResult();
 						res = Global.buildTreeRecord( res );
 						widget.setSourceData( res );
@@ -1791,6 +1771,9 @@ ReportBaseViewController = BaseViewController.extend( {
 
 				api_instance = this.api;
 				option = field;
+				if ( field.indexOf( 'time_period' ) >= 0 ) {
+					option = 'time_period';
+				}
 
 				break;
 		}
@@ -1820,7 +1803,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			res_data = Global.buildRecordArray( res_data );
 			if ( field === 'sort' ) {
 				res_data = $this.buildSortSelectorUnSelectColumns( res_data );
-			} else if ( field === 'time_period' ) {
+			} else if ( field.indexOf( 'time_period' ) >= 0 ) {
 				this.time_period_array = res_data;
 			}
 
@@ -2393,12 +2376,8 @@ ReportBaseViewController = BaseViewController.extend( {
 	onTimePeriodChange: function( target, defaultValue ) {
 		var $this = this;
 		var value = target.getValue();
-
-		this.visible_report_widgets.time_period = null;
-		this.visible_report_widgets.start_date = null;
-		this.visible_report_widgets.end_date = null;
-		this.visible_report_widgets.pay_period_id = null;
-		this.visible_report_widgets.pay_period_schedule_id = null;
+		var field = target.getField();
+		this.visible_report_widgets[field] = null;
 
 		if ( value === 'custom_date' ) {
 			buildCustomDateUI();
@@ -2411,23 +2390,22 @@ ReportBaseViewController = BaseViewController.extend( {
 		}
 
 		function buildPayPeriodScheduleUI() {
-			var form_item_div = ($this.edit_view).find( '#report_time_period_div' );
+			var form_item_div = ($this.edit_view).find( '#report_' + field + '_div' );
 			var form_input_div = $( form_item_div.children()[1] );
 			form_input_div.empty();
 
 			var v_box = $( "<div class='v-box'></div>" );
 
-			var time_period = $this.getSimpleTComboBox( 'time_period', false, false );
-			$this.initSourceData( 'time_period', time_period );
+			var time_period = $this.getSimpleTComboBox( field, false, false );
+			$this.initSourceData( field, time_period );
 			time_period.setValue( value );
 
 			var pay_period = $this.getTComboBox( 'pay_period_schedule_id', ALayoutIDs.PAY_PERIOD_SCHEDULE, (APIFactory.getAPIClass( 'APIPayPeriodSchedule' )) );
-
+			pay_period.attr( 'time_period_key', field );
 			var form_item = $this.putInputToInsideFormItem( time_period, $.i18n._( 'Section' ) );
 			var form_item2 = $this.putInputToInsideFormItem( pay_period, $.i18n._( 'Pay Period Schedule' ) );
 
-			$this.visible_report_widgets.time_period = time_period;
-			$this.visible_report_widgets.pay_period_schedule_id = pay_period;
+			$this.visible_report_widgets[field] = time_period;
 
 			time_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 				$this.onFormItemChange( target );
@@ -2452,18 +2430,18 @@ ReportBaseViewController = BaseViewController.extend( {
 		}
 
 		function buildPayPeriodUI() {
-			var form_item_div = ($this.edit_view).find( '#report_time_period_div' );
+			var form_item_div = ($this.edit_view).find( '#report_' + field + '_div' );
 			var form_input_div = $( form_item_div.children()[1] );
 			form_input_div.empty();
 
 			var v_box = $( "<div class='v-box'></div>" );
 
-			var time_period = $this.getSimpleTComboBox( 'time_period', false, false );
-			$this.initSourceData( 'time_period', time_period );
+			var time_period = $this.getSimpleTComboBox( field, false, false );
+			$this.initSourceData( field, time_period );
 			time_period.setValue( value );
 
 			var pay_period = $this.getTComboBox( 'pay_period_id', ALayoutIDs.PAY_PERIOD, (APIFactory.getAPIClass( 'APIPayPeriod' )) );
-
+			pay_period.attr( 'time_period_key', field );
 			pay_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 				$this.onFormItemChange( target );
 			} );
@@ -2471,8 +2449,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			var form_item = $this.putInputToInsideFormItem( time_period, $.i18n._( 'Section' ) );
 			var form_item2 = $this.putInputToInsideFormItem( pay_period, $.i18n._( 'Pay Period' ) );
 
-			$this.visible_report_widgets.time_period = time_period;
-			$this.visible_report_widgets.pay_period_id = pay_period;
+			$this.visible_report_widgets[field] = time_period;
 
 			time_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 				$this.onFormItemChange( target );
@@ -2494,40 +2471,41 @@ ReportBaseViewController = BaseViewController.extend( {
 		}
 
 		function buildDefaultUI() {
-			var form_item_div = ($this.edit_view).find( '#report_time_period_div' );
+			var form_item_div = ($this.edit_view).find( '#report_' + field + '_div' );
 			var form_input_div = $( form_item_div.children()[1] );
 			form_input_div.empty();
 
-			var time_period = $this.getSimpleTComboBox( 'time_period', false, false );
+			var time_period = $this.getSimpleTComboBox( field, false, false );
 
 			form_input_div.append( time_period );
 
 			time_period.setValue( value );
 
-			$this.initSourceData( 'time_period', time_period );
+			$this.initSourceData( field, time_period );
 
 			time_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 				$this.onFormItemChange( target );
 			} );
 
-			$this.visible_report_widgets.time_period = time_period;
+			$this.visible_report_widgets[field] = time_period;
 
 		}
 
 		function buildCustomDateUI() {
-			var form_item_div = ($this.edit_view).find( '#report_time_period_div' );
+			var form_item_div = ($this.edit_view).find( '#report_' + field + '_div' );
 			var form_input_div = $( form_item_div.children()[1] );
 			form_input_div.empty();
 
 			var v_box = $( "<div class='v-box'></div>" );
 
-			var time_period = $this.getSimpleTComboBox( 'time_period', false, false );
-			$this.initSourceData( 'time_period', time_period );
+			var time_period = $this.getSimpleTComboBox( field, false, false );
+			$this.initSourceData( field, time_period );
 			time_period.setValue( value );
 
 			var start_date = $this.getDatePicker( 'start_date' );
-
 			var end_date = $this.getDatePicker( 'end_date' );
+			start_date.attr( 'time_period_key', field );
+			end_date.attr( 'time_period_key', field );
 
 			if ( defaultValue ) {
 				start_date.setValue( defaultValue.start_date );
@@ -2538,9 +2516,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			var form_item2 = $this.putInputToInsideFormItem( start_date, $.i18n._( 'Start Date' ) );
 			var form_item3 = $this.putInputToInsideFormItem( end_date, $.i18n._( 'End Date' ) );
 
-			$this.visible_report_widgets.time_period = time_period;
-			$this.visible_report_widgets.start_date = start_date;
-			$this.visible_report_widgets.end_date = end_date;
+			$this.visible_report_widgets[field] = time_period;
 
 			time_period.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 				$this.onFormItemChange( target );
@@ -2639,30 +2615,20 @@ ReportBaseViewController = BaseViewController.extend( {
 	},
 
 	setEditViewWidgetsMode: function() {
-
 		var did_clean_dic = {};
-
 		for ( var key in this.edit_view_ui_dic ) {
 			var widget = this.edit_view_ui_dic[key];
 			widget.css( 'opacity', 1 );
-
 			var column = widget.parent().parent().parent();
-
 			var tab_id = column.parent().attr( 'id' );
 			if ( !column.hasClass( 'v-box' ) ) {
-
 				if ( !did_clean_dic[tab_id] ) {
 					did_clean_dic[tab_id] = true;
 				}
-
-				var child_length = column.children().length;
-				var parent_div = widget.parent().parent();
-
 				if ( Global.isSet( widget.setEnabled ) ) {
 					widget.setEnabled( true );
 				}
 			}
-
 		}
 
 	},
@@ -2676,7 +2642,6 @@ ReportBaseViewController = BaseViewController.extend( {
 	},
 
 	getFormValues: function() {
-
 		var other = {};
 
 		other.page_orientation = this.current_edit_record.page_orientation;
@@ -2686,7 +2651,7 @@ ReportBaseViewController = BaseViewController.extend( {
 		other.maximum_page_limit = this.current_edit_record.maximum_page_limit;
 		other.show_duplicate_values = this.current_edit_record.show_duplicate_values;
 
-		if ( this.current_saved_report ) {
+		if ( this.current_saved_report && Global.isSet( this.current_saved_report.name ) ) {
 
 			other.report_name = _.escape( this.current_saved_report.name );
 		}
@@ -2875,7 +2840,6 @@ ReportBaseViewController = BaseViewController.extend( {
 
 		this.api.setCompanyFormConfig( form_setup, {
 			onResult: function( result ) {
-
 				if ( result.isValid() ) {
 					$this.show_empty_message = false;
 					$this.form_setup_changed = false;
@@ -3102,7 +3066,7 @@ ReportBaseViewController = BaseViewController.extend( {
 					}
 
 				} else {
-					$this.current_saved_report = result[0];
+					$this.current_saved_report = $this.getDefaultReport( result );
 				}
 
 				$this.saved_report_array = result;
@@ -3113,7 +3077,7 @@ ReportBaseViewController = BaseViewController.extend( {
 
 			$this.current_edit_record = {};
 			$this.visible_report_values = {};
-			$this.setEditViewWidgetsMode();
+
 			$this.initEditView();
 
 		} );

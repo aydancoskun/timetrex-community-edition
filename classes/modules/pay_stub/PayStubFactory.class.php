@@ -120,7 +120,7 @@ class PayStubFactory extends Factory {
 				break;
 			case 'export_general_ledger':
 				$retval = array(
-										'-2010-csv' => TTi18n::gettext('Excel (CSV)'),
+										'-2010-export_csv' => TTi18n::gettext('Excel (CSV)'),
 										'-2020-simply' => TTi18n::gettext('Simply Accounting GL'),
 										'-2030-quickbooks' => TTi18n::gettext('Quickbooks GL'),
 										'-2040-sage300' => TTi18n::gettext('Sage 300 (Accpac)'),
@@ -2117,11 +2117,11 @@ class PayStubFactory extends Factory {
 			foreach( $uplf as $up_obj ) {
 				if ( $up_obj->getEnableEmailNotificationPayStub() == TRUE AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getStatus() == 10 ) {
 					if ( $up_obj->getUserObject()->getWorkEmail() != '' AND $up_obj->getUserObject()->getWorkEmailIsValid() == TRUE ) {
-						$retarr[] = $up_obj->getUserObject()->getWorkEmail();
+						$retarr[] = Misc::formatEmailAddress( $up_obj->getUserObject()->getWorkEmail(), $up_obj->getUserObject() );
 					}
 
 					if ( $up_obj->getEnableEmailNotificationHome() AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getHomeEmail() != '' AND $up_obj->getUserObject()->getHomeEmailIsValid() == TRUE ) {
-						$retarr[] = $up_obj->getUserObject()->getHomeEmail();
+						$retarr[] = Misc::formatEmailAddress( $up_obj->getUserObject()->getHomeEmail(), $up_obj->getUserObject() );
 					}
 				}
 			}
@@ -2449,7 +2449,7 @@ class PayStubFactory extends Factory {
 					$eft->setBusinessNumber( $current_company->getBusinessNumber() ); //ACH
 					$eft->setOriginatorID( $current_company->getOriginatorID() );
 					$eft->setFileCreationNumber( $setup_data['file_creation_number'] );
-					$eft->setInitialEntryNumber( $current_company->getOtherID5() ); //ACH
+					$eft->setInitialEntryNumber( ( ( $current_company->getOtherID5() != '' ) ? $current_company->getOtherID5() : substr( $current_company->getOriginatorID(), 0, 8) ) ); //ACH
 					$eft->setDataCenter( $current_company->getDataCenterID() );
 					$eft->setDataCenterName( $current_company->getOtherID4() ); //ACH
 					$eft->setOriginatorShortName( $current_company->getShortName() );
@@ -2463,6 +2463,8 @@ class PayStubFactory extends Factory {
 					if ( strtolower($export_type) == 'eft_1464_rbc' ) {
 						$eft->setFilePrefixData( '$$AA01CPA1464[PROD{NL$$'."\r\n" ); //Some RBC services require a "routing" line at the top of the file.
 					}
+
+					$total_credit_amount = 0;
 
 					$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 					foreach ($pslf as $key => $pay_stub_obj) {
@@ -2598,14 +2600,53 @@ class PayStubFactory extends Factory {
 
 								$eft->setRecord( $record );
 							}
+
+							$total_credit_amount += $amount;
 							unset($amount);
 
 							$this->getProgressBarObject()->set( NULL, $key );
 						}
 					}
 
+					$is_balanced = CompanySettingFactory::getCompanySettingValueByName( $current_company->getId(), 'pay_stub.eft.balance_ach');
+					if ( $total_credit_amount > 0
+							AND (bool)$is_balanced == TRUE
+							AND isset($company_obj) AND is_object($company_obj)
+							AND isset($company_bank_obj) AND is_object($company_bank_obj)
+							AND isset($pay_stub_obj) AND is_object($pay_stub_obj)
+							) {
+						Debug::Text('  Balancing ACH... ', __FILE__, __LINE__, __METHOD__, 10);
+						$record = new EFT_Record();
+						$record->setType('D');
+						$record->setCPACode(200);
+						$record->setAmount( $total_credit_amount );
+
+						$record->setDueDate( TTDate::getBeginDayEpoch($pay_stub_obj->getTransactionDate()) );
+						$record->setInstitution( $company_bank_obj->getInstitution() );
+						$record->setTransit( $company_bank_obj->getTransit() );
+						$record->setAccount( $company_bank_obj->getAccount() );
+						$record->setName( substr($company_obj->getName(), 0, 30) );
+
+						$record->setOriginatorShortName( $company_obj->getShortName() );
+						$record->setOriginatorLongName( substr($company_obj->getName(), 0, 30) );
+						$record->setOriginatorReferenceNumber( 'OFFSET' );
+
+						if ( isset($company_bank_obj) AND is_object($company_bank_obj) ) {
+							$record->setReturnInstitution( $company_bank_obj->getInstitution() );
+							$record->setReturnTransit( $company_bank_obj->getTransit() );
+							$record->setReturnAccount( $company_bank_obj->getAccount() );
+						}
+
+						$eft->setRecord( $record );
+					} else {
+						Debug::Text('  NOT Balancing ACH... ', __FILE__, __LINE__, __METHOD__, 10);
+					}
+					unset($is_balanced, $total_credit_amount);
+
 					$eft->compile();
 					$output = $eft->getCompiledData();
+					
+					unset($eft);
 					break;
 				case 'cheque_9085':
 				case 'cheque_9209p':
@@ -3672,17 +3713,22 @@ class PayStubFactory extends Factory {
 
 				$pdf->SetFont('', '', 8);
 				if ( $user_obj->getTitle() > 0 AND is_object( $user_obj->getTitleObject() ) ) {
-					$block_adjust_y = ($block_adjust_y + 4);
+					$block_adjust_y = ($block_adjust_y + 3);
 					$pdf->setXY( Misc::AdjustXY(75, $adjust_x), Misc::AdjustXY($block_adjust_y, $adjust_y) );
 					$pdf->Cell(100, 4, TTi18n::gettext('Title').': '. $user_obj->getTitleObject()->getName(), $border, 1, 'R', FALSE, '', 1);
 				}
 				if ( $user_obj->getHireDate() != '' ) {
-					$block_adjust_y = ($block_adjust_y + 4);
+					$block_adjust_y = ($block_adjust_y + 3);
 					$pdf->setXY( Misc::AdjustXY(75, $adjust_x), Misc::AdjustXY($block_adjust_y, $adjust_y) );
 					$pdf->Cell(100, 4, TTi18n::gettext('Hire Date').': '. TTDate::getDate('DATE', $user_obj->getHireDate() ), $border, 1, 'R', FALSE, '', 1);
 				}
+				if ( $user_obj->getTerminationDate() != '' AND $user_obj->getTerminationDate() <= $pay_stub_obj->getEndDate() ) {
+					$block_adjust_y = ($block_adjust_y + 3);
+					$pdf->setXY( Misc::AdjustXY(75, $adjust_x), Misc::AdjustXY($block_adjust_y, $adjust_y) );
+					$pdf->Cell(100, 4, TTi18n::gettext('Termination Date').': '. TTDate::getDate('DATE', $user_obj->getTerminationDate() ), $border, 1, 'R', FALSE, '', 1);
+				}
 				if ( $user_obj->getSIN() != '' ) {
-					$block_adjust_y = ($block_adjust_y + 4);
+					$block_adjust_y = ($block_adjust_y + 3);
 					$pdf->setXY( Misc::AdjustXY(75, $adjust_x), Misc::AdjustXY($block_adjust_y, $adjust_y) );
 					$pdf->Cell(100, 4, TTi18n::gettext('SIN / SSN').': '. $user_obj->getSecureSIN(), $border, 1, 'R', FALSE, '', 1);
 				}

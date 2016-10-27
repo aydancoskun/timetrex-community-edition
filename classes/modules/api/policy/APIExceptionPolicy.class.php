@@ -178,6 +178,7 @@ class APIExceptionPolicy extends APIFactory {
 					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
 
 					$lf->setObjectFromArray( $row );
+					$lf->Validator->setValidateOnly( $validate_only );
 
 					$is_valid = $lf->isValid( $ignore_warning );
 					if ( $is_valid == TRUE ) {

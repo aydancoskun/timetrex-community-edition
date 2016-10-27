@@ -486,7 +486,9 @@ class Misc {
 			}
 		}
 
-		return FALSE;
+		//Don't return FALSE, as this can create array( 0 => FALSE ) arrays if we then cast it to an array, which corrupts some report data.
+		// Instead just return the original variable that was passed in (likely NULL)
+		return $arr;
 	}
 	//Removes prefix to all array keys, mainly for reportings and joining array data together to avoid conflicting keys.
 	static function removeKeyPrefix( $prefix, $arr, $ignore_elements = NULL ) {
@@ -762,6 +764,17 @@ class Misc {
 		return $retval;
 	}
 
+	static function calculateIncludeExcludeAmount( $amount, $element, $include_elements = array(), $exclude_elements = array() ) {
+		//Make sure the element isnt in both include and exclude.
+		if ( in_array( $element, $include_elements ) AND !in_array( $element, $exclude_elements ) ) {
+			return $amount;
+		} elseif ( in_array( $element, $exclude_elements ) AND !in_array( $element, $include_elements ) ) {
+			return ($amount * -1);
+		} else {
+			return 0;
+		}
+	}
+	
 	static function calculateMultipleColumns($data, $include_elements = array(), $exclude_elements = array() ) {
 		if ( !is_array($data) ) {
 			return FALSE;
@@ -1418,8 +1431,12 @@ class Misc {
 	}
 
 	static function getRemoteHTTPFileSize( $url ) {
-		$headers = array_change_key_case( get_headers($url, 1) );
+		$headers = @get_headers($url, 1);
+		if ( $headers === FALSE ) { //Failure downloading headers from URL.
+			return FALSE;
+		}
 
+		$headers = array_change_key_case( $headers );
 		if ( isset($headers[0]) AND stripos( $headers[0], '404 Not Found') !== FALSE ) {
 			return FALSE;
 		}
@@ -1969,6 +1986,14 @@ class Misc {
 		return FALSE;
 	}
 
+	static function formatEmailAddress( $email, $user_obj ) {
+		if ( !is_object( $user_obj ) ) {
+			return $email;
+		}
+		$email = '"'. $user_obj->getFirstName() .' '. $user_obj->getLastName() .'" <'. $email .'>';
+		return $email;
+	}
+
 	static function sendSystemMail( $subject, $body, $attachments = NULL, $force = FALSE ) {
 		if ( $subject == '' OR $body == '' ) {
 			return FALSE;
@@ -2048,7 +2073,7 @@ class Misc {
 		return FALSE;
 	}
 
-	static function getMapURL( $address1, $address2, $city, $province, $postal_code, $country, $service = 'google' ) { //$service_params = array()
+	static function getMapURL( $address1, $address2, $city, $province, $postal_code, $country, $service = 'google' ) {
 		if ( $address1 == '' AND $address2 == '' ) {
 			return FALSE;
 		}
@@ -2559,7 +2584,7 @@ class Misc {
 			$city_arr[] = $postal_code;
 		}
 
-		if ( is_array($city_arr) ) {
+		if ( isset($city_arr) AND is_array($city_arr) ) {
 			$retarr[] = implode(' ', $city_arr);
 		}
 

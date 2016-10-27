@@ -166,7 +166,8 @@ var ProgressBar = (function() {
 			loading_box.find( '.processing' ).text( temp_message_until_close );
 		} else {
 			//Default process message, change this when update progress bar.
-			loading_box.find( '.processing' ).text( $.i18n._( 'Processing...' ) );
+			// Error: Unable to get property '_' of undefined or null reference in interface/html5/global/ProgressBarManager.js?v=9.0.6-20151231-155042 line 169
+			loading_box.find( '.processing' ).text( $.i18n ? $.i18n._( 'Processing...' ) : 'Processing...' );
 		}
 
 		var complete_info = loading_box.find( '.complete-info' );
@@ -227,7 +228,6 @@ var ProgressBar = (function() {
 				}
 
 				//Error: 'console' is undefined in /interface/html5/global/ProgressBarManager.js?v=8.0.0-20141117-153515 line 224
-				Global.log( 'New time_offset: ' + time_offset );
 				time_remaining.text( Global.secondToHHMMSS( time_offset, '99' ) );
 			}
 			secondDown();
@@ -383,7 +383,7 @@ var ProgressBar = (function() {
 		closeOverlay: closeOverlay,
 		message_id_dic: message_id_dic,
 		changeProgressBarMessage: changeProgressBarMessage,
-		cancelProgressBar:cancelProgressBar
+		cancelProgressBar: cancelProgressBar
 	};
 
 })();

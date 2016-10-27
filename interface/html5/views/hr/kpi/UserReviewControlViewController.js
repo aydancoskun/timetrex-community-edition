@@ -55,35 +55,37 @@ UserReviewControlViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'term' );
 		this.initDropDownOption( 'severity' );
 
-		this.kpi_group_api.getKPIGroup( false, false, false, {onResult: function( res ) {
-			res = res.getResult();
+		this.kpi_group_api.getKPIGroup( false, false, false, {
+			onResult: function( res ) {
+				res = Global.clone( res.getResult() );
 
-			//Error: Uncaught TypeError: Cannot set property 'name' of undefined in /interface/html5/#!m=Employee&a=edit&id=41499&tab=Reviews line 60 
-			if ( !res || !res[0] ) {
-				$this.kpi_group_array = [];
-				return;
+				//Error: Uncaught TypeError: Cannot set property 'name' of undefined in /interface/html5/#!m=Employee&a=edit&id=41499&tab=Reviews line 60
+				if ( !res || !res[0] ) {
+					$this.kpi_group_array = [];
+					return;
+				}
+
+				res[0].name = '-- ' + $.i18n._( 'Add KPIs' ) + ' --';
+
+				var all = {};
+				all.name = '-- ' + $.i18n._( 'All' ) + ' --';
+				all.level = 1;
+				all.id = -1;
+
+				if ( res.hasOwnProperty("0") && res[0].hasOwnProperty( 'children' ) ) {
+					res[0].children.unshift( all );
+				} else {
+					res = [
+						{children: [all], id: 0, level: 0, name: '-- ' + $.i18n._( 'Add KPIs' ) + ' --'}
+					];
+				}
+
+				res = Global.buildTreeRecord( res );
+
+				$this.kpi_group_array = res;
+
 			}
-
-			res[0].name = '-- ' + $.i18n._( 'Add KPIs' ) + ' --';
-
-			var all = {};
-			all.name = '-- ' + $.i18n._( 'All' ) + ' --';
-			all.level = 1;
-			all.id = -1;
-
-			if ( res.length === 1 && res[0].hasOwnProperty( 'children' ) ) {
-				res[0].children.unshift( all );
-			} else {
-				res = [
-					{children: [all], id: 0, level: 0, name: '-- ' + $.i18n._( 'Add KPIs' ) + ' --'}
-				];
-			}
-
-			res = Global.buildTreeRecord( res );
-
-			$this.kpi_group_array = res;
-
-		}} );
+		} );
 
 	},
 
@@ -251,8 +253,16 @@ UserReviewControlViewController = BaseViewController.extend( {
 		} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.kpi_group_array ) );
 
-		var tab_review_column3 = tab_review.find( '.third-column' ).css( {'float': 'left', 'margin-top': '10px', 'margin-bottom': '10px'} );
-		tab_review_column3.find( '.column-form-item-label' ).css( {'float': 'left', 'margin-right': '10px', 'margin-top': '5px'} ).text( $.i18n._( 'Add KPIs from Groups' ) );
+		var tab_review_column3 = tab_review.find( '.third-column' ).css( {
+			'float': 'left',
+			'margin-top': '10px',
+			'margin-bottom': '10px'
+		} );
+		tab_review_column3.find( '.column-form-item-label' ).css( {
+			'float': 'left',
+			'margin-right': '10px',
+			'margin-top': '5px'
+		} ).text( $.i18n._( 'Add KPIs from Groups' ) );
 		tab_review_column3.find( '.column-form-item-input' ).css( {'float': 'left'} ).append( form_item_input );
 
 		this.edit_view_ui_dic[form_item_input.getField()] = form_item_input;
@@ -264,7 +274,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 		// Note
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 
-		form_item_input.TTextArea( {field: 'note', width: '100%', height: 66 } );
+		form_item_input.TTextArea( {field: 'note', width: '100%', height: 66} );
 
 		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_review_column4, 'first_last', null, null, true );
 
@@ -423,7 +433,8 @@ UserReviewControlViewController = BaseViewController.extend( {
 		default_args.permission_section = 'user_review_control';
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Employee' ),
+			new SearchField( {
+				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
 				default_args: default_args,
@@ -432,9 +443,11 @@ UserReviewControlViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Reviewer' ),
+			new SearchField( {
+				label: $.i18n._( 'Reviewer' ),
 				in_column: 1,
 				field: 'reviewer_user_id',
 				layout_name: ALayoutIDs.USER,
@@ -442,74 +455,92 @@ UserReviewControlViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Type' ),
+			new SearchField( {
+				label: $.i18n._( 'Type' ),
 				in_column: 1,
 				field: 'type_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Tags' ),
+			new SearchField( {
+				label: $.i18n._( 'Tags' ),
 				field: 'tag',
 				basic_search: true,
 				adv_search: true,
 				in_column: 1,
 				object_type_id: 320,
-				form_item_type: FormItemType.TAG_INPUT} ),
+				form_item_type: FormItemType.TAG_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Status' ),
+			new SearchField( {
+				label: $.i18n._( 'Status' ),
 				in_column: 2,
 				field: 'status_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Terms' ),
+			new SearchField( {
+				label: $.i18n._( 'Terms' ),
 				in_column: 2,
 				field: 'term_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Severity' ),
+			new SearchField( {
+				label: $.i18n._( 'Severity' ),
 				in_column: 2,
 				field: 'severity_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Start Date' ),
+			new SearchField( {
+				label: $.i18n._( 'Start Date' ),
 				in_column: 1,
 				field: 'start_date',
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.DATE_PICKER} ),
+				form_item_type: FormItemType.DATE_PICKER
+			} ),
 
-			new SearchField( {label: $.i18n._( 'End Date' ),
+			new SearchField( {
+				label: $.i18n._( 'End Date' ),
 				in_column: 1,
 				field: 'end_date',
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.DATE_PICKER} ),
+				form_item_type: FormItemType.DATE_PICKER
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Due Date' ),
+			new SearchField( {
+				label: $.i18n._( 'Due Date' ),
 				in_column: 1,
 				field: 'due_date',
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.DATE_PICKER} ),
+				form_item_type: FormItemType.DATE_PICKER
+			} ),
 
-			new SearchField( {label: $.i18n._( 'KPI' ),
+			new SearchField( {
+				label: $.i18n._( 'KPI' ),
 				in_column: 2,
 				field: 'kpi_id',
 				layout_name: ALayoutIDs.KPI,
@@ -517,9 +548,11 @@ UserReviewControlViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -527,9 +560,11 @@ UserReviewControlViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -537,7 +572,8 @@ UserReviewControlViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 		];
 	},
 
@@ -654,9 +690,11 @@ UserReviewControlViewController = BaseViewController.extend( {
 				filter.filter_data = {};
 				// why need [c_value, -1], -1 will return all, the filter won't work correct if send -1,remove for testting
 				filter.filter_data.group_id = [c_value];
-				this.kpi_api['get' + this.kpi_api.key_name]( filter, false, true, {onResult: function( res ) {
-					$this.setInsideEditorData( res );
-				}} );
+				this.kpi_api['get' + this.kpi_api.key_name]( filter, false, true, {
+					onResult: function( res ) {
+						$this.setInsideEditorData( res );
+					}
+				} );
 				break;
 			default:
 				this.current_edit_record[key] = c_value;
@@ -681,8 +719,10 @@ UserReviewControlViewController = BaseViewController.extend( {
 					c_value = parseInt( c_value );
 					if ( c_value >= minimum_rate && c_value <= maximum_rate ) {
 						target.clearErrorStyle();
+						this.parent_controller.setEditMenu();
 					} else {
 						target.setErrorStyle( $.i18n._( 'Rating must between' ) + ' ' + minimum_rate + ' ' + $.i18n._( 'and' ) + ' ' + maximum_rate, true );
+						this.parent_controller.setErrorMenu();
 					}
 				}
 				break;
@@ -702,12 +742,14 @@ UserReviewControlViewController = BaseViewController.extend( {
 
 			args.filter_data.user_review_control_id = this.current_edit_record['id'];
 
-			$this.user_review_api['get' + $this.user_review_api.key_name]( args, true, {onResult: function( res ) {
-				if ( !$this.edit_view ) {
-					return;
+			$this.user_review_api['get' + $this.user_review_api.key_name]( args, true, {
+				onResult: function( res ) {
+					if ( !$this.edit_view ) {
+						return;
+					}
+					$this.setInsideEditorData( res );
 				}
-				$this.setInsideEditorData( res );
-			}} );
+			} );
 		}
 
 	},
@@ -823,7 +865,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 				form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 				form_item_input.TTextInput( {field: 'rating', width: 40} );
 				form_item_input.setValue( data.rating ? data.rating : null );
-				form_item_input.attr( { 'minimum_rate': data.minimum_rate, 'maximum_rate': data.maximum_rate } );
+				form_item_input.attr( {'minimum_rate': data.minimum_rate, 'maximum_rate': data.maximum_rate} );
 				form_item_input.bind( 'formItemChange', function( e, target, doNotValidate ) {
 					$this.onFormItemChange( target, doNotValidate );
 				} );
@@ -844,7 +886,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 
 			// Note
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
-			form_item_input.TTextArea( {field: 'note', style: { width: '300px', height: '20px', 'min-height': '10px' }} );
+			form_item_input.TTextArea( {field: 'note', style: {width: '300px', height: '20px', 'min-height': '10px'}} );
 			form_item_input.setValue( data.note ? data.note : null );
 			widgets[form_item_input.getField()] = form_item_input;
 			row.children().eq( 3 ).css( 'text-align', 'right' ).append( form_item_input );
@@ -879,7 +921,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 			$this.saveInsideEditorData( function() {
 				$this.search();
 				$this.onSaveDone( result );
-				$this.current_edit_record = null;
+
 				$this.removeEditView();
 			} );
 
@@ -931,9 +973,11 @@ UserReviewControlViewController = BaseViewController.extend( {
 			callBack();
 		} else {
 			var data = this.editor.getValue( this.refresh_id );
-			this.user_review_api.setUserReview( data, {onResult: function( res ) {
-				callBack();
-			}} );
+			this.user_review_api.setUserReview( data, {
+				onResult: function( res ) {
+					callBack();
+				}
+			} );
 		}
 
 	},
@@ -955,7 +999,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 		return this.rows_widgets_array;
 	},
 
-	onCopyAsNewClick: function() {
+	_continueDoCopyAsNew: function() {
 
 		var $this = this;
 		this.is_add = true;
@@ -973,6 +1017,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 			}
 			this.setEditMenu();
 			this.setTabStatus();
+			this.is_changed = false;
 			ProgressBar.closeOverlay();
 
 		} else {
@@ -1070,8 +1115,6 @@ UserReviewControlViewController = BaseViewController.extend( {
 		}
 		this._super( 'onLeftArrowClick' );
 	}
-
-
 
 } );
 

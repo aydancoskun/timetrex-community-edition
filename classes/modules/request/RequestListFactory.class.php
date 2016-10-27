@@ -598,16 +598,16 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 
 		if ( $order == NULL ) {
-			//Sort by date_stamp ASC first, so most recent requests always appear at the top, then by type to try to keep similar requests together. 
-			$order = array( 'status_id' => 'asc', 'date_stamp' => 'asc', 'type_id' => 'asc', 'last_name' => 'asc' );
+			//Sort by date_stamp ASC first, so most recent requests always appear at the top, then by type to try to keep similar requests together.
+			//However when no pending requests exist, the most recent request is at the end of the list. Unless we can do conditional sorting,
+			//always show most recent date at the top, even though its not ideal for pending requests.
+			$order = array( 'status_id' => 'asc', 'date_stamp' => 'desc', 'type_id' => 'asc', 'last_name' => 'asc' );
 			$strict = FALSE;
 		} else {
 			//Always sort by last name, first name after other columns
-			/*
-			if ( !isset($order['effective_date']) ) {
-				$order['effective_date'] = 'desc';
+			if ( !isset($order['date_stamp']) ) {
+				$order['date_stamp'] = 'desc';
 			}
-			*/
 			$strict = TRUE;
 		}
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
@@ -676,7 +676,7 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'b.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'b.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['country']) ) ?$this->getWhereClauseSQL( 'b.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['country']) ) ? $this->getWhereClauseSQL( 'b.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['province']) ) ? $this->getWhereClauseSQL( 'b.province', $filter_data['province'], 'upper_text_list', $ph ) : NULL;
 		
 		$query .= ( isset($filter_data['authorized']) ) ? $this->getWhereClauseSQL( 'a.authorized', $filter_data['authorized'], 'numeric_list', $ph ) : NULL;

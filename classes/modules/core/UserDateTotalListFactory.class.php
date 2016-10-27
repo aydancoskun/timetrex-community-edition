@@ -719,7 +719,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 										)
 										OR ( epf.type_id = \'C1\' )
 									)
-									AND ef.id IS NULL
+									AND ( ef.id IS NULL OR ( ef.id IS NOT NULL AND ef.date_stamp != sf.date_stamp ) )
 								)
 							AND ( epf.deleted = 0 AND epcf.deleted = 0 AND pgf.deleted = 0 AND uf.deleted = 0 AND cf.deleted = 0 )
 					) as tmp
@@ -1677,12 +1677,11 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 
 		//Make it so employees with 0 hours still show up!! Very important!
 		//Order dock hours first, so it can be deducted from regular time.
+		//  Don't break out time by branch/departments, as that cause employees to be full-time and part-time in the same month.
 		$query = '
 					select
 							a.user_id as user_id,
 							'. $date_sql .' as date_stamp,
-							a.branch_id as branch_id,
-							a.department_id as department_id,
 							a.object_type_id as object_type_id,
 							a.pay_code_id,
 							pcf.type_id as pay_code_type_id,
@@ -1734,7 +1733,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		//This isn't needed as it lists every status:	AND a.status_id in (10, 20, 30)
 		$query .= '
 						AND ( a.deleted = 0 )
-					group by a.user_id, a.branch_id, a.department_id, a.date_stamp, a.object_type_id, a.pay_code_id, pcf.type_id
+					group by a.user_id, a.date_stamp, a.object_type_id, a.pay_code_id, pcf.type_id
 					';
 
 		$query .= $this->getSortSQL( $order, FALSE );
@@ -1899,6 +1898,11 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$df = new DepartmentFactory();
 		$ppf_b = new PayPeriodFactory();
 		$pcf = new PayCodeFactory();
+		
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+			$jf = new JobFactory();
+			$jif = new JobItemFactory();
+		}
 
 		$ph = array( 'company_id' => (int)$company_id, );
 
@@ -1907,7 +1911,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		//Show Min/Max punches based on day/branch/department, so we can split reports out day/branch/department and still show
 		//	when the employee punched in/out for each.
 		$query = '
-					select
+					SELECT
 							a.user_id as user_id,
 							ppf.id as pay_period_id,
 							ppf.start_date as pay_period_start_date,
@@ -1934,13 +1938,20 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 							sum(a.actual_total_time) as actual_total_time,
 							sum(a.total_time_amount) as total_time_amount,
 							sum(a.total_time_amount_with_burden) as total_time_amount_with_burden
-					from	'. $this->getTable() .' as a
+					FROM	'. $this->getTable() .' as a
 					LEFT JOIN '. $uf->getTable() .' as uf ON a.user_id = uf.id
 					LEFT JOIN '. $bf->getTable() .' as bf ON a.branch_id = bf.id
 					LEFT JOIN '. $df->getTable() .' as df ON a.department_id = df.id
 					LEFT JOIN '. $pcf->getTable() .' as pcf ON a.pay_code_id = pcf.id
-					LEFT JOIN '. $ppf_b->getTable() .' as ppf ON a.pay_period_id = ppf.id
-					where	uf.company_id = ? ';
+					LEFT JOIN '. $ppf_b->getTable() .' as ppf ON a.pay_period_id = ppf.id ';
+
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+			$query .= '
+					LEFT JOIN '. $jf->getTable() .' as jf ON a.job_id = jf.id
+					LEFT JOIN '. $jif->getTable() .' as jif ON a.job_item_id = jif.id ';
+		}
+
+		$query .= ' WHERE	uf.company_id = ? ';
 
 		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['include_user_id']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['include_user_id'], 'numeric_list', $ph ) : NULL;
@@ -1952,15 +1963,20 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 			$filter_data['user_group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['user_group_id'], TRUE);
 		}
 		$query .= ( isset($filter_data['user_group_id']) ) ? $this->getWhereClauseSQL( 'uf.group_id', $filter_data['user_group_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_title_id']) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['user_title_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_title_id']) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['user_title_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_job_id']) ) ? $this->getWhereClauseSQL( 'uf.default_job_id', $filter_data['default_job_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_job_item_id']) ) ? $this->getWhereClauseSQL( 'uf.default_job_item_id', $filter_data['default_job_item_id'], 'numeric_list', $ph ) : NULL;
+
 		$query .= ( isset($filter_data['punch_branch_id']) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['punch_branch_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['punch_department_id']) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['punch_department_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['punch_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['punch_job_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['punch_job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['punch_job_item_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'numeric_list', $ph ) : NULL;
-
+		
 		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'uf.id', array( 'company_id' => (int)$company_id, 'object_type_id' => 200, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 
 		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {

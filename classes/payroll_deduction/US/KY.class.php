@@ -55,6 +55,10 @@ class PayrollDeduction_US_KY extends PayrollDeduction_US {
 
 
 	var $state_options = array(
+								20160101 => array( //01-Jan-2016
+													'standard_deduction' => 2460,
+													'allowance' => 20
+													),
 								20150101 => array( //01-Jan-2015
 													'standard_deduction' => 2440,
 													'allowance' => 20
@@ -68,7 +72,7 @@ class PayrollDeduction_US_KY extends PayrollDeduction_US {
 													'allowance' => 20
 													),
 								//20120101
-								20090101=> array( //01-Jan-2012 **Had the wrong date before, was 2009.
+								20090101 => array( //01-Jan-2012 **Had the wrong date before, was 2009.
 													'standard_deduction' => 2290,
 													'allowance' => 20
 													),

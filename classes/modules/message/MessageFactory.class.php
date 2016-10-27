@@ -509,11 +509,11 @@ class MessageFactory extends Factory {
 					foreach( $uplf as $up_obj ) {
 						if ( $up_obj->getEnableEmailNotificationMessage() == TRUE AND $up_obj->getUserObject()->getStatus() == 10 ) {
 							if ( $up_obj->getUserObject()->getWorkEmail() != '' ) {
-								$retarr[] = $up_obj->getUserObject()->getWorkEmail();
+								$retarr[] = Misc::formatEmailAddress( $up_obj->getUserObject()->getWorkEmail(), $up_obj->getUserObject() );
 							}
 
 							if ( $up_obj->getEnableEmailNotificationHome() AND $up_obj->getUserObject()->getHomeEmail() != '' ) {
-								$retarr[] = $up_obj->getUserObject()->getHomeEmail();
+								$retarr[] = Misc::formatEmailAddress( $up_obj->getUserObject()->getHomeEmail(), $up_obj->getUserObject() );
 							}
 						}
 					}
@@ -542,7 +542,7 @@ class MessageFactory extends Factory {
 
 		global $current_user, $config_vars;
 		if ( is_object($current_user) AND $current_user->getWorkEmail() != '' ) {
-			$reply_to = $current_user->getWorkEmail();
+			$reply_to = Misc::formatEmailAddress( $current_user->getWorkEmail(), $current_user );
 		}
 		Debug::Text('From: '. $from .' Reply-To: '. $reply_to, __FILE__, __LINE__, __METHOD__, 10);
 

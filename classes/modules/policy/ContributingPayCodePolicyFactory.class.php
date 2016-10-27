@@ -224,12 +224,20 @@ class ContributingPayCodePolicyFactory extends Factory {
 	}
 
 	function Validate( $ignore_warning = TRUE ) {
-		//During InstallSchema_1064 we create ContributingPayCodePolicies without any pay codes.
-		if ( $this->getPayCode() === FALSE OR count( (array)$this->getPayCode() ) == 0 ) {
-			$this->Validator->isTrue(	'pay_code',
-										FALSE,
-										TTi18n::gettext('Please select at least one pay code.')
-										);
+		if ( $this->getDeleted() != TRUE AND $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing.
+			if ( $this->getName() == '' ) {
+				$this->Validator->isTRUE(	'name',
+											FALSE,
+											TTi18n::gettext('Please specify a name') );
+			}
+
+			//During InstallSchema_1064 we create ContributingPayCodePolicies without any pay codes.
+			if ( $this->getPayCode() === FALSE OR count( (array)$this->getPayCode() ) == 0 ) {
+				$this->Validator->isTrue(	'pay_code',
+											FALSE,
+											TTi18n::gettext('Please select at least one pay code.')
+											);
+			}
 		}
 
 		if ( $this->getDeleted() == TRUE ) {

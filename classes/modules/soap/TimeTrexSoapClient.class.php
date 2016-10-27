@@ -49,8 +49,12 @@ class TimeTrexSoapClient {
 
 	function getSoapObject() {
 		if ( $this->soap_client_obj == NULL ) {
-			$location = 'http://www.timetrex.com/ext_soap/server.php';
-			//$location = 'http://www.trunk.dev1.office.timetrex.com/ext_soap/server.php';
+			if ( function_exists('openssl_encrypt') ) {
+				$location = 'https://';
+			} else {
+				$location = 'http://';
+			}
+			$location .= 'www.timetrex.com/ext_soap/server.php';
 
 			$this->soap_client_obj = new SoapClient(NULL, array(
 											'location' => $location,
@@ -254,22 +258,18 @@ class TimeTrexSoapClient {
 		$tt_version_data['system_version'] = SystemSettingFactory::getSystemSettingValueByKey( 'system_version' );
 		$tt_version_data['tax_engine_version'] = SystemSettingFactory::getSystemSettingValueByKey( 'tax_engine_version' );
 		$tt_version_data['tax_data_version'] = SystemSettingFactory::getSystemSettingValueByKey( 'tax_data_version' );
-		$tt_version_data['schema_version_group_A'] = SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_A' );
-		$tt_version_data['schema_version_group_B'] = SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_B' );
-		$tt_version_data['schema_version_group_C'] = SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_C' );
-		$tt_version_data['schema_version_group_D'] = SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_D' );
-		$tt_version_data['schema_version_group_T'] = SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_T' );
+		$tt_version_data['schema_version']['A'] = SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_A' );
+		$tt_version_data['schema_version']['B'] = SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_B' );
+		$tt_version_data['schema_version']['C'] = SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_C' );
+		$tt_version_data['schema_version']['D'] = SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_D' );
+		$tt_version_data['schema_version']['T'] = SystemSettingFactory::getSystemSettingValueByKey( 'schema_version_group_T' );
 
 		if ( isset($_SERVER['SERVER_SOFTWARE']) ) {
 			$server_software = $_SERVER['SERVER_SOFTWARE'];
 		} else {
 			$server_software = 'N/A';
 		}
-		if ( isset($_SERVER['SERVER_NAME']) ) {
-			$server_name = $_SERVER['SERVER_NAME'];
-		} else {
-			$server_name = Misc::getHostName();
-		}
+		$server_name = Misc::getHostName( TRUE );
 
 		$db_server_info = $cf->db->ServerInfo();
 		$sys_version_data = array(
@@ -670,7 +670,7 @@ class TimeTrexSoapClient {
 
 		$company_data = $this->getPrimaryCompanyData();
 		if ( is_array( $company_data ) ) {
-			$user_data = array( 'company_id' => $u_obj->getCompany(), 'host_name' => Misc::getHostName( FALSE ), 'user_id' => $u_obj->getId(), 'permission_level' => $u_obj->getPermissionLevel(), 'company_name' => $u_obj->getCompanyObject()->getName(), 'full_name' => $u_obj->getFullName(), 'work_phone' => $u_obj->getWorkPhone(), 'work_email' => $u_obj->getWorkEmail() );
+			$user_data = array( 'company_id' => $u_obj->getCompany(), 'host_name' => Misc::getHostName( FALSE ), 'user_id' => $u_obj->getId(), 'permission_level' => $u_obj->getPermissionLevel(), 'company_name' => $u_obj->getCompanyObject()->getName(), 'full_name' => $u_obj->getFullName(), 'work_phone' => $u_obj->getWorkPhone(), 'work_email' => $u_obj->getWorkEmail(), 'home_email' => $u_obj->getHomeEmail(), 'user_ip_address' => Misc::getRemoteIPAddress(), 'user_agent' => ( isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : NULL ) );
 			return $this->getSoapObject()->sendUserFeedback( $rating, $message, $user_data, $company_data );
 		}
 

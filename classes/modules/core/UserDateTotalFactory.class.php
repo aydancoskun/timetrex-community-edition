@@ -498,7 +498,7 @@ class UserDateTotalFactory extends Factory {
 		if ( $id == 0
 				OR
 				$this->Validator->isResultSetWithRows(	'src_object_id',
-														$lf->getByID($id),
+														( is_object($lf) ) ? $lf->getByID($id) : FALSE,
 														TTi18n::gettext('Invalid Source Object')
 											) ) {
 
@@ -1716,8 +1716,16 @@ class UserDateTotalFactory extends Factory {
 		return TRUE;
 	}
 
+	function sortAccumulatedTimeByOrder($a, $b) {
+		if ( $a['order'] == $b['order'] ) {
+			return strnatcmp( $a['label'], $b['label'] );
+		} else {
+			return ( $a['order'] - $b['order'] );
+		}
+	}
+
 	//Takes UserDateTotal rows, and calculate the accumlated time sections
-	static function calcAccumulatedTime( $data ) {
+	static function calcAccumulatedTime( $data, $include_daily_totals = TRUE ) {
 		if ( is_array($data) AND count($data) > 0 ) {
 			//Keep track of item ids for each section type so we can decide later on if we can eliminate unneeded data.
 			$section_ids = array( 'branch' => array(), 'department' => array(), 'job' => array(), 'job_item' => array() );
@@ -1803,40 +1811,48 @@ class UserDateTotalFactory extends Factory {
 				}
 				//Debug::text('User Date ID: '. $row['date_stamp'] .' Total Time: '. $row['total_time'] .' Object Type ID: '. $row['object_type_id'] .' Keys: Primary: '. $primary_array_key .' Secondary: '. $secondary_array_key, __FILE__, __LINE__, __METHOD__, 10);
 
-				if ( !isset($retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]) ) {
-					$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key] = array('label' => $row['name'] . $label_suffix, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0 );
-
-				}
-				$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time'] += $row['total_time'];
-				if ( $row['object_type_id'] == 10 ) {
-					$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time_amount'] = FALSE;
-					$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['hourly_rate'] = FALSE;
-				} else {
-					$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
-					$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['hourly_rate'] = ( $retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time_amount'] / ( ($retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time'] ) : 1 ) );
-
-					//Calculate Accumulated Time Total.
-					if ( in_array( $row['object_type_id'], array(20,25,30) ) ) {
-						if ( !isset($retval[$row['date_stamp']]['accumulated_time']['total']['total_time_amount']) ) {
-							$retval[$row['date_stamp']]['accumulated_time']['total']['total_time_amount'] = 0;
-						}
-						if ( !isset($retval[$row['date_stamp']]['accumulated_time']['total']['total_time']) ) {
-							$retval[$row['date_stamp']]['accumulated_time']['total']['total_time'] = 0;
-						}
-
-						$retval[$row['date_stamp']]['accumulated_time']['total']['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
-						$retval[$row['date_stamp']]['accumulated_time']['total']['hourly_rate'] = ( $retval[$row['date_stamp']]['accumulated_time']['total']['total_time_amount'] / ( ($retval[$row['date_stamp']]['accumulated_time']['total']['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['accumulated_time']['total']['total_time'] ) : 1 ) );
-
-						//$retval[$row['date_stamp']]['accumulated_time']['worked_time']['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
-						//$retval[$row['date_stamp']]['accumulated_time']['worked_time']['hourly_rate'] = ( $retval[$row['date_stamp']]['accumulated_time']['worked_time']['total_time_amount'] / ( ($retval[$row['date_stamp']]['accumulated_time']['worked_time']['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['accumulated_time']['worked_time']['total_time'] ) : 1 ) );
+				if ( $include_daily_totals == TRUE ) {
+					if ( !isset($retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]) ) {
+						$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key] = array('label' => $row['name'] . $label_suffix, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0, 'order' => $order );
 					}
-				}
+					$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time'] += $row['total_time'];
+					if ( $row['object_type_id'] == 10 ) {
+						$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time_amount'] = FALSE;
+						$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['hourly_rate'] = FALSE;
+					} else {
+						$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
+						$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['hourly_rate'] = ( $retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time_amount'] / ( ($retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['total_time'] ) : 1 ) );
 
-				if ( isset($row['override']) AND $row['override'] == TRUE ) {
-					$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['override'] = TRUE;
-				}
-				if ( isset($row['note']) AND $row['note'] == TRUE ) {
-					$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['note'] = TRUE;
+						//Calculate Accumulated Time Total.
+						if ( in_array( $row['object_type_id'], array(20,25,30) ) ) {
+							if ( !isset($retval[$row['date_stamp']]['accumulated_time']['total']['label']) ) {
+								$retval[$row['date_stamp']]['accumulated_time']['total']['label'] = TTi18n::getText('Total Time');
+							}
+							if ( !isset($retval[$row['date_stamp']]['accumulated_time']['total']['order']) ) {
+								$retval[$row['date_stamp']]['accumulated_time']['total']['order'] = 999; //Always goes at the end.
+							}
+							
+							if ( !isset($retval[$row['date_stamp']]['accumulated_time']['total']['total_time_amount']) ) {
+								$retval[$row['date_stamp']]['accumulated_time']['total']['total_time_amount'] = 0;
+							}
+							if ( !isset($retval[$row['date_stamp']]['accumulated_time']['total']['total_time']) ) {
+								$retval[$row['date_stamp']]['accumulated_time']['total']['total_time'] = 0;
+							}
+
+							$retval[$row['date_stamp']]['accumulated_time']['total']['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
+							$retval[$row['date_stamp']]['accumulated_time']['total']['hourly_rate'] = ( $retval[$row['date_stamp']]['accumulated_time']['total']['total_time_amount'] / ( ($retval[$row['date_stamp']]['accumulated_time']['total']['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['accumulated_time']['total']['total_time'] ) : 1 ) );
+
+							//$retval[$row['date_stamp']]['accumulated_time']['worked_time']['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
+							//$retval[$row['date_stamp']]['accumulated_time']['worked_time']['hourly_rate'] = ( $retval[$row['date_stamp']]['accumulated_time']['worked_time']['total_time_amount'] / ( ($retval[$row['date_stamp']]['accumulated_time']['worked_time']['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['accumulated_time']['worked_time']['total_time'] ) : 1 ) );
+						}
+					}
+
+					if ( isset($row['override']) AND $row['override'] == TRUE ) {
+						$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['override'] = TRUE;
+					}
+					if ( isset($row['note']) AND $row['note'] == TRUE ) {
+						$retval[$row['date_stamp']][$primary_array_key][$secondary_array_key]['note'] = TRUE;
+					}
 				}
 
 				if ( $row['object_type_id'] != 50 ) { //Don't show Absences (Taken) in Weekly/Pay Period totals.
@@ -1853,6 +1869,14 @@ class UserDateTotalFactory extends Factory {
 
 						//Calculate Accumulated Time Total.
 						if ( in_array( $row['object_type_id'], array(20,25,30) ) ) {
+							//If there is no time on the 2nd (current) week in the pay period, but there is time on the first week, we need to make sure there is a label.
+							if ( !isset($retval['total']['accumulated_time']['total']['label']) ) {
+								$retval['total']['accumulated_time']['total']['label'] = TTi18n::getText('Total Time');
+							}
+							if ( !isset($retval['total']['accumulated_time']['total']['order']) ) {
+								$retval['total']['accumulated_time']['total']['order'] = 999; //Always goes at the end.
+							}
+
 							if ( !isset($retval['total']['accumulated_time']['total']['total_time_amount']) ) {
 								$retval['total']['accumulated_time']['total']['total_time_amount'] = 0;
 							}
@@ -1870,14 +1894,14 @@ class UserDateTotalFactory extends Factory {
 
 
 				//Section: Accumulated Time by Branch, Department, Job, Task
-				if ( $row['object_type_id'] == 20 OR $row['object_type_id'] == 30 ) {
+				if ( $include_daily_totals == TRUE AND $row['object_type_id'] == 20 OR $row['object_type_id'] == 30 ) {
 					//Branch
 					$branch_name = $row['branch'];
 					if ( $branch_name == '' ) {
 						$branch_name = TTi18n::gettext('No Branch');
 					}
 					if ( !isset($retval[$row['date_stamp']]['branch_time']['branch_'.$row['branch_id']]) ) {
-						$retval[$row['date_stamp']]['branch_time']['branch_'.$row['branch_id']] = array('label' => $branch_name, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0 );
+						$retval[$row['date_stamp']]['branch_time']['branch_'.$row['branch_id']] = array('label' => $branch_name, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0, 'order' => $order );
 					}
 					$retval[$row['date_stamp']]['branch_time']['branch_'.$row['branch_id']]['total_time'] += $row['total_time'];
 					$retval[$row['date_stamp']]['branch_time']['branch_'.$row['branch_id']]['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
@@ -1890,7 +1914,7 @@ class UserDateTotalFactory extends Factory {
 						$department_name = TTi18n::gettext('No Department');
 					}
 					if ( !isset($retval[$row['date_stamp']]['department_time']['department_'.$row['department_id']]) ) {
-						$retval[$row['date_stamp']]['department_time']['department_'.$row['department_id']] = array('label' => $department_name, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0 );
+						$retval[$row['date_stamp']]['department_time']['department_'.$row['department_id']] = array('label' => $department_name, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0, 'order' => $order );
 					}
 					$retval[$row['date_stamp']]['department_time']['department_'.$row['department_id']]['total_time'] += $row['total_time'];
 					$retval[$row['date_stamp']]['department_time']['department_'.$row['department_id']]['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
@@ -1903,7 +1927,7 @@ class UserDateTotalFactory extends Factory {
 						$job_name = TTi18n::gettext('No Job');
 					}
 					if ( !isset($retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]) ) {
-						$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']] = array('label' => $job_name, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0 );
+						$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']] = array('label' => $job_name, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0, 'order' => $order );
 					}
 					$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time'] += $row['total_time'];
 					$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
@@ -1916,7 +1940,7 @@ class UserDateTotalFactory extends Factory {
 						$job_item_name = TTi18n::gettext('No Task');
 					}
 					if ( !isset($retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]) ) {
-						$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']] = array('label' => $job_item_name, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0 );
+						$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']] = array('label' => $job_item_name, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0, 'order' => $order );
 					}
 					$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time'] += $row['total_time'];
 					$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
@@ -1936,7 +1960,18 @@ class UserDateTotalFactory extends Factory {
 						foreach( $retval as $date_stamp => $day_data ) {
 							unset($retval[$date_stamp][$section.'_time']);
 						}
+					} else {
+						foreach( $retval as $date_stamp => $day_data ) {
+							if ( isset($retval[$date_stamp]['accumulated_time']) ) {
+								uasort($retval[$date_stamp]['accumulated_time'], array( 'UserDateTotalFactory', 'sortAccumulatedTimeByOrder' ) ); //Sort by Order then label.
+							}
+						}
 					}
+				}
+
+				//Sort the accumulated time so its always in the same order.
+				if ( isset($retval['total']['accumulated_time']) ) {
+					uasort($retval['total']['accumulated_time'], array( 'UserDateTotalFactory', 'sortAccumulatedTimeByOrder' ) ); //Sort by Order then label.
 				}
 
 				return $retval;

@@ -537,11 +537,11 @@ class MessageControlFactory extends Factory {
 				foreach( $uplf as $up_obj ) {
 					if ( $up_obj->getEnableEmailNotificationMessage() == TRUE AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getStatus() == 10 ) {
 						if ( $up_obj->getUserObject()->getWorkEmail() != '' AND $up_obj->getUserObject()->getWorkEmailIsValid() == TRUE ) {
-							$retarr[] = $up_obj->getUserObject()->getWorkEmail();
+							$retarr[] = Misc::formatEmailAddress( $up_obj->getUserObject()->getWorkEmail(), $up_obj->getUserObject() );
 						}
 
 						if ( $up_obj->getEnableEmailNotificationHome() AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getHomeEmail() != '' AND $up_obj->getUserObject()->getHomeEmailIsValid() == TRUE ) {
-							$retarr[] = $up_obj->getUserObject()->getHomeEmail();
+							$retarr[] = Misc::formatEmailAddress( $up_obj->getUserObject()->getHomeEmail(), $up_obj->getUserObject() );
 						}
 					}
 				}
@@ -576,7 +576,7 @@ class MessageControlFactory extends Factory {
 
 		global $current_user, $config_vars;
 		if ( is_object($current_user) AND $current_user->getWorkEmail() != '' ) {
-			$reply_to = $current_user->getWorkEmail();
+			$reply_to = Misc::formatEmailAddress( $current_user->getWorkEmail(), $current_user );
 		}
 		Debug::Text('To: '. implode(',', $email_to_arr), __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Text('From: '. $from .' Reply-To: '. $reply_to, __FILE__, __LINE__, __METHOD__, 10);

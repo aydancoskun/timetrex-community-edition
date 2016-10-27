@@ -311,3 +311,17 @@
     right: -3px;
     top: 2px;
 }
+
+.a-dropdown .edit-columnIcon-div {
+    float: left;
+    width: 20px;
+
+}
+
+.a-dropdown .edit-columnIcon-div .edit_column_icon {
+
+}
+
+.a-dropdown .selected-tree-cell {
+    color: #999;
+}

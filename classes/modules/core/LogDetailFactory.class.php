@@ -188,7 +188,23 @@ class LogDetailFactory extends Factory {
 			if ( $action_id == 20 ) { //Edit
 				if ( method_exists( $object, 'setObjectFromArray' ) ) {
 					//Run the old data back through the objects own setObjectFromArray(), so any necessary values can be parsed.
+
+					if ( isset($object->old_data) AND isset( $object->old_data['password'] ) ) { //Password from old_data is encrypted, and if put back into the class always causes validation error.
+						$object->old_data['password'] = NULL;
+					}
+
 					$tmp_class = new $class;
+
+					//Since RecurringScheduleTemplates can change created_by,
+					//we need to make sure it doesn't appear in audit logs for classes that don't allow it to be changed.
+					if ( isset($new_data['created_by']) AND method_exists( $tmp_class, '_getVariableToFunctionMap' ) ) {
+						$variable_to_function_map = $tmp_class->getVariableToFunctionMap();
+						if ( !isset($variable_to_function_map['created_by']) ) {
+							$object->old_data['created_by'] = $new_data['created_by'];
+						}
+						unset($variable_to_function_map);
+					}
+
 					$tmp_class->setObjectFromArray( $object->old_data );
 					$old_data = $tmp_class->data;
 					unset($tmp_class);
@@ -302,6 +318,12 @@ class LogDetailFactory extends Factory {
 							$diff_arr['overlap']
 							);
 					break;
+				case 'ExceptionPolicyFactory':
+				case 'ExceptionPolicyListFactory':
+					unset(
+							$diff_arr['enable_authorization']
+							);
+					break;
 				case 'AccrualFactory':
 				case 'AccrualListFactory':
 					unset(
@@ -376,8 +398,8 @@ class LogDetailFactory extends Factory {
 
 					//General fields to skip
 					$diff_arr['created_date'],
-					$diff_arr['created_by'],
-					$diff_arr['created_by_id'],
+					//$diff_arr['created_by'], //Need to audit created_by, because it can change on some records like RecurringScheduleTemplateControl
+					//$diff_arr['created_by_id'],
 					$diff_arr['updated_date'],
 					$diff_arr['updated_by'],
 					$diff_arr['updated_by_id'],

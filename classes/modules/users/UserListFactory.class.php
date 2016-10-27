@@ -2100,7 +2100,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['postal_code']) ) ? $this->getWhereClauseSQL( 'a.postal_code', $filter_data['postal_code'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['employee_number']) ) ? $this->getWhereClauseSQL( 'a.employee_number', $filter_data['employee_number'], 'numeric', $ph ) : NULL;
 		$query .= ( isset($filter_data['user_name']) ) ? $this->getWhereClauseSQL( 'a.user_name', $filter_data['user_name'], 'text', $ph ) : NULL;
-		$query .= ( isset($filter_data['sin']) ) ? $this->getWhereClauseSQL( 'a.sin', $filter_data['sin'], 'numeric', $ph ) : NULL;
+		$query .= ( isset($filter_data['sin']) ) ? $this->getWhereClauseSQL( 'a.sin', $filter_data['sin'], 'numeric_string', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['email']) AND !is_array($filter_data['email']) AND $filter_data['email'] != '' ) ? 'AND ('. $this->getWhereClauseSQL( 'a.work_email', $filter_data['email'], 'text', $ph, NULL, FALSE ).' OR '. $this->getWhereClauseSQL( 'a.home_email', $filter_data['email'], 'text', $ph, NULL, FALSE ) .')' : NULL;
 		$query .= ( isset($filter_data['work_email']) ) ? $this->getWhereClauseSQL( 'a.work_email', $filter_data['work_email'], 'text', $ph ) : NULL;
@@ -2119,6 +2119,24 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		if ( isset($filter_data['employed_end_date']) AND (int)$filter_data['employed_end_date'] != 0 ) {
 			$query .= ' AND ( a.termination_date IS NULL OR a.termination_date >= '. (int)$filter_data['employed_end_date'].' ) ';
 		}
+
+		if ( isset($filter_data['hire_start_date']) AND (int)$filter_data['hire_start_date'] != 0 AND isset($filter_data['hire_end_date']) AND (int)$filter_data['hire_end_date'] != 0 ) {
+			$query .= ' AND ( a.hire_date >= '. (int)$filter_data['hire_start_date'].' AND a.hire_date <= '. (int)$filter_data['hire_end_date'].' ) ';
+		}
+		if ( isset($filter_data['termination_start_date']) AND (int)$filter_data['termination_start_date'] != 0 AND isset($filter_data['termination_end_date']) AND (int)$filter_data['termination_end_date'] != 0 ) {
+			$query .= ' AND ( a.termination_date >= '. (int)$filter_data['termination_start_date'].' AND a.termination_date <= '. (int)$filter_data['termination_end_date'].' ) ';
+		}
+
+		if ( isset($filter_data['birth_start_date']) AND (int)$filter_data['birth_start_date'] != 0 AND isset($filter_data['birth_end_date']) AND (int)$filter_data['birth_end_date'] != 0 ) {
+			$query .= ' AND ( a.birth_date >= '. (int)$filter_data['birth_start_date'].' AND a.birth_date <= '. (int)$filter_data['birth_end_date'].' ) ';
+		}
+		if ( isset($filter_data['last_login_start_date']) AND (int)$filter_data['last_login_start_date'] != 0 AND isset($filter_data['last_login_end_date']) AND (int)$filter_data['last_login_end_date'] != 0 ) {
+			$query .= ' AND ( a.last_login_date >= '. (int)$filter_data['last_login_start_date'].' AND a.last_login_date <= '. (int)$filter_data['last_login_end_date'].' ) ';
+		}
+		if ( isset($filter_data['password_start_date']) AND (int)$filter_data['password_start_date'] != 0 AND isset($filter_data['password_end_date']) AND (int)$filter_data['password_end_date'] != 0 ) {
+			$query .= ' AND ( a.password_updated_date >= '. (int)$filter_data['password_start_date'].' AND a.password_updated_date <= '. (int)$filter_data['password_end_date'].' ) ';
+		}
+
 
 		if ( isset($filter_data['last_login_date']) AND !is_array($filter_data['last_login_date']) AND trim($filter_data['last_login_date']) != '' ) {
 			$date_filter = $this->getDateRangeSQL( $filter_data['last_login_date'], 'a.last_login_date' );

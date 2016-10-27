@@ -271,16 +271,33 @@ class CompanySettingFactory extends Factory {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Company Setting - Name').': '. $this->getName() .' '. TTi18n::getText('Value').': '. $this->getValue(), NULL, $this->getTable() );
 	}
 	
-	static function getCompanySetting( $company_id, $name ) {
+	static function getCompanySettingObjectByName( $company_id, $name ) {
 		$cslf = new CompanySettingListFactory();
 		$cslf->getByCompanyIdAndName( $company_id, $name );
 		if ( $cslf->getRecordCount() == 1 ) {
 			$cs_obj = $cslf->getCurrent();
-			$retarr = $cs_obj->getObjectAsArray();
-			return $retarr;
+			return $cs_obj;
 		}
-		
+
 		return FALSE;
+	}
+
+	static function getCompanySettingArrayByName( $company_id, $name ) {
+		$cs_obj = self::getCompanySettingObjectByName( $company_id, $name );
+		if ( is_object( $cs_obj ) ) {
+			return $cs_obj->getObjectAsArray();
+		}
+
+		return FALSE;
+	}
+
+	static function getCompanySettingValueByName( $company_id, $name ) {
+		$cs_obj = self::getCompanySettingObjectByName( $company_id, $name );
+		if ( is_object( $cs_obj ) ) {
+			return $cs_obj->getValue();
+		}
+
+		return NULL;
 	}
 	
 	static function setCompanySetting( $company_id, $name, $value, $type_id = 10 ) {

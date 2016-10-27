@@ -49,7 +49,13 @@ class PayrollDeduction_US_MA extends PayrollDeduction_US {
 */
 
 	var $state_options = array(
-								20150101 => array( //01-Jan-14
+								20160101 => array( //01-Jan-16
+													'rate' => 5.10,
+													'allowance' => array( 4400, 1000 ), //1 = Base amount, 2 = Per Allowance multiplier
+													'federal_tax_maximum' => 2000,
+													'minimum_income' => 8000,
+													),
+								20150101 => array( //01-Jan-15
 													'rate' => 5.15,
 													'allowance' => array( 4400, 1000 ), //1 = Base amount, 2 = Per Allowance multiplier
 													'federal_tax_maximum' => 2000,

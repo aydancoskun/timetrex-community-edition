@@ -138,22 +138,10 @@ var TAlertManager = (function() {
 	};
 
 	var showAlert = function( content, title, callBack ) {
-
 		if ( !title ) {
 			title = $.i18n._( 'Message' );
 		}
 
-		if ( view !== null ) {
-
-			var cContent = view.find( '.content' ).text();
-
-			if ( cContent === content ) {
-				return;
-			}
-
-			remove();
-
-		}
 		var result = $( '<div class="t-alert">' +
 		'<div class="content-div"><span class="content"/></div>' +
 		'<span class="title"/>' +
@@ -161,8 +149,19 @@ var TAlertManager = (function() {
 		'<button class="t-button">Close</button>' +
 		'</div>' +
 		'</div>' );
-		view = result;
 		setTimeout( function() {
+			if ( view !== null ) {
+
+				var cContent = view.find( '.content' ).text();
+
+				if ( cContent === content ) {
+					return;
+				}
+
+				remove();
+
+			}
+			view = result;
 			$( 'body' ).append( result );
 			result.find( '.title' ).text( title );
 			result.find( '.content' ).html( content );
@@ -175,6 +174,7 @@ var TAlertManager = (function() {
 			} );
 			button.focus();
 			button.bind( 'keydown', function( e ) {
+				e.stopPropagation();
 				if ( e.keyCode === 13 ) {
 					remove();
 					if ( callBack ) {
@@ -211,7 +211,7 @@ var TAlertManager = (function() {
 			remove();
 		}
 		var result = $( '<div class="confirm-alert"> ' +
-		'<span class="content"></span>' +
+		'<div class="content-div"><span class="content"/></div>' +
 		'<span class="title"></span>' +
 		'<div class="bottom-bar">' +
 		'<button id="yesBtn" class="t-button bottom-bar-yes-btn"></button>' +

@@ -591,7 +591,7 @@ class Authentication {
 			}
 
 			$uf = new UserFactory();
-			if ( preg_match( $uf->username_validator_regex, $user_name ) === 0 ) {
+			if ( preg_match( $uf->username_validator_regex, $user_name ) === 0 ) { //This helps prevent invalid byte sequences on unicode strings.
 				Debug::Text('Username doesnt match regex: '. $user_name, __FILE__, __LINE__, __METHOD__, 10);
 				return FALSE; //No company by that user name.
 			}
@@ -759,13 +759,19 @@ class Authentication {
 
 	//When company status changes, logout all users for the company.
 	function logoutCompany( $company_id ) {
+		//MySQL fails with many of these queries due to recently changed syntax in a point release, disable purging when using MySQL for now.
+		//http://bugs.mysql.com/bug.php?id=27525
+		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
+			return FALSE;
+		}
+
 		$ph = array(
 					'company_id' => (int)$company_id,
 					'type_id' => (int)$this->getTypeIDByName( 'USER_NAME' ),
 					);
 
 		$query = 'DELETE FROM authentication as a USING users as b WHERE a.object_id = b.id AND b.company_id = ? AND a.type_id = ?';
-					
+
 		try {
 			Debug::text('Logging out entire company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
 			$this->db->Execute($query, $ph);
@@ -783,10 +789,10 @@ class Authentication {
 					'type_id' => (int)$this->getTypeIDByName( 'USER_NAME' ),
 					);
 
-		$query = 'DELETE FROM authentication as a WHERE a.object_id = ? AND a.type_id = ?';
+		$query = 'DELETE FROM authentication WHERE object_id = ? AND type_id = ?';
 
 		try {
-			Debug::text('Logging all user sessions: '. $object_id, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text('Logging out all user sessions: '. $object_id, __FILE__, __LINE__, __METHOD__, 10);
 			$this->db->Execute($query, $ph);
 		} catch (Exception $e) {
 			throw new DBError($e);

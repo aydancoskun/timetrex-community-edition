@@ -154,6 +154,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 								),
 								//Finish initializing page 1.
 								'ssn' => array(
+												'function' => array('formatSSN', 'drawNormal' ),
 												'coordinates' => array(
 																		'x' => 153,
 																		'y' => 47,
@@ -163,6 +164,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 																		),
 											),
 								'ein' => array(
+												'function' => array('formatEIN', 'drawNormal' ),
 												'coordinates' => array(
 																		'x' => 38,
 																		'y' => 70,
@@ -558,7 +560,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 								'l15a_state' => array(
 												'coordinates' => array(
 																		'x' => 38,
-																		'y' => 300,
+																		'y' => 298,
 																		'h' => 12,
 																		'w' => 27,
 																		'halign' => 'C',
@@ -567,7 +569,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 								'l15a_state_id' => array(
 												'coordinates' => array(
 																		'x' => 65,
-																		'y' => 300,
+																		'y' => 298,
 																		'h' => 12,
 																		'w' => 130,
 																		'halign' => 'C',
@@ -577,7 +579,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 												'function' => array( 'MoneyFormat', 'drawNormal' ),
 												'coordinates' => array(
 																		'x' => 196,
-																		'y' => 300,
+																		'y' => 298,
 																		'h' => 12,
 																		'w' => 85,
 																		'halign' => 'R',
@@ -587,7 +589,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 												'function' => array( 'MoneyFormat', 'drawNormal' ),
 												'coordinates' => array(
 																		'x' => 281,
-																		'y' => 300,
+																		'y' => 298,
 																		'h' => 12,
 																		'w' => 79,
 																		'halign' => 'R',
@@ -597,7 +599,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 												'function' => array( 'MoneyFormat', 'drawNormal' ),
 												'coordinates' => array(
 																		'x' => 360,
-																		'y' => 300,
+																		'y' => 298,
 																		'h' => 12,
 																		'w' => 86,
 																		'halign' => 'R',
@@ -607,16 +609,16 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 												'function' => array( 'MoneyFormat', 'drawNormal' ),
 												'coordinates' => array(
 																		'x' => 446,
-																		'y' => 300,
+																		'y' => 298,
 																		'h' => 12,
 																		'w' => 80,
 																		'halign' => 'R',
 																		),
 											),
-								'l20a' => array(
+								'l20a_district' => array(
 												'coordinates' => array(
 																		'x' => 526,
-																		'y' => 300,
+																		'y' => 298,
 																		'h' => 12,
 																		'w' => 50,
 																		'halign' => 'R',
@@ -627,7 +629,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 								'l15b_state' => array(
 												'coordinates' => array(
 																		'x' => 38,
-																		'y' => 325,
+																		'y' => 320,
 																		'h' => 12,
 																		'w' => 27,
 																		'halign' => 'C',
@@ -636,7 +638,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 								'l15b_state_id' => array(
 												'coordinates' => array(
 																		'x' => 65,
-																		'y' => 325,
+																		'y' => 320,
 																		'h' => 12,
 																		'w' => 130,
 																		'halign' => 'C',
@@ -646,7 +648,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 												'function' => array( 'MoneyFormat', 'drawNormal' ),
 												'coordinates' => array(
 																		'x' => 196,
-																		'y' => 325,
+																		'y' => 320,
 																		'h' => 12,
 																		'w' => 85,
 																		'halign' => 'R',
@@ -656,7 +658,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 												'function' => array( 'MoneyFormat', 'drawNormal' ),
 												'coordinates' => array(
 																		'x' => 281,
-																		'y' => 325,
+																		'y' => 320,
 																		'h' => 12,
 																		'w' => 79,
 																		'halign' => 'R',
@@ -666,7 +668,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 												'function' => array( 'MoneyFormat', 'drawNormal' ),
 												'coordinates' => array(
 																		'x' => 360,
-																		'y' => 325,
+																		'y' => 320,
 																		'h' => 12,
 																		'w' => 86,
 																		'halign' => 'R',
@@ -676,16 +678,16 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 												'function' => array( 'MoneyFormat', 'drawNormal' ),
 												'coordinates' => array(
 																		'x' => 446,
-																		'y' => 325,
+																		'y' => 320,
 																		'h' => 12,
 																		'w' => 80,
 																		'halign' => 'R',
 																		),
 											),
-								'l20b' => array(
+								'l20b_district' => array(
 												'coordinates' => array(
 																		'x' => 526,
-																		'y' => 325,
+																		'y' => 320,
 																		'h' => 12,
 																		'w' => 50,
 																		'halign' => 'R',
@@ -881,7 +883,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 		$line[] = $this->padRecord( '', 1, 'AN'); //Blank
 		$line[] = $this->padRecord( 'L', 1, 'AN'); //PreParers Code
 		$line[] = $this->padRecord( '', 12, 'AN'); //Blank
-
+		
 		$retval = implode( ( $this->debug == TRUE ) ? ',' : '', $line);
 		Debug::Text('RA Record:'. $retval, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -890,22 +892,22 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 	}
 
 	function _compileRE() {
-		$line[] = 'RE'; //RE Record
-		$line[] = $this->padRecord( $this->stripNonNumeric( $this->year ), 4, 'N'); //Tax Year
-		$line[] = $this->padRecord( '', 1, 'AN'); //Agent Indicator
-		$line[] = $this->padRecord( $this->stripNonNumeric( $this->ein ), 9, 'N'); //EIN
+		$line[] = 'RE'; //RE Record [1-2]
+		$line[] = $this->padRecord( $this->stripNonNumeric( $this->year ), 4, 'N'); //Tax Year [3-6]
+		$line[] = $this->padRecord( '', 1, 'AN'); //Agent Indicator [7-8]
+		$line[] = $this->padRecord( $this->stripNonNumeric( $this->ein ), 9, 'N'); //EIN [9-17]
 		$line[] = $this->padRecord( '', 9, 'AN'); //Agent for EIN
 		$line[] = $this->padRecord( '0', 1, 'N'); //Terminating Business
 		$line[] = $this->padRecord( '', 4, 'AN'); //Establishment Number
 		$line[] = $this->padRecord( '', 9, 'AN'); //Other EIN
-		$line[] = $this->padRecord( $this->trade_name, 57, 'AN'); //Company Name
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_address2 ), 22, 'AN'); //Company Location Address
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_address1 ), 22, 'AN'); //Company Delivery Address
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_city ), 22, 'AN'); //Company City
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_state ), 2, 'AN'); //Company State
-		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_zip_code ), 5, 'AN'); //Company Zip Code
-		$line[] = $this->padRecord( '', 4, 'AN'); //Company Zip Code Extension
-		$line[] = $this->padRecord( 'N', 1, 'AN'); //Kind of Employer
+		$line[] = $this->padRecord( $this->trade_name, 57, 'AN'); //Company Name [40-96]
+		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_address2 ), 22, 'AN'); //Company Location Address [97-118]
+		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_address1 ), 22, 'AN'); //Company Delivery Address [119-140]
+		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_city ), 22, 'AN'); //Company City [141-162]
+		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_state ), 2, 'AN'); //Company State [163-164]
+		$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->company_zip_code ), 5, 'AN'); //Company Zip Code [165-169]
+		$line[] = $this->padRecord( '', 4, 'AN'); //Company Zip Code Extension [170-173]
+		$line[] = $this->padRecord( strtoupper( $this->kind_of_employer), 1, 'AN'); //Kind of Employer
 		$line[] = $this->padRecord( '', 4, 'AN'); //Blank
 		$line[] = $this->padRecord( '', 23, 'AN'); //Foreign State/Province
 		$line[] = $this->padRecord( '', 15, 'AN'); //Foreign Postal Code
@@ -985,18 +987,18 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 		$l17 = 'l17'.$id;
 		$l18 = 'l18'.$id;
 		$l19 = 'l19'.$id;
-		$l20 = 'l20'.$id;
+		$l20 = 'l20'.$id.'_district';
 
 		if ( !isset($this->$l15_state) ) {
 			return FALSE;
 		}
 
-		$line[] = 'RS'; //RS Record
-		$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N'); //State Code
 
 		Debug::Text('RS Record State: '. $this->efile_state, __FILE__, __LINE__, __METHOD__, 10);		
 		switch ( strtolower($this->efile_state) ) {
 			case 'ga': //Georgia
+				$line[] = 'RS'; //RS Record
+				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N'); //State Code
 				$line[] = $this->padRecord( '', 5, 'AN'); //Tax Entity Code (Leave Blank)
 				$line[] = $this->padRecord( $this->stripNonNumeric( $this->ssn ), 9, 'N'); //SSN
 				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->first_name ), 15, 'AN'); //First Name
@@ -1047,8 +1049,75 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 				$line[] = $this->padRecord( '', 25, 'AN'); //Blank
 				
 				break;
+			case 'oh': //Ohio - They share with Federal SSA. This is for RITA/Local format instead. It does not include school district taxes.
+				//File format specifications: https://www.ritaohio.com/businesses/magnetic-reporting-of-w2s/
+				$municipality_code = FALSE;
+				$tax_type = 'C';
+
+				//District/City Name must contain: [NNNA] ie: [123R] or [123C] -- Where R is tax based on residence location and C is tax based on work location.
+				$municipality_match = preg_match('/\[([0-9]{3})([A-Z]{1})\]/i', $this->$l20, $matches );
+				if ( isset($matches[0]) ) {
+					if ( isset($matches[1]) ) {
+						$municipality_code = $matches[1];
+					}
+					if ( isset($matches[2]) ) {
+						$tax_type = $matches[2];
+					}
+				}
+				
+				if ( $municipality_code != '' AND $tax_type != '' ) {
+					//Withholding Number for State format is the State ID number.
+					$line[] = 'RS'; //RS Record
+					$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N'); //State Code
+					$line[] = $this->padRecord( 'RO'. $municipality_code, 5, 'AN'); //Tax Entity Code (Leave Blank) [5-9]
+					$line[] = $this->padRecord( $this->stripNonNumeric( $this->ssn ), 9, 'N'); //SSN [10-18]
+					$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->first_name ), 15, 'AN'); //First Name
+					$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->middle_name ), 15, 'AN'); //Middle Name
+					$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->last_name ), 20, 'AN'); //Last Name
+					$line[] = $this->padRecord( '', 4, 'AN'); //Suffix
+					$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address2 ), 22, 'AN'); //Location Address
+					$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->address1 ), 22, 'AN'); //Delivery Address
+					$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->city ), 22, 'AN'); //City
+					$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->state ), 2, 'AN'); //State
+					$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->zip_code ), 5, 'AN'); //Zip
+					$line[] = $this->padRecord( '', 4, 'AN'); //Zip Extension [146-149]
+					$line[] = $this->padRecord( '', 5, 'AN'); //Blank
+					$line[] = $this->padRecord( '', 23, 'AN'); //Foreign State/Province
+					$line[] = $this->padRecord( '', 15, 'AN'); //Foreign Postal Code
+					$line[] = $this->padRecord( '', 2, 'AN'); //Country, fill with blanks if its the US
+
+					//Unemployment reporting: Starts at 194
+					$line[] = $this->padRecord( '', 2, 'AN'); //Optional Code
+					$line[] = $this->padRecord( '', 6, 'AN'); //Reporting Period
+					$line[] = $this->padRecord( '', 11, 'AN'); //State Quarterly Unemployment Total
+					$line[] = $this->padRecord( '', 11, 'AN'); //State Quarterly Unemployment Insurance
+					$line[] = $this->padRecord( '', 2, 'AN'); //Number of weeks worked
+					$line[] = $this->padRecord( '', 8, 'AN'); //Date first employed
+					$line[] = $this->padRecord( '', 8, 'AN'); //Date of separation
+					$line[] = $this->padRecord( '', 5, 'AN'); //Blank
+					$line[] = $this->padRecord( $this->stripNonNumeric( $this->$l15_state_id ), 20, 'N'); //State Employer Account Number
+					$line[] = $this->padRecord( '', 6, 'AN'); //Blank
+
+					//Income Tax Reporting: Starts at 273
+					$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N'); //State Code [273-275]
+					$line[] = $this->padRecord( $this->removeDecimal( $this->$l16 ), 11, 'N'); //State Taxable Wages [276-286]
+					$line[] = $this->padRecord( $this->removeDecimal( $this->$l17 ), 11, 'N'); //State income tax [287-297]
+					$line[] = $this->padRecord( '', 10, 'N'); //Other State Data [298-307]
+					$line[] = $this->padRecord( strtoupper( $tax_type ), 1, 'AN'); //Tax Type Code [308] //C=Employment Municipality, R=Residence Municapility
+					$line[] = $this->padRecord( $this->removeDecimal( $this->$l18 ), 11, 'N'); //Local Wages [309-319]
+					$line[] = $this->padRecord( $this->removeDecimal( $this->$l19 ), 11, 'N'); //Local Income Tax [320-330]
+					$line[] = $this->padRecord( '', 7, 'AN'); //State Control Number
+					$line[] = $this->padRecord( '', 75, 'AN'); //Supplemental Data 1
+					$line[] = $this->padRecord( '', 75, 'AN'); //Supplemental Data 2
+					$line[] = $this->padRecord( '', 25, 'AN'); //Blank
+				} else {
+					Debug::Text('Skipping RS Record due to incorrect Municipality Code: '. $municipality_code .' Tax Type: '. $tax_type, __FILE__, __LINE__, __METHOD__, 10);
+				}
+				break;
 			default: //Federal
 				//Withholding Number for State format is the State ID number.
+				$line[] = 'RS'; //RS Record
+				$line[] = $this->padRecord( $this->_getStateNumericCode( $this->$l15_state ), 2, 'N'); //State Code								
 				$line[] = $this->padRecord( '', 5, 'AN'); //Tax Entity Code (Leave Blank)
 				$line[] = $this->padRecord( $this->stripNonNumeric( $this->ssn ), 9, 'N'); //SSN
 				$line[] = $this->padRecord( $this->stripNonAlphaNumeric( $this->first_name ), 15, 'AN'); //First Name
@@ -1090,14 +1159,17 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 				$line[] = $this->padRecord( '', 75, 'AN'); //Supplemental Data 1
 				$line[] = $this->padRecord( '', 75, 'AN'); //Supplemental Data 2
 				$line[] = $this->padRecord( '', 25, 'AN'); //Blank
-				
 				break;			
 		}
-		
-		$retval = implode( ( $this->debug == TRUE ) ? ',' : '', $line);
-		Debug::Text('RS Record:'. $retval, __FILE__, __LINE__, __METHOD__, 10);
 
-		return $retval;
+		if ( isset($line) ) {
+			$retval = implode( ( $this->debug == TRUE ) ? ',' : '', $line);
+			Debug::Text('RS Record: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+
+			return $retval;
+		} else {
+			Debug::Text('Skipping RS Record... ', __FILE__, __LINE__, __METHOD__, 10);
+		}
 	}
 
 	function _compileRT( $total ) {
@@ -1142,8 +1214,6 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 		if ( !isset($this->$l15_state) ) {
 			return FALSE;
 		}
-
-		Debug::Arr($total, 'zzzRV Record:', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $total->total > 0 ) {
 			$line[] = 'RV'; //RT Record
@@ -1524,7 +1594,7 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 					$l17 = 'l17'.$z;
 					$l18 = 'l18'.$z;
 					$l19 = 'l19'.$z;
-					$l20 = 'l20'.$z;
+					$l20 = 'l20'.$z.'_district';
 
 					if (	empty($this->$l15_state) == FALSE
 							OR empty($this->$l15_state_id) == FALSE

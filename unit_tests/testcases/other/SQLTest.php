@@ -37,15 +37,15 @@
 require_once('PHPUnit/Framework/TestCase.php');
 
 class SQLTest extends PHPUnit_Framework_TestCase {
-    public function setUp() {
+	public function setUp() {
 		global $dd;
-        Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$dd = new DemoData();
 		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
 		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
-		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
 		$this->assertGreaterThan( 0, $this->company_id );
 
 		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
@@ -62,13 +62,13 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$this->user_id = $dd->createUser( $this->company_id, 100 );
 		$this->assertGreaterThan( 0, $this->user_id );
 
-        return TRUE;
-    }
-
-    public function tearDown() {
-        Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__,10);
-        return TRUE;
-    }
+		return TRUE;
+	}
+	
+	public function tearDown() {
+		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
+		return TRUE;
+	}
 
 	function getListFactoryClassList( $equal_parts = 1 ) {
 		global $global_class_map;
@@ -85,13 +85,13 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$chunk_size = ceil( ( count($retarr) / $equal_parts ) );
 		return array_chunk( $retarr, $chunk_size );
 	}
-	
+
 	function runSQLTestOnListFactory( $factory_name ) {
 		if ( class_exists( $factory_name ) ) {
 			$reflectionClass = new ReflectionClass( $factory_name );
 			$class_file_name = $reflectionClass->getFileName();
 
-			Debug::text('Checking Class: '. $factory_name .' File: '. $class_file_name, __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Checking Class: '. $factory_name .' File: '. $class_file_name, __FILE__, __LINE__, __METHOD__, 10);
 
 			$filter_data_types = array(
 										'not_set', //passes
@@ -108,9 +108,9 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 			//Parse filter array keys from class file so we can populate them with dummy data.
 			preg_match_all( '/\$filter_data\[\'([a-z0-9_]*)\'\]/i', file_get_contents($class_file_name), $filter_data_match);
 			if ( isset($filter_data_match[1]) ) {
-				//Debug::Arr($filter_data_match, 'Filter Data Match: ', __FILE__, __LINE__, __METHOD__,10);
+				//Debug::Arr($filter_data_match, 'Filter Data Match: ', __FILE__, __LINE__, __METHOD__, 10);
 				foreach( $filter_data_types as $filter_data_type ) {
-					Debug::Text('Filter Data Type: '. $filter_data_type, __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Filter Data Type: '. $filter_data_type, __FILE__, __LINE__, __METHOD__, 10);
 
 					$filter_data = array();
 
@@ -146,16 +146,16 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 								$filter_data[$filter_data_key] = rand(2147483648, 21474836489);
 								break;
 							case 'string':
-								$filter_data[$filter_data_key] = 'A'.substr( md5(microtime()), rand(0,26), 10 );
+								$filter_data[$filter_data_key] = 'A'.substr( md5(microtime()), rand(0, 26), 10 );
 								break;
 							case 'array':
-								$filter_data[$filter_data_key] = array( rand(0, 128), rand(2147483648, 21474836489), 'A'.substr( md5(microtime()), rand(0,26), 10 ) );
+								$filter_data[$filter_data_key] = array( rand(0, 128), rand(2147483648, 21474836489), 'A'.substr( md5(microtime()), rand(0, 26), 10 ) );
 								break;
 							case 'not_set':
 								break;
 						}
 					}
-					//Debug::Arr($filter_data, 'Filter Data: ', __FILE__, __LINE__, __METHOD__,10);
+					//Debug::Arr($filter_data, 'Filter Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 					$lf = TTNew( $factory_name );
 					switch( $factory_name ) {
@@ -195,7 +195,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 			Debug::text('Done...', __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
 		} else {
-			Debug::text('Class does not exist: '. $factory_name, __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Class does not exist: '. $factory_name, __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return FALSE;
@@ -214,10 +214,10 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 			) {
 			return TRUE; //Deprecated classes.
 		}
-		
+
 		if ( class_exists( $factory_name ) ) {
 			$reflectionClass = new ReflectionClass( $factory_name );
-			Debug::text('Checking Class: '. $factory_name, __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Checking Class: '. $factory_name, __FILE__, __LINE__, __METHOD__, 10);
 
 			$raw_methods = $reflectionClass->getMethods( ReflectionMethod::IS_PUBLIC );
 			if ( is_array($raw_methods) ) {
@@ -350,12 +350,23 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 										case 'PayStubEntryAccountListFactory::getByTypeArrayByCompanyIdAndStatusId':
 											//Skip due to failures.
 											break;
+										case 'CompanyListFactory::getByPhoneID':
+											$retarr = call_user_func_array( array( $lf, $raw_method->name ), $input_arguments );
+											if ( $test_mode == 'fuzz' ) {
+												$this->assertEquals( $retarr, FALSE ); //This will be FALSE
+											} else {
+												$this->assertNotEquals( $retarr, FALSE );
+												$this->assertTrue( is_object($retarr), TRUE );
+											}
+											break;
 										case 'MessageControlListFactory::getByCompanyIdAndObjectTypeAndObjectAndNotUser':
 											$retarr = call_user_func_array( array( $lf, $raw_method->name ), $input_arguments );
 											$this->assertEquals( $retarr, FALSE ); //This will be FALSE, but it still executes a query.
 											//$this->assertTrue( is_object($retarr), TRUE );
 											break;
+										case 'CompanyListFactory::getByPhoneID':
 										case 'PayStubEntryListFactory::getByPayStubIdAndEntryNameId':
+											//FUZZ tests should return FALSE, otherwise they should be normal.
 											$retarr = call_user_func_array( array( $lf, $raw_method->name ), $input_arguments );
 											if ( $test_mode == 'fuzz' ) {
 												$this->assertEquals( $retarr, FALSE ); //This will be FALSE
@@ -386,7 +397,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 			Debug::text('Done...', __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
 		} else {
-			Debug::text('Class does not exist: '. $factory_name, __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Class does not exist: '. $factory_name, __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return FALSE;
@@ -400,7 +411,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		$this->assertTrue( TRUE );
 		if ( $product_edition <= $original_product_edition ) {
 			$TT_PRODUCT_EDITION = $product_edition;
-			Debug::text('Checking against Edition: '. getTTProductEditionName(), __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Checking against Edition: '. getTTProductEditionName(), __FILE__, __LINE__, __METHOD__, 10);
 
 			//Loop through all ListFactory classes testing SQL queries.
 			foreach( $class_list as $class_name ) {

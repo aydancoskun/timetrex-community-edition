@@ -139,7 +139,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		$this.initEditView();
 	},
 
-	onCopyAsNewClick: function() {
+	_continueDoCopyAsNew: function() {
 		var $this = this;
 		this.is_add = true;
 
@@ -154,6 +154,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 			navigation_div.css( 'display', 'none' );
 			this.setEditMenu();
 			this.setTabStatus();
+			this.is_changed = false;
 			ProgressBar.closeOverlay();
 
 		} else {
@@ -490,7 +491,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 			$this.saveInsideEditorData( function() {
 				$this.search();
 				$this.onSaveDone( result );
-				$this.current_edit_record = null;
+
 				$this.removeEditView();
 			} );
 

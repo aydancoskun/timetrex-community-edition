@@ -372,7 +372,7 @@ class APITimeSheet extends APIFactory {
 					$pp_user_date_total_data[] = $udt_obj->getObjectAsArray( $udt_columns );
 				}
 				
-				$pay_period_accumulated_user_date_total_data = UserDateTotalFactory::calcAccumulatedTime( $pp_user_date_total_data );
+				$pay_period_accumulated_user_date_total_data = UserDateTotalFactory::calcAccumulatedTime( $pp_user_date_total_data, FALSE );
 				if ( isset($pay_period_accumulated_user_date_total_data['total']) ) {
 					$pay_period_accumulated_user_date_total_data = $pay_period_accumulated_user_date_total_data['total'];
 				} else {

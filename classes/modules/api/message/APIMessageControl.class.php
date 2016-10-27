@@ -299,6 +299,10 @@ class APIMessageControl extends APIFactory {
 						$row['to_user_id'] = FALSE;
 					}
 
+					if ( !isset($row['object_id']) ) {
+						$row['object_id'] = FALSE;
+					}
+
 					if ( isset($row['object_type_id']) AND $row['object_type_id'] != 5 ) {
 						Debug::Text('Adding message to request, determining our own to_user_ids...', __FILE__, __LINE__, __METHOD__, 10);
 						//When replying to a request, find all users who have contributed messages to the request and make those the to_user_ids.

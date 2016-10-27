@@ -2,14 +2,15 @@
     background-color: #cb2e2e;
     border: 1px solid #cb2e2e;
     position: absolute;
-    padding: 4px;
-    padding-top: 2px;
+    padding-left: 4px;
+    padding-right: 4px;
+    line-height: 22px;
     z-index: 100;
     max-width: 500px;
     border-radius: 3px;
 }
 
-.warningtip-box{
+.warningtip-box {
     background-color: #ffff00 !important;
     border: 1px solid #e7be00 !important;
 }
@@ -19,6 +20,6 @@
     color: #ffffff;
 }
 
-.warningtip-box .errortip-label{
+.warningtip-box .errortip-label {
     color: #362B36 !important;
 }

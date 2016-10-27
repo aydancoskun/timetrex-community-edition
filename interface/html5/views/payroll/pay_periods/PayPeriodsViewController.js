@@ -253,7 +253,7 @@ PayPeriodsViewController = BaseViewController.extend( {
 				$this.getPayPeriodData( id, function( result ) {
 					// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
 					$this.current_edit_record = result;
-					$this.setEditViewWidgetsMode();
+
 					$this.initEditView();
 
 				} );
@@ -265,7 +265,7 @@ PayPeriodsViewController = BaseViewController.extend( {
 				this.initEditViewUI( $this.viewId, $this.edit_view_tpl );
 			}
 
-			this.setEditViewWidgetsMode();
+
 		}
 
 	},

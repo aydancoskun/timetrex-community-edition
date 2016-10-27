@@ -57,18 +57,20 @@ AccrualBalanceViewController = BaseViewController.extend( {
 	initOptions: function() {
 		var $this = this;
 
-		this.user_group_api.getUserGroup( '', false, false, {onResult: function( res ) {
+		this.user_group_api.getUserGroup( '', false, false, {
+			onResult: function( res ) {
 
-			res = res.getResult();
-			res = Global.buildTreeRecord( res );
+				res = res.getResult();
+				res = Global.buildTreeRecord( res );
 
-			if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
-				$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
+				if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
+					$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
+				}
+
+				$this.user_group_array = res;
+
 			}
-
-			$this.user_group_array = res;
-
-		}} );
+		} );
 
 	},
 
@@ -103,7 +105,8 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Employee' ),
+			new SearchField( {
+				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
@@ -111,9 +114,11 @@ AccrualBalanceViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Accrual Account' ),
+			new SearchField( {
+				label: $.i18n._( 'Accrual Account' ),
 				in_column: 1,
 				field: 'accrual_policy_account_id',
 				layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
@@ -121,9 +126,11 @@ AccrualBalanceViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Default Branch' ),
+			new SearchField( {
+				label: $.i18n._( 'Default Branch' ),
 				in_column: 2,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
@@ -131,9 +138,11 @@ AccrualBalanceViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Default Department' ),
+			new SearchField( {
+				label: $.i18n._( 'Default Department' ),
 				in_column: 2,
 				field: 'default_department_id',
 				layout_name: ALayoutIDs.DEPARTMENT,
@@ -141,9 +150,11 @@ AccrualBalanceViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Group' ),
+			new SearchField( {
+				label: $.i18n._( 'Group' ),
 				in_column: 2,
 				multiple: true,
 				field: 'group_id',
@@ -151,7 +162,8 @@ AccrualBalanceViewController = BaseViewController.extend( {
 				tree_mode: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 		];
 	},
 
@@ -206,12 +218,9 @@ AccrualBalanceViewController = BaseViewController.extend( {
 	},
 
 	onAddClick: function() {
-
 		var $this = this;
-		this.is_viewing = false;
-		this.is_edit = false;
-		this.is_add = true;
-		LocalCacheData.current_doing_context_action = 'new';
+		this.setCurrentEditViewState( 'view' );
+		this.add_accrual = true;
 		$this.openEditView();
 
 		var selected_item = null;
@@ -233,50 +242,51 @@ AccrualBalanceViewController = BaseViewController.extend( {
 			filter.filter_data.accrual_policy_account_id = selected_item.accrual_policy_account_id;
 		}
 
-		this.api['get' + this.api.key_name]( filter, {onResult: function( result ) {
-			var result_data = result.getResult();
+		this.api['get' + this.api.key_name]( filter, {
+			onResult: function( result ) {
+				var result_data = result.getResult();
 
-			if ( !result_data ) {
-				result_data = [];
-			}
-
-			result_data = $this.__createRowId( result_data );
-
-			result_data = result_data[0];
-
-			if ( !result_data ) {
-				result_data = {};
-			}
-
-			$this.current_edit_record = result_data;
-
-			if ( $this.current_edit_record && $this.current_edit_record.user_id && $this.current_edit_record.accrual_policy_account_id ) {
-				filter.filter_data.user_id = $this.current_edit_record.user_id;
-				filter.filter_data.accrual_policy_account_id = $this.current_edit_record.accrual_policy_account_id;
-			}
-
-			// get the accrual data with the same filter data in order to be used for the audit tab.
-			$this.accrual_api['get' + $this.accrual_api.key_name]( filter, {onResult: function( res ) {
-				var result = res.getResult();
-				$this.log_object_ids = [];
-				for ( var i = 0; i < result.length; i++ ) {
-					$this.log_object_ids.push( result[i]['id'] );
+				if ( !result_data ) {
+					result_data = [];
 				}
 
-				$this.initEditView();
+				result_data = $this.__createRowId( result_data );
 
-			}} );
+				result_data = result_data[0];
 
-		}} );
+				if ( !result_data ) {
+					result_data = {};
+				}
+
+				$this.current_edit_record = result_data;
+
+				if ( $this.current_edit_record && $this.current_edit_record.user_id && $this.current_edit_record.accrual_policy_account_id ) {
+					filter.filter_data.user_id = $this.current_edit_record.user_id;
+					filter.filter_data.accrual_policy_account_id = $this.current_edit_record.accrual_policy_account_id;
+				}
+
+				// get the accrual data with the same filter data in order to be used for the audit tab.
+				$this.accrual_api['get' + $this.accrual_api.key_name]( filter, {
+					onResult: function( res ) {
+						var result = res.getResult();
+						$this.log_object_ids = [];
+						for ( var i = 0; i < result.length; i++ ) {
+							$this.log_object_ids.push( result[i]['id'] );
+						}
+
+						$this.initEditView();
+
+					}
+				} );
+
+			}
+		} );
 
 	},
 
 	onViewClick: function( view_id ) {
 		var $this = this;
-		this.is_viewing = true;
-		this.is_edit = false;
-		this.is_add = false;
-		LocalCacheData.current_doing_context_action = 'view';
+		this.setCurrentEditViewState( 'view' );
 		$this.openEditView();
 
 		var selected_item = null;
@@ -303,42 +313,46 @@ AccrualBalanceViewController = BaseViewController.extend( {
 			filter.filter_data.accrual_policy_account_id = selected_item.accrual_policy_account_id;
 		}
 
-		this.api['get' + this.api.key_name]( filter, {onResult: function( result ) {
-			var result_data = result.getResult();
+		this.api['get' + this.api.key_name]( filter, {
+			onResult: function( result ) {
+				var result_data = result.getResult();
 
-			if ( !result_data ) {
-				result_data = [];
-			}
-
-			result_data = $this.__createRowId( result_data );
-
-			result_data = result_data[0];
-
-			if ( !result_data ) {
-				TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
-				$this.onCancelClick();
-				return;
-			}
-
-			$this.current_edit_record = result_data;
-			if ( $this.current_edit_record && $this.current_edit_record.user_id && $this.current_edit_record.accrual_policy_account_id ) {
-				filter.filter_data.user_id = $this.current_edit_record.user_id;
-				filter.filter_data.accrual_policy_account_id = $this.current_edit_record.accrual_policy_account_id;
-			}
-
-			// get the accrual data with the same filter data in order to be used for the audit tab.
-			$this.accrual_api['get' + $this.accrual_api.key_name]( filter, {onResult: function( res ) {
-				var result = res.getResult();
-				$this.log_object_ids = [];
-				for ( var i = 0; i < result.length; i++ ) {
-					$this.log_object_ids.push( result[i]['id'] );
+				if ( !result_data ) {
+					result_data = [];
 				}
 
-				$this.initEditView();
+				result_data = $this.__createRowId( result_data );
 
-			}} );
+				result_data = result_data[0];
 
-		}} );
+				if ( !result_data ) {
+					TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
+					$this.onCancelClick();
+					return;
+				}
+
+				$this.current_edit_record = result_data;
+				if ( $this.current_edit_record && $this.current_edit_record.user_id && $this.current_edit_record.accrual_policy_account_id ) {
+					filter.filter_data.user_id = $this.current_edit_record.user_id;
+					filter.filter_data.accrual_policy_account_id = $this.current_edit_record.accrual_policy_account_id;
+				}
+
+				// get the accrual data with the same filter data in order to be used for the audit tab.
+				$this.accrual_api['get' + $this.accrual_api.key_name]( filter, {
+					onResult: function( res ) {
+						var result = res.getResult();
+						$this.log_object_ids = [];
+						for ( var i = 0; i < result.length; i++ ) {
+							$this.log_object_ids.push( result[i]['id'] );
+						}
+
+						$this.initEditView();
+
+					}
+				} );
+
+			}
+		} );
 
 	},
 
@@ -481,9 +495,9 @@ AccrualBalanceViewController = BaseViewController.extend( {
 			$this.sub_accrual_view_controller = subViewController;
 			$this.sub_accrual_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_accrual_view_controller.parent_view_controller = $this;
-			$this.sub_accrual_view_controller.is_trigger_add = $this.is_add ? true : false;
-//			$this.sub_accrual_view_controller.__createRowId = $this.saveLogIds;
+			$this.sub_accrual_view_controller.is_trigger_add = $this.add_accrual ? true : false;
 			$this.sub_accrual_view_controller.initData();
+			$this.add_accrual = false;
 		}
 
 	},
@@ -517,7 +531,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		function afterLoadView( subViewController ) {
 			// Can't directly open Audit in this case, because Audit need data from Sub Accrual View and it not
 			// be loaded if directly open audit from url
-			if(!$this.log_object_ids){
+			if ( !$this.log_object_ids ) {
 				$this.edit_view_tab.tabs( 'select', 0 );
 				return;
 			}

@@ -5,7 +5,7 @@ TimesheetDetailReportViewController = ReportBaseViewController.extend( {
 		this.script_name = 'TimesheetDetailReport';
 		this.viewId = 'TimesheetDetailReport';
 		this.context_menu_name = $.i18n._( 'Timesheet Detail' );
-		this.navigation_label = $.i18n._( 'Saved Report' );
+		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
 		this.view_file = 'TimesheetDetailReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APITimesheetDetailReport' ))();
 		this.buildContextMenu();

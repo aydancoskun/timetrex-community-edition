@@ -226,6 +226,98 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::parseTimeUnit('1.00'), (60 * 60) );
 	}
 
+	function testTimeUnit4() {
+		Debug::text('Testing Time Unit Format: Decimal', __FILE__, __LINE__, __METHOD__, 10);
+
+		TTDate::setDateFormat('dMY');
+		TTDate::setTimeFormat('g:i A');
+
+		/*
+			10 	=> 'hh:mm (2:15)',
+			12 	=> 'hh:mm:ss (2:15:59)',
+			20 	=> 'Hours (2.25)',
+			22 	=> 'Hours (2.241)',
+			30 	=> 'Minutes (135)'
+		*/
+		TTDate::setTimeUnitFormat(10);
+		$this->assertEquals( TTDate::getTimeUnit( 3600 ),  '01:00' );
+		$this->assertEquals( TTDate::getTimeUnit( 3660 ),  '01:01' );
+		$this->assertEquals( TTDate::getTimeUnit( 36060 ), '10:01' );
+		$this->assertEquals( TTDate::getTimeUnit( 36660 ), '10:11' );
+		$this->assertEquals( TTDate::getTimeUnit( 360660 ), '100:11' );
+		$this->assertEquals( TTDate::getTimeUnit( 3600660 ), '1000:11' );
+		$this->assertEquals( TTDate::getTimeUnit( 36000660 ), '10000:11' );
+		$this->assertEquals( TTDate::getTimeUnit( 360000660 ), '100000:11' );
+		$this->assertEquals( TTDate::getTimeUnit( 3600000660 ), '1000000:11' );
+		//$this->assertEquals( TTDate::getTimeUnit( ( PHP_INT_MAX + PHP_INT_MAX ) ),  				'ERR(FLOAT)' ); //This is passing a float that is losing precision.
+		$this->assertEquals( TTDate::getTimeUnit( bcadd(PHP_INT_MAX, PHP_INT_MAX ) ), 				'5124095576030431:00' );
+		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcadd(PHP_INT_MAX, PHP_INT_MAX ), 660 ) ), '5124095576030431:11' );
+
+
+		TTDate::setTimeUnitFormat(10);
+		$this->assertEquals( TTDate::getTimeUnit( -3600 ),  '-01:00' );
+		$this->assertEquals( TTDate::getTimeUnit( -3660 ),  '-01:01' );
+		$this->assertEquals( TTDate::getTimeUnit( -36060 ), '-10:01' );
+		$this->assertEquals( TTDate::getTimeUnit( -36660 ), '-10:11' );
+		$this->assertEquals( TTDate::getTimeUnit( -360660 ), '-100:11' );
+		$this->assertEquals( TTDate::getTimeUnit( -3600660 ), '-1000:11' );
+		$this->assertEquals( TTDate::getTimeUnit( -36000660 ), '-10000:11' );
+		$this->assertEquals( TTDate::getTimeUnit( -360000660 ), '-100000:11' );
+		$this->assertEquals( TTDate::getTimeUnit( -3600000660 ), '-1000000:11' );
+		//$this->assertEquals( TTDate::getTimeUnit( ( ( PHP_INT_MAX + PHP_INT_MAX ) * -1 ) ), 		'ERR(FLOAT)' );
+		$this->assertEquals( TTDate::getTimeUnit( bcmul( bcadd(PHP_INT_MAX,PHP_INT_MAX), -1 ) ),	'-5124095576030431:00' );
+
+
+		TTDate::setTimeUnitFormat(12);
+		$this->assertEquals( TTDate::getTimeUnit( 3600 ),  '01:00:00' );
+		$this->assertEquals( TTDate::getTimeUnit( 3661 ),  '01:01:01' );
+		$this->assertEquals( TTDate::getTimeUnit( 36060 ), '10:01:00' );
+		$this->assertEquals( TTDate::getTimeUnit( 36660 ), '10:11:00' );
+		$this->assertEquals( TTDate::getTimeUnit( 360660 ), '100:11:00' );
+		$this->assertEquals( TTDate::getTimeUnit( 3600660 ), '1000:11:00' );
+		$this->assertEquals( TTDate::getTimeUnit( 36000660 ), '10000:11:00' );
+		$this->assertEquals( TTDate::getTimeUnit( 360000660 ), '100000:11:00' );
+		$this->assertEquals( TTDate::getTimeUnit( 3600000660 ), '1000000:11:00' );
+		//$this->assertEquals( TTDate::getTimeUnit( ( PHP_INT_MAX + PHP_INT_MAX ) ), 	'ERR(FLOAT)' );
+		$this->assertEquals( TTDate::getTimeUnit( bcadd(PHP_INT_MAX,PHP_INT_MAX) ), '5124095576030431:00:14' );
+
+		$this->assertEquals( TTDate::getTimeUnit( bcmul(PHP_INT_MAX,PHP_INT_MAX) ), '9223372036854775807:00:49' );
+
+		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcmul(PHP_INT_MAX,PHP_INT_MAX), 0.99999) ), '9223372036854775807:00:49' );
+		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcmul(PHP_INT_MAX,PHP_INT_MAX), 0.00001) ), '9223372036854775807:00:49' );
+
+		
+		TTDate::setTimeUnitFormat(12);
+		$this->assertEquals( TTDate::getTimeUnit( -3600 ),  '-01:00:00' );
+		$this->assertEquals( TTDate::getTimeUnit( -3661 ),  '-01:01:01' );
+		$this->assertEquals( TTDate::getTimeUnit( -36060 ), '-10:01:00' );
+		$this->assertEquals( TTDate::getTimeUnit( -36660 ), '-10:11:00' );
+		$this->assertEquals( TTDate::getTimeUnit( -360660 ), '-100:11:00' );
+		$this->assertEquals( TTDate::getTimeUnit( -3600660 ), '-1000:11:00' );
+		$this->assertEquals( TTDate::getTimeUnit( -36000660 ), '-10000:11:00' );
+		$this->assertEquals( TTDate::getTimeUnit( -360000660 ), '-100000:11:00' );
+		$this->assertEquals( TTDate::getTimeUnit( -3600000660 ), '-1000000:11:00' );
+		//$this->assertEquals( TTDate::getTimeUnit( ( ( PHP_INT_MAX + PHP_INT_MAX ) * -1 ) ), 		'ERR(FLOAT)' );
+		$this->assertEquals( TTDate::getTimeUnit( bcmul( bcadd(PHP_INT_MAX,PHP_INT_MAX), -1 ) ),	'-5124095576030431:00:14' );
+		
+		$this->assertEquals( TTDate::getTimeUnit( bcmul( bcmul(PHP_INT_MAX,PHP_INT_MAX), -1 ) ),	'-9223372036854775807:00:49' );
+
+		
+		TTDate::setTimeUnitFormat(23);
+		$this->assertEquals( TTDate::getTimeUnit( 3600 ),  '1.000' );
+		$this->assertEquals( TTDate::getTimeUnit( 3660 ),  '1.0167' );
+		$this->assertEquals( TTDate::getTimeUnit( 36060 ), '10.0167' );
+		$this->assertEquals( TTDate::getTimeUnit( 36660 ), '10.1833' );
+		$this->assertEquals( TTDate::getTimeUnit( 360660 ), '100.1833' );
+		$this->assertEquals( TTDate::getTimeUnit( 3600660 ), '1,000.1833' );
+		$this->assertEquals( TTDate::getTimeUnit( 36000660 ), '10,000.1833' );
+		$this->assertEquals( TTDate::getTimeUnit( 360000660 ), '100,000.1833' );
+		$this->assertEquals( TTDate::getTimeUnit( 3600000660 ), '1,000,000.1833' );		
+		$this->assertEquals( TTDate::getTimeUnit( ( PHP_INT_MAX + PHP_INT_MAX ) ),  				'5,124,095,576,030,431.0000' ); //This is passing a float that is losing precision.
+		$this->assertEquals( TTDate::getTimeUnit( bcadd(PHP_INT_MAX, PHP_INT_MAX ) ), 				'5,124,095,576,030,431.0000' );
+		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcadd(PHP_INT_MAX, PHP_INT_MAX ), 660 ) ), '5,124,095,576,030,431.0000' );
+	}
+
 	function testDate_DMY_1() {
 		Debug::text('Testing Date Format: d-M-y', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -556,7 +648,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:01 AM'), (60 * 5), 30, (60 * 2) ), strtotime('15-Apr-07 8:00 AM') );
 
 	}
-
+	
 	function test_graceTime() {
 		$this->assertEquals( (int)TTDate::graceTime( strtotime('15-Apr-07 7:58 AM'), (60 * 5), strtotime('15-Apr-07 8:00 AM') ), strtotime('15-Apr-07 8:00 AM') );
 		$this->assertEquals( (int)TTDate::graceTime( strtotime('15-Apr-07 7:58:23 AM'), (60 * 5), strtotime('15-Apr-07 8:00 AM') ), strtotime('15-Apr-07 8:00 AM') );

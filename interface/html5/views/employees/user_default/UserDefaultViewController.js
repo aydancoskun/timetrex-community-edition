@@ -108,7 +108,7 @@ UserDefaultViewController = BaseViewController.extend( {
 				$this.getUserDefaultData( function( result ) {
 					// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
 					$this.current_edit_record = result;
-					$this.setEditViewWidgetsMode();
+
 					$this.initEditView();
 
 				} );
@@ -120,7 +120,7 @@ UserDefaultViewController = BaseViewController.extend( {
 				this.initEditViewUI( 'UserTitle', 'UserTitleEditView.html' );
 			}
 
-			this.setEditViewWidgetsMode();
+
 		}
 
 	},
@@ -201,7 +201,7 @@ UserDefaultViewController = BaseViewController.extend( {
 					$this.refresh_id = result_data;
 				}
 
-				$this.current_edit_record = null;
+
 				$this.removeEditView();
 
 			} else {

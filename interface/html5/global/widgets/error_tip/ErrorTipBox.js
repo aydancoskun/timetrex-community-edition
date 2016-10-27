@@ -34,9 +34,9 @@
 			$( this ).css( 'left', related_widget.offset().left + related_widget.width() + 5 );
 
 			if ( related_widget.hasClass( 'a-combobox' ) ) {
-				$( this ).css( 'top', related_widget.offset().top + 1 );
+				$( this ).css( 'top', related_widget.offset().top );
 			} else {
-				$( this ).css( 'top', related_widget.offset().top - 2 );
+				$( this ).css( 'top', related_widget.offset().top );
 			}
 
 			$( 'body' ).append( this );

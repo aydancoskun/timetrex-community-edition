@@ -82,12 +82,20 @@ class APINotification extends APIFactory {
 
 						if ( $license_validate === TRUE ) {
 							//License likely expires soon.
-							$retarr[] = array(
-												'delay' => 0, //0= Show until clicked, -1 = Show until next getNotifications call.
-												'bg_color' => '#FFFF00', //Yellow
-												'message' => TTi18n::getText('WARNING: %1', $license_message ),
-												'destination' => $destination_url,
-												);
+							if (
+									( $license->getExpireDays() >= 15 AND $this->getPermissionObject()->getLevel() >= 20 ) //When expires in more than 15 days only show administrators.
+									OR
+									( $license->getExpireDays() <= 14 AND $this->getPermissionObject()->getLevel() >= 10 ) //When expires in less than 14 days show administrators/supervisors
+									OR
+									( $license->getExpireDays() <= 7 ) //When expires in less than 7 days show all employees.
+								) {
+								$retarr[] = array(
+													'delay' => 0, //0= Show until clicked, -1 = Show until next getNotifications call.
+													'bg_color' => '#FFFF00', //Yellow
+													'message' => TTi18n::getText('WARNING: %1', $license_message ),
+													'destination' => $destination_url,
+													);
+							}
 						} else {
 							//License error.
 							$retarr[] = array(

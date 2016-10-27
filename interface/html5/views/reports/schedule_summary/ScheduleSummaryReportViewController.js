@@ -5,7 +5,7 @@ ScheduleSummaryReportViewController = ReportBaseViewController.extend( {
 		this.script_name = 'ScheduleSummaryReport';
 		this.viewId = 'ScheduleSummaryReport';
 		this.context_menu_name = $.i18n._( 'Schedule Summary' );
-		this.navigation_label = $.i18n._( 'Saved Report' );
+		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
 		this.view_file = 'ScheduleSummaryReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIScheduleSummaryReport' ))();
 		this.buildContextMenu();
@@ -32,7 +32,7 @@ ScheduleSummaryReportViewController = ReportBaseViewController.extend( {
 
 			$this.getReportData( function( result ) {
 				// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
-				var edit_item = result[0];
+				var edit_item;
 				if ( LocalCacheData.default_edit_id_for_next_open_edit_view ) {
 					for ( var i = 0; i < result.length; i++ ) {
 						if ( result[i].id === parseInt( LocalCacheData.default_edit_id_for_next_open_edit_view ) ) {
@@ -40,6 +40,8 @@ ScheduleSummaryReportViewController = ReportBaseViewController.extend( {
 						}
 					}
 					LocalCacheData.default_edit_id_for_next_open_edit_view = null;
+				}else{
+					edit_item = $this.getDefaultReport( result );
 				}
 
 				if ( result && result.length > 0 ) {
@@ -50,13 +52,13 @@ ScheduleSummaryReportViewController = ReportBaseViewController.extend( {
 					$this.saved_report_array = [];
 				}
 
-				if ( $this.current_saved_report.hasOwnProperty( 'data' ) && $this.current_saved_report.data.hasOwnProperty( 'config' ) && $this.current_saved_report.data.config.hasOwnProperty( 'filter_' ) ) {
+				if ( !$.isEmptyObject( $this.current_saved_report ) && $this.current_saved_report.hasOwnProperty( 'data' ) && $this.current_saved_report.data.hasOwnProperty( 'config' ) && $this.current_saved_report.data.config.hasOwnProperty( 'filter_' ) ) {
 					$this.current_saved_report.data.config.filter = $this.current_saved_report.data.config.filter_;
 					delete $this.current_saved_report.data.config.filter_;
 				}
 				$this.current_edit_record = {};
 				$this.visible_report_values = {};
-				$this.setEditViewWidgetsMode();
+
 				$this.initEditView();
 
 			} );
@@ -152,31 +154,37 @@ ScheduleSummaryReportViewController = ReportBaseViewController.extend( {
 			permission: null
 		} );
 
-		var print = new RibbonSubMenu( {label: $.i18n._( 'Print' ),
+		var print = new RibbonSubMenu( {
+			label: $.i18n._( 'Print' ),
 			id: ContextMenuIconName.print,
 			group: schedule_group,
 			icon: 'print-35x35.png',
 			type: RibbonSubMenuType.NAVIGATION,
 			items: [],
 			permission_result: true,
-			permission: true} );
+			permission: true
+		} );
 
-		var pdf_schedule = new RibbonSubMenuNavItem( {label: $.i18n._( 'Individual Schedules' ),
+		var pdf_schedule = new RibbonSubMenuNavItem( {
+			label: $.i18n._( 'Individual Schedules' ),
 			id: 'pdf_schedule',
 			nav: print
 		} );
 
-		var pdf_schedule_group_combined = new RibbonSubMenuNavItem( {label: $.i18n._( 'Group - Combined' ),
+		var pdf_schedule_group_combined = new RibbonSubMenuNavItem( {
+			label: $.i18n._( 'Group - Combined' ),
 			id: 'pdf_schedule_group_combined',
 			nav: print
 		} );
 
-		var pdf_schedule_group = new RibbonSubMenuNavItem( {label: $.i18n._( 'Group - Separated' ),
+		var pdf_schedule_group = new RibbonSubMenuNavItem( {
+			label: $.i18n._( 'Group - Separated' ),
 			id: 'pdf_schedule_group',
 			nav: print
 		} );
 
-		var pdf_schedule_group_pagebreak = new RibbonSubMenuNavItem( {label: $.i18n._( 'Group - Separated (Page Breaks)' ),
+		var pdf_schedule_group_pagebreak = new RibbonSubMenuNavItem( {
+			label: $.i18n._( 'Group - Separated (Page Breaks)' ),
 			id: 'pdf_schedule_group_pagebreak',
 			nav: print
 		} );
@@ -192,50 +200,9 @@ ScheduleSummaryReportViewController = ReportBaseViewController.extend( {
 		widget.setValue( value.status_id );
 	},
 
-	onFormItemChange: function( target, doNotValidate ) {
-		var $this = this;
-		this.setIsChanged( target );
-		var key = target.getField();
-
-		if ( this.visible_report_widgets && this.visible_report_widgets[key] ) {
-			if ( key === 'sort' ) {
-				this.visible_report_values[key] = target.getValue( true );
-
-			} else if ( key === 'time_period' ) {
-				var time_period = target.getValue();
-				this.visible_report_values[key] = {time_period: time_period};
-
-				this.onTimePeriodChange( target );
-
-			} else if ( key === 'filter' ) {
-				var filter = target.getValue();
-				this.visible_report_values[key] = {status_id: filter};
-
-			} else if ( key === 'start_date' || key === 'end_date' || key === 'pay_period_id' || key === 'pay_period_schedule_id' ) {
-				time_period = this.visible_report_values['time_period'];
-				time_period[key] = target.getValue();
-
-			} else {
-				this.visible_report_values[key] = target.getValue();
-			}
-
-		} else {
-			this.current_edit_record[key] = target.getValue();
-		}
-
-		if ( key === 'template' ) {
-			$this.onTemplateChange( this.current_edit_record[key] );
-			$this.setEditMenu(); //clean error, set edit menu
-		} else {
-
-			if ( this.edit_view_tab_selected_index === 0 ) {
-				if ( !doNotValidate ) {
-					this.validate();
-				}
-			}
-
-		}
-
+	onFormItemChangeProcessFilterField: function( target, key ) {
+		var filter = target.getValue();
+		this.visible_report_values[key] = {status_id: filter};
 	}
 
 } );

@@ -58,15 +58,15 @@ class DBError extends Exception {
 		Debug::Arr( Debug::backTrace(), ' BackTrace: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Log database error
-		if ( isset($e->message) ) {
-			if ( stristr( $e->message, 'statement timeout' ) !== FALSE ) {
+		if ( $e->getMessage() != '' ) {
+			if ( stristr( $e->getMessage(), 'statement timeout' ) !== FALSE ) {
 				$code = 'DBTimeout';
 			}
-			Debug::Text($e->message, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text( $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		if ( isset($e->trace) ) {
-			$e = strip_tags( adodb_backtrace($e->trace) );
+		if ( $e->getTrace() != '' ) {
+			$e = strip_tags( adodb_backtrace( $e->getTrace() ) );
 			Debug::Arr( $e, 'Exception...', __FILE__, __LINE__, __METHOD__, 10);
 		}
 

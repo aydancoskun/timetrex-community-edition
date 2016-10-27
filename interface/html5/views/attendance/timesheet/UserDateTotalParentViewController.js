@@ -77,7 +77,7 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 			var date_stamp = Global.strToDate( date_str, 'YYYYMMDD' ).format();
 
 			$this.current_edit_record = {date: date_str, user_id: LocalCacheData.all_url_args.user_id, date_stamp: date_stamp};
-			$this.setEditViewWidgetsMode();
+
 			$this.initEditView();
 
 		} else {
@@ -85,7 +85,7 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 				this.initEditViewUI( $this.viewId, $this.edit_view_tpl );
 			}
 
-			this.setEditViewWidgetsMode();
+
 		}
 
 	},

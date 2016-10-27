@@ -41,6 +41,18 @@
 class PayrollDeduction_US_OH extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+												20140801 => array(
+															0 => array(
+																	array( 'income' => 5000,	'rate' => 0.556,	'constant' => 0 ),
+																	array( 'income' => 10000,	'rate' => 1.112,	'constant' => 27.80 ),
+																	array( 'income' => 15000,	'rate' => 2.226,	'constant' => 83.40 ),
+																	array( 'income' => 20000,	'rate' => 2.782,	'constant' => 194.70 ),
+																	array( 'income' => 40000,	'rate' => 3.338,	'constant' => 333.80 ),
+																	array( 'income' => 80000,	'rate' => 3.894,	'constant' => 1001.40 ),
+																	array( 'income' => 100000,	'rate' => 4.451,	'constant' => 2559.00 ),
+																	array( 'income' => 100000,	'rate' => 5.563,	'constant' => 3449.20 ),
+																	),
+															),
 												20140701 => array(
 															0 => array(
 																	array( 'income' => 5000,	'rate' => 0.574,	'constant' => 0 ),

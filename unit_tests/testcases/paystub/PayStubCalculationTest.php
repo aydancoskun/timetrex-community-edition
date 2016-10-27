@@ -980,7 +980,6 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function createPayStub() {
-
 		$cps = new CalculatePayStub();
 		$cps->setUser( $this->user_id );
 		$cps->setPayPeriod( $this->pay_period_objs[0]->getId() );
@@ -1648,6 +1647,356 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][14]['ytd_amount'], '1172.37' );
 
 		$this->assertEquals( count($pse_arr[$pse_accounts['regular_time']]), 15 );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group PayStubCalculation_testCPPAgeLimitsA
+	 */
+	//Test 18/70 age limits for CPP and pro-rating.
+	function testCPPAgeLimitsA() {
+		$cdf = new CompanyDeductionFactory();
+		$cdf->setCompany( $this->company_id );
+		$cdf->setStatus( 10 ); //Enabled
+		$cdf->setType( 10 ); //Tax
+		$cdf->setName( 'CPP' );
+		$cdf->setCalculation( 90 ); //CPP
+		$cdf->setCalculationOrder( 90 );
+		$cdf->setPayStubEntryAccount( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'CPP') );
+		$cdf->setMinimumUserAge( 18 );
+		$cdf->setMaximumUserAge( 70 );
+		//if ( $cdf->isValid() ) {
+		//	$cdf->Save(FALSE);
+		//	$cdf->setIncludePayStubEntryAccount( array( $this->pay_stub_account_link_arr['total_gross'] ) );
+		//	if ( $cdf->isValid() ) {
+		//		$cdf->Save( FALSE );
+		//	}
+		//}
+
+		$birth_date = strtotime('16-Oct-1997'); //18yrs old
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('01-Sep-2014') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('01-Sep-2015') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('01-Oct-2015') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('31-Oct-2015') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('01-Nov-2015') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('31-Nov-2015') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('01-Dec-2015') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('31-Dec-2015') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('01-Jan-2016') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('14-Jan-2016') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('16-Jan-2016') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('31-Jan-2016') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('31-Jan-2017') ), TRUE );
+
+		$birth_date = strtotime('31-Dec-1997'); //18yrs old
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('01-Sep-2014') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('01-Sep-2015') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('01-Oct-2015') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('31-Oct-2015') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('01-Nov-2015') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('31-Nov-2015') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('01-Dec-2015') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('31-Dec-2015') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('01-Jan-2016') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('14-Jan-2016') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('16-Jan-2016') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('31-Jan-2016') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('31-Jan-2017') ), TRUE );
+
+
+		$birth_date = strtotime('15-Jun-1997'); //18yrs old
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2011') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2011') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2011') ), FALSE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2012') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2012') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2012') ), FALSE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2013') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2013') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2013') ), FALSE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2014') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2014') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2014') ), FALSE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('01-May-2015') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('01-Jun-2015') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('15-Jun-2015') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2015') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('01-Jul-2015') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('03-Jul-2015') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('15-Jul-2015') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2015') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Aug-2015') ), TRUE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2016') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2016') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2016') ), TRUE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2017') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2017') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2017') ), TRUE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2018') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2018') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2018') ), TRUE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2019') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2019') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2019') ), TRUE );
+
+
+
+		$birth_date = strtotime('15-Jun-1960'); //55yrs old
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2011') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2011') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2011') ), TRUE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2012') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2012') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2012') ), TRUE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2013') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2013') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2013') ), TRUE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2014') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2014') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2014') ), TRUE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2015') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2015') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2015') ), TRUE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2016') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2016') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2016') ), TRUE );
+
+		
+		
+		$birth_date = strtotime('15-Jun-1945'); //70yrs old
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2011') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2011') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2011') ), TRUE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2012') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2012') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2012') ), TRUE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2013') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2013') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2013') ), TRUE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2014') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2014') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2014') ), TRUE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('01-May-2015') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('01-Jun-2015') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('15-Jun-2015') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2015') ), TRUE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('01-Jul-2015') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('03-Jul-2015') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('15-Jul-2015') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2015') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Aug-2015') ), FALSE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2016') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2016') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2016') ), FALSE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2017') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2017') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2017') ), FALSE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2018') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2018') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2018') ), FALSE );
+
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2019') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2019') ), FALSE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2019') ), FALSE );
+		
+		return TRUE;
+	}
+
+	/**
+	 * @group PayStubCalculation_testCPPAgeLimitsB
+	 */
+	//Test 18/70 age limits for CPP and pro-rating.
+	function testCPPAgeLimitsB() {
+		$cdf = new CompanyDeductionFactory();
+		$cdf->setCompany( $this->company_id );
+		$cdf->setStatus( 10 ); //Enabled
+		$cdf->setType( 10 ); //Tax
+		$cdf->setName( 'CPP' );
+		$cdf->setCalculation( 90 ); //CPP
+		$cdf->setCalculationOrder( 100 );
+		$cdf->setPayStubEntryAccount( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'CPP') );
+		//if ( $cdf->isValid() ) {
+		//	$cdf->Save(FALSE);
+		//	$cdf->setIncludePayStubEntryAccount( array( $this->pay_stub_account_link_arr['total_gross'] ) );
+		//	if ( $cdf->isValid() ) {
+		//		$cdf->Save( FALSE );
+		//	}
+		//}
+
+		
+		$udf = new UserDeductionFactory();
+		$udf->setUser( $this->user_id );
+		$udf->setStartDate( strtotime( '16-Oct-2015' ) );
+		$udf->setEndDate( '' );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('01-Sep-2014') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('01-Sep-2015') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('01-Oct-2015') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('31-Oct-2015') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('01-Nov-2015') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('31-Nov-2015') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('01-Dec-2015') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('31-Dec-2015') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('01-Jan-2016') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('14-Jan-2016') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('16-Jan-2016') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('31-Jan-2016') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('31-Jan-2017') ), TRUE );
+
+		$udf->setStartDate( strtotime('31-Dec-2015') ); //18yrs old
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('01-Sep-2014') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('01-Sep-2015') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('01-Oct-2015') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('31-Oct-2015') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('01-Nov-2015') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('31-Nov-2015') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('01-Dec-2015') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('31-Dec-2015') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('01-Jan-2016') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('14-Jan-2016') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('16-Jan-2016') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('31-Jan-2016') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('31-Jan-2017') ), TRUE );
+
+
+		$udf->setStartDate( strtotime('15-Jun-2015') );	//18yrs old
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2011') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2011') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2011') ), FALSE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2012') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2012') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2012') ), FALSE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2013') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2013') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2013') ), FALSE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2014') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2014') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2014') ), FALSE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('01-May-2015') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('01-Jun-2015') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('15-Jun-2015') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2015') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('01-Jul-2015') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('03-Jul-2015') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('15-Jul-2015') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2015') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Aug-2015') ), TRUE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2016') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2016') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2016') ), TRUE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2017') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2017') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2017') ), TRUE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2018') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2018') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2018') ), TRUE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2019') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2019') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2019') ), TRUE );
+
+
+
+		$udf->setStartDate( strtotime('15-Jun-2010') );	//55yrs old
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2011') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2011') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2011') ), TRUE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2012') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2012') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2012') ), TRUE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2013') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2013') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2013') ), TRUE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2014') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2014') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2014') ), TRUE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2015') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2015') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2015') ), TRUE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2016') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2016') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2016') ), TRUE );
+
+
+
+		$udf->setStartDate( strtotime('15-Jun-1970') );
+		$udf->setEndDate( strtotime('15-Jun-2015') );	//70yrs old
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2011') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2011') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2011') ), TRUE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2012') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2012') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2012') ), TRUE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2013') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2013') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2013') ), TRUE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2014') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2014') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2014') ), TRUE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('01-May-2015') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('01-Jun-2015') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('15-Jun-2015') ), TRUE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2015') ), TRUE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('01-Jul-2015') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('03-Jul-2015') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('15-Jul-2015') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2015') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Aug-2015') ), FALSE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2016') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2016') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2016') ), FALSE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2017') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2017') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2017') ), FALSE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2018') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2018') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2018') ), FALSE );
+
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-May-2019') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jun-2019') ), FALSE );
+		$this->assertEquals( $cdf->isActiveDate( $udf, NULL, strtotime('30-Jul-2019') ), FALSE );
 
 		return TRUE;
 	}

@@ -240,6 +240,11 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 
 		$uf = new UserFactory();
 
+		if ( preg_match( $uf->username_validator_regex, $user_name ) === 0 ) { //This helps prevent invalid byte sequences on unicode strings.
+			Debug::Text('Username doesnt match regex: '. $user_name, __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE; //No company by that user name.
+		}
+
 		$ph = array(
 					'user_name' => strtolower( $user_name ),
 					);
@@ -265,6 +270,11 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 		}
 
 		$uf = new UserFactory();
+
+		if ( preg_match( $uf->phoneid_validator_regex, $phone_id ) === 0 ) { //This helps prevent invalid byte sequences on unicode strings.
+			Debug::Text('PhoneID doesnt match regex: '. $phone_id, __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE; //No company by that user name.
+		}
 
 		$ph = array(
 					'phone_id' => strtolower( $phone_id ),
@@ -474,7 +484,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 
 		$query .= ( isset($filter_data['product_edition_id']) ) ? $this->getWhereClauseSQL( 'a.product_edition_id', $filter_data['product_edition_id'], 'numeric_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['country']) ) ?$this->getWhereClauseSQL( 'a.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['country']) ) ? $this->getWhereClauseSQL( 'a.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['province']) ) ? $this->getWhereClauseSQL( 'a.province', $filter_data['province'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['city']) ) ? $this->getWhereClauseSQL( 'a.city', $filter_data['city'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['address1']) ) ? $this->getWhereClauseSQL( 'a.address1', $filter_data['address1'], 'text', $ph ) : NULL;

@@ -27,14 +27,10 @@
 
 		this.setValue = function( val ) {
 			if ( !val ) {
-				val = $.i18n._('N/A');
+				val = $.i18n._( 'N/A' );
 			}
 
-			val = val.toString();
-			val = val.replace( /\n|\r|(\r\n)|(\u0085)|(\u2028)|(\u2029)/g, '<br>' );
-			val = val.replace( /\n|\r|(\r\n)|(\u0085)|(\u2028)|(\u2029)/g, '<br>' );
-			val = Global.htmlEncode( val );
-			val = val.replace( /&lt;br&gt;/g, '<br>' );
+			val = Global.decodeCellValue( val );
 			$this.html( ( val ) );
 			$this.height( 'auto' );
 
@@ -56,6 +52,10 @@
 			var o = $.meta ? $.extend( {}, opts, $( this ).data() ) : opts;
 
 			field = o.field;
+
+			if ( o.selected_able ) {
+				$( this ).addClass( 't-text-selected-able' )
+			}
 
 		} );
 

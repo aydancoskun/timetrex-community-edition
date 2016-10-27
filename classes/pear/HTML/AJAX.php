@@ -12,7 +12,7 @@
  * @author    Elizabeth Smith <auroraeosrose@gmail.com>
  * @copyright 2005-2008 Joshua Eichorn, Arpad Ray, David Coallier, Elizabeth Smith
  * @license   http://www.opensource.org/licenses/lgpl-license.php   LGPL
- * @version   Release: 0.5.6
+ * @version   Release: 0.5.7
  * @link      http://pear.php.net/package/HTML_AJAX
  */
 
@@ -37,7 +37,7 @@ require_once 'HTML/AJAX/Debug.php';
  * @author    Elizabeth Smith <auroraeosrose@gmail.com>
  * @copyright 2005-2008 Joshua Eichorn, Arpad Ray, David Coallier, Elizabeth Smith
  * @license   http://www.opensource.org/licenses/lgpl-license.php   LGPL
- * @version   Release: 0.5.6
+ * @version   Release: 0.5.7
  * @link      http://pear.php.net/package/HTML_AJAX
  */
 class HTML_AJAX
@@ -404,6 +404,7 @@ class HTML_AJAX
                 // handle error
                 trigger_error('Unknown method: ' . $method);
             }
+            $phpCallback = null;
         } else if (!empty($phpCallback)) {
             if (strpos($phpCallback, '.') !== false) {
                 $phpCallback = explode('.', $phpCallback);
@@ -441,9 +442,9 @@ class HTML_AJAX
             $args = $this->_processInterceptor($class, $method, $phpCallback, $args);
         }
         
-        if (empty($phpCallback)) {
+        if (!empty($class) && !empty($method)) {
             $ret = call_user_func_array(array(&$this->_exportedInstances[$class]['instance'], $method), $args);
-        } else {
+        } else if (!empty($phpCallback)) {
             $ret = call_user_func_array($phpCallback, $args);
         }
         

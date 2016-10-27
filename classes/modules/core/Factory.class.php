@@ -596,26 +596,31 @@ abstract class Factory {
 		return FALSE;
 	}
 
-	function setCreatedAndUpdatedColumns( $data ) {
-		Debug::text(' Set created/updated columns...', __FILE__, __LINE__, __METHOD__, 10);
+	function setCreatedAndUpdatedColumns( $data, $variable_to_function_map = array() ) {
+		//Debug::text(' Set created/updated columns...', __FILE__, __LINE__, __METHOD__, 10);
+
+		//CreatedBy/Time needs to be set to original values when doing things like importing records.
+		//However from the API, Created By only needs to be set for a small subset of classes like RecurringScheduleTemplateControl.
+		//For now, only allow these fields to be changed from user input if its set in the variable_to_function_map.
+
 		//Update array in-place.
-		if ( isset($data['created_by']) AND is_numeric($data['created_by']) AND $data['created_by'] > 0 ) {
+		if ( isset($data['created_by']) AND is_numeric($data['created_by']) AND $data['created_by'] > 0 AND isset($variable_to_function_map['created_by']) ) {
 			$this->setCreatedBy( $data['created_by'] );
 		}
-		if ( isset($data['created_by_id']) AND is_numeric($data['created_by_id']) AND $data['created_by_id'] > 0 ) {
+		if ( isset($data['created_by_id']) AND is_numeric($data['created_by_id']) AND $data['created_by_id'] > 0 AND isset($variable_to_function_map['created_by']) ) {
 			$this->setCreatedBy( $data['created_by_id'] );
 		}
-		if ( isset($data['created_date']) AND $data['created_date'] != FALSE AND $data['created_date'] != '' ) {
+		if ( isset($data['created_date']) AND $data['created_date'] != FALSE AND $data['created_date'] != '' AND isset($variable_to_function_map['created_date']) ) {
 			$this->setCreatedDate( TTDate::parseDateTime( $data['created_date'] ) );
 		}
 
-		if ( isset($data['updated_by']) AND is_numeric($data['updated_by']) AND $data['updated_by'] > 0 ) {
+		if ( isset($data['updated_by']) AND is_numeric($data['updated_by']) AND $data['updated_by'] > 0 AND isset($variable_to_function_map['updated_by']) ) {
 			$this->setUpdatedBy( $data['updated_by'] );
 		}
-		if ( isset($data['updated_by_id']) AND is_numeric($data['updated_by_id']) AND $data['updated_by_id'] > 0 ) {
+		if ( isset($data['updated_by_id']) AND is_numeric($data['updated_by_id']) AND $data['updated_by_id'] > 0 AND isset($variable_to_function_map['updated_by']) ) {
 			$this->setUpdatedBy( $data['updated_by_id'] );
 		}
-		if ( isset($data['updated_date']) AND $data['updated_date'] != FALSE AND $data['updated_date'] != '' ) {
+		if ( isset($data['updated_date']) AND $data['updated_date'] != FALSE AND $data['updated_date'] != '' AND isset($variable_to_function_map['updated_date']) ) {
 			$this->setUpdatedDate( TTDate::parseDateTime( $data['updated_date'] ) );
 		}
 
@@ -758,6 +763,11 @@ abstract class Factory {
 				} else {
 					$retval = (int)$int;
 				}
+				break;
+			case 'numeric_string':
+				//This is just numeric values, but not actualling cast to integers, ie: SSNs that start with leading 0s.
+				//Since stripNonNumeric is already run on the input, just return the value untouched.
+				$retval = $int;
 				break;
 			case 'numeric':
 			case 'int':
@@ -1080,6 +1090,7 @@ abstract class Factory {
 			case 'int':
 			case 'bigint':
 			case 'numeric':
+			case 'numeric_string':
 				if ( !is_array($args) ) { //Can't check isset() on a NULL value.
 					if ( $query_stub == '' AND !is_array($columns) ) {
 						if ( $args === NULL ) {
@@ -1690,17 +1701,21 @@ abstract class Factory {
 	}
 
 	function StartTransaction() {
-		Debug::text('StartTransaction(): Transaction Count: '. $this->db->transCnt .' Trans Off: '. $this->db->transOff, __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text('StartTransaction(): Transaction: Count: '. $this->db->transCnt .' Off: '. $this->db->transOff .' OK: '. (int)$this->db->_transOK, __FILE__, __LINE__, __METHOD__, 9);
 		return $this->db->StartTrans();
 	}
 
 	function FailTransaction() {
-		Debug::text('FailTransaction(): Transaction Count: '. $this->db->transCnt .' Trans Off: '. $this->db->transOff, __FILE__, __LINE__, __METHOD__, 9);
+		Debug::text('FailTransaction(): Transaction: Count: '. $this->db->transCnt .' Off: '. $this->db->transOff .' OK: '. (int)$this->db->_transOK, __FILE__, __LINE__, __METHOD__, 9);
 		return $this->db->FailTrans();
 	}
 
 	function CommitTransaction() {
-		Debug::text('CommitTransaction(): Transaction Count: '. $this->db->transCnt .' Trans Off: '. $this->db->transOff, __FILE__, __LINE__, __METHOD__, 9);
+		if ( $this->db->transOff == 1 ) {
+			Debug::text('CommitTransaction(): Final Commit... Transaction: Count: '. $this->db->transCnt .' Off: '. $this->db->transOff .' OK: '. (int)$this->db->_transOK, __FILE__, __LINE__, __METHOD__, 9);
+		} else {
+			Debug::text('CommitTransaction(): Transaction: Count: '. $this->db->transCnt .' Off: '. $this->db->transOff, __FILE__, __LINE__, __METHOD__, 9);
+		}
 		$retval = $this->db->CompleteTrans();
 
 		if ( $retval == FALSE ) { //Check to see if the transaction has failed.
@@ -1794,6 +1809,9 @@ abstract class Factory {
 			//Insert
 			$time = TTDate::getTime();
 
+			//CreatedBy/Time needs to be set to original values when doing things like importing records.
+			//However from the API, Created By only needs to be set for a small subset of classes like RecurringScheduleTemplateControl.
+			//We handle this in setCreatedAndUpdatedColumns().
 			if ( $this->getCreatedDate() == '' ) {
 				$this->setCreatedDate($time);
 			}
@@ -1813,7 +1831,7 @@ abstract class Factory {
 				//Append insert ID to data array.
 				$insert_id = $this->getNextInsertId();
 				if ( $insert_id === 0 ) { //Sometimes with MYSQL the _seq tables might not be initialized properly and cause insert_id=0.
-					throw new DBError('ERROR: Insert ID returned as 0, sequence likely not setup correctly.');
+					throw new DBError('ERROR: Insert ID returned as 0, sequence likely not setup correctly for table: '. $this->getTable() );
 				} else {
 					Debug::text('Insert ID: '. $insert_id .' Table: '. $this->getTable(), __FILE__, __LINE__, __METHOD__, 9);
 					$this->setId($insert_id);

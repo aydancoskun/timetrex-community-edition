@@ -315,10 +315,29 @@ class EFT {
 		return TRUE;
 	}
 
-	function setRecord( $obj ) {
-		$this->data[] = $obj;
+	private function usortByDueDateAndType($a, $b) {
+		if ( $a->record_data['due_date'] == $b->record_data['due_date'] ) {
+			return strcmp($a->record_data['type'], $b->record_data['type']);
+		} else {
+			return ( $a->record_data['due_date'] > $b->record_data['due_date'] ) ? (-1) : 1;
+		}
+	}
+	private function sortRecords() {
+		if ( is_array($this->data) ) {
+			return usort( $this->data, array( $this, 'usortByDueDateAndType' ) );
+		}
 
-		return TRUE;
+		return FALSE;
+	}
+
+	function setRecord( $obj ) {
+		if ( is_object( $obj ) ) {
+			$this->data[] = $obj;
+
+			return TRUE;
+		}
+
+		return FALSE;
 	}
 
 	/*
@@ -366,6 +385,9 @@ class EFT {
 			$file_format_obj = new EFT_File_Format_{$this->getFileFormat()}( $this->header_data, $this->data );
 		*/
 
+		//Always sort records based on type, so debits come first, then credits (when offset records exist)
+		$this->sortRecords();
+		
 		switch ( strtoupper( $this->getFileFormat() ) )	 {
 			case 1464:
 				$file_format_obj = new EFT_File_Format_1464($this->header_data, $this->data);
@@ -1269,11 +1291,14 @@ class EFT_File_Format_ACH Extends EFT {
 	private function compileBatchHeader( $type, $due_date ) {
 		$line[] = '5'; //5 Record
 
-		if ( $type == 'C' ) {
-			$line[] = '220'; //Batch Type
+		if ( $type == 'CD' ) {
+			$line[] = '200'; //Debits and Credits
+		} elseif ( $type == 'D' ) {
+			$line[] = '225'; //Debits Only
 		} else {
-			$line[] = '225'; //Batch Type
+			$line[] = '220'; //Credits Only
 		}
+		
 		$line[] = $this->padRecord( strtoupper( $this->getOriginatorShortName() ), 16, 'AN'); //Company Short Name
 		$line[] = $this->padRecord( '', 20, 'AN'); //Discretionary Data
 		$line[] = $this->padRecord( $this->getBusinessNumber(), 10, 'N'); //Company Identification - Recommend IRS Federal Tax ID Number
@@ -1283,7 +1308,7 @@ class EFT_File_Format_ACH Extends EFT {
 		$line[] = $this->padRecord( date('ymd', $due_date ), 6, 'N'); //Date to post funds.
 		$line[] = $this->padRecord( '', 3, 'AN'); //Blank
 		$line[] = '1'; //Originator Status Code
-		$line[] = $this->padRecord( $this->getDataCenter(), 8, 'N' ); //Originating Bank Transit
+		$line[] = $this->padRecord( $this->getOriginatorID(), 8, 'N' ); //First 8 digits of Originating ID or Originating Bank Transit
 		$line[] = $this->padRecord( $this->batch_number, 7, 'N'); //Batch Number
 
 		$retval = $this->padLine( implode('', $line), 94 );
@@ -1293,34 +1318,49 @@ class EFT_File_Format_ACH Extends EFT {
 		return $retval;
 	}
 
-	private function compileBatchControl( $type, $record_count, $batch_amount, $hash ) {
+	private function compileBatchControl( $type, $record_count, $batch_debit_amount, $batch_credit_amount, $hash ) {
 		$line[] = '8'; //8 Record
 
-		if ( $type == 'C' ) {
-			$line[] = '220'; //Batch Type
+		if ( $type == 'CD' ) {
+			$line[] = '200'; //Debits and Credits
+		} elseif ( $type == 'D' ) {
+			$line[] = '225'; //Debits Only
 		} else {
-			$line[] = '225'; //Batch Type
+			$line[] = '220'; //Credits Only
 		}
 
 		$line[] = $this->padRecord( $record_count, 6, 'N'); //Entry and Addenda count.
 		$line[] = $this->padRecord( substr( str_pad( $hash, 10, 0, STR_PAD_LEFT), -10), 10, 'N'); //Entry hash. If it exceeds 10 digits, use just the last 10.
-		$line[] = $this->padRecord( 0, 12, 'N'); //Debit Total
-		$line[] = $this->padRecord( $this->removeDecimal( $batch_amount ), 12, 'N'); //Credit Total
+		$line[] = $this->padRecord( $this->removeDecimal( $batch_debit_amount ), 12, 'N'); //Debit Total
+		$line[] = $this->padRecord( $this->removeDecimal( $batch_credit_amount ), 12, 'N'); //Credit Total
 		$line[] = $this->padRecord( $this->getBusinessNumber(), 10, 'N'); //Company Identification - Recommend IRS Federal Tax ID Number
 		$line[] = $this->padRecord( '', 19, 'AN'); //Blank
 		$line[] = $this->padRecord( '', 6, 'AN'); //Blank
-		$line[] = $this->padRecord( $this->getDataCenter(), 8, 'N' ); //Originating Bank Transit
+		$line[] = $this->padRecord( $this->getOriginatorID(), 8, 'N' ); //First 8 digits of Originating ID or Originating Bank Transit
 		$line[] = $this->padRecord( $this->batch_number, 7, 'N'); //Batch Number
 
 		$retval = $this->padLine( implode('', $line), 94 );
 
-		Debug::Text('Batch Control Record:'. $retval .' Count: '. $record_count .' Amount: '. $batch_amount, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('Batch Control Record: '. $retval .' Count: '. $record_count .' Amount: Debit: '. $batch_debit_amount .' Credit: '. $batch_credit_amount .' BatchNum: '. $this->batch_number, __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->batch_number++;
 
 		return $retval;
 	}
+	
+	private function getRecordTypes( $records ) {
+		$retval = FALSE;
+		foreach( $records as $key => $record ) {
+			if ( $retval == FALSE ) {
+				$retval = $record->getType();
+			} elseif ( $record->getType() != $retval ) {
+				$retval = 'CD'; //Credits and Debits.
+			}
+		}
 
+		return $retval;
+	}
+	
 	private function compileRecords() {
 		//gets all Detail records.
 
@@ -1329,67 +1369,85 @@ class EFT_File_Format_ACH Extends EFT {
 			return FALSE;
 		}
 
+		//Batch records by due date.
+		$prev_due_date = FALSE;
+		$batch_id = 0;
+		foreach( $this->data as $key => $record ) {
+			$prev_due_date = $record->getDueDate();
+
+			$batched_records[$batch_id][] = $record;
+
+			if ( isset($this->data[($key + 1)]) AND ( $prev_due_date == FALSE OR $prev_due_date != $this->data[($key + 1)]->getDueDate() ) ) {
+				$batch_id++;
+				Debug::Text('  Starting new batch: '. $batch_id, __FILE__, __LINE__, __METHOD__, 10);
+			}
+		}
+		unset($prev_due_date, $batch_id);
+
 		$i = 1;
 		$max = count($this->data);
-		$prev_due_date = FALSE;
-		$batch_amount = 0;
-		$batch_record_count = 1;
-		$batch_hash = 0;
-		foreach ( $this->data as $key => $record ) {
-			//Debug::Arr($record, 'Record Object:', __FILE__, __LINE__, __METHOD__, 10);
-			if ( $batch_amount == 0 ) {
-				$retval[] = $this->compileBatchHeader( $record->getType(), $record->getDueDate() );
-			}
+		foreach( $batched_records as $batch_id => $batch_records ) {
+			$batch_max = count($batch_records);
+			$batch_debit_amount = 0;
+			$batch_credit_amount = 0;
+			$batch_record_count = 0;
+			$batch_hash = 0;
+			
+			$batch_record_types = $this->getRecordTypes( $batch_records );
 
-			Debug::Text('Institution: '. $record->getInstitution() .' Transit: '.$record->getTransit().' Bank Account Number: '. $record->getAccount(), __FILE__, __LINE__, __METHOD__, 10);
+			$retval[] = $this->compileBatchHeader( $batch_record_types, $record->getDueDate() );
+			
+			foreach( $batch_records as $key => $record ) {
+				//Debug::Arr($record, 'Record Object:', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text('Institution: '. $record->getInstitution() .' Transit: '.$record->getTransit().' Bank Account Number: '. $record->getAccount(), __FILE__, __LINE__, __METHOD__, 10);
 
-			$line[] = '6'; //6 Record (PPD)
+				$line[] = '6'; //6 Record (PPD)
 
-			//Transaction code used to default to 22 (checkings account) always.
-			$transaction_type = substr( $record->getInstitution(), 0, 2);
-			if ( (int)$transaction_type == 0 ) { //Institution defaults to '000' if its not set, so assume its a checkings account in that case.
-				$transaction_type = 22;
-			}
-			$line[] = $this->padRecord( $transaction_type, 2, 'N'); //Transaction code - 22=Deposit destined for checking account, 32=Deposit destined for savings account
+				//Transaction code used to default to 22 (checkings account) always.
+				$transaction_type = substr( $record->getInstitution(), 0, 2);
+				if ( (int)$transaction_type == 0 ) { //Institution defaults to '000' if its not set, so assume its a checkings account in that case.
+					$transaction_type = 22;
+				}
 
-			$line[] = $this->padRecord( substr($record->getTransit(), 0, 8), 8, 'N'); //Transit
-			$line[] = $this->padRecord( substr($record->getTransit(), -1, 1), 1, 'AN'); //Check Digit
-			$line[] = $this->padRecord( $record->getAccount(), 17, 'AN'); //Account number
-			$line[] = $this->padRecord( $this->removeDecimal( $record->getAmount() ), 10, 'N'); //Amount
-			$line[] = $this->padRecord( $record->getOriginatorReferenceNumber(), 15, 'AN'); //transaction identification number
-			$line[] = $this->padRecord( $record->getName(), 22, 'AN'); //Name of receiver
-			$line[] = $this->padRecord( '', 2, 'AN'); //discretionary data
-			$line[] = $this->padRecord( 0, 1, 'N'); //Addenda record indicator
-			$line[] = $this->padRecord( $this->getInitialEntryNumber() . str_pad( $i, ( 15 - strlen($this->getInitialEntryNumber() ) ), 0, STR_PAD_LEFT), 15, 'N'); //Trace number. Bank assigns?
+				if ( $record->getType() == 'D' ) {
+					$transaction_type = 27; //Checking Account Debit.
+				}
 
-			$d_record = $this->padLine( implode('', $line), 94 );
+				$line[] = $this->padRecord( $transaction_type, 2, 'N'); //Transaction code - 22=Deposit destined for checking account, 32=Deposit destined for savings account
 
-			$retval[] = $d_record;
+				$line[] = $this->padRecord( substr($record->getTransit(), 0, 8), 8, 'N'); //Transit
+				$line[] = $this->padRecord( substr($record->getTransit(), -1, 1), 1, 'AN'); //Check Digit
+				$line[] = $this->padRecord( $record->getAccount(), 17, 'AN'); //Account number
+				$line[] = $this->padRecord( $this->removeDecimal( $record->getAmount() ), 10, 'N'); //Amount
+				$line[] = $this->padRecord( $record->getOriginatorReferenceNumber(), 15, 'AN'); //transaction identification number
+				$line[] = $this->padRecord( $record->getName(), 22, 'AN'); //Name of receiver
+				$line[] = $this->padRecord( '', 2, 'AN'); //discretionary data
+				$line[] = $this->padRecord( 0, 1, 'N'); //Addenda record indicator
+				$line[] = $this->padRecord( $this->getInitialEntryNumber() . str_pad( $i, ( 15 - strlen($this->getInitialEntryNumber() ) ), 0, STR_PAD_LEFT), 15, 'N'); //Trace number. Bank assigns?
 
-			$batch_amount += $record->getAmount();
-			$prev_due_date = $record->getDueDate();
-			$batch_hash += substr($record->getTransit(), 0, 8);
-			Debug::Text('PPD Record:'. $d_record .' - DueDate: '. $record->getDueDate() .' Batch Amount: '. $batch_amount .' Length: '. strlen($d_record) .' Hash1: '. substr($record->getTransit(), 0, 8) .' Hash2: '. $batch_hash, __FILE__, __LINE__, __METHOD__, 10);
+				$d_record = $this->padLine( implode('', $line), 94 );
 
-			//Add BatchControl Record Here
-			if ( $i == $max ) {
-				$retval[] = $this->compileBatchControl( $record->getType(), $batch_record_count, $batch_amount, $batch_hash );
-			} elseif ( isset($this->data[($key + 1)]) AND $prev_due_date == FALSE OR $prev_due_date != $this->data[($key + 1)]->getDueDate() ) {
-				//Because each batch only has a due date, only start a new batch if the DueDate changes.
-				//Add batch record here
-				//Close the previous batch before starting a new one.
-				$retval[] = $this->compileBatchControl( $record->getType(), $batch_record_count, $batch_amount, $batch_hash );
+				$retval[] = $d_record;
 
-				$batch_amount = 0;
-				$batch_record_count = 1;
-				$batch_hash = 0;
-			} else {
+				if ( $record->getType() == 'D' ) {
+					$batch_debit_amount += $record->getAmount();
+				} else {
+					$batch_credit_amount += $record->getAmount();
+				}
+				$batch_hash += substr($record->getTransit(), 0, 8);
+				Debug::Text('PPD Record:'. $d_record .' - DueDate: '. $record->getDueDate() .' Batch Amount Debit: '. $batch_debit_amount.' Credit: '. $batch_credit_amount .' Length: '. strlen($d_record) .' Hash1: '. substr($record->getTransit(), 0, 8) .' Hash2: '. $batch_hash, __FILE__, __LINE__, __METHOD__, 10);
+
+				unset($line);
+				unset($d_record);
+				$i++;
 				$batch_record_count++;
 			}
 
-			unset($line);
-			unset($d_record);
-			$i++;
+			//Add BatchControl Record Here
+			//Because each batch only has a due date, only start a new batch if the DueDate changes.
+			//Add batch record here
+			//Close the previous batch before starting a new one.
+			$retval[] = $this->compileBatchControl( $batch_record_types, $batch_record_count, $batch_debit_amount, $batch_credit_amount, $batch_hash );
 		}
 
 		if ( isset($retval) ) {
@@ -1423,7 +1481,6 @@ class EFT_File_Format_ACH Extends EFT {
 			}
 		}
 		$hash_total = substr( str_pad( $hash_total, 10, 0, STR_PAD_LEFT), -10); //Last 10 chars.
-		Debug::Text('File Hash:'. $hash_total, __FILE__, __LINE__, __METHOD__, 10);
 
 		$line[] = '9'; //9 Record
 		$line[] = $this->padRecord( ($this->batch_number - 1), 6, 'N'); //Total number of batches
@@ -1432,8 +1489,12 @@ class EFT_File_Format_ACH Extends EFT {
 		Total count of output lines, including the first and last lines, divided by 10,
 		rounded up to the nearest integer e.g. 99.9 becomes 100); 6 columns, zero-padded on
 		the left.
+		Total up: All C records, All D records, Total Batches (x2 lines each), plus FileHeader and FileControl.
 		*/
-		$line[] = $this->padRecord( round( ((($c_record_count + $d_record_count) * 2) + 2) / 10 ), 6, 'N'); //Block count?!?!
+		$block_count = ( ( ( $c_record_count + $d_record_count + ( ( $this->batch_number - 1 ) * 2 ) ) + 2 ) / 10 );
+		Debug::Text('File Hash:'. $hash_total .' Batch Number: '. $this->batch_number .' Block Count: '. $block_count, __FILE__, __LINE__, __METHOD__, 10);
+		
+		$line[] = $this->padRecord( ceil( $block_count ), 6, 'N'); //Block count?!?!
 
 		$line[] = $this->padRecord( ($c_record_count + $d_record_count), 8, 'N'); //Total entry count
 
@@ -1448,7 +1509,27 @@ class EFT_File_Format_ACH Extends EFT {
 		Debug::Text('File Control Record:'. $retval, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $retval;
+	}
 
+	function compileFileControlPadding( $compiled_data ) {
+		$total_records = substr_count( $compiled_data, "\n" );
+
+		//Need to create batches of 94x10. 94 chars wide, 10lines long. So every file must be 10 lines, 20 lines, etc...
+		$pad_lines = ( $total_records % 10 );
+		if ( $pad_lines > 0 ) {
+			$pad_lines = ( 10 - $pad_lines );
+		}
+		Debug::Text('File Control Record Padding: Total Records: '. $total_records .' Pad Lines: '. $pad_lines, __FILE__, __LINE__, __METHOD__, 10);
+
+		for( $i = 0; $i < $pad_lines; $i++ ) {
+			$line[] = $this->padLine( str_repeat(9, 94), 94 );
+		}
+
+		if ( isset($line) ) {
+			return implode('', $line);
+		}
+
+		return NULL;
 	}
 
 	function _compile() {
@@ -1458,6 +1539,7 @@ class EFT_File_Format_ACH Extends EFT {
 		$compiled_data = $this->compileFileHeader();
 		$compiled_data .= @implode('', $this->compileRecords() );
 		$compiled_data .= $this->compileFileControl();
+		$compiled_data .= $this->compileFileControlPadding( $compiled_data );
 
 		//Make sure the length of at least 3 records exists.
 		if ( strlen( $compiled_data ) >= (94 * 3) ) {

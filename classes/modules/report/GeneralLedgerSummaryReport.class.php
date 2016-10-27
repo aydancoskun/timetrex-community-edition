@@ -97,8 +97,11 @@ class GeneralLedgerSummaryReport extends Report {
 										'-2070-default_department_id' => TTi18n::gettext('Default Department'),
 										'-2100-custom_filter' => TTi18n::gettext('Custom Filter'),
 
-										'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
+										'-2205-pay_stub_type_id' => TTi18n::gettext('Pay Stub Type'),
+										'-2210-pay_stub_run_id' => TTi18n::gettext('Payroll Run'),
 
+										'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
+										
 										'-5000-columns' => TTi18n::gettext('Display Columns'), //No Columns for this report.
 										'-5010-group' => TTi18n::gettext('Group By'),
 										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
@@ -173,6 +176,10 @@ class GeneralLedgerSummaryReport extends Report {
 										'-1220-policy_group' => TTi18n::gettext('Policy Group'),
 										//Handled in date_columns above.
 										//'-1250-pay_period' => TTi18n::gettext('Pay Period'),
+
+										'-1800-pay_stub_status' => TTi18n::gettext('Pay Stub Status'),
+										'-1810-pay_stub_type' => TTi18n::gettext('Pay Stub Type'),
+										'-1820-pay_stub_run_id' => TTi18n::gettext('Payroll Run'),
 
 										'-2010-account' => TTi18n::gettext('Account'),
 								);
@@ -511,13 +518,13 @@ class GeneralLedgerSummaryReport extends Report {
 
 						if ( ( $column == 'worked' OR $column == 'absence' ) AND $udt_obj->getColumn('total_time') != 0 ) {
 							if ( isset($this->tmp_data['user_date_total'][$user_id][$pay_period_id][$branch_id][$department_id][$job_id][$job_item_id]) ) {
-								$this->tmp_data['user_date_total'][$user_id][$pay_period_id][$branch_id][$department_id][$job_id][$job_item_id] += $udt_obj->getColumn('total_time');
+								$this->tmp_data['user_date_total'][$user_id][$pay_period_id][$branch_id][$department_id][$job_id][$job_item_id] = bcadd( $this->tmp_data['user_date_total'][$user_id][$pay_period_id][$branch_id][$department_id][$job_id][$job_item_id], $udt_obj->getColumn('total_time') );
 							} else {
 								$this->tmp_data['user_date_total'][$user_id][$pay_period_id][$branch_id][$department_id][$job_id][$job_item_id] = $udt_obj->getColumn('total_time');
 							}
 
 							if ( isset($this->tmp_data['pay_period_total'][$user_id][$pay_period_id]) ) {
-								$this->tmp_data['pay_period_total'][$user_id][$pay_period_id] += $udt_obj->getColumn('total_time');
+								$this->tmp_data['pay_period_total'][$user_id][$pay_period_id] = bcadd( $this->tmp_data['pay_period_total'][$user_id][$pay_period_id], $udt_obj->getColumn('total_time') );
 							} else {
 								$this->tmp_data['pay_period_total'][$user_id][$pay_period_id] = $udt_obj->getColumn('total_time');
 							}
@@ -538,12 +545,16 @@ class GeneralLedgerSummaryReport extends Report {
 			foreach( $pself as $key => $pse_obj ) {
 				$user_id = $pse_obj->getColumn('user_id');
 				$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_period_transaction_date') );
+				$run_id = $pse_obj->getColumn('pay_stub_run_id');
 				$branch = $pse_obj->getColumn('default_branch');
 				$department = $pse_obj->getColumn('default_department');
 				$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
 
-				if ( !isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]) ) {
-					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] = array(
+				if ( !isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]) ) {
+					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id] = array(
+																'pay_stub_status' => Option::getByKey( $pse_obj->getColumn('pay_stub_status_id'), $psf->getOptions('status') ),
+																'pay_stub_type' => Option::getByKey( $pse_obj->getColumn('pay_stub_type_id'), $psf->getOptions('type') ),
+
 																'pay_period_start_date' => strtotime( $pse_obj->getColumn('pay_period_start_date') ),
 																'pay_period_end_date' => strtotime( $pse_obj->getColumn('pay_period_end_date') ),
 																'pay_period_transaction_date' => strtotime( $pse_obj->getColumn('pay_period_transaction_date') ),
@@ -553,6 +564,7 @@ class GeneralLedgerSummaryReport extends Report {
 																'pay_stub_start_date' => strtotime( $pse_obj->getColumn('pay_stub_start_date') ),
 																'pay_stub_end_date' => strtotime( $pse_obj->getColumn('pay_stub_end_date') ),
 																'pay_stub_transaction_date' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
+																'pay_stub_run_id' => $run_id,
 															);
 				}
 
@@ -573,14 +585,14 @@ class GeneralLedgerSummaryReport extends Report {
 							//Allow negative amounts as not all accounting systems accept them, but skip any $0 entries
 							//This is especially important for handling vacation accruals.
 							if ( $pse_obj->getAmount() > 0 ) {
-								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][] = array(
+								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['psen_ids'][] = array(
 													'account' => trim($debit_account),
 													'debit_amount' => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( $pse_obj->getAmount(), $pse_obj->getColumn('currency_rate'), $currency_convert_to_base ), FALSE ),
 													'credit_amount' => NULL,
 													);
 							} elseif ( $pse_obj->getAmount() < 0 )	{
 								Debug::Text('Negative debit amount, switching to credit: '. $pse_obj->getAmount() .' Debit Account: '. $debit_account .' User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
-								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][] = array(
+								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['psen_ids'][] = array(
 													'account' => trim($debit_account),
 													'debit_amount' => NULL,
 													'credit_amount' => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( abs($pse_obj->getAmount()), $pse_obj->getColumn('currency_rate'), $currency_convert_to_base ), FALSE ),
@@ -598,14 +610,14 @@ class GeneralLedgerSummaryReport extends Report {
 						foreach( $credit_accounts as $credit_account) {
 							//Allow negative amounts, but skip any $0 entries
 							if ( $pse_obj->getAmount() > 0 ) {
-								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][] = array(
+								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['psen_ids'][] = array(
 													'account' => trim($credit_account),
 													'debit_amount' => NULL,
 													'credit_amount' => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( $pse_obj->getAmount(), $pse_obj->getColumn('currency_rate'), $currency_convert_to_base ), FALSE ),
 													);
 							} elseif ( $pse_obj->getAmount() < 0 )	{
 								Debug::Text('Negative credit amount, switching to debit: '. $pse_obj->getAmount() .' Credit Account: '. $credit_account .' User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
-								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][] = array(
+								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]['psen_ids'][] = array(
 													'account' => trim($credit_account),
 													'debit_amount' => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( abs($pse_obj->getAmount()), $pse_obj->getColumn('currency_rate'), $currency_convert_to_base ), FALSE ),
 													'credit_amount' => NULL,
@@ -711,124 +723,126 @@ class GeneralLedgerSummaryReport extends Report {
 		$key = 0;
 		if ( isset($this->tmp_data['pay_stub_entry']) ) {
 			foreach( $this->tmp_data['pay_stub_entry'] as $user_id => $level_1 ) {
-				if ( isset($this->tmp_data['user'][$user_id]) ) {
-					foreach( $level_1 as $date_stamp => $row ) {
-						$replace_arr = array(
-												//*NOTE*: If this changes you must change numeric indexes in calcPercentDistribution().
-												( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getManualID() : NULL,
-												( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID1() : NULL,
-												( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID2() : NULL,
-												( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID3() : NULL,
-												( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID4() : NULL,
-												( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID5() : NULL,
+				if ( isset($this->tmp_data['user'][$user_id]) ) {					
+					foreach( $level_1 as $date_stamp => $level_2 ) {
+						foreach( $level_2 as $run_id => $row ) {
+							$replace_arr = array(
+													//*NOTE*: If this changes you must change numeric indexes in calcPercentDistribution().
+													( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getManualID() : NULL,
+													( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID1() : NULL,
+													( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID2() : NULL,
+													( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID3() : NULL,
+													( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID4() : NULL,
+													( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID5() : NULL,
 
-												( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getManualID() : NULL,
-												( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getOtherID1() : NULL,
-												( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getOtherID2() : NULL,
-												( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getOtherID3() : NULL,
-												( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getOtherID4() : NULL,
-												( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getOtherID5() : NULL,
+													( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getManualID() : NULL,
+													( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getOtherID1() : NULL,
+													( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getOtherID2() : NULL,
+													( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getOtherID3() : NULL,
+													( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getOtherID4() : NULL,
+													( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getOtherID5() : NULL,
 
-												( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getManualID() : NULL, //'#default_job#',
-												( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getOtherID1() : NULL, //'#default_job_other_id1#',
-												( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getOtherID2() : NULL, //'#default_job_other_id2#',
-												( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getOtherID3() : NULL, //'#default_job_other_id3#',
-												( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getOtherID4() : NULL, //'#default_job_other_id4#',
-												( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getOtherID5() : NULL, //'#default_job_other_id5#',
+													( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getManualID() : NULL, //'#default_job#',
+													( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getOtherID1() : NULL, //'#default_job_other_id1#',
+													( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getOtherID2() : NULL, //'#default_job_other_id2#',
+													( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getOtherID3() : NULL, //'#default_job_other_id3#',
+													( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getOtherID4() : NULL, //'#default_job_other_id4#',
+													( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getOtherID5() : NULL, //'#default_job_other_id5#',
 
-												( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getManualID() : NULL, //'#default_job_item#',
-												( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getOtherID1() : NULL, //'#default_job_item_other_id1#',
-												( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getOtherID2() : NULL, //'#default_job_item_other_id2#',
-												( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getOtherID3() : NULL, //'#default_job_item_other_id3#',
-												( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getOtherID4() : NULL, //'#default_job_item_other_id4#',
-												( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getOtherID5() : NULL, //'#default_job_item_other_id5#',
+													( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getManualID() : NULL, //'#default_job_item#',
+													( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getOtherID1() : NULL, //'#default_job_item_other_id1#',
+													( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getOtherID2() : NULL, //'#default_job_item_other_id2#',
+													( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getOtherID3() : NULL, //'#default_job_item_other_id3#',
+													( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getOtherID4() : NULL, //'#default_job_item_other_id4#',
+													( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getOtherID5() : NULL, //'#default_job_item_other_id5#',
 
-												( is_object($title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]) ) ? $title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]->getOtherID1() : NULL,
-												( is_object($title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]) ) ? $title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]->getOtherID2() : NULL,
-												( is_object($title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]) ) ? $title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]->getOtherID3() : NULL,
-												( is_object($title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]) ) ? $title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]->getOtherID4() : NULL,
-												( is_object($title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]) ) ? $title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]->getOtherID5() : NULL,
+													( is_object($title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]) ) ? $title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]->getOtherID1() : NULL,
+													( is_object($title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]) ) ? $title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]->getOtherID2() : NULL,
+													( is_object($title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]) ) ? $title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]->getOtherID3() : NULL,
+													( is_object($title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]) ) ? $title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]->getOtherID4() : NULL,
+													( is_object($title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]) ) ? $title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]->getOtherID5() : NULL,
 
-												//Use default branch as punch branch in case the employee does not punch in/out at all during the pay period.
-												//This allows a fallback to default branch if its set.
-												//29
-												( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getManualID() : NULL, //'#punch_branch#',
-												( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID1() : NULL, //'#punch_branch_other_id1#',
-												( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID2() : NULL, //'#punch_branch_other_id2#',
-												( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID3() : NULL, //'#punch_branch_other_id3#',
-												( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID4() : NULL, //'#punch_branch_other_id4#',
-												( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID5() : NULL, //'#punch_branch_other_id5#',
+													//Use default branch as punch branch in case the employee does not punch in/out at all during the pay period.
+													//This allows a fallback to default branch if its set.
+													//29
+													( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getManualID() : NULL, //'#punch_branch#',
+													( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID1() : NULL, //'#punch_branch_other_id1#',
+													( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID2() : NULL, //'#punch_branch_other_id2#',
+													( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID3() : NULL, //'#punch_branch_other_id3#',
+													( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID4() : NULL, //'#punch_branch_other_id4#',
+													( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID5() : NULL, //'#punch_branch_other_id5#',
 
-												//35
-												( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getManualID() : NULL, //'#punch_department#',
-												( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getOtherID1() : NULL, //'#punch_department_other_id1#',
-												( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getOtherID2() : NULL, //'#punch_department_other_id2#',
-												( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getOtherID3() : NULL, //'#punch_department_other_id3#',
-												( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getOtherID4() : NULL, //'#punch_department_other_id4#',
-												( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getOtherID5() : NULL, //'#punch_department_other_id5#',
+													//35
+													( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getManualID() : NULL, //'#punch_department#',
+													( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getOtherID1() : NULL, //'#punch_department_other_id1#',
+													( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getOtherID2() : NULL, //'#punch_department_other_id2#',
+													( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getOtherID3() : NULL, //'#punch_department_other_id3#',
+													( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getOtherID4() : NULL, //'#punch_department_other_id4#',
+													( is_object($department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]) ) ? $department_code_map[(int)$this->tmp_data['user'][$user_id]['default_department_id']]->getOtherID5() : NULL, //'#punch_department_other_id5#',
 
-												//41
-												( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getManualID() : NULL, //'#punch_job#',
-												( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getOtherID1() : NULL, //'#punch_job_other_id1#',
-												( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getOtherID2() : NULL, //'#punch_job_other_id2#',
-												( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getOtherID3() : NULL, //'#punch_job_other_id3#',
-												( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getOtherID4() : NULL, //'#punch_job_other_id4#',
-												( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getOtherID5() : NULL, //'#punch_job_other_id5#',
+													//41
+													( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getManualID() : NULL, //'#punch_job#',
+													( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getOtherID1() : NULL, //'#punch_job_other_id1#',
+													( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getOtherID2() : NULL, //'#punch_job_other_id2#',
+													( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getOtherID3() : NULL, //'#punch_job_other_id3#',
+													( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getOtherID4() : NULL, //'#punch_job_other_id4#',
+													( is_object($job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]) ) ? $job_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_id']]->getOtherID5() : NULL, //'#punch_job_other_id5#',
 
-												//47
-												( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getManualID() : NULL, //'#punch_job_item#',
-												( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getOtherID1() : NULL, //'#punch_job_item_other_id1#',
-												( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getOtherID2() : NULL, //'#punch_job_item_other_id2#',
-												( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getOtherID3() : NULL, //'#punch_job_item_other_id3#',
-												( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getOtherID4() : NULL, //'#punch_job_item_other_id4#',
-												( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getOtherID5() : NULL, //'#punch_job_item_other_id5#',
-												
-												( isset($this->tmp_data['user'][$user_id]['employee_number']) ) ? $this->tmp_data['user'][$user_id]['employee_number'] : NULL,
-												( isset($this->tmp_data['user'][$user_id]['other_id1']) ) ? $this->tmp_data['user'][$user_id]['other_id1'] : NULL,
-												( isset($this->tmp_data['user'][$user_id]['other_id2']) ) ? $this->tmp_data['user'][$user_id]['other_id2'] : NULL,
-												( isset($this->tmp_data['user'][$user_id]['other_id3']) ) ? $this->tmp_data['user'][$user_id]['other_id3'] : NULL,
-												( isset($this->tmp_data['user'][$user_id]['other_id4']) ) ? $this->tmp_data['user'][$user_id]['other_id4'] : NULL,
-												( isset($this->tmp_data['user'][$user_id]['other_id5']) ) ? $this->tmp_data['user'][$user_id]['other_id5'] : NULL,
-											);
+													//47
+													( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getManualID() : NULL, //'#punch_job_item#',
+													( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getOtherID1() : NULL, //'#punch_job_item_other_id1#',
+													( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getOtherID2() : NULL, //'#punch_job_item_other_id2#',
+													( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getOtherID3() : NULL, //'#punch_job_item_other_id3#',
+													( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getOtherID4() : NULL, //'#punch_job_item_other_id4#',
+													( is_object($job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]) ) ? $job_item_code_map[(int)$this->tmp_data['user'][$user_id]['default_job_item_id']]->getOtherID5() : NULL, //'#punch_job_item_other_id5#',
 
-						$date_columns = TTDate::getReportDates( 'transaction', $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
-						$processed_data	 = array(
-												//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
-												//'pay_stub' => array('sort' => $row['pay_stub_transaction_date'], 'display' => TTDate::getDate('DATE', $row['pay_stub_transaction_date'] ) ),
+													( isset($this->tmp_data['user'][$user_id]['employee_number']) ) ? $this->tmp_data['user'][$user_id]['employee_number'] : NULL,
+													( isset($this->tmp_data['user'][$user_id]['other_id1']) ) ? $this->tmp_data['user'][$user_id]['other_id1'] : NULL,
+													( isset($this->tmp_data['user'][$user_id]['other_id2']) ) ? $this->tmp_data['user'][$user_id]['other_id2'] : NULL,
+													( isset($this->tmp_data['user'][$user_id]['other_id3']) ) ? $this->tmp_data['user'][$user_id]['other_id3'] : NULL,
+													( isset($this->tmp_data['user'][$user_id]['other_id4']) ) ? $this->tmp_data['user'][$user_id]['other_id4'] : NULL,
+													( isset($this->tmp_data['user'][$user_id]['other_id5']) ) ? $this->tmp_data['user'][$user_id]['other_id5'] : NULL,
 												);
 
-						if ( isset($row['psen_ids']) AND is_array($row['psen_ids']) ) {
-							$psen_ids = $row['psen_ids'];
-							unset($row['psen_ids']);
-							foreach($psen_ids as $psen_data ) {
-								if ( $this->enable_time_based_distribution == TRUE ) {
-									//Debug::Text('     TimeBased Distribution...', __FILE__, __LINE__, __METHOD__, 10);
-									if ( !isset($this->tmp_data['pay_period_distribution'][$user_id][$row['pay_period_id']]) ) {
-										$this->tmp_data['pay_period_distribution'][$user_id][$row['pay_period_id']] = array();
-									}
-									$expanded_gl_rows = $this->expandGLAccountRows( $psen_data, $this->tmp_data['pay_period_distribution'][$user_id][$row['pay_period_id']], $branch_code_map, $department_code_map, $job_code_map, $job_item_code_map, $replace_arr );
-									if ( is_array($expanded_gl_rows) AND count($expanded_gl_rows) > 0 ) {
-										//Debug::Arr($expanded_gl_rows, '       Expanded GL Rows...', __FILE__, __LINE__, __METHOD__, 10);
-										foreach( $expanded_gl_rows as $gl_row ) {
-											$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $processed_data, $gl_row );
+							$date_columns = TTDate::getReportDates( 'transaction', $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
+							$processed_data	 = array(
+													//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
+													//'pay_stub' => array('sort' => $row['pay_stub_transaction_date'], 'display' => TTDate::getDate('DATE', $row['pay_stub_transaction_date'] ) ),
+													);
+
+							if ( isset($row['psen_ids']) AND is_array($row['psen_ids']) ) {
+								$psen_ids = $row['psen_ids'];
+								unset($row['psen_ids']);
+								foreach($psen_ids as $psen_data ) {
+									if ( $this->enable_time_based_distribution == TRUE ) {
+										//Debug::Text('     TimeBased Distribution...', __FILE__, __LINE__, __METHOD__, 10);
+										if ( !isset($this->tmp_data['pay_period_distribution'][$user_id][$row['pay_period_id']]) ) {
+											$this->tmp_data['pay_period_distribution'][$user_id][$row['pay_period_id']] = array();
 										}
+										$expanded_gl_rows = $this->expandGLAccountRows( $psen_data, $this->tmp_data['pay_period_distribution'][$user_id][$row['pay_period_id']], $branch_code_map, $department_code_map, $job_code_map, $job_item_code_map, $replace_arr );
+										if ( is_array($expanded_gl_rows) AND count($expanded_gl_rows) > 0 ) {
+											//Debug::Arr($expanded_gl_rows, '       Expanded GL Rows...', __FILE__, __LINE__, __METHOD__, 10);
+											foreach( $expanded_gl_rows as $gl_row ) {
+												$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $processed_data, $gl_row );
+											}
+										} else {
+											Debug::Text('       NO Expanded GL Rows...', __FILE__, __LINE__, __METHOD__, 10);
+										}
+										unset($expanded_gl_rows, $psen_data);
 									} else {
-										Debug::Text('       NO Expanded GL Rows...', __FILE__, __LINE__, __METHOD__, 10);
+										//Debug::Text('     NO TimeBased Distribution...', __FILE__, __LINE__, __METHOD__, 10);
+										$psen_data['account'] = $this->replaceGLAccountVariables( $psen_data['account'], $replace_arr );
+										//Need to make sure PSEA IDs are strings not numeric otherwise array_merge will re-key them.
+										$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $processed_data, $psen_data );
 									}
-									unset($expanded_gl_rows, $psen_data);
-								} else {
-									//Debug::Text('     NO TimeBased Distribution...', __FILE__, __LINE__, __METHOD__, 10);
-									$psen_data['account'] = $this->replaceGLAccountVariables( $psen_data['account'], $replace_arr );
-									//Need to make sure PSEA IDs are strings not numeric otherwise array_merge will re-key them.
-									$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $processed_data, $psen_data );
+
 								}
-
+								unset($psen_ids, $psen_id, $psen_amount);
 							}
-							unset($psen_ids, $psen_id, $psen_amount);
-						}
 
-						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
-						$key++;
+							$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+							$key++;
+						}
 					}
 				}
 			}
@@ -1057,7 +1071,7 @@ class GeneralLedgerSummaryReport extends Report {
 
 			$gle = new GeneralLedgerExport();
 			$gle->setFileFormat( $format );
-			if ( strtolower( $format ) == 'csv' ) {
+			if ( strtolower( $format ) == 'csv' OR strtolower( $format ) == 'export_csv' ) {
 				$ignore_balance_check = TRUE; //Dont be so strict on the balance, there may be cases where they just want the data out, even if it doesn't balance for other purposes.
 			} else {
 				$ignore_balance_check = FALSE; //Dont be so strict on the balance, there may be cases where they just want the data out, even if it doesn't balance for other purposes.

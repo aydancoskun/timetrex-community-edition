@@ -90,6 +90,15 @@ class APIRecurringScheduleControl extends APIFactory {
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'recurring_schedule', 'view' );
 
+		//If we don't have permissions to view open shifts, exclude user_id = 0;
+		//FIXME: Make separate permissions for viewing OPEN recurring schedules?
+		if ( $this->getPermissionObject()->Check('schedule', 'view_open') == FALSE ) {
+			$data['filter_data']['exclude_id'] = array(0);
+		} elseif ( count($data['filter_data']['permission_children_ids']) > 0 ) {
+			//If schedule, view_open is allowed but they are also only allowed to see their subordinates (which they have some of), add "open" employee as if they are a subordinate.
+			$data['filter_data']['permission_children_ids'][] = 0;
+		}
+
 		$blf = TTnew( 'RecurringScheduleControlListFactory' );
 		if ( $expanded_mode == TRUE ) {
 			$blf->getAPIExpandedSearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );

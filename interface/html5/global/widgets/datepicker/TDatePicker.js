@@ -142,8 +142,8 @@
 		};
 
 		this.getDefaultFormatValue = function() {
-			var val = date_picker_input.val();
-
+			// Error: Uncaught TypeError: Cannot read property 'val' of undefined in interface/html5/global/widgets/datepicker/TDatePicker.js?v=9.0.5-20151222-162114 line 145
+			var val = date_picker_input ? date_picker_input.val() : null;
 			//Error: Uncaught TypeError: Cannot read property 'format' of null in interface/html5/global/widgets/datepicker/TDatePicker.js?v=9.0.0-20150909-213207 line 140
 			val = Global.strToDate( val ) && Global.strToDate( val ).format( 'YYYYMMDD' );
 
@@ -201,7 +201,7 @@
 		this.each( function() {
 			var o = $.meta ? $.extend( {}, opts, $( this ).data() ) : opts;
 			field = o.field;
-			if( o.validation_field){
+			if ( o.validation_field ) {
 				validation_field = o.validation_field;
 			}
 			multiple = o.multiple; // This is used to test Punches -> Edit view Date
@@ -314,7 +314,7 @@
 
 			date_picker_input.change( function() {
 				if ( check_box ) {
-					$this.setCheckBox(true);
+					$this.setCheckBox( true );
 				}
 
 				$this.trigger( 'formItemChange', [$this] );

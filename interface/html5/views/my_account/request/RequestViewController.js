@@ -114,17 +114,17 @@ RequestViewController = BaseViewController.extend( {
 
 		// Employee
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'full_name'} );
+		form_item_input.TText( {field: 'full_name', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_request_column1, '' );
 
 		// Date
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'date_stamp'} );
+		form_item_input.TText( {field: 'date_stamp', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_request_column1 );
 
 		// Type
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'type'} );
+		form_item_input.TText( {field: 'type', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_request_column1, '' );
 
 		var separate_box = tab_request.find( '.grid-title' );
@@ -133,9 +133,7 @@ RequestViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( {label: $.i18n._( 'Authorization History' )} );
-
 		form_item_input.attr( 'id', 'authorization_history' );
-
 		this.addEditFieldToColumn( null, form_item_input, separate_box );
 
 		// tab_request first column end
@@ -156,17 +154,17 @@ RequestViewController = BaseViewController.extend( {
 
 		// From
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'from'} );
+		form_item_input.TText( {field: 'from', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'From' ), form_item_input, tab_request_column2, '' );
 
 		// Subject
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'subject'} );
+		form_item_input.TText( {field: 'subject', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_request_column2 );
 
 		// Body
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'body'} );
+		form_item_input.TText( {field: 'body', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_request_column2, '', null, null, true );
 
 		// Tab 0 second column end
@@ -648,8 +646,9 @@ RequestViewController = BaseViewController.extend( {
 				data: [],
 				datatype: 'local',
 				sortable: false,
-				width: ($( this.edit_view.find( '.grid-div' ) ).width() - 14),
+				width: this.edit_view.find(".edit-view-tab").width(),
 				rowNum: 10000,
+				height: 25,
 				colNames: [],
 				colModel: column_info_array
 
@@ -668,9 +667,10 @@ RequestViewController = BaseViewController.extend( {
 				altRows: true,
 				data: [],
 				rowNum: 10000,
+				height: 25,
 				sortable: false,
 				datatype: 'local',
-				width: ($( this.edit_view.find( '.grid-div' ) ).width() - 14),
+				width: this.edit_view.find(".edit-view-tab").width(),
 				colNames: [],
 				colModel: column_info_array
 
@@ -681,13 +681,14 @@ RequestViewController = BaseViewController.extend( {
 	},
 
 	setAuthorizationGridSize: function() {
-
+		var history_height_unit;
 		if ( (!this.authorization_history_grid || !this.authorization_history_grid.is( ':visible' )) ) {
 			return;
 		}
-
+		history_height_unit = this.authorization_history_grid.getGridParam( 'data' ).length;
+		history_height_unit > 5 && (history_height_unit = 5);
 		this.authorization_history_grid.setGridWidth( $( this.edit_view.find( '#authorization_history' ) ).width() );
-
+		this.authorization_history_grid.setGridHeight( history_height_unit * 25 );
 	},
 
 	buildAuthorizationDisplayColumns: function( apiDisplayColumnsArray ) {
@@ -761,7 +762,8 @@ RequestViewController = BaseViewController.extend( {
 		$this.message_control_api['getEmbeddedMessage']( args, {
 			onResult: function( res ) {
 
-				if ( !$this.edit_view ) {
+				// Error: Uncaught TypeError: Cannot read property 'setValue' of undefined in interface/html5/#!m=RequestAuthorization&id=1306 line 1547
+				if ( !$this.edit_view || !$this.edit_view_ui_dic['from'] ) {
 					return;
 				}
 
@@ -1107,7 +1109,7 @@ RequestViewController = BaseViewController.extend( {
 			if ( $this.is_edit ) {
 				$this.onViewClick( $this.current_edit_record.id );
 			} else {
-				$this.current_edit_record = null;
+
 				$this.removeEditView();
 			}
 
@@ -1116,35 +1118,6 @@ RequestViewController = BaseViewController.extend( {
 			$this.setErrorTips( result );
 
 		}
-	},
-
-	removeEditView: function() {
-
-		if ( this.edit_view ) {
-			this.edit_view.remove();
-		}
-		this.edit_view = null;
-		this.is_mass_editing = false;
-		this.is_viewing = false;
-		this.is_edit = false;
-		this.is_changed = false;
-		this.mass_edit_record_ids = [];
-		this.edit_view_tab_selected_index = 0;
-		LocalCacheData.current_doing_context_action = '';
-
-		// reset parent context menu if edit only mode
-		if ( !this.edit_only_mode ) {
-			this.setDefaultMenu();
-		} else {
-			this.setParentContextMenuAfterSubViewClose();
-		}
-
-		this.reSetURL();
-
-		this.sub_log_view_controller = null;
-		this.edit_view_ui_dic = {};
-		this.edit_view_form_item_dic = {};
-		this.edit_view_error_ui_dic = {};
 	},
 
 	uniformVariable: function( records ) {
@@ -1463,50 +1436,30 @@ RequestViewController = BaseViewController.extend( {
 	},
 
 	setEditViewWidgetsMode: function() {
-
 		var did_clean = false;
 		for ( var key in this.edit_view_ui_dic ) {
 			var widget = this.edit_view_ui_dic[key];
 			widget.css( 'opacity', 1 );
-
 			var column = widget.parent().parent().parent();
 			if ( !column.hasClass( 'v-box' ) ) {
-
 				if ( !did_clean ) {
 					did_clean = true;
 				}
-
-				var child_length = column.children().length;
-				var parent_div = widget.parent().parent();
-
-				if ( Global.isSet( widget.setEnabled ) ) {
-					widget.setEnabled( true );
-				}
 			}
-
-			widget.setValue( '' ); // Set all value back to empty before new value coming.
-
 			if ( this.is_viewing ) {
-//				  if ( Global.isSet( widget.setEnabled ) ) {
-//					  widget.setEnabled( false );
-//				  }
 			} else {
 				if ( Global.isSet( widget.setEnabled ) ) {
-
 					widget.setEnabled( true );
-
 				}
 			}
-
 		}
-
 	},
 
 	openEditView: function() {
 
 		this.initEditViewUI( this.viewId, this.edit_view_tpl );
 
-		this.setEditViewWidgetsMode();
+
 	},
 
 	initEditViewUI: function( view_id, edit_view_file_name ) {
@@ -1553,7 +1506,7 @@ RequestViewController = BaseViewController.extend( {
 		}
 
 		$this.setEditViewTabHeight();
-	},
+	}
 
 } );
 

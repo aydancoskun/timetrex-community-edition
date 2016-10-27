@@ -978,7 +978,7 @@ class PayPeriodScheduleFactory extends Factory {
 		//FIXME: This breaks having pay periods with different daily start times.
 		//However, without it, I think DST breaks pay periods.
 		//$last_pay_period_end_date = TTDate::getEndDayEpoch( $last_pay_period_end_date + 1 ) - 86400;
-		$last_pay_period_end_date = TTDate::getEndDayEpoch( $last_pay_period_end_date - (86400 / 2) );
+		$last_pay_period_end_date = TTDate::getEndDayEpoch( $last_pay_period_end_date - 43200 );
 		Debug::text('bLast Pay Period End Date: '. TTDate::getDate('DATE+TIME', $last_pay_period_end_date) .' ('.$last_pay_period_end_date .')', __FILE__, __LINE__, __METHOD__, 10);
 
 		/*
@@ -1207,7 +1207,7 @@ class PayPeriodScheduleFactory extends Factory {
 			$ppf->setTransactionDate( $this->getNextTransactionDate() );
 
 			$ppf->setPrimary( $this->getNextPrimary() );
-			$ppf->setEnableImportData( $enable_import_data ); //Import punches when creating new pay periods.
+			$ppf->setEnableImportOrphanedData( $enable_import_data ); //Import orphaned punches when creating new pay periods.
 			if ( $ppf->isValid() ) {
 				$new_pay_period_id = $ppf->Save();
 				Debug::text('New Pay Period ID: '. $new_pay_period_id, __FILE__, __LINE__, __METHOD__, 10);
@@ -1316,8 +1316,8 @@ class PayPeriodScheduleFactory extends Factory {
 			$end_year_epoch = TTDate::getEndYearEpoch( $epoch );
 			$i = 0;
 
-			while ( $next_transaction_date <= $end_year_epoch AND $i < 100 ) {
-				//Debug::text('I: '. $i .' Looping: Transaction Date: '. TTDate::getDate('DATE+TIME', $next_transaction_date) .' - End Year Epoch: '. TTDate::getDate('DATE+TIME', $end_year_epoch), __FILE__, __LINE__, __METHOD__, 10);
+			while ( $next_transaction_date <= $end_year_epoch AND $i < 60 ) {
+				Debug::text('I: '. $i .' Looping: Transaction Date: '. TTDate::getDate('DATE+TIME', $next_transaction_date) .' - End Year Epoch: '. TTDate::getDate('DATE+TIME', $end_year_epoch), __FILE__, __LINE__, __METHOD__, 10);
 				$this->getNextPayPeriod( $next_end_date );
 
 				$next_transaction_date = $this->getNextTransactionDate();
@@ -1328,9 +1328,8 @@ class PayPeriodScheduleFactory extends Factory {
 				}
 			}
 
-			Debug::text('i: '. $i, __FILE__, __LINE__, __METHOD__, 10);
 			$retval = ( $this->getAnnualPayPeriods() - $i );
-			Debug::text('Current Pay Period: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text('Current Pay Period: '. $retval .' Annual PPs: '. $this->getAnnualPayPeriods() .' I: '. $i, __FILE__, __LINE__, __METHOD__, 10);
 
 			//Cache results
 			$this->saveCache($retval, $id);
@@ -1921,6 +1920,28 @@ class PayPeriodScheduleFactory extends Factory {
 		return FALSE;
 	}
 
+	function importData( $user_ids = FALSE ) {
+		$epoch = TTDate::getMiddleDayEpoch( time() );
+
+		//Get all OPEN pay periods that have a transaction date *after* today, and import data into them.
+		//  Only OPEN pay periods. Definitely not post-adjustment ones incase they have switched pay period schedules and have to go back to make a correction.
+		$pplf = TTnew('PayPeriodListFactory');
+		$pplf->getByCompanyIdAndStatus( $this->getCompany(), array(10) );
+		Debug::Text('Found Open Pay Periods: '. $pplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		if ( $pplf->getRecordCount() > 0 ) {
+			foreach( $pplf as $pp_obj ) {
+				Debug::Text('  Pay Period: ID: '. $pp_obj->getID() .' Transaction Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getTransactionDate() ), __FILE__, __LINE__, __METHOD__, 10);
+				if ( TTDate::getMiddleDayEpoch( $pp_obj->getTransactionDate() ) >= $epoch ) {
+					$pp_obj->importData( $user_ids, $pp_obj->getID() );
+				} else {
+					Debug::Text('  OPEN Pay Period with Transaction Date before today, skipping...', __FILE__, __LINE__, __METHOD__, 10);
+				}
+			}
+		}
+
+		return TRUE;
+	}
+	
 	function getEnableInitialPayPeriods() {
 		if ( isset($this->enable_create_initial_pay_periods) ) {
 			return $this->enable_create_initial_pay_periods;
@@ -1981,6 +2002,18 @@ class PayPeriodScheduleFactory extends Factory {
 		}
 
 		return TRUE;
+	}
+
+	function getFirstPayPeriodStartDate() {
+		$pplf = TTnew('PayPeriodListFactory');
+		$retarr = $pplf->getFirstStartDateAndLastEndDateByPayPeriodScheduleId( $this->getId() );
+		if ( is_array($retarr) AND isset($retarr['first_start_date']) ) {
+			$retval = TTDate::strtotime( $retarr['first_start_date'] );
+			Debug::text('First Pay Period Start Date: '. TTDate::getDate('DATE', $retval), __FILE__, __LINE__, __METHOD__, 10);
+			return $retval;
+		}
+
+		return FALSE;
 	}
 
 	function preSave() {

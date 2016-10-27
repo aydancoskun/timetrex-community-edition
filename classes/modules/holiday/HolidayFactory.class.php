@@ -170,6 +170,11 @@ class HolidayFactory extends Factory {
 			) {
 
 			if	( $epoch > 0 ) {
+				if ( $this->getDateStamp() !== $epoch AND $this->getOldDateStamp() != $this->getDateStamp() ) {
+					Debug::Text(' Setting Old DateStamp... Current Old DateStamp: '. (int)$this->getOldDateStamp() .' Current DateStamp: '. (int)$this->getDateStamp(), __FILE__, __LINE__, __METHOD__, 10);
+					$this->setOldDateStamp( $this->getDateStamp() );
+				}
+
 				$this->data['date_stamp'] = $epoch;
 
 				return TRUE;
@@ -183,6 +188,20 @@ class HolidayFactory extends Factory {
 		return FALSE;
 	}
 
+	function getOldDateStamp() {
+		if ( isset($this->tmp_data['old_date_stamp']) ) {
+			return $this->tmp_data['old_date_stamp'];
+		}
+
+		return FALSE;
+	}
+	function setOldDateStamp($date_stamp) {
+		Debug::Text(' Setting Old DateStamp: '. TTDate::getDate('DATE', $date_stamp ), __FILE__, __LINE__, __METHOD__, 10);
+		$this->tmp_data['old_date_stamp'] = TTDate::getMiddleDayEpoch( $date_stamp );
+
+		return TRUE;
+	}
+	
 	function isUniqueName($name) {
 		//BindDate() causes a deprecated error if date_stamp is not set, so just return TRUE so we can throw a invalid date error elsewhere instead.
 		//This also causes it so we can never have a invalid date and invalid name validation errors at the same time.
@@ -336,34 +355,41 @@ class HolidayFactory extends Factory {
 		if ( TTDate::getMiddleDayEpoch( $this->getDateStamp() ) >= TTDate::getMiddleDayEpoch( time() ) ) {
 			Debug::text('Holiday is today or in the future, try to recalculate recurring schedules on this date: '. TTDate::getDate('DATE', $this->getDateStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 
-			$start_date = TTDate::getBeginDayEpoch( $this->getDateStamp() );
-			$end_date = TTDate::getEndDayEpoch( $this->getDateStamp() );
+			if ( TTDate::getMiddleDayEpoch( $this->getDateStamp() ) != TTDate::getMiddleDayEpoch( $this->getOldDateStamp() ) ) {
+				$date_ranges[] = array( 'start_date' => TTDate::getBeginDayEpoch( $this->getOldDateStamp() ), 'end_date' => TTDate::getEndDayEpoch( $this->getOldDateStamp() ) );
+			}
+			$date_ranges[] = array( 'start_date' => TTDate::getBeginDayEpoch( $this->getDateStamp() ), 'end_date' => TTDate::getEndDayEpoch( $this->getDateStamp() ) );
 			
-			//Get existing recurring_schedule rows on the holiday day, so we can figure out which recurring_schedule_control records to recalculate.
-			$recurring_schedule_control_ids = array();
+			foreach( $date_ranges as $date_range ) {
+				$start_date = $date_range['start_date'];
+				$end_date = $date_range['end_date'];
+				
+				//Get existing recurring_schedule rows on the holiday day, so we can figure out which recurring_schedule_control records to recalculate.
+				$recurring_schedule_control_ids = array();
 
-			$rslf = TTnew('RecurringScheduleListFactory');
-			$rslf->getByCompanyIDAndStartDateAndEndDateAndNoConflictingSchedule( $this->getHolidayPolicyObject()->getCompany(), $start_date, $end_date );
-			Debug::text('Recurring Schedule Record Count: '. $rslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
-			if ( $rslf->getRecordCount() > 0 ) {
-				foreach( $rslf as $rs_obj ) {
-					if ( $rs_obj->getRecurringScheduleControl() > 0 ) {
-						$recurring_schedule_control_ids[] = $rs_obj->getRecurringScheduleControl();
+				$rslf = TTnew('RecurringScheduleListFactory');
+				$rslf->getByCompanyIDAndStartDateAndEndDateAndNoConflictingSchedule( $this->getHolidayPolicyObject()->getCompany(), $start_date, $end_date );
+				Debug::text('Recurring Schedule Record Count: '. $rslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+				if ( $rslf->getRecordCount() > 0 ) {
+					foreach( $rslf as $rs_obj ) {
+						if ( $rs_obj->getRecurringScheduleControl() > 0 ) {
+							$recurring_schedule_control_ids[] = $rs_obj->getRecurringScheduleControl();
+						}
 					}
 				}
-			}
-			$recurring_schedule_control_ids = array_unique($recurring_schedule_control_ids);
-			Debug::Arr($recurring_schedule_control_ids, 'Recurring Schedule Control IDs: ', __FILE__, __LINE__, __METHOD__, 10);
+				$recurring_schedule_control_ids = array_unique($recurring_schedule_control_ids);
+				Debug::Arr($recurring_schedule_control_ids, 'Recurring Schedule Control IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 
-			if ( count($recurring_schedule_control_ids) > 0 ) {
-				//
-				//**THIS IS DONE IN RecurringScheduleControlFactory, RecurringScheduleTemplateControlFactory, HolidayFactory postSave() as well.
-				//
-				$rsf = TTnew('RecurringScheduleFactory');
-				$rsf->StartTransaction();
-				$rsf->clearRecurringSchedulesFromRecurringScheduleControl( $recurring_schedule_control_ids, $start_date, $end_date );
-				$rsf->addRecurringSchedulesFromRecurringScheduleControl( $this->getHolidayPolicyObject()->getCompany(), $recurring_schedule_control_ids, $start_date, $end_date );
-				$rsf->CommitTransaction();
+				if ( count($recurring_schedule_control_ids) > 0 ) {
+					//
+					//**THIS IS DONE IN RecurringScheduleControlFactory, RecurringScheduleTemplateControlFactory, HolidayFactory postSave() as well.
+					//
+					$rsf = TTnew('RecurringScheduleFactory');
+					$rsf->StartTransaction();
+					$rsf->clearRecurringSchedulesFromRecurringScheduleControl( $recurring_schedule_control_ids, $start_date, $end_date );
+					$rsf->addRecurringSchedulesFromRecurringScheduleControl( $this->getHolidayPolicyObject()->getCompany(), $recurring_schedule_control_ids, $start_date, $end_date );
+					$rsf->CommitTransaction();
+				}
 			}
 		} else {
 			Debug::text('Holiday is not in the future...', __FILE__, __LINE__, __METHOD__, 10);

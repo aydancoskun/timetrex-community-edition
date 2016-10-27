@@ -689,20 +689,25 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 					);
 
 		$uf = new UserFactory();
+		$udtf = new UserDateTotalFactory();
 
+		//Make sure we handle orphaned records attached to UDT records.
 		$query = '
 					select	a.*
 					from	'. $this->getTable() .' as a
 							LEFT JOIN '. $uf->getTable() .' as b ON a.user_id = b.id
+							LEFT JOIN '. $udtf->getTable() .' as udtf ON ( a.user_date_total_id = udtf.id AND udtf.deleted = 0 )
 					where	a.accrual_policy_account_id = ?
-						AND a.deleted = 0
-						AND b.deleted = 0
+						AND ( ( a.user_date_total_id is NOT NULL AND udtf.id is NOT NULL AND udtf.deleted = 0 ) OR ( a.user_date_total_id IS NULL AND udtf.id is NULL ) )
+						AND ( a.deleted = 0 AND b.deleted = 0 )
 					LIMIT 1
 				';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
 		$this->ExecuteSQL( $query, $ph );
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}
@@ -770,6 +775,7 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 					'company_id' => (int)$company_id,
 					);
 
+		//If changes are made to UDTF joining, also update getByAccrualPolicyAccount().
 		$query = '
 					select	a.*,
 							ab.name as accrual_policy_account,
@@ -828,7 +834,7 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'b.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'b.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'b.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['country']) ) ?$this->getWhereClauseSQL( 'b.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['country']) ) ? $this->getWhereClauseSQL( 'b.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['province']) ) ? $this->getWhereClauseSQL( 'b.province', $filter_data['province'], 'upper_text_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'udtf.pay_period_id', $filter_data['pay_period_id'], 'numeric_list', $ph ) : NULL;

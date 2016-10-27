@@ -39,6 +39,11 @@ if ( isset($_GET['disable_db']) AND $_GET['disable_db'] == 1 ) {
 }
 
 require_once('../../includes/global.inc.php');
+if ( isset( $_SERVER['REQUEST_URI'] ) AND strpos( $_SERVER['REQUEST_URI'], '//' ) !== FALSE ) { //Always strip duplicate a slashes from URL whenever possible.
+	Debug::text('Stripping duplicate slashes from URL: '. $_SERVER['REQUEST_URI'] , __FILE__, __LINE__, __METHOD__, 10);
+	Redirect::Page( Environment::stripDuplicateSlashes( $_SERVER['REQUEST_URI'] ) ); 
+}
+
 forceNoCacheHeaders(); //Send headers to disable caching.
 
 //Break out of any domain masking that may exist for security reasons.
@@ -132,7 +137,7 @@ unset($authentication);
             <link rel="stylesheet" type="text/css" href="theme/default/css/image_area_select/imgareaselect-default.css?v=<?php echo APPLICATION_BUILD?>">
 			<script>
 				use_composite_css_files = false;
-			</script>						
+			</script>
 		<?php } ?>
 
 		<?php if ( file_exists('login.composite.js') ) { //See tools/compile/Gruntfile.js to configure which files are included in the composites... ?>
@@ -196,6 +201,12 @@ unset($authentication);
 	</div>
 	<div class="need-hidden-element"><a href="http://www.timetrex.com/download.php">Download Time and Attendance Software</a></div>
 	<div id="bottomContainer" class="bottom-container" ondragstart="return false;">
+		<ul class="signal-strength">
+			<li class="signal-strength-very-weak"><div></div></li>
+			<li class="signal-strength-weak"><div></div></li>
+			<li class="signal-strength-strong"><div></div></li>
+			<li class="signal-strength-pretty-strong"><div></div></li>
+		</ul>
 		<div class="copyright-container">
 			<a id="copy_right_logo_link" class="copy-right-logo-link" target="_blank"><img id="copy_right_logo" class="copy-right-logo"></a>
 			<a id="copy_right_info" class="copy-right-info" target="_blank" style="display: none"></a>
@@ -262,7 +273,6 @@ unset($authentication);
 	</script>
 
 	<script src="framework/require.js?v=<?php echo APPLICATION_BUILD?>" data-main="main.js?v=<?php echo APPLICATION_BUILD?>"></script>
-
 	<!-- <?php echo Misc::getInstanceIdentificationString( $primary_company, $system_settings );?>  -->
 	</html>
 <?php

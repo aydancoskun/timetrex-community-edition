@@ -197,6 +197,7 @@ switch ($object_type) {
 
 						$dr_obj->setRemoteFileName($upload_file_arr['name']);
 						$dr_obj->setMimeType( $dr_obj->detectMimeType( $upload_file_arr['name'], $upload_file_arr['type'] ) );
+						$dr_obj->setEnableFileUpload( TRUE );
 						if ( $dr_obj->isValid() ) {
 							$dr_obj->Save( FALSE );
 							$dr_obj->renameLocalFile(); //Rename after save as finished successfully, otherwise a validation error will occur because the src file is gone.

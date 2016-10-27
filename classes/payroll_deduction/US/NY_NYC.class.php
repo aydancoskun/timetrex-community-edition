@@ -51,7 +51,7 @@ Used to be:
 */
 
 	var $district_income_tax_rate_options = array(
-												20150601 => array(
+												20160101 => array(
 															10 => array(
 																	array( 'income' => 8000,	'rate' => 1.9,	'constant' => 0 ),
 																	array( 'income' => 8700,	'rate' => 2.65,	'constant' => 152 ),
@@ -59,7 +59,7 @@ Used to be:
 																	array( 'income' => 25000,	'rate' => 3.7,	'constant' => 366 ),
 																	array( 'income' => 60000,	'rate' => 3.9,	'constant' => 736 ),
 																	array( 'income' => 500000,	'rate' => 4.0,	'constant' => 2101 ),
-																	array( 'income' => 500000,	'rate' => 4.25,	'constant' => 20828.46 ),
+																	array( 'income' => 500000,	'rate' => 4.25,	'constant' => 20828.46 ), //Just the constant changed by the looks of it.
 																	),
 															20 => array(
 																	array( 'income' => 8000,	'rate' => 1.9,	'constant' => 0 ),
@@ -69,6 +69,26 @@ Used to be:
 																	array( 'income' => 60000,	'rate' => 3.9,	'constant' => 736 ),
 																	array( 'income' => 500000,	'rate' => 4.0,	'constant' => 2101 ),
 																	array( 'income' => 500000,	'rate' => 4.25,	'constant' => 20828.46 ),
+																	),
+															),
+												20150601 => array(
+															10 => array(
+																	array( 'income' => 8000,	'rate' => 1.9,	'constant' => 0 ),
+																	array( 'income' => 8700,	'rate' => 2.65,	'constant' => 152 ),
+																	array( 'income' => 15000,	'rate' => 3.1,	'constant' => 171 ),
+																	array( 'income' => 25000,	'rate' => 3.7,	'constant' => 366 ),
+																	array( 'income' => 60000,	'rate' => 3.9,	'constant' => 736 ),
+																	array( 'income' => 500000,	'rate' => 4.0,	'constant' => 2101 ),
+																	array( 'income' => 500000,	'rate' => 4.25,	'constant' => 20834.16 ),
+																	),
+															20 => array(
+																	array( 'income' => 8000,	'rate' => 1.9,	'constant' => 0 ),
+																	array( 'income' => 8700,	'rate' => 2.65,	'constant' => 152 ),
+																	array( 'income' => 15000,	'rate' => 3.1,	'constant' => 171 ),
+																	array( 'income' => 25000,	'rate' => 3.7,	'constant' => 366 ),
+																	array( 'income' => 60000,	'rate' => 3.9,	'constant' => 736 ),
+																	array( 'income' => 500000,	'rate' => 4.0,	'constant' => 2101 ),
+																	array( 'income' => 500000,	'rate' => 4.25,	'constant' => 20834.16 ),
 																	),
 															),
 												20110101 => array(
@@ -116,7 +136,7 @@ Used to be:
 													'standard_deduction' => array(
 																				'10' => 5000.00,
 																				'20' => 5500.00,
-																				'30' => 5000.00,
+																				'30' => 5500.00,
 																				'40' => 5000.00,
 																				),
 													'allowance' => array(

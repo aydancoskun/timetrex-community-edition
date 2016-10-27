@@ -310,6 +310,8 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		if ( ( isset($date) AND $date > 0) OR ( isset($valid_user_ids) AND is_array($valid_user_ids) AND count($valid_user_ids) > 0 ) ) {
 			$query .= ' AND ( ';
 
+			//When the Mobile App/TimeClock are doing a reload database, $date should always be 0. That forces the query to just send data for $valid_user_ids.
+			//  All other cases it will send data for all current users always, or records that were recently created/updated.
 			if ( isset($date) AND $date > 0 ) {
 				//Append the same date twice for created and updated.
 				$ph[] = (int)$date;
@@ -461,13 +463,13 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		if ( isset($filter_data['sex']) AND !is_array($filter_data['sex']) AND trim($filter_data['sex']) != '' AND !isset($filter_data['sex_id']) ) {
 			$filter_data['sex_id'] = Option::getByFuzzyValue( $filter_data['sex'], $this->getOptions('sex') );
 		}
-		$query .= ( isset($filter_data['sex_id']) ) ?$this->getWhereClauseSQL( 'b.sex_id', $filter_data['sex_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['sex_id']) ) ? $this->getWhereClauseSQL( 'b.sex_id', $filter_data['sex_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['first_name']) ) ? $this->getWhereClauseSQL( 'b.first_name', $filter_data['first_name'], 'text_metaphone', $ph ) : NULL;
 		$query .= ( isset($filter_data['last_name']) ) ? $this->getWhereClauseSQL( 'b.last_name', $filter_data['last_name'], 'text_metaphone', $ph ) : NULL;
 		$query .= ( isset($filter_data['home_phone']) ) ? $this->getWhereClauseSQL( 'b.home_phone', $filter_data['home_phone'], 'phone', $ph ) : NULL;
 		$query .= ( isset($filter_data['work_phone']) ) ? $this->getWhereClauseSQL( 'b.work_phone', $filter_data['work_phone'], 'phone', $ph ) : NULL;
-		$query .= ( isset($filter_data['country']) ) ?$this->getWhereClauseSQL( 'b.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['country']) ) ? $this->getWhereClauseSQL( 'b.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['province']) ) ? $this->getWhereClauseSQL( 'b.province', $filter_data['province'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['city']) ) ? $this->getWhereClauseSQL( 'b.city', $filter_data['city'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['address1']) ) ? $this->getWhereClauseSQL( 'b.address1', $filter_data['address1'], 'text', $ph ) : NULL;
@@ -475,7 +477,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		$query .= ( isset($filter_data['postal_code']) ) ? $this->getWhereClauseSQL( 'b.postal_code', $filter_data['postal_code'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['employee_number']) ) ? $this->getWhereClauseSQL( 'b.employee_number', $filter_data['employee_number'], 'numeric', $ph ) : NULL;
 		$query .= ( isset($filter_data['user_name']) ) ? $this->getWhereClauseSQL( 'b.user_name', $filter_data['user_name'], 'text', $ph ) : NULL;
-		$query .= ( isset($filter_data['sin']) ) ? $this->getWhereClauseSQL( 'b.sin', $filter_data['sin'], 'numeric', $ph ) : NULL;
+		$query .= ( isset($filter_data['sin']) ) ? $this->getWhereClauseSQL( 'b.sin', $filter_data['sin'], 'numeric_string', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['work_email']) ) ? $this->getWhereClauseSQL( 'b.work_email', $filter_data['work_email'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['home_email']) ) ? $this->getWhereClauseSQL( 'b.home_email', $filter_data['home_email'], 'text', $ph ) : NULL;

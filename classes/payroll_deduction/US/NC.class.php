@@ -115,6 +115,24 @@ class PayrollDeduction_US_NC extends PayrollDeduction_US {
 															),
 												);
 	var $state_options = array(
+								20160101 => array(
+													'standard_deduction' => array(
+																				'10' => 7750.00,
+																				'20' => 15500.00,
+																				'30' => 7750.00,
+																				'40' => 12400.00,
+																				),
+													'allowance_cutoff' => array(
+																				'10' => 50000.00,
+																				'20' => 100000.00,
+																				'30' => 50000.00,
+																				'40' => 80000.00,
+																				),
+													'allowance' => array(
+																		1 => 2500,
+																		),
+													'rate' => 5.85, //Flat 5.85%
+													),
 								//Formula changed for 01-Jan-15
 								20150101 => array(
 													'standard_deduction' => array(
@@ -131,7 +149,6 @@ class PayrollDeduction_US_NC extends PayrollDeduction_US {
 																				),
 													'allowance' => array(
 																		1 => 2500,
-																		2 => 2000
 																		),
 													'rate' => 5.75, //Flat 5.75%
 													),
@@ -151,7 +168,6 @@ class PayrollDeduction_US_NC extends PayrollDeduction_US {
 																				),
 													'allowance' => array(
 																		1 => 2500,
-																		2 => 2000
 																		),
 													'rate' => 5.8, //Flat 5.8%
 													),
@@ -171,7 +187,7 @@ class PayrollDeduction_US_NC extends PayrollDeduction_US {
 																				),
 													'allowance' => array(
 																		1 => 2500,
-																		2 => 2000
+																		2 => 2000 //Legacy formula.
 																		),
 													)
 								);

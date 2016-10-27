@@ -1146,9 +1146,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 			$this.api_import.uploadFile( current_step_data.file_uploader, 'object_type=import&object_id=' + this.api_import.className, {
 				onResult: function( upload_file_result ) {
-
 				if ( upload_file_result.toLowerCase() !== 'true' ) {
-					TAlertManager.showAlert( upload_file_result );
 					$this.setButtonsStatus(); // set button enabled or disabled
 					return;
 				}

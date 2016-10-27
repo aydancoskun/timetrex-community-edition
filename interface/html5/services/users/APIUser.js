@@ -81,6 +81,11 @@ var APIUser = ServiceCaller.extend( {
 	setUserFeedbackRating: function() {
 		return this.argumentsHandler( this.className, 'setUserFeedbackRating', arguments );
 
+	},
+
+	sendValidationEmail: function() {
+		return this.argumentsHandler( this.className, 'sendValidationEmail', arguments );
+
 	}
 
 

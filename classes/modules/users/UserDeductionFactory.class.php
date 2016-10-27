@@ -735,7 +735,7 @@ class UserDeductionFactory extends Factory {
 		return $retval;
 	}
 
-	function getDeductionAmount( $user_id, $pay_stub_obj, $pay_period_obj, $formula_type_id = 10 ) {
+	function getDeductionAmount( $user_id, $pay_stub_obj, $pay_period_obj, $formula_type_id = 10, $payroll_run_id = 1 ) {
 		if ( $user_id == '' ) {
 			Debug::Text('Missing User ID: ', __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
@@ -758,7 +758,14 @@ class UserDeductionFactory extends Factory {
 		if ( $annual_pay_periods <= 0 ) {
 			$annual_pay_periods = 1;
 		}
-		$current_pay_period = $pay_period_obj->getPayPeriodScheduleObject()->getCurrentPayPeriodNumber( $pay_period_obj->getTransactionDate(), $pay_period_obj->getEndDate() );
+
+		//Need to use pay stub dates rather than pay period dates for this, because if you are in the first pay period of 2016 (Transaction: 01-Jan) and
+		//you need to run a out-of-cycle bonus to be paid by 24-Dec, it will think its the 1st pay stub of the year when its really the last. This causes taxes to be incorrect.
+		//$current_pay_period = $pay_period_obj->getPayPeriodScheduleObject()->getCurrentPayPeriodNumber( $pay_period_obj->getTransactionDate(), $pay_period_obj->getEndDate() );
+		$current_pay_period = $pay_period_obj->getPayPeriodScheduleObject()->getCurrentPayPeriodNumber( $pay_stub_obj->getTransactionDate(), $pay_stub_obj->getEndDate() );
+		if ( $current_pay_period <= 0 ) {
+			$current_pay_period = 1;
+		}
 
 		if ( !is_object($cd_obj) ) {
 			return FALSE;
@@ -1594,8 +1601,11 @@ class UserDeductionFactory extends Factory {
 				$pd_obj = new PayrollDeduction( 'US', NULL );
 				$pd_obj->setCompany( $this->getUserObject()->getCompany() );
 				$pd_obj->setUser( $this->getUser() );
-				$pd_obj->setDate( $pay_period_obj->getTransactionDate() );
+				$pd_obj->setDate( $pay_stub_obj->getTransactionDate() );
 				$pd_obj->setAnnualPayPeriods( $annual_pay_periods );
+				$pd_obj->setCurrentPayPeriod( $current_pay_period );
+				$pd_obj->setCurrentPayrollRunID( $payroll_run_id );
+				$pd_obj->setFormulaType( $formula_type_id );
 
 				if ( is_object( $this->getUserObject() ) ) {
 					$currency_id = $this->getUserObject()->getCurrency();
@@ -1604,7 +1614,7 @@ class UserDeductionFactory extends Factory {
 				}
 
 				$pd_obj->setGrossPayPeriodIncome( $amount );
-				
+
 				switch ( $cd_obj->getCalculation() ) {
 					case 82: //US - Medicare - Employee
 						$pd_obj->setMedicareFilingStatus( $user_value1 );
@@ -1634,8 +1644,11 @@ class UserDeductionFactory extends Factory {
 				$pd_obj = new PayrollDeduction( 'CA', NULL);
 				$pd_obj->setCompany( $this->getUserObject()->getCompany() );
 				$pd_obj->setUser( $this->getUser() );
-				$pd_obj->setDate( $pay_period_obj->getTransactionDate() );
+				$pd_obj->setDate( $pay_stub_obj->getTransactionDate() );
 				$pd_obj->setAnnualPayPeriods( $annual_pay_periods );
+				$pd_obj->setCurrentPayPeriod( $current_pay_period );
+				$pd_obj->setCurrentPayrollRunID( $payroll_run_id );
+				$pd_obj->setFormulaType( $formula_type_id );
 
 				$pd_obj->setEnableCPPAndEIDeduction(TRUE);
 
@@ -1671,8 +1684,11 @@ class UserDeductionFactory extends Factory {
 				$pd_obj = new PayrollDeduction( 'CA', NULL);
 				$pd_obj->setCompany( $this->getUserObject()->getCompany() );
 				$pd_obj->setUser( $this->getUser() );
-				$pd_obj->setDate( $pay_period_obj->getTransactionDate() );
+				$pd_obj->setDate( $pay_stub_obj->getTransactionDate() );
 				$pd_obj->setAnnualPayPeriods( $annual_pay_periods );
+				$pd_obj->setCurrentPayPeriod( $current_pay_period );
+				$pd_obj->setCurrentPayrollRunID( $payroll_run_id );
+				$pd_obj->setFormulaType( $formula_type_id );				
 
 				$pd_obj->setEnableCPPAndEIDeduction(TRUE);
 
@@ -1723,10 +1739,11 @@ class UserDeductionFactory extends Factory {
 				$pd_obj = new PayrollDeduction( $this->getCompanyDeductionObject()->getCountry(), NULL );
 				$pd_obj->setCompany( $this->getUserObject()->getCompany() );
 				$pd_obj->setUser( $this->getUser() );
-				$pd_obj->setDate( $pay_period_obj->getTransactionDate() );
+				$pd_obj->setDate( $pay_stub_obj->getTransactionDate() );
 				$pd_obj->setAnnualPayPeriods( $annual_pay_periods );
 				$pd_obj->setCurrentPayPeriod( $current_pay_period );
-				$pd_obj->setFormulaType( $formula_type_id );
+				$pd_obj->setCurrentPayrollRunID( $payroll_run_id );
+				$pd_obj->setFormulaType( $formula_type_id );				
 
 				if ( is_object( $this->getUserObject() ) ) {
 					$currency_id = $this->getUserObject()->getCurrency();
@@ -1831,10 +1848,11 @@ class UserDeductionFactory extends Factory {
 				$pd_obj = new PayrollDeduction( $this->getCompanyDeductionObject()->getCountry(), $this->getCompanyDeductionObject()->getProvince() );
 				$pd_obj->setCompany( $this->getUserObject()->getCompany() );
 				$pd_obj->setUser( $this->getUser() );
-				$pd_obj->setDate( $pay_period_obj->getTransactionDate() );
+				$pd_obj->setDate( $pay_stub_obj->getTransactionDate() );
 				$pd_obj->setAnnualPayPeriods( $annual_pay_periods );
-				$pd_obj->setCurrentPayPeriod( $current_pay_period );				
-				$pd_obj->setFormulaType( $formula_type_id );
+				$pd_obj->setCurrentPayPeriod( $current_pay_period );
+				$pd_obj->setCurrentPayrollRunID( $payroll_run_id );
+				$pd_obj->setFormulaType( $formula_type_id );				
 				
 				if ( is_object( $this->getUserObject() ) ) {
 					$currency_id = $this->getUserObject()->getCurrency();
@@ -1973,10 +1991,11 @@ class UserDeductionFactory extends Factory {
 				$pd_obj = new PayrollDeduction( $this->getCompanyDeductionObject()->getCountry(), $this->getCompanyDeductionObject()->getProvince(), $this->getCompanyDeductionObject()->getDistrict() );
 				$pd_obj->setCompany( $this->getUserObject()->getCompany() );
 				$pd_obj->setUser( $this->getUser() );
-				$pd_obj->setDate( $pay_period_obj->getTransactionDate() );
+				$pd_obj->setDate( $pay_stub_obj->getTransactionDate() );
 				$pd_obj->setAnnualPayPeriods( $annual_pay_periods );
-				$pd_obj->setCurrentPayPeriod( $current_pay_period );				
-				$pd_obj->setFormulaType( $formula_type_id );
+				$pd_obj->setCurrentPayPeriod( $current_pay_period );
+				$pd_obj->setCurrentPayrollRunID( $payroll_run_id );
+				$pd_obj->setFormulaType( $formula_type_id );				
 				
 				$pd_obj->setDistrictFilingStatus( $user_value1 );
 				$pd_obj->setDistrictAllowance( $user_value2 );

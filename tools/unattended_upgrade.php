@@ -469,8 +469,11 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 
 								Debug::Text('Upgrade Staging Extract Dir: '. $upgrade_staging_extract_dir .' Renaming to: '. $upgrade_staging_latest_dir, __FILE__, __LINE__, __METHOD__, 10);
 								if ( @rename( $upgrade_staging_extract_dir, $upgrade_staging_latest_dir ) == FALSE ) {
-									Debug::Text('ERROR: Unable to rename: '. $upgrade_staging_extract_dir .' to: '. $upgrade_staging_latest_dir, __FILE__, __LINE__, __METHOD__, 10);
-									echo 'ERROR: Unable to rename: '. $upgrade_staging_extract_dir .' to: '. $upgrade_staging_latest_dir ."\n";
+									sleep(5); //Might fix possible "Access is denied. (code: 5)" errors on Windows when using PHP v5.2 (https://bugs.php.net/bug.php?id=43817)
+									if ( rename( $upgrade_staging_extract_dir, $upgrade_staging_latest_dir ) == FALSE ) { //Don't hide any error messages this time.
+										Debug::Text('ERROR: Unable to rename: '. $upgrade_staging_extract_dir .' to: '. $upgrade_staging_latest_dir, __FILE__, __LINE__, __METHOD__, 10);
+										echo 'ERROR: Unable to rename: '. $upgrade_staging_extract_dir .' to: '. $upgrade_staging_latest_dir ."\n";
+									}
 								}
 							} else {
 								Debug::Text('ERROR: UPGRADE.ZIP extract directory does not exist...', __FILE__, __LINE__, __METHOD__, 10);

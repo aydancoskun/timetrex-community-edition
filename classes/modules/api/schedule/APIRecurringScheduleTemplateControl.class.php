@@ -74,6 +74,7 @@ class APIRecurringScheduleTemplateControl extends APIFactory {
 
 		$data = array(
 						'company_id' => $company_obj->getId(),
+						'created_by_id' => $this->getCurrentUserObject()->getId(),
 					);
 
 		return $this->returnHandler( $data );
@@ -217,20 +218,28 @@ class APIRecurringScheduleTemplateControl extends APIFactory {
 					if ( $is_valid == TRUE ) {
 						Debug::Text('Saving data...', __FILE__, __LINE__, __METHOD__, 10);
 
-						$recurring_schedule_template_ids = Misc::arrayColumn( $row['recurring_schedule_template'], 'id' );
-						//Debug::Arr($recurring_schedule_template_ids, 'Template IDs...', __FILE__, __LINE__, __METHOD__, 10);
+						if ( isset($row['recurring_schedule_template']) ) {
+							$recurring_schedule_template_ids = Misc::arrayColumn( $row['recurring_schedule_template'], 'id' );
+						} else {
+							$recurring_schedule_template_ids = array();
+						}
 
-						$rstlf = TTnew('RecurringScheduleTemplateListFactory');
-						$rstlf->getByRecurringScheduleTemplateControlId( (int)$row['id'] );
-						if ( $rstlf->getRecordCount() > 0 ) {
-							foreach( $rstlf as $rst_obj ) {
-								if ( !in_array( (int)$rst_obj->getId(), $recurring_schedule_template_ids ) ) {
-									Debug::Text('Removing Template ID: '. $rst_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
-									$rst_obj->Delete();
+						//Debug::Arr($recurring_schedule_template_ids, 'Template IDs...', __FILE__, __LINE__, __METHOD__, 10);
+						if ( count($recurring_schedule_template_ids) > 0 ) {
+							//Only delete templates if there are some to delete, and definitely not during a Mass Edit.
+							$rstlf = TTnew('RecurringScheduleTemplateListFactory');
+							$rstlf->getByRecurringScheduleTemplateControlId( (int)$row['id'] );
+							if ( $rstlf->getRecordCount() > 0 ) {
+								foreach( $rstlf as $rst_obj ) {
+									if ( !in_array( (int)$rst_obj->getId(), $recurring_schedule_template_ids ) ) {
+										Debug::Text('Removing Template ID: '. $rst_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+										$rst_obj->Delete();
+									}
 								}
 							}
+							unset($rstlf, $rst_obj);
 						}
-						unset($rstlf, $rst_obj, $recurring_schedule_template_ids);
+						unset($recurring_schedule_template_ids);
 
 						//Save templates here...
 						if ( isset($row['recurring_schedule_template']) AND is_array($row['recurring_schedule_template']) AND count($row['recurring_schedule_template']) > 0 ) {

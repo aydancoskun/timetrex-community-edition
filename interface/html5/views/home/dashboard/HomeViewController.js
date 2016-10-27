@@ -16,6 +16,7 @@ HomeViewController = Backbone.View.extend( {
 		this.user_generic_data_api = new (APIFactory.getAPIClass( 'APIUserGenericData' ))();
 		this.api_dashboard = new (APIFactory.getAPIClass( 'APIDashboard' ))();
 		this.dashboard_container = $( this.el ).find( '.dashboard-container' );
+		this.initMasonryDone = false;
 		this.initContextMenu();
 		this.initDashBoard();
 		this.setViewHeight();
@@ -148,31 +149,31 @@ HomeViewController = Backbone.View.extend( {
 						for ( var i = 0; i < $this.dashlet_list.length; i++ ) {
 							ids.push( $this.dashlet_list[i].id );
 						}
-						if(ids.length > 0){
-						$this.user_generic_data_api.deleteUserGenericData( ids, {
-							onResult: function( result ) {
-								if ( result.isValid() ) {
+						if ( ids.length > 0 ) {
+							$this.user_generic_data_api.deleteUserGenericData( ids, {
+								onResult: function( result ) {
+									if ( result.isValid() ) {
 										doResetAllNext();
 									} else {
 										TAlertManager.showErrorAlert( result );
 									}
 								}
 							} )
-						}else{
+						} else {
 							doResetAllNext();
 						}
 
-						function doResetAllNext(){
-									if ( $this.order_data ) {
-										$this.user_generic_data_api.deleteUserGenericData( $this.order_data.id, {
-											onResult: function() {
-												$this.initDashBoard();
-											}
-										} );
-									} else {
+						function doResetAllNext() {
+							if ( $this.order_data ) {
+								$this.user_generic_data_api.deleteUserGenericData( $this.order_data.id, {
+									onResult: function() {
 										$this.initDashBoard();
 									}
-								}
+								} );
+							} else {
+								$this.initDashBoard();
+							}
+						}
 
 					} else {
 						ProgressBar.closeOverlay();
@@ -365,9 +366,12 @@ HomeViewController = Backbone.View.extend( {
 	},
 
 	unLoadCurrentDashlets: function() {
-		for ( var i = 0; i < this.dashletControllerArray.length; i++ ) {
-			var dashletController = this.dashletControllerArray[i];
-			dashletController.cleanWhenUnloadView();
+		//Error: TypeError: this.dashletControllerArray is null in interface/html5/framework/jquery.min.js?v=9.0.2-20151106-092147 line 2 > eval line 368
+		if(this.dashletControllerArray){
+			for ( var i = 0; i < this.dashletControllerArray.length; i++ ) {
+				var dashletController = this.dashletControllerArray[i];
+				dashletController.cleanWhenUnloadView();
+			}
 		}
 		this.dashletControllerArray = [];
 	},
@@ -486,7 +490,11 @@ HomeViewController = Backbone.View.extend( {
 				$this.dashboard_container.append( dash_let );
 				dash_let.find( '.button' ).unbind( 'click' ).bind( 'click', function( e ) {
 					var target = e.target;
-					var container = $( target ).parent().parent().parent()
+					var container = $( target ).parent().parent().parent();
+					// Error: Uncaught TypeError: Cannot read property 'split' of undefined in interface/html5/#!m=Home line 490
+					if ( !container.attr( 'id' ) ) {
+						return;
+					}
 					var dashlet_id = container.attr( 'id' ).split( '_' )[1];
 
 					if ( $( target ).hasClass( 'delete-btn' ) ) {
@@ -544,7 +552,7 @@ HomeViewController = Backbone.View.extend( {
 	addMissedDashLetToOrder: function( dashlet_list ) {
 		var $this = this;
 		//Error: Uncaught TypeError: $this.order_data.data.push is not a function in interface/html5/#!m=Home line 546
-		if ( !$this.order_data || !$this.order_data.data  ) {
+		if ( !$this.order_data || !$this.order_data.data ) {
 			return;
 		}
 		for ( var j = 0, jj = dashlet_list.length; j < jj; j++ ) {

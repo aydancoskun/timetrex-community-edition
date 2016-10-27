@@ -296,7 +296,7 @@ var HTML_AJAX_Util = {
 			}
 			node.innerHTML = '';
 		}
-		var good_browser = (window.opera || navigator.product == 'Gecko');
+		var good_browser = (navigator.product == 'Gecko');
 		var regex = /^([\s\S]*?)<script([\s\S]*?)>([\s\S]*?)<\/script>([\s\S]*)$/i;
 		var regex_src = /src=["'](.*?)["']/i;
 		var matches, id, script, output = '', subject = innerHTML;

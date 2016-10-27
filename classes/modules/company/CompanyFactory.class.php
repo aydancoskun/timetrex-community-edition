@@ -3124,6 +3124,21 @@ class CompanyFactory extends Factory {
 	function Validate( $ignore_warning = TRUE ) {
 		global $config_vars;
 
+		global $current_user;
+		if ( is_object($current_user) AND $current_user->getCompany() == $this->getID() ) { //Acting on currently logged in user.
+			if ( $this->getDeleted() == TRUE ) {
+				$this->Validator->isTrue(		'status',
+													FALSE,
+													TTi18n::gettext('Unable to delete your own company') );
+			}
+
+			if ( $this->getStatus() != 10 ) {
+				$this->Validator->isTrue(		'status_id',
+													FALSE,
+													TTi18n::gettext('Unable to change status of your own company') );
+			}
+		}
+
 		//Don't allow the primary company to be deleted.
 		if ( $this->getDeleted() == TRUE
 				AND isset($config_vars['other']['primary_company_id']) AND $config_vars['other']['primary_company_id'] == $this->getID() ) {

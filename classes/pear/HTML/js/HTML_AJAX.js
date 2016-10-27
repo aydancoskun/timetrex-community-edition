@@ -99,27 +99,22 @@ if (!Array.pop && !Array.prototype.pop) {
 		return this.splice(this.length - 1, 1)[0];
 	}
 }
-/*
-	From IE7, version 0.9 (alpha) (2005-08-19)
-	Copyright: 2004-2005, Dean Edwards (http://dean.edwards.name/)
-*/
-if (!DOMParser.parseFromString && window.ActiveXObject)
-{
-function DOMParser() {/* empty constructor */};
-DOMParser.prototype = {
-	parseFromString: function(str, contentType) {
-		var xmlDocument = new ActiveXObject('Microsoft.XMLDOM');
-		xmlDocument.loadXML(str);
-		return xmlDocument;
-	}
-};
+if (window.ActiveXObject && window['DOMParser'] == 'undefined') {
+	window.DOMParser = new function() {};
+	DOMParser.prototype = {
+		parseFromString: function(str, contentType) {
+			var xmlDocument = new ActiveXObject('Microsoft.XMLDOM');
+			xmlDocument.loadXML(str);
+			return xmlDocument;
+		}
+	};
 
-function XMLSerializer() {/* empty constructor */};
-XMLSerializer.prototype = {
-	serializeToString: function(root) {
-		return root.xml || root.outerHTML;
-	}
-};
+	window.XMLSerializer = new function() {};
+	XMLSerializer.prototype = {
+		serializeToString: function(root) {
+			return root.xml || root.outerHTML;
+		}
+	};
 }
 // Main.js
 /**
@@ -154,7 +149,7 @@ XMLSerializer.prototype = {
  * HTML_AJAX static methods, this is the main proxyless api, it also handles global error and event handling
  */
 var HTML_AJAX = {
-	version: '0.5.2',
+	version: '0.5.7',
 	defaultServerUrl: false,
 	defaultEncoding: 'JSON',
 	queues: false,
@@ -319,7 +314,7 @@ var HTML_AJAX = {
 		'Error':		'application/error',
 		'PHP':			'application/php-serialized',
 		'HA' :			'application/html_ajax_action',
-		'Urlencoded':	'application/x-www-form-urlencoded'
+		'Urlencoded':		'application/x-www-form-urlencoded'
 	},
 	// used internally to make queues work, override Load or onError to perform custom events when a request is complete
 	// fires on success and error
@@ -515,8 +510,14 @@ var HTML_AJAX = {
 				request[i] = options[i];
 			}
 		}
-		HTML_AJAX.makeRequest(request);
-		return true;
+
+		if (request.isAsync == false) {
+			return HTML_AJAX.makeRequest(request);
+		}
+		else {
+			HTML_AJAX.makeRequest(request);
+			return true;
+		}
 	}, // end formSubmit()
 	makeFormAJAX: function(form,target,options) {
 		form = HTML_AJAX_Util.getElement(form);
@@ -1765,22 +1766,17 @@ HTML_AJAX_HttpClient.prototype = {
 			var self = this;
 			this.xmlhttp.open(this.request.requestType,this.request.completeUrl(),this.request.isAsync);
 			if (this.request.customHeaders) {
-				for (i in this.request.customHeaders) {
+				for (var i in this.request.customHeaders) {
 					this.xmlhttp.setRequestHeader(i, this.request.customHeaders[i]);
 				}
 			}
 			if (this.request.customHeaders && !this.request.customHeaders['Content-Type']) {
 				var content = this.request.getContentType();
-				//opera is stupid for anything but plain text or xml!!
-				if(window.opera && content != 'application/xml')
-				{
-					this.xmlhttp.setRequestHeader('Content-Type','text/plain; charset=utf-8');
-					this.xmlhttp.setRequestHeader('x-Content-Type', content + '; charset=utf-8');
+				var charsetIndex = content.indexOf('; charset=UTF-8');
+				if (charsetIndex == -1) {
+					content += '; charset=UTF-8';
 				}
-				else
-				{
-					this.xmlhttp.setRequestHeader('Content-Type', content +  '; charset=utf-8');
-				}
+				this.xmlhttp.setRequestHeader('Content-Type', content);
 			}
 
 			if (this.request.isAsync) {
@@ -1914,7 +1910,7 @@ HTML_AJAX_HttpClient.prototype = {
 			content = content.substring(0, content.indexOf(';'));
 		}
 		// hook for xml, it doesn't need to be unserialized
-		if(content == 'application/xml')
+		if(content == 'application/xml' || content == 'text/xml')
 		{
 			return this.xmlhttp.responseXML;
 		}
@@ -1996,7 +1992,7 @@ HTML_AJAX_Request.prototype = {
 	priority: 0,
 
 	// a hash of headers to add to add to this request
-	customHeaders: {'X-Requested-With': 'XMLHttpRequest', 'X-Ajax-Engine': 'HTML_AJAX/0.5.2'},
+	customHeaders: {'X-Requested-With': 'XMLHttpRequest', 'X-Ajax-Engine': 'HTML_AJAX/0.5.7'},
 
 	// true if this request will be sent using iframes
 	iframe: false,
@@ -2889,7 +2885,7 @@ var HTML_AJAX_Util = {
 			}
 			node.innerHTML = '';
 		}
-		var good_browser = (window.opera || navigator.product == 'Gecko');
+		var good_browser = (navigator.product == 'Gecko');
 		var regex = /^([\s\S]*?)<script([\s\S]*?)>([\s\S]*?)<\/script>([\s\S]*)$/i;
 		var regex_src = /src=["'](.*?)["']/i;
 		var matches, id, script, output = '', subject = innerHTML;

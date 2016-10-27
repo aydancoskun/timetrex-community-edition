@@ -119,6 +119,7 @@ class GeneralLedgerExport {
 				$file_format_obj = new GeneralLedgerExport_File_Format_Sage300( $this->data );
 				break;
 			case 'csv':
+			case 'export_csv':
 				$file_format_obj = new GeneralLedgerExport_File_Format_CSV( $this->data );
 				break;
 		}
@@ -750,7 +751,7 @@ class GeneralLedgerExport_File_Format_Sage300 Extends GeneralLedgerExport {
 			$line1[] = 'JE'; //SRCETYPE
 			$line1[] = $this->toDate( $journal_entry->getDate() );
 
-			$line1 = implode('","',  $line1);
+			$line1 = implode('","', $line1);
 			Debug::Text('Line 1 (Header): '. $line1, __FILE__, __LINE__, __METHOD__, 10);
 			$retval[] = '"'. $line1 .'"';
 

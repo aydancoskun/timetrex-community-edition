@@ -47,6 +47,40 @@ class PayrollDeduction_US_DC extends PayrollDeduction_US {
 */
 	
 	var $state_income_tax_rate_options = array(
+												20160101 => array(
+															10 => array(
+																	array( 'income' => 10000,	'rate' => 4.0,	'constant' => 0 ),
+																	array( 'income' => 40000,	'rate' => 6.0,	'constant' => 400 ),
+																	array( 'income' => 60000,	'rate' => 6.5,	'constant' => 2200 ),
+																	array( 'income' => 350000,	'rate' => 8.5,	'constant' => 3500 ),
+																	array( 'income' => 1000000,	'rate' => 8.75,	'constant' => 28150 ),
+																	array( 'income' => 1000000,	'rate' => 8.95,	'constant' => 85025 ),
+																	),
+															20 => array(
+																	array( 'income' => 10000,	'rate' => 4.0,	'constant' => 0 ),
+																	array( 'income' => 40000,	'rate' => 6.0,	'constant' => 400 ),
+																	array( 'income' => 60000,	'rate' => 6.5,	'constant' => 2200 ),
+																	array( 'income' => 350000,	'rate' => 8.5,	'constant' => 3500 ),
+																	array( 'income' => 1000000,	'rate' => 8.75,	'constant' => 28150 ),
+																	array( 'income' => 1000000,	'rate' => 8.95,	'constant' => 85025 ),
+																	),
+															30 => array(
+																	array( 'income' => 10000,	'rate' => 4.0,	'constant' => 0 ),
+																	array( 'income' => 40000,	'rate' => 6.0,	'constant' => 400 ),
+																	array( 'income' => 60000,	'rate' => 6.5,	'constant' => 2200 ),
+																	array( 'income' => 350000,	'rate' => 8.5,	'constant' => 3500 ),
+																	array( 'income' => 1000000,	'rate' => 8.75,	'constant' => 28150 ),
+																	array( 'income' => 1000000,	'rate' => 8.95,	'constant' => 85025 ),
+																	),
+															40 => array(
+																	array( 'income' => 10000,	'rate' => 4.0,	'constant' => 0 ),
+																	array( 'income' => 40000,	'rate' => 6.0,	'constant' => 400 ),
+																	array( 'income' => 60000,	'rate' => 6.5,	'constant' => 2200 ),
+																	array( 'income' => 350000,	'rate' => 8.5,	'constant' => 3500 ),
+																	array( 'income' => 1000000,	'rate' => 8.75,	'constant' => 28150 ),
+																	array( 'income' => 1000000,	'rate' => 8.95,	'constant' => 85025 ),
+																	),
+															),
 												20150101 => array(
 															10 => array(
 																	array( 'income' => 10000,	'rate' => 4.0,	'constant' => 0 ),

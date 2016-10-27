@@ -459,6 +459,14 @@ class SchedulePolicyFactory extends Factory {
 	}
 
 	function Validate( $ignore_warning = TRUE ) {
+		if ( $this->getDeleted() != TRUE AND $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing.
+			if ( $this->getName() == '' ) {
+				$this->Validator->isTRUE(	'name',
+											FALSE,
+											TTi18n::gettext('Please specify a name') );
+			}
+		}
+
 		return TRUE;
 	}
 

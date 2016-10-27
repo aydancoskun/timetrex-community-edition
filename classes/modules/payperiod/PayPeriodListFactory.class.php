@@ -1105,7 +1105,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 					where	pay_period_schedule_id = ?
 						AND start_date < ?
 						AND deleted=0
-					ORDER BY id desc
+					ORDER BY start_date desc
 					LIMIT 1';
 					
 		$this->ExecuteSQL( $query, $ph );

@@ -478,10 +478,10 @@ class ExceptionFactory extends Factory {
 						AND $u_obj->getStatus() == 10 ) {
 					Debug::Text(' Emailing exception to user!', __FILE__, __LINE__, __METHOD__, 10);
 					if ( $u_obj->getWorkEmail() != '' AND $u_obj->getWorkEmailIsValid() == TRUE ) {
-						$retarr[] = $u_obj->getWorkEmail();
+						$retarr[] = Misc::formatEmailAddress( $u_obj->getWorkEmail(), $u_obj );
 					}
 					if ( $u_obj->getUserPreferenceObject()->getEnableEmailNotificationHome() == TRUE AND $u_obj->getHomeEmail() != '' AND $u_obj->getHomeEmailIsValid() == TRUE ) {
-						$retarr[] = $u_obj->getHomeEmail();
+						$retarr[] = Misc::formatEmailAddress( $u_obj->getHomeEmail(), $u_obj );
 					}
 				} else {
 					Debug::Text(' Skipping email to user.', __FILE__, __LINE__, __METHOD__, 10);
@@ -504,11 +504,11 @@ class ExceptionFactory extends Factory {
 										AND $parent_user_obj->getStatus() == 10 ) {
 									Debug::Text(' Emailing exception to supervisor!', __FILE__, __LINE__, __METHOD__, 10);
 									if ( $parent_user_obj->getWorkEmail() != '' AND $parent_user_obj->getWorkEmailIsValid() == TRUE ) {
-										$retarr[] = $parent_user_obj->getWorkEmail();
+										$retarr[] = Misc::formatEmailAddress( $parent_user_obj->getWorkEmail(), $parent_user_obj );
 									}
 
 									if ( $parent_user_obj->getUserPreferenceObject()->getEnableEmailNotificationHome() == TRUE AND $parent_user_obj->getHomeEmail() != '' AND $parent_user_obj->getHomeEmailIsValid() == TRUE ) {
-										$retarr[] = $parent_user_obj->getHomeEmail();
+										$retarr[] = Misc::formatEmailAddress( $parent_user_obj->getHomeEmail(), $parent_user_obj );
 									}
 								} else {
 									Debug::Text(' Skipping email to supervisor.', __FILE__, __LINE__, __METHOD__, 10);
@@ -565,7 +565,7 @@ class ExceptionFactory extends Factory {
 			return FALSE;
 		}
 
-		$from = $reply_to = '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Exception') .'"<DoNotReply@'. Misc::getEmailDomain() .'>';
+		$from = $reply_to = '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Exception') .'" <DoNotReply@'. Misc::getEmailDomain() .'>';
 		Debug::Text('To: '. implode(',', $email_to_arr), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( is_array($email_to_arr) ) {

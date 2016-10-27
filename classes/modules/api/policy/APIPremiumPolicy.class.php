@@ -222,7 +222,6 @@ class APIPremiumPolicy extends APIFactory {
 					$row['company_id'] = $this->getCurrentCompanyObject()->getId();
 
 					$lf->setObjectFromArray( $row, $validate_only );
-
 					$lf->Validator->setValidateOnly( $validate_only );
 
 					$is_valid = $lf->isValid( $ignore_warning );

@@ -286,7 +286,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 			$this.saveInsideEditorData( result, function() {
 				$this.search();
 				$this.onSaveDone( result );
-				$this.current_edit_record = null;
+
 				$this.removeEditView();
 			} );
 

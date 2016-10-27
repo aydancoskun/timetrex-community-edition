@@ -284,13 +284,13 @@ class APIDashboard extends APIFactory {
 
 				//Job Tracking Reports
 				if ( $product_edition >= 20 ) {
-					if ( $this->getPermissionObject()->Check('report', 'enabled') AND $this->getPermissionObject()->Check('report', 'view_job_summary') ) {
+					if ( $this->getPermissionObject()->Check('report', 'enabled') AND $this->getPermissionObject()->Check('job_report', 'view_job_summary') ) {
 						$retarr['JobSummaryReport'] = TTi18n::getText('Job Summary');
 					}
-					if ( $this->getPermissionObject()->Check('report', 'enabled') AND $this->getPermissionObject()->Check('report', 'view_job_analysis') ) {
+					if ( $this->getPermissionObject()->Check('report', 'enabled') AND $this->getPermissionObject()->Check('job_report', 'view_job_analysis') ) {
 						$retarr['JobDetailReport'] = TTi18n::getText('Job Analysis');
 					}
-					if ( $this->getPermissionObject()->Check('report', 'enabled') AND $this->getPermissionObject()->Check('report', 'view_job_summary') ) {
+					if ( $this->getPermissionObject()->Check('report', 'enabled') AND $this->getPermissionObject()->Check('job_report', 'view_job_summary') ) {
 						$retarr['JobInformationReport'] = TTi18n::getText('Job Information');
 						$retarr['JobItemInformationReport'] = TTi18n::getText('Task Information');
 					}
@@ -362,8 +362,7 @@ class APIDashboard extends APIFactory {
 			foreach ($user_generic_data['filter_data'] as $key => $value) {
 				if ( is_array($value['value']) ) {
 					$values = array();
-					for ($i = 0; $i < count($value['value']); $i++) {
-						$item = $value['value'][$i];
+					foreach( $value['value'] as $i => $item ) {
 						if ( isset($item['value']) ) { // saved options
 							$values[] = $item['value'];
 						} else if ( isset($item['id']) ) {  // saved awesomebox
@@ -733,7 +732,10 @@ class APIDashboard extends APIFactory {
 					$pplf->getLastPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate($this->getCurrentCompanyObject()->getId(), array( $pay_period_schedule_id ), time());
 					if ( $pplf->getRecordCount() > 0 ) {
 						foreach ($pplf as $pp_obj) {
-							$pay_period_ids[] = $pp_obj->getId();
+							//Only show last pay period if its not closed.
+							if ( $pp_obj->getStatus() != 20 ) {
+								$pay_period_ids[] = $pp_obj->getId();
+							}
 						}
 					}
 

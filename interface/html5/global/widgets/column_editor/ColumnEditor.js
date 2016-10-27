@@ -39,11 +39,11 @@
 
 		this.getIsMouseOver = function() {
 			return is_mouse_over;
-		}
+		};
 
 		this.getParentAwesomeBox = function() {
 			return parent_awesome_box;
-		}
+		};
 
 		Global.addCss( 'global/widgets/column_editor/ColumnEditor.css' );
 
@@ -68,7 +68,7 @@
 			a_dropdown = Global.loadWidget( 'global/widgets/awesomebox/ADropDown.html' );
 			a_dropdown = $( a_dropdown );
 			//Create ADropDown
-			a_dropdown = a_dropdown.ADropDown( {display_show_all: false, id: 'column_editor', key: 'value', display_close_btn: false} );
+			a_dropdown = a_dropdown.ADropDown( {display_show_all: false, id: 'column_editor', key: 'value', display_close_btn: false, display_column_settings: false} );
 
 			a_dropdown_div.append( a_dropdown );
 

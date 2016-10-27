@@ -533,7 +533,7 @@ class APIPayStub extends APIFactory {
 		return $this->returnHandler( FALSE );
 	}
 
-	function generatePayStubs( $pay_period_ids, $user_ids = NULL, $enable_correction = FALSE, $run_id = 1, $type_id = 10, $transaction_date = NULL ) {
+	function generatePayStubs( $pay_period_ids, $user_ids = NULL, $enable_correction = FALSE, $run_id = FALSE, $type_id = 10, $transaction_date = NULL ) {
 		global $profiler;
 		Debug::Text('Generate Pay Stubs!', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -568,6 +568,11 @@ class APIPayStub extends APIFactory {
 				Debug::text('Pay Period Schedule ID: '. $pay_period_obj->getPayPeriodSchedule(), __FILE__, __LINE__, __METHOD__, 10);
 				if ( $pay_period_obj->isPreviousPayPeriodClosed() == TRUE ) {
 					$pslf = TTnew( 'PayStubListFactory' );
+					
+					if ( (int)$run_id == 0 ) {
+						$run_id = PayStubListFactory::getCurrentPayRun( $this->getCurrentCompanyObject()->getId(), $pay_period_obj->getId() );
+					}
+					Debug::text('  Using Run ID: '. $run_id, __FILE__, __LINE__, __METHOD__, 10);
 
 					//Check to make sure pay stubs with a transaction date before today are not open, as that can cause the payroll run number to be incorrectly determined on its own.
 					$open_pay_stub_transaction_date = ( TTDate::getMiddleDayEpoch( time() ) >= TTDate::getMiddleDayEpoch( $pay_period_obj->getTransactionDate() ) ) ? $pay_period_obj->getTransactionDate() : TTDate::getBeginDayEpoch( time() );

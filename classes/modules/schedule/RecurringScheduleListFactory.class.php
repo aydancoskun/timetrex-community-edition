@@ -334,15 +334,9 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 
 		$ph = array(
 					'company_id' => (int)$company_id,
-					'start_date' => $this->db->BindTimeStamp( $start_date ),
-					'end_date' => $this->db->BindTimeStamp( $end_date ),
+					'start_date' => (int)$start_date,
+					'end_date' => (int)$end_date,
 					);
-
-		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
-				$interval_sql = '';
-		} else {
-				$interval_sql = '* INTERVAL \'1 second\'';
-		}
 					
 		//
 		// Base the start_date/end_date filter on start_time only.
@@ -400,10 +394,11 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 													)
 						WHERE sf.id is NULL
 							AND uf.company_id = ?
-							AND ( rsf.start_time - ( CASE WHEN spf.start_stop_window > 0 THEN spf.start_stop_window ELSE 1 END '. $interval_sql .' ) ) >= ?
-							AND ( rsf.start_time - ( CASE WHEN spf.start_stop_window > 0 THEN spf.start_stop_window ELSE 1 END '. $interval_sql .' ) ) <= ?
+							AND ( '. $this->getSQLToEpochFunction( 'rsf.start_time') .' - ( CASE WHEN spf.start_stop_window > 0 THEN spf.start_stop_window ELSE 1 END ) ) >= ?
+							AND ( '. $this->getSQLToEpochFunction( 'rsf.start_time') .' - ( CASE WHEN spf.start_stop_window > 0 THEN spf.start_stop_window ELSE 1 END ) ) <= ?
 							AND ( rsf.deleted = 0 AND ( spf.id IS NULL OR spf.deleted = 0 ) )
 					';
+
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 

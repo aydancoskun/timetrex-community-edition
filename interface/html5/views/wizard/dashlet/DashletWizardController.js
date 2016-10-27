@@ -31,6 +31,10 @@ DashletWizardController = BaseWizardController.extend( {
 		ScheduleSummaryReport: 'APIScheduleSummaryReport',
 		TimeSheetDetailReport: 'APITimesheetDetailReport',
 		TimeSheetSummaryReport: 'APITimesheetSummaryReport',
+		JobSummaryReport: 'APIJobSummaryReport',
+		JobDetailReport: 'APIJobDetailReport',
+		JobInformationReport: 'APIJobInformationReport',
+		JobItemInformationReport: 'APIJobItemInformationReport',
 		ActiveShiftReport: 'APIActiveShiftReport'
 	},
 
@@ -81,8 +85,6 @@ DashletWizardController = BaseWizardController.extend( {
 				if ( step_1_data.dashlet_type == 'custom_list' ) {
 					label.text( $.i18n._( 'Choose a list view and layout to display in the dashlet' ) );
 					this.content_div.append( label );
-
-
 
 					// Choose view
 					form_item = $( Global.loadWidget( 'global/widgets/wizard_form_item/WizardFormItem.html' ) );
@@ -249,7 +251,8 @@ DashletWizardController = BaseWizardController.extend( {
 			case 1:
 				api.getOptions( 'dashlets', {
 					onResult: function( result ) {
-						current_step_ui.dashlet_type.setSourceData( Global.buildRecordArray( result.getResult() ) );
+						var result_data = Global.buildRecordArray( result.getResult() );
+						current_step_ui.dashlet_type.setSourceData( result_data );
 						if ( current_step_data ) {
 							if ( current_step_data.dashlet_type ) {
 								current_step_ui.dashlet_type.setValue( current_step_data.dashlet_type );
@@ -302,6 +305,10 @@ DashletWizardController = BaseWizardController.extend( {
 					api.getOptions( 'custom_report', {
 						onResult: function( result ) {
 							var array = Global.buildRecordArray( result.getResult() );
+							if ( array.length === 0 ) {
+								Global.setWidgetEnabled( $this.done_btn, false );
+								return;
+							}
 							current_step_ui.report.setSourceData( array );
 							//If has saved steps data
 							if ( current_step_data && current_step_data.report ) {
@@ -558,7 +565,7 @@ DashletWizardController = BaseWizardController.extend( {
 			this.stepsWidgetDic[2].name.setErrorStyle( 'Dashlet title can\'t be empty', true );
 			return;
 		}
-		
+
 		if ( dashlet_type == 'custom_list' ) {
 			var view_name = this.stepsDataDic[2].script;
 			var layout_id = this.stepsDataDic[2].layout;

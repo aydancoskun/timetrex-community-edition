@@ -50,6 +50,7 @@ class LogFactory extends Factory {
 		switch( $name ) {
 			case 'action':
 				$retval = array(
+											5 => TTi18n::gettext('View'), //For special cases like viewing documents. We don't want to log every view action as that would be hugely overkill.
 											10 => TTi18n::gettext('Add'),
 											20 => TTi18n::gettext('Edit'),
 											30 => TTi18n::gettext('Delete'),
@@ -273,7 +274,7 @@ class LogFactory extends Factory {
 											'premium_policy_job_item'			=> array('premium_policy'),
 											'absence_policy'					=> array('absence_policy'),
 											'exception_policy_control'			=> array('exception_policy'),
-											'exception_policy'					=> array('excepton_policy'),
+											'exception_policy'					=> array('exception_policy'),
 											'holiday_policy'					=> array('holiday_policy'),
 											'holiday_policy_recurring_holiday'	=> array('holiday_policy'),
 											'regular_time_policy'				=> array('regular_time_policy'),

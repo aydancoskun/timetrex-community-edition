@@ -1,0 +1,586 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="ROEHEADER">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ROE"
+                    type="RoeType"
+                    minOccurs="1"
+                    maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="FileVersion"
+                    type="xs:string"
+                    use="required"
+                    fixed="W-2.0"/>
+      <xs:attribute name="SoftwareVendor"
+                    type="SoftwareVendorType"
+                    use="required"/>
+      <xs:attribute name="ProductName"
+                    type="ProductNameType"
+                    use="required" />
+      <xs:attribute name="ProductVersion"
+                    type="ProductVersionType"
+                    use="optional" />
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="RoeType">
+    <xs:sequence>
+      <xs:element name="B2"
+                  type="SerialNumberType"
+                  minOccurs="0"
+                  maxOccurs="1" />
+      <xs:element name="B3"
+                  type="PayrollRefType"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+      <xs:element name="B5"
+                  type="BusinessNumberWithOrgAndFolderCds"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="B6"
+                  type="PayPeriodCodeType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="B8"
+                  type="SinType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="B9"
+                  type="EmployeeInfoType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="B10"
+                  type="BulkRoeDateType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="B11"
+                  type="BulkRoeDateType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="B12"
+                  type="BulkRoeDateType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="B13"
+                  type="OccupationType"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+      <xs:element name="B14"
+                  type="ExpectedRecallInfoType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="B15A"
+                  type="TotalInsurableHoursType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="B15C"
+                  type="PayPeriodDetailsType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="B16"
+                  type="ContactAndReasonForIssuingCodeType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="B17A"
+                  type="VacationPayType"
+                  minOccurs="0"
+                  maxOccurs="1">
+      </xs:element>
+      <xs:element name="B17B"
+                  type="StatutoryHolidayListType"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+      <xs:element name="B17C"
+                  type="OtherMoniesListType"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+      <xs:element name="B18"
+                  type="CommentsType"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+      <xs:element name="B19"
+                  type="SpecialPaymentListType"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+      <xs:element name="B20"
+                  type="LanguageType"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute name="PrintingLanguage"
+                  type="LanguageType"
+                  use="required"/>
+    <xs:attribute name="Issue"
+                  type="IssueCodeType"
+                  use="required"/>
+  </xs:complexType>
+  <xs:simpleType name="SerialNumberType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="9"/>
+      <xs:pattern value="([A-Z][0-9]{8}|)" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="PayrollRefType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="26"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="BusinessNumberType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="15"/>
+      <xs:pattern value="[0-9]{9}[R][PW][0-9]{4}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="BusinessNumberWithOrgAndFolderCds">
+    <xs:simpleContent>
+      <xs:extension base="BusinessNumberType">
+        <xs:attribute name="OrgNum"
+                      type="OrgNumType"
+                      use="optional"/>
+        <xs:attribute name="FolderCD"
+                      type="FolderCodeType"
+                      use="optional"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:simpleType name="PayPeriodCodeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="B"/>
+      <xs:enumeration value="M"/>
+      <xs:enumeration value="O"/>
+      <xs:enumeration value="S"/>
+      <xs:enumeration value="E"/>
+      <xs:enumeration value="H"/>
+      <xs:enumeration value="W"/>
+      <xs:enumeration value="b"/>
+      <xs:enumeration value="m"/>
+      <xs:enumeration value="o"/>
+      <xs:enumeration value="s"/>
+      <xs:enumeration value="e"/>
+      <xs:enumeration value="h"/>
+      <xs:enumeration value="w"/>
+      <xs:maxLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="SinType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="9"/>
+      <xs:pattern value="[0-9]{9}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="EmployeeInfoType">
+    <xs:sequence>
+      <xs:element name="FN"
+                  type="FirstNameType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="MN"
+                  type="MiddleNameType"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+      <xs:element name="LN"
+                  type="LastNameType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="A1"
+                  type="EmployeeAddressLineType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="A2"
+                  type="EmployeeAddressLineType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="A3"
+                  type="EmployeeAddressLineType"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+      <xs:element name="PC"
+                  type="EmployeePostalCodeType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:simpleType name="FirstNameType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="20"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="MiddleNameType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="4"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="LastNameType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="28"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="EmployeeAddressLineType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="35"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="OccupationType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="40"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ExpectedRecallInfoType">
+    <xs:sequence>
+      <xs:element name="CD"
+                  type="RecallCodeType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="DT"
+                  type="NullableDate"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:simpleType name="RecallCodeType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="1"/>
+      <xs:enumeration value="N"/>
+      <xs:enumeration value="U"/>
+      <xs:enumeration value="Y"/>
+      <xs:enumeration value="n"/>
+      <xs:enumeration value="u"/>
+      <xs:enumeration value="y"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="TotalInsurableHoursType">
+    <xs:restriction base="xs:integer">
+      <xs:minInclusive value="1"/>
+      <xs:maxInclusive value="8904"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="PayPeriodDetailsType">
+    <xs:sequence>
+      <xs:element name="PP"
+                  type="PayPeriodType"
+                  minOccurs="1"
+                  maxOccurs="53"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="PayPeriodType">
+    <xs:sequence>
+      <xs:element name="AMT"
+                  type="BulkRoeAmountType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute name="nbr"
+                  use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:integer">
+          <xs:minInclusive value="1"/>
+          <xs:maxInclusive value="53"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="ContactAndReasonForIssuingCodeType">
+    <xs:sequence>
+      <xs:element name="CD"
+                  type="ReasonForIssuingCodeType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="FN"
+                  type="FirstNameType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="LN"
+                  type="LastNameType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="AC"
+                  type="PhoneAreaCodeType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="TEL"
+                  type="PhoneNumberType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="EXT"
+                  type="PhoneExtensionType"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:simpleType name="PhoneAreaCodeType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="3"/>
+      <xs:pattern value="[0-9]{3}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="PhoneNumberType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="7"/>
+      <xs:pattern value="[0-9]{7}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="PhoneExtensionType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="8"/>
+      <xs:pattern value="[0-9]{0,8}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ReasonForIssuingCodeType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="3"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="StatutoryHolidayListType">
+    <xs:sequence>
+      <xs:element name="SH"
+                  type="StatutoryHolidayType"
+                  minOccurs="0"
+                  maxOccurs="10"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="StatutoryHolidayType">
+    <xs:sequence>
+      <xs:element name="DT"
+                  type="NullableDate"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+      <xs:element name="AMT"
+                  type="BulkRoeAmountType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute name="nbr"
+                  use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:integer">
+          <xs:minInclusive value="1"/>
+          <xs:maxInclusive value="10"/>
+        </xs:restriction>
+
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="OtherMoniesListType">
+    <xs:sequence>
+      <xs:element name="OM"
+                  type="OtherMoneyType"
+                  minOccurs="0"
+                  maxOccurs="3"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="OtherMoneyType">
+    <xs:sequence>
+      <xs:element name="CD"
+                  type="OtherMoneyCodeType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="SDT"
+                  type="NullableDate"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+      <xs:element name="EDT"
+                  type="NullableDate"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+      <xs:element name="AMT"
+                  type="NullableBulkRoeAmountType"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute name="nbr"
+                  use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:integer">
+          <xs:minInclusive value="1"/>
+          <xs:maxInclusive value="3"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:simpleType name="OtherMoneyCodeType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="3"/>
+      <xs:minLength value="3"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="CommentsType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="160"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="LanguageType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="E"/>
+      <xs:enumeration value="F"/>
+      <xs:enumeration value="e"/>
+      <xs:enumeration value="f"/>
+      <xs:enumeration value="" />
+      <xs:maxLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="SpecialPaymentListType">
+    <xs:sequence>
+      <xs:element name="SP"
+                  type="SpecialPaymentType"
+                  minOccurs="0"
+                  maxOccurs="4"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="SpecialPaymentType">
+    <xs:sequence>
+      <xs:element name="SDT"
+                  type="NullableDate"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+      <xs:element name="EDT"
+                  type="NullableDate"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+      <xs:element name="AMT"
+                  type="NullableBulkRoeAmountType"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+      <xs:element name="PRD"
+                  type="SpecialPaymentPeriodType"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute name="cd"
+                  type="SpecialPaymentCodeType"
+                  use="required">
+    </xs:attribute>
+  </xs:complexType>
+  <xs:simpleType name="SpecialPaymentPeriodType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="1"/>
+      <xs:enumeration value="D"/>
+      <xs:enumeration value="W"/>
+      <xs:enumeration value="d"/>
+      <xs:enumeration value="w"/>
+      <xs:enumeration value=""/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="IssueCodeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="S"/>
+      <xs:enumeration value="D"/>
+      <xs:enumeration value="s"/>
+      <xs:enumeration value="d"/>
+      <xs:enumeration value="" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="BulkRoeDateType">
+    <xs:restriction base="xs:date"/>
+  </xs:simpleType>
+  <xs:simpleType name="BulkRoeAmountType">
+    <xs:restriction base="xs:decimal">
+      <xs:fractionDigits value="2"/>
+      <xs:totalDigits value="8"/>
+      <xs:minInclusive value="0.00"/>
+      <xs:maxInclusive value="999999.99"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="SoftwareVendorType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="100"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ProductNameType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="100"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ProductVersionType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="10"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="OrgNumType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="15"/>
+      <xs:pattern value="[A-Z]{3}[0-9]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="FolderCodeType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="30"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="EmployeePostalCodeType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="10"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="NullableDate">
+    <xs:union memberTypes="xs:date">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value=""/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:union>
+  </xs:simpleType>
+  <xs:complexType name="VacationPayType">
+    <xs:sequence>
+      <xs:element name="VP"
+                  type="VacationPayDetailType"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="VacationPayDetailType">
+    <xs:sequence>
+      <xs:element name="CD"
+                  type="VacationCodeType"
+                  minOccurs="1"
+                  maxOccurs="1"/>
+      <xs:element name="SDT"
+                  type="NullableDate"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+      <xs:element name="EDT"
+                  type="NullableDate"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+      <xs:element name="AMT"
+                  type="NullableBulkRoeAmountType"
+                  minOccurs="0"
+                  maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute name="nbr"
+                  type="VacationPayNumberType"
+                  use="required"/>
+  </xs:complexType>
+  <xs:simpleType name="VacationPayNumberType">
+    <xs:restriction base="xs:integer">
+      <xs:minInclusive value="1"/>
+      <xs:maxInclusive value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="VacationCodeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="1"/>
+      <xs:enumeration value="2"/>
+      <xs:enumeration value="3"/>
+      <xs:enumeration value="4"/>
+      <xs:maxLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="SpecialPaymentCodeType">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="5"/>
+      <xs:minLength value="5"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="NullableBulkRoeAmountType">
+    <xs:union memberTypes="BulkRoeAmountType empty-string" />
+  </xs:simpleType>
+
+  <xs:simpleType name="empty-string">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="" />
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>

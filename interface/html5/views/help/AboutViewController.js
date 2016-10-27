@@ -110,7 +110,7 @@ AboutViewController = BaseViewController.extend( {
 		var $this = this;
 		this.api['isNewVersionAvailable']( {onResult: function( result ) {
 			$this.current_edit_record = result.getResult();
-			$this.setEditViewWidgetsMode();
+
 			$this.initEditView();
 		}} );
 	},
@@ -139,7 +139,7 @@ AboutViewController = BaseViewController.extend( {
 			$this.getAboutData( function( result ) {
 				// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
 				$this.current_edit_record = result;
-				$this.setEditViewWidgetsMode();
+
 				$this.initEditView();
 
 			} );

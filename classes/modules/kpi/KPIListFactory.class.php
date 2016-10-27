@@ -245,6 +245,7 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		}
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
 
+		//This is special in that there is an "--ALL--" group that KPIs must actually be assigned to (in addition to any other group if needed), in order to appear when a review is created using the "--ALL--" group.
 		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'b.map_id', $filter_data['group_id'], 'numeric_list_with_all', $ph ) : NULL;
 		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => (int)$company_id, 'object_type_id' => 310, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 

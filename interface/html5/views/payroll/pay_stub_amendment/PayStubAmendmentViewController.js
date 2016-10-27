@@ -296,7 +296,8 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 			permission_result: true,
 			permission: null
 		} );
-
+/*
+		//Checks/Direct Deposit no longer needed for Pay Stub Amendments now that out-of-cycle pay stubs are available.
 		var print_checks = new RibbonSubMenu( {
 			label: $.i18n._( 'Print Checks' ),
 			id: ContextMenuIconName.print_checks,
@@ -342,7 +343,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				nav: direct_deposit
 			} );
 		}
-
+*/
 		var import_csv = new RibbonSubMenu( {
 			label: $.i18n._( 'Import' ),
 			id: ContextMenuIconName.import_icon,
@@ -954,7 +955,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 	openEditView: function() {
 		this.initEditViewUI( this.viewId, this.edit_view_tpl );
 
-		this.setEditViewWidgetsMode();
+
 	},
 
 //	onCopyAsNewClick: function() {
@@ -1142,7 +1143,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				}
 				$this.search();
 				$this.onSaveDone( result );
-				$this.current_edit_record = null;
+
 				$this.removeEditView();
 
 			} else {
@@ -1159,6 +1160,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 			ignoreWarning = false;
 		}
 		this.is_add = true;
+		this.is_changed = false;
 		var record = this.current_edit_record;
 		LocalCacheData.current_doing_context_action = 'save_and_copy';
 		var records_data = null;

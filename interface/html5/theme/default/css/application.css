@@ -47,6 +47,10 @@ html, div {
     /*height: 100%;*/
 }
 
+textarea {
+    resize: vertical;
+}
+
 .float-left {
     float: left;
 }
@@ -158,6 +162,10 @@ progress::-moz-progress-bar {
     display: block;
     font-weight: bold;
     margin-top: 50px;
+}
+
+.dashlet .no-result-div .message {
+    font-size: 20px;
 }
 
 .save-and-continue-div .save-and-continue-button-div {
@@ -296,6 +304,7 @@ progress::-moz-progress-bar {
     margin-right: 0;
     margin-left: 0;
     height: 170px;
+    position: relative;
 
 }
 
@@ -673,6 +682,15 @@ progress::-moz-progress-bar {
     display: inline-block;
     word-wrap: break-word;
     line-height: 25px;
+}
+
+.t-text-selected-able {
+    -webkit-touch-callout: initial;
+    -webkit-user-select: initial;
+    -khtml-user-select: initial;
+    -moz-user-select: initial;
+    -ms-user-select: initial;
+    user-select: initial;
 }
 
 .t-checkbox {
@@ -1120,6 +1138,10 @@ progress::-moz-progress-bar {
 
 }
 
+.edit-view .navigation-div .navigation-widget-div .a-combobox {
+    margin-top: 1px;
+}
+
 .edit-view .widget-h-box {
 
 }
@@ -1185,10 +1207,12 @@ progress::-moz-progress-bar {
 .overlay {
     bottom: 0;
     left: 0;
-    position: fixed;
+    position: absolute;
     right: 0;
     top: 0;
     z-index: 100;
+    background: #fff; /* Fix for IE */
+    opacity: 0; /* Fix for IE */
 }
 
 .paging-div {
@@ -1772,7 +1796,6 @@ progress::-moz-progress-bar {
 
 .formula-builder .formula-textarea {
     float: left;
-
 }
 
 .formula-builder .formula-btn {
@@ -2009,7 +2032,7 @@ progress::-moz-progress-bar {
     padding: 5px;
     box-sizing: border-box;
     min-width: 200px;
-    min-height: 200px;
+    min-height: 120px;
     max-width: calc(100% - 5px);
 
 }
@@ -2293,7 +2316,8 @@ progress::-moz-progress-bar {
 
 }
 
-.t-alert .content-div {
+.t-alert .content-div,
+.confirm-alert .content-div {
     min-height: 100px;
     max-height: 200px;
     overflow: auto;
@@ -2437,6 +2461,98 @@ progress::-moz-progress-bar {
 
 }
 
-.SearchPanel-displayColumns-label{
+.SearchPanel-displayColumns-label {
     margin-bottom: 10px;
+}
+
+.signal-strength {
+    height: 20px;
+    list-style: none;
+    overflow: hidden;
+    float: left;
+    margin: 0;
+    padding: 0;
+    margin-top: 4px;
+    margin-right: 10px;
+    display: none;
+    cursor: pointer;
+    border: 1px solid #355f87;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 3px;
+    padding-right: 2px;
+    border-radius: 3px;
+}
+
+.signal-strength li {
+    display: inline-block;
+    width: 5px;
+    float: left;
+    height: 100%;
+    margin-right: 1px;
+    box-sizing: border-box;
+
+}
+
+.signal-strength-pretty-strong {
+    padding-top: 0;
+}
+
+.signal-strength-strong {
+    padding-top: 5px;
+}
+
+.signal-strength-weak {
+    padding-top: 10px;
+}
+
+.signal-strength-very-weak {
+    padding-top: 15px;
+}
+
+.signal-strength li div {
+    height: 100%;
+    background: #355f87;
+}
+
+.signal-strength-empty div {
+    background: #aaa !important;
+}
+
+.employee-email-icon {
+    vertical-align: middle;
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+.tt-liveChat {
+    border: 1px solid #355f87;
+    border-radius: 3px;
+    position: relative;
+    color: #4a4a4a;
+    padding-left: 15px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-right: 40px;
+    background-color: #fff;
+    display: inline-block;
+    font-size: 12px;
+    text-decoration: none;
+}
+
+.tt-liveChat:after {
+    background: url("../images/live_chat.png");
+    width: 18px;
+    height: 15px;
+    background-size: 18px 15px;
+    display: inline-block;
+    content: "";
+    position: absolute;
+    right: 10px;
+}
+
+.top-container-liveChat {
+    position: absolute;
+    top: 3px;
+    right: 186px;
 }

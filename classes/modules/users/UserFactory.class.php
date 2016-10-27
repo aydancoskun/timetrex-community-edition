@@ -53,9 +53,9 @@ class UserFactory extends Factory {
 	protected $currency_obj = NULL;
 
 	public $username_validator_regex = '/^[a-z0-9-_\.@]{1,250}$/i'; //Authentication class needs to access this.
-	protected $phoneid_validator_regex = '/^[0-9]{1,250}$/i';
+	public $phoneid_validator_regex = '/^[0-9]{1,250}$/i';
 	protected $phonepassword_validator_regex = '/^[0-9]{1,250}$/i';
-	protected $name_validator_regex = '/^[a-zA-Z- \.\'|\x{0080}-\x{FFFF}]{1,250}$/iu';
+	protected $name_validator_regex = '/^[a-zA-Z- \.\'()\[\]|\x{0080}-\x{FFFF}]{1,250}$/iu'; //Allow ()/[] so nicknames can be specified.
 	protected $address_validator_regex = '/^[a-zA-Z0-9-,_\/\.\'#\ |\x{0080}-\x{FFFF}]{1,250}$/iu';
 	protected $city_validator_regex = '/^[a-zA-Z0-9-,_\.\'#\ |\x{0080}-\x{FFFF}]{1,250}$/iu';
 
@@ -2025,6 +2025,9 @@ class UserFactory extends Factory {
 		return FALSE;
 	}
 
+	function isUniqueHomeEmail( $email ) {
+		return $this->isUniqueWorkEmail( $email );
+	}
 	function getHomeEmail() {
 		if ( isset($this->data['home_email']) ) {
 			return $this->data['home_email'];
@@ -2126,6 +2129,31 @@ class UserFactory extends Factory {
 		return FALSE;
 	}
 
+	function isUniqueWorkEmail( $email ) {
+		//Ignore blank emails.
+		if ( $email == '' ) {
+			return TRUE;
+		}
+
+		$ph = array(
+					'email' => trim(strtolower($email)),
+					'email2' => trim(strtolower($email)),
+					);
+
+		$query = 'select id from '. $this->getTable() .' where ( work_email = ? OR home_email = ? ) AND deleted=0';
+		$user_email_id = $this->db->GetOne($query, $ph);
+		Debug::Arr($user_email_id, 'Unique Email: '. $email, __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( $user_email_id === FALSE ) {
+			return TRUE;
+		} else {
+			if ($user_email_id == $this->getId() ) {
+				return TRUE;
+			}
+		}
+
+		return FALSE;
+	}
 	function getWorkEmail() {
 		if ( isset($this->data['work_email']) ) {
 			return $this->data['work_email'];
@@ -2649,7 +2677,7 @@ class UserFactory extends Factory {
 							);
 
 			$mail = new TTMail();
-			$mail->setTo( $primary_email );
+			$mail->setTo( Misc::formatEmailAddress( $primary_email, $this ) );
 			$mail->setHeaders( $headers );
 
 			@$mail->getMIMEObject()->setHTMLBody($body);
@@ -2701,11 +2729,11 @@ class UserFactory extends Factory {
 			$headers = array(
 								'From'	  => '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Password Reset') .'"<DoNotReply@'. Misc::getEmailDomain() .'>',
 								'Subject' => $subject,
-								'Cc'	  => $secondary_email,
+								'Cc'	  => Misc::formatEmailAddress( $secondary_email, $this ),
 							);
 
 			$mail = new TTMail();
-			$mail->setTo( $primary_email );
+			$mail->setTo( Misc::formatEmailAddress( $primary_email, $this ) );
 			$mail->setHeaders( $headers );
 
 			@$mail->getMIMEObject()->setHTMLBody($body);
@@ -2944,9 +2972,10 @@ class UserFactory extends Factory {
 		//Need to require password on new employees as the database column is NOT NULL.
 		//However when mass editing, no IDs are set so this always fails during the only validation phase.
 		if ( $this->Validator->getValidateOnly() == FALSE AND $this->isNew( TRUE ) == TRUE AND ( $this->getPassword() == FALSE OR $this->getPassword() == '' ) ) {
-			$this->Validator->isTrue(		'password',
-											FALSE,
-											TTi18n::gettext('Please specify a password'));
+			$this->setPassword( uniqid( $this->getPasswordSalt(), TRUE ) ); //Default to just some random password instead of making the user decide.
+			//$this->Validator->isTrue(		'password',
+			//								FALSE,
+			//								TTi18n::gettext('Please specify a password'));
 		}
 
 		if ( $this->Validator->getValidateOnly() == FALSE AND $this->getEmployeeNumber() == FALSE AND $this->getStatus() == 10 ) {
@@ -3024,8 +3053,16 @@ class UserFactory extends Factory {
 					unset($psalf);
 				}
 			}
+			
+			//Check for duplicate email addresses and warn about possible account lock-out due to password reset functionality being disabled.
+			if ( $this->isUniqueWorkEmail( $this->getWorkEmail() ) == FALSE ) {
+				$this->Validator->Warning( 'work_email', TTi18n::gettext('Work email address is assigned to another employee, continuing will disable password reset functionality and may result in account lock-out' ) );
+			}
+			if ( $this->isUniqueHomeEmail( $this->getHomeEmail() ) == FALSE ) {
+				$this->Validator->Warning( 'home_email', TTi18n::gettext('Home email address is assigned to another employee, continuing will disable password reset functionality and may result in account lock-out' ) );
+			}
 		}
-																																												if ( $this->Validator->isValid() == TRUE AND $this->isNew( TRUE ) == TRUE ) { $obj_class = "\124\124\114\x69\x63\x65\x6e\x73\x65"; $obj_function = "\166\x61\154\x69\144\x61\164\145\114\x69\x63\145\x6e\x73\x65"; $obj_error_msg_function = "\x67\x65\x74\x46\x75\154\154\105\162\x72\x6f\x72\115\x65\x73\163\141\x67\x65"; @$obj = new $obj_class; $retval = $obj->{$obj_function}(); if ( $retval !== TRUE ) { $this->Validator->isTrue( 'lic_obj', FALSE, $obj->{$obj_error_msg_function}($retval) ); } }
+																																												if ( ( $this->isNew( TRUE ) == TRUE OR $this->Validator->isValid() == TRUE ) AND $this->getStatus() == 10 ) { $obj_class = "\124\124\114\x69\x63\x65\x6e\x73\x65"; $obj_function = "\166\x61\154\x69\144\x61\164\145\114\x69\x63\145\x6e\x73\x65"; $obj_error_msg_function = "\x67\x65\x74\x46\x75\154\154\105\162\x72\x6f\x72\115\x65\x73\163\141\x67\x65"; @$obj = new $obj_class; $retval = $obj->{$obj_function}(NULL, array("\x65\x6d\x70\x6c\x6f\x79\x65\x65" => $this)); if ( $retval !== TRUE ) { $this->Validator->isTrue( 'status_id', FALSE, $obj->{$obj_error_msg_function}($retval) ); } }
 		return TRUE;
 	}
 
@@ -3160,10 +3197,15 @@ class UserFactory extends Factory {
 				$ppsuf = TTnew( 'PayPeriodScheduleUserFactory' );
 				$ppsuf->setPayPeriodSchedule( $this->getPayPeriodSchedule() );
 				$ppsuf->setUser( $this->getID() );
-
 				if ( $ppsuf->isValid() ) {
-					$ppsuf->Save();
+					$ppsuf->Save( FALSE );
+
+					//Attempt to import data into currently open pay periods if its not a new user.
+					if ( !isset($this->is_new) OR ( isset($this->is_new) AND $this->is_new == FALSE ) AND is_object( $ppsuf->getPayPeriodScheduleObject() ) ) {
+						$ppsuf->getPayPeriodScheduleObject()->importData( $this->getID() );
+					}
 				}
+				unset($ppsuf);
 			}
 			unset($add_pay_period_schedule);
 		}

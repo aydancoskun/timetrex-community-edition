@@ -121,6 +121,8 @@ class APICompanyDeduction extends APIFactory {
 		} elseif ( $this->getPermissionObject()->Check('user_tax_deduction', 'enabled') AND ( $this->getPermissionObject()->Check('user_tax_deduction', 'view') OR $this->getPermissionObject()->Check('user_tax_deduction', 'view_own') OR $this->getPermissionObject()->Check('user_tax_deduction', 'view_child') ) )  {
 			Debug::Text('Using user_tax_deduction permission_children...', __FILE__, __LINE__, __METHOD__, 10);
 			$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user_tax_deduction', 'view' );
+		} else {
+			$data['filter_data']['permission_children_ids'] = NULL;
 		}
 
 		$blf = TTnew( 'CompanyDeductionListFactory' );

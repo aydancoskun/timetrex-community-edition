@@ -774,8 +774,7 @@ PayStubViewController = BaseViewController.extend( {
 			if ( Global.isSet( widget ) ) {
 				switch ( key ) {
 					case 'country':
-						this.eSetProvince( this.current_edit_record[key] );
-						widget.setValue( this.current_edit_record[key] );
+						this.setCountryValue(widget, key);
 						break;
 					case 'status_id':
 						if ( this.current_edit_record[key] === 40 || this.current_edit_record[key] === 100 ) {
@@ -1502,7 +1501,7 @@ PayStubViewController = BaseViewController.extend( {
 //			$this.saveInsideEditorData( function() {
 //				$this.search();
 //				$this.onSaveDone( result );
-//				$this.current_edit_record = null;
+//
 //				$this.removeEditView();
 //			} );
 //
@@ -1511,7 +1510,7 @@ PayStubViewController = BaseViewController.extend( {
 //			$this.setErrorMenu();
 //		}
 //	},
-	onCopyAsNewClick: function() {
+	_continueDoCopyAsNew: function() {
 		var $this = this;
 		var reload_entries = false;
 		this.is_add = true;
@@ -1544,7 +1543,7 @@ PayStubViewController = BaseViewController.extend( {
 			navigation_div.css( 'display', 'none' );
 			this.setEditMenu();
 			this.setTabStatus();
-
+			this.is_changed = false;
 			// reset the entries data.
 //			if ( reload_entries ) {
 				this.editor.removeAllRows( true );
@@ -1817,11 +1816,6 @@ PayStubViewController = BaseViewController.extend( {
 
 		this.current_edit_record[key] = c_value;
 		switch ( key ) {
-//			case 'status_id':
-//				if ( c_value === 40 || c_value === 100 ) {
-//					this.include_entries = false;
-//				}
-//				break;
 			case 'country':
 				var widget = this.edit_view_ui_dic['province'];
 				widget.setValue( null );
@@ -1831,7 +1825,8 @@ PayStubViewController = BaseViewController.extend( {
 				filter.filter_data = {};
 				filter.filter_data.id = c_value;
 				this.pay_period_api['get' + this.pay_period_api.key_name]( filter, {onResult: function( res ) {
-					if ( res.isValid() ) {
+					//Error: Uncaught TypeError: Cannot read property 'start_date' of undefined in interface/html5/#!m=PayStub&a=new&tab=PayStub line 1836
+					if ( res.isValid() && res.getResult()[0] ) {
 						var result = res.getResult()[0];
 						var start_date = Global.strToDate( result.start_date ).format();
 						var end_date = Global.strToDate( result.end_date ).format();
@@ -1848,7 +1843,6 @@ PayStubViewController = BaseViewController.extend( {
 						if ( !doNotValidate ) {
 							$this.validate();
 						}
-
 					}
 				}} );
 				break;

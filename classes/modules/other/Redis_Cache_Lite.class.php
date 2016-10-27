@@ -155,7 +155,11 @@ class Redis_Cache_Lite extends Cache_Lite {
 		$redis = $this->redisConnect('master');
 		//if ( !PEAR::isError($redis) ) {
 		if ( is_object($redis) AND get_class($redis) == 'Redis' ) {
-			return $redis->get( $this->_file );
+			try {
+				return $redis->get( $this->_file );
+			} catch (Exception $e) {
+				Debug::Text( 'Redis Error: Message: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 1);
+			}
 		}
 
 		//return $this->raiseError('Cache_Lite : Unable to read cache !', -2); //In order to catch these we need to include PEAR.php all the time.
@@ -208,7 +212,11 @@ class Redis_Cache_Lite extends Cache_Lite {
 		//if ( !PEAR::isError($redis) ) {
 		if ( is_object($redis) AND get_class($redis) == 'Redis' ) {
 			//Debug::text('Writing to REDIS as KEY: '. $this->_file, __FILE__, __LINE__, __METHOD__, 10);
-			return $redis->set( $this->_file, $data, $this->_lifeTime );
+			try {
+				return $redis->set( $this->_file, $data, $this->_lifeTime );
+			} catch (Exception $e) {
+				Debug::Text( 'Redis Error: Message: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 1);
+			}
 		}
 
 		//return $this->raiseError('Cache_Lite : Unable to write cache file : '.$this->_file, -1); //In order to catch these we need to include PEAR.php all the time.
@@ -223,9 +231,13 @@ class Redis_Cache_Lite extends Cache_Lite {
 				//if ( !PEAR::isError($redis) ) {
 				if ( is_object($redis) AND get_class($redis) == 'Redis' ) {
 					//Debug::text('Deleting REDIS as KEY: '. $this->_file .' Server Key: '. $server_key, __FILE__, __LINE__, __METHOD__, 10);
-					if ( $redis->del( $this->_file ) === FALSE ) {
-						//return $this->raiseError('Cache_Lite : Unable to delete cache file : '.$this->_file, -1);  //In order to catch these we need to include PEAR.php all the time.
-						return FALSE;
+					try {
+						if ( $redis->del( $this->_file ) === FALSE ) {
+							//return $this->raiseError('Cache_Lite : Unable to delete cache file : '.$this->_file, -1);  //In order to catch these we need to include PEAR.php all the time.
+							return FALSE;
+						}
+					} catch (Exception $e) {
+						Debug::Text( 'Redis Error: Message: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 1);
 					}
 				}
 			}
@@ -241,10 +253,14 @@ class Redis_Cache_Lite extends Cache_Lite {
 				$redis = $this->redisConnect( $server_key );
 				//if ( !PEAR::isError($redis) ) {
 				if ( is_object($redis) AND get_class($redis) == 'Redis' ) {
-					if ( $group != '' ) {
-						$redis->eval( 'return redis.call(\'del\', unpack(redis.call(\'keys\', ARGV[1])))', array( $group .'_*' ) );
-					} else {
-						$redis->flushdb(); //If no group is specified, flush all keys in DB.
+					try {
+						if ( $group != '' ) {
+							$redis->eval( 'return redis.call(\'del\', unpack(redis.call(\'keys\', ARGV[1])))', array( $group .'_*' ) );
+						} else {
+							$redis->flushdb(); //If no group is specified, flush all keys in DB.
+						}
+					} catch (Exception $e) {
+						Debug::Text( 'Redis Error: Message: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 1);
 					}
 				}
 			}

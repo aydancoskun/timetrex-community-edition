@@ -100,7 +100,7 @@ UserGroupViewController = BaseViewController.extend( {
 
 	},
 
-	onCopyAsNewClick: function() {
+	_continueDoCopyAsNew: function() {
 
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
 		var $this = this;
@@ -111,6 +111,7 @@ UserGroupViewController = BaseViewController.extend( {
 			navigation_div.css( 'display', 'none' );
 			this.setEditMenu();
 			this.setTabStatus();
+			this.is_changed = false;
 			ProgressBar.closeOverlay();
 
 		} else {

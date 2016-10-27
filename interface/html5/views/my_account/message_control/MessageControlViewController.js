@@ -434,7 +434,7 @@ MessageControlViewController = BaseViewController.extend( {
 
 			if ( iconName === ContextMenuIconName.cancel && $this.isReloadViewUI ) {
 				$this.isReloadViewUI = false;
-//				$this.current_edit_record = null; //set to fix that IndexViewConroler force ui back to view when open view again
+//				 //set to fix that IndexViewConroler force ui back to view when open view again
 				$this.onViewClick( $this.current_select_message_control_data );
 			} else {
 				$this.removeEditView();
@@ -460,7 +460,7 @@ MessageControlViewController = BaseViewController.extend( {
 			}
 
 			$this.onSaveDone( result );
-			$this.current_edit_record = null;
+
 
 			if ( $this.isReloadViewUI ) {
 				$this.isReloadViewUI = false;
@@ -646,7 +646,7 @@ MessageControlViewController = BaseViewController.extend( {
 
 	openEditView: function() {
 		this.initEditViewUI( this.viewId, this.edit_view_tpl );
-		this.setEditViewWidgetsMode();
+
 	},
 
 	setGridCellBackGround: function() {
@@ -1175,17 +1175,17 @@ MessageControlViewController = BaseViewController.extend( {
 
 		// Employee
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'full_name'} );
+		form_item_input.TText( {field: 'full_name', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_message_column1, '' );
 
 		// Date
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'date_stamp'} );
+		form_item_input.TText( {field: 'date_stamp', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_message_column1 );
 
 		// Type
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'type'} );
+		form_item_input.TText( {field: 'type', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_message_column1, '' );
 
 		// tab_message first column end
@@ -1206,17 +1206,17 @@ MessageControlViewController = BaseViewController.extend( {
 
 		// From
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'from'} );
+		form_item_input.TText( {field: 'from', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'From' ), form_item_input, tab_message_column2, '' );
 
 		// Subject
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'subject'} );
+		form_item_input.TText( {field: 'subject', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_message_column2 );
 
 		// Body
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'body'} );
+		form_item_input.TText( {field: 'body', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_message_column2, '', null, null, true );
 
 		// Tab 0 second column end
@@ -1262,27 +1262,27 @@ MessageControlViewController = BaseViewController.extend( {
 
 		// From
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'from_full_name'} );
+		form_item_input.TText( {field: 'from_full_name', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'From' ), form_item_input, tab_message_column1, '' );
 
 		// To
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'to_full_name'} );
+		form_item_input.TText( {field: 'to_full_name', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'To' ), form_item_input, tab_message_column1 );
 
 		// Date
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'updated_date'} );
+		form_item_input.TText( {field: 'updated_date', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_message_column1 );
 
 		// Subject
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'subject'} );
+		form_item_input.TText( {field: 'subject', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_message_column1 );
 
 		// Body
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'body'} );
+		form_item_input.TText( {field: 'body', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_message_column1, '', null, null, true );
 
 		tab_message_column2.css( 'display', 'none' );
@@ -1503,16 +1503,11 @@ MessageControlViewController = BaseViewController.extend( {
 	setCurrentEditRecordData: function() {
 		var $this = this;
 		// If the current_edit_record is an array, then handle them in setEditViewDataDone function.
-
 		if ( Global.isArray( this.current_edit_record ) ) {
 			this.setMultipleMessages();
-
 		} else {
-
 			//Set current edit record data to all widgets
-
 			for ( var key in this.current_edit_record ) {
-
 				var widget = this.edit_view_ui_dic[key];
 				if ( Global.isSet( widget ) ) {
 					switch ( key ) {
@@ -1541,24 +1536,19 @@ MessageControlViewController = BaseViewController.extend( {
 							widget.setValue( this.current_edit_record[key] );
 							break;
 					}
-
 				}
 			}
-
 			//request will do this when initEmbeddedMessage
-			if ( this.is_message && this.current_edit_record.status_id == 10 ) {
+			if ( this.is_message && this.current_edit_record && this.current_edit_record.status_id == 10 ) {
 				this.api['markRecipientMessageAsRead']( [this.current_edit_record.id], {
 					onResult: function( res ) {
 						$this.search( false );
 					}
 				} );
 			}
-
 		}
-
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
-
 	},
 	/* jshint ignore:end */
 	autoOpenEditViewIfNecessary: function() {

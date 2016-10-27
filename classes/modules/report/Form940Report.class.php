@@ -572,13 +572,13 @@ class Form940Report extends Report {
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments']	= $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'] = 0;
 
 						//Need to total up payments for each employee so we know when we exceed the limit.
-						$this->tmp_data['user_total'][$user_id]['net_payments'] += $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['net_payments'];
+						$this->tmp_data['user_total'][$user_id]['net_payments'] = bcadd( $this->tmp_data['user_total'][$user_id]['net_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['net_payments'] );
 
 						if ( $this->tmp_data['user_total'][$user_id]['excess_payments'] == 0  ) {
 							if ( $this->tmp_data['user_total'][$user_id]['net_payments'] > $payments_over_cutoff ) {
 								//Debug::Text(' First time over cutoff for User: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments'] = ( $this->tmp_data['user_total'][$user_id]['net_payments'] - $payments_over_cutoff );
-								$this->tmp_data['user_total'][$user_id]['excess_payments'] += $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments'];
+								$this->tmp_data['user_total'][$user_id]['excess_payments'] = bcadd( $this->tmp_data['user_total'][$user_id]['excess_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments'] );
 							}
 						} else {
 							//Debug::Text(' Next time over cutoff for User: '. $user_id .' Date Stamp: '. $date_stamp, __FILE__, __LINE__, __METHOD__, 10);
@@ -602,13 +602,13 @@ class Form940Report extends Report {
 						if ( !isset($this->form_data['pay_period'][$quarter_month][$date_stamp]) ) {
 							$this->form_data['pay_period'][$quarter_month][$date_stamp] = Misc::preSetArrayValues( array(), array('total_payments', 'exempt_payments', 'excess_payments', 'taxable_wages', 'before_adjustment_tax', 'adjustment_tax', 'after_adjustment_tax' ), 0 );
 						}
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['total_payments'] += $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total_payments'];
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['exempt_payments'] += $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['exempt_payments'];
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['excess_payments'] += $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments'];
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['taxable_wages'] += $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['taxable_wages'];
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['before_adjustment_tax'] += $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['before_adjustment_tax'];
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['adjustment_tax'] += $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'];
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['after_adjustment_tax'] += $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['after_adjustment_tax'];
+						$this->form_data['pay_period'][$quarter_month][$date_stamp]['total_payments'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['total_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total_payments'] );
+						$this->form_data['pay_period'][$quarter_month][$date_stamp]['exempt_payments'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['exempt_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['exempt_payments'] );
+						$this->form_data['pay_period'][$quarter_month][$date_stamp]['excess_payments'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['excess_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments'] );
+						$this->form_data['pay_period'][$quarter_month][$date_stamp]['taxable_wages'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['taxable_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['taxable_wages'] );
+						$this->form_data['pay_period'][$quarter_month][$date_stamp]['before_adjustment_tax'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['before_adjustment_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['before_adjustment_tax'] );
+						$this->form_data['pay_period'][$quarter_month][$date_stamp]['adjustment_tax'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['adjustment_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'] );
+						$this->form_data['pay_period'][$quarter_month][$date_stamp]['after_adjustment_tax'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['after_adjustment_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['after_adjustment_tax'] );
 					}
 				}
 

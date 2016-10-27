@@ -34,7 +34,6 @@ UserSkillViewController = BaseViewController.extend( {
 	},
 
 	resizeSubGridHeight: function( length ) {
-		debugger
 		var height = ( length * 26 >= 200 ) ? 200 : length * 26;
 		this.grid.setGridHeight( height );
 	},

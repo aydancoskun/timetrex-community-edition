@@ -513,74 +513,46 @@ class T4SummaryReport extends Report {
 		$filter_data = $this->getFilterConfig();
 		$form_data = $this->formatFormConfig();
 
-		$pself = TTnew( 'PayStubEntryListFactory' );
-		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-		if ( $pself->getRecordCount() > 0 ) {
-			foreach( $pself as $pse_obj ) {
+		//
+		//Figure out province/CPP/EI wages/taxes.
+		//
+		$cdlf = TTnew( 'CompanyDeductionListFactory' );
+		$cdlf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), array(10, 20), 10 );
+		if ( $cdlf->getRecordCount() > 0 ) {
+			foreach( $cdlf as $cd_obj ) {
+				if ( in_array( $cd_obj->getCalculation(), array(200, 90, 91) ) ) { //Only consider Province, CPP, EI records.
+					Debug::Text('Company Deduction: ID: '. $cd_obj->getID() .' Name: '. $cd_obj->getName(), __FILE__, __LINE__, __METHOD__, 10);
+					$tax_deductions[$cd_obj->getId()] = $cd_obj;
+					$tax_deduction_users[$cd_obj->getId()] = $cd_obj->getUser(); //Optimization so we don't have to get assigned users more than once per obj, as its used lower down in a tighter loop.
 
-				$user_id = $this->user_ids[] = $pse_obj->getColumn('user_id');
-				//$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_stub_transaction_date') );
-				$branch = $pse_obj->getColumn('default_branch');
-				$department = $pse_obj->getColumn('default_department');
-				$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
-
-				if ( !isset($this->tmp_data['pay_stub_entry'][$user_id]) ) {
-					$this->tmp_data['pay_stub_entry'][$user_id] = array(
-																'date_stamp' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
-																'pay_period_start_date' => strtotime( $pse_obj->getColumn('pay_stub_start_date') ),
-																'pay_period_end_date' => strtotime( $pse_obj->getColumn('pay_stub_end_date') ),
-																'pay_period_transaction_date' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
-																'pay_period' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
-															);
-				}
-
-
-				if ( isset($this->tmp_data['pay_stub_entry'][$user_id]['psen_ids'][$pay_stub_entry_name_id]) ) {
-					$this->tmp_data['pay_stub_entry'][$user_id]['psen_ids'][$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id]['psen_ids'][$pay_stub_entry_name_id], $pse_obj->getColumn('amount') );
-				} else {
-					$this->tmp_data['pay_stub_entry'][$user_id]['psen_ids'][$pay_stub_entry_name_id] = $pse_obj->getColumn('amount');
-				}
-			}
-
-			if ( isset($this->tmp_data['pay_stub_entry']) AND is_array($this->tmp_data['pay_stub_entry']) ) {
-				foreach($this->tmp_data['pay_stub_entry'] as $user_id => $data_b) {
-					$this->tmp_data['pay_stub_entry'][$user_id]['income']					= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['income']['include_pay_stub_entry_account'], $form_data['income']['exclude_pay_stub_entry_account'] );
-					$this->tmp_data['pay_stub_entry'][$user_id]['tax']						= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['tax']['include_pay_stub_entry_account'],	$form_data['tax']['exclude_pay_stub_entry_account'] );
-					$this->tmp_data['pay_stub_entry'][$user_id]['employee_cpp']				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['employee_cpp']['include_pay_stub_entry_account'], $form_data['employee_cpp']['exclude_pay_stub_entry_account'] );
-					$this->tmp_data['pay_stub_entry'][$user_id]['employer_cpp']				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['employer_cpp']['include_pay_stub_entry_account'], $form_data['employer_cpp']['exclude_pay_stub_entry_account'] );
-					$this->tmp_data['pay_stub_entry'][$user_id]['employee_ei']				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['employee_ei']['include_pay_stub_entry_account'],	$form_data['employee_ei']['exclude_pay_stub_entry_account'] );
-					$this->tmp_data['pay_stub_entry'][$user_id]['employer_ei']				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['employer_ei']['include_pay_stub_entry_account'],	$form_data['employer_ei']['exclude_pay_stub_entry_account'] );
-					$this->tmp_data['pay_stub_entry'][$user_id]['ei_earnings']				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['ei_earnings']['include_pay_stub_entry_account'],	$form_data['ei_earnings']['exclude_pay_stub_entry_account'] );
-					$this->tmp_data['pay_stub_entry'][$user_id]['cpp_earnings']				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['cpp_earnings']['include_pay_stub_entry_account'], $form_data['cpp_earnings']['exclude_pay_stub_entry_account'] );
-					$this->tmp_data['pay_stub_entry'][$user_id]['union_dues']				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['union_dues']['include_pay_stub_entry_account'], $form_data['union_dues']['exclude_pay_stub_entry_account'] );
-					$this->tmp_data['pay_stub_entry'][$user_id]['rpp']						= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['rpp']['include_pay_stub_entry_account'], $form_data['rpp']['exclude_pay_stub_entry_account'] );
-					$this->tmp_data['pay_stub_entry'][$user_id]['charity']					= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['charity']['include_pay_stub_entry_account'], $form_data['charity']['exclude_pay_stub_entry_account'] );
-					$this->tmp_data['pay_stub_entry'][$user_id]['pension_adjustment']		= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['pension_adjustment']['include_pay_stub_entry_account'], $form_data['pension_adjustment']['exclude_pay_stub_entry_account'] );
-
-					for( $n = 0; $n <= 5; $n++) {
-						$this->tmp_data['pay_stub_entry'][$user_id]['other_box_'.$n]		= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['other_box'][$n]['include_pay_stub_entry_account'], $form_data['other_box'][$n]['exclude_pay_stub_entry_account'] );
+					//Need to determine start/end dates for each CompanyDeduction/User pair, so we can break down total wages earned in the date ranges.
+					$udlf = TTnew( 'UserDeductionListFactory' );
+					$udlf->getByCompanyIdAndCompanyDeductionId( $cd_obj->getCompany(), $cd_obj->getId() );
+					if ( $udlf->getRecordCount() > 0 ) {
+						foreach( $udlf as $ud_obj ) {
+							//Debug::Text('  User Deduction: ID: '. $ud_obj->getID() .' User ID: '. $ud_obj->getUser(), __FILE__, __LINE__, __METHOD__, 10);
+							$user_deduction_data[$ud_obj->getCompanyDeduction()][$ud_obj->getUser()] = $ud_obj;
+						}
 					}
 				}
 			}
+			//Debug::Arr($tax_deductions, 'Tax Deductions: ', __FILE__, __LINE__, __METHOD__, 10);
+			//Debug::Arr($user_deduction_data, 'User Deductions: ', __FILE__, __LINE__, __METHOD__, 10);
 		}
+		unset($cdlf, $cd_obj, $udlf, $ud_obj);
 
-		$this->user_ids = array_unique( $this->user_ids ); //Used to get the total number of employees.
-
-/*
- 		//Code below ignores CPP/EI earnings if no CPP/EI was deducted, but the better way to handle this is to split out CPP/EI earnings into its own separate pay stub account so adjustments can be made over time.
 		$pself = TTnew( 'PayStubEntryListFactory' );
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		if ( $pself->getRecordCount() > 0 ) {
 			foreach( $pself as $pse_obj ) {
 				$user_id = $this->user_ids[] = $pse_obj->getColumn('user_id');
-				$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_stub_transaction_date') );
-				$branch = $pse_obj->getColumn('default_branch');
-				$department = $pse_obj->getColumn('default_department');
+				$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_stub_end_date') );
 				$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
 
 				if ( !isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]) ) {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] = array(
 																'date_stamp' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
+																'birth_date' => $pse_obj->getColumn('birth_date'), //Its a epoch value, no need to strtotime.
 																'pay_period_start_date' => strtotime( $pse_obj->getColumn('pay_stub_start_date') ),
 																'pay_period_end_date' => strtotime( $pse_obj->getColumn('pay_stub_end_date') ),
 																'pay_period_transaction_date' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
@@ -589,7 +561,7 @@ class T4SummaryReport extends Report {
 				}
 
 				if ( isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id]) ) {
-					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id]['psen_ids'][$pay_stub_entry_name_id], $pse_obj->getColumn('amount') );
+					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id], $pse_obj->getColumn('amount') );
 				} else {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] = $pse_obj->getColumn('amount');
 				}
@@ -598,47 +570,63 @@ class T4SummaryReport extends Report {
 			if ( isset($this->tmp_data['pay_stub_entry']) AND is_array($this->tmp_data['pay_stub_entry']) ) {
 				foreach($this->tmp_data['pay_stub_entry'] as $user_id => $data_a) {
 					foreach($data_a as $date_stamp => $data_b) {
-						if ( !isset($this->tmp_data['form_pay_stub_entry'][$user_id]) ) {
-							$this->tmp_data['form_pay_stub_entry'][$user_id] = $data_b;
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income']					= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['income']['include_pay_stub_entry_account'], $form_data['income']['exclude_pay_stub_entry_account'] );
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['tax']						= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['tax']['include_pay_stub_entry_account'],	$form_data['tax']['exclude_pay_stub_entry_account'] );
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['union_dues']				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['union_dues']['include_pay_stub_entry_account'], $form_data['union_dues']['exclude_pay_stub_entry_account'] );
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['rpp']						= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['rpp']['include_pay_stub_entry_account'], $form_data['rpp']['exclude_pay_stub_entry_account'] );
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['charity']					= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['charity']['include_pay_stub_entry_account'], $form_data['charity']['exclude_pay_stub_entry_account'] );
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pension_adjustment']		= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['pension_adjustment']['include_pay_stub_entry_account'], $form_data['pension_adjustment']['exclude_pay_stub_entry_account'] );
+
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['employee_ei']				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['employee_ei']['include_pay_stub_entry_account'],	$form_data['employee_ei']['exclude_pay_stub_entry_account'] );
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['employer_ei']				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['employer_ei']['include_pay_stub_entry_account'],	$form_data['employer_ei']['exclude_pay_stub_entry_account'] );
+
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['employee_cpp']			= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['employee_cpp']['include_pay_stub_entry_account'], $form_data['employee_cpp']['exclude_pay_stub_entry_account'] );
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['employer_cpp']			= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['employer_cpp']['include_pay_stub_entry_account'], $form_data['employer_cpp']['exclude_pay_stub_entry_account'] );
+
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_earnings'] = 0;
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['ei_earnings'] = 0;
+
+						if ( is_array($data_b['psen_ids']) AND isset($tax_deductions) AND isset($user_deduction_data) ) {
+							//Support multiple tax/deductions that deposit to the same pay stub account.
+							//Also make sure we handle tax/deductions that may not have anything deducted/withheld, but do have wages to be displayed.
+							//  For example an employee not earning enough to have tax taken off yet.
+							//Now that user_deduction supports start/end dates per employee, we could use that to better handle employees switching between Tax/Deduction records mid-year
+							//  while still accounting for cases where nothing is deducted/withheld but still needs to be displayed.
+							foreach( $tax_deductions as $tax_deduction_id => $tax_deduction_obj ) {
+								//Found Tax/Deduction associated with this pay stub account.
+								if ( in_array( $user_id, (array)$tax_deduction_users[$tax_deduction_id]) AND isset($user_deduction_data[$tax_deduction_id][$user_id]) ) {
+									//Debug::Text('Found User ID: '. $user_id .' in Tax Deduction Name: '. $tax_deduction_obj->getName() .'('.$tax_deduction_obj->getID().') Calculation ID: '. $tax_deduction_obj->getCalculation(), __FILE__, __LINE__, __METHOD__, 10);
+
+									if ( $tax_deduction_obj->isActiveDate( $user_deduction_data[$tax_deduction_id][$user_id], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_transaction_date'] ) == TRUE
+											AND $tax_deduction_obj->isActiveLengthOfService( $user_deduction_data[$tax_deduction_id][$user_id], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'] ) == TRUE
+											AND $tax_deduction_obj->isActiveUserAge( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['birth_date'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_transaction_date'] ) == TRUE ) {
+										//Debug::Text('  Is Eligible... Date: '. TTDate::getDate('DATE', $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
+
+										if ( $tax_deduction_obj->getCalculation() == 90 ) {
+											$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_earnings']			= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['cpp_earnings']['include_pay_stub_entry_account'], $form_data['cpp_earnings']['exclude_pay_stub_entry_account'] );
+										}
+
+										if ( $tax_deduction_obj->getCalculation() == 91 ) {
+											$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['ei_earnings']				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['ei_earnings']['include_pay_stub_entry_account'],	$form_data['ei_earnings']['exclude_pay_stub_entry_account'] );
+										}
+									} else {
+										Debug::Text('  NOT Eligible... Date: '. TTDate::getDate('DATE', $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
+									}
+								}
+							}							
 						}
-						$this->tmp_data['form_pay_stub_entry'][$user_id] = Misc::preSetArrayValues( $this->tmp_data['form_pay_stub_entry'][$user_id], array( 'income', 'tax', 'employee_cpp', 'employer_cpp', 'employee_ei', 'employer_ei', 'ei_earnings', 'cpp_earnings', 'union_dues', 'rpp', 'charity', 'pension_adjustment', 'other_box_0', 'other_box_1', 'other_box_2', 'other_box_3', 'other_box_4', 'other_box_5', ), 0 );
-
-						$this->tmp_data['form_pay_stub_entry'][$user_id]['income'] = bcadd( $this->tmp_data['form_pay_stub_entry'][$user_id]['income'], Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['income']['include_pay_stub_entry_account'], $form_data['income']['exclude_pay_stub_entry_account'] ) );
-						$this->tmp_data['form_pay_stub_entry'][$user_id]['tax']	= bcadd( $this->tmp_data['form_pay_stub_entry'][$user_id]['tax'], Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['tax']['include_pay_stub_entry_account'],	$form_data['tax']['exclude_pay_stub_entry_account'] ) );
-
-						$this->tmp_data['form_pay_stub_entry'][$user_id]['employee_cpp'] = bcadd( $this->tmp_data['form_pay_stub_entry'][$user_id]['employee_cpp'], Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['employee_cpp']['include_pay_stub_entry_account'], $form_data['employee_cpp']['exclude_pay_stub_entry_account'] ) );
-						$this->tmp_data['form_pay_stub_entry'][$user_id]['employer_cpp'] = bcadd( $this->tmp_data['form_pay_stub_entry'][$user_id]['employer_cpp'], Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['employer_cpp']['include_pay_stub_entry_account'], $form_data['employer_cpp']['exclude_pay_stub_entry_account'] ) );
-						$this->tmp_data['form_pay_stub_entry'][$user_id]['employee_ei'] = bcadd( $this->tmp_data['form_pay_stub_entry'][$user_id]['employee_ei'], Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['employee_ei']['include_pay_stub_entry_account'],	$form_data['employee_ei']['exclude_pay_stub_entry_account'] ) );
-						$this->tmp_data['form_pay_stub_entry'][$user_id]['employer_ei'] = bcadd( $this->tmp_data['form_pay_stub_entry'][$user_id]['employer_ei'], Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['employer_ei']['include_pay_stub_entry_account'],	$form_data['employer_ei']['exclude_pay_stub_entry_account'] ) );
-
-						//Only include CPP/EI earnings if CPP/EI was deducted, so in case the employee was under 18 or exempt for part of the year the earnings are properly calculated.
-						//FIXME: Perhaps a better way to handle this is to have a separate pay stub account (line item) for insurable earnings and CPP insurable earnings and have
-						//CPP/EI calculated on that, then adjustments can be made to both if necessary.
-						//The problem with just using != 0 is that it doesn't account for adjustments to be made mid-year.
-						if ( $this->tmp_data['form_pay_stub_entry'][$user_id]['employee_cpp'] != 0 OR $this->tmp_data['form_pay_stub_entry'][$user_id]['employer_cpp'] != 0 ) {
-							$this->tmp_data['form_pay_stub_entry'][$user_id]['cpp_earnings'] = bcadd( $this->tmp_data['form_pay_stub_entry'][$user_id]['cpp_earnings'], Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['cpp_earnings']['include_pay_stub_entry_account'], $form_data['cpp_earnings']['exclude_pay_stub_entry_account'] ) );
-						}
-						if ( $this->tmp_data['form_pay_stub_entry'][$user_id]['employee_ei'] != 0 OR $this->tmp_data['form_pay_stub_entry'][$user_id]['employer_ei'] != 0 ) {
-							$this->tmp_data['form_pay_stub_entry'][$user_id]['ei_earnings'] = bcadd( $this->tmp_data['form_pay_stub_entry'][$user_id]['ei_earnings'], Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['ei_earnings']['include_pay_stub_entry_account'],	$form_data['ei_earnings']['exclude_pay_stub_entry_account'] ) );
-						}
-
-						$this->tmp_data['form_pay_stub_entry'][$user_id]['union_dues'] = bcadd( $this->tmp_data['form_pay_stub_entry'][$user_id]['union_dues'], Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['union_dues']['include_pay_stub_entry_account'], $form_data['union_dues']['exclude_pay_stub_entry_account'] ) );
-						$this->tmp_data['form_pay_stub_entry'][$user_id]['rpp'] = bcadd( $this->tmp_data['form_pay_stub_entry'][$user_id]['rpp'], Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['rpp']['include_pay_stub_entry_account'], $form_data['rpp']['exclude_pay_stub_entry_account'] ) );
-						$this->tmp_data['form_pay_stub_entry'][$user_id]['charity'] = bcadd( $this->tmp_data['form_pay_stub_entry'][$user_id]['charity'], Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['charity']['include_pay_stub_entry_account'], $form_data['charity']['exclude_pay_stub_entry_account'] ) );
-						$this->tmp_data['form_pay_stub_entry'][$user_id]['pension_adjustment'] = bcadd( $this->tmp_data['form_pay_stub_entry'][$user_id]['pension_adjustment'], Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['pension_adjustment']['include_pay_stub_entry_account'], $form_data['pension_adjustment']['exclude_pay_stub_entry_account'] ) );
-
+						
 						for( $n = 0; $n <= 5; $n++) {
-							$this->tmp_data['form_pay_stub_entry'][$user_id]['other_box_'.$n] = bcadd( $this->tmp_data['form_pay_stub_entry'][$user_id]['other_box_'.$n], Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['other_box'][$n]['include_pay_stub_entry_account'], $form_data['other_box'][$n]['exclude_pay_stub_entry_account'] ) );
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['other_box_'.$n]		= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['other_box'][$n]['include_pay_stub_entry_account'], $form_data['other_box'][$n]['exclude_pay_stub_entry_account'] );
 						}
 					}
 				}
 			}
+			unset($tax_deductions, $tax_deduction_users, $tax_deduction_id, $tax_deduction_obj, $user_deduction_data, $user_id, $data_a, $data_b);
 		}
 
 		$this->user_ids = array_unique( $this->user_ids ); //Used to get the total number of employees.
-		unset($this->tmp_data['pay_stub_entry']);
 
-*/
 		//Debug::Arr($this->user_ids, 'User IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->form_data, 'Form Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->tmp_data, 'Tmp Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -650,6 +638,7 @@ class T4SummaryReport extends Report {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( $this->getColumnDataConfig() );
+			$this->tmp_data['user'][$u_obj->getId()]['user_id'] = $u_obj->getId();
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
 		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -658,17 +647,17 @@ class T4SummaryReport extends Report {
 	}
 
 	//PreProcess data such as calculating additional columns from raw data etc...
-	function _preProcess() {
+	function _preProcess( $format = NULL ) {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['pay_stub_entry']), NULL, TTi18n::getText('Pre-Processing Data...') );
 
 		//Merge time data with user data
 		$key = 0;
 		if ( isset($this->tmp_data['pay_stub_entry']) ) {
-			foreach( $this->tmp_data['pay_stub_entry'] as $user_id => $row ) {
-				if ( isset($this->tmp_data['user'][$user_id]) ) {
-					$date_columns = TTDate::getReportDates( NULL, $row['date_stamp'], FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
+			foreach( $this->tmp_data['pay_stub_entry'] as $user_id => $level_1 ) {
+				foreach( $level_1 as $date_stamp => $row ) {
+					$date_columns = TTDate::getReportDates( NULL, $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
 					$processed_data	 = array(
-											'user_id' => $user_id,
+											//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
 											);
 
 					$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $processed_data );
@@ -678,10 +667,32 @@ class T4SummaryReport extends Report {
 				}
 			}
 			unset($this->tmp_data, $row, $date_columns, $processed_data, $level_1, $level_2, $level_3);
+			
+			//Total data per employee for the T4 forms. Just include the columns that are necessary for the form.
+			if ( is_array($this->data) AND !($format == 'html' OR $format == 'pdf') ) {
+				$t4_dollar_columns = array('income', 'tax', 'employee_cpp', 'ei_earnings', 'cpp_earnings', 'employee_ei', 'union_dues', 'rpp', 'charity', 'pension_adjustment', 'employer_ei', 'employer_cpp', 'other_box_0', 'other_box_1', 'other_box_2', 'other_box_3', 'other_box_4' );
+
+				Debug::Text('Calculating Form Data...', __FILE__, __LINE__, __METHOD__, 10);
+				foreach( $this->data as $row ) {
+					if ( !isset($this->form_data[$row['user_id']]) ) {
+						$this->form_data[$row['user_id']] = array( 'user_id' => $row['user_id'] );
+					}
+
+					foreach( $row as $key => $value ) {
+						if ( in_array( $key, $t4_dollar_columns) ) {
+							if ( !isset($this->form_data[$row['user_id']][$key]) ) {
+								$this->form_data[$row['user_id']][$key] = 0;
+							}
+							$this->form_data[$row['user_id']][$key] = bcadd( $this->form_data[$row['user_id']][$key], $value );
+						} else {
+							$this->form_data[$row['user_id']][$key] = $value;
+						}
+					}
+				}
+			}			
 		}
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
-
-		$this->form_data = $this->data; //Copy data to Form Data so group/sort doesn't affect it.
+		//Debug::Arr($this->form_data, 'Form Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		return TRUE;
 	}
@@ -797,8 +808,9 @@ class T4SummaryReport extends Report {
 								'address1' => $user_obj->getAddress1(),
 								'address2' => $user_obj->getAddress2(),
 								'city' => $user_obj->getCity(),
-								'province' => ( $user_obj->getProvince() != '00' ) ? $user_obj->getProvince() : NULL,
-								'country' => Option::getByKey( $user_obj->getCountry(), $current_company->getOptions('country') ) ,
+								'province' => ( ( $user_obj->getCountry() == 'CA' OR $user_obj->getCountry() == 'US' ) ? ( ( $user_obj->getProvince() != '00' ) ? $user_obj->getProvince() : NULL ) : 'ZZ' ),
+								'country' => Option::getByKey( $user_obj->getCountry(), $current_company->getOptions('country') ),
+								'country_code' => $user_obj->getCountry(),
 								'employment_province' => ( $employment_province != '00' ) ? $employment_province : NULL,
 								'postal_code' => $user_obj->getPostalCode(),
 								'sin' => $user_obj->getSIN(),

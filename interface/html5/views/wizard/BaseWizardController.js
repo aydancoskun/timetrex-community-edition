@@ -151,7 +151,7 @@ BaseWizardController = BaseWindowController.extend( {
 
 	},
 
-	saveCurrentStep: function() {
+	saveCurrentStep: function( direction, callBack ) {
 
 	},
 
@@ -550,7 +550,7 @@ BaseWizardController = BaseWindowController.extend( {
 	},
 
 	setGridSize: function( grid ) {
-		grid.setGridWidth( $( this.content_div.find( '.grid-div' ) ).width() - 6 );
+		grid.setGridWidth( $( this.content_div.find( '.grid-div' ) ).width() - 11 );
 	},
 
 	getGridColumns: function( gridId, callBack ) {

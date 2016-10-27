@@ -456,7 +456,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 			}
 
 			$this.onSaveDone( result );
-			$this.current_edit_record = null;
+
 			$this.removeEditView();
 
 		} else {

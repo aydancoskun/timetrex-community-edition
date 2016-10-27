@@ -52,7 +52,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 		return TRUE;
 	}
 	function getFederalFilingStatus() {
-		if ( isset($this->data['federal_filing_status']) ) {
+		if ( isset($this->data['federal_filing_status']) AND $this->data['federal_filing_status'] != '' ) {
 			return $this->data['federal_filing_status'];
 		}
 
@@ -167,7 +167,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 		return TRUE;
 	}
 	function getStateFilingStatus() {
-		if ( isset($this->data['state_filing_status']) ) {
+		if ( isset($this->data['state_filing_status']) AND $this->data['state_filing_status'] != '' ) {
 			return $this->data['state_filing_status'];
 		}
 
@@ -212,7 +212,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	function getStatePayPeriodDeductions() {
 		if ( $this->getFormulaType() == 20 ) {
 			Debug::text('Formula Type: '. $this->getFormulaType() .' YTD Payable: '. $this->getStateTaxPayable() .' YTD Paid: '. $this->getYearToDateDeduction() .' Current PP: '. $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10);
-			$retval = $this->calcNonPeriodicDeduction( $this->getStateTaxPayable(), $this->getYearToDateDeduction(), $this->getAnnualPayPeriods(), $this->getCurrentPayPeriod() );
+			$retval = $this->calcNonPeriodicDeduction( $this->getStateTaxPayable(), $this->getYearToDateDeduction() );
 		} else {
 			$retval = bcdiv( $this->getStateTaxPayable(), $this->getAnnualPayPeriods() );
 		}
@@ -230,7 +230,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	function getDistrictPayPeriodDeductions() {
 		if ( $this->getFormulaType() == 20 ) {
 			Debug::text('Formula Type: '. $this->getFormulaType() .' YTD Payable: '. $this->getDistrictTaxPayable() .' YTD Paid: '. $this->getYearToDateDeduction() .' Current PP: '. $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10);
-			$retval = $this->calcNonPeriodicDeduction( $this->getDistrictTaxPayable(), $this->getYearToDateDeduction(), $this->getAnnualPayPeriods(), $this->getCurrentPayPeriod() );
+			$retval = $this->calcNonPeriodicDeduction( $this->getDistrictTaxPayable(), $this->getYearToDateDeduction() );
 		} else {
 			$retval = bcdiv( $this->getDistrictTaxPayable(), $this->getAnnualPayPeriods() );
 		}
@@ -397,7 +397,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	function getAnnualTaxableIncome() {
 		if ( $this->getFormulaType() == 20 ) {
 			Debug::text('Formula Type: '. $this->getFormulaType() .' YTD Gross: '. $this->getYearToDateGrossIncome() .' This Gross: '. $this->getGrossPayPeriodIncome() .' Current PP: '. $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10);
-			$retval = $this->calcNonPeriodicIncome( $this->getYearToDateGrossIncome(), $this->getGrossPayPeriodIncome(), $this->getAnnualPayPeriods(), $this->getCurrentPayPeriod() );
+			$retval = $this->calcNonPeriodicIncome( $this->getYearToDateGrossIncome(), $this->getGrossPayPeriodIncome() );
 		} else {
 			$retval = bcmul( $this->getGrossPayPeriodIncome(), $this->getAnnualPayPeriods() );
 		}
@@ -412,7 +412,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	function getFederalPayPeriodDeductions() {
 		if ( $this->getFormulaType() == 20 ) {
 			Debug::text('Formula Type: '. $this->getFormulaType() .' YTD Payable: '. $this->getFederalTaxPayable() .' YTD Paid: '. $this->getYearToDateDeduction() .' Current PP: '. $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10);
-			$retval = $this->calcNonPeriodicDeduction( $this->getFederalTaxPayable(), $this->getYearToDateDeduction(), $this->getAnnualPayPeriods(), $this->getCurrentPayPeriod() );
+			$retval = $this->calcNonPeriodicDeduction( $this->getFederalTaxPayable(), $this->getYearToDateDeduction() );
 		} else {
 			$retval = bcdiv( $this->getFederalTaxPayable(), $this->getAnnualPayPeriods() );
 		}
@@ -648,7 +648,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 	// Earning Income Tax Credit (EIC, EITC). - Repealed as of 31-Dec-2010.
 	//
 	function getEIC() {
-		if ( $this->getDate() <= strtotime('31-Dec-2010') ) { //Repealed as of 31-Dec-2010.
+		if ( $this->getDate() <= 20101231 ) { //Repealed as of 31-Dec-2010.
 			$eic_options = $this->getEICRateArray( $this->getAnnualTaxableIncome(), $this->getEICFilingStatus() );
 			//Debug::Arr($eic_options, ' EIC Options: ', __FILE__, __LINE__, __METHOD__, 10);
 

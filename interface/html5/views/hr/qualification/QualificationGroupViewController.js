@@ -20,13 +20,13 @@ QualificationGroupViewController = BaseViewController.extend( {
 		this.invisible_context_menu_dic[ContextMenuIconName.delete_and_next] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.save_and_continue] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.save_and_next] = true;
-
+		this.grid_select_id_array = [];
 		this.render();
 		this.buildContextMenu();
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'QualificationGroup' );
 
-		this.grid_select_id_array = [];
+
 	},
 
 	onDeleteDone: function( result ) {
@@ -90,7 +90,7 @@ QualificationGroupViewController = BaseViewController.extend( {
 
 	},
 
-	onCopyAsNewClick: function() {
+	_continueDoCopyAsNew: function() {
 
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
 		var $this = this;
@@ -101,6 +101,7 @@ QualificationGroupViewController = BaseViewController.extend( {
 			navigation_div.css( 'display', 'none' );
 			this.setEditMenu();
 			this.setTabStatus();
+			this.is_changed = false;
 			ProgressBar.closeOverlay();
 
 		} else {

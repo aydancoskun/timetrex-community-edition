@@ -1041,7 +1041,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 			$this.saveInsideEditorData( function() {
 				$this.search();
 				$this.onSaveDone( result );
-				$this.current_edit_record = null;
+
 				$this.removeEditView();
 			} );
 
@@ -1153,25 +1153,21 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		}
 	},
 
-	onCopyAsNewClick: function() {
+	_continueDoCopyAsNew: function() {
 		var $this = this;
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
 		this.is_add = true;
 		if ( Global.isSet( this.edit_view ) ) {
-
 			for ( var i = 0; i < this.editor.rows_widgets_array.length; i++ ) {
 				this.editor.rows_widgets_array[i].length_of_service.attr( 'milestone_id', '' );
 			}
-
 			this.current_edit_record.id = '';
 			var navigation_div = this.edit_view.find( '.navigation-div' );
 			navigation_div.css( 'display', 'none' );
 			this.setEditMenu();
 			this.setTabStatus();
 			ProgressBar.closeOverlay();
-
 		} else {
-
 			var filter = {};
 			var selectedId;
 			var grid_selected_id_array = this.getGridSelectIdArray();
@@ -1183,18 +1179,14 @@ AccrualPolicyViewController = BaseViewController.extend( {
 				TAlertManager.showAlert( $.i18n._( 'No selected record' ) );
 				return;
 			}
-
 			filter.filter_data = {};
 			filter.filter_data.id = [selectedId];
-
 			this.api['get' + this.api.key_name]( filter, {
 				onResult: function( result ) {
 					$this.onCopyAsNewResult( result );
-
 				}
 			} );
 		}
-
 	},
 
 	onCopyAsNewResult: function( result ) {

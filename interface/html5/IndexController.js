@@ -20,8 +20,14 @@ var ApplicationRouter = Backbone.Router.extend( {
 	},
 
 	reloadView: function( view_id ) {
-		TopMenuManager.selected_sub_menu_id = ''; // clear select ribbon menu, set in view init;
-		BaseViewController.loadView( view_id );
+		//error: Uncaught ReferenceError: XXXXViewController is not defined ininterface/html5/#!m=TimeSheet line 3
+		// Happens when quickly click on context menu and network is slow.
+		if ( window[view_id + 'ViewController'] &&
+			LocalCacheData.current_open_primary_controller &&
+			LocalCacheData.current_open_primary_controller.viewId === view_id ) {
+			LocalCacheData.current_open_primary_controller.setSelectLayout();
+			LocalCacheData.current_open_primary_controller.search();
+		}
 	},
 
 	notFound: function( url ) {
@@ -38,6 +44,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 		var view_id;
 		var edit_id;
 		var action;
+		var auto_login_timer;
 
 		if ( Global.needReloadBrowser ) {
 			Global.needReloadBrowser = false;
@@ -55,14 +62,26 @@ var ApplicationRouter = Backbone.Router.extend( {
 		}
 
 		LocalCacheData.fullUrlParameterStr = viewName;
-
 		LocalCacheData.all_url_args = args;
-
 		if ( view_id == 'Install' ) {
-			IndexViewController.openWizard( 'InstallWizard', null, function() {
-				// need to link to the login interface.
-			} );
-
+			if ( LocalCacheData.loadViewRequiredJSReady ) {
+				IndexViewController.openWizard( 'InstallWizard', null, function() {
+					// need to link to the login interface.
+				} );
+			} else {
+				auto_login_timer = setInterval( function() {
+					if ( timeout_count == 100 ) {
+						clearInterval( auto_login_timer );
+					}
+					timeout_count = timeout_count + 1;
+					if ( LocalCacheData.loadViewRequiredJSReady ) {
+						IndexViewController.openWizard( 'InstallWizard', null, function() {
+							// need to link to the login interface.
+						} );
+						clearInterval( auto_login_timer );
+					}
+				}, 600 );
+			}
 			return;
 		}
 
@@ -178,7 +197,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 				if ( LocalCacheData.loadViewRequiredJSReady ) {
 					initRibbonMenuAndCopyRight();
 				} else {
-					var auto_login_timer = setInterval( function() {
+					auto_login_timer = setInterval( function() {
 						if ( timeout_count == 100 ) {
 							clearInterval( auto_login_timer );
 						}
@@ -196,13 +215,14 @@ var ApplicationRouter = Backbone.Router.extend( {
 		}
 
 		function showRibbonMenuAndLoadView() {
+
 			//Show ribbon menu UI
 			if ( view_id && view_id !== 'Login' && !TopMenuManager.ribbon_view_controller ) {
 				$this.addTopMenu();
 				$( 'body' ).removeClass( 'login-bg' );
 				$( 'body' ).addClass( 'application-bg' );
 				$this.setContentDivHeight();
-				$this.setLoginInformationLabel();
+				$this.setLoginInformationLabelAndChat();
 
 			} else if ( view_id && view_id !== 'Login' && TopMenuManager.ribbon_view_controller ) {
 				Global.topContainer().css( 'display', 'block' );
@@ -238,45 +258,46 @@ var ApplicationRouter = Backbone.Router.extend( {
 				TopMenuManager.initRibbonMenu();
 				TopMenuManager.selected_sub_menu_id = view_id;
 				TopMenuManager.selected_menu_id = TopMenuManager.menus_quick_map[view_id];
+
 			}
 
 			//Add copy right
 			Global.bottomContainer().css( 'display', 'block' );
 
-			//Add feedback event
+			//Start check signal
+			Global.setSignalStrength();
 
+			//Add feedback event
 			if ( !Global.bottomFeedbackContainer().is( ':visible' ) ) {
-				$( '.yay-filter' ).attr( 'src', 'theme/default/css/global/widgets/ribbon/icons/happy.png' );
-				$( '.meh-filter' ).attr( 'src', 'theme/default/css/global/widgets/ribbon/icons/neutral.png' );
-				$( '.grr-filter' ).attr( 'src', 'theme/default/css/global/widgets/ribbon/icons/sad.png' );
+				var path = 'theme/default/css/global/widgets/ribbon/icons/';
+				$( '.yay-filter' ).attr( 'src', path + 'happy.png' );
+				$( '.meh-filter' ).attr( 'src', path + 'neutral.png' );
+				$( '.grr-filter' ).attr( 'src', path + 'sad.png' );
 				Global.bottomFeedbackContainer().css( 'display', 'block' );
 				Global.bottomFeedbackContainer().find( 'img' ).each( function() {
-					var path = $( this ).attr( 'src' ).replace( /^(.*\/)[^\/]+$/, '$1' );
-					if ( Global.isSet( LocalCacheData.getLoginUser().feedback_rating ) && $( this ).attr( 'data-feedback' ) === LocalCacheData.getLoginUser().feedback_rating ) {
-						$( this ).addClass( 'current' ).attr( 'src', path + $( this ).attr( 'alt' ) + '_light.png' );
-					}
-					$( this ).unbind( 'click' ).bind( 'click', function() {
-						$( this ).TFeedback();
-					} )
-					$( this ).hover( function() {
-						$( this ).attr( 'src', path + $( this ).attr( 'alt' ) + '_light.png' );
-					}, function() {
-						if ( !$( this ).hasClass( 'current' ) ) {
-							$( this ).attr( 'src', path + $( this ).attr( 'alt' ) + '.png' );
+					// Error: Uncaught ReferenceError: path is not defined in interface/html5/IndexController.js?v=9.0.6-20151231-155152 line 270
+					if ( path ) {
+						if ( Global.isSet( LocalCacheData.getLoginUser().feedback_rating ) && $( this ).attr( 'data-feedback' ) === LocalCacheData.getLoginUser().feedback_rating ) {
+							$( this ).addClass( 'current' ).attr( 'src', path + $( this ).attr( 'alt' ) + '_light.png' );
 						}
-					} )
+						$( this ).unbind( 'click' ).bind( 'click', function() {
+							$( this ).TFeedback();
+						} );
+						$( this ).hover( function() {
+							$( this ).attr( 'src', path + $( this ).attr( 'alt' ) + '_light.png' );
+						}, function() {
+							if ( !$( this ).hasClass( 'current' ) ) {
+								$( this ).attr( 'src', path + $( this ).attr( 'alt' ) + '.png' );
+							}
+						} )
+					}
 				} );
 			}
-
 			$( '#copy_right_info_1' ).css( 'display', 'inline' );
-
 			$( '#copy_right_logo_link' ).attr( 'href', 'http://' + LocalCacheData.getLoginData().organization_url );
-
 			if ( !$( '#copy_right_logo' ).attr( 'src' ) ) {
 				$( '#copy_right_logo' ).attr( 'src', ServiceCaller.poweredByLogo + '&t=' + new Date().getTime() );
-
 			}
-
 			showRibbonMenuAndLoadView();
 		}
 
@@ -375,18 +396,61 @@ var ApplicationRouter = Backbone.Router.extend( {
 		}
 	},
 
-	//CompanyName - User name at top left
-	setLoginInformationLabel: function() {
+	testInternetConnection: function() {
+		if ( !navigator.onLine ) {
+			internet_connection_available = false;
+			is_testing_internet_connection = false;
+		}
+		var img = new Image();
+		is_testing_internet_connection = true;
+		img.onload = function() {
+			internet_connection_available = true;
+			is_testing_internet_connection = false;
+		};
+		img.onerror = function( e ) {
+			internet_connection_available = false;
+			is_testing_internet_connection = false;
+		};
+		img.src = 'https://www.timetrex.com/images/ping.gif';
+	},
 
+	//CompanyName - User name at top left
+	setLoginInformationLabelAndChat: function() {
+
+		//Add login informaiton
 		var current_company = LocalCacheData.getCurrentCompany();
 		var current_user = LocalCacheData.getLoginUser();
-
 		var label = current_company.name + ' - ' + current_user.first_name + ' ' + current_user.last_name;
 		var label_container = $( "<div class='login-information-div'><span class='login-information'></span></div>" );
-
 		label_container.children().eq( 0 ).text( label );
-
 		Global.topContainer().append( label_container );
+		this.testInternetConnection();
+		if ( ( APIGlobal.pre_login_data.demo_mode === false && APIGlobal.pre_login_data.deployment_on_demand === true && LocalCacheData.getCurrentCompany().product_edition_id > 10 ) ) {
+			var permission_api = new (APIFactory.getAPIClass( 'APIPermissionControl' ))();
+			var filter = {};
+			filter.filter_data = {};
+			filter.filter_data.id = [LocalCacheData.getLoginUser().permission_control_id];
+			permission_api.getPermissionControl( filter, {
+				onResult: function( result ) {
+					var permission = result.getResult()[0];
+					//Error: TypeError: permission is undefined interface/html5/IndexController.js?v=9.0.4-20151123-153601 line 405
+					if ( permission && permission.level > 10 ) {
+						//Add chat
+						var chat = $( '<a href="javascript:void(0)" onclick="return lh_inst.lh_openchatWindow()" class="tt-liveChat top-container-liveChat">Live Chat w/Support</a>' );
+						var check_connection_timer = setInterval( function() {
+							if ( !is_testing_internet_connection ) {
+								clearInterval( check_connection_timer );
+								if ( internet_connection_available ) {
+									Global.topContainer().append( chat );
+									Global.loadScript( 'global/widgets/live-chat/live-chat.js' );
+								}
+							}
+						}, 500 );
+					}
+				}
+			} );
+
+		}
 	},
 
 	setContentDivHeight: function() {
@@ -415,7 +479,15 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 	removeCurrentView: function( callBack ) {
 
+		if ( LocalCacheData.current_open_edit_only_controller ) {
+			clean( LocalCacheData.current_open_edit_only_controller );
+			LocalCacheData.current_open_edit_only_controller = null;
+		}
+
 		if ( LocalCacheData.current_open_primary_controller ) {
+			if ( LocalCacheData.current_open_primary_controller.edit_view ) {
+				clean( LocalCacheData.current_open_primary_controller );
+			}
 			Global.contentContainer().empty();
 			LocalCacheData.current_open_primary_controller.cleanWhenUnloadView( callBack );
 		} else {
@@ -423,6 +495,20 @@ var ApplicationRouter = Backbone.Router.extend( {
 			if ( Global.isSet( callBack ) ) {
 				callBack();
 			}
+		}
+
+		function clean( viewController ) {
+			viewController.clearErrorTips();
+			// Cannot read property 'remove' of null in interface/html5/IndexController.js?v=9.0.0-20151016-153057 line 439
+			if ( viewController.edit_view ) {
+				viewController.edit_view.remove();
+			}
+			viewController.sub_log_view_controller = null;
+			viewController.edit_view_ui_dic = {};
+			viewController.edit_view_ui_validation_field_dic = {};
+			viewController.edit_view_form_item_dic = {};
+			viewController.edit_view_error_ui_dic = {};
+			LocalCacheData.current_doing_context_action = '';
 		}
 	}
 
@@ -440,7 +526,10 @@ IndexViewController = Backbone.View.extend( {
 		//$( 'title' ).html( '' );
 
 		this.router.controller = this;
-		Backbone.history.start();
+		//Error: Backbone.history has already been started in interface/html5/framework/backbone/backbone-min.js?v=9.0.1-20151022-162110 line 28
+		if ( !Backbone.History.started ) {
+			Backbone.history.start();
+		}
 
 		IndexViewController.instance = this;
 
@@ -572,7 +661,7 @@ IndexViewController.openEditView = function( parent_view_controller, view_name, 
 				if ( current_url.indexOf( '&sm' ) > 0 ) {
 					current_url = current_url.substring( 0, current_url.indexOf( '&sm' ) );
 				}
-				if ( id ) {
+				if ( id && _.isString( id ) ) {
 					current_url = current_url + '&sm=' + view_name + '&sid=' + id;
 				} else {
 					current_url = current_url + '&sm=' + view_name;

@@ -51,9 +51,13 @@ class ProgressBar {
 	var $update_iteration = 1; //This is how often we actually update the progress bar, even if the function is called more often.
 
 	function __construct() {
-		$this->obj = new SharedMemory();
-
-		return TRUE;
+		try {
+			$this->obj = new SharedMemory();
+			return TRUE;
+		} catch ( Exception $e ) {
+			Debug::text('ERROR: Caught Exception: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 9);
+			return FALSE;
+		}
 	}
 
 	//Allow setting a default key so we don't have to pass the key around outside of this object.
@@ -74,19 +78,27 @@ class ProgressBar {
 			}
 		}
 
+		if ( !is_object($this->obj) ) { //If there is an error getting the shared memory object, cancel out early.
+			return FALSE;
+		}
+
 		if (  $msg == '' ) {
 			$msg = TTi18n::getText('Processing...');
 		}
 
 		$epoch = microtime(TRUE);
 
-		$progress_bar_arr = $this->obj->get( $this->key_prefix.$key );
-		$progress_bar_arr['status_id'] = 9999;
-		$progress_bar_arr['message'] = $msg;
+		try {
+			$progress_bar_arr = $this->obj->get( $this->key_prefix.$key );
+			$progress_bar_arr['status_id'] = 9999;
+			$progress_bar_arr['message'] = $msg;
 
-		$this->obj->set( $this->key_prefix.$key, $progress_bar_arr );
-
-		return TRUE;
+			$this->obj->set( $this->key_prefix.$key, $progress_bar_arr );
+			return TRUE;
+		} catch ( Exception $e ) {
+			Debug::text('ERROR: Caught Exception: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 9);
+			return FALSE;
+		}
 	}
 
 	function start( $key, $total_iterations = 100, $update_iteration = NULL, $msg = NULL ) {
@@ -103,6 +115,10 @@ class ProgressBar {
 			return FALSE;
 		}
 
+		if ( !is_object($this->obj) ) { //If there is an error getting the shared memory object, cancel out early.
+			return FALSE;
+		}
+		
 		if ( $update_iteration == '' ) {
 			$this->update_iteration = ceil($total_iterations / 20); //Update every 5%.
 		} else {
@@ -123,10 +139,13 @@ class ProgressBar {
 					'last_update_time' => $epoch,
 					'message' => $msg,
 					);
-
-		$this->obj->set( $this->key_prefix.$key, $progress_bar_arr );
-
-		return TRUE;
+		try {
+			$this->obj->set( $this->key_prefix.$key, $progress_bar_arr );
+			return TRUE;
+		} catch ( Exception $e ) {
+			Debug::text('ERROR: Caught Exception: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 9);
+			return FALSE;
+		}
 	}
 
 	function delete( $key ) {
@@ -140,9 +159,16 @@ class ProgressBar {
 			}
 		}
 
-		//Debug::text('stop: '. $key, __FILE__, __LINE__, __METHOD__, 9);
+		if ( !is_object($this->obj) ) { //If there is an error getting the shared memory object, cancel out early.
+			return FALSE;
+		}
 
-		return $this->obj->delete( $this->key_prefix.$key );
+		try {
+			return $this->obj->delete( $this->key_prefix.$key );
+		} catch ( Exception $e ) {
+			Debug::text('ERROR: Caught Exception: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 9);
+			return FALSE;
+		}
 	}
 
 	function set( $key, $current_iteration, $msg = NULL ) {
@@ -153,35 +179,45 @@ class ProgressBar {
 			}
 		}
 
+		if ( !is_object($this->obj) ) { //If there is an error getting the shared memory object, cancel out early.
+			return FALSE;
+		}
+
 		//Add quick IF statement to short circuit any work unless we meet the update_iteration, ie: every X calls do we actually do anything.
 		//When processing long batches though, we need to update every iteration for the first 10 iterations so we can get an accruate estimated time for completion.
 		if ( $current_iteration <= 10 OR ( $current_iteration % $this->update_iteration ) == 0 ) {
 			//Debug::text('set: '. $key .' Iteration: '. $current_iteration, __FILE__, __LINE__, __METHOD__, 9);
 
-			$progress_bar_arr = $this->obj->get( $this->key_prefix.$key );
+			try {
+				$progress_bar_arr = $this->obj->get( $this->key_prefix.$key );
 
-			if ( $progress_bar_arr != FALSE
-					AND is_array( $progress_bar_arr )
-					AND $current_iteration >= 0
-					AND $current_iteration <= $progress_bar_arr['total_iterations']) {
-
-				/*
-				if ( PRODUCTION == FALSE AND isset($progress_bar_arr['total_iterations']) AND $progress_bar_arr['total_iterations'] >= 1 ) {
-					//Add a delay based on the total iterations so we can test the progressbar more often
-					$total_delay = 15000000; //10seconds
-					usleep( ( ($total_delay / $progress_bar_arr['total_iterations']) * $this->update_iteration));
+				if ( $progress_bar_arr != FALSE
+						AND is_array( $progress_bar_arr )
+						AND $current_iteration >= 0
+						AND $current_iteration <= $progress_bar_arr['total_iterations']) {
+	
+					/*
+					if ( PRODUCTION == FALSE AND isset($progress_bar_arr['total_iterations']) AND $progress_bar_arr['total_iterations'] >= 1 ) {
+						//Add a delay based on the total iterations so we can test the progressbar more often
+						$total_delay = 15000000; //10seconds
+						usleep( ( ($total_delay / $progress_bar_arr['total_iterations']) * $this->update_iteration));
+					}
+					*/
+	
+					$progress_bar_arr['current_iteration'] = $current_iteration;
+					$progress_bar_arr['last_update_time'] = microtime(TRUE);
 				}
-				*/
+	
+				if ( $msg != '' ) {
+					$progress_bar_arr['message'] = $msg;
+				}
 
-				$progress_bar_arr['current_iteration'] = $current_iteration;
-				$progress_bar_arr['last_update_time'] = microtime(TRUE);
+				return $this->obj->set( $this->key_prefix.$key, $progress_bar_arr );
+			} catch ( Exception $e ) {
+				Debug::text('ERROR: Caught Exception: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 9);
+				return FALSE;
 			}
-
-			if ( $msg != '' ) {
-				$progress_bar_arr['message'] = $msg;
-			}
-
-			return $this->obj->set( $this->key_prefix.$key, $progress_bar_arr );
+		
 		}
 
 		return TRUE;
@@ -195,11 +231,16 @@ class ProgressBar {
 			}
 		}
 
-		$retval = $this->obj->get( $this->key_prefix.$key );
-		//Debug::text('get: '. $key .'('.microtime(TRUE).')', __FILE__, __LINE__, __METHOD__, 9);
-		//Debug::Arr($retval, 'get: '. $key .'('.microtime(TRUE).')', __FILE__, __LINE__, __METHOD__, 9);
-
-		return $retval;
+		if ( !is_object($this->obj) ) { //If there is an error getting the shared memory object, cancel out early.
+			return FALSE;
+		}
+		
+		try {
+			return $this->obj->get( $this->key_prefix.$key );
+		} catch ( Exception $e ) {
+			Debug::text('ERROR: Caught Exception: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 9);
+			return FALSE;
+		}		
 	}
 
 	function test( $key, $total_iterations = 10 ) {

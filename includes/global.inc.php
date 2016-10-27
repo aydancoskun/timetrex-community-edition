@@ -56,8 +56,8 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '9.0.0' );
-define('APPLICATION_VERSION_DATE', @strtotime('13-Oct-2015') ); // Release date of version.
+define('APPLICATION_VERSION', '9.0.9' );
+define('APPLICATION_VERSION_DATE', @strtotime('04-Mar-2016') ); // Release date of version.
 
 if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'WIN' ) { define('OPERATING_SYSTEM', 'WIN' ); } else { define('OPERATING_SYSTEM', 'LINUX' ); }
 
@@ -82,11 +82,11 @@ if ( isset($_SERVER['TT_CONFIG_FILE']) AND $_SERVER['TT_CONFIG_FILE'] != '' ) {
 if ( file_exists(CONFIG_FILE) ) {
 	$config_vars = parse_ini_file( CONFIG_FILE, TRUE);
 	if ( $config_vars === FALSE ) {
-		echo "Config file (". CONFIG_FILE .") contains a syntax error! If your passwords contain special characters you need to wrap them in double quotes, ie:<br>\n password = \"test!1!me\"\n";
+		echo "ERROR: Config file (". CONFIG_FILE .") contains a syntax error! If your passwords contain special characters you need to wrap them in double quotes, ie:<br>\n password = \"test!1!me\"\n";
 		exit(1);
 	}
 } else {
-	echo "Config file (". CONFIG_FILE .") does not exist or is not readable!\n";
+	echo "ERROR: Config file (". CONFIG_FILE .") does not exist or is not readable!\n";
 	exit(1);
 }
 
@@ -303,14 +303,14 @@ function forceNoCacheHeaders() {
 
 	//CSP headers break many things at this stage, unless "unsafe" is used for almost everything.
 	//Header('Content-Security-Policy: default-src *; script-src \'self\' *.google-analytics.com *.google.com');
-	Header('Content-Security-Policy: default-src * \'unsafe-inline\'; script-src \'unsafe-eval\' \'unsafe-inline\' \'self\' *.google-analytics.com *.google.com');
+	header('Content-Security-Policy: default-src * \'unsafe-inline\'; script-src \'unsafe-eval\' \'unsafe-inline\' \'self\' *.timetrex.com *.google-analytics.com *.google.com; img-src \'self\' *.timetrex.com *.google-analytics.com *.google.com data:');
 
 	//Help prevent XSS or frame clickjacking.
-	Header('X-XSS-Protection: 1; mode=block');
-	Header('X-Frame-Options: SAMEORIGIN');
+	header('X-XSS-Protection: 1; mode=block');
+	header('X-Frame-Options: SAMEORIGIN');
 
 	//Reduce MIME-TYPE security risks.
-	Header('X-Content-Type-Options: nosniff');
+	header('X-Content-Type-Options: nosniff');
 	
 	//Turn caching off.
 	header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
@@ -321,9 +321,10 @@ function forceNoCacheHeaders() {
 	header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0');
 	if ( isset($_SERVER['HTTP_USER_AGENT']) AND stripos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE ) {
 		header('Pragma: token'); //If set to no-cache it breaks IE downloading reports, with error that the site is not available.
-		if ( preg_match('/(?i)MSIE [5-9]/i', $_SERVER['HTTP_USER_AGENT'] ) ) {
-			header('Connection: close'); //ie6-9 may send empty POST requests causing API errors due to poor keepalive handling, so force all connections to close instead.
-		}
+		//20-Jan-16: Re-enable keepalive requests on IE to see if the issue persists after we have (mostly) fixed the duplicate request issue when users double-click icons. 
+		//if ( preg_match('/(?i)MSIE [5-9]/i', $_SERVER['HTTP_USER_AGENT'] ) ) {
+		//	header('Connection: close'); //ie6-9 may send empty POST requests causing API errors due to poor keepalive handling, so force all connections to close instead.
+		//}
 	} else {
 		header('Pragma: no-cache');
 	}
@@ -352,30 +353,30 @@ function forceCacheHeaders( $file_name = NULL, $mtime = NULL, $etag = NULL ) {
 	}
 
 	//Help prevent XSS or frame clickjacking.
-	Header('X-XSS-Protection: 1; mode=block');
-	Header('X-Frame-Options: SAMEORIGIN');
+	header('X-XSS-Protection: 1; mode=block');
+	header('X-Frame-Options: SAMEORIGIN');
 
 	//For some reason even with must-revalidate the browsers won't check ETag every page load.
 	//So some pages may get cached for an hour or two regardless of ETag changes.
-	Header('Cache-Control: must-revalidate, max-age=0');
-	Header('Cache-Control: private', FALSE);
-	Header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+	header('Cache-Control: must-revalidate, max-age=0');
+	header('Cache-Control: private', FALSE);
+	header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
 	//Check eTag first, then last modified time.
 	if ( ( isset($_SERVER['HTTP_IF_NONE_MATCH']) AND trim($_SERVER['HTTP_IF_NONE_MATCH']) == $etag )
 			OR ( !isset($_SERVER['HTTP_IF_NONE_MATCH'])
 					AND isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])
 					AND strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) == $file_modified_time ) ) {
 		//Cached page, send 304 code and exit.
-		Header('HTTP/1.1 304 Not Modified');
-		Header('Connection: close');
+		header('HTTP/1.1 304 Not Modified');
+		//Header('Connection: close'); //This closes keep-alive connections to close, shouldn't be needed and just slows things down.
 		ob_clean();
 		exit; //File is cached, don't continue.
 	} else {
 		//Not cached page, add headers to assist caching.
 		if ( $etag != '' ) {
-			Header('ETag: '. $etag);
+			header('ETag: '. $etag);
 		}
-		Header('Last-Modified: '.gmdate('D, d M Y H:i:s', $file_modified_time).' GMT');
+		header('Last-Modified: '.gmdate('D, d M Y H:i:s', $file_modified_time).' GMT');
 	}
 
 	return TRUE;
@@ -448,13 +449,9 @@ if ( function_exists('bcscale') ) {
 }
 
 //Make sure we are using SSL if required.
-if ( $config_vars['other']['force_ssl'] == 1 AND Misc::isSSL( TRUE ) == FALSE AND isset( $_SERVER['HTTP_HOST'] ) AND isset( $_SERVER['REQUEST_URI'] ) AND !isset( $disable_https ) AND !isset( $enable_wap ) AND php_sapi_name() != 'cli' ) {
+if ( $config_vars['other']['force_ssl'] == 1 AND Misc::isSSL( TRUE ) == FALSE AND isset( $_SERVER['HTTP_HOST'] ) AND isset( $_SERVER['REQUEST_URI'] ) AND !isset( $disable_https ) AND php_sapi_name() != 'cli' ) {
 	Redirect::Page( 'https://'. $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'] );
 	exit;
-}
-
-if ( isset($enable_wap) AND $enable_wap == TRUE ) {
-	header( 'Content-type: text/vnd.wap.wml', TRUE );
 }
 
 if ( PRODUCTION == TRUE ) {

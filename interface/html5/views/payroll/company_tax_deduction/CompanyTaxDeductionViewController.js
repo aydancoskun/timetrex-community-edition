@@ -218,6 +218,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			if ( Global.isSet( callBack ) ) {
 				callBack();
 			}
+			return;
 		}
 		var data = this.employee_setting_grid.getGridParam( 'data' );
 		var columns = this.employee_setting_grid.getGridParam( 'colModel' );
@@ -492,7 +493,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				$this.saveInsideEditorData( function() {
 					$this.refresh_id = $this.current_edit_record.id; // as add
 					$this.search();
-					$this.current_edit_record = null;
+
 					$this.removeEditView();
 				} );
 			}
@@ -621,14 +622,14 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				$this.saveInsideEditorData( function() {
 					$this.search();
 					$this.onSaveDone( result );
-					$this.current_edit_record = null;
+
 					$this.removeEditView();
 				} );
 			} else {
 				$this.refresh_id = null;
 				$this.search();
 				$this.onSaveDone( result );
-				$this.current_edit_record = null;
+
 				$this.removeEditView();
 			}
 
@@ -708,7 +709,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		}
 	},
 
-	onCopyAsNewClick: function() {
+	_continueDoCopyAsNew: function() {
 		var $this = this;
 		this.is_add = true;
 
@@ -726,6 +727,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			navigation_div.css( 'display', 'none' );
 			this.setEditMenu();
 			this.setTabStatus();
+			this.is_changed = false;
 			ProgressBar.closeOverlay();
 
 		} else {
@@ -1053,7 +1055,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		}
 
 		if ( this.current_edit_record['minimum_length_of_service_unit_id'] === 50 || this.current_edit_record['maximum_length_of_service_unit_id'] === 50 ) {
-			this.attachElement('length_of_service_contributing_pay_code_policy_id' );
+			this.attachElement( 'length_of_service_contributing_pay_code_policy_id' );
 		} else {
 			this.detachElement( 'length_of_service_contributing_pay_code_policy_id' );
 		}
@@ -2475,17 +2477,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				column_info_array.push( column_info );
 				break;
 			case "300-US-IN":
-				column_info = {
-					name: 'user_value5',
-					index: 'user_value5',
-					label: $.i18n._( 'District / County Name' ),
-					width: 100,
-					sortable: false,
-					title: false,
-					editable: true,
-					edittype: 'text'
-				};
-				column_info_array.push( column_info );
 
 				column_info = {
 					name: 'user_value1',
@@ -2524,17 +2515,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				column_info_array.push( column_info );
 				break;
 			case "300-US-MD":
-				column_info = {
-					name: 'user_value5',
-					index: 'user_value5',
-					label: $.i18n._( 'District / County Name' ),
-					width: 100,
-					sortable: false,
-					title: false,
-					editable: true,
-					edittype: 'text'
-				};
-				column_info_array.push( column_info );
 
 				column_info = {
 					name: 'user_value2',
@@ -2561,17 +2541,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				column_info_array.push( column_info );
 				break;
 			case "300-US-PERCENT":
-				column_info = {
-					name: 'user_value1',
-					index: 'user_value1',
-					label: $.i18n._( 'District / County Name' ),
-					width: 100,
-					sortable: false,
-					title: false,
-					editable: true,
-					edittype: 'text'
-				};
-				column_info_array.push( column_info );
 
 				column_info = {
 					name: 'user_value2',
@@ -2892,12 +2861,12 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		var c_id = this.current_edit_record.calculation_id;
 
-		if(c_id === 20){
-			this.detachElement('include_account_amount_type_id');
-			this.detachElement('exclude_account_amount_type_id');
-		}else{
-			this.attachElement('include_account_amount_type_id');
-			this.attachElement('exclude_account_amount_type_id');
+		if ( c_id === 20 ) {
+			this.detachElement( 'include_account_amount_type_id' );
+			this.detachElement( 'exclude_account_amount_type_id' );
+		} else {
+			this.attachElement( 'include_account_amount_type_id' );
+			this.attachElement( 'exclude_account_amount_type_id' );
 		}
 
 		if ( !countryOrP ) {
@@ -3733,7 +3702,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			// Dynamic Field 11
 			form_item_input = Global.loadWidgetByName( FormItemType.FORMULA_BUILDER );
 			form_item_input.FormulaBuilder( {
-				field: 'df_11', onFormulaBtnClick: function() {
+				field: 'df_11', width: '100%', onFormulaBtnClick: function() {
 
 					var custom_column_api = new (APIFactory.getAPIClass( 'APIReportCustomColumn' ))();
 
@@ -3764,7 +3733,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				}
 			} );
 			this.addEditFieldToColumn( 'df_11', form_item_input, tab_tax_deductions_column1, '', null, true );
-
+			form_item_input.parent().width( '45%' );
 		} else {
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 			form_item_input.TTextInput( {field: 'df_11'} );
@@ -3848,7 +3817,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			} );
 			form_item = this.putInputToInsideFormItem( form_item_input_1, $.i18n._( 'Selection' ) );
 			v_box.append( form_item );
-			this.addEditFieldToColumn( $.i18n._( 'Include Pay Stub Accounts' ), [form_item_input, form_item_input_1], tab_tax_deductions_column1, null,v_box, true, true );
+			this.addEditFieldToColumn( $.i18n._( 'Include Pay Stub Accounts' ), [form_item_input, form_item_input_1], tab_tax_deductions_column1, null, v_box, true, true );
 
 		}
 
@@ -3947,7 +3916,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		form_item_input.TDatePicker( {field: 'start_date'} );
 
 		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'>"+ $.i18n._( '(Leave blank for no start date)' ) + "</span>" );
+		label = $( "<span class='widget-right-label'>" + $.i18n._( '(Leave blank for no start date)' ) + "</span>" );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -3959,7 +3928,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		form_item_input.TDatePicker( {field: 'end_date'} );
 
 		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'>"+ $.i18n._( '(Leave blank for no end date)' ) + "</span>" );
+		label = $( "<span class='widget-right-label'>" + $.i18n._( '(Leave blank for no end date)' ) + "</span>" );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -4059,7 +4028,8 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			id: 'company_tax_deduction_ids',
 			key: 'id',
 			display_close_btn: false,
-			allow_drag_to_order: false
+			allow_drag_to_order: false,
+			display_column_settings: false
 		} );
 
 		this.addEditFieldToColumn( $.i18n._( 'Taxes / Deductions' ), form_item_input, tab5_column1, '', null, false, true );
@@ -4196,7 +4166,8 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				adv_search: false,
 				form_item_type: FormItemType.TEXT_INPUT
 			} ),
-			new SearchField( {label: $.i18n._( 'Pay Stub Account' ),
+			new SearchField( {
+				label: $.i18n._( 'Pay Stub Account' ),
 				in_column: 1,
 				field: 'pay_stub_entry_name_id',
 				layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
@@ -4204,7 +4175,8 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 			new SearchField( {
 				label: $.i18n._( 'Calculation' ),
 				in_column: 2,

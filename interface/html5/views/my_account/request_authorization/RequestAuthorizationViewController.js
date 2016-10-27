@@ -758,7 +758,7 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 			if ( $this.is_edit ) {
 				$this.onViewClick( $this.current_edit_record.id );
 			} else {
-				$this.current_edit_record = null;
+
 				$this.removeEditView();
 			}
 
@@ -792,8 +792,8 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 				$this.parent_view_controller.onCancelClick();
 
 			} else {
-
-				if ( $this.is_edit ) {
+				//Error: Uncaught TypeError: Cannot read property 'id' of null in interface/html5/#!m=TimeSheet&date=null&user_id=null&show_wage=0 line 797
+				if ( $this.is_edit && $this.current_edit_record ) {
 					$this.onViewClick( $this.current_edit_record.id );
 				} else {
 					$this.removeEditView();
@@ -959,7 +959,7 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 		this.initEditViewUI( this.viewId, this.edit_view_tpl );
 
-		this.setEditViewWidgetsMode();
+
 	},
 
 	onEditClick: function( editId, noRefreshUI ) {
@@ -1095,17 +1095,17 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 		// Employee
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'full_name'} );
+		form_item_input.TText( {field: 'full_name', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_request_column1, '' );
 
 		// Date
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'date_stamp'} );
+		form_item_input.TText( {field: 'date_stamp', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_request_column1 );
 
 		// Type
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'type'} );
+		form_item_input.TText( {field: 'type', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_request_column1, '' );
 
 		var separate_box = tab_request.find( '.grid-title' );
@@ -1114,6 +1114,7 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( {label: $.i18n._( 'Authorization History' )} );
+		form_item_input.attr( 'id', 'authorization_history' );
 		this.addEditFieldToColumn( null, form_item_input, separate_box );
 
 		// tab_request first column end
@@ -1134,17 +1135,17 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 		// From
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'from'} );
+		form_item_input.TText( {field: 'from', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'From' ), form_item_input, tab_request_column2, '' );
 
 		// Subject
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'subject'} );
+		form_item_input.TText( {field: 'subject', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_request_column2 );
 
 		// Body
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'body', width: 600, height: 400} );
+		form_item_input.TText( {field: 'body', width: 600, height: 400, selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_request_column2, '', null, null, true );
 
 		// Tab 0 second column end
@@ -1200,35 +1201,6 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 		}
 
 		$this.setEditViewTabHeight();
-	},
-
-	removeEditView: function() {
-
-		if ( this.edit_view ) {
-			this.edit_view.remove();
-		}
-		this.edit_view = null;
-		this.is_mass_editing = false;
-		this.is_viewing = false;
-		this.is_edit = false;
-		this.is_changed = false;
-		this.mass_edit_record_ids = [];
-		this.edit_view_tab_selected_index = 0;
-		LocalCacheData.current_doing_context_action = '';
-
-		// reset parent context menu if edit only mode
-		if ( !this.edit_only_mode ) {
-			this.setDefaultMenu();
-		} else {
-			this.setParentContextMenuAfterSubViewClose();
-		}
-
-		this.reSetURL();
-
-		this.sub_log_view_controller = null;
-		this.edit_view_ui_dic = {};
-		this.edit_view_form_item_dic = {};
-		this.edit_view_error_ui_dic = {};
 	},
 
 	setCurrentEditRecordData: function() {
@@ -1370,7 +1342,8 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 				data: [],
 				datatype: 'local',
 				sortable: false,
-				width: ($( this.edit_view.find( '.grid-div' ) ).width() - 14),
+				width: this.edit_view.find(".edit-view-tab").width(),
+				height: 25,
 				rowNum: 10000,
 				colNames: [],
 				colModel: column_info_array
@@ -1392,7 +1365,8 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 				rowNum: 10000,
 				sortable: false,
 				datatype: 'local',
-				width: ($( this.edit_view.find( '.grid-div' ) ).width() - 14),
+				width: this.edit_view.find(".edit-view-tab").width(),
+				height: 25,
 				colNames: [],
 				colModel: column_info_array
 
@@ -1403,13 +1377,14 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 	},
 
 	setAuthorizationGridSize: function() {
-
+		var history_height_unit;
 		if ( (!this.authorization_history_grid || !this.authorization_history_grid.is( ':visible' )) ) {
 			return;
 		}
-
-		this.authorization_history_grid.setGridWidth( $( this.edit_view.find( '.grid-div' ) ).width() );
-
+		history_height_unit = this.authorization_history_grid.getGridParam( 'data' ).length;
+		history_height_unit > 5 && (history_height_unit = 5);
+		this.authorization_history_grid.setGridWidth( $( this.edit_view.find( '#authorization_history' ) ).width() );
+		this.authorization_history_grid.setGridHeight( history_height_unit * 25 );
 	},
 
 	getFilterColumnsFromDisplayColumns: function( authorization_history ) {
@@ -1546,8 +1521,8 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 		args.filter_data.object_id = this.current_edit_record.id;
 
 		$this.message_control_api['getEmbeddedMessage']( args, {onResult: function( res ) {
-
-			if ( !$this.edit_view ) {
+			// Error: Uncaught TypeError: Cannot read property 'setValue' of undefined in interface/html5/#!m=RequestAuthorization&id=1306 line 1547
+			if ( !$this.edit_view || !$this.edit_view_ui_dic['from']) {
 				return;
 			}
 
@@ -1572,7 +1547,8 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 					}
 					/* jshint ignore:end */
 
-					var from = currentItem.from_first_name + '' + currentItem.from_last_name + '@' + currentItem.updated_date;
+
+					var from = currentItem.from_first_name + ' ' + currentItem.from_last_name + ' @ ' + currentItem.updated_date;
 					$this.edit_view_ui_dic['from'].setValue( from );
 					$this.edit_view_ui_dic['subject'].setValue( currentItem.subject );
 					$this.edit_view_ui_dic['body'].setValue( currentItem.body );

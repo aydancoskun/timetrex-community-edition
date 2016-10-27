@@ -180,8 +180,8 @@ StationViewController = BaseViewController.extend( {
 		var job_item_widget = $this.edit_view_ui_dic['job_item_id'];
 		var current_job_item_id = job_item_widget.getValue();
 		job_item_widget.setSourceData( null );
-		job_item_widget.setCheckBox(true);
-		this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
+		job_item_widget.setCheckBox( true );
+		this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
 		var args = {};
 		args.filter_data = {job_id: $this.current_edit_record.job_id};
 		$this.edit_view_ui_dic['job_item_id'].setDefaultArgs( args );
@@ -245,13 +245,13 @@ StationViewController = BaseViewController.extend( {
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.setJobItemValueWhenJobChanged( target.getValue( true ) );
-					this.edit_view_ui_dic['job_quick_search'].setCheckBox(true);
+					this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
 				}
 				break;
 			case 'job_item_id':
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
-					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
+					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
 				}
 				break;
 			case 'job_quick_search':
@@ -328,25 +328,25 @@ StationViewController = BaseViewController.extend( {
 				tab_2_label.text( $.i18n._( 'TimeClock' ) );
 
 				if ( parseInt( this.current_edit_record['type_id'] ) !== 150 ) {
-					this.attachElement('manual_command');
-					this.attachElement('push_frequency');
-					this.attachElement('partial_push_frequency');
+					this.attachElement( 'manual_command' );
+					this.attachElement( 'push_frequency' );
+					this.attachElement( 'partial_push_frequency' );
 				} else {
-					this.detachElement('manual_command');
-					this.detachElement('push_frequency');
-					this.detachElement('partial_push_frequency');
+					this.detachElement( 'manual_command' );
+					this.detachElement( 'push_frequency' );
+					this.detachElement( 'partial_push_frequency' );
 				}
 
-				this.attachElement('password');
-				this.attachElement('port');
+				this.attachElement( 'password' );
+				this.attachElement( 'port' );
 
 			} else {
 				tab_2_label.text( $.i18n._( 'Mobile App' ) );
-				this.detachElement('password');
-				this.detachElement('port');
-				this.detachElement('manual_command');
-				this.detachElement('push_frequency');
-				this.detachElement('partial_push_frequency');
+				this.detachElement( 'password' );
+				this.detachElement( 'port' );
+				this.detachElement( 'manual_command' );
+				this.detachElement( 'push_frequency' );
+				this.detachElement( 'partial_push_frequency' );
 
 			}
 
@@ -518,7 +518,7 @@ StationViewController = BaseViewController.extend( {
 		if ( !this.edit_only_mode ) {
 			$this.openEditView();
 		} else {
-			$this.setEditViewWidgetsMode();
+
 		}
 		var filter = {};
 		filter.filter_data = {};
@@ -562,7 +562,7 @@ StationViewController = BaseViewController.extend( {
 					//if ( !$this.editPermissionValidate() || !$this.editOwnerOrChildPermissionValidate()) {
 					//	$this.is_viewing = true;
 					//}
-					$this.setEditViewWidgetsMode();
+
 					$this.initEditView();
 
 				} );
@@ -574,7 +574,7 @@ StationViewController = BaseViewController.extend( {
 				this.initEditViewUI( $this.viewId, $this.edit_view_tpl );
 			}
 
-			this.setEditViewWidgetsMode();
+
 		}
 
 	},
@@ -974,10 +974,15 @@ StationViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Last Downloaded Punch' ), form_item_input, tab_time_clock_column2 );
 
 		// Configuration Modes
-		form_item_input = Global.loadWidgetByName( FormItemType.LIST );
-		form_item_input.TList( {field: 'mode_flag'} );
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			allow_multiple_selection: true,
+			layout_name: ALayoutIDs.OPTION_COLUMN,
+			show_search_inputs: true,
+			set_empty: true,
+			field: 'mode_flag'
+		} );
 		this.addEditFieldToColumn( $.i18n._( 'Configuration Modes' ), form_item_input, tab_time_clock_column2, '', null, null, true );
-
 	},
 
 	buildSearchFields: function() {

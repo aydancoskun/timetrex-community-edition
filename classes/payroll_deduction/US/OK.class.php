@@ -41,6 +41,26 @@
 class PayrollDeduction_US_OK extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+												20160101 => array(
+															10 => array(
+																	array( 'income' => 6300,	'rate' => 0,	'constant' => 0 ),
+																	array( 'income' => 7300,	'rate' => 0.5,	'constant' => 0 ),
+																	array( 'income' => 8800,	'rate' => 1.0,	'constant' => 5 ),
+																	array( 'income' => 10050,	'rate' => 2.0,	'constant' => 20 ),
+																	array( 'income' => 11200,	'rate' => 3.0,	'constant' => 45 ),
+																	array( 'income' => 13500,	'rate' => 4.0,	'constant' => 79.50 ),
+																	array( 'income' => 13500,	'rate' => 5.0,	'constant' => 171.50 ),
+																	),
+															20 => array(
+																	array( 'income' => 12600,	'rate' => 0,	'constant' => 0 ),
+																	array( 'income' => 14600,	'rate' => 0.5,	'constant' => 0 ),
+																	array( 'income' => 17600,	'rate' => 1.0,	'constant' => 10 ),
+																	array( 'income' => 20100,	'rate' => 2.0,	'constant' => 40 ),
+																	array( 'income' => 22400,	'rate' => 3.0,	'constant' => 90 ),
+																	array( 'income' => 24800,	'rate' => 4.0,	'constant' => 159 ),
+																	array( 'income' => 24800,	'rate' => 5.0,	'constant' => 255 ),
+																	),
+															),
 												20150101 => array(
 															10 => array(
 																	array( 'income' => 6300,	'rate' => 0,	'constant' => 0 ),

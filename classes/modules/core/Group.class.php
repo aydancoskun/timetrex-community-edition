@@ -157,15 +157,27 @@ class Group {
 		}
 	}
 
+	//Need to use bcmath for large numbers, especially on 32bit PHP installs.
+	static function arraySum( $array ) {
+		$retval = 0;
+		foreach( $array as $value ) {
+			$retval = bcadd( $retval, $value );
+		}
+
+		return $retval;
+	}
+	
 	static function aggregate( $array, $type ) {
 		switch( $type ) {
 			default:
 			case 'sum':
-				$retarr = array_sum($array);
+				//$retarr = array_sum($array);
+				$retarr = self::arraySum($array); 
 				break;
 			case 'average':
 			case 'avg':
-				$retarr = ( array_sum($array) / count($array) );
+				//$retarr = ( array_sum($array) / count($array) );
+				$retarr = ( self::arraySum($array) / count($array) );
 				break;
 			case 'minimum':
 			case 'min':

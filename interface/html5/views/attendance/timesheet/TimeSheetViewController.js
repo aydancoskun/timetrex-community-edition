@@ -657,20 +657,11 @@ TimeSheetViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
-		var edit_accumulated_time = new RibbonSubMenu( {
-			label: $.i18n._( 'Accumulated<br>Time' ),
-			id: ContextMenuIconName.accumulated_time,
+		var in_out = new RibbonSubMenu( {
+			label: $.i18n._( 'In/Out' ),
+			id: ContextMenuIconName.in_out,
 			group: navigation_group,
-			icon: Icons.timesheet,
-			permission_result: true,
-			permission: null
-		} );
-
-		var edit_employee = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit<br>Employee' ),
-			id: ContextMenuIconName.edit_employee,
-			group: navigation_group,
-			icon: Icons.employee,
+			icon: Icons.in_out,
 			permission_result: true,
 			permission: null
 		} );
@@ -693,15 +684,6 @@ TimeSheetViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
-		var edit_pay_period = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit Pay<br>Period' ),
-			id: ContextMenuIconName.edit_pay_period,
-			group: navigation_group,
-			icon: Icons.pay_period,
-			permission_result: true,
-			permission: null
-		} );
-
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) ) {
 			var map = new RibbonSubMenu( {
 				label: $.i18n._( 'Map' ),
@@ -712,6 +694,33 @@ TimeSheetViewController = BaseViewController.extend( {
 				permission: null
 			} );
 		}
+
+		var edit_employee = new RibbonSubMenu( {
+			label: $.i18n._( 'Edit<br>Employee' ),
+			id: ContextMenuIconName.edit_employee,
+			group: navigation_group,
+			icon: Icons.employee,
+			permission_result: true,
+			permission: null
+		} );
+
+		var edit_pay_period = new RibbonSubMenu( {
+			label: $.i18n._( 'Edit Pay<br>Period' ),
+			id: ContextMenuIconName.edit_pay_period,
+			group: navigation_group,
+			icon: Icons.pay_period,
+			permission_result: true,
+			permission: null
+		} );
+
+		var edit_accumulated_time = new RibbonSubMenu( {
+			label: $.i18n._( 'Accumulated<br>Time' ),
+			id: ContextMenuIconName.accumulated_time,
+			group: navigation_group,
+			icon: Icons.timesheet,
+			permission_result: true,
+			permission: null
+		} );
 
 		var re_cal_timesheet = new RibbonSubMenu( {
 			label: $.i18n._( 'ReCalculate<br>TimeSheet' ),
@@ -763,42 +772,25 @@ TimeSheetViewController = BaseViewController.extend( {
 			this.initEditViewUI( 'TimeSheet', 'TimeSheetEditView.html' );
 		}
 
-		this.setEditViewWidgetsMode();
 	},
 
 	/* jshint ignore:start */
 	//set widget disablebility if view mode or edit mode
 	setEditViewWidgetsMode: function() {
-
 		var did_clean = false;
 		for ( var key in this.edit_view_ui_dic ) {
-
 			if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
 				continue;
 			}
-
 			var widget = this.edit_view_ui_dic[key];
 			var widgetContainer = this.edit_view_form_item_dic[key];
-
 			var column = widget.parent().parent().parent();
 			if ( !column.hasClass( 'v-box' ) ) {
-
 				if ( !did_clean ) {
 					did_clean = true;
 				}
-
-				var child_length = column.children().length;
-				var parent_div = widget.parent().parent();
-
-				if ( Global.isSet( widget.setEnabled ) ) {
-					widget.setEnabled( true );
-				}
 			}
-
-			widget.setValue( '' );
-
 			if ( this.absence_model ) {
-
 				switch ( key ) {
 					case 'punch_date':
 					case 'punch_time':
@@ -846,7 +838,6 @@ TimeSheetViewController = BaseViewController.extend( {
 				}
 
 			} else {
-
 				switch ( key ) {
 					case 'punch_dates':
 						if ( this.is_mass_adding ) {
@@ -901,7 +892,6 @@ TimeSheetViewController = BaseViewController.extend( {
 
 				}
 			}
-
 			if ( this.is_viewing ) {
 				if ( Global.isSet( widget.setEnabled ) ) {
 					widget.setEnabled( false );
@@ -911,7 +901,6 @@ TimeSheetViewController = BaseViewController.extend( {
 					widget.setEnabled( true );
 				}
 			}
-
 		}
 
 	},
@@ -1366,6 +1355,10 @@ TimeSheetViewController = BaseViewController.extend( {
 		this.setMassEditingFieldsWhenFormChange( target );
 		var key = target.getField();
 		var c_value = target.getValue();
+		// Error: TypeError: this.current_edit_record is null in interface/html5/framework/jquery.min.js?v=9.0.5-20151222-094938 line 2 > eval line 1409
+		if ( !this.current_edit_record ) {
+			return;
+		}
 		this.current_edit_record[key] = c_value;
 		switch ( key ) {
 			case 'job_id':
@@ -1401,12 +1394,10 @@ TimeSheetViewController = BaseViewController.extend( {
 			} else {
 				this.current_edit_record[key] = c_value;
 			}
-
 			if ( key !== 'override' ) {
 				this.edit_view_ui_dic.override.setValue( true );
 				this.current_edit_record.override = true;
 			}
-
 		} else {
 			this.current_edit_record[key] = c_value;
 		}
@@ -1561,7 +1552,8 @@ TimeSheetViewController = BaseViewController.extend( {
 		} );
 
 		this.start_date_picker.bind( 'formItemChange', function() {
-			$this.setDatePickerValue( $this.start_date_picker.getValue() );
+			var select_date = $this.getSelectDate() ? $this.getSelectDate() : new Date().format()
+			$this.setDatePickerValue( select_date );
 			$this.search();
 		} );
 
@@ -1903,6 +1895,7 @@ TimeSheetViewController = BaseViewController.extend( {
 		this.accumulated_total_grid_source = [];
 		this.punch_note_grid_source = [];
 		this.verification_grid_source = [];
+		this.select_cells_Array = [];
 
 		this.branch_cell_count = 0;
 		this.department_cell_count = 0;
@@ -2051,7 +2044,17 @@ TimeSheetViewController = BaseViewController.extend( {
 		};
 		columns.push( punch_in_out_column );
 
-		punch_in_out_column = {name: 'note', index: 'note', label: ' ', width: 100, sortable: false, title: false};
+		punch_in_out_column = {
+			name: 'note',
+			index: 'note',
+			label: ' ',
+			width: 100,
+			sortable: false,
+			title: false,
+			cellattr: function( index, value ) {
+				return 'title="' + value + '"';
+			}
+		};
 		columns.push( punch_in_out_column );
 
 		if ( !this.punch_note_grid ) {
@@ -2262,6 +2265,17 @@ TimeSheetViewController = BaseViewController.extend( {
 
 	},
 
+	checkIsSelectedAbsenceCell: function( row_id, cell_index ) {
+		for ( var i = 0, m = this.absence_select_cells_Array.length; i < m; i++ ) {
+			var cell = this.absence_select_cells_Array[i];
+			if ( cell.row_id.toString() === row_id.toString() && cell.cell_index.toString() === cell_index.toString() ) {
+				return true;
+			}
+		}
+
+		return false;
+	},
+
 	buildAbsenceGrid: function() {
 		var $this = this;
 		var grid;
@@ -2290,16 +2304,18 @@ TimeSheetViewController = BaseViewController.extend( {
 					$this.onGridDblClickRow( 'absence' );
 				},
 				onSelectRow: function( row_id, flag, e ) {
-
 					$this.onSelectRow( 'absence_grid', row_id, this );
-
+				},
+				onRightClickRow: function( row_id, iRow, cell_index, e ) {
+					if ( !$this.checkIsSelectedAbsenceCell( row_id, cell_index ) ) {
+						var cell_val = $( e.target ).closest( "td,th" ).html();
+						$this.onCellSelect( 'absence_grid', row_id, cell_index, cell_val, this, e );
+						$this.onSelectRow( 'absence_grid', row_id, this );
+					}
 				},
 				onCellSelect: function( row_id, cell_index, cell_val, e ) {
-
 					$this.onCellSelect( 'absence_grid', row_id, cell_index, cell_val, this, e );
-
 				},
-
 				colNames: [],
 				colModel: this.timesheet_columns,
 				viewrecords: true
@@ -2316,14 +2332,17 @@ TimeSheetViewController = BaseViewController.extend( {
 			this.absence_grid.jqGrid( {
 				altRows: true,
 				onSelectRow: function( row_id, flag, e ) {
-
 					$this.onSelectRow( 'absence_grid', row_id, this );
-
+				},
+				onRightClickRow: function( row_id, iRow, cell_index, e ) {
+					if ( !$this.checkIsSelectedAbsenceCell( row_id, cell_index ) ) {
+						var cell_val = $( e.target ).closest( "td,th" ).html();
+						$this.onCellSelect( 'absence_grid', row_id, cell_index, cell_val, this, e );
+						$this.onSelectRow( 'absence_grid', row_id, this );
+					}
 				},
 				onCellSelect: function( row_id, cell_index, cell_val, e ) {
-
 					$this.onCellSelect( 'absence_grid', row_id, cell_index, cell_val, this, e );
-
 				},
 				ondblClickRow: function() {
 					$this.onGridDblClickRow();
@@ -2347,6 +2366,17 @@ TimeSheetViewController = BaseViewController.extend( {
 		this.setGridHeaderBar( 'absence_grid', 'Absence' );
 
 		this.bindGridColumnEvents();
+	},
+
+	checkIsSelectedPunchCell: function( row_id, cell_index ) {
+		for ( var i = 0, m = this.select_cells_Array.length; i < m; i++ ) {
+			var cell = this.select_cells_Array[i];
+			if ( cell.row_id.toString() === row_id.toString() && cell.cell_index.toString() === cell_index.toString() ) {
+				return true;
+			}
+		}
+
+		return false;
 	},
 
 	buildTimeSheetGrid: function() {
@@ -2378,16 +2408,18 @@ TimeSheetViewController = BaseViewController.extend( {
 					$this.onGridDblClickRow();
 				},
 				onSelectRow: function( row_id, flag, e ) {
-
 					$this.onSelectRow( 'timesheet_grid', row_id, this );
-
+				},
+				onRightClickRow: function( row_id, iRow, cell_index, e ) {
+					if ( !$this.checkIsSelectedPunchCell( row_id, cell_index ) ) {
+						var cell_val = $( e.target ).closest( "td,th" ).html();
+						$this.onCellSelect( 'timesheet_grid', row_id, cell_index, cell_val, this, e );
+						$this.onSelectRow( 'timesheet_grid', row_id, this );
+					}
 				},
 				onCellSelect: function( row_id, cell_index, cell_val, e ) {
-
 					$this.onCellSelect( 'timesheet_grid', row_id, cell_index, cell_val, this, e );
-
 				},
-
 				colNames: [],
 				colModel: this.timesheet_columns,
 				viewrecords: true
@@ -2405,14 +2437,18 @@ TimeSheetViewController = BaseViewController.extend( {
 				altRows: true,
 				alt2Rows: true,
 				onSelectRow: function( row_id, flag, e ) {
-
 					$this.onSelectRow( 'timesheet_grid', row_id, this );
 
 				},
+				onRightClickRow: function( row_id, iRow, cell_index, e ) {
+					if ( !$this.checkIsSelectedPunchCell( row_id, cell_index ) ) {
+						var cell_val = $( e.target ).closest( "td,th" ).html();
+						$this.onCellSelect( 'timesheet_grid', row_id, cell_index, cell_val, this, e );
+						$this.onSelectRow( 'timesheet_grid', row_id, this );
+					}
+				},
 				onCellSelect: function( row_id, cell_index, cell_val, e ) {
-
 					$this.onCellSelect( 'timesheet_grid', row_id, cell_index, cell_val, this, e );
-
 				},
 				ondblClickRow: function() {
 					$this.onGridDblClickRow();
@@ -2465,14 +2501,15 @@ TimeSheetViewController = BaseViewController.extend( {
 				sortable: false,
 				altRows: true,
 				onSelectRow: function( row_id, flag, e ) {
-
 					$this.onSelectRow( 'accumulated_grid', row_id, this );
-
+				},
+				onRightClickRow: function( row_id, iRow, cell_index, e ) {
+					var cell_val = $( e.target ).closest( "td,th" ).html();
+					$this.onCellSelect( 'accumulated_grid', row_id, cell_index, cell_val, this, e );
+					$this.onSelectRow( 'accumulated_grid', row_id, this );
 				},
 				onCellSelect: function( row_id, cell_index, cell_val, e ) {
-
 					$this.onCellSelect( 'accumulated_grid', row_id, cell_index, cell_val, this, e );
-
 				},
 				ondblClickRow: function() {
 					$this.onAccumulatedTimeClick();
@@ -2495,14 +2532,15 @@ TimeSheetViewController = BaseViewController.extend( {
 			this[grid_id].jqGrid( {
 				altRows: true,
 				onSelectRow: function( row_id, flag, e ) {
-
 					$this.onSelectRow( 'accumulated_grid', row_id, this );
-
+				},
+				onRightClickRow: function( row_id, iRow, cell_index, e ) {
+					var cell_val = $( e.target ).closest( "td,th" ).html();
+					$this.onCellSelect( 'accumulated_grid', row_id, cell_index, cell_val, this, e );
+					$this.onSelectRow( 'accumulated_grid', row_id, this );
 				},
 				onCellSelect: function( row_id, cell_index, cell_val, e ) {
-
 					$this.onCellSelect( 'accumulated_grid', row_id, cell_index, cell_val, this, e );
-
 				},
 				ondblClickRow: function() {
 					$this.onAccumulatedTimeClick();
@@ -2556,6 +2594,11 @@ TimeSheetViewController = BaseViewController.extend( {
 					onSelectRow: function( row_id, flag, e ) {
 						$this.onSelectRow( 'premium_grid', row_id, this );
 					},
+					onRightClickRow: function( row_id, iRow, cell_index, e ) {
+						var cell_val = $( e.target ).closest( "td,th" ).html();
+						$this.onCellSelect( 'premium_grid', row_id, cell_index, cell_val, this, e );
+						$this.onSelectRow( 'premium_grid', row_id, this );
+					},
 					onCellSelect: function( row_id, cell_index, cell_val, e ) {
 						$this.onCellSelect( 'premium_grid', row_id, cell_index, cell_val, this, e );
 					},
@@ -2585,6 +2628,11 @@ TimeSheetViewController = BaseViewController.extend( {
 					colModel: this.timesheet_columns,
 					viewrecords: true,
 					onSelectRow: function( row_id, flag, e ) {
+						$this.onSelectRow( 'premium_grid', row_id, this );
+					},
+					onRightClickRow: function( row_id, iRow, cell_index, e ) {
+						var cell_val = $( e.target ).closest( "td,th" ).html();
+						$this.onCellSelect( 'premium_grid', row_id, cell_index, cell_val, this, e );
 						$this.onSelectRow( 'premium_grid', row_id, this );
 					},
 					onCellSelect: function( row_id, cell_index, cell_val, e ) {
@@ -2818,7 +2866,6 @@ TimeSheetViewController = BaseViewController.extend( {
 		this.branch_grid.clearGridData();
 		this.branch_grid.setGridParam( {data: this.branch_source} );
 		this.branch_grid.trigger( 'reloadGrid' );
-
 		this.department_grid.clearGridData();
 		this.department_grid.setGridParam( {data: this.department_source} );
 		this.department_grid.trigger( 'reloadGrid' );
@@ -2915,20 +2962,22 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		function payPeriodCheck() {
+			if ( $this.start_date ) {
+				for ( var i = 0; i < 7; i++ ) {
+					var select_date = new Date( new Date( $this.start_date.getTime() ).setDate( $this.start_date.getDate() + i ) );
 
-			for ( var i = 0; i < 7; i++ ) {
-				var select_date = new Date( new Date( $this.start_date.getTime() ).setDate( $this.start_date.getDate() + i ) );
+					var select_date_str = select_date.format();
+					var hire_date = $this.getSelectEmployee( true ).hire_date;
+					var termination_date = $this.getSelectEmployee( true ).termination_date;
+					//Error: Uncaught TypeError: Cannot read property 'getTime' of null in interface/html5/index.php?user_name=dustin#!m=TimeSheet&date=20151214&user_id=38599&show_wage=0 line 2947
+					if ( !select_date ) continue;
+					if ( select_date.getTime() < new Date().getTime() && !$this.getPayPeriod( select_date_str ) &&
+						(!hire_date || select_date.getTime() >= Global.strToDate( hire_date ).getTime()) &&
+						(!termination_date || select_date.getTime() <= Global.strToDate( termination_date ).getTime()) ) {
+						return false;
+					}
 
-				var select_date_str = select_date.format();
-				var hire_date = $this.getSelectEmployee( true ).hire_date;
-				var termination_date = $this.getSelectEmployee( true ).termination_date;
-
-				if ( select_date.getTime() < new Date().getTime() && !$this.getPayPeriod( select_date_str ) &&
-					(!hire_date || select_date.getTime() >= Global.strToDate( hire_date ).getTime()) &&
-					(!termination_date || select_date.getTime() <= Global.strToDate( termination_date ).getTime()) ) {
-					return false;
 				}
-
 			}
 
 			return true;
@@ -3201,7 +3250,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			this.highlight_header.removeClass( 'highlight-header' );
 		}
 
+		//Error: TypeError: select_date is null in interface/html5/framework/jquery.min.js?v=9.0.1-20151022-081724 line 2 > eval line 3214
 		var select_date = Global.strToDate( this.start_date_picker.getValue() );
+		!select_date && (select_date = new Date());
 		select_date = select_date.format( this.full_format );
 
 		this.highlight_header = $( '#' + this.ui_id + '_grid_' + select_date );
@@ -3312,25 +3363,23 @@ TimeSheetViewController = BaseViewController.extend( {
 			this.setGridHeight( key );
 		}
 
-		if(this.search_panel.is(':visible')){
+		if ( this.search_panel.is( ':visible' ) ) {
 			this.grid_div.height( $( this.el ).height() - this.search_panel.height() - 72 );
-		}else{
+		} else {
 			this.grid_div.height( $( this.el ).height() - 72 );
 		}
-
 
 		this.setPayPeriodHeaderSize();
 
 	},
 
 	onCellFormat: function( cell_value, related_data, row ) {
-
 		var col_model = related_data.colModel;
 		var row_id = related_data.rowid;
 		var content_div = $( "<div class='punch-content-div'></div>" );
 		var punch_info;
+		cell_value = Global.decodeCellValue( cell_value );
 		if ( related_data.pos === 0 ) {
-
 			if ( row.type === TimeSheetViewController.TOTAL_ROW ) {
 				punch_info = $( "<span class='total' style='font-size: 11px'></span>" );
 				if ( Global.isSet( cell_value ) ) {
@@ -3341,16 +3390,15 @@ TimeSheetViewController = BaseViewController.extend( {
 
 				return punch_info.get( 0 ).outerHTML;
 			} else if ( row.type === TimeSheetViewController.REGULAR_ROW ) {
-
 				punch_info = $( "<span class='top-line-span' style='font-size: 11px'></span>" );
 				if ( Global.isSet( cell_value ) ) {
 					punch_info.text( cell_value );
 				} else {
 					punch_info.text( '' );
 				}
-
 				return punch_info.get( 0 ).outerHTML;
 			}
+
 			return cell_value;
 
 		}
@@ -3458,6 +3506,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			time_span = $( "<span class='request'></span>" );
 			if ( Global.isSet( cell_value ) ) {
 				time_span.text( cell_value );
+				time_span.attr( 'title', createRequestToolTip( row[col_model.name + '_request'] ) );
 			} else {
 				time_span.text( '' );
 			}
@@ -3602,6 +3651,45 @@ TimeSheetViewController = BaseViewController.extend( {
 			content_div.prepend( time_span );
 		}
 
+		function createRequestToolTip( value ) {
+			var label;
+			if ( _.isArray( value ) ) {
+				label = calDAndA( value );
+			} else {
+				// Already translate when back from API
+				label = value.status;
+			}
+			function calDAndA( array ) {
+				var len = array.length;
+				var a = 0;
+				var d = 0;
+				var p = 0;
+				var label = '';
+				for ( var i = 0; i < len; i++ ) {
+					var item = array[i];
+					if ( item.status_id === 50 ) {
+						a = a + 1;
+					} else if ( item.status_id === 55 ) {
+						d = d + 1;
+					} else if ( item.status_id === 30 ) {
+						p = p + 1;
+					}
+				}
+				if ( a > 0 ) {
+					label += ' ' + $.i18n._( 'Authorized' ) + ': ' + a;
+				}
+				if ( p > 0 ) {
+					label += ' ' + $.i18n._( 'Pending' ) + ': ' + p;
+				}
+				if ( d > 0 ) {
+					label += ' ' + $.i18n._( 'Declined' ) + ': ' + d;
+				}
+				return label;
+			}
+
+			return label;
+		}
+
 		return content_div.get( 0 ).outerHTML;
 	},
 
@@ -3704,7 +3792,11 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			data_field = colModel[cell_index].name;
 
-			punch = row[data_field + '_data'];
+			if ( row ) {
+				punch = row[data_field + '_data'];
+			} else {
+				punch = null;
+			}
 
 			related_punch = row[data_field + '_related_data'];
 
@@ -3725,7 +3817,12 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			data_field = colModel[cell_index].name;
 
-			punch = row[data_field + '_data'];
+			// Error: Uncaught TypeError: Cannot read property 'punch_info_data' of undefined in interface/html5/#!m=TimeSheet&date=20151220&user_id=null&show_wage=0 line 3761
+			if ( row ) {
+				punch = row[data_field + '_data'];
+			} else {
+				punch = null;
+			}
 
 			date = Global.strToDate( data_field, this.full_format );
 
@@ -4126,12 +4223,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			var a = 0;
 			var d = 0;
 			var p = 0;
-
 			var label = '';
-
 			for ( var i = 0; i < len; i++ ) {
 				var item = array[i];
-
 				if ( item.status_id === 50 ) {
 					a = a + 1;
 				} else if ( item.status_id === 55 ) {
@@ -4139,25 +4233,18 @@ TimeSheetViewController = BaseViewController.extend( {
 				} else if ( item.status_id === 30 ) {
 					p = p + 1;
 				}
-
 			}
-
-			if ( p > 0 ) {
-				label = 'P: ' + p;
-			}
-
 			if ( a > 0 ) {
-				label += ' A: ' + p;
+				label += ' A: ' + a;
 			}
-
+			if ( p > 0 ) {
+				label += ' P: ' + p;
+			}
 			if ( d > 0 ) {
 				label += ' D: ' + d;
 			}
-
 			return label;
-
 		}
-
 	},
 
 	buildTimeSheetExceptions: function() {
@@ -4254,10 +4341,14 @@ TimeSheetViewController = BaseViewController.extend( {
 
 	reLoadSubGridsSource: function() {
 
+		// Error: Uncaught TypeError: Cannot read property 'pay_period_id' of undefined in interface/html5/#!m=TimeSheet&date=20151214&user_id=null&show_wage=0 line 4290
+		if ( !this.full_timesheet_data || !this.full_timesheet_data.timesheet_verify_data ) {
+			return;
+		}
+
 		if ( this.full_timesheet_data.timesheet_verify_data.pay_period_id === this.pay_period_map[this.getSelectDate()] ||
 			( !Global.isSet( this.full_timesheet_data.timesheet_verify_data.pay_period_id ) && !this.pay_period_map[this.getSelectDate()])
 		) {
-
 			return;
 		}
 
@@ -4442,8 +4533,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			//Build Accumulated Total Grid week column data end
 			//Build all sub grids data
-
+			//Error: Uncaught TypeError: Cannot read property 'format' of null in interface/html5/#!m=TimeSheet&date=20151117&user_id=35367&show_wage=0 line 4478
 			date = Global.strToDate( key );
+			if ( !date ) continue;
 			date_string = date.format( this.full_format );
 
 			accumulated_time = accumulated_user_date_total_data[key].accumulated_time;
@@ -4490,8 +4582,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		if ( Global.isSet( meal_and_break_total_data ) ) {
 
 			for ( key  in meal_and_break_total_data ) {
-
+				// Error: Uncaught TypeError: Cannot read property 'format' of null in interface/html5/#!m=TimeSheet&date=20151119&user_id=55338&show_wage=0 line 4527
 				date = Global.strToDate( key );
+				if ( !date ) continue;
 				date_string = date.format( this.full_format );
 
 				this.buildBreakAndLunchData( meal_and_break_total_data[key], date_string );
@@ -4739,7 +4832,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			date_string = date.format();
 			if ( punch.note && punch.punch_control_id !== last_control_id ) {
 				this.punch_note_account = this.punch_note_account + 1;
-				this.punch_note_grid_source.push( {note: date_string + ' @ ' + punch.punch_time + ': ' + punch.note} );
+				this.punch_note_grid_source.push( {note: date_string + ' @ ' + punch.punch_time + ': ' + punch.note.replace( /\n/g, ' ' )} );
 				last_control_id = punch.punch_control_id;
 			}
 		}
@@ -4749,7 +4842,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			date_string = date.format();
 			if ( absence.note ) {
 				this.punch_note_account = this.punch_note_account + 1;
-				this.punch_note_grid_source.push( {note: date_string + ' @ ' + Global.secondToHHMMSS( absence.total_time ) + ': ' + absence.note} );
+				this.punch_note_grid_source.push( {note: date_string + ' @ ' + Global.secondToHHMMSS( absence.total_time ) + ': ' + absence.note.replace( /\n/g, ' ' )} );
 			}
 		}
 	},
@@ -4837,7 +4930,6 @@ TimeSheetViewController = BaseViewController.extend( {
 	},
 
 	buildTimeSheetSource: function() {
-
 		this.timesheet_data_source = [];
 		var punch_array = this.full_timesheet_data.punch_data;
 		var len = punch_array.length;
@@ -4845,11 +4937,11 @@ TimeSheetViewController = BaseViewController.extend( {
 		var new_row;
 		for ( var i = 0; i < len; i++ ) {
 			var punch = punch_array[i];
+			// Error: TypeError: Global.strToDate(...) is null in interface/html5/framework/jquery.min.js?v=9.0.1-20151022-081724 line 2 > eval line 4869
+			// Punch must have a date
+			if ( !punch.date_stamp ) continue;
 			var date = Global.strToDate( punch.date_stamp );
 			var date_string = date.format( this.full_format );
-
-			var current_select_date_string = this.start_date_picker.getValue();
-			current_select_date_string = Global.strToDate( current_select_date_string ).format( this.full_format );
 
 			var punch_status_id = punch.status_id;
 
@@ -6031,9 +6123,10 @@ TimeSheetViewController = BaseViewController.extend( {
 			case ContextMenuIconName.drag_copy:
 				this.setMoveOrDropMode( id );
 				break;
-			case ContextMenuIconName.edit_employee:
+			case ContextMenuIconName.in_out:
 			case ContextMenuIconName.schedule:
 			case ContextMenuIconName.pay_stub:
+			case ContextMenuIconName.edit_employee:
 			case ContextMenuIconName.edit_pay_period:
 				this.onNavigationClick( id );
 				break;
@@ -6075,6 +6168,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		var post_data;
 
 		switch ( iconName ) {
+			case ContextMenuIconName.in_out:
+				IndexViewController.openEditView( LocalCacheData.current_open_primary_controller, 'InOut' );
+				break;
 			case ContextMenuIconName.edit_employee:
 				IndexViewController.openEditView( this, 'Employee', this.getSelectEmployee() );
 				break;
@@ -6276,7 +6372,8 @@ TimeSheetViewController = BaseViewController.extend( {
 					punch_control_id = select_item.related_punch.punch_control_id;
 					prev_punch_id = select_item.related_punch.id;
 				} else {
-					var current_column_field = Global.strToDate( select_item.date ).format( this.full_format );
+					//Error: Uncaught TypeError: Cannot read property 'format' of null in interface/html5/#!m=TimeSheet&date=20151006&user_id=51085&show_wage=0 line 6292
+					var current_column_field = Global.strToDate( select_item.date ? select_item.date : this.start_date_picker.getValue() ).format( this.full_format );
 
 					if ( this.timesheet_data_source && this.timesheet_data_source[select_item.row_id - 2] ) {
 						var pre_punch = this.timesheet_data_source[select_item.row_id - 2][current_column_field + '_data'];
@@ -6318,10 +6415,11 @@ TimeSheetViewController = BaseViewController.extend( {
 					type_id = 10;
 				} else {
 					var row_data = this.timesheet_data_source[select_cell.row_id - 1];
-					var left_side_punch = row_data[new_date.format(this.full_format ) + '_data'];
-					if(left_side_punch){
+					//Error: Unable to get property 'Sun-Dec-13-2015_data' of undefined or null reference in interface/html5/ line 6362
+					var left_side_punch = row_data && row_data[new_date.format( this.full_format ) + '_data'];
+					if ( left_side_punch ) {
 						type_id = left_side_punch.type_id;
-					}else{
+					} else {
 						type_id = 10;
 					}
 				}
@@ -6500,7 +6598,7 @@ TimeSheetViewController = BaseViewController.extend( {
 		} );
 	},
 
-	onCopyAsNewClick: function() {
+	_continueDoCopyAsNew: function() {
 		var $this = this;
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
 		this.is_mass_adding = true;
@@ -6528,6 +6626,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			this.initEditView();
 			this.setEditMenu();
 			this.setTabStatus();
+			this.is_changed = false;
 			ProgressBar.closeOverlay();
 		}
 
@@ -6539,6 +6638,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			ignoreWarning = false;
 		}
 		var current_api = this.getCurrentAPI();
+		this.is_changed = false;
 		LocalCacheData.current_doing_context_action = 'save_and_copy';
 		var record = this.current_edit_record;
 		if ( this.is_mass_adding ) {
@@ -6650,7 +6750,7 @@ TimeSheetViewController = BaseViewController.extend( {
 
 				if ( result.isValid() ) {
 					$this.search();
-					$this.current_edit_record = null;
+
 					$this.removeEditView();
 
 				} else {
@@ -6785,7 +6885,10 @@ TimeSheetViewController = BaseViewController.extend( {
 						break;
 					case 'first_last_name':
 						var select_employee = this.getSelectEmployee( true ); //Get full item
-						widget.setValue( select_employee['first_name'] + ' ' + select_employee['last_name'] );
+						//Error: Uncaught TypeError: Cannot read property 'first_name' of null in interface/html5/#!m=TimeSheet&date=null&user_id=null&show_wage=0&a=new&t=punch&tab=Punch line 6810
+						if ( select_employee ) {
+							widget.setValue( select_employee['first_name'] + ' ' + select_employee['last_name'] );
+						}
 						break;
 					case 'total_time':
 						if ( this.absence_model ) {
@@ -7092,9 +7195,9 @@ TimeSheetViewController = BaseViewController.extend( {
 					$this.show_station_ui = false;
 				}
 
-				if ( $this.show_station_ui ) {
-					var form_item_input = $this.edit_view_ui_dic['station_id'];
-					form_item_input.css( 'cursor', 'pointer' );
+				// Error: TypeError: form_item_input is undefined in interface/html5/framework/jquery.min.js?v=9.0.1-20151022-091549 line 2 > eval line 7119
+				if ( $this.show_station_ui && widget ) {
+					widget.css( 'cursor', 'pointer' );
 				}
 
 			}
@@ -7176,8 +7279,10 @@ TimeSheetViewController = BaseViewController.extend( {
 					this.setDefaultMenuMassEditIcon( context_btn, grid_selected_length, p_id );
 					break;
 				case ContextMenuIconName.copy:
-				case ContextMenuIconName.drag_copy:
 					this.setDefaultMenuCopyIcon( context_btn, grid_selected_length, p_id );
+					break;
+				case ContextMenuIconName.drag_copy:
+					this.setDefaultMenuDragCopyIcon( context_btn, grid_selected_length, p_id );
 					break;
 				case ContextMenuIconName.delete_icon:
 					this.setDefaultMenuDeleteIcon( context_btn, grid_selected_length, p_id );
@@ -7245,6 +7350,21 @@ TimeSheetViewController = BaseViewController.extend( {
 
 		this.setContextMenuGroupVisibility();
 
+	},
+
+	setEditMenuDragCopyIcon: function( context_btn, grid_selected_length, pId ) {
+		if ( !this.copyPermissionValidate( pId ) || this.edit_only_mode ) {
+			context_btn.addClass( 'invisible-image' );
+		}
+
+	},
+
+	setDefaultMenuDragCopyIcon: function( context_btn, grid_selected_length, pId ) {
+		if ( !this.copyPermissionValidate( pId ) || this.edit_only_mode ) {
+			context_btn.addClass( 'invisible-image' );
+		}
+
+		context_btn.removeClass( 'disable-image' );
 	},
 
 	setDefaultMenuScheduleIcon: function( context_btn, grid_selected_length, pId ) {
@@ -7539,8 +7659,10 @@ TimeSheetViewController = BaseViewController.extend( {
 					this.setEditMenuMassEditIcon( context_btn, p_id );
 					break;
 				case ContextMenuIconName.copy:
+					this.setEditMenuCopyIcon( context_btn, p_id );
+					break;
 				case ContextMenuIconName.drag_copy:
-					this.setEditMenuCopyIcon( context_btn, p_id )
+					this.setEditMenuDragCopyIcon( context_btn, p_id );
 					break;
 				case ContextMenuIconName.move:
 					if ( !this.movePermissionValidate( p_id ) ) {

@@ -916,23 +916,34 @@ class CompanyDeductionFactory extends Factory {
 	}
 
 	//Check if this date is within the effective date range
-	function isActiveDate( $ud_obj, $epoch ) {
-		$epoch = TTDate::getBeginDayEpoch( $epoch );
+	function isActiveDate( $ud_obj, $pp_end_date = NULL, $pp_transaction_date = NULL ) {
+		$pp_end_date = TTDate::getBeginDayEpoch( $pp_end_date );
 
 		if ( $ud_obj->getStartDate() == '' AND $ud_obj->getEndDate() == '' ) {
 			return TRUE;
 		}
 
-		if ( $epoch >= (int)$ud_obj->getStartDate()
-				AND ( $epoch <= (int)$ud_obj->getEndDate() OR $ud_obj->getEndDate() == '' ) ) {
-			Debug::text('Within Start/End Date.', __FILE__, __LINE__, __METHOD__, 10);
+		if ( $this->getCalculation() == 90 AND $pp_transaction_date != '' ) { //CPP
+			if ( TTDate::getEndDayEpoch( $pp_transaction_date ) > TTDate::getEndMonthEpoch( (int)$ud_obj->getStartDate() )
+					AND ( TTDate::getEndDayEpoch( $pp_transaction_date ) <= TTDate::getEndMonthEpoch( (int)$ud_obj->getEndDate() ) OR $ud_obj->getEndDate() == '' ) ) {
+				Debug::text('CPP: Within Start/End Date.', __FILE__, __LINE__, __METHOD__, 10);
 
-			return TRUE;
+				return TRUE;
+			}
+
+			Debug::text('CPP: Epoch: '. TTDate::getDate('DATE+TIME', $pp_transaction_date) .' is outside Start: '. TTDate::getDate('DATE+TIME', $ud_obj->getStartDate()) .' and End Date: '. TTDate::getDate('DATE+TIME', $ud_obj->getEndDate()), __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		} else {
+			if ( $pp_end_date >= (int)$ud_obj->getStartDate()
+					AND ( $pp_end_date <= (int)$ud_obj->getEndDate() OR $ud_obj->getEndDate() == '' ) ) {
+				Debug::text('Within Start/End Date.', __FILE__, __LINE__, __METHOD__, 10);
+
+				return TRUE;
+			}
+
+			Debug::text('Epoch: '. TTDate::getDate('DATE+TIME', $pp_end_date) .' is outside Start: '. TTDate::getDate('DATE+TIME', $ud_obj->getStartDate()) .' and End Date: '. TTDate::getDate('DATE+TIME', $ud_obj->getEndDate()), __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
 		}
-
-		Debug::text('Epoch: '. TTDate::getDate('DATE+TIME', $epoch) .' is outside Start: '. TTDate::getDate('DATE+TIME', $ud_obj->getStartDate()) .' and End Date: '. TTDate::getDate('DATE+TIME', $ud_obj->getEndDate()), __FILE__, __LINE__, __METHOD__, 10);
-
-		return FALSE;
 	}
 
 	function getMinimumLengthOfServiceDays() {
@@ -1429,7 +1440,7 @@ class CompanyDeductionFactory extends Factory {
 			$maximum_length_of_service_result = TRUE;
 		}
 
-		Debug::Text('   Min Result: '. (int)$minimum_length_of_service_result .' Max Result: '. (int)$maximum_length_of_service_result, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Text('   Min Result: '. (int)$minimum_length_of_service_result .' Max Result: '. (int)$maximum_length_of_service_result, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $minimum_length_of_service_result == TRUE AND $maximum_length_of_service_result == TRUE ) {
 			return TRUE;
@@ -1438,12 +1449,68 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 
-	function isActiveUserAge( $u_obj, $epoch ) {
-		$user_age = TTDate::getYearDifference( $u_obj->getBirthDate(), $epoch );
+	function isCPPAgeEligible( $birth_date, $pp_transaction_date = NULL  ) {
+		//CPP starts on the first transaction date *after* the month they turn 18, and ends on the first transaction date after they turn 70.
+		//  Basically so pro-rating is for whole months rather than partial months.
+		//http://www.cra-arc.gc.ca/tx/bsnss/tpcs/pyrll/clcltng/cpp-rpc/prrtng/xmpls-eng.html#xmpl_1
+		// If they are 18 on Feb 16, and the PP runs: Feb 2nd to Feb 17th Transact: Feb 25, CPP would NOT be deducted, as they turned 18 in the same month.
+		// If they are 18 on Feb 16, and the PP runs: Feb 15nd to Feb 28th Transact: Mar 2nd, CPP would be deducted, as they turned 18 in the month befor they were paid.
+		// If they are 70 on Feb 16, and the PP runs: Feb 2nd to Feb 17th Transact: Feb 25, CPP would be deducted, as they turned 18 in the same month.
+		// If they are 70 on Feb 16, and the PP runs: Feb 15nd to Feb 28th Transact: Mar 2nd, CPP would NOT be deducted, as they turned 18 in the month befor they were paid.
+		if ( $pp_transaction_date != '' ) { //CPP
+			$user_age = TTDate::getYearDifference( $birth_date, $pp_transaction_date );
+			Debug::Text('User Age: '. $user_age .' Min: '. $this->getMinimumUserAge() .' Max: '. $this->getMaximumUserAge(), __FILE__, __LINE__, __METHOD__, 10);
+
+			if ( $this->getMinimumUserAge() == 0 OR $this->getMaximumUserAge() == 0 ) {
+				return TRUE;
+			} elseif ( $user_age >= ( $this->getMinimumUserAge() - 0.25 ) AND $user_age <= ( $this->getMaximumUserAge() + 0.25 ) ) {
+				//Check to see if they are within a few months of the min/max ages
+				if ( abs( $user_age - $this->getMinimumUserAge() ) <= 0.25 ) {
+					$birth_month = TTDate::getBirthDateAtAge( $birth_date, $this->getMinimumUserAge() );
+					Debug::Text('  aBirth Date: '. TTDate::getDate('DATE', $birth_date ) .' Birth Month: '. TTDate::getDate('DATE+TIME', $birth_month ) .' Transaction Date: '. TTDate::getDate('DATE+TIME', $pp_transaction_date ), __FILE__, __LINE__, __METHOD__, 10);
+
+					//Start deducting CPP
+					if ( TTDate::getEndDayEpoch( $pp_transaction_date ) > TTDate::getEndMonthEpoch( $birth_month ) ) {
+						Debug::Text('Transaction date is after the end of the birth month, eligible...', __FILE__, __LINE__, __METHOD__, 10);
+						return TRUE;
+					} else {
+						Debug::Text('Transaction date is before the end of the birth month, skipping...', __FILE__, __LINE__, __METHOD__, 10);
+						return FALSE;
+					}
+				} elseif ( abs( $user_age - $this->getMaximumUserAge() ) <= 0.25  ) {
+					$birth_month = TTDate::getBirthDateAtAge( $birth_date, $this->getMaximumUserAge() );
+					Debug::Text('  bBirth Date: '. TTDate::getDate('DATE', $birth_date ) .' Birth Month: '. TTDate::getDate('DATE+TIME', $birth_month ) .' Transaction Date: '. TTDate::getDate('DATE+TIME', $pp_transaction_date ), __FILE__, __LINE__, __METHOD__, 10);
+					
+					//Stop deducting CPP.
+					if ( TTDate::getEndDayEpoch( $pp_transaction_date ) > TTDate::getEndMonthEpoch( $birth_month ) ) {
+						Debug::Text('Transaction date is after the end of the birth month, skipping...', __FILE__, __LINE__, __METHOD__, 10);
+						return FALSE;
+					} else {
+						Debug::Text('Transaction date is before the end of the birth month, eligible...', __FILE__, __LINE__, __METHOD__, 10);
+						return TRUE;
+					}
+				} else {
+					Debug::Text('Not within 1 year of Min/Max age, assuming always eligible...', __FILE__, __LINE__, __METHOD__, 10);
+					return TRUE;
+				}
+			}
+		} else {
+			Debug::Text('ERROR: Transaction date not specified...', __FILE__, __LINE__, __METHOD__, 10);
+		}
+
+		return FALSE;
+	}
+
+	function isActiveUserAge( $birth_date, $pp_end_date = NULL, $pp_transaction_date = NULL ) {
+		$user_age = TTDate::getYearDifference( $birth_date, $pp_end_date );
 		Debug::Text('User Age: '. $user_age .' Min: '. $this->getMinimumUserAge() .' Max: '. $this->getMaximumUserAge(), __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( ( $this->getMinimumUserAge() == 0 OR $user_age >= $this->getMinimumUserAge() ) AND ( $this->getMaximumUserAge() == 0 OR $user_age <= $this->getMaximumUserAge() ) ) {
-			return TRUE;
+		if ( $this->getCalculation() == 90 ) { //CPP
+			return $this->isCPPAgeEligible( $birth_date, $pp_transaction_date );
+		} else {
+			if ( ( $this->getMinimumUserAge() == 0 OR $user_age >= $this->getMinimumUserAge() ) AND ( $this->getMaximumUserAge() == 0 OR $user_age <= $this->getMaximumUserAge() ) ) {
+				return TRUE;
+			}
 		}
 
 		return FALSE;
@@ -2666,7 +2733,7 @@ class CompanyDeductionFactory extends Factory {
 		$total_gross_key = array_search( $this->getPayStubEntryAccountLinkObject()->getTotalGross(), $ids);
 		if ( $total_gross_key !== FALSE ) {
 			$type_ids[] = 10;
-			$type_ids[] = 60; //Automatically inlcude Advance Earnings here?
+			//$type_ids[] = 60; //Automatically inlcude Advance Earnings here?
 			unset($ids[$total_gross_key]);
 		}
 		unset($total_gross_key);
@@ -2698,19 +2765,6 @@ class CompanyDeductionFactory extends Factory {
 
 		//Debug::Arr($retval, 'Retval: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
-
-	}
-
-	//Combines include account IDs/Type IDs and exclude account IDs/Type Ids
-	//and outputs just include account ids.
-	function getCombinedIncludeExcludePayStubEntryAccount( $include_ids, $exclude_ids ) {
-		$ret_include_ids = $this->getExpandedPayStubEntryAccountIDs( $include_ids );
-		$ret_exclude_ids = $this->getExpandedPayStubEntryAccountIDs( $exclude_ids );
-
-		$retarr = array_diff( $ret_include_ids, $ret_exclude_ids );
-
-		//Debug::Arr($retarr, 'Retarr: ', __FILE__, __LINE__, __METHOD__, 10);
-		return $retarr;
 	}
 
 	function getPayStubEntryAmountSum( $pay_stub_obj, $ids, $ps_entries = 'current', $return_value = 'amount' ) {
@@ -2961,6 +3015,48 @@ class CompanyDeductionFactory extends Factory {
 			}
 		}
 
+		return TRUE;
+	}
+
+	function updateCompanyDeductionForTaxYear( $date ) {
+		require_once( Environment::getBasePath(). DIRECTORY_SEPARATOR . 'classes'. DIRECTORY_SEPARATOR .'payroll_deduction'. DIRECTORY_SEPARATOR .'PayrollDeduction.class.php');
+
+		$clf = TTnew( 'CompanyListFactory' );
+		$clf->getAll();
+		if ( $clf->getRecordCount() > 0 ) {
+			foreach( $clf as $c_obj ) {
+				Debug::text('Company: '. $c_obj->getName() .' Date: '. TTDate::getDate('DATE+TIME', $date), __FILE__, __LINE__, __METHOD__, 9);
+				if ( $c_obj->getStatus() != 30 ) {
+					$cdlf = TTnew('CompanyDeductionListFactory');
+					$cdlf->getAPISearchByCompanyIdAndArrayCriteria( $c_obj->getID(), array( 'calculation_id' => array(100,200), 'country' => 'CA' ) );
+					if ( $cdlf->getRecordCount() > 0 ) {
+						foreach( $cdlf as $cd_obj ) {
+							$pd_obj = new PayrollDeduction( $cd_obj->getCountry(), $cd_obj->getProvince() );
+							$pd_obj->setDate( $date );
+
+							if ( $cd_obj->getCalculation() == 100 ) { //Federal
+								$pd_obj->setFederalTotalClaimAmount( $cd_obj->getUserValue1() );
+								$claim_amount = $pd_obj->getFederalTotalClaimAmount();
+							} elseif ( $cd_obj->getCalculation() == 200 ) { //Provincial
+								$pd_obj->setProvincialTotalClaimAmount( $cd_obj->getUserValue1() );
+								$claim_amount = $pd_obj->getProvincialTotalClaimAmount();
+							}
+
+							if ( (float)$cd_obj->getUserValue1() != (float)$claim_amount ) {
+								Debug::text('Updating claim amounts... Old: '. $cd_obj->getUserValue1() .' New: '. $claim_amount, __FILE__, __LINE__, __METHOD__, 9);								
+								//Use a SQL query instead of modifying the CompanyDeduction class, as that can cause errors when we add columns to the table later on.
+								$query = 'UPDATE '. $cd_obj->getTable() .' set user_value1 = '. (float)$claim_amount .' where id = '. (int)$cd_obj->getId();
+								$this->db->Execute($query);
+							} else {
+								Debug::text('Amount matches, no changes needed... Old: '. $cd_obj->getUserValue1() .' New: '. $claim_amount, __FILE__, __LINE__, __METHOD__, 9);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		Debug::text('Done updating claim amounts...', __FILE__, __LINE__, __METHOD__, 9);
 		return TRUE;
 	}
 

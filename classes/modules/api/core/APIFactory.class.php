@@ -413,28 +413,45 @@ abstract class APIFactory {
 	function setValidationArray( $primary_validator, $secondary_validator, $tertiary_validator = FALSE ) {
 		//Handle primary validator first
 		$validator = array();
-		if ( $primary_validator->isError() === TRUE ) {
-			$validator['error'] = $primary_validator->getErrorsArray();
-		} else {
-			//Check for primary validator warnings next.
-			if ( $primary_validator->isWarning() === TRUE ) {
-				$validator['warning'] = $primary_validator->Validator->getWarningsArray();
+
+		if ( $this->getProtocolVersion() == 1 ) { //Don't return any warnings and therefore don't put errors in its own array element.
+			if ( $primary_validator->isError() === TRUE ) {
+				$validator = $primary_validator->getErrorsArray();
 			} else {
 				//Check secondary validator for errors.
 				if ( $secondary_validator->Validator->isError() === TRUE ) {
-					$validator['error'] = $secondary_validator->Validator->getErrorsArray();
+					$validator = $secondary_validator->Validator->getErrorsArray();
 				} else {
-					//Check secondary validator for warnings.
-					if ( $secondary_validator->Validator->isWarning() === TRUE ) {
-						$validator['warning'] = $secondary_validator->Validator->getWarningsArray();
+					//Check tertiary validator for errors.
+					if ( $tertiary_validator->isError() === TRUE ) {
+						$validator = $tertiary_validator->getErrorsArray();
+					}
+				}
+			}
+		} else {
+			if ( $primary_validator->isError() === TRUE ) {
+				$validator['error'] = $primary_validator->getErrorsArray();
+			} else {
+				//Check for primary validator warnings next.
+				if ( $primary_validator->isWarning() === TRUE ) {
+					$validator['warning'] = $primary_validator->Validator->getWarningsArray();
+				} else {
+					//Check secondary validator for errors.
+					if ( $secondary_validator->Validator->isError() === TRUE ) {
+						$validator['error'] = $secondary_validator->Validator->getErrorsArray();
 					} else {
-						//Check secondary validator for errors.
-						if ( $tertiary_validator->isError() === TRUE ) {
-							$validator['error'] = $tertiary_validator->getErrorsArray();
+						//Check secondary validator for warnings.
+						if ( $secondary_validator->Validator->isWarning() === TRUE ) {
+							$validator['warning'] = $secondary_validator->Validator->getWarningsArray();
 						} else {
-							//Check secondary validator for warnings.
-							if ( $tertiary_validator->isWarning() === TRUE ) {
-								$validator['warning'] = $tertiary_validator->getWarningsArray();
+							//Check tertiary validator for errors.
+							if ( $tertiary_validator->isError() === TRUE ) {
+								$validator['error'] = $tertiary_validator->getErrorsArray();
+							} else {
+								//Check tertiary validator for warnings.
+								if ( $tertiary_validator->isWarning() === TRUE ) {
+									$validator['warning'] = $tertiary_validator->getWarningsArray();
+								}
 							}
 						}
 					}

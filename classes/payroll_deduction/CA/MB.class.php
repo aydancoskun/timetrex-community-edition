@@ -42,13 +42,13 @@ class PayrollDeduction_CA_MB extends PayrollDeduction_CA {
 	var $provincial_income_tax_rate_options = array(
 													20090101 => array(
 																	array( 'income' => 31000,	'rate' => 10.8,	'constant' => 0 ),
-																	array( 'income' => 67000,	'rate' => 12.75,	'constant' => 605 ),
+																	array( 'income' => 67000,	'rate' => 12.75,'constant' => 605 ),
 																	array( 'income' => 67000,	'rate' => 17.4,	'constant' => 3720 ),
 																),
 													20080101 => array(
-																	array( 'income' => 30544,	'rate' => 10.90,	'constant' => 0 ),
-																	array( 'income' => 66000,	'rate' => 12.75,	'constant' => 565 ),
-																	array( 'income' => 66000,	'rate' => 17.40,	'constant' => 3634 ),
+																	array( 'income' => 30544,	'rate' => 10.90,'constant' => 0 ),
+																	array( 'income' => 66000,	'rate' => 12.75,'constant' => 565 ),
+																	array( 'income' => 66000,	'rate' => 17.40,'constant' => 3634 ),
 																),
 													20070101 => array(
 																	array( 'income' => 30544,	'rate' => 10.9,	'constant' => 0 ),

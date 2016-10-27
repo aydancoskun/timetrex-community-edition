@@ -7,6 +7,7 @@
 		var related_view_controller;
 		var message = Global.no_result_message;
 		var iconLabel = '';
+
 		this.each( function() {
 
 			var o = $.meta ? $.extend( {}, opts, $( this ).data() ) : opts;

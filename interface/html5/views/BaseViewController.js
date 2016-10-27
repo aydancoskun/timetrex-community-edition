@@ -480,19 +480,13 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	initLayout: function() {
-
 		var $this = this;
-
 		$this.getAllLayouts( function() {
-
 			$this.getDefaultDisplayColumns( function() {
 				$this.setSelectLayout();
 				$this.search();
-
 			} );
-
 		} );
-
 	},
 
 	// edit_only_mode call this when open edit view. Not in initData
@@ -672,7 +666,7 @@ BaseViewController = Backbone.View.extend( {
 
 			//make sure only one context menu shown at a time
 			if ( Global.isSet( LocalCacheData.currentShownContextMenuName ) && LocalCacheData.currentShownContextMenuName !== ribbon_menu.get( 'id' ) ) {
-				this.removeContentMenuByName( LocalCacheData.currentShownContextMenuName );
+				var needRemovedContextMenuName = LocalCacheData.currentShownContextMenuName;
 				this.context_menu_array = [];
 
 			} else if ( Global.isSet( LocalCacheData.currentShownContextMenuName ) && LocalCacheData.currentShownContextMenuName === ribbon_menu.get( 'id' ) ) {
@@ -707,6 +701,7 @@ BaseViewController = Backbone.View.extend( {
 						sub_menu_ui_node = $( '<li ><div class="ribbon-sub-menu-icon" id="' + ribbon_sub_menu.get( 'id' ) + '"><img src="' + ribbon_sub_menu.get( 'icon' ) + '" ><span class="ribbon-label">' + ribbon_sub_menu.get( 'label' ) + '</span></div></li>' );
 					}
 
+					sub_menu_ui_node.addClass( 'disable-image' );
 					this.context_menu_array.push( sub_menu_ui_node );
 
 					if ( ribbon_sub_menu.get( 'type' ) === RibbonSubMenuType.NAVIGATION ) {
@@ -743,6 +738,10 @@ BaseViewController = Backbone.View.extend( {
 			ribbon_menu_root_node.append( ribbon_menu_ui );
 		}
 
+		if ( needRemovedContextMenuName ) {
+			this.removeContentMenuByName( needRemovedContextMenuName );
+		}
+
 		//Register ribbon menu to tab widget
 		$( '#ribbon_view_container' ).tabs( 'add', '#' + ribbon_menu.get( 'id' ) );
 		$( '#ribbon_view_container' ).tabs( 'remove', ($( '#ribbon_view_container' ).tabs( 'length' ) - 1) );
@@ -751,6 +750,7 @@ BaseViewController = Backbone.View.extend( {
 //
 
 			this.need_switch_to_context_menu = true;
+			this.selectContextMenu()
 			//Don't select context menu until search complete
 
 		}
@@ -895,14 +895,32 @@ BaseViewController = Backbone.View.extend( {
 
 	},
 
-	onAddClick: function() {
-		var $this = this;
+	setCurrentEditViewState: function( state ) {
 		this.is_viewing = false;
 		this.is_edit = false;
-		this.is_add = true;
-		LocalCacheData.current_doing_context_action = 'new';
-		$this.openEditView();
+		this.is_add = false;
+		this.is_mass_editing = false;
+		switch ( state ) {
+			case 'view':
+				this.is_viewing = true;
+				break;
+			case 'new':
+				this.is_add = true;
+				break;
+			case 'edit':
+				this.is_edit = true;
+				break;
+			case 'mass_edit':
+				this.is_mass_editing = true;
+				break;
+		}
+		LocalCacheData.current_doing_context_action = state;
+	},
 
+	onAddClick: function() {
+		var $this = this;
+		this.setCurrentEditViewState( 'new' );
+		$this.openEditView();
 		//Error: Uncaught TypeError: undefined is not a function in /interface/html5/views/BaseViewController.js?v=8.0.0-20141117-111140 line 897
 		if ( $this.api && typeof $this.api['get' + $this.api.key_name + 'DefaultData'] === 'function' ) {
 			$this.api['get' + $this.api.key_name + 'DefaultData']( {
@@ -919,7 +937,7 @@ BaseViewController = Backbone.View.extend( {
 		var $this = this;
 		var result_data = result.getResult();
 
-		if ( !result_data ) {
+		if ( !result_data || result_data === true ) {
 			result_data = [];
 		}
 
@@ -1065,6 +1083,7 @@ BaseViewController = Backbone.View.extend( {
 			ignoreWarning = false;
 		}
 		this.is_add = true;
+		this.is_changed = false;
 		LocalCacheData.current_doing_context_action = 'save_and_copy';
 		var record = this.current_edit_record;
 		record = this.uniformVariable( record );
@@ -1272,7 +1291,6 @@ BaseViewController = Backbone.View.extend( {
 			}
 
 			$this.onSaveDone( result );
-			$this.current_edit_record = null;
 			$this.removeEditView();
 
 		} else {
@@ -1305,10 +1323,7 @@ BaseViewController = Backbone.View.extend( {
 	onMassEditClick: function() {
 
 		var $this = this;
-		$this.is_add = false;
-		$this.is_viewing = false;
-		$this.is_mass_editing = true;
-		LocalCacheData.current_doing_context_action = 'mass_edit';
+		this.setCurrentEditViewState( 'mass_edit' )
 		$this.openEditView();
 		var filter = {};
 		var grid_selected_id_array = this.getGridSelectIdArray();
@@ -1356,10 +1371,7 @@ BaseViewController = Backbone.View.extend( {
 
 	onViewClick: function( editId, noRefreshUI ) {
 		var $this = this;
-		$this.is_viewing = true;
-		$this.is_edit = false;
-		$this.is_add = false;
-		LocalCacheData.current_doing_context_action = 'view';
+		this.setCurrentEditViewState( 'view' );
 		$this.openEditView();
 
 		var filter = {};
@@ -1419,10 +1431,7 @@ BaseViewController = Backbone.View.extend( {
 			}
 		}
 
-		this.is_viewing = false;
-		this.is_edit = true;
-		this.is_add = false;
-		LocalCacheData.current_doing_context_action = 'edit';
+		this.setCurrentEditViewState( 'edit' );
 		$this.openEditView();
 		var filter = {};
 
@@ -1464,10 +1473,25 @@ BaseViewController = Backbone.View.extend( {
 		$this.is_add = false;
 		if ( $this.edit_view ) {
 			copyIds.push( $this.current_edit_record.id );
+			if ( this.is_changed ) {
+				TAlertManager.showConfirmAlert( Global.modify_alert_message, null, function( flag ) {
+					if ( flag === true ) {
+						$this.is_changed = false;
+						$this._continueDoCopy( copyIds );
+					}
+					ProgressBar.closeOverlay();
+				} );
+			} else {
+				$this._continueDoCopy( copyIds );
+			}
 		} else {
 			copyIds = $this.getGridSelectIdArray().slice();
+			$this._continueDoCopy( copyIds );
 		}
+	},
 
+	_continueDoCopy: function( copyIds ) {
+		var $this = this;
 		ProgressBar.showOverlay();
 		$this.api['copy' + $this.api.key_name]( copyIds, {
 			onResult: function( result ) {
@@ -1498,42 +1522,48 @@ BaseViewController = Backbone.View.extend( {
 
 	onCopyAsNewClick: function() {
 		var $this = this;
-		this.is_add = true;
+		if ( this.is_changed ) {
+			TAlertManager.showConfirmAlert( Global.modify_alert_message, null, function( flag ) {
+				if ( flag === true ) {
+					$this._continueDoCopyAsNew();
+				}
+				ProgressBar.closeOverlay();
+			} );
+		} else {
+			this._continueDoCopyAsNew();
+		}
+	},
 
+	_continueDoCopyAsNew: function() {
+		var $this = this;
+		this.is_add = true;
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
 		if ( Global.isSet( this.edit_view ) ) {
-
 			this.current_edit_record.id = '';
 			var navigation_div = this.edit_view.find( '.navigation-div' );
 			navigation_div.css( 'display', 'none' );
 			this.setEditMenu();
 			this.setTabStatus();
+			this.is_changed = false;
 			ProgressBar.closeOverlay();
-
 		} else {
-
 			var filter = {};
 			var grid_selected_id_array = this.getGridSelectIdArray();
 			var grid_selected_length = grid_selected_id_array.length;
-
 			if ( grid_selected_length > 0 ) {
 				var selectedId = grid_selected_id_array[0];
 			} else {
 				TAlertManager.showAlert( $.i18n._( 'No selected record' ) );
 				return;
 			}
-
 			filter.filter_data = {};
 			filter.filter_data.id = [selectedId];
-
 			this.api['get' + this.api.key_name]( filter, {
 				onResult: function( result ) {
 					$this.onCopyAsNewResult( result );
-
 				}
 			} );
 		}
-
 	},
 
 	onCopyAsNewResult: function( result ) {
@@ -1576,7 +1606,7 @@ BaseViewController = Backbone.View.extend( {
 
 		if ( key === 'job_quick_search' ) {
 
-			args.filter_data = {manual_id: value};
+			args.filter_data = {manual_id: value, user_id: this.current_edit_record.user_id, status_id: "10"};
 
 			this.job_api.getJob( args, {
 				onResult: function( result ) {
@@ -1600,7 +1630,7 @@ BaseViewController = Backbone.View.extend( {
 			$this.edit_view_ui_dic['job_id'].setCheckBox( true );
 		} else if ( key === 'job_item_quick_search' ) {
 
-			args.filter_data = {manual_id: value};
+			args.filter_data = {manual_id: value, job_id: this.current_edit_record.job_id, status_id: "10"};
 
 			this.job_item_api.getJobItem( args, {
 				onResult: function( result ) {
@@ -1654,7 +1684,8 @@ BaseViewController = Backbone.View.extend( {
 
 	//Don't call super if override this function.
 	onFormItemChange: function( target, doNotValidate ) {
-
+		// Error: TypeError: this.current_edit_record is undefined in interface/html5/views/BaseViewController.js?v=9.0.7-20160202-113244 line 1691
+		if(!this.current_edit_record) return;
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 		var key = target.getField();
@@ -1762,9 +1793,16 @@ BaseViewController = Backbone.View.extend( {
 	//Error: Uncaught TypeError: Cannot read property 'interfaces' of undefined in interface/html5/framework/jquery.qtip.min.js?v=9.0.0-20150918-221906 line 15
 	removeEditViewErrorTip: function() {
 		if ( this.edit_view_error_tip ) {
-			this.edit_view_error_tip.qtip( 'hide' );
-			this.edit_view_error_tip = null;
-			$( '.qtip-defaults' ).remove();
+			//Error: TypeError: f(...).data(...) is undefined in interface/html5/framework/jquery.qtip.min.js?v=9.0.4-20151123-133946 line 15
+			try {
+				this.edit_view_error_tip.qtip( 'hide' );
+				$( '.qtip-defaults' ).remove();
+				this.edit_view_error_tip = null;
+			} catch ( e ) {
+				$( '.qtip-defaults' ).remove();
+				this.edit_view_error_tip = null;
+			}
+
 		}
 	},
 
@@ -2118,11 +2156,6 @@ BaseViewController = Backbone.View.extend( {
 					when: false,
 					delay: 0
 				},
-				events: {
-					hide: function( event, api ) {
-						$( this ).qtip( 'destroy' );
-					}
-				},
 				content: error_string,
 				style: {
 					color: color,
@@ -2162,7 +2195,6 @@ BaseViewController = Backbone.View.extend( {
 			this.initEditViewUI( this.viewId, this.edit_view_tpl );
 		}
 
-		this.setEditViewWidgetsMode();
 	},
 
 	setTabOVisibility: function( flag ) {
@@ -2183,49 +2215,30 @@ BaseViewController = Backbone.View.extend( {
 	},
 	//set widget disablebility if view mode or edit mode
 	setEditViewWidgetsMode: function() {
-
 		var did_clean_dic = {};
 		for ( var key in this.edit_view_ui_dic ) {
-
 			if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
 				continue;
 			}
-
 			var widget = this.edit_view_ui_dic[key];
 			widget.css( 'opacity', 1 );
-
 			var column = widget.parent().parent().parent();
 			var tab_id = column.parent().attr( 'id' );
 			if ( !column.hasClass( 'v-box' ) ) {
-
 				if ( !did_clean_dic[tab_id] ) {
 					did_clean_dic[tab_id] = true;
 				}
-
-				var child_length = column.children().length;
-				var parent_div = widget.parent().parent();
-
-				if ( Global.isSet( widget.setEnabled ) ) {
-					widget.setEnabled( true );
-				}
 			}
-
-			widget.setValue( '' ); // Set all value back to empty before new value coming.
-
 			if ( this.is_viewing ) {
 				if ( Global.isSet( widget.setEnabled ) ) {
 					widget.setEnabled( false );
 				}
 			} else {
 				if ( Global.isSet( widget.setEnabled ) ) {
-
 					widget.setEnabled( true );
-
 				}
 			}
-
 		}
-
 	},
 
 	//Call this when edit view open
@@ -2237,6 +2250,10 @@ BaseViewController = Backbone.View.extend( {
 		}
 
 		this.edit_view = $( Global.loadViewSource( view_id, edit_view_file_name, null, true ) );
+
+		this.edit_view.unbind( 'click' ).bind( 'click', function() {
+			$this.selectContextMenu();
+		} );
 
 		this.edit_view_tab = $( this.edit_view.find( '.edit-view-tab-bar' ) );
 
@@ -2297,6 +2314,7 @@ BaseViewController = Backbone.View.extend( {
 
 		this.setTabStatus();
 		this.clearEditViewData();
+		this.setEditViewWidgetsMode();
 		this.setEditViewData();
 		this.setOtherFields();
 		this.setFocusToFirstInput();
@@ -2580,6 +2598,18 @@ BaseViewController = Backbone.View.extend( {
 		}
 	},
 
+	setWidgetVisible: function( widgets ) {
+		var widget = widgets;
+		if ( Global.isArray( widgets ) ) {
+			for ( var i = 0; i < widgets.length; i++ ) {
+				widget = widgets[i];
+				widget.css( 'opacity', 1 );
+			}
+		} else {
+			widget.css( 'opacity', 1 );
+		}
+	},
+
 	//widgetContainer: add widget to custom container
 	//saveFormItemDiv: if cache current formItemDiv and use it later
 	addEditFieldToColumn: function( label, widgets, column, firstOrLastRecord, widgetContainer, saveFormItemDiv, setResizeEvent, saveFormItemDivKey, hasKeyEvent, customLabelWidget ) {
@@ -2811,17 +2841,17 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	clearEditViewData: function() {
-
 		for ( var key in this.edit_view_ui_dic ) {
-
 			if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
 				continue;
 			}
-
-			this.edit_view_ui_dic[key].setValue( null );
+			if ( _.isFunction( this.edit_view_ui_dic[key].setEmptyValueAndShowLoading ) ) {
+				this.edit_view_ui_dic[key].setEmptyValueAndShowLoading();
+			} else {
+				this.edit_view_ui_dic[key].setValue( null );
+			}
 			this.edit_view_ui_dic[key].clearErrorStyle();
 		}
-
 	},
 
 	//Called after set current_edit_record
@@ -2947,24 +2977,17 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	setUIWidgetFieldsToCurrentEditRecord: function() {
-		if ( this.is_mass_editing ) {
-			return;
-		}
 
 		var $this = this;
-
+		$this.current_edit_record === true && ($this.current_edit_record = {});
 		for ( var key in this.edit_view_ui_dic ) {
-
 			if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
 				continue;
 			}
-
 //			//Set all UI field to current edit record, we need validate all UI field when save and validate
 			//use != to ingore string or number, value from html is string.
-
 			//Error: TypeError: $this.current_edit_record is undefined in /interface/html5/views/BaseViewController.js?v=8.0.0-20141117-122453 line 2702
 			if ( $this.current_edit_record && !Global.isSet( $this.current_edit_record[key] ) ) {
-
 				$this.current_edit_record[key] = false;
 
 			}
@@ -3023,7 +3046,6 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	setCurrentEditRecordData: function() {
-
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
 
@@ -3035,8 +3057,7 @@ BaseViewController = Backbone.View.extend( {
 			if ( Global.isSet( widget ) ) {
 				switch ( key ) {
 					case 'country': //popular case
-						this.eSetProvince( this.current_edit_record[key] );
-						widget.setValue( this.current_edit_record[key] );
+						this.setCountryValue(widget, key);
 						break;
 					default:
 						widget.setValue( this.current_edit_record[key] );
@@ -3049,6 +3070,15 @@ BaseViewController = Backbone.View.extend( {
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
 
+	},
+
+	setCountryValue: function(widget, key){
+		if(!this.current_edit_record["province"]){
+			this.eSetProvince( this.current_edit_record[key], true );
+		}else{
+			this.eSetProvince( this.current_edit_record[key] );
+		}
+		widget.setValue( this.current_edit_record[key] );
 	},
 
 	putInputToInsideFormItem: function( form_item_input, label ) {
@@ -3113,10 +3143,9 @@ BaseViewController = Backbone.View.extend( {
 
 		//TypeError: this.navigation.getSelectIndex is not a function
 		//navigation could not be initial in cases, for example in Request new view
-		if ( !this.navigation || !(this.navigation.hasOwnProperty('getSelectIndex')) ) {
+		if ( !this.navigation || !(this.navigation.hasOwnProperty( 'getSelectIndex' )) ) {
 			return;
 		}
-
 
 		var selected_index = this.navigation.getSelectIndex();
 		var source_data = this.navigation.getSourceData();
@@ -3195,7 +3224,8 @@ BaseViewController = Backbone.View.extend( {
 			next_select_item = this.navigation.getItemByIndex( (selected_index + 1) );
 			$this.onRightOrLeftArrowClickCallBack( next_select_item );
 
-		} else if ( selected_index === (source_data.length - 1) && current_pager_data.current_page < current_pager_data.last_page_number ) {
+			//Error: Unable to get property 'current_page' of undefined or null reference in interface/html5/views/BaseViewController.js?v=9.0.0-20151016-102254 line 3204
+		} else if ( selected_index === (source_data.length - 1) && current_pager_data && current_pager_data.current_page < current_pager_data.last_page_number ) {
 			this.navigation.onADropDownSearch( 'unselect_grid', current_pager_data.current_page + 1, 'first', function( result ) {
 				next_select_item = result;
 				$this.onRightOrLeftArrowClickCallBack( next_select_item );
@@ -3241,13 +3271,10 @@ BaseViewController = Backbone.View.extend( {
 		}
 		this.edit_view = null;
 		this.edit_view_tab = null;
-		this.is_mass_editing = false;
-		this.is_viewing = false;
-		this.is_edit = false;
+		this.setCurrentEditViewState( '' );
 		this.is_changed = false;
 		this.mass_edit_record_ids = [];
 		this.edit_view_tab_selected_index = 0;
-		LocalCacheData.current_doing_context_action = '';
 
 		if ( this.edit_only_mode ) {
 			var current_url = window.location.href;
@@ -3264,11 +3291,8 @@ BaseViewController = Backbone.View.extend( {
 			this.setDefaultMenu();
 		} else {
 			this.setParentContextMenuAfterSubViewClose();
-
 		}
-
 		this.reSetURL();
-
 		//If there is a action in url, add it back. So we have correct url when set tabs urls
 		//This caused a bug where whenever saving a punch on Attendance ->TimeSheet, it would re-open the edit view, same with navigating between weeks, or even deleting punches in some cases.
 		//This need to put under reSetUrl and need clean url_agrs until it set from onViewChange in router again
@@ -3281,6 +3305,7 @@ BaseViewController = Backbone.View.extend( {
 		this.edit_view_ui_validation_field_dic = {};
 		this.edit_view_form_item_dic = {};
 		this.edit_view_error_ui_dic = {};
+		this.current_edit_record = null;
 	},
 
 	reSetURL: function() {
@@ -3903,14 +3928,12 @@ BaseViewController = Backbone.View.extend( {
 
 	setCurrentViewPosition: function() {
 		var current_view_div = this.search_panel.find( '.layout-selector-div' );
+		var saved_layout_li = this.search_panel.find( "a[ref='saved_layout']" ).parent();
 		// Error: Unable to get property 'left' of undefined or null reference in /interface/html5/views/BaseViewController.js?v=8.0.6-20150417-083849 line 3691
-		if ( !current_view_div ) {
+		if ( !current_view_div || !saved_layout_li || !saved_layout_li.offset() ) {
 			return;
 		}
-		var saved_layout_li = this.search_panel.find( "a[ref='saved_layout']" ).parent();
-		var offset_left = saved_layout_li.offset().left;
-
-		current_view_div.css( 'left', offset_left + saved_layout_li.width() + 20 );
+		current_view_div.css( 'left', saved_layout_li.offset().left + saved_layout_li.width() + 20 );
 	},
 
 	//Build fields when search tab change
@@ -4039,9 +4062,6 @@ BaseViewController = Backbone.View.extend( {
 	onSearch: function() {
 		var do_update = false;
 //
-//		if ( this.search_panel ) {
-//			this.search_panel.attr( 'search_complete', false );
-//		}
 
 		//don't keep temp filter any more, set them when change tab
 		this.temp_adv_filter_data = null;
@@ -4058,8 +4078,12 @@ BaseViewController = Backbone.View.extend( {
 			}
 			var layout_name = BaseViewController.default_layout_name;
 
-		} else {
+		} else if ( this.show_search_tab ) {
 			this.onSaveNewLayout( BaseViewController.default_layout_name );
+			return;
+		} else if ( !this.show_search_tab ) {
+			this.search();
+			this.setGridHeaderStyle();
 			return;
 		}
 
@@ -4532,11 +4556,12 @@ BaseViewController = Backbone.View.extend( {
 			id: this.ui_id + '_column_selector',
 			key: 'value',
 			allow_drag_to_order: true,
-			display_close_btn: false
+			display_close_btn: false,
+			display_column_settings: false
 		} );
 
 		form_item_label.text( $.i18n._( 'Display Columns' ) + ':' );
-		form_item_label.addClass('SearchPanel-displayColumns-label');
+		form_item_label.addClass( 'SearchPanel-displayColumns-label' );
 		form_item_input_div.append( this.column_selector );
 
 		layout_div.append( form_item );
@@ -4734,6 +4759,14 @@ BaseViewController = Backbone.View.extend( {
 					}
 
 				},
+				onRightClickRow: function( rowId ) {
+					var id_array = $this.getGridSelectIdArray();
+					if ( id_array.indexOf( rowId ) < 0 ) {
+						$this.grid.resetSelection();
+						$this.grid.jqGrid( "setSelection", rowId, false, null );
+						$this.onGridSelectRow();
+					}
+				},
 				onSelectRow: $.proxy( this.onGridSelectRow, this ),
 				colModel: column_info_array,
 				multiselect: true,
@@ -4765,6 +4798,14 @@ BaseViewController = Backbone.View.extend( {
 					if ( $( this ).jqGrid( 'getGridParam', 'data' ).length > 0 ) {
 
 						$this.setGridColumnsWidth();
+					}
+				},
+				onRightClickRow: function( rowId ) {
+					var id_array = $this.getGridSelectIdArray();
+					if ( id_array.indexOf( rowId ) < 0 ) {
+						$this.grid.resetSelection();
+						$this.grid.jqGrid( "setSelection", rowId, false, null );
+						$this.onGridSelectRow();
 					}
 				},
 				sortable: false,
@@ -5154,7 +5195,7 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	buildSortCondition: function( reset, field ) {
-		var next_sort = 'asc';
+		var next_sort = 'desc';
 
 		if ( reset ) {
 
@@ -5951,10 +5992,10 @@ BaseViewController = Backbone.View.extend( {
 			return;
 		}
 		var primary_view_id = LocalCacheData.current_open_primary_controller.viewId;
-		var select_menu_id = TopMenuManager.menus_quick_map[primary_view_id];
-		if ( TopMenuManager.ribbon_view_controller && TopMenuManager.selected_menu_id && TopMenuManager.selected_menu_id.indexOf( 'ContextMenu' ) !== -1 ) {
-			TopMenuManager.ribbon_view_controller.setSelectMenu( select_menu_id );
-		}
+		//var select_menu_id = TopMenuManager.menus_quick_map[primary_view_id];
+		//if ( TopMenuManager.ribbon_view_controller && TopMenuManager.selected_menu_id && TopMenuManager.selected_menu_id.indexOf( 'ContextMenu' ) !== -1 ) {
+		//	TopMenuManager.ribbon_view_controller.setSelectMenu( select_menu_id );
+		//}
 
 		if ( !Global.isSet( name ) ) {
 			name = this.context_menu_name;

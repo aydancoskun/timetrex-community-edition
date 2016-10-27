@@ -263,6 +263,8 @@ class ActiveShiftReport extends Report {
 					foreach($columns as $column => $name ) {
 						if ( strpos($column, 'wage') !== FALSE OR strpos($column, 'hourly_rate') !== FALSE ) {
 							$retval[$column] = 'currency';
+						} elseif ( strpos($column, 'total_user') !== FALSE ) {
+							$retval[$column] = 'numeric';
 						}
 					}
 				}

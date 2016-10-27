@@ -56,7 +56,7 @@ HTML_AJAX_Request.prototype = {
 	priority: 0,
 
 	// a hash of headers to add to add to this request
-	customHeaders: {'X-Requested-With': 'XMLHttpRequest', 'X-Ajax-Engine': 'HTML_AJAX/0.5.2'},
+	customHeaders: {'X-Requested-With': 'XMLHttpRequest', 'X-Ajax-Engine': 'HTML_AJAX/0.5.7'},
 
 	// true if this request will be sent using iframes
 	iframe: false,

@@ -107,6 +107,10 @@ switch ($object_type) {
 						if ( file_exists($file_name) ) {
 							$rl->delete(); //Clear download rate limit upon successful download.
 
+							//Log document downloads in audit report, just so people can see who has viewed which revision.
+							//Make sure we link this to the main document_id so its viewed in the main document audit tab.
+							TTLog::addEntry( (int)$parent_id, 5, TTi18n::getText('Downloaded Revision: %1', array( $dr_obj->getRevision() ) ), NULL, $dr_obj->getTable(), $dr_obj );
+
 							$params['file'] = $file_name;
 							$params['ContentType'] = $dr_obj->getMimeType();
 							$params['ContentDisposition'] = array( HTTP_DOWNLOAD_ATTACHMENT, basename( $dr_obj->getRemoteFileName() ) );

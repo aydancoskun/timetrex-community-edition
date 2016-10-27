@@ -102,7 +102,10 @@ class AccrualBalanceSummaryReport extends Report {
 				$retval = TTDate::getTimePeriodOptions();
 				break;
 			case 'date_columns':
-				$retval = TTDate::getReportDateOptions( NULL, TTi18n::getText('Date'), 13, FALSE );
+				$retval = array_merge(
+									TTDate::getReportDateOptions( 'hire', TTi18n::getText('Hire Date'), 13, FALSE ),
+									TTDate::getReportDateOptions( NULL, TTi18n::getText('Date'), 19, TRUE )
+								);
 				break;
 			case 'custom_columns':
 				//Get custom fields for report data.
@@ -178,14 +181,16 @@ class AccrualBalanceSummaryReport extends Report {
 										'-1110-currency' => TTi18n::gettext('Currency'),
 										'-1112-current_currency' => TTi18n::gettext('Current Currency'),
 
-										'-1120-accrual_policy_account' => TTi18n::gettext('Accrual Account'),
-										'-1130-type' => TTi18n::gettext('Accrual Type'),
+										'-1399-hire_date_age' => TTi18n::gettext('Length of Service'),
+										
+										'-1820-accrual_policy_account' => TTi18n::gettext('Accrual Account'),
+										'-1830-type' => TTi18n::gettext('Accrual Type'),
 										//'-1160-date_stamp' => TTi18n::gettext('Date'), //Date stamp is combination of time_stamp and user_date.date_stamp columns.
 
-										'-1150-accrual_policy' => TTi18n::gettext('Accrual Policy'),
-										'-1160-accrual_policy_type' => TTi18n::gettext('Accrual Policy Type'),
+										'-1850-accrual_policy' => TTi18n::gettext('Accrual Policy'),
+										'-1860-accrual_policy_type' => TTi18n::gettext('Accrual Policy Type'),
 
-										'-3010-note' => TTi18n::gettext('Note'),
+										'-3010-note' => TTi18n::gettext('Accrual Note'),
 								);
 
 				$retval = array_merge( $retval, (array)$this->getOptions('date_columns'), (array)$this->getOptions('custom_columns'), (array)$this->getOptions('report_static_custom_column') );
@@ -207,6 +212,7 @@ class AccrualBalanceSummaryReport extends Report {
 				break;
 			case 'columns':
 				$retval = array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') );
+				ksort($retval);
 				break;
 			case 'column_format':
 				//Define formatting function for each column.
@@ -475,7 +481,7 @@ class AccrualBalanceSummaryReport extends Report {
 		Debug::Text(' User Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $ulf as $key => $u_obj ) {
-			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( $columns );
+			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$columns, array( 'hire_date' => TRUE ) ) );
 			$this->tmp_data['user'][$u_obj->getId()]['user_status'] = Option::getByKey( $u_obj->getStatus(), $u_obj->getOptions( 'status' ) );
 
 			$this->tmp_data['user_wage'][$u_obj->getId()] = array();
@@ -492,7 +498,7 @@ class AccrualBalanceSummaryReport extends Report {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $uwlf as $key => $uw_obj ) {
 			if ( $this->getPermissionObject()->isPermissionChild( $uw_obj->getUser(), $wage_permission_children_ids ) ) {
-				$this->tmp_data['user_wage'][$uw_obj->getUser()] = (array)$uw_obj->getObjectAsArray( $columns );
+				$this->tmp_data['user_wage'][$uw_obj->getUser()] = (array)$uw_obj->getObjectAsArray( array('hourly_rate' => TRUE, 'current_currency' => TRUE, 'effective_date' => TRUE ) ); //Force specific columns, otherwise if hourly_rate is not included wage cant be calculated.
 
 				if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
 					$this->tmp_data['user_wage'][$uw_obj->getUser()]['current_currency'] = Option::getByKey( $base_currency_obj->getId(), $currency_options );
@@ -554,6 +560,12 @@ class AccrualBalanceSummaryReport extends Report {
 									$date_columns = array();
 								}								
 
+								if ( isset($this->tmp_data['user'][$user_id]['hire_date']) ) {
+									$hire_date_columns = TTDate::getReportDates( 'hire', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['hire_date'] ), FALSE, $this->getUserObject() );
+								} else {
+									$hire_date_columns = array();
+								}
+
 								if ( !isset($this->tmp_data['user_wage'][$user_id]) ) {
 									$this->tmp_data['user_wage'][$user_id] = array();
 								}
@@ -565,7 +577,7 @@ class AccrualBalanceSummaryReport extends Report {
 								}
 
 								//Merge $row after user_wage so user_wage.type column isn't passed through.
-								$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $this->tmp_data['user_wage'][$user_id], $row, $date_columns );
+								$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $this->tmp_data['user_wage'][$user_id], $row, $date_columns, $hire_date_columns );
 							}
 						}
 					}

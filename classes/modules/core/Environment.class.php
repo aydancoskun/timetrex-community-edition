@@ -43,6 +43,10 @@ class Environment {
 	static protected $template_dir = 'templates';
 	static protected $template_compile_dir = 'templates_c';
 
+	static function stripDuplicateSlashes( $path ) {
+		return preg_replace('/([^:])(\/{2,})/', '$1/', $path);
+	}
+
 	static function getBasePath() {
 		//return dirname( __FILE__ ) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR;
 		return str_replace('classes'. DIRECTORY_SEPARATOR . 'modules'. DIRECTORY_SEPARATOR .'core', '', dirname( __FILE__ ) );
@@ -55,14 +59,17 @@ class Environment {
 	static function getBaseURL() {
 		global $config_vars;
 
+		$retval = '/';
+
 		if ( isset($config_vars['path']['base_url']) ) {
 			if ( substr( $config_vars['path']['base_url'], -1) != '/' ) {
-				return $config_vars['path']['base_url']. '/'; //Don't use directory separator here
+				$retval = $config_vars['path']['base_url']. '/'; //Don't use directory separator here
+			} else {
+				$retval = $config_vars['path']['base_url'];
 			}
-			return $config_vars['path']['base_url'];
 		}
 
-		return '/';
+		return self::stripDuplicateSlashes( $retval );
 	}
 
 	//Due to how the legacy interface is handled, we need to use the this function to determine the URL to redirect too,
@@ -88,7 +95,7 @@ class Environment {
 			}
 		}
 
-		$base_url = $base_url.'/api/'.$api.'/';
+		$base_url = self::stripDuplicateSlashes( $base_url.'/api/'.$api.'/' );
 
 		return $base_url;
 	}

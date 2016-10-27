@@ -77,6 +77,10 @@
 
 }
 
+.time-sheet-view .employee-nav-div .navigation-widget-div .a-combobox {
+    margin-top: 1px;
+}
+
 .time-sheet-view .title-bar {
     height: 25px;
     text-align: center;
@@ -241,7 +245,6 @@
     background: url("../../../../images/cell_hover.png") repeat-x;
     background-position: bottom;
 }
-
 
 .time-sheet-view .verification-grid-title {
     background: #375979;

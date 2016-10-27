@@ -225,7 +225,7 @@ RibbonViewController = Backbone.View.extend( {
 				TopMenuManager.goToView( 'Home' );
 			} else {
 				LocalCacheData.current_open_primary_controller.setDefaultMenu();
-				if(LocalCacheData.current_open_edit_only_controller){
+				if ( LocalCacheData.current_open_edit_only_controller ) {
 					LocalCacheData.current_open_edit_only_controller.onCancelClick();
 				}
 				if ( LocalCacheData.current_open_report_controller ) {
@@ -245,7 +245,10 @@ RibbonViewController = Backbone.View.extend( {
 		switch ( name ) {
 			case 'ImportCSV':
 				IndexViewController.openWizard( 'ImportCSVWizard', null, function() {
-					LocalCacheData.current_open_primary_controller.search();
+					//Error: TypeError: LocalCacheData.current_open_primary_controller.search is not a function in interface/html5/framework/jquery.min.js?v=9.0.0-20151016-110437 line 2 > eval line 248
+					if ( LocalCacheData.current_open_primary_controller && typeof LocalCacheData.current_open_primary_controller.search === 'function' ) {
+						LocalCacheData.current_open_primary_controller.search();
+					}
 				} );
 				break;
 			case 'QuickStartWizard':
@@ -294,7 +297,10 @@ RibbonViewController = Backbone.View.extend( {
 				break;
 			case 'ProcessPayrollWizard':
 				IndexViewController.openWizard( 'ProcessPayrollWizard', null, function() {
-					LocalCacheData.current_open_primary_controller.search();
+					//Error: TypeError: LocalCacheData.current_open_primary_controller.search is not a function in interface/html5/framework/jquery.min.js?v=9.0.0-20151016-110437 line 2 > eval line 248
+					if ( LocalCacheData.current_open_primary_controller && typeof LocalCacheData.current_open_primary_controller.search === 'function' ) {
+						LocalCacheData.current_open_primary_controller.search();
+					}
 				} );
 				break;
 			default:

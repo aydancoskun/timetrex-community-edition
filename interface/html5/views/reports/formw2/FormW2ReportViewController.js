@@ -1,6 +1,6 @@
 FormW2ReportViewController = ReportBaseViewController.extend( {
 
-
+	kind_of_employer_array: null,
 	efile_state_array: null,
 	state_field_array: null,
 
@@ -9,7 +9,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.script_name = 'FormW2Report';
 		this.viewId = 'FormW2Report';
 		this.context_menu_name = $.i18n._( 'Form W2/W3' );
-		this.navigation_label = $.i18n._( 'Saved Report' );
+		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
 		this.view_file = 'FormW2ReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIFormW2Report' ))();
 		this.include_form_setup = true;
@@ -173,7 +173,9 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 			{option_name: 'chart_display_mode'},
 			{option_name: 'chart_type'},
 			{option_name: 'templates'},
-			{option_name: 'setup_fields'}
+			{option_name: 'setup_fields'},
+			{option_name: 'kind_of_employer'},
+			{option_name: 'auto_refresh'}
 		];
 
 		this.initDropDownOptions( options, function( result ) {
@@ -256,6 +258,12 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.edit_view_tabs[3] = [];
 
 		this.edit_view_tabs[3].push( tab3_column1 );
+
+		//Kind of Employer
+		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( {field: 'kind_of_employer', set_empty: false} );
+		form_item_input.setSourceData( Global.addFirstItemToArray( $this.kind_of_employer_array ) );
+		this.addEditFieldToColumn( $.i18n._( 'Kind of Employer' ), form_item_input, tab3_column1 );
 
 		//Wages, Tips, Other Compensation (Box 1)
 		var v_box = $( "<div class='v-box'></div>" );
@@ -1130,6 +1138,9 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 	getFormSetupData: function() {
 		var other = {};
+
+		other.kind_of_employer = this.current_edit_record.kind_of_employer;
+
 		other.l1 = {include_pay_stub_entry_account: this.current_edit_record.l1_include_pay_stub_entry_account,
 			exclude_pay_stub_entry_account: this.current_edit_record.l1_exclude_pay_stub_entry_account};
 

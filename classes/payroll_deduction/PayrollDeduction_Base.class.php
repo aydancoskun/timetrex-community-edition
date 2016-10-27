@@ -209,6 +209,10 @@ class PayrollDeduction_Base {
 	}
 
 	function setCurrentPayPeriod($value) {
+		if ( $value <= 0 ) {
+			$value = 1; //Make sure current pay period can never be less than 1.
+		}
+		
 		$this->data['current_pay_period'] = $value;
 
 		return TRUE;
@@ -218,11 +222,25 @@ class PayrollDeduction_Base {
 			return $this->data['current_pay_period'];
 		}
 
-		return FALSE;
+		return 1; //Always default to 1 to avoid division by 0 errors.
+	}
+
+	function setCurrentPayrollRunID($value) {
+		$this->data['current_payroll_run_id'] = $value;
+
+		return TRUE;
+	}
+	function getCurrentPayrollRunID() {
+		if ( isset($this->data['current_payroll_run_id']) ) {
+			return $this->data['current_payroll_run_id'];
+		}
+
+		return 1; //Always default to 1.
 	}
 	
 	function getRemainingPayPeriods() {
-		$retval = ( $this->getAnnualPayPeriods() - $this->getCurrentPayPeriod() );
+		//$retval = ( $this->getAnnualPayPeriods() - $this->getCurrentPayPeriod() );
+		$retval = bcsub( $this->getAnnualPayPeriods(), bcsub( $this->getCurrentPayPeriod(), 1 ) ); //Current pay period is considered a remaining one.
 		Debug::Text('Pay Periods Remaining: '. $retval .' Annual PPs: '. $this->getAnnualPayPeriods() .' Current PP: '. $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
@@ -353,7 +371,7 @@ class PayrollDeduction_Base {
 		$country_currency_id = $this->getCountryPrimaryCurrencyID();
 
 		if ( $user_currency_id !== FALSE AND $country_currency_id !== FALSE ) {
-			$retval =  CurrencyFactory::convertCurrency( $this->getCountryPrimaryCurrencyID(), $this->getUserCurrency(), $amount);
+			$retval = CurrencyFactory::convertCurrency( $this->getCountryPrimaryCurrencyID(), $this->getUserCurrency(), $amount);
 		} else {
 			$retval = $amount;
 		}
@@ -361,20 +379,31 @@ class PayrollDeduction_Base {
 		return $retval;
 	}
 
-	function calcNonPeriodicIncome( $ytd_gross_income, $gross_pp_income, $annual_pp, $current_pp ) {
-		$retval = bcdiv( bcmul( bcadd( $ytd_gross_income, $gross_pp_income ), $annual_pp ), $current_pp );
-		if ( $retval < 0 ) {
-			$retval = 0;
+	function getAnnualizingFactor( $reverse = FALSE ) {
+		$retval = bcdiv( $this->getAnnualPayPeriods(), $this->getCurrentPayPeriod() );
+		if ( $reverse == TRUE ) {
+			$retval = bcdiv( 1, $retval);
 		}
-
+		Debug::text('Annualizing Factor (S1): '. $retval .' Annual PP: '. $this->getAnnualPayPeriods() .' Current PP: '. $this->getCurrentPayPeriod() .' Reverse: '. (int)$reverse, __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 	}
-	function calcNonPeriodicDeduction( $annual_tax_payable, $ytd_deduction, $annual_pp, $current_pp ) {
-		$retval = bcsub( bcmul( bcdiv( $annual_tax_payable, $annual_pp ), $current_pp ), $ytd_deduction );
+
+	function calcNonPeriodicIncome( $ytd_gross_income, $gross_pp_income ) {
+		$retval = bcmul( bcadd( $ytd_gross_income, $gross_pp_income ), $this->getAnnualizingFactor() );
+		//$retval = bcdiv( bcmul( bcadd( $ytd_gross_income, $gross_pp_income ), $this->getAnnualPayPeriods() ), $this->getCurrentPayPeriod() );
 		if ( $retval < 0 ) {
 			$retval = 0;
 		}
-
+		Debug::text('Non-Periodic Income: '. $retval .' Gross: YTD: '. $ytd_gross_income .' PP: '. $gross_pp_income, __FILE__, __LINE__, __METHOD__, 10);
+		return $retval;
+	}
+	function calcNonPeriodicDeduction( $annual_tax_payable, $ytd_deduction ) {
+		$retval = bcsub( bcmul( $annual_tax_payable, $this->getAnnualizingFactor( TRUE ) ), $ytd_deduction );
+		//$retval = bcsub( bcmul( bcdiv( $annual_tax_payable, $this->getAnnualPayPeriods() ), $this->getCurrentPayPeriod() ), $ytd_deduction );
+		if ( $retval < 0 ) {
+			$retval = 0;
+		}
+		Debug::text('Non-Periodic Deduction: '. $retval .' Tax Payable: YTD: '. $annual_tax_payable .' Deduction: '. $ytd_deduction, __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 	}
 

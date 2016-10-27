@@ -10,14 +10,15 @@
 }
 
 .file-browser .browser {
-
     max-width: 200px;
+}
 
+.edit-view-form-item-input-div .file-browser .browser {
+    margin-top: 3px;
 }
 
 .file-browser .image {
     max-width: 500px;
-    max-height: 350px;
 }
 
 .t-image-cut {

@@ -535,15 +535,15 @@ class Form941Report extends Report {
 						if ( !isset($this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages']) ) {
 							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'] = 0;
 						}
-						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages']	+= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_wages']['include_pay_stub_entry_account'], $form_data['social_security_wages']['exclude_pay_stub_entry_account'] );
+						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'], Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_wages']['include_pay_stub_entry_account'], $form_data['social_security_wages']['exclude_pay_stub_entry_account'] ) );
 						//Include tips in this amount as well.
-						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages']	+= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_tips']['include_pay_stub_entry_account'], $form_data['social_security_tips']['exclude_pay_stub_entry_account'] );
+						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'], Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_tips']['include_pay_stub_entry_account'], $form_data['social_security_tips']['exclude_pay_stub_entry_account'] ) );
 
 						//Handle additional medicare wages in excess of 200, 000
 						if ( !isset($this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages']) ) {
 							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] = 0;
 						}
-						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages']	+= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['medicare_wages']['include_pay_stub_entry_account'], $form_data['medicare_wages']['exclude_pay_stub_entry_account'] );
+						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'], Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['medicare_wages']['include_pay_stub_entry_account'], $form_data['medicare_wages']['exclude_pay_stub_entry_account'] ) );
 					}
 				}
 			}
@@ -614,8 +614,9 @@ class Form941Report extends Report {
 								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tips'] = 0;
 								$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'] = $social_security_wage_limit;
 							} else {
-								$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'] += $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'];
-								$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'] += $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tips'];
+								$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] );
+								//Include tips in this amount as well? We do lower down.
+								$this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['social_security_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tips'] );
 							}
 						} else {
 							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] = 0;
@@ -653,13 +654,12 @@ class Form941Report extends Report {
 						if ( !isset($this->form_data['pay_period'][$quarter_month][$date_stamp]) ) {
 							$this->form_data['pay_period'][$quarter_month][$date_stamp] = Misc::preSetArrayValues( array(), array('l2', 'l3', 'l5a', 'l5b', 'l5c', 'l5d', 'l7', 'l9', 'l5a2', 'l5b2', 'l5c2', 'l5d', 'l8', 'l10' ), 0 );
 						}
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l2'] += $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['wages'];
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l3'] += $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income_tax'];
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5a'] += $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'];
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5b'] += $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tips'];
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5c'] += $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'];
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5d'] += $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'];
-						//$this->form_data['pay_period'][$quarter_month][$date_stamp]['l9'] += $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['eic'];
+						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l2'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l2'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['wages'] );
+						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l3'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l3'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income_tax'] );
+						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5a'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5a'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] );
+						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5b'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5b'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tips'] );
+						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5c'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5c'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'] );
+						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5d'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5d'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'] );
 
 						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l5f'] = 0; //Not implemented currently.
 

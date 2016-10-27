@@ -469,14 +469,12 @@ class RecurringHolidayFactory extends Factory {
 			} elseif ( $this->getType() == 20 ) { //Dynamic - Week Interval
 				Debug::text('Dynamic - Week Interval... Current Month: '. TTDate::getMonth( $epoch ) .' Holiday Month: '. $this->getMonth(), __FILE__, __LINE__, __METHOD__, 10);
 				//Dynamic
-
-				//$start_month_epoch = TTDate::getBeginMonthEpoch( $epoch );
-				$start_month_epoch = mktime(12, 0, 0, $this->getMonth(), 1, (date('Y', $epoch) + 1));
+				$start_month_epoch = TTDate::getBeginMonthEpoch( $epoch );
 				$end_month_epoch = mktime(12, 0, 0, ($this->getMonth() + 1), 1, (date('Y', $epoch) + 1));
 
 				$tmp_holiday_epoch = FALSE;
 				
-				Debug::text('Start Epoch: '. TTDate::getDate('DATE+TIME', $start_month_epoch) .' End Epoch: '. TTDate::getDate('DATE+TIME', $end_month_epoch), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text('Start Epoch: '. TTDate::getDate('DATE+TIME', $start_month_epoch) .' End Epoch: '. TTDate::getDate('DATE+TIME', $end_month_epoch) .' Current Epoch: '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__, 10);
 				//Get all day of weeks in the month. Determine which is less or greater then day.
 				$day_of_week_dates = array();
 				$week_interval = 0;
@@ -487,7 +485,7 @@ class RecurringHolidayFactory extends Factory {
 
 						if ( $day_of_week == abs( $this->getDayOfWeek() ) ) {
 							$day_of_week_dates[] = date('j', $i);
-							//Debug::text('I: '. $i .' Day Of Month: '. date('j', $i), __FILE__, __LINE__, __METHOD__, 10);
+							Debug::text('I: '. $i .' Day Of Month: '. date('j', $i) .' Week Interval: '. $week_interval, __FILE__, __LINE__, __METHOD__, 10);
 
 							$week_interval++;
 						}
@@ -500,6 +498,10 @@ class RecurringHolidayFactory extends Factory {
 								break;
 							}
 						}
+					} else {
+						//Outside the month we need to be in, so reset all other settings.
+						$week_interval = 0;
+						$day_of_week_dates = array();
 					}
 				}
 

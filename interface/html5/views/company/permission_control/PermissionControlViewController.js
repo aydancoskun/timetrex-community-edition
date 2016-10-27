@@ -603,7 +603,8 @@ PermissionControlViewController = BaseViewController.extend( {
 			key: 'value',
 			allow_drag_to_order: false,
 			display_close_btn: false,
-			auto_sort: true
+			auto_sort: true,
+			display_column_settings: false
 		} );
 
 		this.addEditFieldToColumn( $.i18n._( 'Permissions' ), form_item_input, tab_permission_group_column1, '', null, true, true );

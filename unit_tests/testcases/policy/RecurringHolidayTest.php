@@ -43,9 +43,9 @@ class RecurringHolidayTest extends PHPUnit_Framework_TestCase {
 	protected $pay_period_objs = NULL;
 	protected $pay_stub_account_link_arr = NULL;
 
-    public function setUp() {
+	public function setUp() {
 		global $dd;
-        Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
 
 		TTDate::setTimeZone('PST8PDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
@@ -53,7 +53,7 @@ class RecurringHolidayTest extends PHPUnit_Framework_TestCase {
 		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
 		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
-		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
 
@@ -70,16 +70,16 @@ class RecurringHolidayTest extends PHPUnit_Framework_TestCase {
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
 
-        return TRUE;
-    }
-
-    public function tearDown() {
-        Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__,10);
+		return TRUE;
+	}
+	
+	public function tearDown() {
+		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//$this->deleteAllSchedules();
 
-        return TRUE;
-    }
+		return TRUE;
+	}
 
 	function getUserObject( $user_id ) {
 		$ulf = TTNew( 'UserListFactory' );
@@ -167,6 +167,65 @@ class RecurringHolidayTest extends PHPUnit_Framework_TestCase {
 		$next_date = $rhf->getNextDate( strtotime('01-Mar-2010') );
 		//Debug::text('Next Date: '. TTDate::getDate('DATE+TIME', $next_date ), __FILE__, __LINE__, __METHOD__, 10);
 		$this->assertEquals( $next_date, strtotime('14-Feb-2011 12:00PM PST') );
+	}
+
+	/**
+	 * @group RecurringHoliday_testRecurringHolidayDatesC
+	 */
+	function testRecurringHolidayDatesC() {
+		//First Monday in August
+		$rhf = TTNew('RecurringHolidayFactory');
+		$rhf->setCompany( $this->company_id );
+		$rhf->setName('US - Thanksgiving');
+		$rhf->setType( 20 );
+		$rhf->setWeekInterval( 4 );
+		$rhf->setDayOfWeek( 4 );
+		$rhf->setMonth( 11 );
+		$rhf->setAlwaysOnWeekDay( 0 );
+
+		$next_date = $rhf->getNextDate( strtotime('28-Nov-2013') );
+		Debug::text('Next Date: '. TTDate::getDate('DATE+TIME', $next_date ), __FILE__, __LINE__, __METHOD__, 10);
+		$this->assertEquals( $next_date, strtotime('28-Nov-2013 12:00PM PST') );
+
+		$start_date = strtotime('29-Nov-2013 12:00PM');
+		$end_date = strtotime('27-Nov-2014 12:00PM');
+		$n = 0;
+		for( $i = $start_date; $i < $end_date; $i += 86400 ) {
+			$next_date = $rhf->getNextDate( $i );
+			Debug::text('N: '. $n .' Next Date: '. TTDate::getDate('DATE+TIME', $next_date ), __FILE__, __LINE__, __METHOD__, 10);
+			$this->assertEquals( $next_date, strtotime('27-Nov-2014 12:00PM PST') );
+			$n++;
+		}
+
+		$start_date = strtotime('28-Nov-2014 12:00PM');
+		$end_date = strtotime('26-Nov-2015 12:00PM');
+		$n = 0;
+		for( $i = $start_date; $i < $end_date; $i += 86400 ) {
+			$next_date = $rhf->getNextDate( $i );
+			Debug::text('N: '. $n .' Next Date: '. TTDate::getDate('DATE+TIME', $next_date ), __FILE__, __LINE__, __METHOD__, 10);
+			$this->assertEquals( $next_date, strtotime('26-Nov-2015 12:00PM PST') );
+			$n++;
+		}
+
+		$next_date = $rhf->getNextDate( strtotime('27-Nov-2015') );
+		Debug::text('Next Date: '. TTDate::getDate('DATE+TIME', $next_date ), __FILE__, __LINE__, __METHOD__, 10);
+		$this->assertEquals( $next_date, strtotime('24-Nov-2016 12:00PM PST') );
+
+		$next_date = $rhf->getNextDate( strtotime('28-Nov-2015') );
+		Debug::text('Next Date: '. TTDate::getDate('DATE+TIME', $next_date ), __FILE__, __LINE__, __METHOD__, 10);
+		$this->assertEquals( $next_date, strtotime('24-Nov-2016 12:00PM PST') );
+
+		$next_date = $rhf->getNextDate( strtotime('29-Nov-2015') );
+		Debug::text('Next Date: '. TTDate::getDate('DATE+TIME', $next_date ), __FILE__, __LINE__, __METHOD__, 10);
+		$this->assertEquals( $next_date, strtotime('24-Nov-2016 12:00PM PST') );		
+
+		$next_date = $rhf->getNextDate( strtotime('30-Nov-2015') );
+		Debug::text('Next Date: '. TTDate::getDate('DATE+TIME', $next_date ), __FILE__, __LINE__, __METHOD__, 10);
+		$this->assertEquals( $next_date, strtotime('24-Nov-2016 12:00PM PST') );
+
+		$next_date = $rhf->getNextDate( strtotime('01-Dec-2015') );
+		Debug::text('Next Date: '. TTDate::getDate('DATE+TIME', $next_date ), __FILE__, __LINE__, __METHOD__, 10);
+		$this->assertEquals( $next_date, strtotime('24-Nov-2016 12:00PM PST') );
 	}
 }
 ?>

@@ -100,6 +100,26 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 												);
 	
 	var $state_options = array(
+								20160101 => array( //01-Jan-15
+													'standard_deduction' => array(
+																				'10' => 6300.00,
+																				'20' => 6300.00,
+																				'30' => 12600.00,
+																				'40' => 9300.00,
+																				),
+													'allowance' => array(
+																				'10' => array( 2100.00, 1200.00, 1200.00 ),
+																				'20' => array( 2100.00, 1200.00, 1200.00 ),
+																				'30' => array( 2100.00, 2100.00, 1200.00 ),
+																				'40' => array( 3500.00, 1200.00, 1200.00 ),
+																				),
+													'federal_tax_maximum' => array(
+																				'10' => 5000.00,
+																				'20' => 5000.00,
+																				'30' => 10000.00,
+																				'40' => 5000.00
+																				)
+													),
 								20150101 => array( //01-Jan-15
 													'standard_deduction' => array(
 																				'10' => 6300.00,

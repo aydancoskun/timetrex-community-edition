@@ -850,7 +850,7 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 				if ( $this->address2 != '' ) { $xml->Return->T4->T4Slip[$e]->EMPE_ADDR->addChild('addr_l2_txt', substr( Misc::stripHTMLSpecialChars( $this->address2 ), 0, 30) ); }
 				if ( $this->city != '' ) { $xml->Return->T4->T4Slip[$e]->EMPE_ADDR->addChild('cty_nm', $this->city ); }
 				if ( $this->province != '' ) { $xml->Return->T4->T4Slip[$e]->EMPE_ADDR->addChild('prov_cd', $this->province ); }
-				$xml->Return->T4->T4Slip[$e]->EMPE_ADDR->addChild('cntry_cd', 'CAN' );
+				$xml->Return->T4->T4Slip[$e]->EMPE_ADDR->addChild('cntry_cd', $this->formatAlpha3CountryCode( $this->country_code ) );
 				if ( $this->postal_code != '' ) { $xml->Return->T4->T4Slip[$e]->EMPE_ADDR->addChild('pstl_cd', $this->postal_code ); }
 
 				$xml->Return->T4->T4Slip[$e]->addChild('sin', ( $this->sin != '' ) ? $this->sin : '000000000' ); //Required

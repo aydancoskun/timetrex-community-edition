@@ -279,43 +279,71 @@ class TTDate {
 	public static function convertSecondsToHMS( $seconds, $include_seconds = FALSE ) {
 		if ( $seconds < 0 ) {
 			$negative_number = TRUE;
+		} else {
+			$negative_number = FALSE;
 		}
 
-		$seconds = abs($seconds);
+		//Check to see if the value is larger than PHP_INT_MAX, so we can switch to using bcmath if needed.
+		if (
+				( //Check if we're passed a numeric string value that is greater than PHP_INT_MAX.
+					is_string( $seconds ) == TRUE
+					AND
+					(
+						( $negative_number == FALSE AND bccomp($seconds, PHP_INT_MAX, 0) === 1 )
+						OR
+						( $negative_number == TRUE AND bccomp($seconds, ( PHP_INT_MAX * -1 ), 0) === -1 )
+					)
+				)
+			) {
+			//Greater than PHP_INT_MAX, use bcmath
+			//Debug::Text( 'BIGINT Seconds: '. $seconds, __FILE__, __LINE__, __METHOD__, 10);
 
-		// there are 3600 seconds in an hour, so if we
-		// divide total seconds by 3600 and throw away
-		// the remainder, we've got the number of hours
-		$hours = intval(intval($seconds) / 3600);
+			if ( $negative_number == TRUE ) {
+				$seconds = substr($seconds, 1); //Remove negative sign to get absolute value.
+			}
 
-		// add to $hms, with a leading 0 if asked for
-		$retval[] = str_pad($hours, 2, "0", STR_PAD_LEFT);
+			//Check to see if there are decimals.
+			if ( strpos($seconds, '.') !== FALSE ) {
+				$seconds = bcadd( $seconds, 0, 0); //Using scale(0), drop everything after the decimal, as that is fractions of a second. Could try rounding this instead, but its difficult with large values.
+			}
+			
+			if ( $include_seconds == TRUE ) {
+				$retval = sprintf( '%02d:%02d:%02d', bcdiv( $seconds, 3600 ), bcmod( bcdiv( $seconds, 60 ), 60 ), bcmod( $seconds, 60 ) );
+			} else {
+				$retval = sprintf( '%02d:%02d', bcdiv( $seconds, 3600 ), bcmod( bcdiv( $seconds, 60 ), 60 ) );
+			}
+		} else {
+			if ( //Check if we're passed a FLOAT value that is greater than PHP_INT_MAX, as precision has been lost if that is the case.
+					is_float($seconds) == TRUE
+					AND
+					(
+						( $negative_number == FALSE AND $seconds > PHP_INT_MAX )
+						OR
+						( $negative_number == TRUE AND $seconds < ( PHP_INT_MAX * -1 ) )
+					)
+				) {
+				Debug::Text( '  ERROR: Float value outside range, should be using BCMATH instead? Seconds: '. $seconds, __FILE__, __LINE__, __METHOD__, 10);
+				//return 'ERR(FLOAT)'; //Deactive this for now until we have more testing.
+			}
+			//else {
+				$seconds = round( abs( $seconds ) );
 
-		// dividing the total seconds by 60 will give us
-		// the number of minutes, but we're interested in
-		// minutes past the hour: to get that, we need to
-		// divide by 60 again and keep the remainder
-		$minutes = intval(($seconds / 60) % 60);
-
-		// then add to $hms (with a leading 0 if needed)
-		$retval[] = str_pad($minutes, 2, "0", STR_PAD_LEFT);
-
-		if ( $include_seconds == TRUE ) {
-			// seconds are simple - just divide the total
-			// seconds by 60 and keep the remainder
-			$secs = intval($seconds % 60);
-
-			// add to $hms, again with a leading 0 if needed
-			$retval[] = str_pad($secs, 2, "0", STR_PAD_LEFT);
+				//Using sprintf() is much more efficient, and handles large integers better too.
+				if ( $include_seconds == TRUE ) {
+					$retval = sprintf( '%02d:%02d:%02d', ( $seconds / 3600 ), ( ( $seconds / 60 ) % 60 ), ( $seconds % 60 ) );
+				} else {
+					$retval = sprintf( '%02d:%02d', ( $seconds / 3600 ), ( ( $seconds / 60 ) % 60 ) );
+				}
+			//}
 		}
 
-		if ( isset( $negative_number ) ) {
+		if ( $negative_number == TRUE ) {
 			$negative = '-';
 		} else {
 			$negative = '';
 		}
 
-		return $negative.implode(':', $retval );
+		return $negative.$retval;
 	}
 
 	public static function parseTimeUnit($time_unit, $format = NULL ) {
@@ -451,7 +479,7 @@ class TTDate {
 					$retval = self::convertSecondsToHMS( $seconds, TRUE );
 					break;
 				case 20: //hours with 2 decimal places
-					$retval = number_format( ( $seconds / 3600 ), 2);
+					$retval = number_format( ( $seconds / 3600 ), 2); //Number format doesn't support large numbers.
 					break;
 				case 22: //hours with 3 decimal places
 					$retval = number_format( ( $seconds / 3600 ), 3);
@@ -1979,6 +2007,14 @@ class TTDate {
 		return FALSE;
 	}
 
+	public static function getBirthDateAtAge( $birth_date, $age ) {
+		if ( $age > 0 ) {
+			$age = '+'.$age;
+		}
+
+		return strtotime( $age.' years', $birth_date );
+	}
+	
 	public static function getTimeLockedDate($time_epoch, $date_epoch) {
 		//This causes unit tests to fail.
 		//if ( $time_epoch == '' OR $date_epoch == '' ) {

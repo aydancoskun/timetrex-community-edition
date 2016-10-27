@@ -126,6 +126,18 @@ class TimesheetDetailReport extends Report {
 										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
 										'-5030-sort' => TTi18n::gettext('Sort By'),
 							);
+
+				if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
+					$corporate_edition_setup_fields = array(
+										'-2075-default_job_id' => TTi18n::gettext('Default Job'),
+										'-2076-default_job_item_id' => TTi18n::gettext('Default Task'),
+
+										'-2095-punch_job_id' => TTi18n::gettext('Punch Job'),
+										'-2096-punch_job_item_id' => TTi18n::gettext('Punch Task'),
+									);
+					$retval = array_merge( $retval, $corporate_edition_setup_fields );
+				}
+				ksort($retval);
 				break;
 			case 'time_period':
 				$retval = TTDate::getTimePeriodOptions();
@@ -892,7 +904,7 @@ class TimesheetDetailReport extends Report {
 						//
 						if ( strpos($format, 'pdf_') !== FALSE ) {
 							if ( isset($this->form_data['user_date_total'][$user_id]['data'][$date_stamp][$column.'_time']) ) {
-								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp][$column.'_time'] += $udt_obj->getColumn('total_time');
+								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp][$column.'_time'] = bcadd( $this->form_data['user_date_total'][$user_id]['data'][$date_stamp][$column.'_time'], $udt_obj->getColumn('total_time') );
 							} else {
 								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp][$column.'_time'] = $udt_obj->getColumn('total_time');
 							}
@@ -906,7 +918,7 @@ class TimesheetDetailReport extends Report {
 							}
 						} else {
 							if ( isset($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_time']) ) {
-								$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_time'] += $udt_obj->getColumn('total_time');
+								$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_time'] = bcadd( $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_time'], $udt_obj->getColumn('total_time') );
 							} else {
 								$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_time'] = $udt_obj->getColumn('total_time');
 							}
@@ -915,8 +927,8 @@ class TimesheetDetailReport extends Report {
 							//Worked Time is required for printable TimeSheets. Therefore this report is handled differently from TimeSheetSummary.
 							if ( $enable_wages == TRUE AND !in_array( $column, array('total','worked') ) AND ( $udt_obj->getColumn('total_time_amount') != 0 OR $udt_obj->getColumn('total_time_amount_with_burden') != 0 ) ) { //Exclude worked time from gross wage total.
 								if ( isset($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage']) ) {
-									$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage'] += $udt_obj->getColumn('total_time_amount');
-									$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage_with_burden'] += $udt_obj->getColumn('total_time_amount_with_burden');
+									$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage'] = bcadd( $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage'], $udt_obj->getColumn('total_time_amount') );
+									$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage_with_burden'] = bcadd( $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage_with_burden'], $udt_obj->getColumn('total_time_amount_with_burden') );
 								} else {
 									$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage'] = $udt_obj->getColumn('total_time_amount');
 									$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage_with_burden'] = $udt_obj->getColumn('total_time_amount_with_burden');
@@ -993,7 +1005,7 @@ class TimesheetDetailReport extends Report {
 
 					//Make sure we handle multiple schedules on the same day.
 					if ( isset($this->tmp_data['schedule'][$user_id][$date_stamp][$branch_id][$department_id]['schedule_'.$status]) ) {
-						$this->tmp_data['schedule'][$user_id][$date_stamp][$branch_id][$department_id]['schedule_'.$status] += $s_obj->getColumn('total_time');
+						$this->tmp_data['schedule'][$user_id][$date_stamp][$branch_id][$department_id]['schedule_'.$status] = bcadd( $this->tmp_data['schedule'][$user_id][$date_stamp][$branch_id][$department_id]['schedule_'.$status], $s_obj->getColumn('total_time') );
 					} else {
 						$this->tmp_data['schedule'][$user_id][$date_stamp][$branch_id][$department_id]['schedule_'.$status] = $s_obj->getColumn('total_time');
 					}

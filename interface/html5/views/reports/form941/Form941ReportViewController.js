@@ -11,7 +11,7 @@ Form941ReportViewController = ReportBaseViewController.extend( {
 		this.script_name = 'Form941Report';
 		this.viewId = 'Form941Report';
 		this.context_menu_name = $.i18n._( 'Form 941' );
-		this.navigation_label = $.i18n._( 'Saved Report' );
+		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
 		this.view_file = 'Form941ReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIForm941Report' ))();
 		this.include_form_setup = true;
@@ -29,7 +29,8 @@ Form941ReportViewController = ReportBaseViewController.extend( {
 			{option_name: 'chart_type'},
 			{option_name: 'templates'},
 			{option_name: 'setup_fields'},
-			{option_name: 'schedule_deposit'}
+			{option_name: 'schedule_deposit'},
+			{option_name: 'auto_refresh'}
 		];
 
 		this.initDropDownOptions( options, function( result ) {

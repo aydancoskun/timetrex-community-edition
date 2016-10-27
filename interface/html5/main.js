@@ -220,12 +220,24 @@ require( [
 			}
 
 			if ( LocalCacheData.openAwesomeBox ) {
-				if ( e.keyCode !== 16 &&
-					e.keyCode !== 17 &&
-					e.keyCode !== 91 ) {
+				if ( Global.isValidInputCodes( e.keyCode ) ) {
 					LocalCacheData.openAwesomeBox.selectNextItem( e );
 				}
+			} else if ( LocalCacheData.current_open_primary_controller &&
+				LocalCacheData.current_open_primary_controller.column_selector &&
+				LocalCacheData.current_open_primary_controller.column_selector.is( ':visible' ) &&
+				LocalCacheData.current_open_primary_controller.column_selector.has( $( ':focus' ) ).length > 0 ) {
+				if ( Global.isValidInputCodes( e.keyCode ) ) {
+					LocalCacheData.current_open_primary_controller.column_selector.selectNextItem( e );
+				}
+			}
 
+			if ( LocalCacheData.current_open_wizard_controller && e.keyCode === 13 ) {
+				if ( LocalCacheData.current_open_wizard_controller.$el.hasClass( 'change-password-wizard' ) ) {
+					!LocalCacheData.current_open_wizard_controller.done_btn.attr( "disabled" ) &&
+					e.target &&
+					e.target.type !== 'textarea' && LocalCacheData.current_open_wizard_controller.onDoneClick();
+				}
 			}
 
 			if ( (e.keyCode === 65 && e.metaKey === true) || (e.keyCode === 65 && e.ctrlKey === true ) ) {
@@ -245,7 +257,6 @@ require( [
 			if ( LocalCacheData.current_open_primary_controller &&
 				LocalCacheData.current_open_primary_controller.viewId === 'PermissionControl' &&
 				LocalCacheData.current_open_primary_controller.edit_view ) {
-
 				LocalCacheData.current_open_primary_controller.onKeyDown( e );
 
 			}
@@ -269,12 +280,12 @@ require( [
 
 		} );
 
-		$( 'body' ).unbind( 'mousedown' ).bind( 'mousedown', function() {
+		$( 'body' ).unbind( 'mousedown' ).bind( 'mousedown', function( e ) {
 
 
 			// MUST COLLLECT DATA WHEN MOUSE down, otherwise when do save in edit view when awesomebox open, the data can't be saved.
 			//Mouse down to collect data so for some actions like search can read select data in its click event
-			if ( LocalCacheData.openAwesomeBox && !LocalCacheData.openAwesomeBox.getIsMouseOver() ) {
+			if ( LocalCacheData.openAwesomeBox && LocalCacheData.openAwesomeBox.getADropDown().has( e.target ).length < 1 ) {
 				LocalCacheData.openAwesomeBox.onClose();
 			}
 
@@ -307,7 +318,7 @@ require( [
 
 		ServiceCaller.baseUrl = cUrl + 'api/json/api.php';
 		ServiceCaller.staticURL = ServiceCaller.baseUrl;
-
+		ServiceCaller.orginalUrl = cUrl;
 		ServiceCaller.rootURL = getRootURL( cUrl );
 
 		var loginData = {};
@@ -390,23 +401,22 @@ require( [
 		}
 
 		function gridScrollDown() {
-			if ( LocalCacheData.openAwesomeBox ) {
+			if ( LocalCacheData.openAwesomeBox &&
+				_.isFunction( LocalCacheData.openAwesomeBox.gridScrollDown ) ) {
 				LocalCacheData.openAwesomeBox.gridScrollDown();
 				return;
 			}
 
 			if ( LocalCacheData.current_open_sub_controller ) {
-
-				if ( !LocalCacheData.current_open_sub_controller.edit_view ) {
+				if ( !LocalCacheData.current_open_sub_controller.edit_view &&
+					_.isFunction( LocalCacheData.current_open_sub_controller.gridScrollDown ) ) {
 					LocalCacheData.current_open_sub_controller.gridScrollDown();
 				}
-
 				return;
 			}
-
 			if ( LocalCacheData.current_open_primary_controller ) {
-
-				if ( !LocalCacheData.current_open_primary_controller.edit_view ) {
+				if ( !LocalCacheData.current_open_primary_controller.edit_view &&
+					_.isFunction( LocalCacheData.current_open_primary_controller.gridScrollDown ) ) {
 					LocalCacheData.current_open_primary_controller.gridScrollDown();
 				}
 				return;
@@ -414,23 +424,22 @@ require( [
 		}
 
 		function gridScrollTop() {
-			if ( LocalCacheData.openAwesomeBox ) {
+			if ( LocalCacheData.openAwesomeBox &&
+				_.isFunction( LocalCacheData.openAwesomeBox.gridScrollTop ) ) {
 				LocalCacheData.openAwesomeBox.gridScrollTop();
 				return;
 			}
-
 			if ( LocalCacheData.current_open_sub_controller ) {
-
-				if ( !LocalCacheData.current_open_sub_controller.edit_view ) {
+				if ( !LocalCacheData.current_open_sub_controller.edit_view &&
+					_.isFunction( LocalCacheData.current_open_sub_controller.gridScrollTop ) ) {
 					LocalCacheData.current_open_sub_controller.gridScrollTop();
 				}
-
 				return;
 			}
-
+			//Error: Uncaught TypeError: LocalCacheData.current_open_primary_controller.gridScrollTop is not a function in interface/html5/main.js?v=9.0.2-20151106-092147 line 434
 			if ( LocalCacheData.current_open_primary_controller ) {
-
-				if ( !LocalCacheData.current_open_primary_controller.edit_view ) {
+				if ( !LocalCacheData.current_open_primary_controller.edit_view &&
+					_.isFunction( LocalCacheData.current_open_primary_controller.gridScrollTop ) ) {
 					LocalCacheData.current_open_primary_controller.gridScrollTop();
 				}
 				return;
@@ -439,14 +448,17 @@ require( [
 
 		function selectAll() {
 
-			if ( LocalCacheData.openAwesomeBox ) {
+			//Error: Uncaught TypeError: LocalCacheData.current_open_primary_controller.selectAll is not a function in interface/html5/main.js?v=9.0.4-20151123-121757 line 457
+			if ( LocalCacheData.openAwesomeBox &&
+				_.isFunction( LocalCacheData.openAwesomeBox.selectAll ) ) {
 				LocalCacheData.openAwesomeBox.selectAll();
 				return;
 			}
 
 			if ( LocalCacheData.current_open_sub_controller ) {
 
-				if ( !LocalCacheData.current_open_sub_controller.edit_view ) {
+				if ( !LocalCacheData.current_open_sub_controller.edit_view &&
+					_.isFunction( LocalCacheData.current_open_sub_controller.selectAll ) ) {
 					LocalCacheData.current_open_sub_controller.selectAll();
 				}
 
@@ -454,8 +466,8 @@ require( [
 			}
 
 			if ( LocalCacheData.current_open_primary_controller ) {
-
-				if ( !LocalCacheData.current_open_primary_controller.edit_view ) {
+				if ( !LocalCacheData.current_open_primary_controller.edit_view &&
+					_.isFunction( LocalCacheData.current_open_primary_controller.selectAll ) ) {
 					LocalCacheData.current_open_primary_controller.selectAll();
 				}
 				return;
@@ -505,7 +517,6 @@ require( [
 			'RibbonSubMenuNavWidget',
 			'SearchPanel',
 			'grid_locale',
-			'jqGrid',
 			'jqGrid_extend',
 			'ImageAreaSelect',
 			'qtip',
@@ -532,8 +543,13 @@ require( [
 		} )
 	}
 
+	function stripDuplicateSlashes( url ) {
+		return url.replace( /([^:]\/)\/+/g, '$1' )
+	}
+
 	function getRelatedURL( url ) {
-		var a = url.split( '/' );
+		url = stripDuplicateSlashes( url );
+		var a = url.split( '/' ); //Strip duplicate slashes
 
 		var targetIndex = (a.length - 3);
 		var newUrl = '';
@@ -550,6 +566,7 @@ require( [
 	}
 
 	function getRootURL( url ) {
+		url = stripDuplicateSlashes( url );
 		var a = url.split( '/' );
 		var targetIndex = 3;
 		var newUrl = '';

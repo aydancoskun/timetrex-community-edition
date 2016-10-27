@@ -15,7 +15,7 @@
 
 		this.getValue = function() {
 			return selected_btn ? selected_btn.val() : null;
-		}
+		};
 
 		this.setValue = function( val ) {
 			if ( selected_btn ) {
@@ -23,7 +23,9 @@
 			}
 
 			selected_btn = btn_dic[val];
-			selected_btn.addClass( 'selected' )
+			//Error: TypeError: selected_btn is undefined in interface/html5/global/widgets/toggle_button/TToggleButton.js?v=9.0.4-20151123-161606 line 26
+			selected_btn && selected_btn.addClass( 'selected' );
+
 		};
 
 		this.each( function() {
@@ -56,7 +58,7 @@
 				btn.click( function() {
 					$this.setValue( $( this ).val() );
 					$this.trigger( 'change', [$this.getValue()] );
-				} )
+				} );
 
 				$this.append( btn );
 			}
@@ -67,8 +69,6 @@
 
 	};
 
-	$.fn.TToggleButton.defaults = {
-
-	};
+	$.fn.TToggleButton.defaults = {};
 
 })( jQuery );

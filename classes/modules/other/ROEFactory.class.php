@@ -519,33 +519,12 @@ class ROEFactory extends Factory {
 	}
 
 	function getInsurableHoursReportPayPeriods() {
-		$report_period_arr = array(
-							10	=> 53, //'Weekly',
-							20	=> 27, //'Bi-Weekly',
-							30	=> 25, //'Semi-Monthly',
-							40	=> 13, //'Monthly + Advance',
-							50	=> 13, //'Monthly'
-							100	=> 53, //'Weekly',
-							200	=> 27, //'Bi-Weekly',
-							);
-
-		return $report_period_arr[$this->getPayPeriodType()];
+		return $this->getInsurableEarningsReportPayPeriods( '15c' );
 	}
 
 	function getInsurableEarningsReportPayPeriods( $line = '15b' ) {
-		if ( $line == '15c' ) {
-			//15c requires more pay periods data than is used to total up 15b.
-			$report_period_arr = array(
-								10	=> 53, //'Weekly',
-								20	=> 27, //'Bi-Weekly',
-								30	=> 25, //'Semi-Monthly',
-								40	=> 13, //'Monthly + Advance',
-								50	=> 13, //'Monthly'
-								100	=> 53, //'Weekly',
-								200	=> 27, //'Bi-Weekly',
-								);
-		} else {
-			//Line 15b is a total of insurable hours over a shorter period than displayed in 15b often.
+		if ( $line == '15b' ) {
+			//Line 15b is a total of insurable earnings over a shorter period than displayed in 15b often.
 			$report_period_arr = array(
 								10	=> 27, //'Weekly',
 								20	=> 14, //'Bi-Weekly',
@@ -555,11 +534,22 @@ class ROEFactory extends Factory {
 								100	=> 27, //'Weekly',
 								200	=> 14, //'Bi-Weekly',
 								);
+		} else {
+			//15a & 15c requires more pay periods data than is used to total up 15b.
+			$report_period_arr = array(
+								10	=> 53, //'Weekly',
+								20	=> 27, //'Bi-Weekly',
+								30	=> 25, //'Semi-Monthly',
+								40	=> 13, //'Monthly + Advance',
+								50	=> 13, //'Monthly'
+								100	=> 53, //'Weekly',
+								200	=> 27, //'Bi-Weekly',
+								);			
 		}
 
 		$retval = $report_period_arr[$this->getPayPeriodType()];
 
-		Debug::Text('Pay Periods: '. $retval .' Line: '. $line, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('Pay Periods: '. $retval .' Line: '. $line .' Type: '. $this->getPayPeriodType(), __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 	}
 
@@ -646,7 +636,9 @@ class ROEFactory extends Factory {
 		return TRUE;
 	}
 
-	function calculateFirstDate( $user_id ) {
+	function calculateFirstDate() {
+		$user_id = $this->getUser();
+
 		//get User data for hire date
 		$ulf = TTnew( 'UserListFactory' );
 		$user_obj = $ulf->getById($user_id)->getCurrent();
@@ -675,7 +667,9 @@ class ROEFactory extends Factory {
 		return $first_date;
 	}
 
-	function calculateLastDate( $user_id ) {
+	function calculateLastDate() {
+		$user_id = $this->getUser();
+
 		$plf = TTnew( 'PunchListFactory' );
 		$plf->getLastPunchByUserId( $user_id );
 		if ( $plf->getRecordCount() > 0 ) {
@@ -690,17 +684,94 @@ class ROEFactory extends Factory {
 		return $last_date;
 	}
 
-	function calculateFinalPayStubEndDate( $user_id, $end_date ) {
-		$plf = TTnew( 'PayPeriodListFactory' );
-		$plf->getByUserIdAndEndDate($user_id, $end_date );
-		if ( $plf->getRecordCount() > 0 ) {
-			return $plf->getCurrent()->getEndDate();
+	function calculateFinalPayStubEndDate() {
+		$user_id = $this->getUser();
+
+		if ( is_object( $this->getUserObject() ) ) {
+			if ( $this->getUserObject()->getStatus() != 10 AND $this->getUserObject()->getTerminationDate() != '' ) {
+				$end_date = $this->getUserObject()->getTerminationDate();
+			} else {
+				$end_date = time();
+			}
+
+			$plf = TTnew( 'PayPeriodListFactory' );
+			$plf->getByUserIdAndEndDate($user_id, $end_date );
+			if ( $plf->getRecordCount() > 0 ) {
+				$pp_obj = $plf->getCurrent();
+				Debug::Text('PayPeriod ID: '. $pp_obj->getId() .' Start Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
+				$pslf = TTnew('PayStubListFactory');
+				$pslf->getByUserIdAndCompanyIdAndPayPeriodId( $this->getUserObject()->getId(), $this->getUserObject()->getCompany(), array( $pp_obj->getId() ) );
+				if ( $pslf->getRecordCount() > 0 ) {
+					Debug::Text('zzz1PS ID: '. $pslf->getCurrent()->getId() .' Start Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
+
+					return $pslf->getCurrent()->getEndDate();
+				} else {
+					Debug::Text('zzz2PayPeriod ID: '. $pp_obj->getId() .' Start Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
+					return $plf->getCurrent()->getEndDate();
+				}
+			}
 		}
 
 		return FALSE;
 	}
 
-	function calculatePayPeriodType( $user_id, $date ) {
+	function calculateFinalPayStubTransactionDate() {
+		$user_id = $this->getUser();
+
+		if ( is_object( $this->getUserObject() ) ) {
+			if ( $this->getUserObject()->getStatus() != 10 AND $this->getUserObject()->getTerminationDate() != '' ) {
+				$end_date = $this->getUserObject()->getTerminationDate();
+			} else {
+				$end_date = time();
+			}
+
+			$plf = TTnew( 'PayPeriodListFactory' );
+			$plf->getByUserIdAndEndDate($user_id, $end_date );
+			if ( $plf->getRecordCount() > 0 ) {
+				$pp_obj = $plf->getCurrent();
+				Debug::Text('PayPeriod ID: '. $pp_obj->getId() .' Start Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
+				$pslf = TTnew('PayStubListFactory');
+				$pslf->getByUserIdAndCompanyIdAndPayPeriodId( $this->getUserObject()->getId(), $this->getUserObject()->getCompany(), array( $pp_obj->getId() ) );
+				if ( $pslf->getRecordCount() > 0 ) {
+					return $pslf->getCurrent()->getTransactionDate();
+				} else {
+					return time();
+				}
+			}
+		}
+
+		return FALSE;
+	}
+
+	function isFinalPayStubExists() {
+		$user_id = $this->getUser();
+
+		if ( is_object( $this->getUserObject() ) ) {
+			if ( $this->getUserObject()->getStatus() != 10 AND $this->getUserObject()->getTerminationDate() != '' ) {
+				$end_date = $this->getUserObject()->getTerminationDate();
+			} else {
+				$end_date = time();
+			}
+
+			$plf = TTnew( 'PayPeriodListFactory' );
+			$plf->getByUserIdAndEndDate($user_id, $end_date );
+			if ( $plf->getRecordCount() > 0 ) {
+				$pp_obj = $plf->getCurrent();
+				Debug::Text('PayPeriod ID: '. $pp_obj->getId() .' Start Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
+				$pslf = TTnew('PayStubListFactory');
+				$pslf->getByUserIdAndCompanyIdAndPayPeriodId( $this->getUserObject()->getId(), $this->getUserObject()->getCompany(), array( $pp_obj->getId() ) );
+				if ( $pslf->getRecordCount() > 0 ) {
+					return TRUE;
+				}
+			}
+		}
+
+		return FALSE;
+	}
+
+	function calculatePayPeriodType( $date ) {
+		$user_id = $this->getUser();
+		
 		$plf = TTnew( 'PayPeriodListFactory' );
 		$pay_period_obj = $plf->getByUserIdAndEndDate( $user_id, $date )->getCurrent();
 
@@ -771,10 +842,9 @@ class ROEFactory extends Factory {
 			return $this->pay_period_earnings;
 		}
 
-		Debug::Text('Getting earnings for line: '. $line .' Last Date: '. TTDate::getDate('DATE', $this->getLastDate() ) .' Final Pay Stub End Date: '. TTDate::getDate('DATE', $this->getFinalPayStubEndDate() ), __FILE__, __LINE__, __METHOD__, 10);
-
 		$setup_data = $this->getSetupData();
 		$insurable_earnings_start_date = $this->getInsurablePayPeriodStartDate( $this->getInsurableEarningsReportPayPeriods( $line ) );
+		Debug::Text('Getting earnings for line: '. $line .' Start Date: '. TTDate::getDate('DATE', $insurable_earnings_start_date ) .' Last Date: '. TTDate::getDate('DATE', $this->getLastDate() ) .' Final Pay Stub End Date: '. TTDate::getDate('DATE', $this->getFinalPayStubEndDate() ), __FILE__, __LINE__, __METHOD__, 10);
 
 		$pay_periods_with_earnings = 0;
 
@@ -806,6 +876,9 @@ class ROEFactory extends Factory {
 				$pay_periods_with_earnings++;
 			}
 		}
+
+		//There shouldn't be pay periods at the end of the list (beginning of the employment) that are $0.
+		//  We can't remove them though as the first/last date of the ROE is likely incorrect and needs to be fixed anyways.
 
 		if ( $pay_periods_with_earnings > 0 ) {
 			Debug::Arr($this->pay_period_earnings, 'Pay Period Earnings: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -917,34 +990,13 @@ class ROEFactory extends Factory {
 
 		//FIXME: Alert the user if they don't have enough information in TimeTrex to get accurate values.
 		//Get insurable hours, earnings, and vacation pay now that the final pay stub is generated
-		$ugdlf = TTnew( 'UserGenericDataListFactory' );
-		$ugdlf->getByCompanyIdAndScriptAndDefault( $this->getUserObject()->getCompany(), $this->getTable() );
-		if ( $ugdlf->getRecordCount() > 0 ) {
-			Debug::Text('Found Company Form Setup!', __FILE__, __LINE__, __METHOD__, 10);
-			$ugd_obj = $ugdlf->getCurrent();
-			$setup_data = $ugd_obj->getData();
-		}
-		unset($ugd_obj);
-
-		$absence_policy_ids = array();
-		$insurable_earnings_psea_ids = array();
-		if ( isset($setup_data) ) {
-			//var_dump($setup_data);
-			if ( isset($setup_data['insurable_earnings_psea_ids']) ) {
-				$insurable_earnings_psea_ids = $setup_data['insurable_earnings_psea_ids'];
-			} else {
-				//Fall back to Total Gross.
-				$insurable_earnings_psea_ids = $this->getPayStubEntryAccountLinkObject()->getTotalGross();
-			}
-
-			if ( isset($setup_data['absence_policy_ids']) ) {
-				$absence_policy_ids = $setup_data['absence_policy_ids'];
-			}
-		}
-
+		$setup_data = $this->getSetupData();
+		$insurable_earnings_psea_ids = $setup_data['insurable_earnings_psea_ids'];
+		$absence_policy_ids = $setup_data['absence_policy_ids'];
+		
 		//Find out the date of how far back we have to go to get insurable values.
 		//Insurable Hours
-		$insurable_hours_start_date = $this->getInsurablePayPeriodStartDate( $this->getInsurableHoursReportPayPeriods( '15c' ) );
+		$insurable_hours_start_date = $this->getInsurablePayPeriodStartDate( $this->getInsurableHoursReportPayPeriods() );
 
 		//All worked time and overtime is considered insurable.
 		//Only between the start and final date worked, as if they worked or have insurable earnings past the last date then the last date should be moved back.

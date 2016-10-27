@@ -54,7 +54,7 @@ extract	(FormVariables::GetVariables(
 												'email_sent',
 												'password',
 												'password2',
-												) ) );
+												), 'BOTH', TRUE, array('password', 'password2') ) ); //Don't sanitize the password, as special chars like & or < won't work then.
 
 $rl = TTNew('RateLimit');
 $rl->setID( 'password_reset_'. Misc::getRemoteIPAddress() );
@@ -67,7 +67,7 @@ $action = Misc::findSubmitButton();
 Debug::Text('Action: '. $action, __FILE__, __LINE__, __METHOD__, 10);
 switch ($action) {
 	case 'change_password':
-		Debug::Text('Change Password: '. $key, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('Change Password Key: '. $key, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $rl->check() == FALSE ) {
 			Debug::Text('Excessive change password attempts... Preventing resets from: '. Misc::getRemoteIPAddress() .' for up to 15 minutes...', __FILE__, __LINE__, __METHOD__, 10);
 			sleep(5); //Excessive password attempts, sleep longer.
@@ -97,6 +97,8 @@ switch ($action) {
 							unset($user_obj);
 
 							Redirect::Page( URLBuilder::getURL( array('password_reset' => 1 ), Environment::getDefaultInterfaceBaseURL() ) );
+						} else {
+							$validator->merge( $user_obj->Validator ); //Make sure we display any validation errors like password too weak.
 						}
 					} else {
 						$validator->isTrue('password', FALSE, TTi18n::getText('Passwords do not match') );

@@ -83,14 +83,18 @@ if ( $udtlf->getRecordCount() > 0 ) {
 	foreach ($udtlf as $udt_obj) {
 		Debug::text('('.$i.'). User: '. $udt_obj->getUser() .' Start Date: '. TTDate::getDate('DATE+TIME', strtotime( $udt_obj->getColumn('start_date') ) ) .' End Date: '. TTDate::getDate('DATE+TIME', strtotime( $udt_obj->getColumn('end_date') ) ), __FILE__, __LINE__, __METHOD__,5);
 
-		//Calculate pre-mature exceptions, so pre-mature Missing Out Punch exceptions arn't made active until they are ready.
-		//Don't calculate future exceptions though.
-		$cp = TTNew('CalculatePolicy');
-		$cp->setFlag( $flags );
-		$cp->setUserObject( $udt_obj->getUserObject() );
-		$cp->addPendingCalculationDate( strtotime( $udt_obj->getColumn('start_date') ), strtotime( $udt_obj->getColumn('end_date') ) );
-		$cp->calculate( strtotime( $udt_obj->getColumn('start_date') ) ); //This sets timezone itself.
-		$cp->Save();
+		if ( is_object( $udt_obj->getUserObject() ) ) {
+			//Calculate pre-mature exceptions, so pre-mature Missing Out Punch exceptions arn't made active until they are ready.
+			//Don't calculate future exceptions though.
+			$cp = TTNew('CalculatePolicy');
+			$cp->setFlag( $flags );
+			$cp->setUserObject( $udt_obj->getUserObject() );
+			$cp->addPendingCalculationDate( strtotime( $udt_obj->getColumn('start_date') ), strtotime( $udt_obj->getColumn('end_date') ) );
+			$cp->calculate( strtotime( $udt_obj->getColumn('start_date') ) ); //This sets timezone itself.
+			$cp->Save();
+		} else {
+			Debug::Arr( $udt_obj->getUserObject(), 'ERROR: Invalid UserObject: User ID: '. $udt_obj->getUser(), __FILE__, __LINE__, __METHOD__, 10);
+		}
 
 		$i++;
 	}

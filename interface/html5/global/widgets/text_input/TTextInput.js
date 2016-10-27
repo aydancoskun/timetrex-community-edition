@@ -28,6 +28,8 @@
 
 		var no_validate_timer = null;
 
+		var no_validate_timer_sec = 0;
+
 		var password_style = false;
 
 		var disable_keyup_event = false; //set to not send change event when mouseup
@@ -289,6 +291,9 @@
 			if ( o.validation_field ) {
 				validation_field = o.validation_field;
 			}
+			if ( o.hasOwnProperty( 'no_validate_timer_sec' ) && o.no_validate_timer_sec > 0 ) {
+				no_validate_timer_sec = o.no_validate_timer_sec;
+			}
 			hasKeyEvent = o.hasKeyEvent;
 			need_parser_date = o.need_parser_date;
 			need_parser_sec = o.need_parser_sec;
@@ -328,14 +333,17 @@
 			} );
 
 			$( this ).keyup( function( e ) {
-
+				var is_valid_input = Global.isValidInputCodes( e.keyCode );
+				if ( !is_valid_input ) {
+					return;
+				}
 				//don't clean event when click tab
-				if ( e.keyCode !== 9 && validate_timer ) {
+				if ( validate_timer ) {
 					clearTimeout( validate_timer );
 					validate_timer = null;
 				}
 
-				if ( e.keyCode !== 9 && no_validate_timer ) {
+				if ( no_validate_timer ) {
 					clearTimeout( no_validate_timer );
 					no_validate_timer = null;
 				}
@@ -372,12 +380,12 @@
 
 				}, validate_sec );
 
-				//TO make sure the value is set to currentEditRecord when user typing it, but not trigger validate
+				// TO make sure the value is set to currentEditRecord when user typing it, but not trigger validate
+				// Do this immediately instead wait for 300 ms.
 				no_validate_timer = setTimeout( function() {
 					if ( check_box ) {
 						$this.setCheckBox( true );
 					}
-
 					if ( need_parser_date || need_parser_sec ) {
 						parseDateAsync( function() {
 
@@ -391,9 +399,7 @@
 							$this.trigger( 'formItemChange', [$this, true] );
 						}
 					}
-
-				}, 300 )
-
+				}, no_validate_timer_sec );
 			} );
 
 			$( this ).mouseover( function() {

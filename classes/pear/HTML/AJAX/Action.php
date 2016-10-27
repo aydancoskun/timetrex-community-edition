@@ -9,7 +9,7 @@
  * @author    Elizabeth Smith <auroraeosrose@gmail.com>
  * @copyright 2005-2008 Elizabeth Smith
  * @license   http://www.opensource.org/licenses/lgpl-license.php  LGPL
- * @version   Release: 0.5.6
+ * @version   Release: 0.5.7
  * @link      http://htmlajax.org/HTML_AJAX/Using%20haSerializer
  */
 
@@ -32,7 +32,7 @@ require_once 'HTML/AJAX/Serializer/JSON.php';
  * @author    Elizabeth Smith <auroraeosrose@gmail.com>
  * @copyright 2005-2008 Elizabeth Smith
  * @license   http://www.opensource.org/licenses/lgpl-license.php  LGPL
- * @version   Release: 0.5.6
+ * @version   Release: 0.5.7
  * @link      http://htmlajax.org/HTML_AJAX/Using%20haSerializer
  */
 class HTML_AJAX_Action extends HTML_AJAX_Response

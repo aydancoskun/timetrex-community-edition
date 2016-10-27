@@ -96,16 +96,17 @@ LoginViewController = BaseViewController.extend( {
 		} else {
 			return;
 		}
-		var copy_right_text = $( '#login_copy_right_info' ).text();
-		var xhr = $.ajax( {
-			type: "HEAD",
-			url: ServiceCaller.login_page_powered_by_logo,
-			success: function() {
-				var _0xee93 = ["\x6F\x6E\x6C\x6F\x61\x64", "\x74\x6F\x74\x61\x6C", "\x43\x6F\x70\x79\x72\x69\x67\x68\x74\x20", "\x69\x6E\x64\x65\x78\x4F\x66", "\x6F\x72\x67\x61\x6E\x69\x7A\x61\x74\x69\x6F\x6E\x5F\x6E\x61\x6D\x65", "\x6C\x6F\x67\x69\x6E\x44\x61\x74\x61", "\x41\x6C\x6C\x20\x52\x69\x67\x68\x74\x73\x20\x52\x65\x73\x65\x72\x76\x65\x64", "\x45\x52\x52\x4F\x52\x3A\x20\x54\x68\x69\x73\x20\x69\x6E\x73\x74\x61\x6C\x6C\x61\x74\x69\x6F\x6E\x20\x6F\x66\x20", "\x61\x70\x70\x6C\x69\x63\x61\x74\x69\x6F\x6E\x5F\x6E\x61\x6D\x65", "\x20\x69\x73\x20\x69\x6E\x20\x76\x69\x6F\x6C\x61\x74\x69\x6F\x6E\x20\x6F\x66\x20\x74\x68\x65\x20\x6C\x69\x63\x65\x6E\x73\x65\x20\x61\x67\x72\x65\x65\x6D\x65\x6E\x74\x21", "\x73\x68\x6F\x77\x41\x6C\x65\x72\x74", "\x67\x65\x74\x52\x65\x73\x70\x6f\x6e\x73\x65\x48\x65\x61\x64\x65\x72", "\x43\x6f\x6e\x74\x65\x6e\x74\x2d\x4c\x65\x6e\x67\x74\x68"];
-				var s = xhr[_0xee93[11]]( _0xee93[12] );
-				if ( (s && parseInt( s ) !== 7793) || copy_right_text[_0xee93[3]]( _0xee93[2] ) !== 2 || copy_right_text[_0xee93[3]]( LocalCacheData[_0xee93[5]][_0xee93[4]] ) !== 19 ) { Global.sendErrorReport( (_0xee93[7] + LocalCacheData[_0xee93[5]][_0xee93[8]] + _0xee93[9] + 'c: ' + s + ' ' + copy_right_text[_0xee93[3]]( _0xee93[2] ) + ' ' + copy_right_text[_0xee93[3]]( LocalCacheData[_0xee93[5]][_0xee93[4]] ) ), ServiceCaller.rootURL, '', '', '' );}
-			}
-		} );
+		// Don't check copy right for now
+		//var copy_right_text = $( '#login_copy_right_info' ).text();
+		//var xhr = $.ajax( {
+		//	type: "HEAD",
+		//	url: ServiceCaller.login_page_powered_by_logo,
+		//	success: function() {
+		//		var _0xee93 = ["\x6F\x6E\x6C\x6F\x61\x64", "\x74\x6F\x74\x61\x6C", "\x43\x6F\x70\x79\x72\x69\x67\x68\x74\x20", "\x69\x6E\x64\x65\x78\x4F\x66", "\x6F\x72\x67\x61\x6E\x69\x7A\x61\x74\x69\x6F\x6E\x5F\x6E\x61\x6D\x65", "\x6C\x6F\x67\x69\x6E\x44\x61\x74\x61", "\x41\x6C\x6C\x20\x52\x69\x67\x68\x74\x73\x20\x52\x65\x73\x65\x72\x76\x65\x64", "\x45\x52\x52\x4F\x52\x3A\x20\x54\x68\x69\x73\x20\x69\x6E\x73\x74\x61\x6C\x6C\x61\x74\x69\x6F\x6E\x20\x6F\x66\x20", "\x61\x70\x70\x6C\x69\x63\x61\x74\x69\x6F\x6E\x5F\x6E\x61\x6D\x65", "\x20\x69\x73\x20\x69\x6E\x20\x76\x69\x6F\x6C\x61\x74\x69\x6F\x6E\x20\x6F\x66\x20\x74\x68\x65\x20\x6C\x69\x63\x65\x6E\x73\x65\x20\x61\x67\x72\x65\x65\x6D\x65\x6E\x74\x21", "\x73\x68\x6F\x77\x41\x6C\x65\x72\x74", "\x67\x65\x74\x52\x65\x73\x70\x6f\x6e\x73\x65\x48\x65\x61\x64\x65\x72", "\x43\x6f\x6e\x74\x65\x6e\x74\x2d\x4c\x65\x6e\x67\x74\x68"];
+		//		var s = xhr[_0xee93[11]]( _0xee93[12] );
+		//		if ( (s && parseInt( s ) !== 7793) || copy_right_text[_0xee93[3]]( _0xee93[2] ) !== 2 || copy_right_text[_0xee93[3]]( LocalCacheData[_0xee93[5]][_0xee93[4]] ) !== 19 ) { Global.sendErrorReport( (_0xee93[7] + LocalCacheData[_0xee93[5]][_0xee93[8]] + _0xee93[9] + 'c: ' + s + ' ' + copy_right_text[_0xee93[3]]( _0xee93[2] ) + ' ' + copy_right_text[_0xee93[3]]( LocalCacheData[_0xee93[5]][_0xee93[4]] ) ), ServiceCaller.rootURL, '', '', '' );}
+		//	}
+		//} );
 		this.authentication_api.login( user_name, password, {
 			onResult: function( e ) {
 				if ( LocalCacheData.loadViewRequiredJSReady ) {
@@ -137,6 +138,7 @@ LoginViewController = BaseViewController.extend( {
 		if ( LocalCacheData.loadViewRequiredJSReady ) {
 			ALayoutCache.layout_dic = {};
 		}
+		LocalCacheData.view_layout_cache = {};
 		LocalCacheData.result_cache = {};
 		if ( LocalCacheData.current_open_wizard_controller ) {
 			LocalCacheData.current_open_wizard_controller.onCloseClick();
@@ -168,7 +170,7 @@ LoginViewController = BaseViewController.extend( {
 					user_name: user_name.val(),
 					message: e.getDetailsAsString()
 				}, function() {
-					TAlertManager.showAlert( $.i18n._( 'Password has been changed successfully, you may now login' ), 'Error', function() {
+					TAlertManager.showAlert( $.i18n._( 'Password has been changed successfully, you may now login' ), '', function() {
 						password.focus();
 					} );
 				} );
@@ -417,8 +419,14 @@ LoginViewController = BaseViewController.extend( {
 	},
 
 	autoLogin: function() {
-		this.doing_login = true;
-		this.onLoginSuccess( null, $.cookie( 'SessionID' ) );
+		// Error: TypeError: e is null in interface/html5/framework/jquery.min.js?v=9.0.5-20151222-094938 line 2 > eval line 154
+		if ( $.cookie( 'SessionID' ) ) {
+			this.doing_login = true;
+			this.onLoginSuccess( null, $.cookie( 'SessionID' ) );
+		} else {
+			$( this.el ).visible();
+			this.render();
+		}
 	},
 
 	render: function() {
@@ -594,14 +602,7 @@ LoginViewController = BaseViewController.extend( {
 	},
 
 	cleanWhenUnloadView: function( callBack ) {
-
 		$( '#loginViewContainer' ).remove();
-//		$( '#powered_by' ).remove();
-//		$( '#login_copy_right_info' ).remove();
-//		$( '#social_div' ).remove();
-//		$( '.foot-right-html' ).remove();
-//		$( '.foot-left-html' ).remove();
-
 		this._super( 'cleanWhenUnloadView', callBack );
 	}
 

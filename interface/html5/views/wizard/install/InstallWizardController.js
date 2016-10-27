@@ -22,7 +22,7 @@ InstallWizardController = BaseWizardController.extend( {
 		this.wizard_id = 'InstallWizard';
 		this.api = new (APIFactory.getAPIClass( 'APIInstall' ))();
 		ServiceCaller.extra_url = '&disable_db=1';
-		if ( _.size( LocalCacheData.all_url_args ) > 0  ) {
+		if ( _.size( LocalCacheData.all_url_args ) > 0 ) {
 			var url_args = LocalCacheData.all_url_args;
 			this.current_step = url_args.a;
 			this.external_installer = url_args.external_installer;
@@ -44,169 +44,167 @@ InstallWizardController = BaseWizardController.extend( {
 
 		title.text( $.i18n._( 'Install Wizard' ) );
 
-//		$( this.el ).css( {
-//				width: $(window).width() - 4 ,
-//				height: $(window).height() - 20
-////				height: $(document ).height(),
-////				'border-radius': '20px',
-////				margin: 0,
-////				top: 0,
-////				left: 0
-////				bottom: 0
-//			}
-//		);
-
-		$( this.el ).css( {left:  ( Global.bodyWidth() - $(this.el ).width() )/2} );
-
-		this.content_div.css( {height: $(this.el ).height() - 145} );
-
-		$( window ).resize( function() {
-			$( $this.el ).css( {left:  ( Global.bodyWidth() - $($this.el ).width() )/2} );
-			$this.content_div.css( {height: $($this.el ).height() - 145} );
-		} );
-
 		this.initCurrentStep();
 	},
 
 	initCurrentStep: function( step ) {
 		var $this = this;
 
-		if ( step ){}
+		if ( step ) {}
 		else {
 			step = this.current_step;
 		}
 
 		ProgressBar.showOverlay();
 
-		switch( step ) {
+		switch ( step ) {
 			case 'license':
-				this.api.getLicense( {onResult: function( res ){
-					$this.stepsDataDic[$this.current_step] = res.getResult();
-					$this._initCurrentStep();
-				}} );
+				this.api.getLicense( {
+					onResult: function( res ) {
+						$this.stepsDataDic[$this.current_step] = res.getResult();
+						$this._initCurrentStep();
+					}
+				} );
 				break;
 			case 'requirements':
-				this.api.getRequirements( this.external_installer, {onResult: function( res ) {
-					if ( res.isValid() ) {
-						if ( res.getResult().action ) {
-							$this.onNextClick();
+				this.api.getRequirements( this.external_installer, {
+					onResult: function( res ) {
+						if ( res.isValid() ) {
+							if ( res.getResult().action ) {
+								$this.onNextClick();
+							} else {
+								$this.stepsDataDic[$this.current_step] = res.getResult();
+								$this._initCurrentStep();
+							}
 						} else {
-							$this.stepsDataDic[$this.current_step] = res.getResult();
-							$this._initCurrentStep();
+							$this.current_step = 'license';
+							$this.initCurrentStep();
 						}
-					} else {
-						$this.current_step = 'license';
-						$this.initCurrentStep();
 					}
-				}} );
+				} );
 				break;
 			case 'databaseSchema':
 				ServiceCaller.extra_url = false;
-				this.api.getDatabaseSchema( {onResult: function( res ) {
-					if ( res.isValid() ) {
-						$this.stepsDataDic[$this.current_step] = res.getResult();
-						$this._initCurrentStep();
-					} else {
-						$this.current_step = 'license';
-						$this.initCurrentStep();
+				this.api.getDatabaseSchema( {
+					onResult: function( res ) {
+						if ( res.isValid() ) {
+							$this.stepsDataDic[$this.current_step] = res.getResult();
+							$this._initCurrentStep();
+						} else {
+							$this.current_step = 'license';
+							$this.initCurrentStep();
+						}
 					}
-				}} );
+				} );
 				break;
 			case 'databaseConfig':
-				this.api.getDatabaseConfig( {onResult: function( res ) {
-					if ( res.isValid() ) {
-						$this.stepsDataDic[$this.current_step] = res.getResult();
-						$this.type_array = res.getResult().type_options;
-						$this._initCurrentStep();
-					} else {
-						$this.current_step = 'license';
-						$this.initCurrentStep();
+				this.api.getDatabaseConfig( {
+					onResult: function( res ) {
+						if ( res.isValid() ) {
+							$this.stepsDataDic[$this.current_step] = res.getResult();
+							$this.type_array = res.getResult().type_options;
+							$this._initCurrentStep();
+						} else {
+							$this.current_step = 'license';
+							$this.initCurrentStep();
+						}
 					}
-				}} );
+				} );
 				break;
 			case 'postUpgrade':
-				this.api.postUpgrade( {onResult: function( res ) {
-					if ( res.isValid() ) {
-						$this.stepsDataDic[$this.current_step] = res.getResult();
-						$this._initCurrentStep();
-					} else {
-						$this.current_step = 'license';
-						$this.initCurrentStep();
-					}
+				this.api.postUpgrade( {
+					onResult: function( res ) {
+						if ( res.isValid() ) {
+							$this.stepsDataDic[$this.current_step] = res.getResult();
+							$this._initCurrentStep();
+						} else {
+							$this.current_step = 'license';
+							$this.initCurrentStep();
+						}
 
-				}} );
+					}
+				} );
 				break;
 			case 'systemSettings':
-				this.api.getSystemSettings( {onResult: function(res) {
-					if ( res.isValid() ) {
-						$this.stepsDataDic[$this.current_step] = res.getResult();
-						$this._initCurrentStep();
-					} else {
-						$this.current_step = 'license';
-						$this.initCurrentStep();
+				this.api.getSystemSettings( {
+					onResult: function( res ) {
+						if ( res.isValid() ) {
+							$this.stepsDataDic[$this.current_step] = res.getResult();
+							$this._initCurrentStep();
+						} else {
+							$this.current_step = 'license';
+							$this.initCurrentStep();
+						}
 					}
-				}} );
+				} );
 				break;
 			case 'company':
-				this.api.getCompany( this.company_id, {onResult: function( res ) {
-					if ( res.isValid() ) {
-						$this.stepsDataDic[$this.current_step] = res.getResult();
-						$this._initCurrentStep();
-					} else {
-						$this.current_step = 'license';
-						$this.initCurrentStep();
+				this.api.getCompany( this.company_id, {
+					onResult: function( res ) {
+						if ( res.isValid() ) {
+							$this.stepsDataDic[$this.current_step] = res.getResult();
+							$this._initCurrentStep();
+						} else {
+							$this.current_step = 'license';
+							$this.initCurrentStep();
+						}
 					}
-				}} );
+				} );
 				break;
 			case 'user':
 				var company_id = '';
 				if ( Global.isSet( this.stepsDataDic[this.current_step] ) ) {
 					company_id = this.stepsDataDic[this.current_step]['company_id'];
 				}
-				this.api.getUser( company_id, this.user_id, {onResult: function( res ) {
-					if ( res.isValid() ) {
-						$this.stepsDataDic[$this.current_step] = res.getResult();
-						$this._initCurrentStep();
-					} else {
-						$this.current_step = 'license';
-						$this.initCurrentStep();
+				this.api.getUser( company_id, this.user_id, {
+					onResult: function( res ) {
+						if ( res.isValid() ) {
+							$this.stepsDataDic[$this.current_step] = res.getResult();
+							$this._initCurrentStep();
+						} else {
+							$this.current_step = 'license';
+							$this.initCurrentStep();
+						}
 					}
-				}} );
+				} );
 				break;
 			case 'installDone':
 				var upgrade = '';
 				if ( Global.isSet( $this.stepsDataDic[$this.current_step] ) ) {
 					upgrade = $this.stepsDataDic[$this.current_step]['upgrade'];
 				}
-				this.api.installDone( upgrade, {onResult: function( res ){
-					if ( res.isValid() ) {
-						$this.stepsDataDic[$this.current_step] = res.getResult();
-						$this._initCurrentStep();
-					} else {
-						$this.current_step = 'license';
-						$this.initCurrentStep();
+				this.api.installDone( upgrade, {
+					onResult: function( res ) {
+						if ( res.isValid() ) {
+							$this.stepsDataDic[$this.current_step] = res.getResult();
+							$this._initCurrentStep();
+						} else {
+							$this.current_step = 'license';
+							$this.initCurrentStep();
+						}
 					}
-				}} );
+				} );
 				break;
 			case 'maintenanceJobs':
-				this.api.getMaintenanceJobs(  {onResult: function( res ){
-					if ( res.isValid() ) {
-						if ( res.getResult() === true ) {
-							$this.current_step = 'installDone';
-							$this.initCurrentStep();
-						} else {
-						$this.stepsDataDic[$this.current_step] = res.getResult();
-						$this._initCurrentStep();
-						}
+				this.api.getMaintenanceJobs( {
+					onResult: function( res ) {
+						if ( res.isValid() ) {
+							if ( res.getResult() === true ) {
+								$this.current_step = 'installDone';
+								$this.initCurrentStep();
+							} else {
+								$this.stepsDataDic[$this.current_step] = res.getResult();
+								$this._initCurrentStep();
+							}
 
-					} else {
-						$this.current_step = 'license';
-						$this.initCurrentStep();
+						} else {
+							$this.current_step = 'license';
+							$this.initCurrentStep();
+						}
 					}
-				}} );
+				} );
 				break;
 		}
-
 
 	},
 
@@ -244,7 +242,7 @@ InstallWizardController = BaseWizardController.extend( {
 		var license = this.content_div.find( '.license' );
 		var requirements = this.content_div.find( '.requirements' );
 		var databaseConfig = this.content_div.find( '.databaseConfig' );
-		var databaseSchema =  this.content_div.find( '.databaseSchema' );
+		var databaseSchema = this.content_div.find( '.databaseSchema' );
 		var postUpgrade = this.content_div.find( '.postUpgrade' );
 		var systemSettings = this.content_div.find( '.systemSettings' );
 		var company = this.content_div.find( '.company' );
@@ -254,8 +252,8 @@ InstallWizardController = BaseWizardController.extend( {
 
 		var form_item_input;
 		var stepData = this.stepsDataDic[this.current_step];
-		this.content_div.find('.step' ).hide();
-		this.content_div.find('.content-handle-btn' ).empty();
+		this.content_div.find( '.step' ).hide();
+		this.content_div.find( '.content-handle-btn' ).empty();
 
 		if ( Global.isSet( this.stepsWidgetDic[this.current_step] ) ) {
 
@@ -269,7 +267,7 @@ InstallWizardController = BaseWizardController.extend( {
 				this.title_1.text( $.i18n._( 'License Acceptance' ) );
 				if ( stepData['install_mode'] ) {
 					if ( stepData['license_text'] ) {
-						step_title.text( $.i18n._( 'Please read through the following license and if you agree and accept it, click the ' + '"' + $.i18n._('I Accept') + '"' + 'checkbox at the bottom.' ) );
+						step_title.text( $.i18n._( 'Please read through the following license and if you agree and accept it, click the ' + '"' + $.i18n._( 'I Accept' ) + '"' + 'checkbox at the bottom.' ) );
 
 						form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 						form_item_input.TTextArea( {field: 'license_text', width: '65%', height: '80%'} );
@@ -301,69 +299,65 @@ InstallWizardController = BaseWizardController.extend( {
 					license.append( accept_label );
 
 				} else {
-					var license_html = $.i18n._('The installer has already been run, as a safety measure it has been disabled from running again. If you are absolutely sure you want to run it again, or upgrade your system, please go to your timetrex.ini.php file and set "installer_enabled" to "TRUE". The line should look like') + ':';
+					var license_html = $.i18n._( 'The installer has already been run, as a safety measure it has been disabled from running again. If you are absolutely sure you want to run it again, or upgrade your system, please go to your timetrex.ini.php file and set "installer_enabled" to "TRUE". The line should look like' ) + ':';
 					license_html = license_html + '<br>';
 					license_html = license_html + '<br>';
-					license_html = license_html + '"' + '<b>installer_enabled = TRUE</b>' +  '"';
+					license_html = license_html + '"' + '<b>installer_enabled = TRUE</b>' + '"';
 					license_html = license_html + '<br>';
 					license_html = license_html + '<br>';
-					license_html = license_html + $.i18n._('After this change has been made, you can click the "Start" button below to begin your installation. ');
-					license_html = license_html + '<b>' + $.i18n._('After the installation is complete, you will want to change') + ' "installer_enabled" ' + $.i18n._('to') + ' "FALSE".' + '</b>';
+					license_html = license_html + $.i18n._( 'After this change has been made, you can click the "Start" button below to begin your installation. ' );
+					license_html = license_html + '<b>' + $.i18n._( 'After the installation is complete, you will want to change' ) + ' "installer_enabled" ' + $.i18n._( 'to' ) + ' "FALSE".' + '</b>';
 					license_html = license_html + '<br>';
 					license_html = license_html + '<br>';
-					license_html = license_html + $.i18n._('For help, please visit') + ' <a href="http://www.timetrex.com">www.timetrex.com</a> ';
+					license_html = license_html + $.i18n._( 'For help, please visit' ) + ' <a href="http://www.timetrex.com">www.timetrex.com</a> ';
 					license.append( license_html );
 
 					var ribbon_button_box = this.getRibbonButtonBox();
 
-					var ribbon_btn = $( '<li><button class="ribbon-sub-menu-icon" id="re-check">' + $.i18n._('Re-Check') + '</button></li>' );
+					var ribbon_btn = $( '<li><button class="ribbon-sub-menu-icon" id="re-check">' + $.i18n._( 'Re-Check' ) + '</button></li>' );
 					ribbon_btn.unbind( 'click' ).bind( 'click', function() {
 						ProgressBar.showOverlay();
-						$this.api.getLicense( {onResult: function( res ){
-							$this.stepsDataDic[$this.current_step] = res.getResult();
-							$this._initCurrentStep();
-						}} );
+						$this.api.getLicense( {
+							onResult: function( res ) {
+								$this.stepsDataDic[$this.current_step] = res.getResult();
+								$this._initCurrentStep();
+							}
+						} );
 
 					} );
 
 					ribbon_button_box.children().eq( 0 ).append( ribbon_btn );
 
-					this.content_div.find('.content-handle-btn' ).html( ribbon_button_box );
+					this.content_div.find( '.content-handle-btn' ).html( ribbon_button_box );
 
 				}
-
-				// set size;
-				this.content_div.find('.license' ).css( {height: this.content_div.height() - 50} );
-				$( window ).resize( function() {
-					$this.content_div.find('.license' ).css( {height: $this.content_div.height() - 50} );
-				} );
 
 				license.show();
 				break;
 
 			case 'requirements':
 
-				var step_title_htm = $.i18n._( 'In order for your') + ' '
+				var step_title_htm = $.i18n._( 'In order for your' ) + ' '
 					+ $.i18n._( stepData.application_name ) + ' '
-					+ $.i18n._('installation to function properly, please ensure all of the system check items listed below are marked as') + ' '
+					+ $.i18n._( 'installation to function properly, please ensure all of the system check items listed below are marked as' ) + ' '
 					+ '<b>OK</b>' + '. '
-					+ $.i18n._('If any are red, please take the necessary steps to fix them.');
+					+ $.i18n._( 'If any are red, please take the necessary steps to fix them.' );
 
 				if ( stepData.check_all_requirements != 0 ) {
 
 					if ( stepData.tt_product_edition > 10 ) {
 						step_title_htm = step_title_htm
-							+ '<p style="background-color: #FFFF00">'
-							+ $.i18n._('For installation support, please contact ')
-							+ '<a href="http://www.timetrex.com/contactus.php" target="_blank">' + $.i18n._('TimeTrex support') + '</a>';
+						+ '<p style="background-color: #FFFF00">'
+						+ $.i18n._( 'For installation support, please contact ' )
+						+ '<a href="http://www.timetrex.com/contactus.php" target="_blank">' + $.i18n._( 'TimeTrex support' ) + '</a>';
 					} else if ( stepData.tt_product_edition == 10 ) {
 
 						step_title_htm = step_title_htm
-							+ '<p style="background-color: #FFFF00">'
-							+ $.i18n._('For installation support, please join our community ')
-							+ '<a href="http://forums.timetrex.com" target="_blank">' + $.i18n._('forums') + '</a>'
-							+ $.i18n._(' or contact a TimeTrex support expert for ')
-							+ '<a href="http://www.timetrex.com/setup_support.php" target="_blank">' + $.i18n._('Implementation Support Services') + '</a></p>';
+						+ '<p style="background-color: #FFFF00">'
+						+ $.i18n._( 'For installation support, please join our community ' )
+						+ '<a href="http://forums.timetrex.com" target="_blank">' + $.i18n._( 'forums' ) + '</a>'
+						+ $.i18n._( ' or contact a TimeTrex support expert for ' )
+						+ '<a href="http://www.timetrex.com/setup_support.php" target="_blank">' + $.i18n._( 'Implementation Support Services' ) + '</a></p>';
 					}
 
 				}
@@ -402,8 +396,8 @@ InstallWizardController = BaseWizardController.extend( {
 				requirements_column2.empty();
 				if ( stepData.check_all_requirements == 0 ) {
 
-					requirements_column2.html( $.i18n._('All System Requirements have been met successfully') + '!' );
-					requirements_column2.addClass('all-ok');
+					requirements_column2.html( $.i18n._( 'All System Requirements have been met successfully' ) + '!' );
+					requirements_column2.addClass( 'all-ok' );
 				} else {
 					// php requirements
 
@@ -454,6 +448,10 @@ InstallWizardController = BaseWizardController.extend( {
 					this.addEditFieldToColumn( $.i18n._( 'MAIL Enabled' ), form_item_input, requirements_column2, '', null, true, true );
 
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+					form_item_input.TText( {field: 'openssl'} );
+					this.addEditFieldToColumn( $.i18n._( 'OpenSSL Enabled' ), form_item_input, requirements_column2, '', null, true, true );
+
+					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( {field: 'pear'} );
 					this.addEditFieldToColumn( $.i18n._( 'PEAR Enabled' ), form_item_input, requirements_column2, '', null, true, true );
 
@@ -492,8 +490,7 @@ InstallWizardController = BaseWizardController.extend( {
 
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( {field: 'config_file'} );
-					this.addEditFieldToColumn( $.i18n._( 'Writable' ) + ' ' + $.i18n._(stepData.application_name) + ' ' + $.i18n._( 'Configuration File' ) + "<br>" + "(timetrex.ini.php)", form_item_input, requirements_column2, '', null, true, true );
-
+					this.addEditFieldToColumn( $.i18n._( 'Writable' ) + ' ' + $.i18n._( stepData.application_name ) + ' ' + $.i18n._( 'Configuration File' ) + "<br>" + "(timetrex.ini.php)", form_item_input, requirements_column2, '', null, true, true );
 
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( {field: 'cache_dir'} );
@@ -511,7 +508,6 @@ InstallWizardController = BaseWizardController.extend( {
 					form_item_input.TText( {field: 'empty_cache_dir'} );
 					this.addEditFieldToColumn( $.i18n._( 'Empty Cache Directory' ), form_item_input, requirements_column2, '', null, true, true );
 
-
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( {field: 'file_permission'} );
 					this.addEditFieldToColumn( $.i18n._( 'File Permissions' ), form_item_input, requirements_column2, '', null, true, true );
@@ -527,10 +523,10 @@ InstallWizardController = BaseWizardController.extend( {
 				requirements_column4.empty();
 
 				if ( _.size( stepData.extended_error_messages ) > 0 ) {
-					var error_html = '<span><b>' + $.i18n._('Detailed Error Messages') + '</b></span>';
+					var error_html = '<span><b>' + $.i18n._( 'Detailed Error Messages' ) + '</b></span>';
 					error_html = error_html + '<br>';
 					error_html = error_html + '<br>';
-					for( var i in stepData.extended_error_messages ) {
+					for ( var i in stepData.extended_error_messages ) {
 						var errors = stepData['extended_error_messages'][i];
 						for ( var key in errors ) {
 							error_html = error_html + errors[key];
@@ -539,30 +535,30 @@ InstallWizardController = BaseWizardController.extend( {
 					}
 
 					requirements_column4.html( error_html );
-					requirements_column4.addClass('dataError');
+					requirements_column4.addClass( 'dataError' );
 				}
 
 				// fifth column
 				var requirements_column5 = requirements.find( '.fifth-column' );
 				requirements_column5.empty();
 
-				var columns_html = $.i18n._('Your') + ' ' + $.i18n._(stepData['application_name']) + ' ' + $.i18n._('configuration file') + ' ';
+				var columns_html = $.i18n._( 'Your' ) + ' ' + $.i18n._( stepData['application_name'] ) + ' ' + $.i18n._( 'configuration file' ) + ' ';
 				columns_html = columns_html + '(timetrex.ini.php)';
-				columns_html = columns_html + ' ' + $.i18n._('is located at') + ':';
+				columns_html = columns_html + ' ' + $.i18n._( 'is located at' ) + ':';
 				columns_html = columns_html + '<br>';
 				columns_html = columns_html + '<p><b>' + stepData['config_file_loc'] + '</b></p>';
 				columns_html = columns_html + '<br>';
-				columns_html = columns_html + $.i18n._('Your PHP configuration file') + ' ' + '(php.ini)' + ' ' + $.i18n._('is located at') + ':';
+				columns_html = columns_html + $.i18n._( 'Your PHP configuration file' ) + ' ' + '(php.ini)' + ' ' + $.i18n._( 'is located at' ) + ':';
 				columns_html = columns_html + '<br>';
 
 				if ( stepData['php_include_path'] ) {
-					columns_html = columns_html + '<p><b>' + stepData['php_config_file'] + '</b>' + ', ' + $.i18n._('the include path is') + ': ' + '"' + '<b>' + stepData['php_include_path'] + '</b>' + '"' + '</p>';
+					columns_html = columns_html + '<p><b>' + stepData['php_config_file'] + '</b>' + ', ' + $.i18n._( 'the include path is' ) + ': ' + '"' + '<b>' + stepData['php_include_path'] + '</b>' + '"' + '</p>';
 				} else {
-					columns_html = columns_html + '<p><b>' + stepData['php_config_file'] + '</b>' + ', ' + $.i18n._('the include path is') + ': ' + '""' + '</p>';
+					columns_html = columns_html + '<p><b>' + stepData['php_config_file'] + '</b>' + ', ' + $.i18n._( 'the include path is' ) + ': ' + '""' + '</p>';
 				}
 
-				columns_html = columns_html + $.i18n._('Detailed') + '&nbsp;';
-				columns_html = columns_html + '<a href="phpinfo.php" target="_blank">' + $.i18n._('PHP Information') + '</a>';
+				columns_html = columns_html + $.i18n._( 'Detailed' ) + '&nbsp;';
+				columns_html = columns_html + '<a href="phpinfo.php" target="_blank">' + $.i18n._( 'PHP Information' ) + '</a>';
 
 				if ( stepData.check_all_requirements == 0 ) {
 
@@ -573,43 +569,36 @@ InstallWizardController = BaseWizardController.extend( {
 				var ribbon_button_box = this.getRibbonButtonBox();
 
 //				ribbon_button_box.css( 'width', '96%' );
-				var ribbon_btn = $( '<li><button class="ribbon-sub-menu-icon" id="re-check">' + $.i18n._('Re-Check') + '</button></li>' );
+				var ribbon_btn = $( '<li><button class="ribbon-sub-menu-icon" id="re-check">' + $.i18n._( 'Re-Check' ) + '</button></li>' );
 				ribbon_btn.unbind( 'click' ).bind( 'click', function() {
 					ProgressBar.showOverlay();
-					$this.api.getRequirements( $this.external_installer, {onResult: function( res ) {
-						if ( res.isValid() ) {
-							$this.stepsDataDic[$this.current_step] = res.getResult();
-							$this._initCurrentStep();
+					$this.api.getRequirements( $this.external_installer, {
+						onResult: function( res ) {
+							if ( res.isValid() ) {
+								$this.stepsDataDic[$this.current_step] = res.getResult();
+								$this._initCurrentStep();
+							}
 						}
-					}} );
+					} );
 
 				} );
 
 				ribbon_button_box.children().eq( 0 ).append( ribbon_btn );
 
-				this.content_div.find('.content-handle-btn' ).html( ribbon_button_box );
-
-				requirements.find( '.first-column' ).css('border', '1px solid #C7C7C7');
-
-				// set size;
-				this.content_div.find('.s-require' ).css( {height: this.content_div.height() - step_title.height() - 163} );
-				$( window ).resize( function() {
-					$this.content_div.find('.s-require' ).css( {height: $this.content_div.height() - step_title.height() - 163} );
-				} );
+				this.content_div.find( '.content-handle-btn' ).html( ribbon_button_box );
 
 				requirements.show();
 				break;
 			case 'user':
 				step_title.html( $.i18n._( 'Please enter the administrator user name and password' )
-						+'<br>'
-						+'<br>'
-						+'<b>' + '*' + $.i18n._('IMPORTANT') + '*' + ':' + '</b>' + ' '
-						+ $.i18n._('Please write this information down, as you will need it later to login to') + ' '
-						+ $.i18n._( stepData.application_name )
-
+					+ '<br>'
+					+ '<br>'
+					+ '<b>' + '*' + $.i18n._( 'IMPORTANT' ) + '*' + ':' + '</b>' + ' '
+					+ $.i18n._( 'Please write this information down, as you will need it later to login to' ) + ' '
+					+ $.i18n._( stepData.application_name )
 				);
 				this.title_1.text( $.i18n._( 'Administrator Login' ) );
-				var user_column1 = user.find('.first-column');
+				var user_column1 = user.find( '.first-column' );
 				user_column1.empty();
 
 				// User Name
@@ -629,7 +618,6 @@ InstallWizardController = BaseWizardController.extend( {
 				form_item_input.TTextInput( {field: 'password2', width: 200} );
 				this.addEditFieldToColumn( $.i18n._( 'Password(confirm)' ), form_item_input, user_column1 );
 
-
 				// First Name
 				form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 				form_item_input.TTextInput( {field: 'first_name', width: 200} );
@@ -644,12 +632,6 @@ InstallWizardController = BaseWizardController.extend( {
 				form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 				form_item_input.TTextInput( {field: 'work_email', width: 200} );
 				this.addEditFieldToColumn( $.i18n._( 'Email' ), form_item_input, user_column1 );
-				user.find( '.first-column' ).css('border', '1px solid #C7C7C7');
-
-				this.content_div.find('.user' ).css( {height: this.content_div.height() - step_title.height() - 15} );
-				$( window ).resize( function() {
-					$this.content_div.find('.user' ).css( {height: $this.content_div.height() - step_title.height() - 15} );
-				} );
 
 				user.show();
 				break;
@@ -657,7 +639,7 @@ InstallWizardController = BaseWizardController.extend( {
 			case 'company':
 				step_title.text( $.i18n._( 'Please enter your company information below.' ) );
 				this.title_1.text( $.i18n._( 'Company Information' ) );
-				var company_column1 = company.find('.first-column');
+				var company_column1 = company.find( '.first-column' );
 				company_column1.empty();
 
 				// Company Full Name
@@ -670,7 +652,7 @@ InstallWizardController = BaseWizardController.extend( {
 				form_item_input.TTextInput( {field: 'short_name', width: 200} );
 
 				var widgetContainer = $( "<div class='widget-h-box'></div>" );
-				var label = $( "<span class='widget-right-label'> ( " + $.i18n._( 'ie' ) + ': ' + $.i18n._('America Online') + ' = ' + $.i18n._('AOL') + ', ' +  $.i18n._('no spaces') + " )</span>" );
+				var label = $( "<span class='widget-right-label'> ( " + $.i18n._( 'ie' ) + ': ' + $.i18n._( 'America Online' ) + ' = ' + $.i18n._( 'AOL' ) + ', ' + $.i18n._( 'no spaces' ) + " )</span>" );
 
 				widgetContainer.append( form_item_input );
 				widgetContainer.append( label );
@@ -718,12 +700,12 @@ InstallWizardController = BaseWizardController.extend( {
 				form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 				form_item_input.TTextInput( {field: 'work_phone', width: 200} );
 				this.addEditFieldToColumn( $.i18n._( 'Phone' ), form_item_input, company_column1 );
-				company.find( '.first-column' ).css('border', '1px solid #C7C7C7');
-
-				this.content_div.find('.company' ).css( {height: this.content_div.height() - step_title.height() - 15} );
-				$( window ).resize( function() {
-					$this.content_div.find('.company' ).css( {height: $this.content_div.height() - step_title.height() - 15} );
-				} );
+				//company.find( '.first-column' ).css( 'border', '1px solid #C7C7C7' );
+				//
+				//this.content_div.find( '.company' ).css( {height: this.content_div.height() - step_title.height() - 15} );
+				//$( window ).resize( function() {
+				//	$this.content_div.find( '.company' ).css( {height: $this.content_div.height() - step_title.height() - 15} );
+				//} );
 
 				company.show();
 				break;
@@ -731,7 +713,7 @@ InstallWizardController = BaseWizardController.extend( {
 			case 'systemSettings':
 				step_title.text( $.i18n._( 'Please enter your site configuration information below. If you are unsure of the fields, we suggest that you use the default values.' ) );
 				this.title_1.text( $.i18n._( 'System Settings' ) );
-				var systemSettings_column1 = systemSettings.find('.first-column');
+				var systemSettings_column1 = systemSettings.find( '.first-column' );
 				systemSettings_column1.empty();
 				// URL
 				var widgetContainer = $( "<div class='widget-h-box'></div>" );
@@ -745,7 +727,6 @@ InstallWizardController = BaseWizardController.extend( {
 				form_item_url_input.TTextInput( {field: 'base_url', width: 400} );
 
 				widgetContainer.append( form_item_url_input );
-
 
 				var ie_label = $( "<span class='widget-right-label'>( " + $.i18n._( 'No trailing slash' ) + " )</span>" );
 
@@ -769,21 +750,10 @@ InstallWizardController = BaseWizardController.extend( {
 
 				this.addEditFieldToColumn( $.i18n._( 'Storage Directory' ), form_item_input, systemSettings_column1, '', widgetContainer, null, true );
 
-
 				// Cache Directory
 				form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 				form_item_input.TTextInput( {field: 'cache_dir', width: 400} );
 				this.addEditFieldToColumn( $.i18n._( 'Cache Directory' ), form_item_input, systemSettings_column1 );
-				systemSettings.find( '.first-column' ).css('border', '1px solid #C7C7C7');
-
-				systemSettings.find('.edit-view-form-item-input-div' ).css('width', '700');
-				systemSettings.find('.edit-view-form-item-label-div' ).css( {width: systemSettings_column1.width() - 900, 'min-width': 120} );
-
-				this.content_div.find('.systemSettings' ).css( {height: this.content_div.height() - step_title.height() - 15} );
-				$( window ).resize( function() {
-					systemSettings.find('.edit-view-form-item-label-div' ).css( {width: systemSettings_column1.width() - 900, 'min-width': 120} );
-					$this.content_div.find('.systemSettings' ).css( {height: $this.content_div.height() - step_title.height() - 15} );
-				} );
 
 				systemSettings.show();
 				break;
@@ -795,23 +765,23 @@ InstallWizardController = BaseWizardController.extend( {
 
 				if ( stepData.database_engine == false ) {
 					step_title_htm = step_title_htm
-						+ '<p style="background-color: #ff0000">'
-						+ $.i18n._( 'Your MySQL database does not support the' ) + ' '
-						+ '<b>' + $.i18n._('InnoDB') + '</b>' + ' '
-						+ $.i18n._( 'storage engine which is required for' ) + ' '
-						+ $.i18n._( stepData.application_name ) + ' '
-						+ $.i18n._( 'to use transactions and ensure data integrity. Please add' ) + ' '
-						+ '<b>' + $.i18n._('InnoDB') + '</b>' + ' '
-						+ $.i18n._( 'support to MySQL before continuing.' )
-						+ '</p>';
+					+ '<p style="background-color: #ff0000">'
+					+ $.i18n._( 'Your MySQL database does not support the' ) + ' '
+					+ '<b>' + $.i18n._( 'InnoDB' ) + '</b>' + ' '
+					+ $.i18n._( 'storage engine which is required for' ) + ' '
+					+ $.i18n._( stepData.application_name ) + ' '
+					+ $.i18n._( 'to use transactions and ensure data integrity. Please add' ) + ' '
+					+ '<b>' + $.i18n._( 'InnoDB' ) + '</b>' + ' '
+					+ $.i18n._( 'support to MySQL before continuing.' )
+					+ '</p>';
 				}
 
 				step_title_htm = step_title_htm + $.i18n._( 'Please enter your database configuration information below. If you are unsure, use the default values.' )
 
-				step_title.html(step_title_htm);
+				step_title.html( step_title_htm );
 				this.title_1.text( $.i18n._( 'Database Configuration' ) );
 
-				var databaseConfig_column1 = databaseConfig.find('.first-column');
+				var databaseConfig_column1 = databaseConfig.find( '.first-column' );
 				databaseConfig_column1.empty();
 
 				// database type
@@ -840,7 +810,7 @@ InstallWizardController = BaseWizardController.extend( {
 				form_item_input.TTextInput( {field: 'password', width: 200} );
 				this.addEditFieldToColumn( $.i18n._( 'Password for Payroll and Time Management' ), form_item_input, databaseConfig_column1 );
 
-				var databaseConfig_column2 = databaseConfig.find('.second-column');
+				var databaseConfig_column2 = databaseConfig.find( '.second-column' );
 				databaseConfig_column2.empty();
 
 				// Privileged Database User Name
@@ -862,7 +832,7 @@ InstallWizardController = BaseWizardController.extend( {
 				this.addEditFieldToColumn( $.i18n._( 'Privileged Database User Password' ), form_item_input, databaseConfig_column2 );
 
 				var ribbon_button_box = this.getRibbonButtonBox();
-				var ribbon_btn = $( '<li><button class="ribbon-sub-menu-icon" id="testConnection">' + $.i18n._('Test Connnection') + '</button></li>' );
+				var ribbon_btn = $( '<li><button class="ribbon-sub-menu-icon" id="testConnection">' + $.i18n._( 'Test Connnection' ) + '</button></li>' );
 				ribbon_btn.unbind( 'click' ).bind( 'click', function() {
 					$data = {};
 					for ( var key in $this.stepsWidgetDic[$this.current_step] ) {
@@ -870,76 +840,78 @@ InstallWizardController = BaseWizardController.extend( {
 						$data[key] = widget.getValue();
 					}
 					ProgressBar.showOverlay();
-					$this.api.testConnection( $data, {onResult: function( res ) {
-						if ( res.isValid() ) {
-							var result = res.getResult();
-							var step_title_htm = '';
-							if ( result.database_engine == false ) {
-								step_title_htm = step_title_htm
+					$this.api.testConnection( $data, {
+						onResult: function( res ) {
+							if ( res.isValid() ) {
+								var result = res.getResult();
+								var step_title_htm = '';
+								if ( result.database_engine == false ) {
+									step_title_htm = step_title_htm
 									+ '<p style="background-color: #ff0000">'
 									+ $.i18n._( 'Your MySQL database does not support the' ) + ' '
-									+ '<b>' + $.i18n._('InnoDB') + '</b>' + ' '
+									+ '<b>' + $.i18n._( 'InnoDB' ) + '</b>' + ' '
 									+ $.i18n._( 'storage engine which is required for' ) + ' '
 									+ $.i18n._( stepData.application_name ) + ' '
 									+ $.i18n._( 'to use transactions and ensure data integrity. Please add' ) + ' '
-									+ '<b>' + $.i18n._('InnoDB') + '</b>' + ' '
+									+ '<b>' + $.i18n._( 'InnoDB' ) + '</b>' + ' '
 									+ $.i18n._( 'support to MySQL before continuing.' )
 									+ '</p>';
-							}
-							if ( result.test_connection !== null ){
-								if ( result.test_connection === true ) {
-									step_title_htm = step_title_htm
+								}
+								if ( result.test_connection !== null ) {
+									if ( result.test_connection === true ) {
+										step_title_htm = step_title_htm
 										+ '<p>'
 										+ $.i18n._( 'Connection test to your database as a non-privileged user has' ) + ' '
-										+ '<b>' + $.i18n._('SUCCEEDED') + '</b>' + '!' + ' '
+										+ '<b>' + $.i18n._( 'SUCCEEDED' ) + '</b>' + '!' + ' '
 										+ $.i18n._( 'You may continue.' )
 										+ '</p>';
-								} else if ( result.test_connection === false ) {
-									step_title_htm = step_title_htm
+									} else if ( result.test_connection === false ) {
+										step_title_htm = step_title_htm
 										+ '<p style="background-color: #ff0000">'
 										+ $.i18n._( 'Connection test to your database as a non-privileged user has' ) + ' '
-										+ '<b>' + $.i18n._('FAILED') + '</b>' + '!' + ' '
+										+ '<b>' + $.i18n._( 'FAILED' ) + '</b>' + '!' + ' '
 										+ $.i18n._( 'Please correct them and try again.' )
 										+ '</p>';
+									}
 								}
-							}
 
-							if ( result.test_priv_connection !== null ) {
-								if ( result.test_priv_connection === false ) {
-									step_title_htm = step_title_htm
+								if ( result.test_priv_connection !== null ) {
+									if ( result.test_priv_connection === false ) {
+										step_title_htm = step_title_htm
 										+ '<p style="background-color: #ff0000">'
 										+ $.i18n._( 'Connection test to your database as a privileged user has' ) + ' '
-										+ '<b>' + $.i18n._('FAILED') + '</b>' + '!' + ' '
+										+ '<b>' + $.i18n._( 'FAILED' ) + '</b>' + '!' + ' '
 										+ $.i18n._( 'Please correct the user name/password and try again.' )
 										+ '</p>';
+									}
 								}
+
+								TAlertManager.showAlert( step_title_htm );
+
 							}
-
-							TAlertManager.showAlert( step_title_htm );
-
 						}
-					}} );
+					} );
 
 				} );
 
 				ribbon_button_box.children().eq( 0 ).append( ribbon_btn );
 
-				this.content_div.find('.content-handle-btn' ).html( ribbon_button_box );
-				databaseConfig.find( '.first-column' ).css('border', '1px solid #C7C7C7');
+				this.content_div.find( '.content-handle-btn' ).html( ribbon_button_box );
+				//databaseConfig.find( '.first-column' ).css( 'border', '1px solid #C7C7C7' );
 
-				this.content_div.find('.databaseConfig' ).css( {height: this.content_div.height() - step_title.height() - 65} );
-				$( window ).resize( function() {
-					$this.content_div.find('.databaseConfig' ).css( {height: $this.content_div.height() - step_title.height() - 65} );
-				} );
+				//this.content_div.find( '.databaseConfig' ).css( {height: this.content_div.height() - step_title.height() - 65} );
+				//$( window ).resize( function() {
+				//	$this.content_div.find( '.databaseConfig' ).css( {height: $this.content_div.height() - step_title.height() - 65} );
+				//} );
 
 				databaseConfig.show();
 				break;
 			case 'databaseSchema':
 				this.title_1.text( $.i18n._( 'Database Configuration' ) );
 				if ( stepData.upgrade ) {
-					databaseSchema.find( '.s-label' ).text( $.i18n._('Upgrading database, please wait...') );
+					databaseSchema.find( '.s-label' ).text( $.i18n._( 'Upgrading database, please wait...' ) );
 				} else {
-					databaseSchema.find( '.s-label' ).text( $.i18n._('Initializing database, please wait...') );
+					databaseSchema.find( '.s-label' ).text( $.i18n._( 'Initializing database, please wait...' ) );
 				}
 
 				step_title.empty();
@@ -948,19 +920,18 @@ InstallWizardController = BaseWizardController.extend( {
 			case 'postUpgrade':
 				step_title.empty();
 				this.title_1.text( $.i18n._( 'Upgrade Complete' ) );
-				postUpgrade.html( '<b>' + $.i18n._('Congratulations! ') + '</b>'
-						+ $.i18n._('You have successfully upgraded') + ' '
-						+ $.i18n._( stepData.application_name ) + ' '
-						+ $.i18n._( 'to' ) + ' '
-						+ '<b>' + stepData.application_version + '</b>'
-						+ '<br>'
-					    + '<br>'
-						+ '<b>' + $.i18n._('Note') + ':' + '</b>' + ' '
-						+ $.i18n._( 'In order to access new features you may need to re-apply the' ) + ' '
-						+ '<b>' + $.i18n._('Administrator') + '</b>' + ' '
-						+ $.i18n._('permission preset to each administrator employee in') + ' '
-						+ $.i18n._( stepData.application_name ) + '.'
-
+				postUpgrade.html( '<b>' + $.i18n._( 'Congratulations! ' ) + '</b>'
+					+ $.i18n._( 'You have successfully upgraded' ) + ' '
+					+ $.i18n._( stepData.application_name ) + ' '
+					+ $.i18n._( 'to' ) + ' '
+					+ '<b>' + stepData.application_version + '</b>'
+					+ '<br>'
+					+ '<br>'
+					+ '<b>' + $.i18n._( 'Note' ) + ':' + '</b>' + ' '
+					+ $.i18n._( 'In order to access new features you may need to re-apply the' ) + ' '
+					+ '<b>' + $.i18n._( 'Administrator' ) + '</b>' + ' '
+					+ $.i18n._( 'permission preset to each administrator employee in' ) + ' '
+					+ $.i18n._( stepData.application_name ) + '.'
 				);
 				postUpgrade.show();
 				break;
@@ -968,22 +939,22 @@ InstallWizardController = BaseWizardController.extend( {
 				step_title.empty();
 				this.title_1.text( $.i18n._( 'Done!' ) );
 				if ( stepData.upgrade == 1 ) {
-					installDone.html( '<b>' + $.i18n._('Congratulations! ') + '</b>' + ' '
-						+ $.i18n._('You have successfully upgraded') + ' ' + $.i18n._( stepData.application_name )
+					installDone.html( '<b>' + $.i18n._( 'Congratulations! ' ) + '</b>' + ' '
+						+ $.i18n._( 'You have successfully upgraded' ) + ' ' + $.i18n._( stepData.application_name )
 						+ '<br>'
 						+ '<br>'
-						+ $.i18n._('You may now') + ' '
-						+ '<a href="/interface/html5/#!m=Login">' + $.i18n._('login') + '</a>' + ' '
-						+ $.i18n._('with the user name/password that you created earlier.')
+						+ $.i18n._( 'You may now' ) + ' '
+						+ '<a href="/interface/html5/#!m=Login">' + $.i18n._( 'login' ) + '</a>' + ' '
+						+ $.i18n._( 'with the user name/password that you created earlier.' )
 					);
 				} else {
-					installDone.html( '<b>' + $.i18n._('Congratulations!') + ' ' + '</b>' + ' '
-						+ $.i18n._('You have successfully installed') + ' ' + $.i18n._( stepData.application_name )
+					installDone.html( '<b>' + $.i18n._( 'Congratulations!' ) + ' ' + '</b>' + ' '
+						+ $.i18n._( 'You have successfully installed' ) + ' ' + $.i18n._( stepData.application_name )
 						+ '<br>'
 						+ '<br>'
-						+ $.i18n._('You may now') + ' '
-						+ '<a href="/interface/html5/#!m=Login">' + $.i18n._('login') + '</a>' + ' '
-						+ $.i18n._('with the user name/password that you created earlier.')
+						+ $.i18n._( 'You may now' ) + ' '
+						+ '<a href="/interface/html5/#!m=Login">' + $.i18n._( 'login' ) + '</a>' + ' '
+						+ $.i18n._( 'with the user name/password that you created earlier.' )
 					);
 				}
 				installDone.show();
@@ -992,12 +963,12 @@ InstallWizardController = BaseWizardController.extend( {
 				step_title.empty();
 				this.title_1.text( $.i18n._( 'Maintenance Jobs' ) );
 				var maintenanceJob_html = $.i18n._( stepData.application_name ) + ' '
-					+ '<b>' + $.i18n._('requires') + '</b>' + ' '
-					+ $.i18n._('that maintenance jobs be run regularly throughout the day.')
+					+ '<b>' + $.i18n._( 'requires' ) + '</b>' + ' '
+					+ $.i18n._( 'that maintenance jobs be run regularly throughout the day.' )
 					+ '<br>'
 					+ '<p style="color: #ff0000">'
 					+ '<b>'
-					+ $.i18n._('This is extremely important and without these maintenance jobs running') + ' '
+					+ $.i18n._( 'This is extremely important and without these maintenance jobs running' ) + ' '
 					+ $.i18n._( stepData.application_name ) + ' '
 					+ $.i18n._( 'will fail to operate correctly.' )
 					+ '</b>'
@@ -1008,29 +979,29 @@ InstallWizardController = BaseWizardController.extend( {
 					+ '<br>';
 
 				if ( stepData.php_os == 'WINNT' ) {
-					maintenanceJob_html  = maintenanceJob_html + $.i18n._('In Windows simply run this command as Administrator.') + '<br><br>' + stepData.schedule_maintenance_job_command;
+					maintenanceJob_html = maintenanceJob_html + $.i18n._( 'In Windows simply run this command as Administrator.' ) + '<br><br>' + stepData.schedule_maintenance_job_command;
 				} else {
-					maintenanceJob_html  = maintenanceJob_html + $.i18n._( 'In most Linux distributions, you can run the following command' );
+					maintenanceJob_html = maintenanceJob_html + $.i18n._( 'In most Linux distributions, you can run the following command' );
 					if ( stepData.is_sudo_installed == false ) {
-						maintenanceJob_html  = maintenanceJob_html +  + ' ' + $.i18n._('as root');
+						maintenanceJob_html = maintenanceJob_html + +' ' + $.i18n._( 'as root' );
 					}
-					maintenanceJob_html  = maintenanceJob_html + ':' + '<br>'  + '<b>';
+					maintenanceJob_html = maintenanceJob_html + ':' + '<br>' + '<b>';
 
 					if ( stepData.is_sudo_installed ) {
-						maintenanceJob_html  = maintenanceJob_html + 'sudo';
+						maintenanceJob_html = maintenanceJob_html + 'sudo';
 					}
 
-					maintenanceJob_html  = maintenanceJob_html + ' crontab -u ' + stepData.web_server_user + ' -e';
+					maintenanceJob_html = maintenanceJob_html + ' crontab -u ' + stepData.web_server_user + ' -e';
 
-					maintenanceJob_html  = maintenanceJob_html + '</b>'
-						+ '<br>'
-						+ '<br>'
-						+ $.i18n._('Then add the following line to the bottom of the file') + ':'
-						+ '<br>'
-						+ '<b>' + '* * * * * php ' + stepData.cron_file + ' > /dev/null 2>&1' + '</b>'
-						+ '<br>'
-						+ '<br>'
-						+ '</div>';
+					maintenanceJob_html = maintenanceJob_html + '</b>'
+					+ '<br>'
+					+ '<br>'
+					+ $.i18n._( 'Then add the following line to the bottom of the file' ) + ':'
+					+ '<br>'
+					+ '<b>' + '* * * * * php ' + stepData.cron_file + ' > /dev/null 2>&1' + '</b>'
+					+ '<br>'
+					+ '<br>'
+					+ '</div>';
 
 				}
 
@@ -1047,24 +1018,26 @@ InstallWizardController = BaseWizardController.extend( {
 
 		var key = target.getField();
 		var c_value = target.getValue();
-		switch( key ) {
+		switch ( key ) {
 			case 'country':
-				this.api.getProvinceOptions( c_value, {onResult: function(res ) {
-					if ( res.isValid() ) {
-						widgets.province.setSourceData( [] );
-						widgets.province.setSourceData( Global.addFirstItemToArray( res.getResult() ) );
+				this.api.getProvinceOptions( c_value, {
+					onResult: function( res ) {
+						if ( res.isValid() ) {
+							widgets.province.setSourceData( [] );
+							widgets.province.setSourceData( Global.addFirstItemToArray( res.getResult() ) );
+						}
 					}
-				}} );
+				} );
 				break;
 			case 'type':
 				if ( c_value == 'mysqli' || c_value == 'mysqlt' ) {
-					var message = $.i18n._( 'WARNING: Using MySQL is NOT recommended if you have more or plan on growing to more than 25 employees, if you have employees in multiple timezones, or if you plan on using this system for mission critical purposes.');
+					var message = $.i18n._( 'WARNING: Using MySQL is NOT recommended if you have more or plan on growing to more than 25 employees, if you have employees in multiple timezones, or if you plan on using this system for mission critical purposes.' );
 					message = message + '<br>';
 					message = message + '<br>';
-					message = message + $.i18n._('MySQL lacks proper timezone support, is orders of magnitude slower in processing some of the complex queries that are required and it lacks support for DDL transactions, so if an error occurs during an upgrade your data will become corrupt and you must restore from backup.');
+					message = message + $.i18n._( 'MySQL lacks proper timezone support, is orders of magnitude slower in processing some of the complex queries that are required and it lacks support for DDL transactions, so if an error occurs during an upgrade your data will become corrupt and you must restore from backup.' );
 					message = message + '<br>';
 					message = message + '<br>';
-					message = message + $.i18n._('We recommend using PostgreSQL instead as it does not exhibit any of these shortcomings. You have been warned!');
+					message = message + $.i18n._( 'We recommend using PostgreSQL instead as it does not exhibit any of these shortcomings. You have been warned!' );
 					TAlertManager.showAlert( message );
 				}
 				break;
@@ -1075,7 +1048,7 @@ InstallWizardController = BaseWizardController.extend( {
 	onBackClick: function() {
 		var $this = this;
 		this.saveCurrentStep();
-		switch( this.current_step ) {
+		switch ( this.current_step ) {
 			case 'license':
 				break;
 			case 'requirements':
@@ -1110,7 +1083,7 @@ InstallWizardController = BaseWizardController.extend( {
 	onNextClick: function() {
 		var $this = this;
 		this.saveCurrentStep();
-		switch( this.current_step ) {
+		switch ( this.current_step ) {
 			case 'license':
 				// the next interface is system requirements, so set the current step to the requirements
 				this.current_step = 'requirements';
@@ -1133,20 +1106,22 @@ InstallWizardController = BaseWizardController.extend( {
 					$data[key] = widget.getValue();
 				}
 
-				TAlertManager.showConfirmAlert( $.i18n._('Installing/Upgrading the TimeTrex database may take up to 10 minutes. Please do not stop the process in any way, including pressing STOP or BACK in your web browser, doing so may leave your database in an unusable state.'), null, function( result ) {
+				TAlertManager.showConfirmAlert( $.i18n._( 'Installing/Upgrading the TimeTrex database may take up to 10 minutes. Please do not stop the process in any way, including pressing STOP or BACK in your web browser, doing so may leave your database in an unusable state.' ), null, function( result ) {
 					if ( result ) {
-						$this.api.createDatabase( $data, {onResult: function( res ) {
-							if ( res.isValid() ) {
-								if ( res.getResult().next_page ) {
-									$this.current_step = res.getResult().next_page;
-									$this.initCurrentStep();
-								} else {
-									$this.stepsDataDic[$this.current_step] = res.getResult();
-									$this._initCurrentStep();
-								}
+						$this.api.createDatabase( $data, {
+							onResult: function( res ) {
+								if ( res.isValid() ) {
+									if ( res.getResult().next_page ) {
+										$this.current_step = res.getResult().next_page;
+										$this.initCurrentStep();
+									} else {
+										$this.stepsDataDic[$this.current_step] = res.getResult();
+										$this._initCurrentStep();
+									}
 
+								}
 							}
-						}} );
+						} );
 					}
 				} );
 				break;
@@ -1166,13 +1141,15 @@ InstallWizardController = BaseWizardController.extend( {
 					$data[key] = widget.getValue();
 				}
 
-				this.api.setSystemSettings( $data, this.external_installer, {onResult: function( res ) {
-					if ( res.isValid() ) {
+				this.api.setSystemSettings( $data, this.external_installer, {
+					onResult: function( res ) {
+						if ( res.isValid() ) {
 
-						$this.current_step = 'company';
-						$this.initCurrentStep();
+							$this.current_step = 'company';
+							$this.initCurrentStep();
+						}
 					}
-				}} );
+				} );
 				break;
 			case 'company':
 				$data = {};
@@ -1182,18 +1159,20 @@ InstallWizardController = BaseWizardController.extend( {
 					$data[key] = widget.getValue();
 				}
 
-				this.api.setCompany( $data, {onResult: function( res ) {
-					if ( res.isValid() ) {
-						var company_id = res.getResult();
-						$this.current_step = 'user';
-						$this.company_id = company_id;
-						$this.stepsDataDic[$this.current_step] = {company_id: company_id};
-						$this.initCurrentStep();
+				this.api.setCompany( $data, {
+					onResult: function( res ) {
+						if ( res.isValid() ) {
+							var company_id = res.getResult();
+							$this.current_step = 'user';
+							$this.company_id = company_id;
+							$this.stepsDataDic[$this.current_step] = {company_id: company_id};
+							$this.initCurrentStep();
 
-					} else {
-						$this.setErrorTips( res );
+						} else {
+							$this.setErrorTips( res );
+						}
 					}
-				}} );
+				} );
 
 				break;
 			case 'user':
@@ -1205,21 +1184,22 @@ InstallWizardController = BaseWizardController.extend( {
 				}
 
 				$data = $.extend( {}, $data, this.stepsDataDic[$this.current_step] );
-				this.api.setUser( $data, this.external_installer, {onResult: function( res ) {
-					if ( res.isValid() ) {
-						var next_page = res.getResult().next_page;
-						$this.user_id = res.getResult().user_id;
-						$this.current_step = next_page;
-						$this.initCurrentStep();
-					} else {
-						$this.setErrorTips( res );
+				this.api.setUser( $data, this.external_installer, {
+					onResult: function( res ) {
+						if ( res.isValid() ) {
+							var next_page = res.getResult().next_page;
+							$this.user_id = res.getResult().user_id;
+							$this.current_step = next_page;
+							$this.initCurrentStep();
+						} else {
+							$this.setErrorTips( res );
+						}
 					}
-				}} );
+				} );
 				break;
 		}
 
 	},
-
 
 	buildCurrentStepData: function() {
 		var args = {};
@@ -1245,17 +1225,19 @@ InstallWizardController = BaseWizardController.extend( {
 					}
 				}
 				var country = widgets.country.getValue();
-				this.api.getProvinceOptions( country, {onResult: function(res ) {
-					if ( res.isValid() ) {
-						widgets.province.setSourceData( Global.addFirstItemToArray( res.getResult() ) );
-						widgets.province.setValue( stepData['province'] );
+				this.api.getProvinceOptions( country, {
+					onResult: function( res ) {
+						if ( res.isValid() ) {
+							widgets.province.setSourceData( Global.addFirstItemToArray( res.getResult() ) );
+							widgets.province.setValue( stepData['province'] );
+						}
+						ProgressBar.closeOverlay();
 					}
-					ProgressBar.closeOverlay();
-				}} );
+				} );
 				break;
 			case 'requirements':
-				for( var key in widgets ) {
-					var edit_view_form_item_dic = $(this.edit_view_form_item_dic[key] );
+				for ( var key in widgets ) {
+					var edit_view_form_item_dic = $( this.edit_view_form_item_dic[key] );
 					if ( stepData[key] == 0 ) {
 					} else {
 						edit_view_form_item_dic.show();
@@ -1263,61 +1245,61 @@ InstallWizardController = BaseWizardController.extend( {
 					var widget = widgets[key];
 					widget.removeClass( 't-text' );
 					widget.addClass( 'custom-t-text' );
-					switch( key ) {
+					switch ( key ) {
 						case 'timetrex_version':
-							if (stepData[key].check_timetrex_version == 0  ) {
-								widget.html( $.i18n._("OK") + "(v" + stepData[key].current_timetrex_version + ")"  );
+							if ( stepData[key].check_timetrex_version == 0 ) {
+								widget.html( $.i18n._( "OK" ) + "(v" + stepData[key].current_timetrex_version + ")" );
 							} else if ( stepData[key].check_timetrex_version == 1 ) {
-								widget.html( $.i18n._('Unable to Check Latest Version') );
-								widget.addClass('dataWarning');
+								widget.html( $.i18n._( 'Unable to Check Latest Version' ) );
+								widget.addClass( 'dataWarning' );
 							} else if ( stepData[key].check_timetrex_version == 2 ) {
 								widget.html(
 									$.i18n._( 'A Newer Version of TimeTrex is Available.' ) + ' '
-										+ '<a href="http://www.timetrex.com/download.php">' + $.i18n._('Download') + 'v' + stepData[key].latest_timetrex_version +  + ' ' + $.i18n._('Now') + ' ' + '</a>' );
-								widget.addClass('dataWarning');
+									+ '<a href="http://www.timetrex.com/download.php">' + $.i18n._( 'Download' ) + ' v' + stepData[key].latest_timetrex_version + ' ' + $.i18n._( 'Now' ) + '</a>' );
+								widget.addClass( 'dataWarning' );
 							}
 							break;
 						case 'php_version':
 							if ( stepData[key].check_php_version == 0 ) {
-								widget.html( $.i18n._('OK') + ' (v' + stepData[key].php_version + ')'  );
+								widget.html( $.i18n._( 'OK' ) + ' (v' + stepData[key].php_version + ')' );
 							} else if ( stepData[key].check_php_version == 1 ) {
-								widget.html( $.i18n._('Invalid') + ' (v' + stepData[key].php_version + ')'  );
-								widget.addClass('dataError');
+								widget.html( $.i18n._( 'Invalid' ) + ' (v' + stepData[key].php_version + ')' );
+								widget.addClass( 'dataError' );
 							} else if ( stepData[key].check_php_version == 2 ) {
-								widget.html( $.i18n._('Unsupported') + ' (v' + stepData[key].php_version + ')'  );
-								widget.addClass('dataWarning');
+								widget.html( $.i18n._( 'Unsupported' ) + ' (v' + stepData[key].php_version + ')' );
+								widget.addClass( 'dataWarning' );
 							}
 							break;
 						case 'database_engine':
 							if ( stepData[key] == 0 ) {
-								widget.html( $.i18n._('OK')   );
-							} else if ( stepData[key] == 1) {
+								widget.html( $.i18n._( 'OK' ) );
+							} else if ( stepData[key] == 1 ) {
 								widget.html( $.i18n._( 'Invalid, PGSQL or MySQLi PHP extensions are required' ) );
 								widget.addClass( 'dataError' );
 							} else if ( stepData[key] == 2 ) {
 								widget.html( $.i18n._( 'Unsupported, upgrade to MySQLi PHP extension instead.' ) );
 								widget.addClass( 'dataWarning' );
 							}
-  							break;
+							break;
 						case 'bcmath':
 							if ( stepData[key] == 0 ) {
-								widget.html( $.i18n._('OK')   );
-							} else if ( setpData[key] == 1) {
-								widget.html( $.i18n._('Warning: Not Installed. (BCMATH extension must be enabled)') );
+								widget.html( $.i18n._( 'OK' ) );
+							} else if ( setpData[key] == 1 ) {
+								widget.html( $.i18n._( 'Warning: Not Installed. (BCMATH extension must be enabled)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'mbstring':
 							if ( stepData[key] == 0 ) {
-								widget.html( $.i18n._('OK')   );
+								widget.html( $.i18n._( 'OK' ) );
 							} else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._('Warning: Not Installed. (MBSTRING extension must be enabled)') );
+								widget.html( $.i18n._( 'Warning: Not Installed. (MBSTRING extension must be enabled)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'gettext':
 							if ( stepData[key] == 0 ) {
-								widget.html( $.i18n._('OK')   );
+								widget.html( $.i18n._( 'OK' ) );
 							} else if ( stepData[key] > 0 ) {
 								widget.html( $.i18n._( 'Warning: Not Installed. (GETTEXT extension must be enabled)' ) );
 								widget.addClass( 'dataError' );
@@ -1325,72 +1307,80 @@ InstallWizardController = BaseWizardController.extend( {
 							break;
 						case 'soap':
 							if ( stepData[key] == 0 ) {
-								widget.html( $.i18n._('OK')   );
+								widget.html( $.i18n._( 'OK' ) );
 							} else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._('Warning: Not Installed. (SOAP extension must be enabled)') )
+								widget.html( $.i18n._( 'Warning: Not Installed. (SOAP extension must be enabled)' ) )
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'gd':
 							if ( stepData[key] == 0 ) {
-								widget.html( $.i18n._('OK')   );
+								widget.html( $.i18n._( 'OK' ) );
 							} else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._('Warning: Not Installed. (GD extension must be enabled)') );
+								widget.html( $.i18n._( 'Warning: Not Installed. (GD extension must be enabled)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'json':
 							if ( stepData[key] == 0 ) {
-								widget.html( $.i18n._('OK')   );
+								widget.html( $.i18n._( 'OK' ) );
 							} else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._('Warning: Not Installed. (JSON extension must be enabled)')   );
+								widget.html( $.i18n._( 'Warning: Not Installed. (JSON extension must be enabled)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'mcrypt':
 							if ( stepData[key] == 0 ) {
-								widget.html( $.i18n._('OK')   );
-							}  else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._('Warning: Not Installed. (MCRYPT extension must be enabled)')   );
+								widget.html( $.i18n._( 'OK' ) );
+							} else if ( stepData[key] == 1 ) {
+								widget.html( $.i18n._( 'Warning: Not Installed. (MCRYPT extension must be enabled)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'simplexml':
 							if ( stepData[key] == 0 ) {
-								widget.html( $.i18n._('OK')   );
-							}  else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._('Warning: Not Installed. (SimpleXML extension must be enabled)')   );
+								widget.html( $.i18n._( 'OK' ) );
+							} else if ( stepData[key] == 1 ) {
+								widget.html( $.i18n._( 'Warning: Not Installed. (SimpleXML extension must be enabled)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'zip':
 							if ( stepData[key] == 0 ) {
-								widget.html( $.i18n._('OK')   );
-							}  else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._('Warning: Not Installed. (ZIP extension must be enabled)')   );
+								widget.html( $.i18n._( 'OK' ) );
+							} else if ( stepData[key] == 1 ) {
+								widget.html( $.i18n._( 'Warning: Not Installed. (ZIP extension must be enabled)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'mail':
 							if ( stepData[key] == 0 ) {
-								widget.html( $.i18n._('OK')   );
-							}  else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._('Warning: Not Installed. (MAIL extension must be enabled)')   );
+								widget.html( $.i18n._( 'OK' ) );
+							} else if ( stepData[key] == 1 ) {
+								widget.html( $.i18n._( 'Warning: Not Installed. (MAIL extension must be enabled)' ) );
+								widget.addClass( 'dataError' );
+							}
+							break;
+						case 'openssl':
+							if ( stepData[key] == 0 ) {
+								widget.html( $.i18n._( 'OK' ) );
+							} else if ( stepData[key] == 1 ) {
+								widget.html( $.i18n._( 'Warning: Not Installed. (OpenSSL extension must be enabled)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'pear':
 							if ( stepData[key] == 0 ) {
-								widget.html( $.i18n._('OK')   );
-							}  else if ( stepData[key] == 1 ) {
+								widget.html( $.i18n._( 'OK' ) );
+							} else if ( stepData[key] == 1 ) {
 								if ( stepData.php_os == 'WINNT' ) {
-									widget.html( $.i18n._('Warning: Not Installed.')
-										+ '(' + $.i18n._('try running') + ': ' + '"<b>go-pear.bat</b>"' + ')'
+									widget.html( $.i18n._( 'Warning: Not Installed.' )
+										+ '(' + $.i18n._( 'try running' ) + ': ' + '"<b>go-pear.bat</b>"' + ')'
 									)
 								} else {
-									widget.html( $.i18n._('Warning: Not Installed.')
+									widget.html( $.i18n._( 'Warning: Not Installed.' )
 										+ '('
-										+ $.i18n._('install the PEAR RPM or package from') + ' '
+										+ $.i18n._( 'install the PEAR RPM or package from' ) + ' '
 										+ '<a href=\"http://pear.php.net\">http://pear.php.net</a>'
 										+ ')'
 									)
@@ -1400,137 +1390,137 @@ InstallWizardController = BaseWizardController.extend( {
 							break;
 						case 'safe_mode':
 							if ( stepData[key] == 0 ) {
-								widget.html( $.i18n._('OK')   );
-							}  else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._('Safe Mode is On. (Please disable it in php.ini)')   );
+								widget.html( $.i18n._( 'OK' ) );
+							} else if ( stepData[key] == 1 ) {
+								widget.html( $.i18n._( 'Safe Mode is On. (Please disable it in php.ini)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'magic_quotes':
 							if ( stepData[key] == 0 ) {
-								widget.html( $.i18n._('OK')   );
-							}  else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._('magic_quotes_gpc is On. (Please disable it in php.ini)')   );
+								widget.html( $.i18n._( 'OK' ) );
+							} else if ( stepData[key] == 1 ) {
+								widget.html( $.i18n._( 'magic_quotes_gpc is On. (Please disable it in php.ini)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'disk_space':
 							if ( stepData[key] == 0 ) {
-								widget.html( $.i18n._('OK')   );
-							}  else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._('Not enough disk space available, please free up disk space and try again.')   );
+								widget.html( $.i18n._( 'OK' ) );
+							} else if ( stepData[key] == 1 ) {
+								widget.html( $.i18n._( 'Not enough disk space available, please free up disk space and try again.' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'memory_limit':
 							if ( stepData[key].check_php_memory_limit == 0 ) {
-								var str = $.i18n._('OK');
+								var str = $.i18n._( 'OK' );
 								if ( stepData[key].memory_limit > 0 ) {
 									str += '(' + stepData[key].memory_limit + 'M' + ')';
 								}
-								widget.html(  str );
+								widget.html( str );
 								edit_view_form_item_dic.hide();
-							}  else if ( stepData[key].check_php_memory_limit == 1 ) {
-								widget.html( $.i18n._('Warning') + ': ' + stepData[key].memory_limit + 'M' +  ' (' + $.i18n._('Set this to 128M or higher') + ')'  );
+							} else if ( stepData[key].check_php_memory_limit == 1 ) {
+								widget.html( $.i18n._( 'Warning' ) + ': ' + stepData[key].memory_limit + 'M' + ' (' + $.i18n._( 'Set this to 128M or higher' ) + ')' );
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'base_url':
 							if ( stepData[key].check_base_url == 0 ) {
-								widget.html( $.i18n._('OK')   );
+								widget.html( $.i18n._( 'OK' ) );
 								edit_view_form_item_dic.hide();
 							} else {
-								widget.html( $.i18n._('Warning') + ': ' + key + ' ' + $.i18n._('in') + ' timetrex.ini.php' + $.i18n._('is incorrect, perhaps it should be') + ' ' + stepData[key].recommended_base_url + ' ' + $.i18n._('instead') );
+								widget.html( $.i18n._( 'Warning' ) + ': ' + key + ' ' + $.i18n._( 'in' ) + ' timetrex.ini.php' + $.i18n._( 'is incorrect, perhaps it should be' ) + ' ' + stepData[key].recommended_base_url + ' ' + $.i18n._( 'instead' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'base_dir':
 							if ( stepData[key].check_php_open_base_dir == 0 ) {
-								widget.html( $.i18n._('OK')   );
+								widget.html( $.i18n._( 'OK' ) );
 								edit_view_form_item_dic.hide();
 							} else {
-								widget.html( $.i18n._('Warning: PHP open_basedir setting') + ' ' + '(' + stepData[key].php_open_base_dir + ') ' + $.i18n._('does not include directory of PHP CLI binary') + ' ' + '(' + stepData[key].php_cli_directory + ')'  );
+								widget.html( $.i18n._( 'Warning: PHP open_basedir setting' ) + ' ' + '(' + stepData[key].php_open_base_dir + ') ' + $.i18n._( 'does not include directory of PHP CLI binary' ) + ' ' + '(' + stepData[key].php_cli_directory + ')' );
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'cli_executable':
 							if ( stepData[key].check_php_cli_binary == 0 ) {
-								widget.html( $.i18n._('OK')   );
+								widget.html( $.i18n._( 'OK' ) );
 								edit_view_form_item_dic.hide();
 							} else {
-								widget.html( $.i18n._('Warning: PHP CLI') + ' ' + '(' + stepData[key].php_cli + ')' + ' ' + $.i18n._('does not exist or is not executable.') );
+								widget.html( $.i18n._( 'Warning: PHP CLI' ) + ' ' + '(' + stepData[key].php_cli + ')' + ' ' + $.i18n._( 'does not exist or is not executable.' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'cli_requirements':
 							if ( stepData[key].check_php_cli_requirements == 0 ) {
-								widget.html( $.i18n._('OK')   );
+								widget.html( $.i18n._( 'OK' ) );
 								edit_view_form_item_dic.hide();
 							} else {
-								widget.html( $.i18n._('Warning: PHP CLI requirements failed while executing') + '<br>'
+								widget.html( $.i18n._( 'Warning: PHP CLI requirements failed while executing' ) + '<br>'
 									+ stepData[key].php_cli_requirements_command + '<br>'
-									+ $.i18n._('Likely caused by having two PHP.INI files with different settings.')
+									+ $.i18n._( 'Likely caused by having two PHP.INI files with different settings.' )
 								);
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'config_file':
 							if ( stepData[key] == 0 ) {
-								widget.html( $.i18n._('OK')   );
+								widget.html( $.i18n._( 'OK' ) );
 							} else {
-								widget.html( $.i18n._('Warning: Not writable')   );
+								widget.html( $.i18n._( 'Warning: Not writable' ) );
 								widget.addClass( 'dataError' );
 							}
-  							break;
+							break;
 						case 'cache_dir':
 							if ( stepData[key].check_writable_cache_directory == 0 ) {
-								widget.html( $.i18n._('OK')   );
+								widget.html( $.i18n._( 'OK' ) );
 								edit_view_form_item_dic.hide();
 							} else {
-								widget.html( $.i18n._('Warning: Not writable') + ' (' + stepData[key].cache_dir + ')' );
+								widget.html( $.i18n._( 'Warning: Not writable' ) + ' (' + stepData[key].cache_dir + ')' );
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'storage_dir':
 							if ( stepData[key].check_writable_storage_directory == 0 ) {
-								widget.html( $.i18n._('OK')   );
+								widget.html( $.i18n._( 'OK' ) );
 								edit_view_form_item_dic.hide();
 							} else {
-								widget.html( $.i18n._('Warning: Not writable') + ' (' + stepData[key].storage_path + ')' );
+								widget.html( $.i18n._( 'Warning: Not writable' ) + ' (' + stepData[key].storage_path + ')' );
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'log_dir':
 							if ( stepData[key].check_writable_log_directory == 0 ) {
-								widget.html( $.i18n._('OK')   );
+								widget.html( $.i18n._( 'OK' ) );
 								edit_view_form_item_dic.hide();
 							} else {
-								widget.html( $.i18n._('Warning: Not writable') + ' (' + stepData[key].log_path + ')' );
+								widget.html( $.i18n._( 'Warning: Not writable' ) + ' (' + stepData[key].log_path + ')' );
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'empty_cache_dir':
 							if ( stepData[key].check_clean_cache_directory == 0 ) {
-								widget.html( $.i18n._('OK')   );
+								widget.html( $.i18n._( 'OK' ) );
 								edit_view_form_item_dic.hide();
 							} else {
-								widget.html( $.i18n._('Warning: Please delete all files/directories in') + ': ' + ' <b>' + stepData[key].cache_dir + '</b>' );
+								widget.html( $.i18n._( 'Warning: Please delete all files/directories in' ) + ': ' + ' <b>' + stepData[key].cache_dir + '</b>' );
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'file_permission':
 							if ( stepData[key] == 0 ) {
-								widget.html( $.i18n._('OK')   );
+								widget.html( $.i18n._( 'OK' ) );
 							} else {
-								widget.html( $.i18n._( 'Warning: File permissions are invalid, some') + ' ' + $.i18n._(stepData.application_name) + ' ' + $.i18n._('files are not readable/writable. See detailed error messages below.') )
+								widget.html( $.i18n._( 'Warning: File permissions are invalid, some' ) + ' ' + $.i18n._( stepData.application_name ) + ' ' + $.i18n._( 'files are not readable/writable. See detailed error messages below.' ) )
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'file_checksums':
 							if ( stepData[key] == 0 ) {
-								widget.html( $.i18n._('OK')   );
+								widget.html( $.i18n._( 'OK' ) );
 							} else {
-								widget.html( $.i18n._( 'Warning' ) + ': ' + $.i18n._('File checksums do not match, some') + ' ' + $.i18n._(stepData.application_name) + ' ' + $.i18n._('files may be corrupted, missing, or not installed properly. See detailed error messages below.'));
+								widget.html( $.i18n._( 'Warning' ) + ': ' + $.i18n._( 'File checksums do not match, some' ) + ' ' + $.i18n._( stepData.application_name ) + ' ' + $.i18n._( 'files may be corrupted, missing, or not installed properly. See detailed error messages below.' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1541,26 +1531,28 @@ InstallWizardController = BaseWizardController.extend( {
 				ProgressBar.closeOverlay();
 				break;
 			case 'databaseSchema':
-				this.api.setDatabaseSchema( this.external_installer, {onResult: function( res ) {
-					if ( res.isValid() ) {
-						var result = res.getResult();
-						if ( result.next_page ) {
-							$this.current_step = result.next_page;
-							switch( result.next_page ) {
-								case 'postUpgrade':
-									$this.initCurrentStep();
-									break;
-								case 'systemSettings':
-									if ( result.action ) {
-										$this.onNextClick(); // skip system setting to company information directly.
-									} else {
+				this.api.setDatabaseSchema( this.external_installer, {
+					onResult: function( res ) {
+						if ( res.isValid() ) {
+							var result = res.getResult();
+							if ( result.next_page ) {
+								$this.current_step = result.next_page;
+								switch ( result.next_page ) {
+									case 'postUpgrade':
 										$this.initCurrentStep();
-									}
-									break;
+										break;
+									case 'systemSettings':
+										if ( result.action ) {
+											$this.onNextClick(); // skip system setting to company information directly.
+										} else {
+											$this.initCurrentStep();
+										}
+										break;
+								}
 							}
 						}
 					}
-				}} );
+				} );
 				break;
 			default:
 				ProgressBar.closeOverlay();
@@ -1569,7 +1561,6 @@ InstallWizardController = BaseWizardController.extend( {
 		}
 
 	},
-
 
 	setErrorTips: function( result ) {
 		this.clearErrorTips();
@@ -1646,8 +1637,5 @@ InstallWizardController = BaseWizardController.extend( {
 		this.stepsDataDic = {};
 		this.current_step = 'license';
 	}
-
-
-
 
 } );

@@ -175,7 +175,6 @@ class ScheduleFactory extends Factory {
 
 										//'date_stamp' => FALSE,
 										'start_date_stamp' => FALSE,
-										'pay_period_id' => FALSE,
 										'status_id' => 'Status',
 										'status' => FALSE,
 										'start_date' => FALSE,
@@ -685,6 +684,11 @@ class ScheduleFactory extends Factory {
 			$id = 0;
 		}
 
+		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $id == -1 ) { //Find default
+			$id = $this->getUserObject()->getDefaultBranch();
+			Debug::Text('Using Default Branch: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+		}
+
 		$blf = TTnew( 'BranchListFactory' );
 
 		if (  $id == 0
@@ -713,6 +717,11 @@ class ScheduleFactory extends Factory {
 
 		if ( $id == FALSE OR $id == 0 OR $id == '' ) {
 			$id = 0;
+		}
+
+		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $id == -1 ) { //Find default
+			$id = $this->getUserObject()->getDefaultDepartment();
+			Debug::Text('Using Default Department: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		$dlf = TTnew( 'DepartmentListFactory' );
@@ -745,9 +754,15 @@ class ScheduleFactory extends Factory {
 			$id = 0;
 		}
 
+		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $id == -1 ) { //Find default
+			$id = $this->getUserObject()->getDefaultJob();
+			Debug::Text('Using Default Job: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+		}
+
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jlf = TTnew( 'JobListFactory' );
 		}
+
 
 		if (  $id == 0
 				OR
@@ -777,6 +792,11 @@ class ScheduleFactory extends Factory {
 			$id = 0;
 		}
 
+		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $id == -1 ) { //Find default
+			$id = $this->getUserObject()->getDefaultJobItem();
+			Debug::Text('Using Default Job Item: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+		}
+		
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jilf = TTnew( 'JobItemListFactory' );
 		}
@@ -866,7 +886,7 @@ class ScheduleFactory extends Factory {
 			}
 		}
 
-		Debug::text('Difference from schedule: "'. $retval .'" Epoch: '. $epoch .' Status: '. $status_id, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::text('Difference from schedule: "'. $retval .'" Epoch: '. $epoch .' Status: '. $status_id, __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 	}
 
@@ -1775,7 +1795,7 @@ class ScheduleFactory extends Factory {
 			foreach( $slf as $conflicting_schedule_shift_obj ) {
 				if ( $conflicting_schedule_shift_obj->isNew() === FALSE
 						AND $conflicting_schedule_shift_obj->getId() != $this->getId() ) {
-					Debug::text('Conflicting Schedule Shift ID:'. $conflicting_schedule_shift_obj->getId() .' Schedule Shift ID: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text('Conflicting Schedule Shift ID: '. $conflicting_schedule_shift_obj->getId() .' Schedule Shift ID: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
 					return TRUE;
 				}
 			}
@@ -1863,6 +1883,11 @@ class ScheduleFactory extends Factory {
 		}
 
 		if ( $ignore_warning == FALSE ) {
+			//Warn users if they are trying to insert schedules too far in the future. 
+			if ( $this->getDateStamp() != FALSE AND $this->getDateStamp() > (time() + (86400 * 366 ) ) ) {
+				$this->Validator->Warning( 'date_stamp', TTi18n::gettext('Date is more than one year in the future') );
+			}
+
 			if ( $this->getDateStamp() != FALSE
 					AND is_object( $this->getPayPeriodObject() )
 					AND is_object( $this->getPayPeriodObject()->getPayPeriodScheduleObject() )
@@ -2106,7 +2131,6 @@ class ScheduleFactory extends Factory {
 						case 'title_id':
 						case 'default_branch_id':
 						case 'default_department_id':
-						case 'pay_period_id':
 							$data[$variable] = (int)$this->getColumn( $variable );
 							break;
 						case 'group':

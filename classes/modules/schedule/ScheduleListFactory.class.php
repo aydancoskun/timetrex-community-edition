@@ -476,6 +476,61 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		return FALSE;
 	}
 
+	function getMostCommonScheduleDataByCompanyIdAndUserAndStartDateAndEndDate($company_id, $user_id, $start_date, $end_date) {
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $user_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $start_date == '' ) {
+			return FALSE;
+		}
+
+		if ( $end_date == '' ) {
+			return FALSE;
+		}
+
+		$ph = array();
+
+		$query = 'SELECT
+							( 	SELECT	'. $this->getSQLToTimeFunction( 'a.start_time' ) .' as start_time
+								FROM	'. $this->getTable() .' as a
+								WHERE 	a.company_id = '. (int)$company_id .'
+									AND a.date_stamp >= '. $this->db->qstr( $this->db->BindDate( $start_date ) ).'
+									AND a.date_stamp <= '. $this->db->qstr( $this->db->BindDate( $end_date ) ) .'
+									AND a.user_id IN ( '. $this->getListSQL( $user_id, $ph, 'INT' ) .' )
+									AND ( a.deleted = 0 )
+								GROUP BY '. $this->getSQLToTimeFunction( 'a.start_time' ) .'
+								ORDER BY count(*) DESC LIMIT 1 ) as start_time,
+							( 	SELECT	'. $this->getSQLToTimeFunction( 'a.end_time' ) .' as end_time
+								FROM	'. $this->getTable() .' as a
+								WHERE 	a.company_id = '. (int)$company_id .'
+									AND a.date_stamp >= '. $this->db->qstr( $this->db->BindDate( $start_date ) ).'
+									AND a.date_stamp <= '. $this->db->qstr( $this->db->BindDate( $end_date ) ) .'
+									AND a.user_id IN ( '. $this->getListSQL( $user_id, $ph, 'INT' ) .' )
+									AND ( a.deleted = 0 )
+								GROUP BY '. $this->getSQLToTimeFunction( 'a.end_time' ) .'
+								ORDER BY count(*) DESC LIMIT 1 ) as end_time,
+							( 	SELECT	schedule_policy_id as schedule_policy_id
+								FROM	'. $this->getTable() .' as a
+								WHERE 	a.company_id = '. (int)$company_id .'
+									AND a.date_stamp >= '. $this->db->qstr( $this->db->BindDate( $start_date ) ).'
+									AND a.date_stamp <= '. $this->db->qstr( $this->db->BindDate( $end_date ) ) .'
+									AND a.user_id IN ( '. $this->getListSQL( $user_id, $ph, 'INT' ) .' )
+									AND ( a.deleted = 0 )
+								GROUP BY schedule_policy_id
+								ORDER BY count(*) DESC LIMIT 1 ) as schedule_policy_id';
+
+		$result = $this->db->GetRow($query, $ph);
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+
+		return $result;
+	}
+
 	//Returning RecurringScheduleIDs that have already been overridden by a committed shift, so we can exclude them from subsequent queries like getSearchByCompanyIdAndArrayCriteria()
 	function getOverriddenOpenShiftRecurringSchedules( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {

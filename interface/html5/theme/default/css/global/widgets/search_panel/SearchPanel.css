@@ -150,6 +150,7 @@
 .search-panel .current-view-label {
     font-weight: bold;
     color: #34628d;
+    line-height: 18px;
 }
 
 .search-panel .layout-selector {

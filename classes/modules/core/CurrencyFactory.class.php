@@ -1038,19 +1038,21 @@ class CurrencyFactory extends Factory {
 		//CompanyFactory->getEncoding() is used to determine report encodings based on data saved here.
 		$this->removeCache( 'encoding_'.$this->getCompany(), 'company' );
 
-		Debug::Text('Currency modified, update historical rate for today: '. $this->getISOCode() .' Date: '. time() .' Rate: '. $this->getConversionRate(), __FILE__, __LINE__, __METHOD__, 10);
-		$crlf = TTnew('CurrencyRateListFactory');
-		$crlf->getByCurrencyIdAndDateStamp( $this->getID(), time() );
-		if ( $crlf->getRecordCount() > 0 ) {
-			$crf = $crlf->getCurrent();
-		} else {
-			$crf = TTnew('CurrencyRateFactory');
-		}
-		$crf->setCurrency( $this->getID() );
-		$crf->setDateStamp( time() );
-		$crf->setConversionRate( $this->getConversionRate() );
-		if ( $crf->isValid() ) {
-			$crf->Save();
+		if ( $this->getDeleted() == FALSE ) {
+			Debug::Text('Currency modified, update historical rate for today: '. $this->getISOCode() .' Date: '. time() .' Rate: '. $this->getConversionRate(), __FILE__, __LINE__, __METHOD__, 10);
+			$crlf = TTnew('CurrencyRateListFactory');
+			$crlf->getByCurrencyIdAndDateStamp( $this->getID(), time() );
+			if ( $crlf->getRecordCount() > 0 ) {
+				$crf = $crlf->getCurrent();
+			} else {
+				$crf = TTnew('CurrencyRateFactory');
+			}
+			$crf->setCurrency( $this->getID() );
+			$crf->setDateStamp( time() );
+			$crf->setConversionRate( $this->getConversionRate() );
+			if ( $crf->isValid() ) {
+				$crf->Save();
+			}
 		}
 
 		return TRUE;

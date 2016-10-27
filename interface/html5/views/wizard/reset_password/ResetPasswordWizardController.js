@@ -29,7 +29,8 @@ ResetPasswordWizardController = BaseWizardController.extend( {
 		switch ( this.current_step ) {
 			case 1:
 				var label = this.getLabel();
-				label.text( this.default_data.message );
+				//Error: TypeError: this.default_data is null in interface/html5/framework/jquery.min.js?v=9.0.0-20151016-110437 line 2 > eval line 32
+				label.text( this.default_data ? this.default_data.message : '' );
 				this.content_div.append( label );
 
 				var form_item = $( Global.loadWidget( 'global/widgets/wizard_form_item/WizardFormItem.html' ) );
@@ -38,7 +39,7 @@ ResetPasswordWizardController = BaseWizardController.extend( {
 
 				var user_name = this.getText();
 
-				user_name.text( this.default_data.user_name );
+				user_name.text( this.default_data ? this.default_data.user_name : '' );
 
 				form_item_label.text( $.i18n._( 'User Name' ) + ':' );
 				form_item_input_div.append( user_name );
@@ -81,6 +82,8 @@ ResetPasswordWizardController = BaseWizardController.extend( {
 				this.stepsWidgetDic[this.current_step][current_password.getField()] = current_password;
 				this.stepsWidgetDic[this.current_step][new_password.getField()] = new_password;
 				this.stepsWidgetDic[this.current_step][confirm_password.getField()] = confirm_password;
+
+				current_password.focus();
 
 				break;
 
@@ -140,27 +143,33 @@ ResetPasswordWizardController = BaseWizardController.extend( {
 
 			var api = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
 
+			if ( !this.default_data || !this.default_data.user_name ) {
+				TAlertManager.showAlert( $.i18n._( 'Invalid user name' ) );
+				return;
+			}
+
 			api.changePassword( this.default_data.user_name,
 				current_password,
 				new_password,
 				confirm_password
-				, {onResult: function( result ) {
+				, {
+					onResult: function( result ) {
 
-					if ( !result.isValid() ) {
-						TAlertManager.showErrorAlert( result );
-					} else {
-						$this.onCloseClick();
+						if ( !result.isValid() ) {
+							TAlertManager.showErrorAlert( result );
+						} else {
+							$this.onCloseClick();
 
-						if ( $this.call_back ) {
-							$this.call_back();
+							if ( $this.call_back ) {
+								$this.call_back();
+							}
 						}
-					}
 
-				}} )
+					}
+				} )
 		}
 
 	}
-
 
 } );
 

@@ -11,7 +11,7 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 		this.script_name = 'Form940Report';
 		this.viewId = 'Form940Report';
 		this.context_menu_name = $.i18n._( 'Form 940' );
-		this.navigation_label = $.i18n._( 'Saved Report' );
+		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
 		this.view_file = 'Form940ReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIForm940Report' ))();
 		this.include_form_setup = true;
@@ -31,7 +31,8 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 			{option_name: 'setup_fields'},
 			{option_name: 'return_type'},
 			{option_name: 'exempt_payment'},
-			{option_name: 'state'}
+			{option_name: 'state'},
+			{option_name: 'auto_refresh'}
 		];
 
 		this.initDropDownOptions( options, function( result ) {

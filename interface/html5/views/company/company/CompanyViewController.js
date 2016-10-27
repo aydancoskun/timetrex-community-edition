@@ -99,7 +99,7 @@ CompanyViewController = BaseViewController.extend( {
 				$this.getCompanyData( function( result ) {
 					// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
 					$this.current_edit_record = result;
-					$this.setEditViewWidgetsMode();
+
 					$this.initEditView();
 
 				} );
@@ -111,7 +111,7 @@ CompanyViewController = BaseViewController.extend( {
 				this.initEditViewUI( 'Company', 'CompanyEditView.html' );
 			}
 
-			this.setEditViewWidgetsMode();
+
 		}
 
 	},
@@ -122,8 +122,7 @@ CompanyViewController = BaseViewController.extend( {
 			if ( Global.isSet( widget ) ) {
 				switch ( key ) {
 					case 'country':
-						this.eSetProvince( this.current_edit_record[key] );
-						widget.setValue( this.current_edit_record[key] );
+						this.setCountryValue(widget, key);
 						break;
 					default:
 						widget.setValue( this.current_edit_record[key] );
@@ -267,7 +266,7 @@ CompanyViewController = BaseViewController.extend( {
 					} else if ( result_data > 0 ) {
 						$this.refresh_id = result_data
 					}
-					$this.current_edit_record = null;
+
 					$this.removeEditView();
 
 					$this.updateCurrentCompanyCache();

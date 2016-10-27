@@ -153,17 +153,19 @@ class GovernmentForms_Base {
 	 * Math functions
 	 *
 	 */
-	function MoneyFormat($value, $pretty = TRUE) {
+	function MoneyFormatPretty($value) {
 		if ( !is_numeric( $value ) ) {
 			return FALSE;
 		}
-		if ( $pretty == TRUE ) {
-			$thousand_sep = ',';
-		} else {
-			$thousand_sep = '';
+
+		return number_format( $value, 2, '.', ',');
+	}
+	function MoneyFormat($value) {
+		if ( !is_numeric( $value ) ) {
+			return FALSE;
 		}
 
-		return number_format( $value, 2, '.', $thousand_sep);
+		return number_format( $value, 2, '.', '');
 	}
 
 	function getBeforeDecimal($float) {
@@ -204,6 +206,21 @@ class GovernmentForms_Base {
 		}
 
 		return date('Y', $epoch);
+	}
+
+	/*
+	 *
+	 * Formatting functions
+	 *
+	 */
+	public function formatSSN( $value ) {
+		$value = substr_replace($value, '-', 3, 0);
+		$value = substr_replace($value, '-', 6, 0);
+		return $value;
+	}
+
+	public function formatEIN( $value ) {
+		return substr_replace($value, '-', 2, 0);
 	}
 
 	/*
@@ -385,7 +402,6 @@ class GovernmentForms_Base {
 
 	//Draw all digits before the decimal in the first location, and after the decimal in the second location.
 	function drawSplitDecimalFloat( $value, $schema) {
-
 		if ( $value > 0 ) {
 			$this->Draw( $this->getBeforeDecimal( $value ), $this->getSchemaSpecificCoordinates( $schema, 0 ) );
 			$this->Draw( $this->getAfterDecimal( $value ), $this->getSchemaSpecificCoordinates( $schema, 1 ) );
@@ -417,8 +433,8 @@ class GovernmentForms_Base {
                 }
             }
         }
+		
         return TRUE;
-
     }
 
 	//Draw each element of an array at different locations.
@@ -438,7 +454,6 @@ class GovernmentForms_Base {
 
 	//Draw an X in each of the specified locations
 	function drawSplitDecimalFloatGrid( $value, $schema ) {
-
 		if ( !is_array( $value ) ) {
 			$value = (array)$value;
 		}
@@ -702,7 +717,7 @@ class GovernmentForms_Base {
 				$pdf->MultiCell( $coordinates['w'], $coordinates['h'], $value, $coordinates['border'], strtoupper($coordinates['halign']), $coordinates['fill'] );
 			} else {
 				//Debug::text('Drawing Cell... Value: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-				$pdf->Cell( $coordinates['w'], $coordinates['h'], $value, $coordinates['border'], 0, strtoupper($coordinates['halign']), $coordinates['fill'] );
+				$pdf->Cell( $coordinates['w'], $coordinates['h'], $value, $coordinates['border'], 0, strtoupper($coordinates['halign']), $coordinates['fill'], FALSE, 1 );
 			}
 			unset($coordinates);
 		} else {

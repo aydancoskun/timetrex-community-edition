@@ -5,7 +5,7 @@ PayStubSummaryReportViewController = ReportBaseViewController.extend( {
 		this.script_name = 'PayStubSummaryReport';
 		this.viewId = 'PayStubSummaryReport';
 		this.context_menu_name = $.i18n._( 'Pay Stub Summary' );
-		this.navigation_label = $.i18n._( 'Saved Report' );
+		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
 		this.view_file = 'PayStubSummaryReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIPayStubSummaryReport' ))();
 		this.buildContextMenu();
@@ -196,7 +196,7 @@ PayStubSummaryReportViewController = ReportBaseViewController.extend( {
 			$this.getReportData( function( result ) {
 				// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
 
-				var edit_item = result[0];
+				var edit_item;
 				if ( LocalCacheData.default_edit_id_for_next_open_edit_view ) {
 					for ( var i = 0; i < result.length; i++ ) {
 						if ( result[i].id == LocalCacheData.default_edit_id_for_next_open_edit_view ) {
@@ -204,6 +204,8 @@ PayStubSummaryReportViewController = ReportBaseViewController.extend( {
 						}
 					}
 					LocalCacheData.default_edit_id_for_next_open_edit_view = null;
+				}else{
+					edit_item = $this.getDefaultReport( result );
 				}
 
 				if ( result && result.length > 0 ) {
@@ -216,7 +218,7 @@ PayStubSummaryReportViewController = ReportBaseViewController.extend( {
 
 				$this.current_edit_record = {};
 				$this.visible_report_values = {};
-				$this.setEditViewWidgetsMode();
+
 				$this.initEditView();
 
 			} );
@@ -225,51 +227,9 @@ PayStubSummaryReportViewController = ReportBaseViewController.extend( {
 
 	},
 
-	onFormItemChange: function( target, doNotDoValidate ) {
-		var $this = this;
-		this.setIsChanged( target );
-		var key = target.getField();
-
-		if ( this.visible_report_widgets && this.visible_report_widgets[key] ) {
-			if ( key === 'sort' ) {
-				this.visible_report_values[key] = target.getValue( true );
-
-			} else if ( key === 'time_period' ) {
-				var time_period = target.getValue();
-				this.visible_report_values[key] = {time_period: time_period};
-
-				this.onTimePeriodChange( target );
-
-			} else if ( key === 'filter' ) {
-				var filter = target.getValue();
-				this.visible_report_values[key] = {status_id: filter};
-
-			} else if ( key === 'start_date' || key === 'end_date' || key === 'pay_period_id' || key === 'pay_period_schedule_id' ) {
-				time_period = this.visible_report_values['time_period'];
-				time_period[key] = target.getValue();
-
-			} else {
-				this.visible_report_values[key] = target.getValue();
-			}
-
-		} else {
-			this.current_edit_record[key] = target.getValue();
-		}
-
-		if ( key === 'template' ) {
-			$this.onTemplateChange( this.current_edit_record[key] );
-			$this.setEditMenu(); //clean error, set edit menu
-		} else {
-
-			if ( this.edit_view_tab_selected_index === 0 ) {
-				if ( !doNotDoValidate ) {
-					this.validate();
-				}
-
-			}
-
-		}
-
+	onFormItemChangeProcessFilterField: function( target, key ) {
+		var filter = target.getValue();
+		this.visible_report_values[key] = {status_id: filter};
 	},
 
 	setFilterValue: function( widget, value ) {

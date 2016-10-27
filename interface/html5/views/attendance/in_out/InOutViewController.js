@@ -188,7 +188,7 @@ InOutViewController = BaseViewController.extend( {
 
 		// Error: Uncaught TypeError: (intermediate value).isBranchAndDepartmentAndJobAndJobItemEnabled is not a function on line 207
 		var company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
-		if ( company_api ) {
+		if ( company_api && _.isFunction( company_api.isBranchAndDepartmentAndJobAndJobItemEnabled ) ) {
 			result = company_api.isBranchAndDepartmentAndJobAndJobItemEnabled( {async: false} );
 		}
 
@@ -316,7 +316,7 @@ InOutViewController = BaseViewController.extend( {
 				$this.getUserPunch( function( result ) {
 					// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
 					$this.current_edit_record = result;
-					$this.setEditViewWidgetsMode();
+
 					$this.initEditView();
 
 				} );
@@ -343,13 +343,13 @@ InOutViewController = BaseViewController.extend( {
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.setJobItemValueWhenJobChanged( target.getValue( true ) );
-					this.edit_view_ui_dic['job_quick_search'].setCheckBox(true);
+					this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
 				}
 				break;
 			case 'job_item_id':
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? (target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '') : '' );
-					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
+					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
 				}
 				break;
 
@@ -370,9 +370,10 @@ InOutViewController = BaseViewController.extend( {
 
 	onTransferChanged: function( value ) {
 
+		// type_id_widget is undefined in interface/html5/framework/jquery.min.js?v=9.0.1-20151022-091549 line 2 > eval line 390
 		var type_id_widget = this.edit_view_ui_dic['type_id'];
 		var status_id_widget = this.edit_view_ui_dic['status_id'];
-		if ( value ) {
+		if ( value && type_id_widget && status_id_widget ) {
 
 			type_id_widget.setEnabled( false );
 			status_id_widget.setEnabled( false );
@@ -386,7 +387,7 @@ InOutViewController = BaseViewController.extend( {
 			this.current_edit_record.type_id = 10;
 			this.current_edit_record.status_id = 10;
 
-		} else {
+		} else if ( type_id_widget && status_id_widget ) {
 			type_id_widget.setEnabled( true );
 			status_id_widget.setEnabled( true );
 
@@ -412,8 +413,8 @@ InOutViewController = BaseViewController.extend( {
 		var job_item_widget = $this.edit_view_ui_dic['job_item_id'];
 		var current_job_item_id = job_item_widget.getValue();
 		job_item_widget.setSourceData( null );
-		job_item_widget.setCheckBox(true);
-		this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
+		job_item_widget.setCheckBox( true );
+		this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
 		var args = {};
 		args.filter_data = {status_id: 10, job_id: $this.current_edit_record.job_id};
 		$this.edit_view_ui_dic['job_item_id'].setDefaultArgs( args );
@@ -507,8 +508,8 @@ InOutViewController = BaseViewController.extend( {
 
 				}
 			} );
-			this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
-			this.edit_view_ui_dic['job_item_id'].setCheckBox(true);
+			this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
+			this.edit_view_ui_dic['job_item_id'].setCheckBox( true );
 		}
 
 	},
@@ -570,7 +571,7 @@ InOutViewController = BaseViewController.extend( {
 						$this.refresh_id = result_data
 					}
 
-					$this.current_edit_record = null;
+
 					$this.removeEditView();
 
 					if ( LocalCacheData.current_open_primary_controller.viewId === 'TimeSheet' ) {
@@ -695,7 +696,7 @@ InOutViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Transfer' ), form_item_input, tab_punch_column1, '', null, true );
 
 		if ( !this.show_transfer_ui ) {
-			this.detachElement('transfer');
+			this.detachElement( 'transfer' );
 		}
 
 		// Punch
@@ -728,7 +729,7 @@ InOutViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Branch' ), form_item_input, tab_punch_column1, '', null, true );
 
 		if ( !this.show_branch_ui ) {
-			this.detachElement('branch_id');
+			this.detachElement( 'branch_id' );
 		}
 
 		// Department
@@ -746,7 +747,7 @@ InOutViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Department' ), form_item_input, tab_punch_column1, '', null, true );
 
 		if ( !this.show_department_ui ) {
-			this.detachElement('department_id')
+			this.detachElement( 'department_id' )
 		}
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
@@ -780,7 +781,7 @@ InOutViewController = BaseViewController.extend( {
 			this.addEditFieldToColumn( $.i18n._( 'Job' ), [form_item_input, job_coder], tab_punch_column1, '', widgetContainer, true );
 
 			if ( !this.show_job_ui ) {
-				this.detachElement('job_id');
+				this.detachElement( 'job_id' );
 			}
 
 			// Task
@@ -810,7 +811,7 @@ InOutViewController = BaseViewController.extend( {
 			this.addEditFieldToColumn( $.i18n._( 'Task' ), [form_item_input, job_item_coder], tab_punch_column1, '', widgetContainer, true );
 
 			if ( !this.show_job_item_ui ) {
-				this.detachElement('job_item_id');
+				this.detachElement( 'job_item_id' );
 			}
 
 		}
@@ -841,7 +842,7 @@ InOutViewController = BaseViewController.extend( {
 			this.addEditFieldToColumn( $.i18n._( 'Quantity' ), [good, bad], tab_punch_column1, '', widgetContainer, true );
 
 			if ( !this.show_bad_quantity_ui && !this.show_good_quantity_ui ) {
-				this.detachElement('quantity');
+				this.detachElement( 'quantity' );
 			} else {
 				if ( !this.show_bad_quantity_ui ) {
 					bad_label.hide();
@@ -866,7 +867,7 @@ InOutViewController = BaseViewController.extend( {
 		form_item_input.parent().width( '45%' );
 
 		if ( !this.show_node_ui ) {
-			this.detachElement('note');
+			this.detachElement( 'note' );
 		}
 
 	},
@@ -922,14 +923,11 @@ InOutViewController = BaseViewController.extend( {
 			}
 		}
 
+		//Error: Uncaught TypeError: Cannot read property 'setValue' of undefined in interface/html5/#!m=TimeSheet&date=20151019&user_id=25869&show_wage=0&sm=InOut line 926
 		//The API will return if transfer should be enabled/disabled by default.
-		this.edit_view_ui_dic['transfer'].setValue( this.current_edit_record['transfer'] );
-		//if ( PermissionManager.validate( 'punch', 'edit_transfer' ) && PermissionManager.validate( 'punch', 'default_transfer' ) ) {
-		//	this.edit_view_ui_dic['transfer'].setValue( true );
-		//	this.current_edit_record['transfer'] = true;
-		//} else {
-		//	this.edit_view_ui_dic['transfer'].setValue( this.current_edit_record['transfer'] );
-		//}
+		if ( this.show_transfer_ui && this.edit_view_ui_dic['transfer'] ) {
+			this.edit_view_ui_dic['transfer'].setValue( this.current_edit_record['transfer'] );
+		}
 
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();

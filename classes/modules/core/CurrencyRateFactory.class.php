@@ -161,7 +161,7 @@ class CurrencyRateFactory extends Factory {
 
 	function isUnique() {
 		$ph = array(
-					'currency_id' => $this->getCurrency(),
+					'currency_id' => (int)$this->getCurrency(),
 					'date_stamp' => $this->db->BindDate( $this->getDateStamp() ),
 					);
 

@@ -518,36 +518,21 @@ PunchesViewController = BaseViewController.extend( {
 
 	//set widget disablebility if view mode or edit mode
 	setEditViewWidgetsMode: function() {
-
 		var did_clean_dic = {};
 		for ( var key in this.edit_view_ui_dic ) {
-
 			if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
 				continue;
 			}
-
 			var widget = this.edit_view_ui_dic[key];
 			var widgetContainer = this.edit_view_form_item_dic[key];
 			widget.css( 'opacity', 1 );
-
 			var column = widget.parent().parent().parent();
 			var tab_id = column.parent().attr( 'id' );
 			if ( !column.hasClass( 'v-box' ) ) {
-
 				if ( !did_clean_dic[tab_id] ) {
 					did_clean_dic[tab_id] = true;
 				}
-
-				var child_length = column.children().length;
-				var parent_div = widget.parent().parent();
-
-				if ( Global.isSet( widget.setEnabled ) ) {
-					widget.setEnabled( true );
-				}
 			}
-
-			widget.setValue( '' ); // Set all value back to empty before new value coming.
-
 			switch ( key ) {
 				case 'punch_dates':
 					if ( this.is_mass_adding ) {
@@ -572,7 +557,6 @@ PunchesViewController = BaseViewController.extend( {
 					}
 					break;
 			}
-
 			if ( this.is_viewing ) {
 				if ( Global.isSet( widget.setEnabled ) ) {
 					widget.setEnabled( false );
@@ -705,9 +689,7 @@ PunchesViewController = BaseViewController.extend( {
 						widget.setValue( date_array );
 						break;
 					case 'country': //popular case
-						this.eSetProvince( this.current_edit_record[key] );
-
-						widget.setValue( this.current_edit_record[key] );
+						this.setCountryValue(widget, key);
 						break;
 					case 'enable_email_notification_message':
 						widget.setValue( this.current_edit_record[key] );
@@ -1704,7 +1686,7 @@ PunchesViewController = BaseViewController.extend( {
 		}
 	},
 
-	onCopyAsNewClick: function() {
+	_continueDoCopyAsNew: function() {
 		var $this = this;
 		this.is_add = true;
 		this.is_mass_adding = true;
@@ -1719,6 +1701,7 @@ PunchesViewController = BaseViewController.extend( {
 			this.initEditView();
 			this.setEditMenu();
 			this.setTabStatus();
+			this.is_changed = false;
 			ProgressBar.closeOverlay();
 
 		} else {
@@ -1769,6 +1752,7 @@ PunchesViewController = BaseViewController.extend( {
 			ignoreWarning = false;
 		}
 		this.is_add = true;
+		this.is_changed = false;
 		LocalCacheData.current_doing_context_action = 'save_and_copy';
 		var record = this.current_edit_record;
 		if ( this.is_mass_adding ) {

@@ -219,23 +219,35 @@ class AccrualPolicyAccountFactory extends Factory {
 	}
 
 	function Validate( $ignore_warning = TRUE ) {
-		if ( $this->getDeleted() == TRUE ) {
-			//Check to make sure there are no hours using this accrual policy.
-			$alf = TTnew( 'AccrualListFactory' );
-			$alf->getByAccrualPolicyAccount( $this->getId() );
-			if ( $alf->getRecordCount() > 0 ) {
-				$this->Validator->isTRUE(	'in_use',
+		if ( $this->getDeleted() != TRUE AND $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing.
+			if ( $this->getName() == '' ) {
+				$this->Validator->isTRUE(	'name',
 											FALSE,
-											TTi18n::gettext('This accrual account is in use by accrual records'));
+											TTi18n::gettext('Please specify a name') );
 			}
+		}
 
+		if ( $this->getDeleted() == TRUE ) {
 			$aplf = TTnew( 'AccrualPolicyListFactory' );
 			$aplf->getByCompanyIdAndAccrualPolicyAccount( $this->getCompany(), $this->getId() );
+			Debug::Text('  Accrual Policy Total Records: '. $aplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $aplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
 											FALSE,
 											TTi18n::gettext('This accrual account is currently in use by accrual policies') );
+			} else {
+				//Only if there are no accrual policies attached,
+				//Check to make sure there are no hours using this accrual policy if.
+				$alf = TTnew( 'AccrualListFactory' );
+				$alf->getByAccrualPolicyAccount( $this->getId() );
+				Debug::Text('  Accrual Total Records: '. $alf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+				if ( $alf->getRecordCount() > 0 ) {
+					$this->Validator->isTRUE(	'in_use',
+												FALSE,
+												TTi18n::gettext('This accrual account is in use by accrual records'));
+				}
 			}
+
 		}
 
 		return TRUE;

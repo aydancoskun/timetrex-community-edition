@@ -151,19 +151,19 @@ if ( $argc < 3 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	}
 
 	if ( in_array('-server', $argv) ) {
-		$api_url = strtolower( trim($argv[( array_search('-server', $argv) + 1)]) );
+		$api_url = trim($argv[( array_search('-server', $argv) + 1)]);
 	} else {
 		$api_url = FALSE;
 	}
 
 	if ( in_array('-username', $argv) ) {
-		$username = strtolower( trim($argv[(array_search('-username', $argv) + 1)]) );
+		$username = trim($argv[(array_search('-username', $argv) + 1)]);
 	} else {
 		$username = FALSE;
 	}
 
 	if ( in_array('-password', $argv) ) {
-		$password = strtolower( trim($argv[(array_search('-password', $argv) + 1)]) );
+		$password = trim($argv[(array_search('-password', $argv) + 1)]);
 	} else {
 		$password = FALSE;
 	}

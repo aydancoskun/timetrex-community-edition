@@ -48,12 +48,8 @@ class APICompanySetting extends APIFactory {
 	}
 	
 	function getCompanySetting( $name ) {
-		$retarr = CompanySettingFactory::getCompanySetting( $this->getCurrentCompanyObject()->getId(), $name );
-		if ( $retarr == TRUE ) {
-			return $this->returnHandler( $retarr );
-		}
-		
-		return $this->returnHandler( TRUE);
+		$retarr = CompanySettingFactory::getCompanySettingArrayByName( $this->getCurrentCompanyObject()->getId(), $name );
+		return $this->returnHandler( $retarr );
 	}
 	
 	function setCompanySetting( $name, $value, $type_id = 10 ) {

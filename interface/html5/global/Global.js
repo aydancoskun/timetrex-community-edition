@@ -6,6 +6,8 @@ Global.app_min_width = 990;
 
 Global.theme = 'default';
 
+Global.signal_timer = null;
+
 Global.isScrolledIntoView = function( elem ) {
 	var $elem = elem;
 	var $window = $( window );
@@ -74,7 +76,8 @@ Global.sendErrorReport = function() {
 
 	var login_user = LocalCacheData.getLoginUser();
 	if ( error_string.indexOf( "TypeError: 'null' is not an object" ) >= 0 ||
-		error_string.indexOf( "NS_ERROR_FAILURE" ) >= 0 ) {
+		error_string.indexOf( "NS_ERROR_" ) >= 0 ||
+		error_string.indexOf( "NS_ERROR_OUT_OF_MEMORY" ) >= 0 ) {
 		return;
 	}
 	var error;
@@ -114,7 +117,7 @@ Global.sendErrorReport = function() {
 						if ( !Global.dont_check_browser_cache && APIGlobal.pre_login_data.production === true && result.getResult() !== APIGlobal.pre_login_data.application_build ) {
 							var message = $.i18n._( 'Your web browser is caching incorrect data, please press the refresh button on your web browser or log out, clear your web browsers cache and try logging in again.' ) + '<br><br>' + $.i18n._( 'Local Version' ) + ':  ' + result.getResult() + '<br>' + $.i18n._( 'Remote Version' ) + ': ' + APIGlobal.pre_login_data.application_build;
 							Global.dont_check_browser_cache = true;
-							Global.sendErrorReport( 'Your web browser is caching incorrect data. Local Version' + ':  ' + result.getResult()  + 'Remote Version' + ': ' + APIGlobal.pre_login_data.application_build, ServiceCaller.rootURL, '', '', '' );
+							Global.sendErrorReport( 'Your web browser is caching incorrect data. Local Version' + ':  ' + result.getResult() + 'Remote Version' + ': ' + APIGlobal.pre_login_data.application_build, ServiceCaller.rootURL, '', '', '' );
 							TAlertManager.showAlert( message, '', function() {
 								window.location.reload( true );
 							} );
@@ -145,9 +148,13 @@ Global.initStaticStrings = function() {
 
 	Global.root_item = $.i18n._( 'Root' );
 
+	Global.loading_label = '...';
+
 	Global.customize_item = '-- ' + $.i18n._( 'Customize' ) + ' --';
 
 	Global.default_item = '-- ' + $.i18n._( 'Default' ) + ' --';
+
+	Global.selected_item = '-- ' + $.i18n._( 'Selected' ) + ' --';
 
 	Global.open_item = '-- ' + $.i18n._( 'Open' ) + ' --';
 
@@ -181,34 +188,37 @@ Global.getUpgradeMessage = function() {
 	return message;
 };
 
-Global.doPingIfNecessary = function(){
+Global.doPingIfNecessary = function() {
 	var api = new (APIFactory.getAPIClass( 'APIMisc' ))();
 	if ( Global.idle_time < 15 ) {
 		Global.idle_time = 0;
-			return;
-		}
+		return;
+	}
+
+	Global.log( 'User is active again after idle for: ' + Global.idle_time + '... Resetting idle to 0', ' ' );
 	Global.idle_time = 0;
-		if ( LocalCacheData.current_open_primary_controller.viewId === 'LoginView' ) {
-			return;
-		}
-		//Error: Uncaught TypeError: undefined is not a function in /interface/html5/global/Global.js?v=8.0.0-20141230-124906 line 182
-		if ( !api || (typeof api.isLoggedIn) !== 'function' ) {
-			return;
-		}
-		api.isLoggedIn( false, {
-			onResult: function( result ) {
-				var res_data = result.getResult();
 
-				if ( res_data !== true ) {
-					api.ping( {
-						onResult: function() {
+	if ( LocalCacheData.current_open_primary_controller.viewId === 'LoginView' ) {
+		return;
+	}
+	//Error: Uncaught TypeError: undefined is not a function in /interface/html5/global/Global.js?v=8.0.0-20141230-124906 line 182
+	if ( !api || (typeof api.isLoggedIn) !== 'function' ) {
+		return;
+	}
+	api.isLoggedIn( false, {
+		onResult: function( result ) {
+			var res_data = result.getResult();
 
-						}
-					} );
-				}
+			if ( res_data !== true ) {
+				api.ping( {
+					onResult: function() {
 
+					}
+				} );
 			}
-		} );
+
+		}
+	} );
 }
 
 Global.setupPing = function() {
@@ -224,6 +234,9 @@ Global.setupPing = function() {
 	setInterval( timerIncrement, 60000 ); // 1 minute
 	function timerIncrement() {
 		Global.idle_time = Global.idle_time + 1;
+		if ( Global.idle_time >= 15 ) {
+			Global.log( 'User is idle: ' + Global.idle_time, ' ' );
+		}
 	}
 };
 
@@ -896,6 +909,17 @@ Global.isString = function( obj ) {
 	return true;
 };
 
+Global.decodeCellValue = function( val ) {
+	if ( !val || _.isObject( val ) ) return val;
+	val = val.toString();
+	val = val.replace( /\n|\r|(\r\n)|(\u0085)|(\u2028)|(\u2029)/g, '<br>' );
+	val = val.replace( /\n|\r|(\r\n)|(\u0085)|(\u2028)|(\u2029)/g, '<br>' );
+	val = Global.htmlEncode( val );
+	val = val.replace( /&lt;br&gt;/g, '<br>' );
+
+	return val;
+};
+
 Global.buildColumnArray = function( array ) {
 	var columns = [];
 
@@ -1106,6 +1130,133 @@ Global.bottomContainer = function() {
 
 Global.bottomFeedbackContainer = function() {
 	return $( '#feedbackContainer' );
+};
+
+Global.setSignalStrength = function() {
+	if ( Global.signal_timer ) {
+		return;
+	}
+	$( '.signal-strength' ).css( 'display', 'block' );
+	var status = '......';
+	var average_time = 0;
+	var checking_array = [];
+	var single_strength = null;
+	var single_strength_tooltip = null;
+	setTooltip();
+	setTimeout( function() {
+		doPing();
+	}, 10000 );
+	Global.signal_timer = setInterval( function() {
+		doPing();
+	}, 60000 );
+	function doPing() {
+		if ( Global.idle_time >= 15 || (LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId === 'LoginView') ) {
+			return;
+		}
+		ping( ServiceCaller.orginalUrl + 'interface/ping.html?t=' + new Date().getTime(), function( time ) {
+			$( '.signal-strength-empty' ).removeClass( 'signal-strength-empty' );
+
+			if ( checking_array.length >= 3 ) {
+				checking_array.shift();
+			}
+			checking_array.push( time );
+			var total_time = 0;
+			for ( var i = 0; i < checking_array.length; i++ ) {
+				total_time = checking_array[i] + total_time;
+			}
+			average_time = total_time / checking_array.length;
+			Global.log( 'Current Ping: ' + time + 'ms Average: ' + average_time + 'ms Date: ' + (new Date).toISOString().replace( /z|t/gi, ' ' ) );
+
+			status = 'Good';
+			if ( average_time > 400 ) {
+				$( '.signal-strength-pretty-strong' ).addClass( 'signal-strength-empty' );
+				$( '.signal-strength-strong' ).addClass( 'signal-strength-empty' );
+				$( '.signal-strength-weak' ).addClass( 'signal-strength-empty' );
+				status = 'Poor'
+			} else if ( average_time > 250 ) {
+				$( '.signal-strength-pretty-strong' ).addClass( 'signal-strength-empty' );
+				$( '.signal-strength-strong' ).addClass( 'signal-strength-empty' );
+				status = 'Below Average'
+			} else if ( average_time > 150 ) {
+				$( '.signal-strength-pretty-strong' ).addClass( 'signal-strength-empty' );
+				status = 'Average'
+			}
+
+			setTooltip();
+
+		} );
+	}
+
+	function setTooltip() {
+
+		if ( single_strength ) {
+			single_strength.qtip( 'api' ).updateContent( '<div style="width:100%;">' +
+			'<div style="width:100%; clear: both;"><span style="float:left;">' + $.i18n._( "Your Network Connection is" ) + ' ' + status + ' (' + $.i18n._( 'Latency' ) + ': ' + (average_time > 0 ? average_time.toFixed( 0 ) + 'ms' : $.i18n._( 'Calculating...' )) + ')</span></div>' +
+			'</div>' );
+		} else {
+			single_strength = $( '.signal-strength' ).qtip(
+				{
+					show: {
+						when: {event: 'mouseover'},
+						effect: {type: 'fade', length: 0}
+					},
+					position: {
+						adjust: {
+							y: -58
+						}
+					},
+					api: {
+						onRender: function() {
+							single_strength_tooltip = this.elements.tooltip;
+							single_strength_tooltip.attr( 'id', 'single_strength' );
+							$( '#single_strength' ).find( '.qtip-content' ).empty();
+							$( '#single_strength' ).find( '.qtip-content' ).html( '<div style="width:100%;">' +
+							'<div style="width:100%; clear: both;"><span style="float:left;">' + $.i18n._( "Your Network Connection is" ) + ' ' + status + ' (' + $.i18n._( 'Latency' ) + ': ' + (average_time > 0 ? average_time.toFixed( 0 ) + 'ms' : $.i18n._( 'Calculating...' )) + ')</span></div>' +
+							'</div>' );
+						}
+					},
+					style: {
+						name: 'cream',
+						width: 400 //Dynamically changing the width causes display bugs when switching between Absence Policies and thereby widths.
+					},
+					content: '<div style="width:100%;">' +
+					'<div style="width:100%; clear: both;"><span style="float:left;">' + $.i18n._( "Your Network Connection is" ) + ' ' + status + ' (' + $.i18n._( 'Latency' ) + ': ' + (average_time > 0 ? average_time.toFixed( 0 ) + 'ms' : $.i18n._( 'Calculating...' )) + ')</span></div>' +
+					'</div>'
+				} );
+		}
+
+	}
+
+	function ping( url, callback ) {
+		var inUse, start, img, timer;
+		if ( !inUse ) {
+			inUse = true;
+			img = new Image();
+			img.onload = function() {
+				var endTime = new Date().getTime();
+				inUse = false;
+				callback( (endTime - start) );
+
+			};
+			img.onerror = function( e ) {
+				if ( inUse ) {
+					inUse = false;
+					var endTime = new Date().getTime();
+					callback( (endTime - start) );
+				}
+
+			};
+			start = new Date().getTime();
+			img.src = url;
+			timer = setTimeout( function() {
+				if ( inUse ) {
+					var endTime = new Date().getTime();
+					inUse = false;
+					callback( (endTime - start) );
+				}
+			}, 5000 );
+		}
+	}
 };
 
 Global.contentContainer = function() {
@@ -1331,7 +1482,7 @@ Global.isFalseOrNull = function( object ) {
 
 Global.isSet = function( object ) {
 
-	if ( typeof object === 'undefined' || object === null ) {
+	if ( _.isUndefined( object ) || _.isNull( object ) ) {
 		return false;
 	} else {
 		return true;
@@ -1608,10 +1759,13 @@ Global.loadWidget = function( url ) {
 	} );
 
 	ProgressBar.removeProgressBar();
-
-	LocalCacheData.loadedWidgetCache[url] = responseData.responseText;
-
-	return (responseData.responseText);
+	//Error: Uncaught ReferenceError: responseText is not defined in interface/html5/global/Global.js?v=9.0.2-20151106-092147 line 1747
+	if ( !responseData ) {
+		return null;
+	} else {
+		LocalCacheData.loadedWidgetCache[url] = responseData.responseText;
+		return (responseData.responseText);
+	}
 
 };
 
@@ -2229,6 +2383,35 @@ Global.isArrayAndHasItems = function( object ) {
 	return false;
 
 };
+
+Global.isValidInputCodes = function( keyCode ) {
+	var result = true;
+	switch(keyCode){
+		case 9:
+		case 16:
+		case 17:
+		case 18:
+		case 19:
+		case 20:
+		case 33:
+		case 34:
+		case 37:
+		case 38:
+		case 39:
+		case 40:
+		case 45:
+		case 91:
+		case 92:
+		case 93:
+			result = false;
+			break;
+		default:
+			if(keyCode >= 112 && keyCode <= 123){
+				result = false
+			}
+	}
+	return result;
+}
 
 /* jshint ignore:start */
 Global.convertLayoutFilterToAPIFilter = function( layout ) {
@@ -2858,9 +3041,6 @@ Global.setAnalyticDimensions = function( user_name, company_name ) {
 
 Global.sendAnalytics = function( track_address ) {
 	if ( APIGlobal.pre_login_data.analytics_enabled === true ) {
-		if ( APIGlobal.pre_login_data.production !== true ) {
-			Global.log( 'Sending Analytics w/Address: ' + track_address );
-		}
 		// Call this delay so view load goes first
 		setTimeout( function() {
 			ga( 'send', 'pageview', track_address );

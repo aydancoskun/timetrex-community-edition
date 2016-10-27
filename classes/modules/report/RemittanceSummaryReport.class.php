@@ -182,10 +182,20 @@ class RemittanceSummaryReport extends Report {
 				$retval = array(
 										//Dynamic - Aggregate functions can be used
 										'-2060-total' => TTi18n::gettext('Total Deductions'),
-										'-2070-ei_total' => TTi18n::gettext('EI'),
-										'-2080-cpp_total' => TTi18n::gettext('CPP'),
+
+										'-2070-ei_total_earnings' => TTi18n::gettext('EI Insurable Earnings'),
+										'-2071-ei_total' => TTi18n::gettext('EI'),
+										'-2072-expected_ei_total' => TTi18n::gettext('Expected EI'),
+										'-2073-expected_ei_total_diff' => TTi18n::gettext('Expected EI Difference'),
+
+										'-2080-cpp_total_earnings' => TTi18n::gettext('CPP Pensionable Earnings'),
+										'-2081-cpp_total' => TTi18n::gettext('CPP'),
+										'-2082-expected_cpp_total' => TTi18n::gettext('Expected CPP'),
+										'-2083-expected_cpp_total_diff' => TTi18n::gettext('Expected CPP Difference'),
+										
 										'-2090-tax_total' => TTi18n::gettext('Tax'),
-										'-2100-gross_payroll' => TTi18n::gettext('Gross Pay')
+										'-2100-gross_payroll' => TTi18n::gettext('Gross Pay'),
+										'-2200-expected_total_diff' => TTi18n::gettext('Expected Difference'),
 							);
 				break;
 			case 'columns':
@@ -235,6 +245,7 @@ class RemittanceSummaryReport extends Report {
 										'-1130-by_month_by_department' => TTi18n::gettext('by Month/Department'),
 										'-1140-by_month_by_branch_by_department' => TTi18n::gettext('by Month/Branch/Department'),
 
+										'-2000-pier' => TTi18n::gettext('Pensionable & Insurable Earnings Review (PIER)'),
 								);
 
 				break;
@@ -275,6 +286,30 @@ class RemittanceSummaryReport extends Report {
 										//Group By
 										//SubTotal
 										//Sort
+										case 'pier':
+											$retval['-1010-time_period']['time_period'] = 'this_year';
+											
+											$retval['columns'][] = 'first_name';
+											$retval['columns'][] = 'last_name';
+											$retval['columns'][] = 'ei_total_earnings';
+											$retval['columns'][] = 'ei_total';
+											$retval['columns'][] = 'expected_ei_total';
+											$retval['columns'][] = 'expected_ei_total_diff';
+											$retval['columns'][] = 'cpp_total_earnings';
+											$retval['columns'][] = 'cpp_total';
+											$retval['columns'][] = 'expected_cpp_total';
+											$retval['columns'][] = 'expected_cpp_total_diff';
+											//$retval['columns'][] = 'expected_total_diff';
+											$retval['columns'][] = 'gross_payroll';
+
+											$retval['group'][] = 'first_name';
+											$retval['group'][] = 'last_name';
+
+											$retval['sort'][] = array('expected_total_diff' => 'desc');
+											$retval['sort'][] = array('last_name' => 'asc');
+											$retval['sort'][] = array('first_name' => 'asc');
+
+											break;
 										case 'by_pay_period':
 											$retval['-1010-time_period']['time_period'] = 'this_year';
 
@@ -408,13 +443,14 @@ class RemittanceSummaryReport extends Report {
 											$retval['sort'][] = array('default_branch' => 'asc');
 											$retval['sort'][] = array('default_department' => 'asc');
 											break;
-
 									}
 								}
 							}
 
-							$retval['columns'] = array_merge( $retval['columns'], array_keys( Misc::trimSortPrefix( $this->getOptions('dynamic_columns') ) ) );
-
+							if ( $template_keyword != 'pier' ) {
+								//$retval['columns'] = array_merge( $retval['columns'], array_keys( Misc::trimSortPrefix( $this->getOptions('dynamic_columns') ) ) );
+								$retval['columns'] = array_merge( $retval['columns'], array('total', 'ei_total', 'cpp_total', 'tax_total', 'gross_payroll' ) );
+							}
 							break;
 					}
 				}
@@ -483,31 +519,77 @@ class RemittanceSummaryReport extends Report {
 		}
 
 		$this->user_ids = array();
-		
+
+		if ( isset($form_data['gross_payroll']['include_pay_stub_entry_account']) AND is_array($form_data['gross_payroll']['include_pay_stub_entry_account']) ) {
+			$gross_payroll_psea_ids['include'] = $form_data['gross_payroll']['include_pay_stub_entry_account'];
+			$gross_payroll_psea_ids['exclude'] = $form_data['gross_payroll']['exclude_pay_stub_entry_account'];
+		} else {
+			$gross_payroll_psea_ids['include'] = (array)$pseal_obj->getTotalGross();
+			$gross_payroll_psea_ids['exclude'] = array();
+		}
+
+		$cdlf = TTnew( 'CompanyDeductionListFactory' );
+		$cdlf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), array(10, 20), 10 );
+		if ( $cdlf->getRecordCount() > 0 ) {
+			foreach( $cdlf as $cd_obj ) {
+				//Debug::Text('Company Deduction: ID: '. $cd_obj->getID() .' Name: '. $cd_obj->getName(), __FILE__, __LINE__, __METHOD__, 10);
+				if ( in_array( $cd_obj->getCalculation(), array(90, 91) ) ) { //Only consider EI/CPP Formulas
+					$tax_deductions[$cd_obj->getId()] = $cd_obj;
+					$tax_deduction_users[$cd_obj->getId()] = $cd_obj->getUser(); //Optimization so we don't have to get assigned users more than once per obj, as its used lower down in a tighter loop.
+					
+					//Need to determine start/end dates for each CompanyDeduction/User pair, so we can break down total wages earned in the date ranges.
+					$udlf = TTnew( 'UserDeductionListFactory' );
+					$udlf->getByCompanyIdAndCompanyDeductionId( $cd_obj->getCompany(), $cd_obj->getId() );
+					if ( $udlf->getRecordCount() > 0 ) {
+						foreach( $udlf as $ud_obj ) {
+							//Debug::Text('  User Deduction: ID: '. $ud_obj->getID() .' User ID: '. $ud_obj->getUser(), __FILE__, __LINE__, __METHOD__, 10);
+							$user_deduction_data[$ud_obj->getCompanyDeduction()][$ud_obj->getUser()] = $ud_obj;
+						}
+					}
+				}
+
+			}
+			//Debug::Arr($tax_deductions, 'Tax Deductions: ', __FILE__, __LINE__, __METHOD__, 10);
+			//Debug::Arr($user_deduction_data, 'User Deductions: ', __FILE__, __LINE__, __METHOD__, 10);
+		}
+		unset($cdlf, $cd_obj, $udlf, $ud_obj);
+
 		$pself = TTnew( 'PayStubEntryListFactory' );
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		if ( $pself->getRecordCount() > 0 ) {
+			$final_date_stamp = FALSE; //Used for PayrollDeduction class below.
 			foreach( $pself as $pse_obj ) {
 				$user_id = $pse_obj->getColumn('user_id');
 				$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_stub_transaction_date') );
-				$branch = $pse_obj->getColumn('default_branch');
-				$department = $pse_obj->getColumn('default_department');
+				if ( $date_stamp > $final_date_stamp OR $final_date_stamp == FALSE ) {
+					$final_date_stamp = $date_stamp;
+				}
+				//$branch = $pse_obj->getColumn('default_branch');
+				//$department = $pse_obj->getColumn('default_department');
 				$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
+
+				$this->tmp_data['pay_period_ids']['all'][$user_id][] = $pse_obj->getColumn('pay_period_id');
+				if ( !isset($this->tmp_data['pay_period_ids']['cpp'][$user_id]) ) {
+					$this->tmp_data['pay_period_ids']['cpp'][$user_id] = array();
+				}
 
 				if ( !isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]) ) {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] = array(
+																'date_stamp' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
+																'birth_date' => $pse_obj->getColumn('birth_date'), //Its a epoch value, no need to strtotime.
 																'pay_period_start_date' => strtotime( $pse_obj->getColumn('pay_stub_start_date') ),
 																'pay_period_end_date' => strtotime( $pse_obj->getColumn('pay_stub_end_date') ),
 																//Some transaction dates could be throughout the day for terminated employees being paid early, so always forward them to the middle of the day to keep group_by working correctly.
 																'pay_period_transaction_date' => TTDate::getMiddleDayEpoch( strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ) ),
 																'pay_period' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
+																'pay_period_id' => $pse_obj->getColumn('pay_period_id'),
 															);
 
 					$this->form_data['pay_period'][] = strtotime( $pse_obj->getColumn('pay_stub_transaction_date') );
 				}
 
 				if ( isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id]) ) {
-					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id], $pse_obj->getColumn('amount') );
+					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] = ( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] + $pse_obj->getColumn('amount') );
 				} else {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] = $pse_obj->getColumn('amount');
 				}
@@ -516,15 +598,53 @@ class RemittanceSummaryReport extends Report {
 			if ( isset($this->tmp_data['pay_stub_entry']) AND is_array($this->tmp_data['pay_stub_entry']) ) {
 				foreach($this->tmp_data['pay_stub_entry'] as $user_id => $data_a) {
 					foreach($data_a as $date_stamp => $data_b) {
-
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['ei_total']				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['ei']['include_pay_stub_entry_account'], $form_data['ei']['exclude_pay_stub_entry_account'] );
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_total']				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['cpp']['include_pay_stub_entry_account'],	$form_data['cpp']['exclude_pay_stub_entry_account'] );
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['tax_total']				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['tax']['include_pay_stub_entry_account'],	$form_data['tax']['exclude_pay_stub_entry_account'] );
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total']					= ( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['ei_total'] + $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_total'] + $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['tax_total'] );
-						if ( isset($form_data['gross_payroll']['include_pay_stub_entry_account']) AND is_array($form_data['gross_payroll']['include_pay_stub_entry_account']) ) {
-							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['gross_payroll']		= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['gross_payroll']['include_pay_stub_entry_account'],	$form_data['gross_payroll']['exclude_pay_stub_entry_account'] );
-						} else {
-							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['gross_payroll']		= Misc::calculateMultipleColumns( $data_b['psen_ids'], (array)$pseal_obj->getTotalGross(), array() );
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['gross_payroll']			= Misc::calculateMultipleColumns( $data_b['psen_ids'], $gross_payroll_psea_ids['include'],	$gross_payroll_psea_ids['exclude'] );
+
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_total_earnings'] = 0;
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['ei_total_earnings'] = 0;
+						
+						//If we exclude earnings when no CPP/EI deductions are calculated, this improves accuracy for employees who
+						//  opt in/out of EI/CPP throughout the year (ie: not eligible due to age), however it doesn't catch
+						//  cases when the employee should have had something deducted but didnt.
+						//  It also makes cases where the employee earns a small amount on some pay stubs and CPP is not deducted on those due to too low of amount,
+						//  but does on other amounts.
+						//  There is no way to be accurate for both cases at this stage, so we will ignore age eligiblity for now.
+						//  Taking into account the user deduction start/end dates will be the best way to handle CPP/EI start/end calculations.
+						if ( is_array($data_b['psen_ids']) AND isset($tax_deductions) AND isset($user_deduction_data) ) {
+							//Support multiple tax/deductions that deposit to the same pay stub account.
+							//Also make sure we handle tax/deductions that may not have anything deducted/withheld, but do have wages to be displayed.
+							//  For example an employee not earning enough to have tax taken off yet.
+							//Now that user_deduction supports start/end dates per employee, we could use that to better handle employees switching between Tax/Deduction records mid-year
+							//  while still accounting for cases where nothing is deducted/withheld but still needs to be displayed.
+							foreach( $tax_deductions as $tax_deduction_id => $tax_deduction_obj ) {
+								//Found Tax/Deduction associated with this pay stub account.
+								if ( in_array( $user_id, (array)$tax_deduction_users[$tax_deduction_id]) AND isset($user_deduction_data[$tax_deduction_id][$user_id]) ) {
+									//Debug::Text('Found User ID: '. $user_id .' in Tax Deduction Name: '. $tax_deduction_obj->getName() .'('.$tax_deduction_obj->getID().') Calculation ID: '. $tax_deduction_obj->getCalculation(), __FILE__, __LINE__, __METHOD__, 10);
+
+									if ( $tax_deduction_obj->isActiveDate( $user_deduction_data[$tax_deduction_id][$user_id], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_transaction_date'] ) == TRUE
+											AND $tax_deduction_obj->isActiveLengthOfService( $user_deduction_data[$tax_deduction_id][$user_id], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'] ) == TRUE
+											AND $tax_deduction_obj->isActiveUserAge( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['birth_date'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_transaction_date'] ) == TRUE ) {
+											//Debug::Text('  Is Eligible... Date: '. TTDate::getDate('DATE', $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
+
+										if ( $tax_deduction_obj->getCalculation() == 90 AND in_array( $tax_deduction_obj->getPayStubEntryAccount(), (array)$form_data['cpp']['include_pay_stub_entry_account'] ) AND ( !isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_total_earnings']) OR ( isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_total_earnings']) AND $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_total_earnings'] == 0 ) ))  {
+											$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_total_earnings'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $tax_deduction_obj->getIncludePayStubEntryAccount(), $tax_deduction_obj->getExcludePayStubEntryAccount() );
+											
+											$this->tmp_data['pay_period_ids']['cpp'][$user_id][] = $data_b['pay_period_id']; //Only count pay periods with CPP earnings.
+										}
+
+										if ( $tax_deduction_obj->getCalculation() == 91 AND in_array( $tax_deduction_obj->getPayStubEntryAccount(), (array)$form_data['ei']['include_pay_stub_entry_account'] ) AND ( !isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['ei_total_earnings']) OR ( isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['ei_total_earnings']) AND $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['ei_total_earnings'] == 0 ) ) ) {
+											$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['ei_total_earnings'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $tax_deduction_obj->getIncludePayStubEntryAccount(), $tax_deduction_obj->getExcludePayStubEntryAccount() );
+										}
+										//Debug::Text('Total Earnings: CPP '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_total_earnings'] .' EI: '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['ei_total_earnings'], __FILE__, __LINE__, __METHOD__, 10);
+									} else {
+										Debug::Text('  NOT Eligible... Date: '. TTDate::getDate('DATE', $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
+									}
+								}
+							}
 						}
 
 						//Only count users who have some gross payroll or deductions.
@@ -533,8 +653,75 @@ class RemittanceSummaryReport extends Report {
 						}
 					}
 				}
+				unset($tax_deductions, $tax_deduction_users, $tax_deduction_id, $tax_deduction_obj, $user_deduction_data, $user_id, $data_a, $data_b);
+			}
+
+			//Debug::Arr($this->tmp_data['pay_period_ids'], 'Per User Pay Periods: ', __FILE__, __LINE__, __METHOD__, 10);
+
+			//Get PayPeriodSchedule data for each employee.
+			$ppslf = TTNew('PayPeriodScheduleListFactory');
+			$ppslf->getByCompanyIdAndUserId( $this->getUserObject()->getCompany(), $this->user_ids );
+			if ( $ppslf->getRecordCount() > 0 ) {
+				foreach( $ppslf as $pps_obj ) {
+					$this->tmp_data['pay_period_schedule'][(int)$pps_obj->getColumn('user_id')] = $pps_obj->getAnnualPayPeriods();
+				}
+			}
+			
+			require_once( Environment::getBasePath().'/classes/payroll_deduction/PayrollDeduction.class.php');
+			$pd_obj = new PayrollDeduction( 'CA', 'BC' ); //Province doesn't matter as its just for federal calculations.
+			$pd_obj->setDate( $final_date_stamp );
+			Debug::Text(' Payroll Deduction Date: '. TTDate::getDate('DATE+TIME', $final_date_stamp ) .' EI Max Earnings: '. $pd_obj->getEIMaximumEarnings(), __FILE__, __LINE__, __METHOD__, 10);
+			
+			//Calculate expected EI/CPP values only for the very last pay period.
+			if ( isset($this->tmp_data['pay_stub_entry']) AND is_array($this->tmp_data['pay_stub_entry']) ) {
+				foreach($this->tmp_data['pay_stub_entry'] as $user_id => $data_a) {
+					ksort($data_a);
+					$first_date_stamp = array_shift( array_keys( $data_a ) );
+					$last_date_stamp = array_pop( array_keys( $data_a ) );
+
+					$tmp_total_cpp_pay_periods = count( array_unique( $this->tmp_data['pay_period_ids']['cpp'][$user_id] ) );
+					if ( $tmp_total_cpp_pay_periods < 1 ) {
+						$tmp_total_cpp_pay_periods = 1;
+					}
+					$tmp_cpp_pro_rate = bcdiv( $tmp_total_cpp_pay_periods, ( isset($this->tmp_data['pay_period_schedule'][$user_id]) ? $this->tmp_data['pay_period_schedule'][$user_id] : $tmp_total_cpp_pay_periods ) );
+					if ( $tmp_cpp_pro_rate > 1 ) {
+						$tmp_cpp_pro_rate = 1; //This can happen if last year they had 27PP and this year they have 26.
+					}
+
+					$tmp_gross_payroll = array_sum( Misc::arrayColumn($this->tmp_data['pay_stub_entry'][$user_id], 'gross_payroll') );
+					$tmp_cpp_total_earnings = array_sum( Misc::arrayColumn($this->tmp_data['pay_stub_entry'][$user_id], 'cpp_total_earnings') );
+					$tmp_ei_total_earnings = array_sum( Misc::arrayColumn($this->tmp_data['pay_stub_entry'][$user_id], 'ei_total_earnings') );
+					Debug::Text(' User ID: '. $user_id .' PPs: '. $tmp_total_cpp_pay_periods .' First Transaction Date: '. $first_date_stamp .' Last Transaction Date: '. $last_date_stamp .' CPP Earnings: '. $tmp_cpp_total_earnings .' CPP ProRate: '. $tmp_cpp_pro_rate, __FILE__, __LINE__, __METHOD__, 10);
+
+					//Calculate both Employee and Employer amounts, so thats why we multiply by 2.
+					$tmp_cpp_total = ( ( $tmp_cpp_total_earnings - ( $pd_obj->getCPPBasicExemption() * $tmp_cpp_pro_rate ) ) * $pd_obj->getCPPEmployeeRate() );
+					if ( $tmp_cpp_total < 0 ) {
+						$tmp_cpp_total = 0;
+					}
+
+					$tmp_cpp_total_deducted = Misc::MoneyFormat( array_sum( Misc::arrayColumn($this->tmp_data['pay_stub_entry'][$user_id], 'cpp_total') ), FALSE );
+					if ( $tmp_cpp_total_deducted > 0 ) { //If nothing was deducted, assume they are exempt.
+						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total'] = Misc::MoneyFormat( ( ( $tmp_cpp_total > $pd_obj->getCPPEmployeeMaximumContribution() ? $pd_obj->getCPPEmployeeMaximumContribution() : $tmp_cpp_total ) * 2 ), FALSE );
+						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total_diff'] = ( $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total'] - $tmp_cpp_total_deducted );
+					} else {
+						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total'] = $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total_diff'] = NULL;
+					}
+
+					$tmp_ei_total = ( $tmp_ei_total_earnings * $pd_obj->getEIEmployeeRate() );
+					$tmp_ei_total_deducted = Misc::MoneyFormat( array_sum( Misc::arrayColumn($this->tmp_data['pay_stub_entry'][$user_id], 'ei_total') ), FALSE );
+					if ( $tmp_ei_total_deducted > 0 ) { //If nothing was deducted, assume they are exempt.
+						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total'] = Misc::MoneyFormat( ( ( $tmp_ei_total > $pd_obj->getEIEmployeeMaximumContribution() ? $pd_obj->getEIEmployeeMaximumContribution() : $tmp_ei_total ) * ( 1 + $pd_obj->getEIEmployerRate() ) ), FALSE );
+						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total_diff'] = ( $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total'] - $tmp_ei_total_deducted );
+					} else {
+						$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total'] = $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total_diff'] = NULL;
+					}
+
+					$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_total_diff'] = ( $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total_diff'] + $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total_diff'] );
+				}
+				unset($first_date_stamp, $last_date_stamp, $tmp_total_pay_periods, $tmp_cpp_pro_rate, $tmp_gross_payroll, $tmp_cpp_total_earnings, $tmp_ei_total_earnings, $tmp_cpp_total, $tmp_ei_total, $tmp_cpp_total_deducted, $tmp_ei_total_deducted, $user_id, $data_a);
 			}
 		}
+		//Debug::Arr($this->tmp_data['pay_stub_entry'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->user_ids = array_unique( $this->user_ids ); //Used to get the total number of employees.
 
@@ -712,6 +899,85 @@ class RemittanceSummaryReport extends Report {
 
 		parent::_pdf_Header();
 		return TRUE;
+	}
+
+	function _html_Header() {
+		$column_options = array(
+								'cpp_total' => TTi18n::getText('CPP Contributions'),
+								'ei_total' => TTi18n::getText('EI Premiums'),
+								'tax_total' => TTi18n::getText('Tax Deductions'),
+								'total' => TTi18n::getText('This Payment'),
+								'gross_payroll' => TTi18n::getText('Gross Payroll'),
+								'employees' => TTi18n::getText('Total Employees'),
+								'end_remitting_period' => TTi18n::getText('End of Period'),
+								'due_date' => TTi18n::getText('Due Date'),
+							);
+		$columns = array(
+								'cpp_total' => TRUE,
+								'ei_total' => TRUE,
+								'tax_total' => TRUE,
+								'total' => TRUE,
+								'gross_payroll' => TRUE,
+								'employees' => TRUE,
+								'end_remitting_period' => TRUE,
+								'due_date' => TRUE,
+							);
+
+
+		if ( is_array( $columns ) AND count( $columns ) > 0 ) {
+
+			$this->html .= '<style type="text/css">';
+			$this->html .= '.pay-online{ border-top: 5px solid #000000; text-align: center; font-size: ' . $this->_html_fontSize( 200 ) . '% }';
+			$this->html .= '.pay-online a{ border: 5px solid red; width: 40%; display: block; margin: 2 auto; }';
+			$this->html .= '</style>';
+
+			$this->html .= '<table class="content">';
+			$this->html .= '<thead>';
+			$this->html .= '<tr class="content-thead content-header">';
+			foreach( $columns as $column => $tmp ) {
+				if ( isset($column_options[$column]) ) {
+					$this->html .= '<th>'. wordwrap($column_options[$column], $this->config['other']['table_header_word_wrap'], '<br>') .'</th>';
+				} else {
+					$this->html .= '<th>&nbsp;</th>';
+					Debug::Text(' Invalid Column: '. $column, __FILE__, __LINE__, __METHOD__, 10);
+				}
+			}
+			$this->html .= '</tr>';
+			$this->form_data['pay_period'] = array_unique( (array)$this->form_data['pay_period'] );
+			ksort( $this->form_data['pay_period'] );
+			$transaction_date = current( (array)$this->form_data['pay_period'] );
+			Debug::Text('Transaction Date: '. TTDate::getDate('DATE', $transaction_date) .'('.	$transaction_date .')', __FILE__, __LINE__, __METHOD__, 10);
+			$summary_table_data = $this->total_row;
+			$summary_table_data['cpp_total'] = TTi18n::formatCurrency( ( isset($summary_table_data['cpp_total']) ) ? $summary_table_data['cpp_total'] : 0 );
+			$summary_table_data['ei_total'] = TTi18n::formatCurrency( ( isset($summary_table_data['ei_total'] ) ) ? $summary_table_data['ei_total'] : 0 );
+			$summary_table_data['tax_total'] = TTi18n::formatCurrency( ( isset($summary_table_data['tax_total'] ) ) ? $summary_table_data['tax_total'] : 0 );
+			$summary_table_data['total'] = TTi18n::formatCurrency( ( isset($summary_table_data['total'] ) ) ? $summary_table_data['total'] : 0 );
+			$summary_table_data['gross_payroll'] = TTi18n::formatCurrency( ( isset($summary_table_data['gross_payroll'] ) ) ? $summary_table_data['gross_payroll'] : 0 );
+			$summary_table_data['employees'] = count($this->user_ids);
+			$remittance_due_date = Wage::getRemittanceDueDate($transaction_date, ( isset($summary_table_data['total'] ) ) ? $summary_table_data['total'] : 0 );
+			$summary_table_data['due_date'] = ( $remittance_due_date > 0 ) ? TTDate::getDate('DATE', $remittance_due_date ) : TTi18n::getText("N/A");
+			$summary_table_data['end_remitting_period'] = ( $transaction_date > 0 ) ? date('Y-m', $transaction_date) : TTi18n::getText("N/A");
+
+			$this->html .= '<tr>';
+			foreach( $columns as $column => $tmp ) {
+				$value = $summary_table_data[$column];
+				if ( $column == 'total' ) {
+					$this->html .= '<th style="color: rgb(255, 0, 0);">'. wordwrap($value, $this->config['other']['table_header_word_wrap'], '<br>') .'</th>';
+				} else {
+					$this->html .= '<th>'. wordwrap($value, $this->config['other']['table_header_word_wrap'], '<br>') .'</th>';
+				}
+			}
+			$this->html .= '</tr>';
+
+			$this->html .= '<tr><th class="pay-online" colspan="' . count($columns) . '"><a href="http://www.timetrex.com/r.php?id=10100" target="_blank">PAY ONLINE NOW</a></th></tr>';
+			$this->html .= '</thead>';
+			$this->html .= '</table>';
+		}
+
+		parent::_html_Header();
+		return TRUE;
+
+
 	}
 }
 ?>

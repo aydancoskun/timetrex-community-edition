@@ -44,6 +44,17 @@ function getUnauthenticatedAPIClasses() {
 
 //Returns session ID from _COOKIE, _POST, then _GET.
 function getSessionID() {
+
+	//FIXME: Work-around for bug in Mobile app v3.0.86 that uses old SessionIDs in the Cookie, but correct ones on the URL.
+	if ( isset($_COOKIE['SessionID']) AND isset($_GET['SessionID']) AND $_COOKIE['SessionID'] != $_GET['SessionID'] ) {
+		//Debug::Arr( array($_COOKIE, $_POST, $_GET), 'Input Data:', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'WARNING: Two different SessionIDs sent, COOKIE: '. $_COOKIE['SessionID'] .' GET: '. $_GET['SessionID'], __FILE__, __LINE__, __METHOD__, 10);
+		if ( isset($_SERVER['REQUEST_URI']) AND stripos( $_SERVER['REQUEST_URI'], 'APIClientStationUnAuthenticated' ) !== FALSE ) {
+			Debug::Text( 'Using GET Session ID...', __FILE__, __LINE__, __METHOD__, 10);
+			unset($_COOKIE['SessionID']);
+		}
+	}
+
 	if ( isset($_COOKIE['SessionID']) AND $_COOKIE['SessionID'] != '' ) {
 		$session_id = $_COOKIE['SessionID'];
 	} elseif ( isset($_POST['SessionID']) AND $_POST['SessionID'] != '' ) {

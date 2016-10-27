@@ -866,14 +866,19 @@ class HolidayPolicyFactory extends Factory {
 
 
 	function Validate( $ignore_warning = TRUE ) {
-		//If we always do this check, it breaks mass editing of holiday policies.
-		/*
-		if ( $this->isNew() == TRUE AND $this->isSave() == TRUE AND $this->getAbsencePolicyID() == FALSE ) {
-			$this->Validator->isTrue(		'absence_policy_id',
+		if ( $this->getDeleted() != TRUE AND $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing.
+			if ( $this->getName() == '' ) {
+				$this->Validator->isTRUE(	'name',
 											FALSE,
-											TTi18n::gettext('Absence Policy is invalid') );
+											TTi18n::gettext('Please specify a name') );
+			}
+
+			if ( $this->getAbsencePolicyID() == 0 ) {
+				$this->Validator->isTrue(		'absence_policy_id',
+												FALSE,
+												TTi18n::gettext('Please specify an Absence Policy') );
+			}
 		}
-		*/
 
 		return TRUE;
 	}

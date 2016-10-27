@@ -292,6 +292,8 @@ class PunchSummaryReport extends Report {
 							$retval[$column] = 'currency';
 						} elseif ( strpos($column, '_time') OR strpos($column, '_policy') ) {
 							$retval[$column] = 'time_unit';
+						} elseif ( strpos($column, 'total_punch') !== FALSE OR strpos($column, 'total_tainted_punch') !== FALSE ) {
+							$retval[$column] = 'numeric';
 						}
 					}
 				}
@@ -954,10 +956,5 @@ class PunchSummaryReport extends Report {
 
 		return TRUE;
 	}
-/*
-	function _output( $format = NULL ) {
-		return $this->_pdf();
-	}
-*/
 }
 ?>

@@ -17,7 +17,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 		this.script_name = 'PayrollExportReport';
 		this.viewId = 'PayrollExportReport';
 		this.context_menu_name = $.i18n._( 'Payroll Export' );
-		this.navigation_label = $.i18n._( 'Saved Report' );
+		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
 		this.view_file = 'PayrollExportReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIPayrollExportReport' ))();
 		this.include_form_setup = true;
@@ -36,7 +36,8 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 			{option_name: 'chart_type'},
 			{option_name: 'templates'},
 			{option_name: 'setup_fields'},
-			{option_name: 'export_type'}
+			{option_name: 'export_type'},
+			{option_name: 'auto_refresh'}
 		];
 
 		this.initDropDownOptions( options, function( result ) {
@@ -80,11 +81,20 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 			sub_menus: []
 		} );
 
-		var view = new RibbonSubMenu( {
+		var view_html = new RibbonSubMenu( {
 			label: $.i18n._( 'View' ),
-			id: ContextMenuIconName.view,
+			id: ContextMenuIconName.view_html,
 			group: editor_group,
 			icon: Icons.view,
+			permission_result: true,
+			permission: null
+		} );
+
+		var view_pdf = new RibbonSubMenu( {
+			label: $.i18n._( 'PDF' ),
+			id: ContextMenuIconName.view,
+			group: editor_group,
+			icon: Icons.print,
 			permission_result: true,
 			permission: null
 		} );
@@ -180,10 +190,10 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				break;
 			case ContextMenuIconName.view_html:
 
-				this.onViewClick('html');
+				this.onViewClick( 'html' );
 				break;
 			case ContextMenuIconName.view_html_new_window:
-				this.onViewClick('html', true);
+				this.onViewClick( 'html', true );
 				break;
 			case ContextMenuIconName.export_excel:
 				this.onViewExcelClick();
@@ -250,7 +260,16 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				switch ( type ) {
 					case 'adp':
+					case 'adp_advanced':
 						$this.api.getOptions( 'adp_hour_column_options', {
+							onResult: function( result ) {
+								$this.buildAdditionalInputBox( type );
+								$this.buildGrid( type, result.getResult() );
+							}
+						} );
+						break;
+					case 'adp_resource':
+						$this.api.getOptions( 'adp_resource_hour_column_options', {
 							onResult: function( result ) {
 								$this.buildAdditionalInputBox( type );
 								$this.buildGrid( type, result.getResult() );
@@ -286,6 +305,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 					case 'quickbooks_advanced':
 					case 'csv':
 					case 'csv_advanced':
+					case 'sage_50':
 						$this.buildAdditionalInputBox( type );
 						$this.buildGrid( type );
 						break;
@@ -310,7 +330,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 		var column_info = {
 			name: 'column_id',
 			index: 'column_id',
-			label: $.i18n._('Hours'),
+			label: $.i18n._( 'Hours' ),
 			width: 100,
 			sortable: false,
 			title: false
@@ -321,6 +341,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 		switch ( type ) {
 			case 'adp':
+			case 'adp_advanced':
 				columnOptions = Global.buildRecordArray( columnOptions.adp_hour_column_options );
 
 				for ( var i = 0; i < columnOptions.length; i++ ) {
@@ -336,7 +357,36 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				column_info = {
 					name: 'hour_column',
 					index: 'hour_column',
-					label: $.i18n._('ADP Hours'),
+					label: $.i18n._( 'ADP Hours' ),
+					width: 100,
+					sortable: false,
+					formatter: 'select',
+					editable: true,
+					title: false,
+					edittype: 'select',
+					editoptions: {value: column_options_string}
+				};
+				column_info_array.push( column_info );
+
+				hour_code_label = 'ADP Hours Code';
+				break;
+			case 'adp_resource':
+				columnOptions = Global.buildRecordArray( columnOptions.adp_resource_hour_column_options );
+
+				for ( var i = 0; i < columnOptions.length; i++ ) {
+
+					if ( i !== columnOptions.length - 1 ) {
+						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label + ';';
+					} else {
+						column_options_string += columnOptions[i].fullValue + ':' + columnOptions[i].label;
+					}
+
+				}
+
+				column_info = {
+					name: 'hour_column',
+					index: 'hour_column',
+					label: $.i18n._( 'ADP Hours' ),
 					width: 100,
 					sortable: false,
 					formatter: 'select',
@@ -365,7 +415,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				column_info = {
 					name: 'hour_column',
 					index: 'hour_column',
-					label: $.i18n._('Hour Type'),
+					label: $.i18n._( 'Hour Type' ),
 					width: 100,
 					sortable: false,
 					formatter: 'select',
@@ -377,7 +427,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				column_info_array.push( column_info );
 
 				hour_code_label = 'HED Override #'; //Hours Code
-				break;			
+				break;
 			case 'paychex_preview_advanced_job':
 			case 'paychex_preview':
 				hour_code_label = 'Paychex Hours Code';
@@ -418,7 +468,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				column_info = {
 					name: 'hour_column',
 					index: 'hour_column',
-					label: $.i18n._('Columns'),
+					label: $.i18n._( 'Columns' ),
 					width: 100,
 					sortable: false,
 					formatter: 'select',
@@ -430,6 +480,12 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				column_info_array.push( column_info );
 
 				hour_code_label = 'Hours Code';
+				break;
+			case 'compupay':
+				hour_code_label = 'DET Code';
+				break;
+			case 'sage_50':
+				hour_code_label = 'Item Number';
 				break;
 			case 'csv':
 			case 'csv_advanced':
@@ -548,7 +604,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				var export_column_value = export_columns[row.value];
 				// Error: Uncaught TypeError: Cannot read property 'hour_column' of undefined in /interface/html5/#!m=Exception&sm=PayrollExportReport&sid=1726 line 523 
 				if ( !export_column_value ) {
-					if ( default_columns && row.value ) {
+					if ( default_columns && row.value && default_columns[row.value] ) {
 						export_column_value = default_columns[row.value]
 					} else {
 						export_column_value = {};
@@ -559,8 +615,11 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				switch ( type ) {
 					case 'adp':
+					case 'adp_advanced':
+					case 'adp_resource':
 					case 'accero':
 					case 'va_munis':
+					case 'sage_50':
 						if ( !hour_column ) {
 							hour_column = '0';
 						}
@@ -692,7 +751,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				h_box.append( text_box );
 
 				this.addEditFieldToColumn( $.i18n._( 'Company Code' ), [form_item_input, text_box], tab3_column1, '', h_box, true );
-
+				this.setWidgetVisible( [form_item_input, text_box] );
 				form_item_input.bind( 'formItemChange', function( e, target ) {
 					if ( target.getValue() === 0 ) {
 						text_box.css( 'display', 'inline' );
@@ -734,7 +793,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				h_box.append( text_box1 );
 
 				this.addEditFieldToColumn( $.i18n._( 'Batch ID' ), [form_item_input1, text_box1], tab3_column1, '', h_box, true );
-
+				this.setWidgetVisible( [form_item_input1, text_box1] );
 				form_item_input1.bind( 'formItemChange', function( e, target ) {
 					if ( target.getValue() === 0 ) {
 						text_box1.css( 'display', 'inline' );
@@ -771,7 +830,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				h_box.append( form_item_input2 );
 				h_box.append( text_box2 );
 				this.addEditFieldToColumn( $.i18n._( 'Temp Department' ), [form_item_input2, text_box2], tab3_column1, '', h_box, true );
-
+				this.setWidgetVisible( [form_item_input2, text_box2] );
 				form_item_input2.bind( 'formItemChange', function( e, target ) {
 					if ( target.getValue() === 0 ) {
 						text_box2.css( 'display', 'inline' );
@@ -793,6 +852,220 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				$this.export_setup_ui_dic[code2] = $this.edit_view_form_item_dic[code2];
 				delete $this.edit_view_form_item_dic[code2];
+
+				break;
+			case 'adp_advanced':
+			case 'adp_resource': //ADP Resource/Pay Expert
+				//Company code
+				var code = 'company_code';
+				var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+				form_item_input.TComboBox( {field: code} );
+
+				var h_box = $( "<div class='h-box'></div>" );
+
+				var text_box = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+				text_box.css( 'margin-left', '10px' );
+				text_box.TTextInput( {field: code + '_text'} );
+
+				h_box.append( form_item_input );
+				h_box.append( text_box );
+
+				this.addEditFieldToColumn( $.i18n._( 'Company Code' ), [form_item_input, text_box], tab3_column1, '', h_box, true );
+				this.setWidgetVisible( [form_item_input, text_box] );
+				form_item_input.bind( 'formItemChange', function( e, target ) {
+					if ( target.getValue() === 0 ) {
+						text_box.css( 'display', 'inline' );
+						text_box.setValue( $this.export_setup_data[code] );
+					} else {
+						text_box.css( 'display', 'none' );
+					}
+
+				} );
+
+				$this.api.getOptions( 'adp_company_code_options', {
+					onResult: function( result ) {
+
+						var result_data = result.getResult();
+
+						form_item_input.setSourceData( Global.buildRecordArray( result_data ) );
+
+						form_item_input.setValue( $this.export_setup_data[code] );
+						form_item_input.trigger( 'formItemChange', [form_item_input, true] );
+
+					}
+				} );
+
+				$this.export_setup_ui_dic[code] = $this.edit_view_form_item_dic[code];
+				delete $this.edit_view_form_item_dic[code];
+
+				//Batch ID
+				var code1 = 'batch_id';
+				var form_item_input1 = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+				form_item_input1.TComboBox( {field: code1} );
+
+				h_box = $( "<div class='h-box'></div>" );
+
+				var text_box1 = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+				text_box1.css( 'margin-left', '10px' );
+				text_box1.TTextInput( {field: code1 + '_text'} );
+
+				h_box.append( form_item_input1 );
+				h_box.append( text_box1 );
+
+				this.addEditFieldToColumn( $.i18n._( 'Batch ID' ), [form_item_input1, text_box1], tab3_column1, '', h_box, true );
+				this.setWidgetVisible( [form_item_input1, text_box1] );
+				form_item_input1.bind( 'formItemChange', function( e, target ) {
+					if ( target.getValue() === 0 ) {
+						text_box1.css( 'display', 'inline' );
+						text_box1.setValue( $this.export_setup_data[code1] );
+					} else {
+						text_box1.css( 'display', 'none' );
+					}
+				} );
+
+				$this.api.getOptions( 'adp_batch_options', {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						form_item_input1.setSourceData( Global.buildRecordArray( result_data ) );
+						form_item_input1.setValue( $this.export_setup_data[code1] );
+						form_item_input1.trigger( 'formItemChange', [form_item_input1, true] );
+					}
+				} );
+
+				$this.export_setup_ui_dic[code1] = $this.edit_view_form_item_dic[code1];
+				delete $this.edit_view_form_item_dic[code1];
+
+				// Temp Department
+
+				var code2 = 'temp_dept';
+				var form_item_input2 = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+				form_item_input2.TComboBox( {field: code2} );
+
+				h_box = $( "<div class='h-box'></div>" );
+
+				var text_box2 = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+				text_box2.css( 'margin-left', '10px' );
+				text_box2.TTextInput( {field: code2 + '_text'} );
+
+				h_box.append( form_item_input2 );
+				h_box.append( text_box2 );
+				this.addEditFieldToColumn( $.i18n._( 'Temp Department' ), [form_item_input2, text_box2], tab3_column1, '', h_box, true );
+				this.setWidgetVisible( [form_item_input2, text_box2] );
+				form_item_input2.bind( 'formItemChange', function( e, target ) {
+					if ( target.getValue() === 0 ) {
+						text_box2.css( 'display', 'inline' );
+						text_box2.setValue( $this.export_setup_data[code2] );
+					} else {
+						text_box2.css( 'display', 'none' );
+					}
+
+				} );
+
+				$this.api.getOptions( 'adp_temp_dept_options', {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						form_item_input2.setSourceData( Global.buildRecordArray( result_data ) );
+						form_item_input2.setValue( $this.export_setup_data[code2] );
+						form_item_input2.trigger( 'formItemChange', [form_item_input2, true] );
+					}
+				} );
+
+				$this.export_setup_ui_dic[code2] = $this.edit_view_form_item_dic[code2];
+				delete $this.edit_view_form_item_dic[code2];
+
+				// Job Cost #
+				var code3 = 'job_cost';
+				var form_item_input3 = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+				form_item_input3.TComboBox( {field: code3} );
+
+				h_box = $( "<div class='h-box'></div>" );
+
+				var text_box3 = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+				text_box3.css( 'margin-left', '10px' );
+				text_box3.TTextInput( {field: code3 + '_text'} );
+
+				h_box.append( form_item_input3 );
+				h_box.append( text_box3 );
+				this.addEditFieldToColumn( $.i18n._( 'Job Cost #' ), [form_item_input3, text_box3], tab3_column1, '', h_box, true );
+				this.setWidgetVisible( [form_item_input3, text_box3] );
+				form_item_input3.bind( 'formItemChange', function( e, target ) {
+					if ( target.getValue() === 0 ) {
+						text_box3.css( 'display', 'inline' );
+						text_box3.setValue( $this.export_setup_data[code3] );
+					} else {
+						text_box3.css( 'display', 'none' );
+					}
+
+				} );
+
+				$this.api.getOptions( 'adp_job_cost_options', {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						form_item_input3.setSourceData( Global.buildRecordArray( result_data ) );
+						form_item_input3.setValue( $this.export_setup_data[code3] );
+						form_item_input3.trigger( 'formItemChange', [form_item_input3, true] );
+					}
+				} );
+				$this.export_setup_ui_dic[code3] = $this.edit_view_form_item_dic[code3];
+				delete $this.edit_view_form_item_dic[code3];
+
+				// Work Class
+				var code4 = 'work_class';
+				var form_item_input4 = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+				form_item_input4.TComboBox( {field: code4} );
+
+				h_box = $( "<div class='h-box'></div>" );
+
+				var text_box4 = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+				text_box4.css( 'margin-left', '10px' );
+				text_box4.TTextInput( {field: code4 + '_text'} );
+
+				h_box.append( form_item_input4 );
+				h_box.append( text_box4 );
+				this.addEditFieldToColumn( $.i18n._( 'Work Class' ), [form_item_input4, text_box4], tab3_column1, '', h_box, true );
+				this.setWidgetVisible( [form_item_input4, text_box4] );
+				form_item_input4.bind( 'formItemChange', function( e, target ) {
+					if ( target.getValue() === 0 ) {
+						text_box4.css( 'display', 'inline' );
+						text_box4.setValue( $this.export_setup_data[code4] );
+					} else {
+						text_box4.css( 'display', 'none' );
+					}
+
+				} );
+
+				$this.api.getOptions( 'adp_work_class_options', {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						form_item_input4.setSourceData( Global.buildRecordArray( result_data ) );
+						form_item_input4.setValue( $this.export_setup_data[code4] );
+						form_item_input4.trigger( 'formItemChange', [form_item_input4, true] );
+					}
+				} );
+				$this.export_setup_ui_dic[code4] = $this.edit_view_form_item_dic[code4];
+				delete $this.edit_view_form_item_dic[code4];
+
+				//State
+				var code7 = 'state_columns';
+				var form_item_input7 = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+				form_item_input7.TComboBox( {
+					field: code7,
+					set_empty: true
+				} );
+
+				this.addEditFieldToColumn( $.i18n._( 'State' ), form_item_input7, tab3_column1, '', null, true );
+				this.setWidgetVisible( [form_item_input7] );
+				new (APIFactory.getAPIClass( 'APIJobDetailReport' ))().getOptions( 'static_columns', {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						form_item_input7.setSourceData( Global.buildRecordArray( result_data ) );
+						form_item_input7.setValue( $this.export_setup_data[code7] );
+					}
+				} );
+
+				$this.export_setup_ui_dic[code7] = $this.edit_view_form_item_dic[code7];
+				delete $this.edit_view_form_item_dic[code7];
+
 				break;
 			case 'accero':
 				// Temp Department
@@ -809,7 +1082,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				h_box.append( form_item_input2 );
 				h_box.append( text_box2 );
 				this.addEditFieldToColumn( $.i18n._( 'Department Override Code' ), [form_item_input2, text_box2], tab3_column1, '', h_box, true );
-
+				this.setWidgetVisible( [form_item_input2, text_box2] );
 				form_item_input2.bind( 'formItemChange', function( e, target ) {
 					if ( target.getValue() === 0 ) {
 						text_box2.css( 'display', 'inline' );
@@ -831,7 +1104,8 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				$this.export_setup_ui_dic[code2] = $this.edit_view_form_item_dic[code2];
 				delete $this.edit_view_form_item_dic[code2];
-				break;			
+
+				break;
 			case 'va_munis':
 				//Department
 				code = 'department';
@@ -848,7 +1122,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				h_box.append( text_box );
 
 				this.addEditFieldToColumn( $.i18n._( 'Department' ), [form_item_input, text_box], tab3_column1, '', h_box, true );
-
+				this.setWidgetVisible( [form_item_input, text_box] );
 				form_item_input.bind( 'formItemChange', function( e, target ) {
 					if ( target.getValue() === 0 ) {
 						text_box.css( 'display', 'inline' );
@@ -891,7 +1165,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				h_box.append( text_box1 );
 
 				this.addEditFieldToColumn( $.i18n._( 'Employee Number' ), [form_item_input1, text_box1], tab3_column1, '', h_box, true );
-
+				this.setWidgetVisible( [form_item_input1, text_box1] );
 				form_item_input1.bind( 'formItemChange', function( e, target ) {
 					if ( target.getValue() === 0 ) {
 						text_box1.css( 'display', 'inline' );
@@ -931,7 +1205,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				h_box.append( form_item_input2 );
 				h_box.append( text_box2 );
 				this.addEditFieldToColumn( $.i18n._( 'Long GL Account' ), [form_item_input2, text_box2], tab3_column1, '', h_box, true );
-
+				this.setWidgetVisible( [form_item_input2, text_box2] );
 				form_item_input2.bind( 'formItemChange', function( e, target ) {
 					if ( target.getValue() === 0 ) {
 						text_box2.css( 'display', 'inline' );
@@ -958,6 +1232,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				$this.export_setup_ui_dic[code2] = $this.edit_view_form_item_dic[code2];
 				delete $this.edit_view_form_item_dic[code2];
+
 				break;
 			case 'ceridian_insync':
 				// Employer Number
@@ -965,10 +1240,12 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 				form_item_input.TTextInput( {field: code} );
 				this.addEditFieldToColumn( $.i18n._( 'Employer Number' ), form_item_input, tab3_column1, '', null, true );
+				this.setWidgetVisible( [form_item_input] );
 				form_item_input.setValue( $this.export_setup_data[code] );
 
 				$this.export_setup_ui_dic[code] = $this.edit_view_form_item_dic[code];
 				delete $this.edit_view_form_item_dic[code];
+
 				break;
 			case 'paychex_preview':
 				// Client Number
@@ -976,18 +1253,20 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 				form_item_input.TTextInput( {field: code} );
 				this.addEditFieldToColumn( $.i18n._( 'Client Number' ), form_item_input, tab3_column1, '', null, true );
+				this.setWidgetVisible( [form_item_input] );
 				form_item_input.setValue( $this.export_setup_data[code] );
 
 				$this.export_setup_ui_dic[code] = $this.edit_view_form_item_dic[code];
 				delete $this.edit_view_form_item_dic[code];
-				break;
 
+				break;
 			case 'paychex_preview_advanced_job':
 				// Client Number
 				code = 'client_number_adv';
 				form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 				form_item_input.TTextInput( {field: code} );
 				this.addEditFieldToColumn( $.i18n._( 'Client Number' ), form_item_input, tab3_column1, '', null, true );
+				this.setWidgetVisible( [form_item_input] );
 				form_item_input.setValue( $this.export_setup_data['client_number'] );
 
 				$this.export_setup_ui_dic[code] = $this.edit_view_form_item_dic[code];
@@ -1005,7 +1284,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				} );
 
 				this.addEditFieldToColumn( $.i18n._( 'Job' ), form_item_input1, tab3_column1, '', null, true );
-
+				this.setWidgetVisible( [form_item_input1] );
 				new (APIFactory.getAPIClass( 'APIJobDetailReport' ))().getOptions( 'static_columns', {
 					onResult: function( result ) {
 						var result_data = result.getResult();
@@ -1026,7 +1305,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				} );
 
 				this.addEditFieldToColumn( $.i18n._( 'State' ), form_item_input2, tab3_column1, '', null, true );
-
+				this.setWidgetVisible( [form_item_input2] );
 				new (APIFactory.getAPIClass( 'APIJobDetailReport' ))().getOptions( 'static_columns', {
 					onResult: function( result ) {
 						var result_data = result.getResult();
@@ -1043,6 +1322,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 				form_item_input.TCheckbox( {field: code} );
 				this.addEditFieldToColumn( $.i18n._( 'Include Override Rates' ), form_item_input, tab3_column1, '', null, true );
+				this.setWidgetVisible( [form_item_input] );
 				form_item_input.setValue( $this.export_setup_data[code] );
 
 				$this.export_setup_ui_dic[code] = $this.edit_view_form_item_dic[code];
@@ -1051,7 +1331,6 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				break;
 			case 'quickbooks':
 			case 'quickbooks_advanced':
-
 				// Company Name
 				code = 'company_name';
 				form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -1060,6 +1339,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				var containerWithTextTip = this.buildWidgetContainerWithTextTip( form_item_input, '(Exactly as shown in Quickbooks)' );
 
 				this.addEditFieldToColumn( $.i18n._( 'Company Name' ), form_item_input, tab3_column1, '', containerWithTextTip, true );
+				this.setWidgetVisible( [form_item_input] );
 				form_item_input.setValue( $this.export_setup_data[code] );
 
 				$this.export_setup_ui_dic[code] = $this.edit_view_form_item_dic[code];
@@ -1073,6 +1353,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				containerWithTextTip = this.buildWidgetContainerWithTextTip( form_item_input, '(Exactly as shown in exported timer list)' );
 
 				this.addEditFieldToColumn( $.i18n._( 'Company Created Time' ), form_item_input, tab3_column1, '', containerWithTextTip, true );
+				this.setWidgetVisible( [form_item_input] );
 				form_item_input.setValue( $this.export_setup_data[code] );
 
 				$this.export_setup_ui_dic[code] = $this.edit_view_form_item_dic[code];
@@ -1086,7 +1367,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				} );
 
 				this.addEditFieldToColumn( $.i18n._( 'Map PROJ Field To' ), form_item_input1, tab3_column1, '', null, true );
-
+				this.setWidgetVisible( [form_item_input1] );
 				this.api.getOptions( 'quickbooks_proj_options', {
 					onResult: function( result ) {
 						var result_data = result.getResult();
@@ -1106,7 +1387,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				} );
 
 				this.addEditFieldToColumn( $.i18n._( 'Map ITEM Field To' ), form_item_input2, tab3_column1, '', null, true );
-
+				this.setWidgetVisible( [form_item_input2] );
 				this.api.getOptions( 'quickbooks_proj_options', {
 					onResult: function( result ) {
 						var result_data = result.getResult();
@@ -1126,7 +1407,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				} );
 
 				this.addEditFieldToColumn( $.i18n._( 'Map JOB Field To' ), form_item_input3, tab3_column1, '', null, true );
-
+				this.setWidgetVisible( [form_item_input3] );
 				this.api.getOptions( 'quickbooks_proj_options', {
 					onResult: function( result ) {
 						var result_data = result.getResult();
@@ -1137,6 +1418,50 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				$this.export_setup_ui_dic[code3] = $this.edit_view_form_item_dic[code3];
 				delete $this.edit_view_form_item_dic[code3];
+
+				break;
+			case 'sage_50':
+				//Company code
+				var code = 'customer_name';
+				var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+				form_item_input.TComboBox( {field: code} );
+
+				var h_box = $( "<div class='h-box'></div>" );
+
+				var text_box = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+				text_box.css( 'margin-left', '10px' );
+				text_box.TTextInput( {field: code + '_text'} );
+
+				h_box.append( form_item_input );
+				h_box.append( text_box );
+
+				this.addEditFieldToColumn( $.i18n._( 'Customer Name' ), [form_item_input, text_box], tab3_column1, '', h_box, true );
+				this.setWidgetVisible( [form_item_input, text_box] );
+				form_item_input.bind( 'formItemChange', function( e, target ) {
+					if ( target.getValue() === 0 ) {
+						text_box.css( 'display', 'inline' );
+						text_box.setValue( $this.export_setup_data[code] );
+					} else {
+						text_box.css( 'display', 'none' );
+					}
+
+				} );
+
+				$this.api.getOptions( 'sage_50_customer_name_options', {
+					onResult: function( result ) {
+
+						var result_data = result.getResult();
+
+						form_item_input.setSourceData( Global.buildRecordArray( result_data ) );
+
+						form_item_input.setValue( $this.export_setup_data[code] );
+						form_item_input.trigger( 'formItemChange', [form_item_input, true] );
+
+					}
+				} );
+
+				$this.export_setup_ui_dic[code] = $this.edit_view_form_item_dic[code];
+				delete $this.edit_view_form_item_dic[code];
 
 				break;
 			case 'csv_advanced':
@@ -1152,7 +1477,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				} );
 
 				this.addEditFieldToColumn( $.i18n._( 'Export Columns' ), form_item_input, tab3_column1, '', null, true );
-
+				this.setWidgetVisible( [form_item_input] );
 				this.api.getOptions( 'export_columns', 'csv_advanced', {
 					onResult: function( result ) {
 						var result_data = result.getResult();
@@ -1163,13 +1488,12 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 				$this.export_setup_ui_dic[code] = $this.edit_view_form_item_dic[code];
 				delete $this.edit_view_form_item_dic[code];
+
 				break;
 			default:
 				break;
-
 		}
 
-		this.setEditViewWidgetsMode();
 		this.editFieldResize( 3 );
 	},
 
@@ -1212,7 +1536,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 			columns[item.column_id_key] = {};
 			columns[item.column_id_key].hour_code = item.hour_code;
 
-			if ( type === 'adp' || type === 'accero' || type === 'va_munis' ) {
+			if ( type === 'adp' || type === 'adp_advanced' || type === 'adp_resource' || type === 'accero' || type === 'va_munis' ) {
 				columns[item.column_id_key].hour_column = item.hour_column;
 			}
 
@@ -1251,6 +1575,40 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 						other.temp_dept = this.edit_view_ui_dic.temp_dept.getValue();
 					}
 
+					break;
+				case 'adp_advanced':
+				case 'adp_resource':
+					if ( !this.edit_view_ui_dic.company_code.getValue() ) {
+						other.company_code = this.edit_view_ui_dic.company_code_text.getValue();
+					} else {
+						other.company_code = this.edit_view_ui_dic.company_code.getValue();
+					}
+
+					if ( !this.edit_view_ui_dic.batch_id.getValue() ) {
+						other.batch_id = this.edit_view_ui_dic.batch_id_text.getValue();
+					} else {
+						other.batch_id = this.edit_view_ui_dic.batch_id.getValue();
+					}
+
+					if ( !this.edit_view_ui_dic.temp_dept.getValue() ) {
+						other.temp_dept = this.edit_view_ui_dic.temp_dept_text.getValue();
+					} else {
+						other.temp_dept = this.edit_view_ui_dic.temp_dept.getValue();
+					}
+
+					if ( !this.edit_view_ui_dic.job_cost.getValue() ) {
+						other.job_cost = this.edit_view_ui_dic.job_cost_text.getValue();
+					} else {
+						other.job_cost = this.edit_view_ui_dic.job_cost.getValue();
+					}
+
+					if ( !this.edit_view_ui_dic.work_class.getValue() ) {
+						other.work_class = this.edit_view_ui_dic.work_class_text.getValue();
+					} else {
+						other.work_class = this.edit_view_ui_dic.work_class.getValue();
+					}
+
+					other.state_columns = this.edit_view_ui_dic.state_columns.getValue();
 					break;
 				case 'accero':
 					if ( !this.edit_view_ui_dic.temp_dept.getValue() ) {
@@ -1299,6 +1657,14 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 						other.gl_account = this.edit_view_ui_dic.gl_account.getValue();
 					}
 					break;
+				case 'sage_50':
+					if ( !this.edit_view_ui_dic.customer_name.getValue() ) {
+						other.customer_name = this.edit_view_ui_dic.customer_name_text.getValue();
+					} else {
+						other.customer_name = this.edit_view_ui_dic.customer_name.getValue();
+					}
+
+					break;
 				case 'csv_advanced':
 					other.csv_export_columns = this.edit_view_ui_dic.csv_export_columns.getValue();
 					break;
@@ -1332,6 +1698,45 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 					}
 
 					break;
+				case 'adp_advanced':
+				case 'adp_resource':
+					if ( !this.edit_view_ui_dic.company_code.getValue() ) {
+						other[other.export_type].company_code = 0;
+						other[other.export_type].company_code_value = this.edit_view_ui_dic.company_code_text.getValue();
+					} else {
+						other[other.export_type].company_code = this.edit_view_ui_dic.company_code.getValue();
+					}
+
+					if ( !this.edit_view_ui_dic.batch_id.getValue() ) {
+						other[other.export_type].batch_id = 0;
+						other[other.export_type].batch_id_value = this.edit_view_ui_dic.batch_id_text.getValue();
+					} else {
+						other[other.export_type].batch_id = this.edit_view_ui_dic.batch_id.getValue();
+					}
+
+					if ( !this.edit_view_ui_dic.temp_dept.getValue() ) {
+						other[other.export_type].temp_dept = 0;
+						other[other.export_type].temp_dept_value = this.edit_view_ui_dic.temp_dept_text.getValue();
+					} else {
+						other[other.export_type].temp_dept = this.edit_view_ui_dic.temp_dept.getValue();
+					}
+
+					if ( !this.edit_view_ui_dic.job_cost.getValue() ) {
+						other[other.export_type].job_cost = 0;
+						other[other.export_type].job_cost_value = this.edit_view_ui_dic.job_cost_text.getValue();
+					} else {
+						other[other.export_type].job_cost = this.edit_view_ui_dic.job_cost.getValue();
+					}
+
+					if ( !this.edit_view_ui_dic.work_class.getValue() ) {
+						other[other.export_type].work_class = 0;
+						other[other.export_type].work_class_value = this.edit_view_ui_dic.work_class_text.getValue();
+					} else {
+						other[other.export_type].work_class = this.edit_view_ui_dic.work_class.getValue();
+					}
+
+					other[other.export_type].state_columns = this.edit_view_ui_dic.state_columns.getValue();
+					break;
 				case 'accero':
 					if ( !this.edit_view_ui_dic.temp_dept.getValue() ) {
 						other[other.export_type].temp_dept = 0;
@@ -1340,7 +1745,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 						other[other.export_type].temp_dept = this.edit_view_ui_dic.temp_dept.getValue();
 					}
 
-					break;				
+					break;
 				case 'paychex_preview':
 					other[other.export_type].client_number = this.edit_view_ui_dic.client_number.getValue();
 					break;
@@ -1381,6 +1786,14 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 						other[other.export_type].gl_account_value = this.edit_view_ui_dic.gl_account_text.getValue();
 					} else {
 						other[other.export_type].gl_account = this.edit_view_ui_dic.gl_account.getValue();
+					}
+					break;
+				case 'sage_50':
+					if ( !this.edit_view_ui_dic.customer_name.getValue() ) {
+						other[other.export_type].customer_name = 0;
+						other[other.export_type].customer_name_value = this.edit_view_ui_dic.customer_name_text.getValue();
+					} else {
+						other[other.export_type].customer_name = this.edit_view_ui_dic.customer_name.getValue();
 					}
 					break;
 				case 'csv_advanced':

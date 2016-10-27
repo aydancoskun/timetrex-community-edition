@@ -120,6 +120,7 @@ class APIInstall extends APIFactory {
 				$retval['mcrypt'] = $install_obj->checkMCRYPT();
 				$retval['simplexml'] = $install_obj->checkSimpleXML();
 				$retval['zip'] = $install_obj->checkZIP();
+				$retval['openssl'] = $install_obj->checkOpenSSL();
 				$retval['mail'] = $install_obj->checkMAIL();
 				$retval['pear'] = $install_obj->checkPEAR();
 				$retval['safe_mode'] = $install_obj->checkPHPSafeMode();

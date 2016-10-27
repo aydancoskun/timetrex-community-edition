@@ -199,7 +199,9 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 				}
 			}
 
-			return $pay_codes;
+			if ( isset($pay_codes) ) {
+				return $pay_codes;
+			}
 		}
 
 		return FALSE;

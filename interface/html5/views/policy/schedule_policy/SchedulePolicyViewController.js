@@ -283,8 +283,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 			if ( Global.isSet( widget ) ) {
 				switch ( key ) {
 					case 'country': //popular case
-						this.eSetProvince( this.current_edit_record[key] );
-						widget.setValue( this.current_edit_record[key] );
+						this.setCountryValue(widget, key);
 						break;
 					default:
 						widget.setValue( this.current_edit_record[key] );

@@ -26,8 +26,6 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 		this.document_object_type_id = 10;
 
-		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
-
 		this.render();
 		this.buildContextMenu();
 
@@ -136,6 +134,19 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 		form_item_input.parent().width( '45%' );
 
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			allow_multiple_selection: false,
+			layout_name: ALayoutIDs.USER,
+			show_search_inputs: true,
+			set_empty: true,
+			field: 'created_by_id'
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Created By' ), form_item_input, tab_recurring_template_column1 );
+
+		form_item_input.parent().width( '45%' );
+
 		//Inside editor
 
 		var inside_editor_div = tab_recurring_template.find( '.inside-editor-div' );
@@ -203,7 +214,13 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 	setEditViewDataDone: function() {
 		this._super( 'setEditViewDataDone' );
-		this.initInsideEditorData();
+		if ( !this.is_mass_editing ) {
+			this.initInsideEditorData();
+			this.edit_view.find( '.inside-editor-div' ).show();
+		} else {
+			this.edit_view.find( '.inside-editor-div' ).hide();
+		}
+
 	},
 
 	initInsideEditorData: function() {
@@ -689,12 +706,13 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 	},
 
 	uniformVariable: function( records ) {
-		records.recurring_schedule_template = this.editor.getValue( this.refresh_id );
-		;
+		if ( !this.is_mass_editing ) {
+			records.recurring_schedule_template = this.editor.getValue( this.refresh_id );
+		}
 		return records;
 	},
 
-	onCopyAsNewClick: function() {
+	_continueDoCopyAsNew: function() {
 		var $this = this;
 		this.is_add = true;
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
@@ -707,6 +725,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			navigation_div.css( 'display', 'none' );
 			this.setEditMenu();
 			this.setTabStatus();
+			this.is_changed = false;
 			ProgressBar.closeOverlay();
 
 		} else {
@@ -960,6 +979,15 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
+		var mass_edit = new RibbonSubMenu( {
+			label: $.i18n._( 'Mass<br>Edit' ),
+			id: ContextMenuIconName.mass_edit,
+			group: editor_group,
+			icon: Icons.mass_edit,
+			permission_result: true,
+			permission: null
+		} );
+
 		var del = new RibbonSubMenu( {
 			label: $.i18n._( 'Delete' ),
 			id: ContextMenuIconName.delete_icon,
@@ -1088,6 +1116,10 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			case ContextMenuIconName.edit:
 				ProgressBar.showOverlay();
 				this.onEditClick();
+				break;
+			case ContextMenuIconName.mass_edit:
+				ProgressBar.showOverlay();
+				this.onMassEditClick();
 				break;
 			case ContextMenuIconName.delete_icon:
 				ProgressBar.showOverlay();

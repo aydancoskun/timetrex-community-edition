@@ -243,33 +243,20 @@
 
 		this.setEnabled = function( val ) {
 			enabled = val;
-			var edit_icon_div = $( this ).find( '.edit-columnIcon-div' );
 			if ( val === false || val === '' ) {
 				$this.addClass( 'a-combobox-readonly' );
-
 				if ( check_box ) {
 					check_box.hide();
 				}
-				if ( $this.shouldInitColumns() ) { //Sort Selector in search panel
-					edit_icon_div.css( 'display', 'none' );
-				}
-
 				if ( !this.children().eq( 1 ).text() ) {
 					this.children().eq( 1 ).text( $.i18n._( 'N/A' ) );
 				}
-
 			} else {
 				$this.removeClass( 'a-combobox-readonly' );
 
 				if ( check_box ) {
 					check_box.show();
 				}
-
-				if ( $this.shouldInitColumns() ) { //Sort Selector in search panel
-
-					edit_icon_div.css( 'display', 'inline-block' );
-				}
-
 				if ( !this.children().eq( 1 ).text() === $.i18n._( 'N/A' ) ) {
 					this.children().eq( 1 ).text( '' );
 				}
@@ -298,7 +285,7 @@
 
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-				'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+					'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
@@ -427,41 +414,48 @@
 
 		this.getValue = function( return_full_value ) {
 			var return_value = null;
-
 			if ( allow_multiple_selection ) {
 				if ( return_full_value ) {
 					return_value = select_items;
 				} else {
 					return_value = [];
-
 					if ( Global.isArray( select_items ) ) {
 						$.each( select_items, function( index, content ) {
-
-							if ( Global.isString( content ) || $.type( content ) === 'number' ) {
-								return_value.push( content );
-							} else {
-								return_value.push( content[key] );
+							// In 1891, one value in select items is null
+							if ( content ) {
+								if ( Global.isString( content ) || $.type( content ) === 'number' ) {
+									return_value.push( content );
+								} else {
+									return_value.push( content[key] );
+								}
 							}
-
 						} );
-
 						if ( select_items.length === 0 ) {
 							if ( set_any ) {
-//								return_value = -1;
 								return_value.push( -1 ); // In fact, if the columns can be multiple selected. and no have any options selected, it's should be return an array.
 							}
 						}
 					} else {
 						if ( set_any ) {
-//							return_value = -1;
 							return_value.push( -1 ); // In fact, if the columns can be multiple selected. and no have any options selected, it's should be return an array.
 						}
 					}
-
+					// Return false when no selected value
+					if ( return_value.length === 0 ) {
+						if ( set_any ) {
+							return_value = -1;
+						} else if ( set_empty ) {
+							return_value = 0;
+						} else if ( set_special_empty ) {
+							return_value = -1;
+						} else if ( set_open ) {
+							return_value = 0;
+						} else if ( set_default ) {
+							return_value = 0;
+						}
+					}
 				}
-
 			} else {
-
 				if ( return_full_value ) {
 					return_value = select_item
 				} else {
@@ -470,7 +464,6 @@
 						if ( Global.isSet( select_item[key] ) ) {
 							return_value = select_item[key];
 						} else {
-
 							return_value = select_item;
 						}
 
@@ -492,7 +485,6 @@
 			}
 
 			return return_value;
-
 		};
 
 		this.setSourceData = function( val ) {
@@ -551,6 +543,14 @@
 			return row_per_page;
 		};
 
+		this.setAllColumns = function( value ) {
+			all_columns = value;
+		};
+
+		this.setDisplayColumnsForEditor = function( value ) {
+			display_columns_in_columnEditor = value;
+		};
+
 		this.getAllColumns = function() {
 
 			if ( possible_display_columns ) {
@@ -563,16 +563,25 @@
 			return display_columns_in_columnEditor;
 		};
 
-		this.setValue = function( val ) {
-			if ( allow_multiple_selection ) {
+		this.setEmptyValueAndShowLoading = function() {
+			var current_width = $this.find( '.a-combobox-label' ).width();
+			this.setValue( null );
+			label_span.text( Global.loading_label );
+			$this.find( '.a-combobox-label' ).width( current_width + 'px' );
+		};
 
+		this.setValue = function( val ) {
+			// Related to 1891, one case is value is [null] in vacatuon_psea_ids in ROE edit view
+			if ( _.isArray( val ) && val.length === 1 && val[0] === null ) {
+				val = null;
+			}
+			if ( allow_multiple_selection ) {
 				if ( !val || $.type( val ) === 'array' ) {
 					this.setSelectItems( val )
 				} else if ( $.type( val ) === 'string' || $.type( val ) === 'number' ) {
 					this.setSelectItems( [val] );
 				}
 			} else {
-
 				if ( $.type( val ) === 'array' && val.length > 0 ) {
 					val = val[0];
 				}
@@ -600,7 +609,7 @@
 			if ( Global.isSet( api_class ) ) {
 
 				//Try api awesomebox first
-				if ( parseInt( val ) === -1 || parseInt( val ) === 0 ) {
+				if ( parseInt( val ) <= 0 ) {
 
 					if ( allow_multiple_selection ) {
 						$this.setValue( [this.getLocalSelectItem( val )] );
@@ -617,6 +626,8 @@
 				if ( this.customSearchFilter ) {
 					filter = this.customSearchFilter( filter );
 				}
+
+				label_span.text( Global.loading_label );
 
 				api['get' + custom_key_name]( filter, {
 					onResult: function( result ) {
@@ -882,8 +893,8 @@
 				}
 
 			} else {
-
-				if ( !select_item ) {
+				// Error: Uncaught TypeError: Cannot read property 'length' of null in interface/html5/global/widgets/awesomebox/AComboBox.js?v=9.0.6-20151231-140748 line 902
+				if ( !select_item || !display_columns ) {
 					this.setEmptyLabel();
 					return;
 				}
@@ -918,6 +929,8 @@
 
 				}
 			}
+
+			$this.find( '.a-combobox-label' ).width( 'auto' );
 
 		};
 
@@ -1273,6 +1286,10 @@
 
 		};
 
+		this.getADropDown = function() {
+			return a_dropdown_div;
+		};
+
 		this.onClose = function( e, target ) {
 
 			if ( allow_multiple_selection ) {
@@ -1298,7 +1315,7 @@
 
 			LocalCacheData.openAwesomeBox = null;
 
-			if ( a_dropdown.isChanged() ) {
+			if ( a_dropdown.isChanged() || layout_name === ALayoutIDs.SORT_COLUMN ) {
 				if ( check_box ) {
 					$this.setCheckBox( true );
 				}
@@ -1342,6 +1359,7 @@
 
 					select_item = next_select_item;
 					a_dropdown.setSelectItem( next_select_item );
+					a_dropdown.setIsChanged( true );
 				}
 			} else if ( e.keyCode === 38 ) { //Up
 
@@ -1359,22 +1377,21 @@
 					next_select_item = this.getItemByIndex( next_index );
 					select_item = next_select_item;
 					a_dropdown.setSelectItem( next_select_item );
+					a_dropdown.setIsChanged( true );
 				}
 			} else if ( e.keyCode === 39 ) { //right
 
-				e.preventDefault();
-
-				if ( allow_multiple_selection ) {
-
+				if ( allow_multiple_selection && !$( e.target ).hasClass( 'search-input' ) ) {
+					e.preventDefault();
 					a_dropdown.onUnSelectGridDoubleClick();
+					a_dropdown.setIsChanged( true );
 				}
 			} else if ( e.keyCode === 37 ) { //left
 
-				e.preventDefault();
-
-				if ( allow_multiple_selection ) {
-
+				if ( allow_multiple_selection && !$( e.target ).hasClass( 'search-input' ) ) {
+					e.preventDefault();
 					a_dropdown.onSelectGridDoubleClick();
+					a_dropdown.setIsChanged( true );
 				}
 			} else {
 
@@ -1416,6 +1433,7 @@
 						next_select_item = target_grid.jqGrid( 'getGridParam', 'data' )[next_index];
 						select_item = next_select_item;
 						a_dropdown.setSelectItem( next_select_item, target_grid );
+						a_dropdown.setIsChanged( true );
 						quick_search_dic = {};
 						quick_search_dic[quick_search_typed_keys] = search_index + 1;
 					}
@@ -1438,7 +1456,7 @@
 						next_select_item = this.getItemByIndex( next_index );
 						select_item = next_select_item;
 						a_dropdown.setSelectItem( next_select_item );
-
+						a_dropdown.setIsChanged( true );
 						quick_search_dic = {};
 						quick_search_dic[quick_search_typed_keys] = search_index + 1;
 					}
@@ -2070,7 +2088,7 @@
 						$.each( sort_by_unselect_columns, function( index1, content1 ) {
 							if ( content1.value === key ) {
 								content1.sort = content[key];
-								sort_by_select_columns.push( content1 )
+								sort_by_select_columns.push( content1 );
 								return false;
 							}
 						} );
@@ -2086,11 +2104,9 @@
 		this.each( function() {
 			var o = $.meta ? $.extend( {}, opts, $( this ).data() ) : opts;
 			label_span = $( this ).find( '.a-combobox-label' );
-			var edit_icon_div = $( this ).find( '.edit-columnIcon-div' );
-			var edit_icon = $( this ).find( '.edit_column_icon' );
 			var focus_input = $( this ).find( '.focus-input' );
 
-			if( o.extendDataProcessWhenSearch){
+			if ( o.extendDataProcessWhenSearch ) {
 				extendDataProcessWhenSearch = o.extendDataProcessWhenSearch;
 			}
 
@@ -2279,56 +2295,15 @@
 				$this.hideErrorTip();
 			} );
 
-			if ( $this.shouldInitColumns() ) { //Sort Selector in search panel
-				if ( !o.width ) {
-					$( this ).css( 'min-width', '194px' );
-				} else {
-					$( this ).css( 'min-width', (o.width + 60) + 'px' );
-				}
-
-				edit_icon_div.css( 'display', 'inline-block' );
-				edit_icon.attr( 'src', Global.getRealImagePath( 'images/edit.png' ) );
-
-				//OPen Column editor
-				edit_icon_div.click( function( e ) {
-					e.preventDefault();
-					e.stopPropagation();
-
-					if ( !enabled ) {
-						return;
-					}
-					api.getOptions( column_option_key, {
-						onResult: function( columns_result ) {
-
-							column_editor = Global.loadWidget( 'global/widgets/column_editor/ColumnEditor.html' );
-							column_editor = $( column_editor );
-							column_editor.find( '#save_btn' ).text( $.i18n._( 'Save and Close' ) );
-							column_editor.find( '#close_btn' ).text( $.i18n._( 'Close' ) );
-							column_editor.find( '.rows-per-page' ).text( $.i18n._( 'Rows Per Page' ) + ':' );
-							column_editor.find( '.choose-layout' ).text( $.i18n._( 'Choose Layout' ) + ':' );
-
-							column_editor = column_editor.ColumnEditor( {parent_awesome_box: $this} );
-
-							var columns_result_data = columns_result.getResult();
-							all_columns = Global.buildColumnArray( columns_result_data );
-							display_columns_in_columnEditor = $this.buildDisplayColumnsForEditor();
-
-							//Open Column Editor;
-							column_editor.show();
-
-						}
-					} );
-
-				} );
-
+			if ( !o.width ) {
+				$( this ).css( 'min-width', '169px' );
 			} else {
+				$( this ).css( 'min-width', (o.width + 40) + 'px' );
+			}
+
+			if ( !$this.shouldInitColumns() ) { //Sort Selector in search panel
 				do_not_get_real_data = true; // For Simple OPTIONS mode
-				if ( !o.width ) {
-					$( this ).css( 'min-width', '169px' );
-				} else {
-					$( this ).css( 'min-width', (o.width + 40) + 'px' );
-				}
-				edit_icon_div.css( 'display', 'none' );
+
 			}
 
 			display_columns = ALayoutCache.getDefaultColumn( layout_name ); //Get Default columns base on different layout name
@@ -2418,7 +2393,10 @@
 					select_grid_search_input_filter: cached_select_grid_search_inputs_filter,
 					default_sort_filter: cached_sort_filter,
 					default_select_grid_sort_filter: cached_selected_grid_sort_filter,
-					tree_mode: tree_mode
+					tree_mode: tree_mode,
+					column_option_key: column_option_key,
+					api: api,
+					display_column_settings: $this.shouldInitColumns()
 				} );
 
 				a_dropdown_div = $( "<div id='" + id + "a_dropdown_div' class='a-dropdown-div'></div>" );

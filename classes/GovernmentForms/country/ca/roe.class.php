@@ -42,7 +42,8 @@ include_once( 'CA.class.php' );
  */
 class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 
-	public $xml_schema = 'BulkRoeHeader_Basic.xsd';
+	//public $xml_schema = 'BulkRoeHeader_Basic.xsd';
+	public $xml_schema = 'PayrollExtractXmlV2.xsd'; //http://www.esdc.gc.ca/en/ei/roe/user_requirements/appendix_d.page
 	public $pdf_template = 'roe.pdf';
 
 	public $template_offsets = array( -10, 0 );
@@ -135,20 +136,17 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 
 								//Serial
 								'serial' => array(
-
 										'coordinates' => array(
 															'x' => 35,
 															'y' => 58,
 															'h' => 8,
 															'w' => 115,
 															'halign' => 'R',
-
 													),
 										'font' => array(
 														'size' => 12,
 														'type' => '',
 													)
-
 									),
 
 								//Employer Info
@@ -160,7 +158,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 310,
 															'halign' => 'L',
-
 															),
 										'font' => array(
 																'size' => 12,
@@ -175,7 +172,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 310,
 															'halign' => 'L',
-
 															),
 										'font' => array(
 																'size' => 12,
@@ -190,12 +186,10 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 																'h' => 10,
 																'w' => 65,
 																'halign' => 'C',
-
 															),
 										'font' => array(
 																'size' => 10,
 																'type' => '' ),
-
 									),
 
 								//Business Number
@@ -206,7 +200,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 210,
 															'halign' => 'R',
-
 															),
 										'font' => array(
 																'size' => 12,
@@ -220,7 +213,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 310,
 															'halign' => 'L',
-
 															),
 										'font' => array(
 																'size' => 12,
@@ -235,7 +227,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 310,
 															'halign' => 'L',
-
 															),
 										'font' => array(
 																'size' => 12,
@@ -252,12 +243,10 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 210,
 															'halign' => 'R',
-
 															),
 										'font' => array(
 																'size' => 12,
 																'type' => '' ),
-
 									),
 								//SIN
 								'sin' => array(
@@ -267,12 +256,10 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 210,
 															'halign' => 'R',
-
 															),
 										'font' => array(
 																'size' => 12,
 																'type' => '' ),
-
 									),
 
 								//Employee Title
@@ -283,7 +270,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 310,
 															'halign' => 'L',
-
 															),
 										'font' => array(
 															'size' => 12,
@@ -300,7 +286,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 15,
 															'w' => 20,
 															'halign' => 'C',
-
 															),
 															array(
 															'x' => 512,
@@ -308,7 +293,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 15,
 															'w' => 26,
 															'halign' => 'C',
-
 															),
 															array(
 															'x' => 540,
@@ -316,7 +300,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 15,
 															'w' => 40,
 															'halign' => 'C',
-
 															),
 													),
 										'font' => array(
@@ -329,7 +312,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 								//Last day paid
 
 								'last_date' => array(
-
 										'function' => array('filterDate', 'drawSegments'),
 										'coordinates' => array(
 															array(
@@ -338,7 +320,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 17,
 															'w' => 21,
 															'halign' => 'C',
-
 															),
 															array(
 															'x' => 513,
@@ -346,7 +327,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 17,
 															'w' => 25,
 															'halign' => 'C',
-
 															),
 															array(
 															'x' => 540,
@@ -354,7 +334,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 17,
 															'w' => 40,
 															'halign' => 'C',
-
 															),
 													),
 										'font' => array(
@@ -365,7 +344,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 
 								//Pay Period End Date
 								'pay_period_end_date' => array(
-
 										'function' => array('filterDate', 'drawSegments'),
 										'coordinates' => array(
 															array(
@@ -374,7 +352,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 18,
 															'w' => 21,
 															'halign' => 'C',
-
 															),
 															array(
 															'x' => 513,
@@ -382,7 +359,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 18,
 															'w' => 25,
 															'halign' => 'C',
-
 															),
 															array(
 															'x' => 540,
@@ -390,7 +366,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 18,
 															'w' => 40,
 															'halign' => 'C',
-
 															),
 													),
 										'font' => array(
@@ -408,7 +383,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 18,
 															'w' => 21,
 															'halign' => 'C',
-
 															),
 															array(
 															'x' => 513,
@@ -416,7 +390,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 18,
 															'w' => 25,
 															'halign' => 'C',
-
 															),
 															array(
 															'x' => 540,
@@ -424,7 +397,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 18,
 															'w' => 40,
 															'halign' => 'C',
-
 															),
 													),
 										'font' => array(
@@ -444,7 +416,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 																'h' => 8,
 																'w' => 11,
 																'halign' => 'C',
-
 															),
 													),
 										'font' => array(
@@ -478,7 +449,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 																'h' => 10,
 																'w' => 60,
 																'halign' => 'R',
-
 																),
 															array(
 																'x' => 238,
@@ -486,12 +456,27 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 																'h' => 10,
 																'w' => 14,
 																'halign' => 'L',
-
 																),
 															),
 										'font' => array(
 															'type' => '',
 															'size' => 10,
+															//'text_color' => array( 255, 0, 0 ),
+													),
+									),
+								//Enter Code
+								'insurable_earnings_pay_periods' => array(
+										'function' => array( 'filterInsurableEarningsPayPeriods', 'drawNormal' ),
+										'coordinates' => array(
+															'x' => 37,
+															'y' => 304,
+															'h' => 5,
+															'w' => 70,
+															'halign' => 'C',
+															),
+										'font' => array(
+															'type' => '',
+															'size' => 8,
 													),
 									),
 
@@ -503,7 +488,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 15,
 															'halign' => 'C',
-
 															),
 										'font' => array(
 															'type' => '',
@@ -522,7 +506,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 																'h' => 10,
 																'w' => 310,
 																'halign' => 'L',
-
 															),
 															array(
 																'x' => 275,
@@ -530,7 +513,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 																'h' => 10,
 																'w' => 210,
 																'halign' => 'L',
-
 															),
 													),
 										'font' => array(
@@ -548,7 +530,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 																'h' => 8,
 																'w' => 250,
 																'halign' => 'L',
-
 															),
 															array(
 																'x' => 155,
@@ -556,7 +537,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 																'h' => 10,
 																'w' => 110,
 																'halign' => 'L',
-
 															),
 													),
 										'font' => array(
@@ -575,7 +555,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 																'h' => 10,
 																'w' => 42,
 																'halign' => 'R',
-
 																),
 															array(
 																'x' => 551,
@@ -584,7 +563,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 																'w' => 16,
 																'halign' => 'L',
 																),
-
 															),
 										'font' => array(
 															'type' => '',
@@ -599,7 +577,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 45,
 															'w' => 290,
 															'halign' => 'L',
-
 															),
 										'font' => array(
 															'type' => '',
@@ -615,9 +592,8 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 																'x' => 40,
 																'y' => 713,
 																'h' => 8,
-																'w' => 8,
+																'w' => 15,
 																'halign' => 'L',
-
 															),
 													),
 										'font' => array(
@@ -635,7 +611,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 8,
 															'w' => 25,
 															'halign' => 'C',
-
 															),
 															array(
 															'x' => 518,
@@ -643,7 +618,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 8,
 															'w' => 25,
 															'halign' => 'C',
-
 															),
 															array(
 															'x' => 544,
@@ -651,7 +625,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 8,
 															'w' => 35,
 															'halign' => 'C',
-
 															),
 													),
 										'font' => array(
@@ -674,7 +647,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 													),
 										'coordinates' => array(
 															'halign' => 'R',
-
 															// not in here handle .
 															//'x' => 35,
 															//'y' => 368,
@@ -696,7 +668,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 47,
 															'halign' => 'R',
-
 														),
 														array(
 															'x' => 396,
@@ -715,7 +686,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 47,
 															'halign' => 'R',
-
 														),
 														array(
 															'x' => 551,
@@ -740,7 +710,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 17,
 															'halign' => 'L',
-
 														),
 													),
 													array(
@@ -750,7 +719,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 47,
 															'halign' => 'R',
-
 														),
 														array(
 															'x' => 551,
@@ -758,7 +726,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 17,
 															'halign' => 'L',
-
 														),
 													),
 													array(
@@ -768,7 +735,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 47,
 															'halign' => 'R',
-
 														),
 														array(
 															'x' => 396,
@@ -776,7 +742,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 17,
 															'halign' => 'L',
-
 														),
 													),
 													array(
@@ -786,7 +751,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 47,
 															'halign' => 'R',
-
 														),
 														array(
 															'x' => 551,
@@ -794,7 +758,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 17,
 															'halign' => 'L',
-
 														),
 													),
 													array(
@@ -804,7 +767,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 47,
 															'halign' => 'R',
-
 														),
 														array(
 															'x' => 396,
@@ -812,7 +774,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 17,
 															'halign' => 'L',
-
 														),
 													),
 													array(
@@ -822,7 +783,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 47,
 															'halign' => 'R',
-
 														),
 														array(
 															'x' => 551,
@@ -830,7 +790,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 17,
 															'halign' => 'L',
-
 														),
 													),
 													array(
@@ -840,7 +799,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 47,
 															'halign' => 'R',
-
 														),
 														array(
 															'x' => 396,
@@ -848,7 +806,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 17,
 															'halign' => 'L',
-
 														),
 													),
 													array(
@@ -858,7 +815,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 47,
 															'halign' => 'R',
-
 														),
 														array(
 															'x' => 551,
@@ -866,7 +822,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 17,
 															'halign' => 'L',
-
 														),
 													),
 
@@ -888,7 +843,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 47,
 															'halign' => 'R',
-
 														),
 														array(
 															'x' => 551,
@@ -896,7 +850,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 17,
 															'halign' => 'L',
-
 														),
 													),
 													array(
@@ -906,7 +859,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 47,
 															'halign' => 'R',
-
 														),
 														array(
 															'x' => 551,
@@ -914,7 +866,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 17,
 															'halign' => 'L',
-
 														),
 													),
 													array(
@@ -924,7 +875,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 47,
 															'halign' => 'R',
-
 														),
 														array(
 															'x' => 551,
@@ -932,7 +882,6 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 															'h' => 10,
 															'w' => 17,
 															'halign' => 'L',
-
 														),
 													),
 										),
@@ -976,8 +925,17 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 		return $value;
 	}
 
-	function _outputXML() {
+	function filterInsurableEarningsPayPeriods( $value ) {
+		$retval = (int)$value;
+		$total_pay_periods_with_earnings = count($this->pay_period_earnings);
+		if ( $value > $total_pay_periods_with_earnings ) {
+			return NULL; //No need to display this msg as all PPs are included.
+		} else {
+			return '*'.TTi18n::getText('Includes PP: 1 to %1', array( $retval ) );
+		}
+	}
 
+	function _outputXML() {
 		$records = $this->getRecords();
 		Debug::Arr($records, 'Output XML Records: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -988,10 +946,13 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 											10  => 'W',
 											20  => 'B',
 											30  => 'S',
-											50  => 'M'
+											50  => 'M',
+											100 => 'W', //Weekly 53/year
+											200 => 'B', //Bi-Weekly 27/year
 										);
 
-			$xml = new SimpleXMLElement('<ROEHEADER Application="RoeWeb" FileVersion="1.00"></ROEHEADER>');
+
+			$xml = new SimpleXMLElement('<ROEHEADER FileVersion="W-2.0" SoftwareVendor="'. APPLICATION_NAME .'" ProductName="'. APPLICATION_NAME .'"></ROEHEADER>');
 			$this->setXMLObject( $xml );
 
 			$e = 0;
@@ -1000,62 +961,65 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 				//Debug::Arr($employee_data, 'Employee Data: ', __FILE__, __LINE__, __METHOD__,10);
 				$this->arrayToObject( $employee_data ); //Convert record array to object
 
-				$xml->addChild('Roe');
+				$xml->addChild('ROE');
+				$xml->ROE[$e]->addAttribute('PrintingLanguage', 'E'); //E=English, F=French
+				$xml->ROE[$e]->addAttribute('Issue', 'S'); //S=Submit, D=Draft
 
 				// Box2
 				if ( $this->serial != '' ) {
-					$xml->Roe[$e]->addChild('B2', substr( $this->serial, 0, 9)); //maxLength 9  minOccurs="0"
+					$xml->ROE[$e]->addChild('B2', substr( $this->serial, 0, 9)); //maxLength 9  minOccurs="0"
 				}
 
 				// Box3
 				if ( $this->payroll_reference_number != '' ) {
-					$xml->Roe[$e]->addChild('B3', substr( $this->payroll_reference_number, 0, 15)); //maxLength 15  minOccurs="0"
+					$xml->ROE[$e]->addChild('B3', substr( $this->payroll_reference_number, 0, 15)); //maxLength 15  minOccurs="0"
 				}
 				// Box5
-				$xml->Roe[$e]->addChild('B5', substr($this->business_number, 0, 15)); //maxLength 15
+				$xml->ROE[$e]->addChild('B5', substr($this->business_number, 0, 15)); //maxLength 15
 				// Box6
-				$xml->Roe[$e]->addChild('B6', $pay_period_type_options[$this->pay_period_type_id]); //maxLength 1
+				$xml->ROE[$e]->addChild('B6', $pay_period_type_options[$this->pay_period_type_id]); //maxLength 1
 				// Box8
-				$xml->Roe[$e]->addChild('B8', ( $this->sin != '' ) ? $this->sin : '000000000' ); //maxLength 9
+				$xml->ROE[$e]->addChild('B8', ( $this->sin != '' ) ? $this->sin : '000000000' ); //maxLength 9
 				// Box9
-				$xml->Roe[$e]->addChild('B9');
-				$xml->Roe[$e]->B9->addChild('FN', $this->first_name); //maxLength 20
+				$xml->ROE[$e]->addChild('B9');
+				$xml->ROE[$e]->B9->addChild('FN', $this->first_name); //maxLength 20
 				if ( $this->middle_name != '' ) {
-					$xml->Roe[$e]->B9->addChild('MN', substr( $this->middle_name, 0, 4));//maxLength 4  minOccurs="0"
+					$xml->ROE[$e]->B9->addChild('MN', substr( $this->middle_name, 0, 4));//maxLength 4  minOccurs="0"
 				}
-				$xml->Roe[$e]->B9->addChild('LN', $this->last_name);    //maxLength 28
-				$xml->Roe[$e]->B9->addChild('A1', substr( Misc::stripHTMLSpecialChars( $this->employee_address1 ) .' '. Misc::stripHTMLSpecialChars( $this->employee_address2 ), 0, 35 ) );//maxLength 35
+				$xml->ROE[$e]->B9->addChild('LN', $this->last_name);    //maxLength 28
+				$xml->ROE[$e]->B9->addChild('A1', substr( Misc::stripHTMLSpecialChars( $this->employee_address1 ) .' '. Misc::stripHTMLSpecialChars( $this->employee_address2 ), 0, 35 ) );//maxLength 35
 				if ( $this->employee_city != '' ) {
-					$xml->Roe[$e]->B9->addChild('A2', $this->employee_city);//maxLength 35  minOccurs="0"
+					$xml->ROE[$e]->B9->addChild('A2', $this->employee_city);//maxLength 35  minOccurs="0"
 				}
-				if ( $this->employee_province != '' OR $this->employee_postal_code != '' ) {
-					$xml->Roe[$e]->B9->addChild('A3', $this->employee_province .' '. $this->employee_postal_code); //maxLength 35  minOccurs="0"
+				if ( $this->employee_province != '' ) {
+					$xml->ROE[$e]->B9->addChild('A3', $this->employee_province); //maxLength 35  minOccurs="0"
+				}
+				if ( $this->employee_postal_code != '' ) {
+					$xml->ROE[$e]->B9->addChild('PC', $this->employee_postal_code);
 				}
 
 				// Box10
-				$xml->Roe[$e]->addChild('B10', date('dmY', $this->first_date )); //maxLength 8
+				$xml->ROE[$e]->addChild('B10', date('Y-m-d', $this->first_date )); //maxLength 8
 				// Box11
-				$xml->Roe[$e]->addChild('B11', date('dmY', $this->last_date)); //maxLength 8
+				$xml->ROE[$e]->addChild('B11', date('Y-m-d', $this->last_date)); //maxLength 8
 				// Box12
-				$xml->Roe[$e]->addChild('B12', date('dmY', $this->pay_period_end_date)); //maxLength 8
+				$xml->ROE[$e]->addChild('B12', date('Y-m-d', $this->pay_period_end_date)); //maxLength 8
 				// Box13
 				if ( $this->title != '' ) {
-					$xml->Roe[$e]->addChild('B13', Misc::stripHTMLSpecialChars( $this->title ) ); //maxLength 40  minOccurs="0"
+					$xml->ROE[$e]->addChild('B13', Misc::stripHTMLSpecialChars( $this->title ) ); //maxLength 40  minOccurs="0"
 				}
 				// Box14
-				if ( $this->recall_code != '' ) {
-					$xml->Roe[$e]->addChild('B14'); // minOccurs="0"
-
-					$xml->Roe[$e]->B14->addChild('CD', $this->recall_code); //maxLength 1
-					$xml->Roe[$e]->B14->addChild('DT', date('dmY', $this->recall_date)); //maxLength 8   minOccurs="0"
-				}
-
+				$xml->ROE[$e]->addChild('B14'); // minOccurs="0"
+				$xml->ROE[$e]->B14->addChild('CD', ( ( $this->recall_date != '' ) ? 'Y' : 'N' ) ); //maxLength 1
+				$xml->ROE[$e]->B14->addChild('DT', ( ( $this->recall_date != '' ) ? date('Y-m-d', $this->recall_date) : '' ) ); //maxLength 8   minOccurs="0"
+				
 				// Box15A
-				$xml->Roe[$e]->addChild('B15A', substr(round($this->insurable_hours), 0, 4)); //maxLength 4
+				$xml->ROE[$e]->addChild('B15A', substr(round($this->insurable_hours), 0, 4)); //maxLength 4
 				// Box15B
-				$xml->Roe[$e]->addChild('B15B', (float)substr($this->insurable_earnings, -9, 9)); //maxLength 9
+				//$xml->ROE[$e]->addChild('B15B', (float)substr($this->insurable_earnings, -9, 9)); //maxLength 9
+				
 				// Box15C
-				$xml->Roe[$e]->addChild('B15C');
+				$xml->ROE[$e]->addChild('B15C');
 
 				if ( is_array( $this->pay_period_earnings ) ) {
 					$i = 1;
@@ -1064,22 +1028,22 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 						if ( $x == 53 ) {
 							break;
 						}
-						$xml->Roe[$e]->B15C->addChild('PP'); //maxOccurs="53"
-						$xml->Roe[$e]->B15C->PP[$x]->addAttribute('nbr', $i);
-						$xml->Roe[$e]->B15C->PP[$x]->addChild('AMT', (float)substr($pay_period_earning, -9, 9) ); //maxLength 9
+						$xml->ROE[$e]->B15C->addChild('PP'); //maxOccurs="53"
+						$xml->ROE[$e]->B15C->PP[$x]->addAttribute('nbr', $i);
+						$xml->ROE[$e]->B15C->PP[$x]->addChild('AMT', (float)substr($pay_period_earning, -9, 9) ); //maxLength 9
 						$i++;
 						$x++;
 					}
 				} else {
-					$xml->Roe[$e]->B15C->addChild('PP'); //maxOccurs="53"
-					$xml->Roe[$e]->B15C->PP->addAttribute('nbr', 0);
-					$xml->Roe[$e]->B15C->PP->addChild('AMT', 0 ); //maxLength 9
+					$xml->ROE[$e]->B15C->addChild('PP'); //maxOccurs="53"
+					$xml->ROE[$e]->B15C->PP->addAttribute('nbr', 0);
+					$xml->ROE[$e]->B15C->PP->addChild('AMT', 0 ); //maxLength 9
 				}
 				// Box16
-				$xml->Roe[$e]->addChild('B16');
-				$xml->Roe[$e]->B16->addChild('CD', $this->code_id); //maxLength 1
-				$xml->Roe[$e]->B16->addChild('FN', $this->created_user_first_name); //maxLength 20
-				$xml->Roe[$e]->B16->addChild('LN', $this->created_user_last_name); //maxLength 28
+				$xml->ROE[$e]->addChild('B16');
+				$xml->ROE[$e]->B16->addChild('CD', $this->code_id); //maxLength 1
+				$xml->ROE[$e]->B16->addChild('FN', $this->created_user_first_name); //maxLength 20
+				$xml->ROE[$e]->B16->addChild('LN', $this->created_user_last_name); //maxLength 28
 
 				if ( $this->created_user_work_phone != '' ) {
 					$phone = $this->created_user_work_phone;
@@ -1091,18 +1055,22 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 				$validator = new Validator();
 				$phone = $validator->stripNonNumeric($phone);
 
-				$xml->Roe[$e]->B16->addChild('AC', substr($phone, 0, 3 ) ); //maxLength 3
-				$xml->Roe[$e]->B16->addChild('TEL', substr($phone, 3, 7 ) ); //maxLength 7
+				$xml->ROE[$e]->B16->addChild('AC', substr($phone, 0, 3 ) ); //maxLength 3
+				$xml->ROE[$e]->B16->addChild('TEL', substr($phone, 3, 7 ) ); //maxLength 7
 
 				// Box17A
 				if ( $this->vacation_pay > 0 ) {
-					$xml->Roe[$e]->addChild('B17A', (float)substr($this->vacation_pay, -9, 9)); // maxLength 9   minOccurs="0"
+					//$xml->ROE[$e]->addChild('B17A', (float)substr($this->vacation_pay, -9, 9)); // maxLength 9   minOccurs="0"
+					$xml->ROE[$e]->addChild('B17A');
+					$xml->ROE[$e]->B17A->addChild('VP');
+					$xml->ROE[$e]->B17A->VP->addAttribute('nbr', 1);
+					$xml->ROE[$e]->B17A->VP->addChild('CD', 2 ); //1=Included with each pay, 2=Paid because no longer working
+					$xml->ROE[$e]->B17A->VP->addChild('AMT', (float)substr($this->vacation_pay, -9, 9) );
 				}
 
 				// Box17B
-
 				if ( is_array( $this->statutory_holiday ) ) {
-					$xml->Roe[$e]->addChild('B17B'); // minOccurs="0"
+					$xml->ROE[$e]->addChild('B17B'); // minOccurs="0"
 
 					$x = 0;
 					$i = 0;
@@ -1112,27 +1080,23 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 							break;
 						}
 						if ( is_array( $holiday ) ) {
-							$xml->Roe[$e]->B17B->addChild('SH'); //minOccurs="0" maxOccurs="3"
-							$xml->Roe[$e]->B17B->SH[$x]->addAttribute('nbr', $i);
-							$xml->Roe[$e]->B17B->SH[$x]->addChild('DT', date('dmY', $holiday['date'] )); //maxLength 8
-							$xml->Roe[$e]->B17B->SH[$x]->addChild('AMT', (float)substr($holiday['amount'], -9, 9)); //maxLength 9
+							$xml->ROE[$e]->B17B->addChild('SH'); //minOccurs="0" maxOccurs="3"
+							$xml->ROE[$e]->B17B->SH[$x]->addAttribute('nbr', $i);
+							$xml->ROE[$e]->B17B->SH[$x]->addChild('DT', date('Y-m-d', $holiday['date'] )); //maxLength 8
+							$xml->ROE[$e]->B17B->SH[$x]->addChild('AMT', (float)substr($holiday['amount'], -9, 9)); //maxLength 9
 
 							$x++;
 							$i++;
 						} else {
 							continue;
 						}
-
-
 					}
 				}
 
 
 				// Box17C
-
 				if ( is_array( $this->other_monies ) ) {
-
-					$xml->Roe[$e]->addChild('B17C'); //minOccurs="0"
+					$xml->ROE[$e]->addChild('B17C'); //minOccurs="0"
 
 					$x = 0;
 					$i = 0;
@@ -1141,10 +1105,10 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 							break;
 						}
 						if ( is_array( $monies ) ) {
-							$xml->Roe[$e]->B17C->addChild('OM'); //minOccurs="0" maxOccurs="3"
-							$xml->Roe[$e]->B17C->OM[$x]->addAttribute('nbr', $i);
-							$xml->Roe[$e]->B17C->OM[$x]->addChild('CD', $monies['other_monies_code']); //maxLength 1
-							$xml->Roe[$e]->B17C->OM[$x]->addChild('AMT', (float)substr($monies['amount'], -9, 9)); //maxLength 9
+							$xml->ROE[$e]->B17C->addChild('OM'); //minOccurs="0" maxOccurs="3"
+							$xml->ROE[$e]->B17C->OM[$x]->addAttribute('nbr', $i);
+							$xml->ROE[$e]->B17C->OM[$x]->addChild('CD', $monies['other_monies_code']); //maxLength 1
+							$xml->ROE[$e]->B17C->OM[$x]->addChild('AMT', (float)substr($monies['amount'], -9, 9)); //maxLength 9
 
 							$x++;
 							$i++;
@@ -1156,7 +1120,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 
 				// Box18
 				if ( $this->comments != '' ) {
-					$xml->Roe[$e]->addChild('B18', $this->comments ); //minOccurs="0"
+					$xml->ROE[$e]->addChild('B18', $this->comments ); //minOccurs="0"
 				}
 
 
@@ -1164,7 +1128,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 
 
 				// Box20
-				$xml->Roe[$e]->addChild('B20', 'E'); //Language //minOccurs="0"  //maxLength 1
+				$xml->ROE[$e]->addChild('B20', 'E'); //Language //minOccurs="0"  //maxLength 1
 
 				$e++;
 			}
@@ -1205,7 +1169,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 				$this->arrayToObject( $employee_data ); //Convert record array to object
 
 				foreach( $template_schema as $field => $schema ) {
-					Debug::text('Drawing Cell... Field: '. $field, __FILE__, __LINE__, __METHOD__, 10);
+					//Debug::text('Drawing Cell... Field: '. $field, __FILE__, __LINE__, __METHOD__, 10);
 					$this->Draw( $this->$field, $schema );
 				}
 

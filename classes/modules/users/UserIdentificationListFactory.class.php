@@ -244,6 +244,8 @@ class UserIdentificationListFactory extends UserIdentificationFactory implements
 		if ( ( isset($date) AND $date > 0) OR ( isset($valid_user_ids) AND is_array($valid_user_ids) AND count($valid_user_ids) > 0 ) ) {
 			$query .= ' AND ( ';
 
+			//When the Mobile App/TimeClock are doing a reload database, $date should always be 0. That forces the query to just send data for $valid_user_ids.
+			//  All other cases it will send data for all current users always, or records that were recently created/updated.
 			if ( isset($date) AND $date > 0 ) {
 				//Append the same date twice for created and updated.
 				$ph[] = (int)$date;

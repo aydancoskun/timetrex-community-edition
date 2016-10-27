@@ -95,22 +95,17 @@ HTML_AJAX_HttpClient.prototype = {
 			var self = this;
 			this.xmlhttp.open(this.request.requestType,this.request.completeUrl(),this.request.isAsync);
 			if (this.request.customHeaders) {
-				for (i in this.request.customHeaders) {
+				for (var i in this.request.customHeaders) {
 					this.xmlhttp.setRequestHeader(i, this.request.customHeaders[i]);
 				}
 			}
 			if (this.request.customHeaders && !this.request.customHeaders['Content-Type']) {
 				var content = this.request.getContentType();
-				//opera is stupid for anything but plain text or xml!!
-				if(window.opera && content != 'application/xml')
-				{
-					this.xmlhttp.setRequestHeader('Content-Type','text/plain; charset=utf-8');
-					this.xmlhttp.setRequestHeader('x-Content-Type', content + '; charset=utf-8');
+				var charsetIndex = content.indexOf('; charset=UTF-8');
+				if (charsetIndex == -1) {
+					content += '; charset=UTF-8';
 				}
-				else
-				{
-					this.xmlhttp.setRequestHeader('Content-Type', content +  '; charset=utf-8');
-				}
+				this.xmlhttp.setRequestHeader('Content-Type', content);
 			}
 
 			if (this.request.isAsync) {
@@ -244,7 +239,7 @@ HTML_AJAX_HttpClient.prototype = {
 			content = content.substring(0, content.indexOf(';'));
 		}
 		// hook for xml, it doesn't need to be unserialized
-		if(content == 'application/xml')
+		if(content == 'application/xml' || content == 'text/xml')
 		{
 			return this.xmlhttp.responseXML;
 		}

@@ -549,7 +549,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				base_date = grid_selected_row.start_date;
 			} );
 		}
-		base_date = Global.strToDateTime( base_date ).format();
+
+		//Error: TypeError: Global.strToDateTime(...) is null in interface/html5/framework/jquery.min.js?v=9.0.0-20151014-164655 line 2 > eval line 552
+		base_date = base_date ? Global.strToDateTime( base_date ).format() : new Date().format();
 
 		switch ( iconName ) {
 			case ContextMenuIconName.edit_employee:
@@ -611,7 +613,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 
 			current_edit_record_id = $this.current_edit_record.id;
 
-			$this.current_edit_record = null;
+
 			$this.onViewClick( current_edit_record_id );
 
 		} else {
@@ -971,7 +973,6 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 
 		this.initEditViewUI( this.viewId, this.edit_view_tpl );
 
-		this.setEditViewWidgetsMode();
 	},
 
 	onEditClick: function( editId, noRefreshUI ) {
@@ -1092,12 +1093,16 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 
 		// Employee
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'full_name'} );
+		form_item_input.TText( {field: 'full_name', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_timesheet_verification_column1, '' );
+
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+		form_item_input.TText( {field: 'status', selected_able: true} );
+		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_timesheet_verification_column1, '' );
 
 		// Pay Period
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'pay_period'} );
+		form_item_input.TText( {field: 'pay_period', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Period' ), form_item_input, tab_timesheet_verification_column1 );
 
 		// tab_timesheet_verification first column end
@@ -1120,17 +1125,17 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 
 		// From
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'from'} );
+		form_item_input.TText( {field: 'from', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'From' ), form_item_input, tab_timesheet_verification_column2, '' );
 
 		// Subject
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'subject'} );
+		form_item_input.TText( {field: 'subject', selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_timesheet_verification_column2 );
 
 		// Body
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'body', width: 600, height: 400} );
+		form_item_input.TText( {field: 'body', width: 600, height: 400, selected_able: true} );
 		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_timesheet_verification_column2, '', null, true, true );
 
 		// Tab 0 second column end
@@ -1719,6 +1724,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 	},
 
 	onCellFormat: function( cell_value, related_data, row ) {
+		cell_value = Global.decodeCellValue( cell_value );
 		var col_model = related_data.colModel;
 		var row_id = related_data.rowid;
 		var content_div = $( "<div class='punch-content-div'></div>" );
@@ -1836,7 +1842,8 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		}
 		$this.message_control_api['getEmbeddedMessage']( args, {
 			onResult: function( res ) {
-				if ( !$this.edit_view ) {
+				// Error: Uncaught TypeError: Cannot read property 'setValue' of undefined in interface/html5/#!m=RequestAuthorization&id=1306 line 1547
+				if ( !$this.edit_view || !$this.edit_view_ui_dic['from'] ) {
 					return;
 				}
 
@@ -1859,7 +1866,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 						}
 						/* jshint ignore:end */
 
-						var from = currentItem.from_first_name + '' + currentItem.from_last_name + '@' + currentItem.updated_date;
+						var from = currentItem.from_first_name + ' ' + currentItem.from_last_name + ' @ ' + currentItem.updated_date;
 						$this.edit_view_ui_dic['from'].setValue( from );
 						$this.edit_view_ui_dic['subject'].setValue( currentItem.subject );
 						$this.edit_view_ui_dic['body'].setValue( currentItem.body );

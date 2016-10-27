@@ -86,6 +86,7 @@ class TimeTrexClientAPI {
 		$retval = new SoapClient(NULL, array(
 								'location' => $url,
 								'uri' => $this->namespace,
+								'encoding' => 'UTF-8',
 								'style' => SOAP_RPC,
 								'use' => SOAP_ENCODED,
 								'login' => $TIMETREX_BASIC_AUTH_USER,

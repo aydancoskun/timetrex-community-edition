@@ -241,6 +241,14 @@ class Debug {
 					$class = NULL;
 				}
 
+				if ( !isset($trace_line['file']) ) {
+					$trace_line['file'] = 'N/A';
+				}
+
+				if ( !isset($trace_line['line']) ) {
+					$trace_line['line'] = 'N/A';
+				}
+
 				if ( isset($trace_line['args']) AND is_array($trace_line['args']) ) {
 					$args = array();
 					foreach( $trace_line['args'] as $arg ) {
@@ -264,7 +272,7 @@ class Debug {
 						}
 					}
 				}
-				$retval .= '#'.$i.'.'. $class.$trace_line['function'].'('. implode(', ', $args) .')' ."\n";
+				$retval .= '#'.$i.'.'. $class.$trace_line['function'].'('. implode(', ', $args) .') '. $trace_line['file'] .':'. $trace_line['line'] ."\n";
 				$i++;
 			}
 		}
@@ -426,30 +434,32 @@ class Debug {
 
 			$eol = "\n";
 
-			$output = $eol.'---------------[ '. @date('d-M-Y G:i:s O') .' ['. $_SERVER['REQUEST_TIME_FLOAT'] .'] (PID: '.getmypid().') ]---------------'.$eol;
 			if ( is_array( self::$debug_buffer ) ) {
+				$output = $eol.'---------------[ '. @date('d-M-Y G:i:s O') .' ['. $_SERVER['REQUEST_TIME_FLOAT'] .'] (PID: '.getmypid().') ]---------------'.$eol;
+
 				foreach (self::$debug_buffer as $arr) {
 					if ( $arr[0] <= self::getVerbosity() ) {
 						$output .= $arr[1];
 					}
 				}
-			}
-			$output .= '---------------[ '. @date('d-M-Y G:i:s O') .' ['. microtime(TRUE) .'] (PID: '.getmypid().') ]---------------'.$eol;
+				
+				$output .= '---------------[ '. @date('d-M-Y G:i:s O') .' ['. microtime(TRUE) .'] (PID: '.getmypid().') ]---------------'.$eol;
 
-			if ( isset($config_vars['debug']['enable_syslog']) AND $config_vars['debug']['enable_syslog'] == TRUE AND OPERATING_SYSTEM != 'WIN' ) {
-				//If using rsyslog, need to set:
-				//$MaxMessageSize 256000 #Above ModuleLoad imtcp
-				openlog( self::getSyslogIdent(), 11, self::getSyslogFacility( 0 ) ); //11 = LOG_PID | LOG_NDELAY | LOG_CONS
-				syslog( self::getSyslogPriority( 0 ), $output ); //Used to strip_tags output, but that was likely causing problems with SQL queries with >= and <= in them.
-				closelog();
-			} elseif ( is_writable( $config_vars['path']['log'] ) ) {
-				$fp = @fopen( $file_name, 'a' );
-				@fwrite($fp, $output ); //Used to strip_tags output, but that was likely causing problems with SQL queries with >= and <= in them.
-				@fclose($fp);
-				unset($output);
-			}
+				if ( isset($config_vars['debug']['enable_syslog']) AND $config_vars['debug']['enable_syslog'] == TRUE AND OPERATING_SYSTEM != 'WIN' ) {
+					//If using rsyslog, need to set:
+					//$MaxMessageSize 256000 #Above ModuleLoad imtcp
+					openlog( self::getSyslogIdent(), 11, self::getSyslogFacility( 0 ) ); //11 = LOG_PID | LOG_NDELAY | LOG_CONS
+					syslog( self::getSyslogPriority( 0 ), $output ); //Used to strip_tags output, but that was likely causing problems with SQL queries with >= and <= in them.
+					closelog();
+				} elseif ( is_writable( $config_vars['path']['log'] ) ) {
+					$fp = @fopen( $file_name, 'a' );
+					@fwrite($fp, $output ); //Used to strip_tags output, but that was likely causing problems with SQL queries with >= and <= in them.
+					@fclose($fp);
+					unset($output);
+				}
 
-			return TRUE;
+				return TRUE;
+			}
 		}
 
 		return FALSE;

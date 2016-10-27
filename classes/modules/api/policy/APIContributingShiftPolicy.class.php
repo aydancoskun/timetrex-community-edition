@@ -217,6 +217,7 @@ class APIContributingShiftPolicy extends APIFactory {
 					$row['company_id'] = $this->getCurrentCompanyObject()->getId();
 
 					$lf->setObjectFromArray( $row );
+					$lf->Validator->setValidateOnly( $validate_only );
 
 					$is_valid = $lf->isValid( $ignore_warning );
 					if ( $is_valid == TRUE ) {

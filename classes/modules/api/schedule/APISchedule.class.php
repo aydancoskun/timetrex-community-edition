@@ -51,39 +51,73 @@ class APISchedule extends APIFactory {
 	 * Get default schedule data for creating new schedulees.
 	 * @return array
 	 */
-	function getScheduleDefaultData( $user_id = NULL, $date = NULL ) {
+	function getScheduleDefaultData( $data = NULL ) {
 		$company_obj = $this->getCurrentCompanyObject();
 
 		Debug::Text('Getting schedule default data...', __FILE__, __LINE__, __METHOD__, 10);
 
-		$data = array(
+		$retarr = array(
 						'status_id' => 10,
-						'user_id' => ($user_id != '' ) ? $user_id : $this->getCurrentUserObject()->getID(),
+						//'user_id' => ($user_id != '' ) ? $user_id : $this->getCurrentUserObject()->getID(),
 						'start_time' => TTDate::getAPIDate( 'TIME', strtotime( '8:00 AM' ) ),
 						'end_time' => TTDate::getAPIDate( 'TIME', strtotime( '5:00 PM' ) ),
-						'branch_id' => $this->getCurrentUserObject()->getDefaultBranch(),
-						'department_id' => $this->getCurrentUserObject()->getDefaultDepartment(),
-						'job_id' => $this->getCurrentUserObject()->getDefaultJob(),
-						'job_item_id' => $this->getCurrentUserObject()->getDefaultJobItem(),
+						'schedule_policy_id' => 0,
+
+						//JS will figure out these values based on selected cells.
+						'branch_id' => -1,
+						'department_id' => -1,
+						'job_id' => -1,
+						'job_item_id' => -1,
 					);
 
-		//If user_id is specified, use their default branch/department.
-		$ulf = TTnew( 'UserListFactory' );
-		$ulf->getByIdAndCompanyId( (int)$user_id, $company_obj->getID() );
-		if ( $ulf->getRecordCount() == 1 ) {
-			$user_obj = $ulf->getCurrent();
+		//Get all user_ids.
+		if ( is_array($data) ) {
+			$first_date_stamp = $last_date_stamp = FALSE;
+			$prev_branch_id = $prev_department_id = $prev_job_id = $prev_job_item_id = FALSE;
+			foreach( $data as $row ) {
+				$user_ids[] = ( isset($row['user_id']) ) ? $row['user_id'] : $this->getCurrentUserObject()->getId();
 
-			$data['user_id'] = $user_obj->getID();
-			$data['branch_id'] = $user_obj->getDefaultBranch();
-			$data['department_id'] = $user_obj->getDefaultDepartment();
-			$data['job_id'] = $user_obj->getDefaultJob();
-			$data['job_item_id'] = $user_obj->getDefaultJobItem();
+				//$retarr['branch_id'] = ( isset($row['branch_id']) ) ? $row['branch_id'] : 0;
+				//if ( $retarr['branch_id'] != FALSE AND $prev_branch_id != FALSE AND $retarr['branch_id'] != $prev_branch_id ) {
+				//	$retarr['branch_id'] = -1; //More than one item selected, so use defaults.
+				//}
+
+				$date_stamp = ( isset($row['date_stamp']) ) ? TTDate::parseDateTime( $row['date_stamp'] ) : time();
+				if ( $date_stamp < $first_date_stamp OR $first_date_stamp == FALSE ) {
+					$first_date_stamp = $date_stamp;
+				}
+				if ( $date_stamp > $last_date_stamp OR $last_date_stamp == FALSE ) {
+					$last_date_stamp = $date_stamp;
+				}
+			}
+
+			Debug::Arr( $user_ids, 'First Date Stamp: '. $first_date_stamp .' Last: '. $last_date_stamp .' User Ids: ', __FILE__, __LINE__, __METHOD__, 10);
+		} else {
+			$retarr['date_stamp'] = TTDate::getDate('DATE', time() );
+			Debug::Text( 'No input data to base defaults on...', __FILE__, __LINE__, __METHOD__, 10);
+			
+			return $retarr;
 		}
-		unset($ulf, $user_obj);
+		
+		//Try to determine most common start/end times to use by default.
+		$slf = TTnew('ScheduleListFactory');
+		$most_common_data = $slf->getMostCommonScheduleDataByCompanyIdAndUserAndStartDateAndEndDate( $company_obj->getID(), $user_ids, TTDate::getBeginWeekEpoch( $first_date_stamp ), TTDate::getEndWeekEpoch( $last_date_stamp ) );
+		//Use array_key_exists() instead of isset() as the array keys are always returned as NULL if no data exists.
+		if ( array_key_exists('start_time', $most_common_data ) AND array_key_exists('end_time', $most_common_data ) AND $most_common_data['start_time'] == NULL AND $most_common_data['end_time'] == NULL ) { //Extend the date range to find some value.
+			Debug::Text('No schedules to get default default from, extend range back one more week...', __FILE__, __LINE__, __METHOD__, 10);
+			$most_common_data = $slf->getMostCommonScheduleDataByCompanyIdAndUserAndStartDateAndEndDate($company_obj->getId(), $user_ids, TTDate::getBeginWeekEpoch( ( TTDate::getMiddleDayEpoch($first_date_stamp) - (86400 * 7) ) ), TTDate::getEndWeekEpoch( $last_date_stamp ) );
+		}
+		
+		if ( isset($most_common_data['start_time']) AND isset($most_common_data['end_time']) ) {
+			$retarr['start_time'] = TTDate::getAPIDate( 'TIME', TTDate::getTimeLockedDate( TTDate::strtotime( $most_common_data['start_time'] ), $first_date_stamp ) );
+			$retarr['end_time'] = TTDate::getAPIDate( 'TIME', TTDate::getTimeLockedDate( TTDate::strtotime( $most_common_data['end_time'] ), $first_date_stamp ) );
+			$retarr['schedule_policy_id'] = $most_common_data['schedule_policy_id'];
+			Debug::Text('  Common Data... Start Time: '. TTDate::getDATE('DATE+TIME', $retarr['start_time'] ) .'('. $retarr['start_time'] .') End Time: '. TTDate::getDATE('DATE+TIME', $retarr['end_time'] ) .'('. $retarr['end_time'] .')', __FILE__, __LINE__, __METHOD__, 10);
+		}
 
-		Debug::Arr($data, 'Default data...', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Arr($retarr, 'Default data...', __FILE__, __LINE__, __METHOD__, 10);
 
-		return $this->returnHandler( $data );
+		return $this->returnHandler( $retarr );
 	}
 
 	/**
@@ -259,7 +293,7 @@ class APISchedule extends APIFactory {
 	 */
 	function getSchedule( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('schedule', 'enabled')
-				OR !( $this->getPermissionObject()->Check('schedule', 'view') OR $this->getPermissionObject()->Check('schedule', 'edit_own') OR $this->getPermissionObject()->Check('schedule', 'view_child')  ) ) {
+				OR !( $this->getPermissionObject()->Check('schedule', 'view') OR $this->getPermissionObject()->Check('schedule', 'view_own') OR $this->getPermissionObject()->Check('schedule', 'view_child') ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
@@ -363,6 +397,11 @@ class APISchedule extends APIFactory {
 		} else {
 			//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
 			$permission_children_ids = $this->getPermissionChildren();
+		}
+
+		//If they have permissions to view open shifts, assume "0" is one of their subordinates.
+		if ( $this->getPermissionObject()->Check('schedule', 'view_open') == TRUE ) {
+			$permission_children_ids[] = 0;
 		}
 
 		extract( $this->convertToMultipleRecords($data) );
@@ -517,6 +556,10 @@ class APISchedule extends APIFactory {
 
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
 		$permission_children_ids = $this->getPermissionChildren();
+		//If they have permissions to view open shifts, assume "0" is one of their subordinates.
+		if ( $this->getPermissionObject()->Check('schedule', 'view_open') == TRUE ) {
+			$permission_children_ids[] = 0;
+		}
 
 		Debug::Text('Received data for: '. count($data) .' Schedules', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);

@@ -44,6 +44,7 @@ class Redirect {
 			$url = $_SERVER['HTTP_REFERER'];
 		}
 
+		$url = Environment::stripDuplicateSlashes( $url );
 		Debug::Text('Redirect URL: '. $url, __FILE__, __LINE__, __METHOD__, 11);
 
 		if ( Debug::getVerbosity() != 11 ) {

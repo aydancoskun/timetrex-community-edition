@@ -208,11 +208,11 @@ class ExceptionReport extends Report {
 					foreach($columns as $column => $name ) {
 						if ( strpos($column, 'wage') !== FALSE OR strpos($column, 'hourly_rate') !== FALSE ) {
 							$retval[$column] = 'currency';
-						}
-						if ( strpos($column, 'amount') !== FALSE ) {
+						} elseif ( strpos($column, 'amount') !== FALSE ) {
 							$retval[$column] = 'time_unit';
+						} elseif ( strpos($column, 'total_exception') !== FALSE ) {
+							$retval[$column] = 'numeric';
 						}
-
 					}
 				}
 				break;

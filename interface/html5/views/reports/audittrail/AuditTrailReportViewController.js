@@ -5,7 +5,7 @@ AuditTrailReportViewController = ReportBaseViewController.extend( {
 		this.script_name = 'AuditTrailReport';
 		this.viewId = 'AuditTrailReport';
 		this.context_menu_name = $.i18n._( 'Audit Trail' );
-		this.navigation_label = $.i18n._( 'Saved Report' );
+		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
 		this.view_file = 'AuditTrailReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIAuditTrailReport' ))();
 		this.buildContextMenu();

@@ -523,6 +523,8 @@ class ROEReport extends Report {
 			return FALSE;
 		}
 
+		$roef = TTnew('ROEFactory');
+
 		$roe = $this->getROEObject();
 		$roe->setShowBackground( $show_background );
 		//$roe->setDebug( TRUE );
@@ -551,6 +553,8 @@ class ROEReport extends Report {
 
 				$title_obj = $user_obj->getTitleObject();
 
+				$roef->setPayPeriodType( $row['pay_period_type_id'] );
+				
 				$ee_data = array(
 							'first_name' => $user_obj->getFirstName(),
 							'middle_name' => $user_obj->getMiddleName(),
@@ -561,11 +565,13 @@ class ROEReport extends Report {
 							'employee_city' => $user_obj->getCity(),
 							'employee_province' => $user_obj->getProvince(),
 							'employee_postal_code' => $user_obj->getPostalCode(),
-							'title' => ( is_object( $title_obj ) ) ?  $title_obj->getName() : NULL,
+							'title' => ( is_object( $title_obj ) ) ? $title_obj->getName() : NULL,
 							'sin' => $user_obj->getSIN(),
 
 							'pay_period_type' => $row['pay_period_type'],
 							'pay_period_type_id' => $row['pay_period_type_id'],
+							'insurable_earnings_pay_periods' => $roef->getInsurableEarningsReportPayPeriods( '15b' ),
+							
 							'code_id' => $row['code_id'],
 							'first_date' => TTDate::parseDateTime( $row['first_date'] ),
 							'last_date' => TTDate::parseDateTime( $row['last_date'] ),
@@ -618,8 +624,11 @@ class ROEReport extends Report {
 		}
 
 		$output = $this->getFormObject()->output( $output_format );
+		if ( !is_array($output) ) {
+			return array( 'file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $output );
+		}
 
-		return array( 'file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $output );
+		return $output;
 	}
 
 	//Short circuit this function, as no postprocessing is required for exporting the data.

@@ -128,7 +128,7 @@ CompanyBankAccountViewController = BaseViewController.extend( {
 				$this.getBankAccountDefaultData( function( result ) {
 					// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
 					$this.current_edit_record = result;
-					$this.setEditViewWidgetsMode();
+
 					$this.initEditView();
 
 				} );
@@ -191,7 +191,7 @@ CompanyBankAccountViewController = BaseViewController.extend( {
 					$this.refresh_id = result_data;
 				}
 
-				$this.current_edit_record = null;
+
 				$this.removeEditView();
 
 			} else {

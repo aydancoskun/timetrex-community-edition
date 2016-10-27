@@ -224,8 +224,12 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 
 		var content_div = $( this.el ).find( '.content' );
 
-		this.grid.setGridWidth( content_div.width() - 10 );
-		this.grid.setGridHeight( content_div.height() - 20 );
+		this.grid.setGridWidth( content_div.width() - 2 );
+		this.grid.setGridHeight( content_div.height() - 25 );
+		$( window ).resize( function() {
+			$this.grid.setGridWidth( content_div.width() - 2 );
+			$this.grid.setGridHeight( content_div.height() - 25 );
+		} );
 
 		this.filter_data = this.select_layout.data.filter_data;
 	}

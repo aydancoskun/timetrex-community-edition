@@ -36,7 +36,7 @@
 
 $disable_database_connection=TRUE;
 require_once('../includes/global.inc.php');
-Header("Content-type: text/css; charset=UTF-8");
+header('Content-type: text/css; charset=UTF-8');
 forceCacheHeaders();
 
 //This causes iframes to resize themselves (Monthly view, click on a day, the Day iframe resizes to half size

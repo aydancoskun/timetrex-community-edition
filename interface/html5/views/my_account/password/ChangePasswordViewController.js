@@ -111,7 +111,7 @@ ChangePasswordViewController = BaseViewController.extend( {
 
 			$this.current_edit_record = {};
 
-			$this.setEditViewWidgetsMode();
+
 			$this.initEditView();
 
 		} else {
@@ -190,7 +190,7 @@ ChangePasswordViewController = BaseViewController.extend( {
 			} else {
 				$this.saveWebPassword( record, function( result ) {
 					if ( result.isValid() ) {
-						$this.current_edit_record = null;
+
 						$this.removeEditView();
 					} else {
 						$this.showErrorTips( result, 0 );
@@ -206,7 +206,7 @@ ChangePasswordViewController = BaseViewController.extend( {
 			} else {
 				$this.savePhonePassword( record, function( result ) {
 					if ( result.isValid() ) {
-						$this.current_edit_record = null;
+
 						$this.removeEditView();
 					} else {
 						$this.showErrorTips( result, 1 );

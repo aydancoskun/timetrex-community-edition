@@ -85,6 +85,9 @@ var ServiceCaller = Backbone.Model.extend( {
 			ProgressBar.changeProgressBarMessage( 'File Uploading' );
 			form_data.ajaxForm().ajaxSubmit( {
 				success: function( result ) {
+					if ( result && result.toString().toLocaleLowerCase() !== 'true' ) {
+						TAlertManager.showAlert( result );
+					}
 					ProgressBar.removeProgressBar();
 					if ( responseObj.onResult ) {
 						responseObj.onResult( result );
@@ -112,9 +115,13 @@ var ServiceCaller = Backbone.Model.extend( {
 //
 //			},
 
-			success: function( res ) {
+			success: function( result ) {
+				if ( result && result.toString().toLocaleLowerCase() !== 'true' ) {
+					TAlertManager.showAlert( result );
+				}
+
 				if ( responseObj.onResult ) {
-					responseObj.onResult( res );
+					responseObj.onResult( result );
 				}
 
 				ProgressBar.removeProgressBar();
@@ -152,8 +159,27 @@ var ServiceCaller = Backbone.Model.extend( {
 			case 'isBranchAndDepartmentAndJobAndJobItemEnabled':
 			case 'getHierarchyControlOptions':
 			case 'getUserGroup':
+			case 'getJobGroup':
+			case 'getJobItemGroup':
+			case 'getProductGroup':
+			case 'getDocumentGroup':
+			case 'getQualificationGroup':
+			case 'getKPIGroup':
+
 				if ( function_name === 'getUserGroup' ) {
 					cache_key = className + '.' + 'userGroup';
+				} else if ( function_name === 'getJobGroup' ) {
+					cache_key = className + '.' + 'jobGroup';
+				} else if ( function_name === 'getJobItemGroup' ) {
+					cache_key = className + '.' + 'jobItemGroup';
+				} else if ( function_name === 'getProductGroup' ) {
+					cache_key = className + '.' + 'productGroup';
+				} else if ( function_name === 'getDocumentGroup' ) {
+					cache_key = className + '.' + 'documentGroup';
+				} else if ( function_name === 'getQualificationGroup' ) {
+					cache_key = className + '.' + 'qualificationGroup';
+				} else if ( function_name === 'getKPIGroup' ) {
+					cache_key = className + '.' + 'kPIGroup';
 				} else if ( function_name === 'getHierarchyControlOptions' ) {
 					cache_key = 'getHierarchyControlOptions';
 				} else {
@@ -184,6 +210,36 @@ var ServiceCaller = Backbone.Model.extend( {
 			case 'setUserGroup':
 			case 'deleteUserGroup':
 				cache_key = className + '.' + 'userGroup';
+				LocalCacheData.result_cache[cache_key] = false;
+				break;
+			case 'setJobGroup':
+			case 'deleteJobGroup':
+				cache_key = className + '.' + 'jobGroup';
+				LocalCacheData.result_cache[cache_key] = false;
+				break;
+			case 'setJobItemGroup':
+			case 'deleteJobItemGroup':
+				cache_key = className + '.' + 'jobItemGroup';
+				LocalCacheData.result_cache[cache_key] = false;
+				break;
+			case 'setProductGroup':
+			case 'deleteProductGroup':
+				cache_key = className + '.' + 'productGroup';
+				LocalCacheData.result_cache[cache_key] = false;
+				break;
+			case 'setDocumentGroup':
+			case 'deleteDocumentGroup':
+				cache_key = className + '.' + 'documentGroup';
+				LocalCacheData.result_cache[cache_key] = false;
+				break;
+			case 'setQualificationGroup':
+			case 'deleteQualificationGroup':
+				cache_key = className + '.' + 'qualificationGroup';
+				LocalCacheData.result_cache[cache_key] = false;
+				break;
+			case 'setKPIGroup':
+			case 'deleteKPIGroup':
+				cache_key = className + '.' + 'kPIGroup';
 				LocalCacheData.result_cache[cache_key] = false;
 				break;
 		}
@@ -255,6 +311,12 @@ var ServiceCaller = Backbone.Model.extend( {
 						case 'getOtherField':
 						case 'isBranchAndDepartmentAndJobAndJobItemEnabled':
 						case 'getUserGroup':
+						case 'getJobGroup':
+						case 'getJobItemGroup':
+						case 'getProductGroup':
+						case 'getDocumentGroup':
+						case 'getQualificationGroup':
+						case 'getKPIGroup':
 						case 'getHierarchyControlOptions':
 							LocalCacheData.result_cache[cache_key] = result;
 							break;

@@ -161,7 +161,7 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 
 					// Waiting for the API returns data to set the current edit record.
 					$this.current_edit_record = result;
-					$this.setEditViewWidgetsMode();
+
 					$this.initEditView();
 
 				} );
@@ -320,7 +320,7 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 						window.location.reload( true );
 					}, $.i18n._( 'Updating preferences, reloading' ) + '...' );
 
-					$this.current_edit_record = null;
+
 					$this.removeEditView();
 
 					IndexViewController.setNotificationBar( 'preference' );
@@ -372,10 +372,12 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		var tab_preferences = this.edit_view_tab.find( '#tab_preferences' );
 
 		var tab_preferences_column1 = tab_preferences.find( '.first-column' );
+		var tab_preference_column2 = tab_preferences.find( '.second-column' );
 
 		this.edit_view_tabs[0] = [];
 
 		this.edit_view_tabs[0].push( tab_preferences_column1 );
+		this.edit_view_tabs[0].push( tab_preference_column2 );
 
 		// Employee
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
@@ -447,30 +449,30 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( {label: $.i18n._( 'Email Notifications' )} );
-		this.addEditFieldToColumn( null, form_item_input, tab_preferences_column1 );
+		this.addEditFieldToColumn( null, form_item_input, tab_preference_column2 );
 
 		// Exceptions
 
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( {field: 'enable_email_notification_exception'} );
-		this.addEditFieldToColumn( $.i18n._( 'Exceptions' ), form_item_input, tab_preferences_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Exceptions' ), form_item_input, tab_preference_column2 );
 
 		// Messages
 
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( {field: 'enable_email_notification_message'} );
-		this.addEditFieldToColumn( $.i18n._( 'Messages' ), form_item_input, tab_preferences_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Messages' ), form_item_input, tab_preference_column2 );
 
 		// Pay Stubs
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( {field: 'enable_email_notification_pay_stub'} );
-		this.addEditFieldToColumn( $.i18n._( 'Pay Stubs' ), form_item_input, tab_preferences_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Pay Stubs' ), form_item_input, tab_preference_column2 );
 
 		// Send Notifications to Home Email
 
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 		form_item_input.TCheckbox( {field: 'enable_email_notification_home'} );
-		this.addEditFieldToColumn( $.i18n._( 'Send Notifications to Home Email' ), form_item_input, tab_preferences_column1, '' );
+		this.addEditFieldToColumn( $.i18n._( 'Send Notifications to Home Email' ), form_item_input, tab_preference_column2, '' );
 
 		//Tab 1 start
 

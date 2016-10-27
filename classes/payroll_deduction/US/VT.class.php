@@ -41,6 +41,24 @@
 class PayrollDeduction_US_VT extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+												20160101 => array(
+															10 => array(
+																	array( 'income' => 2650,	'rate' => 0,	'constant' => 0 ),
+																	array( 'income' => 39900,	'rate' => 3.55,	'constant' => 0 ),
+																	array( 'income' => 93400,	'rate' => 6.8,	'constant' => 1322.38 ),
+																	array( 'income' => 192400,	'rate' => 7.8,	'constant' => 4960.38 ),
+																	array( 'income' => 415600,	'rate' => 8.8,	'constant' => 12682.38 ),
+																	array( 'income' => 415600,	'rate' => 8.95,	'constant' => 32323.98 ),
+																	),
+															20 => array(
+																	array( 'income' => 8000,	'rate' => 0,	'constant' => 0 ),
+																	array( 'income' => 69900,	'rate' => 3.55,	'constant' => 0 ),
+																	array( 'income' => 160450,	'rate' => 6.8,	'constant' => 2197.45 ),
+																	array( 'income' => 240000,	'rate' => 7.8,	'constant' => 8354.85 ),
+																	array( 'income' => 421900,	'rate' => 8.8,	'constant' => 14559.75 ),
+																	array( 'income' => 421900,	'rate' => 8.95,	'constant' => 30566.95 ),
+																	),
+															),
 												20150101 => array(
 															10 => array(
 																	array( 'income' => 2650,	'rate' => 0,	'constant' => 0 ),
@@ -206,6 +224,9 @@ class PayrollDeduction_US_VT extends PayrollDeduction_US {
 												);
 
 	var $state_options = array(
+								20160101 => array( //01-Jan-16
+													'allowance' => 4050
+													),
 								20150101 => array( //01-Jan-15
 													'allowance' => 4000
 													),

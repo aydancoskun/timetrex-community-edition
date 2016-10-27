@@ -137,13 +137,15 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 				//Inside editor
 
-				var args = { country: $.i18n._( 'Country' ),
+				var args = {
+					country: $.i18n._( 'Country' ),
 					province: $.i18n._( 'Province/State' )
 				};
 
 				var editor = Global.loadWidgetByName( FormItemType.INSIDE_EDITOR );
 
-				editor.InsideEditor( {title: '',
+				editor.InsideEditor( {
+					title: '',
 					addRow: this.insideEditorAddRow,
 					removeRow: this.insideEditorRemoveRow,
 					getValue: this.insideEditorGetValue,
@@ -224,7 +226,10 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 		var $this = this;
 		if ( !data ) {
-			data = {country: LocalCacheData.getCurrentCompany().country, province: LocalCacheData.getCurrentCompany().province};
+			data = {
+				country: LocalCacheData.getCurrentCompany().country,
+				province: LocalCacheData.getCurrentCompany().province
+			};
 		}
 
 		var row = this.getRowRender(); //Get Row render
@@ -244,13 +249,15 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 		var country_api = new (APIFactory.getAPIClass( 'APICompany' ))();
 
-		country_api.getOptions( 'country', {onResult: function( result ) {
-			var result_data = result.getResult();
-			country.setSourceData( Global.buildRecordArray( result_data ) );
+		country_api.getOptions( 'country', {
+			onResult: function( result ) {
+				var result_data = result.getResult();
+				country.setSourceData( Global.buildRecordArray( result_data ) );
 
-			country.setValue( data.country );
+				country.setValue( data.country );
 
-		}} );
+			}
+		} );
 
 		widgets[country.getField()] = country;
 
@@ -313,14 +320,16 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 		var country_api = new (APIFactory.getAPIClass( 'APICompany' ))();
 
-		country_api.getOptions( 'province', val.country, {onResult: function( res ) {
-			res = res.getResult();
+		country_api.getOptions( 'province', val.country, {
+			onResult: function( res ) {
+				res = res.getResult();
 
-			province.setSourceData( Global.buildRecordArray( res ) );
+				province.setSourceData( Global.buildRecordArray( res ) );
 
-			province.setValue( val.province );
+				province.setValue( val.province );
 
-		}} );
+			}
+		} );
 	},
 
 	onFrequencyChange: function( target ) {
@@ -406,9 +415,11 @@ QuickStartWizardController = BaseWizardController.extend( {
 					var company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
 					LocalCacheData.getCurrentCompany().is_setup_complete = true;
 
-					company_api.setCompany( company, {onResult: function() {
+					company_api.setCompany( company, {
+						onResult: function() {
 
-					}} );
+						}
+					} );
 				}
 
 				$( $this.el ).remove();
@@ -479,15 +490,17 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 			var api = new (APIFactory.getAPIClass( 'APIPayPeriodSchedule' ))();
 
-			api.detectPayPeriodScheduleDates( type_id, first_date, {onResult: function( result ) {
-				var res_data = result.getResult();
-				grid.clearGridData();
-				grid.setGridParam( {data: res_data} );
-				grid.trigger( 'reloadGrid' );
+			api.detectPayPeriodScheduleDates( type_id, first_date, {
+				onResult: function( result ) {
+					var res_data = result.getResult();
+					grid.clearGridData();
+					grid.setGridParam( {data: res_data} );
+					grid.trigger( 'reloadGrid' );
 
-				$this.setStep3CellDatePickers( grid );
+					$this.setStep3CellDatePickers( grid );
 
-			}} );
+				}
+			} );
 		}
 
 	},
@@ -499,22 +512,43 @@ QuickStartWizardController = BaseWizardController.extend( {
 		switch ( gridId ) {
 			case 'example_dates':
 
-				var column_info = {name: 'start_date', index: 'start_date', label: $.i18n._('Start Date'), width: 100, sortable: false, title: false,
+				var column_info = {
+					name: 'start_date',
+					index: 'start_date',
+					label: $.i18n._( 'Start Date' ),
+					width: 100,
+					sortable: false,
+					title: false,
 					formatter: function( cell_value, related_data, row ) {
 						return $this.onTextInputRender( cell_value, related_data, row );
-					}};
+					}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'end_date', index: 'end_date', label: $.i18n._('End Date'), width: 100, sortable: false, title: false,
+				column_info = {
+					name: 'end_date',
+					index: 'end_date',
+					label: $.i18n._( 'End Date' ),
+					width: 100,
+					sortable: false,
+					title: false,
 					formatter: function( cell_value, related_data, row ) {
 						return $this.onTextInputRender( cell_value, related_data, row );
-					}};
+					}
+				};
 				column_info_array.push( column_info );
 
-				column_info = {name: 'transaction_date', index: 'transaction_date', label: $.i18n._('Transaction Date'), width: 100, sortable: false, title: false,
+				column_info = {
+					name: 'transaction_date',
+					index: 'transaction_date',
+					label: $.i18n._( 'Transaction Date' ),
+					width: 100,
+					sortable: false,
+					title: false,
 					formatter: function( cell_value, related_data, row ) {
 						return $this.onTextInputRender( cell_value, related_data, row );
-					}};
+					}
+				};
 				column_info_array.push( column_info );
 
 				break;
@@ -541,86 +575,96 @@ QuickStartWizardController = BaseWizardController.extend( {
 				var api_current_user = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
 
 				//Time ZOne
-				api_user_preference.getOptions( 'time_zone', {onResult: function( result ) {
+				api_user_preference.getOptions( 'time_zone', {
+					onResult: function( result ) {
 
-					current_step_ui['time_zone'].setSourceData( Global.buildRecordArray( result.getResult() ) );
+						current_step_ui['time_zone'].setSourceData( Global.buildRecordArray( result.getResult() ) );
 
-					if ( current_step_data ) {
-						for ( var key in current_step_data ) {
-							if ( !current_step_data.hasOwnProperty( key ) ) continue;
+						if ( current_step_data ) {
+							for ( var key in current_step_data ) {
+								if ( !current_step_data.hasOwnProperty( key ) ) continue;
 
-							current_step_ui[key].setValue( current_step_data[key] );
+								current_step_ui[key].setValue( current_step_data[key] );
+							}
 						}
+
+						step2OptionsCallBack();
+
 					}
-
-					step2OptionsCallBack();
-
-				}} );
+				} );
 
 				//Time Format
-				api_user_preference.getOptions( 'time_format', {onResult: function( result ) {
+				api_user_preference.getOptions( 'time_format', {
+					onResult: function( result ) {
 
-					current_step_ui['time_format'].setSourceData( Global.buildRecordArray( result.getResult() ) );
+						current_step_ui['time_format'].setSourceData( Global.buildRecordArray( result.getResult() ) );
 
-					if ( current_step_data ) {
-						for ( var key in current_step_data ) {
-							if ( !current_step_data.hasOwnProperty( key ) ) continue;
+						if ( current_step_data ) {
+							for ( var key in current_step_data ) {
+								if ( !current_step_data.hasOwnProperty( key ) ) continue;
 
-							current_step_ui[key].setValue( current_step_data[key] );
+								current_step_ui[key].setValue( current_step_data[key] );
+							}
 						}
+
+						step2OptionsCallBack();
+
 					}
-
-					step2OptionsCallBack();
-
-				}} );
+				} );
 
 				//Calendar Starts On
-				api_user_preference.getOptions( 'start_week_day', {onResult: function( result ) {
+				api_user_preference.getOptions( 'start_week_day', {
+					onResult: function( result ) {
 
-					current_step_ui['start_week_day'].setSourceData( Global.buildRecordArray( result.getResult() ) );
+						current_step_ui['start_week_day'].setSourceData( Global.buildRecordArray( result.getResult() ) );
 
-					if ( current_step_data ) {
-						for ( var key in current_step_data ) {
-							if ( !current_step_data.hasOwnProperty( key ) ) continue;
+						if ( current_step_data ) {
+							for ( var key in current_step_data ) {
+								if ( !current_step_data.hasOwnProperty( key ) ) continue;
 
-							current_step_ui[key].setValue( current_step_data[key] );
+								current_step_ui[key].setValue( current_step_data[key] );
+							}
 						}
+
+						step2OptionsCallBack();
+
 					}
+				} );
 
-					step2OptionsCallBack();
+				api_current_user.getCurrentUserPreference( {
+					onResult: function( result ) {
+						var res_data = result.getResult();
+						setStep2Values( res_data );
 
-				}} );
-
-				api_current_user.getCurrentUserPreference( {onResult: function( result ) {
-					var res_data = result.getResult();
-					setStep2Values( res_data );
-
-				}} );
+					}
+				} );
 
 				break;
 			case 3:
 				var api_pp_schedule = new (APIFactory.getAPIClass( 'APIPayPeriodSchedule' ))();
-				api_pp_schedule.getOptions( 'type', {onResult: function( result ) {
-					var res_data = Global.buildRecordArray( result.getResult() );
-					res_data.splice( 0, 1 );
+				api_pp_schedule.getOptions( 'type', {
+					onResult: function( result ) {
+						var res_data = Global.buildRecordArray( result.getResult() );
+						res_data.splice( 0, 1 );
 
-					current_step_ui['type_id'].setSourceData( res_data );
+						current_step_ui['type_id'].setSourceData( res_data );
 
-					if ( current_step_data ) {
-						var array = current_step_data['example_dates'];
+						if ( current_step_data ) {
+							var array = current_step_data['example_dates'];
 
-						var grid = current_step_ui['example_dates'];
-						grid.clearGridData();
-						grid.setGridParam( {data: array} );
-						grid.trigger( 'reloadGrid' );
-						$this.setStep3CellDatePickers( grid );
-						current_step_ui['type_id'].setValue( current_step_data['type_id'] );
+							var grid = current_step_ui['example_dates'];
+							grid.clearGridData();
+							grid.setGridParam( {data: array} );
+							grid.trigger( 'reloadGrid' );
+							$this.setStep3CellDatePickers( grid );
+							current_step_ui['type_id'].setValue( current_step_data['type_id'] );
 
-					} else {
-						buildStep3EmptySource();
+						} else {
+							buildStep3EmptySource();
+						}
+
 					}
-
-				}} );
+				} );
 
 				break;
 			case 4:
@@ -644,43 +688,47 @@ QuickStartWizardController = BaseWizardController.extend( {
 			var s = current_step_ui['start_week_day'];
 
 			if ( user_preference.language === "en" ) {
-				api_user_preference.getOptions( 'date_format', {onResult: function( result ) {
+				api_user_preference.getOptions( 'date_format', {
+					onResult: function( result ) {
 
-					current_step_ui['date_format'].setSourceData( Global.buildRecordArray( result.getResult() ) );
+						current_step_ui['date_format'].setSourceData( Global.buildRecordArray( result.getResult() ) );
 
-					if ( current_step_data ) {
-						for ( var key in current_step_data ) {
-							if ( !current_step_data.hasOwnProperty( key ) ) continue;
+						if ( current_step_data ) {
+							for ( var key in current_step_data ) {
+								if ( !current_step_data.hasOwnProperty( key ) ) continue;
 
-							current_step_ui[key].setValue( current_step_data[key] );
+								current_step_ui[key].setValue( current_step_data[key] );
+							}
+						} else {
+							t.setValue( user_preference.time_zone );
+							d.setValue( user_preference.date_format );
+							tf.setValue( user_preference.time_format );
+							s.setValue( user_preference.start_week_day );
 						}
-					} else {
-						t.setValue( user_preference.time_zone );
-						d.setValue( user_preference.date_format );
-						tf.setValue( user_preference.time_format );
-						s.setValue( user_preference.start_week_day );
-					}
 
-				}} );
+					}
+				} );
 			} else {
-				api_user_preference.getOptions( 'other_date_format', {onResult: function( result ) {
+				api_user_preference.getOptions( 'other_date_format', {
+					onResult: function( result ) {
 
-					current_step_ui['date_format'].setSourceData( Global.buildRecordArray( result.getResult() ) );
+						current_step_ui['date_format'].setSourceData( Global.buildRecordArray( result.getResult() ) );
 
-					if ( current_step_data ) {
-						for ( var key in current_step_data ) {
-							if ( !current_step_data.hasOwnProperty( key ) ) continue;
+						if ( current_step_data ) {
+							for ( var key in current_step_data ) {
+								if ( !current_step_data.hasOwnProperty( key ) ) continue;
 
-							current_step_ui[key].setValue( current_step_data[key] );
+								current_step_ui[key].setValue( current_step_data[key] );
+							}
+						} else {
+							t.setValue( user_preference.time_zone );
+							d.setValue( user_preference.date_format );
+							tf.setValue( user_preference.time_format );
+							s.setValue( user_preference.start_week_day );
 						}
-					} else {
-						t.setValue( user_preference.time_zone );
-						d.setValue( user_preference.date_format );
-						tf.setValue( user_preference.time_format );
-						s.setValue( user_preference.start_week_day );
-					}
 
-				}} );
+					}
+				} );
 			}
 
 			step2OptionsCallBack();
@@ -689,10 +737,10 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 		function buildStep3EmptySource() {
 			var array = [
-				{ start_date: '', end_date: '', transaction_date: '' },
-				{ start_date: '', end_date: '', transaction_date: '' },
-				{ start_date: '', end_date: '', transaction_date: '' },
-				{ start_date: '', end_date: '', transaction_date: '' }
+				{start_date: '', end_date: '', transaction_date: ''},
+				{start_date: '', end_date: '', transaction_date: ''},
+				{start_date: '', end_date: '', transaction_date: ''},
+				{start_date: '', end_date: '', transaction_date: ''}
 			];
 
 			var grid = current_step_ui['example_dates'];
@@ -752,7 +800,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 		var $this = this;
 
-		this.saveCurrentStep( function( result ) {
+		this.saveCurrentStep( 'forward', function( result ) {
 			Global.setWidgetEnabled( $this.next_btn, true );
 			Global.setWidgetEnabled( $this.back_btn, true );
 			if ( result ) {
@@ -766,7 +814,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 	onBackClick: function() {
 		var $this = this;
 
-		this.saveCurrentStep( function( result ) {
+		this.saveCurrentStep( 'back', function( result ) {
 			Global.setWidgetEnabled( $this.next_btn, true );
 			Global.setWidgetEnabled( $this.back_btn, true );
 			if ( result ) {
@@ -776,7 +824,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 		} );
 	},
 
-	saveCurrentStep: function( callBack ) {
+	saveCurrentStep: function( direction, callBack ) {
 		this.stepsDataDic[this.current_step] = {};
 		var current_step_data = this.stepsDataDic[this.current_step];
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
@@ -791,26 +839,33 @@ QuickStartWizardController = BaseWizardController.extend( {
 				current_step_data.time_format = current_step_ui.time_format.getValue();
 				current_step_data.date_format = current_step_ui.date_format.getValue();
 				current_step_data.start_week_day = current_step_ui.start_week_day.getValue();
-				var api_current_user = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
-				var api_user_preference = new (APIFactory.getAPIClass( 'APIUserPreference' ))();
 
-				api_current_user.getCurrentUserPreference( {onResult: function( result ) {
-					var res_data = result.getResult();
+				if(direction === 'forward'){
+					var api_current_user = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
+					var api_user_preference = new (APIFactory.getAPIClass( 'APIUserPreference' ))();
+					api_current_user.getCurrentUserPreference( {
+						onResult: function( result ) {
+							var res_data = result.getResult();
 
-					res_data.date_format = current_step_data.date_format;
-					res_data.time_format = current_step_data.time_format;
-					res_data.time_zone = current_step_data.time_zone;
-					res_data.start_week_day = current_step_data.start_week_day;
+							res_data.date_format = current_step_data.date_format;
+							res_data.time_format = current_step_data.time_format;
+							res_data.time_zone = current_step_data.time_zone;
+							res_data.start_week_day = current_step_data.start_week_day;
 
-					api_user_preference.setUserPreference( res_data, {onResult: function() {
+							api_user_preference.setUserPreference( res_data, {
+								onResult: function() {
 
-						Global.updateUserPreference( function() {
-							callBack( true );
-						} );
-					}} );
+									Global.updateUserPreference( function() {
+										callBack( true );
+									} );
+								}
+							} );
 
-				}} );
-
+						}
+					} );
+				}else{
+					callBack( true );
+				}
 				break;
 			case 3:
 				Global.setWidgetEnabled( this.next_btn, false );
@@ -819,46 +874,61 @@ QuickStartWizardController = BaseWizardController.extend( {
 				current_step_data.type_id = current_step_ui.type_id.getValue();
 				current_step_data.example_dates = current_step_ui.example_dates.getGridParam( 'data' );
 
-				var api_pp_schedule = new (APIFactory.getAPIClass( 'APIPayPeriodSchedule' ))();
+				if(direction === 'forward'){
+					var api_pp_schedule = new (APIFactory.getAPIClass( 'APIPayPeriodSchedule' ))();
 
-				api_pp_schedule.detectPayPeriodScheduleSettings( current_step_data.type_id, current_step_data.example_dates, {onResult: function( result ) {
+					api_pp_schedule.detectPayPeriodScheduleSettings( current_step_data.type_id, current_step_data.example_dates, {
+						onResult: function( result ) {
 
-					result = result.getResult();
+							result = result.getResult();
 
-					if ( result.hasOwnProperty( 'company_id' ) ) {
+							if ( result.hasOwnProperty( 'company_id' ) ) {
 
-						api_pp_schedule.setPayPeriodSchedule( result, {onResult: function( result_1 ) {
+								api_pp_schedule.setPayPeriodSchedule( result, {
+									onResult: function( result_1 ) {
 
-							if ( result_1.isValid() ) {
-								callBack( true );
+										if ( result_1.isValid() ) {
+											callBack( true );
+										} else {
+											TAlertManager.showErrorAlert( result_1 );
+											callBack( false );
+										}
+
+									}
+								} );
 							} else {
-								TAlertManager.showErrorAlert( result_1 );
-								callBack( false );
+								callBack( true );
 							}
 
-						}} );
-					} else {
-						callBack( true );
-					}
+						}
+					} );
+				}else{
+					callBack( true );
+				}
 
-				}} );
+
 
 				break;
 			case 4:
 				Global.setWidgetEnabled( this.next_btn, false );
 				Global.setWidgetEnabled( this.back_btn, false );
 				current_step_data.country = current_step_ui.country.getValue();
-				var company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
+				if ( direction === 'forward' ) {
+					var company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
+					company_api.createPresets( current_step_data.country, {
+						onResult: function( result ) {
 
-				company_api.createPresets( current_step_data.country, {onResult: function( result ) {
-
-					if ( result.isValid ) {
-						callBack( true );
-					} else {
-						TAlertManager.showErrorAlert( result );
-						callBack( false );
-					}
-				}} );
+							if ( result.isValid ) {
+								callBack( true );
+							} else {
+								TAlertManager.showErrorAlert( result );
+								callBack( false );
+							}
+						}
+					} );
+				}else{
+					callBack( true );
+				}
 				break;
 			case 5:
 				callBack( true );

@@ -215,6 +215,8 @@ class APIPayPeriod extends APIFactory {
 
 					$lf->setObjectFromArray( $row );
 
+					$lf->setEnableImportData( TRUE ); //Make sure when editing pay periods we try to import data whenever possible.
+
 					$is_valid = $lf->isValid( $ignore_warning );
 					if ( $is_valid == TRUE ) {
 						Debug::Text('Saving data...', __FILE__, __LINE__, __METHOD__, 10);

@@ -101,7 +101,7 @@ LoginUserBankAccountViewController = BaseViewController.extend( {
 				$this.getUserBankAccountData( function( result ) {
 					// Waiting for the API returns data to set the current edit record.
 					$this.current_edit_record = result;
-					$this.setEditViewWidgetsMode();
+
 					$this.initEditView();
 
 				} );
@@ -189,7 +189,7 @@ LoginUserBankAccountViewController = BaseViewController.extend( {
 					$this.refresh_id = result_data;
 				}
 
-				$this.current_edit_record = null;
+
 				$this.removeEditView();
 
 			} else {

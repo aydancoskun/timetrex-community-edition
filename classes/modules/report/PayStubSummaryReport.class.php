@@ -123,7 +123,12 @@ class PayStubSummaryReport extends Report {
 				$retval = TTDate::getTimePeriodOptions();
 				break;
 			case 'date_columns':
-				$retval = TTDate::getReportDateOptions( 'transaction', TTi18n::getText('Transaction Date'), 13, TRUE );
+				$retval = array_merge(
+									TTDate::getReportDateOptions( 'hire', TTi18n::getText('Hire Date'), 13, FALSE ),
+									TTDate::getReportDateOptions( 'termination', TTi18n::getText('Termination Date'), 14, FALSE ),
+									TTDate::getReportDateOptions( 'birth', TTi18n::getText('Birth Date'), 15, FALSE ),
+									TTDate::getReportDateOptions( 'transaction', TTi18n::getText('Transaction Date'), 27, TRUE )
+								);
 				break;
 			case 'custom_columns':
 				//Get custom fields for report data.
@@ -306,6 +311,8 @@ class PayStubSummaryReport extends Report {
 							$retval[$column] = 'currency';
 						} elseif ( strpos($column, '_time') OR strpos($column, '_policy') ) {
 							$retval[$column] = 'time_unit';
+						} elseif ( strpos($column, 'total_pay_stub') !== FALSE ) {
+							$retval[$column] = 'numeric';
 						}
 					}
 				}
@@ -769,7 +776,7 @@ class PayStubSummaryReport extends Report {
 		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $ulf as $key => $u_obj ) {
-			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( $this->getColumnDataConfig() );
+			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$this->getColumnDataConfig(), array( 'hire_date' => TRUE, 'termination_date' => TRUE, 'birth_date' => TRUE ) ) );
 			$this->tmp_data['user'][$u_obj->getId()]['total_pay_stub'] = 1;
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
@@ -790,13 +797,32 @@ class PayStubSummaryReport extends Report {
 					foreach( $level_1 as $date_stamp => $level_2 ) {
 						foreach( $level_2 as $run_id => $row ) {
 							$date_columns = TTDate::getReportDates( 'transaction', $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
+
+							if ( isset($this->tmp_data['user'][$user_id]['hire_date']) ) {
+								$hire_date_columns = TTDate::getReportDates( 'hire', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['hire_date'] ), FALSE, $this->getUserObject() );
+							} else {
+								$hire_date_columns = array();
+							}
+
+							if ( isset($this->tmp_data['user'][$user_id]['termination_date']) ) {
+								$termination_date_columns = TTDate::getReportDates( 'termination', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['termination_date'] ), FALSE, $this->getUserObject() );
+							} else {
+								$termination_date_columns = array();
+							}
+
+							if ( isset($this->tmp_data['user'][$user_id]['birth_date']) ) {
+								$birth_date_columns = TTDate::getReportDates( 'birth', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['birth_date'] ), FALSE, $this->getUserObject() );
+							} else {
+								$birth_date_columns = array();
+							}
+
 							$processed_data	 = array(
 													//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
 													//'pay_stub' => array('sort' => $row['pay_stub_transaction_date'], 'display' => TTDate::getDate('DATE', $row['pay_stub_transaction_date'] ) ),
 													);
 
 							//Need to make sure PSEA IDs are strings not numeric otherwise array_merge will re-key them.
-							$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $processed_data );
+							$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $hire_date_columns, $termination_date_columns, $birth_date_columns, $processed_data );
 
 							$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 							$key++;
@@ -804,7 +830,7 @@ class PayStubSummaryReport extends Report {
 					}
 				}
 			}
-			unset($this->tmp_data, $row, $date_columns, $processed_data, $level_1 );
+			unset($this->tmp_data, $row, $date_columns, $hire_date_columns, $termination_date_columns, $birth_date_columns, $processed_data, $level_1 );
 		}
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 

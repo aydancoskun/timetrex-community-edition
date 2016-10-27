@@ -235,6 +235,8 @@ class KPIReport extends Report {
 					foreach($columns as $column => $name ) {
 						if ( strpos($column, 'rate') !== FALSE) {
 							$retval[$column] = 'numeric';
+						} elseif ( strpos($column, 'total_review') !== FALSE ) {
+							$retval[$column] = 'numeric';
 						}
 					}
 				}

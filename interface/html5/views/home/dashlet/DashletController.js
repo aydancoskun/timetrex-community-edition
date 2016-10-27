@@ -54,6 +54,8 @@ DashletController = Backbone.View.extend( {
 		if ( Global.isScrolledIntoView( $( $this.el ) ) ) {
 			doInit();
 		}
+		// remove first
+		interact( '#' + $( this.el ).attr( 'id' ) ).unset();
 		interact( '#' + $( this.el ).attr( 'id' ) )
 			.resizable( {
 				edges: {left: true, right: true, bottom: true, top: true}
@@ -70,6 +72,9 @@ DashletController = Backbone.View.extend( {
 				var top = parseFloat( $( target ).css( 'top' ) );
 				if ( xUnit > 1 ) {
 					var percentage_width = ((xUnit * 20) / $this.homeViewController.dashboard_container.width() * 100);
+					if ( Math.abs( percentage_width - 33 ) < 2 ) {
+						percentage_width = 33;
+					}
 					var currentWidth = $( target ).width();
 					target.style.width = percentage_width + '%';
 					var newWidth = $( target ).width();
@@ -233,6 +238,7 @@ DashletController = Backbone.View.extend( {
 	},
 
 	onCellFormat: function( cell_value, related_data, row ) {
+		cell_value = Global.decodeCellValue( cell_value );
 		var col_model = related_data.colModel;
 		var row_id = related_data.rowid;
 		var content_div = $( "<div class='punch-content-div'></div>" );
@@ -411,12 +417,13 @@ DashletController = Backbone.View.extend( {
 					if ( $this.full_timesheet_data.timesheet_dates ) {
 						$this.start_date = Global.strToDate( $this.full_timesheet_data.timesheet_dates.start_display_date );
 						$this.end_date = Global.strToDate( $this.full_timesheet_data.timesheet_dates.end_display_date );
+						// Error: Uncaught TypeError: Cannot read property 'format' of null in interface/html5/#!m=Home line 607
+						if ( !$this.initTimesheetGridComplete && $this.start_date && $this.end_date ) {
+							$this.buildAccumulatedTotalGrid();
+							$this.initTimesheetGridComplete = true;
+						}
+						$this.buildAccumulatedTotalData();
 					}
-					if ( !$this.initTimesheetGridComplete ) {
-						$this.buildAccumulatedTotalGrid();
-						$this.initTimesheetGridComplete = true;
-					}
-					$this.buildAccumulatedTotalData();
 					$( '.button-rotate' ).removeClass( 'button-rotate' );
 				} else {
 					$( '.button-rotate' ).removeClass( 'button-rotate' );
@@ -438,6 +445,8 @@ DashletController = Backbone.View.extend( {
 	},
 
 	buildAccumulatedTotalData: function() {
+		// There will be no grid when no start date and end date when calling getTimeSheetData
+		if(!this.grid) return;
 		this.accmulated_order_map = {};
 		this.accumulated_total_grid_source = [];
 		var accumulated_user_date_total_data = this.full_timesheet_data.accumulated_user_date_total_data;
@@ -699,7 +708,9 @@ DashletController = Backbone.View.extend( {
 			$this.getAllColumns( function() {
 				$this.setSelectLayout();
 				$this.grid.clearGridData();
-				$this.grid.setGridParam( {data: Global.formatGridData( $this.dashboard_data.data, $this.data.data.dashlet_type )} );
+				var data = Global.formatGridData( $this.dashboard_data.data, $this.data.data.dashlet_type );
+				data = $this.processId( data );
+				$this.grid.setGridParam( {data: data} );
 				$this.grid.trigger( 'reloadGrid' );
 				$( '.button-rotate' ).removeClass( 'button-rotate' );
 				if ( !Global.isArray( $this.dashboard_data.data ) || $this.dashboard_data.data.length < 1 ) {
@@ -710,6 +721,20 @@ DashletController = Backbone.View.extend( {
 				$this.setGridCellBackGround();
 			} );
 		} );
+	},
+
+	processId: function( data ) {
+		var start_id = -2;
+		// Add a random id to make sure each row has different id when the item don't have id itself (Scheudle summary)
+		data = _.map( data, function( item ) {
+			if ( item.hasOwnProperty( 'id' ) && !item.id ) {
+				item.id = start_id;
+			}
+			start_id--;
+			return item;
+		} );
+
+		return data;
 	},
 
 	addIframeBack: function() {
@@ -729,6 +754,8 @@ DashletController = Backbone.View.extend( {
 
 	saveSize: function() {
 		var $his = this;
+        //Error: Uncaught TypeError: Cannot read property 'style' of undefined in /html5/?desktop=1#!m=Exception line 755
+		if(!$( this.el )[0]) return;
 		var height = $( this.el )[0].style.height;
 		var width = $( this.el )[0].style.width;
 		this.data.data.width = width.replace( '%', '' );
@@ -745,7 +772,7 @@ DashletController = Backbone.View.extend( {
 			return;
 		}
 		this.grid.setGridWidth( $( this.el ).width() - 6 );
-		var height_offset = $( this.el ).find( '.ui-jqgrid-sortable' ).height() + 43
+		var height_offset = $( this.el ).find( '.ui-jqgrid-sortable' ).height() + 43;
 		this.grid.setGridHeight( $( this.el ).height() - height_offset );
 	},
 
@@ -1145,10 +1172,59 @@ DashletController = Backbone.View.extend( {
 	showNoResultCover: function() {
 		this.removeNoResultCover();
 		this.no_result_box = Global.loadWidgetByName( WidgetNamesDic.NO_RESULT_BOX );
-		this.no_result_box.NoResultBox( {related_view_controller: this, is_new: false} );
-		this.no_result_box.attr( 'id', '#dashlet_' + this.data.id + '_no_result_box' );
-		var grid_div = $( this.el ).find( '.content' );
-		grid_div.append( this.no_result_box );
+		if ( this.no_result_box ) {
+			this.no_result_box.NoResultBox( {
+				related_view_controller: this,
+				is_new: false,
+				message: this.getNoResultMessage()
+			} );
+			this.no_result_box.attr( 'id', '#dashlet_' + this.data.id + '_no_result_box' );
+			var grid_div = $( this.el ).find( '.content' );
+			grid_div.append( this.no_result_box );
+		}
+
+	},
+	getNoResultMessage: function() {
+		//Show result message base on different dashlet type
+		var result = $.i18n._( 'No Results Found' );
+		switch ( this.data.data.dashlet_type ) {
+			case 'schedule_summary':
+				result = $.i18n._( 'Perhaps if you ask nicely, your supervisor will add a schedule for you?' );
+				break;
+			case 'exception_summary':
+				result = $.i18n._( 'No exceptions to correct, great job!' );
+				break;
+			case 'message_summary':
+				result = $.i18n._( 'All messages are read, nicely done!' );
+				break;
+			case 'request_summary':
+				result = $.i18n._( 'Send a request to your supervisor by clicking MyAccount -> Requests.' );
+				break;
+			case 'accrual_balance_summary':
+				result = $.i18n._( 'No accrual balances at this time.' );
+				break;
+			case 'timesheet_verification_summary':
+			case 'timesheet_verification_summary_child':
+				result = $.i18n._( 'No timesheets to verify yet.' );
+				break;
+			case 'schedule_summary_child':
+				result = $.i18n._( 'Schedules can be added by clicking Attendance -> Schedules.' );
+				break;
+			case 'exception_summary_child':
+				result = $.i18n._( 'All exceptions are corrected... You can relax now!' );
+				break;
+			case 'user_active_shift_summary':
+				result = $.i18n._( 'No active shifts at this moment.' );
+				break;
+			case 'request_authorize_summary':
+				result = $.i18n._( 'All requests are authorized, excellent work!' );
+				break;
+			case 'news':
+				result = $.i18n._( 'Slow news day, nothing to see here yet...' );
+				break;
+		}
+
+		return result;
 	},
 
 	removeNoResultCover: function() {

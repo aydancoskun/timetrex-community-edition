@@ -50,7 +50,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 				$this.getPayPeriodScheduleData( id, function( result ) {
 					// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
 					$this.current_edit_record = result;
-					$this.setEditViewWidgetsMode();
+
 					$this.initEditView();
 
 				} );
@@ -62,7 +62,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 				this.initEditViewUI( $this.viewId, $this.edit_view_tpl );
 			}
 
-			this.setEditViewWidgetsMode();
+
 		}
 
 	},
@@ -279,7 +279,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		this.editFieldResize();
 	},
 
-	onCopyAsNewClick: function() {
+	_continueDoCopyAsNew: function() {
 		var $this = this;
 		this.is_add = true;
 
@@ -296,6 +296,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 			this.setTabStatus();
 
 			$this.onTypeChange(); //Override for this;
+			this.is_changed = false;
 			ProgressBar.closeOverlay();
 
 		} else {

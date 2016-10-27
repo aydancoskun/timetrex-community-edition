@@ -93,7 +93,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 																'type' => '' )
 								),
 								array(
-										'value' => $this->year+1,
+										'value' => ( $this->year + 1 ),
 										'on_background' => TRUE,
 										'coordinates' => array(
 															'x' => 533,
@@ -125,28 +125,28 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 												'coordinates' => array(
 																		'941' => array(
 																			'x' => 122,
-																			'y' => 72,
+																			'y' => 70,
 																			'h' => 10,
 																			'w' => 11,
 																			'halign' => 'C',
 																			),
 																		'military' => array(
 																			'x' => 158,
-																			'y' => 72,
+																			'y' => 70,
 																			'h' => 10,
 																			'w' => 11,
 																			'halign' => 'C',
 																			),
 																		'943' => array(
 																			'x' => 194,
-																			'y' => 72,
+																			'y' => 70,
 																			'h' => 10,
 																			'w' => 11,
 																			'halign' => 'C',
 																			),
 																		'944' => array(
 																			'x' => 230,
-																			'y' => 72,
+																			'y' => 70,
 																			'h' => 10,
 																			'w' => 11,
 																			'halign' => 'C',
@@ -179,44 +179,43 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 																		'type' => 'B' )
 											),
 								'kind_of_employer' => array(
-												'function' => 'drawCheckBox',
+												'function' => array( 'strtolower', 'drawCheckBox' ),
 												'coordinates' => array(
-																		'none' => array(
+																		'n' => array(
 																			'x' => 367,
-																			'y' => 72,
+																			'y' => 70,
 																			'h' => 10,
 																			'w' => 11,
 																			'halign' => 'C',
 																			),
-																		'501c' => array(
+																		't' => array(
 																			'x' => 418,
-																			'y' => 72,
+																			'y' => 70,
 																			'h' => 10,
 																			'w' => 11,
 																			'halign' => 'C',
 																			),
-																		'state/nonlocal' => array(
+																		's' => array(
 																			'x' => 367,
 																			'y' => 96,
 																			'h' => 10,
 																			'w' => 11,
 																			'halign' => 'C',
 																			),
-																		'state/local' => array(
+																		'y' => array(
 																			'x' => 418,
 																			'y' => 96,
 																			'h' => 10,
 																			'w' => 11,
 																			'halign' => 'C',
 																			),
-																		'federal' => array(
+																		'f' => array(
 																			'x' => 475,
 																			'y' => 96,
 																			'h' => 10,
 																			'w' => 11,
 																			'halign' => 'C',
 																			),
-
 																	  ),
 												'font' => array (
 																		'size' => 10,
@@ -257,6 +256,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 																		),
 											),
 								'ein' => array(
+												'function' => array('formatEIN', 'drawNormal' ),
 												'coordinates' => array(
 																		'x' => 38,
 																		'y' => 140,

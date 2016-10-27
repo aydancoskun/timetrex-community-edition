@@ -398,7 +398,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		$ph = array(
 					'transaction_date' => $this->db->BindTimeStamp( $transaction_date ),
 					'run_id' => (int)$run_id,
-					'transaction_date2' => $this->db->BindTimeStamp( $transaction_date ),
+					'transaction_date2' => $this->db->BindTimeStamp( TTDate::getEndDayEpoch( $transaction_date ) ),
 					);
 
 		$query = '
@@ -1059,6 +1059,13 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 			$filter_data['status_id'] = $filter_data['pay_stub_status_id'];
 		}
 
+		if ( isset($filter_data['pay_stub_run_id']) ) {
+			$filter_data['run_id'] = $filter_data['pay_stub_run_id'];
+		}
+		if ( isset($filter_data['pay_stub_type_id']) ) {
+			$filter_data['type_id'] = $filter_data['pay_stub_type_id'];
+		}
+
 		if ( isset($filter_data['title_id']) ) {
 			$filter_data['user_title_id'] = $filter_data['title_id'];
 		}
@@ -1075,7 +1082,8 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 									);
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 		if ( $order == NULL ) {
-			$order = array( 'a.transaction_date' => 'desc', 'a.run_id' => 'desc', 'b.last_name' => 'asc' );
+			//Sort by end_date after run_id, so all else being equal later end dates come first.
+			$order = array( 'a.transaction_date' => 'desc', 'a.run_id' => 'desc', 'a.end_date' => 'desc', 'a.start_date' => 'desc', 'b.last_name' => 'asc' );
 			$strict = FALSE;
 		} else {
 			if ( isset($order['transaction_date']) ) {
@@ -1160,7 +1168,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 
 		$query .= ( isset($filter_data['currency_id']) ) ? $this->getWhereClauseSQL( 'b.currency_id', $filter_data['currency_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['country']) ) ?$this->getWhereClauseSQL( 'b.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['country']) ) ? $this->getWhereClauseSQL( 'b.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['province']) ) ? $this->getWhereClauseSQL( 'b.province', $filter_data['province'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['city']) ) ? $this->getWhereClauseSQL( 'b.city', $filter_data['city'], 'text', $ph ) : NULL;
 
@@ -1193,12 +1201,16 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 	}
 
 	static function getCurrentPayRun( $company_id, $pay_period_ids ) {
+		if ( !is_array($pay_period_ids) AND is_numeric( $pay_period_ids ) ) {
+			$pay_period_ids = (array)$pay_period_ids;
+		}
+		
 		$retval = 1;
 		if ( is_array($pay_period_ids) AND count($pay_period_ids) > 0 ) {
 			$prev_pp_retval = $pp_retval = $retval;
 			foreach( $pay_period_ids as $pay_period_id ) {
 				$pslf = TTnew( 'PayStubListFactory' );
-				$pslf->getPayRunStatusByCompanyIdAndPayPeriodId(  $company_id, $pay_period_id );
+				$pslf->getPayRunStatusByCompanyIdAndPayPeriodId( $company_id, $pay_period_id );
 				if ( $pslf->getRecordCount() > 0 ) {
 					//Current Pay Run is the highest run with open pay stubs.
 					//If no open pay stubs exist, move on to the next run.

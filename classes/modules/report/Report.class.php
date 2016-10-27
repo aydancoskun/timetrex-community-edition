@@ -44,6 +44,8 @@ class Report {
 	public $file_name = 'report';
 	public $file_mime_type = 'application/pdf';
 
+	protected $PDF_IMAGE_SCALE_RATIO = 1.25; //CONST from TCPDF, copy it here so we don't need to include TCPDF for HTML reports.
+
 	protected $config = array(
 								'other' => array(
 												'report_name' => '', //Name to be displayed on the report.
@@ -716,9 +718,9 @@ class Report {
 		//Check for other time_period arrays.
 		if ( is_array( $data ) ) {
 			foreach( $data as $column => $column_data ) {
-				if ( strpos( $column, '-time_period' ) !== FALSE ) {
+				if ( strpos( $column, '_time_period' ) !== FALSE ) {
 					Debug::Text('Found Custom TimePeriod... Column: '. $column, __FILE__, __LINE__, __METHOD__, 10);
-					$data = array_merge( $data, (array)$this->convertTimePeriodToStartEndDate( $data[$column], str_replace('-time_period', '', $column.'_' ) ) );
+					$data = array_merge( $data, (array)$this->convertTimePeriodToStartEndDate( $data[$column], str_replace('_time_period', '', $column.'_' ) ) );
 				}
 			}
 		}
@@ -2045,21 +2047,44 @@ class Report {
 	function _output( $format = NULL ) {
 		Debug::Text('Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( $format == 'raw' ) {
-			//Should we rekey this array so the order can be presevered, which is critical to outputting it properly?
-			return $this->data;
-		} elseif ( $format == 'csv' OR $format == 'xml' ) {
-			//Make sure we use the full readable column name when exporting to CSV.
-			$column_options = (array)Misc::trimSortPrefix( $this->getOptions('columns') );
-			$column_config = (array)$this->getReportColumns();
-			$columns = array();
-			foreach( $column_config as $column => $tmp ) {
-				if ( isset($column_options[$column]) ) {
-					$columns[$column] = $column_options[$column];
-				}
+		//Make sure we use the full readable column name when exporting to CSV.
+		$column_options = (array)Misc::trimSortPrefix( $this->getOptions('columns') );
+		$column_config = (array)$this->getReportColumns();
+		$columns = array();
+		foreach( $column_config as $column => $tmp ) {
+			if ( isset($column_options[$column]) ) {
+				$columns[$column] = $column_options[$column];
 			}
-			//Debug::Arr($columns, 'Columns:  '. $format, __FILE__, __LINE__, __METHOD__, 10);
+		}
+		//Debug::Arr($columns, 'Columns:  '. $format, __FILE__, __LINE__, __METHOD__, 10);
 
+		if ( $format == 'raw' ) {
+			//Since only columns that are displayed are formatted, this can cause confusion if we return some formatted and some unformatted columns.
+			//Therefore make sure we still format the data somewhat, by ordering and removing columns that aren't actually displayed (with the exception of _total/_subtotal columns)
+			//return $this->data;
+
+			if ( is_array($this->data) ) {
+				$columns['_subtotal'] = $columns['_total'] = ''; //Always include these columns so they can be easily determined programmatically.
+				$data = array();
+				$i = 0;
+				foreach( $this->data as $key => $row ) {
+					if ( is_array($row) ) {
+						foreach ($columns as $column_key => $tmp ) {
+							if ( isset($row[$column_key]) ) {
+								$data[$key][$column_key] = $row[$column_key];
+							} else {
+								//$data[$key][$column_key] = NULL; //Don't bother with NULLs as it just eats up memory.
+							}
+						}
+					}
+					$i++;
+				}
+
+				return $data;
+			} else {
+				return $this->data;
+			}
+		} elseif ( $format == 'csv' OR $format == 'xml' ) {
 			if ( $format == 'csv' ) {
 				$data = Misc::Array2CSV( $this->data, $columns, FALSE, TRUE );
 				$file_extension = 'csv';
@@ -2128,11 +2153,11 @@ class Report {
 			) {
 
 			if ( $this->getUserObject()->getWorkEmail() != '' AND $this->getUserObject()->getWorkEmailIsValid() == TRUE ) {
-				$primary_email = $this->getUserObject()->getWorkEmail();
+				$primary_email = Misc::formatEmailAddress( $this->getUserObject()->getWorkEmail(), $this->getUserObject() );
 
 				$secondary_email = NULL;
 				if ( is_object( $report_schedule_obj ) AND $report_schedule_obj->getEnableHomeEmail() == TRUE AND $this->getUserObject()->getHomeEmail() != '' AND $this->getUserObject()->getHomeEmailIsValid() == TRUE ) {
-					$secondary_email .= $this->getUserObject()->getHomeEmail();
+					$secondary_email .= Misc::formatEmailAddress( $this->getUserObject()->getHomeEmail(), $this->getUserObject() );
 				}
 
 				if ( is_object( $report_schedule_obj ) AND $report_schedule_obj->getOtherEmail() != '' ) {
@@ -2142,7 +2167,7 @@ class Report {
 					$secondary_email .= $report_schedule_obj->getOtherEmail();
 				}
 			} else {
-				$primary_email = $this->getUserObject()->getHomeEmail();
+				$primary_email = Misc::formatEmailAddress( $this->getUserObject()->getHomeEmail(), $this->getUserObject() );
 				$secondary_email = NULL;
 			}
 
@@ -2386,7 +2411,7 @@ class Report {
 	}
 
 	function _pdf_unitsToPixels( $size ) {
-		return ( $size * ( PDF_IMAGE_SCALE_RATIO * 2 ) );
+		return ( $size * ( $this->PDF_IMAGE_SCALE_RATIO * 2 ) );
 	}
 	
 	function _pdf_scaleSize( $size ) {
@@ -3081,7 +3106,7 @@ class Report {
 		$css .= '.exceeded-warning{ text-align:center; font-size: ' . $this->_html_fontSize( 200 ) . '%; font-weight: bold;}';
 		$css .= '.blank-row{ height: 10px}';
 		$css .= '.content-footer td{ width: 1%;}';
-		$css .= '.content-header th{ width: 1%; white-space: nowrap; font-size: '. $this->_html_fontSize( 100 ) .'%; border-bottom: 5px solid #000000; border-top: 5px solid #000000; background-color: #e5e5e5; }';
+		$css .= '.content-header th{ width: 1%; white-space: nowrap; font-size: '. $this->_html_fontSize( 100 ) .'%; border-bottom: 5px solid #000000; border-top: 5px solid #000000; background-color: #e5e5e5; text-align: right; }';
 		$css .= '.footer{ margin:0 auto; text-align: center; vertical-align: middle; font-size: '. $this->_html_fontSize( 75 ) .'%; }';
 		$css .= '.bg-white{ background-color: #FFFFFF; }';
 		$css .= '.bg-gray{ background-color: #FAFAFA; }';
@@ -3146,7 +3171,7 @@ class Report {
 			//Page width: 205mm
 			$this->pdf = new TTPDF( $this->config['other']['page_orientation'], 'mm', $this->config['other']['page_format'], $this->getUserObject()->getCompanyObject()->getEncoding() );
 
-			$this->pdf->setImageScale( PDF_IMAGE_SCALE_RATIO );
+			$this->pdf->setImageScale( $this->PDF_IMAGE_SCALE_RATIO );
 
 			$this->pdf->SetAuthor( $this->getUserObject()->getFullName() );
 			$this->pdf->SetTitle( $this->title );
@@ -3201,7 +3226,7 @@ class Report {
 				$this->_html_Chart();
 				$this->html .= '</table>';
 			}
-			$this->html .= '<table class="content">';
+//			$this->html .= '<table class="content">';
 
 			$this->_html_Header(); // do the table header.
 			$this->_html_Table(); // do the table content.
@@ -3243,6 +3268,8 @@ class Report {
 	}
 
 	function _html_Header() {
+
+		$this->html .= '<table class="content">';
 		$column_options = Misc::trimSortPrefix( $this->getOptions('columns') );
 		$columns = $this->getReportColumns();
 		$this->html .= '<thead>';
@@ -3389,7 +3416,7 @@ class Report {
 			$this->html .= '</td>';
 
 			// center
-			$this->html .= '<td class="print-icon"><img onclick="'. "this.style.display='none';" .'window.print();' . "this.style.display='block';" . '" src="data:image/x-icon;base64,' .base64_encode( file_get_contents( Environment::getBasePath(). '/interface/'. $config_vars['other']['default_interface'] . '/theme/default/css/global/widgets/ribbon/icons/print-35x35.png' ) ). '"></td>';
+			$this->html .= '<td class="print-icon"><img onclick="'. "this.style.display='none';" .'window.print();' . "this.style.display='inline-block';" . '" src="data:image/x-icon;base64,' .base64_encode( file_get_contents( Environment::getBasePath(). '/interface/'. $config_vars['other']['default_interface'] . '/theme/default/css/global/widgets/ribbon/icons/print-35x35.png' ) ). '"></td>';
 
 			// right
 			$this->html .= '<td class="generated">';
@@ -3665,7 +3692,9 @@ class Report {
 								$this->profiler->startTimer( 'Draw Cell' );
 								//MultiCell() is significantly slower than Cell(), so only use MultiCell when the height is more than one row.
 								if ( $row_cell_height > $this->_pdf_fontSize( $row_layout['height'] ) ) {
-									$this->pdf->MultiCell( $cell_width, $row_cell_height, wordwrap($value, $this->config['other']['table_data_word_wrap']), $border, $row_layout['align'], $row_layout['fill'], 0, '', '', TRUE, $row_layout['stretch'], FALSE, TRUE, 0, 'T', TRUE );
+									//MultiCell should wrap the text automatically, so no need to call wordwrap() directly.
+									//$this->pdf->MultiCell( $cell_width, $row_cell_height, wordwrap('This is some really long text to test wrapping. '.$value, $this->config['other']['table_data_word_wrap']), $border, $row_layout['align'], $row_layout['fill'], 0, '', '', TRUE, $row_layout['stretch'], FALSE, TRUE, 0, 'T', TRUE );
+									$this->pdf->MultiCell( $cell_width, $row_cell_height, $value, $border, $row_layout['align'], $row_layout['fill'], 0, '', '', TRUE, $row_layout['stretch'], FALSE, TRUE, 0, 'T', FALSE );
 								} else {
 									$this->pdf->Cell( $cell_width, $this->_pdf_fontSize( $row_layout['height'] ), $value, $border, 0, $row_layout['align'], $row_layout['fill'], '', $row_layout['stretch'] );
 								}
@@ -3950,19 +3979,18 @@ class ReportCellQRcode extends ReportCell {
 	}
 
 	function display( $format, $max_width, $max_height, $row_i = 0 ) {
+		$width = $max_width;
+		$height = $max_height;
+
+		//Make sure we don't stretch the QRcode as it makes it difficult to read.
+		if ( $width > $height ) {
+			$width = $height;
+		}
+		if ( $height > $width ) {
+			$height = $width;
+		}
+		
 		if ( $format == 'pdf' ) {
-
-			$width = $max_width;
-			$height = $max_height;
-
-			//Make sure we don't stretch the QRcode as it makes it difficult to read.
-			if ( $width > $height ) {
-				$width = $height;
-			}
-			if ( $height > $width ) {
-				$height = $width;
-			}
-
 			if ( ($row_i % 2) == 0 ) {
 				$bgcolor = 255;
 			} else {
@@ -3981,7 +4009,7 @@ class ReportCellQRcode extends ReportCell {
 		} else if ( $format == 'html' ) {
 			require_once( Environment::getBasePath() . 'classes/tcpdf' . '/tcpdf_barcodes_2d.php');
 			$barcode_obj = new TCPDF2DBarcode($this->value, 'QRCODE');
-			$barcode_html = '<img width='. $this->report_obj->_pdf_unitsToPixels( $max_width ) .' height='. $this->report_obj->_pdf_unitsToPixels( $max_height ) .' src="data:image/x-icon;base64,'.base64_encode( $barcode_obj->getBarcodePngData($max_width, $max_height) ).'">';
+			$barcode_html = '<img width='. $this->report_obj->_pdf_unitsToPixels( $width ) .' height='. $this->report_obj->_pdf_unitsToPixels( $height ) .' src="data:image/x-icon;base64,'.base64_encode( $barcode_obj->getBarcodePngData($width, $height) ).'">';
 			return $barcode_html;
 		}
 	}

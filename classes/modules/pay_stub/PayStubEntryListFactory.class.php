@@ -1653,7 +1653,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 											);
 
 		if ( $order == NULL ) {
-			$order = array( 'b.user_id' => 'asc');
+			$order = array( 'b.user_id' => 'asc', 'pay_period_transaction_date' => 'asc', 'ps_order' => 'asc');
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;
@@ -1669,6 +1669,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		$psf = new PayStubFactory();
 		$uf = new UserFactory();
 		$psaf = new PayStubAmendmentFactory();
+		$pseaf = new PayStubEntryAccountFactory();
 
 		$ph = array(
 					'company_id' => (int)$company_id,
@@ -1679,6 +1680,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		$query = '
 					SELECT	a.*,
 							b.user_id as user_id,
+							c.birth_date as birth_date,
 							b.pay_period_id as pay_period_id,
 							ppf.start_date as pay_period_start_date,
 							ppf.end_date as pay_period_end_date,
@@ -1695,11 +1697,13 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 					FROM 	(
 							SELECT aa.pay_stub_id as pay_stub_id,
 								aa.pay_stub_entry_name_id as pay_stub_entry_name_id,
+								ii.ps_order as ps_order,
 								avg(aa.rate) as rate,
 								sum(aa.units) as units,
 								sum(aa.amount) as amount,
 								sum(aa.ytd_amount) as ytd_amount
 							FROM '. $this->getTable() .' as aa
+							LEFT JOIN '. $pseaf->getTable() .' as ii ON aa.pay_stub_entry_name_id = ii.id
 							LEFT JOIN '. $psaf->getTable() .' as hh ON aa.pay_stub_amendment_id = hh.id
 							LEFT JOIN '. $psf->getTable() .' as bb ON aa.pay_stub_id = bb.id
 							LEFT JOIN '. $uf->getTable() .' as cc ON bb.user_id = cc.id
@@ -1760,7 +1764,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 
 		$query .= '
 								AND (aa.deleted = 0 AND bb.deleted = 0 AND cc.deleted=0)
-							group by aa.pay_stub_id, aa.pay_stub_entry_name_id
+							group by aa.pay_stub_id, aa.pay_stub_entry_name_id, ii.ps_order
 							) a
 						LEFT JOIN '. $psf->getTable() .' as b ON a.pay_stub_id = b.id
 						LEFT JOIN '. $uf->getTable() .' as c ON b.user_id = c.id
@@ -1769,7 +1773,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 					';
 
 		$query .=	'
-						AND (c.deleted=0)
+						AND ( c.deleted = 0 )
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
@@ -1836,6 +1840,9 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 							b.start_date as pay_stub_start_date,
 							b.end_date as pay_stub_end_date,
 							b.transaction_date as pay_stub_transaction_date,
+							b.status_id as pay_stub_status_id,
+							b.type_id as pay_stub_type_id,
+							b.run_id as pay_stub_run_id,
 							b.currency_id as currency_id,
 							b.currency_rate as currency_rate,
 							a.pay_stub_entry_name_id as pay_stub_entry_name_id,
@@ -1867,6 +1874,10 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 							$query .= ( isset($filter_data['include_user_id']) ) ? $this->getWhereClauseSQL( 'cc.id', $filter_data['include_user_id'], 'numeric_list', $ph ) : NULL;
 							$query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'cc.id', $filter_data['exclude_user_id'], 'not_numeric_list', $ph ) : NULL;
 							$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'cc.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
+
+							$query .= ( isset($filter_data['pay_stub_status_id']) ) ? $this->getWhereClauseSQL( 'bb.status_id', $filter_data['pay_stub_status_id'], 'numeric_list', $ph ) : NULL;
+							$query .= ( isset($filter_data['pay_stub_type_id']) ) ? $this->getWhereClauseSQL( 'bb.type_id', $filter_data['pay_stub_type_id'], 'numeric_list', $ph ) : NULL;
+							$query .= ( isset($filter_data['pay_stub_run_id']) ) ? $this->getWhereClauseSQL( 'bb.run_id', $filter_data['pay_stub_run_id'], 'numeric_list', $ph ) : NULL;
 
 							if ( isset($filter_data['exclude_ytd_adjustment']) AND (bool)$filter_data['exclude_ytd_adjustment'] == TRUE ) {
 								$query .= ' AND ( hh.ytd_adjustment is NULL OR hh.ytd_adjustment = 0 )';

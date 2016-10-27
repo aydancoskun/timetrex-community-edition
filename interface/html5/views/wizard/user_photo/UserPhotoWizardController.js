@@ -33,8 +33,8 @@ UserPhotoWizardController = BaseWizardController.extend( {
 				var combo_box = this.getComboBox( 'image_type' );
 
 				combo_box.setSourceData( [
-					{value: 'file', label: $.i18n._('File')},
-					{value: 'camera', label: $.i18n._('Camera')}
+					{value: 'file', label: $.i18n._( 'File' )},
+					{value: 'camera', label: $.i18n._( 'Camera' )}
 				] );
 
 				this.stepsWidgetDic[this.current_step] = {};
@@ -126,17 +126,20 @@ UserPhotoWizardController = BaseWizardController.extend( {
 
 		var form_data = new FormData( current_step_ui.hide_form[0] );
 
-		var image_source_array = current_step_data.after_img_src.split( ',' );
+		var image_source_array = current_step_data.after_img_src && current_step_data.after_img_src.split( ',' );
 
 		var args = {};
 
-		form_data.append( 'file_data', image_source_array[1] );
-		form_data.append( 'base64_encoded', true );
-		form_data.append( 'mime_type', image_source_array[0].split( ';' )[0].split( ':' )[1] );
-		form_data.append( 'file_name', this.stepsDataDic[2].file_name );
+		//Error: TypeError: current_step_data.after_img_src is undefined in interface/html5/framework/jquery.min.js?v=9.0.0-20151016-110437 line 2 > eval line 129
+		if ( image_source_array && image_source_array.length > 0 ) {
+			form_data.append( 'file_data', image_source_array[1] );
+			form_data.append( 'base64_encoded', true );
+			form_data.append( 'mime_type', image_source_array[0].split( ';' )[0].split( ':' )[1] );
+			form_data.append( 'file_name', this.stepsDataDic[2].file_name );
 
-		if ( this.call_back ) {
-			this.call_back( form_data );
+			if ( this.call_back ) {
+				this.call_back( form_data );
+			}
 		}
 
 		$this.onCloseClick();
@@ -223,6 +226,5 @@ UserPhotoWizardController = BaseWizardController.extend( {
 		}
 
 	}
-
 
 } );

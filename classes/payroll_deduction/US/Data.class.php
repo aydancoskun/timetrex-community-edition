@@ -37,65 +37,69 @@
 
 /*
 * Other tax calculators:
+	http://payroll.intuit.com/paycheck_calculators/legacy/
 	http://www.paycheckcity.com/calculator/salary/
 	http://www.pensoft.com/freestuff/stateinformation.aspx
 	http://www.yourmoneypage.com/withhold/fedwh1.php
 
 	- List of tax table changes*****:
+		http://legacy.americanpayroll.org/paystate/paystateupdate.html
 		http://www.tax-tables.com/withholding.html
 		http://www.payroll-taxes.com/federal-tax
 
 	- Federal/State tax information: http://www.payroll-taxes.com/state-tax.htm
 
+//***Update PayrollDeduction.class.php with updated date/version
+
 //NOCHANGE-* means document was updated for the year, but no changes affected the formulas.
 //Change every year usually
-C:19-Dec-14				Federal          		- Google: Notice 1036 http://www.irs.gov/pub/irs-pdf/n1036.pdf
-C:19-Jun-15-NOCHANGE-	'AL' => 'Alabama' 		- http://www.ador.state.al.us/Withholding/index.html *Withholding Tax Tables and Instructions
-C:19-Jun-15				'CA' => 'California' 	- http://www.edd.ca.gov/Payroll_Taxes/Rates_and_Withholding.htm *PIT Withholding schedules
-C:19-Jun-15				'CT' => 'Connecticut'	- http://www.ct.gov/drs/cwp/view.asp?a=1509&q=444766 *May have to search for the latest year... Form TPG-211 Withholding Calculation Rules Effective
-C:19-Jun-15-NOCHANGE-	'ID' => 'Idaho',		- http://tax.idaho.gov/s-results-pub.cfm?doc=EPB00006&pkey=bus
-C:19-Jun-15				'MN' => 'Minnesota',	- http://www.revenue.state.mn.us/businesses/withholding/Pages/Forms.aspx *2013 Minnesota Withholding Computer Formula
-C:19-Jun-15				'MO' => 'Missouri',		- http://www.dor.mo.gov/tax/business/withhold/ *Employers Tax Guide
-C:19-Jun-15				'NM' => 'New Mexico', 	- http://www.tax.newmexico.gov/Businesses/Wage-Withholding-Tax/Pages/Home.aspx *FYI-104 ***Often changes in Jan.
-C:19-Jun-15-NOCHANGE-	'OH' => 'Ohio',			- http://www.tax.ohio.gov/employer_withholding.aspx *Withholding Tables/Income Tax Withholding Instructions
-C:19-Jun-15				'OK' => 'Oklahoma',		- http://ok.gov/tax/Forms_&_Publications/Publications/Withholding/ *OW-2, Oklahoma Income Tax Withholding Tables
-C:19-Jun-15				'VT' => 'Vermont',		- http://www.state.vt.us/tax/businesswithholding.shtml *Vermont Percentage Method Withholding Tables
-C:19-Jun-15				'CO' => 'Colorado',		- https://www.colorado.gov/pacific/tax/withholding-payroll-tax-instructions-and-forms *Form: DR 1098
-C:19-Jun-15-NOCHANGE-	'DE' => 'Delaware',		- http://revenue.delaware.gov/services/WITBk.shtml *http://revenue.delaware.gov/services/wit_folder/section17.shtml
-C:19-Jun-15				'KS' => 'Kansas',		- http://www.ksrevenue.org/forms-btwh.html *Form: KW-100
-C:19-Jun-15				'KY' => 'Kentucky', 	- http://revenue.ky.gov/wht/ *Standard Deduction adjusted each year in Computer Formula (Optional Withholding Method)
-C:19-Jun-15-NOCHANGE-	'MD' => 'Maryland',		- http://business.marylandtaxes.com/taxinfo/withholding/default.asp - Use 1.25% LOCAL INCOME TAX tables, *minus 1.25%*, manually calculate each bracket.  **PAY ATTENTION TO FILING STATUS AND WHICH SIDE ITS ON** Use tax_table_bracket_calculator.ods. See MD.class.php for more information.
-C:19-Jun-15				'ME' => 'Maine',		- http://www.state.me.us/revenue/forms/with/2013.htm -- Check each year on the right of the page.
-C:19-Jun-15				'NY' => 'New York',		- http://www.tax.ny.gov/forms/withholding_cur_forms.htm *WATCH NYS=New York State, NYC=New York City. NYS-50-T.1 or .2
-C:19-Jun-15				'NC' => 'North Carolina'- http://www.dornc.com/taxes/wh_tax/index.html *Income Tax Withholding Tables & Instructions for Employers, NC30
-C:19-Jun-15	CHG			'ND' => 'North Dakota', - http://www.nd.gov/tax/indwithhold/pubs/guide/index.html *Withholding Rates and Instructions for Wages Paid in 2013
-C:19-Jun-15				'OR' => 'Oregon',		- http://www.oregon.gov/DOR/BUS/Pages/payroll_updates.aspx *Search: Withholdings Tax Formulas 2013
-C:19-Jun-15-NOCHANGE-	'MI' => 'Michigan',		- http://www.michigan.gov/taxes/0,4676,7-238-43531_61039---,00.html *Michigan Income Tax Withholding Guide 446-I
-C:19-Jun-15				'IL' => 'Illinois',		- http://www.revenue.state.il.us/Businesses/TaxInformation/Payroll/index.htm *Booklet IL-700-T
-C:19-Jun-15				'MA' => 'Massachusetts' - http://www.mass.gov/dor/individuals/taxpayer-help-and-resources/tax-guides/withholding-tax-guide.html#calculate *Circular M
-C:19-Jun-15				'RI' => 'Rhode Island', - http://www.tax.state.ri.us/misc/software_developers.php *Percentage Method Withholding Tables
+DONE-C:14-Dec-15		Federal          		- Google: Notice 1036 http://www.irs.gov/pub/irs-pdf/n1036.pdf
+C:30-Dec-15				'AL' => 'Alabama' 		- http://www.ador.state.al.us/Withholding/index.html *Withholding Tax Tables and Instructions
+DONE-C:14-Dec-15		'CA' => 'California' 	- http://www.edd.ca.gov/Payroll_Taxes/Rates_and_Withholding.htm *PIT Withholding schedules
+DONE-C:21-Dec-15				'CT' => 'Connecticut'	- http://www.ct.gov/drs/cwp/view.asp?a=1509&q=444766 *May have to search for the latest year... Form TPG-211 Withholding Calculation Rules Effective
+C:30-Dec-15				'ID' => 'Idaho',		- http://tax.idaho.gov/s-results-pub.cfm?doc=EPB00006&pkey=bus
+DONE-C:14-Dec-15				'MN' => 'Minnesota',	- http://www.revenue.state.mn.us/businesses/withholding/Pages/Forms.aspx *2013 Minnesota Withholding Computer Formula
+DONE-C:30-Dec-15				'MO' => 'Missouri',		- http://dor.mo.gov/business/withhold/ *Employers Tax Guide, Withholding Formula
+DONE-C:14-Dec-15				'NM' => 'New Mexico', 	- http://www.tax.newmexico.gov/Businesses/Wage-Withholding-Tax/Pages/Home.aspx *FYI-104 ***Often changes in Jan.
+C:30-Dec-15				'OH' => 'Ohio',			- http://www.tax.ohio.gov/employer_withholding.aspx *Withholding Tables/Income Tax Withholding Instructions
+DONE-C:21-Dec-15				'OK' => 'Oklahoma',		- http://ok.gov/tax/Forms_&_Publications/Publications/Withholding/ *OW-2, Oklahoma Income Tax Withholding Tables
+DONE-C:30-Dec-15				'VT' => 'Vermont',		- http://tax.vermont.gov/business-and-corp/withholding-tax *Income Tax Withholding  Instructions, Tables, and Charts.
+DONE-C:14-Dec-15-NOCHANGE-	'CO' => 'Colorado',		- https://www.colorado.gov/pacific/tax/withholding-payroll-tax-instructions-and-forms *Form: DR 1098
+C:30-Dec-15				'DE' => 'Delaware',		- http://revenue.delaware.gov/services/WITBk.shtml *http://revenue.delaware.gov/services/wit_folder/section17.shtml
+C:30-Dec-15				'KS' => 'Kansas',		- http://www.ksrevenue.org/forms-btwh.html *Form: KW-100
+DONE-C:14-Dec-15				'KY' => 'Kentucky', 	- http://revenue.ky.gov/wht/ *Standard Deduction adjusted each year in Computer Formula (Optional Withholding Method)
+DONE-C:21-Dec-15-NOCHANGE-		'MD' => 'Maryland',		- http://business.marylandtaxes.com/taxinfo/withholding/default.asp *Maryland Withholding Guide* - Use 1.25% LOCAL INCOME TAX tables, *minus 1.25%*, manually calculate each bracket.  **PAY ATTENTION TO FILING STATUS AND WHICH SIDE ITS ON** Use tax_table_bracket_calculator.ods. See MD.class.php for more information.
+DONE-C:14-Dec-15				'ME' => 'Maine',		- http://www.state.me.us/revenue/forms/with/2013.htm -- Check each year on the right of the page.
+DONE-C:14-Dec-15				'NY' => 'New York',		- http://www.tax.ny.gov/forms/withholding_cur_forms.htm *WATCH NYS=New York State, NYC=New York City. NYS-50-T.1 or .2
+DONE-C:21-Dec-15				'NC' => 'North Carolina'- http://www.dornc.com/taxes/wh_tax/index.html *Income Tax Withholding Tables & Instructions for Employers, NC30
+DONE-C:30-Dec-15				'ND' => 'North Dakota', - http://www.nd.gov/tax/user/businesses/formspublications/income-tax-withholding/income-tax-withholding-instructions--tables *Income Tax Withholding Rates & Instructions Booklet
+DONE-C:30-Dec-15				'OR' => 'Oregon',		- http://www.oregon.gov/DOR/programs/businesses/Pages/payroll-updates.aspx *Search: Withholdings Tax Formulas 2013
+DONE-C:30-Dec-15				'MI' => 'Michigan',		- http://www.michigan.gov/taxes/0,4676,7-238-43519_43531---,00.html *Michigan Income Tax Withholding Guide 446-I
+DONE-C:14-Dec-15				'IL' => 'Illinois',		- http://www.revenue.state.il.us/Businesses/TaxInformation/Payroll/index.htm *Booklet IL-700-T
+DONE-C:21-Dec-15				'MA' => 'Massachusetts' - http://www.mass.gov/dor/individuals/taxpayer-help-and-resources/tax-guides/withholding-tax-guide.html#calculate *Circular M
+DONE-C:18-Jan-16				'RI' => 'Rhode Island', - http://www.tax.state.ri.us/misc/software_developers.php *Percentage Method Withholding Tables
 
 //Change less often
-C:19-Jun-15-NOCHANGE-	'GA' => 'Georgia',		- http://dor.georgia.gov/tax-guides *Employers Tax Guide
-C:19-Jun-15-NOCHANGE-	'HI' => 'Hawaii',		- http://tax.hawaii.gov/forms/a1_b1_5whhold/ *Employers Tax Guide (Booklet A)
-C:19-Jun-15				'NE' => 'Nebraska',		- http://www.revenue.nebraska.gov/withhold.html *Nebraska  Circular EN, Income Tax Withholding on Wages
-C:19-Jun-15-NOCHANGE-	'WI' => 'Wisconsin',	- http://www.revenue.wi.gov/forms/with/index.html *Pub W-166, Method "B" calculation
+C:30-Dec-15				'GA' => 'Georgia',		- http://dor.georgia.gov/tax-guides *Employers Tax Guide
+C:30-Dec-15				'HI' => 'Hawaii',		- http://tax.hawaii.gov/forms/a1_b1_5whhold/ *Employers Tax Guide (Booklet A)
+DONE-C:21-Dec-15-NOCHANGE-	'NE' => 'Nebraska',		- http://www.revenue.nebraska.gov/withhold.html *Nebraska  Circular EN, Income Tax Withholding on Wages
+DONE-C:14-Dec-15-NOCHANGE-	'WI' => 'Wisconsin',	- http://www.revenue.wi.gov/forms/with/index.html *Pub W-166, Method "B" calculation
 
 //Rarely change
-C:19-Jun-15-NOCHANGE-*	'UT' => 'Utah',			- http://tax.utah.gov/withholding *PUB 14, Withholding Tax Guide
-C:19-Jun-15-NOCHANGE-	'AZ' => 'Arizona',		- http://www.azdor.gov/Forms/Withholding.aspx *Form A4: Employees choose a straight percent to pick.
-C:19-Jun-15				'AR' => 'Arkansas'		- http://www.dfa.arkansas.gov/offices/incomeTax/withholding/Pages/withholdingForms.aspx *Witholding Tax Formula ***They use a minus calculation, so we have to manually calculate each bracket ourselves. Use tax_table_bracket_calculator.ods
-C:19-Jun-15*			'DC' => 'D.C.', 		- http://otr.cfo.dc.gov/page/income-tax-withholding-instructions-and-tables *Form: FR-230
-C:19-Jun-15				'IN' => 'Indiana',		- http://www.in.gov/dor/4006.htm#withholding *Departmental Notice #1 DN01
-C:19-Jun-15-NOCHANGE-	'IA' => 'Iowa',			- https://tax.iowa.gov/withholding-tax-information-0 *Iowa Withholding Tax Guide
-C:19-Jun-15-NOCHANGE-	'LA' => 'Louisiana',	- http://revenue.louisiana.gov/WithholdingTax *R-1306
-C:19-Jun-15-NOCHANGE-	'MS' => 'Mississippi',	- http://www.dor.ms.gov/taxareas/withhold/main.html *Pub 89-700
-C:19-Jun-15-NOCHANGE-	'MT' => 'Montana',		- https://revenue.mt.gov/home/businesses/wage_withholding *Expand bottom sections. *Montana Witholding Tax Guide
-C:19-Jun-15-NOCHANGE-	'NJ' => 'New Jersey',	- http://www.state.nj.us/treasury/taxation/freqqite.shtml *Withholding Rate Tables
-C:19-Jun-15-NOCHANGE-	'PA' => 'Pennsylvania', - http://www.revenue.pa.gov/GeneralTaxInformation/Tax%20Types%20and%20Information/Pages/Employer-Withholding.aspx#.VJ3CWAuA *Rev 415 - Employer Withholding Information
-C:19-Jun-15-NOCHANGE-	'SC' => 'South Carolina'- http://www.sctax.org/tax/withholding *Formula for Computing SC Withholding Tax WH-1603F
-C:19-Jun-15-NOCHANGE- 	'VA' => 'Virginia',		- http://www.tax.virginia.gov/content/withholding-tax *Employer Withholding Instructions
-C:19-Jun-15-NOCHANGE-	'WV' => 'West Virginia',- https://www.wva.state.wv.us/wvtax/Forms/Pages/WithholdingTaxForms.aspx *IT-100.1A
+DONE-C:14-Dec-15-NOCHANGE-*	'UT' => 'Utah',			- http://tax.utah.gov/withholding *PUB 14, Withholding Tax Guide
+C:30-Dec-15				'AR' => 'Arkansas'		- http://www.dfa.arkansas.gov/offices/incomeTax/withholding/Pages/withholdingForms.aspx *Witholding Tax Formula ***They use a minus calculation, so we have to manually calculate each bracket ourselves. Use tax_table_bracket_calculator.ods
+DONE-C:30-Dec-15				'DC' => 'D.C.', 		- http://otr.cfo.dc.gov/page/income-tax-withholding-instructions-and-tables *Form: FR-230
+DONE-C:14-Dec-15-NOCHANGE-*				'IN' => 'Indiana',		- http://www.in.gov/dor/4006.htm#withholding *Departmental Notice #1 DN01
+DONE-C:14-Dec-15-NOCHANGE-	'IA' => 'Iowa',			- https://tax.iowa.gov/withholding-tax-information-0 *Iowa Withholding Tax Guide
+C:14-Dec-15-NOCHANGE-	'LA' => 'Louisiana',	- http://revenue.louisiana.gov/WithholdingTax *R-1306
+C:14-Dec-15-NOCHANGE-	'MS' => 'Mississippi',	- http://www.dor.ms.gov/Business/Pages/Withholding-Tax.aspx *Pub 89-700
+C:14-Dec-15-NOCHANGE-	'MT' => 'Montana',		- https://revenue.mt.gov/home/businesses/wage_withholding#Filing-Payment-Information-723 *Montana Witholding Tax Guide
+C:14-Dec-15-NOCHANGE-	'NJ' => 'New Jersey',	- http://www.state.nj.us/treasury/taxation/freqqite.shtml *Withholding Rate Tables
+C:14-Dec-15-NOCHANGE-	'PA' => 'Pennsylvania', - http://www.revenue.pa.gov/GeneralTaxInformation/Tax%20Types%20and%20Information/Pages/Employer-Withholding.aspx#.VJ3CWAuA *Rev 415 - Employer Withholding Information
+C:14-Dec-15-NOCHANGE-	'SC' => 'South Carolina'- https://dor.sc.gov/tax/withholding/forms *Formula for Computing SC Withholding Tax WH-1603F
+C:14-Dec-15-NOCHANGE- 	'VA' => 'Virginia',		- http://www.tax.virginia.gov/content/withholding-tax *Employer Withholding Instructions
+C:14-Dec-15-NOCHANGE-	'WV' => 'West Virginia',- http://tax.wv.gov/Business/Withholding/Pages/WithholdingTaxForms.aspx *IT-100.1A
+DONE-C:14-Dec-15-NOCHANGE-	'AZ' => 'Arizona',		- http://www.azdor.gov/Forms/Withholding.aspx *Form A4: Employees choose a straight percent to pick.
 
 	'AK' => 'Alaska',		- NO STATE TAXES
 	'FL' => 'Florida',		- NO STATE TAXES
@@ -118,6 +122,7 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 	var $country_primary_currency = 'USD';
 
 	var $federal_allowance = array(
+									20160101 => 4050.00, //01-Jan-16
 									20150101 => 4000.00, //01-Jan-15
 									20140101 => 3950.00, //01-Jan-14
 									20130101 => 3900.00, //01-Jan-13
@@ -310,6 +315,28 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 		Federal Income Tax Rates
 	*/
 	var $federal_income_tax_rate_options = array(
+													20160101 => array(
+																10 => array(
+																		array( 'income' => 2250,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 11525,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 39900,	'rate' => 15,	'constant' => 927.50 ),
+																		array( 'income' => 93400,	'rate' => 25,	'constant' => 5183.75 ),
+																		array( 'income' => 192400,	'rate' => 28,	'constant' => 18558.75 ),
+																		array( 'income' => 415600,	'rate' => 33,	'constant' => 46278.75 ),
+																		array( 'income' => 417300,	'rate' => 35,	'constant' => 119934.75 ),
+																		array( 'income' => 417300,	'rate' => 39.6,	'constant' => 120529.75 ),
+																		),
+																20 => array(
+																		array( 'income' => 8550,	'rate' => 0,	'constant' => 0 ),
+																		array( 'income' => 27100,	'rate' => 10,	'constant' => 0 ),
+																		array( 'income' => 83850,	'rate' => 15,	'constant' => 1855.00 ),
+																		array( 'income' => 160450,	'rate' => 25,	'constant' => 10367.50 ),
+																		array( 'income' => 240000,	'rate' => 28,	'constant' => 29517.50 ),
+																		array( 'income' => 421900,	'rate' => 33,	'constant' => 51791.50 ),
+																		array( 'income' => 475500,	'rate' => 35,	'constant' => 111818.50 ),
+																		array( 'income' => 475500,	'rate' => 39.6,	'constant' => 130578.50 ),
+																		),
+																),
 													20150101 => array(
 																10 => array(
 																		array( 'income' => 2300,	'rate' => 0,	'constant' => 0 ),
@@ -572,7 +599,7 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 			$epoch = $this->getISODate( TTDate::getTime() );
 		}
 
-		Debug::text('Using ('. $state .'/'. $district .') values from: '. TTDate::getDate('DATE+TIME', $epoch) .' Status: State: '. $state_status, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Using ('. $state .'/'. $district .') values from: '. TTDate::getDate('DATE+TIME', $this->getDateEpoch($epoch) ) .' Status: State: '. $state_status, __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->income_tax_rates = FALSE;
 		if ( isset($this->federal_income_tax_rate_options) AND count($this->federal_income_tax_rate_options) > 0 ) {

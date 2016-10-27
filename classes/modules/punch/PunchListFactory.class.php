@@ -551,11 +551,13 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 					'user_id' => (int)$user_id,
 					'start_date_stamp' => $this->db->BindDate( $start_time_stamp ),
 					'end_date_stamp' => $this->db->BindDate( $end_time_stamp ),
-					'start_time_stamp2' => $this->db->BindTimeStamp( $start_time_stamp ),
-					'end_time_stamp2' => $this->db->BindTimeStamp( $end_time_stamp ),
+					//'start_time_stamp2' => $this->db->BindTimeStamp( $start_time_stamp ), //Always include all punches on the entire day, so we don't split shifts on lunch punches.
+					//'end_time_stamp2' => $this->db->BindTimeStamp( $end_time_stamp ),
 					);
 
 		//This query removes the sub-query and is optimized for MySQL.
+		//								AND x.time_stamp >= ?
+		//								AND x.time_stamp <= ?
 		$query = '
 					select distinct a.*, pcf.date_stamp
 					from '. $this->getTable() .' as a
@@ -569,8 +571,6 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 							where y.user_id = ?
 								AND y.date_stamp >= ?
 								AND y.date_stamp <= ?
-								AND x.time_stamp >= ?
-								AND x.time_stamp <= ?
 								AND ( x.deleted = 0 AND y.deleted = 0 )
 						) as z ON a.punch_control_id = z.punch_control_id
 					LEFT JOIN '. $pcf->getTable() .' as pcf ON ( a.punch_control_id = pcf.id )

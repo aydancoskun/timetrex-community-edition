@@ -153,7 +153,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 	}
 
 	function setYearToDateCPPContribution($value) {
-		if ( $value > 0 ) {
+		if ( $value >= 0 ) {
 			$this->data['cpp_year_to_date_contribution'] = $value;
 
 			return TRUE;
@@ -184,7 +184,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 	}
 
 	function setYearToDateEIContribution($value) {
-		if ( $value > 0 ) {
+		if ( $value >= 0 ) {
 			$this->data['ei_year_to_date_contribution'] = $value;
 
 			return TRUE;
@@ -276,7 +276,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 	function getFederalPayPeriodDeductions() {
 		if ( $this->getFormulaType() == 20 ) {
 			Debug::text('Formula Type: '. $this->getFormulaType() .' YTD Payable: '. $this->getFederalTaxPayable() .' YTD Paid: '. $this->getYearToDateDeduction() .' Current PP: '. $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10);
-			$retval = $this->calcNonPeriodicDeduction( $this->getFederalTaxPayable(), $this->getYearToDateDeduction(), $this->getAnnualPayPeriods(), $this->getCurrentPayPeriod() );
+			$retval = $this->calcNonPeriodicDeduction( $this->getFederalTaxPayable(), $this->getYearToDateDeduction() );
 		} else {
 			$retval = bcdiv( $this->getFederalTaxPayable(), $this->getAnnualPayPeriods() );
 		}
@@ -286,7 +286,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 	function getProvincialPayPeriodDeductions() {
 		if ( $this->getFormulaType() == 20 ) {
 			Debug::text('Formula Type: '. $this->getFormulaType() .' YTD Payable: '. $this->getProvincialTaxPayable() .' YTD Paid: '. $this->getYearToDateDeduction() .' Current PP: '. $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10);
-			$retval = $this->calcNonPeriodicDeduction( $this->getProvincialTaxPayable(), $this->getYearToDateDeduction(), $this->getAnnualPayPeriods(), $this->getCurrentPayPeriod() );
+			$retval = $this->calcNonPeriodicDeduction( $this->getProvincialTaxPayable(), $this->getYearToDateDeduction() );
 		} else {
 			$retval = bcdiv( $this->getProvincialTaxPayable(), $this->getAnnualPayPeriods() );
 		}
@@ -296,7 +296,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 	function getAnnualTaxableIncome() {
 		if ( $this->getFormulaType() == 20 ) {
 			Debug::text('Formula Type: '. $this->getFormulaType() .' YTD Gross: '. $this->getYearToDateGrossIncome() .' This Gross: '. $this->getGrossPayPeriodIncome() .' Current PP: '. $this->getCurrentPayPeriod(), __FILE__, __LINE__, __METHOD__, 10);
-			$A = $this->calcNonPeriodicIncome( $this->getYearToDateGrossIncome(), $this->getGrossPayPeriodIncome(), $this->getAnnualPayPeriods(), $this->getCurrentPayPeriod() );
+			$A = $this->calcNonPeriodicIncome( $this->getYearToDateGrossIncome(), $this->getGrossPayPeriodIncome() );
 		} else {
 			/*
 			A = [P * (I - F - F2 - U1)] - HD - F1
@@ -438,55 +438,72 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		return $K4P;
 	}
 
-	function getFederalCPPTaxCredit() {
+	function getCPPTaxCredit( $type ) {
+		if ( $type == 'provincial' ) {
+			$rate = $this->getData()->getProvincialLowestRate();
+		} else {
+			$rate = $this->getData()->getFederalLowestRate();
+		}
+
 		/*
 		  K2_CPP = [(0.16 * (P * C, max $1801.80))
 		*/
-
 		$C = $this->getEmployeeCPP();
 		$P = $this->getAnnualPayPeriods();
 
-		$P_times_C = bcmul($P, $C);
+		if ( $this->getFormulaType() == 20 ) {
+			$PR = $this->getRemainingPayPeriods();
+			$P_times_C = bcadd( $this->getYearToDateCPPContribution(), bcmul( $PR, $C ) );
+			Debug::text('PR: '. $PR .' C: '. $C .' YTD '. $this->getYearToDateCPPContribution(), __FILE__, __LINE__, __METHOD__, 10);
+		} else {
+			$P_times_C = bcmul($P, $C);
+		}
 		if ($P_times_C > $this->getCPPEmployeeMaximumContribution() ) {
 			$P_times_C = $this->getCPPEmployeeMaximumContribution();
 		}
 		Debug::text('P_times_C: '. $P_times_C, __FILE__, __LINE__, __METHOD__, 10);
 
-		$K2_CPP = bcmul( $this->getData()->getFederalLowestRate(), $P_times_C);
-
+		$K2_CPP = bcmul( $rate, $P_times_C);
 		Debug::text('K2_CPP: '. $K2_CPP, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $K2_CPP;
 	}
 
-	function getFederalEITaxCredit() {
+	function getEITaxCredit( $type ) {
+		if ( $type == 'provincial' ) {
+			$rate = $this->getData()->getProvincialLowestRate();
+		} else {
+			$rate = $this->getData()->getFederalLowestRate();
+		}
+
 		/*
 		  K2_EI = [(0.16 * (P * C, max $819))
 		*/
-
 		$C = $this->getEmployeeEI();
 		$P = $this->getAnnualPayPeriods();
 
-		//$P_times_C = ($P * $C);
-		$P_times_C = bcmul($P, $C);
+		if ( $this->getFormulaType() == 20 ) {
+			$PR = $this->getRemainingPayPeriods();
+			$P_times_C = bcadd( $this->getYearToDateEIContribution(), bcmul( $PR, $C ) );
+			Debug::text('PR: '. $PR .' C: '. $C .' YTD '. $this->getYearToDateEIContribution(), __FILE__, __LINE__, __METHOD__, 10);
+		} else {
+			$P_times_C = bcmul($P, $C);
+		}
 		if ($P_times_C > $this->getEIEmployeeMaximumContribution() ) {
 			$P_times_C = $this->getEIEmployeeMaximumContribution();
 		}
-
 		Debug::text('P_times_C: '. $P_times_C, __FILE__, __LINE__, __METHOD__, 10);
 
-		$K2_EI = bcmul($this->getData()->getFederalLowestRate(), $P_times_C);
-
+		$K2_EI = bcmul($rate, $P_times_C);
 		Debug::text('K2_EI: '. $K2_EI, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $K2_EI;
 	}
 
 	function getFederalCPPAndEITaxCredit() {
-		$K2 = bcadd($this->getFederalCPPTaxCredit(), $this->getFederalEITaxCredit() );
-
+		$K2 = bcadd($this->getCPPTaxCredit( 'federal' ), $this->getEITaxCredit( 'federal' ) );
 		Debug::text('K2: '. $K2, __FILE__, __LINE__, __METHOD__, 10);
-
+		
 		return $K2;
 	}
 
@@ -625,12 +642,11 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		return $V2;
 	}
 
-
+/*
 	function getProvincialCPPTaxCredit() {
-		/*
-		  K2P_CPP = [(0.0605 * (P * C, max $1801.80))
-			0.0605 is the lowest income tax rate
-		*/
+
+		//  K2P_CPP = [(0.0605 * (P * C, max $1801.80))
+		//	0.0605 is the lowest income tax rate
 
 		$C = $this->getEmployeeCPP();
 		$P = $this->getAnnualPayPeriods();
@@ -652,10 +668,8 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 	}
 
 	function getProvincialEITaxCredit() {
-		/*
-		  K2P_EI = [(0.0605 * (P * C, max $1801.80))
-			0.0605 is the lowest income tax rate
-		*/
+		//  K2P_EI = [(0.0605 * (P * C, max $1801.80))
+		//	0.0605 is the lowest income tax rate
 
 		$C = $this->getEmployeeEI();
 		$P = $this->getAnnualPayPeriods();
@@ -674,11 +688,9 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 
 		return $K2P_EI;
 	}
-
+*/
 	function getProvincialCPPAndEITaxCredit() {
-		//$K2P = $this->getProvincialCPPTaxCredit() + $this->getProvincialEITaxCredit();
-		$K2P = bcadd( $this->getProvincialCPPTaxCredit(), $this->getProvincialEITaxCredit() );
-
+		$K2P = bcadd( $this->getCPPTaxCredit( 'provincial' ), $this->getEITaxCredit( 'provincial' ) );
 		Debug::text('K2P: '. $K2P, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $K2P;
@@ -700,18 +712,21 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		$D = $this->getYearToDateCPPContribution();
 		$P = $this->getAnnualPayPeriods();
 		$I = $this->getGrossPayPeriodIncome();
+		$exemption = bcdiv($this->getCPPBasicExemption(), $P);
+
+		//We used to just check if its payroll_run_id > 1 and remove the exemption in that case, but that fails when the first in-cycle run is ID=4 or something.
+		//  So switch this to just checking the formula type, and only remove the exemption if its a out-of-cycle run.
+		//     That won't handle the case of the last pay stub being a out-of-cycle run and no in-cycle run is done for that employee though, but not sure we can do much about that.
+		if ( $this->getFormulaType() == 20 ) {
+			$exemption = 0;
+		}
 
 		Debug::text('D: '. $D, __FILE__, __LINE__, __METHOD__, 10);
 		Debug::text('P: '. $P, __FILE__, __LINE__, __METHOD__, 10);
 		Debug::text('I: '. $I, __FILE__, __LINE__, __METHOD__, 10);
 
-		//$tmp1_C = $this->cpp_employee_maximum_contribution - $D;
-		//$tmp1_C = $this->getCPPEmployeeMaximumContribution() - $D;
 		$tmp1_C = bcsub( $this->getCPPEmployeeMaximumContribution(), $D);
-
-		//$tmp2_C = $this->cpp_employee_rate * ($I - ($this->cpp_basic_exemption / $P) );
-		//$tmp2_C = $this->getCPPEmployeeRate() * ($I - ($this->getCPPBasicExemption() / $P) );
-		$tmp2_C = bcmul( $this->getCPPEmployeeRate(), bcsub($I, bcdiv($this->getCPPBasicExemption(), $P) ) );
+		$tmp2_C = bcmul( $this->getCPPEmployeeRate(), bcsub($I, $exemption ) );
 
 		Debug::text('Tmp1_C: '. $tmp1_C, __FILE__, __LINE__, __METHOD__, 10);
 		Debug::text('Tmp2_C: '. $tmp2_C, __FILE__, __LINE__, __METHOD__, 10);
@@ -751,18 +766,9 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 
 		$D = $this->getYearToDateEIContribution();
 		$I = $this->getGrossPayPeriodIncome();
-		/*
-		$tmp1_EI = $this->ei_employee_maximum_contribution - $D;
-		$tmp2_EI = $this->ei_employee_rate * $I;
-		if ($tmp2_EI > $this->ei_employee_maximum_contribution) {
-			$tmp2_EI = $this->ei_employee_maximum_contribution;
-		}
-		*/
 
 		Debug::text('Employee EI Rate: '. $this->getEIEmployeeRate() .' I: '. $I, __FILE__, __LINE__, __METHOD__, 10);
-		//$tmp1_EI = $this->getEIEmployeeMaximumContribution() - $D;
 		$tmp1_EI = bcsub( $this->getEIEmployeeMaximumContribution(), $D);
-		//$tmp2_EI = $this->getEIEmployeeRate() * $I;
 		$tmp2_EI = bcmul( $this->getEIEmployeeRate(), $I);
 		if ($tmp2_EI > $this->getEIEmployeeMaximumContribution() ) {
 			$tmp2_EI = $this->getEIEmployeeMaximumContribution();

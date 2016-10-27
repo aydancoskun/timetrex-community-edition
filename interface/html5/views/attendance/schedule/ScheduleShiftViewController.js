@@ -132,15 +132,12 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
-			set_any: true,
+			set_empty: !this.checkOpenPermission(),
+			set_open: this.checkOpenPermission(),
 			field: 'user_id',
-			custom_first_label: Global.empty_item,
 			addition_source_function: (function( target, source_data ) {
 				return $this.onEmployeeSourceCreate( target, source_data );
-			}),
-			added_items: [
-				{value: 0, label: Global.open_item}
-			]
+			})
 
 		} );
 		var default_args = {};
@@ -158,7 +155,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		// Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'date_stamp'} );
+		form_item_input.TDatePicker( {field: 'start_date_stamp', validation_field: 'date_stamp'} );
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_schedule_column1, '', null );
 
 		// In
@@ -325,6 +322,23 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			b_div.css( 'display', 'block' );
 
 		}
+	},
+
+	onAddResult: function( result ) {
+		var $this = this;
+		var result_data = result.getResult();
+		if ( !result_data ) {
+			result_data = [];
+		}
+		result_data.company = LocalCacheData.current_company.name;
+		if ( $this.sub_view_mode && $this.parent_key ) {
+			result_data[$this.parent_key] = $this.parent_value;
+		}
+		// Default to Open
+		result_data === true && (result_data = {user_id: 0});
+		!result_data.user_id && (result_data.user_id = 0);
+		$this.current_edit_record = result_data;
+		$this.initEditView();
 	},
 
 	setAbsencePolicyFilter: function( filter ) {
@@ -545,8 +559,8 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		var job_item_widget = $this.edit_view_ui_dic['job_item_id'];
 		var current_job_item_id = job_item_widget.getValue();
 		job_item_widget.setSourceData( null );
-		job_item_widget.setCheckBox(true);
-		this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
+		job_item_widget.setCheckBox( true );
+		this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
 		var args = {};
 		args.filter_data = {status_id: 10, job_id: $this.current_edit_record.job_id};
 		$this.edit_view_ui_dic['job_item_id'].setDefaultArgs( args );
@@ -607,13 +621,13 @@ ScheduleShiftViewController = BaseViewController.extend( {
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.setJobItemValueWhenJobChanged( target.getValue( true ) );
-					this.edit_view_ui_dic['job_quick_search'].setCheckBox(true);
+					this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
 				}
 				break;
 			case 'job_item_id':
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
-					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
+					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
 				}
 				break;
 			case 'job_quick_search':
@@ -712,9 +726,9 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			p_str += "</table>";
 
 			container.html( p_str );
-			this.attachElement('available_balance');
+			this.attachElement( 'available_balance' );
 		} else {
-			this.detachElement('available_balance');
+			this.detachElement( 'available_balance' );
 		}
 	},
 
@@ -755,7 +769,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
 			var widget = this.edit_view_ui_dic[key];
-			if ( Global.isSet( widget ) ) {
+			if ( Global.isSet( widget ) || key === 'date_stamp' ) {
 				switch ( key ) {
 					case 'total_time':
 						this.pre_total_time = ( this.is_add ) ? 0 : this.current_edit_record[key];
@@ -779,6 +793,11 @@ ScheduleShiftViewController = BaseViewController.extend( {
 					case 'user_id':
 						widget.setValue( this.current_edit_record[key] );
 						this.getAbsencePolicy( this.current_edit_record[key] );
+						break;
+					case 'start_date_stamp':
+						break;
+					case 'date_stamp':
+						this.edit_view_ui_dic['start_date_stamp'].setValue( this.current_edit_record[key] );
 						break;
 					default:
 						widget.setValue( this.current_edit_record[key] );
@@ -817,9 +836,9 @@ ScheduleShiftViewController = BaseViewController.extend( {
 	onStatusChange: function() {
 
 		if ( this.current_edit_record['status_id'] === 10 ) {
-			this.detachElement('absence_policy_id')
+			this.detachElement( 'absence_policy_id' )
 		} else if ( this.current_edit_record['status_id'] === 20 ) {
-			this.attachElement('absence_policy_id')
+			this.attachElement( 'absence_policy_id' )
 		}
 
 		this.editFieldResize();

@@ -699,7 +699,7 @@ class TimesheetSummaryReport extends Report {
 						//Debug::Text('bColumn: '. $column .' Total Time: '. $udt_obj->getColumn('total_time') .' Object Type ID: '. $udt_obj->getColumn('object_type_id') .' Rate: '. $udt_obj->getColumn( 'hourly_rate' ), __FILE__, __LINE__, __METHOD__, 10);
 
 						if ( isset($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_time']) ) {
-							$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_time'] += $udt_obj->getColumn('total_time');
+							$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_time'] = bcadd( $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_time'], $udt_obj->getColumn('total_time') );
 						} else {
 							$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_time'] = $udt_obj->getColumn('total_time');
 						}
@@ -708,8 +708,8 @@ class TimesheetSummaryReport extends Report {
 						//Worked Time is required for printable TimeSheets. Therefore this report is handled differently from TimeSheetSummary.
 						if ( $enable_wages == TRUE AND !in_array( $column, array('total','worked') ) AND ( $udt_obj->getColumn('total_time_amount') != 0 OR $udt_obj->getColumn('total_time_amount_with_burden') != 0 ) ) { //Exclude worked time from gross wage total.
 							if ( isset($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage']) ) {
-								$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage'] += $udt_obj->getColumn('total_time_amount');
-								$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage_with_burden'] += $udt_obj->getColumn('total_time_amount_with_burden');
+								$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage'] = bcadd( $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage'], $udt_obj->getColumn('total_time_amount') );
+								$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage_with_burden'] = bcadd( $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage_with_burden'], $udt_obj->getColumn('total_time_amount_with_burden') );
 							} else {
 								$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage'] = $udt_obj->getColumn('total_time_amount');
 								$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id][$column.'_wage_with_burden'] = $udt_obj->getColumn('total_time_amount_with_burden');
@@ -766,7 +766,7 @@ class TimesheetSummaryReport extends Report {
 
 					//Make sure we handle multiple schedules on the same day.
 					if ( isset($this->tmp_data['schedule'][(int)$s_obj->getUser()][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')]['schedule_'.$status]) ) {
-						$this->tmp_data['schedule'][(int)$s_obj->getUser()][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')]['schedule_'.$status] += $s_obj->getColumn('total_time');
+						$this->tmp_data['schedule'][(int)$s_obj->getUser()][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')]['schedule_'.$status] = bcadd( $this->tmp_data['schedule'][(int)$s_obj->getUser()][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')]['schedule_'.$status], $s_obj->getColumn('total_time') );
 					} else {
 						$this->tmp_data['schedule'][(int)$s_obj->getUser()][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')]['schedule_'.$status] = $s_obj->getColumn('total_time');
 					}

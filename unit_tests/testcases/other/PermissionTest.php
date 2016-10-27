@@ -834,19 +834,19 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( 7, count($output_data) );
 		$this->assertArrayHasKey('employee_number', $output_data[0] );
 		$this->assertArrayHasKey('hourly_rate', $output_data[0] );
-		$this->assertEquals( 21.50, $output_data[0]['hourly_rate'] );
+		$this->assertGreaterThan( 10.00, $output_data[0]['hourly_rate'] );
 		$this->assertArrayHasKey('hourly_rate', $output_data[1] );
-		$this->assertEquals( 21.50, $output_data[1]['hourly_rate'] );
+		$this->assertGreaterThan( 10.00, $output_data[1]['hourly_rate'] );
 		$this->assertArrayHasKey('hourly_rate', $output_data[2] );
-		$this->assertEquals( 21.50, $output_data[2]['hourly_rate'] );
+		$this->assertGreaterThan( 10.00, $output_data[2]['hourly_rate'] );
 		$this->assertArrayHasKey('hourly_rate', $output_data[3] );
-		$this->assertEquals( 21.50, $output_data[3]['hourly_rate'] );
+		$this->assertGreaterThan( 10.00, $output_data[3]['hourly_rate'] );
 		$this->assertArrayHasKey('hourly_rate', $output_data[4] );
-		$this->assertEquals( 21.50, $output_data[4]['hourly_rate'] );
+		$this->assertGreaterThan( 10.00, $output_data[4]['hourly_rate'] );
 		$this->assertArrayHasKey('hourly_rate', $output_data[5] );
-		$this->assertEquals( 21.50, $output_data[5]['hourly_rate'] );
+		$this->assertGreaterThan( 10.00, $output_data[5]['hourly_rate'] );
 		$this->assertArrayHasKey('hourly_rate', $output_data[6] );
-		$this->assertEquals( 21.50, $output_data[6]['hourly_rate'] );
+		$this->assertGreaterThan( 10.00, $output_data[6]['hourly_rate'] );
 
 		return TRUE;
 	}

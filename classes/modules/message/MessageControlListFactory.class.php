@@ -142,9 +142,9 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 								AND c.object_type_id in (5, 50, 90)
 								AND a.status_id = 10
 								AND ( ( a.deleted = 0 AND c.deleted = 0 )
-										AND ( d.id IS NULL OR ( d.id IS NOT NULL AND d.deleted = 0 ) )
-										AND ( f.id IS NULL OR ( f.id IS NOT NULL AND f.deleted = 0 ) )
-										AND ( h.id IS NULL OR ( h.id IS NOT NULL AND h.deleted = 0 ) )
+										AND ( CASE WHEN c.object_type_id = 5 THEN d.deleted = 0 ELSE d.id IS NULL END )
+										AND ( CASE WHEN c.object_type_id = 50 THEN f.deleted = 0 ELSE f.id IS NULL END )
+										AND ( CASE WHEN c.object_type_id = 90 THEN h.deleted = 0 ELSE h.id IS NULL END )
 									)
 						';
 			//Debug::Arr($ph, ' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
@@ -211,9 +211,9 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 								AND bb.company_id = ?
 								AND c.object_type_id in (5, 50, 90)
 								AND ( a.deleted = 0 AND c.deleted = 0
-										AND ( d.id IS NULL OR ( d.id IS NOT NULL AND d.deleted = 0 ) )
-										AND ( f.id IS NULL OR ( f.id IS NOT NULL AND f.deleted = 0 ) )
-										AND ( h.id IS NULL OR ( h.id IS NOT NULL AND h.deleted = 0 ) )
+										AND ( CASE WHEN c.object_type_id = 5 THEN d.deleted = 0 ELSE d.id IS NULL END )
+										AND ( CASE WHEN c.object_type_id = 50 THEN f.deleted = 0 ELSE f.id IS NULL END )
+										AND ( CASE WHEN c.object_type_id = 90 THEN h.deleted = 0 ELSE h.id IS NULL END )																
 									)
 						';
 		} else {  //Sent
@@ -241,9 +241,9 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 								AND bb.company_id = ?
 								AND c.object_type_id in (5, 50, 90)
 								AND ( b.deleted = 0 AND c.deleted = 0
-										AND ( d.id IS NULL OR ( d.id IS NOT NULL AND d.deleted = 0 ) )
-										AND ( f.id IS NULL OR ( f.id IS NOT NULL AND f.deleted = 0 ) )
-										AND ( h.id IS NULL OR ( h.id IS NOT NULL AND h.deleted = 0 ) )
+										AND ( CASE WHEN c.object_type_id = 5 THEN d.deleted = 0 ELSE d.id IS NULL END )
+										AND ( CASE WHEN c.object_type_id = 50 THEN f.deleted = 0 ELSE f.id IS NULL END )
+										AND ( CASE WHEN c.object_type_id = 90 THEN h.deleted = 0 ELSE h.id IS NULL END )																
 									)
 						';
 		}
@@ -667,9 +667,9 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 			$query .= ( isset($filter_data['body']) ) ? $this->getWhereClauseSQL( 'c.body', $filter_data['body'], 'text', $ph ) : NULL;
 
 			$query .= '			AND ( a.deleted = 0 AND c.deleted = 0
-										AND ( d.id IS NULL OR ( d.id IS NOT NULL AND d.deleted = 0 ) )
-										AND ( f.id IS NULL OR ( f.id IS NOT NULL AND f.deleted = 0 ) )
-										AND ( h.id IS NULL OR ( h.id IS NOT NULL AND h.deleted = 0 ) )
+										AND ( CASE WHEN c.object_type_id = 5 THEN d.deleted = 0 ELSE d.id IS NULL END )
+										AND ( CASE WHEN c.object_type_id = 50 THEN f.deleted = 0 ELSE f.id IS NULL END )
+										AND ( CASE WHEN c.object_type_id = 90 THEN h.deleted = 0 ELSE h.id IS NULL END )
 									)
 						';
 		} else {  //Sent
@@ -711,18 +711,19 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 			$query .= ( isset($filter_data['body']) ) ? $this->getWhereClauseSQL( 'c.body', $filter_data['body'], 'text', $ph ) : NULL;
 			
 			$query .= '			AND ( b.deleted = 0 AND c.deleted = 0
-										AND ( d.id IS NULL OR ( d.id IS NOT NULL AND d.deleted = 0 ) )
-										AND ( f.id IS NULL OR ( f.id IS NOT NULL AND f.deleted = 0 ) )
-										AND ( h.id IS NULL OR ( h.id IS NOT NULL AND h.deleted = 0 ) )
+										AND ( CASE WHEN c.object_type_id = 5 THEN d.deleted = 0 ELSE d.id IS NULL END )
+										AND ( CASE WHEN c.object_type_id = 50 THEN f.deleted = 0 ELSE f.id IS NULL END )
+										AND ( CASE WHEN c.object_type_id = 90 THEN h.deleted = 0 ELSE h.id IS NULL END )
 									)
 						';
 		}
 
-		//Debug::Arr($ph, ' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		//Debug::Arr($ph, ' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}

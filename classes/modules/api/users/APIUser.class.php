@@ -700,6 +700,38 @@ class APIUser extends APIFactory {
 		return FALSE;
 	}
 
+	function sendValidationEmail( $user_ids ) {
+		if ( !$this->getPermissionObject()->Check('user', 'enabled')
+				OR !( $this->getPermissionObject()->Check('user', 'edit') OR $this->getPermissionObject()->Check('user', 'edit_child') OR $this->getPermissionObject()->Check('user', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
+		}
+
+		$ulf = TTnew( 'UserListFactory' );
+		$ulf->getByIdAndCompanyId( $user_ids, $this->getCurrentCompanyObject()->getId() );
+		if ( $ulf->getRecordCount() == 1 ) {
+			$emails_sent = 0;
+			foreach( $ulf as $u_obj ) {
+				if ( $u_obj->getWorkEmailIsValid() == FALSE ) {
+					$u_obj->sendValidateEmail( 'work' );
+					$emails_sent++;
+				}
+
+				if ( $u_obj->getHomeEmailIsValid() == FALSE ) {
+					$u_obj->sendValidateEmail( 'home' );
+					$emails_sent++;
+				}
+			}
+
+			Debug::Text('Users Found: '. $ulf->getRecordCount() .' Validation Emails Sent: '. $emails_sent, __FILE__, __LINE__, __METHOD__, 10);
+			if ( $emails_sent > 0 ) {
+				return TRUE;
+			}
+		}
+
+		Debug::Text('ERROR: No users to send validation emails to.', __FILE__, __LINE__, __METHOD__, 10);
+		return FALSE;
+	}
+
 
 	/**
 	 * Get user data for one or more users. This is an alias for getUser() that can be overridden by a plugin for getting data on remote servers.
@@ -718,19 +750,24 @@ class APIUser extends APIFactory {
 		if ( $ulf->getRecordCount() == 1 ) {
 			$u_obj = $ulf->getCurrent();
 
-			$u_obj->setFeedbackRating( $rating );
-			if ( $u_obj->isValid() ) {
-				$retval = $u_obj->Save( FALSE );
-				if ( $retval == TRUE ) {
-					$ttsc = new TimeTrexSoapClient();
-					$ttsc->sendUserFeedback( $rating, $message, $u_obj );
+			if ( $rating != $u_obj->getFeedbackRating() ) {
+				$u_obj->setFeedbackRating( $rating );
+				if ( $u_obj->isValid() ) {
+					$retval = $u_obj->Save( FALSE );
+					if ( $retval == TRUE ) {
+						$ttsc = new TimeTrexSoapClient();
+						$ttsc->sendUserFeedback( $rating, $message, $u_obj );
 
-					//Since we are updating the user record, the audit log will contain the rating change.
-					//TTLog::addEntry( $u_obj->getId(), 500, TTi18n::getText('Feedback Rating').': '. $rating .' '. TTi18n::getText('Message') .': '. $message, $u_obj->getId(), $u_obj->getTable() );
+						//Since we are updating the user record, the audit log will contain the rating change.
+						//TTLog::addEntry( $u_obj->getId(), 500, TTi18n::getText('Feedback Rating').': '. $rating .' '. TTi18n::getText('Message') .': '. $message, $u_obj->getId(), $u_obj->getTable() );
+					}
 				}
-
-				return $this->returnHandler( $retval );
+			} elseif ( $message != '' ) {
+				$ttsc = new TimeTrexSoapClient();
+				$ttsc->sendUserFeedback( $rating, $message, $u_obj );
 			}
+
+			return $this->returnHandler( TRUE );
 		}
 
 		return $this->returnHandler( FALSE );

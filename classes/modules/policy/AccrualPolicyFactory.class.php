@@ -1140,16 +1140,16 @@ class AccrualPolicyFactory extends Factory {
 
 		}
 
-		//Previous time is time already taken into account in the balance, so add that back in here.
-		$available_balance = ( $previous_time + $this->getCurrentAccrualBalance( $u_obj->getID(), $this->getAccrualPolicyAccount() ) );
+		//Previous time is time already taken into account in the balance, so subtract it here (opposite of adding lower down in remaining balance)
+		$available_balance = ( $this->getCurrentAccrualBalance( $u_obj->getID(), $this->getAccrualPolicyAccount() ) - $previous_time );
 		$projected_accrual = ( ( $available_balance + $this->getProjectedAccrualAmount( $u_obj, time(), $epoch ) ) + $other_policy_projected_balance );
 
 		$retarr = array(
 						'available_balance' => $available_balance,
 						'current_time' => $current_time,
-						'remaining_balance' => ( $available_balance - $current_time ),
+						'remaining_balance' => ( $available_balance + $current_time ),
 						'projected_balance' => $projected_accrual,
-						'projected_remaining_balance' => ( $projected_accrual - $current_time ),
+						'projected_remaining_balance' => ( $projected_accrual + $current_time ),
 						);
 
 		Debug::Arr($retarr, 'Projected Accrual Arr: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -1476,6 +1476,14 @@ class AccrualPolicyFactory extends Factory {
 	}
 
 	function Validate( $ignore_warning = TRUE ) {
+		if ( $this->getDeleted() != TRUE AND $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing.
+			if ( $this->getName() == '' ) {
+				$this->Validator->isTRUE(	'name',
+											FALSE,
+											TTi18n::gettext('Please specify a name') );
+			}
+		}
+
 		/*
 		//They need to be able to delete accrual policies while still keeping records originally created by the accrual policy.
 		if ( $this->getDeleted() == TRUE ) {

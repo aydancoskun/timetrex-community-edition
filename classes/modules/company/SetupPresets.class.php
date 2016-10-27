@@ -2018,7 +2018,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													),
 										'l4' => array( //Social Security Tax Withheld (Box 4)
@@ -2035,7 +2035,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													),
 										'l6' => array( //Medicare Tax Withheld (Box 6)
@@ -2094,7 +2094,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													),
 										'social_security_tax' => array( //Social Security Tax Withheld (Box 4)
@@ -2118,7 +2118,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													),
 										'medicare_tax' => array( //Medicare Tax Withheld (Box 6)
@@ -2141,7 +2141,7 @@ class SetupPresets extends Factory {
 										'total_payments' => array( //Wages (Line 3)
 														'include_pay_stub_entry_account' => array(
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 40, 'Total Gross' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, '401(k)' ),
 																								),
 														'exclude_pay_stub_entry_account' => array(
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
@@ -2206,6 +2206,8 @@ class SetupPresets extends Factory {
 					break;
 			}
 		}
+
+		return TRUE;
 	}
 
 	function createCompanyDeduction( $data ) {
@@ -2235,6 +2237,9 @@ class SetupPresets extends Factory {
 	}
 
 	function CompanyDeductions( $country = NULL, $province = NULL, $district = NULL, $industry = NULL ) {
+		//
+		// Intuit Payroll has lots of information:
+		//  http://payroll.intuit.com/support/compliance/agencydetail.jsp?agencyCode=WY
 		//
 		//Additional Information: http://www.payroll-taxes.com/state-tax.htm
 		//
@@ -2438,7 +2443,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -2461,7 +2466,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -2482,7 +2487,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -2504,7 +2509,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -2524,7 +2529,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -2564,6 +2569,31 @@ class SetupPresets extends Factory {
 									);
 
 			Debug::text('Province: '. $province, __FILE__, __LINE__, __METHOD__, 10);
+			//Labor Law wording for BC (https://www.labour.gov.bc.ca/esb/igm/esa-part-7/igm-esa-s-58.htm)
+			//   Its somewhat vague, and its different if the employee leaves during their 5th year or not.
+			//   The section about when vacation pay is paid out on every check is telling.
+			//
+			//   But overall they should start accruing 6% *during* their 5th year of employment to be used once they start their 6th year.
+			//     That way any "adjustment" would be to reduce their final vacation accrual payout upon termination.
+			/*
+				An employee becomes entitled to 6% vacation pay at the completion of their fifth year of employment.
+				If an employee has not completed their fifth year of consecutive employment, and their employment ends,
+				the vacation pay is based on 4% of gross earnings in the fifth year of employment.
+				Vacation pay for an employee who completes five years of employment is calculated as 6% of the gross
+				wages earned by the employee during the fifth year of employment.
+
+				When an employee is paid on each scheduled payday
+					An employee and employer may agree, in writing, that the employee will receive their vacation pay on every scheduled payday.
+					However, when vacation pay is paid on each pay period, the employee will be entitled to an adjustment upon reaching their fifth anniversary.
+
+				Example
+					Rashid is paid 4% vacation pay on every cheque. Upon completion of his fifth year of employment, Rashid receives 6%
+					vacation pay on each cheque. He also receives a one-time 2% vacation pay adjustment based on total gross earnings
+					during the fifth year of employment. The 2% vacation pay adjustment, which he becomes entitled to upon completion
+					of his fifth year of employment (employment anniversary) should be paid on the first pay day following the completion
+					of the fifth year of employment. Payment of the 2% adjustment ensures that Rashid has received 6% vacation pay when
+					he takes his next annual vacation.
+			 */
 			switch ($province) {
 				//CA
 				case 'bc':
@@ -2575,7 +2605,7 @@ class SetupPresets extends Factory {
 					$vacation_data = array(
 											'primary_percent' => 4,
 											'secondary_percent' => 6,
-											'secondary_length_of_service' => 6, //After 5th year
+											'secondary_length_of_service' => 5, //After 5th year
 											);
 					break;
 				case 'nb':
@@ -2584,7 +2614,7 @@ class SetupPresets extends Factory {
 					$vacation_data = array(
 											'primary_percent' => 4,
 											'secondary_percent' => 6,
-											'secondary_length_of_service' => 9, //After 8th year
+											'secondary_length_of_service' => 8, //After 8th year
 											);
 					break;
 				case 'on':
@@ -2599,14 +2629,14 @@ class SetupPresets extends Factory {
 					$vacation_data = array(
 											'primary_percent' => 4,
 											'secondary_percent' => 8,
-											'secondary_length_of_service' => 11, //After 10th year
+											'secondary_length_of_service' => 10, //After 10th year
 											);
 					break;
 				case 'nl':
 					$vacation_data = array(
 											'primary_percent' => 4,
 											'secondary_percent' => 6,
-											'secondary_length_of_service' => 16, //After 15th year
+											'secondary_length_of_service' => 15, //After 15th year
 											);
 					break;
 			}
@@ -2817,7 +2847,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -2825,7 +2855,7 @@ class SetupPresets extends Factory {
 				case 'ak': //alaska
 					//Unemployment Insurance - Employee
 					//Unemployment Insurance - Employer
-					$company_state_unemployment_wage_base =	$state_unemployment_wage_base = 37400;
+					$company_state_unemployment_wage_base =	$state_unemployment_wage_base = 39700;
 					break;
 				case 'az': //arizona
 					//Unemployment Insurance - Employee
@@ -2849,7 +2879,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -2874,14 +2904,14 @@ class SetupPresets extends Factory {
 														'calculation_order' => 186,
 														'pay_stub_entry_account_id' => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, strtoupper($province).' - Disability Insurance' ),
 														'user_value1' => 0.9, //Percent
-														'user_value2' => 104378, //WageBase
+														'user_value2' => 106742, //WageBase
 														'user_value3' => 0,
 														'include_pay_stub_entry_account' => array( $psea_obj->getTotalGross() ),
 														'exclude_pay_stub_entry_account' => array(
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -2904,14 +2934,14 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
 					break;
 				case 'co': //colorado
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 11700;
+					$state_unemployment_wage_base = 12200;
 
 					break;
 				case 'ct': //connecticut
@@ -2944,14 +2974,14 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
 					break;
 				case 'fl': //florida
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 8000;
+					$state_unemployment_wage_base = 7000;
 
 					break;
 				case 'ga': //georgia
@@ -2976,14 +3006,14 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
 					break;
 				case 'hi': //hawaii
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 40400;
+					$state_unemployment_wage_base = 42200;
 
 					//E&T Assessment
 					$this->createCompanyDeduction(
@@ -3003,7 +3033,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3026,7 +3056,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3041,15 +3071,15 @@ class SetupPresets extends Factory {
 														'calculation_id' => 15,
 														'calculation_order' => 186,
 														'pay_stub_entry_account_id' => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, strtoupper($province).' - Disability Insurance' ),
-														'user_value1' => 0.00, //Percent
-														'user_value2' => 48882.60, //WageBase
+														'user_value1' => 0.50, //Percent
+														'user_value2' => 51082.72, //WageBase
 														'user_value3' => 0,
 														'include_pay_stub_entry_account' => array( $psea_obj->getTotalGross() ),
 														'exclude_pay_stub_entry_account' => array(
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3057,7 +3087,7 @@ class SetupPresets extends Factory {
 					break;
 				case 'id': //idaho
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 35200;
+					$state_unemployment_wage_base = 37200;
 
 					//Administrative Reserve
 					$this->createCompanyDeduction(
@@ -3077,7 +3107,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3100,7 +3130,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3128,7 +3158,7 @@ class SetupPresets extends Factory {
 					break;
 				case 'ia': //iowa
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 26800;
+					$state_unemployment_wage_base = 28300;
 
 					//Reserve Fund
 					$this->createCompanyDeduction(
@@ -3148,7 +3178,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3171,18 +3201,18 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
 					break;
 				case 'ks': //kansas
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 8000;
+					$state_unemployment_wage_base = 14000;
 					break;
 				case 'ky': //kentucky
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 9600;
+					$state_unemployment_wage_base = 10200;
 					break;
 				case 'la': //louisiana
 					//Unemployment Insurance - Employee
@@ -3210,7 +3240,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3221,7 +3251,7 @@ class SetupPresets extends Factory {
 					break;
 				case 'ma': //massachusetts
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 14000;
+					$state_unemployment_wage_base = 15000;
 
 					//Health Insurance
 					$this->createCompanyDeduction(
@@ -3241,7 +3271,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3264,7 +3294,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3275,7 +3305,7 @@ class SetupPresets extends Factory {
 					break;
 				case 'mn': //minnesota
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 29000;
+					$state_unemployment_wage_base = 31000;
 
 					//Workforce Enhancement Fee
 					$this->createCompanyDeduction(
@@ -3295,7 +3325,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3322,7 +3352,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3333,7 +3363,7 @@ class SetupPresets extends Factory {
 					break;
 				case 'mt': //montana
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 29000;
+					$state_unemployment_wage_base = 30500;
 
 					//Administrative Fund
 					$this->createCompanyDeduction(
@@ -3353,7 +3383,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3380,14 +3410,14 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
 					break;
 				case 'nv': //nevada
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 27400;
+					$state_unemployment_wage_base = 28200;
 
 					//Career Enhancement
 					$this->createCompanyDeduction(
@@ -3407,7 +3437,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3434,7 +3464,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3442,7 +3472,7 @@ class SetupPresets extends Factory {
 				case 'nj': //new jersey
 					//Unemployment Insurance - Employee
 					//Unemployment Insurance - Employer
-					$state_unemployment_wage_base = 31500;
+					$state_unemployment_wage_base = 32600;
 
 					//Disability Insurance - Employee
 					$this->createCompanyDeduction(
@@ -3454,7 +3484,7 @@ class SetupPresets extends Factory {
 														'calculation_id' => 15,
 														'calculation_order' => 186,
 														'pay_stub_entry_account_id' => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, strtoupper($province).' - Disability Insurance' ),
-														'user_value1' => 0.38, //Percent
+														'user_value1' => 0.20, //Percent
 														'user_value2' => $state_unemployment_wage_base, //WageBase
 														'user_value3' => 0,
 														'include_pay_stub_entry_account' => array( $psea_obj->getTotalGross() ),
@@ -3462,7 +3492,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3477,7 +3507,7 @@ class SetupPresets extends Factory {
 														'calculation_id' => 15,
 														'calculation_order' => 186,
 														'pay_stub_entry_account_id' => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, strtoupper($province).' - Disability Insurance' ),
-														'user_value1' => 0.00, //Percent
+														'user_value1' => 0.50, //Percent
 														'user_value2' => $state_unemployment_wage_base, //WageBase
 														'user_value3' => 0,
 														'include_pay_stub_entry_account' => array( $psea_obj->getTotalGross() ),
@@ -3485,7 +3515,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3508,7 +3538,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3531,7 +3561,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3554,7 +3584,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3577,7 +3607,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3600,7 +3630,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3608,7 +3638,7 @@ class SetupPresets extends Factory {
 					break;
 				case 'nm': //new mexico
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 23400;
+					$state_unemployment_wage_base = 24100;
 
 					//State Trust Fund
 					$this->createCompanyDeduction(
@@ -3628,14 +3658,14 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
 					break;
 				case 'ny': //new york
 					//Unemployment Insurance - Employee
-					$company_state_unemployment_wage_base = $state_unemployment_wage_base = 10300;
+					$company_state_unemployment_wage_base = $state_unemployment_wage_base = 10700;
 
 					//Reemployment Service Fund
 					$this->createCompanyDeduction(
@@ -3655,7 +3685,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3671,14 +3701,14 @@ class SetupPresets extends Factory {
 														'calculation_order' => 186,
 														'pay_stub_entry_account_id' => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, strtoupper($province).' - Disability Insurance' ),
 														'user_value1' => 0.50, //Percent
-														'user_value2' => 0, //WageBase
+														'user_value2' => 6240, //WageBase
 														'user_value3' => 0,
 														'include_pay_stub_entry_account' => array( $psea_obj->getTotalGross() ),
 														'exclude_pay_stub_entry_account' => array(
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3701,7 +3731,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3724,7 +3754,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3747,18 +3777,18 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
 					break;
 				case 'nc': //north carolina
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 21400;
+					$state_unemployment_wage_base = 22300;
 					break;
 				case 'nd': //north dakota
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 33600;
+					$state_unemployment_wage_base = 37200;
 					break;
 				case 'oh': //ohio
 					//Unemployment Insurance - Employee
@@ -3766,11 +3796,11 @@ class SetupPresets extends Factory {
 					break;
 				case 'ok': //oklahoma
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 18700;
+					$state_unemployment_wage_base = 17500;
 					break;
 				case 'or': //oregon
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 35000;
+					$state_unemployment_wage_base = 36900;
 
 					//Workers Benefit - Employee
 					$this->createCompanyDeduction(
@@ -3790,7 +3820,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3813,7 +3843,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3836,7 +3866,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3859,7 +3889,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3882,7 +3912,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3891,7 +3921,7 @@ class SetupPresets extends Factory {
 					//Unemployment Insurance - Employee
 					//Unemployment Insurance - Employer
 					$state_unemployment_wage_base = 0;
-					$company_state_unemployment_wage_base = 8750;
+					$company_state_unemployment_wage_base = 9500;
 					break;
 				case 'ri': //rhode island
 					//Employment Security
@@ -3905,14 +3935,14 @@ class SetupPresets extends Factory {
 														'calculation_order' => 186,
 														'pay_stub_entry_account_id' => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, strtoupper($province).' - Employment Security' ),
 														'user_value1' => 0.00, //Percent
-														'user_value2' => 20600, //WageBase
+														'user_value2' => 22000, //WageBase
 														'user_value3' => 0,
 														'include_pay_stub_entry_account' => array( $psea_obj->getTotalGross() ),
 														'exclude_pay_stub_entry_account' => array(
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3928,14 +3958,14 @@ class SetupPresets extends Factory {
 														'calculation_order' => 186,
 														'pay_stub_entry_account_id' => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, strtoupper($province).' - Job Development Fund' ),
 														'user_value1' => 0.51, //Percent
-														'user_value2' => 20600, //WageBase
+														'user_value2' => 22000, //WageBase
 														'user_value3' => 0,
 														'include_pay_stub_entry_account' => array( $psea_obj->getTotalGross() ),
 														'exclude_pay_stub_entry_account' => array(
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -3951,21 +3981,21 @@ class SetupPresets extends Factory {
 														'calculation_order' => 186,
 														'pay_stub_entry_account_id' => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, strtoupper($province).' - Temporary Disability Ins.' ),
 														'user_value1' => 1.20, //Percent
-														'user_value2' => 62700, //WageBase
+														'user_value2' => 66300, //WageBase
 														'user_value3' => 0,
 														'include_pay_stub_entry_account' => array( $psea_obj->getTotalGross() ),
 														'exclude_pay_stub_entry_account' => array(
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
 					break;
 				case 'sc': //south carolina
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 12000;
+					$state_unemployment_wage_base = 14000;
 
 					//Contingency Assessment
 					$this->createCompanyDeduction(
@@ -3985,14 +4015,14 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
 					break;
 				case 'sd': //south dakota
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 14000;
+					$state_unemployment_wage_base = 15000;
 
 					//Investment Fee
 					$this->createCompanyDeduction(
@@ -4012,7 +4042,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -4035,14 +4065,14 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
 					break;
 				case 'tn': //tennessee
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 9000;
+					$state_unemployment_wage_base = 8000;
 
 					//Job Skills Fee
 					$this->createCompanyDeduction(
@@ -4062,7 +4092,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -4089,7 +4119,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -4112,18 +4142,18 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
 					break;
 				case 'ut': //utah
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 30800;
+					$state_unemployment_wage_base = 32200;
 					break;
 				case 'vt': //vermont
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 16000;
+					$state_unemployment_wage_base = 16800;
 					break;
 				case 'va': //virginia
 					//Unemployment Insurance - Employee
@@ -4131,7 +4161,7 @@ class SetupPresets extends Factory {
 					break;
 				case 'wa': //washington
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 41300;
+					$state_unemployment_wage_base = 44000;
 
 					//Industrial Insurance - Employee
 					$this->createCompanyDeduction(
@@ -4151,7 +4181,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -4174,7 +4204,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -4197,7 +4227,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -4212,7 +4242,7 @@ class SetupPresets extends Factory {
 					break;
 				case 'wy': //wyoming
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 24500;
+					$state_unemployment_wage_base = 24700;
 
 					//Employment Support Fund
 					$this->createCompanyDeduction(
@@ -4232,7 +4262,7 @@ class SetupPresets extends Factory {
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																									$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																									//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																								),
 													)
 												);
@@ -4243,7 +4273,7 @@ class SetupPresets extends Factory {
 			//State Unemployement Insurace, deducted from employer
 			if ( in_array( $province, array('ak', 'al', 'ar', 'az', 'ca', 'co', 'ct', 'dc', 'de', 'fl', 'ga', 'hi',
 											'ia', 'id', 'il', 'in', 'ks', 'ky', 'la', 'ma', 'md', 'me', 'mi', 'mn',
-											'mo', 'ms', 'mt', 'nc', 'nd', 'ne', 'nh', 'nj', 'nm', 'nv', 'ny', 'oh',
+											'mo', 'ms', 'mt', 'nc', 'nd', 'nh', 'nj', 'nm', 'nv', 'ny', 'oh',
 											'ok', 'or', 'pa', 'sc', 'sd', 'tn', 'tx', 'ut', 'va', 'vt', 'wa', 'wi',
 											'wv', 'wy') ) ) {
 				$this->createCompanyDeduction(
@@ -4263,7 +4293,7 @@ class SetupPresets extends Factory {
 																								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																								//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																							),
 												)
 											);
@@ -4287,7 +4317,7 @@ class SetupPresets extends Factory {
 																								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 																								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 																								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-																								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+																								//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
 																							),
 												)
 											);
@@ -7529,7 +7559,7 @@ class SetupPresets extends Factory {
 									'maximum_time' => 0,
 
 									'include_paid_absence_time' => TRUE,
-									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( strtoupper($province) .' - Statutory Holiday' ),
+									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( 'Statutory Holiday' ),
 									'recurring_holiday_id' => array_merge(
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - New Year%' ),
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - Good Friday%' ),
@@ -7575,7 +7605,7 @@ class SetupPresets extends Factory {
 									'maximum_time' => 0,
 
 									'include_paid_absence_time' => FALSE,
-									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( strtoupper($province) .' - Statutory Holiday' ),
+									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( 'Statutory Holiday' ),
 									'recurring_holiday_id' => array_merge(
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - New Year%' ),
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - Good Friday%' ),
@@ -7621,7 +7651,7 @@ class SetupPresets extends Factory {
 									'maximum_time' => 0,
 
 									'include_paid_absence_time' => TRUE,
-									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( strtoupper($province) .' - Statutory Holiday' ),
+									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( 'Statutory Holiday' ),
 									'recurring_holiday_id' => array_merge(
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - New Year%' ),
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - Good Friday%' ),
@@ -7668,7 +7698,7 @@ class SetupPresets extends Factory {
 									'maximum_time' => 0,
 
 									'include_paid_absence_time' => TRUE,
-									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( strtoupper($province) .' - Statutory Holiday' ),
+									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( 'Statutory Holiday' ),
 									'recurring_holiday_id' => array_merge(
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - New Year%' ),
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - Good Friday%' ),
@@ -7715,7 +7745,7 @@ class SetupPresets extends Factory {
 									'maximum_time' => 0,
 
 									'include_paid_absence_time' => TRUE,
-									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( strtoupper($province) .' - Statutory Holiday' ),
+									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( 'Statutory Holiday' ),
 									'recurring_holiday_id' => array_merge(
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - New Year%' ),
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - Good Friday%' ),
@@ -7763,7 +7793,7 @@ class SetupPresets extends Factory {
 									'maximum_time' => 0,
 
 									'include_paid_absence_time' => TRUE,
-									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( strtoupper($province) .' - Statutory Holiday' ),
+									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( 'Statutory Holiday' ),
 									'recurring_holiday_id' => array_merge(
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - New Year%' ),
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - Good Friday%' ),
@@ -7810,7 +7840,7 @@ class SetupPresets extends Factory {
 									'maximum_time' => 0,
 
 									'include_paid_absence_time' => TRUE,
-									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( strtoupper($province) .' - Statutory Holiday' ),
+									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( 'Statutory Holiday' ),
 									'recurring_holiday_id' => array_merge(
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - New Year%' ),
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - Good Friday%' ),
@@ -7858,7 +7888,7 @@ class SetupPresets extends Factory {
 									'maximum_time' => 0,
 
 									'include_paid_absence_time' => TRUE,
-									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( strtoupper($province) .' - Statutory Holiday' ),
+									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( 'Statutory Holiday' ),
 									'recurring_holiday_id' => array_merge(
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - New Year%' ),
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - Good Friday%' ),
@@ -7905,7 +7935,7 @@ class SetupPresets extends Factory {
 									'maximum_time' => 0,
 
 									'include_paid_absence_time' => TRUE,
-									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( strtoupper($province) .' - Statutory Holiday' ),
+									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( 'Statutory Holiday' ),
 									'recurring_holiday_id' => array_merge(
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - New Year%' ),
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - Good Friday%' ),
@@ -7952,7 +7982,7 @@ class SetupPresets extends Factory {
 									'maximum_time' => 0,
 
 									'include_paid_absence_time' => TRUE,
-									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( strtoupper($province) .' - Statutory Holiday' ),
+									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( 'Statutory Holiday' ),
 									'recurring_holiday_id' => array_merge(
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - New Year%' ),
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - Good Friday%' ),
@@ -7999,7 +8029,7 @@ class SetupPresets extends Factory {
 									'maximum_time' => 0,
 
 									'include_paid_absence_time' => FALSE,
-									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( strtoupper($province) .' - Statutory Holiday' ),
+									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( 'Statutory Holiday' ),
 									'recurring_holiday_id' => array_merge(
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - New Year%' ),
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - Good Friday%' ),
@@ -8046,7 +8076,7 @@ class SetupPresets extends Factory {
 									'maximum_time' => 0,
 
 									'include_paid_absence_time' => FALSE,
-									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( strtoupper($province) .' - Statutory Holiday' ),
+									'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( 'Statutory Holiday' ),
 									'recurring_holiday_id' => array_merge(
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - New Year%' ),
 																		(array)$this->getRecurringHolidayByCompanyIDAndName( strtoupper($country).' - Good Friday%' ),

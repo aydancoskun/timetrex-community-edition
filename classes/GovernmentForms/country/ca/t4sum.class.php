@@ -567,7 +567,7 @@ class GovernmentForms_CA_T4Sum extends GovernmentForms_CA {
 			$template_page = NULL;
 
 			foreach( $template_schema as $field => $schema ) {
-				Debug::text('Drawing Cell... Field: '. $field, __FILE__, __LINE__, __METHOD__, 10);
+				//Debug::text('Drawing Cell... Field: '. $field, __FILE__, __LINE__, __METHOD__, 10);
 				$this->Draw( $this->$field, $schema );
 			}
 		}

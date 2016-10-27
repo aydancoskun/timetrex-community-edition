@@ -37,9 +37,9 @@
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
 
-Debug::setBufferOutput(FALSE);
-Debug::setEnable(FALSE);
-Debug::setVerbosity(0);
+//Debug::setBufferOutput(FALSE);
+//Debug::setEnable(FALSE);
+//Debug::setVerbosity(0);
 
 /*
 Debug::setBufferOutput(TRUE);
@@ -80,29 +80,15 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 		$data['force'] = FALSE;
 	}
 
+	$config_vars['other']['demo_mode'] = TRUE;
+	$config_vars['other']['enable_plugins'] = FALSE; //Disable plugins as they shouldn't be needed and likely just cause problems.
+
 	if ( DEMO_MODE == TRUE OR $data['force'] === TRUE ) {
-		$obj = new SystemSettingListFactory();
-		$obj->setName( 'system_version' );
-		$obj->setValue( APPLICATION_VERSION );
-		if ( $obj->isValid() ) {
-			$obj->Save();
-		}
-
-		$obj = new SystemSettingListFactory();
-		$obj->setName( 'tax_engine_version' );
-		$obj->setValue( '1.1.0' );
-		if ( $obj->isValid() ) {
-			$obj->Save();
-		}
-
-		$obj = new SystemSettingListFactory();
-		$obj->setName( 'tax_data_version' );
-		$obj->setValue( date('Ymd') );
-		if ( $obj->isValid() ) {
-			$obj->Save();
-		}
-
-		Debug::Text('Generating Data...', __FILE__, __LINE__, __METHOD__, 10);
+		SystemSettingListFactory::setSystemSetting( 'system_version', APPLICATION_VERSION );
+		SystemSettingListFactory::setSystemSetting( 'tax_engine_version', '1.1.0' );
+		SystemSettingListFactory::setSystemSetting( 'tax_data_version', date('Ymd') );
+		
+		Debug::Text('Generating DEMO Data...', __FILE__, __LINE__, __METHOD__, 10);
 		echo "UserName suffix: ". $data['suffix'] ." Max Random Users: ". $data['random_users'] ."<br>\n";
 		sleep(1);
 
@@ -110,10 +96,12 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 		$dd->setMaxRandomUsers( $data['random_users'] );
 		$dd->setUserNamePostFix( $data['suffix'] );
 		$dd->generateData();
+		Debug::Text('Done Generating DEMO Data!', __FILE__, __LINE__, __METHOD__, 10);
 	} else {
 		echo "DEMO MODE IS NOT ENABLED!<br>\n";
 		exit(1);
 	}
 }
+Debug::WriteToLog();
 //Debug::Display();
 ?>

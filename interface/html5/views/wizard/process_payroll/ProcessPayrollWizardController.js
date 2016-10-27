@@ -133,12 +133,18 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 
 				ribbon_button_box = this.getRibbonButtonBox();
 				ribbon_btn = this.getRibbonButton( ContextMenuIconName.timesheet_reports, Global.getRibbonIconRealPath( Icons.timesheet_reports ), $.i18n._( 'TimeSheet Summary' ) );
+				var ribbon_btn2 = this.getRibbonButton( ContextMenuIconName.authorization_timesheet, Global.getRibbonIconRealPath( Icons.authorization_timesheet ), $.i18n._( 'TimeSheet Authorizations' ) );
 
 				ribbon_btn.unbind( 'click' ).bind( 'click', function() {
 					$this.onNavigationClick( ContextMenuIconName.timesheet_reports );
 				} );
 
+				ribbon_btn2.unbind( 'click' ).bind( 'click', function() {
+					$this.onNavigationClick( ContextMenuIconName.authorization_timesheet );
+				} );
+
 				ribbon_button_box.children().eq( 0 ).append( ribbon_btn );
+				ribbon_button_box.children().eq( 0 ).append( ribbon_btn2 );
 				this.content_div.append( ribbon_button_box );
 				break;
 			case 5:
@@ -154,7 +160,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 
 				ribbon_button_box = this.getRibbonButtonBox();
 				ribbon_btn = this.getRibbonButton( ContextMenuIconName.lock, Global.getRibbonIconRealPath( Icons.lock ), $.i18n._( 'Lock' ) );
-				var ribbon_btn2 = this.getRibbonButton( ContextMenuIconName.unlock, Global.getRibbonIconRealPath( Icons.unlock ), $.i18n._( 'UnLock' ) );
+				ribbon_btn2 = this.getRibbonButton( ContextMenuIconName.unlock, Global.getRibbonIconRealPath( Icons.unlock ), $.i18n._( 'UnLock' ) );
 
 				ribbon_btn.unbind( 'click' ).bind( 'click', function() {
 					if ( $( this ).hasClass( 'disable-image' ) ) {
@@ -681,7 +687,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 					data.status_id = 12;
 					data_array.push( data );
 				}
-
+				ProgressBar.showOverlay();
 				this.api_pay_period.setPayPeriod( data_array, {
 					onResult: function( result ) {
 						if ( result.isValid() ) {
@@ -702,7 +708,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 					data.status_id = 10;
 					data_array.push( data );
 				}
-
+				ProgressBar.showOverlay();
 				this.api_pay_period.setPayPeriod( data_array, {
 					onResult: function( result ) {
 						if ( result.isValid() ) {
@@ -727,7 +733,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 
 				grid = current_step_ui.pay_stub_generate;
 				ids = grid.jqGrid( 'getGridParam', 'selarrrow' );
-
+				ProgressBar.showOverlay();
 				new (APIFactory.getAPIClass( 'APIPayStub' ))().generatePayStubs( ids, {
 					onResult: function( result ) {
 						if ( result.isValid() ) {
@@ -779,7 +785,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 					data.status_id = 20;
 					data_array.push( data );
 				}
-
+				ProgressBar.showOverlay();
 				this.api_pay_period.setPayPeriod( data_array, {
 					onResult: function( result ) {
 						if ( result.isValid() ) {
@@ -789,6 +795,11 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 						}
 					}
 				} );
+				break;
+			case ContextMenuIconName.authorization_timesheet:
+				Global.addViewTab( this.wizard_id, 'Process Payroll', window.location.href );
+				IndexViewController.goToView( 'TimeSheetAuthorization' );
+				this.onCloseClick();
 				break;
 
 		}

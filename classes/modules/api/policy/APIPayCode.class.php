@@ -201,7 +201,8 @@ class APIPayCode extends APIFactory {
 					$row['company_id'] = $this->getCurrentCompanyObject()->getId();
 
 					$lf->setObjectFromArray( $row );
-
+					$lf->Validator->setValidateOnly( $validate_only );
+					
 					$is_valid = $lf->isValid( $ignore_warning );
 					if ( $is_valid == TRUE ) {
 						Debug::Text('Saving data...', __FILE__, __LINE__, __METHOD__, 10);

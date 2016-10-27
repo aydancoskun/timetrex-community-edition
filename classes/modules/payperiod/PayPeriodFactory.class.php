@@ -628,6 +628,19 @@ class PayPeriodFactory extends Factory {
 		return $retval;
 	}
 
+	function getEnableImportOrphanedData() {
+		if ( isset($this->import_orphaned_data) ) {
+			return $this->import_orphaned_data;
+		}
+
+		return FALSE;
+	}
+	function setEnableImportOrphanedData($bool) {
+		$this->import_orphaned_data = $bool;
+
+		return TRUE;
+	}
+
 	function getEnableImportData() {
 		if ( isset($this->import_data) ) {
 			return $this->import_data;
@@ -654,6 +667,20 @@ class PayPeriodFactory extends Factory {
 		}
 
 		return TRUE;
+	}
+
+	function isFirstPayPeriodInYear() {
+		$pplf = TTnew('PayPeriodListFactory');
+		$pplf->getPreviousPayPeriodById( $this->getID() );
+		if ( $pplf->getRecordCount() > 0 ) {
+			$pp_obj = $pplf->getCurrent();
+			Debug::text(' Previous Pay Period ID: '. $pp_obj->getID() .' Transaction Date: '. $pp_obj->getTransactionDate(), __FILE__, __LINE__, __METHOD__, 10);
+			if ( TTDate::getYear( $pp_obj->getTransactionDate() ) != TTDate::getYear( $this->getTransactionDate() ) ) {
+				return TRUE;
+			}
+		}
+
+		return FALSE;
 	}
 
 	//Imports only data not assigned to other pay periods
@@ -741,12 +768,21 @@ class PayPeriodFactory extends Factory {
 	}
 
 	//Imports all data from other pay periods into this one.
-	function importData() {
+	function importData( $user_ids = FALSE, $pay_period_id = FALSE ) {
 		$pps_obj = $this->getPayPeriodScheduleObject();
 
 		//Make sure current pay period isnt closed.
 		if ( $this->getStatus() == 20 ) {
 			return FALSE;
+		}
+
+		if ( $user_ids == FALSE ) {
+			$user_ids = $pps_obj->getUser();
+		} else {
+			Debug::Text('  Custom user_ids specified, only importing for them...', __FILE__, __LINE__, __METHOD__, 10);
+			if ( !is_array( $user_ids )) {
+				$user_ids = array($user_ids);
+			}
 		}
 		
 		$pay_period_ids = array( 0 ); //Always include a 0 pay_period_id so orphaned data is pulled over too.
@@ -754,14 +790,30 @@ class PayPeriodFactory extends Factory {
 		$pplf = TTnew('PayPeriodListFactory');
 		$pplf->StartTransaction();
 
-		//Get a list of all pay periods that are not closed != 20, so we can restrict the below queries to just show pay periods.
-		$pplf->getByCompanyIdAndStatus( $this->getCompany(), array(10, 12, 30) );
-		if ( $pplf->getRecordCount() ) {
-			foreach( $pplf as $pp_obj ) {
-				$pay_period_ids[] = $pp_obj->getId();
+		if ( $pay_period_id == FALSE ) {
+			//Get a list of all pay periods that are not closed != 20, so we can restrict the below queries to just those pay periods.
+			$pplf->getByCompanyIdAndStatus( $this->getCompany(), array(10, 12, 30) );
+			if ( $pplf->getRecordCount() ) {
+				foreach( $pplf as $pp_obj ) {
+					$pay_period_ids[] = $pp_obj->getId();
+				}
 			}
+			Debug::Text('  Found non-Closed Pay Periods: '. $pplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		} else {
+			Debug::Text('  Custom pay_period_ids specified, only importing for them...', __FILE__, __LINE__, __METHOD__, 10);
+			
+			$pplf->getByIdAndCompanyId( $pay_period_id, $this->getCompany() );
+			unset($pay_period_id);
+			if ( $pplf->getRecordCount() ) {
+				foreach( $pplf as $pp_obj ) {
+					if ( in_array( $pp_obj->getStatus(), array( 10, 12, 30) ) ) {
+						$pay_period_ids[] = $pp_obj->getId();
+					} else {
+						Debug::Text('  Skipping closed pay period...', __FILE__, __LINE__, __METHOD__, 10);
+					}
+				}
+			}			
 		}
-		Debug::Text('Found non-Closed Pay Periods: '. $pplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( isset($pay_period_ids) AND is_array($pay_period_ids) AND count($pay_period_ids) > 0 AND (int)$this->getID() > 0 ) {
 			//UserDateTotal
@@ -770,7 +822,7 @@ class PayPeriodFactory extends Factory {
 						'start_date' => $this->db->BindDate( $this->getStartDate() ),
 						'end_date' => $this->db->BindDate( $this->getEndDate() ),
 						);
-			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE pay_period_id != '. (int)$this->getID() .' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $pps_obj->getUser(), $ph) .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph) .')';
+			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE pay_period_id != '. (int)$this->getID() .' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph) .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph) .')';
 			$f->db->Execute( $query, $ph );
 			Debug::Arr($ph, 'UserDateTotal Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -781,7 +833,7 @@ class PayPeriodFactory extends Factory {
 						'start_date' => $this->db->BindDate( $this->getStartDate() ),
 						'end_date' => $this->db->BindDate( $this->getEndDate() ),
 						);
-			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE pay_period_id != '. (int)$this->getID() .' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $pps_obj->getUser(), $ph) .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph) .')';
+			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE pay_period_id != '. (int)$this->getID() .' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph) .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph) .')';
 			$f->db->Execute( $query, $ph );
 			Debug::Arr($ph, 'PunchControl Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -792,7 +844,7 @@ class PayPeriodFactory extends Factory {
 						'start_date' => $this->db->BindDate( $this->getStartDate() ),
 						'end_date' => $this->db->BindDate( $this->getEndDate() ),
 						);
-			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE pay_period_id != '. (int)$this->getID() .' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $pps_obj->getUser(), $ph) .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph) .')';
+			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE pay_period_id != '. (int)$this->getID() .' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph) .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph) .')';
 			$f->db->Execute( $query, $ph );
 			Debug::Arr($ph, 'Schedule Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -803,7 +855,7 @@ class PayPeriodFactory extends Factory {
 						'start_date' => $this->db->BindDate( $this->getStartDate() ),
 						'end_date' => $this->db->BindDate( $this->getEndDate() ),
 						);
-			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE pay_period_id != '. (int)$this->getID() .' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $pps_obj->getUser(), $ph) .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph) .')';
+			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE pay_period_id != '. (int)$this->getID() .' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph) .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph) .')';
 			$f->db->Execute( $query, $ph );
 			Debug::Arr($ph, 'Request Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -814,7 +866,7 @@ class PayPeriodFactory extends Factory {
 						'start_date' => $this->db->BindDate( $this->getStartDate() ),
 						'end_date' => $this->db->BindDate( $this->getEndDate() ),
 						);
-			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE pay_period_id != '. (int)$this->getID() .' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $pps_obj->getUser(), $ph) .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph) .')';
+			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE pay_period_id != '. (int)$this->getID() .' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph) .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph) .')';
 			$f->db->Execute( $query, $ph );
 			Debug::Arr($ph, 'Exception Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -824,7 +876,7 @@ class PayPeriodFactory extends Factory {
 						'start_date' => $this->db->BindDate( $this->getStartDate() ),
 						'end_date' => $this->db->BindDate( $this->getEndDate() ),
 						);
-			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE ( pay_period_id = 0 OR pay_period_id IS NULL ) AND start_date >= ? AND end_date <= ? AND user_id in ('. $this->getListSQL( $pps_obj->getUser(), $ph) .')';
+			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = '. (int)$this->getID() .' WHERE ( pay_period_id = 0 OR pay_period_id IS NULL ) AND start_date >= ? AND end_date <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph) .')';
 			$f->db->Execute( $query, $ph );
 			Debug::Arr($ph, 'PayStub Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1106,8 +1158,17 @@ class PayPeriodFactory extends Factory {
 			$query = 'update '. $ef->getTable() .' set pay_period_id = 0 where pay_period_id = '. (int)$this->getId();
 			$this->db->Execute($query);
 
+			//Now that v9 has multiple payroll runs, if the user tries deleting multiple pay periods that have pay stubs assigned to them, this will fail due to unique constraint.
+			//May need to try and get the latest payroll run_id for the pay_period_id = 0 case, and increment that instead...
+			//Can't use getCurrentPayRun() here as it ignores invalid pay period IDs (ie: 0)
 			$psf = TTnew( 'PayStubFactory' );
-			$query = 'update '. $psf->getTable() .' set pay_period_id = 0 where pay_period_id = '. (int)$this->getId();
+			$uf = TTNew('UserFactory');
+
+			$query = 'SELECT  max(run_id) FROM '. $psf->getTable() .' as a LEFT JOIN '. $uf->getTable() .' as b ON ( a.user_id = b.id ) WHERE b.company_id = '. (int)$this->getCompany() .' AND a.pay_period_id = 0';
+			$run_id = ( (int)$this->db->GetOne($query) + 1);
+			Debug::text('Next Run ID for PayPeriodID=0: '. $run_id .' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+			
+			$query = 'update '. $psf->getTable() .' set pay_period_id = 0, run_id = '. (int)$run_id .' where pay_period_id = '. (int)$this->getId();
 			$this->db->Execute($query);			
 		} else {
 			if ( $this->getStatus() == 20 ) { //Closed
@@ -1118,7 +1179,40 @@ class PayPeriodFactory extends Factory {
 				TTLog::addEntry( $this->getId(), 20, TTi18n::getText('Setting Pay Period to Post-Adjustment'), NULL, $this->getTable() );
 			}
 
-			if ( $this->getEnableImportData() == TRUE ) {
+			//When creating the 2nd pay period of the year (the previous pay period is the 1st), run the first pay period maintenance.
+			//By this time (2-4days before the first pay period in the year ends) they should have made any corrections from the previous pay period,
+			//  which was the last pay period in the previous year.
+			$pplf = TTnew('PayPeriodListFactory');
+			$pplf->getPreviousPayPeriodById( $this->getID() );
+			if ( $pplf->getRecordCount() > 0 ) {
+				$pp_obj = $pplf->getCurrent();
+				if ( $pp_obj->isFirstPayPeriodInYear()
+						AND time() >= $pp_obj->getStartDate() //Can't be end or transaction date, as those are too late. This helps prevent manual pay periods created in the future from triggering the maintenance.
+					) {
+					Debug::text('Creating/Modifying 2nd Pay Period in Year... Running maintenance for 1st pay period year...', __FILE__, __LINE__, __METHOD__, 10);
+					$cd_obj = TTnew('CompanyDeductionFactory');
+					$cd_obj->updateCompanyDeductionForTaxYear( $pp_obj->getTransactionDate() );
+				} else {
+					Debug::text('NOT running maintenance, maybe not past the start date of the last pay period yet, or not 2nd pay period in the year...', __FILE__, __LINE__, __METHOD__, 10);
+				}
+			}
+			unset($pplf, $pp_obj, $cd_obj);
+
+			//If there is only one pay period schedule, and they are editing a OPEN pay period
+			//  always import data when editing pay periods. (preferrably only if the start/end dates change though)
+			//  This can help avoid issues with users changing pay period dates and not importing the data manually.
+			//  FIXME: It would be nice to only do this if the start OR end date change, but we can't determine that for certain right now.
+			//  **This causes UNIT TESTs to fail due to deadlock, so disable this functionality during those tests.
+			if ( $this->getEnableImportData() == TRUE AND $this->getStatus() == 10 ) { //Only consider open pay periods.
+				$ppslf = TTnew('PayPeriodScheduleListFactory');
+				$ppslf->getByCompanyId( $this->getCompany() );
+				if ( $ppslf->getRecordCount() == 1 ) {
+					Debug::text('Only one PP schedule, importing data...', __FILE__, __LINE__, __METHOD__, 10);
+					$this->importData( FALSE, $this->getID() );
+				}
+			}
+
+			if ( $this->getEnableImportOrphanedData() == TRUE ) {
 				$this->importOrphanedData();
 				//$this->importData();
 			}

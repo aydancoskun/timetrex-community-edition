@@ -43,29 +43,30 @@ KPIViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'type' );
 		this.initDropDownOption( 'status' );
 
-		this.kpi_group_api.getKPIGroup( '', false, false, {onResult: function( res ) {
-			res = res.getResult();
+		this.kpi_group_api.getKPIGroup( '', false, false, {
+			onResult: function( res ) {
+				res = Global.clone( res.getResult() );
+				var all = {};
+				all.name = '-- ' + $.i18n._( 'All' ) + ' --';
+				all.level = 1;
+				all.id = -1;
 
-			var all = {};
-			all.name = '-- ' + $.i18n._( 'All' ) + ' --';
-			all.level = 1;
-			all.id = -1;
+				if ( res.hasOwnProperty( "0" ) && res[0].hasOwnProperty( 'children' ) ) {
+					res[0].children.unshift( all );
+				} else {
+					res = [
+						{children: [all], id: 0, level: 0, name: 'Root'}
+					];
+				}
 
-			if ( res.length === 1 && res[0].hasOwnProperty( 'children' ) ) {
-				res[0].children.unshift( all );
-			} else {
-				res = [
-					{children: [all], id: 0, level: 0, name: 'Root'}
-				];
+				res = Global.buildTreeRecord( res );
+				$this.kpi_group_array = res;
+				if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
+					$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
+				}
+
 			}
-
-			res = Global.buildTreeRecord( res );
-			$this.kpi_group_array = res;
-			if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
-				$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
-			}
-
-		}} );
+		} );
 
 	},
 
@@ -148,7 +149,6 @@ KPIViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_key_performance_indicator_column1 );
 		form_item_input.parent().width( '45%' );
 
-
 		//Group
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
@@ -195,41 +195,50 @@ KPIViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Name' ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
 				field: 'name',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Type' ),
+			new SearchField( {
+				label: $.i18n._( 'Type' ),
 				in_column: 1,
 				field: 'type_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Status' ),
+			new SearchField( {
+				label: $.i18n._( 'Status' ),
 				in_column: 1,
 				field: 'status_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Tags' ),
+			new SearchField( {
+				label: $.i18n._( 'Tags' ),
 				field: 'tag',
 				basic_search: true,
 				adv_search: false,
 				in_column: 1,
 				object_type_id: 310,
-				form_item_type: FormItemType.TAG_INPUT} ),
+				form_item_type: FormItemType.TAG_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Group' ),
+			new SearchField( {
+				label: $.i18n._( 'Group' ),
 				in_column: 2,
 				multiple: true,
 				field: 'group_id',
@@ -237,17 +246,21 @@ KPIViewController = BaseViewController.extend( {
 				tree_mode: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Description' ),
+			new SearchField( {
+				label: $.i18n._( 'Description' ),
 				in_column: 2,
 				field: 'description',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -255,9 +268,11 @@ KPIViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -265,7 +280,8 @@ KPIViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 		];
 	},
 
@@ -418,7 +434,6 @@ KPIViewController = BaseViewController.extend( {
 		}
 
 	}
-
 
 } );
 
