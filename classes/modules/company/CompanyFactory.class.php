@@ -1083,6 +1083,8 @@ class CompanyFactory extends Factory {
 										'SA' => array( '00' => '--'),
 										'SN' => array( '00' => '--'),
 										'CS' => array( '00' => '--'),
+										'ME' => array( '00' => '--'),
+										'RS' => array( '00' => '--'),
 										'SC' => array( '00' => '--'),
 										'SL' => array( '00' => '--'),
 										'SG' => array( '00' => '--'),
@@ -1746,7 +1748,11 @@ class CompanyFactory extends Factory {
 	}
 
 	function getName() {
-		return $this->data['name'];
+		if ( isset($this->data['name']) ) {
+			return $this->data['name'];
+		}
+
+		return FALSE;
 	}
 	function setName($name, $force = FALSE) {
 		$name = ucwords( trim($name) );

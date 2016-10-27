@@ -309,7 +309,7 @@ class Authentication {
 			}
 		}
 
-		if ( is_object($retval) ) {
+		if ( isset($retval) AND is_object($retval) ) {
 			return $retval;
 		}
 
@@ -393,7 +393,13 @@ class Authentication {
 			}
 			Debug::text('Cookie Expires: '. $cookie_expires, __FILE__, __LINE__, __METHOD__, 10);
 
-			setcookie( $this->getName(), NULL, ( time() + 9999999 ), Environment::getBaseURL(), NULL, Misc::isSSL( TRUE ) ); //Delete old directory cookie as it can cause a conflict if it stills exists.
+			//15-Jun-2016: This should be not be needed anymore as it has been around for several years now.
+			//setcookie( $this->getName(), NULL, ( time() + 9999999 ), Environment::getBaseURL(), NULL, Misc::isSSL( TRUE ) ); //Delete old directory cookie as it can cause a conflict if it stills exists.
+
+			//Upon successful login to a cloud hosted server, set the URL to a cookie that can be read from the upper domain to help get the user back to the proper login URL later.
+			if ( DEPLOYMENT_ON_DEMAND == TRUE AND DEMO_MODE == FALSE ) {
+				setcookie( 'LoginURL', Misc::getURLProtocol() .'://'.Misc::getHostName().Environment::getBaseURL(), ( time() + 9999999 ), '/', '.'.Misc::getHostNameWithoutSubDomain( Misc::getHostName( FALSE ) ), FALSE ); //Delete old directory cookie as it can cause a conflict if it stills exists.
+			}
 
 			//Set cookie in root directory so other interfaces can access it.
 			setcookie( $this->getName(), $this->getSessionID(), $cookie_expires, '/', NULL, Misc::isSSL( TRUE ) );

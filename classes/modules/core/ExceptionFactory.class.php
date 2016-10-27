@@ -613,7 +613,7 @@ class ExceptionFactory extends Factory {
 							( is_object( $punch_obj ) ) ? TTDate::getDate('TIME', $punch_obj->getTimeStamp() ) : NULL,
 							);
 
-		$exception_email_subject = ' #exception_name# (#exception_code#) '. TTi18n::gettext('exception for') .' #employee_first_name# #employee_last_name# '. TTi18n::gettext('on') .' #date#';
+		$exception_email_subject = '#exception_name# (#exception_code#) '. TTi18n::gettext('exception for') .' #employee_first_name# #employee_last_name# '. TTi18n::gettext('on') .' #date#';
 		$exception_email_body  = TTi18n::gettext('Employee').': #employee_first_name# #employee_last_name#'."\n";
 		$exception_email_body .= TTi18n::gettext('Date').': #date#'."\n";
 		$exception_email_body .= TTi18n::gettext('Exception').': #exception_name# (#exception_code#)'."\n";

@@ -12,7 +12,7 @@ CREATE TABLE authentication (
         updated_date integer,
 		type_id smallint NOT NULL,
         ip_address varchar(45)
-);
+) ENGINE=InnoDB;
 CREATE UNIQUE INDEX authenication_session_id ON authentication(session_id);
 
 ALTER TABLE recurring_schedule_control ADD COLUMN display_weeks smallint DEFAULT 12;
@@ -53,7 +53,7 @@ CREATE TABLE recurring_schedule (
 	other_id4 varchar(250),
 	other_id5 varchar(250),
 	note varchar(250)
-);
+) ENGINE=InnoDB;
 CREATE UNIQUE INDEX recurring_schedule_id ON recurring_schedule(id);
 CREATE INDEX recurring_schedule_company_id ON recurring_schedule(company_id);
 CREATE INDEX recurring_schedule_recurring_schedule_control_id_b ON recurring_schedule(recurring_schedule_control_id);

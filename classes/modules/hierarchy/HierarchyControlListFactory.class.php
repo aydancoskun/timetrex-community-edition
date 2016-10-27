@@ -144,19 +144,24 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 			$list[0] = '--';
 		}
 
-		foreach ($lf as $obj) {
-			if ( $object_sorted_array == TRUE ) {
-				if ( $include_blank == TRUE AND !isset($list[$obj->getColumn('object_type_id')][0]) ) {
-					$list[$obj->getColumn('object_type_id')][0] = '--';
-				}
+		//Make sure we always ensure that we return valid object_types for the product edition.
+		$valid_object_type_ids = $this->getOptions('object_type');
 
-				if ( $include_name == TRUE ) {
-					$list[$obj->getColumn('object_type_id')][$obj->getID()] = $obj->getName();
+		foreach ($lf as $obj) {
+			if ( isset($valid_object_type_ids[$obj->getColumn('object_type_id')])) {
+				if ( $object_sorted_array == TRUE ) {
+					if ( $include_blank == TRUE AND !isset( $list[$obj->getColumn( 'object_type_id' )][0] ) ) {
+						$list[$obj->getColumn( 'object_type_id' )][0] = '--';
+					}
+
+					if ( $include_name == TRUE ) {
+						$list[$obj->getColumn( 'object_type_id' )][$obj->getID()] = $obj->getName();
+					} else {
+						$list[$obj->getColumn( 'object_type_id' )] = $obj->getID();
+					}
 				} else {
-					$list[$obj->getColumn('object_type_id')] = $obj->getID();
+					$list[$obj->getID()] = $obj->getName();
 				}
-			} else {
-				$list[$obj->getID()] = $obj->getName();
 			}
 		}
 

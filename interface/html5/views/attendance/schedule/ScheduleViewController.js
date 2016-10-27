@@ -5667,6 +5667,13 @@ ScheduleViewController = BaseViewController.extend( {
 				if ( related_data.pos === col_models.length - 1 ) {
 					content_div.css( 'padding-right', '15px' );
 				}
+
+				if ( Global.isSet( item ) ) {
+					if (item.user_id === 0) {
+						content_div.addClass('yellow-outline');
+					}
+				}
+
 				content_div.prepend( time_span );
 				break;
 

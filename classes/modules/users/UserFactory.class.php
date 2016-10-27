@@ -2194,7 +2194,7 @@ class UserFactory extends Factory {
 
 			$this->data['work_email'] = $work_email;
 			$this->setEnableClearPasswordResetData( TRUE ); //Clear any outstanding password reset key to prevent unexpected changes later on.
-
+			
 			return TRUE;
 		}
 
@@ -3333,6 +3333,12 @@ class UserFactory extends Factory {
 				$query = 'UPDATE '. $this->getTable() .' SET longitude = NULL, latitude = NULL where id = ?';
 				$this->db->Execute( $query, array( 'id' => $this->getID() ) );
 			}
+
+			if ( is_array($data_diff) AND ( isset($data_diff['hire_date']) OR isset($data_diff['termination_date']) ) ) {
+				Debug::text('Hire Date or Termination date have changed!', __FILE__, __LINE__, __METHOD__, 10);
+				$rsf = TTnew('RecurringScheduleFactory');
+				$rsf->recalculateRecurringSchedules( $this->getID(), ( time() - ( 86400 * 28 ) ), ( time() + ( 86400 * 28 ) ) );
+			}
 		}
 
 		if ( isset($this->is_new) AND $this->is_new == TRUE ) {
@@ -3561,6 +3567,13 @@ class UserFactory extends Factory {
 						case 'password_reset_date': //Password columns must not be changed from the API.
 						case 'password_reset_key':
 						case 'password_updated_date':
+						case 'work_email_is_valid':
+						case 'work_email_is_valid': //EMail validation fields must not be changed from API.
+						case 'work_email_is_valid_key':
+						case 'work_email_is_valid_date':
+						case 'home_email_is_valid':
+						case 'home_email_is_valid_key':
+						case 'home_email_is_valid_date':
 							break;
 						default:
 							if ( method_exists( $this, $function ) ) {

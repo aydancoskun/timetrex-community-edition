@@ -264,9 +264,6 @@ var ServiceCaller = Backbone.Model.extend( {
 			apiArgs = {json: JSON.stringify( apiArgs )};
 		}
 
-		//#1568  -  Add "fragment" to POST variables in API calls so the server can get it...
-		//apiArgs.REQUEST_URI_FRAGMENT = LocalCacheData.fullUrlParameterStr;
-
 		var api_called_date = new Date();
 		var api_stack = {
 			api: className + '.' + function_name,
@@ -292,7 +289,11 @@ var ServiceCaller = Backbone.Model.extend( {
 				dataType: 'JSON',
 				data: apiArgs,
 				headers: {
-					"REQUEST_URI_FRAGMENT": LocalCacheData.fullUrlParameterStr
+					//#1568  -  Add "fragment" to POST variables in API calls so the server can get it...
+					//Encoding is a must, otherwise HTTP requests will be corrupted on some web browsers (ie: Mobile Safari)
+					//This caused the corrupted requests for things like: "POST_/api/json/api_php?Class"
+					//Also it must use dashes instead of underscores for separators.
+					"Request-Uri-Fragment": encodeURIComponent( LocalCacheData.fullUrlParameterStr ),
 				},
 				type: 'POST',
 				async: async,

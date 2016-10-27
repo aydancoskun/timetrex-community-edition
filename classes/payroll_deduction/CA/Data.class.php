@@ -50,6 +50,22 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 	*/
 	var $basic_claim_code_options = array(
 							//Make sure updateCompanyDeductionForTaxYear() is run in the installer so it updates the Tax/Deduction records properly.
+							20160701 => array( //01-Jul-2016:
+											   'CA' => 11474, //Federal
+											   'BC' => 10027,
+											   'AB' => 18451,
+											   'SK' => 15843,
+											   'MB' => 9134,
+											   'QC' => 0,
+											   'ON' => 10011,
+											   'NL' => 8802,
+											   'NB' => 9758,
+											   'NS' => 8481,
+											   'PE' => 8292,
+											   'NT' => 14081,
+											   'YT' => 11474,
+											   'NU' => 12947,
+							),
 							20160101 => array( //01-Jan-2016:
 										'CA' => 11474, //Federal
 										'BC' => 10027,

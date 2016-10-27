@@ -881,6 +881,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		// therefore we need to join to the pay_period table to figure out which pay_period the future dates belong too.
 		// This isn't perfect, and will really only be useful for one pay period in the future, and doesn't handle PP schedule changes very well, but it should suffice for now.
 		$ppsuf = new PayPeriodScheduleUserFactory();
+		$ppsf = new PayPeriodScheduleFactory();
 		$ppf = new PayPeriodFactory();
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
@@ -1036,9 +1037,10 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 									rsf.deleted as deleted
 								FROM '. $rsf->getTable() .' as rsf
 								LEFT JOIN '. $rscf->getTable() .' as rscf ON rsf.recurring_schedule_control_id = rscf.id
-								LEFT JOIN '. $uf->getTable() .' as uf_b ON rsf.user_id = uf_b.id
+								LEFT JOIN '. $uf->getTable() .' as uf_b ON rsf.user_id = uf_b.id								
 								LEFT JOIN '. $ppsuf->getTable() .' as ppsuf ON ( rsf.user_id = ppsuf.user_id )
-								LEFT JOIN '. $ppf->getTable() .' as ppf ON ( ppf.pay_period_schedule_id = ppsuf.pay_period_schedule_id AND rsf.date_stamp >= ppf.start_date AND rsf.date_stamp <= ppf.end_date )
+								LEFT JOIN '. $ppsf->getTable() .' as ppsf ON ( ppsuf.pay_period_schedule_id = ppsf.id AND ppsf.deleted = 0 )
+								LEFT JOIN '. $ppf->getTable() .' as ppf ON ( ppf.pay_period_schedule_id = ppsuf.pay_period_schedule_id AND rsf.date_stamp >= ppf.start_date AND rsf.date_stamp <= ppf.end_date AND ppf.deleted = 0 )
 								LEFT JOIN schedule as sf_b ON (
 																( sf_b.user_id != 0 AND sf_b.user_id = rsf.user_id )
 																AND
@@ -1065,7 +1067,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 					}
 
 					$query .= '
-									AND ( rsf.deleted = 0 AND rscf.deleted = 0 AND ( uf_b.deleted IS NULL OR uf_b.deleted = 0 ) )
+									AND ( rsf.deleted = 0 AND rscf.deleted = 0 AND ( ppsf.deleted IS NULL OR ppsf.deleted = 0 ) AND ( uf_b.deleted IS NULL OR uf_b.deleted = 0 ) )
 							)
 					) as a
 

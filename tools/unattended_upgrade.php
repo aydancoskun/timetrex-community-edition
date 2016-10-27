@@ -36,12 +36,12 @@
 
 
 //This must go above include for global.inc.php
-if ( in_array('--config', $argv) ) {
+if ( isset($argv) AND in_array('--config', $argv) ) {
 	$_SERVER['TT_CONFIG_FILE'] = trim($argv[(array_search('--config', $argv) + 1)]);
 }
 
 //If requirements only check is enabled, do not connect to the database just in case the database isnt setup yet or setup incorrectly.
-if ( in_array('--requirements_only', $argv) ) {
+if ( isset($argv) AND in_array('--requirements_only', $argv) ) {
 	$disable_database_connection = TRUE;
 }
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');

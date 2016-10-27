@@ -361,6 +361,16 @@ class Debug {
 			$text = 'PHP ERROR - '. $error_name .': '. $error_str .' File: '. $error_file .' Line: '. $error_line;
 
 			self::$php_errors++;
+
+			if ( function_exists('apache_request_headers') ) {
+				self::Arr( apache_request_headers(), 'Raw Request Headers: ', $error_file, $error_line, __METHOD__, 1 );
+			}
+			
+			global $HTTP_RAW_POST_DATA;
+			if ( $HTTP_RAW_POST_DATA != '' ) {
+				self::Arr( $HTTP_RAW_POST_DATA, 'Raw POST Request: ', $error_file, $error_line, __METHOD__, 1 );
+			}
+
 			self::Text( $text, $error_file, $error_line, __METHOD__, 1 );
 			self::Text( self::backTrace(), $error_file, $error_line, __METHOD__, 1 );
 		}

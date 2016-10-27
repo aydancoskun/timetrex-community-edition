@@ -1055,6 +1055,43 @@ class RecurringScheduleFactory extends Factory {
 		return TRUE;
 	}
 
+	function recalculateRecurringSchedules( $user_id, $start_date, $end_date ) {
+		global $amf_message_id;
+
+		//Used in UserFactory->postSave() to update recurring schedules immediately after employees are terminated/re-hired.
+
+		$current_epoch = TTDate::getBeginWeekEpoch( TTDate::getBeginWeekEpoch( time() ) - 86400 );
+
+		$start_date = TTDate::getBeginDayEpoch( $start_date );
+		$end_date = TTDate::getEndDayEpoch( $end_date );
+		Debug::text('Start Date: '. TTDate::getDate('DATE+TIME', $start_date ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__, 10);
+
+		$rsclf = TTnew('RecurringScheduleControlListFactory');
+		$rsclf->getByUserIDAndStartDateAndEndDate($user_id, $start_date, $end_date );
+		if ( $rsclf->getRecordCount() > 0 ) {
+			foreach( $rsclf as $rsc_obj ) {
+				$rsf = TTnew('RecurringScheduleFactory');
+				$rsf->StartTransaction();
+				$rsf->clearRecurringSchedulesFromRecurringScheduleControl( $rsc_obj->getID(), ( $current_epoch - (86400 * 720) ), ( $current_epoch + (86400 * 720) ) );
+				if ( $this->getDeleted() == FALSE ) {
+					//FIXME: Put a cap on this perhaps, as 3mths into the future so we don't spend a ton of time doing this
+					//if the user puts sets it to display 1-2yrs in the future. Leave creating the rest of the rows to the maintenance job?
+					//Since things may change we will want to delete all schedules with each change, but only add back in X weeks at most unless from a maintenance job.
+					$maximum_end_date = ( TTDate::getBeginWeekEpoch($current_epoch) + ( $rsc_obj->getDisplayWeeks() * ( 86400 * 7 ) ) );
+					if ( $rsc_obj->getEndDate() != '' AND $maximum_end_date > $rsc_obj->getEndDate() ) {
+						$maximum_end_date = $rsc_obj->getEndDate();
+					}
+					Debug::text('Recurring Schedule ID: '. $rsc_obj->getID() .' Maximum End Date: '. TTDate::getDate('DATE+TIME', $maximum_end_date ), __FILE__, __LINE__, __METHOD__, 10);
+
+					$rsf->addRecurringSchedulesFromRecurringScheduleControl( $rsc_obj->getCompany(), $rsc_obj->getID(), $current_epoch, $maximum_end_date );
+				}
+				$rsf->CommitTransaction();
+			}
+		}
+
+		return TRUE;
+	}
+	
 	function clearRecurringSchedulesFromRecurringScheduleControl( $id, $start_date, $end_date ) {
 		global $amf_message_id;
 		
@@ -1168,18 +1205,18 @@ class RecurringScheduleFactory extends Factory {
 							//Make sure we not already added this schedule shift.
 							//And that no schedule shifts overlap this one.
 							//Use the isValid() function for this
-							$sf = TTnew('RecurringScheduleFactory');
+							$rsf = TTnew('RecurringScheduleFactory');
 
 							//$sf->StartTransaction(); //Transactions here may cause SQL upgrades to fail due to v1067
 
-							$sf->setCompany( $company_id );
-							$sf->setUser( $recurring_schedule_shift['user_id'] );
-							$sf->setRecurringScheduleControl( $rsc_obj->getID() );
-							$sf->setRecurringScheduleTemplateControl( $rsc_obj->getRecurringScheduleTemplateControl() );
+							$rsf->setCompany( $company_id );
+							$rsf->setUser( $recurring_schedule_shift['user_id'] );
+							$rsf->setRecurringScheduleControl( $rsc_obj->getID() );
+							$rsf->setRecurringScheduleTemplateControl( $rsc_obj->getRecurringScheduleTemplateControl() );
 
 							//Find the date that the shift will be assigned to so we know if its a holiday or not.
-							if ( is_object( $sf->getPayPeriodScheduleObject() ) ) {
-								$date_stamp = $sf->getPayPeriodScheduleObject()->getShiftAssignedDate( $recurring_schedule_shift_start_time, $recurring_schedule_shift_end_time, $sf->getPayPeriodScheduleObject()->getShiftAssignedDay() );
+							if ( is_object( $rsf->getPayPeriodScheduleObject() ) ) {
+								$date_stamp = $rsf->getPayPeriodScheduleObject()->getShiftAssignedDate( $recurring_schedule_shift_start_time, $recurring_schedule_shift_end_time, $rsf->getPayPeriodScheduleObject()->getShiftAssignedDay() );
 							} else {
 								$date_stamp = $recurring_schedule_shift_start_time;
 							}
@@ -1209,31 +1246,33 @@ class RecurringScheduleFactory extends Factory {
 
 							$profiler->startTimer( 'Add Schedule' );
 
-							$sf->setStatus( $status_id ); //Working
-							$sf->setStartTime( $recurring_schedule_shift_start_time );
-							$sf->setEndTime( $recurring_schedule_shift_end_time );
-							$sf->setSchedulePolicyID( (int)$recurring_schedule_shift['schedule_policy_id'] );
+							$rsf->setStatus( $status_id ); //Working
+							$rsf->setStartTime( $recurring_schedule_shift_start_time );
+							$rsf->setEndTime( $recurring_schedule_shift_end_time );
+							$rsf->setSchedulePolicyID( (int)$recurring_schedule_shift['schedule_policy_id'] );
 
 							if ( isset($absence_policy_id) AND $absence_policy_id > 0 ) {
-								$sf->setAbsencePolicyID( (int)$absence_policy_id );
+								$rsf->setAbsencePolicyID( (int)$absence_policy_id );
 							}
 							unset($absence_policy_id);
 
-							$sf->setBranch( (int)$recurring_schedule_shift['branch_id'] );
-							$sf->setDepartment( (int)$recurring_schedule_shift['department_id'] );
-							$sf->setJob( (int)$recurring_schedule_shift['job_id'] );
-							$sf->setJobItem( (int)$recurring_schedule_shift['job_item_id'] );
+							$rsf->setBranch( (int)$recurring_schedule_shift['branch_id'] );
+							$rsf->setDepartment( (int)$recurring_schedule_shift['department_id'] );
+							$rsf->setJob( (int)$recurring_schedule_shift['job_id'] );
+							$rsf->setJobItem( (int)$recurring_schedule_shift['job_item_id'] );
 
-							$sf->setAutoFill( (int)$rsc_obj->getAutoFill() );
+							$rsf->setAutoFill( (int)$rsc_obj->getAutoFill() );
 
-							$sf->setUpdatedDate( $recurring_schedule_shift['updated_date'] );
-							$sf->setCreatedDate( $recurring_schedule_shift['created_date'] );
-							if ( $recurring_schedule_shift['created_by_id'] > 0 ) {
-								$sf->setCreatedBy( $recurring_schedule_shift['created_by_id'] );
-							}
+							//This causes confusion when debugging issues, they should only be set to the currently logged in user if triggered by them,
+							//otherwise it can be set by the cron job.
+							//$rsf->setUpdatedDate( $recurring_schedule_shift['updated_date'] );
+							//$rsf->setCreatedDate( $recurring_schedule_shift['created_date'] );
+							//if ( $recurring_schedule_shift['created_by_id'] > 0 ) {
+							//	$rsf->setCreatedBy( $recurring_schedule_shift['created_by_id'] );
+							//}
 							
-							if ( $sf->isValid() ) {
-								$sf->Save();
+							if ( $rsf->isValid() ) {
+								$rsf->Save();
 								//$sf->CommitTransaction();
 							} else {
 								//$sf->FailTransaction();
@@ -1261,7 +1300,7 @@ class RecurringScheduleFactory extends Factory {
 				//and cause schedules to be included.
 				//TTDate::setTimeZone();
 
-				unset($ulf, $user_obj, $user_obj_prefs, $sf);
+				unset($ulf, $user_obj, $user_obj_prefs, $rsf);
 			}
 		}
 
@@ -1304,11 +1343,12 @@ class RecurringScheduleFactory extends Factory {
 				$sf->setRecurringScheduleTemplateControl( $rs_obj->getRecurringScheduleTemplateControl() );
 
 				//Find the date that the shift will be assigned to so we know if its a holiday or not.
-				if ( is_object( $sf->getPayPeriodScheduleObject() ) ) {
-					$date_stamp = $sf->getPayPeriodScheduleObject()->getShiftAssignedDate( $rs_obj->getStartTime(), $rs_obj->getEndTime(), $sf->getPayPeriodScheduleObject()->getShiftAssignedDay() );
-				} else {
-					$date_stamp = $rs_obj->getDateStamp();
-				}
+				//This is already determined in addRecurringSchedulesFromRecurringScheduleControl() above, no need to do it again?
+				//if ( is_object( $sf->getPayPeriodScheduleObject() ) ) {
+				//	$date_stamp = $sf->getPayPeriodScheduleObject()->getShiftAssignedDate( $rs_obj->getStartTime(), $rs_obj->getEndTime(), $sf->getPayPeriodScheduleObject()->getShiftAssignedDay() );
+				//} else {
+				//	$date_stamp = $rs_obj->getDateStamp();
+				//}
 
 				$sf->setStatus( $rs_obj->getStatus() ); //Working
 				$sf->setStartTime( $rs_obj->getStartTime() );

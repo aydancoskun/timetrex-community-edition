@@ -937,7 +937,14 @@ class PayStubFactory extends Factory {
 
 					if ( $units_diff > 0 ) {
 						//Re-calculate amount when units are involved, due to rounding issues.
-						$unit_rate = Misc::MoneyFormat( bcdiv($amount_diff, $units_diff) );
+						//FIXME: However in the case of salaried employees, where there were no units previously, or no units after,
+						//don't use unit calculation to get the amount, just use the amount directly, as it could be different than what they expect.
+						// For example a salaried employee doesn't get paid in a previous PP, the before pay stub doesn't exist, but the new pay stub
+						// could have 42.5 units at an amont of 254.80 (but no rate specified).
+						// However 254.80 / 42.50 = 5.995, which rounds to 6.00 * 42.5 = 255.00. So its $0.20 different when using a rate calculation.
+						// If we just check to see if before/after units != 0, it will break having units in any other case where the line item didn't exist before, like adding overtime.
+						//   Not sure if there is an easy way to fix this...
+						$unit_rate = Misc::MoneyFormat( bcdiv( $amount_diff, $units_diff ) );
 						$amount_diff = Misc::MoneyFormat( bcmul( $unit_rate, $units_diff ) );
 						Debug::Text('bFOUND DIFFERENCE of: Amount: '. $amount_diff .' Units: '. $units_diff .' Unit Rate: '. $unit_rate, __FILE__, __LINE__, __METHOD__, 10);
 

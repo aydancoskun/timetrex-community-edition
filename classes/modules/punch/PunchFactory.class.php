@@ -254,10 +254,17 @@ class PunchFactory extends Factory {
 
 			$last_punch_id = FALSE;
 			if ( isset($shift_data) AND is_array($shift_data) ) {
-				if ( isset($shift_data['punches']) AND $shift_data['punches'][0]['time_stamp'] >= ( $epoch - $maximum_shift_time ) ) {
-					if ( isset($shift_data['punches']) ) {
-						$last_punch_id = $shift_data['punches'][( count($shift_data['punches']) - 1 )]['id'];
-					}
+				//If we check against the first punch, then split shifts like: 10AM -> 11AM, then 11PM -> 8AM (next day) won't match properly,
+				// as the 8AM would need an almost 24hr maximum shift time, when the shift was only 1hr prior to last out punch.
+				// Instead maybe check from the last punch minus the maximum shift time minus the total time of the shift, that way when the 8AM
+				// punch out specified in the above case is being entered it would be 10hr maximum shift time, not a 22hr maximum shift time.
+
+//				if ( isset($shift_data['punches']) AND $shift_data['punches'][0]['time_stamp'] >= ( $epoch - $maximum_shift_time ) ) {
+//					$last_punch_id = $shift_data['punches'][( count($shift_data['punches']) - 1 )]['id'];
+//				}
+				if ( isset($shift_data['punches']) AND isset($shift_data['last_punch_key']) AND isset($shift_data['punches'][$shift_data['last_punch_key']])
+						AND $shift_data['punches'][$shift_data['last_punch_key']]['time_stamp'] >= ( $epoch - ( $maximum_shift_time - $shift_data['total_time'] ) ) ) {
+					$last_punch_id = $shift_data['punches'][$shift_data['last_punch_key']]['id'];
 				} else {
 					Debug::Text(' Shift didnt start within maximum shift time...', __FILE__, __LINE__, __METHOD__, 10);
 				}

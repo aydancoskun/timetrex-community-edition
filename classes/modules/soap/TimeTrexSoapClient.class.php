@@ -493,7 +493,7 @@ class TimeTrexSoapClient {
 				//$this->printSoapDebug();
 
 				if ( is_array($retval) ) {
-					foreach( $retval as $command => $command_data ) {
+					foreach( $retval as $command => $command_data ) { //Must be v7.3.x or higher.
 						Debug::Text('Running Command: '. $command, __FILE__, __LINE__, __METHOD__, 10);
 						switch( strtolower($command) ) {
 							case 'system_settings':

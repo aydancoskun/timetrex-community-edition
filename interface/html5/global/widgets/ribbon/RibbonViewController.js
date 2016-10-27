@@ -273,15 +273,15 @@ RibbonViewController = Backbone.View.extend( {
 				this.doPortalLogout();
 				break;
 			case 'AdminGuide':
-				var url = 'http://www.timetrex.com/h.php?id=admin_guide&v=' + LocalCacheData.getLoginData().application_version;
+				var url = 'http://www.timetrex.com/h.php?id=admin_guide&v=' + LocalCacheData.getLoginData().application_version +'&e='+ LocalCacheData.getCurrentCompany().product_edition_id;
 				window.open( url, '_blank' );
 				break;
 			case 'FAQS':
-				url = 'http://www.timetrex.com/h.php?id=faq&v=' + LocalCacheData.getLoginData().application_version;
+				url = 'http://www.timetrex.com/h.php?id=faq&v=' + LocalCacheData.getLoginData().application_version +'&e='+ LocalCacheData.getCurrentCompany().product_edition_id;
 				window.open( url, '_blank' );
 				break;
 			case 'WhatsNew':
-				url = 'http://www.timetrex.com/h.php?id=changelog&v=' + LocalCacheData.getLoginData().application_version;
+				url = 'http://www.timetrex.com/h.php?id=changelog&v=' + LocalCacheData.getLoginData().application_version +'&e='+ LocalCacheData.getCurrentCompany().product_edition_id;
 				window.open( url, '_blank' );
 				break;
 			case 'EmailHelp':

@@ -317,6 +317,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 					case 'csv':
 					case 'csv_advanced':
 					case 'sage_50':
+					case 'meditech':
 						$this.buildAdditionalInputBox( type );
 						$this.buildGrid( type );
 						break;
@@ -385,7 +386,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				};
 				column_info_array.push( column_info );
 
-				hour_code_label = 'ADP Hours Code';
+				hour_code_label = $.i18n._('ADP Hours Code');
 				break;
 			case 'adp_resource':
 				columnOptions = Global.buildRecordArray( columnOptions.adp_resource_hour_column_options );
@@ -411,7 +412,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				};
 				column_info_array.push( column_info );
 
-				hour_code_label = 'ADP Hours Code';
+				hour_code_label = $.i18n._('ADP Hours Code');
 				break;
 			case 'accero':
 				columnOptions = Global.buildRecordArray( columnOptions.accero_hour_column_options );
@@ -437,30 +438,30 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				};
 				column_info_array.push( column_info );
 
-				hour_code_label = 'HED Override #'; //Hours Code
+				hour_code_label = $.i18n._('HED Override #'); //Hours Code
 				break;
 			case 'paychex_preview_advanced_job':
 			case 'paychex_preview':
-				hour_code_label = 'Paychex Hours Code';
+				hour_code_label = $.i18n._('Paychex Hours Code');
 				break;
 			case 'paychex_online':
-				hour_code_label = 'Earning Code';
+				hour_code_label = $.i18n._('Earning Code');
 				break;
 			case 'ceridian_insync':
-				hour_code_label = 'Ceridian Hours Code';
+				hour_code_label = $.i18n._('Ceridian Hours Code');
 				break;
 			case 'millenium':
-				hour_code_label = 'Millenium Hours Code';
+				hour_code_label = $.i18n._('Millenium Hours Code');
 				break;
 			case 'quickbooks_advanced':
 			case 'quickbooks':
-				hour_code_label = 'Quickbooks Payroll Item Name';
+				hour_code_label = $.i18n._('Quickbooks Payroll Item Name');
 				break;
 			case 'surepayroll':
-				hour_code_label = 'Payroll Code';
+				hour_code_label = $.i18n._('Payroll Code');
 				break;
 			case 'chris21':
-				hour_code_label = 'Chris21 Hours Code';
+				hour_code_label = $.i18n._('Chris21 Hours Code');
 				break;
 			case 'va_munis':
 				columnOptions = Global.buildRecordArray( columnOptions );
@@ -486,13 +487,13 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				};
 				column_info_array.push( column_info );
 
-				hour_code_label = 'Hours Code';
+				hour_code_label = $.i18n._('Hours Code');
 				break;
 			case 'compupay':
-				hour_code_label = 'DET Code';
+				hour_code_label = $.i18n._('DET Code');
 				break;
 			case 'sage_50':
-				hour_code_label = 'Item Number';
+				hour_code_label = $.i18n._('Item Number');
 				break;
 			case 'cms_pbj':
 				columnOptions = Global.buildRecordArray( columnOptions.cms_pbj_hour_column_options );
@@ -519,10 +520,13 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				column_info_array.push( column_info );
 
 				hour_code_label = false;
-				break;			
+				break;
+			case 'meditech':
+				hour_code_label = $.i18n._('Earning Number');
+				break;
 			case 'csv':
 			case 'csv_advanced':
-				hour_code_label = 'Hours Code';
+				hour_code_label = $.i18n._('Hours Code');
 				break;
 		}
 
@@ -1646,6 +1650,134 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				delete $this.edit_view_form_item_dic[code3];
 
 				break;
+			case 'meditech': //Meditech
+				//Payroll dictionary value
+				code4 = 'payroll';
+				form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+				form_item_input.TTextInput( {field: code4} );
+				this.addEditFieldToColumn( $.i18n._( 'Payroll' ), form_item_input, tab3_column1, '', null, true );
+				this.setWidgetVisible( [form_item_input] );
+				form_item_input.setValue( $this.export_setup_data[code4] );
+
+				$this.export_setup_ui_dic[code4] = $this.edit_view_form_item_dic[code4];
+				delete $this.edit_view_form_item_dic[code4];
+
+				//Employee Number
+				var code = 'employee_number';
+				var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+				form_item_input.TComboBox( {field: code} );
+
+				var h_box = $( "<div class='h-box'></div>" );
+
+				var text_box = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+				text_box.css( 'margin-left', '10px' );
+				text_box.TTextInput( {field: code + '_text'} );
+
+				h_box.append( form_item_input );
+				h_box.append( text_box );
+
+				this.addEditFieldToColumn( $.i18n._( 'Employee Number' ), [form_item_input, text_box], tab3_column1, '', h_box, true );
+				this.setWidgetVisible( [form_item_input, text_box] );
+				form_item_input.bind( 'formItemChange', function( e, target ) {
+					if ( target.getValue() === 0 ) {
+						text_box.css( 'display', 'inline' );
+						text_box.setValue( $this.export_setup_data[code] );
+					} else {
+						text_box.css( 'display', 'none' );
+					}
+
+				} );
+
+				$this.api.getOptions( 'export_columns', 'meditech', {
+					onResult: function( result ) {
+
+						var result_data = result.getResult();
+
+						form_item_input.setSourceData( Global.buildRecordArray( result_data ) );
+
+						form_item_input.setValue( $this.export_setup_data[code] );
+						form_item_input.trigger( 'formItemChange', [form_item_input, true] );
+
+					}
+				} );
+
+				$this.export_setup_ui_dic[code] = $this.edit_view_form_item_dic[code];
+				delete $this.edit_view_form_item_dic[code];
+
+				//Department
+				var code2 = 'department';
+				var form_item_input2 = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+				form_item_input2.TComboBox( {field: code2} );
+
+				h_box = $( "<div class='h-box'></div>" );
+
+				var text_box2 = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+				text_box2.css( 'margin-left', '10px' );
+				text_box2.TTextInput( {field: code2 + '_text'} );
+
+				h_box.append( form_item_input2 );
+				h_box.append( text_box2 );
+				this.addEditFieldToColumn( $.i18n._( 'Department' ), [form_item_input2, text_box2], tab3_column1, '', h_box, true );
+				this.setWidgetVisible( [form_item_input2, text_box2] );
+				form_item_input2.bind( 'formItemChange', function( e, target ) {
+					if ( target.getValue() === 0 ) {
+						text_box2.css( 'display', 'inline' );
+						text_box2.setValue( $this.export_setup_data[code2] );
+					} else {
+						text_box2.css( 'display', 'none' );
+					}
+
+				} );
+
+				$this.api.getOptions( 'meditech_department_options', {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						form_item_input2.setSourceData( Global.buildRecordArray( result_data ) );
+						form_item_input2.setValue( $this.export_setup_data[code2] );
+						form_item_input2.trigger( 'formItemChange', [form_item_input2, true] );
+					}
+				} );
+
+				$this.export_setup_ui_dic[code2] = $this.edit_view_form_item_dic[code2];
+				delete $this.edit_view_form_item_dic[code2];
+
+				// Job Code
+				var code3 = 'job_code';
+				var form_item_input3 = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+				form_item_input3.TComboBox( {field: code3} );
+
+				h_box = $( "<div class='h-box'></div>" );
+
+				var text_box3 = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+				text_box3.css( 'margin-left', '10px' );
+				text_box3.TTextInput( {field: code3 + '_text'} );
+
+				h_box.append( form_item_input3 );
+				h_box.append( text_box3 );
+				this.addEditFieldToColumn( $.i18n._( 'Job Code' ), [form_item_input3, text_box3], tab3_column1, '', h_box, true );
+				this.setWidgetVisible( [form_item_input3, text_box3] );
+				form_item_input3.bind( 'formItemChange', function( e, target ) {
+					if ( target.getValue() === 0 ) {
+						text_box3.css( 'display', 'inline' );
+						text_box3.setValue( $this.export_setup_data[code3] );
+					} else {
+						text_box3.css( 'display', 'none' );
+					}
+
+				} );
+
+				$this.api.getOptions( 'meditech_job_code_options', {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						form_item_input3.setSourceData( Global.buildRecordArray( result_data ) );
+						form_item_input3.setValue( $this.export_setup_data[code3] );
+						form_item_input3.trigger( 'formItemChange', [form_item_input3, true] );
+					}
+				} );
+				$this.export_setup_ui_dic[code3] = $this.edit_view_form_item_dic[code3];
+				delete $this.edit_view_form_item_dic[code3];
+
+				break;
 			case 'csv_advanced':
 				//Export Columns
 				code = 'csv_export_columns';
@@ -1761,32 +1893,26 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 		switch ( other.export_type ) {
 			case 'adp':
 				other[other.export_type] = this.getFormSetupFieldValues( [ 'company_code', 'batch_id', 'temp_dept' ] );
-
 				break;
 			case 'adp_advanced':
 			case 'adp_resource':
 				other[other.export_type] = this.getFormSetupFieldValues( [ 'company_code', 'batch_id', 'temp_dept', 'job_cost', 'work_class' ] );
 				other[other.export_type].state_columns = this.edit_view_ui_dic.state_columns.getValue();
-
 				break;
 			case 'accero':
 				other[other.export_type] = this.getFormSetupFieldValues( [ 'temp_dept' ] );
-
 				break;
 			case 'paychex_preview':
 				other[other.export_type].client_number = this.edit_view_ui_dic.client_number.getValue();
-
 				break;
 			case 'paychex_preview_advanced_job':
 				other[other.export_type].client_number = this.edit_view_ui_dic.client_number_adv.getValue();
 				other[other.export_type].job_columns = this.edit_view_ui_dic.job_columns.getValue();
 				other[other.export_type].state_columns = this.edit_view_ui_dic.state_columns.getValue();
 				other[other.export_type].include_hourly_rate = this.edit_view_ui_dic.include_hourly_rate.getValue();
-
 				break;
 			case 'ceridian_insync':
 				other[other.export_type].employer_number = this.edit_view_ui_dic.employer_number.getValue();
-
 				break;
 			case 'quickbooks':
 			case 'quickbooks_advanced':
@@ -1795,15 +1921,16 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				other[other.export_type].proj = this.edit_view_ui_dic.proj.getValue();
 				other[other.export_type].item = this.edit_view_ui_dic.item.getValue();
 				other[other.export_type].job = this.edit_view_ui_dic.job.getValue();
-
 				break;
 			case 'va_munis':
 				other[other.export_type] = this.getFormSetupFieldValues( [ 'department', 'employee_number', 'gl_account', 'customer_name', 'facility_code', 'state_code', 'pay_type_code', 'job_title_code', '' ] );
-
+				break;
+			case 'meditech':
+				other[other.export_type] = this.getFormSetupFieldValues( [ 'employee_number', 'department', 'job_code' ] );
+				other[other.export_type].payroll = this.edit_view_ui_dic.payroll.getValue();
 				break;
 			case 'csv_advanced':
 				other[other.export_type].export_columns = this.edit_view_ui_dic.csv_export_columns.getValue();
-
 				break;
 		}
 

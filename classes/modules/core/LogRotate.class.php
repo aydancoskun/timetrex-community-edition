@@ -172,7 +172,9 @@ class LogRotate {
 						$new_file = $filename . '.' . $this->padExtension( 1, $rotate_config['history'] );
 						if ( file_exists( $filename ) AND !file_exists( $new_file ) ) {
 							Debug::Text(' Renaming primary log file: '. $filename .' To: '. $new_file, __FILE__, __LINE__, __METHOD__, 10);
-							rename( $filename, $new_file);
+							if ( @rename( $filename, $new_file) == FALSE ) {
+								Debug::Text('   ERROR: Rename failed, possibly due to permissions?', __FILE__, __LINE__, __METHOD__, 10);
+							}
 						} else {
 							Debug::Text(' NOT Renaming primary log file: '. $filename, __FILE__, __LINE__, __METHOD__, 10);
 						}

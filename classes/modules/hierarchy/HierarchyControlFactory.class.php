@@ -210,24 +210,33 @@ class HierarchyControlFactory extends Factory {
 		$object_types = $this->getOptions('short_object_type');
 
 		$retval = array();
-		foreach( $object_type_ids as $object_type_id ) {
-			$retval[] = Option::getByKey( $object_type_id, $object_types );
-		}
-		sort($retval); //Maintain consistent order.
+		if ( is_array($object_type_ids) ) {
+			foreach ( $object_type_ids as $object_type_id ) {
+				$retval[] = Option::getByKey( $object_type_id, $object_types );
+			}
+			sort( $retval ); //Maintain consistent order.
 
-		return implode(',', $retval );
+			return implode(',', $retval );
+		}
+
+		return NULL;
 	}
 
 	function getObjectType() {
+		$valid_object_type_ids = $this->getOptions('object_type');
+
 		$hotlf = TTnew( 'HierarchyObjectTypeListFactory' );
 		$hotlf->getByHierarchyControlId( $this->getId() );
+		if ( $hotlf->getRecordCount() > 0 ) {
+			foreach ( $hotlf as $object_type ) {
+				if ( isset( $valid_object_type_ids[$object_type->getObjectType()] ) ) {
+					$object_type_list[] = $object_type->getObjectType();
+				}
+			}
 
-		foreach ($hotlf as $object_type) {
-			$object_type_list[] = $object_type->getObjectType();
-		}
-
-		if ( isset($object_type_list) ) {
-			return $object_type_list;
+			if ( isset($object_type_list) ) {
+				return $object_type_list;
+			}
 		}
 
 		return FALSE;

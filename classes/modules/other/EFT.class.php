@@ -91,6 +91,7 @@ class EFT {
 
 	var $file_format_options = array( '1464', '105', 'HSBC', 'BEANSTREAM', 'ACH' );
 	var $file_format = NULL; //File format
+	var $line_ending = "\r\n";
 
 	var $file_prefix_data = NULL; //Leading data in the file, primarily for RBC routing lines.
 	var $header_data = NULL;
@@ -128,7 +129,8 @@ class EFT {
 
 	function isAlphaNumeric( $value ) {
 		/*
-		if ( preg_match('/^[-0-9A-Z\ ]+$/', $value) ) {
+		//if ( preg_match('/^[-0-9A-Z\ ]+$/', $value) ) {
+		if ( preg_match('/^[-0-9A-Z_\ =\$\.\&\*\,]+$/i', $value) ) { //Case insensitive
 			return TRUE;
 		}
 
@@ -473,7 +475,7 @@ class EFT {
 	function padLine( $line, $length ) {
 		$retval = str_pad( $line, $length, ' ', STR_PAD_RIGHT);
 
-		return $retval."\r\n";
+		return $retval.$this->line_ending;
 	}
 
 
@@ -933,7 +935,7 @@ class EFT_File_Format_1464 Extends EFT {
 	private function compileHeader() {
 		$line[] = 'A'; //A Record
 		$line[] = '000000001'; //A Record number
-		$line[] = $this->padRecord( $this->getOriginatorID(), 10, 'N');
+		$line[] = $this->padRecord( $this->getOriginatorID(), 10, 'AN');
 		$line[] = $this->padRecord( $this->getFileCreationNumber(), 4, 'N');
 		$line[] = $this->padRecord( $this->toJulian( $this->getFileCreationDate() ), 6, 'N');
 		$line[] = $this->padRecord( $this->getDataCenter(), 5, 'N');
@@ -1436,8 +1438,12 @@ class EFT_File_Format_ACH Extends EFT {
 	private function compileFileHeader() {
 		$line[] = '1'; //1 Record
 		$line[] = '01'; //Priority code
-		$line[] = $this->padRecord( $this->getDataCenter(), 10, 'X'); //Immidiate destination - 10 digits, left padding with space. '072000805' - Standard Federal Bank
-		$line[] = $this->padRecord( $this->getOriginatorID(), 10, 'X'); //Immediate Origin - 10 digits, left padding with space. Recommend IRS Federal Tax ID Number
+
+		//NOTE: Some banks require this to have a leading blank space, or all 0's with a leading blank. If that is the case it will need to be defined specifically.
+		//Banks seem to want DataCenter/Immediate Origin preceeded by a space, but 0 padded to 9 digits.
+		//Some banks use 10 digits though, so check to see if its less than 10 and handle it differently.
+		$line[] = $this->padRecord( str_pad( $this->getDataCenter(), 9, '0', STR_PAD_LEFT), 10, 'X'); //Immidiate destination - 10 digits, left padding with space. '072000805' - Standard Federal Bank
+		$line[] = $this->padRecord( str_pad( $this->getOriginatorID(), 9, '0', STR_PAD_LEFT), 10, 'X'); //Immediate Origin - 10 digits, left padding with space. Recommend IRS Federal Tax ID Number
 
 		$line[] = $this->padRecord( date('ymd', $this->getFileCreationDate() ), 6, 'N');
 		$line[] = $this->padRecord( date('Hi', $this->getFileCreationDate() ), 4, 'N');
@@ -1451,7 +1457,7 @@ class EFT_File_Format_ACH Extends EFT {
 		$line[] = $this->padRecord( strtoupper( $this->getDataCenterName() ), 23, 'AN'); //Immidiate destination name. Optional
 		$line[] = $this->padRecord( strtoupper( $this->getOriginatorShortName() ), 23, 'AN'); //Company Short Name. Optional
 
-		$line[] = $this->padRecord( '', 8, 'AN'); //File Reference Code
+		$line[] = $this->padRecord( substr( $this->getFileCreationNumber(), -8 ), 8, 'AN'); //File Reference Code
 
 		$retval = $this->padLine( implode('', $line), 94 );
 

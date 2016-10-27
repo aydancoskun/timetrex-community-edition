@@ -3621,7 +3621,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 1416.67 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1416.67' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '46.80' ); //Formulas changed on Jul 1st 2016.
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
@@ -3633,7 +3633,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 1416.67 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1416.67' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.05' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
@@ -3645,7 +3645,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 1416.67 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1416.67' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.05' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
@@ -3657,7 +3657,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 1416.67 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1416.67' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.05' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
@@ -3669,7 +3669,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 1416.67 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1416.67' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.05' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
@@ -3681,7 +3681,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 1416.67 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1416.67' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.05' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
@@ -3693,7 +3693,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 1416.67 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1416.67' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.05' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
@@ -3705,7 +3705,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 1416.67 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1416.67' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.05' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
@@ -3717,7 +3717,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 1416.67 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1416.67' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.05' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
@@ -3729,7 +3729,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 1416.67 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1416.67' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.05' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
@@ -3741,7 +3741,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 1416.67 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1416.67' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.05' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
@@ -3753,13 +3753,13 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( $ytd_deduction );
 		$pd_obj->setGrossPayPeriodIncome( 1416.67 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1416.67' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '54.05' );
 		$current_pay_period++;
 		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
 		$ytd_deduction += $pd_obj->getProvincialPayPeriodDeductions();
 
 		$this->assertEquals( $ytd_gross_income, 27449.47 );
-		$this->assertEquals( $this->mf( $ytd_deduction ), 735.32 );
+		$this->assertEquals( $this->mf( $ytd_deduction ), 728.68 );
 
 
 		//Actual Income/Deductions for the year.
@@ -3770,7 +3770,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( 0 );
 		$pd_obj->setGrossPayPeriodIncome( 27449.47 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '27449.47' );
-		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '735.32' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '728.68' );
 
 	}
 

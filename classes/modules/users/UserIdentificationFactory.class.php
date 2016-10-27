@@ -217,7 +217,7 @@ class UserIdentificationFactory extends Factory {
 													$value,
 													TTi18n::gettext('Value is too short or too long'),
 													1,
-													48000) //Need relatively large face images.
+													256000) //Need relatively large face images.
 			) {
 
 			$this->data['value'] = $value;

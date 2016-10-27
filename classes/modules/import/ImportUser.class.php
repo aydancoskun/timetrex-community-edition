@@ -625,7 +625,7 @@ class ImportUser extends Import {
 	function getHierarchyControlOptions() {
 		//Get job titles
 		$hclf = TTNew('HierarchyControlListFactory');
-		$hclf->getByCompanyId( $this->company_id );
+		$hclf->getObjectTypeAppendedListByCompanyID( $this->company_id );
 		$this->hierarchy_control_options = (array)$hclf->getArrayByListFactory( $hclf, TRUE, FALSE, TRUE );
 		unset($pglf);
 

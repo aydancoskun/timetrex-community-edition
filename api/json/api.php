@@ -250,7 +250,8 @@ if ( isset($_POST['json']) OR isset($_GET['json']) ) {
 //This causes data to be modified when stored in the database though, we have since enabled escaping on output in jqGrid instead.
 //FormVariables::RecurseFilterArray( $arguments );
 
-$argument_size = strlen( serialize($arguments) );
+//$argument_size = strlen( serialize($arguments) );
+$argument_size = strlen( $HTTP_RAW_POST_DATA ); //Just strlen this variable rather than serialize all the data as it should be much faster.
 if ( PRODUCTION == TRUE AND $argument_size > (1024 * 12) ) {
 	Debug::Text('Arguments too large to display... Size: '. $argument_size, __FILE__, __LINE__, __METHOD__, 10);
 } else {

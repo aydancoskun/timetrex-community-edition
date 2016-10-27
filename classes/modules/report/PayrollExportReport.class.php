@@ -74,8 +74,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 		$retval = NULL;
 		switch( $name ) {
 			case 'export_columns': //Must pass export_type.
-				if ( $params == 'csv_advanced' OR $params = 'va_munis' ) {
-
+				if ( $params == 'csv_advanced' OR $params = 'va_munis' OR $params = 'meditech' ) {
 					if ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCompanyObject() ) AND $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
 						$jar = TTNew('JobDetailReport');
 					} else {
@@ -110,6 +109,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 								'-0900-accero'			=> TTi18n::gettext('Accero'),
 								'-1000-compupay'			=> TTi18n::gettext('CompuPay'),
 								'-1100-sage_50'			=> TTi18n::gettext('Sage 50'),
+								'-1110-meditech'			=> TTi18n::gettext('Meditech'),
 								'-9900-csv'				=> TTi18n::gettext('Generic Excel/CSV'),
 								'-9900-csv_advanced'		=> TTi18n::gettext('Generic Excel/CSV (Advanced)'),
 								//'other'			=> TTi18n::gettext('-- Other --'),
@@ -167,6 +167,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 								'accero'			=> TTi18n::gettext('Hours Code'),
 								'compupay'			=> TTi18n::gettext('Hours Code'),
 								'sage_50'			=> TTi18n::gettext('Item Number'),
+								'meditech'			=> TTi18n::gettext('Earning Number'),
 								'cms_pbj'			=> TTi18n::gettext('Export'),
 								'csv'				=> TTi18n::gettext('Hours Code'),
 								'csv_advanced'		=> TTi18n::gettext('Hours Code'),
@@ -416,6 +417,53 @@ class PayrollExportReport extends TimesheetSummaryReport {
 								'-0030-user_province' => TTi18n::gettext('Employee: Province/State'),
 								);
 				break;
+			case 'meditech_employee_number_options':
+			case 'meditech_department_options':
+			case 'meditech_job_code_options':
+				$retval = array(
+						0 => TTi18n::gettext('-- Custom --'),
+						'-0010-default_branch' => TTi18n::gettext('Default Branch'), //Include branch name, as it is alphanumeric value.
+						'-0010-default_branch_manual_id' => TTi18n::gettext('Default Branch: Code'),
+						'-0020-default_department' => TTi18n::gettext('Default Department'),
+						'-0020-default_department_manual_id' => TTi18n::gettext('Default Department: Code'),
+						'-0030-branch_name' => TTi18n::gettext('Branch'),
+						'-0030-branch_manual_id' => TTi18n::gettext('Branch: Code'),
+						'-0040-department_name' => TTi18n::gettext('Department'),
+						'-0040-department_manual_id' => TTi18n::gettext('Department: Code'),
+				);
+
+				if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
+					$retval['-0200-job_name'] = TTi18n::gettext('Job: Name');
+					$retval['-0210-job_manual_id'] = TTi18n::gettext('Job: Code');
+					$retval['-0300-job_item_name'] = TTi18n::gettext('Task: Name');
+					$retval['-0310-job_item_manual_id'] = TTi18n::gettext('Task: Code');
+				}
+
+				$oflf = TTnew( 'OtherFieldListFactory' );
+
+				//Put a colon or underscore in the name, thats how we know it needs to be replaced.
+
+				//Get Branch other fields.
+				$default_branch_options = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), 4, '-1000-default_branch_', TTi18n::getText('Default Branch').': ' );
+				if (  !is_array($default_branch_options) ) {
+					$default_branch_options = array();
+				}
+				$default_department_options = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), 5, '-2000-default_department_', TTi18n::getText('Default Department').': ' );
+				if (  !is_array($default_department_options) ) {
+					$default_department_options = array();
+				}
+
+				$branch_options = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), 4, '-3000-branch_', TTi18n::getText('Branch').': ' );
+				if ( !is_array($branch_options) ) {
+					$branch_options = array();
+				}
+				$department_options = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), 5, '-4000-department_', TTi18n::getText('Department').': ' );
+				if ( !is_array($department_options) ) {
+					$department_options = array();
+				}
+
+				$retval = array_merge( $retval, (array)$default_branch_options, (array)$default_department_options, (array)$branch_options, (array)$department_options );
+				break;
 			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
@@ -539,8 +587,8 @@ class PayrollExportReport extends TimesheetSummaryReport {
 						break;
 					case 'adp_advanced':  //This uses the Job Analysis report instead, so handle the config later.
 					case 'adp_resource':  //This uses the Job Analysis report instead, so handle the config later.
-						break;
 					case 'paychex_preview_advanced_job': //This uses the Job Analysis report instead, so handle the config later.
+					case 'meditech': //This uses the Job Analysis report instead, so handle the config later.
 						break;
 					case 'paychex_preview':
 					case 'paychex_online':
@@ -1604,7 +1652,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 					$data = '';
 					foreach( $tmp_rows as $tmp_row ) {
-						$data .= str_pad( ( isset($setup_data['va_munis']['department']) AND $setup_data['va_munis']['department'] != 0 ) ? $tmp_row[$export_column_map['department']] : $setup_data['va_munis']['department_value'], 5, 0, STR_PAD_LEFT);		//5 digits left padded
+						$data .= str_pad( ( isset($tmp_row[$export_column_map['department']]) ) ? $tmp_row[$export_column_map['department']] : $setup_data['va_munis']['department_value'], 5, 0, STR_PAD_LEFT);		//5 digits left padded
 						//$data .= ', ';
 						$data .= str_pad( ( isset($tmp_row[$export_column_map['employee_number']]) ) ? $tmp_row[$export_column_map['employee_number']] : '', 9, '0', STR_PAD_LEFT);		//9 digits left padded
 						//$data .= ', ';
@@ -1639,7 +1687,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				}
 				unset($tmp_rows, $export_column_map, $column_id, $column_data, $rows, $row, $absence_policy_data);
 				break;
-			case 'accero': //ADP export format.
+			case 'accero': //Accero export format.
 				/*
 				 	Field #	Field Name	No Of Positions	Start	End	Picture	Field Definition
 				  	1	T1 Card Code	2	1	2	X(2)	Code that defines to the pay calculation program how to process the time card - "12" if only hours are going to be included on the record, the system will calc the pay;"18" if hours and an amount or just an amount (earning that does not have hours associated with it like a bonus) are going to be included on the record, system will not calc pay but pay whats reported; "16" to dock pay and only hours are to be included on the record, system will calc the negative pay; "17" to doc pay and hours and an amount or just an amount are to be included in the record, system will not calc the negative pay.
@@ -1984,7 +2032,224 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$file_name = 'pbj_'.date('Y_m_d').'.xml';
 				$mime_type = 'applications/octet-stream'; //Force file to download.
 				$data = $gf->output( 'XML' );
-				break;						
+				break;
+			case 'meditech': //Meditech
+				unset($rows); //Ignore any existing timesheet summary data, we will be using our own job data below.
+				//Debug::Arr($setup_data, 'Meditech Setup Data: ', __FILE__, __LINE__, __METHOD__, 10);
+
+				function meditechNumericFormat( $value, $pad = 5 ) {
+					$negative = FALSE;
+					if ( $value < 0 ) {
+						$negative = TRUE;
+						$pad--;
+					}
+
+					$retval = str_pad( Misc::removeDecimal( abs( $value ) ), $pad, 0, STR_PAD_LEFT);
+					if ( $negative == TRUE ) {
+						$retval = '-'.$retval;
+					}
+
+					return $retval;
+				}
+
+				function isSecondBiWeeklyWeek( $date_stamp, $first_pay_period_start_date, $start_week_day_id = 0 ) {
+					//This must be based on an "anchor" date, or first_pay_period_start_date, otherwise when there are 53 weeks in a year
+					//it will throw off the odd/even calculation.
+					//FIXME: What happens if they transition from one pay period schedule to another, and the first pay period is a shorter pay period.
+					//  For example from Semi-Monthly to Bi-Weekly, and the first BiWeekly PP is 01-Jan-2014 to 05-Jan-215, then it continues as regular biweekly PPs after that.
+					//  I think for now they will just need to modify their pay period dates so the pay period always starts on the 1st week, not the 2nd week.
+
+					if ( $first_pay_period_start_date == '' ) {
+						$first_pay_period_start_date = 788947200; //Sun, 01-Jan-1995... Used to calculate weeks from.
+						//Debug::text('ERROR: First PP Start Date is invalid, use reference date instead!', __FILE__, __LINE__, __METHOD__, 10);
+					}
+
+					//Based on first pay period start date, get beginning week epoch.
+					$reference_date = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( $first_pay_period_start_date, $start_week_day_id ) );
+
+					//Figure out how many days we are from the first pay period start date, then figure out the number of weeks, to determine odd/even essentially.
+					$days_diff = round( TTDate::getDays( ( TTDate::getMiddleDayEpoch( $date_stamp ) - $reference_date ) ) );
+					$weekly_period_diff = ( $days_diff / 7 );
+
+					$retval = ( $weekly_period_diff % 2 );
+
+					//Debug::text(' Date: '. TTDate::getDate('DATE', $date_stamp ) .' First PP Start Date: '. TTDate::getDate('DATE+TIME', $first_pay_period_start_date ).' Days: '. $days_diff .' Weeks: '. $weekly_period_diff .' Retval: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
+
+					if ( $retval == 1 ) {
+						return TRUE;
+					}
+
+					return FALSE;
+				}
+
+				if ( isset($setup_data[$setup_data['export_type']]['employee_number']) ) {
+					$config['columns'][] = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['employee_number'] );
+				} else {
+					$config['columns'][] = 'employee_number';
+				}
+				if ( isset($setup_data[$setup_data['export_type']]['department']) AND strpos( $setup_data[$setup_data['export_type']]['department'], '_' ) !== FALSE ) {
+					$config['columns'][] = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['department'] );
+				}
+				if ( isset($setup_data[$setup_data['export_type']]['job_code']) AND strpos( $setup_data[$setup_data['export_type']]['job_code'], '_' ) !== FALSE ) {
+					$config['columns'][] = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['job_code'] );
+				}
+				$config['columns'][] = 'pay_period_end_date';
+				$config['columns'][] = 'date_week_start';
+
+
+				if ( isset($setup_data[$setup_data['export_type']]['employee_number']) ) {
+					$config['group'][] = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['employee_number'] );
+				} else {
+					$config['group'][] = 'employee_number';
+				}
+				if ( isset($setup_data[$setup_data['export_type']]['department']) AND strpos( $setup_data[$setup_data['export_type']]['department'], '_' ) !== FALSE ) {
+					$config['group'][] = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['department'] );
+				}
+				if ( isset($setup_data[$setup_data['export_type']]['job_code']) AND strpos( $setup_data[$setup_data['export_type']]['job_code'], '_' ) !== FALSE ) {
+					$config['group'][] = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['job_code'] );
+				}
+				$config['group'][] = 'pay_period_end_date';
+				$config['group'][] = 'date_week_start';
+
+				$dynamic_column_names = array_keys( Misc::trimSortPrefix( $this->getOptions('dynamic_columns') ) );
+				//Force group by hourly_rates, so if there are multiple hourly rates with the same pay code its still split out.
+				foreach( $dynamic_column_names as $dynamic_column_name ) {
+					if ( substr( $dynamic_column_name, -12 ) == '_hourly_rate' ) { //Ends with
+						$config['group'][] = $dynamic_column_name;
+					}
+				}
+				unset($dynamic_column_names, $dynamic_column_name);
+
+
+				if ( isset($setup_data[$setup_data['export_type']]['employee_number']) ) {
+					$config['sort'][] = array( Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['employee_number'] ) => 'asc' );
+				} else {
+					$config['sort'][] = array( 'employee_number' => 'asc' );
+				}
+				if ( isset($setup_data[$setup_data['export_type']]['department']) AND strpos( $setup_data[$setup_data['export_type']]['department'], '_' ) !== FALSE ) {
+					$config['sort'][] = array( Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['department'] ) => 'asc' );
+				}
+				if ( isset($setup_data[$setup_data['export_type']]['job_code']) AND strpos( $setup_data[$setup_data['export_type']]['job_code'], '_' ) !== FALSE ) {
+					$config['sort'][] = array( Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['job_code'] ) => 'asc' );
+				}
+				$config['sort'][] = array( 'pay_period_end_date' => 'asc' );
+				$config['sort'][] = array( 'date_week_start' => 'asc' );
+
+				Debug::Arr($config, 'MediTech Config Data: ', __FILE__, __LINE__, __METHOD__, 10);
+
+				if ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCompanyObject() ) AND $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
+					Debug::Text('Using Job Detail Report...', __FILE__, __LINE__, __METHOD__, 10);
+					$jar = TTNew('JobDetailReport');
+				} else {
+					Debug::Text('Using TimeSheet Detail Report...', __FILE__, __LINE__, __METHOD__, 10);
+					$jar = TTNew('TimesheetDetailReport');
+				}
+				$jar->setAMFMessageID( $this->getAMFMessageID() );
+				$jar->setUserObject( $this->getUserObject() );
+				$jar->setPermissionObject( $this->getPermissionObject() );
+				$jar->setConfig( $config );
+				$jar->setFilterConfig( $this->getFilterConfig() );
+				if ( isset($config['sort']) ) {
+					$jar->setSortConfig( $config['sort'] );
+				}
+				$jar->_getData();
+				$jar->_preProcess();
+				$jar->currencyConvertToBase();
+				$jar->calculateCustomColumns( 10 ); //Selections (these are pre-group)
+				$jar->calculateCustomColumns( 20 ); //Pre-Group
+				$jar->group();
+				$jar->calculateCustomColumns( 21 ); //Post-Group: things like round() functions normally need to be done post-group, otherwise they are rounding already rounded values.
+				$jar->sort();
+				$jar->_postProcess( 'csv' ); //Minor post-processing.
+				$rows = $jar->data;
+				//Debug::Arr($rows, 'Raw Rows: ', __FILE__, __LINE__, __METHOD__, 10);
+
+				$export_column_map = array(
+						'record_type' => 'Record Type',
+						'space_filler' => 'Filler',
+						'employee_number' => 'Employee #',
+						'earning_number' => 'Earning Number',
+						'hours' => 'Hours',
+						'shift' => '1',
+						'department' => 'Department',
+						'job_code' => 'Job Code',
+						'base_rate' => 'Base Rate',
+						'flat_amount' => 'Flat Amount',
+						'week' => 'Week',
+				);
+
+				$employee_number_column = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['employee_number'] );
+				$department_column = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['department'] );
+				$job_code_column = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['job_code'] );
+
+				ksort($setup_data['meditech']['columns']);
+				$setup_data['meditech']['columns'] = Misc::trimSortPrefix( $setup_data['meditech']['columns'] );
+
+				$total_records = 0;
+				$total_hours = 0;
+				$pay_period_end_date = 0;
+				foreach($rows as $row) {
+					$pay_period_end_date = TTDate::parseDateTime( $row['pay_period_end_date'] );
+
+					$static_columns = array(
+							'record_type' => 2,
+							'space_filler' => ' ',
+							'employee_number' => str_pad( NULL, 14, ' ', STR_PAD_RIGHT),
+							'earning_number' => str_pad( NULL, 8, ' ', STR_PAD_RIGHT),
+							'hours' => str_pad( NULL, 7, 0, STR_PAD_LEFT),
+							'shift' => '1',
+							'department' => str_pad( NULL, 15, ' ', STR_PAD_RIGHT),
+							'job_code' => str_pad( NULL, 10, ' ', STR_PAD_RIGHT),
+							'base_rate' => str_pad( NULL, 5, 0, STR_PAD_LEFT),
+							'flat_amount' => str_pad( NULL, 7, 0, STR_PAD_LEFT),
+							'week' => '1',
+					);
+
+					foreach( $setup_data['meditech']['columns'] as $column_id => $column_data ) {
+						//Debug::Arr( $column_data, 'zzzMeditech Column ID: '. $column_id, __FILE__, __LINE__, __METHOD__, 10);
+
+						if ( isset( $row[$column_id.'_time'] ) AND trim($column_data['hour_code']) != '' ) {
+							$tmp_row['employee_number'] = str_pad( ( isset($row[$employee_number_column]) ) ? substr( $row[$employee_number_column], 0, 14) : NULL, 14, ' ', STR_PAD_RIGHT);
+
+							$tmp_row['earning_number'] = str_pad( substr( $column_data['hour_code'], 0, 8 ), 8, ' ', STR_PAD_RIGHT);
+							$tmp_row['hours'] = ( isset($row[$column_id.'_time']) ) ? meditechNumericFormat( TTDate::getHours( $row[$column_id.'_time'] ), 7 ) : '0000000';
+
+							$tmp_row['department'] = str_pad( ( isset($row[$department_column]) ) ? substr( $row[$department_column], 0, 15) : ( ( isset($setup_data['meditech']['department_value']) ) ? $setup_data['meditech']['department_value'] : NULL ), 15, ' ', STR_PAD_RIGHT);
+							$tmp_row['job_code'] = str_pad( ( isset($row[$job_code_column]) ) ? substr( $row[$job_code_column], 0, 10) : ( ( isset($setup_data['meditech']['job_code_value']) ) ? $setup_data['meditech']['job_code_value'] : NULL ), 10, ' ', STR_PAD_RIGHT);
+
+							$tmp_row['base_rate'] = ( isset( $row[$column_id.'_hourly_rate'] ) ) ? meditechNumericFormat( Misc::removeDecimal( $row[$column_id.'_hourly_rate'] ), 5 ) : '00000';
+
+							if ( isSecondBiWeeklyWeek( TTDate::parseDateTime( $row['date_week_start'] ), '', 0 ) == TRUE ) {
+								$tmp_row['week'] = 2;
+							} else {
+								$tmp_row['week'] = 1;
+							}
+
+							//Break out every column onto its own row, that way its easier to handle multiple columns of the same type.
+							$tmp_rows[] = array_merge( $static_columns, $tmp_row );
+
+							$total_hours += isset($row[$column_id.'_time']) ? $row[$column_id.'_time'] : 0;
+							$total_records++;
+
+							unset($tmp_row);
+						}
+					}
+				}
+				Debug::Text('Total Records: '. $total_records .' Hours: '. TTDate::getHours( $total_hours ), __FILE__, __LINE__, __METHOD__, 10);
+
+				//$file_name = 'meditech_payroll_export.csv';
+				$file_name = 'meditech_payroll_export.txt';
+				if ( isset( $tmp_rows ) ) {
+//					$data = Misc::Array2CSV( $tmp_rows, $export_column_map, FALSE );
+
+					$data = '1 '. date('Ymd', time() ) . date('His', time() ) . date('Ymd', $pay_period_end_date ) . str_pad( substr( trim($setup_data[$setup_data['export_type']]['payroll']), 0, 8), 8, ' ', STR_PAD_RIGHT) ."\r\n";
+					foreach( $tmp_rows as $tmp_row ) {
+						$data .= implode($tmp_row, '')."\r\n";
+					}
+					$data .= '9 '. str_pad( $total_records, 6, 0, STR_PAD_LEFT ) . meditechNumericFormat( TTDate::getHours($total_hours), 11 ) . '0000000000' . '0000000000'; //Transmission Trailer
+				}
+				unset($tmp_rows, $tmp_row, $export_column_map, $column_id, $column_data, $rows, $row);
+				break;
 			case 'csv': //Generic CSV.
 				$file_name = strtolower(trim($setup_data['export_type'])).'_'.date('Y_m_d').'.csv';
 

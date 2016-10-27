@@ -280,7 +280,7 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 		}
 
 		$query .=	'
-						AND ( a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0 AND (d.deleted is NULL OR d.deleted = 0 ) )
+						AND ( a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0 AND ( ppsf.deleted IS NULL OR ppsf.deleted = 0 ) AND ( d.deleted is NULL OR d.deleted = 0 ) )
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );

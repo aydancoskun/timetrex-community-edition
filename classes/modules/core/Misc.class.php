@@ -565,11 +565,10 @@ class Misc {
 
 		Header('Content-Type: '. $type);
 
-		$agent = trim($_SERVER['HTTP_USER_AGENT']);
-		if ((preg_match('|MSIE ([0-9.]+)|', $agent, $version)) OR
-			(preg_match('|Internet Explorer/([0-9.]+)|', $agent, $version))) {
+		$agent = ( isset($_SERVER['HTTP_USER_AGENT']) ) ? trim($_SERVER['HTTP_USER_AGENT']) : '';
+		if ( preg_match( '|MSIE ([0-9.]+)|', $agent, $version) OR preg_match( '|Internet Explorer/([0-9.]+)|', $agent, $version) ) {
 			//header('Content-Type: application/x-msdownload');
-			if ($version == '5.5') {
+			if ( $version == '5.5' ) {
 				Header('Content-Disposition: filename="'.$file_name.'"');
 			} else {
 				Header('Content-Disposition: attachment; filename="'.$file_name.'"');
@@ -708,6 +707,10 @@ class Misc {
 		}
 
 		return FALSE;
+	}
+
+	static function removeDecimal( $value ) {
+		return str_replace('.', '', number_format( $value, 2, '.', '') );
 	}
 
 	//Encode integer to a alphanumeric value that is reversible.
@@ -1125,7 +1128,7 @@ class Misc {
 	//This function is used to quickly preset array key => value pairs so we don't
 	//have to have so many isset() checks throughout the code.
 	static function preSetArrayValues( $arr, $keys, $preset_value = NULL ) {
-		if ( is_array( $keys ) ) {
+		if ( ( $arr == '' OR is_bool($arr) OR is_null( $arr ) OR is_array( $arr ) OR is_object( $arr ) ) AND is_array( $keys ) ) {
 			foreach( $keys as $key ) {
 				if ( is_object( $arr ) ) {
 					if ( !isset($arr->$key) ) {

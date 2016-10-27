@@ -128,6 +128,8 @@ if ( !isset($config_vars['other']['disable_cache_permission_check'])
 		Debug::Text('Validating Cache Files/Directory: '. $config_vars['cache']['dir'], __FILE__, __LINE__, __METHOD__, 10);
 
 		//Just as a precaution, confirm that cache directory exists, if not try to create it.
+		//If the cache directory doesnt exist, then LockFile class can't create lock files, and therefore no cron jobs will run.
+		//So also have LockFile class try to create the directory so we can at least get to this point.
 		if ( file_exists($config_vars['cache']['dir']) == FALSE ) {
 			//Try to create cache directory
 			Debug::Text( 'Cache directory does not exist, attempting to create it: '. $config_vars['cache']['dir'], __FILE__, __LINE__, __METHOD__, 10);

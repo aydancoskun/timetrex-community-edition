@@ -34,8 +34,8 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-//Allow both CLI and CGI PHP binaries to call maint scripts.
-if ( PHP_SAPI != 'cli' AND PHP_SAPI != 'cgi' AND PHP_SAPI != 'cgi-fcgi') {
+//Allow only CLI PHP binaries to call maint scripts. To avoid a remote party from running them from hitting a URL.
+if ( PHP_SAPI != 'cli' ) {
 	echo "This script can only be called from the Command Line.\n";
 	exit;
 }
@@ -45,8 +45,8 @@ if ( version_compare( PHP_VERSION, 5, '<') == 1 ) {
 	exit;
 }
 
-//Allow CLI scripts to run much longer.
-ini_set( 'max_execution_time', 7200 );
+//Allow CLI scripts to run much longer. ie: Purging database could takes hours.
+ini_set( 'max_execution_time', 43200 );
 
 //Check post install requirements, because PHP CLI usually uses a different php.ini file.
 $install_obj = new Install();

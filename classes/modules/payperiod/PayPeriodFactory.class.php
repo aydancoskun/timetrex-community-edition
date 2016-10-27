@@ -1164,11 +1164,13 @@ class PayPeriodFactory extends Factory {
 			$psf = TTnew( 'PayStubFactory' );
 			$uf = TTNew('UserFactory');
 
-			$query = 'SELECT  max(run_id) FROM '. $psf->getTable() .' as a LEFT JOIN '. $uf->getTable() .' as b ON ( a.user_id = b.id ) WHERE b.company_id = '. (int)$this->getCompany() .' AND a.pay_period_id = 0';
-			$run_id = ( (int)$this->db->GetOne($query) + 1);
+			$query = 'SELECT max(run_id) FROM '. $psf->getTable() .' as a LEFT JOIN '. $uf->getTable() .' as b ON ( a.user_id = b.id ) WHERE b.company_id = '. (int)$this->getCompany() .' AND a.pay_period_id = 0';
+			$run_id = (int)$this->db->GetOne($query);
 			Debug::text('Next Run ID for PayPeriodID=0: '. $run_id .' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
-			$query = 'update '. $psf->getTable() .' set pay_period_id = 0, run_id = '. (int)$run_id .' where pay_period_id = '. (int)$this->getId();
+			//Rather than update run_id to whatever the last run_id + 1 is, which will fail if there are multiple pay runs in the deleted pay period as its consolidating them all into a single payroll run
+			//  update run_id to always add the maximum run number and that should avoid the unique constraint issue.
+			$query = 'UPDATE '. $psf->getTable() .' SET pay_period_id = 0, run_id = ( run_id + '. (int)$run_id .' ) WHERE pay_period_id = '. (int)$this->getId() .' AND deleted = 0';
 			$this->db->Execute($query);
 		} else {
 			if ( $this->getStatus() == 20 ) { //Closed

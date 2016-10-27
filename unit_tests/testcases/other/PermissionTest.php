@@ -204,10 +204,14 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		Test basic permission functions.
 		Test basic hierarchy permission functions.
 		Test full blown reports that contain wages, and test all possible permutations of permissions in regards to wages.
+
+
+		**** Don't run these in parallel as it seems to cause deadlocks/duplicate IDs on MySQL due to concurrency issues. ****
 	*/
 
 	/**
-	 * @group Permission_testBasicPermissionFunctions
+	 * @ORIGINAL: group Permission_testBasicPermissionFunctions
+	 * @group Permission_test
 	 */
 	function testBasicPermissionFunctions() {
 		global $dd;
@@ -236,7 +240,8 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Permission_testBasicHierarchyPermissionFunctionsA
+	 * @ORIGINAL: group Permission_testBasicHierarchyPermissionFunctionsA
+	 * @group Permission_test
 	 */
 	function testBasicHierarchyPermissionFunctionsA() {
 		global $dd;
@@ -307,7 +312,8 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Permission_testBasicHierarchyPermissionFunctionsB
+	 * @ORIGINAL: group Permission_testBasicHierarchyPermissionFunctionsB
+	 * @group Permission_test
 	 */
 	function testBasicHierarchyPermissionFunctionsB() {
 		global $dd;
@@ -347,7 +353,8 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Permission_testBasicHierarchyPermissionFunctionsC
+	 * @ORIGINAL: group Permission_testBasicHierarchyPermissionFunctionsC
+	 * @group Permission_test
 	 */
 	function testBasicHierarchyPermissionFunctionsC() {
 		global $dd;
@@ -388,7 +395,8 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 	
 	/**
-	 * @group Permission_testBasicHierarchyPermissionFunctionsD
+	 * @ORIGINAL: group Permission_testBasicHierarchyPermissionFunctionsD
+	 * @group Permission_test
 	 */
 	function testBasicHierarchyPermissionFunctionsD() {
 		global $dd;
@@ -429,7 +437,8 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Permission_testBasicHierarchyPermissionFunctionsE
+	 * @ORIGINAL: group Permission_testBasicHierarchyPermissionFunctionsE
+	 * @group Permission_test
 	 */
 	function testBasicHierarchyPermissionFunctionsE() {
 		global $dd;
@@ -470,7 +479,8 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Permission_testBasicHierarchyPermissionFunctionsF
+	 * @ORIGINAL: group Permission_testBasicHierarchyPermissionFunctionsF
+	 * @group Permission_test
 	 */
 	function testBasicHierarchyPermissionFunctionsF() {
 		global $dd;
@@ -512,7 +522,8 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Permission_testUserSummaryReportPermissionsA
+	 * @ORIGINAL: group Permission_testUserSummaryReportPermissionsA
+	 * @group Permission_test
 	 */
 	function testUserSummaryReportPermissionsA() {
 		global $dd;
@@ -577,7 +588,8 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Permission_testUserSummaryReportPermissionsB
+	 * @ORIGINAL: group Permission_testUserSummaryReportPermissionsB
+	 * @group Permission_test
 	 */
 	function testUserSummaryReportPermissionsB() {
 		global $dd;
@@ -642,7 +654,8 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Permission_testUserSummaryReportPermissionsC
+	 * @ORIGINAL: group Permission_testUserSummaryReportPermissionsC
+	 * @group Permission_test
 	 */
 	function testUserSummaryReportPermissionsC() {
 		global $dd;
@@ -712,7 +725,8 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Permission_testUserSummaryReportPermissionsD
+	 * @ORIGINAL: group Permission_testUserSummaryReportPermissionsD
+	 * @group Permission_test
 	 */
 	function testUserSummaryReportPermissionsD() {
 		global $dd;
@@ -781,7 +795,8 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @group Permission_testUserSummaryReportPermissionsE
+	 * @ORIGINAL: group Permission_testUserSummaryReportPermissionsE
+	 * @group Permission_test
 	 */
 	function testUserSummaryReportPermissionsE() {
 		global $dd;

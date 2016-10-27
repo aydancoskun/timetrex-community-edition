@@ -563,16 +563,17 @@ class CalculatePayStub extends PayStubFactory {
 			//Use the end of the current date for the transaction date, as if the employee is terminated
 			//on the same day they are generating the pay stub, the transaction date could be before the end date
 			//as the end date is at 11:59PM
+			//
+			//Since adding multiple payroll runs per pay period, its more critical that the transaction dates are the same so new payroll runs aren't assumed,
+			//so when terminating an employee, switch the default transaction date to the current pay period transaction date.
+			//  This is also more popular in the US. If in Canada, they can generate an ROE and set the specific transaction date then.
+			//  If they want to pay the employee earlier, they can manually modify the date to earlier.
 
 			//For now make sure that the transaction date for a terminated employee is never before their termination date.
 			if ( $this->getTransactionDate() != '' ) {
 				$pay_stub->setTransactionDate( $this->getTransactionDate() );
 			} else {
-				if ( TTDate::getEndDayEpoch( TTDate::getTime() ) < $this->getUserObject()->getTerminationDate() ) {
-					$pay_stub->setTransactionDate( $this->getUserObject()->getTerminationDate() );
-				} else {
-					$pay_stub->setTransactionDate( TTDate::getEndDayEpoch( TTDate::getTime() ) );
-				}
+				$pay_stub->setTransactionDate( $pay_stub->getPayPeriodObject()->getTransactionDate() );
 			}
 		} else {
 			Debug::text('User Termination Date is NOT set, assuming normal pay.', __FILE__, __LINE__, __METHOD__, 10);

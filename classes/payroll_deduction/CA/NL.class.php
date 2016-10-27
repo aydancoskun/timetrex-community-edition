@@ -41,6 +41,13 @@
 class PayrollDeduction_CA_NL extends PayrollDeduction_CA {
 	var $provincial_income_tax_rate_options = array(
 													20160101 => array(
+																	array( 'income' => 35148,	'rate' => 8.7,	'constant' => 0 ),
+																	array( 'income' => 70295,	'rate' => 14.5,	'constant' => 2039 ),
+																	array( 'income' => 125500,	'rate' => 15.8,	'constant' => 2952 ),
+																	array( 'income' => 175700,	'rate' => 17.3,	'constant' => 4835 ),
+																	array( 'income' => 175700,	'rate' => 18.3,	'constant' => 6592 ),
+													),
+													20160101 => array(
 																	array( 'income' => 35148,	'rate' => 7.7,	'constant' => 0 ),
 																	array( 'income' => 70295,	'rate' => 12.5,	'constant' => 1687 ),
 																	array( 'income' => 125500,	'rate' => 13.3,	'constant' => 2249 ),
@@ -115,5 +122,97 @@ class PayrollDeduction_CA_NL extends PayrollDeduction_CA {
 																	array( 'income' => 59180,	'rate' => 18.02,'constant' => 2755 ),
 																),
 													);
+
+	function getAdditionalProvincialSurtax() {
+		/*
+			V2 =
+
+			Where A < 20,000
+			V2 = 0
+
+			Where A >
+
+		*/
+
+		$A = $this->getAnnualTaxableIncome();
+		$V2 = 0;
+
+		if ( $this->getDate() >= 20160701 ) {
+			$tmp_V2_threshold = 1000;
+
+			if ( $A < 50000 ) {
+				//This should result in V2 = 0
+				$tmp_A_threshold = 0;
+				$tmp_V2_constant = 0;
+			} elseif ( $A > 50000 AND $A <= 55000 ) {
+				$tmp_A_threshold = bcsub( $A, 50000 );
+				$tmp_V2_constant = 0;
+			} elseif ( $A > 55000 AND $A <= 60000 ) {
+				$tmp_A_threshold = bcsub( $A, 55000 );
+				$tmp_V2_constant = 100;
+			} elseif ( $A > 60000 AND $A <= 65000 ) {
+				$tmp_A_threshold = bcsub( $A, 60000 );
+				$tmp_V2_constant = 200;
+			} elseif ( $A > 65000 AND $A <= 70000 ) {
+				$tmp_A_threshold = bcsub( $A, 65000 );
+				$tmp_V2_constant = 300;
+			} elseif ( $A > 70000 AND $A <= 75000 ) {
+				$tmp_A_threshold = bcsub( $A, 70000 );
+				$tmp_V2_constant = 400;
+			} elseif ( $A > 75000 AND $A <= 80000 ) {
+				$tmp_A_threshold = bcsub( $A, 75000 );
+				$tmp_V2_constant = 500;
+			} elseif ( $A > 80000 AND $A <= 100000 ) {
+				$tmp_A_threshold = bcsub( $A, 80000 );
+				$tmp_V2_constant = 600;
+			} elseif ( $A > 100000 AND $A <= 125000 ) {
+				$tmp_A_threshold = bcsub( $A, 100000 );
+				$tmp_V2_constant = 700;
+			} elseif ( $A > 125000 AND $A <= 175000 ) {
+				$tmp_A_threshold = bcsub( $A, 125000 );
+				$tmp_V2_constant = 800;
+			} elseif ( $A > 175000 AND $A <= 250000 ) {
+				$tmp_A_threshold = bcsub( $A, 175000 );
+				$tmp_V2_constant = 900;
+			} elseif ( $A > 250000 AND $A <= 300000 ) {
+				$tmp_A_threshold = bcsub( $A, 250000 );
+				$tmp_V2_constant = 1000;
+			} elseif ( $A > 300000 AND $A <= 350000 ) {
+				$tmp_A_threshold = bcsub( $A, 300000 );
+				$tmp_V2_constant = 1100;
+			} elseif ( $A > 350000 AND $A <= 400000 ) {
+				$tmp_A_threshold = bcsub( $A, 350000 );
+				$tmp_V2_constant = 1200;
+			} elseif ( $A > 400000 AND $A <= 450000 ) {
+				$tmp_A_threshold = bcsub( $A, 400000 );
+				$tmp_V2_constant = 1300;
+			} elseif ( $A > 450000 AND $A <= 500000 ) {
+				$tmp_A_threshold = bcsub( $A, 450000 );
+				$tmp_V2_constant = 1400;
+			} elseif ( $A > 500000 AND $A <= 550000 ) {
+				$tmp_A_threshold = bcsub( $A, 500000 );
+				$tmp_V2_constant = 1500;
+			} elseif ( $A > 550000 AND $A <= 600000 ) {
+				$tmp_A_threshold = bcsub( $A, 550000 );
+				$tmp_V2_constant = 1600;
+			} elseif ( $A > 600000 ) {
+				$tmp_A_threshold = bcsub( $A, 600000 );
+				$tmp_V2_constant = 1700;
+			}
+
+			if ( $tmp_A_threshold < $tmp_V2_threshold ) {
+				$V2 = bcmul( 0.10, $tmp_A_threshold );
+			} else {
+				$V2 = bcmul( 0.10, $tmp_V2_threshold );
+			}
+
+			if ( $tmp_V2_constant > 0 ) {
+				$V2 += $tmp_V2_constant;
+			}
+		}
+		Debug::text('V2: '. $V2, __FILE__, __LINE__, __METHOD__, 10);
+
+		return $V2;
+	}
 }
 ?>

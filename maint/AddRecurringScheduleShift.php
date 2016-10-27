@@ -131,19 +131,29 @@ if ( $clf->getRecordCount() > 0 ) {
 					//$minimum_start_date = TTDate::getBeginDayEpoch( ( TTDate::getMiddleDayEpoch( $rslf->getMinimumStartTimeByRecurringScheduleControlID( $rsc_obj->getID() ) + 86400 ) ) );
 					$minimum_start_date = $rslf->getMinimumStartTimeByRecurringScheduleControlID( $rsc_obj->getID() );
 					if ( $minimum_start_date != '' ) {
-						$new_week_start_date = TTDate::getBeginWeekEpoch( ( TTDate::getEndWeekEpoch( TTDate::getMiddleDayEpoch( $minimum_start_date ) ) + 86400 ) );
+						//$new_week_start_date = TTDate::getBeginWeekEpoch( ( TTDate::getEndWeekEpoch( TTDate::getMiddleDayEpoch( $minimum_start_date ) ) + 86400 ) );
+						//Use the exact date that we left off with the last recurring schedule.
+						//This should fix a bug where if the recurring schedule last shift was on Mon Jun 12th, it would skip a week due to taking that time and starting in the next week.
+						//I think we always need to overlap by at least a week in cases where the last schedule ends on a Wed or Mon or something.
+						$new_week_start_date = TTDate::getBeginWeekEpoch( $minimum_start_date );
 						Debug::text('  Starting from where we last left off: '. TTDate::getDate('DATE+TIME', $new_week_start_date ), __FILE__, __LINE__, __METHOD__, 10);
 					} else {
-						$new_week_start_date = TTDate::getBeginWeekEpoch( ( TTDate::getMiddleDayEpoch( $initial_start_date ) + (86400 * 8) ) );
+						//$new_week_start_date = TTDate::getBeginWeekEpoch( ( TTDate::getMiddleDayEpoch( $initial_start_date ) - (86400 * 8) ) );
+						$new_week_start_date = TTDate::getBeginWeekEpoch( $initial_start_date );
 						Debug::text('  Setting new week start date to: '. TTDate::getDate('DATE+TIME', $new_week_start_date ), __FILE__, __LINE__, __METHOD__, 10);
 					}
 					$new_week_end_date = TTDate::getEndWeekEpoch( $new_week_start_date );
-					Debug::text('  Start Date: '. TTDate::getDate('DATE+TIME', $new_week_start_date ) .' End Date: '. TTDate::getDate('DATE+TIME', $new_week_end_date ), __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text('  Start Date: '. TTDate::getDate('DATE+TIME', $new_week_start_date ) .' End Date: '. TTDate::getDate('DATE+TIME', $new_week_end_date ) .' Maximum End Date: '. TTDate::getDate('DATE+TIME', $maximum_end_date ), __FILE__, __LINE__, __METHOD__, 10);
 					
 					if ( $new_week_end_date <= $maximum_end_date ) {
 						//Add new schedules for the upcoming week.
-						$rsf->clearRecurringSchedulesFromRecurringScheduleControl( $rsc_obj->getID(), $new_week_start_date, $new_week_end_date );
-						$rsf->addRecurringSchedulesFromRecurringScheduleControl( $rsc_obj->getCompany(), $rsc_obj->getID(), $new_week_start_date, $new_week_end_date );
+						//$rsf->clearRecurringSchedulesFromRecurringScheduleControl( $rsc_obj->getID(), $new_week_start_date, $new_week_end_date );
+						//$rsf->addRecurringSchedulesFromRecurringScheduleControl( $rsc_obj->getCompany(), $rsc_obj->getID(), $new_week_start_date, $new_week_end_date );
+
+						//Rather than just add new schedules for one week, bring them up to the maximum end date, which in most cases should be just 1 week unless some kind of issue has occurred.
+						//This will help in cases where maintenance jobs haven't run for a while, or in other strange cases too maybe.
+						$rsf->clearRecurringSchedulesFromRecurringScheduleControl( $rsc_obj->getID(), $new_week_start_date, $maximum_end_date );
+						$rsf->addRecurringSchedulesFromRecurringScheduleControl( $rsc_obj->getCompany(), $rsc_obj->getID(), $new_week_start_date, $maximum_end_date ); //Always create schedules out to the maximum end date each time.
 					} else {
 						Debug::text('  Already past maximum end date of: '. TTDate::getDate('DATE+TIME', $maximum_end_date ) .' Display Weeks: '. $rsc_obj->getDisplayWeeks() .' End Date: '. TTDate::getDate('DATE+TIME', $rsc_obj->getEndDate() ), __FILE__, __LINE__, __METHOD__, 10);
 					}

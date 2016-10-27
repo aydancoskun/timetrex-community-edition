@@ -181,6 +181,12 @@ class PayrollDeduction_CA_BC extends PayrollDeduction_CA {
 		Provincial tax reduction
 	*/
 	var $provincial_tax_reduction_options = array(
+													20160701 => array( //2016 (Jul 1)
+																	   	'income1' => 19629,
+																	   	'income2' => 31673.20,
+																	   	'amount' => 436,
+																	   	'rate' => 0.0362,
+													),
 													20160101 => array( //2016
 																		'income1' => 19171,
 																		'income2' => 31628.14,

@@ -141,7 +141,6 @@ class UserGroupFactory extends Factory {
 		return FALSE;
 	}
 	function setPreviousParent($id) {
-
 		$this->tmp_data['previous_parent_id'] = $id;
 
 		return TRUE;
@@ -155,7 +154,6 @@ class UserGroupFactory extends Factory {
 		return FALSE;
 	}
 	function setParent($id) {
-
 		$this->tmp_data['parent_id'] = (int)$id;
 
 		return TRUE;
@@ -181,7 +179,6 @@ class UserGroupFactory extends Factory {
 	}
 
 	function Validate( $ignore_warning = TRUE ) {
-
 		if ( $this->isNew() == FALSE
 				AND $this->getId() == $this->getParent() ) {
 				$this->Validator->isTrue(	'parent',
@@ -212,6 +209,10 @@ class UserGroupFactory extends Factory {
 	}
 
 	function preSave() {
+		if ( $this->getParent() == '' ) {
+			$this->setParent( 0 );
+		}
+
 		if ( $this->isNew() ) {
 			Debug::Text(' Setting Insert Tree TRUE ', __FILE__, __LINE__, __METHOD__, 10);
 			$this->insert_tree = TRUE;
@@ -223,10 +224,8 @@ class UserGroupFactory extends Factory {
 		return TRUE;
 	}
 
-
 	//Must be postSave because we need the ID of the object.
 	function postSave() {
-
 		$this->StartTransaction();
 
 		$this->getFastTreeObject()->setTree( $this->getCompany() );

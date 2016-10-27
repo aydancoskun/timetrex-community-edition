@@ -59,6 +59,14 @@ if ( !isset($disable_database_connection) ) {
 				$ADODB_CACHE_DIR = $config_vars['cache']['dir'] . DIRECTORY_SEPARATOR;
 			}
 
+			if ( Debug::getVerbosity() == 11 ) {
+				$ADODB_OUTP = 'ADODBDebug';
+				function ADODBDebug( $msg, $newline = TRUE ) {
+					Debug::Text( html_entity_decode( strip_tags( $msg ) ), __FILE__, __LINE__, __METHOD__, 11);
+					return TRUE;
+				}
+			}
+
 			$ADODB_GETONE_EOF = FALSE; //Make sure GetOne returns FALSE rather then NULL.
 			if ( strpos( $config_vars['database']['host'], ',' ) !== FALSE ) {
 				require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'adodb'. DIRECTORY_SEPARATOR .'adodb-loadbalancer.inc.php');
@@ -67,14 +75,6 @@ if ( !isset($disable_database_connection) ) {
 				}
 
 				$db = new ADOdbLoadBalancer();
-
-				if ( Debug::getVerbosity() == 11 ) {
-					$ADODB_OUTP = 'ADODBDebug';
-					function ADODBDebug( $msg, $newline = TRUE ) {
-						Debug::Text( html_entity_decode( strip_tags( $msg ) ), __FILE__, __LINE__, __METHOD__, 11);
-						return TRUE;
-					}
-				}
 
 				//Use comma separated database hosts, assuming the first is always the master, the rest are slaves.
 				//Anything after the # is the weight. Username/password/database is assumed to be the same across all connections.
@@ -124,12 +124,6 @@ if ( !isset($disable_database_connection) ) {
 				$db->noBlobs = TRUE; //Optimization to tell ADODB to not bother checking for blobs in any result set.
 
 				if ( Debug::getVerbosity() == 11 ) {
-					$ADODB_OUTP = 'ADODBDebug';
-					function ADODBDebug( $msg, $newline = TRUE ) {
-						Debug::Text( html_entity_decode( strip_tags( $msg ) ), __FILE__, __LINE__, __METHOD__, 11);
-						return TRUE;
-					}
-
 					//Use 1 instead of TRUE, so it only outputs some debugging and not things like backtraces for every cache read/write.
 					//Set to 99 to get all debug output.
 					$db->debug = 1;

@@ -999,7 +999,9 @@ abstract class Factory {
 		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
 			$to_timestamp_sql = 'UNIX_TIMESTAMP('. $sql .')';
 		} else {
-			$to_timestamp_sql = 'EXTRACT( EPOCH FROM '. $sql .' )';
+			//In cases where the column is a timestamp without timezone column (ie: Pay Periods when used from PayPeriodTimeSheetVerify)
+			//We need to case it to a timezone otherwise when adding/subtracting epoch seconds, it may be unexpectedly offset by the timezone amount.
+			$to_timestamp_sql = 'EXTRACT( EPOCH FROM '. $sql .'::timestamp with time zone )';
 		}
 
 		return $to_timestamp_sql;
@@ -1377,24 +1379,26 @@ abstract class Factory {
 			$rs = $this->getEmptyRecordSet();
 			$fields = $this->getRecordSetColumnList($rs);
 
-			foreach ($array as $orig_column => $expression) {
-				if ( is_array( $expression ) ) { //Handle nested arrays, so we the same column can be specified multiple times.
-					foreach ($expression as $orig_column => $expression) {
-						$orig_column = trim($orig_column);
-						$column = $this->parseColumnName( $orig_column );
-						$expression = trim($expression);
+			if ( is_array($fields) ) {
+				foreach ( $array as $orig_column => $expression ) {
+					if ( is_array( $expression ) ) { //Handle nested arrays, so we the same column can be specified multiple times.
+						foreach ( $expression as $orig_column => $expression ) {
+							$orig_column = trim( $orig_column );
+							$column = $this->parseColumnName( $orig_column );
+							$expression = trim( $expression );
 
-						if ( in_array($column, $fields) ) {
-							$sql_chunks[] = $orig_column .' '. $expression;
+							if ( in_array( $column, $fields ) ) {
+								$sql_chunks[] = $orig_column . ' ' . $expression;
+							}
 						}
-					}
-				} else {
-					$orig_column = trim($orig_column);
-					$column = $this->parseColumnName( $orig_column );
-					$expression = trim($expression);
+					} else {
+						$orig_column = trim( $orig_column );
+						$column = $this->parseColumnName( $orig_column );
+						$expression = trim( $expression );
 
-					if ( in_array($column, $fields) ) {
-						$sql_chunks[] = $orig_column .' '. $expression;
+						if ( in_array( $column, $fields ) ) {
+							$sql_chunks[] = $orig_column . ' ' . $expression;
+						}
 					}
 				}
 			}

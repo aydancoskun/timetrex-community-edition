@@ -38,12 +38,15 @@ require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
 
 if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?') ) ) {
-	$help_output = "Usage: fix_client_balance.php [company_id]\n";
+	$help_output = "Usage: fix_client_balance.php -company_id [company_id] -client_id [client_id]\n";
 	echo $help_output;
 } else {
-	//Rebuilt Hierarhcy Tree if a transation fails using MyISAM or something
-	if ( isset($argv[1]) ) {
-		$company_id = $argv[1];
+	if ( in_array('-company_id', $argv) ) {
+		$company_id = trim($argv[array_search('-company_id', $argv)+1]);
+	}
+
+	if ( in_array('-client_id', $argv) ) {
+		$client_id = trim($argv[array_search('-client_id', $argv)+1]);
 	}
 
 	//Force flush after each output line.
@@ -51,7 +54,7 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 	ob_end_flush();
 
 	$clf = new CompanyListFactory();
-	if ( isset($company_id) AND $company_id != '' ) {
+	if ( isset($company_id) AND $company_id > 0 ) {
 		$clf->getByCompanyId( $company_id );
 	} else {
 		$clf->getAll();
@@ -64,7 +67,11 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 			$cbf->StartTransaction();
 
 			$tmp_clf = new ClientListFactory();
-			$tmp_clf->getByCompanyId( $c_obj->getId() );
+			if ( isset($client_id) AND $client_id > 0 ) {
+				$tmp_clf->getByIdAndCompanyId( $client_id, $c_obj->getId() );
+			} else {
+				$tmp_clf->getByCompanyId( $c_obj->getId() );
+			}
 
 			$max = $tmp_clf->getRecordCount();
 			$i = 0;

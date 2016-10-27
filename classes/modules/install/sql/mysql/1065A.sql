@@ -417,7 +417,7 @@ CREATE TABLE request (
 	deleted_by integer,
 	deleted smallint DEFAULT 0 NOT NULL,
 	PRIMARY KEY(id)
-);
+) ENGINE=InnoDB;
 INSERT INTO request (id,user_id,pay_period_id,date_stamp,type_id,status_id,authorized,authorization_level,created_date,created_by,updated_date,updated_by,deleted_date,deleted_by,deleted)
 (
 	SELECT a.id,b.user_id,b.pay_period_id,b.date_stamp,a.type_id,a.status_id,a.authorized,a.authorization_level,a.created_date,a.created_by,a.updated_date,a.updated_by,a.deleted_date,a.deleted_by,a.deleted

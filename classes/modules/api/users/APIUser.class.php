@@ -623,30 +623,38 @@ class APIUser extends APIFactory {
 							return $this->getPermissionObject()->PermissionDenied();
 						}
 
-						$log_description = TTi18n::getText('Password - Web');
-						if ( $current_password != '' ) {
-							if ( $uf->checkPassword($current_password) !== TRUE ) {
-								Debug::text('Password check failed! Attempt: '. $authentication->rl->getAttempts(), __FILE__, __LINE__, __METHOD__, 10);
-								sleep( ($authentication->rl->getAttempts() * 0.5) ); //If password is incorrect, sleep for some time to slow down brute force attacks.
+						if ( $uf->getCompanyObject()->getLDAPAuthenticationType() == 0 ) {
+							$log_description = TTi18n::getText('Password - Web');
+							if ( $current_password != '' ) {
+								if ( $uf->checkPassword($current_password) !== TRUE ) {
+									Debug::text('Password check failed! Attempt: '. $authentication->rl->getAttempts(), __FILE__, __LINE__, __METHOD__, 10);
+									sleep( ($authentication->rl->getAttempts() * 0.5) ); //If password is incorrect, sleep for some time to slow down brute force attacks.
+									$uf->Validator->isTrue(	'current_password',
+															   FALSE,
+															   TTi18n::gettext('Current password is incorrect') );
+								}
+							} else {
+								Debug::Text('Current password not specified', __FILE__, __LINE__, __METHOD__, 10);
 								$uf->Validator->isTrue(	'current_password',
-														FALSE,
-														TTi18n::gettext('Current password is incorrect') );
+														   FALSE,
+														   TTi18n::gettext('Current password is incorrect') );
+							}
+
+							if ( $new_password != '' OR $new_password2 != ''  ) {
+								if ( $new_password === $new_password2 ) {
+									$uf->setPassword($new_password);
+								} else {
+									$uf->Validator->isTrue(	'password',
+															   FALSE,
+															   TTi18n::gettext('Passwords don\'t match') );
+								}
 							}
 						} else {
-							Debug::Text('Current password not specified', __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('LDAP Authentication is enabled, password changing is disabled! ', __FILE__, __LINE__, __METHOD__, 10);
 							$uf->Validator->isTrue(	'current_password',
-													FALSE,
-													TTi18n::gettext('Current password is incorrect') );
-						}
+													   FALSE,
+													   TTi18n::getText('Please contact your administrator for instructions on changing your password.'). ' (LDAP)' );
 
-						if ( $new_password != '' OR $new_password2 != ''  ) {
-							if ( $new_password === $new_password2 ) {
-								$uf->setPassword($new_password);
-							} else {
-								$uf->Validator->isTrue(	'password',
-														FALSE,
-														TTi18n::gettext('Passwords don\'t match') );
-							}
 						}
 						break;
 				}

@@ -84,6 +84,7 @@ class APILog extends APIFactory {
 								AND ( $this->getPermissionObject()->Check( $permission_section, 'edit')
 									OR $this->getPermissionObject()->Check( $permission_section, 'edit_child')
 								) ) ) {
+							//By default administrators have company,edit_own permissions, which means they can't see their own companies audit tab. This is just to be on the safe side.
 							Debug::Text('Skipping table name due to permissions: '. $filter_table_name .' Permission Section: '. $permission_section .' Key: '. $key, __FILE__, __LINE__, __METHOD__, 10);
 							unset($data['filter_data']['table_name'][$key], $data['filter_data']['table_name_object_id'][$filter_table_name]);
 						} else {

@@ -2029,7 +2029,7 @@ class TTDate {
 	 */
 	static function splitDateRangeAtMidnight( $start_time_stamp, $end_time_stamp, $filter_start_time_stamp = FALSE, $filter_end_time_stamp = FALSE ) {
 		$return_arr = array();
-		$start_timestamp_at_midnight = TTDate::getEndDayEpoch( $start_time_stamp ) + 1;
+		$start_timestamp_at_midnight = ( TTDate::getEndDayEpoch( $start_time_stamp ) + 1 );
 
 		/**
 		 * set up first pair
@@ -2043,7 +2043,7 @@ class TTDate {
 		}
 
 		if ( $date_ceiling >= $end_time_stamp ) {
-			$return_arr[] =   array('start_time_stamp' => $start_time_stamp, 'end_time_stamp' => $end_time_stamp);
+			$return_arr[] = array('start_time_stamp' => $start_time_stamp, 'end_time_stamp' => $end_time_stamp);
 			return $return_arr;
 		}
 
@@ -2062,13 +2062,13 @@ class TTDate {
 			 * ensure each is greater than $date_floor, then choose the lowest of the qualifying values.
 			 */
 			if ( $filter_start_time_stamp != FALSE AND $filter_end_time_stamp != FALSE) {
-				$next_midnight = TTDate::getTimeLockedDate( $start_timestamp_at_midnight, TTDate::getMiddleDayEpoch($date_floor) + 86400 );
+				$next_midnight = TTDate::getTimeLockedDate( $start_timestamp_at_midnight, ( TTDate::getMiddleDayEpoch($date_floor) + 86400 ) );
 				$next_filter_start = TTDate::getTimeLockedDate( $filter_start_time_stamp, $date_floor );
 				$next_filter_end = TTDate::getTimeLockedDate( $filter_end_time_stamp, $date_floor );
 
 				$date_ceiling = TTDate::getNextDateFromArray( $date_floor, array( $next_midnight, $next_filter_start, $next_filter_end) );
 			} else {
-				$date_ceiling = TTDate::getTimeLockedDate( $start_timestamp_at_midnight, TTDate::getMiddleDayEpoch($date_floor) + 86400 );
+				$date_ceiling = TTDate::getTimeLockedDate( $start_timestamp_at_midnight, ( TTDate::getMiddleDayEpoch($date_floor) + 86400 ) );
 			}
 
 			/**
@@ -2094,7 +2094,7 @@ class TTDate {
 	 * @param array $dates
 	 * @return mixed
 	 */
-	static function getNextDateFromArray($floor, $dates){
+	static function getNextDateFromArray($floor, $dates) {
 		$tmp_end_times = array();
 		foreach ( $dates as $date ) {
 			if ( $date > $floor ) {
@@ -2315,10 +2315,13 @@ class TTDate {
 						'-1640-last_18_months' => TTi18n::getText('Last 18 Months'),
 						'-1650-last_24_months' => TTi18n::getText('Last 24 Months'),
 
-						'-1700-this_year' => TTi18n::getText('This Year (Year-To-Date)'),
+						'-1700-this_year' => TTi18n::getText('This Year'), //Used to be 'This Year (Year-To-Date)', but its actually the entire year which was confusing for some users. They can use 'This Year (Up To Today)' instead.
 						'-1705-this_year_this_pay_period' => TTi18n::getText('This Year (Up To This Pay Period)'),
 						'-1710-this_year_last_pay_period' => TTi18n::getText('This Year (Up To Last Pay Period)'),
 						'-1715-this_year_yesterday' => TTi18n::getText('This Year (Up To Yesterday)'),
+						'-1716-this_year_today' => TTi18n::getText('This Year (Up To Today)'),
+						'-1717-this_year_ytd' => TTi18n::getText('This Year (Year-To-Date)'), //Could be "This Year (Up to Tomorrow)"? This does not include the current day.
+						//'-1718-this_year_tomorrow' => TTi18n::getText('This Year (Up To Tomorrow)'),
 						'-1720-this_year_last_week' => TTi18n::getText('This Year (Up To Last Week)'),
 						'-1725-this_year_this_week' => TTi18n::getText('This Year (Up To This Week)'),
 						'-1730-this_year_last_month' => TTi18n::getText('This Year (Up To Last Month)'),
@@ -2697,6 +2700,15 @@ class TTDate {
 			case 'this_year_yesterday':
 				$start_date = TTDate::getBeginYearEpoch( $epoch );
 				$end_date = ( TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - 86400) ) - 1);
+				break;
+			case 'this_year_today':
+				$start_date = TTDate::getBeginYearEpoch( $epoch );
+				$end_date = ( TTDate::getBeginDayEpoch( TTDate::getMiddleDayEpoch( $epoch ) ) - 1);
+				break;
+			case 'this_year_ytd': //Same as This Year (Up To Tomorrow), which includes today.
+			case 'this_year_tomorrow':
+				$start_date = TTDate::getBeginYearEpoch( $epoch );
+				$end_date = ( TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + 86400) ) - 1);
 				break;
 			case 'this_year_last_week':
 				$start_date = TTDate::getBeginYearEpoch( $epoch );

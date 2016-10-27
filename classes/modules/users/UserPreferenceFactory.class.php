@@ -147,14 +147,16 @@ class UserPreferenceFactory extends Factory {
 				break;
 			case 'time_format':
 				$retval = array(
-											//'g:i:s A'		=> TTi18n::gettext('8:09:11 PM'),
 											'g:i A'		=> TTi18n::gettext('8:09 PM'),
-											//'g:i:s a'		=> TTi18n::gettext('8:09:11 pm'),
 											'g:i a'		=> TTi18n::gettext('8:09 pm'),
-											//'G:i:s'	=> TTi18n::gettext('20:09:11'),
 											'G:i'		=> TTi18n::gettext('20:09'),
 											'g:i A T'	=> TTi18n::gettext('8:09 PM GMT'),
 											'G:i T'		=> TTi18n::gettext('20:09 GMT'),
+											//'g:i:s A'	=> TTi18n::gettext('8:09:11 PM'),
+											//'g:i:s a'	=> TTi18n::gettext('8:09:11 pm'),
+											//'G:i:s'	=> TTi18n::gettext('20:09:11'),
+											//'g:i:s A T'=> TTi18n::gettext('8:09:11 PM GMT'),
+											//'G:i:s T'	=> TTi18n::gettext('20:09:11 GMT'),
 									);
 				break;
 			case 'time_format_example':

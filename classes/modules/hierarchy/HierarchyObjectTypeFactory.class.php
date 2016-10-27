@@ -45,6 +45,9 @@ class HierarchyObjectTypeFactory extends Factory {
 	var $hierarchy_control_obj = NULL;
 
 	function _getFactoryOptions( $name ) {
+		//Attempt to get the edition of the currently logged in users company, so we can better tailor the columns to them.
+		$product_edition_id = Misc::getCurrentCompanyProductEdition();
+
 		$retval = NULL;
 		switch( $name ) {
 			case 'object_type':
@@ -65,8 +68,11 @@ class HierarchyObjectTypeFactory extends Factory {
 										80 => TTi18n::gettext('Exception'),
 										90 => TTi18n::gettext('TimeSheet'),
 										100 => TTi18n::gettext('Permission'),
-										200 => TTi18n::gettext('Expense'),
 									);
+
+				if ( $product_edition_id >= 25 ) {
+					$retval[200] = TTi18n::gettext('Expense');
+				}
 				break;
 			case 'short_object_type': //Defines a short form of the names.
 				$retval = array(

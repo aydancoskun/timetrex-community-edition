@@ -1727,7 +1727,8 @@ class PayPeriodScheduleFactory extends Factory {
 							AND (
 									(
 										( $p_obj->getType() == 10 OR $shift_data[$shift]['last_out']['type_id'] == 10 ) //Handle cases where there is a Normal Out punch, then Lunch In punch about 12-15hrs later. Treat this as a new shift.
-										AND ( ( $new_shift_trigger_time > 0 AND $p_obj->getTimeStamp() != $shift_data[$shift]['last_out']['time_stamp'] ) OR ( $new_shift_trigger_time == 0 AND isset($shift_data[$shift]['first_in']['time_stamp']) AND TTDate::doesRangeSpanMidnight( $shift_data[$shift]['first_in']['time_stamp'], $p_obj->getTimeStamp(), TRUE ) == TRUE ) ) //Don't allow transfer punches to cause a new shift to start, *unless* new shift trigger time is 0 and the shift spans midnight, so we can have 24hr shifts for an entire week with no gap between them, but each assigned to their own day (ie: live-in care).
+										AND ( ( $p_obj->getTimeStamp() != $shift_data[$shift]['last_out']['time_stamp'] )
+												OR ( $new_shift_trigger_time == 0 AND isset($shift_data[$shift]['first_in']['time_stamp']) AND TTDate::doesRangeSpanMidnight( $shift_data[$shift]['first_in']['time_stamp'], $p_obj->getTimeStamp(), TRUE ) == TRUE ) ) //Don't allow transfer punches to cause a new shift to start, *unless* new shift trigger time is 0 and the shift spans midnight, so we can have 24hr shifts for an entire week with no gap between them, but each assigned to their own day (ie: live-in care).
 										AND ( $p_obj->getTimeStamp() - $shift_data[$shift]['last_out']['time_stamp'] ) >= $new_shift_trigger_time
 									)
 									OR
@@ -1738,7 +1739,7 @@ class PayPeriodScheduleFactory extends Factory {
 									) //If two punches ever exceed the maximum shift time, consider it a new shift. Specifically when a Normal Out punches then a Lunch In punch happen outside maximum shift time.
 									OR
 									(
-										$this->getShiftAssignedDay() == 40
+										$this->getShiftAssignedDay() == 40 //Shifts split at midnight.
 										//Only split shifts on NORMAL punches.
 										AND ( $p_obj->getType() == 10 OR $shift_data[$shift]['last_out']['type_id'] == 10 ) //Handle cases where there is a Normal Out punch, then Lunch In punch about 12-15hrs later. Treat this as a new shift.
 										AND $shift_data[$shift]['last_out']['type_id'] == 10

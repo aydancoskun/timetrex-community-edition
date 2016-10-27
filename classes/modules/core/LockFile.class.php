@@ -65,6 +65,16 @@ class LockFile {
 	}
 
 	function create() {
+		//Attempt to create directory if it does not already exist.
+		if ( file_exists( dirname( $this->getFileName() ) ) == FALSE ) {
+			$mkdir_result = @mkdir( dirname( $this->getFileName() ), 0777, TRUE );
+			if ( $mkdir_result == FALSE ) {
+				Debug::Text( 'ERROR: Unable to create lock file directory: ' . dirname( $this->getFileName() ), __FILE__, __LINE__, __METHOD__, 10 );
+			} else {
+				Debug::Text( 'WARNING: Created lock file directory as it didnt exist: ' . dirname( $this->getFileName() ), __FILE__, __LINE__, __METHOD__, 10 );
+			}
+		}
+
 		return @touch( $this->getFileName() );
 	}
 

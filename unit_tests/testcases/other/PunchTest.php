@@ -4274,7 +4274,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
-		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
 		$this->createSchedule( $this->user_id, $date_epoch, array(
 																	'schedule_policy_id' => $schedule_policy_id,
 																	'start_time' => ' 8:00AM',
@@ -4549,7 +4549,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
-		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
 		$this->createSchedule( $this->user_id, $date_epoch, array(
 																	'schedule_policy_id' => $schedule_policy_id,
 																	'start_time' => ' 8:00AM',
@@ -4604,7 +4604,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
-		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
 		$this->createSchedule( $this->user_id, $date_epoch, array(
 																	'schedule_policy_id' => $schedule_policy_id,
 																	'start_time' => ' 8:00AM',
@@ -4679,7 +4679,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
-		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
 		$this->createSchedule( $this->user_id, $date_epoch, array(
 																	'schedule_policy_id' => $schedule_policy_id,
 																	'start_time' => ' 11:00PM',
@@ -4737,7 +4737,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
-		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
 		$this->createSchedule( $this->user_id, $date_epoch, array(
 																	'schedule_policy_id' => $schedule_policy_id,
 																	'start_time' => ' 11:00PM',
@@ -4798,7 +4798,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
-		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
 		$this->createSchedule( $this->user_id, $date_epoch2, array(
 																	'schedule_policy_id' => $schedule_policy_id,
 																	'start_time' => ' 12:30AM',
@@ -4857,7 +4857,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
-		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
 		$no_lunch_schedule_policy_id = $this->createSchedulePolicy( 20, -1 );
 		$this->createSchedule( $this->user_id, $date_epoch, array(
 																	'schedule_policy_id' => $schedule_policy_id,
@@ -4923,7 +4923,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
-		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
 		$no_lunch_schedule_policy_id = $this->createSchedulePolicy( 20, -1 );
 		$this->createSchedule( $this->user_id, $date_epoch, array(
 																	'schedule_policy_id' => $no_lunch_schedule_policy_id, //No meal policy on this shift.
@@ -5336,6 +5336,148 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * @group Punch_testDefaultPunchSettingsNoScheduleGC1
+	 */
+	function testDefaultPunchSettingsNoScheduleGC1() {
+		//Test with split shift and $new_shift_trigger_time = 0, where the first "shift" is really short, the and 2nd is really long.
+		global $dd;
+
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
+		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
+
+		$this->createPayPeriodSchedule( 10, 57600, 0 ); //Set $new_shift_trigger_time = 0
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$dd->createPunchPair( 	 $this->user_id,
+								 strtotime($date_stamp.' 10:00AM'),
+								 strtotime($date_stamp.' 12:00PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => $this->tmp_branch_id[0],
+										 'department_id' => $this->tmp_department_id[0],
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$dd->createPunchPair( 	 $this->user_id,
+								 strtotime($date_stamp.' 11:00PM'),
+								 NULL,
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => $this->tmp_branch_id[0],
+										 'department_id' => $this->tmp_department_id[0],
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$date_epoch = ( TTDate::getBeginWeekEpoch( time() ) + ( 86400 + 3601 ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$epoch = strtotime($date_stamp.' 8:00AM');
+
+		$ulf = TTNew('UserListFactory');
+		$ulf->getById( $this->user_id );
+		$user_obj = $ulf->getCurrent();
+
+		$plf = TTNew('PunchFactory');
+
+		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
+
+		$this->assertEquals( 20, $data['status_id'] ); //In/Out
+		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
+
+		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
+		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
+		$this->assertEquals( 0, $data['job_id'] );
+		$this->assertEquals( 0, $data['job_item_id'] );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group Punch_testDefaultPunchSettingsNoScheduleGC2
+	 */
+	function testDefaultPunchSettingsNoScheduleGC2() {
+		//Test with split shift and $new_shift_trigger_time = 4hrs, where the first "shift" is really long, causing the 1st and 2nd shifts to be combined and exceed maximum shift time.
+		global $dd;
+
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
+		$this->user_id = $dd->createUser( $this->company_id, 10, 0, $this->tmp_branch_id[0], $this->tmp_department_id[0] ); //Non-Admin user.
+
+		$this->createPayPeriodSchedule( 10, 57600, (3600 * 4) ); //Set $new_shift_trigger_time = 4hrs
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$dd->createPunchPair( 	 $this->user_id,
+								  strtotime($date_stamp.' 10:00AM'),
+								  strtotime($date_stamp.' 09:00PM'),
+								  array(
+										  'in_type_id' => 10,
+										  'out_type_id' => 10,
+										  'branch_id' => $this->tmp_branch_id[0],
+										  'department_id' => $this->tmp_department_id[0],
+										  'job_id' => 0,
+										  'job_item_id' => 0,
+								  ),
+								  TRUE
+		);
+
+		$dd->createPunchPair( 	 $this->user_id,
+								  strtotime($date_stamp.' 11:00PM'),
+								  NULL,
+								  array(
+										  'in_type_id' => 10,
+										  'out_type_id' => 10,
+										  'branch_id' => $this->tmp_branch_id[0],
+										  'department_id' => $this->tmp_department_id[0],
+										  'job_id' => 0,
+										  'job_item_id' => 0,
+								  ),
+								  TRUE
+		);
+
+		$date_epoch = ( TTDate::getBeginWeekEpoch( time() ) + ( 86400 + 3601 ) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$epoch = strtotime($date_stamp.' 8:00AM');
+
+		$ulf = TTNew('UserListFactory');
+		$ulf->getById( $this->user_id );
+		$user_obj = $ulf->getCurrent();
+
+		$plf = TTNew('PunchFactory');
+
+		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
+
+		$this->assertEquals( 10, $data['status_id'] ); //In/Out
+		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
+
+		$this->assertEquals( $this->tmp_branch_id[0], $data['branch_id'] );
+		$this->assertEquals( $this->tmp_department_id[0], $data['department_id'] );
+		$this->assertEquals( 0, $data['job_id'] );
+		$this->assertEquals( 0, $data['job_item_id'] );
+
+		return TRUE;
+	}
+
+	/**
 	 * @group Punch_testDefaultPunchSettingsNoScheduleH
 	 */
 	function testDefaultPunchSettingsNoScheduleH() {
@@ -5539,7 +5681,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
-		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
 		$this->createSchedule( $this->user_id, $date_epoch, array(
 																	'schedule_policy_id' => $schedule_policy_id,
 																	'start_time' => ' 8:00AM',
@@ -5593,7 +5735,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
-		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
 		$this->createSchedule( $this->user_id, $date_epoch, array(
 																	'schedule_policy_id' => $schedule_policy_id,
 																	'start_time' => ' 8:00AM',
@@ -5647,7 +5789,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
-		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
 		$this->createSchedule( $this->user_id, $date_epoch, array(
 																	'schedule_policy_id' => $schedule_policy_id,
 																	'start_time' => ' 8:00AM',
@@ -5714,7 +5856,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
-		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
 		$this->createSchedule( $this->user_id, $date_epoch, array(
 																	'schedule_policy_id' => $schedule_policy_id,
 																	'start_time' => ' 8:00AM',
@@ -5781,7 +5923,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
-		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
 		$this->createSchedule( $this->user_id, $date_epoch, array(
 																	'schedule_policy_id' => $schedule_policy_id,
 																	'start_time' => ' 8:00AM',
@@ -5848,7 +5990,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
-		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
 		$this->createSchedule( $this->user_id, $date_epoch, array(
 																	'schedule_policy_id' => $schedule_policy_id,
 																	'start_time' => ' 8:00AM',
@@ -5915,7 +6057,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
-		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
 		$this->createSchedule( $this->user_id, $date_epoch, array(
 																	'schedule_policy_id' => $schedule_policy_id,
 																	'start_time' => ' 8:00AM',
@@ -5982,7 +6124,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
-		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
 		$this->createSchedule( $this->user_id, $date_epoch, array(
 																	'schedule_policy_id' => $schedule_policy_id,
 																	'start_time' => ' 8:00AM',
@@ -6057,7 +6199,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
-		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
 		$this->createSchedule( $this->user_id, $date_epoch, array(
 																	'schedule_policy_id' => $schedule_policy_id,
 																	'start_time' => ' 8:00AM',
@@ -6132,7 +6274,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
-		$schedule_policy_id = $this->createSchedulePolicy( 10,  $meal_policy_id );
+		$schedule_policy_id = $this->createSchedulePolicy( 10, $meal_policy_id );
 		$this->createSchedule( $this->user_id, $date_epoch, array(
 																	'schedule_policy_id' => $schedule_policy_id,
 																	'start_time' => ' 8:00AM',
