@@ -152,7 +152,7 @@ class APIPayStubAmendment extends APIFactory {
 	 * @return array
 	 */
 	function getCommonPayStubAmendmentData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getPayStubAmendment( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getPayStubAmendment( $data, TRUE ) ) );
 	}
 
 	/**
@@ -405,7 +405,7 @@ class APIPayStubAmendment extends APIFactory {
 		Debug::Text('Received data for: '. count($data) .' PayStubAmendments', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$src_rows = $this->getPayStubAmendment( array('filter_data' => array('id' => $data) ), TRUE );
+		$src_rows = $this->stripReturnHandler( $this->getPayStubAmendment( array('filter_data' => array('id' => $data) ), TRUE ) );
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {

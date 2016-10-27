@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9654 $
- * $Id: Install.class.php 9654 2013-04-22 19:22:51Z ipso $
- * $Date: 2013-04-22 12:22:51 -0700 (Mon, 22 Apr 2013) $
+ * $Revision: 11151 $
+ * $Id: Install.class.php 11151 2013-10-14 22:00:30Z ipso $
+ * $Date: 2013-10-14 15:00:30 -0700 (Mon, 14 Oct 2013) $
  */
 
 /**
@@ -634,7 +634,7 @@ class Install {
 		Debug::text('Comparing with Version: '. $php_version, __FILE__, __LINE__, __METHOD__,9);
 
 		$min_version = '5.0.0';
-		$max_version = '5.4.99'; //Change install.php as well, as some versions break backwards compatibility, so we need early checks as well.
+		$max_version = '5.5.99'; //Change install.php as well, as some versions break backwards compatibility, so we need early checks as well.
 
 		$unsupported_versions = array('');
 
@@ -1089,6 +1089,14 @@ class Install {
 		return 1;
 	}
 
+	function checkMBSTRING() {
+		if ( function_exists('mb_detect_encoding') ) {
+			return 0;
+		}
+
+		return 1;
+	}
+
 	function checkCALENDAR() {
 		if ( function_exists('easter_date') ) {
 			return 0;
@@ -1266,6 +1274,7 @@ class Install {
 		$retarr[$this->checkDatabaseType()]++;
 		$retarr[$this->checkSOAP()]++;
 		$retarr[$this->checkBCMATH()]++;
+		$retarr[$this->checkMBSTRING()]++;
 		$retarr[$this->checkCALENDAR()]++;
 		$retarr[$this->checkGETTEXT()]++;
 		$retarr[$this->checkGD()]++;
@@ -1331,6 +1340,10 @@ class Install {
 
 		if ( $fail_all == TRUE OR $this->checkBCMATH() != 0 ) {
 			$retarr[] = 'BCMATH';
+		}
+
+		if ( $fail_all == TRUE OR $this->checkMBSTRING() != 0 ) {
+			$retarr[] = 'MBSTRING';
 		}
 
 		if ( $fail_all == TRUE OR $this->checkCALENDAR() != 0 ) {

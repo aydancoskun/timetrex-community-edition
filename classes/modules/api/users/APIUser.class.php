@@ -74,6 +74,7 @@ class APIUser extends APIFactory {
 
 			$data = array(
 							'company_id' => $company_id,
+							'status_id' => 10, //Active.
 							'title_id' => $udf_obj->getTitle(),
 							'employee_number' => UserFactory::getNextAvailableEmployeeNumber( $company_id ),
 							'city' => $udf_obj->getCity(),
@@ -146,9 +147,9 @@ class APIUser extends APIFactory {
 		}
 
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
-		//$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user', 'view' );
-		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( $permission_section, 'view' );
-		Debug::Arr($data['filter_data']['permission_children_ids'], 'Permission Section: '. $permission_section .' Child IDs: ', __FILE__, __LINE__, __METHOD__, 10);
+		//$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( $permission_section, 'view' );
+		$data['filter_data'] = array_merge( (array)$data['filter_data'], $this->getPermissionObject()->getPermissionFilterData( $permission_section, 'view' ) );
+		//Debug::Arr($data['filter_data']['permission_children_ids'], 'Permission Section: '. $permission_section .' Child IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Allow getting users from other companies, so we can change admin contacts when using the master company.
 		if ( isset($data['filter_data']['company_id'])
@@ -168,7 +169,8 @@ class APIUser extends APIFactory {
 			$this->setPagerObject( $ulf );
 
 			foreach( $ulf as $u_obj ) {
-				$user_data = $u_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
+				//$user_data = $u_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
+				$user_data = $u_obj->getObjectAsArray( $data['filter_columns'] );
 
 				//Hide SIN if user doesn't have permissions to see it.
 				if ( isset($user_data['sin']) AND $user_data['sin'] != '' AND $this->getPermissionObject()->Check('user','view_sin') == FALSE ) {
@@ -196,7 +198,7 @@ class APIUser extends APIFactory {
 	 * @return array
 	 */
 	function getCommonUserData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getUser( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getUser( $data, TRUE ) ) );
 	}
 
 	/**

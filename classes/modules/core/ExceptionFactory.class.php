@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10609 $
- * $Id: ExceptionFactory.class.php 10609 2013-07-31 17:29:20Z ipso $
- * $Date: 2013-07-31 10:29:20 -0700 (Wed, 31 Jul 2013) $
+ * $Revision: 11018 $
+ * $Id: ExceptionFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -602,7 +602,7 @@ class ExceptionFactory extends Factory {
 		$exception_email_body .= ( $replace_arr[5] != '' ) ? TTi18n::gettext('Title').': #employee_title#'."\n" : NULL;
 
 		$exception_email_body .= "\n";
-		$exception_email_body .= TTi18n::gettext('Link:').' <a href="'. $protocol .'://'. Misc::getHostName().Environment::getBaseURL().'">'.APPLICATION_NAME.' '. TTi18n::gettext('Login') .'</a>';
+		$exception_email_body .= TTi18n::gettext('Link:').' <a href="'. $protocol .'://'. Misc::getHostName().Environment::getDefaultInterfaceBaseURL().'">'.APPLICATION_NAME.' '. TTi18n::gettext('Login') .'</a>';
 
 		$exception_email_body .= ( $replace_arr[10] != '' ) ? "\n\n\n".TTi18n::gettext('Company').': #company_name#'."\n" : NULL; //Always put at the end
 

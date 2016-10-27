@@ -141,7 +141,7 @@ class APIAuthorization extends APIFactory {
 	 * @return array
 	 */
 	function getCommonAuthorizationData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getAuthorization( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getAuthorization( $data, TRUE ) ) );
 	}
 
 	/**

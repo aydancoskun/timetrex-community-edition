@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: ROEFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11115 $
+ * $Id: ROEFactory.class.php 11115 2013-10-11 18:29:20Z ipso $
+ * $Date: 2013-10-11 11:29:20 -0700 (Fri, 11 Oct 2013) $
  */
 
 /**
@@ -745,7 +745,8 @@ class ROEFactory extends Factory {
 		//Get last pay period id
 		$pay_period_earnings = $this->getInsurableEarningsByPayPeriod();
 		if ( is_array( $pay_period_earnings ) ) {
-			$last_pay_period_id = array_shift( array_keys( $pay_period_earnings ) );
+			$pay_period_earning_keys = array_keys( $pay_period_earnings );
+			$last_pay_period_id = array_shift( $pay_period_earning_keys );
 
 			$pself = TTnew( 'PayStubEntryListFactory' );
 			$retval = $pself->getAmountSumByUserIdAndEntryNameIdAndPayPeriodId( $this->getUser(), $setup_data['vacation_psea_ids'], (int)$last_pay_period_id);
@@ -1309,6 +1310,7 @@ class ROEFactory extends Factory {
 				Debug::Text('Setting User Termination Date', __FILE__, __LINE__, __METHOD__,10);
 
 				$user_obj = $ulf->getCurrent();
+				$user_obj->setStatus(20); //Set status to terminated, now that pay stubs will always generate anyways.
 				$user_obj->setTerminationDate( $this->getLastDate() );
 				if ( $user_obj->isValid() ) {
 					$user_obj->Save();

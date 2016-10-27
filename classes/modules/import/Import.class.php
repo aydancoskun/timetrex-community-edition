@@ -595,7 +595,9 @@ class Import {
 	// Generic parser functions.
 	//
 	function findClosestMatch( $input, $options, $match_percent = 50 ) {
-		if ( !isset($options[strtoupper($input)]) ) {
+		if ( isset($options[strtoupper($input)]) ) {
+			return $input;
+		} else {
 			if ( $this->getImportOptions('fuzzy_match') == TRUE ) {
 				//Debug::Arr($options, 'Fuzzy Match for: '. $input, __FILE__, __LINE__, __METHOD__,10);
 				$retval = Misc::findClosestMatch( $input, $options, $match_percent );

@@ -139,7 +139,7 @@ class APICompany extends APIFactory {
 	 * @return array
 	 */
 	function getCommonCompanyData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getCompany( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getCompany( $data, TRUE ) ) );
 	}
 
 	/**
@@ -407,7 +407,7 @@ class APICompany extends APIFactory {
 	 * @return array
 	 */
 	function copyCompany( $data ) {
-		$src_rows = $this->getCompany( $data, TRUE );
+		$src_rows = $this->stripReturnHandler( $this->getCompany( $data, TRUE ) );
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {

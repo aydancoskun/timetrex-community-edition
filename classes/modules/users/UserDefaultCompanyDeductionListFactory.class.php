@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: UserDefaultCompanyDeductionListFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11018 $
+ * $Id: UserDefaultCompanyDeductionListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -70,6 +70,31 @@ class UserDefaultCompanyDeductionListFactory extends UserDefaultCompanyDeduction
 					from	'. $this->getTable() .'
 					where	id = ?
 					';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$udf = new UserDefaultFactory();
+
+		$ph = array(
+					'company_id' => $company_id
+					);
+
+		$query = '
+					select 	a.*
+					from	'. $this->getTable() .' as a
+					LEFT JOIN '. $udf->getTable() .' as udf ON a.user_default_id = udf.id
+					where	udf.company_id = ?
+						AND ( udf.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 

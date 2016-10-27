@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10609 $
- * $Id: UserListFactory.class.php 10609 2013-07-31 17:29:20Z ipso $
- * $Date: 2013-07-31 10:29:20 -0700 (Wed, 31 Jul 2013) $
+ * $Revision: 11018 $
+ * $Id: UserListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -1951,6 +1951,8 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 							i.name as policy_group,
                             egf.name as ethnic_group, ';
 
+		$query .= Permission::getPermissionIsChildIsOwnerSQL( ( isset($filter_data['permission_current_user_id']) ) ? $filter_data['permission_current_user_id'] : 0, 'a.id' );
+
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$query .= '	jf.name as default_job,
 						jif.name as default_job_item, ';
@@ -1995,12 +1997,15 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 							WHERE ( i1.policy_group_id = i2.id AND i2.deleted = 0)
 						) as i ON ( a.id = i.user_id ) ';
 
+		$query .= Permission::getPermissionHierarchySQL( $company_id, ( isset($filter_data['permission_current_user_id']) ) ? $filter_data['permission_current_user_id'] : 0, 'a.id' );
+
 		$query .= '
 						LEFT JOIN '. $this->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $this->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	a.company_id = ?
 					';
 
+		$query .= Permission::getPermissionIsChildIsOwnerFilterSQL( $filter_data, 'a.id' );
 		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;

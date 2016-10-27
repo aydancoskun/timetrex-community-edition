@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10749 $
- * $Id: PunchFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
- * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
+ * $Revision: 11115 $
+ * $Id: PunchFactory.class.php 11115 2013-10-11 18:29:20Z ipso $
+ * $Date: 2013-10-11 11:29:20 -0700 (Fri, 11 Oct 2013) $
  */
 
 /**
@@ -771,6 +771,22 @@ class PunchFactory extends Factory {
 				}
 			}
 
+			//In cases where employees transfer between jobs, then have rounding on just In or Out punches,
+			//its possible for a punch in to be at 3:04PM and a later Out punch at 3:07PM to be rounded down to 3:00PM,
+			//causing a conflict and the punch not to be saved at all.
+			//In these cases don't round the punch.
+			//Don't implement just yet...
+			/*
+			$plf = TTnew( 'PunchListFactory' );
+			$plf->getPreviousPunchByUserIdAndStatusAndTypeAndEpoch( $this->getUser(), 10, array(10,20,30), $original_epoch );
+			if ( $plf->getRecordCount() == 1 ) {
+				if ( $epoch <= $plf->getCurrent()->getTimeStamp() ) {
+					Debug::text(' Rounded TimeStamp is before previous punch, not rounding at all! Previous Punch: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ) .' Rounded Time: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__,10);
+					$epoch = $original_epoch;
+				}
+			}
+			unset($plf, $p_obj);
+			*/
 		} else {
 			Debug::text(' NO Rounding Policy(s) Found', __FILE__, __LINE__, __METHOD__,10);
 		}
@@ -1503,6 +1519,122 @@ class PunchFactory extends Factory {
 		}
 
 		return FALSE;
+	}
+
+
+	function isImageExists( $company_id = NULL, $punch_id = NULL ) {
+		return file_exists( $this->getImageFileName( $company_id = NULL, $punch_id = NULL ) );
+	}
+	function setImage( $data, $company_id = NULL, $punch_id = NULL ) {
+		if ( $company_id == '' AND is_object( $this->getPunchControlObject() )
+				AND is_object( $this->getPunchControlObject()->getUserDateObject() )
+				AND is_object( $this->getPunchControlObject()->getUserDateObject()->getUserObject() ) ) {
+			$company_id = $this->getPunchControlObject()->getUserDateObject()->getUserObject()->getCompany();
+		}
+
+		if ( $punch_id == '' ) {
+			$punch_id = $this->getID();
+		}
+
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $punch_id == '' ) {
+			return FALSE;
+		}
+
+		$this->cleanStoragePath( $company_id, $punch_id );
+
+		$dir = $this->getStoragePath( $company_id, $punch_id );
+		Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__,10);
+		if ( isset($dir) ) {
+			@mkdir($dir, 0700, TRUE);
+
+			return file_put_contents( $this->getImageFileName( $company_id, $punch_id ), $data );
+		}
+
+		return FALSE;
+	}
+	function getImageFileName( $company_id = NULL, $punch_id = NULL ) {
+		if ( $company_id == '' AND is_object( $this->getPunchControlObject() )
+				AND is_object( $this->getPunchControlObject()->getUserDateObject() )
+				AND is_object( $this->getPunchControlObject()->getUserDateObject()->getUserObject() ) ) {
+			$company_id = $this->getPunchControlObject()->getUserDateObject()->getUserObject()->getCompany();
+		}
+
+		if ( $punch_id == '' ) {
+			$punch_id = $this->getID();
+		}
+
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $punch_id == '' ) {
+			return FALSE;
+		}
+
+		//Test for both jpg and png
+		$base_name = $this->getStoragePath( $company_id, $punch_id ) . DIRECTORY_SEPARATOR ;
+		$punch_image_file_name = $base_name . $punch_id . '.png';
+		Debug::Text('Punch Image File Name: '. $punch_image_file_name, __FILE__, __LINE__, __METHOD__,10);
+		return $punch_image_file_name;
+	}
+	function cleanStoragePath( $company_id = NULL, $punch_id = NULL ) {
+		if ( $company_id == '' AND is_object( $this->getPunchControlObject() )
+				AND is_object( $this->getPunchControlObject()->getUserDateObject() )
+				AND is_object( $this->getPunchControlObject()->getUserDateObject()->getUserObject() ) ) {
+			$company_id = $this->getPunchControlObject()->getUserDateObject()->getUserObject()->getCompany();
+		}
+
+		if ( $punch_id == '' ) {
+			$punch_id = $this->getID();
+		}
+
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $punch_id == '' ) {
+			return FALSE;
+		}
+
+		$dir = $this->getStoragePath( $company_id, $punch_id ) . DIRECTORY_SEPARATOR;
+
+		if ( $dir != '' ) {
+			if ( $punch_id != '' ) {
+				@unlink( $this->getImageFileName( $company_id, $user_id ) ); //Delete just users photo.
+			}
+		}
+
+		return TRUE;
+	}
+	function getStoragePath( $company_id = NULL, $punch_id = NULL ) {
+		if ( $company_id == '' AND is_object( $this->getPunchControlObject() )
+				AND is_object( $this->getPunchControlObject()->getUserDateObject() )
+				AND is_object( $this->getPunchControlObject()->getUserDateObject()->getUserObject() ) ) {
+			$company_id = $this->getPunchControlObject()->getUserDateObject()->getUserObject()->getCompany();
+		}
+
+		if ( $punch_id == '' ) {
+			$punch_id = $this->getID();
+		}
+
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $punch_id == '' ) {
+			return FALSE;
+		}
+
+		$hash = crc32($company_id.$punch_id);
+		$hash_dir[0] = substr($hash, 0, 2);
+		$hash_dir[1] = substr($hash, 2, 2);
+		$hash_dir[2] = substr($hash, 4, 2);
+
+		return Environment::getStorageBasePath() . DIRECTORY_SEPARATOR .'punch_images'. DIRECTORY_SEPARATOR . $company_id . DIRECTORY_SEPARATOR . $hash_dir[0] . DIRECTORY_SEPARATOR . $hash_dir[1] . DIRECTORY_SEPARATOR . $hash_dir[2];
 	}
 
 	function Validate() {

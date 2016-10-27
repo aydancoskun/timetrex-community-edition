@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9993 $
- * $Id: EditSchedule.php 9993 2013-05-24 20:16:41Z ipso $
- * $Date: 2013-05-24 13:16:41 -0700 (Fri, 24 May 2013) $
+ * $Revision: 11018 $
+ * $Id: EditSchedule.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 require_once('../../includes/global.inc.php');
 require_once(Environment::getBasePath() .'includes/Interface.inc.php');
@@ -151,7 +151,8 @@ switch ($action) {
 				$sf->setID( $data['id'] );
 			}
 			$sf->setCompany( $current_user->getCompany() );
-			$sf->setUserDate($data['user_id'], $date_stamp);
+			$sf->setUser( $data['user_id'] );
+			//$sf->setUserDate($data['user_id'], $date_stamp);
 			$sf->setOldUserDateID($data['user_date_id']); //Must go after setUserDate(). This is so if the date is modified both dates are recalculated properly.
 			$sf->setStatus( $data['status_id'] );
 			$sf->setSchedulePolicyID( $data['schedule_policy_id'] );
@@ -216,8 +217,6 @@ switch ($action) {
 			$slf = TTnew( 'ScheduleListFactory' );
 			$slf->getById( $id );
 			foreach ($slf as $s_obj) {
-				//Debug::Arr($station,'Department', __FILE__, __LINE__, __METHOD__,10);
-
 				$data = array(
 									'id' => $s_obj->getId(),
 									'user_date_id' => $s_obj->getUserDateId(),

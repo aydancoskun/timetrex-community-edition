@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: UserWageListFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11018 $
+ * $Id: UserWageListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -84,24 +84,27 @@ class UserWageListFactory extends UserWageFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByCompanyId($id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		if ( $id == '') {
+	function getByCompanyId($company_id, $order = NULL) {
+		if ( $company_id == '') {
 			return FALSE;
 		}
 
+		$uf = new UserFactory();
+
 		$ph = array(
-					'id' => $id,
+					'company_id' => $company_id,
 					);
 
 		$query = '
-					select 	*
-					from	'. $this->getTable() .' as a
-					where	company_id = ?
-						AND deleted = 0';
-		$query .= $this->getWhereSQL( $where );
+					select 	a.*
+					from 	'. $this->getTable() .' as a,
+							'. $uf->getTable() .' as b
+					where	a.user_id = b.id
+						AND	b.company_id = ?
+						AND ( a.deleted = 0 AND b.deleted = 0 )';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}

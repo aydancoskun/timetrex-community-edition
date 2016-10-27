@@ -83,14 +83,18 @@ class CompanyGenericTagMapListFactory extends CompanyGenericTagMapFactory implem
 			return FALSE;
 		}
 
+		$cgtf = new CompanyGenericTagFactory();
+
 		$ph = array(
 					'id' => $id,
 					);
 
 		$query = '
-					select 	*
-					from	'. $this->getTable() .'
-					where	company_id = ?
+					select 	a.*
+					from	'. $this->getTable() .' as a
+						LEFT JOIN '. $cgtf->getTable() .' as cgtf ON a.tag_id = cgtf.id
+					where	cgtf.company_id = ?
+						AND ( cgtf.deleted = 0 )
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );

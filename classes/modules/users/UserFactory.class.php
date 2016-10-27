@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10530 $
- * $Id: UserFactory.class.php 10530 2013-07-23 17:41:24Z ipso $
- * $Date: 2013-07-23 10:41:24 -0700 (Tue, 23 Jul 2013) $
+ * $Revision: 11115 $
+ * $Id: UserFactory.class.php 11115 2013-10-11 18:29:20Z ipso $
+ * $Date: 2013-10-11 11:29:20 -0700 (Fri, 11 Oct 2013) $
  */
 
 /**
@@ -101,7 +101,7 @@ class UserFactory extends Factory {
 
 										'-1090-title' => TTi18n::gettext('Title'),
 										'-1099-user_group' => TTi18n::gettext('Group'), //Update ImportUser class if sort order is changed for this.
-                                        '-1100-ethnic_group' => TTi18n::gettext('Ethnic Group'),
+                                        '-1100-ethnic_group' => TTi18n::gettext('Ethnicity'),
 										'-1102-default_branch' => TTi18n::gettext('Branch'),                                        
 										'-1103-default_department' => TTi18n::gettext('Department'),
                                         '-1104-default_job' => TTi18n::gettext('Job'),
@@ -129,12 +129,15 @@ class UserFactory extends Factory {
 										'-1230-home_email' => TTi18n::gettext('Home Email'),
 										'-1240-work_email' => TTi18n::gettext('Work Email'),
 										'-1250-birth_date' => TTi18n::gettext('Birth Date'),
+										'-1251-birth_date_age' => TTi18n::gettext('Age'),
 										'-1260-hire_date' => TTi18n::gettext('Hire Date'),
+										'-1261-hire_date_age' => TTi18n::gettext('Length of Service'),
 										'-1270-termination_date' => TTi18n::gettext('Termination Date'),
 										'-1280-sin' => TTi18n::gettext('SIN/SSN'),
 										'-1290-note' => TTi18n::gettext('Note'),
 										'-1300-tag' => TTi18n::gettext('Tags'),
 										'-1400-hierarchy_control_display' => TTi18n::gettext('Hierarchy'),
+										'-1401-hierarchy_level_display' => TTi18n::gettext('Hierarchy Superiors'),
 										'-1500-last_login_date' => TTi18n::gettext('Last Login Date'),
 										'-2000-created_by' => TTi18n::gettext('Created By'),
 										'-2010-created_date' => TTi18n::gettext('Created Date'),
@@ -251,7 +254,9 @@ class UserFactory extends Factory {
 										'home_email' => 'HomeEmail',
 										'work_email' => 'WorkEmail',
 										'birth_date' => 'BirthDate',
+										'birth_date_age' => FALSE,
 										'hire_date' => 'HireDate',
+										'hire_date_age' => FALSE,
 										'termination_date' => 'TerminationDate',
 										'currency_id' => 'Currency',
 										'currency' => FALSE,
@@ -270,6 +275,7 @@ class UserFactory extends Factory {
 										'tag' => 'Tag',
 										'last_login_date' => 'LastLoginDate',
 										'hierarchy_control_display' => FALSE,
+										'hierarchy_level_display' => FALSE,
 										'password_updated_date' => 'PasswordUpdatedDate', //Needs to be defined otherwise password_updated_date never gets set.
 										'deleted' => 'Deleted',
  										);
@@ -562,6 +568,38 @@ class UserFactory extends Factory {
 		return FALSE;
 	}
 
+	//Display each superior that the employee is assigned too.
+	function getHierarchyLevelDisplay() {
+		$hllf = new HierarchyLevelListFactory();
+		$hllf->getObjectTypeAndHierarchyAppendedListByCompanyIDAndUserID( $this->getCompany(), $this->getID() );
+		if ( $hllf->getRecordCount() > 0 ) {
+			foreach( $hllf as $hl_obj ) {
+				if ( is_object($hl_obj->getUserObject() ) ) {
+					$hierarchy_control_retval[$hl_obj->getColumn('hierarchy_control_name')][] = $hl_obj->getLevel().'.'. $hl_obj->getUserObject()->getFullName(); //Don't add space after "." to prevent word wrap after the level.
+				}
+			}
+
+			if ( isset($hierarchy_control_retval) ) {
+				$enable_display_hierarchy_control_name = FALSE;
+				if ( count($hierarchy_control_retval) > 1 ) {
+					$enable_display_hierarchy_control_name = TRUE;
+				}
+				$retval = '';
+				foreach( $hierarchy_control_retval as $hierarchy_control_name => $levels ) {
+					if ( $enable_display_hierarchy_control_name == TRUE ) {
+						$retval .= $hierarchy_control_name.': ['.implode(', ', $levels ) .'] '; //Include space after , so wordwrap can function better.
+					} else {
+						$retval .= implode(', ', $levels ); //Include space after , so wordwrap can function better.
+					}
+				}
+
+				return trim($retval);
+			}
+		}
+
+		return FALSE;
+	}
+
 	//Display each hierarchy that the employee is assigned too.
 	function getHierarchyControlDisplay() {
 		$hclf = TTnew( 'HierarchyControlListFactory' );
@@ -576,7 +614,7 @@ class UserFactory extends Factory {
 
 			sort($retval); //Maintain consistent order.
 
-			return implode(',', $retval );
+			return implode(', ', $retval ); //Add space so wordwrap has a chance.
 		}
 
 		return FALSE;
@@ -2362,7 +2400,7 @@ class UserFactory extends Factory {
 						AND
 						$this->Validator->isTrue(		'hire_date',
 														$this->isValidWageForHireDate( $epoch ),
-														TTi18n::gettext('Hire date must be on or after the employees first wage entry'))
+														TTi18n::gettext('Hire date must be on or after the employees first wage entry, you may need to change their wage effective date first'))
 					)
 				) {
 
@@ -3488,6 +3526,9 @@ class UserFactory extends Factory {
 								$data[$variable] = $this->getHierarchyControlDisplay();
 							//}
 							break;
+						case 'hierarchy_level_display':
+							$data[$variable] = $this->getHierarchyLevelDisplay();
+							break;
 						case 'password': //Don't return password
 							break;
 						//case 'sin': //This is handled in the API class instead.
@@ -3500,6 +3541,18 @@ class UserFactory extends Factory {
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = TTDate::getAPIDate( 'DATE', $this->$function() );
 							}
+							break;
+						case 'birth_date_age':
+							$data[$variable] = (int)floor( ( ( ( ( ( (time() - $this->getBirthDate() ) / 60) / 60) / 24 ) / 30 )  / 12 ) );
+							break;
+						case 'hire_date_age':
+							if ( $this->getTerminationDate() != '' ) {
+								$end_epoch = $this->getTerminationDate();
+							} else {
+								$end_epoch = time();
+							}
+							$data[$variable] = (int)floor( ( ( ( ( ( ( $end_epoch-$this->getHireDate() ) / 60) / 60) / 24 ) / 30 )  / 12 ) );
+							unset($end_epoch);
 							break;
 						default:
 							if ( method_exists( $this, $function ) ) {

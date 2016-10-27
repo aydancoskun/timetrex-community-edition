@@ -144,7 +144,7 @@ class APIPayPeriodSchedule extends APIFactory {
 	 * @return array
 	 */
 	function getCommonPayPeriodScheduleData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getPayPeriodSchedule( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getPayPeriodSchedule( $data, TRUE ) ) );
 	}
 
 	/**

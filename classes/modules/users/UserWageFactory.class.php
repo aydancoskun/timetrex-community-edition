@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10170 $
- * $Id: UserWageFactory.class.php 10170 2013-06-09 21:11:18Z ipso $
- * $Date: 2013-06-09 14:11:18 -0700 (Sun, 09 Jun 2013) $
+ * $Revision: 11018 $
+ * $Id: UserWageFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -805,7 +805,12 @@ class UserWageFactory extends Factory {
 	}
 
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Employee Wage'), NULL, $this->getTable(), $this );
+		$u_obj = $this->getUserObject();
+		if ( is_object($u_obj) ) {
+			return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Employee Wage') .': '. $u_obj->getFullName(FALSE, TRUE), NULL, $this->getTable(), $this );
+		}
+
+		return FALSE;
 	}
 }
 ?>

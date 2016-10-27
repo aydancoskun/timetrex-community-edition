@@ -291,7 +291,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	function createSchedule( $user_id, $date_stamp, $data = NULL ) {
 		$sf = TTnew( 'ScheduleFactory' );
 		$sf->setCompany( $this->company_id );
-		$sf->setUserDateId( UserDateFactory::findOrInsertUserDate( $user_id, $date_stamp) );
+		$sf->setUser( $user_id );
+		//$sf->setUserDateId( UserDateFactory::findOrInsertUserDate( $user_id, $date_stamp) );
 
 		if ( isset($data['status_id']) ) {
 			$sf->setStatus( $data['status_id'] );
@@ -4600,5 +4601,210 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 	
+
+	function testMaximumShiftTimeA() {
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$date_epoch2 = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+86400+3600 );
+		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
+
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 1:00AM'),
+								strtotime($date_stamp.' 4:30PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
+		//print_r($punch_arr);
+		
+		$this->assertEquals( 2, count($punch_arr[$date_epoch][0]['shift_data']['punches']) );
+		$this->assertEquals( 1, count($punch_arr[$date_epoch][0]['shift_data']['punch_control_ids']) );
+		//$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
+		//Total Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( (15.5*3600), $udt_arr[$date_epoch][0]['total_time'] );
+
+		return TRUE;
+	}
+
+	function testMaximumShiftTimeB() {
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$date_epoch2 = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+86400+3600 );
+		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
+
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 1:00AM'),
+								strtotime($date_stamp.' 5:30PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
+		//print_r($punch_arr);
+
+		$this->assertEquals( 0, count($punch_arr[$date_epoch][0]['shift_data']['punches']) );
+		$this->assertEquals( 0, count($punch_arr[$date_epoch][0]['shift_data']['punch_control_ids']) );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
+
+		$this->assertEquals( 0, count($udt_arr) );
+
+		return TRUE;
+	}
+
+	function testMaximumShiftTimeC() {
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$date_epoch2 = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+86400+3600 );
+		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
+
+		//Create two punch pairs with the minimum time between shifts, so they both fall on the same day, but are considered two separate shifts.
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 1:00AM'),
+								strtotime($date_stamp.' 2:30PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 6:30PM'),
+								strtotime($date_stamp2.' 6:30AM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
+		//print_r($punch_arr);
+
+		$this->assertEquals( 2, count($punch_arr[$date_epoch][0]['shift_data']['punches']) );
+		$this->assertEquals( 1, count($punch_arr[$date_epoch][0]['shift_data']['punch_control_ids']) );
+
+		$this->assertEquals( 2, count($punch_arr[$date_epoch][1]['shift_data']['punches']) );
+		$this->assertEquals( 1, count($punch_arr[$date_epoch][1]['shift_data']['punch_control_ids']) );
+
+		//$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
+		//Total Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( (25.5*3600), $udt_arr[$date_epoch][0]['total_time'] );
+
+		return TRUE;
+	}
+
+	function testMaximumShiftTimeD() {
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$date_epoch2 = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+86400+3600 );
+		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
+
+		//Create two punch pairs with LESS than the minimum time between shifts, so they both fall on the same day, but are considered ONE shift and therefore fails.
+		//However the last punch must be more than 16hrs away from the previous OUT punch (2:30PM)
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 1:00AM'),
+								strtotime($date_stamp.' 2:30PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 6:15PM'),
+								strtotime($date_stamp2.' 8:00AM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => 0,
+											'department_id' => 0,
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
+		//print_r($punch_arr);
+
+		$this->assertEquals( 2, count($punch_arr[$date_epoch][0]['shift_data']['punches']) );
+		$this->assertEquals( 1, count($punch_arr[$date_epoch][0]['shift_data']['punch_control_ids']) );
+		//$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
+		//Total Time
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['status_id'] );
+		$this->assertEquals( 10, $udt_arr[$date_epoch][0]['type_id'] );
+		$this->assertEquals( (13.5*3600), $udt_arr[$date_epoch][0]['total_time'] );
+
+		return TRUE;
+	}
+
 }
 ?>

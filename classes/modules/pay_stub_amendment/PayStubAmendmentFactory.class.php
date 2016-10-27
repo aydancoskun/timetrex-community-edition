@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10749 $
- * $Id: PayStubAmendmentFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
- * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
+ * $Revision: 11018 $
+ * $Id: PayStubAmendmentFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 require_once( 'Numbers/Words.php');
 
@@ -195,18 +195,7 @@ class PayStubAmendmentFactory extends Factory {
 	function getUserObject() {
 		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
 	}
-/*
-	function getUserObject() {
-		if ( is_object($this->user_obj) ) {
-			return $this->user_obj;
-		} else {
-			$ulf = TTnew( 'UserListFactory' );
-			$this->user_obj = $ulf->getById( $this->getUser() )->getCurrent();
-
-			return $this->user_obj;
-		}
-	}
-*/
+	
 	function getPayStubEntryAccountLinkObject() {
 		if ( is_object($this->pay_stub_entry_account_link_obj) ) {
 			return $this->pay_stub_entry_account_link_obj;
@@ -354,7 +343,11 @@ class PayStubAmendmentFactory extends Factory {
 	}
 
 	function getEffectiveDate() {
-		return $this->data['effective_date'];
+		if ( isset($this->data['effective_date']) ) {
+			return $this->data['effective_date'];
+		}
+
+		return FALSE;
 	}
 	function setEffectiveDate($epoch) {
 		$epoch = trim($epoch);
@@ -904,6 +897,30 @@ class PayStubAmendmentFactory extends Factory {
 		return $retval;
 	}
 
+	function isUnique() {
+		$ph = array(
+					'user_id' => (int)$this->getUser(),
+					//'status_id' => $this->getStatus(), //This allows IN USE vs ACTIVE PSA to exists, which shouldn't.
+					'pay_stub_entry_name_id' => (int)$this->getPayStubEntryNameId(),
+					'effective_date' => (int)$this->getEffectiveDate(),
+					'amount' => (float)$this->getAmount(),
+					);
+
+		$query = 'select id from '. $this->getTable() .' where user_id = ? AND pay_stub_entry_name_id = ? AND effective_date = ? AND amount = ? AND deleted=0';
+		$id = $this->db->GetOne($query, $ph);
+		Debug::Arr($id, 'Unique PSA: '. $id, __FILE__, __LINE__, __METHOD__,10);
+
+		if ( $id === FALSE ) {
+			return TRUE;
+		} else {
+			if ($id == $this->getId() ) {
+				return TRUE;
+			}
+		}
+
+		return FALSE;
+	}
+
 	function preSave() {
 		//Authorize all pay stub amendments until we decide they will actually go through an authorization process
 		if ( $this->getAuthorized() == FALSE ) {
@@ -986,7 +1003,27 @@ class PayStubAmendmentFactory extends Factory {
 
 		}
 
-		//FIXME: Make sure effective date isn't in a CLOSED pay period?
+		if ( $this->getDeleted() == FALSE ) {
+			$this->Validator->isTrue(		'user_id',
+											$this->isUnique(),
+											TTi18n::gettext('Another Pay Stub Amendment already exists for the same employee, account, effective date and amount'));
+		}
+
+		//Don't allow these to be deleted in closed pay periods either.
+		//Make sure effective date isn't in a CLOSED pay period?
+		$pplf = TTNew('PayPeriodListFactory');
+		$pplf->getByUserIdAndEndDate( $this->getUser(), $this->getEffectiveDate() );
+		if ( $pplf->getRecordCount() == 1 ) {
+			$pp_obj = $pplf->getCurrent();
+
+			//Only check for CLOSED (not locked) pay periods when the
+			//status of the PSA is *not* 52 and 55
+			if ( $pp_obj->getStatus() == 20 AND ( $this->getStatus() != 52 AND $this->getStatus() != 55 ) ) {
+				$this->Validator->isTrue(		'effective_date',
+												FALSE,
+												TTi18n::gettext('Pay Period that this effective date falls within is currently closed'));
+			}
+		}
 
 		return TRUE;
 	}

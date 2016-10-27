@@ -123,7 +123,7 @@ class APIRecurringScheduleTemplate extends APIFactory {
 	 * @return array
 	 */
 	function getCommonRecurringScheduleTemplateData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getRecurringScheduleTemplate( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getRecurringScheduleTemplate( $data, TRUE ) ) );
 	}
 
 	/**
@@ -197,6 +197,12 @@ class APIRecurringScheduleTemplate extends APIFactory {
 					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('recurring_schedule_template','add'), TTi18n::gettext('Add permission denied') );
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
+
+				//Prefix the current date to the template, this avoids issues with parsing 24hr clock only, ie: 0600
+				$date_epoch = time();
+				$row['start_time'] =  TTDate::parseDateTime( TTDate::getDate('DATE', $date_epoch ) .' '. $row['start_time'] );
+				$row['end_time'] = TTDate::parseDateTime( TTDate::getDate('DATE', $date_epoch ) .' '. $row['end_time'] );
+				unset($date_epoch);
 
 				$is_valid = $primary_validator->isValid();
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
@@ -372,7 +378,7 @@ class APIRecurringScheduleTemplate extends APIFactory {
 		Debug::Text('Received data for: '. count($data) .' RecurringScheduleTemplates', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$src_rows = $this->getRecurringScheduleTemplate( array('filter_data' => array('id' => $data) ), TRUE );
+		$src_rows = $this->stripReturnHandler( $this->getRecurringScheduleTemplate( array('filter_data' => array('id' => $data) ), TRUE ) );
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {

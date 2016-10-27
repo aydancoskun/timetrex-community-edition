@@ -632,9 +632,10 @@ style=menuStyle;
 {/literal}
 {/if}
 
-{if $permission->Check('user','edit') OR $permission->Check('user','edit_child')
+{if ( $permission->Check('user','edit') OR $permission->Check('user','edit_child')
 	OR $permission->Check('recurring_schedule','enabled')
-	OR $permission->Check('recurring_schedule_template','enabled')}
+	OR $permission->Check('recurring_schedule_template','enabled') )
+	AND ( !isset($config_vars.branding ) OR ( isset($config_vars.branding) AND $current_company->getID() == $config_vars.other.primary_company_id ) )}
 {literal}
 with(milonic=new menuname("help")){
 style=menuStyle;

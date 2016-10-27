@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9996 $
- * $Id: Debug.class.php 9996 2013-05-25 19:19:41Z ipso $
- * $Date: 2013-05-25 12:19:41 -0700 (Sat, 25 May 2013) $
+ * $Revision: 11032 $
+ * $Id: Debug.class.php 11032 2013-09-26 00:10:14Z ipso $
+ * $Date: 2013-09-25 17:10:14 -0700 (Wed, 25 Sep 2013) $
  */
 
 /**
@@ -343,6 +343,11 @@ class Debug {
 					break;
 				case E_STRICT:
 					$error_name = 'STRICT';
+
+					//Don't show STRICT errors when using the legacy HTML interface with PHP v5.4
+					if ( defined( 'TIMETREX_AMF_API' ) == FALSE AND defined( 'TIMETREX_JSON_API' ) == FALSE AND defined( 'TIMETREX_SOAP_API' ) == FALSE ) {
+						return TRUE;
+					}
 					break;
 				case E_DEPRECATED:
 					$error_name = 'DEPRECATED';
@@ -358,8 +363,6 @@ class Debug {
 			self::$php_errors++;
 			self::Text( $text, $error_file, $error_line, __METHOD__, 1 );
 			self::Text( self::backTrace(), $error_file, $error_line, __METHOD__, 1 );
-
-			;
 		}
 
 		return FALSE; //Let the standard PHP error handler work as well.

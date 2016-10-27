@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10348 $
- * $Id: PermissionFactory.class.php 10348 2013-07-03 19:25:34Z ipso $
- * $Date: 2013-07-03 12:25:34 -0700 (Wed, 03 Jul 2013) $
+ * $Revision: 11115 $
+ * $Id: PermissionFactory.class.php 11115 2013-10-11 18:29:20Z ipso $
+ * $Date: 2013-10-11 11:29:20 -0700 (Fri, 11 Oct 2013) $
  */
 
 /**
@@ -1729,9 +1729,11 @@ class PermissionFactory extends Factory {
 																				'edit_department' => TRUE,
 																			),
 															'accrual' => 	array(
-																				'view_child' => TRUE,
 																				'add' => TRUE,
+																				'view_child' => TRUE,
+																				'edit_own' => FALSE,
 																				'edit_child' => TRUE,
+																				'delete_own' => FALSE,
 																				'delete_child' => TRUE,
 																			),
 															'report' => 		array(
@@ -1751,10 +1753,12 @@ class PermissionFactory extends Factory {
 															'absence' => 	array(
 																				'add' => TRUE,
 																				'view_child' => TRUE,
+																				'edit_own' => FALSE,
 																				'edit_child' => TRUE,
-																				'delete_child' => TRUE,
 																				'edit_branch' => TRUE,
 																				'edit_department' => TRUE,
+																				'delete_own' => FALSE,
+																				'delete_child' => TRUE,
 																			),
 															'accrual' => 	array(
 																				'view_child' => TRUE,
@@ -2023,6 +2027,8 @@ class PermissionFactory extends Factory {
 																				'view' => TRUE,
 																				'edit' => TRUE,
 																				'delete' => TRUE,
+																				'edit_own' => TRUE,
+																				'delete_own' => TRUE,
 																			),
 															'accrual' => 	array(
 																				'view' => TRUE,

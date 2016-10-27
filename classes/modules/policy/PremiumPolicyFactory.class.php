@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10749 $
- * $Id: PremiumPolicyFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
- * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
+ * $Revision: 11018 $
+ * $Id: PremiumPolicyFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -950,7 +950,7 @@ class PremiumPolicyFactory extends Factory {
 
 	function getRate() {
 		if ( isset($this->data['rate']) ) {
-			return $this->data['rate'];
+			return Misc::removeTrailingZeros( $this->data['rate'] );
 		}
 
 		return FALSE;
@@ -1101,7 +1101,10 @@ class PremiumPolicyFactory extends Factory {
 				break;
 		}
 
-		return Misc::MoneyFormat($rate, FALSE);
+		//Don't round rate, as some currencies accept more than 2 decimal places now.
+		//and all wages support up to 4 decimal places too.
+		//return Misc::MoneyFormat($rate, FALSE);
+		return $rate;
 	}
 
 	/*

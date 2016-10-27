@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: PayPeriodScheduleUserListFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11018 $
+ * $Id: PayPeriodScheduleUserListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -77,6 +77,31 @@ class PayPeriodScheduleUserListFactory extends PayPeriodScheduleUserFactory impl
 
 		return $this;
 	}
+
+	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$ppsf = new PayPeriodScheduleFactory();
+
+		$ph = array(
+					'company_id' => $company_id,
+					);
+
+		$query = '
+					SELECT a.*
+					FROM '. $this->getTable() .' as a
+						LEFT JOIN '. $ppsf->getTable() .' as b ON a.pay_period_schedule_id = b.id
+					WHERE
+							b.company_id = ?
+							AND ( b.deleted = 0 )
+					';
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
 
 	function getByCompanyIDAndPayPeriodScheduleId($company_id, $id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {

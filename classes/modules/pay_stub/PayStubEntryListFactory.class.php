@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10322 $
- * $Id: PayStubEntryListFactory.class.php 10322 2013-07-01 19:04:23Z ipso $
- * $Date: 2013-07-01 12:04:23 -0700 (Mon, 01 Jul 2013) $
+ * $Revision: 11115 $
+ * $Id: PayStubEntryListFactory.class.php 11115 2013-10-11 18:29:20Z ipso $
+ * $Date: 2013-10-11 11:29:20 -0700 (Fri, 11 Oct 2013) $
  */
 
 /**
@@ -74,6 +74,32 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$uf = new UserFactory();
+		$psf = new PayStubFactory();
+
+		$ph = array(
+					'company_id' => $company_id,
+					);
+
+		$query = '
+					SELECT a.*
+					FROM '. $this->getTable() .' as a
+						LEFT JOIN '. $psf->getTable() .' as psf ON a.pay_stub_id = psf.id
+						LEFT JOIN '. $uf->getTable() .' as uf ON psf.user_id = uf.id
+					WHERE
+							uf.company_id = ?
+							AND ( a.deleted = 0 AND psf.deleted = 0 AND uf.deleted = 0)
+					';
 		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
@@ -673,7 +699,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 			$row['units'] = 0;
 		}
 
-		Debug::text('Over All Sum for '. $entry_name_id .': Amount '. $row['amount'] .' Units: '. $row['units'], __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Arr( $entry_name_id, 'Over All Sum: Amount '. $row['amount'] .' Units: '. $row['units'], __FILE__, __LINE__, __METHOD__, 10);
 
 		return $row;
 	}
@@ -1322,7 +1348,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		return $this;
 	}
 
-	function getDateReportByCompanyIdAndUserIdAndPayPeriodId($company_id, $user_ids, $pay_period_ids, $exclude_ytd_adjustments = FALSE, $where = NULL, $order = NULL) {
+	function getDateReportByCompanyIdAndUserIdAndPayPeriodId($company_id, $user_ids, $pay_period_ids, $exclude_ytd_adjustment = FALSE, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -1360,7 +1386,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 			$query .= ' AND b.pay_period_id in ('. $this->getListSQL($pay_period_ids, $ph) .') ';
 		}
 
-		if ( isset($exclude_ytd_adjustments) AND (bool)$exclude_ytd_adjustments == TRUE ) {
+		if ( isset($exclude_ytd_adjustment) AND (bool)$exclude_ytd_adjustment == TRUE ) {
 			$query .= ' AND ( d.ytd_adjustment is NULL OR d.ytd_adjustment = 0 )';
 		}
 
@@ -1642,7 +1668,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 							$query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'cc.id', $filter_data['exclude_user_id'], 'not_numeric_list', $ph ) : NULL;
 							$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'cc.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
 
-							if ( isset($filter_data['exclude_ytd_adjustments']) AND (bool)$filter_data['exclude_ytd_adjustments'] == TRUE ) {
+							if ( isset($filter_data['exclude_ytd_adjustment']) AND (bool)$filter_data['exclude_ytd_adjustment'] == TRUE ) {
 								$query .= ' AND ( hh.ytd_adjustment is NULL OR hh.ytd_adjustment = 0 )';
 							}
 

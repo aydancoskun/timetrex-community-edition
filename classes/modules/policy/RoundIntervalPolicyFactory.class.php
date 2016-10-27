@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: RoundIntervalPolicyFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11115 $
+ * $Id: RoundIntervalPolicyFactory.class.php 11115 2013-10-11 18:29:20Z ipso $
+ * $Date: 2013-10-11 11:29:20 -0700 (Fri, 11 Oct 2013) $
  */
 
 /**
@@ -66,10 +66,10 @@ class RoundIntervalPolicyFactory extends Factory {
 			case 'punch_type':
 				$retval = array(
 										10 => TTi18n::gettext('All Punches'),
-										20 => TTi18n::gettext('All In (incl. Lunch)'),
-										30 => TTi18n::gettext('All Out (incl. Lunch)'),
-										40 => TTi18n::gettext('In'),
-										50 => TTi18n::gettext('Out'),
+										20 => TTi18n::gettext('All In (incl. Lunch/Break)'),
+										30 => TTi18n::gettext('All Out (incl. Lunch/Break)'),
+										40 => TTi18n::gettext('Normal - In'),
+										50 => TTi18n::gettext('Normal - Out'),
 										60 => TTi18n::gettext('Lunch - In'),
 										70 => TTi18n::gettext('Lunch - Out'),
 										80 => TTi18n::gettext('Break - In'),

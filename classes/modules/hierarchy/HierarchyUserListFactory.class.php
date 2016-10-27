@@ -78,6 +78,31 @@ class HierarchyUserListFactory extends HierarchyUserFactory implements IteratorA
 		return $this;
 	}
 
+	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
+
+		$hcf = new HierarchyControlFactory();
+
+		$ph = array(
+					'company_id' => $company_id
+					);
+
+		$query = '
+					select 	a.*
+					from	'. $this->getTable() .' as a
+					LEFT JOIN '. $hcf->getTable() .' as b ON a.hierarchy_control_id = b.id
+					where	 b.company_id = ?
+				';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
 	function getByHierarchyControlId($id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;

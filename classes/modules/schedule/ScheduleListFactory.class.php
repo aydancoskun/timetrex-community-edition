@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10749 $
- * $Id: ScheduleListFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
- * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
+ * $Revision: 11115 $
+ * $Id: ScheduleListFactory.class.php 11115 2013-10-11 18:29:20Z ipso $
+ * $Date: 2013-10-11 11:29:20 -0700 (Fri, 11 Oct 2013) $
  */
 
 /**
@@ -79,6 +79,35 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	function getByCompanyID($company_id) {
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
+
+		$uf = new UserFactory();
+		$udf = new UserDateFactory();
+
+		$ph = array(
+					'company_id' => $company_id,
+					'company_id2' => $company_id,
+					);
+
+		//Status sorting MUST be desc first, otherwise transfer punches are completely out of order.
+		$query = '
+					select 	a.*
+					from	'. $this->getTable() .' as a
+							LEFT JOIN '. $udf->getTable() .' as b ON ( a.user_date_id = b.id )
+							LEFT JOIN '. $uf->getTable() .' as c ON ( b.user_id = c.id AND c.deleted = 0 )
+					where	( c.company_id = ? OR a.company_id = ? )
+						AND ( a.deleted = 0 AND b.deleted = 0 )
+					ORDER BY a.start_time asc, a.status_id desc
+					';
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
 	function getByIdAndCompanyId( $id, $company_id ) {
 		return $this->getByCompanyIDAndId($company_id, $id);
 	}
@@ -100,8 +129,10 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 					);
 
 		//Status sorting MUST be desc first, otherwise transfer punches are completely out of order.
+		//Always include the user_id, this is required for mass edit to function correctly and not assign schedules to OPEN employee all the time.
 		$query = '
-					select 	a.*
+					select 	a.*,
+							b.user_id as user_id
 					from	'. $this->getTable() .' as a
 							LEFT JOIN '. $udf->getTable() .' as b ON ( a.user_date_id = b.id )
 							LEFT JOIN '. $uf->getTable() .' as c ON ( b.user_id = c.id AND c.deleted = 0 )
@@ -287,7 +318,9 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
+		$order = array( 'b.date_stamp' => 'asc' );  //When direction is after, we need to get the days in the proper order (ASC)
 		if ( strtolower($direction) == 'before' ) {
+			$order = array( 'b.date_stamp' => 'desc' ); //When direction is before, we need to get the days in the proper order (DESC)
 			$direction = '<';
 		} elseif ( strtolower($direction) == 'after' ) {
 			$direction = '>';
@@ -296,7 +329,6 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		}
 
 		if ( $order == NULL ) {
-			$order = array( 'b.date_stamp' => 'asc' );
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;
@@ -325,6 +357,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
+		//Debug::Arr($ph, 'Query: '. $query .' Limit: '. $limit, __FILE__, __LINE__, __METHOD__, 10);
 		return $this;
 	}
 
@@ -361,7 +394,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getConflictingByUserIdAndStartDateAndEndDate($user_id, $start_date, $end_date, $where = NULL, $order = NULL) {
+	function getConflictingByUserIdAndStartDateAndEndDate($user_id, $start_date, $end_date, $id = NULL, $where = NULL, $order = NULL) {
 		Debug::Text('User ID: '. $user_id .' Start Date: '. $start_date .' End Date: '. $end_date, __FILE__, __LINE__, __METHOD__,10);
 
 		if ( $user_id == '' ) {
@@ -404,6 +437,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 					'user_id' => $user_id,
 					'start_date_a' => $start_datestamp,
 					'end_date_b' => $end_datestamp,
+					'id' => (int)$id,
 					'start_date1' => $start_timestamp,
 					'end_date1' => $end_timestamp,
 					'start_date2' => $start_timestamp,
@@ -425,6 +459,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 						AND b.user_id = ?
 						AND b.date_stamp >= ?
 						AND b.date_stamp <= ?
+						AND a.id != ?
 						AND
 						(
 							(start_time >= ? AND end_time <= ? )
@@ -442,6 +477,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__,10);
 		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
@@ -1566,6 +1602,8 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 							a.total_time as total_time,
 							a.schedule_policy_id as schedule_policy_id,
 							i.name as schedule_policy,
+
+							a.note as note,
 
 							a.absence_policy_id as absence_policy_id,
 							apf.name as absence_policy,

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9703 $
- * $Id: Login.php 9703 2013-04-26 23:57:20Z ipso $
- * $Date: 2013-04-26 16:57:20 -0700 (Fri, 26 Apr 2013) $
+ * $Revision: 11151 $
+ * $Id: Login.php 11151 2013-10-14 22:00:30Z ipso $
+ * $Date: 2013-10-14 15:00:30 -0700 (Mon, 14 Oct 2013) $
  */
 require_once('../includes/global.inc.php');
 
@@ -179,6 +179,10 @@ $smarty->assign_by_ref('password', $password);
 $smarty->assign_by_ref('password_reset', $password_reset);
 
 $smarty->assign('language_options', TTi18n::getLanguageArray() );
+
+if ( isset($config_vars) ) {
+	$smarty->assign_by_ref('config_vars', $config_vars );
+}
 
 if ( $language == '' ) {
 	$language = TTi18n::getLanguageFromLocale();

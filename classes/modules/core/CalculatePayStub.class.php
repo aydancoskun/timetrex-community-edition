@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10612 $
- * $Id: CalculatePayStub.class.php 10612 2013-07-31 20:29:02Z ipso $
- * $Date: 2013-07-31 13:29:02 -0700 (Wed, 31 Jul 2013) $
+ * $Revision: 11018 $
+ * $Id: CalculatePayStub.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -203,7 +203,6 @@ class CalculatePayStub extends PayStubFactory {
 
 	function getDeductionObjectArrayForSorting( $obj ) {
 		$type_map_arr = $this->getPayStubEntryAccountsTypeArray();
-
 		//Debug::Arr($type_map_arr, 'PS Account Type Map Array: ', __FILE__, __LINE__, __METHOD__,10);
 
 		if ( !is_object($obj) ) {
@@ -229,6 +228,13 @@ class CalculatePayStub extends PayStubFactory {
 			//Need more than just TypeCalculationOrder to prevent Federal/Prov income tax from being calculated BEFORE CPP/EI.
 			//$arr['order'] = $obj->getCompanyDeductionObject()->getPayStubEntryAccountObject()->getTypeCalculationOrder();
 			$arr['order'] = $obj->getCompanyDeductionObject()->getPayStubEntryAccountObject()->getTypeCalculationOrder() . str_pad( $obj->getCompanyDeductionObject()->getCalculationOrder(), 5, 0, STR_PAD_LEFT);
+
+			//If we put TypeCalculationOrder at the beginning, it trumps the specific calculation order itself when dealing with calculations
+			//that require different types or cirucular depedencies that require/provide different types, (ie: ER-DED that requires earnings, and an earnings that requires ER-Ded, for scratch calculations)
+			//So put TypeCalculation order at the end. However this breaks existing tax calculations as it relies too much on the calculation order specified manually.
+			//FIXME: Will need to come up with another situation that can trigger this another way. Perhaps
+			//       when calculation orders exceed 5 digits it can squeeze out the TypeCalculationOrder?
+			//$arr['order'] = '1' . str_pad( $obj->getCompanyDeductionObject()->getCalculationOrder(), 5, 0, STR_PAD_LEFT) . $obj->getCompanyDeductionObject()->getPayStubEntryAccountObject()->getTypeCalculationOrder();
 			$arr['obj'] = $obj;
 			$arr['require_accounts'] = array();
 
@@ -269,6 +275,7 @@ class CalculatePayStub extends PayStubFactory {
 			$arr['id'] = substr($arr['type'],0,1).$obj->getId();
 			$arr['name'] = $obj->getDescription();
 			$arr['order'] = $obj->getPayStubEntryNameObject()->getTypeCalculationOrder() . str_pad( $obj->getPayStubEntryNameObject()->getOrder(), 5, 0, STR_PAD_LEFT);
+			//$arr['order'] = '1' . str_pad( $obj->getPayStubEntryNameObject()->getOrder(), 5, 0, STR_PAD_LEFT) . $obj->getPayStubEntryNameObject()->getTypeCalculationOrder();
 			$arr['obj'] = $obj;
 
 			$arr['affect_accounts'] = $obj->getPayStubEntryNameId();
@@ -286,6 +293,7 @@ class CalculatePayStub extends PayStubFactory {
 			$arr['id'] = 'E'.$obj->getId();
 			$arr['name'] = '';
 			$arr['order'] = $obj->getExpensePolicyObject()->getPayStubEntryNameObject()->getTypeCalculationOrder() . str_pad( $obj->getExpensePolicyObject()->getPayStubEntryNameObject()->getOrder(), 5, 0, STR_PAD_LEFT);
+			//$arr['order'] = '1' . str_pad( $obj->getExpensePolicyObject()->getPayStubEntryNameObject()->getOrder(), 5, 0, STR_PAD_LEFT) . $obj->getExpensePolicyObject()->getPayStubEntryNameObject()->getTypeCalculationOrder();
 			$arr['obj'] = $obj;
 
 			$arr['affect_accounts'] = $obj->getExpensePolicyObject()->getPayStubEntryAccount();
@@ -312,6 +320,7 @@ class CalculatePayStub extends PayStubFactory {
 						$global_id = substr(get_class( $ud_obj ),0,1) . $ud_obj->getId();
 						$deduction_order_arr[$global_id] = $this->getDeductionObjectArrayForSorting( $ud_obj );
 
+						//Debug::Arr( array($deduction_order_arr[$global_id]['require_accounts'], $deduction_order_arr[$global_id]['affect_accounts']), 'Deduction Name: '. $deduction_order_arr[$global_id]['name'], __FILE__, __LINE__, __METHOD__,10);
 						$dependency_tree->addNode( $global_id, $deduction_order_arr[$global_id]['require_accounts'], $deduction_order_arr[$global_id]['affect_accounts'], $deduction_order_arr[$global_id]['order']);
 					} else {
 						Debug::text('Company Deduction is DISABLED!', __FILE__, __LINE__, __METHOD__,10);
@@ -347,9 +356,9 @@ class CalculatePayStub extends PayStubFactory {
 		}
 		unset($uef, $ue_obj);
 
-		$profiler->startTimer( "Calculate Dependency Tree");
+		$profiler->startTimer( 'Calculate Dependency Tree');
 		$sorted_deduction_ids = $dependency_tree->getAllNodesInOrder();
-		$profiler->stopTimer( "Calculate Dependency Tree");
+		$profiler->stopTimer( 'Calculate Dependency Tree');
 
 		if ( is_array($sorted_deduction_ids) ) {
 			foreach( $sorted_deduction_ids as $tmp => $deduction_id ) {
@@ -404,7 +413,7 @@ class CalculatePayStub extends PayStubFactory {
 			return FALSE;
 		}
 
-		Debug::text('bbUser Id: '. $this->getUser() .' Pay Period End Date: '. TTDate::getDate('DATE+TIME', $this->getPayPeriodObject()->getEndDate() ), __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('User Id: '. $this->getUser() .' Pay Period End Date: '. TTDate::getDate('DATE+TIME', $this->getPayPeriodObject()->getEndDate() ), __FILE__, __LINE__, __METHOD__,10);
 
 		$generic_queue_status_label = $this->getUserObject()->getFullName(TRUE).' - '. TTi18n::gettext('Pay Stub');
 
@@ -505,8 +514,7 @@ class CalculatePayStub extends PayStubFactory {
 		$udlf = TTnew( 'UserDeductionListFactory' );
 		$udlf->getByCompanyIdAndUserId( $this->getUserObject()->getCompany(), $this->getUserObject()->getId() );
 
-
-		if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
+		if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE AND $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
 			$uelf = TTnew( 'UserExpenseListFactory' );
 			$uelf->getByUserIdAndAuthorizedAndStartDateAndEndDate( $this->getUser(), TRUE, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() );
 			Debug::text('Total User Expenses: '. $uelf->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);
@@ -551,13 +559,14 @@ class CalculatePayStub extends PayStubFactory {
 						$amount = $psa_obj->getCalculatedAmount( $pay_stub );
 						if ( isset($amount) AND $amount != 0 ) {
 							Debug::text('Pay Stub Amendment Amount: '. $amount , __FILE__, __LINE__, __METHOD__,10);
-							$pay_stub->addEntry( $psa_obj->getPayStubEntryNameId(), $amount, $psa_obj->getUnits(), $psa_obj->getRate(), $psa_obj->getDescription(), $psa_obj->getID(), NULL, NULL, $psa_obj->getYTDAdjustment() );
 
 							//Keep in mind this causes pay stubs to be re-generated every time, as this modifies the updated time
 							//to slightly more then the pay stub creation time.
 							$psa_obj->setStatus( 52 ); //InUse
-							$psa_obj->Save();
-
+							if ( $psa_obj->isValid() ) {
+								$pay_stub->addEntry( $psa_obj->getPayStubEntryNameId(), $amount, $psa_obj->getUnits(), $psa_obj->getRate(), $psa_obj->getDescription(), $psa_obj->getID(), NULL, NULL, $psa_obj->getYTDAdjustment() );
+								$psa_obj->Save();
+							}
 						} else {
 							Debug::text('bPay Stub Amendment Amount is not set...', __FILE__, __LINE__, __METHOD__,10);
 						}

@@ -238,6 +238,10 @@ class TTMail {
 			case 'smtp':
 			case 'mail':
 				$send_retval = $this->getMailObject()->send( $this->getTo(), $this->getMIMEHeaders(), $this->getBody() );
+				if ( PEAR::isError($send_retval) ) {
+					Debug::Text('Send Email Failed... Error: '. $send_retval->getMessage(), __FILE__, __LINE__, __METHOD__,10);
+					$send_retval = FALSE;
+				}
 				break;
 			case 'soap':
 				$ttsc = new TimeTrexSoapClient();

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10127 $
- * $Id: PunchControlListFactory.class.php 10127 2013-06-06 04:39:52Z ipso $
- * $Date: 2013-06-05 21:39:52 -0700 (Wed, 05 Jun 2013) $
+ * $Revision: 11018 $
+ * $Id: PunchControlListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -81,6 +81,34 @@ class PunchControlListFactory extends PunchControlFactory implements IteratorAgg
 
 			$this->saveCache($this->rs,$id);
 		}
+
+		return $this;
+	}
+
+	function getByCompanyId($company_id) {
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
+
+		$uf = new UserFactory();
+		$udf = new UserDateFactory();
+
+		$ph = array(
+					'company_id' => $company_id,
+					);
+
+		$query = '
+					select 	a.*
+					from	'. $this->getTable() .' as a,
+							'. $udf->getTable() .' as b,
+							'. $uf->getTable() .' as c
+					where	a.user_date_id = b.id
+						AND b.user_id = c.id
+						AND c.company_id = ?
+						AND ( a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0 )
+					';
+
+		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}

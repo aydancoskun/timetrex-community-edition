@@ -90,6 +90,9 @@ class TaxSummaryReport extends Report {
 										'-2060-default_branch_id' => TTi18n::gettext('Default Branch'),
 										'-2070-default_department_id' => TTi18n::gettext('Default Department'),
                                         '-3000-custom_filter' => TTi18n::gettext('Custom Filter'),
+
+										'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
+										
 										'-5000-columns' => TTi18n::gettext('Display Columns'),
 										'-5010-group' => TTi18n::gettext('Group By'),
 										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
@@ -454,10 +457,6 @@ class TaxSummaryReport extends Report {
 			$filter_data['permission_children_ids'] = $permission_children_ids;
 		}
 
-		if ( !isset($filter_data['exclude_ytd_adjustments']) ) {
-			$filter_data['exclude_ytd_adjustments'] = FALSE;
-		}
-
         $ulf = TTnew( 'UserListFactory' );
 		$ulf->getSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
         if ( $ulf->getRecordCount() > 0 ) {
@@ -513,7 +512,7 @@ class TaxSummaryReport extends Report {
 
                         $pself = TTnew( 'PayStubEntryListFactory' );
                 		//$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-                        $pself->getDateReportByCompanyIdAndUserIdAndPayPeriodId( $this->getUserObject()->getCompany(), $filter_data['user_ids'], $pay_period_ids, $filter_data['exclude_ytd_adjustments'] );
+                        $pself->getDateReportByCompanyIdAndUserIdAndPayPeriodId( $this->getUserObject()->getCompany(), $filter_data['user_ids'], $pay_period_ids, $filter_data['exclude_ytd_adjustment'] );
 
                 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pself->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
                 		if ( $pself->getRecordCount() > 0 ) {

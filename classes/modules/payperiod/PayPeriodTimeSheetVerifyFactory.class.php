@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: PayPeriodTimeSheetVerifyFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11032 $
+ * $Id: PayPeriodTimeSheetVerifyFactory.class.php 11032 2013-09-26 00:10:14Z ipso $
+ * $Date: 2013-09-25 17:10:14 -0700 (Wed, 25 Sep 2013) $
  */
 
 /**
@@ -232,7 +232,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 
 			$this->data['status_id'] = $value;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -251,7 +251,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 
 		$this->setUserVerifiedDate();
 
-		return true;
+		return TRUE;
 	}
 	function getUserVerifiedDate() {
 		if ( isset($this->data['user_verified_date']) ) {
@@ -290,7 +290,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 	function setAuthorized($bool) {
 		$this->data['authorized'] = $this->toBool($bool);
 
-		return true;
+		return TRUE;
 	}
 
 	function getAuthorizationLevel() {
@@ -375,7 +375,10 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 			$retval = TTi18n::getText('Verified @').' '.TTDate::getDate('DATE+TIME', $this->getUserVerifiedDate() ); //Date verification took place for employee.
 		} else {
 			if ( $this->isNew() == TRUE
-					AND ( is_object( $this->getUserObject() ) AND TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) < TTDate::getMiddleDayEpoch( $this->getPayPeriodObject()->getEndDate() ) )
+					AND ( is_object( $this->getUserObject() )
+							AND ( TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) <= TTDate::getMiddleDayEpoch( $this->getPayPeriodObject()->getEndDate() ) )
+							AND ( $this->getUserObject()->getTerminationDate() == '' OR ( $this->getUserObject()->getTerminationDate() != '' AND TTDate::getMiddleDayEpoch( $this->getUserObject()->getTerminationDate() ) >= TTDate::getMiddleDayEpoch( $this->getPayPeriodObject()->getStartDate() ) ) )
+						)
 					AND TTDate::getTime() >= $this->getPayPeriodObject()->getTimeSheetVerifyWindowStartDate()
 					AND TTDate::getTime() <= $this->getPayPeriodObject()->getTimeSheetVerifyWindowEndDate() ) {
 				$pay_period_verify_type_id = $this->getVerificationType();
@@ -429,7 +432,10 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 
 		$previous_pay_period_obj = $this->getPreviousPayPeriodObject();
 		if ( is_object($previous_pay_period_obj) ) {
-			if ( ( is_object( $this->getUserObject() ) AND TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) >= TTDate::getMiddleDayEpoch( $previous_pay_period_obj->getEndDate() ) ) ) {
+			if ( 	( is_object( $this->getUserObject() )
+					 AND TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) >= TTDate::getMiddleDayEpoch( $previous_pay_period_obj->getEndDate() ) )
+					 AND ( $this->getUserObject()->getTerminationDate() == '' OR ( $this->getUserObject()->getTerminationDate() != '' AND TTDate::getMiddleDayEpoch( $this->getUserObject()->getTerminationDate() ) >= TTDate::getMiddleDayEpoch( $previous_pay_period_obj->getStartDate() ) ) )
+				) {
 				Debug::text('Hired after previous pay period ended...', __FILE__, __LINE__, __METHOD__,10);
 				$is_previous_time_sheet_verified = TRUE;
 			} elseif ( $previous_pay_period_obj->getStatus() == 20 ) {
@@ -503,19 +509,26 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		$pay_period_verify_type_id = $this->getVerificationType();
 		$is_timesheet_superior = $this->isHierarchySuperior( $current_user_id, $user_id );
 		Debug::text('Current User ID: '. $current_user_id .' User ID: '. $user_id .' Verification Type ID: '. $pay_period_verify_type_id .' TimeSheet Superior: '. (int)$is_timesheet_superior , __FILE__, __LINE__, __METHOD__,10);
+		//Debug::text('Hire Date: '. TTDate::getDATE('DATE+TIME', $this->getUserObject()->getHireDate() ) .' Termination Date: '. TTDate::getDATE('DATE+TIME', $this->getUserObject()->getTerminationDate() ), __FILE__, __LINE__, __METHOD__,10);
 
 		if (
 				(
 					( $pay_period_verify_type_id == 20 AND $current_user_id == $user_id )
 					OR
-					( $pay_period_verify_type_id == 30 AND $this->getStatus() != 50 AND ( $is_timesheet_superior == TRUE AND !in_array($current_user_id, (array)$this->getAuthorizedUsers() ) ) )
+					( $pay_period_verify_type_id == 30 AND $this->getStatus() != 50 AND ( $is_timesheet_superior == TRUE AND $current_user_id != $user_id AND !in_array($current_user_id, (array)$this->getAuthorizedUsers() ) ) )
 					OR
 					( $pay_period_verify_type_id == 40 AND ( $this->getStatus() == 55 OR ( $current_user_id == $user_id AND $this->getUserVerified() == 0 ) OR ( $is_timesheet_superior == TRUE AND !in_array($current_user_id, (array)$this->getAuthorizedUsers() )  ) ) )
 				)
 				AND
 				(
 					//If the employee is hired on the last day of a pay period, allow them to verify that timesheet, so <= is required here.
-					is_object( $this->getUserObject() ) AND TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) <= TTDate::getMiddleDayEpoch( $this->getPayPeriodObject()->getEndDate() )
+					(
+						is_object( $this->getUserObject() )
+						AND
+						( TTDate::getMiddleDayEpoch( $this->getUserObject()->getHireDate() ) <= TTDate::getMiddleDayEpoch( $this->getPayPeriodObject()->getEndDate() ) )
+						AND
+						( $this->getUserObject()->getTerminationDate() == '' OR ( $this->getUserObject()->getTerminationDate() != '' AND TTDate::getMiddleDayEpoch( $this->getUserObject()->getTerminationDate() ) >= TTDate::getMiddleDayEpoch( $this->getPayPeriodObject()->getStartDate() ) ) )
+					)
 					AND
 					TTDate::getTime() >= $this->getPayPeriodObject()->getTimeSheetVerifyWindowStartDate() AND TTDate::getTime() <= $this->getPayPeriodObject()->getTimeSheetVerifyWindowEndDate() AND $this->getStatus() != 50
 				)
@@ -578,11 +591,11 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return $retarr;
 	}
 
-	function preSave() {
+	
+	function calcStatus() {
 		//Get pay period schedule verification type.
 		$time_sheet_verification_type_id = $this->getVerificationType();
 		if ( $time_sheet_verification_type_id > 10 ) { //10 = Disabled
-
 			$is_timesheet_superior = FALSE;
 			if ( $time_sheet_verification_type_id == 30 OR $time_sheet_verification_type_id == 40 ) { //Superior or Employee & Superior
 				$is_timesheet_superior = $this->isHierarchySuperior( $this->getCurrentUser() );
@@ -601,9 +614,10 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 				if ( $this->getCurrentUser() != $this->getUser() AND $is_timesheet_superior == TRUE ) {
 					Debug::Text('Superior is verifiying their suborindates timesheet...', __FILE__, __LINE__, __METHOD__,10);
 					$this->setStatus( 30 ); //Pending Authorization
+				} else {
+					Debug::Text('ERROR: Superior is trying to verifiy their own timesheet...', __FILE__, __LINE__, __METHOD__,10);
 				}
 			} elseif ( $time_sheet_verification_type_id == 40 ) { //Superior & Employee
-
 				if ( $this->isNew() == TRUE ) {
 					$this->setStatus( 30 ); //Pending Authorization
 				}
@@ -624,7 +638,6 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 				if ( $this->getStatus() == 50 AND $this->getUserVerified() == FALSE ) {
 					$this->setStatus( 45 ); //Pending Employee Verification
 				}
-
 			}
 
 			//If this is a new verification, find the current authorization level to assign to it.
@@ -635,13 +648,32 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 				$hierarchy_highest_level = 99;
 				if ( is_array( $hierarchy_arr ) ) {
 					Debug::Arr($hierarchy_arr, ' Hierarchy Array: ', __FILE__, __LINE__, __METHOD__,10);
-					$hierarchy_highest_level = end( array_keys( $hierarchy_arr ) ) ;
+					$hierarchy_arr_keys = array_keys( $hierarchy_arr );
+					$hierarchy_highest_level = end( $hierarchy_arr_keys ) ;
 					Debug::Text(' Setting hierarchy level to: '. $hierarchy_highest_level, __FILE__, __LINE__, __METHOD__,10);
 				}
 				$this->setAuthorizationLevel( $hierarchy_highest_level );
 			}
 		}
 
+		return TRUE;
+	}
+	
+	function Validate() {
+		$this->calcStatus();
+		
+		if ( $this->getStatus() == '' ) {
+			$this->Validator->isTrue(		'status',
+											FALSE,
+											TTi18n::gettext('Status is invalid'));
+		}
+
+		return TRUE;
+	}
+
+	function preSave() {
+		$this->calcStatus();
+		
 		if ( $this->getAuthorized() == TRUE ) {
 			$this->setAuthorizationLevel( 0 );
 		}

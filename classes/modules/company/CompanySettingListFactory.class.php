@@ -79,6 +79,28 @@ class CompanySettingListFactory extends CompanySettingFactory implements Iterato
 		return $this;
 	}
 
+	function getByCompanyId($id, $where = NULL, $order = NULL) {
+		if ( $id == '') {
+			return FALSE;
+		}
+
+		$ph = array(
+					'id' => $id,
+					);
+
+		$query = '
+					select 	*
+					from	'. $this->getTable() .'
+					where	company_id = ?
+					';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
 	function getByCompanyIdAndName($company_id, $name) {	    
         if ( $company_id == '' ) {
             return FALSE;

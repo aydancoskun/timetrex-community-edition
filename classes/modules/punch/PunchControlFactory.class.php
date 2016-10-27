@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10333 $
- * $Id: PunchControlFactory.class.php 10333 2013-07-02 23:29:50Z ipso $
- * $Date: 2013-07-02 16:29:50 -0700 (Tue, 02 Jul 2013) $
+ * $Revision: 11018 $
+ * $Id: PunchControlFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -242,25 +242,25 @@ class PunchControlFactory extends Factory {
 						$shift_data['first_in']['time_stamp'] = $shift_data['last_out']['time_stamp'];
 					}
 					//Can't use the First In user_date_id because it may need to be changed when editing a punch.
-					Debug::Text('Assign Shifts to the day they START on... Date: '. TTDate::getDate('DATE', $shift_data['first_in']['time_stamp']) , __FILE__, __LINE__, __METHOD__,10);
-					$user_date_id = UserDateFactory::findOrInsertUserDate( $this->getUser(), $shift_data['first_in']['time_stamp'] );
+					//Debug::Text('Assign Shifts to the day they START on... Date: '. TTDate::getDate('DATE', $shift_data['first_in']['time_stamp']) , __FILE__, __LINE__, __METHOD__,10);
+					$user_date_epoch = $shift_data['first_in']['time_stamp'];
 					break;
 				case 20: //Day they end on
 					if ( !isset($shift_data['last_out']['time_stamp']) ) {
 						$shift_data['last_out']['time_stamp'] = $shift_data['first_in']['time_stamp'];
 					}
 					Debug::Text('Assign Shifts to the day they END on... Date: '. TTDate::getDate('DATE', $shift_data['last_out']['time_stamp']) , __FILE__, __LINE__, __METHOD__,10);
-					$user_date_id = UserDateFactory::findOrInsertUserDate( $this->getUser(), $shift_data['last_out']['time_stamp'] );
+					$user_date_epoch = $shift_data['last_out']['time_stamp'];
 					break;
 				case 30: //Day with most time worked
 					Debug::Text('Assign Shifts to the day they WORK MOST on... Date: '. TTDate::getDate('DATE', $shift_data['day_with_most_time']) , __FILE__, __LINE__, __METHOD__,10);
-					$user_date_id = UserDateFactory::findOrInsertUserDate( $this->getUser(), $shift_data['day_with_most_time'] );
+					$user_date_epoch = $shift_data['day_with_most_time'];
 					break;
 			}
-
 		} else {
-			$user_date_id = UserDateFactory::findOrInsertUserDate( $this->getUser(), $this->getPunchObject()->getTimeStamp() );
+			$user_date_epoch = $this->getPunchObject()->getTimeStamp();
 		}
+		$user_date_id = UserDateFactory::findOrInsertUserDate( $this->getUser(), $user_date_epoch );
 
 		if ( isset($user_date_id) AND $user_date_id > 0 ) {
 			Debug::Text('Found UserDateID: '. $user_date_id, __FILE__, __LINE__, __METHOD__,10);

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10609 $
- * $Id: AuthorizationListFactory.class.php 10609 2013-07-31 17:29:20Z ipso $
- * $Date: 2013-07-31 10:29:20 -0700 (Wed, 31 Jul 2013) $
+ * $Revision: 11018 $
+ * $Id: AuthorizationListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -79,6 +79,31 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 		return $this;
 	}
 
+	function getByCompanyId($company_id, $where = NULL, $order = NULL ) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$uf = new UserFactory();
+
+		$ph = array(
+					'company_id' => $company_id,
+					);
+
+		$query = '
+					select 	a.*
+					from 	'. $this->getTable() .' as a
+					LEFT JOIN '. $uf->getTable() .' as uf ON (a.created_by = uf.id )
+					where	uf.company_id = ?
+						AND ( a.deleted = 0 AND uf.deleted = 0 )';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
 	function getByIdAndCompanyId($id, $company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
@@ -112,8 +137,6 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
-
-		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}

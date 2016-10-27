@@ -117,7 +117,7 @@ class APIRecurringScheduleControl extends APIFactory {
 	 * @return array
 	 */
 	function getCommonRecurringScheduleControlData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getRecurringScheduleControl( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getRecurringScheduleControl( $data, TRUE ) ) );
 	}
 
 	/**
@@ -406,7 +406,7 @@ class APIRecurringScheduleControl extends APIFactory {
 		Debug::Text('Received data for: '. count($data) .' RecurringScheduleControls', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$src_rows = $this->getRecurringScheduleControl( array('filter_data' => array('id' => $data) ), TRUE );
+		$src_rows = $this->stripReturnHandler( $this->getRecurringScheduleControl( array('filter_data' => array('id' => $data) ), TRUE ) );
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: RecurringPayStubAmendmentUserListFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11018 $
+ * $Id: RecurringPayStubAmendmentUserListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -73,6 +73,30 @@ class RecurringPayStubAmendmentUserListFactory extends RecurringPayStubAmendment
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$rpsaf = new RecurringPayStubAmendmentFactory();
+
+		$ph = array(
+					'company_id' => $company_id,
+					);
+
+		$query = '
+					SELECT a.*
+					FROM '. $this->getTable() .' as a
+						LEFT JOIN '. $rpsaf->getTable() .' as b ON a.recurring_ps_amendment_id = b.id
+					WHERE
+							b.company_id = ?
+							AND ( b.deleted = 0 )
+					';
 		$this->ExecuteSQL( $query, $ph );
 
 		return $this;

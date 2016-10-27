@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10530 $
- * $Id: DepartmentFactory.class.php 10530 2013-07-23 17:41:24Z ipso $
- * $Date: 2013-07-23 10:41:24 -0700 (Tue, 23 Jul 2013) $
+ * $Revision: 11018 $
+ * $Id: DepartmentFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -220,6 +220,10 @@ class DepartmentFactory extends Factory {
 											TTi18n::gettext('Code has too many digits'),
 											0,
 											10)
+				AND
+				$this->Validator->isTrue(	'manual_id',
+											( $this->Validator->stripNon32bitInteger( $value ) === 0 ) ? FALSE : TRUE,
+											TTi18n::gettext('Code is invalid, maximum value exceeded') )
 				AND
 				$this->Validator->isTrue(		'manual_id',
 												$this->isUniqueManualID($value),

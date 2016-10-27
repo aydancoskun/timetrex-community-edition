@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8131 $
- * $Id: Wage.class.php 8131 2012-10-29 16:21:52Z ipso $
- * $Date: 2012-10-29 09:21:52 -0700 (Mon, 29 Oct 2012) $
+ * $Revision: 11018 $
+ * $Id: Wage.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -458,32 +458,6 @@ class Wage {
 						Debug::text('Paid Premium Time Policy... Rate: '. $udt_obj->getPremiumPolicyObject()->getRate(), __FILE__, __LINE__, __METHOD__,10);
 
 						$rate = $udt_obj->getPremiumPolicyObject()->getHourlyRate( $this->getHourlyRate( $udt_obj->getColumn('premium_policy_wage_id') ) );
-						/*
-						switch ( $udt_obj->getPremiumPolicyObject()->getPayType() ) {
-							case 10: //Pay Factor
-								//Since they are already paid for this time with regular or OT, minus 1 from the rate
-								$rate = bcmul( $this->getHourlyRate( $udt_obj->getColumn('premium_policy_wage_id') ), bcsub( $udt_obj->getPremiumPolicyObject()->getRate(), 1 ) );
-								break;
-							case 20: //Pay Plus Premium
-								$rate = $udt_obj->getPremiumPolicyObject()->getRate();
-								break;
-							case 30: //Flat Hourly Rate (relative)
-								//Get the difference between the employees current wage and the premium wage.
-								$rate = bcsub( $udt_obj->getPremiumPolicyObject()->getRate(), $this->getHourlyRate( $udt_obj->getColumn('premium_policy_wage_id') ) );
-								break;
-							case 32: //Flat Hourly Rate (*NOT* relative)
-								$rate = $udt_obj->getPremiumPolicyObject()->getRate();
-								break;
-							case 40: //Minimum/Prevailing wage
-								if ( $udt_obj->getPremiumPolicyObject()->getRate() > $this->getHourlyRate( $udt_obj->getColumn('premium_policy_wage_id') ) ) {
-									$rate = bcsub( $udt_obj->getPremiumPolicyObject()->getRate(), $this->getHourlyRate( $udt_obj->getColumn('premium_policy_wage_id') ) );
-								} else {
-									$rate = 0;
-								}
-								break;
-						}
-						*/
-
 						$pay_stub_entry = $udt_obj->getPremiumPolicyObject()->getPayStubEntryAccountId();
 						$total_time = $udt_obj->getTotalTime();
 						$amount = $this->getWage( $udt_obj->getTotalTime(), $rate );

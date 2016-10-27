@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10630 $
- * $Id: Factory.class.php 10630 2013-08-01 21:05:29Z ipso $
- * $Date: 2013-08-01 14:05:29 -0700 (Thu, 01 Aug 2013) $
+ * $Revision: 11018 $
+ * $Id: Factory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -605,15 +605,25 @@ abstract class Factory {
 		$permission = new Permission();
 
 		if( $include_columns == NULL OR ( isset($include_columns['is_owner']) AND $include_columns['is_owner'] == TRUE) ) {
-			$data['is_owner'] = $permission->isOwner( $created_by_id, $object_user_id );
+			//If is_owner column is passed directly from SQL, use that instead of adding it here. Specifically the UserListFactory uses this.
+			if ( $this->getColumn('is_owner') !== FALSE ) {
+				$data['is_owner'] = (bool)$this->getColumn('is_owner');
+			} else {
+				$data['is_owner'] = $permission->isOwner( $created_by_id, $object_user_id );
+			}
 		}
 
 		if ( $include_columns == NULL OR ( isset($include_columns['is_child']) AND $include_columns['is_child'] == TRUE) ) {
-			if ( is_array($permission_children_ids) ) {
-				//ObjectID should always be a user_id.
-				$data['is_child'] = $permission->isChild( $object_user_id, $permission_children_ids );
+			//If is_child column is passed directly from SQL, use that instead of adding it here. Specifically the UserListFactory uses this.
+			if ( $this->getColumn('is_child') !== FALSE ) {
+				$data['is_child'] = (bool)$this->getColumn('is_child');
 			} else {
-				$data['is_child'] = FALSE;
+				if ( is_array($permission_children_ids) ) {
+					//ObjectID should always be a user_id.
+					$data['is_child'] = $permission->isChild( $object_user_id, $permission_children_ids );
+				} else {
+					$data['is_child'] = FALSE;
+				}
 			}
 		}
 

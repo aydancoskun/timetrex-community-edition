@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9811 $
- * $Id: PayPeriodScheduleFactory.class.php 9811 2013-05-08 20:12:17Z ipso $
- * $Date: 2013-05-08 13:12:17 -0700 (Wed, 08 May 2013) $
+ * $Revision: 11018 $
+ * $Id: PayPeriodScheduleFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -1600,6 +1600,37 @@ class PayPeriodScheduleFactory extends Factory {
 		return TRUE;
 	}
 
+	static function getShiftAssignedDate( $start_epoch, $end_epoch, $shift_assigned_day_id = FALSE ) {
+		if ( $shift_assigned_day_id == '' AND isset($this) ) {
+			$shift_assigned_day_id = $this->getShiftAssignedDay();
+		}
+
+		//
+		//FIXME: During testing always force start_date which is existing behaivor.
+		//       Once this is tested more it can be changed. 
+		return $start_epoch;
+
+		switch ( $shift_assigned_day_id ) {
+			default:
+			case 10: //Day they start on
+			case 40: //Split at midnight
+				//Debug::Text('Assign Shifts to the day they START on... Date: '. TTDate::getDate('DATE', $start_epoch ) , __FILE__, __LINE__, __METHOD__,10);
+				$retval = $start_epoch;
+				break;
+			case 20: //Day they end on
+				//Debug::Text('Assign Shifts to the day they END on... Date: '. TTDate::getDate('DATE', $end_epoch ) , __FILE__, __LINE__, __METHOD__,10);
+				$retval = $end_epoch;
+				break;
+			case 30: //Day with most time worked
+				$day_with_most_time = TTDate::getDayWithMostTime( $start_epoch, $end_epoch );
+				//Debug::Text('Assign Shifts to the day they WORK MOST on... Date: '. TTDate::getDate('DATE', $day_with_most_time ), __FILE__, __LINE__, __METHOD__,10);
+				$retval = $day_with_most_time;
+				break;
+		}
+
+		return $retval;
+	}
+
 	//Returns shift data according to the pay period schedule criteria for use
 	//in determining which day punches belong to.
 	function getShiftData( $user_date_id = NULL, $user_id = NULL, $epoch = NULL, $filter = NULL, $tmp_punch_control_obj = NULL, $maximum_shift_time = NULL, $new_shift_trigger_time = NULL, $plf = NULL ) {
@@ -1633,7 +1664,15 @@ class PayPeriodScheduleFactory extends Factory {
 				if ( is_object( $tmp_punch_control_obj ) ) {
 					$punch_control_id = $tmp_punch_control_obj->getId();
 				}
-				$plf->getShiftPunchesByUserIDAndEpoch( $user_id, $epoch, $punch_control_id, $maximum_shift_time );
+
+				//We need to double the maximum shift time when searching for punches.
+				//Assuming a maximum punch time of 14hrs:
+				// In: 10:00AM Out: 2:00PM
+				// In: 6:00PM Out: 6:00AM (next day)
+				// The above scenario when adding the last 6:00AM punch on the next day will only look back 14hrs and not find the first
+				// punch pair, therefore allowing more than 14hrs on the same day.
+				// So we need to extend the maximum shift time just when searching for punches and let getShiftData() sort out the proper maximum shift time itself.
+				$plf->getShiftPunchesByUserIDAndEpoch( $user_id, $epoch, $punch_control_id, $maximum_shift_time * 2 );
 				unset($punch_control_id);
 			}
 		}
@@ -1712,6 +1751,12 @@ class PayPeriodScheduleFactory extends Factory {
 							) {
 						$shift++;
 					}
+				} elseif ( $i > 0
+							AND isset($prev_punch_arr['time_stamp'])
+							AND $prev_punch_arr['punch_control_id'] != $p_obj->getPunchControlId()
+							AND abs($prev_punch_arr['time_stamp']-$p_obj->getTimeStamp()) > $maximum_shift_time ) {
+					//Debug::text('  New shift because two punch_control records exist and punch timestamp exceed maximum shift time.', __FILE__, __LINE__, __METHOD__, 10);
+					$shift++;
 				}
 
 				if ( !isset($shift_data[$shift]['total_time']) ) {
@@ -1898,7 +1943,7 @@ class PayPeriodScheduleFactory extends Factory {
 		}
 
 		//Start with 7 days initially, then cut back to 5 days eventually.
-		$date = $date-(86400*7); //Give a 7 days grace period after the transaction date to start with.
+		$date = $date-(86400*5); //Give a 5 days grace period after the transaction date to start with.
 
 		$pplf = TTNew('PayPeriodListFactory');
 		$pplf->getByCompanyIDAndPayPeriodScheduleIdAndStatusAndStartTransactionDateAndEndTransactionDate( $this->getCompany(), $this->getID(), 10, 1, $date );

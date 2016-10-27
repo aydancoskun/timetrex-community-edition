@@ -127,7 +127,7 @@ class APIOtherField extends APIFactory {
 	 * @return array
 	 */
 	function getCommonOtherFieldData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getOtherField( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getOtherField( $data, TRUE ) ) );
 	}
 
 	/**

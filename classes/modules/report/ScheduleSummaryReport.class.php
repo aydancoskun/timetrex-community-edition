@@ -206,7 +206,7 @@ class ScheduleSummaryReport extends Report {
 										//Handled in date_columns above.
 										//'-1230-pay_period' => TTi18n::gettext('Pay Period'),
 
-										'-1290-note' => TTi18n::gettext('Note'),
+										'-1290-note' => TTi18n::gettext('Employee Note'),
 										'-1295-tag' => TTi18n::gettext('Tags'),
 
 										'-1600-branch' => TTi18n::gettext('Branch'),
@@ -218,6 +218,8 @@ class ScheduleSummaryReport extends Report {
 										//'-1660-date_stamp' => TTi18n::gettext('Date'),
 										'-1670-start_time' => TTi18n::gettext('Start Time'),
 										'-1680-end_time' => TTi18n::gettext('End Time'),
+
+										'-5000-schedule_note' => TTi18n::gettext('Note'),
 							   );
 
 				$retval = array_merge( $retval, (array)$this->getOptions('date_columns'), (array)$this->getOptions('custom_columns'), (array)$this->getOptions('report_static_custom_column') );
@@ -734,6 +736,8 @@ class ScheduleSummaryReport extends Report {
 						'pay_period' => strtotime( $s_obj->getColumn('pay_period_transaction_date') ),
 						'pay_period_id' => $s_obj->getColumn('pay_period_id'),
 
+						'schedule_note' => $s_obj->getColumn('note'),
+
 						'total_shift' => 1,
 						);
 					unset($hourly_rate);
@@ -1056,7 +1060,7 @@ class ScheduleSummaryReport extends Report {
 										$this->pdf->Cell($column_widths['day'], ($max_shifts_per_day-$shifts_per_day)*$row_height, '', 'LR', 2, 'C', 1);
 									}
 								} else {
-									Debug::Text('   No Shifts: User ID: '. $user_id .' Date: '. $date_stamp .' Height: '. $max_row_height, __FILE__, __LINE__, __METHOD__,10);
+									//Debug::Text('   No Shifts: User ID: '. $user_id .' Date: '. $date_stamp .' Height: '. $max_row_height, __FILE__, __LINE__, __METHOD__,10);
 									$this->pdf->Cell($column_widths['day'], $max_row_height, '', 'LR', 2, 'C', 1);
 								}
 
@@ -1269,7 +1273,13 @@ class ScheduleSummaryReport extends Report {
 
 		$sf = TTNew('ScheduleFactory');
 
-		//FIXME: getScheduleArray() doesn't accept pay_period_ids, so no data is returned if a time period of "last_pay_period" is selected.
+		//getScheduleArray() doesn't accept pay_period_ids, so no data is returned if a time period of "last_pay_period" is selected.
+		if ( isset($filter_data['pay_period_id']) ) {
+			unset($filter_data['pay_period_id']);
+
+			$filter_data['start_date'] = TTDate::getBeginDayEpoch( time()-(86400*14) ); //Default to the last 14days.
+			$filter_data['end_date'] = TTDate::getEndDayEpoch( time()-86400 );
+		}
 		$raw_schedule_shifts = $sf->getScheduleArray( $filter_data );
 
 		if ( is_array($raw_schedule_shifts) ) {
@@ -1416,6 +1426,9 @@ class ScheduleSummaryReport extends Report {
 									}
 
 									$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+									if ( $key % 25 == 0 AND $this->isSystemLoadValid() == FALSE ) {
+										return FALSE;
+									}
 									$key++;
 									$i++;
 								}
@@ -1483,6 +1496,9 @@ class ScheduleSummaryReport extends Report {
 								}
 
 								$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+								if ( $key % 25 == 0 AND $this->isSystemLoadValid() == FALSE ) {
+									return FALSE;
+								}
 								$key++;
 							}
 
@@ -1548,6 +1564,9 @@ class ScheduleSummaryReport extends Report {
 								}
 
 								$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+								if ( $key % 25 == 0 AND $this->isSystemLoadValid() == FALSE ) {
+									return FALSE;
+								}
 								$key++;
 								$i++;
 							}

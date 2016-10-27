@@ -158,7 +158,7 @@ class APIUserGroup extends APIFactory {
 	 * @return array
 	 */
 	function getCommonUserGroupData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getUserGroup( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getUserGroup( $data, TRUE ) ) );
 	}
 
 	/**
@@ -396,7 +396,7 @@ class APIUserGroup extends APIFactory {
 		Debug::Arr($src_id, 'Src ID: Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($dst_id, 'Dst ID: Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$src_rows = $this->getUserGroup( array('filter_data' => array('id' => $src_id ) ), TRUE, 'flat' );
+		$src_rows = $this->stripReturnHandler( $this->getUserGroup( array('filter_data' => array('id' => $src_id ) ), TRUE, 'flat' ) );
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {

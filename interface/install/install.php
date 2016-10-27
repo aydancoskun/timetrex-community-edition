@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9967 $
- * $Id: install.php 9967 2013-05-22 15:10:29Z ipso $
- * $Date: 2013-05-22 08:10:29 -0700 (Wed, 22 May 2013) $
+ * $Revision: 11151 $
+ * $Id: install.php 11151 2013-10-14 22:00:30Z ipso $
+ * $Date: 2013-10-14 15:00:30 -0700 (Mon, 14 Oct 2013) $
  */
 
 /*
@@ -69,7 +69,7 @@ if ( version_compare( PHP_VERSION, 5, '<') == 1 ) {
 	echo "You are currenting using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v5</b> or greater!<br><br>\n";
 	$redir = FALSE;
 }
-if ( version_compare( PHP_VERSION, '5.4.99', '>') == 1 ) {
+if ( version_compare( PHP_VERSION, '5.5.99', '>') == 1 ) {
 	echo "You are currenting using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v5.4.x</b> or earlier!<br><br>\n";
 	$redir = FALSE;
 }

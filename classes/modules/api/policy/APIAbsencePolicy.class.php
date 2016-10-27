@@ -151,7 +151,7 @@ class APIAbsencePolicy extends APIFactory {
 	 * @return array
 	 */
 	function getCommonAbsencePolicyData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getAbsencePolicy( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getAbsencePolicy( $data, TRUE ) ) );
 	}
 
 	/**
@@ -388,7 +388,7 @@ class APIAbsencePolicy extends APIFactory {
 		Debug::Text('Received data for: '. count($data) .' AbsencePolicys', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$src_rows = $this->getAbsencePolicy( array('filter_data' => array('id' => $data) ), TRUE );
+		$src_rows = $this->stripReturnHandler( $this->getAbsencePolicy( array('filter_data' => array('id' => $data) ), TRUE ) );
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {

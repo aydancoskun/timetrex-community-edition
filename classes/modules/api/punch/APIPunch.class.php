@@ -62,15 +62,15 @@ class APIPunch extends APIFactory {
 			$epoch = TTDate::getTime();
 		}
 
-		if ( $user_id == '' ) {
+		if ( !is_numeric( $user_id  ) ) {
 			$user_id = $this->getCurrentUserObject()->getId();
 		}
 
-		if ( $company_id == '' ) {
+		if ( !is_numeric( $company_id ) ) {
 			$company_id = $this->getCurrentCompanyObject()->getId();
 		}
 
-		if ( $station_id == '' ) {
+		if ( !is_numeric( $station_id ) ) {
 			$station_id = getStationID(); //API.inc
 		}
 
@@ -251,6 +251,10 @@ class APIPunch extends APIFactory {
 	function getPunchDefaultData( $user_id = NULL, $date = NULL, $punch_control_id = NULL, $previous_punch_id = NULL ) {
 		$company_obj = $this->getCurrentCompanyObject();
 
+		if ( !is_numeric( $user_id  ) ) {
+			$user_id = $this->getCurrentUserObject()->getId();
+		}
+
 		Debug::Text('Getting punch default data... User ID: '. $user_id .' Date: '. $date .' Punch Control ID: '. $punch_control_id .' Previous Punch Id: '. $previous_punch_id, __FILE__, __LINE__, __METHOD__,10);
 
 		$data = array(
@@ -391,7 +395,7 @@ class APIPunch extends APIFactory {
 	 * @return array
 	 */
 	function getCommonPunchData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getPunch( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getPunch( $data, TRUE ) ) );
 	}
 
 	/**
@@ -471,7 +475,19 @@ class APIPunch extends APIFactory {
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('punch','add'), TTi18n::gettext('Add permission denied') );
+					if (    !( $validate_only == TRUE
+								OR
+								( $this->getPermissionObject()->Check('punch','add')
+									AND
+									(
+										$this->getPermissionObject()->Check('punch','edit')
+										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('punch','edit_own') AND $this->getPermissionObject()->isOwner( FALSE, $row['user_id'] ) === TRUE ) //We don't know the created_by of the user at this point, but only check if the user is assigned to the logged in person.
+										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('punch','edit_child') AND $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === TRUE )
+									)
+								)
+							) ) {
+						$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Add permission denied') );
+					}
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 

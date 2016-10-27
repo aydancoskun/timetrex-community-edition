@@ -185,7 +185,7 @@ class APISchedule extends APIFactory {
 		$sf = TTnew( 'ScheduleFactory' );
 		$sf->setAMFMessageID( $this->getAMFMessageID() );
 
-		$retarr = $sf->getScheduleArray( $data['filter_data'] );
+		$retarr = $sf->getScheduleArray( $data['filter_data'], $data['filter_data']['permission_children_ids'] );
 		//Hide wages if the user doesn't have permission to see them.
 		if ( is_array($retarr) ) {
 			foreach( $retarr as $date_stamp => $shifts ) {
@@ -289,7 +289,7 @@ class APISchedule extends APIFactory {
 	 * @return array
 	 */
 	function getCommonScheduleData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getSchedule( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getSchedule( $data, TRUE ) ) );
 	}
 
 	/**
@@ -365,7 +365,19 @@ class APISchedule extends APIFactory {
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('schedule','add'), TTi18n::gettext('Add permission denied') );
+					if (    !( $validate_only == TRUE
+								OR
+								( $this->getPermissionObject()->Check('schedule','add')
+									AND
+									(
+										$this->getPermissionObject()->Check('schedule','edit')
+										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('schedule','edit_own') AND $this->getPermissionObject()->isOwner( FALSE, $row['user_id'] ) === TRUE ) //We don't know the created_by of the user at this point, but only check if the user is assigned to the logged in person.
+										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('schedule','edit_child') AND $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === TRUE )
+									)
+								)
+							) ) {
+						$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Add permission denied') );
+					}
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -561,8 +573,12 @@ class APISchedule extends APIFactory {
 		}
 
 		$sf = TTnew( 'ScheduleFactory' );
-		$sf->setStartTime( TTDate::parseDateTime($start) );
-		$sf->setEndTime( TTDate::parseDateTime($end) );
+
+		//Prefix the current date to the template, this avoids issues with parsing 24hr clock only, ie: 0600
+		$date_epoch = time();
+		$sf->setStartTime( TTDate::parseDateTime( TTDate::getDate('DATE', $date_epoch ).' '. $start) );
+		$sf->setEndTime( TTDate::parseDateTime( TTDate::getDate('DATE', $date_epoch ).' '. $end) );
+
 		$sf->setSchedulePolicyId( $schedule_policy_id );
 		$sf->preSave();
 
@@ -587,7 +603,7 @@ class APISchedule extends APIFactory {
 		Debug::Text('Received data for: '. count($data) .' Schedules', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$src_rows = $this->getSchedule( array('filter_data' => array('id' => $data) ), TRUE );
+		$src_rows = $this->stripReturnHandler( $this->getSchedule( array('filter_data' => array('id' => $data) ), TRUE ) );
 		if ( is_array( $src_rows ) AND count($src_rows) == count($data) ) {
 			//Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 

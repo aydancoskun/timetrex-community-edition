@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: HolidayPolicyRecurringHolidayListFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11018 $
+ * $Id: HolidayPolicyRecurringHolidayListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -78,8 +78,32 @@ class HolidayPolicyRecurringHolidayListFactory extends HolidayPolicyRecurringHol
 		return $this;
 	}
 
-	function getByHolidayPolicyId($id, $where = NULL, $order = NULL) {
+	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
 
+		$hpf = new HolidayPolicyFactory();
+
+		$ph = array(
+					'company_id' => $company_id
+					);
+
+		$query = '
+					select 	a.*
+					from	'. $this->getTable() .' as a
+					LEFT JOIN '. $hpf->getTable() .' as hpf ON a.holiday_policy_id = hpf.id
+					where	hpf.company_id = ?
+						AND ( hpf.deleted = 0 )';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getByHolidayPolicyId($id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}

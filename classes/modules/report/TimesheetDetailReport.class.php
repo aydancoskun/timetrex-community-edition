@@ -217,6 +217,8 @@ class TimesheetDetailReport extends Report {
 										'-1430-branch' => TTi18n::gettext('Branch'),
 										'-1440-department' => TTi18n::gettext('Department'),
 
+										'-1480-sin' => TTi18n::gettext('SIN/SSN'),
+
 										'-1490-note' => TTi18n::gettext('Note'),
 										'-1495-tag' => TTi18n::gettext('Tags'),
 
@@ -973,52 +975,54 @@ class TimesheetDetailReport extends Report {
 					//Handle data form PDF timesheet. Don't split it out by branch/department
 					//  as that causes multiple rows per day to display.
 					//
-					if ( !isset($this->form_data['user_date_total'][$user_id]['data'][$date_stamp]) ) {
+					if ( strpos($format, 'pdf_') !== FALSE ) {
+						if ( !isset($this->form_data['user_date_total'][$user_id]['data'][$date_stamp]) ) {
 
-						$this->form_data['user_date_total'][$user_id]['data'][$date_stamp] = array(
-															//'branch_id' => $udt_obj->getColumn('branch_id'),
-															'branch' => $udt_obj->getColumn('branch'),
-															//'department_id' => $udt_obj->getColumn('department_id'),
-															'department' => $udt_obj->getColumn('department'),
-															//'pay_period_start_date' => strtotime( $udt_obj->getColumn('pay_period_start_date') ),
-															//'pay_period_end_date' => strtotime( $udt_obj->getColumn('pay_period_end_date') ),
-															//'pay_period_transaction_date' => strtotime( $udt_obj->getColumn('pay_period_transaction_date') ),
-															'pay_period' => strtotime( $udt_obj->getColumn('pay_period_transaction_date') ),
-															'pay_period_id' => $udt_obj->getColumn('pay_period_id'),
-															'time_stamp' => $date_stamp,
-															'min_punch_time_stamp' => strtotime( $udt_obj->getColumn('min_punch_time_stamp') ),
-															'max_punch_time_stamp' => strtotime( $udt_obj->getColumn('max_punch_time_stamp') ),
-															);
-					} else {
-						if ( strtotime( $udt_obj->getColumn('min_punch_time_stamp') ) < $this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['min_punch_time_stamp'] ) {
-							$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['min_punch_time_stamp'] = strtotime( $udt_obj->getColumn('min_punch_time_stamp') );
-						}
-						if ( strtotime( $udt_obj->getColumn('max_punch_time_stamp') ) > $this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['max_punch_time_stamp'] ) {
-							$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['max_punch_time_stamp'] = strtotime( $udt_obj->getColumn('max_punch_time_stamp') );
-						}
+							$this->form_data['user_date_total'][$user_id]['data'][$date_stamp] = array(
+																//'branch_id' => $udt_obj->getColumn('branch_id'),
+																'branch' => $udt_obj->getColumn('branch'),
+																//'department_id' => $udt_obj->getColumn('department_id'),
+																'department' => $udt_obj->getColumn('department'),
+																//'pay_period_start_date' => strtotime( $udt_obj->getColumn('pay_period_start_date') ),
+																//'pay_period_end_date' => strtotime( $udt_obj->getColumn('pay_period_end_date') ),
+																//'pay_period_transaction_date' => strtotime( $udt_obj->getColumn('pay_period_transaction_date') ),
+																'pay_period' => strtotime( $udt_obj->getColumn('pay_period_transaction_date') ),
+																'pay_period_id' => $udt_obj->getColumn('pay_period_id'),
+																'time_stamp' => $date_stamp,
+																'min_punch_time_stamp' => strtotime( $udt_obj->getColumn('min_punch_time_stamp') ),
+																'max_punch_time_stamp' => strtotime( $udt_obj->getColumn('max_punch_time_stamp') ),
+																);
+						} else {
+							if ( strtotime( $udt_obj->getColumn('min_punch_time_stamp') ) < $this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['min_punch_time_stamp'] ) {
+								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['min_punch_time_stamp'] = strtotime( $udt_obj->getColumn('min_punch_time_stamp') );
+							}
+							if ( strtotime( $udt_obj->getColumn('max_punch_time_stamp') ) > $this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['max_punch_time_stamp'] ) {
+								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['max_punch_time_stamp'] = strtotime( $udt_obj->getColumn('max_punch_time_stamp') );
+							}
 
-					}
-					if ( isset($this->form_data['user_date_total'][$user_id]['data'][$date_stamp][$column]) ) {
-						$this->form_data['user_date_total'][$user_id]['data'][$date_stamp][$column] += $udt_obj->getColumn('total_time');
-					} else {
-						$this->form_data['user_date_total'][$user_id]['data'][$date_stamp][$column] = $udt_obj->getColumn('total_time');
-					}
-					//Total overtime/absence time, along with categorizing the time for easier timesheet generation later on.
-					if ( strpos( $column, 'absence_policy' ) !== FALSE ) {
-						if ( isset($this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['absence_time']) ) {
-							$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['absence_time'] += $udt_obj->getColumn('total_time');
-						} else {
-							$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['absence_time'] = $udt_obj->getColumn('total_time');
 						}
-						$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['categorized_time']['absence_policy'][$column] = TRUE;
-					}
-					if ( strpos( $column, 'over_time_policy' ) !== FALSE ) {
-						if ( isset($this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['over_time']) ) {
-							$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['over_time'] += $udt_obj->getColumn('total_time');
+						if ( isset($this->form_data['user_date_total'][$user_id]['data'][$date_stamp][$column]) ) {
+							$this->form_data['user_date_total'][$user_id]['data'][$date_stamp][$column] += $udt_obj->getColumn('total_time');
 						} else {
-							$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['over_time'] = $udt_obj->getColumn('total_time');
+							$this->form_data['user_date_total'][$user_id]['data'][$date_stamp][$column] = $udt_obj->getColumn('total_time');
 						}
-						$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['categorized_time']['over_time_policy'][$column] = TRUE;
+						//Total overtime/absence time, along with categorizing the time for easier timesheet generation later on.
+						if ( strpos( $column, 'absence_policy' ) !== FALSE ) {
+							if ( isset($this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['absence_time']) ) {
+								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['absence_time'] += $udt_obj->getColumn('total_time');
+							} else {
+								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['absence_time'] = $udt_obj->getColumn('total_time');
+							}
+							$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['categorized_time']['absence_policy'][$column] = TRUE;
+						}
+						if ( strpos( $column, 'over_time_policy' ) !== FALSE ) {
+							if ( isset($this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['over_time']) ) {
+								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['over_time'] += $udt_obj->getColumn('total_time');
+							} else {
+								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['over_time'] = $udt_obj->getColumn('total_time');
+							}
+							$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['categorized_time']['over_time_policy'][$column] = TRUE;
+						}
 					}
 					unset($hourly_rate);
 				}
@@ -1063,11 +1067,13 @@ class TimesheetDetailReport extends Report {
 			    $this->tmp_data['user'][$u_obj->getId()]['current_currency'] = $u_obj->getColumn('currency');
 			}
             
-			if ( !isset($this->form_data['user_date_total'][$u_obj->getId()]) ) {
-				$this->form_data['user_date_total'][$u_obj->getId()] = array();
+			if ( strpos($format, 'pdf_') !== FALSE ) {
+				if ( !isset($this->form_data['user_date_total'][$u_obj->getId()]) ) {
+					$this->form_data['user_date_total'][$u_obj->getId()] = array();
+				}
+				//Make sure we merge this array with existing data and include all required fields for generating timesheets. This prevents slow columns from being returned.
+				$this->form_data['user_date_total'][$u_obj->getId()] += (array)$u_obj->getObjectAsArray( array('first_name' => TRUE, 'last_name' => TRUE, 'employee_number' => TRUE, 'title' => TRUE, 'group' => TRUE, 'default_branch' => TRUE, 'default_department' => TRUE ) );
 			}
-			//Make sure we merge this array with existing data and include all required fields for generating timesheets. This prevents slow columns from being returned.
-			$this->form_data['user_date_total'][$u_obj->getId()] += (array)$u_obj->getObjectAsArray( array('first_name' => TRUE, 'last_name' => TRUE, 'employee_number' => TRUE, 'title' => TRUE, 'group' => TRUE, 'default_branch' => TRUE, 'default_department' => TRUE ) );
 
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
@@ -1099,12 +1105,14 @@ class TimesheetDetailReport extends Report {
 				}
 			}
 
-			$pplf = TTnew('PayPeriodListFactory');
-			$pplf->getByIDList( $pay_period_ids );
-			if ( $pplf->getRecordCount() > 0 ) {
-				foreach( $pplf as $pp_obj ) {
-					if ( isset($this->tmp_data['pay_period_schedule'][$pp_obj->getPayPeriodSchedule()]) ) {
-						$this->form_data['pay_period'][$pp_obj->getID()] = $this->tmp_data['pay_period_schedule'][$pp_obj->getPayPeriodSchedule()];
+			if ( strpos($format, 'pdf_') !== FALSE ) {
+				$pplf = TTnew('PayPeriodListFactory');
+				$pplf->getByIDList( $pay_period_ids );
+				if ( $pplf->getRecordCount() > 0 ) {
+					foreach( $pplf as $pp_obj ) {
+						if ( isset($this->tmp_data['pay_period_schedule'][$pp_obj->getPayPeriodSchedule()]) ) {
+							$this->form_data['pay_period'][$pp_obj->getID()] = $this->tmp_data['pay_period_schedule'][$pp_obj->getPayPeriodSchedule()];
+						}
 					}
 				}
 			}
@@ -1116,7 +1124,7 @@ class TimesheetDetailReport extends Report {
 	}
 
 	//PreProcess data such as calculating additional columns from raw data etc...
-	function _preProcess() {
+	function _preProcess( $format ) {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['user_date_total']), NULL, TTi18n::getText('Pre-Processing Data...') );
 
 		//Merge time data with user data
@@ -1173,10 +1181,12 @@ class TimesheetDetailReport extends Report {
 									$processed_data['schedule_absent'] = 0;
 								}
 
-								$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $processed_data );
-
-								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp] = array_merge( $this->form_data['user_date_total'][$user_id]['data'][$date_stamp], $date_columns, $processed_data );
-								//$this->form_data[$user_id]['data'][] = array_merge( $row, $date_columns, $processed_data );
+								if ( strpos($format, 'pdf_') === FALSE ) {
+									$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $processed_data );
+								} else {
+									$this->form_data['user_date_total'][$user_id]['data'][$date_stamp] = array_merge( $this->form_data['user_date_total'][$user_id]['data'][$date_stamp], $date_columns, $processed_data );
+									//$this->form_data[$user_id]['data'][] = array_merge( $row, $date_columns, $processed_data );
+								}
 							}
 						}
 					}
@@ -1759,17 +1769,19 @@ class TimesheetDetailReport extends Report {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), 2, NULL, TTi18n::getText('Querying Database...') ); //Iterations need to be 2, otherwise progress bar is not created.
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), 2 );
 
-			$plf = TTnew( 'PunchListFactory' );
-			$plf->getSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data);
-			Debug::Text('Got punch data... Total Rows: '. $plf->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $plf->getRecordCount(), NULL, TTi18n::getText('Retrieving Punch Data...') );
-			if ( $plf->getRecordCount() > 0 ) {
-				foreach( $plf as $key => $p_obj ) {
-					$this->form_data['user_date_total'][$p_obj->getColumn('user_id')]['punch_rows'][$p_obj->getColumn('pay_period_id')][TTDate::strtotime( $p_obj->getColumn('date_stamp'))][$p_obj->getPunchControlID()][$p_obj->getStatus()] = array( 'status_id' => $p_obj->getStatus(), 'type_id' => $p_obj->getType(), 'type_code' => $p_obj->getTypeCode(), 'time_stamp' => $p_obj->getTimeStamp() );
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			if ( $format == 'pdf_timesheet_detail' ) {
+				$plf = TTnew( 'PunchListFactory' );
+				$plf->getSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data);
+				Debug::Text('Got punch data... Total Rows: '. $plf->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);
+				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $plf->getRecordCount(), NULL, TTi18n::getText('Retrieving Punch Data...') );
+				if ( $plf->getRecordCount() > 0 ) {
+					foreach( $plf as $key => $p_obj ) {
+						$this->form_data['user_date_total'][$p_obj->getColumn('user_id')]['punch_rows'][$p_obj->getColumn('pay_period_id')][TTDate::strtotime( $p_obj->getColumn('date_stamp'))][$p_obj->getPunchControlID()][$p_obj->getStatus()] = array( 'status_id' => $p_obj->getStatus(), 'type_id' => $p_obj->getType(), 'type_code' => $p_obj->getTypeCode(), 'time_stamp' => $p_obj->getTimeStamp() );
+						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+					}
 				}
+				unset($plf,$p_obj);
 			}
-			unset($plf,$p_obj);
 
 			Debug::Text('Drawing timesheets...', __FILE__, __LINE__, __METHOD__,10);
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->form_data['user_date_total']), NULL, TTi18n::getText('Generating TimeSheets...') );
@@ -1876,6 +1888,9 @@ class TimesheetDetailReport extends Report {
 				}
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				if ( $key % 25 == 0 AND $this->isSystemLoadValid() == FALSE ) {
+					return FALSE;
+				}
 				$key++;
 			}
 

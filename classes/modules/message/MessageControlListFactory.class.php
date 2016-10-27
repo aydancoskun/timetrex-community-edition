@@ -79,6 +79,33 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		return $this;
 	}
 
+	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$mrf = new MessageRecipientFactory();
+		$uf = new UserFactory();
+
+		$ph = array(
+					'company_id' => $company_id
+					);
+
+		$query = '
+					select 	a.*
+					from	'. $this->getTable() .' as a
+					LEFT JOIN '. $mrf->getTable() .'	as mrf ON a.id = mrf.message_sender_id
+					LEFT JOIN '. $uf->getTable() .' 	as uf ON mrf.user_id = uf.id
+					where	uf.company_id = ?
+						AND ( a.deleted = 0 AND uf.deleted = 0 )';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
 	function getNewMessagesByCompanyIdAndUserId( $company_id, $user_id ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -263,8 +290,6 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		$uf = new UserFactory();
 		$udf = new UserDateFactory();
 		$pptsvf = new PayPeriodTimeSheetVerifyFactory();
-
-
 
 		$ph = array(
 					'company_id' => $company_id,

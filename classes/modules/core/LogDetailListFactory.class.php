@@ -111,6 +111,33 @@ class LogDetailListFactory extends LogDetailFactory implements IteratorAggregate
 		return $this;
 	}
 
+	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$uf = new UserFactory();
+		$lf = new LogFactory();
+
+		$ph = array(
+					'company_id' => $company_id
+					);
+
+		$query = '
+					select 	a.*
+					from	'. $this->getTable() .' as a
+						LEFT JOIN  '. $lf->getTable() .' as lf on a.system_log_id = lf.id
+						LEFT JOIN  '. $uf->getTable() .' as uf on lf.user_id = uf.id
+					where	uf.company_id = ?
+						AND ( uf.deleted = 0 )';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
 	function getBySystemLogIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;

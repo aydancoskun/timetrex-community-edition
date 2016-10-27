@@ -107,7 +107,7 @@ class APIUserDeduction extends APIFactory {
 	 * @return array
 	 */
 	function getCommonUserDeductionData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getUserDeduction( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getUserDeduction( $data, TRUE ) ) );
 	}
 
 	/**
@@ -357,7 +357,7 @@ class APIUserDeduction extends APIFactory {
 		Debug::Text('Received data for: '. count($data) .' UserDeductions', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$src_rows = $this->getUserDeduction( array('filter_data' => array('id' => $data) ), TRUE );
+		$src_rows = $this->stripReturnHandler( $this->getUserDeduction( array('filter_data' => array('id' => $data) ), TRUE ) );
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {

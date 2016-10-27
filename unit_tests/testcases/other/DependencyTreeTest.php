@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 7639 $
- * $Id: DependencyTreeTest.php 7639 2012-09-13 19:19:41Z ipso $
- * $Date: 2012-09-13 12:19:41 -0700 (Thu, 13 Sep 2012) $
+ * $Revision: 11018 $
+ * $Id: DependencyTreeTest.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 require_once('PHPUnit/Framework/TestCase.php');
 
@@ -1098,6 +1098,18 @@ class DependencyTreeTest extends PHPUnit_Framework_TestCase {
 
 
 	}
+/*
+$deptree->addNode('P17', 	array(), 			array(124), 6000380 );
 
+$deptree->addNode('U7897', 	array(104,121), 	array(120), 6000100 ); //Average Vacation Rate (per Day)
+$deptree->addNode('U7905', 	array(120), 		array(104), 4000200 ); //Vacation Pay (Based on Average Rate/Day)
+$deptree->addNode('U7907', 	array(104,121), 	array(121), 4000100 ); //Vac Normalization
+$deptree->addNode('U7909', 	array(121,104), 	array(92), 	5000205 ); //Income Tax
+
+
+U7905 (R: 120 P: 104) -> U7897 (R:104,121 P: 120)
+						 U7907 (R:104,121 P: 121)
+
+ */
 }
 ?>

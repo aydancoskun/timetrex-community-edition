@@ -121,7 +121,7 @@ class APIKPI extends APIFactory {
 	 * @return array
 	 */
 	function getCommonKPIData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getKPI( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getKPI( $data, TRUE ) ) );
 	}
 
 	/**
@@ -368,7 +368,7 @@ class APIKPI extends APIFactory {
 		Debug::Text('Received data for: '. count($data) .' KPIs', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$src_rows = $this->getKPI( array('filter_data' => array('id' => $data) ), TRUE );
+		$src_rows = $this->stripReturnHandler( $this->getKPI( array('filter_data' => array('id' => $data) ), TRUE ) );
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {

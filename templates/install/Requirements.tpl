@@ -126,6 +126,20 @@
 
 							<tr>
 								<td class="cellLeftEditTable">
+									{t}MBSTRING Enabled:{/t}
+								</td>
+								<td class="cellRightEditTable">
+									{if $install_obj->checkMBSTRING() == 0}
+										<span class="">{t}OK{/t}
+									{elseif $install_obj->checkMBSTRING() == 1}
+										<span class="tblDataError">{t}Warning: Not Installed. (MBSTRING extension must be enabled){/t}
+									{/if}
+									</span>
+								</td>
+							</tr>
+
+							<tr>
+								<td class="cellLeftEditTable">
 									{t}GETTEXT Enabled:{/t}
 								</td>
 								<td class="cellRightEditTable">

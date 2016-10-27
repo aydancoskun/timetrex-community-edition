@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: ExceptionListFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11018 $
+ * $Id: ExceptionListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -101,7 +101,6 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		return $this;
 	}
 
-
 	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
@@ -118,19 +117,52 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 			$strict = TRUE;
 		}
 
+		$epf = new ExceptionPolicyFactory();
+		$epcf = new ExceptionPolicyControlFactory();
+
 		$ph = array(
 					'company_id' => $company_id,
 					);
 
 		$query = '
-					select 	*
-					from	'. $this->getTable() .'
+					select 	a.*
+					from	'. $this->getTable() .' as a
+					LEFT JOIN '. $epf->getTable() .' as epf ON a.exception_policy_id = epf.id
+					LEFT JOIN '. $epcf->getTable() .' as epcf ON epf.exception_policy_control_id = epcf.id
 					where
-						company_id = ?
-						id in ('. $this->getListSQL($id, $ph) .')
-						AND deleted = 0';
+						epcf.company_id = ?
+						a.id in ('. $this->getListSQL($id, $ph) .')
+						AND ( a.deleted = 0 AND epf.deleted = 0 AND epcf.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$epf = new ExceptionPolicyFactory();
+		$epcf = new ExceptionPolicyControlFactory();
+
+		$ph = array(
+					'company_id' => $company_id,
+					);
+
+		$query = '
+					select 	a.*
+					from	'. $this->getTable() .' as a
+					LEFT JOIN '. $epf->getTable() .' as epf ON a.exception_policy_id = epf.id
+					LEFT JOIN '. $epcf->getTable() .' as epcf ON epf.exception_policy_control_id = epcf.id
+					where
+						epcf.company_id = ?
+						AND ( a.deleted = 0 AND epf.deleted = 0 AND epcf.deleted = 0 )';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
 
 		$this->ExecuteSQL( $query, $ph );
 

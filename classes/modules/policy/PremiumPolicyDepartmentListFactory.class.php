@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: PremiumPolicyDepartmentListFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11018 $
+ * $Id: PremiumPolicyDepartmentListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -70,6 +70,31 @@ class PremiumPolicyDepartmentListFactory extends PremiumPolicyDepartmentFactory 
 					from	'. $this->getTable() .'
 					where	id = ?
 					';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$ppf = new PremiumPolicyFactory();
+
+		$ph = array(
+					'company_id' => $company_id
+					);
+
+		$query = '
+					select 	a.*
+					from	'. $this->getTable() .' as a
+					LEFT JOIN '. $ppf->getTable() .' as ppf ON a.premium_policy_id = ppf.id
+					where	ppf.company_id = ?
+						AND ( ppf.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 

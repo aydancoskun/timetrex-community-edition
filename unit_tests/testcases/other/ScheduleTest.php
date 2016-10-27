@@ -294,7 +294,8 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 	function createSchedule( $user_id, $date_stamp, $data = NULL ) {
 		$sf = TTnew( 'ScheduleFactory' );
 		$sf->setCompany( $this->company_id );
-		$sf->setUserDateId( UserDateFactory::findOrInsertUserDate( $user_id, $date_stamp) );
+		$sf->setUser( $user_id );
+		//$sf->setUserDateId( UserDateFactory::findOrInsertUserDate( $user_id, $date_stamp) );
 
 		if ( isset($data['status_id']) ) {
 			$sf->setStatus( $data['status_id'] );

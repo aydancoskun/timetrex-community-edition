@@ -142,7 +142,8 @@ function getScheduleTotalTime() {
 						{t}Date:{/t}
 					</td>
 					<td class="cellRightEditTable">
-						<input type="text" size="15" id="date" name="data[date_stamp]" value="{getdate type="DATE" epoch=$data.date_stamp}">
+						 {* Must use the date of the start_time, as date_stamp is the date that the schedule will be displayed on (based on PP schedule Assign Shifts too setting *}
+						<input type="text" size="15" id="date" name="data[date_stamp]" value="{getdate type="DATE" epoch=$data.start_time}">
 						<img src="{$BASE_URL}/images/cal.gif" id="cal_date" width="16" height="16" border="0" alt="Pick a date" onMouseOver="calendar_setup('date', 'cal_date', false);">
 						{t}ie:{/t} {$current_user_prefs->getDateFormatExample()}
 					</td>

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9884 $
- * $Id: DemoData.class.php 9884 2013-05-14 22:00:58Z ipso $
- * $Date: 2013-05-14 15:00:58 -0700 (Tue, 14 May 2013) $
+ * $Revision: 11018 $
+ * $Id: DemoData.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 
@@ -1676,7 +1676,7 @@ class DemoData {
 		return FALSE;
     }
 
-	function createPolicyGroup( $company_id, $meal_policy_ids = NULL, $exception_policy_id = NULL, $holiday_policy_ids = NULL, $over_time_policy_ids = NULL, $premium_policy_ids = NULL, $rounding_policy_ids = NULL, $user_ids = NULL, $break_policy_ids = NULL, $accrual_policy_ids = NULL, $expense_policy_ids = NULL ) {
+	function createPolicyGroup( $company_id, $meal_policy_ids = NULL, $exception_policy_id = NULL, $holiday_policy_ids = NULL, $over_time_policy_ids = NULL, $premium_policy_ids = NULL, $rounding_policy_ids = NULL, $user_ids = NULL, $break_policy_ids = NULL, $accrual_policy_ids = NULL, $expense_policy_ids = NULL, $absence_policy_ids = NULL ) {
 		$pgf = TTnew( 'PolicyGroupFactory' );
 
 		$pgf->StartTransaction();
@@ -1737,6 +1737,12 @@ class DemoData {
 				$pgf->setAccrualPolicy( $accrual_policy_ids );
 			} else {
 				$pgf->setAccrualPolicy( array() );
+			}
+
+			if ( is_array($absence_policy_ids) ) {
+				$pgf->setAbsencePolicy( $absence_policy_ids );
+			} else {
+				$pgf->setAbsencePolicy( array() );
 			}
 
 			if ( is_array($user_ids) ) {
@@ -5484,7 +5490,8 @@ class DemoData {
 	function createSchedule( $company_id, $user_id, $date_stamp, $data = NULL ) {
 		$sf = TTnew( 'ScheduleFactory' );
 		$sf->setCompany( $company_id );
-		$sf->setUserDateId( UserDateFactory::findOrInsertUserDate( $user_id, $date_stamp) );
+		$sf->setUser( $user_id );
+		//$sf->setUserDateId( UserDateFactory::findOrInsertUserDate( $user_id, $date_stamp) );
 
 		if ( isset($data['status_id']) ) {
 			$sf->setStatus( $data['status_id'] );
@@ -5810,6 +5817,7 @@ class DemoData {
 
 		Debug::Text('Failed Creating Punch Pair!', __FILE__, __LINE__, __METHOD__,10);
 		$pf->FailTransaction();
+		$pf->CommitTransaction();
 
 		return FALSE;
 	}
@@ -6132,7 +6140,8 @@ class DemoData {
 										$user_ids,
 										NULL,
 										NULL,
-										$policy_ids['expense'] );
+										$policy_ids['expense'],
+										$policy_ids['absence'] );
 
 			if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 				//Client Groups

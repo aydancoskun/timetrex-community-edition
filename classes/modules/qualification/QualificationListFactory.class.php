@@ -265,7 +265,7 @@ class QualificationListFactory extends QualificationFactory implements IteratorA
 
 		$query = '
 					select 	a.*,
-                            d.name as group,
+                            d.name as "group",
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
 							y.last_name as created_by_last_name,

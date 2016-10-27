@@ -67,6 +67,11 @@ class APIPayStub extends APIFactory {
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view' );
 
+		if ( $this->getPermissionObject()->Check('pay_stub','view') == FALSE AND $this->getPermissionObject()->Check('pay_stub','view_child') == FALSE ) {
+			//Only display PAID pay stubs.
+			$data['filter_data']['status_id'] = array(40);
+		}
+
 		$pslf = TTnew( 'PayStubListFactory' );
 		$pslf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $pslf->getRecordCount() .' Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
@@ -149,7 +154,7 @@ class APIPayStub extends APIFactory {
 	 * @return array
 	 */
 	function getCommonPayStubData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getPayStub( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getPayStub( $data, TRUE ) ) );
 	}
 
 	/**
@@ -385,7 +390,7 @@ class APIPayStub extends APIFactory {
 		return $this->returnHandler( FALSE );
 	}
 
-	function generatePayStubs( $pay_period_ids, $user_ids = NULL ) {
+	function generatePayStubs( $pay_period_ids, $user_ids = NULL, $enable_correction = FALSE ) {
 		global $profiler;
 		Debug::Text('Generate Pay Stubs!', __FILE__, __LINE__, __METHOD__,10);
 
@@ -463,6 +468,7 @@ class APIPayStub extends APIFactory {
 						$profiler->startTimer( 'Calculating Pay Stub' );
 						//Calc paystubs.
 						$cps = new CalculatePayStub();
+						$cps->setEnableCorrection( (bool)$enable_correction );
 						$cps->setUser( $pay_period_schdule_user_obj->getUser() );
 						$cps->setPayPeriod( $pay_period_obj->getId() );
 						$cps->calculate();

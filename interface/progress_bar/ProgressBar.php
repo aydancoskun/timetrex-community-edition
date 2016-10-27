@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8602 $
- * $Id: ProgressBar.php 8602 2012-12-14 01:09:03Z ipso $
- * $Date: 2012-12-13 17:09:03 -0800 (Thu, 13 Dec 2012) $
+ * $Revision: 11018 $
+ * $Id: ProgressBar.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 require_once('../../includes/global.inc.php');
 require_once(Environment::getBasePath() .'includes/Interface.inc.php');
@@ -624,7 +624,8 @@ switch ($action) {
 						//Re-initialize schedule factory here so we clear any errors preventing the next schedule from being inserted.
 						$sf = TTnew( 'ScheduleFactory' );
 						$sf->setCompany( $current_user->getCompany() );
-						$sf->setUserDate($user_id, $time_stamp);
+						$sf->setUser( $user_id );
+						//$sf->setUserDate($user_id, $time_stamp);
 						$sf->setStatus( $data['status_id'] );
 						$sf->setSchedulePolicyID( $data['schedule_policy_id'] );
 						$sf->setAbsencePolicyID( $data['absence_policy_id'] );

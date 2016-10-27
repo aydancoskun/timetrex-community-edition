@@ -181,6 +181,7 @@ class UserSummaryReport extends Report {
 										'-1100-default_department' => TTi18n::gettext('Department'), //abbreviate for space
 										'-1120-default_job' => TTi18n::gettext('Job'), //abbreviate for space
 										'-1150-default_job_item' => TTi18n::gettext('Task'), //abbreviate for space
+										'-1190-ethnic_group' => TTi18n::gettext('Ethnicity'),
 
 										'-1200-permission_control' => TTi18n::gettext('Permission Group'),
 										'-1210-pay_period_schedule' => TTi18n::gettext('Pay Period Schedule'),
@@ -206,11 +207,7 @@ class UserSummaryReport extends Report {
 
 										'-1495-tag' => TTi18n::gettext('Tags'),
 										'-1499-hierarchy_control_display' => TTi18n::gettext('Hierarchy'),
-
-										//Date columns handles these.
-										//'-1500-hire_date' => TTi18n::gettext('Hire Date'),
-										//'-1600-termination_date' => TTi18n::gettext('Termination Date'),
-										//'-1700-birth_date' => TTi18n::gettext('Birth Date'),
+										'-1499-hierarchy_level_display' => TTi18n::gettext('Hierarchy Superiors'),
 
 										'-1500-institution' => TTi18n::gettext('Bank Institution'),
 										'-1510-transit' => TTi18n::gettext('Bank Transit/Routing'),
@@ -229,6 +226,9 @@ class UserSummaryReport extends Report {
 										'-1690-items_per_page' => TTi18n::gettext('Rows Per page'),
 
 										'-1695-password_updated_date' => TTi18n::gettext('Password Updated Date'),
+
+										'-1699-hire_date_age' => TTi18n::gettext('Length of Service'),
+										'-1899-birth_date_age' => TTi18n::gettext('Age'),
 
 										'-2205-created_by' => TTi18n::gettext('Created By'),
 										'-2215-updated_by' => TTi18n::gettext('Updated By'),
@@ -426,8 +426,7 @@ class UserSummaryReport extends Report {
 							$retval['columns'][] = 'last_name';
 
 							$retval['columns'][] = 'birth-date_stamp';
-
-							//$retval['group'][] = 'birth-date_month';
+							$retval['columns'][] = 'birth_date_age';
 
 							$retval['sub_total'][] = 'birth-date_month';
 
@@ -444,18 +443,25 @@ class UserSummaryReport extends Report {
 							$retval['columns'][] = 'default_department';
 							$retval['columns'][] = 'title';
 							$retval['columns'][] = 'user_group';
+							$retval['columns'][] = 'ethnic_group';
+							$retval['columns'][] = 'sex';
 
 							$retval['columns'][] = 'first_name';
 							$retval['columns'][] = 'last_name';
 
+							$retval['columns'][] = 'birth_date_age';
+
 							$retval['columns'][] = 'hire-date_stamp';
 							$retval['columns'][] = 'termination-date_stamp';
+							$retval['columns'][] = 'hire_date_age';
 
 							$retval['sort'][] = array('status' => 'asc');
 							$retval['sort'][] = array('default_branch' => 'asc');
 							$retval['sort'][] = array('default_department' => 'asc');
 							$retval['sort'][] = array('title' => 'asc');
 							$retval['sort'][] = array('user_group' => 'asc');
+							$retval['sort'][] = array('ethnic_group' => 'asc');
+							$retval['sort'][] = array('sex' => 'asc');
 							$retval['sort'][] = array('last_name' => 'asc');
 							$retval['sort'][] = array('first_name' => 'asc');
 							//$retval['sort'][] = array('hire-date_month' => 'asc');

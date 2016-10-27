@@ -136,6 +136,30 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 		return $this;
 	}
 
+    function getByCompanyId( $company_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+        $uf = new UserFactory();
+
+		$ph = array(
+					'company_id' => $company_id
+					);
+
+		$query = '
+					select 	a.*
+					from	'. $this->getTable() .' as a
+                        LEFT JOIN  '. $uf->getTable() .' as u ON ( a.user_id = u.id AND u.deleted = 0 )
+ 					where	u.company_id = ?
+						AND a.deleted = 0';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL($query,$ph);
+
+		return $this;
+	}
+
     function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
@@ -166,9 +190,7 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 		return $this;
 	}
 
-
-    function  getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
-
+    function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
     	if ( $company_id == '') {
 			return FALSE;
 		}
@@ -248,7 +270,7 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 					);
 
 		$query = '
-					select 	distinct a.id, a.*,
+					select 	distinct a.*,
                             uf.first_name as user_first_name,
                             uf.last_name as user_last_name,
                             u.first_name as reviewer_user_first_name,

@@ -128,7 +128,7 @@ class APIAccrual extends APIFactory {
 	 * @return array
 	 */
 	function getCommonAccrualData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getAccrual( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getAccrual( $data, TRUE ) ) );
 	}
 
 	/**
@@ -159,6 +159,10 @@ class APIAccrual extends APIFactory {
 
 		if ( $validate_only == TRUE ) {
 			Debug::Text('Validating Only!', __FILE__, __LINE__, __METHOD__, 10);
+			$permission_children_ids = FALSE;
+		} else {
+			//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
+			$permission_children_ids = $this->getPermissionChildren();
 		}
 
 		extract( $this->convertToMultipleRecords($data) );
@@ -184,7 +188,8 @@ class APIAccrual extends APIFactory {
 							  OR
 								(
 								$this->getPermissionObject()->Check('accrual','edit')
-									OR ( $this->getPermissionObject()->Check('accrual','edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('accrual','edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('accrual','edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -199,7 +204,19 @@ class APIAccrual extends APIFactory {
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('accrual','add'), TTi18n::gettext('Add permission denied') );
+					if (    !( $validate_only == TRUE
+								OR
+								( $this->getPermissionObject()->Check('accrual','add')
+									AND
+									(
+										$this->getPermissionObject()->Check('accrual','edit')
+										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('accrual','edit_own') AND $this->getPermissionObject()->isOwner( FALSE, $row['user_id'] ) === TRUE ) //We don't know the created_by of the user at this point, but only check if the user is assigned to the logged in person.
+										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('accrual','edit_child') AND $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === TRUE )
+									)
+								)
+							) ) {
+						$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Add permission denied') );
+					}
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -384,7 +401,7 @@ class APIAccrual extends APIFactory {
 		Debug::Text('Received data for: '. count($data) .' Accruals', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$src_rows = $this->getAccrual( array('filter_data' => array('id' => $data) ), TRUE );
+		$src_rows = $this->stripReturnHandler( $this->getAccrual( array('filter_data' => array('id' => $data) ), TRUE ) );
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {

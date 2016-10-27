@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: PayStubEntryAccountListFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11018 $
+ * $Id: PayStubEntryAccountListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -452,7 +452,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		return $this;
 	}
 
-	function getArrayByListFactory($lf, $include_blank = TRUE, $include_disabled = TRUE, $abbreviate_type = TRUE ) {
+	function getArrayByListFactory($lf, $include_blank = TRUE, $include_disabled = TRUE, $abbreviate_type = TRUE, $include_type = TRUE ) {
 		if ( !is_object($lf) ) {
 			return FALSE;
 		}
@@ -465,7 +465,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 
 
 		$type_options  = $this->getOptions('type');
-		if ( $abbreviate_type == TRUE ) {
+		if ( $include_type != FALSE AND $abbreviate_type == TRUE ) {
 			foreach( $type_options as $key => $val ) {
 				$type_options[$key] = str_replace( array('Employee', 'Employer', 'Deduction'), array('EE', 'ER', 'Ded'), $val);
 			}
@@ -473,7 +473,11 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		}
 
 		foreach ($lf as $obj) {
-			$list[$obj->getID()] = $type_options[$obj->getType()] .' - '. $obj->getName();
+			if ( $include_type == FALSE ) {
+				$list[$obj->getID()] = $obj->getName();
+			} else {
+				$list[$obj->getID()] = $type_options[$obj->getType()] .' - '. $obj->getName();
+			}
 		}
 
 		if ( isset($list) ) {

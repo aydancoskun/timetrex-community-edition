@@ -250,7 +250,7 @@ class BackgroundProcess {
 							//Debug::Text(' Lock file was created, returning...', __FILE__, __LINE__, __METHOD__, 10);
 							break;
 						} else {
-							Debug::Text(' Waiting for lock file to be created... I: '. $i, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('I: '. $i .' Waiting for lock file to be created... File Name: '. $next_lock_file_name, __FILE__, __LINE__, __METHOD__, 10);
 							usleep(500000); //.5 seconds
 						}
 					}

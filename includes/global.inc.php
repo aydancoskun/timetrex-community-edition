@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10749 $
- * $Id: global.inc.php 10749 2013-08-26 22:00:42Z ipso $
- * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
+ * $Revision: 11151 $
+ * $Id: global.inc.php 11151 2013-10-14 22:00:30Z ipso $
+ * $Date: 2013-10-14 15:00:30 -0700 (Mon, 14 Oct 2013) $
  */
 //PHP v5.1.0 introduced $_SERVER['REQUEST_TIME'], but it doesn't include microseconds until v5.4.0.
 if ( version_compare(PHP_VERSION, '5.4.0', '<') == TRUE ) {
@@ -61,8 +61,8 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '7.1.2' );
-define('APPLICATION_VERSION_DATE', strtotime('28-Aug-2013') ); //Release date of version.
+define('APPLICATION_VERSION', '7.1.3' );
+define('APPLICATION_VERSION_DATE', @strtotime('11-Oct-2013') ); //Release date of version.
 
 if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') { define('OPERATING_SYSTEM', 'WIN'); } else { define('OPERATING_SYSTEM', 'LINUX'); }
 

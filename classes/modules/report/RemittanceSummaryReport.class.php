@@ -94,6 +94,8 @@ class RemittanceSummaryReport extends Report {
                                         
                                         '-3000-custom_filter' => TTi18n::gettext('Custom Filter'),
 
+										'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
+
 										'-5000-columns' => TTi18n::gettext('Display Columns'),
 										'-5010-group' => TTi18n::gettext('Group By'),
 										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
@@ -504,7 +506,6 @@ class RemittanceSummaryReport extends Report {
 					$this->form_data['pay_period'][] = strtotime( $pse_obj->getColumn('pay_stub_transaction_date') );
 				}
 
-
 				if ( isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id]) ) {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id], $pse_obj->getColumn('amount') );
 				} else {
@@ -648,7 +649,8 @@ class RemittanceSummaryReport extends Report {
 										'stretch' => 1 );
 
 				//Get the earliest transaction date of all pay periods.
-				ksort( array_unique( (array)$this->form_data['pay_period']) );
+				$this->form_data['pay_period'] = array_unique( (array)$this->form_data['pay_period'] );
+				ksort( $this->form_data['pay_period'] );
 				$transaction_date = current( (array)$this->form_data['pay_period']);
 				Debug::Text('Transaction Date: '. TTDate::getDate('DATE', $transaction_date) .'('.  $transaction_date .')', __FILE__, __LINE__, __METHOD__,10);
 

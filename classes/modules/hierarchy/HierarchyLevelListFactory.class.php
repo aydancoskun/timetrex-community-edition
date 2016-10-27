@@ -81,6 +81,32 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		return $this;
 	}
 
+	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
+
+		$hcf = new HierarchyControlFactory();
+
+		$ph = array(
+					'company_id' => $company_id
+					);
+
+		$query = '
+					select 	a.*
+					from	'. $this->getTable() .' as a
+					LEFT JOIN '. $hcf->getTable() .' as b ON a.hierarchy_control_id = b.id
+					where	 b.company_id = ?
+						AND a.deleted = 0
+				';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
 	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
@@ -296,6 +322,53 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		}
 
 		return FALSE;
+	}
+
+	function getObjectTypeAndHierarchyAppendedListByCompanyIDAndUserID($company_id, $user_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $user_id == '' ) {
+			return FALSE;
+		}
+
+		$additional_order_fields = array( 'object_type_id', 'hierarchy_control_name' );
+		if ( $order == NULL ) {
+			$order = array( 'object_type_id' => 'asc', 'hierarchy_control_name' => 'asc', 'level' => 'asc', 'user_id' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$uf = new UserFactory();
+		$hcf = new HierarchyControlFactory();
+		$hotf = new HierarchyObjectTypeFactory();
+		$huf = new HierarchyUserFactory();
+
+		$ph = array(
+					'company_id' => $company_id,
+					'user_id' => $user_id,
+					);
+
+		$query = '
+					select 	hlf.*,
+							hcf.name as hierarchy_control_name,
+							hotf.object_type_id
+					from '. $this->getTable() .' as hlf
+					LEFT JOIN '. $hcf->getTable() .' as hcf ON hcf.id = hlf.hierarchy_control_id
+					LEFT JOIN '. $hotf->getTable() .' as hotf ON hcf.id = hotf.hierarchy_control_id
+					LEFT JOIN '. $huf->getTable() .' as huf ON hcf.id = huf.hierarchy_control_id
+					where 	hcf.company_id = ?
+							AND huf.user_id = ?
+							AND ( hlf.deleted = 0 AND hcf.deleted = 0 )
+				';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
 	}
 
 	function getLevelsAndHierarchyControlIDsByUserIdAndObjectTypeID( $user_id, $object_type_id = 50 ) { //Requests

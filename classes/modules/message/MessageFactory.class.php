@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: MessageFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11018 $
+ * $Id: MessageFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -585,7 +585,7 @@ class MessageFactory extends Factory {
 			$protocol .= 's';
 		}
 
-		$email_body .= TTi18n::gettext('Link').': <a href="'. $protocol .'://'. Misc::getHostName().Environment::getBaseURL().'">'. APPLICATION_NAME .' '. TTi18n::getText('Login') .'</a>';
+		$email_body .= TTi18n::gettext('Link').': <a href="'. $protocol .'://'. Misc::getHostName().Environment::getDefaultInterfaceBaseURL().'">'. APPLICATION_NAME .' '. TTi18n::getText('Login') .'</a>';
 
 		//Define subject/body variables here.
 		$search_arr = array(

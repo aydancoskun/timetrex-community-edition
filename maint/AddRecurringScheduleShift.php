@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10749 $
- * $Id: AddRecurringScheduleShift.php 10749 2013-08-26 22:00:42Z ipso $
- * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
+ * $Revision: 11018 $
+ * $Id: AddRecurringScheduleShift.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
@@ -45,7 +45,7 @@ $minimum_add_shift_offset = (3600 * 2) ; //Add shifts at least 2hrs before they 
 $lookup_shift_offset = 3600 * 10; //Lookup shifts that started X hrs before now.
 
 $current_epoch = TTDate::getTime();
-//$current_epoch = strtotime('06-Apr-07 6:00 AM');
+//$current_epoch = strtotime('05-Sep-2013 10:00 PM');
 Debug::text('Current Epoch: '. TTDate::getDate('DATE+TIME', $current_epoch ), __FILE__, __LINE__, __METHOD__, 10);
 
 //Initial Start/End dates need to cover all timezones, we narrow it done further once we change to each users timezone later on.
@@ -155,9 +155,26 @@ if ( $clf->getRecordCount() > 0 ) {
 
 											$status_id = 10; //Working
 
+											//Make sure we not already added this schedule shift.
+											//And that no schedule shifts overlap this one.
+											//Use the isValid() function for this
+											$sf = new ScheduleFactory();
+
+											$sf->StartTransaction();
+
+											$sf->setCompany( $c_obj->getID() );
+											$sf->setUser( $user_id );
+
+											//Find the date that the shift will be assigned to so we know if its a holiday or not.
+											if ( is_object( $sf->getPayPeriodScheduleObject() ) ) {
+												$date_stamp = $sf->getPayPeriodScheduleObject()->getShiftAssignedDate( $recurring_schedule_shift_start_time, $recurring_schedule_shift_end_time, $sf->getPayPeriodScheduleObject()->getShiftAssignedDay() );
+											} else {
+												$date_stamp = $recurring_schedule_shift_start_time;
+											}
+
 											//Is this a holiday?
 											$hlf = new HolidayListFactory();
-											$hlf->getByPolicyGroupUserIdAndDate( $user_id, TTDate::getBeginDayEpoch( $recurring_schedule_shift_start_time ) );
+											$hlf->getByPolicyGroupUserIdAndDate( $user_id, TTDate::getBeginDayEpoch( $date_stamp ) );
 											if ( $hlf->getRecordCount() > 0 ) {
 												$h_obj = $hlf->getCurrent();
 
@@ -183,15 +200,8 @@ if ( $clf->getRecordCount() > 0 ) {
 
 											$profiler->startTimer( "Add Schedule");
 
-											//Make sure we not already added this schedule shift.
-											//And that no schedule shifts overlap this one.
-											//Use the isValid() function for this
-											$sf = new ScheduleFactory();
-
-											$sf->StartTransaction();
-
-											$sf->setCompany( $c_obj->getID() );
-											$sf->findUserDate( $user_id, $recurring_schedule_shift_start_time );
+											//No longer need to call findUserDate()
+											//$sf->findUserDate( $user_id, $recurring_schedule_shift_start_time );
 											$sf->setStatus( $status_id ); //Working
 											$sf->setStartTime( $recurring_schedule_shift_start_time );
 											$sf->setEndTime( $recurring_schedule_shift_end_time );

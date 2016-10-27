@@ -164,7 +164,9 @@ class APITimeSheet extends APIFactory {
 		Debug::Text('Punch Record Count: '. $plf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $plf->getRecordCount() > 0 ) {
 			foreach( $plf as $p_obj ) {
-				$punch_data[] = $p_obj->getObjectAsArray( NULL, $data['filter_data']['permission_children_ids'] );
+				//$punch_data[] = $p_obj->getObjectAsArray( NULL, $data['filter_data']['permission_children_ids'] );
+				//Don't need to pass permission_children_ids, as Flex uses is_owner/is_child from the timesheet user record instead, not the punch record.
+				$punch_data[] = $p_obj->getObjectAsArray();
 			}
 		}
 		$meal_and_break_total_data = PunchFactory::calcMealAndBreakTotalTime( $punch_data, TRUE );
@@ -197,8 +199,9 @@ class APITimeSheet extends APIFactory {
 		Debug::Text('User Date Total Record Count: '. $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $udtlf->getRecordCount() > 0 ) {
 			foreach( $udtlf as $udt_obj ) {
-				//FIXME: We need to differentiate between punch permissions and absence permissions.
-				$user_date_total = $udt_obj->getObjectAsArray( NULL, $data['filter_data']['permission_children_ids'] );
+				//Don't need to pass permission_children_ids, as Flex uses is_owner/is_child from the timesheet user record instead, not the punch record.
+				//$user_date_total = $udt_obj->getObjectAsArray( NULL, $data['filter_data']['permission_children_ids'] );
+				$user_date_total = $udt_obj->getObjectAsArray();
 				$user_date_total_data[] = $user_date_total;
 
 				//Get all pay periods that have total time assigned to them.
@@ -458,16 +461,28 @@ class APITimeSheet extends APIFactory {
 					$this->getProgressBarObject()->start( $this->getAMFMessageID(), $udlf->getRecordCount(), NULL, TTi18n::getText('ReCalculating...') );
 
 					$x=1;
+					$prev_date_stamp = FALSE;
 					foreach($udlf as $ud_obj ) {
-						//Debug::text($x .' / '. $udlf->getRecordCount() .' - User Date Id: '. $ud_obj->getId() .' Date: '.$ud_obj->getDateStamp(TRUE) .' User ID: '. $ud_obj->getUser() , __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text($x .' / '. $udlf->getRecordCount() .' - User Date Id: '. $ud_obj->getId() .' Date: '.$ud_obj->getDateStamp(TRUE) .' User ID: '. $ud_obj->getUser() , __FILE__, __LINE__, __METHOD__, 10);
+						if ( $prev_date_stamp != FALSE AND abs( $ud_obj->getDateStamp()-$prev_date_stamp ) > 86400 ) {
+							Debug::text('Found gap between user_date rows! - User Date Id: '. $ud_obj->getId() .' Date: '.$ud_obj->getDateStamp(TRUE) .' Previous Date: '. TTDate::getDate('DATE', $prev_date_stamp ) .' User ID: '. $ud_obj->getUser() , __FILE__, __LINE__, __METHOD__, 10);
+							for( $n=$prev_date_stamp; $n < $ud_obj->getDateStamp(); $n += 86400 ) {
+								$tmp_user_date_id = UserDateFactory::findOrInsertUserDate( $ud_obj->getUser(),  TTDate::getBeginDayEpoch( $n ) );
+								Debug::text('Filling gap in user_date rows! - Date: '. TTDate::getDate('DATE', $n ) .' User ID: '. $ud_obj->getUser() .' New User Date ID: '. $tmp_user_date_id, __FILE__, __LINE__, __METHOD__, 10);
+								UserDateTotalFactory::reCalculateDay( $tmp_user_date_id, TRUE );
+							}
+							unset($n, $tmp_user_date_id);
+						}
 						TTLog::addEntry( $ud_obj->getId(), 500, TTi18n::gettext('Recalculating Employee TimeSheet').': '. $ud_obj->getUserObject()->getFullName() .' '. TTi18n::gettext('Date').': '. TTDate::getDate('DATE', $ud_obj->getDateStamp() ), $this->getCurrentUserObject()->getId(), 'user_date_total' );
 
 						$udlf->StartTransaction(); //If a transaction wraps the entire recalculation process, a deadlock is likely to occur for large batches.
 						UserDateTotalFactory::reCalculateDay( $ud_obj->getId(), TRUE );
 						$udlf->CommitTransaction();
 
+
 						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $x );
 
+						$prev_date_stamp = $ud_obj->getDateStamp();
 						$x++;
 					}
 

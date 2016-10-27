@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10749 $
- * $Id: PayStubFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
- * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
+ * $Revision: 11167 $
+ * $Id: PayStubFactory.class.php 11167 2013-10-15 20:29:07Z ipso $
+ * $Date: 2013-10-15 13:29:07 -0700 (Tue, 15 Oct 2013) $
  */
 require_once( 'Numbers/Words.php');
 
@@ -352,6 +352,11 @@ class PayStubFactory extends Factory {
 	function setStartDate($epoch) {
 		$epoch = trim($epoch);
 
+		if ( $epoch != '' ) {
+			//Make sure all pay periods start at the first second of the day.
+			$epoch = TTDate::getTimeLockedDate( strtotime('00:00:00', $epoch), $epoch);
+		}
+
 		if 	(	$this->Validator->isDate(		'start_date',
 												$epoch,
 												TTi18n::gettext('Incorrect start date'))
@@ -371,8 +376,9 @@ class PayStubFactory extends Factory {
 	}
 
 	function isValidEndDate($epoch) {
+		//Allow a 59 second grace period around the pay period end date, due to seconds being stripped in some cases.
 		if ( is_object( $this->getPayPeriodObject() ) AND
-				( $epoch <= $this->getPayPeriodObject()->getEndDate() AND $epoch >= $this->getPayPeriodObject()->getStartDate() ) ) {
+				( $epoch <= ($this->getPayPeriodObject()->getEndDate()+59) AND $epoch >= $this->getPayPeriodObject()->getStartDate() ) ) {
 			return TRUE;
 		}
 
@@ -393,8 +399,12 @@ class PayStubFactory extends Factory {
 	}
 	function setEndDate($epoch) {
 		$epoch = trim($epoch);
-		//Debug::Text('Epoch: '. $epoch .' ( '. TTDate::getDate('DATE+TIME', $epoch) .' ) Test: '. TTDate::getDBTimeStamp($epoch, FALSE), __FILE__, __LINE__, __METHOD__,10);
 
+		if ( $epoch != '' ) {
+			//Make sure all pay periods end at the last second of the day.
+			$epoch = TTDate::getTimeLockedDate( strtotime('23:59:59', $epoch), $epoch);
+		}
+		
 		if 	(	$this->Validator->isDate(		'end_date',
 												$epoch,
 												TTi18n::gettext('Incorrect end date'))
@@ -436,6 +446,16 @@ class PayStubFactory extends Factory {
 	}
 	function setTransactionDate($epoch) {
 		$epoch = trim($epoch);
+
+		if ( $epoch != '' ) {
+			//Make sure all pay periods transact at noon.
+			$epoch = TTDate::getTimeLockedDate( strtotime('12:00:00', $epoch), $epoch);
+
+			//Unless they are on the same date as the end date, then it should match that.
+			if ( $this->getEndDate() != '' AND $this->getEndDate() > $epoch ) {
+				$epoch = $this->getEndDate();
+			}
+		}
 
 		if 	(	$this->Validator->isDate(		'transaction_date',
 												$epoch,
@@ -717,7 +737,6 @@ class PayStubFactory extends Factory {
 				if ( $pplf->getRecordCount() > 0 ) {
 					Debug::Text('Using Pay Period End Date.', __FILE__, __LINE__, __METHOD__,10);
 					$ps_amendment_date = TTDate::getBeginDayEpoch( $pplf->getCurrent()->getEndDate() );
-
 				}
 			} else {
 				Debug::Text('Using Today.', __FILE__, __LINE__, __METHOD__,10);
@@ -1905,18 +1924,10 @@ class PayStubFactory extends Factory {
 					$function = 'set'.$function;
 					switch( $key ) {
 						case 'start_date':
-							if ( method_exists( $this, $function ) ) {
-								$this->$function( TTDate::getBeginDayEpoch( TTDate::parseDateTime( $data[$key] ) ) );
-							}
-							break;
 						case 'end_date':
-							if ( method_exists( $this, $function ) ) {
-								$this->$function( TTDate::getEndDayEpoch( TTDate::parseDateTime( $data[$key] ) ) );
-							}
-							break;
 						case 'transaction_date':
 							if ( method_exists( $this, $function ) ) {
-								$this->$function( TTDate::getMiddleDayEpoch( TTDate::parseDateTime( $data[$key] ) ) );
+								$this->$function( TTDate::parseDateTime( $data[$key] ) );
 							}
 							break;
 						default:

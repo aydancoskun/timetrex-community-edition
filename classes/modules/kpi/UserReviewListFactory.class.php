@@ -84,8 +84,6 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 		return $this;
 	}
 
-
-
     function getByUserReviewControlId($id, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
@@ -126,6 +124,31 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 
 		return $this;
     }
+
+    function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+        $kf  = new KPIFactory();
+
+		$ph = array(
+					'company_id' => $company_id
+					);
+
+		$query = '
+					select 	a.*
+					from	'. $this->getTable() .' as a
+                        LEFT JOIN  '. $kf->getTable() .' as k ON ( a.kpi_id = k.id AND k.deleted = 0 )
+ 					where	k.company_id = ?
+						AND a.deleted = 0';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL($query,$ph);
+
+		return $this;
+	}
 
     function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {

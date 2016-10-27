@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: AbsencePolicyListFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11018 $
+ * $Id: AbsencePolicyListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -205,34 +205,26 @@ class AbsencePolicyListFactory extends AbsencePolicyFactory implements IteratorA
 					where	a.company_id = ?
 					';
 
-		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query  .=	' AND a.created_by in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
-		}
-		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query  .=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
-		}
-		if ( isset($filter_data['exclude_id']) AND isset($filter_data['exclude_id'][0]) AND !in_array(-1, (array)$filter_data['exclude_id']) ) {
-			$query  .=	' AND a.id not in ('. $this->getListSQL($filter_data['exclude_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['type_id']) AND isset($filter_data['type_id'][0]) AND !in_array(-1, (array)$filter_data['type_id']) ) {
-			$query  .=	' AND a.type_id in ('. $this->getListSQL($filter_data['type_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['pay_stub_entry_account_id']) AND isset($filter_data['pay_stub_entry_account_id'][0]) AND !in_array(-1, (array)$filter_data['pay_stub_entry_account_id']) ) {
-			$query  .=	' AND a.pay_stub_entry_account_id in ('. $this->getListSQL($filter_data['pay_stub_entry_account_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['accrual_policy_id']) AND isset($filter_data['accrual_policy_id'][0]) AND !in_array(-1, (array)$filter_data['accrual_policy_id']) ) {
-			$query  .=	' AND a.accrual_policy_id in ('. $this->getListSQL($filter_data['accrual_policy_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['name']) AND trim($filter_data['name']) != '' ) {
-			$ph[] = strtolower(trim($filter_data['name']));
-			$query  .=	' AND lower(a.name) LIKE ?';
-		}
-		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-        
-        $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
-        
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
 
-        $query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'pguf.user_id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
+		if ( isset($filter_data['type']) AND trim($filter_data['type']) != '' AND !isset($filter_data['type_id']) ) {
+			$filter_data['type_id'] = Option::getByFuzzyValue( $filter_data['type'], $this->getOptions('type') );
+		}
+		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'pguf.user_id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['pay_stub_entry_account_id']) ) ? $this->getWhereClauseSQL( 'a.pay_stub_entry_account_id', $filter_data['pay_stub_entry_account_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['accrual_policy_id']) ) ? $this->getWhereClauseSQL( 'a.accrual_policy_id', $filter_data['accrual_policy_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['wage_group_id']) ) ? $this->getWhereClauseSQL( 'a.wage_group_id', $filter_data['wage_group_id'], 'numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
+        $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
+
 		$query .= 	'
 						AND a.deleted = 0
 					';

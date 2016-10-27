@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9581 $
- * $Id: RecurringScheduleTemplateListFactory.class.php 9581 2013-04-13 01:16:14Z ipso $
- * $Date: 2013-04-12 18:16:14 -0700 (Fri, 12 Apr 2013) $
+ * $Revision: 11053 $
+ * $Id: RecurringScheduleTemplateListFactory.class.php 11053 2013-09-27 23:08:52Z ipso $
+ * $Date: 2013-09-27 16:08:52 -0700 (Fri, 27 Sep 2013) $
  */
 
 /**
@@ -71,6 +71,31 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 					from	'. $this->getTable() .'
 					where	id = ?
 						AND deleted = 0';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$rstcf = new RecurringScheduleTemplateControlFactory();
+
+		$ph = array(
+					'company_id' => $company_id,
+					);
+
+		$query = '
+					select 	a.*
+					from	'. $this->getTable() .' as a
+					LEFT JOIN '. $rstcf->getTable() .' as b ON a.recurring_schedule_template_control_id = b.id
+					where	b.company_id = ?
+						AND a.deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
@@ -222,6 +247,9 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 		$utf = new UserTitleFactory();
 		$apf = new AbsencePolicyFactory();
 
+		$ppsuf = new PayPeriodScheduleUserFactory();
+		$ppsf = new PayPeriodScheduleFactory();
+
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jf = new JobFactory();
 			$jif = new JobItemFactory();
@@ -267,6 +295,8 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 							uw.hourly_rate as user_wage_hourly_rate,
 							uw.effective_date as user_wage_effective_date,
 
+							ppsf.shift_assigned_day_id as shift_assigned_day_id,
+
 							c.created_by as recurring_schedule_control_created_by
 							';
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
@@ -294,6 +324,9 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 						LEFT JOIN '. $rscf->getTable() .' as c ON a.recurring_schedule_template_control_id = c.recurring_schedule_template_control_id
 						LEFT JOIN '. $rsuf->getTable() .' as cb ON c.id = cb.recurring_schedule_control_id
 						LEFT JOIN '. $uf->getTable() .' as d ON cb.user_id = d.id
+
+						LEFT JOIN '. $ppsuf->getTable() .' as ppsuf ON d.id = ppsuf.user_id
+						LEFT JOIN '. $ppsf->getTable() .' as ppsf ON ( ppsuf.pay_period_schedule_id = ppsf.id AND ppsf.deleted = 0 )
 
 						LEFT JOIN '. $bf->getTable() .' as bf ON ( d.default_branch_id = bf.id AND bf.deleted = 0)
 						LEFT JOIN '. $bf->getTable() .' as bfb ON ( a.branch_id = bfb.id AND bfb.deleted = 0)
@@ -459,7 +492,7 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 
 		if ( $order == NULL ) {
-			$order = array( 'week' => 'asc', 'start_time' => 'asc', 'end_time' => 'asc');
+			$order = array( 'week' => 'asc', 'sun' => 'asc', 'mon' => 'asc', 'tue' => 'asc', 'wed' => 'asc', 'thu' => 'asc', 'fri' => 'asc', 'sat' => 'asc',  'start_time' => 'asc', 'end_time' => 'asc');
 			$strict = FALSE;
 		} else {
 			//Always sort by last name,first name after other columns

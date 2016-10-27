@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 6446 $
- * $Id: StationUserListFactory.class.php 6446 2012-03-23 23:25:32Z ipso $
- * $Date: 2012-03-23 16:25:32 -0700 (Fri, 23 Mar 2012) $
+ * $Revision: 11018 $
+ * $Id: StationUserListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -69,6 +69,32 @@ class StationUserListFactory extends StationUserFactory implements IteratorAggre
 					select 	*
 					from	'. $this->getTable() .'
 					where	id = ?
+					';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$sf = new StationFactory();
+
+		$ph = array(
+					'company_id' => $company_id,
+					);
+
+		$query = '
+					select 	a.*
+					from	'. $this->getTable() .' as a,
+							'. $sf->getTable() .' as b
+					where	b.id = a.station_id
+						AND b.company_id = ?
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );

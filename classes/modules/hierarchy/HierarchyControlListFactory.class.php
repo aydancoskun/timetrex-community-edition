@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: HierarchyControlListFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11018 $
+ * $Id: HierarchyControlListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -282,10 +282,11 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 					'company_id' => $company_id,
 					);
 
+		//Count total users in HierarchyControlFactory factory, so we can disable it when needed. That way it doesn't slow down Hierarchy dropdown boxes.
+		//(select count(*) from '. $hlf->getTable().' as hlf WHERE a.id = hlf.hierarchy_control_id AND hlf.deleted = 0 AND a.deleted = 0) as superiors,
+		//(select count(*) from '. $huf->getTable().' as hulf WHERE a.id = hulf.hierarchy_control_id AND a.deleted = 0 ) as subordinates,
 		$query = '
 					select 	distinct a.*,
-							(select count(*) from '. $hlf->getTable().' as hlf WHERE a.id = hlf.hierarchy_control_id AND hlf.deleted = 0 AND a.deleted = 0) as superiors,
-							(select count(*) from '. $huf->getTable().' as hulf WHERE a.id = hulf.hierarchy_control_id AND a.deleted = 0 ) as subordinates,
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
 							y.last_name as created_by_last_name,

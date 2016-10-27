@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: AccrualPolicyMilestoneListFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11018 $
+ * $Id: AccrualPolicyMilestoneListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -79,13 +79,43 @@ class AccrualPolicyMilestoneListFactory extends AccrualPolicyMilestoneFactory im
 		return $this;
 	}
 
+	function getByCompanyID( $company_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$ph = array(
+					'company_id' => $company_id,
+					);
+
+		$apf = new AccrualPolicyFactory();
+
+		$query = '
+					select 	a.*
+					from	'. $this->getTable() .' as a
+					LEFT JOIN '. $apf->getTable() .' as b ON a.accrual_policy_id = b.id
+					where	b.company_id = ?
+						AND ( a.deleted = 0 AND b.deleted = 0)';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
 	function getByIdAndCompanyID($id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
 		$ph = array(
 					'id' => $id,
+					'company_id' => $company_id,
 					);
 
 		$apf = new AccrualPolicyFactory();
@@ -95,6 +125,7 @@ class AccrualPolicyMilestoneListFactory extends AccrualPolicyMilestoneFactory im
 					from	'. $this->getTable() .' as a
 					LEFT JOIN '. $apf->getTable() .' as b ON a.accrual_policy_id = b.id
 					where	a.id = ?
+						AND b.company_id = ?
 						AND ( a.deleted = 0 AND b.deleted = 0)';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );

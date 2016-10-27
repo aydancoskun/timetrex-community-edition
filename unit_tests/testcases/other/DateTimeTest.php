@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10365 $
- * $Id: DateTimeTest.php 10365 2013-07-05 01:45:36Z ipso $
- * $Date: 2013-07-04 18:45:36 -0700 (Thu, 04 Jul 2013) $
+ * $Revision: 11115 $
+ * $Id: DateTimeTest.php 11115 2013-10-11 18:29:20Z ipso $
+ * $Date: 2013-10-11 11:29:20 -0700 (Fri, 11 Oct 2013) $
  */
 require_once('PHPUnit/Framework/TestCase.php');
 
@@ -518,6 +518,12 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 
 		TTDate::setTimeFormat('g:i A');
 		$this->assertEquals( TTDate::parseDateTime(1162670400), (int)1162670400 );
+		
+		$this->assertEquals( TTDate::parseDateTime(600), (int)600 ); //Test small epochs that may conflict with 24hr time that just has the time and not a date.
+		$this->assertEquals( TTDate::parseDateTime(1800), (int)1800 );  //Test small epochs that may conflict with 24hr time that just has the time and not a date.
+
+		$this->assertEquals( TTDate::parseDateTime(-600), (int)-600 ); //Test small epochs that may conflict with 24hr time that just has the time and not a date.
+		$this->assertEquals( TTDate::parseDateTime(-1800), (int)-1800 ); //Test small epochs that may conflict with 24hr time that just has the time and not a date.
 	}
 
 	function test_roundTime() {

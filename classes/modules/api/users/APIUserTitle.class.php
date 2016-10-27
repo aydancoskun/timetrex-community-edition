@@ -129,7 +129,7 @@ class APIUserTitle extends APIFactory {
 	 * @return array
 	 */
 	function getCommonUserTitleData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getUserTitle( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getUserTitle( $data, TRUE ) ) );
 	}
 
 	/**
@@ -366,7 +366,7 @@ class APIUserTitle extends APIFactory {
 		Debug::Text('Received data for: '. count($data) .' UserTitles', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$src_rows = $this->getUserTitle( array('filter_data' => array('id' => $data) ), TRUE );
+		$src_rows = $this->stripReturnHandler( $this->getUserTitle( array('filter_data' => array('id' => $data) ), TRUE ) );
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {

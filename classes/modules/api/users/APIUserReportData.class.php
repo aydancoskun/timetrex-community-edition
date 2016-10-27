@@ -306,7 +306,7 @@ class APIUserReportData extends APIFactory {
 		Debug::Arr($user_report_data_ids, 'User Report Data IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($destination_user_ids, 'Destination User IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$src_rows = $this->getUserReportData( array('filter_data' => array('id' => $user_report_data_ids ) ), TRUE );
+		$src_rows = $this->stripReturnHandler( $this->getUserReportData( array('filter_data' => array('id' => $user_report_data_ids ) ), TRUE ) );
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			$dst_rows = array();

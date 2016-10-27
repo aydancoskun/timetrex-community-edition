@@ -132,7 +132,7 @@ class APIUserSkill extends APIFactory {
 	 * @return array
 	 */
 	function getCommonUserSkillData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getUserSkill( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getUserSkill( $data, TRUE ) ) );
 	}
 
 	/**
@@ -208,7 +208,19 @@ class APIUserSkill extends APIFactory {
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('user_skill','add'), TTi18n::gettext('Add permission denied') );
+					if (    !( $validate_only == TRUE
+								OR
+								( $this->getPermissionObject()->Check('user_skill','add')
+									AND
+									(
+										$this->getPermissionObject()->Check('user_skill','edit')
+										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('user_skill','edit_own') AND $this->getPermissionObject()->isOwner( FALSE, $row['user_id'] ) === TRUE ) //We don't know the created_by of the user at this point, but only check if the user is assigned to the logged in person.
+										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('user_skill','edit_child') AND $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === TRUE )
+									)
+								)
+							) ) {
+						$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Add permission denied') );
+					}
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -386,7 +398,7 @@ class APIUserSkill extends APIFactory {
 		Debug::Text('Received data for: '. count($data) .' Skills', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$src_rows = $this->getUserSkill( array('filter_data' => array('id' => $data) ), TRUE );
+		$src_rows = $this->stripReturnHandler( $this->getUserSkill( array('filter_data' => array('id' => $data) ), TRUE ) );
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {

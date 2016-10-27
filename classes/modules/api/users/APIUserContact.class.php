@@ -168,7 +168,7 @@ class APIUserContact extends APIFactory {
 	 * @return array
 	 */
 	function getCommonUserContactData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getUserContact( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getUserContact( $data, TRUE ) ) );
 	}
 
 	/**
@@ -232,7 +232,6 @@ class APIUserContact extends APIFactory {
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
-							//$row = array_merge( $lf->getCurrent()->getObjectAsArray(), $row );
 							$lf = $lf->getCurrent(); //Make the current $lf variable the current object, so we can ignore some fields if needed.
 							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
@@ -244,9 +243,20 @@ class APIUserContact extends APIFactory {
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('user_contact','add'), TTi18n::gettext('Add permission denied') );
+					if (    !( $validate_only == TRUE
+								OR
+								( $this->getPermissionObject()->Check('user_contact','add')
+									AND
+									(
+										$this->getPermissionObject()->Check('user_contact','edit')
+										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('user_contact','edit_own') AND $this->getPermissionObject()->isOwner( FALSE, $row['user_id'] ) === TRUE ) //We don't know the created_by of the user at this point, but only check if the user is assigned to the logged in person.
+										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('user_contact','edit_child') AND $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === TRUE )
+									)
+								)
+							) ) {
+						$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Add permission denied') );
+					}
 				}
-
 
 				//Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 

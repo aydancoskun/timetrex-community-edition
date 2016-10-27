@@ -173,7 +173,7 @@ class APIPermissionControl extends APIFactory {
 	 * @return array
 	 */
 	function getCommonPermissionControlData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getPermissionControl( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getPermissionControl( $data, TRUE ) ) );
 	}
 
 	/**
@@ -418,7 +418,7 @@ class APIPermissionControl extends APIFactory {
 		Debug::Text('Received data for: '. count($data) .' PermissionControls', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$src_rows = $this->getPermissionControl( array('filter_data' => array('id' => $data) ), TRUE );
+		$src_rows = $this->stripReturnHandler( $this->getPermissionControl( array('filter_data' => array('id' => $data) ), TRUE ) );
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {

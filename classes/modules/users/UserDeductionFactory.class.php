@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10609 $
- * $Id: UserDeductionFactory.class.php 10609 2013-07-31 17:29:20Z ipso $
- * $Date: 2013-07-31 10:29:20 -0700 (Wed, 31 Jul 2013) $
+ * $Revision: 11018 $
+ * $Id: UserDeductionFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -970,7 +970,7 @@ class UserDeductionFactory extends Factory {
 					}
 
 					//First pass to gather any necessary data based on variables
-					if ( in_array('employee_hourly_rate', $formula_variables) OR in_array('employee_hourly_rate', $formula_variables ) OR in_array( 'employee_wage_average_weekly_hours', $formula_variables ) ) {
+					if ( in_array('employee_hourly_rate', $formula_variables) OR in_array('employee_annual_wage', $formula_variables ) OR in_array( 'employee_wage_average_weekly_hours', $formula_variables ) ) {
 						$uwlf = TTnew('UserWageListFactory');
 						$uwlf->getWageByUserIdAndPayPeriodEndDate( $this->getUser(), $pay_period_obj->getEndDate() );
 						if ( $uwlf->getRecordCount() > 0 ) {

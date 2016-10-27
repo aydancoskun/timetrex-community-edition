@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10643 $
- * $Id: Misc.class.php 10643 2013-08-02 19:06:09Z ipso $
- * $Date: 2013-08-02 12:06:09 -0700 (Fri, 02 Aug 2013) $
+ * $Revision: 11167 $
+ * $Id: Misc.class.php 11167 2013-10-15 20:29:07Z ipso $
+ * $Date: 2013-10-15 13:29:07 -0700 (Tue, 15 Oct 2013) $
  */
 
 /**
@@ -273,13 +273,16 @@ class Misc {
 	*/
 	static function arrayIntersectByRow( $rows ) {
 		if ( !is_array($rows) ) {
+			Debug::Text('zzz1Intersected/Common Data', __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
 		}
 
 		if ( count($rows) < 2 ) {
+			Debug::Text('zzz2Intersected/Common Data', __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
 		}
 
+		Debug::Arr($rows, 'Intersected/Common Data', __FILE__, __LINE__, __METHOD__, 10);
 		$retval = FALSE;
 		if ( isset($rows[0]) ) {
 			$retval = @call_user_func_array( 'array_intersect_assoc', $rows ); 
@@ -295,6 +298,8 @@ class Misc {
             // Put a "@" in front to prevent the error, otherwise, the Flex will not work properly.            
             
 			Debug::Arr($retval, 'Intersected/Common Data', __FILE__, __LINE__, __METHOD__, 10);
+		} else {
+			Debug::Text('zzz3Intersected/Common Data', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return $retval;
@@ -883,6 +888,118 @@ class Misc {
 		return FALSE;
 	}
 
+	static function Export2XML( $factory_arr, $filter_data, $output_file ) {
+		global $global_class_map;
+
+		$global_exclude_arr = array(
+									'Factory',
+									'FactoryListIterator',
+									'SystemSettingFactory',
+									'CronJobFactory',
+									'CompanyUserCountFactory',
+
+									'HelpFactory',
+									'HelpGroupControlFactory',
+									'HelpGroupFactory',
+									'HierarchyFactory',
+									'HierarchyShareFactory',
+									'JobUserAllowFactory',
+									'JobItemAllowFactory',
+									'PolicyGroupAccrualPolicyFactory',
+									'PolicyGroupOverTimePolicyFactory',
+									'PolicyGroupPremiumPolicyFactory',
+									'PolicyGroupRoundIntervalPolicyFactory',
+									'ProductTaxPolicyProductFactory',
+									);
+		
+		$dependency_tree = new DependencyTree();
+		$i=0;
+		foreach( $global_class_map as $class => $file ) {
+			if ( stripos( $class, 'Factory' ) !== FALSE
+					AND stripos( $class, 'API' ) === FALSE AND stripos( $class, 'ListFactory' ) === FALSE AND stripos( $class, 'Report' ) === FALSE
+					AND !in_array( $class, $global_exclude_arr )
+					) {
+				if ( isset($global_class_dependancy_map[$class]) ) {
+					$dependency_tree->addNode( $class, $global_class_dependancy_map[$class], $class, $i);
+				} else {
+					$dependency_tree->addNode( $class, array(), $class, $i);
+				}
+			}
+			$i++;
+		}
+		$ordered_factory_arr = $dependency_tree->getAllNodesInOrder();
+		//Debug::Arr($ordered_factory_arr, 'Ordered Factory List: ', __FILE__, __LINE__, __METHOD__,10);
+
+		if ( is_array($factory_arr) AND count($factory_arr) > 0 ) {
+			Debug::Arr($factory_arr, 'Factory Filter: ', __FILE__, __LINE__, __METHOD__,10);
+			foreach( $ordered_factory_arr as $factory ) {
+				if ( in_array( $factory, $factory_arr) ) {
+					$filtered_factory_arr[] = $factory;
+				} else {
+					//Debug::Text('Removing factory: '. $factory .' due to filter...', __FILE__, __LINE__, __METHOD__,10);
+				}
+			}
+		} else {
+			Debug::Text('Not filtering factory...', __FILE__, __LINE__, __METHOD__,10);
+			$filtered_factory_arr = $ordered_factory_arr;
+		}
+		unset($ordered_factory_arr);
+
+		if ( isset($filtered_factory_arr) AND count($filtered_factory_arr) > 0 ) {
+			@unlink( $output_file );
+			$fp = bzopen( $output_file, 'w');
+			
+			Debug::Arr($filtered_factory_arr, 'Filtered/Ordered Factory List: ', __FILE__, __LINE__, __METHOD__,10);
+			
+			Debug::Text('Exporting data...', __FILE__, __LINE__, __METHOD__,10);
+			foreach( $filtered_factory_arr as $factory ) {
+				$class = str_replace( 'Factory', 'ListFactory', $factory );
+				$lf = new $class;
+				Debug::Text('Exporting ListFactory: '. $factory .' Memory Usage: '. memory_get_usage() .' Peak: '. memory_get_peak_usage(TRUE), __FILE__, __LINE__, __METHOD__,10);
+				self::ExportListFactory2XML( $lf, $filter_data, $fp );
+				unset($lf);
+			}
+			bzclose($fp);
+
+		} else {
+			Debug::Text('No data to export...', __FILE__, __LINE__, __METHOD__,10);
+		}
+	}
+
+	static function ExportListFactory2XML( $lf, $filter_data, $file_pointer ) {
+		require_once(Environment::getBasePath() .'classes/pear/XML/Serializer.php');
+		
+		$serializer = new XML_Serializer( array(
+													XML_SERIALIZER_OPTION_INDENT        => '  ',
+													XML_SERIALIZER_OPTION_RETURN_RESULT => TRUE,
+													'linebreak'			=> "\n",
+													'typeHints'   		=> TRUE,
+													'encoding'      	=> 'UTF-8',
+													'rootName'			=> get_parent_class( $lf ),
+												)
+										 );
+
+		$lf->getByCompanyId( $filter_data['company_id'] );
+		if ( $lf->getRecordCount() > 0 ) {
+			Debug::Text('Exporting '. $lf->getRecordCount() .' rows...', __FILE__, __LINE__, __METHOD__,10);
+			foreach( $lf as $obj ) {
+				if ( isset($obj->data) ) {
+					$result = $serializer->serialize( $obj->data );
+					bzwrite($file_pointer, $result."\n" );
+					//Debug::Arr($result, 'Data: ', __FILE__, __LINE__, __METHOD__,10);
+				} else {
+					Debug::Text('Object \'data\' variable does not exist, cant export...', __FILE__, __LINE__, __METHOD__,10);
+				}
+			}
+			unset($result, $obj, $serializer);
+		} else {
+			Debug::Text('No rows to export...', __FILE__, __LINE__, __METHOD__,10);
+			return FALSE;
+		}
+
+		return TRUE;
+	}
+
 	static function inArrayByKeyAndValue( $arr, $search_key, $search_value ) {
 		if ( !is_array($arr) AND $search_key != '' AND $search_value != '') {
 			return FALSE;
@@ -1391,6 +1508,67 @@ class Misc {
 		}
 	}
 
+	static function getBytesFromSize($val) {
+		$val = trim($val);
+
+		switch ( strtolower( substr($val, -1) ) ) {
+			case 'm':
+				$val = (int)substr($val, 0, -1) * 1048576;
+				break;
+			case 'k':
+				$val = (int)substr($val, 0, -1) * 1024;
+				break;
+			case 'g':
+				$val = (int)substr($val, 0, -1) * 1073741824;
+				break;
+			case 'b':
+				switch ( strtolower(substr($val, -2, 1)) ) {
+					case 'm':
+						$val = (int)substr($val, 0, -2) * 1048576;
+						break;
+					case 'k':
+						$val = (int)substr($val, 0, -2) * 1024;
+						break;
+					case 'g':
+						$val = (int)substr($val, 0, -2) * 1073741824;
+						break;
+					default:
+						break;
+				}
+				break;
+			default:
+				break;
+		}
+
+		return $val;
+	}
+
+	static function getSystemMemoryInfo( $type = 'free+cached' ) {
+		if ( OPERATING_SYSTEM == 'LINUX' ) {
+			$memory_file = '/proc/meminfo';
+			if ( file_exists( $memory_file ) AND is_readable( $memory_file ) ) {
+				$buffer = file_get_contents( $memory_file );
+
+				preg_match('/MemFree:\s+([0-9]+) kB/im', $buffer, $mem_free_match);
+				if ( isset($mem_free_match[1]) ) {
+					$mem_free = Misc::getBytesFromSize( (int)$mem_free_match[1].'K' );
+					unset($mem_free_match);
+				}
+
+				preg_match('/Cached:\s+([0-9]+) kB/im', $buffer, $mem_cached_match);
+				if ( isset($mem_cached_match[1]) ) {
+					$mem_cached = Misc::getBytesFromSize( (int)$mem_cached_match[1].'K' );
+					unset($mem_cached_match);
+				}
+
+				Debug::Text(' Memory Info: Free: '. $mem_free .'b Cached: '. $mem_cached .'b' , __FILE__, __LINE__, __METHOD__,10);
+				return $mem_free+$mem_cached;
+			}
+		}
+
+		return 999999999; //If not linux, return large number, this is in KB.
+	}
+	
 	static function getSystemLoad() {
 		if ( OPERATING_SYSTEM == 'LINUX' ) {
 			$loadavg_file = '/proc/loadavg';
@@ -1401,7 +1579,7 @@ class Misc {
 
 				//$retval = max((float)$load[0], (float)$load[1], (float)$load[2]);
 				$retval = max((float)$load[0], (float)$load[1] ); //Only consider 1 and 5 minute load averages, so we don't block cron/reports for more than 5 minutes.
-				Debug::text(' Load Average: '. $retval , __FILE__, __LINE__, __METHOD__,10);
+				//Debug::text(' Load Average: '. $retval , __FILE__, __LINE__, __METHOD__,10);
 
 				return $retval;
 			}

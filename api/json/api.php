@@ -109,7 +109,7 @@ if ( isset($_GET['SessionID']) AND $_GET['SessionID'] != '' ) {
 					}
 
 					if ( $method != '' AND method_exists( $obj, $method ) ) {
-						$retval = call_user_func_array( array($obj, $method), $arguments );
+						$retval = call_user_func_array( array($obj, $method), (array)$arguments );
 						if ( $retval !== NULL ) {
 							echo json_encode( $retval );
 						} else {

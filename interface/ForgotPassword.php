@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8243 $
- * $Id: ForgotPassword.php 8243 2012-11-08 17:00:03Z ipso $
- * $Date: 2012-11-08 09:00:03 -0800 (Thu, 08 Nov 2012) $
+ * $Revision: 11018 $
+ * $Id: ForgotPassword.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 require_once('../includes/global.inc.php');
 
@@ -67,6 +67,7 @@ Debug::Text('Action: '. $action, __FILE__, __LINE__, __METHOD__,10);
 switch ($action) {
 	case 'change_password':
 		Debug::Text('Change Password: '. $key, __FILE__, __LINE__, __METHOD__,10);
+		
 		$ulf = TTnew( 'UserListFactory' );
 		$ulf->getByPasswordResetKey( $key );
 		if ( $ulf->getRecordCount() == 1 ) {
@@ -83,14 +84,11 @@ switch ($action) {
 				$user_obj->setPasswordResetDate('');
 				if ( $user_obj->isValid() ) {
 					$user_obj->Save();
-
 					Debug::Text('Password Change succesful!', __FILE__, __LINE__, __METHOD__,10);
 
-					Redirect::Page( URLBuilder::getURL( array('password_reset' => 1 ), 'Login.php' ) );
+					Redirect::Page( URLBuilder::getURL( array('password_reset' => 1 ), Environment::getDefaultInterfaceBaseURL() ) );
 				}
-
 			} else {
-
 				$validator->isTrue('password',FALSE, TTi18n::getText('Passwords do not match') );
 			}
 

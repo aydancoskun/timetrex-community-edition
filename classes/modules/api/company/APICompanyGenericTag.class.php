@@ -128,7 +128,7 @@ class APICompanyGenericTag extends APIFactory {
 	 * @return array
 	 */
 	function getCommonCompanyGenericTagData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getCompanyGenericTag( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getCompanyGenericTag( $data, TRUE ) ) );
 	}
 
 	/**

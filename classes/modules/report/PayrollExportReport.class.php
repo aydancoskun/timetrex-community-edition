@@ -105,6 +105,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 								'ceridian_insync' 	=> TTi18n::gettext('Ceridian Insync'),
 								'millenium' 		=> TTi18n::gettext('Millenium'),
 								'quickbooks' 		=> TTi18n::gettext('QuickBooks Pro'),
+								//'quickbooks_advanced' => TTi18n::gettext('QuickBooks Pro (Advanced)'), //Break time out by day?
 								'surepayroll' 		=> TTi18n::gettext('SurePayroll'),
 								'chris21' 			=> TTi18n::gettext('Chris21'),
 								'csv' 				=> TTi18n::gettext('Generic Excel/CSV'),
@@ -196,12 +197,15 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$hour_column_name_map = array(
 								'adp' 				=> TTi18n::gettext('ADP Hours Code'),
 								'paychex_preview' 	=> TTi18n::gettext('Paychex Hours Code'),
+								'paychex_preview_advanced_job' => TTi18n::gettext('Paychex Hours Code'),
 								'paychex_online' 	=> TTi18n::gettext('Paychex Hours Code'),
 								'ceridian_insync' 	=> TTi18n::gettext('Ceridian Hours Code'),
 								'millenium' 		=> TTi18n::gettext('Millenium Hours Code'),
 								'quickbooks' 		=> TTi18n::gettext('Quickbooks Payroll Item Name'),
+								'quickbooks_advanced' => TTi18n::gettext('Quickbooks Payroll Item Name'),
 								'surepayroll' 		=> TTi18n::gettext('Payroll Code'),
 								'csv' 				=> TTi18n::gettext('Hours Code'),
+								'csv_advanced' 				=> TTi18n::gettext('Hours Code'),
 								);
 
 				if (  isset($params['export_type']) AND isset($hour_column_name_map[$params['export_type']]) ) {
@@ -255,6 +259,8 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$retval = array_merge( $retval, (array)$default_branch_options, (array)$default_department_options, $branch_options, $department_options );
 				break;
 			case 'quickbooks_proj_options':
+			case 'quickbooks_job_options':
+			case 'quickbooks_item_options':
 				$retval = array(
 								0 => TTi18n::gettext('-- NONE --'),
 								'default_branch' => TTi18n::gettext('Default Branch'),
@@ -389,6 +395,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 						$config['sort'][] = array('employee_number' => 'asc');
 						break;
 					case 'quickbooks':
+					case 'quickbooks_advanced':
 						$config['columns'][] = 'pay_period_end_date';
 						$config['columns'][] = 'employee_number';
 						$config['columns'][] = 'last_name';
@@ -398,6 +405,9 @@ class PayrollExportReport extends TimesheetSummaryReport {
 						//Support custom group based on PROJ field
 						if ( isset($setup_data['quickbooks']['proj']) AND !empty($setup_data['quickbooks']['proj']) ) {
 							$config['columns'][] = $setup_data['quickbooks']['proj'];
+						}
+						if ( isset($setup_data['quickbooks']['item']) AND !empty($setup_data['quickbooks']['item']) ) {
+							$config['columns'][] = $setup_data['quickbooks']['item'];
 						}
 						if ( isset($setup_data['quickbooks']['job']) AND !empty($setup_data['quickbooks']['job']) ) {
 							$config['columns'][] = $setup_data['quickbooks']['job'];
@@ -414,6 +424,9 @@ class PayrollExportReport extends TimesheetSummaryReport {
 						//Support custom group based on PROJ field
 						if ( isset($setup_data['quickbooks']['proj']) AND !empty($setup_data['quickbooks']['proj']) ) {
 							$config['group'][] = $setup_data['quickbooks']['proj'];
+						}
+						if ( isset($setup_data['quickbooks']['item']) AND !empty($setup_data['quickbooks']['item']) ) {
+							$config['group'][] = $setup_data['quickbooks']['item'];
 						}
 						if ( isset($setup_data['quickbooks']['job']) AND !empty($setup_data['quickbooks']['job']) ) {
 							$config['group'][] = $setup_data['quickbooks']['job'];
@@ -913,6 +926,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 				break;
 			case 'quickbooks': //Quickbooks Pro export format.
+			case 'quickbooks_advanced': //Quickbooks Pro export format.
 				$file_name = 'payroll_export.iif';
 
 				ksort($setup_data['quickbooks']['columns']);
@@ -925,6 +939,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					Company Create Time can be found by first running an Timer Activity export in QuickBooks and viewing the output.
 
 					PITEM field needs to be populated, as that is the PAYROLL ITEM in quickbooks. It can be the same as the ITEM field.
+					ITEM is the service item, can be mapped to department/task?
 					PROJ could be mapped to the default department/branch?
 				*/
 				$data =  "!TIMERHDR\tVER\tREL\tCOMPANYNAME\tIMPORTEDBEFORE\tFROMTIMER\tCOMPANYCREATETIME\n";
@@ -944,12 +959,16 @@ class PayrollExportReport extends TimesheetSummaryReport {
 							if ( isset($row[$setup_data['quickbooks']['proj']]) ) {
 								$proj = $row[$setup_data['quickbooks']['proj']];
 							}
+							$item = NULL;
+							if ( isset($row[$setup_data['quickbooks']['item']]) ) {
+								$item = $row[$setup_data['quickbooks']['item']];
+							}
 							$job = NULL;
 							if ( isset($row[$setup_data['quickbooks']['job']]) ) {
 								$job = $row[$setup_data['quickbooks']['job']];
 							}
 
-							$data .= "TIMEACT\t". date('n/j/y', $row['pay_period_end_date'])."\t". $job ."\t". $tmp_employee_name ."\t". trim($column_data['hour_code']) ."\t". trim($column_data['hour_code']) ."\t".  TTDate::getTimeUnit( $row[$column_id], 10 ) ."\t". $proj ."\t\tY\t0\n";
+							$data .= "TIMEACT\t". date('n/j/y', $row['pay_period_end_date'])."\t". $job ."\t". $tmp_employee_name ."\t". $item ."\t". trim($column_data['hour_code']) ."\t".  TTDate::getTimeUnit( $row[$column_id], 10 ) ."\t". $proj ."\t\tY\t0\n";
 							unset($tmp_employee_name);
 						}
 					}

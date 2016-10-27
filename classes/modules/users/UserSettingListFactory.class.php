@@ -79,6 +79,31 @@ class UserSettingListFactory extends UserSettingFactory implements IteratorAggre
 		return $this;
 	}
 
+	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$uf = new UserFactory();
+
+		$ph = array(
+					'company_id' => $company_id
+					);
+
+		$query = '
+					select 	a.*
+					from	'. $this->getTable() .' as a
+					LEFT JOIN '. $uf->getTable() .' as uf ON a.user_id = uf.id
+					where	uf.company_id = ?
+						AND ( uf.deleted = 0 )';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
 	function getByUserIdAndName($user_id, $name) {	    
         if ( $user_id == '' ) {
             return FALSE;

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9725 $
- * $Id: PremiumPolicyListFactory.class.php 9725 2013-04-30 15:57:06Z ipso $
- * $Date: 2013-04-30 08:57:06 -0700 (Tue, 30 Apr 2013) $
+ * $Revision: 11018 $
+ * $Id: PremiumPolicyListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -213,29 +213,36 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 					'user_id' => $user_id,
 					);
 
+		//Make sure we don't include duplicate premium policies
+		//if the premium policy is assigned to the policy group AND the schedule policy.
+		//it could double up on the premium time. 
 		$query = '
-					select 	distinct d.*
-					from 	'. $pguf->getTable() .' as a,
-							'. $pgf->getTable() .' as b,
-							'. $cgmf->getTable() .' as c,
-							'. $this->getTable() .' as d
-					where 	a.policy_group_id = b.id
-						AND ( b.id = c.object_id AND b.company_id = c.company_id AND c.object_type_id = 120 )
-						AND c.map_id = d.id
-						AND a.user_id = ?
-						AND ( b.deleted = 0 AND d.deleted = 0 )
-					UNION ALL
-						select 	z.*
-						from	'. $this->getTable() .' as z,
-								'. $cgmf->getTable() .' as c
-						WHERE 	c.map_id = z.id AND c.object_type_id = 125
-								AND c.object_id in ('. $this->getListSQL($id, $ph) .')
-								AND z.deleted = 0
+					select distinct * from (
+						select 	distinct d.*
+						from 	'. $pguf->getTable() .' as a,
+								'. $pgf->getTable() .' as b,
+								'. $cgmf->getTable() .' as c,
+								'. $this->getTable() .' as d
+						where 	a.policy_group_id = b.id
+							AND ( b.id = c.object_id AND b.company_id = c.company_id AND c.object_type_id = 120 )
+							AND c.map_id = d.id
+							AND a.user_id = ?
+							AND ( b.deleted = 0 AND d.deleted = 0 )
+						UNION ALL
+							select 	z.*
+							from	'. $this->getTable() .' as z,
+									'. $cgmf->getTable() .' as c
+							WHERE 	c.map_id = z.id AND c.object_type_id = 125
+									AND c.object_id in ('. $this->getListSQL($id, $ph) .')
+									AND z.deleted = 0
+					) as tmp
 						';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
+
+		//Debug::Arr($ph ,' Query: '. $query, __FILE__, __LINE__, __METHOD__,10);
 
 		return $this;
 	}

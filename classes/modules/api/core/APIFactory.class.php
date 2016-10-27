@@ -325,9 +325,16 @@ abstract class APIFactory {
 				Debug::Arr($retarr, 'returnHandler ERROR: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
 			}
 
-			Debug::Arr($retarr, 'returnHandler: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
+			//Debug::Arr($retarr, 'returnHandler: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
 			return $retarr;
 		}
+	}
+	function stripReturnHandler( $retarr ) {
+		if ( isset($retarr['api_retval']) ) {
+			return $retarr['api_retval'];
+		}
+
+		return $retarr;
 	}
 
 	//Bridge to main class getOptions factory.

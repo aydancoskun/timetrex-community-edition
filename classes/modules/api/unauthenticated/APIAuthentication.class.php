@@ -382,6 +382,7 @@ class APIAuthentication extends APIFactory {
 		global $config_vars;
 
 		return array(
+				'primary_company_id' => PRIMARY_COMPANY_ID, //Needed for some branded checks.
 				'base_url' => Environment::getBaseURL(),
 				'api_url' => Environment::getAPIURL( $api ),
 				'api_base_url' => Environment::getAPIBaseURL( $api ),

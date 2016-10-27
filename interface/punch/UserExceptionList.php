@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 5976 $
- * $Id: UserExceptionList.php 5976 2012-01-06 17:05:41Z ipso $
- * $Date: 2012-01-06 09:05:41 -0800 (Fri, 06 Jan 2012) $
+ * $Revision: 11121 $
+ * $Id: UserExceptionList.php 11121 2013-10-12 04:36:49Z ipso $
+ * $Date: 2013-10-11 21:36:49 -0700 (Fri, 11 Oct 2013) $
  */
 require_once('../../includes/global.inc.php');
 require_once(Environment::getBasePath() .'includes/Interface.inc.php');
@@ -142,10 +142,9 @@ switch ($action) {
 
 		$ulf = TTnew( 'UserListFactory' );
 		$elf = TTnew( 'ExceptionListFactory' );
-
 		$hlf = TTnew( 'HierarchyListFactory' );
 		$permission_children_ids = $hlf->getHierarchyChildrenByCompanyIdAndUserIdAndObjectTypeID( $current_company->getId(), $current_user->getId() );
-		Debug::Arr($permission_children_ids,'Permission Children Ids:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($permission_children_ids,'Permission Children Ids:', __FILE__, __LINE__, __METHOD__,10);
 		$filter_data['permission_children_ids'] = array();
 		if ( $permission->Check('punch','view') == FALSE ) {
 			if ( $permission->Check('punch','view_child') ) {
@@ -172,7 +171,12 @@ switch ($action) {
 			$filter_data['type_id'][] = 5;
 		}
 
+		//This query can be really slow, make sure we put a time limit on it.
+		if ( DEPLOYMENT_ON_DEMAND == TRUE ) { $elf->setQueryStatementTimeout( 5000 ); }
+
 		$elf->getSearchByCompanyIdAndArrayCriteria( $current_company->getId(), $filter_data, $current_user_prefs->getItemsPerPage(), $page, NULL, $sort_array );
+
+		if ( DEPLOYMENT_ON_DEMAND == TRUE ) { $elf->setQueryStatementTimeout(); }
 
 		$pager = new Pager($elf);
 

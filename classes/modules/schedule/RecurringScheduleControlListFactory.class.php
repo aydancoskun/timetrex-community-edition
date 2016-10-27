@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9714 $
- * $Id: RecurringScheduleControlListFactory.class.php 9714 2013-04-27 17:50:36Z ipso $
- * $Date: 2013-04-27 10:50:36 -0700 (Sat, 27 Apr 2013) $
+ * $Revision: 11018 $
+ * $Id: RecurringScheduleControlListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -143,7 +143,7 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 						AND a.id = c.recurring_schedule_control_id
 						AND c.user_id = d.id
 						AND a.company_id = ?
-						AND ( a.deleted = 0 AND b.deleted=0 AND c.deleted=0 AND d.deleted=0 )
+						AND ( a.deleted = 0 AND b.deleted=0 AND d.deleted=0 )
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_sort_fields );

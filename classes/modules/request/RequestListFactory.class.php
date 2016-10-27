@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: RequestListFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11018 $
+ * $Id: RequestListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -120,24 +120,22 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		if ( $order == NULL ) {
-			$order = array( 'type_id' => 'asc' );
-			$strict = FALSE;
-		} else {
-			$strict = TRUE;
-		}
+		$udf = new UserDateFactory();
+		$uf = new UserFactory();
 
 		$ph = array(
 					'id' => $id,
 					);
 
 		$query = '
-					select 	*
+					select 	a.*
 					from	'. $this->getTable() .' as a
-					where	company_id = ?
-						AND deleted = 0';
+					LEFT JOIN '. $udf->getTable() .' as udf ON a.user_date_id = udf.id
+					LEFT JOIN '. $uf->getTable() .' as uf ON udf.user_id = uf.id
+					where	uf.company_id = ?
+						AND ( a.deleted = 0 AND udf.deleted = 0 AND uf.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order, $strict );
+		$query .= $this->getSortSQL( $order );
 
 		$this->ExecuteSQL( $query, $ph );
 

@@ -3452,6 +3452,7 @@ class SetupPresets extends Factory {
 												'pay_stub_entry_account_id' => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'Loan Repayment' ),
 												'user_value1' => 25, //Fixed amount to repay each pay period.
 												'user_value2' => 0,
+												'include_pay_stub_entry_account' => array( $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 50, 'Loan Balance' ) ),
 											)
 										);
 		}
@@ -4452,6 +4453,22 @@ class SetupPresets extends Factory {
 														'always_week_day_id' => 3, //Closest
 													)
 												  );
+
+					$this->createRecurringHoliday(
+													array(
+														'company_id' => $this->getCompany(),
+														'name' => strtoupper($province) .' - Civic Holiday',
+														'type_id' => 20,
+														'special_day' => 0,
+														//'pivot_day_direction_id' => 0,
+														'week_interval' => 1,
+														'day_of_week' => 1,
+														//'day_of_month' => 1,
+														'month_int' => 8,
+														'always_week_day_id' => 3, //Closest
+													)
+												  );
+
 					break;
 				case 'yt':
 					$this->createRecurringHoliday(
@@ -5400,13 +5417,18 @@ class SetupPresets extends Factory {
 
 	function getAbsencePolicyByCompanyIDAndTypeAndName( $type_id, $name ) {
 		$filter_data = array(
-								'type_id' => array($type_id),
+								'type_id' => $type_id,
 								'name' => $name
 							);
 		$aplf = TTnew( 'AbsencePolicyListFactory' );
 		$aplf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), $filter_data );
 		if ( $aplf->getRecordCount() > 0 ) {
-			return $aplf->getCurrent()->getId();
+			$retarr = array();
+			foreach( $aplf as $ap_obj ) {
+				$retarr[] = $ap_obj->getCurrent()->getId();
+			}
+
+			return $retarr;
 		}
 
 		return FALSE;
@@ -5631,6 +5653,19 @@ class SetupPresets extends Factory {
 													'pay_stub_entry_account_id' => 0,
 												)
 											);
+
+					$this->createAbsencePolicy(
+												array(
+													'company_id' => $this->getCompany(),
+													'name' => 'Statutory Holiday',
+													'type_id' => 10, //Paid, 20=UnPaid
+													'rate' => 1.00,
+													'wage_group_id' => 0,
+													'accrual_rate' => 1.00,
+													'accrual_policy_id' => 0,
+													'pay_stub_entry_account_id' => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Statutory Holiday' ),
+												)
+											);
 					break;
 			}
 		}
@@ -5683,6 +5718,11 @@ class SetupPresets extends Factory {
 		if ( is_array($data) ) {
 			$hpf = TTnew( 'HolidayPolicyFactory' );
 			$data['id'] = $hpf->getNextInsertId();
+
+			if ( isset($data['absence_policy_id']) AND is_array($data['absence_policy_id']) ) {
+				$data['absence_policy_id'] = $data['absence_policy_id'][0];
+			}
+
 			$hpf->setObjectFromArray( $data );
 			if ( $hpf->isValid() ) {
 				return $hpf->Save( TRUE, TRUE );
@@ -5710,7 +5750,8 @@ class SetupPresets extends Factory {
 
 										'minimum_time' => (8*3600), //8hrs
 
-										'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( 10, strtoupper($province) .' - Statutory Holiday' ),
+										//'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( 10, strtoupper($province) .' - Statutory Holiday' ),
+										'absence_policy_id' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( 10, 'Statutory Holiday' ),
 										'recurring_holiday_id' => (array)$this->getRecurringHolidayByCompanyIDAndName( $country.'%' ),
 									)
 								);
@@ -6130,6 +6171,7 @@ class SetupPresets extends Factory {
 										'accrual_policy' => $this->getAccrualPolicyByCompanyIDAndTypeAndName( 20, strtoupper($province).'%' ),
 										'holiday_policy' => $this->getHolidayPolicyByCompanyIDAndName( strtoupper($province).'%' ),
 										'exception_policy_control_id' => $this->getExceptionPolicyByCompanyIDAndName( 'Default' ),
+										'absence_policy' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( array(10,20), '%' ),
 									)
 								);
 					break;
@@ -6147,6 +6189,7 @@ class SetupPresets extends Factory {
 								'accrual_policy' => $this->getAccrualPolicyByCompanyIDAndTypeAndName( 20, strtoupper($province).'%' ),
 								'holiday_policy' => $this->getHolidayPolicyByCompanyIDAndName( strtoupper($province).'%' ),
 								'exception_policy_control_id' => $this->getExceptionPolicyByCompanyIDAndName( 'Default' ),
+								'absence_policy' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( array(10,20), '%' ),
 							)
 						);
 
@@ -6159,6 +6202,7 @@ class SetupPresets extends Factory {
 								'accrual_policy' => $this->getAccrualPolicyByCompanyIDAndTypeAndName( 20, strtoupper($province).'%' ),
 								'holiday_policy' => $this->getHolidayPolicyByCompanyIDAndName( strtoupper($province).'%' ),
 								'exception_policy_control_id' => $this->getExceptionPolicyByCompanyIDAndName( 'Default' ),
+								'absence_policy' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( array(10,20), '%' ),
 							)
 						);
 		}
@@ -6173,6 +6217,7 @@ class SetupPresets extends Factory {
 								'accrual_policy' => $this->getAccrualPolicyByCompanyIDAndTypeAndName( 20, strtoupper($province).'%' ),
 								'holiday_policy' => $this->getHolidayPolicyByCompanyIDAndName( strtoupper($province).'%' ),
 								'exception_policy_control_id' => $this->getExceptionPolicyByCompanyIDAndName( 'Default' ),
+								'absence_policy' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( array(10,20), '%' )
 							)
 						);
 
@@ -6185,6 +6230,7 @@ class SetupPresets extends Factory {
 								'accrual_policy' => $this->getAccrualPolicyByCompanyIDAndTypeAndName( 20, strtoupper($province).'%' ),
 								'holiday_policy' => $this->getHolidayPolicyByCompanyIDAndName( strtoupper($province).'%' ),
 								'exception_policy_control_id' => $this->getExceptionPolicyByCompanyIDAndName( 'Default' ),
+								'absence_policy' => $this->getAbsencePolicyByCompanyIDAndTypeAndName( array(10,20), '%' )
 							)
 						);
 		}

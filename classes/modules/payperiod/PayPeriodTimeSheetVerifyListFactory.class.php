@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: PayPeriodTimeSheetVerifyListFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11018 $
+ * $Id: PayPeriodTimeSheetVerifyListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -219,24 +219,20 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 			return FALSE;
 		}
 
-		if ( $order == NULL ) {
-			$order = array( 'type_id' => 'asc' );
-			$strict = FALSE;
-		} else {
-			$strict = TRUE;
-		}
+		$ppf = new PayPeriodFactory();
 
 		$ph = array(
 					'company_id' => $id
 					);
 
 		$query = '
-					select 	*
+					select 	a.*
 					from	'. $this->getTable() .' as a
-					where	company_id = ?
-						AND deleted = 0';
+					LEFT JOIN '. $ppf->getTable() .' as b ON a.pay_period_id = b.id
+					where	b.company_id = ?
+						AND ( a.deleted = 0 AND b.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order, $strict );
+		$query .= $this->getSortSQL( $order );
 
 		$this->ExecuteSQL( $query, $ph );
 

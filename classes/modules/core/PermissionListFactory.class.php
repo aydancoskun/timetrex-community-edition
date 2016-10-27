@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 6446 $
- * $Id: PermissionListFactory.class.php 6446 2012-03-23 23:25:32Z ipso $
- * $Date: 2012-03-23 16:25:32 -0700 (Fri, 23 Mar 2012) $
+ * $Revision: 11018 $
+ * $Id: PermissionListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -70,6 +70,32 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 					from	'. $this->getTable() .'
 					where	id = ?
 						AND deleted = 0';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$ph = array(
+					'company_id' => $company_id,
+					);
+
+		$pcf = new PermissionControlFactory();
+
+		$query = '
+					select 	a.*
+					from	'. $this->getTable() .' as a,
+							'. $pcf->getTable() .' as b
+					where 	b.id = a.permission_control_id
+						AND b.company_id = ?
+						AND ( a.deleted = 0 AND b.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 

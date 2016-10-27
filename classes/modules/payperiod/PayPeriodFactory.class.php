@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10749 $
- * $Id: PayPeriodFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
- * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
+ * $Revision: 11053 $
+ * $Id: PayPeriodFactory.class.php 11053 2013-09-27 23:08:52Z ipso $
+ * $Date: 2013-09-27 16:08:52 -0700 (Fri, 27 Sep 2013) $
  */
 
 /**
@@ -344,6 +344,11 @@ class PayPeriodFactory extends Factory {
 	function setStartDate($epoch) {
 		$epoch = trim($epoch);
 
+		if ( $epoch != '' ) {
+			//Make sure all pay periods start at the first second of the day.
+			$epoch = TTDate::getTimeLockedDate( strtotime('00:00:00', $epoch), $epoch);
+		}
+
 		if 	(	$this->Validator->isDate(		'start_date',
 												$epoch,
 												TTi18n::gettext('Incorrect start date'))
@@ -377,11 +382,15 @@ class PayPeriodFactory extends Factory {
 	function setEndDate($epoch) {
 		$epoch = trim($epoch);
 
+		if ( $epoch != '' ) {
+			//Make sure all pay periods end at the last second of the day.
+			$epoch = TTDate::getTimeLockedDate( strtotime('23:59:59', $epoch), $epoch);
+		}
+
 		if 	(	$this->Validator->isDate(		'end_date',
 												$epoch,
 												TTi18n::gettext('Incorrect end date')) ) {
 
-			//$this->data['end_date'] = $epoch;
 			$this->data['end_date'] = $epoch;
 
 			return TRUE;
@@ -403,6 +412,16 @@ class PayPeriodFactory extends Factory {
 	}
 	function setTransactionDate($epoch) {
 		$epoch = trim($epoch);
+
+		if ( $epoch != '' ) {
+			//Make sure all pay periods transact at noon.
+			$epoch = TTDate::getTimeLockedDate( strtotime('12:00:00', $epoch), $epoch);
+
+			//Unless they are on the same date as the end date, then it should match that.
+			if ( $this->getEndDate() != '' AND $this->getEndDate() > $epoch ) {
+				$epoch = $this->getEndDate();
+			}
+		}
 
 		if 	(	$this->Validator->isDate(		'transaction_date',
 												$epoch,

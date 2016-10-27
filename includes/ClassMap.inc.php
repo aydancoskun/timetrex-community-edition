@@ -638,4 +638,523 @@ $global_class_map = array(
     'APITaxSummaryReport' => 'api/report/APITaxSummaryReport.class.php',
     'TaxSummaryReport' => 'report/TaxSummaryReport.class.php',
 );
+
+$global_class_dependancy_map = array(
+	'CompanyGenericTagFactory' => array(
+						'CompanyFactory'
+						),
+	'CompanyGenericTagMapFactory' => array(
+						'CompanyGenericTagFactory'
+						),
+	'CompanySettingFactory' => array(
+						'CompanyFactory'
+						),
+	'AbsencePolicyFactory' => array(
+						'CompanyFactory'
+						),
+	'AccrualFactory' => array(
+						'UserFactory'
+						),
+	'AccrualBalanceFactory' => array(
+						'UserFactory',
+						'AccrualPolicyFactory'
+						),
+	'AccrualPolicyFactory' => array(
+						'CompanyFactory'
+						),
+	'AccrualPolicyMilestoneFactory' => array(
+						'AccrualPolicyFactory'
+						),
+	'AreaPolicyFactory' => array(
+						'CompanyFactory'
+						),
+	'AreaPolicyLocationFactory' => array(
+						'AreaPolicyFactory'
+						),
+	'BranchFactory' => array(
+						'CompanyFactory'
+						),
+	'BreakPolicyFactory' => array(
+						'CompanyFactory'
+						),
+	'ClientFactory' => array(
+						'CompanyFactory'
+						),
+	'ClientBalanceFactory' => array(
+						'ClientFactory'
+						),
+	'ClientContactFactory' => array(
+						'ClientFactory'
+						),
+	'ClientGroupFactory' => array(
+						'CompanyFactory'
+						),
+	'ClientPaymentFactory' => array(
+						'ClientFactory'
+						),
+	'CompanyDeductionFactory' => array(
+						'CompanyFactory',
+						'PayStubEntryAccountFactory',
+						),
+	'CompanyDeductionPayStubEntryAccountFactory' => array(
+						'CompanyDeductionFactory',
+						'PayStubEntryAccountFactory',
+						),
+	'CompanyGenericMapFactory' => array(
+						'CompanyFactory'
+						),
+	'CompanyUserCountFactory' => array(
+						'CompanyFactory'
+						),
+	'CurrencyFactory' => array(
+						'CompanyFactory'
+						),
+	'DepartmentFactory' => array(
+						'CompanyFactory'
+						),
+	'DepartmentBranchFactory' => array(
+						'BranchFactory',
+						'DepartmentFactory'
+						),
+	'DepartmentBranchUserFactory' => array(
+						'UserFactory',
+						'DepartmentFactory',
+						),
+	'DocumentFactory' => array(
+						'CompanyFactory'
+						),
+	'DocumentAttachmentFactory' => array(
+						'DocumentFactory'
+						),
+	'DocumentGroupFactory' => array(
+						'CompanyFactory'
+						),
+	'DocumentRevisionFactory' => array(
+						'DocumentFactory'
+						),
+	'ExceptionFactory' => array(
+						'ExceptionPolicyFactory',
+						'UserDateFactory',
+						'PunchFactory',
+						'PunchControlFactory'
+						),
+	'ExceptionPolicyFactory' => array(
+						'ExceptionPolicyControlFactory'
+						),
+	'ExceptionPolicyControlFactory' => array(
+						'CompanyFactory'
+						),
+	'HierarchyControlFactory' => array(
+						'CompanyFactory'
+						),
+	'HierarchyLevelFactory' => array(
+						'HierarchyControlFactory',
+						'UserFactory'
+						),
+	'HierarchyObjectTypeFactory' => array(
+						'HierarchyControlFactory'
+						),
+	'HierarchyUserFactory' => array(
+						'HierarchyControlFactory',
+						'UserFactory'
+						),
+	'HolidayPolicyFactory' => array(
+						'CompanyFactory'
+						),
+	'HolidayPolicyRecurringHolidayFactory' => array(
+						'HolidayPolicyFactory',
+						'RecurringHolidayFactory'
+						),
+	'HolidayFactory' => array(
+						'HolidayPolicyFactory'
+						),
+	'InvoiceFactory' => array(
+						'ClientFactory'
+						),
+	'InvoiceConfigFactory' => array(
+						'CompanyFactory'
+						),
+	'InvoiceDistrictFactory' => array(
+						'CompanyFactory'
+						),
+	'TransactionFactory' => array(
+						'ClientFactory',
+						'ProductFactory',
+						'InvoiceFactory'
+						),
+	'JobFactory' => array(
+						'CompanyFactory'
+						),
+	'JobGroupFactory' => array(
+						'CompanyFactory'
+						),
+	'JobItemFactory' => array(
+						'CompanyFactory'
+						),
+	'JobItemAmendmentFactory' => array(
+						'JobFactory'
+						),
+	'JobItemGroupFactory' => array(
+						'CompanyFactory'
+						),
+	'QualificationFactory' => array(
+						'CompanyFactory'
+						),
+	'QualificationGroupFactory' => array(
+						'CompanyFactory'
+						),
+	'UserEducationFactory' => array(
+						'UserFactory'
+						),
+	'UserLicenseFactory' => array(
+						'UserFactory'
+						),
+	'UserSkillFactory' => array(
+						'UserFactory'
+						),
+	'UserLanguageFactory' => array(
+						'UserFactory'
+						),
+	'UserMembershipFactory' => array(
+						'UserFactory'
+						),
+	'UserReviewControlFactory' => array(
+						'UserFactory'
+						),
+	'UserReviewFactory' => array(
+						'UserReviewControlFactory'
+						),
+	'KPIFactory' => array(
+						'CompanyFactory'
+						),
+	'KPIGroupFactory' => array(
+						'CompanyFactory'
+						),
+	'EthnicGroupFactory' => array(
+						'CompanyFactory'
+						),
+	'UserContactFactory' => array(
+						'UserFactory'
+						),
+	'JobVacancyFactory' => array(
+						'CompanyFactory'
+						),
+	'JobApplicantFactory' => array(
+						'CompanyFactory'
+						),
+	'JobApplicationFactory' => array(
+						'JobApplicantFactory',
+						'JobVacancyFactory'
+						),
+	'JobApplicantLocationFactory' => array(
+						'JobApplicantFactory'
+						),
+	'JobApplicantEmploymentFactory' => array(
+						'JobApplicantFactory'
+						),
+	'JobApplicantReferenceFactory' => array(
+						'JobApplicantFactory'
+						),
+	'JobApplicantEducationFactory' => array(
+						'JobApplicantFactory'
+						),
+	'JobApplicantSkillFactory' => array(
+						'JobApplicantFactory'
+						),
+	'JobApplicantLanguageFactory' => array(
+						'JobApplicantFactory'
+						),
+	'JobApplicantMembershipFactory' => array(
+						'JobApplicantFactory'
+						),
+	'JobApplicantLicenseFactory' => array(
+						'JobApplicantFactory'
+						),
+	'ExpensePolicyFactory' => array(
+						'CompanyFactory'
+						),
+	'UserExpenseFactory' => array(
+						'UserFactory',
+						'ExpensePolicyFactory'
+						),
+	'MealPolicyFactory' => array(
+						'CompanyFactory'
+						),
+	'MessageRecipientFactory' => array(
+						'UserFactory',
+						'MessageSenderFactory'
+						),
+	'MessageSenderFactory' => array(
+						'UserFactory',
+						'MessageControlFactory'
+						),
+	'OtherFieldFactory' => array(
+						'CompanyFactory'
+						),
+	'OverTimePolicyFactory' => array(
+						'CompanyFactory'
+						),
+	'PayPeriodFactory' => array(
+						'CompanyFactory',
+						'PayPeriodScheduleFactory'
+						),
+	'PayPeriodScheduleFactory' => array(
+						'CompanyFactory'
+						),
+	'PayPeriodScheduleUserFactory' => array(
+						'PayPeriodScheduleFactory',
+						'UserFactory'
+						),
+	'PayPeriodTimeSheetVerifyFactory' => array(
+						'PayPeriodFactory',
+						'UserFactory'
+						),
+	'PayStubFactory' => array(
+						'PayPeriodFactory',
+						'UserFactory',
+						'CurrencyFactory',
+						),
+	'PayStubAmendmentFactory' => array(
+						'UserFactory'
+						),
+	'PayStubEntryFactory' => array(
+						'PayStubFactory'
+						),
+	'PayStubEntryAccountFactory' => array(
+						'CompanyFactory'
+						),
+	'PayStubEntryAccountLinkFactory' => array(
+						'CompanyFactory'
+						),
+	'PaymentGatewayFactory' => array(
+						'CompanyFactory'
+						),
+	'PaymentGatewayCreditCardTypeFactory' => array(
+						'PaymentGatewayFactory'
+						),
+	'PaymentGatewayCurrencyFactory' => array(
+						'PaymentGatewayFactory'
+						),
+	'PermissionFactory' => array(
+						'PermissionControlFactory'
+						),
+	'PermissionControlFactory' => array(
+						'CompanyFactory'
+						),
+	'PermissionUserFactory' => array(
+						'PermissionControlFactory',
+						'UserFactory'
+						),
+	'PolicyGroupFactory' => array(
+						'CompanyFactory',
+						'UserFactory',
+						'OverTimePolicyFactory',
+						'RoundIntervalPolicyListFactory',
+						'MealPolicyFactory',
+						'BreakPolicyFactory',
+						'AccrualPolicyFactory',
+						'PremiumPolicyListFactory',
+						'HolidayPolicyFactory',
+						'ExceptionPolicyControlFactory',
+						'AbsencePolicyFactory',
+						),
+	'PolicyGroupUserFactory' => array(
+						'PolicyGroupFactory',
+						'UserFactory'
+						),
+	'PremiumPolicyFactory' => array(
+						'CompanyFactory'
+						),
+	'PremiumPolicyBranchFactory' => array(
+						'PremiumPolicyFactory',
+						'BranchFactory'
+						),
+	'PremiumPolicyDepartmentFactory' => array(
+						'PremiumPolicyFactory',
+						'DepartmentFactory'
+						),
+	'PremiumPolicyJobFactory' => array(
+						'PremiumPolicyFactory',
+						'JobFactory'
+						),
+	'PremiumPolicyJobGroupFactory' => array(
+						'PremiumPolicyFactory',
+						'JobGroupFactory'
+						),
+	'PremiumPolicyJobItemFactory' => array(
+						'PremiumPolicyFactory',
+						'JobItemFactory'
+						),
+	'PremiumPolicyJobItemGroupFactory' => array(
+						'PremiumPolicyFactory',
+						'JobItemGroupFactory'
+						),
+	'ProductFactory' => array(
+						'CompanyFactory',
+						'ProductGroupFactory',
+						),
+	'ProductGroupFactory' => array(
+						'CompanyFactory'
+						),
+	'ProductPriceFactory' => array(
+						'ProductFactory'
+						),
+	'PunchFactory' => array(
+						'PunchControlFactory',
+						),
+	'PunchControlFactory' => array(
+						'UserDateFactory',
+						'BranchFactory',
+						'DepartmentFactory',
+						'JobFactory',
+						'JobItemFactory',
+						'MealPolicyFactory',
+						),
+	'RecurringHolidayFactory' => array(
+						'CompanyFactory'
+						),
+	'RecurringPayStubAmendmentFactory' => array(
+						'CompanyFactory'
+						),
+	'RecurringPayStubAmendmentUserFactory' => array(
+						'RecurringPayStubAmendmentFactory',
+						'UserFactory'
+						),
+	'RecurringScheduleControlFactory' => array(
+						'CompanyFactory'
+						),
+	'RecurringScheduleTemplateFactory' => array(
+						'RecurringScheduleTemplateControlFactory'
+						),
+	'RecurringScheduleTemplateControlFactory' => array(
+						'CompanyFactory'
+						),
+	'RecurringScheduleUserFactory' => array(
+						'RecurringScheduleControlFactory',
+						'UserFactory'
+						),
+	'ReportScheduleFactory' => array(
+						'UserReportDataFactory'
+						),
+	'RequestFactory' => array(
+						'UserDateFactory'
+						),
+	'ROEFactory' => array(
+						'UserFactory'
+						),
+	'RoundIntervalPolicyFactory' => array(
+						'CompanyFactory'
+						),
+	'ScheduleFactory' => array(
+						'UserDateFactory'
+						),
+	'SchedulePolicyFactory' => array(
+						'CompanyFactory'
+						),
+	'ShippingPolicyFactory' => array(
+						'CompanyFactory'
+						),
+	'ShippingPolicyObjectFactory' => array(
+						'ShippingPolicyFactory'
+						),
+	'StationFactory' => array(
+						'CompanyFactory'
+						),
+	'StationBranchFactory' => array(
+						'StationFactory',
+						'BranchFactory'
+						),
+	'StationDepartmentFactory' => array(
+						'StationFactory',
+						'DepartmentFactory'
+						),
+	'StationExcludeUserFactory' => array(
+						'StationFactory',
+						'UserFactory'
+						),
+	'StationIncludeUserFactory' => array(
+						'StationFactory',
+						'UserFactory'
+						),
+	'StationUserFactory' => array(
+						'StationFactory',
+						'UserFactory'
+						),
+	'StationUserGroupFactory' => array(
+						'StationFactory'
+						),
+	'LogFactory' => array(
+						'UserFactory'
+						),
+	'LogDetailFactory' => array(
+						'LogFactory'
+						),
+	'TaxPolicyFactory' => array(
+						'CompanyFactory'
+						),
+	'TaxPolicyObjectFactory' => array(
+						'TaxPolicyFactory'
+						),
+	'UserDateFactory' => array(
+						'UserFactory',
+						'PayPeriodFactory',
+						),
+	'UserDateTotalFactory' => array(
+						'UserDateFactory',
+						'PunchControlFactory',
+						'OverTimePolicyFactory',
+						'AbsencePolicyFactory',
+						'PremiumPolicyFactory',
+						'BranchFactory',
+						'DepartmentFactory',
+						'JobFactory',
+						'JobItemFactory',
+						'MealPolicyFactory',
+						'BreakPolicyFactory',
+						),
+	'UserDeductionFactory' => array(
+						'UserFactory',
+						'CompanyDeductionFactory'
+						),
+	'UserDefaultFactory' => array(
+						'CompanyFactory'
+						),
+	'UserDefaultCompanyDeductionFactory' => array(
+						'UserDefaultFactory',
+						'CompanyDeductionFactory'
+						),
+	'UserGenericStatusFactory' => array(
+						'UserFactory'
+						),
+	'UserGroupFactory' => array(
+						'CompanyFactory'
+						),
+	'UserIdentificationFactory' => array(
+						'UserFactory'
+						),
+	'UserPreferenceFactory' => array(
+						'UserFactory'
+						),
+	'UserTitleFactory' => array(
+						'CompanyFactory'
+						),
+	'UserWageFactory' => array(
+						'UserFactory',
+						'WageGroupFactory',
+						),
+	'UserFactory' => array(
+						'CompanyFactory',
+						'CurrencyFactory',
+						'BranchFactory',
+						'DepartmentFactory',
+						'JobFactory',
+						'JobItemFactory',
+						'UserTitleFactory',
+						'UserGroupFactory',
+						//array( 'UserGroupFactory' => array( 'user_group_id' => 'id' ) ),
+						),
+	'WageGroupFactory' => array(
+						'CompanyFactory'
+						),
+   );
 ?>

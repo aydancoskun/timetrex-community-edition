@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: HierarchyControlFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11018 $
+ * $Id: HierarchyControlFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -103,8 +103,8 @@ class HierarchyControlFactory extends Factory {
 										'company_id' => 'Company',
 										'name' => 'Name',
 										'description' => 'Description',
-										'superiors' => FALSE,
-										'subordinates' => FALSE,
+										'superiors' => 'TotalSuperiors',
+										'subordinates' => 'TotalSubordinates',
 										'object_type' => 'ObjectType',
 										'object_type_display' => FALSE,
 										'user' => 'User',
@@ -351,6 +351,16 @@ class HierarchyControlFactory extends Factory {
 		Debug::text('No User IDs to set.', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
+	function getTotalSubordinates() {
+		$hulf = TTnew( 'HierarchyUserListFactory' );
+		$hulf->getByHierarchyControlID( $this->getId() );
+		return $hulf->getRecordCount();
+	}
+	function getTotalSuperiors() {
+		$hllf = TTnew('HierarchyLevelListFactory');
+		$hllf->getByHierarchyControlId( $this->getID() );
+		return $hllf->getRecordCount();
+	}
 
 	function Validate() {
 		//When the user changes just the hierarchy objects, we need to loop through ALL users and confirm no conflicting hierarchies exist.
@@ -421,10 +431,10 @@ class HierarchyControlFactory extends Factory {
 
 					$function = 'get'.$function_stub;
 					switch( $variable ) {
-						case 'superiors':
-						case 'subordinates':
-							$data[$variable] = $this->getColumn($variable);
-							break;
+						//case 'superiors':
+						//case 'subordinates':
+						//	$data[$variable] = $this->getColumn($variable);
+						//	break;
 						case 'object_type_display':
 							$data[$variable] = $this->getObjectTypeDisplay();
 							break;

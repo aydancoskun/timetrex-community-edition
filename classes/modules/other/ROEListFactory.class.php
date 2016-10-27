@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10129 $
- * $Id: ROEListFactory.class.php 10129 2013-06-06 04:44:20Z ipso $
- * $Date: 2013-06-05 21:44:20 -0700 (Wed, 05 Jun 2013) $
+ * $Revision: 11018 $
+ * $Id: ROEListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -72,6 +72,31 @@ class ROEListFactory extends ROEFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$uf = new UserFactory();
+
+		$ph = array(
+					'company_id' => $company_id
+					);
+
+		$query = '
+					select 	a.*
+					from	'. $this->getTable() .' as a,
+							'. $uf->getTable() .' as b
+					where	a.user_id = b.id
+						AND b.company_id = ?
+						AND a.deleted = 0 AND b.deleted = 0';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
 		$this->ExecuteSQL( $query, $ph );
 
 		return $this;

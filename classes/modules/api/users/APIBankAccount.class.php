@@ -126,7 +126,7 @@ class APIBankAccount extends APIFactory {
 	 * @return array
 	 */
 	function getCommonBankAccountData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getBankAccount( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getBankAccount( $data, TRUE ) ) );
 	}
 
 	/**

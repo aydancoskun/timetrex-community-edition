@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10485 $
- * $Id: CompanyDeductionFactory.class.php 10485 2013-07-18 19:01:14Z ipso $
- * $Date: 2013-07-18 12:01:14 -0700 (Thu, 18 Jul 2013) $
+ * $Revision: 11018 $
+ * $Id: CompanyDeductionFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -505,8 +505,10 @@ class CompanyDeductionFactory extends Factory {
 										'-1030-name' => TTi18n::gettext('Name'),
 										'-1040-calculation' => TTi18n::gettext('Calculation'),
 
-										'-1040-start_date' => TTi18n::gettext('Start Date'),
-										'-1040-end_Date_date' => TTi18n::gettext('End Date'),
+										'-1050-start_date' => TTi18n::gettext('Start Date'),
+										'-1060-end_Date_date' => TTi18n::gettext('End Date'),
+
+										'-1070-calculation_order' => TTi18n::gettext('Calculation Order'),
 
 										'-2000-created_by' => TTi18n::gettext('Created By'),
 										'-2010-created_date' => TTi18n::gettext('Created Date'),
@@ -1432,7 +1434,7 @@ class CompanyDeductionFactory extends Factory {
 			$type = $key;
 		}
 
-		if ( $this->Validator->inArrayKey(	'calculation',
+		if ( $this->Validator->inArrayKey(	'calculation_id',
 											$value,
 											TTi18n::gettext('Incorrect Calculation'),
 											$this->getOptions('calculation')) ) {

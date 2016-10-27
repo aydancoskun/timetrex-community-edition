@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10749 $
- * $Id: TTDate.class.php 10749 2013-08-26 22:00:42Z ipso $
- * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
+ * $Revision: 11115 $
+ * $Id: TTDate.class.php 11115 2013-10-11 18:29:20Z ipso $
+ * $Date: 2013-10-11 11:29:20 -0700 (Fri, 11 Oct 2013) $
  */
 
 /**
@@ -166,17 +166,18 @@ class TTDate {
 		if ( $time_zone != '' ) {
 			Debug::text('Setting TimeZone: '. $time_zone, __FILE__, __LINE__, __METHOD__, 10);
 
-			self::$time_zone = $time_zone;
-
-			@date_default_timezone_set( $time_zone );
-			putenv('TZ='.$time_zone);
-
 			global $db;
 			if ( isset($db) AND is_object($db) AND strncmp($db->databaseType,'mysql',5) == 0 ) {
 				if ( @$db->Execute('SET SESSION time_zone='. $db->qstr($time_zone) ) == FALSE ) {
 					return FALSE;
 				}
 			}
+
+			//Set timezone AFTER MySQL query above, so if it fails we don't set the timezone below at all.
+			self::$time_zone = $time_zone;
+
+			@date_default_timezone_set( $time_zone );
+			putenv('TZ='.$time_zone);
 
 			return TRUE;
 		} else {
@@ -573,6 +574,8 @@ class TTDate {
 		}
 		//Debug::text('  Parsing Date: '. $formatted_date , __FILE__, __LINE__, __METHOD__, 10);
 
+		//On the Recurring Templates, if the user enters "0600", its passed here without a date, and parsed as "600" which is incorrect.
+		//We worked around this in the API by prefixing the date infront of 0600 to make it a string instead
 		if ( is_numeric( $formatted_date ) ) {
 			$epoch = (int)$formatted_date;
 		} else {
@@ -1013,6 +1016,18 @@ class TTDate {
 		return $epoch;
 	}
 
+	public static function getDayWithMostTime( $start_epoch, $end_epoch ) {
+		$time_on_start_date = TTDate::getEndDayEpoch( $start_epoch ) - $start_epoch;
+		$time_on_end_date = $end_epoch - TTDate::getBeginDayEpoch( $end_epoch );
+		if ( $time_on_start_date > $time_on_end_date ) {
+			$day_with_most_time = $start_epoch;
+		} else {
+			$day_with_most_time = $end_epoch;
+		}
+
+		return $day_with_most_time;
+	}
+	
 	public static function getDayDifference($start_epoch, $end_epoch) {
 		//FIXME: Be more accurate, take leap years in to account etc...
 		$days = ($end_epoch - $start_epoch) / 86400;

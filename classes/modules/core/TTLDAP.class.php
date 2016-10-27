@@ -199,7 +199,7 @@ class TTLDAP {
 	}
 
 	function isBindAuthentication() {
-		if ( $this->getBindUserName() == '' AND $this->getBindPassword() == '' ) {
+		if ( $this->getBindUserName() != '' AND $this->getBindPassword() != '' ) {
 			return TRUE;
 		}
 
@@ -313,7 +313,8 @@ class TTLDAP {
 										//to rebind with the discovered bindAttribute to test the password for cases where it may include a fully qualified domain.
 										//This should avoid the need to suffix the user_name with '@mydomain.com'
 										if ( isset($ldap_data[$this->getBindAttribute()]) AND $ldap_data[$this->getBindAttribute()] != '' ) {
-											$retval = $ldap->Connect( $this->getHost(), $ldap_data[$this->getBindAttribute()], $password, $this->getBaseDN() );
+											//$retval = $ldap->Connect( $this->getHost(), $ldap_data[$this->getBindAttribute()], $password, $this->getBaseDN() );
+											$retval = $ldap->Connect( $this->getHost(), $this->getBindDN( $ldap_data[$this->getBindAttribute()] ), $password, $this->getBaseDN() );
 											Debug::Text('LDAP post-search bind connection result: '. (int)$retval, __FILE__, __LINE__, __METHOD__,10);
 										} else {
 											Debug::Text('BindAttribute not found in users LDAP record...', __FILE__, __LINE__, __METHOD__,10);

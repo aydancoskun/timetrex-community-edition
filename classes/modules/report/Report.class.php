@@ -271,7 +271,13 @@ class Report {
 
 	//Defines the max execution memory limit for PHP
 	function setExecutionMemoryLimit( $str ) {
-		ini_set('memory_limit', $str);
+		$memory_limit = Misc::getBytesFromSize( $str );
+		$available_memory = Misc::getSystemMemoryInfo( 'free+cached' );
+		if ( $available_memory < $memory_limit ) {
+			Debug::Text('Available memory is less than maximum, reducing to: '. $available_memory .' Max Memory: '. $memory_limit, __FILE__, __LINE__, __METHOD__,10);
+			$memory_limit = $available_memory;
+		}
+		ini_set('memory_limit', $available_memory );
 		return TRUE;
 	}
 
@@ -969,7 +975,7 @@ class Report {
 	}
 
 	//Validates report config, mainly so users aren't surprised when they set group by options that aren't doing anything.
-	function validateConfig() {
+	function validateConfig( $format = FALSE ) {
 		$this->validator = new Validator();
 
 		if ( method_exists( $this, '_validateConfig') ) {
@@ -979,7 +985,8 @@ class Report {
 		$column_options = Misc::trimSortPrefix( $this->getOptions('columns') );
 		$config = $this->getConfig();
 
-		if ( !isset($config['columns'])  ) {
+		//Reports with other formats (Tax reports, printable timesheets), don't specify columns.
+		if ( !isset($config['columns']) AND in_array( $format, array('pdf','csv') ) ) {
 			$this->validator->isTrue( 'columns', FALSE, TTi18n::gettext('No columns specified to display on report') );
 			$config['columns'] = array();
 		}
@@ -1069,7 +1076,6 @@ class Report {
 
 	//PreProcess data such as calculating additional columns (Day of Week, Year Quarter, combined multiple columns together, etc...) from raw data etc...
 	function preProcess( $format = NULL ) {
-
 		$this->profiler->startTimer( 'preProcess' );
 		$this->_preProcess( $format );
 		$this->profiler->stopTimer( 'preProcess' );
@@ -1508,7 +1514,7 @@ class Report {
 								//Optimization to lower memory usage when the column formatter doesn't do anything, prevent overwriting the data in the array.
 								//$this->profiler->startTimer( 'columnFormatter' );
 								$formatted_value = $this->columnFormatter( $column_format_config[$column], $column, $value, $format );
-								if ( $formatted_value != $value ) {
+								if ( $formatted_value !== $value ) { //Use !== for exact match, otherwise '100.00' is matched as int(100)
 									$this->data[$key][$column] = $formatted_value;
 								}
 								//$this->profiler->stopTimer( 'columnFormatter' );
@@ -1790,32 +1796,64 @@ class Report {
 		$this->setQueryStatementTimeout( 0 );
 
 		//Check after data is received to make sure we are still below our load threshold.
-		if ( $this->isSystemLoadValid() == FALSE ) {
+		if ( $this->isSystemLoadValid() == TRUE ) {
+			$this->preProcess( $format );
+		} else {
 			return FALSE;
 		}
 
-		$this->preProcess( $format );
-        
-        $this->currencyConvertToBase();
+		if ( $this->isSystemLoadValid() == TRUE ) {
+			$this->currencyConvertToBase();
+			$this->calculateCustomColumns( 10 ); //Selections (these are pre-group)
+		} else {
+			return FALSE;
+		}
 
-        $this->calculateCustomColumns( 20 ); //Pre-Group
+		if ( $this->isSystemLoadValid() == TRUE ) {
+			$this->calculateCustomColumns( 20 ); //Pre-Group
+		} else {
+			return FALSE;
+		}
 
-        $this->calculateCustomColumnFilters( 30 ); //Pre-Group
+		if ( $this->isSystemLoadValid() == TRUE ) {
+			$this->calculateCustomColumnFilters( 30 ); //Pre-Group
+		} else {
+			return FALSE;
+		}
 
-		$this->group();
+		if ( $this->isSystemLoadValid() == TRUE ) {
+			$this->group();
+		} else {
+			return FALSE;
+		}
+		if ( $this->isSystemLoadValid() == TRUE ) {
+			$this->calculateCustomColumns( 21 ); //Post-Group: things like round() functions normally need to be done post-group, otherwise they are rounding already rounded values.
+		} else {
+			return FALSE;
+		}
 
-		$this->calculateCustomColumns( 21 ); //Post-Group: things like round() functions normally need to be done post-group, otherwise they are rounding already rounded values.
+		if ( $this->isSystemLoadValid() == TRUE ) {
+	        $this->calculateCustomColumnFilters( 31 ); //Post-Group //Put after grouping is handled, otherwise the user might get unexpected results based on the data they actually see.
+		} else {
+			return FALSE;
+		}
 
-        $this->calculateCustomColumnFilters( 31 ); //Post-Group //Put after grouping is handled, otherwise the user might get unexpected results based on the data they actually see.
+		if ( $this->isSystemLoadValid() == TRUE ) {
+			$this->sort(); //Sort needs to come before subTotal, as subTotal will need to re-sort the data in order to fit the sub-totals in.
+		} else {
+			return FALSE;
+		}
 
-		$this->sort(); //Sort needs to come before subTotal, as subTotal will need to re-sort the data in order to fit the sub-totals in.
 
 		//if ( $format != 'csv' AND $format != 'xml' ) { //Exclude total/sub-totals for CSV/XML format
 		if ( $format == 'pdf' OR $format == 'raw' OR stripos( $format, 'pdf_' ) !== FALSE ) {  //Only total/subtotal for PDF/RAW formats.
-			$this->Total();
-			$this->subTotal();
+			if ( $this->isSystemLoadValid() == TRUE ) {
+				$this->Total();
+				$this->subTotal();
+			} else {
+				return FALSE;
+			}
 		}
-
 
 
 		//Rekey data array starting at 0 sequentially.
@@ -1825,15 +1863,21 @@ class Report {
 		}
 
 		if ( $this->isEnabledChart() == TRUE  ) {
-			//We need to generate the charts before postProcess runs.
-			//But we need to size the PDF *after* postProcess runs.
-			$this->chart();
+			if ( $this->isSystemLoadValid() == TRUE ) {
+				//We need to generate the charts before postProcess runs.
+				//But we need to size the PDF *after* postProcess runs.
+				$this->chart();
+			} else {
+				return FALSE;
+			}
 		}
 
-        
-		$this->postProcess( $format );
 
-
+		if ( $this->isSystemLoadValid() == TRUE ) {
+			$this->postProcess( $format );
+		} else {
+			return FALSE;
+		}
 
 
 		$this->_pdf_Initialize(); //Size page after postProcess() is done. This will resize the page if its already been initialized for charting purposes.
@@ -2933,6 +2977,7 @@ class Report {
 								);
 								break;
 							case 20:
+							case 21:
 							case 30:
 							case 31:
 								$row['definition'] = $rccf->getFormula();
@@ -2944,12 +2989,11 @@ class Report {
 					}
 				}
 			}
+
+	        $this->setColumnDataConfig( $columns_data );
 		}
         
-        $this->setColumnDataConfig( $columns_data );
-
         return TRUE;
-
     }
 
     function getCustomColumnConfig() {

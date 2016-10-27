@@ -140,7 +140,7 @@ class APIHierarchyLevel extends APIFactory {
 	 * @return array
 	 */
 	function getCommonHierarchyLevelData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getHierarchyLevel( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getHierarchyLevel( $data, TRUE ) ) );
 	}
 
 	/**

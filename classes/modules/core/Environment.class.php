@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 5805 $
- * $Id: Environment.class.php 5805 2011-12-21 00:24:15Z ipso $
- * $Date: 2011-12-20 16:24:15 -0800 (Tue, 20 Dec 2011) $
+ * $Revision: 11151 $
+ * $Id: Environment.class.php 11151 2013-10-14 22:00:30Z ipso $
+ * $Date: 2013-10-14 15:00:30 -0700 (Mon, 14 Oct 2013) $
  */
 
 /**
@@ -64,6 +64,19 @@ class Environment {
 		}
 
 		return '/';
+	}
+
+	//Due to how the legacy interface is handled, we need to use the this function to determine the URL to redirect too,
+	//as the base_url needs to be /interface most of the time, for images and such to load properly.
+	static function getDefaultInterfaceBaseURL() {
+		global $config_vars;
+
+		$retval = self::getBaseURL();
+		if ( isset($config_vars['other']['default_interface']) AND strtolower($config_vars['other']['default_interface']) != 'html' ) {
+			$retval .= strtolower($config_vars['other']['default_interface']) . '/';
+		}
+
+		return $retval;
 	}
 
 	//Returns the BASE_URL for the API functions.
@@ -97,7 +110,13 @@ class Environment {
 	}
 
 	static function getTemplateCompileDir() {
-		return self::getBasePath() . self::$template_compile_dir . DIRECTORY_SEPARATOR;
+		global $config_vars;
+
+		if ( isset($config_vars['path']['templates']) ) {
+			return $config_vars['path']['templates'] . DIRECTORY_SEPARATOR;
+		} else {
+			return self::getBasePath() . self::$template_compile_dir . DIRECTORY_SEPARATOR;
+		}
 	}
 
 	static function getImagesPath() {

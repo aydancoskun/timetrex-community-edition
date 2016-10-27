@@ -70,6 +70,8 @@ class ImportUser extends Import {
 		$retval = NULL;
 		switch( $name ) {
 			case 'columns':
+				global $current_company;
+
 				$uf = TTNew('UserFactory');
 				$retval = Misc::trimSortPrefix( $uf->getOptions('columns') );
 
@@ -84,9 +86,18 @@ class ImportUser extends Import {
 				//logged in employee.
 				if ( ( is_object($this->getCompanyObject()) AND $this->getCompanyObject()->getProductEdition() < TT_PRODUCT_CORPORATE )
 						OR ( !is_object($this->getCompanyObject()) AND getTTProductEdition() < TT_PRODUCT_CORPORATE ) ) {
-					unset($retval['-1104-default_job_id'],$retval['-1105-default_job_item_id']);
+					unset($retval['-1104-default_job'],$retval['-1105-default_job_item']);
 				}
 
+				if ( is_object( $current_company )  ) {
+					//Get custom fields for import data.
+					$oflf = TTnew( 'OtherFieldListFactory' );
+					$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $current_company->getID(), array(10), array( 10 => '' ) );
+					if ( is_array($other_field_names) ) {
+						$retval = array_merge( (array)$retval, (array)$other_field_names );
+					}
+				}
+				
 				Debug::Arr($retval, 'ImportUserColumns: ', __FILE__, __LINE__, __METHOD__,10);
 
 				break;
@@ -96,6 +107,8 @@ class ImportUser extends Import {
 								'status' => 'status_id',
 								'default_branch' => 'default_branch_id',
 								'default_department' => 'default_department_id',
+								'default_job' => 'default_job_id',
+								'default_job_item' => 'default_job_item_id',
 								'title' => 'title_id',
 								'user_group' => 'group_id',
 								'group' => 'group_id',
@@ -129,11 +142,11 @@ class ImportUser extends Import {
 												    '-1010-name' => TTi18n::gettext('Name'),
 													'-1010-manual_id' => TTi18n::gettext('Code'),
 												  ),
-								'default_job_id' => array(
+								'default_job' => array(
 												    '-1010-name' => TTi18n::gettext('Name'),
 													'-1010-manual_id' => TTi18n::gettext('Code'),
 												  ),
-								'default_job_item_id' => array(
+								'default_job_item' => array(
 												    '-1010-name' => TTi18n::gettext('Name'),
 													'-1010-manual_id' => TTi18n::gettext('Code'),
 												  ),
@@ -202,8 +215,13 @@ class ImportUser extends Import {
 			$uf = TTnew('UserFactory');
 
 			if ( !is_array($default_data) ) {
+				$default_data['status'] = 10; //Active
 				$default_data['employee_number'] = 1;
 				$default_data['currency_id'] = 1;
+			}
+
+			if ( !isset($raw_row['status']) OR ( isset($raw_row['status']) AND $raw_row['status'] == 0 ) ) {
+				$raw_row['status'] = $default_data['status_id'];
 			}
 
 			if ( !isset($raw_row['employee_number']) ) {
@@ -490,7 +508,7 @@ class ImportUser extends Import {
 
 		return TRUE;
 	}
-	function parse_default_job_id( $input, $default_value = NULL, $parse_hint = NULL ) {
+	function parse_default_job( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
 			return 0; //No job
 		}
@@ -530,7 +548,7 @@ class ImportUser extends Import {
 
 		return TRUE;
 	}
-	function parse_default_job_item_id( $input, $default_value = NULL, $parse_hint = NULL ) {
+	function parse_default_job_item( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
 			return 0; //No job_item
 		}

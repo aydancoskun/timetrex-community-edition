@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10609 $
- * $Id: BankAccountFactory.class.php 10609 2013-07-31 17:29:20Z ipso $
- * $Date: 2013-07-31 10:29:20 -0700 (Wed, 31 Jul 2013) $
+ * $Revision: 11018 $
+ * $Id: BankAccountFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -45,6 +45,8 @@
 class BankAccountFactory extends Factory {
 	protected $table = 'bank_account';
 	protected $pk_sequence_name = 'bank_account_id_seq'; //PK Sequence name
+
+	protected $user_obj = NULL;
 
 	function _getFactoryOptions( $name ) {
 
@@ -120,6 +122,10 @@ class BankAccountFactory extends Factory {
 		return $variable_function_map;
 	}
 
+    function getUserObject() {
+        return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
+    }
+	
 	function getCompany() {
 		return $this->data['company_id'];
 	}
@@ -405,6 +411,11 @@ class BankAccountFactory extends Factory {
 			$log_description = TTi18n::getText('Company');
 		} else {
 			$log_description = TTi18n::getText('Employee');
+
+			$u_obj = $this->getUserObject();
+			if ( is_object($u_obj) ) {
+				$log_description .= ': '. $u_obj->getFullName(FALSE, TRUE);
+			}
 		}
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Bank Account') .' - '. $log_description, NULL, $this->getTable(), $this );
 	}

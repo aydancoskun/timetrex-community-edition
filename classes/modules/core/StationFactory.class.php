@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10749 $
- * $Id: StationFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
- * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
+ * $Revision: 11018 $
+ * $Id: StationFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 include_once('Net/IPv4.php');
 
@@ -1984,7 +1984,7 @@ class StationFactory extends Factory {
 											TTi18n::gettext('Type is not available in %1 Community Edition, please contact our sales department for more information', APPLICATION_NAME ));
 		}
 
-		if ( $this->getDescription() == '' ) {
+		if ( $this->validate_only == FALSE AND $this->getDescription() == '' ) {
 			$this->Validator->isTrue(		'description',
 											FALSE,
 											TTi18n::gettext('Description must be specified'));

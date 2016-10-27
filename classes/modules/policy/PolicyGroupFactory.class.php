@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: PolicyGroupFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11018 $
+ * $Id: PolicyGroupFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -91,7 +91,7 @@ class PolicyGroupFactory extends Factory {
 										'company_id' => 'Company',
 										'name' => 'Name',
 										'user' => 'User',
-										'total_users' => FALSE,
+										'total_users' => 'TotalUsers',
 										'over_time_policy' => 'OverTimePolicy',
 										'round_interval_policy' => 'RoundIntervalPolicy',
 										'premium_policy' => 'PremiumPolicy',
@@ -261,6 +261,12 @@ class PolicyGroupFactory extends Factory {
 		return FALSE;
 	}
 
+	function getTotalUsers() {
+		$pgulf = TTnew( 'PolicyGroupUserListFactory' );
+		$pgulf->getByPolicyGroupId( $this->getId() );
+		return $pgulf->getRecordCount();
+	}
+
 	function getOverTimePolicy() {
 		return CompanyGenericMapListFactory::getArrayByCompanyIDAndObjectTypeIDAndObjectID( $this->getCompany(), 110, $this->getID() );
 	}
@@ -422,9 +428,9 @@ class PolicyGroupFactory extends Factory {
 
 					$function = 'get'.$function_stub;
 					switch( $variable ) {
-						case 'total_users':
-							$data[$variable] = $this->getColumn( $variable );
-							break;
+						//case 'total_users':
+						//	$data[$variable] = $this->getColumn( $variable );
+						//	break;
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = $this->$function();

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9904 $
- * $Id: UserDateFactory.class.php 9904 2013-05-16 17:54:57Z ipso $
- * $Date: 2013-05-16 10:54:57 -0700 (Thu, 16 May 2013) $
+ * $Revision: 11167 $
+ * $Id: UserDateFactory.class.php 11167 2013-10-15 20:29:07Z ipso $
+ * $Date: 2013-10-15 13:29:07 -0700 (Tue, 15 Oct 2013) $
  */
 
 /**
@@ -200,13 +200,13 @@ class UserDateFactory extends Factory {
 			}
 
 			$date = TTDate::convertTimeZone( $date, $timezone );
-			Debug::text(' Using TimeZone: '. $timezone .' Date: '. TTDate::getDate('DATE+TIME', $date) .'('.$date.')', __FILE__, __LINE__, __METHOD__,10);
+			//Debug::text(' Using TimeZone: '. $timezone .' Date: '. TTDate::getDate('DATE+TIME', $date) .' ('.$date.')', __FILE__, __LINE__, __METHOD__,10);
 
 			$udlf = TTnew( 'UserDateListFactory' );
 			$udlf->getByUserIdAndDate( $user_id, $date );
 			if ( $udlf->getRecordCount() == 1 ) {
 				$id = $udlf->getCurrent()->getId();
-				Debug::text(' Found Already Existing User Date ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+				//Debug::text(' Found Already Existing User Date ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
 				return $id;
 			} elseif ( $udlf->getRecordCount() == 0 ) {
 				Debug::text(' Inserting new UserDate row. User ID: '. $user_id .' Date: '. $date , __FILE__, __LINE__, __METHOD__,10);

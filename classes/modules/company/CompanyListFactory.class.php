@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9714 $
- * $Id: CompanyListFactory.class.php 9714 2013-04-27 17:50:36Z ipso $
- * $Date: 2013-04-27 10:50:36 -0700 (Sat, 27 Apr 2013) $
+ * $Revision: 11018 $
+ * $Id: CompanyListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -118,6 +118,9 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 		}
 
 		return $this;
+	}
+	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+		return self::getById( $company_id, $where, $order);
 	}
 
 	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {

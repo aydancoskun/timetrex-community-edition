@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10749 $
- * $Id: UserDateTotalFactory.class.php 10749 2013-08-26 22:00:42Z ipso $
- * $Date: 2013-08-26 15:00:42 -0700 (Mon, 26 Aug 2013) $
+ * $Revision: 11053 $
+ * $Id: UserDateTotalFactory.class.php 11053 2013-09-27 23:08:52Z ipso $
+ * $Date: 2013-09-27 16:08:52 -0700 (Fri, 27 Sep 2013) $
  */
 
 /**
@@ -1096,7 +1096,7 @@ class UserDateTotalFactory extends Factory {
 		$schedule_total_time = 0;
 		$schedule_over_time_policy_id = 0;
 		$slf = TTnew( 'ScheduleListFactory' );
-		$slf->getByUserDateIdAndStatusId( $this->getUserDateID(), 10 );
+		$slf->getByUserDateIdAndStatusId( $this->getUserDateID(), 10 ); //FIXME: Allow overtime policies to be specified on absence shifts too, like premium policies?
 		if ( $slf->getRecordCount() > 0 ) {
 			//Check for schedule policy
 			foreach ( $slf as $s_obj ) {
@@ -3912,9 +3912,10 @@ class UserDateTotalFactory extends Factory {
 			$slf->getByCompanyIDAndId( $this->getUserDateObject()->getUserObject()->getCompany(), array_unique( (array)$schedule_ids ) );
 			if ( $slf->getRecordCount() > 0 ) {
 				foreach( $slf as $s_obj ) {
+					//Save schedule policies ID so we can pass them onto Premium Policies.
+					//Do this for both working and absence schedules, for purposes of calculating premium when employees are not scheduled.
+					$schedule_policy_ids[] = $s_obj->getSchedulePolicyID();
 					if ( $s_obj->getStatus() == 10 ) {
-						$schedule_policy_ids[] = $s_obj->getSchedulePolicyID(); //Save schedule policies ID so we can passs them onto Premium Policies.
-
 						$schedule_total_time += $s_obj->getTotalTime();
 						if ( is_object( $s_obj->getSchedulePolicyObject() ) ) {
 							$schedule_absence_policy_id = $s_obj->getSchedulePolicyObject()->getAbsencePolicyID();
@@ -4266,6 +4267,14 @@ class UserDateTotalFactory extends Factory {
 				foreach( $hlf as $h_obj ) {
 					Debug::text('ReCalculating Day due to Holiday: '. TTDate::getDate('DATE', $h_obj->getDateStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 					$user_date_ids = $udlf->getArrayByListFactory( $udlf->getByUserIdAndDate( $this->getUserDateObject()->getUser(), $h_obj->getDateStamp() ) );
+
+					if ( $user_date_ids == FALSE AND TTDate::getBeginDayEpoch( $h_obj->getDateStamp() ) <= TTDate::getBeginDayEpoch( time() ) ) {
+						//This fixes a bug where if an employee was added after a holiday (ie: Sept 3rd after Labor day of Sept 2nd)
+						//then had time added before the holiday, the holiday would not be calculated as no user_date record would exist.
+						$user_date_ids = (array)UserDateFactory::findOrInsertUserDate( $this->getUserDateObject()->getUser(), TTDate::getBeginDayEpoch( $h_obj->getDateStamp() ) );
+						Debug::Text( 'User Date ID for holiday doesnt exist, creating it now: '. $user_date_ids[0], __FILE__, __LINE__, __METHOD__, 10);
+					}
+
 					if ( is_array( $user_date_ids ) ) {
 						$retarr = array_merge( $retarr, $user_date_ids );
 					}
@@ -4275,7 +4284,7 @@ class UserDateTotalFactory extends Factory {
 		}
 
 		if ( isset($retarr) AND is_array( $retarr ) AND count($retarr) > 0 ) {
-			//Debug::Arr($retarr, 'Holiday UserDateIDs: ', __FILE__, __LINE__, __METHOD__, 10);
+			//Debug::Arr($retarr, 'bHoliday UserDateIDs: ', __FILE__, __LINE__, __METHOD__, 10);
 			return $retarr;
 		}
 

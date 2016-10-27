@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10171 $
- * $Id: Permission.class.php 10171 2013-06-11 00:21:51Z ipso $
- * $Date: 2013-06-10 17:21:51 -0700 (Mon, 10 Jun 2013) $
+ * $Revision: 11018 $
+ * $Id: Permission.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -229,6 +229,92 @@ class Permission {
 		return FALSE;
 	}
 
+	static function getPermissionIsChildIsOwnerSQL( $id, $inner_column ) {
+		$query = '
+				CASE WHEN phc.is_child is NOT NULL THEN 1 ELSE 0 END as is_child,
+				CASE WHEN '. $inner_column .' = '. (int)$id .' THEN 1 ELSE 0 END as is_owner,
+				';
+		return $query;
+	}
+	static function getPermissionHierarchySQL( $company_id, $user_id, $outer_column ) {
+		$hlf = new HierarchyLevelFactory();
+		$huf = new HierarchyUserFactory();
+		$hotf = new HierarchyObjectTypeFactory();
+		$hcf = new HierarchyControlFactory();
+
+		$query = '
+						LEFT JOIN (
+							select phc_huf.user_id as user_id, 1 as is_child
+							from '. $huf->getTable() .' as phc_huf
+							LEFT JOIN '. $hlf->getTable() .' as phc_hlf ON phc_huf.hierarchy_control_id = phc_hlf.hierarchy_control_id
+							LEFT JOIN '. $hotf->getTable() .' as phc_hotf ON phc_huf.hierarchy_control_id = phc_hotf.hierarchy_control_id
+							LEFT JOIN '. $hcf->getTable() .' as phc_hcf ON phc_huf.hierarchy_control_id = phc_hcf.id
+							WHERE
+								phc_hlf.user_id = '. (int)$user_id .'
+								AND phc_hcf.company_id = '. (int)$company_id .'
+								AND phc_hotf.object_type_id = 100
+								AND phc_huf.user_id != phc_hlf.user_id
+								AND ( phc_hlf.deleted = 0 AND phc_hcf.deleted = 0 )
+						) as phc ON '. $outer_column .' = phc.user_id
+					';
+					
+		return $query;
+	}
+	static function getPermissionIsChildIsOwnerFilterSQL( $filter_data, $outer_column_name ) {
+		if ( isset($filter_data['permission_is_own']) AND $filter_data['permission_is_own'] == TRUE AND isset($filter_data['permission_current_user_id']) ) {
+			$query[] = $outer_column_name .' = '. (int)$filter_data['permission_current_user_id'];
+		}
+		if ( isset($filter_data['permission_is_child']) AND $filter_data['permission_is_child'] == TRUE ) {
+			$query[] = 'phc.is_child = 1';
+		}
+
+		if ( isset($query) AND is_array($query) ) {
+			return ' AND ( '. implode(' OR ', $query ) .') ';
+		}
+
+		return FALSE;
+	}
+
+	function getPermissionFilterData($section, $name, $user_id = NULL, $company_id = NULL) {
+		//Use Cache_Lite class once we need performance.
+		if ( $user_id == NULL OR $user_id == '') {
+			global $current_user;
+			if ( is_object( $current_user ) ) {
+				$user_id = $current_user->getId();
+			} else {
+				return FALSE;
+			}
+		}
+
+		if ( $company_id == NULL OR $company_id == '') {
+			global $current_company;
+			$company_id = $current_company->getId();
+		}
+
+		/*
+			permission_children_ids
+			permission_current_user_id
+			permission_is_child = 1
+			permission_is_own = 1
+		*/
+
+		$retarr['permission_current_user_id'] = $user_id;
+		if ( $this->Check( $section, $name ) == FALSE ) {
+			if ( $this->Check( $section, $name.'_child') ) {
+				$retarr['permission_is_child'] = TRUE;
+			}
+			if ( $this->Check( $section, $name.'_own') ) {
+				$retarr['permission_is_own'] = TRUE; //Return user_id so we can match that specifically
+			}
+		}
+
+		if ( isset($retarr) ) {
+			return $retarr;
+		}
+
+		return array();
+	}
+
 	function getPermissionHierarchyChildren( $company_id, $user_id ) {
 		$hlf = TTnew( 'HierarchyListFactory' );
 		$permission_children_ids = $hlf->getHierarchyChildrenByCompanyIdAndUserIdAndObjectTypeID( $company_id, $user_id, 100 );
@@ -272,6 +358,7 @@ class Permission {
 				$retarr[] = $user_id;
 			}
 		} else {
+			//This must return NULL, otherwise the SQL query will restrict returned records just to the children.
 			$retarr = NULL;
 		}
 

@@ -84,8 +84,6 @@ class UserMembershipListFactory extends UserMembershipFactory implements Iterato
 		return $this;
 	}
 
-
-
     function getByUserId($user_id, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
@@ -138,6 +136,30 @@ class UserMembershipListFactory extends UserMembershipFactory implements Iterato
 		return $this;
 	}
 
+    function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$qf = new QualificationFactory();
+
+		$ph = array(
+					'company_id' => $company_id
+					);
+
+		$query = '
+					select 	a.*
+					from	'. $this->getTable() .' as a
+						LEFT JOIN  '. $qf->getTable() .' as b on a.qualification_id = b.id
+					where	b.company_id = ?
+						AND a.deleted = 0';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL($query,$ph);
+
+		return $this;
+	}
 
     function getByIdAndUserId($id, $user_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {

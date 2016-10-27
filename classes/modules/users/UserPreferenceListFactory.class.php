@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10258 $
- * $Id: UserPreferenceListFactory.class.php 10258 2013-06-21 03:14:26Z ennis $
- * $Date: 2013-06-20 20:14:26 -0700 (Thu, 20 Jun 2013) $
+ * $Revision: 11018 $
+ * $Id: UserPreferenceListFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -143,6 +143,31 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 				$this->saveCache($this->rs,$id);
 			}
 		}
+
+		return $this;
+	}
+
+	function getByCompanyId($company_id, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$uf = new UserFactory();
+
+		$ph = array(
+					'company_id' => $company_id,
+					);
+
+		$query = '
+					select 	a.*
+					from 	'. $this->getTable() .' as a,
+							'. $uf->getTable() .' as b
+					where	a.user_id = b.id
+						AND	b.company_id = ?
+						AND ( a.deleted = 0 AND b.deleted = 0 )';
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}

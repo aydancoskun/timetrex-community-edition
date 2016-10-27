@@ -220,7 +220,7 @@ class UserContactFactory extends Factory {
 
 		if ( $this->Validator->isResultSetWithRows(	'user_id',
 															$ulf->getByID($id),
-															TTi18n::gettext('Invalid User')
+															TTi18n::gettext('Invalid Employee')
 															) ) {
 			$this->data['user_id'] = $id;
 

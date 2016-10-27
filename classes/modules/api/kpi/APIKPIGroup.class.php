@@ -153,7 +153,7 @@ class APIKPIGroup extends APIFactory {
 	 * @return array
 	 */
 	function getCommonKPIGroupData( $data ) {
-		return Misc::arrayIntersectByRow( $this->getKPIGroup( $data, TRUE ) );
+		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getKPIGroup( $data, TRUE ) ) );
 	}
 
 	/**
@@ -401,7 +401,7 @@ class APIKPIGroup extends APIFactory {
 		Debug::Text('Received data for: '. count($data) .' KPIGroups', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
        
-		$src_rows = $this->getKPIGroup( array('filter_data' => array('id' => $data) ), TRUE );
+		$src_rows = $this->stripReturnHandler( $this->getKPIGroup( array('filter_data' => array('id' => $data) ), TRUE ) );
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {
@@ -434,7 +434,7 @@ class APIKPIGroup extends APIFactory {
 		Debug::Arr($src_id, 'Src ID: Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($dst_id, 'Dst ID: Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$src_rows = $this->getKPIGroup( array('filter_data' => array('id' => $src_id ) ), TRUE, 'flat' );
+		$src_rows = $this->stripReturnHandler( $this->getKPIGroup( array('filter_data' => array('id' => $src_id ) ), TRUE, 'flat' ) );
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {

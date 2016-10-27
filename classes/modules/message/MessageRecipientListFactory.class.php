@@ -79,6 +79,30 @@ class MessageRecipientListFactory extends MessageRecipientFactory implements Ite
 		return $this;
 	}
 
+	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$uf = new UserFactory();
+
+		$ph = array(
+					'company_id' => $company_id,
+					);
+
+		$query = '
+					SELECT a.*
+					FROM '. $this->getTable() .' as a
+						LEFT JOIN '. $uf->getTable() .' as b ON a.user_id = b.id
+					WHERE
+							b.company_id = ?
+							AND ( a.deleted = 0 AND b.deleted = 0 )
+					';
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
 	function getByCompanyIdAndMessageControlId($company_id, $id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;

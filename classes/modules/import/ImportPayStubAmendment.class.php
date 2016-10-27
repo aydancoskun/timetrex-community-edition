@@ -111,8 +111,13 @@ class ImportPayStubAmendment extends Import {
 	function getPayStubAccountOptions() {
 		//Get accrual policies
 		$psealf = TTNew('PayStubEntryAccountListFactory');
-		$psealf->getByCompanyId( $this->company_id );
-		$this->pay_stub_account_options = (array)$psealf->getArrayByListFactory( $psealf, FALSE, TRUE );
+		$psealf->getByCompanyIdAndTypeId( $this->company_id, array(10,20,30,50,80) );
+
+		//Get names with types in front, ie: "Earning - Commission"
+		$this->pay_stub_account_options = (array)$psealf->getArrayByListFactory( $psealf, FALSE, TRUE, TRUE );
+
+		//Get names without types in front, ie: "Commission"
+		$this->pay_stub_account_short_options = (array)$psealf->getArrayByListFactory( $psealf, FALSE, TRUE, FALSE, FALSE );
 		unset($aplf);
 
 		return TRUE;
@@ -127,8 +132,13 @@ class ImportPayStubAmendment extends Import {
 		}
 
 		$retval = $this->findClosestMatch( $input, $this->pay_stub_account_options );
+		//Debug::Arr( $this->pay_stub_account_options, 'aAttempting to find PS Account with long name: '. $input, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $retval === FALSE ) {
-			$retval = -1; //Make sure this fails.
+			$retval = $this->findClosestMatch( $input, $this->pay_stub_account_short_options );
+			//Debug::Arr( $this->pay_stub_account_short_options, 'bAttempting to find PS Account with short name: '. $input, __FILE__, __LINE__, __METHOD__, 10);
+			if ( $retval === FALSE ) {
+				$retval = -1; //Make sure this fails.
+			}
 		}
 
 		return $retval;

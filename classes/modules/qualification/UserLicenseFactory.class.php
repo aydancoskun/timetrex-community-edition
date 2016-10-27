@@ -47,7 +47,7 @@ class UserLicenseFactory extends Factory {
 	protected $pk_sequence_name = 'user_license_id_seq'; //PK Sequence name
     protected $qualification_obj = NULL;
 
-    protected $license_number_validator_regex = '/^[0-9]{1,250}$/i';
+    protected $license_number_validator_regex = '/^[A-Z\-\.\ 0-9]{1,250}$/i';
 	function _getFactoryOptions( $name ) {
 
 		$retval = NULL;
@@ -185,9 +185,9 @@ class UserLicenseFactory extends Factory {
         if (    $license_number == ''
                 OR
                 $this->Validator->isRegEx(		'license_number',
-													$license_number,
-													TTi18n::gettext('License number must be digits only'),
-													$this->license_number_validator_regex)  ) {
+												$license_number,
+												TTi18n::gettext('License number is invalid'),
+												$this->license_number_validator_regex)  ) {
                 $this->data['license_number'] = $license_number;
                 return  TRUE;
         }

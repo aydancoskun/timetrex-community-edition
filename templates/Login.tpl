@@ -51,10 +51,10 @@ function bookmarkSite( title, url ) {
 </script>
 </head>
 
-<body onload="document.login.user_name.focus(); document.getElementById('popUpDiv').className += ' visible';">
-
+<body onload="document.login.user_name.focus(); {if !isset($config_vars.branding) OR ( isset($config_vars.branding) AND time() >= strtotime('01-Jan-2014') )}document.getElementById('popUpDiv').className += ' visible';{/if}">
+{if !isset($config_vars.branding) OR ( isset($config_vars.branding) AND time() >= strtotime('01-Jan-2014') )}
 <div id="popUpDiv"><b><span style="font-size: small;">&nbsp;<a style="color: #FF0000; text-decoration: none;" href="{if $smarty.server.HTTP_HOST == 'www.timetrex.com' OR $smarty.server.HTTP_HOST == 'timetrex.com'}http{if $smarty.server.HTTPS == TRUE}s{/if}://{$config_vars.other.hostname}/interface/{/if}{if isset($config_vars.branding)}flex/{else}BetaTest.php{/if}{if $user_name != '' AND $password != ''}?user_name={$user_name}&password={$password}{/if}">WARNING: This legacy interface will be discontinued by January 31st 2014.<br>Please transition to our new {$APPLICATION_NAME} interface as soon as possible by clicking here!</a>&nbsp;</span></b></div>
-
+{/if}
 <div id="container">
 
 <div id="rowHeaderLogin"><a href="http://{$ORGANIZATION_URL}"><img src="{$BASE_URL}/send_file.php?object_type=primary_company_logo" style="width:auto; height:42px;" alt="Time And Attendance"></a></div>

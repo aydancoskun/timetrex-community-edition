@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10047 $
- * $Id: HolidayPolicyFactory.class.php 10047 2013-05-30 00:50:12Z ipso $
- * $Date: 2013-05-29 17:50:12 -0700 (Wed, 29 May 2013) $
+ * $Revision: 11018 $
+ * $Id: HolidayPolicyFactory.class.php 11018 2013-09-24 23:39:40Z ipso $
+ * $Date: 2013-09-24 16:39:40 -0700 (Tue, 24 Sep 2013) $
  */
 
 /**
@@ -155,48 +155,9 @@ class HolidayPolicyFactory extends Factory {
 	}
 
 	function getAbsencePolicyObject() {
-		return $this->getGenericObject( 'AbsencePolicyListFactory', $this->getRoundIntervalPolicyID(), 'absence_policy_obj' );
+		return $this->getGenericObject( 'AbsencePolicyListFactory', $this->getAbsencePolicyID(), 'absence_policy_obj' );
 	}
-/*
-	function getRoundIntervalPolicyObject() {
-		if ( is_object($this->round_interval_policy_obj) ) {
-			return $this->round_interval_policy_obj;
-		} else {
-			$riplf = TTnew( 'RoundIntervalPolicyListFactory' );
-			$riplf->getById( $this->getRoundIntervalPolicyID() );
-			if ( $riplf->getRecordCount() > 0 ) {
-				$this->round_interval_policy_obj = $riplf->getCurrent();
-			}
-
-			return $this->round_interval_policy_obj;
-		}
-	}
-
-	function getAbsencePolicyObject() {
-		if ( is_object($this->absence_policy_obj) ) {
-			return $this->absence_policy_obj;
-		} else {
-			$aplf = TTnew( 'AbsencePolicyListFactory' );
-			$aplf->getById( $this->getAbsencePolicyID() );
-			if ( $aplf->getRecordCount() > 0 ) {
-				$this->absence_policy_obj = $aplf->getCurrent();
-			}
-
-			return $this->absence_policy_obj;
-		}
-	}
-
-	function getCompanyObject() {
-		if ( is_object($this->company_obj) ) {
-			return $this->company_obj;
-		} else {
-			$clf = TTnew( 'CompanyListFactory' );
-			$this->company_obj = $clf->getById( $this->getCompany() )->getCurrent();
-
-			return $this->company_obj;
-		}
-	}
-*/
+	
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
 			return $this->data['company_id'];
