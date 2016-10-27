@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12624 $
- * $Id: global.inc.php 12624 2014-03-13 23:08:27Z mikeb $
- * $Date: 2014-03-13 16:08:27 -0700 (Thu, 13 Mar 2014) $
+ * $Revision: 13895 $
+ * $Id: global.inc.php 13895 2014-07-28 21:43:41Z mikeb $
+ * $Date: 2014-07-28 14:43:41 -0700 (Mon, 28 Jul 2014) $
  */
 //PHP v5.1.0 introduced $_SERVER['REQUEST_TIME'], but it doesn't include microseconds until v5.4.0.
 if ( !isset($_SERVER['REQUEST_TIME_FLOAT']) OR version_compare(PHP_VERSION, '5.4.0', '<') == TRUE ) {
@@ -61,10 +61,10 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '7.3.3' );
-define('APPLICATION_VERSION_DATE', @strtotime('13-Mar-2014') ); // Release date of version.
+define('APPLICATION_VERSION', '7.3.10' );
+define('APPLICATION_VERSION_DATE', @strtotime('29-Jul-2014') ); // Release date of version.
 
-if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') { define('OPERATING_SYSTEM', 'WIN'); } else { define('OPERATING_SYSTEM', 'LINUX'); }
+if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'WIN' ) { define('OPERATING_SYSTEM', 'WIN' ); } else { define('OPERATING_SYSTEM', 'LINUX' ); }
 
 /*
 	Find Config file.
@@ -100,8 +100,8 @@ if ( isset($config_vars['debug']['production']) AND $config_vars['debug']['produ
 } else {
 	define('PRODUCTION', FALSE);
 }
-																																																		//**REMOVING OR CHANGING THIS APPLICATION NAME AND ORGANIZATION URL IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT**//
-																																																		( isset($config_vars['branding']['application_name']) AND $config_vars['branding']['application_name'] != '' ) ? define('APPLICATION_NAME', $config_vars['branding']['application_name']) : define('APPLICATION_NAME', (PRODUCTION == FALSE) ? 'TimeTrex-Debug' : 'TimeTrex'); ( isset($config_vars['branding']['organization_name']) AND $config_vars['branding']['organization_name'] != '' ) ? define('ORGANIZATION_NAME', $config_vars['branding']['organization_name']) : define('ORGANIZATION_NAME', 'TimeTrex'); ( isset($config_vars['branding']['organization_url']) AND $config_vars['branding']['organization_url'] != '' ) ? define('ORGANIZATION_URL', $config_vars['branding']['organization_url']) : define('ORGANIZATION_URL', 'www.TimeTrex.com');
+																																																							//**REMOVING OR CHANGING THIS APPLICATION NAME AND ORGANIZATION URL IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT**//
+																																																							( isset($config_vars['branding']['application_name']) AND $config_vars['branding']['application_name'] != '' ) ? define('APPLICATION_NAME', $config_vars['branding']['application_name']) : define('APPLICATION_NAME', (PRODUCTION == FALSE) ? 'TimeTrex-Debug' : 'TimeTrex'); ( isset($config_vars['branding']['organization_name']) AND $config_vars['branding']['organization_name'] != '' ) ? define('ORGANIZATION_NAME', $config_vars['branding']['organization_name']) : define('ORGANIZATION_NAME', 'TimeTrex'); ( isset($config_vars['branding']['organization_url']) AND $config_vars['branding']['organization_url'] != '' ) ? define('ORGANIZATION_URL', $config_vars['branding']['organization_url']) : define('ORGANIZATION_URL', 'www.TimeTrex.com');
 if ( isset($config_vars['other']['demo_mode']) AND $config_vars['other']['demo_mode'] == 1 ) {
 	define('DEMO_MODE', TRUE);
 } else {
@@ -118,6 +118,12 @@ if ( isset($config_vars['other']['primary_company_id']) AND $config_vars['other'
 	define('PRIMARY_COMPANY_ID', (int)$config_vars['other']['primary_company_id']);
 } else {
 	define('PRIMARY_COMPANY_ID', FALSE);
+}
+
+if ( PRODUCTION == TRUE ) {
+	define('APPLICATION_BUILD', APPLICATION_VERSION .'-'. date('Ymd', APPLICATION_VERSION_DATE ) .'-'. date('His', filemtime( __FILE__ ) ) );
+} else {
+	define('APPLICATION_BUILD', APPLICATION_VERSION .'-'. date('Ymd-Hi00') ); //Dont show seconds, as they will never match across multiple API calls.
 }
 
 //Try to dynamically load required PHP extensions if they aren't already.
@@ -297,6 +303,28 @@ function TTnew( $class_name ) { //Unlimited arguments are supported.
 	}
 }
 
+//Force no caching of file.
+function forceNoCacheHeaders() {
+	//Help prevent XSS or frame clickjacking.
+	Header('X-XSS-Protection: 1; mode=block');
+	Header('X-Frame-Options: SAMEORIGIN');
+
+	//Turn caching off.
+	header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+	header('Last-Modified: ' . gmdate("D, d M Y H:i:s") . ' GMT');
+	//Can Break IE with downloading PDFs over SSL.
+	// IE gets: "file could not be written to cache"
+	// It works on some IE installs though.
+	header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0');
+	header('Pragma: token'); //If set to no-cache it breaks IE downloading reports, with error that the site is not available.
+
+	//Only when force_ssl is enabled and the user is using SSL, include the STS header.
+	global $config_vars;
+	if ( isset($config_vars['other']['force_ssl']) AND ( $config_vars['other']['force_ssl'] == TRUE ) AND Misc::isSSL(TRUE) == TRUE ) {
+		header('Strict-Transport-Security: max-age=31536000; includeSubdomains');
+	}
+}
+
 //Function to force browsers to cache certain files.
 function forceCacheHeaders( $file_name = NULL, $mtime = NULL, $etag = NULL ) {
 	if ( $file_name == '' ) {
@@ -312,6 +340,10 @@ function forceCacheHeaders( $file_name = NULL, $mtime = NULL, $etag = NULL ) {
 	if ( $etag != '' ) {
 		$etag = trim($etag);
 	}
+
+	//Help prevent XSS or frame clickjacking.
+	Header('X-XSS-Protection: 1; mode=block');
+	Header('X-Frame-Options: SAMEORIGIN');
 
 	//For some reason even with must-revalidate the browsers won't check ETag every page load.
 	//So some pages may get cached for an hour or two regardless of ETag changes.
@@ -386,7 +418,8 @@ set_include_path(
 
 require_once(Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'core'. DIRECTORY_SEPARATOR .'Exception.class.php');
 require_once(Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'core'. DIRECTORY_SEPARATOR .'Debug.class.php');
-
+																																																							//**REMOVING OR CHANGING THIS COPYRIGHT NOTICE IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT**//
+																																																							if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) { define( 'COPYRIGHT_NOTICE', 'Copyright &copy; '. date('Y') .' <a href="http://'. ORGANIZATION_URL .'" class="footerLink">'. ORGANIZATION_NAME .'</a>. The Program is free software provided AS IS, without warranty. Licensed under <a href="http://www.fsf.org/licensing/licenses/agpl-3.0.html" target="_blank">AGPLv3.</a>' ); } else { define( 'COPYRIGHT_NOTICE', 'Copyright &copy; '. date('Y') .' <a href="http://'. ORGANIZATION_URL .'" class="footerLink">'. ORGANIZATION_NAME .'</a>. All Rights Reserved.' ); }
 Debug::setEnable( (bool)$config_vars['debug']['enable'] );
 Debug::setEnableTidy( FALSE );
 Debug::setEnableDisplay( (bool)$config_vars['debug']['enable_display'] );
@@ -410,7 +443,8 @@ set_error_handler( array('Debug','ErrorHandler') );
 if ( isset($_SERVER['REQUEST_URI']) AND isset($_SERVER['REMOTE_ADDR']) ) {
 	Debug::Text('URI: '. $_SERVER['REQUEST_URI'] .' IP Address: '. $_SERVER['REMOTE_ADDR'], __FILE__, __LINE__, __METHOD__, 10);
 }
-Debug::Text('Version: '. APPLICATION_VERSION .' Edition: '. getTTProductEdition() .' Production: '. (int)PRODUCTION .' Database: Type: '. $config_vars['database']['type']  .' Name: '. $config_vars['database']['database_name'] .' Config: '. CONFIG_FILE .' Demo Mode: '. (int)DEMO_MODE, __FILE__, __LINE__, __METHOD__, 10);
+//Supress PHP errors on this, mainly if $config_vars['database'] is not set.
+@Debug::Text('Version: '. APPLICATION_VERSION .' Edition: '. getTTProductEdition() .' Production: '. (int)PRODUCTION .' Database: Type: '. $config_vars['database']['type']  .' Name: '. $config_vars['database']['database_name'] .' Config: '. CONFIG_FILE .' Demo Mode: '. (int)DEMO_MODE, __FILE__, __LINE__, __METHOD__, 10);
 
 if ( function_exists('bcscale') ) {
 	bcscale(10);
@@ -425,6 +459,15 @@ if ( $config_vars['other']['force_ssl'] == 1 AND Misc::isSSL( TRUE ) == FALSE AN
 if ( isset($enable_wap) AND $enable_wap == TRUE ) {
 	header( 'Content-type: text/vnd.wap.wml', TRUE );
 }
+
+if ( PRODUCTION == TRUE ) {
+	$origin_url = ( Misc::isSSL( TRUE ) == TRUE ) ? 'https://'.Misc::getHostName( FALSE ) : 'http://'.Misc::getHostName( FALSE );
+} else {
+	$origin_url = '*';
+}
+header('Access-Control-Allow-Origin: '. $origin_url );
+header('Access-Control-Allow-Headers: Content-Type' );
+unset($origin_url);
 
 require_once('Cache.inc.php');
 require_once('Database.inc.php');

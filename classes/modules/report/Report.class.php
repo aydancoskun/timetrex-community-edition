@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -348,8 +348,8 @@ class Report {
 		if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
 			$this->setCurrencyObject( $base_currency_obj );
 		} else {
-			if ( ( isset($filter_data['currency_id'][0]) AND $filter_data['currency_id'][0] > 0 )
-					OR ( isset($filter_data['currency_id']) AND $filter_data['currency_id'] > 0 ) ) {
+			if ( ( isset($filter_data['currency_id'][0]) AND is_array($filter_data['currency_id']) AND $filter_data['currency_id'][0] > 0 )
+					OR ( isset($filter_data['currency_id']) AND !is_array($filter_data['currency_id']) AND $filter_data['currency_id'] > 0 ) ) {
 				$crlf->getByIdAndCompanyId( ( isset($filter_data['currency_id'][0]) ) ? $filter_data['currency_id'][0] : $filter_data['currency_id'], $this->getUserObject()->getCompany() );
 				if ( $crlf->getRecordCount() == 1 ) {
 					$this->setCurrencyObject( $crlf->getCurrent() );
@@ -542,7 +542,7 @@ class Report {
 		return FALSE;
 	}
 
-	function convertTimePeriodToStartEndDate( $time_period_arr, $prefix = NULL ) {
+	function convertTimePeriodToStartEndDate( $time_period_arr, $prefix = NULL, $force_dates_for_pay_periods = FALSE ) {
 		Debug::Arr($time_period_arr, 'Input: Time Period Array: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Convert time_period into start/end date, with pay_period_schedule_ids if necessary.
@@ -591,6 +591,23 @@ class Report {
 				//No pay period find default to no time period, otherwise the report can take forever to finish.
 				Debug::Text('No pay periods found, defaulting to none (0)...', __FILE__, __LINE__, __METHOD__, 10);
 				$retarr[$prefix.'pay_period_id'] = 0; //This can actually find data not assigned to a pay period.
+			}
+
+			if ( $force_dates_for_pay_periods == TRUE ) {
+				Debug::Text('Attempting to convert pay periods to start/end dates...', __FILE__, __LINE__, __METHOD__, 10);
+				$pplf = TTNew('PayPeriodListFactory');
+				$pplf->getByIdList( $retarr[$prefix.'pay_period_id'], NULL, array('start_date' => 'asc' ) );
+				if ( $pplf->getRecordCount() > 0 ) {
+					foreach( $pplf as $pp_obj ) {
+						if ( !isset($retarr[$prefix.'start_date']) OR $pp_obj->getStartDate() < $retarr[$prefix.'start_date'] ) {
+							$retarr[$prefix.'start_date'] = $pp_obj->getStartDate();
+						}
+						if ( !isset($retarr[$prefix.'end_date']) OR $pp_obj->getEndDate() > $retarr[$prefix.'start_date'] ) {
+							$retarr[$prefix.'end_date'] = $pp_obj->getEndDate();
+						}
+					}
+				}
+				unset($pplf);
 			}
 		} else {
 			Debug::Text('Invalid TimePeriod filter...', __FILE__, __LINE__, __METHOD__, 10);
@@ -918,6 +935,8 @@ class Report {
 			if ( !isset($data['default_font']) OR ( isset($data['default_font']) AND $data['default_font'] == '' ) ) {
 				$data['default_font'] = TTi18n::getPDFDefaultFont();
 			}
+			Debug::Text('Report default font: '. $data['default_font'], __FILE__, __LINE__, __METHOD__, 10);
+			
 			if ( isset($data['maximum_page_limit']) AND (int)$data['maximum_page_limit'] != 0 ) {
 				if ( $data['maximum_page_limit'] > 10000 ) {
 					$data['maximum_page_limit'] = 10000;
@@ -1312,6 +1331,13 @@ class Report {
 						$retval = TTDate::getReportDates( $column, $value, TRUE, $this->getUserObject() );
 						break;
 					case 'currency':
+						if ( is_object( $this->getCurrencyObject() ) ) {
+							//Set MIN decimals to 2 and max to the currency rounding.
+							$retval = $this->getCurrencyObject()->round( $value ); //Make sure we don't format the number or add any thousands separators.
+						} else {
+							$retval = $value;
+						}
+						break;
 					case 'percent':
 					case 'numeric':
 						//Don't format above types.
@@ -1345,6 +1371,13 @@ class Report {
 						$retval = TTDate::getReportDates( $column, $value, TRUE, $this->getUserObject() );
 						break;
 					case 'currency':
+						if ( is_object( $this->getCurrencyObject() ) ) {
+							//Set MIN decimals to 2 and max to the currency rounding.
+							$retval = $this->getCurrencyObject()->round( $value ); //Make sure we don't format the number or add any thousands separators.
+						} else {
+							$retval = $value;
+						}
+						break;
 					case 'percent':
 					case 'numeric':
 						//Don't format above types.

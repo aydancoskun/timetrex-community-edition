@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -168,7 +168,7 @@ abstract class APIFactory {
 		//Preset values for LF search function.
 		$data = Misc::preSetArrayValues( $data, array( 'filter_data', 'filter_columns', 'filter_items_per_page', 'filter_page', 'filter_sort' ), NULL );
 
-		if ( $disable_paging == FALSE AND $data['filter_items_per_page'] === NULL ) {
+		if ( $disable_paging == FALSE AND (int)$data['filter_items_per_page'] <= 0 ) { //Used to check $data['filter_items_per_page'] === NULL
 			$data['filter_items_per_page'] = $this->getCurrentUserPreferenceObject()->getItemsPerPage();
 		}
 
@@ -279,7 +279,14 @@ abstract class APIFactory {
 								);
 
 				if ( $retval === FALSE ) {
-					Debug::Arr($retarr, 'returnHandler ERROR: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Arr($retarr, 'returnHandler v1 ERROR: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
+				}
+
+				//Handle progress bar here, make sure they are stopped and if an error occurs display the error.
+				if ( $retval === FALSE ) {
+					$this->getProgressBarObject()->start( $this->getAMFMessageID(), 9999, 9999, $description );
+				} else {
+					$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 				}
 
 				return $retarr;
@@ -323,7 +330,14 @@ abstract class APIFactory {
 							);
 
 			if ( $retval === FALSE ) {
-				Debug::Arr($retarr, 'returnHandler ERROR: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Arr($retarr, 'returnHandler v2 ERROR: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
+			}
+
+			//Handle progress bar here, make sure they are stopped and if an error occurs display the error.
+			if ( $retval === FALSE ) {
+				$this->getProgressBarObject()->start( $this->getAMFMessageID(), 9999, 9999, $description );
+			} else {
+				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 			}
 
 			//Debug::Arr($retarr, 'returnHandler: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);

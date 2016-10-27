@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11925 $
- * $Id: RequestListFactory.class.php 11925 2014-01-08 00:13:44Z mikeb $
- * $Date: 2014-01-07 16:13:44 -0800 (Tue, 07 Jan 2014) $
+ * $Revision: 13814 $
+ * $Id: RequestListFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 
 /**
@@ -792,53 +792,6 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 		
 		$query .= ( isset($filter_data['authorized']) ) ? $this->getWhereClauseSQL( 'a.authorized', $filter_data['authorized'], 'numeric_list', $ph ) : NULL;
 
-/*
-		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query	.=	' AND udf.user_id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
-		}
-		if ( isset($filter_data['user_id']) AND isset($filter_data['user_id'][0]) AND !in_array(-1, (array)$filter_data['user_id']) ) {
-			$query	.=	' AND udf.user_id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query	.=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
-		}
-		if ( isset($filter_data['exclude_id']) AND isset($filter_data['exclude_id'][0]) AND !in_array(-1, (array)$filter_data['exclude_id']) ) {
-			$query	.=	' AND udf.user_id not in ('. $this->getListSQL($filter_data['exclude_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['type_id']) AND isset($filter_data['type_id'][0]) AND !in_array(-1, (array)$filter_data['type_id']) ) {
-			$query	.=	' AND a.type_id in ('. $this->getListSQL($filter_data['type_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['status_id']) AND isset($filter_data['status_id'][0]) AND !in_array(-1, (array)$filter_data['status_id']) ) {
-			$query	.=	' AND a.status_id in ('. $this->getListSQL($filter_data['status_id'], $ph) .') ';
-		}
-
-		if ( isset($filter_data['group_id']) AND isset($filter_data['group_id'][0]) AND !in_array(-1, (array)$filter_data['group_id']) ) {
-			if ( isset($filter_data['include_subgroups']) AND (bool)$filter_data['include_subgroups'] == TRUE ) {
-				$uglf = new UserGroupListFactory();
-				$filter_data['group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['group_id'], TRUE);
-			}
-			$query	.=	' AND b.group_id in ('. $this->getListSQL($filter_data['group_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['default_branch_id']) AND isset($filter_data['default_branch_id'][0]) AND !in_array(-1, (array)$filter_data['default_branch_id']) ) {
-			$query	.=	' AND b.default_branch_id in ('. $this->getListSQL($filter_data['default_branch_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['default_department_id']) AND isset($filter_data['default_department_id'][0]) AND !in_array(-1, (array)$filter_data['default_department_id']) ) {
-			$query	.=	' AND b.default_department_id in ('. $this->getListSQL($filter_data['default_department_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['title_id']) AND isset($filter_data['title_id'][0]) AND !in_array(-1, (array)$filter_data['title_id']) ) {
-			$query	.=	' AND b.title_id in ('. $this->getListSQL($filter_data['title_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['country']) AND isset($filter_data['country'][0]) AND !in_array(-1, (array)$filter_data['country']) ) {
-			$query	.=	' AND b.country in ('. $this->getListSQL($filter_data['country'], $ph) .') ';
-		}
-		if ( isset($filter_data['province']) AND isset($filter_data['province'][0]) AND !in_array( -1, (array)$filter_data['province']) AND !in_array( '00', (array)$filter_data['province']) ) {
-			$query	.=	' AND b.province in ('. $this->getListSQL($filter_data['province'], $ph) .') ';
-		}
-		//Handle authorize list criteria here.
-		if ( isset($filter_data['authorized']) AND isset($filter_data['authorized'][0]) AND !in_array(-1, (array)$filter_data['authorized']) ) {
-			$query	.=	' AND a.authorized in ('. $this->getListSQL($filter_data['authorized'], $ph) .') ';
-		}
-*/
 		if ( isset($filter_data['hierarchy_level_map']) AND is_array($filter_data['hierarchy_level_map']) ) {
 			$query	.= ' AND  huf.id IS NOT NULL '; //Make sure the user maps to a hierarchy.
 			//$query	.= ' AND ( '. HierarchyLevelFactory::convertHierarchyLevelMapToSQL( $filter_data['hierarchy_level_map'], 'a.', 'huf.', 'a.type_id' ) .' )';

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12069 $
- * $Id: AccrualPolicyListFactory.class.php 12069 2014-01-20 18:48:05Z mikeb $
- * $Date: 2014-01-20 10:48:05 -0800 (Mon, 20 Jan 2014) $
+ * $Revision: 13814 $
+ * $Id: AccrualPolicyListFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 
 /**
@@ -89,21 +89,21 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		}
 
 		$ph = array(
-					'id' => $id,
 					'company_id' => $company_id
+					//'id' => $id,
 					);
 
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
-					where	id = ?
-						AND company_id = ?
+					where	company_id = ?
+						AND id in ('. $this->getListSQL($id, $ph) .')
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
 		$this->ExecuteSQL( $query, $ph );
-
+		
 		return $this;
 	}
 

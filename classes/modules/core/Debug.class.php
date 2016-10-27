@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11836 $
- * $Id: Debug.class.php 11836 2013-12-29 00:32:24Z mikeb $
- * $Date: 2013-12-28 16:32:24 -0800 (Sat, 28 Dec 2013) $
+ * $Revision: 12703 $
+ * $Id: Debug.class.php 12703 2014-03-20 16:14:55Z mikeb $
+ * $Date: 2014-03-20 09:14:55 -0700 (Thu, 20 Mar 2014) $
  */
 
 /**
@@ -435,7 +435,7 @@ class Debug {
 
 			$eol = "\n";
 
-			$output = $eol.'---------------[ '. Date('d-M-Y G:i:s O') .' (PID: '.getmypid().') ]---------------'.$eol;
+			$output = $eol.'---------------[ '. @date('d-M-Y G:i:s O') .' (PID: '.getmypid().') ]---------------'.$eol;
 			if ( is_array( self::$debug_buffer ) ) {
 				foreach (self::$debug_buffer as $arr) {
 					if ( $arr[0] <= self::getVerbosity() ) {
@@ -443,7 +443,7 @@ class Debug {
 					}
 				}
 			}
-			$output .= '---------------[ '. Date('d-M-Y G:i:s O') .' (PID: '.getmypid().') ]---------------'.$eol;
+			$output .= '---------------[ '. @date('d-M-Y G:i:s O') .' (PID: '.getmypid().') ]---------------'.$eol;
 
 			if ( isset($config_vars['debug']['enable_syslog']) AND $config_vars['debug']['enable_syslog'] == TRUE AND OPERATING_SYSTEM != 'WIN' ) {
 				//If using rsyslog, need to set:

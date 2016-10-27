@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11925 $
- * $Id: ExceptionPolicyListFactory.class.php 11925 2014-01-08 00:13:44Z mikeb $
- * $Date: 2014-01-07 16:13:44 -0800 (Tue, 07 Jan 2014) $
+ * $Revision: 13271 $
+ * $Id: ExceptionPolicyListFactory.class.php 13271 2014-05-26 18:07:38Z mikeb $
+ * $Date: 2014-05-26 11:07:38 -0700 (Mon, 26 May 2014) $
  */
 
 /**
@@ -278,8 +278,7 @@ class ExceptionPolicyListFactory extends ExceptionPolicyFactory implements Itera
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 
 		if ( $order == NULL ) {
-			//$order = array( 'type_id' => 'asc');
-			$order = array( 'id' => 'asc'); //Type ID is the wrong order, but ID is proper.
+			$order = array( 'type_id' => 'asc');
 			$strict = FALSE;
 		} else {
 			//Always try to order by status first so INACTIVE employees go to the bottom.

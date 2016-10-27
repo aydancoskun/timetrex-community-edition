@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12331 $
- * $Id: PunchFactory.class.php 12331 2014-02-13 18:57:19Z mikeb $
- * $Date: 2014-02-13 10:57:19 -0800 (Thu, 13 Feb 2014) $
+ * $Revision: 13814 $
+ * $Id: PunchFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 
 /**
@@ -476,9 +476,13 @@ class PunchFactory extends Factory {
 	}
 
 	function roundTimeStamp($epoch) {
+		if ( $epoch == '' ) {
+			return FALSE;
+		}
+		
 		$original_epoch = $epoch;
 
-		Debug::text(' Rounding Timestamp: '. TTDate::getDate('DATE+TIME', $epoch ) .' Status ID: '. $this->getStatus() .' Type ID: '. $this->getType(), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text(' Rounding Timestamp: '. TTDate::getDate('DATE+TIME', $epoch ) .'('. $epoch .') Status ID: '. $this->getStatus() .' Type ID: '. $this->getType(), __FILE__, __LINE__, __METHOD__, 10);
 
 		//Punch control is no longer used for rounding.
 		//Check for rounding policies.
@@ -817,7 +821,7 @@ class PunchFactory extends Factory {
 			Debug::text(' NO Rounding Policy(s) Found', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		Debug::text(' Rounded TimeStamp: '. TTDate::getDate('DATE+TIME', $epoch ) .' Original TimeStamp: '. TTDate::getDate('DATE+TIME', $original_epoch ), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text(' Rounded TimeStamp: '. TTDate::getDate('DATE+TIME', $epoch ) .'('. $epoch .') Original TimeStamp: '. TTDate::getDate('DATE+TIME', $original_epoch ), __FILE__, __LINE__, __METHOD__, 10);
 
 		return $epoch;
 	}
@@ -1521,7 +1525,11 @@ class PunchFactory extends Factory {
 								'type_id' => (int)$next_type,
 								'punch_control_id' => $prev_punch_obj->getNextPunchControlID(),
 								'note' => '', //Must be null.
-								//'user_date_id' => $prev_punch_obj->getPunchControlObject()->getUserDateID()
+								'other_id1' => '',
+								'other_id2' => '',
+								'other_id3' => '',
+								'other_id4' => '',
+								'other_id5' => '',
 								);
 			} else {
 				//Out punch
@@ -1537,6 +1545,8 @@ class PunchFactory extends Factory {
 								'job_item_id' => $job_item_id,
 								'quantity' => (float)$prev_punch_obj->getPunchControlObject()->getQuantity(),
 								'bad_quantity' => (float)$prev_punch_obj->getPunchControlObject()->getBadQuantity(),
+								'type_id' => (int)$next_type,
+								'punch_control_id' => $prev_punch_obj->getNextPunchControlID(),
 								'note' => $prev_punch_obj->getPunchControlObject()->getNote(),
 								'other_id1' => $prev_punch_obj->getPunchControlObject()->getOtherID1(),
 								'other_id2' => $prev_punch_obj->getPunchControlObject()->getOtherID2(),
@@ -1544,10 +1554,7 @@ class PunchFactory extends Factory {
 								'other_id4' => $prev_punch_obj->getPunchControlObject()->getOtherID4(),
 								'other_id5' => $prev_punch_obj->getPunchControlObject()->getOtherID5(),
 								'status_id' => (int)$prev_punch_obj->getNextStatus(),
-								'type_id' => (int)$next_type,
-								'punch_control_id' => $prev_punch_obj->getNextPunchControlID(),
 								'note' => (string)$prev_punch_obj->getPunchControlObject()->getNote(), //Must be null.
-								//'user_date_id' => $prev_punch_obj->getPunchControlObject()->getUserDateID()
 								);
 			}
 		} else {
@@ -1566,6 +1573,11 @@ class PunchFactory extends Factory {
 							'status_id' => 10, //In
 							'type_id' => 10, //Normal
 							'note' => '', //Must be null.
+							'other_id1' => '',
+							'other_id2' => '',
+							'other_id3' => '',
+							'other_id4' => '',
+							'other_id5' => '',								
 							);			
 		}
 		

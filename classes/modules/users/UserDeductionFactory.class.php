@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12528 $
- * $Id: UserDeductionFactory.class.php 12528 2014-03-03 23:20:02Z mikeb $
- * $Date: 2014-03-03 15:20:02 -0800 (Mon, 03 Mar 2014) $
+ * $Revision: 13814 $
+ * $Id: UserDeductionFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 
 /**
@@ -123,6 +123,7 @@ class UserDeductionFactory extends Factory {
 										'user_value8' => 'UserValue8',
 										'user_value9' => 'UserValue9',
 										'user_value10' => 'UserValue10',
+										
 										'deleted' => 'Deleted',
 										);
 		return $variable_function_map;
@@ -632,6 +633,7 @@ class UserDeductionFactory extends Factory {
 				} else {
 					$percent = $this->getUserValue1();
 				}
+				$percent = $this->Validator->stripNonFloat( $percent );
 
 				$amount = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj );
 
@@ -644,18 +646,21 @@ class UserDeductionFactory extends Factory {
 				} else {
 					$percent = $this->getUserValue1();
 				}
+				$percent = $this->Validator->stripNonFloat( $percent );
 
 				if ( $this->getUserValue2() == '' ) {
 					$wage_base = $cd_obj->getUserValue2();
 				} else {
 					$wage_base = $this->getUserValue2();
 				}
+				$wage_base = $this->Validator->stripNonFloat( $wage_base );
 
 				if ( $this->getUserValue3() == '' ) {
 					$exempt_amount = $cd_obj->getUserValue3();
 				} else {
 					$exempt_amount = $this->getUserValue3();
 				}
+				$exempt_amount = $this->Validator->stripNonFloat( $exempt_amount );
 
 				//Annual Wage Base is the maximum earnings that an employee can earn before they are no longer eligible for this deduction
 				//Annual Deduction Amount
@@ -724,30 +729,35 @@ class UserDeductionFactory extends Factory {
 				} else {
 					$percent = $this->getUserValue1();
 				}
+				$percent = $this->Validator->stripNonFloat( $percent );
 
 				if ( $this->getUserValue2() == '' ) {
 					$min_wage = $cd_obj->getUserValue2();
 				} else {
 					$min_wage = $this->getUserValue2();
 				}
+				$min_wage = $this->Validator->stripNonFloat( $min_wage );
 
 				if ( $this->getUserValue3() == '' ) {
 					$max_wage = $cd_obj->getUserValue3();
 				} else {
 					$max_wage = $this->getUserValue3();
 				}
+				$max_wage = $this->Validator->stripNonFloat( $max_wage );
 
 				if ( $this->getUserValue4() == '' ) {
 					$annual_deduction_amount = $cd_obj->getUserValue4();
 				} else {
 					$annual_deduction_amount = $this->getUserValue4();
 				}
+				$annual_deduction_amount = $this->Validator->stripNonFloat( $annual_deduction_amount );
 
 				if ( $this->getUserValue5() == '' ) {
 					$annual_fixed_amount = $cd_obj->getUserValue5();
 				} else {
 					$annual_fixed_amount = $this->getUserValue5();
 				}
+				$annual_fixed_amount = $this->Validator->stripNonFloat( $annual_fixed_amount );
 
 				$min_wage = bcdiv( $min_wage, $annual_pay_periods);
 				$max_wage = bcdiv( $max_wage, $annual_pay_periods);
@@ -780,24 +790,28 @@ class UserDeductionFactory extends Factory {
 				} else {
 					$percent = $this->getUserValue1();
 				}
+				$percent = $this->Validator->stripNonFloat( $percent );
 
 				if ( $this->getUserValue2() == '' ) {
 					$wage_base = $cd_obj->getUserValue2();
 				} else {
 					$wage_base = $this->getUserValue2();
 				}
+				$wage_base = $this->Validator->stripNonFloat( $wage_base );
 
 				if ( $this->getUserValue3() == '' ) {
 					$exempt_amount = $cd_obj->getUserValue3();
 				} else {
 					$exempt_amount = $this->getUserValue3();
 				}
+				$exempt_amount = $this->Validator->stripNonFloat( $exempt_amount );
 
 				if ( $this->getUserValue4() == '' ) {
 					$annual_deduction_amount = $cd_obj->getUserValue4();
 				} else {
 					$annual_deduction_amount = $this->getUserValue4();
 				}
+				$annual_deduction_amount = $this->Validator->stripNonFloat( $annual_deduction_amount );
 
 				Debug::Text('Percent: '. $percent .' Wage Base: '. $wage_base .' Exempt Amount: '. $exempt_amount, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -860,30 +874,35 @@ class UserDeductionFactory extends Factory {
 				} else {
 					$percent = $this->getUserValue1();
 				}
+				$percent = $this->Validator->stripNonFloat( $percent );
 
 				if ( $this->getUserValue2() == '' ) {
 					$min_wage = $cd_obj->getUserValue2();
 				} else {
 					$min_wage = $this->getUserValue2();
 				}
+				$min_wage = $this->Validator->stripNonFloat( $min_wage );
 
 				if ( $this->getUserValue3() == '' ) {
 					$max_wage = $cd_obj->getUserValue3();
 				} else {
 					$max_wage = $this->getUserValue3();
 				}
+				$max_wage = $this->Validator->stripNonFloat( $max_wage );
 
 				if ( $this->getUserValue4() == '' ) {
 					$annual_deduction_amount = $cd_obj->getUserValue4();
 				} else {
 					$annual_deduction_amount = $this->getUserValue4();
 				}
+				$annual_deduction_amount = $this->Validator->stripNonFloat( $annual_deduction_amount );
 
 				if ( $this->getUserValue5() == '' ) {
 					$annual_fixed_amount = $cd_obj->getUserValue5();
 				} else {
 					$annual_fixed_amount = $this->getUserValue5();
 				}
+				$annual_fixed_amount = $this->Validator->stripNonFloat( $annual_fixed_amount );
 
 				$min_wage = bcdiv( $min_wage, $annual_pay_periods);
 				$max_wage = bcdiv( $max_wage, $annual_pay_periods);
@@ -916,6 +935,7 @@ class UserDeductionFactory extends Factory {
 				} else {
 					$amount = $this->getUserValue1();
 				}
+				$amount = $this->Validator->stripNonFloat( $amount );
 
 				$retval = $amount;
 				unset($amount);
@@ -927,24 +947,28 @@ class UserDeductionFactory extends Factory {
 				} else {
 					$fixed_amount = $this->getUserValue1();
 				}
+				$fixed_amount = $this->Validator->stripNonFloat( $fixed_amount );
 
 				if ( $this->getUserValue2() == '' ) {
 					$min_wage = $cd_obj->getUserValue2();
 				} else {
 					$min_wage = $this->getUserValue2();
 				}
+				$min_wage = $this->Validator->stripNonFloat( $min_wage );
 
 				if ( $this->getUserValue3() == '' ) {
 					$max_wage = $cd_obj->getUserValue3();
 				} else {
 					$max_wage = $this->getUserValue3();
 				}
+				$max_wage = $this->Validator->stripNonFloat( $max_wage );
 
 				if ( $this->getUserValue4() == '' ) {
 					$annual_deduction_amount = $cd_obj->getUserValue4();
 				} else {
 					$annual_deduction_amount = $this->getUserValue4();
 				}
+				$annual_deduction_amount = $this->Validator->stripNonFloat( $annual_deduction_amount );
 
 				$min_wage = bcdiv( $min_wage, $annual_pay_periods);
 				$max_wage = bcdiv( $max_wage, $annual_pay_periods);
@@ -972,12 +996,14 @@ class UserDeductionFactory extends Factory {
 				} else {
 					$fixed_amount = $this->getUserValue1();
 				}
+				$fixed_amount = $this->Validator->stripNonFloat( $fixed_amount );
 
 				if ( $this->getUserValue2() == '' ) {
 					$target_amount = $cd_obj->getUserValue2();
 				} else {
 					$target_amount = $this->getUserValue2();
 				}
+				$target_amount = $this->Validator->stripNonFloat( $target_amount );
 
 				Debug::Text('Amount: '. $fixed_amount .' Target Amount: '. $target_amount, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1743,6 +1769,68 @@ class UserDeductionFactory extends Factory {
 			//Debug::Text('Deduction was negative, setting to 0...', __FILE__, __LINE__, __METHOD__, 10);
 			Debug::Text('Deduction was negative...', __FILE__, __LINE__, __METHOD__, 10);
 			//$retval = 0;
+		}
+
+		return $retval;
+	}
+
+	//Returns the maximum taxable wages for any given calculation formula.
+	//Returns FALSE for no maximum.
+	//Primary used in TaxSummary (Generic) report.
+	function getMaximumPayStubEntryAccountAmount() {
+		$retval = FALSE;
+
+		$cd_obj = $this->getCompanyDeductionObject();
+		if ( is_object( $cd_obj ) ) {
+			switch ( $cd_obj->getCalculation() ) {
+				case 15: //Advanced Percent
+					if ( $this->getUserValue2() == '' ) {
+						$wage_base = $cd_obj->getUserValue2();
+					} else {
+						$wage_base = $this->getUserValue2();
+					}
+					$retval = $this->Validator->stripNonFloat( $wage_base );
+					break;
+				case 17: //Advanced Percent (Range Bracket)
+					if ( $this->getUserValue3() == '' ) {
+						$max_wage = $cd_obj->getUserValue3();
+					} else {
+						$max_wage = $this->getUserValue3();
+					}
+					$retval = $this->Validator->stripNonFloat( $max_wage );
+					break;
+				case 18: //Advanced Percent (Tax Bracket)
+					if ( $this->getUserValue2() == '' ) {
+						$wage_base = $cd_obj->getUserValue2();
+					} else {
+						$wage_base = $this->getUserValue2();
+					}
+					$retval = $this->Validator->stripNonFloat( $wage_base );
+					break;
+			}
+		}
+
+		return $retval;
+	}
+
+	//Returns the percent rate when specified.
+	function getRate() {
+		$retval = FALSE;
+
+		$cd_obj = $this->getCompanyDeductionObject();
+		if ( is_object( $cd_obj ) ) {
+			switch ( $cd_obj->getCalculation() ) {
+				case 15: //Advanced Percent
+				case 17: //Advanced Percent (Range Bracket)
+				case 18: //Advanced Percent (Tax Bracket)
+					if ( $this->getUserValue1() == '' ) {
+						$percent = $cd_obj->getUserValue1();
+					} else {
+						$percent = $this->getUserValue1();
+					}
+					$retval = $this->Validator->stripNonFloat( $percent );
+					break;
+			}
 		}
 
 		return $retval;

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -246,13 +246,13 @@ class ScheduleSummaryReport extends Report {
 				break;
 			case 'column_format':
 				//Define formatting function for each column.
-				$columns = $this->getOptions('columns');
+				$columns = Misc::trimSortPrefix( $this->getOptions('columns') );
 				if ( is_array($columns) ) {
 					foreach($columns as $column => $name ) {
-						//if ( strpos($column, 'absence_policy') ) {
-							//Ignore
-						//} else
-						if ( strpos($column, 'start_time') !== FALSE OR strpos($column, 'end_time') !== FALSE ) {
+						if ( $column == 'absence_policy' OR $column == 'schedule_policy' ) {
+							//Make sure these columns aren't formatted as they are strings.
+							unset($retval[$column]);
+						} elseif ( strpos($column, 'start_time') !== FALSE OR strpos($column, 'end_time') !== FALSE ) {
 							$retval[$column] = 'time';
 						} elseif ( strpos($column, '_wage') !== FALSE OR strpos($column, '_hourly_rate') !== FALSE OR strpos($column, 'hourly_rate') !== FALSE ) {
 							$retval[$column] = 'currency';
@@ -293,9 +293,9 @@ class ScheduleSummaryReport extends Report {
 
 										'-1310-by_pay_period+work+total_time+total_time_wage' => TTi18n::gettext('Work Time+Wage by Pay Period'),
 										'-1320-by_pay_period_by_employee+work+total_time+total_time_wage' => TTi18n::gettext('Work Time+Wage by Pay Period/Employee'),
-										'-1330-by_pay_period_by_branch+work+total_time+total_time_wage' => TTi18n::gettext('Work  Time+Wage by Pay Period/Branch'),
-										'-1340-by_pay_period_by_department+work+total_time+total_time_wage' => TTi18n::gettext('Work  Time+Wage by Pay Period/Department'),
-										'-1350-by_pay_period_by_branch_by_department+work+total_time+total_time_wage' => TTi18n::gettext('Work	Time+Wage by Pay Period/Branch/Department'),
+										'-1330-by_pay_period_by_branch+work+total_time+total_time_wage' => TTi18n::gettext('Work Time+Wage by Pay Period/Branch'),
+										'-1340-by_pay_period_by_department+work+total_time+total_time_wage' => TTi18n::gettext('Work Time+Wage by Pay Period/Department'),
+										'-1350-by_pay_period_by_branch_by_department+work+total_time+total_time_wage' => TTi18n::gettext('Work Time+Wage by Pay Period/Branch/Department'),
 
 										'-1410-by_employee_by_pay_period+work+total_time+total_time_wage' => TTi18n::gettext('Work Time+Wage by Employee/Pay Period'),
 										'-1420-by_branch_by_pay_period+work+total_time+total_time_wage' => TTi18n::gettext('Work Time+Wage by Branch/Pay Period'),

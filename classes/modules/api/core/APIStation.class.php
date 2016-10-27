@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -465,119 +465,126 @@ class APIStation extends APIFactory {
 					continue;
 				}
 
-				Debug::Text(' Type: '. $row['type_id'] .' Source: '. $row['source'] .' Port: '. $row['port'] .' Password: '. $row['password'], __FILE__, __LINE__, __METHOD__, 10);
-				$tc = new TimeClock( $row['type_id'] );
-				$tc->setIPAddress( $row['source'] );
-				$tc->setPort( $row['port'] );
-				//$tc->setUsername( $row['user_name'] );
-				$tc->setPassword( $row['password'] );
-
 				$slf = TTnew( 'StationListFactory' );
 				$slf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
 				if ( $slf->getRecordCount() == 1 ) {
 					$s_obj = $slf->getCurrent();
 				}
 
-				$s_obj->setLastPunchTimeStamp( $s_obj->getLastPunchTimeStamp() );
+				if ( isset($s_obj) AND is_object($s_obj) ) {
+					$s_obj->setLastPunchTimeStamp( $s_obj->getLastPunchTimeStamp() );
 
-				if ( $s_obj->getTimeZone() != '' AND !is_numeric( $s_obj->getTimeZone() ) ) {
-					Debug::text('Setting Station TimeZone To: '. $s_obj->getTimeZone(), __FILE__, __LINE__, __METHOD__, 10);
-					TTDate::setTimeZone( $s_obj->getTimeZone() );
-				}
+					if ( $s_obj->getTimeZone() != '' AND !is_numeric( $s_obj->getTimeZone() ) ) {
+						Debug::text('Setting Station TimeZone To: '. $s_obj->getTimeZone(), __FILE__, __LINE__, __METHOD__, 10);
+						TTDate::setTimeZone( $s_obj->getTimeZone() );
+					}
 
-				$result_str = NULL;
-				switch ( $command ) {
-					case 'test_connection':
-						if ( $tc->testConnection() == TRUE ) {
-							$result_str = TTi18n::gettext('Connection Succeeded!');
-						} else {
-							$result_str = TTi18n::gettext('Connection Failed!');
-						}
-						break;
-					case 'set_date':
-						TTDate::setTimeZone( $row['time_zone_id'], $s_obj->getTimeZone() );
+					try { //Catch exception here, otherwisw the api.php catches it and causes other problems.
+						Debug::Text(' Type: '. $row['type_id'] .' Source: '. $row['source'] .' Port: '. $row['port'] .' Password: '. $row['password'], __FILE__, __LINE__, __METHOD__, 10);
+						$tc = new TimeClock( $row['type_id'] );
+						$tc->setIPAddress( $row['source'] );
+						$tc->setPort( $row['port'] );
+						//$tc->setUsername( $row['user_name'] );
+						$tc->setPassword( $row['password'] );
 
-						if ( $tc->setDate( time() ) == TRUE ) {
-							$result_str = TTi18n::gettext('Date Successfully Set To: '). TTDate::getDate('DATE+TIME', time() );
-						} else {
-							$result_str = TTi18n::gettext('Setting Date Failed!');
-						}
-						break;
-					case 'download':
-						if ( isset($s_obj) AND $tc->Poll( $this->getCurrentCompanyObject(), $s_obj) == TRUE ) {
-							$result_str = TTi18n::gettext('Download Data Succeeded!');
-							if ( $s_obj->isValid() ) {
-								$s_obj->Save(FALSE);
-							}
-						} else {
-							$result_str = TTi18n::gettext('Download Data Failed!');
-						}
-						break;
-					case 'upload':
-						if ( isset($s_obj) AND $tc->Push( $this->getCurrentCompanyObject(), $s_obj) == TRUE ) {
-							$result_str = TTi18n::gettext('Upload Data Succeeded!');
-							if ( $s_obj->isValid() ) {
-								$s_obj->Save(FALSE);
-							}
-						} else {
-							$result_str = TTi18n::gettext('Upload Data Failed!');
-						}
-						break;
-					case 'update_config':
-						if ( isset($s_obj) AND $tc->setModeFlag( $s_obj->getModeFlag() ) == TRUE ) {
-							$result_str = TTi18n::gettext('Update Configuration Succeeded');
-						} else {
-							$result_str = TTi18n::gettext('Update Configuration Failed');
-						}
-						break;
-					case 'delete_data':
-						if ( isset($s_obj) AND $tc->DeleteAllData( $s_obj ) == TRUE ) {
-							$result_str = TTi18n::gettext('Delete Data Succeeded!');
-							if ( $s_obj->isValid() ) {
-								$s_obj->Save(FALSE);
-							}
-						} else {
-							$result_str = TTi18n::gettext('Delete Data Failed!');
-						}
-						break;
-					case 'reset_last_punch_time_stamp':
-						$s_obj->setLastPunchTimeStamp( time() );
-						if ( $s_obj->isValid() ) {
-							$s_obj->Save(FALSE);
-						}
-						$result_str = TTi18n::gettext('Reset Last Punch Time Succeeded!');
-						break;
-					case 'clear_last_punch_time_stamp':
-						$s_obj->setLastPunchTimeStamp( 1 );
-						if ( $s_obj->isValid() ) {
-							$s_obj->Save(FALSE);
-						}
-						$result_str = TTi18n::gettext('Clear Last Punch Time Succeeded!');
-						break;
-					case 'restart':
-						$tc->restart();
-						$result_str = TTi18n::gettext('Restart Succeeded!');
-						break;
-					case 'firmware':
-						if ( $tc->setFirmware() == TRUE ) {
-							$result_str = TTi18n::gettext('Firmware Update Succeeded!');
-						} else {
-							$result_str = TTi18n::gettext('Firmware Update Failed!');
-						}
-						break;
-					default:
-						$result_str = TTi18n::gettext('Invalid manual command!');
-						break;
-				}
+						$result_str = NULL;
+						switch ( $command ) {
+							case 'test_connection':
+								if ( $tc->testConnection() == TRUE ) {
+									$result_str = TTi18n::gettext('Connection Succeeded!');
+								} else {
+									$result_str = TTi18n::gettext('Connection Failed!');
+								}
+								break;
+							case 'set_date':
+								TTDate::setTimeZone( $row['time_zone_id'], $s_obj->getTimeZone() );
 
-				TTLog::addEntry( $s_obj->getId(), 500, TTi18n::getText('TimeClock Manual Command').': '. ucwords( str_replace('_', ' ', $command ) ) .' '.TTi18n::getText('Result').': '. $result_str, NULL, $s_obj->getTable() );
+								if ( $tc->setDate( time() ) == TRUE ) {
+									$result_str = TTi18n::gettext('Date Successfully Set To: '). TTDate::getDate('DATE+TIME', time() );
+								} else {
+									$result_str = TTi18n::gettext('Setting Date Failed!');
+								}
+								break;
+							case 'download':
+								if ( isset($s_obj) AND $tc->Poll( $this->getCurrentCompanyObject(), $s_obj) == TRUE ) {
+									$result_str = TTi18n::gettext('Download Data Succeeded!');
+									if ( $s_obj->isValid() ) {
+										$s_obj->Save(FALSE);
+									}
+								} else {
+									$result_str = TTi18n::gettext('Download Data Failed!');
+								}
+								break;
+							case 'upload':
+								if ( isset($s_obj) AND $tc->Push( $this->getCurrentCompanyObject(), $s_obj) == TRUE ) {
+									$result_str = TTi18n::gettext('Upload Data Succeeded!');
+									if ( $s_obj->isValid() ) {
+										$s_obj->Save(FALSE);
+									}
+								} else {
+									$result_str = TTi18n::gettext('Upload Data Failed!');
+								}
+								break;
+							case 'update_config':
+								if ( isset($s_obj) AND $tc->setModeFlag( $s_obj->getModeFlag() ) == TRUE ) {
+									$result_str = TTi18n::gettext('Update Configuration Succeeded');
+								} else {
+									$result_str = TTi18n::gettext('Update Configuration Failed');
+								}
+								break;
+							case 'delete_data':
+								if ( isset($s_obj) AND $tc->DeleteAllData( $s_obj ) == TRUE ) {
+									$result_str = TTi18n::gettext('Delete Data Succeeded!');
+									if ( $s_obj->isValid() ) {
+										$s_obj->Save(FALSE);
+									}
+								} else {
+									$result_str = TTi18n::gettext('Delete Data Failed!');
+								}
+								break;
+							case 'reset_last_punch_time_stamp':
+								$s_obj->setLastPunchTimeStamp( time() );
+								if ( $s_obj->isValid() ) {
+									$s_obj->Save(FALSE);
+								}
+								$result_str = TTi18n::gettext('Reset Last Punch Time Succeeded!');
+								break;
+							case 'clear_last_punch_time_stamp':
+								$s_obj->setLastPunchTimeStamp( 1 );
+								if ( $s_obj->isValid() ) {
+									$s_obj->Save(FALSE);
+								}
+								$result_str = TTi18n::gettext('Clear Last Punch Time Succeeded!');
+								break;
+							case 'restart':
+								$tc->restart();
+								$result_str = TTi18n::gettext('Restart Succeeded!');
+								break;
+							case 'firmware':
+								if ( $tc->setFirmware() == TRUE ) {
+									$result_str = TTi18n::gettext('Firmware Update Succeeded!');
+								} else {
+									$result_str = TTi18n::gettext('Firmware Update Failed!');
+								}
+								break;
+							default:
+								$result_str = TTi18n::gettext('Invalid manual command!');
+								break;
+						}
 
-				if ( isset($s_obj) ) {
-					$row['last_poll_date'] = $s_obj->getLastPollDate();
-					$row['last_push_date'] = $s_obj->getLastPushDate();
+						if ( isset($s_obj) ) {
+							$row['last_poll_date'] = $s_obj->getLastPollDate();
+							$row['last_push_date'] = $s_obj->getLastPushDate();
+						}
+					} catch ( Exception $e ) {
+						$result_str = $e->getMessage();
+					}
+
+					TTLog::addEntry( $s_obj->getId(), 500, TTi18n::getText('TimeClock Manual Command').': '. ucwords( str_replace('_', ' ', $command ) ) .' '.TTi18n::getText('Result').': '. $result_str, NULL, $s_obj->getTable() );
+				} else {
+					Debug::text('ERROR: Station not found... ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 				}
 				unset($s_obj, $slf);
-
 			}
 
 			return $this->returnHandler( $result_str );

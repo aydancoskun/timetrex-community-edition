@@ -1,4 +1,43 @@
 <?php
+/*********************************************************************************
+ * TimeTrex is a Payroll and Time Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License version 3 as published by
+ * the Free Software Foundation with the addition of the following permission
+ * added to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED
+ * WORK IN WHICH THE COPYRIGHT IS OWNED BY TIMETREX, TIMETREX DISCLAIMS THE
+ * WARRANTY OF NON INFRINGEMENT OF THIRD PARTY RIGHTS.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses or write to the Free
+ * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ *
+ * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
+ * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ *
+ * The interactive user interfaces in modified source and object code versions
+ * of this program must display Appropriate Legal Notices, as required under
+ * Section 5 of the GNU Affero General Public License version 3.
+ *
+ * In accordance with Section 7(b) of the GNU Affero General Public License
+ * version 3, these Appropriate Legal Notices must retain the display of the
+ * "Powered by TimeTrex" logo. If the display of the logo is not reasonably
+ * feasible for technical reasons, the Appropriate Legal Notices must display
+ * the words "Powered by TimeTrex".
+ ********************************************************************************/
+/*
+ * $Revision: 8160 $
+ * $Id: api.php 8160 2006-05-31 23:33:54Z root $
+ * $Date: 2006-05-31 16:33:54 -0700 (Wed, 31 May 2006) $
+ */
 define('TIMETREX_AMF_API', TRUE );
 
 //Add timetrex.ini.php setting to enable/disable the API. Make an entire [API] section.
@@ -64,7 +103,7 @@ class ServiceMapper {
 		$invoke_service_start_time = (float)microtime(TRUE);
 
 		//Convert . to '/', then class name is basename()
-		$className = TTgetPluginClassName( basename( str_replace('.', '/' , $serviceName ) ) );
+		$className = TTgetPluginClassName( basename( str_replace('.', '/', $serviceName ) ) );
 
 		Debug::text('Service: '. $serviceName .' Method: '. $methodName .' Class: '. $className, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -113,7 +152,7 @@ class ServiceMapper {
 		}
 
 		//Debug::Arr($retval, 'RetVal: ', __FILE__, __LINE__, __METHOD__, 10);
-		Debug::text('Returning '. strlen(serialize($retval)) .' bytes of data... Response Time: '. ((float)microtime(TRUE)-$invoke_service_start_time), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Returning '. strlen(serialize($retval)) .' bytes of data... Response Time: '. ((float)microtime(TRUE) - $invoke_service_start_time), __FILE__, __LINE__, __METHOD__, 10);
 
 		return $retval;
 	}
@@ -142,7 +181,7 @@ if ( $session_id != '' AND !isset($_GET['session']) ) { //When Flex calls PING()
 			$current_user->getUserPreferenceObject()->setDateTimePreferences();
 			$current_user_prefs = $current_user->getUserPreferenceObject();
 
-			Debug::text('Locale Cookie: '. TTi18n::getLocaleCookie() , __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text('Locale Cookie: '. TTi18n::getLocaleCookie(), __FILE__, __LINE__, __METHOD__, 10);
 			if ( TTi18n::getLocaleCookie() != '' AND $current_user_prefs->getLanguage() !== TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) ) {
 				Debug::text('Changing User Preference Language to match cookie...', __FILE__, __LINE__, __METHOD__, 10);
 				$current_user_prefs->setLanguage( TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) );
@@ -199,6 +238,6 @@ if ( $session_id != '' AND !isset($_GET['session']) ) { //When Flex calls PING()
 	}
 }
 
-Debug::text('Server Response Time: '. ((float)microtime(TRUE)-$_SERVER['REQUEST_TIME_FLOAT']), __FILE__, __LINE__, __METHOD__, 10);
+Debug::text('Server Response Time: '. ((float)microtime(TRUE) - $_SERVER['REQUEST_TIME_FLOAT']), __FILE__, __LINE__, __METHOD__, 10);
 Debug::writeToLog();
 ?>

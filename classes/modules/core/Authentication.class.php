@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12453 $
- * $Id: Authentication.class.php 12453 2014-02-25 16:10:34Z mikeb $
- * $Date: 2014-02-25 08:10:34 -0800 (Tue, 25 Feb 2014) $
+ * $Revision: 13838 $
+ * $Id: Authentication.class.php 13838 2014-07-24 00:06:53Z mikeb $
+ * $Date: 2014-07-23 17:06:53 -0700 (Wed, 23 Jul 2014) $
  */
 
 
@@ -274,7 +274,7 @@ class Authentication {
 		//Use UserFactory to set name.
 		$ulf = TTnew( 'UserListFactory' );
 
-		$ulf->getByUserNameAndStatus(strtolower(trim($user_name)), 10 ); //Active
+		$ulf->getByUserNameAndStatus( $user_name, 10 ); //Active
 
 		foreach ($ulf as $user) {
 			if ( $user->checkPassword($password) ) {
@@ -581,7 +581,7 @@ class Authentication {
 			if ( strtolower($type) == 'user_name' ) {
 				if ( $this->checkCompanyStatus( $user_name ) == 10 ) { //Active
 					//Lowercase regular user_names here only.
-					$password_result = $this->checkPassword( strtolower($user_name), $password);
+					$password_result = $this->checkPassword( $user_name, $password);
 				} else {
 					$password_result = FALSE; //No company by that user name.
 				}
@@ -679,7 +679,7 @@ class Authentication {
 			}
 		}
 
-		Debug::text('Session ID: '. $session_id .' IP Address: '. $_SERVER['REMOTE_ADDR'] .' URL: '. $_SERVER['REQUEST_URI'], __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Session ID: '. $session_id .' IP Address: '. $_SERVER['REMOTE_ADDR'] .' URL: '. $_SERVER['REQUEST_URI'] .' Touch Updated Date: '. (int)$touch_updated_date, __FILE__, __LINE__, __METHOD__, 10);
 		//Checks session cookie, returns user_id;
 		if ( isset( $session_id ) ) {
 			/*
@@ -718,7 +718,7 @@ class Authentication {
 	//When company status changes, logout all users for the company.
 	function logoutCompany( $company_id ) {
 		$ph = array(
-					'company_id' => $company_id,
+					'company_id' => (int)$company_id,
 					);
 
 		$query = 'delete from authentication as a USING users as b WHERE a.user_id = b.id AND b.company_id = ?';
@@ -729,6 +729,26 @@ class Authentication {
 		} catch (Exception $e) {
 			throw new DBError($e);
 		}
+
+		return TRUE;
+	}
+
+	//When user resets password, logout all sessions for that user.
+	function logoutUser( $user_id ) {
+		$ph = array(
+					'user_id' => (int)$user_id,
+					);
+
+		$query = 'delete from authentication as a WHERE a.user_id = ?';
+
+		try {
+			Debug::text('Logging all user sessions: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
+			$this->db->Execute($query, $ph);
+		} catch (Exception $e) {
+			throw new DBError($e);
+		}
+
+		return TRUE;
 	}
 }
 ?>

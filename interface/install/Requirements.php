@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,16 +34,16 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9372 $
- * $Id: Requirements.php 9372 2013-03-22 21:51:39Z ipso $
- * $Date: 2013-03-22 14:51:39 -0700 (Fri, 22 Mar 2013) $
+ * $Revision: 13079 $
+ * $Id: Requirements.php 13079 2014-04-30 20:10:10Z mikeb $
+ * $Date: 2014-04-30 13:10:10 -0700 (Wed, 30 Apr 2014) $
  */
-@ini_set('display_errors', true);
+@ini_set('display_errors', TRUE );
 
-$disable_database_connection=TRUE;
+$disable_database_connection = TRUE;
 require_once('../../includes/global.inc.php');
 
-$authenticate=FALSE;
+$authenticate = FALSE;
 require_once(Environment::getBasePath() .'includes/Interface.inc.php');
 
 $smarty->assign('title', TTi18n::gettext($title = '2. System Check Acceptance')); // See index.php
@@ -60,7 +60,7 @@ extract	(FormVariables::GetVariables(
 
 $install_obj = new Install();
 if ( DEPLOYMENT_ON_DEMAND == FALSE ) {
-	$install_obj->cleanCacheDirectory();
+	$install_obj->cleanCacheDirectory( '' ); //Don't exclude .ZIP files, so if there is a corrupt one it will be redownloaded after a manual installer is run.
 }
 if ( $install_obj->isInstallMode() == FALSE ) {
 	Redirect::Page( URLBuilder::getURL(NULL, 'install.php') );
@@ -73,12 +73,12 @@ switch ($action) {
 		exit;
 		break;
 	case 'back':
-		Debug::Text('Back', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Back', __FILE__, __LINE__, __METHOD__, 10);
 
 		Redirect::Page( URLBuilder::getURL(NULL, 'install.php') );
 		break;
 	case 'next':
-		Debug::Text('Next', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Next', __FILE__, __LINE__, __METHOD__, 10);
 		if ( $external_installer == 1 ) {
 			Redirect::Page( URLBuilder::getURL( array('external_installer' => $external_installer ), 'DatabaseSchema.php') );
 		} else {

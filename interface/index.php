@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,10 +34,19 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12172 $
- * $Id: index.php 12172 2014-01-29 16:52:58Z mikeb $
- * $Date: 2014-01-29 08:52:58 -0800 (Wed, 29 Jan 2014) $
+ * $Revision: 13366 $
+ * $Id: index.php 13366 2014-06-09 17:15:19Z mikeb $
+ * $Date: 2014-06-09 10:15:19 -0700 (Mon, 09 Jun 2014) $
  */
 require_once('../includes/global.inc.php');
-Redirect::Page( URLBuilder::getURL(NULL, Environment::GetBaseURL().'flex/') );
+$form_vars = FormVariables::GetVariables( array('desktop') );
+if ( array_key_exists( 'desktop', $form_vars ) AND $form_vars['desktop'] != 1 ) { //isset() won't work here as 'desktop' key can be NULL
+	unset($form_vars['desktop']);
+}
+
+if ( isset($config_vars['other']['default_interface']) AND strtolower($config_vars['other']['default_interface']) == 'html5' ) {
+	Redirect::Page( URLBuilder::getURL( $form_vars, Environment::GetBaseURL().'html5/') );
+} else {
+	Redirect::Page( URLBuilder::getURL( $form_vars, Environment::GetBaseURL().'flex/') );
+}
 ?>

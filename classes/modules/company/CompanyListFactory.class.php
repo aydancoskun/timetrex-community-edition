@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11925 $
- * $Id: CompanyListFactory.class.php 11925 2014-01-08 00:13:44Z mikeb $
- * $Date: 2014-01-07 16:13:44 -0800 (Tue, 07 Jan 2014) $
+ * $Revision: 13075 $
+ * $Id: CompanyListFactory.class.php 13075 2014-04-30 17:38:44Z mikeb $
+ * $Date: 2014-04-30 10:38:44 -0700 (Wed, 30 Apr 2014) $
  */
 
 /**
@@ -85,6 +85,46 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 							(select max(last_login_date) from '. $uf->getTable() .' as uf where uf.company_id = a.id ) as last_login_date
 					from	'. $this->getTable() .' as a
 					WHERE a.deleted = 0';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields	);
+
+		$this->ExecuteSQL( $query, NULL, $limit, $page );
+
+		return $this;
+	}
+
+	function getAllByInValidContacts($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+		if ( $order == NULL ) {
+			$order = array( 'status_id' => 'asc', 'name' => 'asc');
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$additional_order_fields = array();
+
+		$uf = new UserFactory();
+
+		$query = '
+					select	distinct a.*
+					from	'. $this->getTable() .' as a
+					LEFT JOIN '. $uf->getTable() .' as uf_a ON ( a.admin_contact = uf_a.id )
+					LEFT JOIN '. $uf->getTable() .' as uf_b ON ( a.billing_contact = uf_b.id )
+					LEFT JOIN '. $uf->getTable() .' as uf_c ON ( a.support_contact = uf_c.id )
+					WHERE
+						a.status_id = 10
+						AND (
+								( uf_a.id is NULL OR uf_b.id is NULL OR uf_c.id is NULL )
+								OR ( uf_a.deleted = 1 OR uf_b.deleted = 1 OR uf_c.deleted = 1 )
+								OR ( uf_a.status_id != 10 OR uf_b.status_id != 10 OR uf_b.status_id != 10 )
+								OR (
+										( ( uf_a.work_email is NULL OR uf_a.work_email = \'\' ) AND ( uf_a.home_email is NULL OR uf_a.home_email = \'\' ) )
+										OR ( ( uf_b.work_email is NULL OR uf_b.work_email = \'\' ) AND ( uf_b.home_email is NULL OR uf_b.home_email = \'\' ) )
+										OR ( ( uf_c.work_email is NULL OR uf_c.work_email = \'\' ) AND ( uf_c.home_email is NULL OR uf_c.home_email = \'\' ) )
+									)
+							)
+						AND a.deleted = 0
+				';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields	);
 

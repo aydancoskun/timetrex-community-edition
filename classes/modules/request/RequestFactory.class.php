@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11942 $
- * $Id: RequestFactory.class.php 11942 2014-01-09 00:50:10Z mikeb $
- * $Date: 2014-01-08 16:50:10 -0800 (Wed, 08 Jan 2014) $
+ * $Revision: 12920 $
+ * $Id: RequestFactory.class.php 12920 2014-04-14 23:48:25Z mikeb $
+ * $Date: 2014-04-14 16:48:25 -0700 (Mon, 14 Apr 2014) $
  */
 
 /**
@@ -407,6 +407,9 @@ class RequestFactory extends Factory {
 	function preSave() {
 		//If this is a new request, find the current authorization level to assign to it.
 		if ( $this->isNew() == TRUE ) {
+			if ( $this->getStatus() == FALSE ) {
+				$this->setStatus( 30 ); //Pending Auth.
+			}
 
 			if ( is_object( $this->getUserObject() ) ) {
 				$hlf = TTnew( 'HierarchyListFactory' );

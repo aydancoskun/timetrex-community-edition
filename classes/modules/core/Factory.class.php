@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12056 $
- * $Id: Factory.class.php 12056 2014-01-17 20:14:56Z mikeb $
- * $Date: 2014-01-17 12:14:56 -0800 (Fri, 17 Jan 2014) $
+ * $Revision: 13814 $
+ * $Id: Factory.class.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 
 /**
@@ -818,7 +818,7 @@ abstract class Factory {
 	//					>01-Jan-09
 	//					>01-Jan-09 & <10-Jan-09
 	//
-	function getDateRangeSQL( $str, $column, $format = 'epoch' ) {
+	function getDateRangeSQL( $str, $column, $format = 'epoch', $include_blank_dates = FALSE ) {
 		if ( $str == '' ) {
 			return FALSE;
 		}
@@ -860,7 +860,11 @@ abstract class Factory {
 							$date = '\''.$this->db->bindDateStamp( $date ).'\'';
 						}
 
-						$operations[] = $column .' '. $operator[0] .' '. $date;
+						if ( $include_blank_dates == TRUE ) {
+							$operations[] = '('. $column .' '. $operator[0] .' '. $date .' OR ( '. $column .' is NULL OR '. $column .' = 0 ) )';
+						} else {
+							$operations[] = $column .' '. $operator[0] .' '. $date;
+						}
 					} else {
 						//FIXME: Need to handle date filters without any operators better.
 						//for example JobListFactory and JobSummaryReport and the time period is specified.
@@ -875,8 +879,13 @@ abstract class Factory {
 						}
 
 						//Debug::text(' No operator specified... Using a 24hr period', __FILE__, __LINE__, __METHOD__, 10);
-						$operations[] = $column .' >= '. $date1;
-						$operations[] = $column .' <= '. $date2;
+						if ( $include_blank_dates == TRUE ) {
+							$operations[] = '('. $column .' >= '. $date1 .' OR ( '. $column .' is NULL OR '. $column .' = 0 ) )';
+							$operations[] = '('. $column .' <= '. $date2 .' OR ( '. $column .' is NULL OR '. $column .' = 0 ) )';
+						} else {
+							$operations[] = $column .' >= '. $date1;
+							$operations[] = $column .' <= '. $date2;
+						}
 					}
 				}
 			}
@@ -901,7 +910,8 @@ abstract class Factory {
 	protected function handleSQLSyntax( $arg ) {
 		$arg = str_replace('*', '%', trim($arg) );
 
-		if ( strpos($arg, '%') === FALSE AND ( strpos( $arg, '|') === FALSE AND strpos( $arg, '"') === FALSE ) ) {
+		//Make sure we don't add '%' if $arg is blank.
+		if ( $arg != '' AND strpos($arg, '%') === FALSE AND ( strpos( $arg, '|') === FALSE AND strpos( $arg, '"') === FALSE ) ) {
 			$arg .= '%';
 		}
 
@@ -1024,6 +1034,17 @@ abstract class Factory {
 					$retval = str_replace('?', $this->getListSQL($args, $ph, str_replace( '_list', '', $type ) ), $query_stub );
 				}
 				break;
+			case 'numeric_list_with_all': //Doesn't check for -1 and ignore the filter completely. Used in KPIListFactory.
+				if ( !is_array($args) ) {
+					$args = (array)$args;
+				}
+				if ( isset($args) AND isset($args[0]) ) {
+					if ( $query_stub == '' AND !is_array($columns) ) {
+						$query_stub = $columns .' IN (?)';
+					}
+					$retval = str_replace('?', $this->getListSQL($args, $ph, str_replace( '_list', '', 'numeric_list' ) ), $query_stub );
+				}
+				break;
 			case 'not_smallint_list':
 			case 'not_int_list':
 			case 'not_bigint_list':
@@ -1111,17 +1132,27 @@ abstract class Factory {
 				}
 				break;
 			case 'date_range': //Uses EPOCH values only, used for integer datatype columns
+			case 'date_range_include_blank': //Include NULL/Blank dates.
+			case 'date_range_datestamp': 
+			case 'date_range_datestamp_include_blank': //Include NULL/Blank dates.
 			case 'date_range_timestamp': //Uses text timestamp values, used for timestamp datatype columns
+			case 'date_range_timestamp_include_blank': //Include NULL/Blank dates.
 				if ( isset($args) AND !is_array($args) AND trim($args) != '' ) {
 					if ( $query_stub == '' AND !is_array($columns) ) {
-						if ( $type == 'date_range_timestamp' ) {
-							$query_stub = $this->getDateRangeSQL($args, $columns, 'timestamp' );
-						} elseif ( $type == 'date_range_datestamp' ) {
-							$query_stub = $this->getDateRangeSQL($args, $columns, 'datestamp' );
-						} else {
-							$query_stub = $this->getDateRangeSQL($args, $columns, 'epoch' );
+						$include_blank_dates = ( strpos( $type, '_include_blank' ) !== FALSE ) ? TRUE : FALSE;
+						switch( $type ) {
+							case 'date_range_timestamp':
+							case 'date_range_timestamp_and_blank':
+								$query_stub = $this->getDateRangeSQL($args, $columns, 'timestamp', $include_blank_dates );
+								break;
+							case 'date_range_datestamp':
+							case 'date_range_datestamp_and_blank':
+								$query_stub = $this->getDateRangeSQL($args, $columns, 'datestamp', $include_blank_dates );
+								break;
+							default:
+								$query_stub = $this->getDateRangeSQL($args, $columns, 'epoch', $include_blank_dates );
+								break;
 						}
-
 					}
 					//Debug::Text('Query Stub: '. $query_stub, __FILE__, __LINE__, __METHOD__, 10);
 					$retval = $query_stub;
@@ -1551,8 +1582,19 @@ abstract class Factory {
 		return $this->Validator->isValid();
 	}
 
+	function getSequenceName() {
+		if ( isset($this->pk_sequence_name) ) {
+			return $this->pk_sequence_name;
+		}
+
+		return FALSE;
+	}
 	function getNextInsertId() {
-		return $this->db->GenID( $this->pk_sequence_name );
+		if ( isset($this->pk_sequence_name) ) {
+			return $this->db->GenID( $this->pk_sequence_name );
+		}
+		
+		return FALSE;
 	}
 
 	//Execute SQL queries and handle paging properly for select statements.

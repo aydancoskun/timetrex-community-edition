@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11971 $
- * $Id: RecurringScheduleControlFactory.class.php 11971 2014-01-10 23:11:10Z mikeb $
- * $Date: 2014-01-10 15:11:10 -0800 (Fri, 10 Jan 2014) $
+ * $Revision: 13366 $
+ * $Id: RecurringScheduleControlFactory.class.php 13366 2014-06-09 17:15:19Z mikeb $
+ * $Date: 2014-06-09 10:15:19 -0700 (Mon, 09 Jun 2014) $
  */
 
 /**
@@ -300,7 +300,7 @@ class RecurringScheduleControlFactory extends Factory {
 			}
 		}
 
-		if ( is_array($ids) ) {
+		if ( is_array($ids) AND count($ids) > 0 ) {
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
 				$rsulf = TTnew( 'RecurringScheduleUserListFactory' );
@@ -317,7 +317,7 @@ class RecurringScheduleControlFactory extends Factory {
 						$obj->Delete();
 					} else {
 						//Save ID's that need to be updated.
-						Debug::text('NOT Deleting : '. $id, __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('NOT Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 						$tmp_ids[] = $id;
 					}
 				}
@@ -328,7 +328,7 @@ class RecurringScheduleControlFactory extends Factory {
 			$ulf = TTnew( 'UserListFactory' );
 
 			foreach ($ids as $id) {
-				if ( isset($ids) AND !in_array($id, $tmp_ids) ) {
+				if ( $id >= 0 AND isset($tmp_ids) AND !in_array($id, $tmp_ids) ) { //-1 is used as "NONE", so ignore it here.
 					//Handle OPEN shifts.
 					$full_name = NULL;
 					if ( $id == 0 ) {
@@ -346,10 +346,14 @@ class RecurringScheduleControlFactory extends Factory {
 
 					if ( $this->Validator->isTrue(		'user',
 														$rsuf->Validator->isValid(),
-														TTi18n::gettext('Selected Employee is invalid').' ('. $full_name .')' )) {
+														TTi18n::gettext('Selected employee is invalid').' ('. $full_name .')' )) {
 						$rsuf->save();
 					}
 					unset($full_name);
+				} elseif ( $id == -1 ) { //Make sure -1 isn't the only selected option.
+					$this->Validator->isTrue(		'user',
+													FALSE,
+													TTi18n::gettext('Please select at least one employee') );
 				}
 			}
 
@@ -494,6 +498,7 @@ class RecurringScheduleControlFactory extends Factory {
 							//$shifts[TTDate::getBeginDayEpoch($i)][] = array(
 							$shifts[TTDate::getISODateStamp($i)][] = array(
 																'status_id' => $template_week_arr['status_id'],
+																'absence_policy_id' => (int)$template_week_arr['absence_policy_id'],
 																'start_time' => $start_time,
 																'raw_start_time' => TTDate::getDate('DATE+TIME', $start_time ),
 																'end_time' => $end_time,

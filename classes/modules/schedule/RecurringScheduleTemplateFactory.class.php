@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12528 $
- * $Id: RecurringScheduleTemplateFactory.class.php 12528 2014-03-03 23:20:02Z mikeb $
- * $Date: 2014-03-03 15:20:02 -0800 (Mon, 03 Mar 2014) $
+ * $Revision: 13814 $
+ * $Id: RecurringScheduleTemplateFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 
 /**
@@ -949,6 +949,16 @@ class RecurringScheduleTemplateFactory extends Factory {
 
 		if ( $this->getOpenShiftMultiplier() == '' ) {
 			$this->setOpenShiftMultiplier( 1 );
+		}
+
+		return TRUE;
+	}
+
+	function Validate() {
+		if ( $this->getRecurringScheduleTemplateControl() == FALSE ) {
+			$this->Validator->isTRUE(		'recurring_schedule_template_control_id',
+											FALSE,
+											TTi18n::gettext('Invalid Recurring Schedule Template Control') );
 		}
 
 		return TRUE;

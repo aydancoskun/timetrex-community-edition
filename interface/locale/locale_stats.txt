@@ -1,12 +1,13 @@
-fr_FR|49|French <fr@li.org>
-de_DE|63|German <de@li.org>
-pt_PT|43|Portuguese <pt@li.org>
-zh_ZH|60|
-es_ES|62|Spanish <es@li.org>
-it_IT|50|Italian <it@li.org>
-en_US|80|LANGUAGE <LL@li.org>
-pt_BR|46|Brazilian Portuguese <franciscoferreiraluz@yahoo.com.au>
-da_DK|52|Danish <da@li.org>
-zh_CN|60|
-id_ID|85|Indonesian <id@li.org>
-fr_CA|42|French (Canada) <fr_CA@li.org>
+fr_FR|44|French <fr@li.org>
+de_DE|57|German <de@li.org>
+pt_PT|39|Portuguese <pt@li.org>
+zh_ZH|54|
+es_ES|56|Spanish <es@li.org>
+it_IT|45|Italian <it@li.org>
+yi_US|99|
+en_US|0|
+pt_BR|41|Brazilian Portuguese <franciscoferreiraluz@yahoo.com.au>
+da_DK|47|Danish <da@li.org>
+zh_CN|54|
+id_ID|76|Indonesian <id@li.org>
+fr_CA|37|French (Canada) <fr_CA@li.org>

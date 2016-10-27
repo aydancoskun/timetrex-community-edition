@@ -40,7 +40,7 @@ type = mysqlt
 host = localhost
 database_name = timetrex
 user = timetrex
-password = ENTER_PASSWORD_HERE
+password = "ENTER_PASSWORD_HERE"
 
 
 ;
@@ -88,6 +88,9 @@ force_ssl = FALSE
 installer_enabled = TRUE
 primary_company_id = 0
 hostname = localhost
+
+; System Administrators Email address to send critical errors to if necessary. Set to FALSE to disable completely.
+;system_admin_email = "sysadmin@mydomain.com"
 
 default_interface = flex
 

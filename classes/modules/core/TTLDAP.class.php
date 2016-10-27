@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -301,7 +301,8 @@ class TTLDAP {
 
 						if ( $this->getLoginAttribute() != '' AND isset($ldap_data[$this->getLoginAttribute()]) ) {
 
-							if ( $ldap_data[$this->getLoginAttribute()] == $user_name ) {
+							//Usernames are passed here in lowercase already, so it should be case insensitive match.
+							if ( strtolower($ldap_data[$this->getLoginAttribute()]) == strtolower($user_name) ) {
 								//Try to compare plain text password if it exists
 								if ( isset($ldap_data[$this->password_attribute]) ) {
 									if ( $ldap_data[$this->password_attribute] == $password ) {

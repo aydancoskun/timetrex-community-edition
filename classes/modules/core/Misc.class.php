@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12453 $
- * $Id: Misc.class.php 12453 2014-02-25 16:10:34Z mikeb $
- * $Date: 2014-02-25 08:10:34 -0800 (Tue, 25 Feb 2014) $
+ * $Revision: 13814 $
+ * $Id: Misc.class.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 
 /**
@@ -1289,6 +1289,7 @@ class Misc {
 			} elseif ( isset( $_SERVER['HOSTNAME'] ) ) {
 				$server_domain = $_SERVER['HOSTNAME'].$server_port;
 			} else {
+				Debug::Text( 'Unable to determine hostname, falling back to localhost...', __FILE__, __LINE__, __METHOD__, 10);
 				$server_domain = 'localhost'.$server_port;
 			}
 		}
@@ -1392,6 +1393,26 @@ class Misc {
 		return FALSE;
 	}
 
+	static function getCityAndProvinceAndPostalCode( $city, $province, $postal_code ) {
+		$retval = '';
+		if ( $city != '' ) {
+			$retval .= $city;
+		}
+
+		if ( $province != '' AND $province != '00' ) {
+			if ( $retval != '' ) {
+				$retval .= ',';
+			}
+			$retval .= ' '. $province;
+		}
+
+		if ( $postal_code != '' ) {
+			$retval .= ' '. strtoupper( $postal_code );
+		}
+
+		return $retval;
+	}
+
 	//Caller ID numbers can come in in all sorts of forms:
 	// 2505551234
 	// 12505551234
@@ -1433,21 +1454,27 @@ class Misc {
 	* @access public
 	* @return success
 	*/
-	static function cleanDir( $path, $recursive = FALSE, $del_dirs = FALSE, $del_root = FALSE ) {
+	static function cleanDir( $path, $recursive = FALSE, $del_dirs = FALSE, $del_root = FALSE, $exclude_regex_filter = NULL ) {
 		$result = TRUE;
 
 		if( !$dir = @dir($path) ) {
 			return FALSE;
 		}
 
+		Debug::Text('Cleaning: '. $path .' Exclude Regex: '. $exclude_regex_filter, __FILE__, __LINE__, __METHOD__, 10);
 		while( $file = $dir->read() ) {
 			if( $file === '.' OR $file === '..' ) {
 				continue;
 			}
 
-			$full = $dir->path.DIRECTORY_SEPARATOR.$file;
+			$full = $dir->path . DIRECTORY_SEPARATOR . $file;
+
+			if ( $exclude_regex_filter != '' AND preg_match( '/'. $exclude_regex_filter .'/i', $full) == 1 ) {
+				continue;
+			}
+
 			if ( is_dir($full) AND $recursive == TRUE ) {
-				$result = self::cleanDir( $full, $recursive, $del_dirs, $del_dirs );
+				$result = self::cleanDir( $full, $recursive, $del_dirs, $del_dirs, $exclude_regex_filter );
 			} elseif( is_file($full) ) {
 				$result = @unlink($full);
 				//Debug::Text('Deleting: '. $full, __FILE__, __LINE__, __METHOD__, 10);
@@ -1555,7 +1582,7 @@ class Misc {
 	static function getSystemMemoryInfo() {
 		if ( OPERATING_SYSTEM == 'LINUX' ) {
 			$memory_file = '/proc/meminfo';
-			if ( file_exists( $memory_file ) AND is_readable( $memory_file ) ) {
+			if ( @file_exists( $memory_file ) AND is_readable( $memory_file ) ) {
 				$buffer = file_get_contents( $memory_file );
 
 				preg_match('/MemFree:\s+([0-9]+) kB/im', $buffer, $mem_free_match);
@@ -1621,9 +1648,18 @@ class Misc {
 			return FALSE;
 		}
 
-		//Only send errors to TimeTrex support, not the customer.
-		$cc = NULL;
 		$to = 'errors@timetrex.com';
+		
+		global $config_vars;
+		if ( isset($config_vars['other']['system_admin_email']) ) {
+			if ( $config_vars['other']['system_admin_email'] != '' ) {
+				$to = $config_vars['other']['system_admin_email'];
+			} else {
+				return FALSE;
+			}
+		}
+
+		$cc = NULL;
 		$from = APPLICATION_NAME.'@'.Misc::getHostName( FALSE );
 
 		$headers = array(
@@ -1746,7 +1782,7 @@ class Misc {
 		}
 
 		//check if password is not all upper case
-		if ( strtoupper($password) == $password) {
+		if ( strtoupper($password) == $password ) {
 			$strength++;
 		}
 
@@ -1786,9 +1822,10 @@ class Misc {
 	}
 
 	static function redirectMobileBrowser() {
-		//FIXME: Add GET parameter override to prevent any redirection from happening.
-		//Set mobile=1
 		extract( FormVariables::GetVariables( array('desktop') ) );
+		if ( !isset($desktop) ) {
+			$desktop = 0;
+		}
 		if ( getTTProductEdition() != TT_PRODUCT_COMMUNITY AND $desktop != 1 ) {
 			$browser = self::detectMobileBrowser();
 			if ( $browser == 'ios' ) {
@@ -1921,19 +1958,19 @@ class Misc {
 	}
 
 	static function isWritable($path) {
-		if ( $path{(strlen($path) - 1)} == '/' ) {
-			return self::isWritable( $path . uniqid(mt_rand()).'.tmp' );
+		if ( $path[(strlen($path) - 1)] == '/' ) {
+			return self::isWritable( $path . uniqid( mt_rand() ).'.tmp' );
 		}
 
-		if (file_exists($path)) {
-			if ( !($f = @fopen($path, 'r+') ) ) {
+		if ( file_exists($path) ) {
+			if ( !( $f = @fopen($path, 'r+') ) ) {
 				return FALSE;
 			}
 			fclose($f);
 			return TRUE;
 		}
 
-		if ( ! ($f = @fopen($path, 'w') ) ) {
+		if ( !( $f = @fopen($path, 'w') ) ) {
 			return FALSE;
 		}
 
@@ -1972,6 +2009,17 @@ class Misc {
 		return version_compare( $version1, $version2, $operator);
 	}
 
+	static function getInstanceIdentificationString($primary_company, $system_settings ) {
+		$version_string[] = 'Company:';
+		$version_string[] = ( is_object($primary_company) ) ? $primary_company->getName() : 'N/A';
+		$version_string[] = 'Edition: '. getTTProductEditionName();
+		$version_string[] = 'Key:';
+		$version_string[] = ( isset($system_settings) AND isset($system_settings['registration_key']) ) ? $system_settings['registration_key'] : 'N/A';
+		$version_string[] = 'Version: '. APPLICATION_VERSION;
+
+		return implode(' ', $version_string );
+	}
+
 	//Removes the word "the" from the beginning of strings and optionally places it at the end.
 	//Primarily for client/company names like: The XYZ Company -> XYZ Company, The
 	//Should often be used to sanitize metaphones.
@@ -2000,12 +2048,12 @@ class Misc {
 		//In the next 20% of the rollout period, update 25% of the customers.
 		//In the next 20% of the rollout period, update 50% of the customers.
 		//In the next 20% of the rollout period, update 75% of the customers.
-		//In the next 20% of the rollout period, update 100% of the customers.
+		//In the last 20% of the rollout period, update 100% of the customers.
 		$version_updated_date = TTDate::getBeginDayEpoch( $original_release_date );
 		$version_released_days = floor( TTDate::getDays( ( time() - $version_updated_date ) ) );
 		$days_remaining = ( $max_rollout_days - $version_released_days );
-		if ( $days_remaining < 1 ) {
-			$days_remaining = 1;
+		if ( $days_remaining < 0 ) {
+			$days_remaining = 0;
 		}
 
 		if ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.20 ) ) ) {
@@ -2028,9 +2076,11 @@ class Misc {
 			$retval = FALSE;
 		}
 
-		Debug::text('Identifier: '. $identifier .' Original Release Date: '. TTDate::getDate('DATE+TIME', $original_release_date ) .' Rollout Days: '. $max_rollout_days .' Days Remaining: '. $days_remaining .' Force: '. (int)$force .' Result: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Identifier: '. $identifier .' Original Release Date: '. TTDate::getDate('DATE+TIME', $original_release_date ) .' Rollout Days: '. $max_rollout_days .' Days Remaining: '. $days_remaining .' Percent Chance: '. $percent_chance .' Force: '. (int)$force .' Result: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $retval;
 	}
+
+
 }
 ?>

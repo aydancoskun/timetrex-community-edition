@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -47,13 +47,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	protected $pay_period_objs = NULL;
 	protected $pay_stub_account_link_arr = NULL;
 
-	public function __construct() {
-		global $db, $cache, $profiler;
-	}
-
 	public function setUp() {
 		global $dd;
 		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
+
+		TTDate::setTimeZone('PST8PDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$dd = new DemoData();
 		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
@@ -3565,6 +3563,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	 * @group Punch_testRoundingConditionA
 	 */
 	function testRoundingConditionA() {
+		if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) {
+			return TRUE;
+		}
+
 		//Test punches outside the condition, so no rounding takes place.
 		global $dd;
 
@@ -3622,6 +3624,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	 * @group Punch_testRoundingConditionA2
 	 */
 	function testRoundingConditionA2() {
+		if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) {
+			return TRUE;
+		}
+
 		//Test punches inside the condition, so rounding takes place.
 		global $dd;
 
@@ -3679,6 +3685,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	 * @group Punch_testRoundingConditionB
 	 */
 	function testRoundingConditionB() {
+		if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) {
+			return TRUE;
+		}
+
 		//Test punches outside the condition, so rounding doesn't takes place.
 		global $dd;
 
@@ -3749,6 +3759,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	 * @group Punch_testRoundingConditionB2
 	 */
 	function testRoundingConditionB2() {
+		if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) {
+			return TRUE;
+		}
+
 		//Test punches inside the condition, so round takes place.
 		global $dd;
 
@@ -3821,6 +3835,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	 * @group Punch_testRoundingConditionC
 	 */
 	function testRoundingConditionC() {
+		if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) {
+			return TRUE;
+		}
+
 		//Test punches outside the condition, so no rounding takes place.
 		global $dd;
 
@@ -3885,6 +3903,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	 * @group Punch_testRoundingConditionC2
 	 */
 	function testRoundingConditionC2() {
+		if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) {
+			return TRUE;
+		}
+
 		//Test punches inside the condition, so rounding takes place.
 		global $dd;
 
@@ -4846,7 +4868,186 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testDefaultPunchSettingsNoScheduleH
+	 */
+	function testDefaultPunchSettingsNoScheduleH() {
+		//Test with duplicate punches at the exact same time, including seconds.
+		global $dd;
 
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
+		$this->user_id = $dd->createUser( $this->company_id, 10, 0, 0, 0 ); //Non-Admin user.
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 8:00:00 AM'),
+								strtotime($date_stamp.' 1:00:57 PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => $this->tmp_branch_id[0],
+											'department_id' => $this->tmp_department_id[0],
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$epoch = strtotime($date_stamp.' 1:00:57 PM');
+
+		$ulf = TTNew('UserListFactory');
+		$ulf->getById( $this->user_id );
+		$user_obj = $ulf->getCurrent();
+
+		$plf = TTNew('PunchFactory');
+
+		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
+
+		$this->assertEquals( 10, $data['status_id'] ); //In/Out
+		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
+
+		$this->assertEquals( 0, $data['branch_id'] );
+		$this->assertEquals( 0, $data['department_id'] );
+		$this->assertEquals( 0, $data['job_id'] );
+		$this->assertEquals( 0, $data['job_item_id'] );
+
+		return TRUE;
+	}
+	
+	/**
+	 * @group Punch_testDefaultPunchSettingsNoScheduleHB
+	 */
+	function testDefaultPunchSettingsNoScheduleHB() {
+		//Test with duplicate punches at the exact same time, including seconds.
+		global $dd;
+
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
+		$this->user_id = $dd->createUser( $this->company_id, 10, 0, 0, 0 ); //Non-Admin user.
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 8:00:00 AM'),
+								strtotime($date_stamp.' 1:00:23 PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => $this->tmp_branch_id[0],
+											'department_id' => $this->tmp_department_id[0],
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$epoch = strtotime($date_stamp.' 1:00:23 PM');
+
+		$ulf = TTNew('UserListFactory');
+		$ulf->getById( $this->user_id );
+		$user_obj = $ulf->getCurrent();
+
+		$plf = TTNew('PunchFactory');
+
+		$data = $plf->getDefaultPunchSettings( $user_obj, $epoch );
+
+		$this->assertEquals( 10, $data['status_id'] ); //In/Out
+		$this->assertEquals( 10, $data['type_id'] ); //Normal/Lunch/Break
+
+		$this->assertEquals( 0, $data['branch_id'] );
+		$this->assertEquals( 0, $data['department_id'] );
+		$this->assertEquals( 0, $data['job_id'] );
+		$this->assertEquals( 0, $data['job_item_id'] );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group Punch_testDefaultPunchSettingsNoScheduleHC
+	 */
+	function testDefaultPunchSettingsNoScheduleHC() {
+		global $dd;
+
+		$this->tmp_branch_id[] = $this->branch_id;
+		$this->tmp_branch_id[] = $dd->createBranch( $this->company_id, 20 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 10 );
+		$this->tmp_department_id[] = $dd->createDepartment( $this->company_id, 20 );
+		$this->user_id = $dd->createUser( $this->company_id, 10, 0, 0, 0 ); //Non-Admin user.
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$dd->createPunchPair( 	$this->user_id,
+								strtotime($date_stamp.' 8:00:00 AM'),
+								strtotime($date_stamp.' 1:00:23 PM'),
+								array(
+											'in_type_id' => 10,
+											'out_type_id' => 10,
+											'branch_id' => $this->tmp_branch_id[0],
+											'department_id' => $this->tmp_department_id[0],
+											'job_id' => 0,
+											'job_item_id' => 0,
+										),
+								TRUE
+								);
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$epoch = strtotime($date_stamp.' 1:00:23 PM');
+
+		$ulf = TTNew('UserListFactory');
+		$ulf->getById( $this->user_id );
+		$user_obj = $ulf->getCurrent();
+
+		$prev_punch_obj = TTnew( 'PunchListFactory' );
+		$status_id = FALSE;
+		$type_id = FALSE;
+
+		//Test similar functionality to what the timeclock would use to avoid duplicate punches.
+		//This is different than what the mobile app would do though, as the mobile app needs to be able to refresh its default punch settings immediately.
+		$plf = TTnew( 'PunchListFactory' );
+		$plf->getPreviousPunchByUserIDAndEpoch( $user_obj->getId(), $epoch );
+		if ( $plf->getRecordCount() > 0 ) {
+			$prev_punch_obj = $plf->getCurrent();
+
+			$prev_punch_obj->setUser( $user_obj->getId() );
+
+			$status_id = $prev_punch_obj->getNextStatus();
+			$type_id = $prev_punch_obj->getNextType( $epoch ); //Detects breaks/lunches too.
+		}
+
+		//If previous punch actual time matches current punch time, we can skip the auto-status logic
+		//  as its a duplicate punch and shouldn't have a different status. This way its more likely to get rejected as a duplicate.
+		$this->assertEquals( $prev_punch_obj->getActualTimeStamp(), $epoch );
+		$this->assertEquals( 1, $plf->getRecordCount() );
+		$this->assertEquals( 10, $status_id ); //In
+
+		return TRUE;
+	}
 
 
 

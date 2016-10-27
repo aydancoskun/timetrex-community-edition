@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -47,7 +47,7 @@ class UserLicenseFactory extends Factory {
 	protected $pk_sequence_name = 'user_license_id_seq'; //PK Sequence name
 	protected $qualification_obj = NULL;
 
-	protected $license_number_validator_regex = '/^[A-Z\-\.\ 0-9]{1,250}$/i';
+	protected $license_number_validator_regex = '/^[A-Z_\/:;\-\.\ 0-9]{1,250}$/i';
 	function _getFactoryOptions( $name ) {
 
 		$retval = NULL;

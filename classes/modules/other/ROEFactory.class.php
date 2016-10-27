@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11956 $
- * $Id: ROEFactory.class.php 11956 2014-01-10 01:07:15Z mikeb $
- * $Date: 2014-01-09 17:07:15 -0800 (Thu, 09 Jan 2014) $
+ * $Revision: 13814 $
+ * $Id: ROEFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 
 /**
@@ -498,25 +498,31 @@ class ROEFactory extends Factory {
 		return $report_period_arr[$this->getPayPeriodType()];
 	}
 
-	function getInsurableEarningsReportPayPeriods() {
-		//eFile requires more data than paper forms, but the paper form we use supports up to 53 boxes anyways, so just default to that.
-		$report_period_arr = array(
-							10	=> 53, //'Weekly',
-							20	=> 27, //'Bi-Weekly',
-							30	=> 25, //'Semi-Monthly',
-							40	=> 13, //'Monthly + Advance',
-							50	=> 13, //'Monthly'
-							);
-		/*
-		$report_period_arr = array(
-							10	=> 27, //'Weekly',
-							20	=> 14, //'Bi-Weekly',
-							30	=> 13, //'Semi-Monthly',
-							40	=> 7, //'Monthly + Advance',
-							50	=> 7, //'Monthly'
-							);
-		*/
-		return $report_period_arr[$this->getPayPeriodType()];
+	function getInsurableEarningsReportPayPeriods( $line = '15b' ) {
+		if ( $line == '15c' ) {
+			//15c requires more pay periods data than is used to total up 15b.
+			$report_period_arr = array(
+								10	=> 53, //'Weekly',
+								20	=> 27, //'Bi-Weekly',
+								30	=> 25, //'Semi-Monthly',
+								40	=> 13, //'Monthly + Advance',
+								50	=> 13, //'Monthly'
+								);
+		} else {
+			//Line 15b is a total of insurable hours over a shorter period than displayed in 15b often.
+			$report_period_arr = array(
+								10	=> 27, //'Weekly',
+								20	=> 14, //'Bi-Weekly',
+								30	=> 13, //'Semi-Monthly',
+								40	=> 7, //'Monthly + Advance',
+								50	=> 7, //'Monthly'
+								);
+		}
+
+		$retval = $report_period_arr[$this->getPayPeriodType()];
+
+		Debug::Text('Pay Periods: '. $retval .' Line: '. $line, __FILE__, __LINE__, __METHOD__, 10);
+		return $retval;
 	}
 
 	function getInsurablePayPeriodStartDate( $pay_periods ) {
@@ -678,13 +684,15 @@ class ROEFactory extends Factory {
 		return FALSE;
 	}
 
-	function getInsurableEarningsByPayPeriod() {
+	function getInsurableEarningsByPayPeriod( $line  = '15c' ) {
 		if ( $this->pay_period_earnings !== NULL ) {
 			return $this->pay_period_earnings;
 		}
 
+		Debug::Text('Getting earnings for line: '. $line, __FILE__, __LINE__, __METHOD__, 10);
+
 		$setup_data = $this->getSetupData();
-		$insurable_earnings_start_date = $this->getInsurablePayPeriodStartDate( $this->getInsurableEarningsReportPayPeriods() );
+		$insurable_earnings_start_date = $this->getInsurablePayPeriodStartDate( $this->getInsurableEarningsReportPayPeriods( $line ) );
 
 		//Don't include YTD adjustments in ROE totals,
 		//As the proper way is to generate ROEs from their old system and ROEs from TimeTrex, and issue both to the employee.
@@ -712,31 +720,18 @@ class ROEFactory extends Factory {
 	function isPayPeriodWithNoEarnings() {
 		//Show earnings per pay period always, as some provinces require it for certain purposes like EI to determine highest weekly earnings.
 		return TRUE;
-		/*
-		$pp_earnings = $this->getInsurableEarningsByPayPeriod();
-		if ( is_array($pp_earnings) ) {
-			foreach( $pp_earnings as $pp_earning ) {
-				if ( $pp_earning['amount'] <= 0 ) {
-					return TRUE;
-				}
-
-			}
-		}
-
-		return FALSE;
-		*/
 	}
 
 	function getTotalInsurableEarnings() {
 		$total_earnings = 0;
 
-		$pp_earnings = $this->getInsurableEarningsByPayPeriod();
+		$pp_earnings = $this->getInsurableEarningsByPayPeriod( '15b' );
 		if ( is_array($pp_earnings) ) {
 			foreach( $pp_earnings as $pp_earning ) {
 				$total_earnings += $pp_earning['amount'];
 			}
 		}
-		Debug::Text('Total Insurable Earnings: '. $total_earnings, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('Total Insurable Earnings (15b): '. $total_earnings, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $total_earnings;
 	}
@@ -745,7 +740,7 @@ class ROEFactory extends Factory {
 		$setup_data = $this->getSetupData();
 
 		//Get last pay period id
-		$pay_period_earnings = $this->getInsurableEarningsByPayPeriod();
+		$pay_period_earnings = $this->getInsurableEarningsByPayPeriod( '15b' ); 
 		if ( is_array( $pay_period_earnings ) ) {
 			$pay_period_earning_keys = array_keys( $pay_period_earnings );
 			$last_pay_period_id = array_shift( $pay_period_earning_keys );
@@ -831,7 +826,7 @@ class ROEFactory extends Factory {
 
 		//Find out the date of how far back we have to go to get insurable values.
 		//Insurable Hours
-		$insurable_hours_start_date = $this->getInsurablePayPeriodStartDate( $this->getInsurableHoursReportPayPeriods() );
+		$insurable_hours_start_date = $this->getInsurablePayPeriodStartDate( $this->getInsurableHoursReportPayPeriods( '15c' ) );
 
 		//All worked time and overtime is considered insurable.
 		$udtlf = TTnew( 'UserDateTotalListFactory' );
@@ -845,9 +840,6 @@ class ROEFactory extends Factory {
 		$total_hours = Misc::MoneyFormat( TTDate::getHours( $worked_total_time + $absence_total_time ), FALSE );
 		Debug::Text('Total Insurable Hours: '. $total_hours, __FILE__, __LINE__, __METHOD__, 10);
 
-		$insurable_earnings_start_date = $this->getInsurablePayPeriodStartDate( $this->getInsurableEarningsReportPayPeriods() );
-
-		$pself = TTnew( 'PayStubEntryListFactory' );
 		$total_earnings = $this->getTotalInsurableEarnings();
 
 		//Note, this includes the current pay stub we just generated
@@ -899,383 +891,8 @@ class ROEFactory extends Factory {
 
 		return $this->form_obj['roe'];
 	}
-
-	function exportROE( $rlf ) {
-		if ( !is_object($rlf) AND $this->getId() != '' ) {
-			$rlf = TTnew( 'ROEListFactory' );
-			$rlf->getById( $this->getId() );
-		}
-
-		if ( get_class( $rlf ) !== 'ROEListFactory' ) {
-			return FALSE;
-		}
-
-		$border = 0;
-
-		if ( $rlf->getRecordCount() > 0 ) {
-			$ppsf = TTnew( 'PayPeriodScheduleListFactory' );
-			$pay_period_type_options = array(
-											//5 => TTi18n::gettext('Manual'),
-											10	=> 'W',
-											20	=> 'B',
-											30	=> 'S',
-											50	=> 'M'
-										);
-
-			$xml = new SimpleXMLElement('<ROEHEADER Application="RoeWeb" FileVersion="1.00"></ROEHEADER>');
-
-			$r = 0;
-			foreach ($rlf as $r_obj) {
-
-				//$r_obj->getTotalInsurableEarnings();
-
-				//Get User information
-				$ulf = TTnew( 'UserListFactory' );
-				$user_obj = $ulf->getById( $r_obj->getUser() )->getCurrent();
-
-				$ulf = TTnew( 'UserListFactory' );
-				$created_user_obj = $ulf->getById( $r_obj->getCreatedBy() )->getCurrent();
-
-				//Get company information
-				$clf = TTnew( 'CompanyListFactory' );
-				$company_obj = $clf->getById( $user_obj->getCompany() )->getCurrent();
-
-				$xml->addChild('Roe');
-
-				//Box5
-				$xml->Roe[$r]->addChild('B5', $company_obj->getBusinessNumber() );
-
-				//Box6
-				$xml->Roe[$r]->addChild('B6', $pay_period_type_options[$r_obj->getPayPeriodType()] );
-
-				//Box8
-				$xml->Roe[$r]->addChild('B8', $user_obj->getSIN() );
-
-				//Box9
-				$xml->Roe[$r]->addChild('B9');
-				$xml->Roe[$r]->B9->addChild('FN', $user_obj->getFirstName() );
-				$xml->Roe[$r]->B9->addChild('MN', substr( $user_obj->getMiddleName(), 0, 1) );
-				$xml->Roe[$r]->B9->addChild('LN', $user_obj->getLastName() );
-				$xml->Roe[$r]->B9->addChild('A1', $user_obj->getAddress1().' '.$user_obj->getAddress2() );
-				$xml->Roe[$r]->B9->addChild('A2', $user_obj->getCity() );
-				$xml->Roe[$r]->B9->addChild('A3', $user_obj->getProvince() .' '. $user_obj->getPostalCode() );
-
-				//Box10
-				$xml->Roe[$r]->addChild('B10', date('dmY', $r_obj->getFirstDate() ) );
-
-				//Box11
-				$xml->Roe[$r]->addChild('B11', date('dmY', $r_obj->getLastDate() ) );
-
-				//Box12
-				$xml->Roe[$r]->addChild('B12', date('dmY', $r_obj->getPayPeriodEndDate() ) );
-
-				//Box13 - Employee Title
-				if ( is_object($user_obj->getTitleObject() ) ) {
-					$title = $user_obj->getTitleObject()->getName();
-					$xml->Roe[$r]->addChild('B13', $title );
-				}
-
-				//Box15A
-				$xml->Roe[$r]->addChild('B15A', round( $r_obj->getInsurableHours() ) );
-
-				//Box15B
-				$xml->Roe[$r]->addChild('B15B', $r_obj->getInsurableEarnings() );
-
-				//Box15C
-				$xml->Roe[$r]->addChild('B15C');
-				if ( $r_obj->isPayPeriodWithNoEarnings() == TRUE ) {
-					$pay_period_earnings = $r_obj->getInsurableEarningsByPayPeriod();
-					if ( is_array($pay_period_earnings) ) {
-						$i = 1;
-						$x = 0;
-						foreach( $pay_period_earnings as $pay_period_earning ) {
-							$xml->Roe[$r]->B15C->addChild('PP');
-							$xml->Roe[$r]->B15C->PP[$x]->addAttribute('nbr', $i);
-							$xml->Roe[$r]->B15C->PP[$x]->addChild('AMT', (float)$pay_period_earning['amount'] );
-							$i++;
-							$x++;
-						}
-					}
-				} else {
-					$xml->Roe[$r]->B15C->addChild('PP');
-					$xml->Roe[$r]->B15C->PP->addAttribute('nbr', 1);
-					$xml->Roe[$r]->B15C->PP->addChild('AMT', $r_obj->getInsurableEarnings() );
-				}
-
-				//Box16
-				$xml->Roe[$r]->addChild('B16' );
-				$xml->Roe[$r]->B16->addChild('CD', $r_obj->getCode() );
-				$xml->Roe[$r]->B16->addChild('FN', $created_user_obj->getFirstName() );
-				$xml->Roe[$r]->B16->addChild('LN', $created_user_obj->getLastName() );
-
-				if ( $created_user_obj->getWorkPhone() != '' ) {
-					$phone = $created_user_obj->getWorkPhone();
-				} else {
-					$phone = $created_user_obj->getCompanyObject()->getWorkPhone();
-				}
-				$validator = new Validator();
-				$phone = $validator->stripNonNumeric($phone);
-
-				$xml->Roe[$r]->B16->addChild('AC', substr($phone, 0, 3 ) );
-				$xml->Roe[$r]->B16->addChild('TEL', substr($phone, 3, 7 ) );
-
-				//Box17A
-				$vacation_pay = $r_obj->getLastPayPeriodVacationEarnings();
-				if ( $vacation_pay > 0 ) {
-					$xml->Roe[$r]->addChild('B17A', $vacation_pay );
-				}
-
-				$xml->Roe[$r]->addChild('B18', $r_obj->getComments() );
-
-				$r++;
-			}
-
-			$output = $xml->asXML();
-		}
-
-		if ( isset($output) ) {
-			return $output;
-		}
-
-		return FALSE;
-	}
-
-	function getROE( $rlf = NULL, $show_background = TRUE ) {
-
-		if ( !is_object($rlf) AND $this->getId() != '' ) {
-			$rlf = TTnew( 'ROEListFactory' );
-			$rlf->getById( $this->getId() );
-		}
-
-		if ( get_class( $rlf ) !== 'ROEListFactory' ) {
-			return FALSE;
-		}
-
-		$border = 0;
-
-		if ( $rlf->getRecordCount() > 0 ) {
-			$ppsf = TTnew( 'PayPeriodScheduleListFactory' );
-			$pay_period_type_options = $ppsf->getOptions('type');
-
-			$pdf = new TTPDF();
-			$pdf->setMargins(0, 0, 0, 0);
-			$pdf->SetAutoPageBreak(FALSE);
-
-			foreach ($rlf  as $r_obj) {
-				$pdf->SetFont('freesans', '', 12);
-
-				//Get User information
-				$ulf = TTnew( 'UserListFactory' );
-				$user_obj = $ulf->getById( $r_obj->getUser() )->getCurrent();
-
-				$ulf = TTnew( 'UserListFactory' );
-				$created_user_obj = $ulf->getById( $r_obj->getCreatedBy() )->getCurrent();
-
-				//Get company information
-				$clf = TTnew( 'CompanyListFactory' );
-				$company_obj = $clf->getById( $user_obj->getCompany() )->getCurrent();
-
-				$pdf->AddPage();
-
-				if ( $show_background == TRUE ) {
-					//Use this command to convert PDF to images: convert -density 600x600 -quality 00 $file
-					$pdf->Image(Environment::getImagesPath() .'roe-template.jpg', 0, 0, 210, 300);
-				}
-
-				//Serial
-				$pdf->setXY(10, 17);
-				$pdf->Cell(55, 10, $r_obj->getSerial(), $border, 0, 'L');
-
-				//Employer Info
-				$pdf->setXY(10, 30);
-				$pdf->Cell(120, 10, $company_obj->getName(), $border, 0, 'L');
-
-				$pdf->setXY(10, 40);
-				$pdf->Cell(120, 10, $company_obj->getAddress1().' '.$company_obj->getAddress2(), $border, 0, 'L');
-
-				$pdf->setXY(10, 50);
-				$pdf->Cell(90, 10, $company_obj->getCity().', '.$company_obj->getProvince(), $border, 0, 'L');
-
-				$postal_code_a = substr($company_obj->getPostalCode(), 0, 3);
-				$postal_code_b = substr($company_obj->getPostalCode(), 3, 6);
-
-				$pdf->setXY(110, 50);
-				$pdf->Cell(10, 10, $postal_code_a, $border, 0, 'L');
-
-				$pdf->setXY(122, 50);
-				$pdf->Cell(10, 10, $postal_code_b, $border, 0, 'L');
-
-				//Business Number
-				$pdf->setXY(138, 28);
-				$pdf->Cell(120, 10, $company_obj->getBusinessNumber(), $border, 0, 'L');
-
-				//Pay Period Type
-				$pdf->setXY(138, 40);
-				$pdf->Cell(50, 10, $pay_period_type_options[$r_obj->getPayPeriodType()], $border, 0, 'L');
-
-				//SIN
-				$pdf->setXY(138, 50);
-				$pdf->Cell(50, 10, $user_obj->getSIN(), $border, 0, 'L');
-
-				//Employee info
-				$pdf->SetFontSize(10);
-				$pdf->setXY(10, 75);
-				$pdf->Cell(90, 5, $user_obj->getFullName(), $border, 0, 'L');
-
-				$pdf->setXY(10, 80);
-				$pdf->Cell(90, 5, $user_obj->getAddress1().' '.$user_obj->getAddress2(), $border, 0, 'L');
-
-				$pdf->setXY(10, 85);
-				$pdf->Cell(90, 5, $user_obj->getCity().', '.$user_obj->getProvince() .' '. $user_obj->getPostalCode(), $border, 0, 'L');
-
-				$pdf->SetFontSize(12);
-
-				//Employee Title
-				if ( is_object($user_obj->getTitleObject() ) ) {
-					$title = $user_obj->getTitleObject()->getName();
-				} else {
-					$title = NULL;
-				}
-				$pdf->setXY(10, 100);
-				$pdf->Cell(90, 10, $title, $border, 0, 'L');
-
-				//First Day Worked
-				$pdf->SetFontSize(10);
-				$first_date = getdate( $r_obj->getFirstDate() );
-				$pdf->setXY(175, 64);
-				$pdf->Cell(8, 10, $first_date['mday'], $border, 0, 'C');
-				$pdf->setXY(185, 64);
-				$pdf->Cell(8, 10, $first_date['mon'], $border, 0, 'C');
-				$pdf->setXY(196, 64);
-				$pdf->Cell(10, 10, $first_date['year'], $border, 0, 'C');
-
-				//Last day paid
-				$last_date = getdate( $r_obj->getLastDate() );
-				$pdf->setXY(175, 75);
-				$pdf->Cell(8, 10, $last_date['mday'], $border, 0, 'C');
-				$pdf->setXY(185, 75);
-				$pdf->Cell(8, 10, $last_date['mon'], $border, 0, 'C');
-				$pdf->setXY(196, 75);
-				$pdf->Cell(10, 10, $last_date['year'], $border, 0, 'C');
-
-				//Pay Period End Date
-				$pay_period_end_date = getdate( $r_obj->getPayPeriodEndDate() );
-				$pdf->setXY(175, 86);
-				$pdf->Cell(8, 10, $pay_period_end_date['mday'], $border, 0, 'C');
-				$pdf->setXY(185, 86);
-				$pdf->Cell(8, 10, $pay_period_end_date['mon'], $border, 0, 'C');
-				$pdf->setXY(196, 86);
-				$pdf->Cell(10, 10, $pay_period_end_date['year'], $border, 0, 'C');
-
-				//Insurable Hours
-				$pdf->SetFontSize(10);
-				$pdf->setXY(75, 113);
-				$pdf->Cell(25, 10, Misc::getBeforeDecimal( $r_obj->getInsurableHours() ), $border, 0, 'R');
-
-				$pdf->setXY(101, 113);
-				$pdf->Cell(10, 10, Misc::getAfterDecimal( Misc::MoneyFormat( $r_obj->getInsurableHours(), FALSE ) ), $border, 0, 'L');
-
-				//Enter Code
-				$pdf->setXY(185, 113);
-				$pdf->Cell(10, 10, $r_obj->getCode(), $border, 0, 'C');
-
-				//Further Information Contact Name
-				$pdf->setXY(130, 126);
-				$pdf->Cell(75, 5, $created_user_obj->getFullName(), $border, 0, 'R');
-				$pdf->setXY(130, 132);
-				$pdf->Cell(75, 10, $created_user_obj->getWorkPhone(), $border, 0, 'R');
-
-				//Insurable Earnings
-				$pdf->setXY(75, 131);
-				$pdf->Cell(25, 10, Misc::getBeforeDecimal( $r_obj->getInsurableEarnings() ), $border, 0, 'R');
-
-				$pdf->setXY(101, 131);
-				$pdf->Cell(10, 10, Misc::getAfterDecimal( Misc::MoneyFormat( $r_obj->getInsurableEarnings(), FALSE ) ), $border, 0, 'L');
-
-				//Check to see if a pay period didn't have earnings.
-				if ( $r_obj->isPayPeriodWithNoEarnings() == TRUE ) {
-					$pay_period_earnings = $r_obj->getInsurableEarningsByPayPeriod();
-					if ( is_array($pay_period_earnings) ) {
-
-						//Add additional entries for testing alignment purposes.
-						/*
-						for( $y = 0; $y < 14; $y++ ) {
-							$pay_period_earnings[] = array('amount' => rand(1, 10) );
-						}
-						*/
-
-						$top_left_x = $x = Misc::AdjustXY(30, 0);
-						$top_left_y = $y = Misc::AdjustXY(157, 0);
-
-						$col = 1;
-						$i = 1;
-						foreach( $pay_period_earnings as $pay_period_earning ) {
-							Debug::Text('I: '. $i .' X: '. $x .' Y: '. $y .' Col: '. $col .' Amount: '. (float)$pay_period_earning['amount'], __FILE__, __LINE__, __METHOD__, 10);
-							$pdf->setXY( $x, $y );
-							$pdf->Cell(6, 6, Misc::MoneyFormat( (float)$pay_period_earning['amount'], FALSE ), $border, 0, 'R');
-
-							if ( $i > 0 AND ($i % 3) == 0 ) {
-								$x = $top_left_x;
-								$y += 7;
-							} else {
-								$x += 35;
-							}
-							$i++;
-						}
-					}
-				}
-
-				//Box 17A, Vacation pay in last pay period.
-				$vacation_pay = $r_obj->getLastPayPeriodVacationEarnings();
-				if ( $vacation_pay > 0 ) {
-					$pdf->setXY(132, 155);
-					$pdf->Cell(10, 10, Misc::getBeforeDecimal( Misc::MoneyFormat( $vacation_pay, FALSE ) ), $border, 0, 'R');
-					$pdf->Cell(10, 10, Misc::getAfterDecimal( Misc::MoneyFormat( $vacation_pay, FALSE ) ), $border, 0, 'L');
-				}
-
-				//Comments
-				$pdf->setXY(115, 212);
-				$pdf->MultiCell(85, 5, $r_obj->getComments(), $border, 'L');
-
-				//English
-				$pdf->setXY(8.5, 256.5);
-				$pdf->Cell(10, 10, 'X', $border, 0, 'L');
-
-				//ROE creator phone number
-				$pdf->setXY(75, 258);
-				$pdf->Cell(25, 10, $created_user_obj->getWorkPhone(), $border, 0, 'L');
-
-				//ROE create name.
-				$pdf->SetFontSize(12);
-				$pdf->setXY(87, 273);
-				$pdf->Cell(75, 10, $created_user_obj->getFullName(), $border, 0, 'C');
-
-				//Create Date
-				$created_date = getdate( $r_obj->getCreatedDate() );
-				$pdf->SetFontSize(10);
-				$pdf->setXY(175, 273);
-				$pdf->Cell(8, 10, $created_date['mday'], $border, 0, 'C');
-
-				$pdf->setXY(185, 273);
-				$pdf->Cell(8, 10, $created_date['mon'], $border, 0, 'C');
-
-				$pdf->setXY(195, 273);
-				$pdf->Cell(10, 10, $created_date['year'], $border, 0, 'C');
-			}
-
-			$output = $pdf->Output('', 'S');
-		}
-
-		if ( isset($output) ) {
-			return $output;
-		}
-
-		return FALSE;
-	}
-
+	
 	function Validate() {
-
-
 		return TRUE;
 	}
 

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11981 $
- * $Id: Data.class.php 11981 2014-01-13 17:51:20Z mikeb $
- * $Date: 2014-01-13 09:51:20 -0800 (Mon, 13 Jan 2014) $
+ * $Revision: 13838 $
+ * $Id: Data.class.php 13838 2014-07-24 00:06:53Z mikeb $
+ * $Date: 2014-07-23 17:06:53 -0700 (Wed, 23 Jul 2014) $
  */
 
 /*
@@ -55,11 +55,11 @@ C:11-Dec-13				Federal          		- Google: Notice 1036 http://www.irs.gov/pub/i
 C:27-Dec-13-NOCHANGE-	'AL' => 'Alabama' 		- http://www.ador.state.al.us/Withholding/index.html *Withholding Tax Tables and Instructions
 C:11-Dec-13				'CA' => 'California' 	- http://www.edd.ca.gov/Payroll_Taxes/Rates_and_Withholding.htm *PIT Withholding schedules
 C:11-Dec-13				'CT' => 'Connecticut'	- http://www.ct.gov/drs/cwp/view.asp?a=1509&q=444766 *May have to search for the latest year... Form TPG-211 Withholding Calculation Rules Effective
-C:11-Dec-13-NOCHANGE-*	'ID' => 'Idaho',		- http://tax.idaho.gov/s-results-pub.cfm?doc=EPB00006&pkey=bus
+C:01-Jun-14				'ID' => 'Idaho',		- http://tax.idaho.gov/s-results-pub.cfm?doc=EPB00006&pkey=bus
 C:11-Dec-13				'MN' => 'Minnesota',	- http://www.revenue.state.mn.us/businesses/withholding/Pages/Forms.aspx *2013 Minnesota Withholding Computer Formula
 C:27-Dec-13				'MO' => 'Missouri',		- http://www.dor.mo.gov/tax/business/withhold/ *Employers Tax Guide
 C:07-Jan-13-NOCHANGE-	'NM' => 'New Mexico', 	- http://www.tax.newmexico.gov/Businesses/Wage-Withholding-Tax/Pages/Home.aspx *FYI-104
-C:12-Dec-13				'OH' => 'Ohio',			- http://www.tax.ohio.gov/employer_withholding.aspx *Withholding Tables/Income Tax Withholding Instructions
+C:01-Jul-14				'OH' => 'Ohio',			- http://www.tax.ohio.gov/employer_withholding.aspx *Withholding Tables/Income Tax Withholding Instructions
 C:12-Dec-13				'OK' => 'Oklahoma',		- http://www.tax.ok.gov/btforms.html *OW-2, Oklahoma Income Tax Withholding Tables
 C:23-Dec-13				'VT' => 'Vermont',		- http://www.state.vt.us/tax/businesswithholding.shtml *Vermont Percentage Method Withholding Tables
 C:11-Dec-13				'CO' => 'Colorado',		- http://www.colorado.gov/cs/Satellite?c=Page&cid=1214992372268&pagename=Revenue%2FREVXLayout *Form: DR 1098
@@ -81,7 +81,7 @@ C:11-Jan-14				'RI' => 'Rhode Island', - http://www.tax.state.ri.us/misc/softwar
 C:27-Dec-13-NOCHANGE-	'GA' => 'Georgia',		- https://etax.dor.ga.gov/inctax/withholding/whgeninfo.aspx *Employers Tax Guide
 C:27-Dec-13-NOCHANGE-	'HI' => 'Hawaii',		- http://www.state.hi.us/tax/a1_b1_5whhold.htm *Employers Tax Guide (Booklet A)
 C:27-Dec-13-NOCHANGE-	'NE' => 'Nebraska',		- http://www.revenue.ne.gov/tax/current/ind_inc_tax.html *Nebraska Tax Calculation Schedule for Individual Income Tax
-C:19-Dec-13-NOCHANGE-*	'WI' => 'Wisconsin',	- http://www.revenue.wi.gov/forms/with/index.html *Pub W-166, Method "B" calculation
+C:26-Mar-14*			'WI' => 'Wisconsin',	- http://www.revenue.wi.gov/forms/with/index.html *Pub W-166, Method "B" calculation
 
 //Rarely change
 C:12-Dec-13-NOCHANGE-*	'UT' => 'Utah',			- http://tax.utah.gov/withholding *PUB 14, Withholding Tax Guide
@@ -449,8 +449,8 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 
 			if ( isset($this->income_tax_rates) AND is_array($this->income_tax_rates) ) {
 				foreach( $this->income_tax_rates as $type => $brackets ) {
-					$i=0;
-					$total_brackets = count($brackets)-1;
+					$i = 0;
+					$total_brackets = ( count($brackets) - 1 );
 					foreach( $brackets as $key => $bracket_data ) {
 						if ( $i == 0 ) {
 							$first = TRUE;
@@ -501,8 +501,8 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 		}
 
 		$prev_value = 0;
-		$total_rates = count($rates) - 1;
-		$i=0;
+		$total_rates = ( count($rates) - 1 );
+		$i = 0;
 		foreach ($rates as $key => $values) {
 			$value = $values['income'];
 			$rate = $values['rate'];
@@ -548,8 +548,8 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 		}
 
 		$prev_value = 0;
-		$total_rates = count($rates) - 1;
-		$i=0;
+		$total_rates = ( count($rates) - 1 );
+		$i = 0;
 		foreach ($rates as $key => $values) {
 			$value = $values['income'];
 
@@ -734,7 +734,7 @@ class PayrollDeduction_US_Data extends PayrollDeduction_Base {
 			if ( $this->getStateUIRate() > bcsub( $retarr['rate'], $this->getFederalUIMinimumRate() ) ) {
 				$retval = $this->getFederalUIMinimumRate();
 			} else {
-				$retval = $retarr['rate'] - $this->getStateUIRate();
+				$retval = ( $retarr['rate'] - $this->getStateUIRate() );
 			}
 
 			return $retval;

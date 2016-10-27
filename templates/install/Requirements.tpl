@@ -334,6 +334,20 @@
 
 							<tr>
 								<td class="cellLeftEditTable">
+									{t}PHP Open BaseDir:{/t}
+								</td>
+								<td class="cellRightEditTable">
+									{if $install_obj->checkPHPOpenBaseDir() == 0}
+										<span class="">{t}OK{/t}
+									{else}
+										<span class="tblDataError"><b>{t escape="no" 1=$install_obj->getPHPOpenBaseDir() 2=$install_obj->getPHPCLIDirectory()}Warning: PHP open_basedir setting (%1) does not include directory of PHP CLI binary (%2).{/t}</b>
+									{/if}
+									</span>
+								</td>
+							</tr>
+
+							<tr>
+								<td class="cellLeftEditTable">
 									{t}PHP CLI Executable:{/t}
 								</td>
 								<td class="cellRightEditTable">

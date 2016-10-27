@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,11 +42,22 @@ require_once('../../includes/global.inc.php'); //Mainly to force redirect to SSL
 
 Misc::redirectMobileBrowser(); //Redirect mobile browsers automatically.
 
+//Check if HTML5 interface is default, and that the referrer isn't the HTML5 interface.
+//Redirect back to HTML5 interface, this works around users bookmarking /interface/flex
+if ( stripos( Environment::getDefaultInterfaceBaseURL(), 'html' ) !== FALSE
+		AND
+		( !isset($_SERVER['HTTP_REFERER'])
+			OR isset($_SERVER['HTTP_REFERER']) AND stripos( $_SERVER['HTTP_REFERER'], 'html' ) === FALSE )
+		) {
+	Debug::Text('Default HTML5 interface and NOT Referred from HTML5 interface, redirecting back...', __FILE__, __LINE__, __METHOD__, 10);
+	Redirect::Page( URLBuilder::getURL( NULL, Environment::getDefaultInterfaceBaseURL() ) );
+}
 ?>
 <html lang="en">
 
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=7" />
 
 <title>TimeTrex - Secure Login</title>
 <script src="AC_OETags.js" language="javascript"></script>
@@ -117,10 +128,20 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 			"pluginspage", "http://www.adobe.com/go/getflashplayer"
 	);
   } else {  // flash is too old or we can't detect the plugin
-    var alternateContent = ''
-  	+ 'This content requires the Adobe Flash Player. '
-   	+ '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
-    document.write(alternateContent);  // insert non-flash content
+	<?php
+		if ( @file_exists( '../html5/index.php' ) ) {
+			?>
+			window.location = '../html5/index.php' + window.location.search;
+			<?php
+		} else {
+			?>
+			var alternateContent = ''
+			+ 'This content requires the Adobe Flash Player. '
+			+ '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
+			document.write(alternateContent);  // insert non-flash content
+			<?php
+		}
+	?>
   }
 // -->
 </script>
@@ -145,3 +166,6 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 </noscript>
 </body>
 </html>
+<?php
+Debug::writeToLog();
+?>

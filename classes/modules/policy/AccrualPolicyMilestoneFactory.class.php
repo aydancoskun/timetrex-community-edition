@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12620 $
- * $Id: AccrualPolicyMilestoneFactory.class.php 12620 2014-03-13 17:11:59Z mikeb $
- * $Date: 2014-03-13 10:11:59 -0700 (Thu, 13 Mar 2014) $
+ * $Revision: 12920 $
+ * $Id: AccrualPolicyMilestoneFactory.class.php 12920 2014-04-14 23:48:25Z mikeb $
+ * $Date: 2014-04-14 16:48:25 -0700 (Mon, 14 Apr 2014) $
  */
 
 /**
@@ -379,6 +379,16 @@ class AccrualPolicyMilestoneFactory extends Factory {
 
 					$function = 'set'.$function;
 					switch( $key ) {
+						/* Once Flex interface is discontinued we can remove parseTimeUnit from HTML5 interface and do it in the API instead.
+						case 'accrual_rate':
+						case 'maximum_time':
+						case 'minimum_time':
+						case 'rollover_time':
+							if ( method_exists( $this, $function ) ) {
+								$this->$function( TTDate::parseTimeUnit( $data[$key] ) );
+							}
+							break;
+						*/
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );

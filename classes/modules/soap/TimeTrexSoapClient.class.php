@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12184 $
- * $Id: TimeTrexSoapClient.class.php 12184 2014-01-31 23:15:19Z mikeb $
- * $Date: 2014-01-31 15:15:19 -0800 (Fri, 31 Jan 2014) $
+ * $Revision: 13271 $
+ * $Id: TimeTrexSoapClient.class.php 13271 2014-05-26 18:07:38Z mikeb $
+ * $Date: 2014-05-26 11:07:38 -0700 (Mon, 26 May 2014) $
  */
 
 /**
@@ -54,7 +54,7 @@ class TimeTrexSoapClient {
 	function getSoapObject() {
 		if ( $this->soap_client_obj == NULL ) {
 			$location = 'http://www.timetrex.com/ext_soap/server.php';
-			//$location = 'http://192.168.1.9/timetrex-head-master/website/ext_soap/server.php';
+			//$location = 'http://www.trunk.dev1.office.timetrex.com/ext_soap/server.php';
 
 			$this->soap_client_obj = new SoapClient(NULL, array(
 											'location' => $location,
@@ -99,6 +99,48 @@ class TimeTrexSoapClient {
 		}
 
 		return TRUE;
+	}
+
+	function getPrimaryCompanyData() {
+		global $config_vars, $db;
+		
+		//Make sure a database connection has been established at least, otherwise this can cause FATAL error
+		//which during installation (before any database exists) is bad.
+		if ( isset($db) AND is_object($db) ) {
+			if ( !isset( $config_vars['other']['primary_company_id'] ) ) {
+				$config_vars['other']['primary_company_id'] = 1;
+			}
+
+			try {
+				$clf = TTnew( 'CompanyListFactory' );
+				$clf->getById( $config_vars['other']['primary_company_id'] );
+				if ( $clf->getRecordCount() > 0 ) {
+					foreach( $clf as $c_obj ) {
+						$company_data = array(
+												'system_version' => APPLICATION_VERSION,
+												'registration_key' => $this->getLocalRegistrationKey(),
+												'product_edition_id' => $c_obj->getProductEdition(),
+												'product_edition_available' => getTTProductEdition(),
+												'name' => $c_obj->getName(),
+												'short_name' => $c_obj->getShortName(),
+												'work_phone' => $c_obj->getWorkPhone(),
+												'city' => $c_obj->getCity(),
+												'country' => $c_obj->getCountry(),
+												'province' => $c_obj->getProvince(),
+												'postal_code' => $c_obj->getPostalCode(),
+											);
+					}
+
+					return $company_data;
+				} else {
+					Debug::Text('ERROR: Primary company does not exist: '. $config_vars['other']['primary_company_id'], __FILE__, __LINE__, __METHOD__, 10);
+				}
+			} catch( Exception $e ) {
+				Debug::Text('ERROR: Cant get company data for downloading upgrade file, database is likely down...', __FILE__, __LINE__, __METHOD__, 10);
+			}
+		}
+
+		return FALSE;
 	}
 
 	function isLatestVersion( $company_id ) {
@@ -393,6 +435,7 @@ class TimeTrexSoapClient {
 				$company_data['id'] = $c_obj->getId();
 				$company_data['registration_key'] = $this->getLocalRegistrationKey();
 				$company_data['status_id'] = $c_obj->getStatus();
+				$company_data['application_name'] = APPLICATION_NAME;
 				$company_data['product_edition_id'] = $c_obj->getProductEdition();
 				$company_data['is_professional_edition_available'] = getTTProductEdition();
 				$company_data['product_edition_available'] = getTTProductEdition();
@@ -412,21 +455,36 @@ class TimeTrexSoapClient {
 						$ulf->getById( $c_obj->getBillingContact() );
 						if ( $ulf->getRecordCount() == 1 ) {
 							$u_obj = $ulf->getCurrent();
-							$company_data['billing_contact'] = '"'.$u_obj->getFullName().'" <'. $u_obj->getWorkEmail() .'>';
+							if ( $u_obj->getWorkEmail() != '' ) {
+								$email = $u_obj->getWorkEmail();
+							} else {
+								$email = $u_obj->getHomeEmail();
+							}
+							$company_data['billing_contact'] = '"'.$u_obj->getFullName().'" <'. $email .'>';
 						}
 					}
 					if ( $c_obj->getAdminContact() != '' ) {
 						$ulf->getById( $c_obj->getAdminContact() );
 						if ( $ulf->getRecordCount() == 1 ) {
 							$u_obj = $ulf->getCurrent();
-							$company_data['admin_contact'] = '"'.$u_obj->getFullName().'" <'. $u_obj->getWorkEmail() .'>';
+							if ( $u_obj->getWorkEmail() != '' ) {
+								$email = $u_obj->getWorkEmail();
+							} else {
+								$email = $u_obj->getHomeEmail();
+							}
+							$company_data['admin_contact'] = '"'.$u_obj->getFullName().'" <'. $email .'>';
 						}
 					}
 					if ( $c_obj->getSupportContact() != '' ) {
 						$ulf->getById( $c_obj->getSupportContact() );
 						if ( $ulf->getRecordCount() == 1 ) {
 							$u_obj = $ulf->getCurrent();
-							$company_data['support_contact'] = '"'.$u_obj->getFullName().'" <'. $u_obj->getWorkEmail() .'>';
+							if ( $u_obj->getWorkEmail() != '' ) {
+								$email = $u_obj->getWorkEmail();
+							} else {
+								$email = $u_obj->getHomeEmail();
+							}
+							$company_data['support_contact'] = '"'.$u_obj->getFullName().'" <'. $email .'>';
 						}
 					}
 
@@ -449,10 +507,50 @@ class TimeTrexSoapClient {
 
 				Debug::Text('Sent Company Data...', __FILE__, __LINE__, __METHOD__, 10);
 				$retval = $this->getSoapObject()->saveCompanyData( $company_data );
-
 				//$this->printSoapDebug();
 
-				return $retval;
+				if ( is_array($retval) ) {
+					foreach( $retval as $command => $command_data ) {
+						Debug::Text('Running Command: '. $command, __FILE__, __LINE__, __METHOD__, 10);
+						switch( strtolower($command) ) {
+							case 'system_settings':
+								if ( is_array($command_data) ) {
+									foreach( $command_data as $name => $value ) {
+										Debug::Text('Defining System Setting: '. $name, __FILE__, __LINE__, __METHOD__, 10);
+										$sslf = new SystemSettingListFactory();
+										$sslf->getByName( $name );
+										if ( $sslf->getRecordCount() == 1 ) {
+												$obj = $sslf->getCurrent();
+										} else {
+												$obj = new SystemSettingListFactory();
+										}
+										$obj->setName( $name );
+										$obj->setValue( $value );
+										if ( $obj->isValid() ) {
+												$obj->Save();
+										}
+										unset($sslf, $obj);
+									}
+									unset($name, $value);
+								}
+								break;
+							case 'config_file':
+								if ( is_array($command_data) ) {
+									Debug::Arr( $command_data, 'Defining Config File Settings: ', __FILE__, __LINE__, __METHOD__, 10);
+									$install_obj = new Install();
+									$install_obj->writeConfigFile( $command_data );
+									unset($install_obj);
+								}
+								break;
+							default:
+								break;
+						}
+					}
+
+					return TRUE;
+				} else {
+					return $retval;
+				}
 			}
 		}
 
@@ -489,40 +587,65 @@ class TimeTrexSoapClient {
 		return FALSE;
 	}
 
+	function getCurrencyExchangeRatesByDate( $company_id, $currency_arr, $base_currency, $start_date = NULL, $end_date = NULL ) {
+		/*
+
+			Contact info@timetrex.com to request adding custom currency data feeds.
+
+		*/
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
+
+		if ( !is_array($currency_arr) ) {
+			return FALSE;
+		}
+
+		if ( $base_currency == '' ) {
+			return FALSE;
+		}
+
+		if ( $start_date == '' ) {
+			$start_date = time();
+		}
+
+		if ( $end_date == '' ) {
+			$end_date = time();
+		}
+		
+		$currency_rates = $this->getSoapObject()->getCurrencyExchangeRatesByDate( $this->getLocalRegistrationKey(), $company_id, $currency_arr, $base_currency, $start_date, $end_date );
+
+		if ( isset($currency_rates) AND is_array($currency_rates) AND count($currency_rates) > 0 ) {
+			return $currency_rates;
+		}
+
+		return FALSE;
+	}
+
+
+	function isNewVersionReadyForUpgrade( $force = FALSE ) {
+		global $config_vars;
+
+		$company_data = $this->getPrimaryCompanyData();
+		if ( is_array( $company_data ) ) {
+			$company_data['force'] = $force;
+
+			$retval = $this->getSoapObject()->isNewVersionReadyForUpgrade( $company_data );
+			Debug::Arr( array( $company_data, $retval ), 'Checking for new version based on this data: ', __FILE__, __LINE__, __METHOD__, 10);
+
+			return $retval;
+		}
+
+		return FALSE;
+	}
+
 	function getUpgradeFileURL( $force = FALSE ) {
 		global $config_vars;
 
-		if ( !isset( $config_vars['other']['primary_company_id'] ) ) {
-			$config_vars['other']['primary_company_id'] = 1;
-		}
-
-		try {
-			$clf = TTnew( 'CompanyListFactory' );
-			$clf->getById( $config_vars['other']['primary_company_id'] );
-			if ( $clf->getRecordCount() > 0 ) {
-				foreach( $clf as $c_obj ) {
-					$company_data = array(
-											'system_version' => APPLICATION_VERSION,
-											'registration_key' => $this->getLocalRegistrationKey(),
-											'product_edition_id' => $c_obj->getProductEdition(),
-											'product_edition_available' => getTTProductEdition(),
-											'name' => $c_obj->getName(),
-											'short_name' => $c_obj->getShortName(),
-											'work_phone' => $c_obj->getWorkPhone(),
-											'city' => $c_obj->getCity(),
-											'country' => $c_obj->getCountry(),
-											'province' => $c_obj->getProvince(),
-											'postal_code' => $c_obj->getPostalCode(),
-											'force' => $force, 
-										);
-				}
-			}
-		} catch( Exception $e ) {
-			Debug::Text('ERROR: Cant get company data for downloading upgrade file, database is likely down...', __FILE__, __LINE__, __METHOD__, 10);
-			$company_data = NULL;
-		}
-
-		if ( isset($company_data) ) {
+		$company_data = $this->getPrimaryCompanyData();
+		if ( is_array( $company_data ) ) {
+			$company_data['force'] = $force;
+			
 			$retval = $this->getSoapObject()->getUpgradeFileURL( $company_data );
 			return $retval;
 		}
@@ -536,36 +659,8 @@ class TimeTrexSoapClient {
 	function sendEmail( $to, $headers, $body ) {
 		global $config_vars;
 
-		if ( !isset( $config_vars['other']['primary_company_id'] ) ) {
-			$config_vars['other']['primary_company_id'] = 1;
-		}
-
-		try {
-			$clf = TTnew( 'CompanyListFactory' );
-			$clf->getById( $config_vars['other']['primary_company_id'] );
-			if ( $clf->getRecordCount() > 0 ) {
-				foreach( $clf as $c_obj ) {
-					$company_data = array(
-											'system_version' => APPLICATION_VERSION,
-											'registration_key' => $this->getLocalRegistrationKey(),
-											'product_edition_id' => $c_obj->getProductEdition(),
-											'product_edition_available' => getTTProductEdition(),
-											'name' => $c_obj->getName(),
-											'short_name' => $c_obj->getShortName(),
-											'work_phone' => $c_obj->getWorkPhone(),
-											'city' => $c_obj->getCity(),
-											'country' => $c_obj->getCountry(),
-											'province' => $c_obj->getProvince(),
-											'postal_code' => $c_obj->getPostalCode(),
-										);
-				}
-			}
-		} catch( Exception $e ) {
-			Debug::Text('ERROR: Cant get company data for sending email, database is likely down...', __FILE__, __LINE__, __METHOD__, 10);
-			$company_data = NULL;
-		}
-
-		if ( isset($company_data) AND $to != '' AND $body != '' ) {
+		$company_data = $this->getPrimaryCompanyData();
+		if ( is_array( $company_data ) AND $to != '' AND $body != '' ) {
 			$retval = $this->getSoapObject()->sendEmail( $to, $headers, $body, $company_data );
 			if ( $retval === 'unsubscribe' ) {
 				UserFactory::UnsubscribeEmail( $to );
@@ -580,41 +675,14 @@ class TimeTrexSoapClient {
 	function getGeoCodeByAddress( $address1, $address2, $city, $province, $country, $postal_code ) {
 		global $config_vars;
 
-		if ( !isset( $config_vars['other']['primary_company_id'] ) ) {
-			$config_vars['other']['primary_company_id'] = 1;
-		}
-
-		try {
-			$clf = TTnew( 'CompanyListFactory' );
-			$clf->getById( $config_vars['other']['primary_company_id'] );
-			if ( $clf->getRecordCount() > 0 ) {
-				foreach( $clf as $c_obj ) {
-					$company_data = array(
-											'system_version' => APPLICATION_VERSION,
-											'registration_key' => $this->getLocalRegistrationKey(),
-											'product_edition_id' => $c_obj->getProductEdition(),
-											'product_edition_available' => getTTProductEdition(),
-											'name' => $c_obj->getName(),
-											'short_name' => $c_obj->getShortName(),
-											'work_phone' => $c_obj->getWorkPhone(),
-											'city' => $c_obj->getCity(),
-											'country' => $c_obj->getCountry(),
-											'province' => $c_obj->getProvince(),
-											'postal_code' => $c_obj->getPostalCode(),
-										);
-				}
-			}
-		} catch( Exception $e ) {
-			Debug::Text('ERROR: Cant get company data for geocoding, database is likely down...', __FILE__, __LINE__, __METHOD__, 10);
-			$company_data = NULL;
-		}
-
-		if ( isset($company_data) AND $city != '' AND $country != '' ) {
+		$company_data = $this->getPrimaryCompanyData();
+		if ( is_array( $company_data ) AND $city != '' AND $country != '' ) {
 			return $this->getSoapObject()->getGeoCodeByAddress( $address1, $address2, $city, $province, $country, $postal_code, $company_data );
 		}
 
 		return NULL; //Return NULL when no data available, and FALSE to try again later.
 	}
+
 
 }
 ?>

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -247,13 +247,7 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		}
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
 
-		/*
-		if ( isset($filter_data['group_id']) AND isset($filter_data['group_id'][0]) ) {
-			$query	.=	' AND b.map_id in ('. $this->getListSQL($filter_data['group_id'], $ph) .') ';
-		}
-		*/
-		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'b.map_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
-
+		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'b.map_id', $filter_data['group_id'], 'numeric_list_with_all', $ph ) : NULL;
 		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => $company_id, 'object_type_id' => 310, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 
 		if ( isset($filter_data['created_date']) AND !is_array($filter_data['created_date']) AND trim($filter_data['created_date']) != '' ) {
@@ -280,6 +274,7 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
 		$this->ExecuteSQL($query, $ph, $limit, $page);
+		
 		return $this;
 	}
 

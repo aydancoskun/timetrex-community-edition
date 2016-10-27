@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12453 $
- * $Id: PayStubFactory.class.php 12453 2014-02-25 16:10:34Z mikeb $
- * $Date: 2014-02-25 08:10:34 -0800 (Tue, 25 Feb 2014) $
+ * $Revision: 13814 $
+ * $Id: PayStubFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 require_once( 'Numbers/Words.php');
 
@@ -239,6 +239,14 @@ class PayStubFactory extends Factory {
 			$this->data['user_id'] = $id;
 
 			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getDisplayID() {
+		if ( $this->getId() > 0 ) {
+			return str_pad( $this->getId(), 15, 0, STR_PAD_LEFT );
 		}
 
 		return FALSE;
@@ -2009,6 +2017,7 @@ class PayStubFactory extends Factory {
 							'#pay_stub_start_date#', //8
 							'#pay_stub_end_date#',
 							'#pay_stub_transaction_date#',
+							'#display_id#',
 							);
 
 		$replace_arr = array(
@@ -2020,9 +2029,10 @@ class PayStubFactory extends Factory {
 							( is_object( $u_obj->getTitleObject() ) ) ? $u_obj->getTitleObject()->getName() : NULL,
 							( is_object( $u_obj->getCompanyObject() ) ) ? $u_obj->getCompanyObject()->getName() : NULL,
 							NULL,
-							TTDate::getDate('DATE', $this->getStartDate() ),
+							TTDate::getDate('DATE', $this->getStartDate() ), //8
 							TTDate::getDate('DATE', $this->getEndDate() ),
 							TTDate::getDate('DATE', $this->getTransactionDate() ),
+							$this->getDisplayID(),
 							);
 
 		$email_subject = TTi18n::gettext('Pay Stub waiting in').' '. APPLICATION_NAME;
@@ -2033,7 +2043,8 @@ class PayStubFactory extends Factory {
 
 		$email_body .= ( $replace_arr[8] != '' ) ? TTi18n::gettext('Pay Stub Start Date').': #pay_stub_start_date# ' : NULL;
 		$email_body .= ( $replace_arr[9] != '' ) ? TTi18n::gettext('End Date').': #pay_stub_end_date# ' : NULL;
-		$email_body .= ( $replace_arr[10] != '' ) ? TTi18n::gettext('Transaction Date').': #pay_stub_transaction_date#' : NULL;
+		$email_body .= ( $replace_arr[10] != '' ) ? TTi18n::gettext('Transaction Date').': #pay_stub_transaction_date#'."\n" : NULL;
+		$email_body .= ( $replace_arr[11] != '' ) ? TTi18n::gettext('Identification #').': #display_id#' : NULL;
 
 		$email_body .= "\n\n";
 
@@ -2164,7 +2175,7 @@ class PayStubFactory extends Factory {
 
 				}
 			}
-			$this->getPermissionColumns( $data, $this->getID(), $this->getCreatedBy(), $permission_children_ids, $include_columns );
+			$this->getPermissionColumns( $data, $this->getID(), $this->getUser(), $permission_children_ids, $include_columns );
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
 		}
 
@@ -2357,7 +2368,7 @@ class PayStubFactory extends Factory {
 						if ( isset($pay_stub_entries) ) {
 							$pay_stub = array(
 												'id' => $pay_stub_obj->getId(),
-												'display_id' => str_pad($pay_stub_obj->getId(), 12, 0, STR_PAD_LEFT),
+												'display_id' => $pay_stub_obj->getDisplayID(),
 												'user_id' => $pay_stub_obj->getUser(),
 												'pay_period_id' => $pay_stub_obj->getPayPeriod(),
 												'start_date' => $pay_stub_obj->getStartDate(),
@@ -2530,7 +2541,7 @@ class PayStubFactory extends Factory {
 						}
 						$pay_stub = array(
 											'id' => $pay_stub_obj->getId(),
-											'display_id' => str_pad($pay_stub_obj->getId(), 15, 0, STR_PAD_LEFT),
+											'display_id' => $pay_stub_obj->getDisplayID(),
 											'user_id' => $pay_stub_obj->getUser(),
 											'pay_period_id' => $pay_stub_obj->getPayPeriod(),
 											'start_date' => $pay_stub_obj->getStartDate(),
@@ -2694,7 +2705,8 @@ class PayStubFactory extends Factory {
 				$pdf->Cell(75, 5, $company_obj->getAddress1().' '.$company_obj->getAddress2(), $border, 0, 'C', FALSE, '', 1);
 
 				$pdf->setXY( Misc::AdjustXY(50, $adjust_x), Misc::AdjustXY(10, $adjust_y) );
-				$pdf->Cell(75, 5, $company_obj->getCity().', '.$company_obj->getProvince() .' '. strtoupper($company_obj->getPostalCode()), $border, 0, 'C', FALSE, '', 1);
+				$pdf->Cell(75, 5, Misc::getCityAndProvinceAndPostalCode( $company_obj->getCity(), $company_obj->getProvince(), $company_obj->getPostalCode() ), $border, 0, 'C', FALSE, '', 1);
+
 
 				//Pay Period info
 				$pdf->SetFont('', '', 10);
@@ -3383,7 +3395,7 @@ class PayStubFactory extends Factory {
 					$pdf->Cell(60, 5, $user_obj->getAddress2(), $border, 0, 'C', FALSE, '', 1);
 				}
 				$pdf->setXY( Misc::AdjustXY(0, $adjust_x), Misc::AdjustXY( ($block_adjust_y + 24 + $address2_adjust_y), $adjust_y) );
-				$pdf->Cell(60, 5, $user_obj->getCity() .', '. $user_obj->getProvince() .' '. $user_obj->getPostalCode(), $border, 1, 'C', FALSE, '', 1);
+				$pdf->Cell(60, 5, Misc::getCityAndProvinceAndPostalCode( $user_obj->getCity(), $user_obj->getProvince(), $user_obj->getPostalCode() ), $border, 1, 'C', FALSE, '', 1);
 
 				//Pay Period - Balance - ID
 				$net_pay_amount = 0;
@@ -3431,7 +3443,7 @@ class PayStubFactory extends Factory {
 				$block_adjust_y = 215;
 				$pdf->SetFont('', '', 8);
 				$pdf->setXY( Misc::AdjustXY(125, $adjust_x), Misc::AdjustXY( ($block_adjust_y + 30), $adjust_y) );
-				$pdf->Cell(50, 5, TTi18n::gettext('Identification #:').' '. str_pad($pay_stub_obj->getId(), 12, 0, STR_PAD_LEFT).$tainted_flag, $border, 1, 'R', FALSE, '', 1);
+				$pdf->Cell(50, 5, TTi18n::gettext('Identification #:').' '. $pay_stub_obj->getDisplayID().$tainted_flag, $border, 1, 'R', FALSE, '', 1);
 				unset($net_pay_amount, $tainted_flag);
 
 				//Line

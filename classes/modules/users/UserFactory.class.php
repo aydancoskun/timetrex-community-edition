@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12453 $
- * $Id: UserFactory.class.php 12453 2014-02-25 16:10:34Z mikeb $
- * $Date: 2014-02-25 08:10:34 -0800 (Tue, 25 Feb 2014) $
+ * $Revision: 12920 $
+ * $Id: UserFactory.class.php 12920 2014-04-14 23:48:25Z mikeb $
+ * $Date: 2014-04-14 16:48:25 -0700 (Mon, 14 Apr 2014) $
  */
 
 /**
@@ -224,8 +224,10 @@ class UserFactory extends Factory {
 										'default_department_manual_id' => FALSE,
 										'default_job_id' => 'DefaultJob',
 										'default_job' => FALSE,
+										'default_job_manual_id' => FALSE,
 										'default_job_item_id' => 'DefaultJobItem',
 										'default_job_item' => FALSE,
+										'default_job_item_manual_id' => FALSE,
 										'permission_control_id' => 'PermissionControl',
 										'permission_control' => FALSE,
 										'pay_period_schedule_id' => 'PayPeriodSchedule',
@@ -2826,6 +2828,8 @@ class UserFactory extends Factory {
 			$photo_file_name = $base_name.'.jpg';
 		} elseif ( file_exists( $base_name.'.png') ) {
 			$photo_file_name = $base_name.'.png';
+		} elseif ( file_exists( $base_name.'.img') ) {
+			$photo_file_name = $base_name.'.img';
 		} else {
 			if ( $include_default_photo == TRUE ) {
 				//$photo_file_name = Environment::getImagesPath().'unknown_photo.png';
@@ -3389,6 +3393,33 @@ class UserFactory extends Factory {
 			}
 		}
 
+		if ( $this->getDeleted() == TRUE OR $this->getStatus() != 10 ) {
+			//Employee is being deleted or inactivated, make sure they are not a company contact, and if so replace them with a new contact.
+			$default_company_contact_user_id = FALSE;
+			if ( in_array( $this->getId(), array( $this->getCompanyObject()->getAdminContact(), $this->getCompanyObject()->getBillingContact(), $this->getCompanyObject()->getSupportContact() ) ) ) {
+				$default_company_contact_user_id = $this->getCompanyObject()->getDefaultContact();
+				Debug::text('User is primary company contact, remove and replace them with: '. $default_company_contact_user_id, __FILE__, __LINE__, __METHOD__, 10);
+
+				if ( $default_company_contact_user_id != FALSE AND $this->getId() == $this->getCompanyObject()->getAdminContact() ) {
+					$this->getCompanyObject()->setAdminContact( $default_company_contact_user_id );
+					Debug::text('Replacing Admin Contact with: '. $default_company_contact_user_id, __FILE__, __LINE__, __METHOD__, 10);
+
+				}
+				if ( $default_company_contact_user_id != FALSE AND $this->getId() == $this->getCompanyObject()->getBillingContact() ) {
+					$this->getCompanyObject()->setBillingContact( $default_company_contact_user_id );
+					Debug::text('Replacing Billing Contact with: '. $default_company_contact_user_id, __FILE__, __LINE__, __METHOD__, 10);
+				}
+				if ( $default_company_contact_user_id != FALSE AND $this->getId() == $this->getCompanyObject()->getSupportContact() ) {
+					$this->getCompanyObject()->setSupportContact( $default_company_contact_user_id );
+					Debug::text('Replacing Support Contact with: '. $default_company_contact_user_id, __FILE__, __LINE__, __METHOD__, 10);
+				}
+				if ( $default_company_contact_user_id != FALSE AND $this->getCompanyObject()->isValid() ) {
+					$this->getCompanyObject()->Save();
+				}
+			}
+			unset($default_company_contact_user_id);
+		}
+		
 		return TRUE;
 	}
 
@@ -3441,7 +3472,6 @@ class UserFactory extends Factory {
 		return FALSE;
 	}
 
-
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
 		/*
 		$include_columns = array(
@@ -3479,7 +3509,9 @@ class UserFactory extends Factory {
 						case 'default_department':
 						case 'default_department_manual_id':
 						case 'default_job':
+						case 'default_job_manual_id':
 						case 'default_job_item':
+						case 'default_job_item_manual_id':
 						case 'permission_control':
 						case 'pay_period_schedule':
 						case 'policy_group':
@@ -3548,7 +3580,7 @@ class UserFactory extends Factory {
 							}
 							break;
 						case 'birth_date_age':
-							$data[$variable] = (int)floor( ( ( ( ( ( (time() - $this->getBirthDate() ) / 60) / 60) / 24 ) / 30 ) / 12 ) );
+							$data[$variable] = (int)floor( TTDate::getYearDifference( TTDate::getBeginDayEpoch( $this->getBirthDate() ), TTDate::getEndDayEpoch( time() ) ) );
 							break;
 						case 'hire_date_age':
 							if ( $this->getTerminationDate() != '' ) {
@@ -3557,7 +3589,7 @@ class UserFactory extends Factory {
 								$end_epoch = time();
 							}
 							//Staffing agencies may have employees for only a few days, so need to show partial years.
-							$data[$variable] = number_format( ( ( ( ( ( ( $end_epoch - $this->getHireDate() ) / 60) / 60) / 24 ) / 30 ) / 12 ), 2 ); //Years (two decimals)
+							$data[$variable] = number_format( TTDate::getYearDifference( TTDate::getBeginDayEpoch( $this->getHireDate() ), TTDate::getEndDayEpoch( $end_epoch ) ), 2 ); //Years (two decimals)
 							unset($end_epoch);
 							break;
 						default:

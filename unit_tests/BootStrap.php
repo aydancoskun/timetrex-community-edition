@@ -12,8 +12,8 @@ Debug::Text('Version: '. APPLICATION_VERSION .' Edition: '. getTTProductEdition(
 */
 
 //Disable audit log to help speed up tests.
-$config['other']['disable_audit_log'] = TRUE;
-$config['other']['disable_audit_log_detail'] = TRUE;
+$config_vars['other']['disable_audit_log'] = TRUE;
+$config_vars['other']['disable_audit_log_detail'] = TRUE;
 
 Debug::setBufferOutput(FALSE);
 Debug::setEnable(FALSE); //Set to TRUE to see debug output. Leave buffer output FALSE.
@@ -22,14 +22,14 @@ Debug::setVerbosity(10);
 //This prevent PHPUnit from creating a mock ADODB-lib class and causing a fatal error on redeclaration of its functions.
 //See for a possible fix? http://sebastian-bergmann.de/archives/797-Global-Variables-and-PHPUnit.html#content
 //Must use --no-globals-backup to get tests to run properly.
-$ADODB_INCLUDED_LIB=TRUE;
+$ADODB_INCLUDED_LIB = TRUE;
 require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'adodb'. DIRECTORY_SEPARATOR .'adodb.inc.php');
 require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'adodb'. DIRECTORY_SEPARATOR .'adodb-exceptions.inc.php');
 require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'adodb'. DIRECTORY_SEPARATOR .'adodb-lib.inc.php');
 
 if ( PRODUCTION != FALSE ) {
-    echo "DO NOT RUN ON A PRODUCTION SERVER<br>\n";
-    exit;
+	echo "DO NOT RUN ON A PRODUCTION SERVER<br>\n";
+	exit;
 }
 
 set_include_path( get_include_path() . PATH_SEPARATOR . '/usr/share/php'  );

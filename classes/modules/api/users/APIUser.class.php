@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -257,7 +257,7 @@ class APIUser extends APIFactory {
 				$lf->StartTransaction();
 
 				//Force Company ID to current company.
-				if ( !isset($row['company_id']) OR !$this->getPermissionObject()->Check('company', 'view') ) {
+				if ( !isset($row['company_id']) OR ( isset($row['company_id']) AND $row['company_id'] == '' ) OR !$this->getPermissionObject()->Check('company', 'view') ) {
 					$row['company_id'] = $this->getCurrentCompanyObject()->getId();
 				}
 

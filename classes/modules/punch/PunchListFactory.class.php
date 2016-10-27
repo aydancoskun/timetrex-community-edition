@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11925 $
- * $Id: PunchListFactory.class.php 11925 2014-01-08 00:13:44Z mikeb $
- * $Date: 2014-01-07 16:13:44 -0800 (Tue, 07 Jan 2014) $
+ * $Revision: 13814 $
+ * $Id: PunchListFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 
 /**
@@ -796,6 +796,14 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		if ( $epoch == '') {
 			return FALSE;
 		}
+
+		//Punches are always rounded to the nearest minute, so in cases like the mobile app where the punch is saved then immediately refreshed
+		//it may not get the proper data because the actual punch time is 12:41:45 but the punch was saved as 12:42:00.
+		//Therefore round the epoch time up to the next minute to help avoid this. However if punch times are ever rounded up more than 1 minute the issue still persists.
+		//  However this can cause other problems, like with duplicate punch detection when automatic punch status is enabled.
+		//  If the same punch is submitted twice, it will be recorded as an IN then an OUT rather than be rejected.
+		//  Therefore we just need to account for this when processing punches from the timeclock.
+		$epoch = TTDate::roundTime($epoch, 60, 30 ); 
 
 		$maximum_shift_time = $this->getPayPeriodMaximumShiftTime( $user_id );
 

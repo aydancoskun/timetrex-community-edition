@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12429 $
- * $Id: CompanyFactory.class.php 12429 2014-02-21 17:05:56Z mikeb $
- * $Date: 2014-02-21 09:05:56 -0800 (Fri, 21 Feb 2014) $
+ * $Revision: 13814 $
+ * $Id: CompanyFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 
 /**
@@ -317,7 +317,7 @@ class CompanyFactory extends Factory {
 										'VE' => TTi18n::gettext('Venezuela'),
 										'VN' => TTi18n::gettext('Viet Nam'),
 										'VG' => TTi18n::gettext('Virgin Islands, British'),
-										'VI' => TTi18n::gettext('Virgin Islands, U.s.'),
+										'VI' => TTi18n::gettext('Virgin Islands, U.S.'),
 										'WF' => TTi18n::gettext('Wallis and Futuna'),
 										'EH' => TTi18n::gettext('Western Sahara'),
 										'YE' => TTi18n::gettext('Yemen'),
@@ -442,17 +442,17 @@ class CompanyFactory extends Factory {
 													),
 										'BY' => array( '00' => '--'),
 										'BE' => array(	'00' => '--',
-														'AN' => TTi18n::getText('Antwerp '),
-														'BU' => TTi18n::getText('Brussels '),
-														'OV' => TTi18n::getText('East Flanders '),
+														'AN' => TTi18n::getText('Antwerp'),
+														'BU' => TTi18n::getText('Brussels'),
+														'OV' => TTi18n::getText('East Flanders'),
 														'VB' => TTi18n::getText('Flemish Brabant'),
-														'HT' => TTi18n::getText('Hainaut '),
-														'LG' => TTi18n::getText('Liege '),
-														'LI' => TTi18n::getText('Limburg '),
-														'LX' => TTi18n::getText('Luxembourg '),
-														'NA' => TTi18n::getText('Namur '),
+														'HT' => TTi18n::getText('Hainaut'),
+														'LG' => TTi18n::getText('Liege'),
+														'LI' => TTi18n::getText('Limburg'),
+														'LX' => TTi18n::getText('Luxembourg'),
+														'NA' => TTi18n::getText('Namur'),
 														'BW' => TTi18n::getText('Walloon Brabant'),
-														'WV' => TTi18n::getText('West Flanders '),
+														'WV' => TTi18n::getText('West Flanders'),
 													),
 										'BZ' => array( '00' => '--'),
 										'BJ' => array( '00' => '--'),
@@ -465,29 +465,29 @@ class CompanyFactory extends Factory {
 										'BR' => array(	'00' => '--',
 														'AC' => TTi18n::getText('Acre'),
 														'AL' => TTi18n::getText('Alagoas'),
-														'AP' => TTi18n::getText('Amapá'),
+														'AP' => TTi18n::getText('Amapa'),
 														'AM' => TTi18n::getText('Amazonas'),
 														'BA' => TTi18n::getText('Bahia'),
-														'CE' => TTi18n::getText('Ceará'),
+														'CE' => TTi18n::getText('Ceara'),
 														'DF' => TTi18n::getText('Distrito Federal'),
-														'ES' => TTi18n::getText('Espírito Santo'),
-														'GO' => TTi18n::getText('Goiás'),
-														'MA' => TTi18n::getText('Maranhão'),
+														'ES' => TTi18n::getText('Espirito Santo'),
+														'GO' => TTi18n::getText('Goias'),
+														'MA' => TTi18n::getText('Maranhao'),
 														'MT' => TTi18n::getText('Mato Grosso'),
 														'MS' => TTi18n::getText('Mato Grosso do Sul'),
 														'MG' => TTi18n::getText('Minas Gerais'),
-														'PA' => TTi18n::getText('Pará'),
-														'PB' => TTi18n::getText('Paraíba'),
-														'PR' => TTi18n::getText('Paraná'),
+														'PA' => TTi18n::getText('Para'),
+														'PB' => TTi18n::getText('Paraiba'),
+														'PR' => TTi18n::getText('Parana'),
 														'PE' => TTi18n::getText('Pernambuco'),
-														'PI' => TTi18n::getText('Piauí'),
+														'PI' => TTi18n::getText('Piaui'),
 														'RJ' => TTi18n::getText('Rio de Janeiro'),
 														'RN' => TTi18n::getText('Rio Grande do Norte'),
 														'RS' => TTi18n::getText('Rio Grande do Sul'),
-														'RO' => TTi18n::getText('Rondônia'),
+														'RO' => TTi18n::getText('Rondonia'),
 														'RR' => TTi18n::getText('Roraima'),
 														'SC' => TTi18n::getText('Santa Catarina'),
-														'SP' => TTi18n::getText('São Paulo'),
+														'SP' => TTi18n::getText('Sao Paulo'),
 														'SE' => TTi18n::getText('Sergipe'),
 														'TO' => TTi18n::getText('Tocantins'),
 													),
@@ -778,7 +778,7 @@ class CompanyFactory extends Factory {
 														'FE' => TTi18n::getText('Ferrara'),
 														'FI' => TTi18n::getText('Florence'),
 														'FA' => TTi18n::getText('Foggia'),
-														'FO' => TTi18n::getText('Forlì-Cesena'),
+														'FO' => TTi18n::getText('Forli-Cesena'),
 														'FR' => TTi18n::getText('Frosinone'),
 														'GE' => TTi18n::getText('Genoa'),
 														'GO' => TTi18n::getText('Gorizia'),
@@ -2563,6 +2563,8 @@ class CompanyFactory extends Factory {
 			$logo_file_name = $base_name.'.jpg';
 		} elseif ( file_exists( $base_name.'.png') ) {
 			$logo_file_name = $base_name.'.png';
+		} elseif ( file_exists( $base_name.'.img') ) {
+			$logo_file_name = $base_name.'.img';
 		} else {
 			if ( $include_default_logo == TRUE ) {
 				//Check for primary company logo first, so branding gets carried over automatically.
@@ -3071,6 +3073,48 @@ class CompanyFactory extends Factory {
 		return $retval;
 	}
 
+	function getDefaultContact() {
+		if ( $this->getID() > 0 ) {
+			//Loop through all employees with the highest permission level, and pick the account that is the oldest and logged in within the last 30 days.
+			$pclf = TTnew('PermissionControlListFactory');
+			$pclf->getByCompanyId( $this->getID(), 1, NULL, NULL, array( 'level' => 'desc' ) );
+			if ( $pclf->getRecordCount() > 0 ) {
+				$ulf = TTnew('UserListFactory');
+
+				foreach( $pclf as $pc_obj ) {
+					$ulf->getByIdAndCompanyId( $pc_obj->getUser(), $this->getId(), NULL, NULL, array( 'status_id =' => 10 ), array( 'created_date' => 'asc' ) );
+					if ( $ulf->getRecordCount() > 0 ) {
+						$newest_last_login_date = FALSE;
+						$last_user_obj = FALSE;
+						$i = 0;
+						foreach( $ulf as $u_obj ) {
+							if ( $i == 0 ) { //Default to the oldest user with the highest permission level.
+								$last_user_obj = $u_obj;
+								$newest_last_login_date = $u_obj->getLastLoginDate();
+							}
+							
+							if ( ( $u_obj->getWorkEmail() != '' OR $u_obj->getHomeEmail() != '' ) AND ( $newest_last_login_date == FALSE OR $u_obj->getLastLoginDate() > $newest_last_login_date ) ) {
+								$last_user_obj = $u_obj;
+								$newest_last_login_date = $u_obj->getLastLoginDate();
+							}
+
+							$i++;
+						}
+
+						if ( is_object( $last_user_obj ) ) {
+							Debug::text('Found user that has been active in last 30 days: '. $last_user_obj->getFullName() .' ('. $last_user_obj->getID().')', __FILE__, __LINE__, __METHOD__, 9);
+							return $last_user_obj->getId();
+						}
+					}
+
+				}
+			}
+		}
+
+		Debug::text('Unable to find active employees with work email addresses specified...', __FILE__, __LINE__, __METHOD__, 9);
+		return FALSE;
+	}
+
 	function Validate() {
 		global $config_vars;
 
@@ -3086,7 +3130,6 @@ class CompanyFactory extends Factory {
 	}
 
 	function preSave() {
-
 		if ( $this->isNew() == TRUE ) {
 			$this->is_new = TRUE;
 		}
@@ -3114,6 +3157,7 @@ class CompanyFactory extends Factory {
 
 		return TRUE;
 	}
+
 	function postSave() {
 		$this->removeCache( $this->getId() );
 

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12077 $
- * $Id: PayStubCalculationTest.php 12077 2014-01-21 00:59:57Z mikeb $
- * $Date: 2014-01-20 16:59:57 -0800 (Mon, 20 Jan 2014) $
+ * $Revision: 13814 $
+ * $Id: PayStubCalculationTest.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 require_once('PHPUnit/Framework/TestCase.php');
 
@@ -47,14 +47,11 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 	protected $pay_period_objs = NULL;
 	protected $pay_stub_account_link_arr = NULL;
 
-    public function __construct() {
-        global $db, $cache, $profiler;
-    }
-
     public function setUp() {
 		global $dd;
         Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__,10);
-		TTDate::setTimeZone('PST8PDT');
+		
+		TTDate::setTimeZone('PST8PDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$dd = new DemoData();
 		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.

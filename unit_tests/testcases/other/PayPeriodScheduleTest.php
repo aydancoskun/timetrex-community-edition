@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12076 $
- * $Id: PayPeriodScheduleTest.php 12076 2014-01-20 22:15:59Z mikeb $
- * $Date: 2014-01-20 14:15:59 -0800 (Mon, 20 Jan 2014) $
+ * $Revision: 13814 $
+ * $Id: PayPeriodScheduleTest.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 require_once('PHPUnit/Framework/TestCase.php');
 
@@ -45,13 +45,6 @@ require_once('PHPUnit/Framework/TestCase.php');
  */
 class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
     public $company_id = NULL;
-
-    public function __construct() {
-        global $db, $cache, $profiler;
-
-		//$this->company_id = PRIMARY_COMPANY_ID;
-		//Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__,10);
-    }
 
     public function setUp() {
         Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__,10);

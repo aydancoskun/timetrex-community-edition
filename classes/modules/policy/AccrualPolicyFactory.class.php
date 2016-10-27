@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12620 $
- * $Id: AccrualPolicyFactory.class.php 12620 2014-03-13 17:11:59Z mikeb $
- * $Date: 2014-03-13 10:11:59 -0700 (Thu, 13 Mar 2014) $
+ * $Revision: 13814 $
+ * $Id: AccrualPolicyFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 
 /**
@@ -1057,7 +1057,7 @@ class AccrualPolicyFactory extends Factory {
 		}
 	}
 
-	function addAccrualPolicyTime( $epoch = NULL, $offset = 79200 ) { //22hr offset
+	function addAccrualPolicyTime( $epoch = NULL, $offset = 79200, $user_ids = FALSE ) { //22hr offset
 		if ( $epoch == '' ) {
 			$epoch = TTDate::getTime();
 		}
@@ -1073,7 +1073,13 @@ class AccrualPolicyFactory extends Factory {
 			Debug::Text('Found Policy Group...', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $pglf as $pg_obj ) {
 				//Get all users assigned to this policy group.
-				$policy_group_users = $pg_obj->getUser();
+				if ( is_array($user_ids) AND count($user_ids) > 0 AND !in_array( -1, $user_ids ) ) {
+					Debug::Text('Using users passed in by filter...', __FILE__, __LINE__, __METHOD__, 10);
+					$policy_group_users = $user_ids;
+				} else {
+					Debug::Text('Using users assigned to policy group...', __FILE__, __LINE__, __METHOD__, 10);
+					$policy_group_users = $pg_obj->getUser();
+				}
 				if ( is_array($policy_group_users) AND count($policy_group_users) > 0 ) {
 					Debug::Text('Found Policy Group Users: '. count($policy_group_users), __FILE__, __LINE__, __METHOD__, 10);
 					foreach( $policy_group_users as $user_id ) {

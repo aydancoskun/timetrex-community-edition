@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10231 $
- * $Id: ID.class.php 10231 2013-06-19 00:12:37Z ipso $
- * $Date: 2013-06-18 17:12:37 -0700 (Tue, 18 Jun 2013) $
+ * $Revision: 13838 $
+ * $Id: ID.class.php 13838 2014-07-24 00:06:53Z mikeb $
+ * $Date: 2014-07-23 17:06:53 -0700 (Wed, 23 Jul 2014) $
  */
 
 /**
@@ -45,6 +45,12 @@
 class PayrollDeduction_US_ID extends PayrollDeduction_US {
 
 	var $state_options = array(
+								1401606000 => array( //01-Jun-2013
+													'allowance' => 3950
+													),
+								1369119600 => array( //21-May-2013
+													'allowance' => 3900
+													),
 								1369119600 => array( //21-May-2013
 													'allowance' => 3900
 													),

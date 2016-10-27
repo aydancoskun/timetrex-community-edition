@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11958 $
- * $Id: AccrualFactory.class.php 11958 2014-01-10 01:47:35Z mikeb $
- * $Date: 2014-01-09 17:47:35 -0800 (Thu, 09 Jan 2014) $
+ * $Revision: 13814 $
+ * $Id: AccrualFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 
 /**
@@ -467,6 +467,8 @@ class AccrualFactory extends Factory {
 
 					$function = 'set'.$function;
 					switch( $key ) {
+						case 'user_date_total_id': //Skip this, as it should never be set from the API.
+							break;
 						case 'time_stamp':
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( TTDate::parseDateTime( $data[$key] ) );

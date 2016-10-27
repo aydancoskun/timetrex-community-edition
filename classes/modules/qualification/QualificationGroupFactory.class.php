@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -152,7 +152,7 @@ class QualificationGroupFactory extends Factory {
 	}
 	function setParent($id) {
 
-		$this->tmp_data['parent_id'] = $id;
+		$this->tmp_data['parent_id'] = (int)$id;
 
 		return TRUE;
 	}

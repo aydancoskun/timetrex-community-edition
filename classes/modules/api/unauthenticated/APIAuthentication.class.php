@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -215,6 +215,17 @@ class APIAuthentication extends APIFactory {
 		return FALSE;
 	}
 
+	function getSessionIdle() {
+		global $config_vars;
+
+		if ( isset($config_vars['other']['web_session_timeout']) AND $config_vars['other']['web_session_timeout'] != '' ) {
+			return (int)$config_vars['other']['web_session_timeout'];
+		} else {
+			$authentication = new Authentication();
+			return $authentication->getIdle();
+		}
+	}
+
 	function isLoggedIn( $touch_updated_date = TRUE ) {
 		global $authentication, $config_vars;
 
@@ -223,7 +234,7 @@ class APIAuthentication extends APIFactory {
 		if ( $session_id != '' ) {
 			$authentication = new Authentication();
 
-			Debug::text('AMF Session ID: '. $session_id .' Source IP: '. $_SERVER['REMOTE_ADDR'], __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text('AMF Session ID: '. $session_id .' Source IP: '. $_SERVER['REMOTE_ADDR'] .' Touch Updated Date: '. (int)$touch_updated_date, __FILE__, __LINE__, __METHOD__, 10);
 			if ( isset($config_vars['other']['web_session_timeout']) AND $config_vars['other']['web_session_timeout'] != '' ) {
 				$authentication->setIdle( (int)$config_vars['other']['web_session_timeout'] );
 			}
@@ -268,11 +279,20 @@ class APIAuthentication extends APIFactory {
 
 	//Functions that can be called before the API client is logged in.
 	//Mainly so the proper loading/login page can be displayed.
+	function getProduction() {
+		return PRODUCTION;
+	}
 	function getApplicationName() {
 		return APPLICATION_NAME;
 	}
 	function getApplicationVersion() {
 		return APPLICATION_VERSION;
+	}
+	function getApplicationVersionDate() {
+		return APPLICATION_VERSION_DATE;
+	}
+	function getApplicationBuild() {
+		return APPLICATION_BUILD;
 	}
 	function getOrganizationName() {
 		return ORGANIZATION_NAME;
@@ -352,8 +372,10 @@ class APIAuthentication extends APIFactory {
 		}
 		TTi18n::setLocale(); //Sets master locale
 
-		$retval = str_replace('.UTF-8', '', TTi18n::getLocale() );
-		Debug::text('Locale: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		//$retval = str_replace('.UTF-8', '', TTi18n::getLocale() );
+		$retval = TTi18n::getNormalizedLocale();
+
+		Debug::text('Locale: '. $retval .' Language: '. $language, __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 	}
 
@@ -379,16 +401,25 @@ class APIAuthentication extends APIFactory {
 
 	//Returns all login data required in a single call for optimization purposes.
 	function getPreLoginData( $api = NULL ) {
-		global $config_vars;
+		global $config_vars, $authentication;
 
+		$company_name = $this->getCompanyName();
+		if ( $company_name == '' ) {
+			$company_name = 'N/A';
+		}
+		
 		return array(
 				'primary_company_id' => PRIMARY_COMPANY_ID, //Needed for some branded checks.
+				'primary_company_name' => $company_name,
 				'base_url' => Environment::getBaseURL(),
 				'api_url' => Environment::getAPIURL( $api ),
 				'api_base_url' => Environment::getAPIBaseURL( $api ),
 				'api_json_url' => Environment::getAPIURL( 'json' ),
 				'images_url' => Environment::getImagesURL(),
 				'powered_by_logo_enabled' => $this->isPoweredByLogoEnabled(),
+				'application_name' => $this->getApplicationName(),
+				'organization_url' => $this->getOrganizationURL(),
+				'copyright_notice' => COPYRIGHT_NOTICE,
 				'product_edition' => $this->getTTProductEdition( FALSE ),
 				'product_edition_name' => $this->getTTProductEdition( TRUE ),
 				'deployment_on_demand' => $this->getDeploymentOnDemand(),
@@ -397,21 +428,38 @@ class APIAuthentication extends APIFactory {
 				'registration_key' => $this->getRegistrationKey(),
 				'http_host' => $this->getHTTPHost(),
 				'is_ssl' => Misc::isSSL(),
+				'production' => $this->getProduction(),
 				'application_version' => $this->getApplicationVersion(),
+				'application_version_date' => $this->getApplicationVersionDate(),
+				'application_build' => $this->getApplicationBuild(),
 				'is_logged_in' => $this->isLoggedIn(),
-				'language_options' => Misc::addSortPrefix( TTi18n::getLanguageArray() ),
-				'language' => TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ),
+				'session_idle_timeout' => $this->getSessionIdle(),
+ 				'language_options' => Misc::addSortPrefix( TTi18n::getLanguageArray() ),
+				//Make sure locale is set properly before this function is called, either in api.php or APIGlobal.js.php for example.
+				'language' => TTi18n::getLanguage(),
+				'locale' => TTi18n::getNormalizedLocale(), //Needed for HTML5 interface to load proper translation file.
+				//'language' => TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ),
+				//'locale' => $this->getLocale( TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) ),
 			);
 	}
 
 	//Function that Flex can call when an irrecoverable error or uncaught exception is triggered.
-	function sendErrorReport( $data, $screenshot = NULL ) {
+	function sendErrorReport( $data = NULL, $screenshot = NULL ) {
 		$attachments = NULL;
 		if ( $screenshot != '' ) {
 			$attachments[] = array( 'file_name' => 'screenshot.png', 'mime_type' => 'image/png', 'data' => base64_decode( $screenshot ) );
 		}
 
-		return Misc::sendSystemMail( TTi18n::gettext('Flex Error Report'), $data, $attachments );
+		if ( defined( 'TIMETREX_JSON_API' ) == TRUE ) {
+			$subject = TTi18n::gettext('HTML5 Error Report');
+		} else {
+			$subject = TTi18n::gettext('Flex Error Report');
+		}
+
+		Misc::sendSystemMail( $subject, $data, $attachments );
+
+		//return APPLICATION_BUILD so JS can check if its correct and notify the user to refresh/clear cache.
+		return APPLICATION_BUILD;
 	}
 
 	/**

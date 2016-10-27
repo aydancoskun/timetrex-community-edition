@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11811 $
- * $Id: UserDeductionListFactory.class.php 11811 2013-12-26 23:56:23Z mikeb $
- * $Date: 2013-12-26 15:56:23 -0800 (Thu, 26 Dec 2013) $
+ * $Revision: 13814 $
+ * $Id: UserDeductionListFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 
 /**
@@ -200,7 +200,6 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 
 		$ph = array(
 					'company_id' => $company_id,
-					'deduction_id' => $deduction_id,
 					);
 
 		$query = '
@@ -210,7 +209,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 					where
 						a.user_id = b.id
 						AND b.company_id = ?
-						AND a.company_deduction_id = ?
+						AND a.company_deduction_id in ('. $this->getListSQL($deduction_id, $ph) .')
 						AND ( a.deleted = 0 AND b.deleted = 0 )
 					';
 		$query .= $this->getWhereSQL( $where );

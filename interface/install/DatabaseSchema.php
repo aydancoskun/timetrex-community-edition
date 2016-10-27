@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,16 +34,16 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9936 $
- * $Id: DatabaseSchema.php 9936 2013-05-20 16:40:47Z ipso $
- * $Date: 2013-05-20 09:40:47 -0700 (Mon, 20 May 2013) $
+ * $Revision: 13814 $
+ * $Id: DatabaseSchema.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 require_once('../../includes/global.inc.php');
 require_once('HTML/Progress.php');
 
 ignore_user_abort(TRUE);
 ini_set( 'max_execution_time', 0 );
-ini_set( 'memory_limit', '1024M' ); //Just in case.
+ini_set( 'memory_limit', '-1' ); //Just in case.
 
 //Debug::setVerbosity(11);
 

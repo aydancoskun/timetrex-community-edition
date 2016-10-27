@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12123 $
- * $Id: PayStubEntryListFactory.class.php 12123 2014-01-24 20:41:17Z mikeb $
- * $Date: 2014-01-24 12:41:17 -0800 (Fri, 24 Jan 2014) $
+ * $Revision: 13366 $
+ * $Id: PayStubEntryListFactory.class.php 13366 2014-06-09 17:15:19Z mikeb $
+ * $Date: 2014-06-09 10:15:19 -0700 (Mon, 09 Jun 2014) $
  */
 
 /**
@@ -134,6 +134,10 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 					);
 
 		//Also need to make sure we include PS Amendments so we know if its a YTD Adjustment or not. Important for recalculating YTD amounts on newer pay stubs.
+		//  Used to filter out deleted pay stub amendments with: AND ( c.deleted is NULL OR c.deleted = 0 )
+		//  However this causes a problem where if the user generates a pay stub with the pay stub amendment, then deletes the pay stub amendment before
+		//  marking the pay stub as paid, the pay stub looks like the totals are incorrect because its missing a line item, at least until the pay stub is generated again.
+		//  So instead always show deleted pay stub amendments on pay stubs.
 		$query = '
 					select	a.*,
 							c.ytd_adjustment
@@ -141,7 +145,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 							LEFT JOIN '. $psealf->getTable() .' as b ON ( a.pay_stub_entry_name_id = b.id )
 							LEFT JOIN '. $psalf->getTable() .' as c ON ( a.pay_stub_amendment_id = c.id )
 					where	a.pay_stub_id = ?
-						AND ( a.deleted = 0 AND b.deleted = 0 AND ( c.deleted is NULL OR c.deleted = 0 ) )
+						AND ( a.deleted = 0 AND b.deleted = 0 )
 					';
 
 		$query .= $this->getWhereSQL( $where );
@@ -836,7 +840,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		$query = '
 					select	sum(amount) as amount, sum(units) as units, sum(ytd_amount) as ytd_amount, sum(ytd_units) as ytd_units
 					from (
-						select	sum(amount) as amount, sum(units) as units, max(ytd_amount) as ytd_amount, max(ytd_units) as ytd_units
+						select	sum(amount) as amount, sum(units) as units, sum(ytd_amount) as ytd_amount, sum(ytd_units) as ytd_units
 						from	'. $this->getTable() .' as a
 						where
 							a.pay_stub_id = ?
@@ -910,7 +914,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		$query = '
 					select	sum(amount) as amount, sum(units) as units, sum(ytd_amount) as ytd_amount, sum(ytd_units) as ytd_units
 					from (
-						select	sum(amount) as amount, sum(units) as units, max(ytd_amount) as ytd_amount, max(ytd_units) as ytd_units
+						select	sum(amount) as amount, sum(units) as units, sum(ytd_amount) as ytd_amount, sum(ytd_units) as ytd_units
 						from	'. $this->getTable() .' as a
 						where
 							a.pay_stub_id = ?
@@ -987,7 +991,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		$query = '
 					select	sum(amount) as amount, sum(units) as units, sum(ytd_amount) as ytd_amount, sum(ytd_units) as ytd_units
 					from (
-						select	sum(amount) as amount, sum(units) as units, max(ytd_amount) as ytd_amount, max(ytd_units) as ytd_units
+						select	sum(amount) as amount, sum(units) as units, sum(ytd_amount) as ytd_amount, sum(ytd_units) as ytd_units
 						from	'. $this->getTable() .' as a,
 								'. $psealf->getTable() .' as b
 						where	a.pay_stub_entry_name_id = b.id
@@ -1190,7 +1194,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 					select	b.user_id as user_id,
 							a.pay_stub_entry_name_id as pay_stub_entry_name_id,
 							sum(amount) as amount,
-							max(ytd_amount) as ytd_amount
+							sum(ytd_amount) as ytd_amount
 					from	'. $this->getTable() .' as a,
 							'. $psf->getTable() .' as b,
 							'. $uf->getTable() .' as c
@@ -1246,7 +1250,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 					select	b.user_id as user_id,
 							a.pay_stub_entry_name_id as pay_stub_entry_name_id,
 							sum(amount) as amount,
-							max(ytd_amount) as ytd_amount
+							sum(ytd_amount) as ytd_amount
 					from	'. $this->getTable() .' as a,
 							'. $psf->getTable() .' as b,
 							'. $uf->getTable() .' as c
@@ -1304,6 +1308,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		//Include pay periods with no pay stubs for ROEs.
 		//If the company has multiple pay period schedules, this will include pay periods from all schedules, even if the employee was never assigned
 		//to a different one. Therefore only include pay periods that have at least one user_date entry assigned to it.
+		//FIXME: This doesnt handle the case where they may be added at a later date, then some time is manually added earlier, but still with a pay period have no time on it.
 		$query = '
 					select	x.id as pay_period_id,
 							y.id as user_id,
@@ -1386,7 +1391,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 							a.pay_stub_entry_name_id as pay_stub_entry_name_id,
 							b.transaction_date as transaction_date,
 							sum(a.amount) as amount,
-							max(a.ytd_amount) as ytd_amount
+							sum(a.ytd_amount) as ytd_amount
 					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $psaf->getTable() .' as d ON a.pay_stub_amendment_id = d.id
 						LEFT JOIN '. $psf->getTable() .' as b ON a.pay_stub_id = b.id
@@ -1509,7 +1514,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 							select aa.pay_stub_id as pay_stub_id,
 								aa.pay_stub_entry_name_id as pay_stub_entry_name_id,
 								sum(aa.amount) as amount,
-								max(aa.ytd_amount) as ytd_amount
+								sum(aa.ytd_amount) as ytd_amount
 							from '. $this->getTable() .' as aa
 							LEFT JOIN '. $psf->getTable() .' as bb ON aa.pay_stub_id = bb.id
 							LEFT JOIN '. $uf->getTable() .' as cc ON bb.user_id = cc.id
@@ -1637,6 +1642,8 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 					'company_id' => $company_id,
 					);
 
+		//Used to max(aa.ytd_amount), but that caused bugs when YTD or Accrual Balances (for loans specifically)
+		//were in the negative for one row and $0 for the next row as it would always select the $0
 		$query = '
 					select	a.*,
 							b.user_id as user_id,
@@ -1661,7 +1668,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 								avg(aa.rate) as rate,
 								sum(aa.units) as units,
 								sum(aa.amount) as amount,
-								max(aa.ytd_amount) as ytd_amount
+								sum(aa.ytd_amount) as ytd_amount
 							from '. $this->getTable() .' as aa
 							LEFT JOIN '. $psaf->getTable() .' as hh ON aa.pay_stub_amendment_id = hh.id
 							LEFT JOIN '. $psf->getTable() .' as bb ON aa.pay_stub_id = bb.id
@@ -1678,7 +1685,9 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 							$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'cc.id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
 							$query .= ( isset($filter_data['include_user_id']) ) ? $this->getWhereClauseSQL( 'cc.id', $filter_data['include_user_id'], 'numeric_list', $ph ) : NULL;
 							$query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'cc.id', $filter_data['exclude_user_id'], 'not_numeric_list', $ph ) : NULL;
-							$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'cc.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
+							$query .= ( isset($filter_data['user_status_id']) ) ? $this->getWhereClauseSQL( 'cc.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : NULL;
+
+							$query .= ( isset($filter_data['pay_stub_status_id']) ) ? $this->getWhereClauseSQL( 'bb.status_id', $filter_data['pay_stub_status_id'], 'numeric_list', $ph ) : NULL;
 
 							if ( isset($filter_data['exclude_ytd_adjustment']) AND (bool)$filter_data['exclude_ytd_adjustment'] == TRUE ) {
 								$query .= ' AND ( hh.ytd_adjustment is NULL OR hh.ytd_adjustment = 0 )';

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12122 $
- * $Id: CalculatePayStub.class.php 12122 2014-01-24 19:13:56Z mikeb $
- * $Date: 2014-01-24 11:13:56 -0800 (Fri, 24 Jan 2014) $
+ * $Revision: 12703 $
+ * $Id: CalculatePayStub.class.php 12703 2014-03-20 16:14:55Z mikeb $
+ * $Date: 2014-03-20 09:14:55 -0700 (Thu, 20 Mar 2014) $
  */
 
 /**
@@ -311,6 +311,7 @@ class CalculatePayStub extends PayStubFactory {
 		$dependency_tree = new DependencyTree();
 
 		$deduction_order_arr = array();
+		$look_back_deduction_ids = array();
 		if ( is_object($udlf) ) {
 			//Loop over all User Deductions getting Include/Exclude and PS accounts.
 			if ( $udlf->getRecordCount() > 0 ) {
@@ -321,7 +322,14 @@ class CalculatePayStub extends PayStubFactory {
 						$deduction_order_arr[$global_id] = $this->getDeductionObjectArrayForSorting( $ud_obj );
 
 						//Debug::Arr( array($deduction_order_arr[$global_id]['require_accounts'], $deduction_order_arr[$global_id]['affect_accounts']), 'Deduction Name: '. $deduction_order_arr[$global_id]['name'], __FILE__, __LINE__, __METHOD__, 10);
-						$dependency_tree->addNode( $global_id, $deduction_order_arr[$global_id]['require_accounts'], $deduction_order_arr[$global_id]['affect_accounts'], $deduction_order_arr[$global_id]['order']);
+
+						//If the calculation uses lookback, that utilizes previous pay stubs and should be calculated first so it doesn't
+						//contribute to circular dependancies when calculating current pay stub amounts.
+						if ( $ud_obj->getCompanyDeductionObject()->isLookbackCalculation() == TRUE ) {
+							$dependency_tree->addNode( $global_id, array(), array(), $deduction_order_arr[$global_id]['order'] );
+						} else {
+							$dependency_tree->addNode( $global_id, $deduction_order_arr[$global_id]['require_accounts'], $deduction_order_arr[$global_id]['affect_accounts'], $deduction_order_arr[$global_id]['order']);
+						}
 					} else {
 						Debug::text('Company Deduction is DISABLED!', __FILE__, __LINE__, __METHOD__, 10);
 					}
@@ -359,7 +367,8 @@ class CalculatePayStub extends PayStubFactory {
 		$profiler->startTimer( 'Calculate Dependency Tree');
 		$sorted_deduction_ids = $dependency_tree->getAllNodesInOrder();
 		$profiler->stopTimer( 'Calculate Dependency Tree');
-
+		
+		//Debug::Arr($sorted_deduction_ids , 'Sorted Deduction IDs Array: ', __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_array($sorted_deduction_ids) ) {
 			foreach( $sorted_deduction_ids as $tmp => $deduction_id ) {
 				$retarr[$deduction_id] = $deduction_order_arr[$deduction_id];

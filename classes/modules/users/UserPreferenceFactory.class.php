@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12528 $
- * $Id: UserPreferenceFactory.class.php 12528 2014-03-03 23:20:02Z mikeb $
- * $Date: 2014-03-03 15:20:02 -0800 (Mon, 03 Mar 2014) $
+ * $Revision: 13814 $
+ * $Id: UserPreferenceFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 
 /**
@@ -740,48 +740,49 @@ class UserPreferenceFactory extends Factory {
 											//'WET' => 'WET',
 											'Zulu' => 'Zulu',
 
-											'SystemV/AST4ADT' => 'AST4ADT (SysV)', //This appears to only work on Linux.
-											'AST4ADT' => 'AST4ADT', //This doesn't appear to work on Linux.
+											'SystemV/AST4ADT' => 'AST4ADT', //This appears to only work on Linux.
+											//'AST4ADT' => 'AST4ADT', //This doesn't appear to work on Linux.
 											'CST6CDT' => 'CST6CDT',
 											'EST5EDT' => 'EST5EDT',
 											'MST7MDT' => 'MST7MDT',
 											'PST8PDT' => 'PST8PDT',
-											'YST9YDT' => 'YST9YDT',
+											'SystemV/YST9YDT' => 'YST9YDT',
+											//'YST9YDT' => 'YST9YDT', //This doesn't appear to work on Linux.
 
-											'ACT' => 'ACT',
-											'AET' => 'AET',
-											'AGT' => 'AGT',
-											'ART' => 'ART',
-											'AST' => 'AST',
+											//'ACT' => 'ACT',
+											//'AET' => 'AET',
+											//'AGT' => 'AGT',
+											//'ART' => 'ART',
+											//'AST' => 'AST',
 											//'BDT' => 'BDT',
-											'BET' => 'BET',
-											'CAT' => 'CAT',
+											//'BET' => 'BET',
+											//'CAT' => 'CAT',
 											'CET' => 'CET',
-											'CNT' => 'CNT',
-											'CST' => 'CST',
-											'CTT' => 'CTT',
-											'EAT' => 'EAT',
+											//'CNT' => 'CNT',
+											//'CST' => 'CST',
+											//'CTT' => 'CTT',
+											//'EAT' => 'EAT',
 											//'ECT' => 'ECT',
 											'EET' => 'EET',
 											'EST' => 'EST',
 											'GMT' => 'GMT',
 											'HST' => 'HST',
-											'IET' => 'IET',
+											//'IET' => 'IET',
 											//'IST' => 'IST', //10800 offset
-											'JST' => 'JST',
+											//'JST' => 'JST',
 											'MET' => 'MET',
-											'MIT' => 'MIT',
+											//'MIT' => 'MIT',
 											'MST' => 'MST',
-											'NET' => 'NET',
-											'NST' => 'NST',
-											'PLT' => 'PLT',
-											'PNT' => 'PNT',
+											//'NET' => 'NET',
+											//'NST' => 'NST',
+											//'PLT' => 'PLT',
+											//'PNT' => 'PNT',
 											'PRC' => 'PRC',
-											'PRT' => 'PRT',
-											'PST' => 'PST',
+											//'PRT' => 'PRT',
+											//'PST' => 'PST', Not a valid timezone in PHP or PostgreSQL
 											'UCT' => 'UCT',
 											'UTC' => 'UTC',
-											'VST' => 'VST',
+											//'VST' => 'VST',
 
 											//POSIX standard states to invert the signs, so do this here for our users.
 											'Etc/GMT' => 'GMT',
@@ -798,6 +799,8 @@ class UserPreferenceFactory extends Factory {
 											'Etc/GMT-10' => 'GMT+10',
 											'Etc/GMT-11' => 'GMT+11',
 											'Etc/GMT-12' => 'GMT+12',
+											'Etc/GMT-13' => 'GMT+13',
+											'Etc/GMT-14' => 'GMT+14',
 											'Etc/GMT+0' => 'GMT-0',
 											'Etc/GMT+1' => 'GMT-1',
 											'Etc/GMT+2' => 'GMT-2',
@@ -811,8 +814,6 @@ class UserPreferenceFactory extends Factory {
 											'Etc/GMT+10' => 'GMT-10',
 											'Etc/GMT+11' => 'GMT-11',
 											'Etc/GMT+12' => 'GMT-12',
-											'Etc/GMT+13' => 'GMT-13',
-											'Etc/GMT+14' => 'GMT-14',
 									);
 
 				if ( defined('TIMETREX_API') == TRUE AND TIMETREX_API == TRUE ) {

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -47,13 +47,11 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 	protected $pay_period_objs = NULL;
 	protected $pay_stub_account_link_arr = NULL;
 
-    public function __construct() {
-        global $db, $cache, $profiler;
-    }
-
     public function setUp() {
 		global $dd;
         Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__,10);
+
+		TTDate::setTimeZone('PST8PDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$dd = new DemoData();
 		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.

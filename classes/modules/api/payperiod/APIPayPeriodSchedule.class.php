@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -408,7 +408,6 @@ class APIPayPeriodSchedule extends APIFactory {
 
 			//Set name here so it doesn't go through the validation check prior to Flex submitting it back to the API. This avoid the name field being sent through as "false".
 			$retarr['name'] = TTi18n::getText('Default') .' ['. rand(10, 99).']';
-			$retarr['anchor_date'] = TTDate::getDate('DATE', $retarr['anchor_date'] );
 
 			Debug::Arr($retarr, 'Detected settings: ', __FILE__, __LINE__, __METHOD__, 10);
 			return $retarr;

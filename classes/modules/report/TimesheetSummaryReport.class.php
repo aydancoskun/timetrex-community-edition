@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -916,7 +916,7 @@ class TimesheetSummaryReport extends Report {
 						if ( isset($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['gross_wage']) ) {
 							$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['gross_wage'] += $udt_total_time_wage;
 							$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['gross_wage_with_burden'] += $udt_total_time_wage_with_burden;
-						} else {
+						} elseif ( $udt_total_time_wage != 0 OR $udt_total_time_wage_with_burden != 0 ) { //Don't set gross wage if its zero, this helps for comparison between other reports/versions
 							$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['gross_wage'] = $udt_total_time_wage;
 							$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['gross_wage_with_burden'] = $udt_total_time_wage_with_burden;
 						}

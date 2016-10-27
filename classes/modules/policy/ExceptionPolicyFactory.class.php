@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12549 $
- * $Id: ExceptionPolicyFactory.class.php 12549 2014-03-04 22:08:12Z mikeb $
- * $Date: 2014-03-04 14:08:12 -0800 (Tue, 04 Mar 2014) $
+ * $Revision: 13271 $
+ * $Id: ExceptionPolicyFactory.class.php 13271 2014-05-26 18:07:38Z mikeb $
+ * $Date: 2014-05-26 11:07:38 -0700 (Mon, 26 May 2014) $
  */
 
 /**
@@ -61,17 +61,20 @@ class ExceptionPolicyFactory extends Factory {
 			case 'type':
 				$retval = array(
 										//Schedule Exceptions
-										'S1' /* A */ => TTi18n::gettext('Unscheduled Absence'),
-										'S2' /* B */ => TTi18n::gettext('Not Scheduled'),
-										'S3' /* C */ => TTi18n::gettext('In Early'),
-										'S4' /* D */ => TTi18n::gettext('In Late'),
-										'S5' /* E */ => TTi18n::gettext('Out Early'),
-										'S6' /* F */ => TTi18n::gettext('Out Late'),
+										'S1' => TTi18n::gettext('Unscheduled Absence'),
+										'S2' => TTi18n::gettext('Not Scheduled'),
+										'S3' => TTi18n::gettext('In Early'),
+										'S4' => TTi18n::gettext('In Late'),
+										'S5' => TTi18n::gettext('Out Early'),
+										'S6' => TTi18n::gettext('Out Late'),
 
-										'S7' /* G */ => TTi18n::gettext('Over Daily Scheduled Time'),
-										'S8' /* H */ => TTi18n::gettext('Under Daily Scheduled Time'),
+										'S7' => TTi18n::gettext('Over Daily Scheduled Time'),
+										'S8' => TTi18n::gettext('Under Daily Scheduled Time'),
 										'S9' => TTi18n::gettext('Over Weekly Scheduled Time'),
-										//'S10' => TTi18n::gettext('Under Weekly Scheduled Time'), //Is this needed?
+										//'SA' => TTi18n::gettext('Under Weekly Scheduled Time'), //Is this needed?
+
+										'SB' => TTi18n::gettext('Not Scheduled Branch or Department'),
+										'SC' => TTi18n::gettext('Not Scheduled Job or Task'),
 
 										//Add setting to set some sort of "Grace" period, or early warning system? Approaching overtime?
 										//Have exception where they can set the cutoff in hours, and it triggers once the employee has exceeded the weekly hours.
@@ -79,14 +82,14 @@ class ExceptionPolicyFactory extends Factory {
 										'O2' => TTi18n::gettext('Over Weekly Time'),
 
 										//Punch Exceptions
-										'M1' /* K */ => TTi18n::gettext('Missing In Punch'),
-										'M2' /* L */ => TTi18n::gettext('Missing Out Punch'),
-										'M3' /* P */  => TTi18n::gettext('Missing Lunch In/Out Punch'),
+										'M1' => TTi18n::gettext('Missing In Punch'),
+										'M2' => TTi18n::gettext('Missing Out Punch'),
+										'M3' => TTi18n::gettext('Missing Lunch In/Out Punch'),
 										'M4' => TTi18n::gettext('Missing Break In/Out Punch'),
 
-										'L1' /* M */ => TTi18n::gettext('Long Lunch'),
-										'L2' /* N */ => TTi18n::gettext('Short Lunch'),
-										'L3' /* O */ => TTi18n::gettext('No Lunch'),
+										'L1' => TTi18n::gettext('Long Lunch'),
+										'L2' => TTi18n::gettext('Short Lunch'),
+										'L3' => TTi18n::gettext('No Lunch'),
 
 										'B1' => TTi18n::gettext('Long Break'),
 										'B2' => TTi18n::gettext('Short Break'),
@@ -108,10 +111,10 @@ class ExceptionPolicyFactory extends Factory {
 										'V1' => TTi18n::gettext('TimeSheet Not Verified'),
 
 										//Job Exceptions
-										'J1' /* T J1 */	 => TTi18n::gettext('Not Allowed On Job'),
-										'J2' /* U J2 */	 => TTi18n::gettext('Not Allowed On Task'),
-										'J3' /* V J3 */	 => TTi18n::gettext('Job Completed'),
-										'J4' /* W J4 */	 => TTi18n::gettext('No Job or Task'),
+										'J1' => TTi18n::gettext('Not Allowed On Job'),
+										'J2' => TTi18n::gettext('Not Allowed On Task'),
+										'J3' => TTi18n::gettext('Job Completed'),
+										'J4' => TTi18n::gettext('No Job or Task'),
 										//'J5' => TTi18n::gettext('No Task'), //Make J4 No Job only?
 										//Add location based exceptions, ie: Restricted Location.
 									);
@@ -127,7 +130,8 @@ class ExceptionPolicyFactory extends Factory {
 			case 'email_notification':
 				$retval = array(
 											//Flex returns an empty object if 0 => None, so we make it a string and add a space infront ' 0' => None as a work around.
-											' 0' => TTi18n::gettext('None'),
+											// Change it back to '0' as it causes problems with HTML5 interface, however tested it with Flex and seems to still work.
+											'0' => TTi18n::gettext('None'),
 											10 => TTi18n::gettext('Employee'),
 											20 => TTi18n::gettext('Supervisor'),
 											//20 => TTi18n::gettext('Immediate Supervisor'),
@@ -343,6 +347,36 @@ class ExceptionPolicyFactory extends Factory {
 												'email_notification_id' => 100,
 												'demerit' => 5,
 												'grace' => 900,
+												'is_enabled_grace' => $this->isEnabledGrace( $type_id ),
+												'watch_window' => 0,
+												'is_enabled_watch_window' => $this->isEnabledWatchWindow( $type_id )
+												);
+					break;
+				case 'SB': //Not Scheduled Branch/Department
+					$retarr[$type_id] = array(
+												'id' => -1,
+												'type_id' => $type_id,
+												'name' => $type_options[$type_id],
+												'active' => FALSE,
+												'severity_id' => 10,
+												'email_notification_id' => 100,
+												'demerit' => 5,
+												'grace' => 0,
+												'is_enabled_grace' => $this->isEnabledGrace( $type_id ),
+												'watch_window' => 0,
+												'is_enabled_watch_window' => $this->isEnabledWatchWindow( $type_id )
+												);
+					break;
+				case 'SC': //Not Scheduled Job/Task
+					$retarr[$type_id] = array(
+												'id' => -1,
+												'type_id' => $type_id,
+												'name' => $type_options[$type_id],
+												'active' => FALSE,
+												'severity_id' => 10,
+												'email_notification_id' => 100,
+												'demerit' => 5,
+												'grace' => 0,
 												'is_enabled_grace' => $this->isEnabledGrace( $type_id ),
 												'watch_window' => 0,
 												'is_enabled_watch_window' => $this->isEnabledWatchWindow( $type_id )
@@ -692,7 +726,7 @@ class ExceptionPolicyFactory extends Factory {
 		$options = $this->getOptions('type');
 
 		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE OR $product_edition < 20 ) {
-			$corporate_exceptions = array('J1', 'J2', 'J3', 'J4');
+			$corporate_exceptions = array('J1', 'J2', 'J3', 'J4', 'SC', 'C1');
 			foreach( $corporate_exceptions as $corporate_exception ) {
 				unset($options[$corporate_exception]);
 			}
@@ -1346,6 +1380,52 @@ class ExceptionPolicyFactory extends Factory {
 								}
 							}
 							unset($punch_pairs, $punch_pair);
+						}
+						break;
+					case 'sb': //Not Scheduled Branch/Department
+					case 'sc': //Not Scheduled Job/Task
+						if ( $plf->getRecordCount() > 0	 ) {
+							$prev_punch_time_stamp = FALSE;
+							foreach ( $plf as $p_obj ) {
+								$punch_pairs[$p_obj->getPunchControlID()][] = array( 'status_id' => $p_obj->getStatus(), 'punch_control_id' => $p_obj->getPunchControlID(), 'time_stamp' => $p_obj->getTimeStamp() );
+
+								//How do we handle transfer punches? Should we just check Normal IN punches that aren't transfers punches?
+								//For now consider all IN punches, even transfer punches.
+								//if ( $prev_punch_time_stamp != $p_obj->getTimeStamp() AND $p_obj->getType() == 10 AND $p_obj->getStatus() == 10 ) {
+								if ( $p_obj->getStatus() == 10 ) {
+									if ( !isset($scheduled_id_cache[$p_obj->getID()]) ) {
+										$scheduled_id_cache[$p_obj->getID()] = $p_obj->findScheduleID( NULL, $user_date_obj->getUser() );
+									}
+									if ( $p_obj->setScheduleID( $scheduled_id_cache[$p_obj->getID()] ) == TRUE ) {
+										if ( is_object( $p_obj->getPunchControlObject() )
+												AND (
+														( strtolower( $ep_obj->getType() ) == 'sb' AND $p_obj->getScheduleObject()->getBranch() > 0 AND $p_obj->getPunchControlObject()->getBranch() != $p_obj->getScheduleObject()->getBranch() )
+														OR
+														( strtolower( $ep_obj->getType() ) == 'sb' AND $p_obj->getScheduleObject()->getDepartment() > 0 AND $p_obj->getPunchControlObject()->getDepartment() != $p_obj->getScheduleObject()->getDepartment() )
+														OR
+														( getTTProductEdition() >= TT_PRODUCT_CORPORATE AND strtolower( $ep_obj->getType() ) == 'sc' AND $p_obj->getScheduleObject()->getJob() > 0 AND $p_obj->getPunchControlObject()->getJob() != $p_obj->getScheduleObject()->getJob() )
+														OR
+														( getTTProductEdition() >= TT_PRODUCT_CORPORATE AND strtolower( $ep_obj->getType() ) == 'sc' AND $p_obj->getScheduleObject()->getJobItem() > 0 AND $p_obj->getPunchControlObject()->getJobItem() != $p_obj->getScheduleObject()->getJobItem() )
+													)
+											) {
+											Debug::text('	 Punch Branch/Department does not match scheduled branch/department: ', __FILE__, __LINE__, __METHOD__, 10);
+											$current_exceptions[] = array(
+																			'user_date_id' => $user_date_id,
+																			'exception_policy_id' => $ep_obj->getId(),
+																			'type_id' => $type_id,
+																			'punch_id' => $p_obj->getID(),
+																			'punch_control_id' => FALSE,
+																			'punch_obj' => $p_obj,
+																			'schedule_obj' => $p_obj->getScheduleObject(),
+																		);
+										}
+									} else {
+										Debug::text('	 NO Schedule Found', __FILE__, __LINE__, __METHOD__, 10);
+									}
+								}
+								$prev_punch_time_stamp = $p_obj->getTimeStamp();
+							}
+							unset($punch_pairs, $punch_pair, $prev_punch_time_stamp);
 						}
 						break;
 					case 'm1': //Missing In Punch
@@ -2559,7 +2639,7 @@ class ExceptionPolicyFactory extends Factory {
 						}
 						break;
 					default:
-						Debug::text('BAD, should never get here: ', __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('BAD, should never get here: '. $ep_obj->getType(), __FILE__, __LINE__, __METHOD__, 10);
 						break;
 				}
 			}

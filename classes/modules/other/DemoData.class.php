@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12355 $
- * $Id: DemoData.class.php 12355 2014-02-15 00:57:32Z mikeb $
- * $Date: 2014-02-14 16:57:32 -0800 (Fri, 14 Feb 2014) $
+ * $Revision: 13075 $
+ * $Id: DemoData.class.php 13075 2014-04-30 17:38:44Z mikeb $
+ * $Date: 2014-04-30 10:38:44 -0700 (Wed, 30 Apr 2014) $
  */
 
 
@@ -2668,8 +2668,12 @@ class DemoData {
 			case 10: //John Doe
 				$uf->setUserName( 'john.doe'. $this->getUserNamePostfix() );
 				$uf->setPassword( 'demo' );
-				//$uf->setPhoneId( '1111' );
-				//$uf->setPhonePassword( '1111' );
+
+				//Set Phone ID/Password to test web quickpunch
+				if (  $this->getEnableQuickPunch() == TRUE ) {
+					$uf->setPhoneId( '1235'.$this->getUserNamePostfix() );
+					$uf->setPhonePassword( '1234' );
+				}
 
 				$uf->setFirstName( 'John' );
 				$uf->setLastName( 'Doe' );
@@ -2986,11 +2990,14 @@ class DemoData {
 				$uf->setTitle( $user_title_id );
 				break;
 			case 20: //Jane Doe
-
 				$uf->setUserName( 'jane.doe'. $this->getUserNamePostfix() );
 				$uf->setPassword( 'demo' );
-				//$uf->setPhoneId( '2222' );
-				//$uf->setPhonePassword( '2222' );
+
+				//Set Phone ID/Password to test web quickpunch
+				if (  $this->getEnableQuickPunch() == TRUE ) {
+					$uf->setPhoneId( '1234'.$this->getUserNamePostfix() );
+					$uf->setPhonePassword( '1234' );
+				}
 
 				$uf->setFirstName( 'Jane' );
 				$uf->setLastName( 'Doe' );
@@ -3340,15 +3347,8 @@ class DemoData {
 				$uf->setTitle( $user_title_id );
 				break;
 			case 40: //John Hancock
-
 				$uf->setUserName( 'john.hancock'. $this->getUserNamePostfix() );
 				$uf->setPassword( 'demo' );
-
-				//Set Phone ID/Password to test web quickpunch
-				if (  $this->getEnableQuickPunch() == TRUE ) {
-					$uf->setPhoneId( '1234'.$this->getUserNamePostfix() );
-					$uf->setPhonePassword( '1234' );
-				}
 
 				$uf->setFirstName( 'John' );
 				$uf->setLastName( 'Hancock' );

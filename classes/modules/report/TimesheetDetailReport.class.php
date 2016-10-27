@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -122,6 +122,8 @@ class TimesheetDetailReport extends Report {
 										'-2090-punch_department_id' => TTi18n::gettext('Punch Department'),
 										'-2100-custom_filter' => TTi18n::gettext('Custom Filter'),
 										'-2200-currency_id' => TTi18n::gettext('Currency'),
+
+										'-4020-include_no_data_rows' => TTi18n::gettext('Include Blank Records'),
 
 										'-5000-columns' => TTi18n::gettext('Display Columns'),
 										'-5010-group' => TTi18n::gettext('Group By'),
@@ -847,11 +849,8 @@ class TimesheetDetailReport extends Report {
 		$aplf->getByCompanyId( $this->getUserObject()->getCompany() );
 		if ( $aplf->getRecordCount() > 0 ) {
 			foreach( $aplf as $ap_obj ) {
-				if ( $ap_obj->getType() == 10 ) {
-					$policy_rates['absence_policy-'.$ap_obj->getId()] = $ap_obj;
-				} else {
-					$policy_rates['absence_policy-'.$ap_obj->getId()] = FALSE;
-				}
+				//Make sure all absence policies are included, as if they are unpaid we need to override the hourly rate to 0.
+				$policy_rates['absence_policy-'.$ap_obj->getId()] = $ap_obj;
 			}
 		}
 
@@ -981,10 +980,10 @@ class TimesheetDetailReport extends Report {
 				if ( $column == 'paid_time' ) {
 					$column = NULL;
 				}
-
+				
 				//Debug::Text('Column: '. $column .' Total Time: '. $udt_obj->getColumn('total_time') .' Status: '. $status_id .' Type: '. $type_id .' Rate: '. $udt_obj->getColumn( 'hourly_rate' ), __FILE__, __LINE__, __METHOD__, 10);
-				if ( ( isset($filter_data['include_no_data_users']) AND $filter_data['include_no_data_users'] == 1 )
-						OR ( !isset($filter_data['include_no_data_users']) AND $date_stamp != '' AND $column != '' AND $udt_obj->getColumn('total_time') != 0 )	 ) {
+				if ( ( isset($filter_data['include_no_data_rows']) AND $filter_data['include_no_data_rows'] == 1 )
+						OR ( !isset($filter_data['include_no_data_rows']) AND $date_stamp != '' AND $column != '' AND $udt_obj->getColumn('total_time') != 0 )	 ) {
 
 					$hourly_rate = 0;
 					$hourly_rate_with_burden = 0;
@@ -1165,7 +1164,7 @@ class TimesheetDetailReport extends Report {
 		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $ulf as $key => $u_obj ) {
-			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( $this->getColumnDataConfig(), array( 'hire_date' => TRUE ) ) );
+			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$this->getColumnDataConfig(), array( 'hire_date' => TRUE ) ) );
 
 			if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
 				$this->tmp_data['user'][$u_obj->getId()]['current_currency'] = Option::getByKey( $base_currency_obj->getId(), $currency_options );

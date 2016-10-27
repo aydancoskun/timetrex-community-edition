@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -60,6 +60,17 @@ class PunchSummaryReport extends Report {
 		}
 
 		return FALSE;
+	}
+
+	protected function _validateConfig() {
+		$config = $this->getConfig();
+
+		//Make sure some time period is selected.
+		if ( !isset($config['filter']['time_period']) AND !isset($config['filter']['pay_period_id']) ) {
+			$this->validator->isTrue( 'time_period', FALSE, TTi18n::gettext('No time period defined for this report') );
+		}
+
+		return TRUE;
 	}
 
 	protected function _getOptions( $name, $params = NULL ) {

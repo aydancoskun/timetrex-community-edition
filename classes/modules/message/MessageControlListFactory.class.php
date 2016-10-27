@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -639,7 +639,7 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 							LEFT JOIN '. $pptsvf->getTable() .' as h ON c.object_type_id = 90 AND c.object_id = h.id
 						WHERE
 								a.user_id = ?
-								AND bb.company_id = ?
+								AND ( bb.company_id = ? AND aa.company_id = bb.company_id )
 								AND c.object_type_id in (5, 50, 90)';
 
 			$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'b.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
@@ -650,28 +650,6 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 			$query .= ( isset($filter_data['subject']) ) ? $this->getWhereClauseSQL( 'c.subject', $filter_data['subject'], 'text', $ph ) : NULL;
 			$query .= ( isset($filter_data['body']) ) ? $this->getWhereClauseSQL( 'c.body', $filter_data['body'], 'text', $ph ) : NULL;
 
-/*
-			if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-				$query	.=	' AND b.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
-			}
-			if ( isset($filter_data['object_type_id']) AND isset($filter_data['object_type_id'][0]) AND !in_array(-1, (array)$filter_data['object_type_id']) ) {
-				$query	.=	' AND c.object_type_id in ('. $this->getListSQL($filter_data['object_type_id'], $ph) .') ';
-			}
-			if ( isset($filter_data['status_id']) AND isset($filter_data['status_id'][0]) AND !in_array(-1, (array)$filter_data['status_id']) ) {
-				$query	.=	' AND a.status_id in ('. $this->getListSQL($filter_data['status_id'], $ph) .') ';
-			}
-			if ( isset($filter_data['user_id']) AND isset($filter_data['user_id'][0]) AND !in_array(-1, (array)$filter_data['user_id']) ) {
-				$query	.=	' AND b.user_id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
-			}
-			if ( isset($filter_data['subject']) AND !is_array($filter_data['subject']) AND trim($filter_data['subject']) != '' ) {
-				$ph[] = strtolower(trim($filter_data['subject']));
-				$query	.=	' AND lower(c.subject) LIKE ?';
-			}
-			if ( isset($filter_data['body']) AND !is_array($filter_data['body']) AND trim($filter_data['body']) != '' ) {
-				$ph[] = strtolower(trim($filter_data['body']));
-				$query	.=	' AND lower(c.body) LIKE ?';
-			}
-*/
 			$query .= '			AND ( a.deleted = 0 AND c.deleted = 0
 										AND ( d.id IS NULL OR ( d.id IS NOT NULL AND d.deleted = 0 ) )
 										AND ( f.id IS NULL OR ( f.id IS NOT NULL AND f.deleted = 0 ) )
@@ -705,7 +683,7 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 							LEFT JOIN '. $pptsvf->getTable() .' as h ON c.object_type_id = 90 AND c.object_id = h.id
 						WHERE
 								b.user_id = ?
-								AND bb.company_id = ?
+								AND ( bb.company_id = ? AND aa.company_id = bb.company_id )
 								AND c.object_type_id in (5, 50, 90)';
 
 			$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'b.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
@@ -715,28 +693,7 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 
 			$query .= ( isset($filter_data['subject']) ) ? $this->getWhereClauseSQL( 'c.subject', $filter_data['subject'], 'text', $ph ) : NULL;
 			$query .= ( isset($filter_data['body']) ) ? $this->getWhereClauseSQL( 'c.body', $filter_data['body'], 'text', $ph ) : NULL;
-/*
-			if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-				$query	.=	' AND b.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
-			}
-			if ( isset($filter_data['object_type_id']) AND isset($filter_data['object_type_id'][0]) AND !in_array(-1, (array)$filter_data['object_type_id']) ) {
-				$query	.=	' AND c.object_type_id in ('. $this->getListSQL($filter_data['object_type_id'], $ph) .') ';
-			}
-			if ( isset($filter_data['status_id']) AND isset($filter_data['status_id'][0]) AND !in_array(-1, (array)$filter_data['status_id']) ) {
-				$query	.=	' AND a.status_id in ('. $this->getListSQL($filter_data['status_id'], $ph) .') ';
-			}
-			if ( isset($filter_data['user_id']) AND isset($filter_data['user_id'][0]) AND !in_array(-1, (array)$filter_data['user_id']) ) {
-				$query	.=	' AND a.user_id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
-			}
-			if ( isset($filter_data['subject']) AND !is_array($filter_data['subject']) AND trim($filter_data['subject']) != '' ) {
-				$ph[] = strtolower(trim($filter_data['subject']));
-				$query	.=	' AND lower(c.subject) LIKE ?';
-			}
-			if ( isset($filter_data['body']) AND !is_array($filter_data['body']) AND trim($filter_data['body']) != '' ) {
-				$ph[] = strtolower(trim($filter_data['body']));
-				$query	.=	' AND lower(c.body) LIKE ?';
-			}
-*/
+			
 			$query .= '			AND ( b.deleted = 0 AND c.deleted = 0
 										AND ( d.id IS NULL OR ( d.id IS NOT NULL AND d.deleted = 0 ) )
 										AND ( f.id IS NULL OR ( f.id IS NOT NULL AND f.deleted = 0 ) )

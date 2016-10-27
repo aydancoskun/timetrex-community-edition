@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11811 $
- * $Id: Validator.class.php 11811 2013-12-26 23:56:23Z mikeb $
- * $Date: 2013-12-26 15:56:23 -0800 (Thu, 26 Dec 2013) $
+ * $Revision: 13814 $
+ * $Id: Validator.class.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 
 /**
@@ -688,6 +688,34 @@ class Validator {
 		//Debug::Text('Float String:'. $retval, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
 		return $retval;
+	}
+
+	function stripHTML($value) {
+		return strip_tags($value);
+	}
+
+	function escapeHTML($value) {
+		return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+	}
+
+	function purifyHTML( $value ) {
+		global $config_vars;
+		
+		//Require inside this function as HTMLPurifier is a huge file.
+		require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'HTMLPurifier'. DIRECTORY_SEPARATOR .'HTMLPurifier.standalone.php');
+
+		$config = HTMLPurifier_Config::createDefault();
+		if ( isset($config_vars['cache']['enable']) AND $config_vars['cache']['enable'] == TRUE
+			AND $config_vars['cache']['dir'] != '' AND is_writable( $config_vars['cache']['dir'] ) ) {
+			$config->set('Cache.SerializerPath', $config_vars['cache']['dir'] );
+			//Debug::Text('Caching HTMLPurifier...', __FILE__, __LINE__, __METHOD__, $this->verbosity);
+		} else {
+			$config->set('Cache.DefinitionImpl', NULL );
+			Debug::Text('NOT caching HTMLPurifier...', __FILE__, __LINE__, __METHOD__, $this->verbosity);
+		}
+
+		$purifier = new HTMLPurifier( $config );
+		return $purifier->purify( $value );
 	}
 
 	function getPhoneNumberAreaCode($value) {

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12006 $
- * $Id: StationFactory.class.php 12006 2014-01-14 18:29:27Z mikeb $
- * $Date: 2014-01-14 10:29:27 -0800 (Tue, 14 Jan 2014) $
+ * $Revision: 13814 $
+ * $Id: StationFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 include_once('Net/IPv4.php');
 
@@ -190,11 +190,11 @@ class StationFactory extends Factory {
 												4096	=> TTi18n::gettext('Enable: Punch Images'),
 												//8192	=> TTi18n::gettext('Enable: Screensaver'),
 												16384	=> TTi18n::gettext('Enable: Auto-Login'),
-												32768	=> TTi18n::gettext('Enable: WIFI Detection - Punch'),
-												65536	=> TTi18n::gettext('Enable: WIFI Detection - Alert'),
+												//32768	=> TTi18n::gettext('Enable: WIFI Detection - Punch'),
+												//65536	=> TTi18n::gettext('Enable: WIFI Detection - Alert'),
 
-												//131072	=> TTi18n::gettext('QRCodes: Allow Multiple'),
-												//262144	=> TTi18n::gettext('QRCodes: Allow MACROs'),
+												131072	=> TTi18n::gettext('QRCodes: Allow Multiple'), //For single-employee mode scanning.
+												262144	=> TTi18n::gettext('QRCodes: Allow MACROs'), //For single-employee mode scanning.
 												//1048576	=> TTi18n::gettext('Enable: External Barcode Reader'),
 												2097152 => TTi18n::gettext('Enable: Pre-Punch Message'),
 												4194304	=> TTi18n::gettext('Enable: Post-Punch Message'),
@@ -2031,7 +2031,7 @@ class StationFactory extends Factory {
 				return $slf;
 			} elseif ( $slf->getCurrent()->getStatus() == 10 AND in_array( $slf->getCurrent()->getType(), array(28) ) ) {
 				//Check isAllowed for any wildcard stations first...
-				if ( $slf->getCurrent()->checkAllowed( $user_obj->getId() ) == TRUE ) {
+				if ( $slf->getCurrent()->checkAllowed( $user_obj->getId(), $station_id, $type_id ) == TRUE ) {
 					$retval = $slf->getCurrent()->getStation();
 				} else {
 					Debug::text('bStation is disabled...'. $station_id, __FILE__, __LINE__, __METHOD__, 10);
@@ -2075,7 +2075,12 @@ class StationFactory extends Factory {
 					} else {
 						$status_id = 20; //Enabled
 						if ( $station_id != '' ) {
-							$station = $station_id.$type_id;
+							//Prevent stations from having the type_id appended to the end several times.
+							if ( substr( $station_id, ( strlen($type_id) * -1 ) ) != $type_id ) {
+								$station = $station_id.$type_id;
+							} else {
+								$station = $station_id;
+							}
 						} else {
 							$station = NULL; //Can't get UDID on iOS5, but we can on Android. Using NULL means we generate our own.
 						}
@@ -2119,7 +2124,12 @@ class StationFactory extends Factory {
 
 					//Use the passed in station_id, as it will be the UDID and contain the type_id on the end.
 					//Add the type_id as the suffix to avoid conflicts if the user switches between kiosk and non-kiosk modes.
-					$station = $station_id.$type_id;
+					//Prevent stations from having the type_id appended to the end several times.
+					if ( substr( $station_id, ( strlen($type_id) * -1 ) ) != $type_id ) {
+						$station = $station_id.$type_id;
+					} else {
+						$station = $station_id;
+					}
 					$description = TTi18n::getText('PENDING ACTIVATION - Automatic KIOSK Setup');
 					$source = 'ANY';
 

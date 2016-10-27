@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -115,6 +115,16 @@ class APINotification extends APIFactory {
 										);
 				}
 
+				//AutoUpgrade failed.
+				if ( isset($system_settings['auto_upgrade_failed']) AND DEPLOYMENT_ON_DEMAND == FALSE AND (int)$system_settings['auto_upgrade_failed'] == 1 ) {
+					$retarr[] = array(
+										'delay' => -1, //0= Show until clicked, -1 = Show until next getNotifications call.
+										'bg_color' => '#FF0000', //Red
+										'message' => TTi18n::getText('WARNING: %1 automatic upgrade has failed due to a system error! Please contact your %1 administrator immediately to re-run the %1 installer to correct the issue.', APPLICATION_NAME ),
+										'destination' => NULL,
+										);
+				}
+
 				//Check version mismatch
 				if ( isset($system_settings['system_version']) AND DEPLOYMENT_ON_DEMAND == FALSE AND APPLICATION_VERSION != $system_settings['system_version'] ) {
 					$retarr[] = array(
@@ -126,8 +136,8 @@ class APINotification extends APIFactory {
 				}
 
 				//Only display message to the primary company.
-				if ( ( (time() - (int)APPLICATION_VERSION_DATE) > (86400 * 475) )
-						AND ( $this->getCurrentCompanyObject()->getId() == 1 OR ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) ) ) { //~1yr and 3mths
+				if ( ( (time() - (int)APPLICATION_VERSION_DATE) > (86400 * 365) )
+						AND ( $this->getCurrentCompanyObject()->getId() == 1 OR ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) ) ) { //~1yr
 					$retarr[] = array(
 										'delay' => -1,
 										'bg_color' => '#FF0000', //Red

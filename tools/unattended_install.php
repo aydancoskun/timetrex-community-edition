@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -48,9 +48,22 @@ ini_set( 'memory_limit', '1024M' ); //Just in case.
 if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?') ) ) ) {
 	$help_output = "Usage: unattended_install.php\n";
 	$help_output .= " [-f] = Force upgrade even if INSTALL mode is disabled.\n";
+	$help_output .= " [-u] = Default username to create.\n";
 	echo $help_output;
 } else {
-	$last_arg = count($argv)-1;
+	$last_arg = ( count($argv) - 1 );
+
+	if ( in_array('-u', $argv) ) {
+		$user_name = trim($argv[(array_search('-u', $argv) + 1)]);
+	} else {
+		$user_name = 'demoadmin1';
+	}
+
+	if ( in_array('-f', $argv) ) {
+		$force = TRUE;
+	} else {
+		$force = FALSE;
+	}
 
 	if ( in_array('-f', $argv) ) {
 		$force = TRUE;
@@ -138,7 +151,7 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 						$uf = TTnew( 'UserFactory' );
 						$uf->setCompany( $company_id );
 						$uf->setStatus( 10 );
-						$uf->setUserName('demoadmin1');
+						$uf->setUserName( $user_name );
 						$uf->setPassword('demo');
 						$uf->setEmployeeNumber(1);
 
@@ -181,7 +194,7 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 						if ( $pclf->getRecordCount() > 0 ) {
 							$pc_obj = $pclf->getCurrent();
 							if ( is_object($pc_obj) ) {
-								Debug::Text('Adding User to Permission Control: '. $pc_obj->getId(), __FILE__, __LINE__, __METHOD__,10);
+								Debug::Text('Adding User to Permission Control: '. $pc_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 								$uf->setPermissionControl( $pc_obj->getId() );
 							}
 						}
@@ -195,18 +208,18 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 							//Debug::Display();
 							exit(0);
 						} else {
-							Debug::Text('ERROR: Unable to create User!', __FILE__, __LINE__, __METHOD__,10);
+							Debug::Text('ERROR: Unable to create User!', __FILE__, __LINE__, __METHOD__, 10);
 							echo "ERROR: Unable to create User!\n";
 						}
 					} else {
-						Debug::Text('ERROR: Unable to create Company!', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('ERROR: Unable to create Company!', __FILE__, __LINE__, __METHOD__, 10);
 						echo "ERROR: Unable to create Company!\n";
 					}
 
 					$cf->FailTransaction();
 					$cf->CommitTransaction();
 				} else {
-					Debug::Text('ERROR: Database does not exist.', __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('ERROR: Database does not exist.', __FILE__, __LINE__, __METHOD__, 10);
 					echo "ERROR: Database does not exists!\n";
 				}
 			} else {

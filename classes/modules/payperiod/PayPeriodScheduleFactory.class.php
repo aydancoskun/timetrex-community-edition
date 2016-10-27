@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11942 $
- * $Id: PayPeriodScheduleFactory.class.php 11942 2014-01-09 00:50:10Z mikeb $
- * $Date: 2014-01-08 16:50:10 -0800 (Wed, 08 Jan 2014) $
+ * $Revision: 12944 $
+ * $Id: PayPeriodScheduleFactory.class.php 12944 2014-04-15 17:53:17Z mikeb $
+ * $Date: 2014-04-15 10:53:17 -0700 (Tue, 15 Apr 2014) $
  */
 
 /**
@@ -589,7 +589,7 @@ class PayPeriodScheduleFactory extends Factory {
 		return FALSE;
 	}
 	function setAnchorDate($epoch) {
-		$epoch = trim($epoch);
+		$epoch = (int)$epoch;
 
 		if	(	$this->Validator->isDate(		'anchor_date',
 												$epoch,
@@ -2129,6 +2129,11 @@ class PayPeriodScheduleFactory extends Factory {
 							break;
 						case 'shift_assigned_day':
 							$data[$variable] = Option::getByKey( $this->getShiftAssignedDay(), $this->getOptions( $variable ) );
+							break;
+						case 'anchor_date':
+							if ( method_exists( $this, $function ) ) {
+								$data[$variable] = TTDate::getAPIDate( 'DATE', $this->$function() );
+							}
 							break;
 						default:
 							if ( method_exists( $this, $function ) ) {

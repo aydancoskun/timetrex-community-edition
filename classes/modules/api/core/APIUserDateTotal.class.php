@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -177,8 +177,10 @@ class APIUserDateTotal extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
-				OR !( $this->getPermissionObject()->Check('punch', 'edit') OR $this->getPermissionObject()->Check('punch', 'edit_own') OR $this->getPermissionObject()->Check('punch', 'edit_child') OR $this->getPermissionObject()->Check('punch', 'add') ) ) {
+		if ( !( $this->getPermissionObject()->Check('punch', 'enabled') OR $this->getPermissionObject()->Check('absence', 'enabled') )
+				OR !( $this->getPermissionObject()->Check('punch', 'edit') OR $this->getPermissionObject()->Check('punch', 'edit_own') OR $this->getPermissionObject()->Check('punch', 'edit_child') OR $this->getPermissionObject()->Check('punch', 'add') )
+				OR !( $this->getPermissionObject()->Check('absence', 'edit') OR $this->getPermissionObject()->Check('absence', 'edit_own') OR $this->getPermissionObject()->Check('absence', 'edit_child') OR $this->getPermissionObject()->Check('absence', 'add') )
+				) {
 			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
@@ -215,9 +217,16 @@ class APIUserDateTotal extends APIFactory {
 							OR
 								(
 								$this->getPermissionObject()->Check('punch', 'edit')
-									OR ( $this->getPermissionObject()->Check('punch', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('punch', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUserDateObject()->getUser() ) === TRUE )
 									OR ( $this->getPermissionObject()->Check('punch', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )
-								) ) {
+								)
+							OR
+								(
+								$this->getPermissionObject()->Check('absence', 'edit')
+									OR ( $this->getPermissionObject()->Check('absence', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUserDateObject()->getUser() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('absence', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )
+								)
+							) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
@@ -253,6 +262,15 @@ class APIUserDateTotal extends APIFactory {
 										$this->getPermissionObject()->Check('punch', 'edit')
 										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('punch', 'edit_own') AND $this->getPermissionObject()->isOwner( FALSE, $row['user_id'] ) === TRUE ) //We don't know the created_by of the user at this point, but only check if the user is assigned to the logged in person.
 										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('punch', 'edit_child') AND $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === TRUE )
+									)
+								)
+								OR
+								( $this->getPermissionObject()->Check('absence', 'add')
+									AND
+									(
+										$this->getPermissionObject()->Check('absence', 'edit')
+										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('absence', 'edit_own') AND $this->getPermissionObject()->isOwner( FALSE, $row['user_id'] ) === TRUE ) //We don't know the created_by of the user at this point, but only check if the user is assigned to the logged in person.
+										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('absence', 'edit_child') AND $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === TRUE )
 									)
 								)
 							) ) {
@@ -343,11 +361,13 @@ class APIUserDateTotal extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
-				OR !( $this->getPermissionObject()->Check('punch', 'delete') OR $this->getPermissionObject()->Check('punch', 'delete_own') OR $this->getPermissionObject()->Check('punch', 'delete_child') ) ) {
+		if ( !( $this->getPermissionObject()->Check('punch', 'enabled') OR $this->getPermissionObject()->Check('absence', 'enabled') )
+				OR !( $this->getPermissionObject()->Check('punch', 'edit') OR $this->getPermissionObject()->Check('punch', 'edit_own') OR $this->getPermissionObject()->Check('punch', 'edit_child') OR $this->getPermissionObject()->Check('punch', 'add') )
+				OR !( $this->getPermissionObject()->Check('absence', 'edit') OR $this->getPermissionObject()->Check('absence', 'edit_own') OR $this->getPermissionObject()->Check('absence', 'edit_child') OR $this->getPermissionObject()->Check('absence', 'add') )
+				) {
 			return	$this->getPermissionObject()->PermissionDenied();
 		}
-
+		
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
 		$permission_children_ids = $this->getPermissionChildren();
 
@@ -369,9 +389,18 @@ class APIUserDateTotal extends APIFactory {
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
-						if ( $this->getPermissionObject()->Check('punch', 'delete')
-								OR ( $this->getPermissionObject()->Check('punch', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
-								OR ( $this->getPermissionObject()->Check('punch', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )) {
+						if ( 	(
+									$this->getPermissionObject()->Check('punch', 'delete')
+									OR ( $this->getPermissionObject()->Check('punch', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUserDateObject()->getUser() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('punch', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )
+								)
+								OR
+								(
+									$this->getPermissionObject()->Check('absence', 'delete')
+									OR ( $this->getPermissionObject()->Check('absence', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUserDateObject()->getUser() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('absence', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )
+								)
+							) {
 							Debug::Text('Record Exists, deleting record: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {

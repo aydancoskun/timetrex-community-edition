@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -554,6 +554,10 @@ class AccrualBalanceSummaryReport extends Report {
 		$alf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' Accrual Rows: '. $alf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $alf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
+
+		if ( !isset($columns['date_stamp']) ) { //Always include the date_stamp column so other date columns can be calculated.
+			$columns['date_stamp'] = TRUE;
+		}
 		foreach ( $alf as $key => $a_obj ) {
 			if ( $accrual_permission_children_ids === TRUE OR in_array( $a_obj->getUser(), $accrual_permission_children_ids) ) {
 				$this->tmp_data['accrual'][$a_obj->getUser()][$a_obj->getAccrualPolicyID()][] = (array)$a_obj->getObjectAsArray( $columns );

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11942 $
- * $Id: PermissionFactory.class.php 11942 2014-01-09 00:50:10Z mikeb $
- * $Date: 2014-01-08 16:50:10 -0800 (Wed, 08 Jan 2014) $
+ * $Revision: 13856 $
+ * $Id: PermissionFactory.class.php 13856 2014-07-24 22:44:29Z mikeb $
+ * $Date: 2014-07-24 15:44:29 -0700 (Thu, 24 Jul 2014) $
  */
 
 /**
@@ -1633,7 +1633,7 @@ class PermissionFactory extends Factory {
 																				'enabled' => TRUE,
 																				'view_own' => TRUE,
 																				'add' => TRUE,
-																				//'edit_own' => TRUE, //Don't allow editing expenses once they are submitted?
+																				'edit_own' => TRUE, //Allow editing expenses once they are submitted, but not once authorized/declined. This is required to add though.
 																				'delete_own' => TRUE,
 																			),
 														),
@@ -1871,6 +1871,9 @@ class PermissionFactory extends Factory {
 															'qualification' => array(
 																				'enabled' => TRUE,
 																				'add' => TRUE,
+																				'view' => TRUE,
+																				'edit_own' => TRUE,
+																				'delete_own' => TRUE,
 																				'view_child' => TRUE,
 																				'edit_child' => TRUE,
 																				'delete_child' => TRUE,
@@ -1878,6 +1881,9 @@ class PermissionFactory extends Factory {
 															'user_education' =>	array(
 																				'enabled' => TRUE,
 																				'add' => TRUE,
+																				'view' => TRUE,
+																				'edit_own' => TRUE,
+																				'delete_own' => TRUE,
 																				'view_child' => TRUE,
 																				'edit_child' => TRUE,
 																				'delete_child' => TRUE,
@@ -1885,6 +1891,9 @@ class PermissionFactory extends Factory {
 															'user_license' => array(
 																				'enabled' => TRUE,
 																				'add' => TRUE,
+																				'view' => TRUE,
+																				'edit_own' => TRUE,
+																				'delete_own' => TRUE,
 																				'view_child' => TRUE,
 																				'edit_child' => TRUE,
 																				'delete_child' => TRUE,
@@ -1892,6 +1901,9 @@ class PermissionFactory extends Factory {
 															'user_skill' =>	array(
 																				'enabled' => TRUE,
 																				'add' => TRUE,
+																				'view' => TRUE,
+																				'edit_own' => TRUE,
+																				'delete_own' => TRUE,
 																				'view_child' => TRUE,
 																				'edit_child' => TRUE,
 																				'delete_child' => TRUE,
@@ -1899,6 +1911,9 @@ class PermissionFactory extends Factory {
 															'user_membership' => array(
 																				'enabled' => TRUE,
 																				'add' => TRUE,
+																				'view' => TRUE,
+																				'edit_own' => TRUE,
+																				'delete_own' => TRUE,
 																				'view_child' => TRUE,
 																				'edit_child' => TRUE,
 																				'delete_child' => TRUE,
@@ -1906,6 +1921,9 @@ class PermissionFactory extends Factory {
 															'user_language' => array(
 																				'enabled' => TRUE,
 																				'add' => TRUE,
+																				'view' => TRUE,
+																				'edit_own' => TRUE,
+																				'delete_own' => TRUE,
 																				'view_child' => TRUE,
 																				'edit_child' => TRUE,
 																				'delete_child' => TRUE,
@@ -1913,6 +1931,9 @@ class PermissionFactory extends Factory {
 															'kpi' => array(
 																				'enabled' => TRUE,
 																				'add' => TRUE,
+																				'view' => TRUE,
+																				'edit_own' => TRUE,
+																				'delete_own' => TRUE,
 																				'view_child' => TRUE,
 																				'edit_child' => TRUE,
 																				'delete_child' => TRUE,
@@ -1920,6 +1941,7 @@ class PermissionFactory extends Factory {
 															'user_review' => array(
 																				'enabled' => TRUE,
 																				'add' => TRUE,
+																				'view_own' => TRUE,
 																				'view_child' => TRUE,
 																				'edit_child' => TRUE,
 																				'delete_child' => TRUE,
@@ -2076,37 +2098,30 @@ class PermissionFactory extends Factory {
 																				'delete' => TRUE,
 																			),
 															'qualification' => array(
-																				'view' => TRUE,
 																				'edit' => TRUE,
 																				'delete' => TRUE
 																			),
 															'user_education' =>	array(
-																				'view' => TRUE,
 																				'edit' => TRUE,
 																				'delete' => TRUE,
 																			),
 															'user_license' =>	array(
-																				'view' => TRUE,
 																				'edit' => TRUE,
 																				'delete' => TRUE,
 																			),
 															'user_skill' =>	array(
-																				'view' => TRUE,
 																				'edit' => TRUE,
 																				'delete' => TRUE,
 																			),
 															'user_membership' => array(
-																				'view' => TRUE,
 																				'edit' => TRUE,
 																				'delete' => TRUE,
 																			),
 															'user_language' => array(
-																				'view' => TRUE,
 																				'edit' => TRUE,
 																				'delete' => TRUE,
 																			),
 															'kpi' => array(
-																				'view' => TRUE,
 																				'edit' => TRUE,
 																				'delete' => TRUE,
 																			),
@@ -2577,12 +2592,23 @@ class PermissionFactory extends Factory {
 		$pf = TTnew( 'PermissionFactory' );
 		$pf->StartTransaction();
 
-		//Delete all previous permissions for this user.
+		//Delete all previous permissions for this control record..
 		$this->deletePermissions( $this->getCompany(), $permission_control_id );
 		
+		$created_date = time();
 		foreach($preset_permissions as $section => $permissions) {
 			foreach($permissions as $name => $value) {
 				if ( $pf->isIgnore( $section, $name, $product_edition ) == FALSE ) {
+					//Put all inserts into a single query, this speeds things up greatly (9s to less than .5s),
+					//but we are by-passing the audit log so make sure we add a new entry describing what took place.
+					$ph[] = $permission_control_id;
+					$ph[] = $section;
+					$ph[] = $name;
+					$ph[] = (int)$value;
+					$ph[] = $created_date;
+					$data[] = '(?, ?, ?, ?, ?)';
+					
+					/*
 					//Debug::Text('Setting Permission - Section: '. $section .' Name: '. $name .' Value: '. (int)$value, __FILE__, __LINE__, __METHOD__, 10);
 					$pf->setPermissionControl( $permission_control_id );
 					$pf->setSection( $section );
@@ -2593,12 +2619,24 @@ class PermissionFactory extends Factory {
 					} else {
 						Debug::Text('ERROR: Setting Permission - Section: '. $section .' Name: '. $name .' Value: '. (int)$value, __FILE__, __LINE__, __METHOD__, 10);
 					}
+					*/
 				}
 			}
 		}
 
-		//Clear cache for all users assigned to this permission_control_id
 		$pclf = TTnew( 'PermissionControlListFactory' );
+		if ( isset($data) ) {
+			//Save data in a single SQL query.
+			$query = 'INSERT INTO '. $this->getTable() .'(PERMISSION_CONTROL_ID, SECTION, NAME, VALUE, CREATED_DATE) VALUES'. implode(',', $data );
+			Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+			$this->db->Execute($query, $ph);
+
+			//Debug::Text('Logged detail records in: '. (microtime(TRUE) - $start_time), __FILE__, __LINE__, __METHOD__, 10);
+			TTLog::addEntry( $permission_control_id, 20, TTi18n::getText('Applying Permission Preset').': '. Option::getByKey( $preset, $this->getOptions('preset') ), NULL, $pclf->getTable(), $this );
+		}
+		unset($ph, $data, $created_date, $preset_permissions, $permissions, $section, $name, $value );
+
+		//Clear cache for all users assigned to this permission_control_id
 		$pclf->getById( $permission_control_id );
 		if ( $pclf->getRecordCount() > 0 ) {
 			$pc_obj = $pclf->getCurrent();

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11811 $
- * $Id: Pager.class.php 11811 2013-12-26 23:56:23Z mikeb $
- * $Date: 2013-12-26 15:56:23 -0800 (Thu, 26 Dec 2013) $
+ * $Revision: 13814 $
+ * $Id: Pager.class.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 
 /**
@@ -62,7 +62,7 @@ class Pager {
 
 	function getPreviousPage() {
 		if ( is_object($this->rs) ) {
-			return ( $this->rs->absolutepage() - 1 );
+			return (int)( $this->rs->absolutepage() - 1 );
 		}
 
 		return FALSE;
@@ -70,7 +70,7 @@ class Pager {
 
 	function getCurrentPage() {
 		if ( is_object($this->rs) ) {
-			return $this->rs->absolutepage();
+			return (int)$this->rs->absolutepage();
 		}
 
 		return FALSE;
@@ -78,7 +78,7 @@ class Pager {
 
 	function getNextPage() {
 		if ( is_object($this->rs) ) {
-			return ( $this->rs->absolutepage() + 1 );
+			return (int)( $this->rs->absolutepage() + 1 );
 		}
 
 		return FALSE;
@@ -86,7 +86,7 @@ class Pager {
 
 	function isFirstPage() {
 		if ( is_object($this->rs) ) {
-			return $this->rs->atfirstpage();
+			return (bool)$this->rs->atfirstpage();
 		}
 
 		return TRUE;
@@ -99,7 +99,7 @@ class Pager {
 		}
 
 		if ( is_object($this->rs) ) {
-			return $this->rs->atlastpage();
+			return (bool)$this->rs->atlastpage();
 		}
 
 		return TRUE;
@@ -110,19 +110,19 @@ class Pager {
 			if ( $this->count_rows === FALSE ) {
 				if ( $this->getCurrentPage() < 0 ) {
 					//Only one page in result set.
-					return $this->rs->lastpageno();
+					return (int)$this->rs->lastpageno();
 				} else {
 					//More than one page in result set.
 					if ( $this->rs->atlastpage() == TRUE ) {
-						return $this->getCurrentPage();
+						return (int)$this->getCurrentPage();
 					} else {
 						//Since we don't know what the actual last page is, just add 100 pages to the current one.
 						//The user may need to click this several times if there are more than 100 pages.
-						return ( $this->getCurrentPage() + 99 );
+						return (int)( $this->getCurrentPage() + 99 );
 					}
 				}
 			} else {
-				return $this->rs->lastpageno();
+				return (int)$this->rs->lastpageno();
 			}
 		}
 
@@ -132,7 +132,11 @@ class Pager {
 	//Return maximum rows per page
 	function getRowsPerPage() {
 		if ( is_object($this->rs) ) {
-			return $this->rs->recordcount();
+			if ( isset($this->rs->rowsPerPage) ) {
+				return (int)$this->rs->rowsPerPage;
+			} else {
+				return (int)$this->rs->recordcount();
+			}
 		}
 
 		return FALSE;
@@ -140,7 +144,15 @@ class Pager {
 
 	function getTotalRows() {
 		if ( is_object($this->rs) ) {
-			return $this->rs->maxrecordcount();
+			if ( $this->count_rows === FALSE ) {
+				if ( $this->isLastPage() === TRUE ) {
+					return (int)( ( $this->getPreviousPage() * $this->getRowsPerPage() ) + $this->rs->recordcount() );
+				} else {
+					return FALSE;
+				}
+			} else {
+				return (int)$this->rs->maxrecordcount();
+			}
 		}
 
 		return FALSE;
@@ -158,7 +170,7 @@ class Pager {
 							'rows_per_page'		=> $this->getRowsPerPage(),
 							'total_rows'		=> $this->getTotalRows(),
 							);
-		//var_dump($paging_data);
+		//Debug::Arr($paging_data, ' Paging Data: Count Rows: '. (int)$this->count_rows, __FILE__, __LINE__, __METHOD__, 10);
 		return $paging_data;
 	}
 }

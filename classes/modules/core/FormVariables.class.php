@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11775 $
- * $Id: FormVariables.class.php 11775 2013-12-24 00:24:18Z mikeb $
- * $Date: 2013-12-23 16:24:18 -0800 (Mon, 23 Dec 2013) $
+ * $Revision: 13814 $
+ * $Id: FormVariables.class.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 
 /**
@@ -48,8 +48,7 @@ class FormVariables {
 
 		if ( is_array($form_variables) ) {
 			foreach($form_variables as $variable_name) {
-
-				$retarr[$variable_name] = NULL;
+				$retarr[$variable_name] = NULL; //Need to set variables to NULL, otherwise we get a lot of variable not set errors.
 				switch ($form_type) {
 					case 'GET':
 						if ( isset($_GET[$variable_name]) ) {
@@ -70,7 +69,7 @@ class FormVariables {
 
 				//Ignore next_page, batch_next_page variables as those are encoded URLs passed in, and htmlspecialchars
 				//will break them.
-				if ( $filter_input == TRUE AND is_string($retarr[$variable_name]) AND $retarr[$variable_name] != ''
+				if ( $filter_input == TRUE AND isset($retarr[$variable_name]) AND is_string($retarr[$variable_name]) AND $retarr[$variable_name] != ''
 						AND ( !is_array($filter_ignore_name_arr) OR ( is_array($filter_ignore_name_arr) AND !in_array( $variable_name, $filter_ignore_name_arr) ) ) ) {
 					//Remove "javascript:" from all inputs, and run htmlspecialchars over them to help prevent XSS attacks.
 					$retarr[$variable_name] = self::sanitize( $retarr[$variable_name] );
@@ -108,5 +107,11 @@ class FormVariables {
 	static function sanitize( $val ) {
 		return @htmlspecialchars( str_ireplace( array('javascript:', 'src=', 'www.example.com'), '', $val ), ENT_QUOTES, 'UTF-8' ); //Supress warnings due to invalid multibyte sequences
 	}
+
+	//Reverse sanitation for when HTML is allowed. Make sure we purify the HTML after though.
+	static function reverseSanitize( $val ) {
+		return htmlspecialchars_decode( $val );
+	}
+
 }
 ?>

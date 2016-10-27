@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -385,11 +385,11 @@ class APIRecurringScheduleTemplateControl extends APIFactory {
 			}
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 
-			$recurring_schedule_template_control_id = $this->setRecurringScheduleTemplateControl( $src_rows ); //Save copied rows
+			$recurring_schedule_template_control_id = $this->stripReturnHandler( $this->setRecurringScheduleTemplateControl( $src_rows ) ); //Save copied rows
 			Debug::Text('New Recurring Schedule Template Control ID: '. $recurring_schedule_template_control_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			$rstlf = TTnew( 'APIRecurringScheduleTemplate' );
-			$template_src_rows = $rstlf->getRecurringScheduleTemplate( array('filter_data' => array('recurring_schedule_template_control_id' => $data) ), TRUE );
+			$template_src_rows = $this->stripReturnHandler( $rstlf->getRecurringScheduleTemplate( array('filter_data' => array('recurring_schedule_template_control_id' => $data) ), TRUE ) );
 			if ( is_array( $template_src_rows ) AND count($template_src_rows) > 0 ) {
 				//Debug::Arr($template_src_rows, 'TEMPLATE SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 				foreach( $template_src_rows as $key => $row ) {

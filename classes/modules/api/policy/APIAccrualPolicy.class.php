@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -374,11 +374,14 @@ class APIAccrualPolicy extends APIFactory {
 			//Now we need to loop through the result set, and copy the milestones as well.
 			if ( isset($original_ids) ) {
 				Debug::Arr($original_ids, ' Original IDs: ', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Arr($retval, ' New IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 
 				foreach( $original_ids as $key => $original_id ) {
 					$new_id = NULL;
 					if ( is_array($retval) ) {
-						if ( isset($retval['api_details']['details'][$key]) ) {
+						if ( isset($retval['api_retval']) AND is_numeric($retval['api_retval']) AND $retval['api_retval'] > 0 ) {
+							$new_id = $retval['api_retval'];
+						} elseif ( isset($retval['api_details']['details'][$key]) ) {
 							$new_id = $retval['api_details']['details'][$key];
 						}
 					} elseif ( is_numeric($retval) ) {
@@ -410,5 +413,62 @@ class APIAccrualPolicy extends APIFactory {
 
 		return $this->returnHandler( FALSE );
 	}
+
+	/**
+	 * ReCalculate accrual policies
+	 * @return bool
+	 */
+	function reCalculateAccrual( $accrual_policy_ids, $time_period_arr, $user_ids = NULL ) {
+		//Debug::text('Recalculating Employee Timesheet: User ID: '. $user_ids .' Pay Period ID: '. $pay_period_ids, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::setVerbosity(11);
+
+		if ( !$this->getPermissionObject()->Check('accrual_policy', 'enabled')
+				OR !( $this->getPermissionObject()->Check('accrual_policy', 'edit') OR $this->getPermissionObject()->Check('accrual_policy', 'edit_child') OR $this->getPermissionObject()->Check('accrual_policy', 'edit_own') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
+		}
+
+		$report_obj = TTNew('Report');
+		$date_arr = $report_obj->convertTimePeriodToStartEndDate( $time_period_arr, NULL, TRUE ); //Force start/end dates even if pay periods selected.
+		Debug::Arr($date_arr, 'Date Arr', __FILE__, __LINE__, __METHOD__, 10);
+		
+		if ( isset($date_arr['start_date']) AND isset($date_arr['end_date']) ) {
+			$total_days = TTDate::getDays( ( $date_arr['end_date'] - $date_arr['start_date'] ) );
+
+			$aplf = TTnew( 'AccrualPolicyListFactory' );
+			$aplf->getByIdAndCompanyId( (array)$accrual_policy_ids, $this->getCurrentCompanyObject()->getId() );
+			if ( $aplf->getRecordCount() > 0 ) {
+				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $aplf->getRecordCount(), NULL, TTi18n::getText('ReCalculating...') );
+
+				foreach( $aplf as $ap_obj ) {
+					$aplf->StartTransaction();
+
+					TTLog::addEntry( $this->getCurrentUserObject()->getId(), 500, 'Recalculate Accrual Policy: '. $ap_obj->getName() .' Start Date: '. TTDate::getDate('DATE', $date_arr['start_date'] ) .' End Date: '. TTDate::getDate('DATE', $date_arr['end_date'] ) .' Total Days: '. round( $total_days ), $this->getCurrentUserObject()->getId(), $ap_obj->getTable() );
+
+					$x = 0;
+					for( $i = $date_arr['start_date']; $i < $date_arr['end_date']; $i += (86400) ) {
+						//$i = TTDate::getBeginDayEpoch( $i ); //This causes infinite loops during DST transitions.
+						Debug::Text('Recalculating Accruals for Date: '. TTDate::getDate('DATE+TIME', TTDate::getBeginDayEpoch( $i ) ), __FILE__, __LINE__, __METHOD__, 10);
+						$ap_obj->addAccrualPolicyTime( TTDate::getBeginDayEpoch( $i ), 79200, $user_ids ); //Use default offset.
+
+						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $x );
+
+						$x++;
+					}
+
+					//$aplf->FailTransaction();
+					$aplf->CommitTransaction();
+				}
+
+				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			} else {
+				Debug::Text('No accrual policies to recalculate...', __FILE__, __LINE__, __METHOD__, 10);
+			}
+		} else {
+			Debug::Text('No dates to calculate accrual policies for...', __FILE__, __LINE__, __METHOD__, 10);
+		}
+
+		return $this->returnHandler( TRUE );
+	}
+
 }
 ?>

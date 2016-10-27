@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -260,7 +260,8 @@ class APISchedule extends APIFactory {
 
 		//No filter data, restrict to last pay period as a performance optimization when hundreds of thousands of schedules exist.
 		//The issue with this though is that the API doesn't know what the filter criteria is, so it can't display this to the user.
-		if ( count($data['filter_data']) == 0 ) {
+		//if ( count($data['filter_data']) == 0 ) {
+		if ( !isset($data['filter_data']['id']) AND !isset($data['filter_data']['pay_period_ids']) AND !isset($data['filter_data']['pay_period_id']) AND ( !isset($data['filter_data']['start_date']) AND !isset($data['filter_data']['end_date']) ) ) {
 			Debug::Text('Adding default filter data...', __FILE__, __LINE__, __METHOD__, 10);
 			$pplf = TTnew( 'PayPeriodListFactory' );
 			$pplf->getByCompanyId( $this->getCurrentCompanyObject()->getId() );

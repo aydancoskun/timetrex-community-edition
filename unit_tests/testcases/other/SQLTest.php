@@ -5,10 +5,6 @@ require_once('PHPUnit/Framework/TestCase.php');
  * @group SQL
  */
 class SQLTest extends PHPUnit_Framework_TestCase {
-    public function __construct() {
-        global $db, $cache;
-    }
-
     public function setUp() {
 		global $dd;
         Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__,10);

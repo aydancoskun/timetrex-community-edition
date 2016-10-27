@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -431,7 +431,7 @@ class ROEReport extends Report {
 		foreach( $rlf as $key => $r_obj ) {
 			$this->tmp_data['roe'][$r_obj->getUser()] = (array)$r_obj->getObjectAsArray(); //Don't pass $this->getColumnDataConfig() here as no columns are sent from Flex so it breaks the report.
 			if ( $r_obj->isPayPeriodWithNoEarnings() == TRUE ) {
-				$this->tmp_data['roe'][$r_obj->getUser()]['pay_period_earnings'] = $r_obj->getInsurableEarningsByPayPeriod();
+				$this->tmp_data['roe'][$r_obj->getUser()]['pay_period_earnings'] = $r_obj->getInsurableEarningsByPayPeriod( '15c' );
 			}
 			//Box 17A, Vacation pay in last pay period
 			$vacation_pay = $r_obj->getLastPayPeriodVacationEarnings();
@@ -591,8 +591,6 @@ class ROEReport extends Report {
 				$ee_data['created_user_last_name'] = $user_obj->getLastName();
 				$ee_data['created_user_full_name'] = $user_obj->getFullName(FALSE);
 				$ee_data['created_user_work_phone'] = $user_obj->getWorkPhone();
-
-
 			}
 
 			if ( isset( $row['pay_period_earnings'] ) AND is_array( $row['pay_period_earnings'] ) ) {

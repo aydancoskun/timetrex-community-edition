@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12331 $
- * $Id: ForgotPassword.php 12331 2014-02-13 18:57:19Z mikeb $
- * $Date: 2014-02-13 10:57:19 -0800 (Thu, 13 Feb 2014) $
+ * $Revision: 13838 $
+ * $Id: ForgotPassword.php 13838 2014-07-24 00:06:53Z mikeb $
+ * $Date: 2014-07-23 17:06:53 -0700 (Wed, 23 Jul 2014) $
  */
 require_once('../includes/global.inc.php');
 
@@ -83,8 +83,14 @@ switch ($action) {
 				$user_obj->setPasswordResetKey('');
 				$user_obj->setPasswordResetDate('');
 				if ( $user_obj->isValid() ) {
-					$user_obj->Save();
+					$user_obj->Save(FALSE);
 					Debug::Text('Password Change succesful!', __FILE__, __LINE__, __METHOD__, 10);
+
+					//Logout all sessions for this user when password is successfully reset.
+					$authentication = TTNew('Authentication');
+					$authentication->logoutUser( $user_obj->getId() );
+
+					unset($user_obj);
 
 					Redirect::Page( URLBuilder::getURL( array('password_reset' => 1 ), Environment::getDefaultInterfaceBaseURL() ) );
 				}
@@ -115,29 +121,45 @@ switch ($action) {
 		//Debug::setVerbosity( 11 );
 		Debug::Text('Email: '. $email, __FILE__, __LINE__, __METHOD__, 10);
 
-		$ulf = TTnew( 'UserListFactory' );
-		$ulf->getByHomeEmailOrWorkEmail( $email );
-		if ( $ulf->getRecordCount() == 1 ) {
-			$user_obj = $ulf->getCurrent();
+		$rl = TTNew('RateLimit');
+		$rl->setID( 'password_reset_'.$_SERVER['REMOTE_ADDR'] );
+		$rl->setAllowedCalls( 10 );
+		$rl->setTimeFrame( 900 ); //15 minutes
+		if ( $rl->check() == FALSE ) {
+			Debug::Text('Excessive password reset attempts... Preventing resets from: '. $_SERVER['REMOTE_ADDR'] .' for up to 15 minutes...', __FILE__, __LINE__, __METHOD__, 10);
+			sleep(5); //Excessive password attempts, sleep longer.
+			$validator->isTrue('email', FALSE, TTi18n::getText('Email address was not found in our database (z)') );
+		} else {
+			$ulf = TTnew( 'UserListFactory' );
+			$ulf->getByHomeEmailOrWorkEmail( $email );
+			if ( $ulf->getRecordCount() == 1 ) {
+				$user_obj = $ulf->getCurrent();
 
-			if ( $user_obj->getStatus() == 10 ) { //Only allow password resets on active employees.
-				//Check if company is using LDAP authentication, if so deny password reset.
-				if ( $user_obj->getCompanyObject()->getLDAPAuthenticationType() == 0 ) {
-					$user_obj->sendPasswordResetEmail();
-					Debug::Text('Found USER! ', __FILE__, __LINE__, __METHOD__, 10);
+				if ( $user_obj->getStatus() == 10 ) { //Only allow password resets on active employees.
+					//Check if company is using LDAP authentication, if so deny password reset.
+					if ( $user_obj->getCompanyObject()->getLDAPAuthenticationType() == 0 ) {
+						$user_obj->sendPasswordResetEmail();
+						Debug::Text('Found USER! ', __FILE__, __LINE__, __METHOD__, 10);
 
-					Redirect::Page( URLBuilder::getURL( array('email_sent' => 1, 'email' => $email ), 'ForgotPassword.php' ) );
+						$rl->delete(); //Clear password reset rate limit upon successful login.
+
+						Redirect::Page( URLBuilder::getURL( array('email_sent' => 1, 'email' => $email ), 'ForgotPassword.php' ) );
+					} else {
+						Debug::Text('LDAP Authentication is enabled, password reset is disabled! ', __FILE__, __LINE__, __METHOD__, 10);
+						$validator->isTrue('email', FALSE, TTi18n::getText('Please contact your administrator for instructions on changing your password.'). ' (LDAP)' );
+					}
 				} else {
-					Debug::Text('LDAP Authentication is enabled, password reset is disabled! ', __FILE__, __LINE__, __METHOD__, 10);
-					$validator->isTrue('email', FALSE, TTi18n::getText('Please contact your administrator for instructions on changing your password.'). ' (LDAP)' );
+					$validator->isTrue('email', FALSE, TTi18n::getText('Email address was not found in our database (b)') );
 				}
 			} else {
-				$validator->isTrue('email', FALSE, TTi18n::getText('Email address was not found in our database (b)') );
+				//Error
+				Debug::Text('DID NOT FIND USER! Returned: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+				$validator->isTrue('email', FALSE, TTi18n::getText('Email address was not found in our database (a)') );
 			}
-		} else {
-			//Error
-			Debug::Text('DID NOT FIND USER! Returned: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
-			$validator->isTrue('email', FALSE, TTi18n::getText('Email address was not found in our database (a)') );
+
+			Debug::text('Password Reset Failed! Attempt: '. $rl->getAttempts(), __FILE__, __LINE__, __METHOD__, 10);
+
+			sleep( ($rl->getAttempts() * 0.5) ); //If email is incorrect, sleep for some time to slow down brute force attacks.
 		}
 		break;
 	default:

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12387 $
- * $Id: PayStubListFactory.class.php 12387 2014-02-19 00:50:23Z mikeb $
- * $Date: 2014-02-18 16:50:23 -0800 (Tue, 18 Feb 2014) $
+ * $Revision: 12920 $
+ * $Id: PayStubListFactory.class.php 12920 2014-04-14 23:48:25Z mikeb $
+ * $Date: 2014-04-14 16:48:25 -0700 (Mon, 14 Apr 2014) $
  */
 
 /**
@@ -883,6 +883,10 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 			if ( isset($filter_data['sort_column']) AND $filter_data['sort_order']) {
 				$order = array(Misc::trimSortPrefix($filter_data['sort_column']) => $filter_data['sort_order']);
 			}
+		}
+
+		if ( isset($filter_data['pay_stub_status_id']) ) {
+			$filter_data['status_id'] = $filter_data['pay_stub_status_id'];
 		}
 
 		if ( isset($filter_data['title_id']) ) {

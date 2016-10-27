@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 3725 $
- * $Id: CLI.inc.php 3725 2010-07-28 21:16:05Z ipso $
- * $Date: 2010-07-28 14:16:05 -0700 (Wed, 28 Jul 2010) $
+ * $Revision: 13083 $
+ * $Id: CLI.inc.php 13083 2014-04-30 21:22:36Z mikeb $
+ * $Date: 2014-04-30 14:22:36 -0700 (Wed, 30 Apr 2014) $
  */
 //Allow both CLI and CGI PHP binaries to call maint scripts.
 if ( PHP_SAPI != 'cli' AND PHP_SAPI != 'cgi' AND PHP_SAPI != 'cgi-fcgi') {
@@ -64,6 +64,7 @@ if ( $install_obj->checkAllRequirements( TRUE ) == 1 ) {
 	echo "Failed Requirements: ".implode(',', (array)$failed_requirements )." \n";
 	echo "--------------------------------------\n\n\n";
 }
+unset($install_obj);
 
 TTi18n::chooseBestLocale(); //Make sure a locale is set, specifically when generating PDFs.
 

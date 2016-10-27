@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,13 +34,13 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9761 $
- * $Id: Done.php 9761 2013-05-03 23:06:47Z ipso $
- * $Date: 2013-05-03 16:06:47 -0700 (Fri, 03 May 2013) $
+ * $Revision: 13366 $
+ * $Id: Done.php 13366 2014-06-09 17:15:19Z mikeb $
+ * $Date: 2014-06-09 10:15:19 -0700 (Mon, 09 Jun 2014) $
  */
 require_once('../../includes/global.inc.php');
 
-$authenticate=FALSE;
+$authenticate = FALSE;
 require_once(Environment::getBasePath() .'includes/Interface.inc.php');
 
 $authentication->Logout(); //Logout during the install process.
@@ -97,18 +97,33 @@ if ( $obj->isValid() ) {
 	$obj->Save();
 }
 
+//Reset auto_upgrade_failed flag, as they likely just upgraded to the latest version.
+$sslf = new SystemSettingListFactory();
+$sslf->getByName('auto_upgrade_failed');
+if ( $sslf->getRecordCount() == 1 ) {
+	$obj = $sslf->getCurrent();
+} else {
+	$obj = new SystemSettingListFactory();
+}
+$obj->setName( 'auto_upgrade_failed' );
+$obj->setValue( 0 );
+if ( $obj->isValid() ) {
+	$obj->Save();
+}
+
 $action = Misc::findSubmitButton();
 switch ($action) {
 	case 'back':
-		Debug::Text('Back', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Back', __FILE__, __LINE__, __METHOD__, 10);
 
 		Redirect::Page( URLBuilder::getURL(NULL, 'User.php') );
 		break;
 
 	case 'next':
-		Debug::Text('Next', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Next', __FILE__, __LINE__, __METHOD__, 10);
 
-		Redirect::Page( URLBuilder::getURL(NULL, '../Login.php') );
+		//Redirect::Page( URLBuilder::getURL(NULL, '../Login.php') );
+		Redirect::Page( URLBuilder::getURL(NULL, '/') );
 		break;
 	default:
 		break;

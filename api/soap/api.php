@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -35,7 +35,7 @@
  ********************************************************************************/
 /*
  * $Revision: 8160 $
- * $Id: server.php 8160 2006-05-31 23:33:54Z root $
+ * $Id: api.php 8160 2006-05-31 23:33:54Z root $
  * $Date: 2006-05-31 16:33:54 -0700 (Wed, 31 May 2006) $
  */
 define('TIMETREX_SOAP_API', TRUE );
@@ -43,6 +43,7 @@ define('TIMETREX_SOAP_API', TRUE );
 //Add timetrex.ini.php setting to enable/disable the API. Make an entire [API] section.
 require_once('../../includes/global.inc.php');
 require_once('../../includes/API.inc.php');
+Header('Content-Type: application/xml; charset=utf-8');
 
 Debug::setEnable(TRUE);
 Debug::setEnableDisplay(TRUE);
@@ -85,7 +86,7 @@ if ( isset($_GET['SessionID']) AND $_GET['SessionID'] != '' ) {
 				$current_user->getUserPreferenceObject()->setDateTimePreferences();
 				$current_user_prefs = $current_user->getUserPreferenceObject();
 
-				Debug::text('Locale Cookie: '. TTi18n::getLocaleCookie() , __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text('Locale Cookie: '. TTi18n::getLocaleCookie(), __FILE__, __LINE__, __METHOD__, 10);
 				if ( TTi18n::getLocaleCookie() != '' AND $current_user_prefs->getLanguage() !== TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) ) {
 					Debug::text('Changing User Preference Language to match cookie...', __FILE__, __LINE__, __METHOD__, 10);
 					$current_user_prefs->setLanguage( TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) );
@@ -143,7 +144,7 @@ if ( isset($_GET['SessionID']) AND $_GET['SessionID'] != '' ) {
 	}
 }
 
-Debug::text('Server Response Time: '. ((float)microtime(TRUE)-$_SERVER['REQUEST_TIME_FLOAT']), __FILE__, __LINE__, __METHOD__, 10);
+Debug::text('Server Response Time: '. ((float)microtime(TRUE) - $_SERVER['REQUEST_TIME_FLOAT']), __FILE__, __LINE__, __METHOD__, 10);
 //Debug::Display();
 Debug::writeToLog();
 ?>

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12620 $
- * $Id: UserDateTotalFactory.class.php 12620 2014-03-13 17:11:59Z mikeb $
- * $Date: 2014-03-13 10:11:59 -0700 (Thu, 13 Mar 2014) $
+ * $Revision: 13271 $
+ * $Id: UserDateTotalFactory.class.php 13271 2014-05-26 18:07:38Z mikeb $
+ * $Date: 2014-05-26 11:07:38 -0700 (Mon, 26 May 2014) $
  */
 
 /**
@@ -1180,7 +1180,8 @@ class UserDateTotalFactory extends Factory {
 						if ( $current_week_modifier != $week_modifier ) {
 							//$udtlf->getWeekRegularTimeSumByUserIDAndEpochAndStartWeekEpoch() uses "< $epoch" so the current day is ignored, but in this
 							//case we want to include the last day of the week, so we need to add one day to this argument.
-							$first_week_total = $udtlf->getWeekRegularTimeSumByUserIDAndEpochAndStartWeekEpoch( $this->getUserDateObject()->getUser(), ( TTDate::getEndWeekEpoch( (TTDate::getMiddleDayEpoch($this->getUserDateObject()->getDateStamp()) - ( 86400 * 7 ) ), $start_week_day_id) + 86400), TTDate::getBeginWeekEpoch( (TTDate::getMiddleDayEpoch($this->getUserDateObject()->getDateStamp()) - ( 86400 * 7 ) ), $start_week_day_id) );
+							//The above caused problems around March 9th due to DST, so just use the beginning of the current week and the beginning of the last week instead.
+							$first_week_total = $udtlf->getWeekRegularTimeSumByUserIDAndEpochAndStartWeekEpoch( $this->getUserDateObject()->getUser(), TTDate::getBeginWeekEpoch( $this->getUserDateObject()->getDateStamp(), $start_week_day_id), TTDate::getBeginWeekEpoch( (TTDate::getMiddleDayEpoch($this->getUserDateObject()->getDateStamp()) - ( 86400 * 7 ) ), $start_week_day_id) );
 							Debug::text(' Week modifiers differ, calculate total time for the first week: '. $first_week_total, __FILE__, __LINE__, __METHOD__, 10);
 						} else {
 							UserDateTotalFactory::setEnableCalcFutureWeek(TRUE);
@@ -2443,19 +2444,16 @@ class UserDateTotalFactory extends Factory {
 						if ( is_object( $this->getUserDateObject()->getPayPeriodObject() )
 								AND is_object( $this->getUserDateObject()->getPayPeriodObject()->getPayPeriodScheduleObject() ) ) {
 							//This should return all shifts within the minimum time between shifts setting.
-							//We need to get all shifts within
-							$shift_data = $this->getUserDateObject()->getPayPeriodObject()->getPayPeriodScheduleObject()->getShiftData( NULL, $this->getUserDateObject()->getUser(), $first_punch_epoch, NULL, NULL, ( $pp_obj->getMinimumTimeBetweenShift() + $pp_obj->getMinimumFirstShiftTime() ) );
+							//$shift_data = $this->getUserDateObject()->getPayPeriodObject()->getPayPeriodScheduleObject()->getShiftData( NULL, $this->getUserDateObject()->getUser(), $first_punch_epoch, NULL, NULL, ( $pp_obj->getMinimumTimeBetweenShift() + $pp_obj->getMinimumFirstShiftTime() ) );
+							$shift_data = $this->getUserDateObject()->getPayPeriodObject()->getPayPeriodScheduleObject()->getShiftData( NULL, $this->getUserDateObject()->getUser(), $first_punch_epoch, NULL, NULL, NULL, $pp_obj->getMinimumTimeBetweenShift() );
 						} else {
 							Debug::text(' No Pay Period...', __FILE__, __LINE__, __METHOD__, 10);
 						}
-						//Debug::Arr($shift_data, ' Shift Data...', __FILE__, __LINE__, __METHOD__, 10);
+						Debug::Arr($shift_data, ' Shift Data...', __FILE__, __LINE__, __METHOD__, 10);
 
 						//Only calculate if their are at least two shifts
 						if ( count($shift_data) >= 2 ) {
 							Debug::text(' Found at least two shifts...', __FILE__, __LINE__, __METHOD__, 10);
-
-							//Loop through shifts backwards.
-							krsort( $shift_data );
 
 							$prev_key = FALSE;
 							foreach( $shift_data as $key => $data ) {
@@ -2492,8 +2490,26 @@ class UserDateTotalFactory extends Factory {
 													Debug::text(' Found valid Punch Control ID: '. $udt_obj->getPunchControlID(), __FILE__, __LINE__, __METHOD__, 10);
 													Debug::text(' First Punch: '. TTDate::getDate('DATE+TIME', $punch_pairs[$udt_obj->getPunchControlID()][0]['time_stamp'] ) .' Last Punch: '. TTDate::getDate('DATE+TIME', $punch_pairs[$udt_obj->getPunchControlID()][1]['time_stamp'] ), __FILE__, __LINE__, __METHOD__, 10);
 
+													//The upper limit has to be the new shift trigger time, as once we start a new shift its no longer considered a callback.
+													if ( $x == 1 AND ( $punch_pairs[$udt_obj->getPunchControlID()][0]['time_stamp'] - $previous_shift_last_out_epoch ) > $this->getUserDateObject()->getPayPeriodObject()->getPayPeriodScheduleObject()->getNewDayTriggerTime() ) {
+														Debug::text(' Greater than NewDayTrigger time, skipping...', __FILE__, __LINE__, __METHOD__, 10);
+														continue;
+													}
+
 													$punch_total_time = 0;
 													$force_minimum_time_calculation = FALSE;
+
+													//Make sure all punches are after the cutoff time, so we only include time considered to be "callback"/
+													if ( isset($punch_pairs[$udt_obj->getPunchControlID()][0]) AND $punch_pairs[$udt_obj->getPunchControlID()][0]['time_stamp'] >= $current_shift_cutoff ) {
+														Debug::text(' Both punches are AFTER the cutoff time...', __FILE__, __LINE__, __METHOD__, 10);
+														$punch_total_time = bcsub( $punch_pairs[$udt_obj->getPunchControlID()][1]['time_stamp'], $punch_pairs[$udt_obj->getPunchControlID()][0]['time_stamp']);
+													} else {
+														Debug::text(' Both punches are BEFORE the cutoff time... Skipping...', __FILE__, __LINE__, __METHOD__, 10);
+														//continue;
+														$punch_total_time = 0;
+													}
+
+/*
 													//Make sure OUT punch is before current_shift_cutoff
 													if ( isset($punch_pairs[$udt_obj->getPunchControlID()][1]) AND $punch_pairs[$udt_obj->getPunchControlID()][1]['time_stamp'] <= $current_shift_cutoff ) {
 														Debug::text(' Both punches are BEFORE the cutoff time...', __FILE__, __LINE__, __METHOD__, 10);
@@ -2507,6 +2523,7 @@ class UserDateTotalFactory extends Factory {
 														//continue;
 														$punch_total_time = 0;
 													}
+*/
 													Debug::text(' Punch Total Time: '. $punch_total_time, __FILE__, __LINE__, __METHOD__, 10);
 
 													//Apply meal policy adjustment BEFORE min/max times
@@ -3845,7 +3862,11 @@ class UserDateTotalFactory extends Factory {
 					//If a holiday policy is applied on this day, ignore the schedule so we don't duplicate it.
 					//We could take the difference, and use the greatest of the two,
 					//But I think that will just open the door for errors.
-					if ( !isset($holiday_obj) OR ( $holiday_time == 0 AND is_object($holiday_obj) AND $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyID() != $s_obj->getAbsencePolicyID() ) ) {
+					//However we need to be able to schedule vacation on a holiday as well as holiday time if necessary, so just check that
+					//the absence policies don't match. This can happen if they take a half day holiday, or want to get paid for both.
+					//Make sure we don't carry the scheduled time through to the timesheet for employees who are not eligible for holidays.
+					if ( !isset($holiday_obj) OR
+							( isset($holiday_obj) AND is_object($holiday_obj) AND $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyID() != $s_obj->getAbsencePolicyID() ) ) {
 						$udtf = TTnew( 'UserDateTotalFactory' );
 						$udtf->setUserDateID( $this->getUserDateID() );
 						$udtf->setStatus( 30 ); //Absence
@@ -4496,13 +4517,25 @@ class UserDateTotalFactory extends Factory {
 		}
 
 		//Check to make sure if this is an absence row, the absence policy is actually set.
-		if ( $this->getStatus() == 30 AND $this->getAbsencePolicyID() == FALSE ) {
+		if ( $this->getDeleted() == FALSE AND $this->getStatus() == 30 ) {
+			if ( $this->getAbsencePolicyID() == FALSE ) {
 				$this->Validator->isTRUE(	'absence_policy_id',
 											FALSE,
 											TTi18n::gettext('Please specify an absence type'));
+			}
+
+			if ( is_object( $this->getUserDateObject() ) AND is_object( $this->getUserDateObject()->getUserObject() ) AND $this->getUserDateObject()->getUserObject()->getHireDate() != '' AND TTDate::getBeginDayEpoch( $this->getUserDateObject()->getDateStamp() ) < TTDate::getBeginDayEpoch( $this->getUserDateObject()->getUserObject()->getHireDate() ) ) {
+				$this->Validator->isTRUE(	'date_stamp',
+											FALSE,
+											TTi18n::gettext('Absence is before employees hire date') );
+			}
+
+			if ( is_object( $this->getUserDateObject() ) AND is_object( $this->getUserDateObject()->getUserObject() ) AND $this->getUserDateObject()->getUserObject()->getTerminationDate() != '' AND TTDate::getEndDayEpoch( $this->getUserDateObject()->getDateStamp() ) > TTDate::getEndDayEpoch( $this->getUserDateObject()->getUserObject()->getTerminationDate() ) ) {
+				$this->Validator->isTRUE(	'date_stamp',
+											FALSE,
+											TTi18n::gettext('Absence is after employees termination date') );
+			}
 		}
-
-
 
 		//Check to make sure if this is an overtime row, the overtime policy is actually set.
 		if ( $this->getStatus() == 10 AND $this->getType() == 30 AND $this->getOverTimePolicyID() == FALSE ) {

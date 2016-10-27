@@ -1,12 +1,49 @@
 <?php
+/*********************************************************************************
+ * TimeTrex is a Payroll and Time Management program developed by
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License version 3 as published by
+ * the Free Software Foundation with the addition of the following permission
+ * added to Section 15 as permitted in Section 7(a): FOR ANY PART OF THE COVERED
+ * WORK IN WHICH THE COPYRIGHT IS OWNED BY TIMETREX, TIMETREX DISCLAIMS THE
+ * WARRANTY OF NON INFRINGEMENT OF THIRD PARTY RIGHTS.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses or write to the Free
+ * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ *
+ * You can contact TimeTrex headquarters at Unit 22 - 2475 Dobbin Rd. Suite
+ * #292 Westbank, BC V4T 2E9, Canada or at email address info@timetrex.com.
+ *
+ * The interactive user interfaces in modified source and object code versions
+ * of this program must display Appropriate Legal Notices, as required under
+ * Section 5 of the GNU Affero General Public License version 3.
+ *
+ * In accordance with Section 7(b) of the GNU Affero General Public License
+ * version 3, these Appropriate Legal Notices must retain the display of the
+ * "Powered by TimeTrex" logo. If the display of the logo is not reasonably
+ * feasible for technical reasons, the Appropriate Legal Notices must display
+ * the words "Powered by TimeTrex".
+ ********************************************************************************/
+/*
+ * $Revision: 8160 $
+ * $Id: api.php 8160 2006-05-31 23:33:54Z root $
+ * $Date: 2006-05-31 16:33:54 -0700 (Wed, 31 May 2006) $
+ */
+define('TIMETREX_JSON_API', TRUE );
+
 //Add timetrex.ini.php setting to enable/disable the API. Make an entire [API] section.
 require_once('../../includes/global.inc.php');
 require_once('../../includes/API.inc.php');
-
-define('TIMETREX_JSON_API', TRUE );
-
-//header('Access-Control-Allow-Origin: '. ( isset($_SERVER['HTTP_ORIGIN']) ) ? $_SERVER['HTTP_ORIGIN'] : '*' );
-header('Access-Control-Allow-Origin: *' );
+Header('Content-Type: application/json'); //Make sure content type is not text/HTML to help avoid XSS.
 
 /*
  Arguments:
@@ -68,15 +105,22 @@ if ( isset($_POST['json']) OR isset($_GET['json']) ) {
 		$arguments = json_decode( $_POST['json'], TRUE );
 	}
 }
+
+//Make sure we sanitize all user inputs from XSS vulnerabilities. Where HTML should be allowed we can reverse this process on a case-by-case basis.
+//This causes data to be modified when stored in the database though, we have since enabled escaping on output in jqGrid instead.
+//FormVariables::RecurseFilterArray( $arguments );
+
 $argument_size = strlen( serialize($arguments) );
-if ( PRODUCTION == TRUE AND $argument_size > (1024*12) ) {
+if ( PRODUCTION == TRUE AND $argument_size > (1024 * 12) ) {
 	Debug::Text('Arguments too large to display... Size: '. $argument_size, __FILE__, __LINE__, __METHOD__, 10);
 } else {
 	Debug::Arr($arguments, 'Arguments: (Size: '. $argument_size .')', __FILE__, __LINE__, __METHOD__, 10);
 }
 unset($argument_size);
 
-if ( isset($_GET['SessionID']) AND $_GET['SessionID'] != '' ) {
+$api_auth = TTNew('APIAuthentication'); //Used to handle error cases and display error messages.
+
+if ( isset($_GET['SessionID']) AND $_GET['SessionID'] != '' AND $method != 'isLoggedIn' ) { //When interface calls PING() on a regular basis we need to skip this check and pass it to APIAuthentication immediately to avoid updating the session time.
 	$authentication = new Authentication();
 
 	Debug::text('Session ID: '. $_GET['SessionID'] .' Source IP: '. $_SERVER['REMOTE_ADDR'], __FILE__, __LINE__, __METHOD__, 10);
@@ -87,7 +131,7 @@ if ( isset($_GET['SessionID']) AND $_GET['SessionID'] != '' ) {
 			$current_user->getUserPreferenceObject()->setDateTimePreferences();
 			$current_user_prefs = $current_user->getUserPreferenceObject();
 
-			Debug::text('Locale Cookie: '. TTi18n::getLocaleCookie() , __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text('Locale Cookie: '. TTi18n::getLocaleCookie(), __FILE__, __LINE__, __METHOD__, 10);
 			if ( TTi18n::getLocaleCookie() != '' AND $current_user_prefs->getLanguage() !== TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) ) {
 				Debug::text('Changing User Preference Language to match cookie...', __FILE__, __LINE__, __METHOD__, 10);
 				$current_user_prefs->setLanguage( TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) );
@@ -125,20 +169,24 @@ if ( isset($_GET['SessionID']) AND $_GET['SessionID'] != '' ) {
 						}
 					} else {
 						Debug::text('Method: '. $method .' does not exist!', __FILE__, __LINE__, __METHOD__, 10);
+						echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', TTi18n::getText('Method %1 does not exist.', array( $method ) ) ) );
 					}
 				} else {
 					Debug::text('Class: '. $class_name .' does not exist!', __FILE__, __LINE__, __METHOD__, 10);
+					echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', TTi18n::getText('Class %1 does not exist.', array( $class_name ) ) ) );
 				}
 			} else {
 				Debug::text('Failed to get Company Object!', __FILE__, __LINE__, __METHOD__, 10);
+				echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('Company does not exist.' ) ) );
 			}
 		} else {
 			Debug::text('Failed to get User Object!', __FILE__, __LINE__, __METHOD__, 10);
+			echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('User does not exist.' ) ) );
 		}
 	} else {
 		Debug::text('User not authenticated!', __FILE__, __LINE__, __METHOD__, 10);
-
-		echo "User not authenticated!<br>\n";
+		//echo "User not authenticated!<br>\n";
+		echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('User is not unauthenticated.' ) ) );
 	}
 } else {
 	TTi18n::chooseBestLocale(); //Make sure we set the locale as best we can when not logged in
@@ -149,18 +197,20 @@ if ( isset($_GET['SessionID']) AND $_GET['SessionID'] != '' ) {
 		$obj = new $class_name;
 		$obj->setAMFMessageID( $message_id ); //Sets AMF message ID so progress bar continues to work.
 		if ( $method != '' AND method_exists( $obj, $method ) ) {
-			$retval = call_user_func_array( array($obj, $method), $arguments );
+			$retval = call_user_func_array( array($obj, $method), (array)$arguments );
 			//If the function returns anything else, encode into JSON and return it.
 			//Debug::Arr($retval, 'Retval: ', __FILE__, __LINE__, __METHOD__, 10);
 			echo json_encode( $retval );
 		} else {
 			Debug::text('Method: '. $method .' does not exist!', __FILE__, __LINE__, __METHOD__, 10);
+			echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('Method %1 does not exist.', array( $method ) ) ) );
 		}
 	} else {
 		Debug::text('Class: '. $class_name .' does not exist! (unauth)', __FILE__, __LINE__, __METHOD__, 10);
+		echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('Class %1 does not exist, or unauthenticated.', array( $class_name ) ) ) );
 	}
 }
 
-Debug::text('Server Response Time: '. ((float)microtime(TRUE)-$_SERVER['REQUEST_TIME_FLOAT']), __FILE__, __LINE__, __METHOD__, 10);
+Debug::text('Server Response Time: '. ((float)microtime(TRUE) - $_SERVER['REQUEST_TIME_FLOAT']), __FILE__, __LINE__, __METHOD__, 10);
 Debug::writeToLog();
 ?>

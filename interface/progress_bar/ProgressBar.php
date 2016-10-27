@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10841 $
- * $Id: ProgressBar.php 10841 2013-09-05 20:02:09Z ipso $
- * $Date: 2013-09-05 13:02:09 -0700 (Thu, 05 Sep 2013) $
+ * $Revision: 13271 $
+ * $Id: ProgressBar.php 13271 2014-05-26 18:07:38Z mikeb $
+ * $Date: 2014-05-26 11:07:38 -0700 (Mon, 26 May 2014) $
  */
 require_once('../../includes/global.inc.php');
 require_once(Environment::getBasePath() .'includes/Interface.inc.php');
@@ -706,7 +706,6 @@ switch ($action) {
 				$start_date = TTDate::getMiddleDayEpoch( $data['start_date'] );
 				$end_date = TTDate::getMiddleDayEpoch( $data['end_date'] );
 				$total_days = TTDate::getDays( ($end_date-$start_date) );
-				$offset = (86400/2);
 
 				$init_progress_bar = TRUE;
 
@@ -732,7 +731,7 @@ switch ($action) {
 						for( $i=$start_date; $i < $end_date; $i+=(86400) ) {
 							//$i = TTDate::getBeginDayEpoch( $i ); //This causes infinite loops during DST transitions.
 							Debug::Text('Recalculating Accruals for Date: '. TTDate::getDate('DATE+TIME', TTDate::getBeginDayEpoch( $i ) ), __FILE__, __LINE__, __METHOD__,10);
-							$ap_obj->addAccrualPolicyTime( TTDate::getBeginDayEpoch( $i ), $offset );
+							$ap_obj->addAccrualPolicyTime( TTDate::getBeginDayEpoch( $i ) ); //Use default offset.
 
 							$progress_bar->setValue( Misc::calculatePercent( $x, $total_days ) );
 							$progress_bar->display();

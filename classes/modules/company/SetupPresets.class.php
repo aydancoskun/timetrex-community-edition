@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -3481,6 +3481,7 @@ class SetupPresets extends Factory {
 												'pay_stub_entry_account_id' => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'Loan Repayment' ),
 												'user_value1' => 25, //Fixed amount to repay each pay period.
 												'user_value2' => 0,
+												'include_account_amount_type_id' => 30, //YTD Amount
 												'include_pay_stub_entry_account' => array( $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 50, 'Loan Balance' ) ),
 											)
 										);

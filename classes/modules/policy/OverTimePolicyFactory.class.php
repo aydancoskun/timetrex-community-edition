@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12175 $
- * $Id: OverTimePolicyFactory.class.php 12175 2014-01-29 22:17:28Z mikeb $
- * $Date: 2014-01-29 14:17:28 -0800 (Wed, 29 Jan 2014) $
+ * $Revision: 12920 $
+ * $Id: OverTimePolicyFactory.class.php 12920 2014-04-14 23:48:25Z mikeb $
+ * $Date: 2014-04-14 16:48:25 -0700 (Mon, 14 Apr 2014) $
  */
 
 /**
@@ -518,6 +518,13 @@ class OverTimePolicyFactory extends Factory {
 
 					$function = 'set'.$function;
 					switch( $key ) {
+						/* Once Flex interface is discontinued we can remove parseTimeUnit from HTML5 interface and do it in the API instead.
+						case 'trigger_time':
+							if ( method_exists( $this, $function ) ) {
+								$this->$function( TTDate::parseTimeUnit( $data[$key] ) );
+							}
+							break;
+						*/
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );

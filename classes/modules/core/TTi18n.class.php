@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12350 $
- * $Id: TTi18n.class.php 12350 2014-02-14 21:19:25Z mikeb $
- * $Date: 2014-02-14 13:19:25 -0800 (Fri, 14 Feb 2014) $
+ * $Revision: 13814 $
+ * $Id: TTi18n.class.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 
 /*
@@ -63,6 +63,7 @@ class TTi18n {
 
 	static private $master_locale = NULL;
 	static private $locale = NULL;
+	static private $normalized_locale = NULL;
 
 	static public function getLocaleHandler() {
 		if ( self::$locale_handler === NULL ) {
@@ -353,6 +354,10 @@ class TTi18n {
 		return FALSE;
 	}
 
+	static public function getNormalizedLocale() {
+		return self::$normalized_locale;
+	}
+
 	static public function getLocale() {
 		return self::$locale;
 	}
@@ -386,7 +391,11 @@ class TTi18n {
 					if ( self::getTranslationHandler()->setLang( $locale ) === FALSE ) {
 						Debug::Text('Failed setting translator locale: '. $locale, __FILE__, __LINE__, __METHOD__, 10);
 						return FALSE;
+					} else {
+						self::$normalized_locale = $locale;
 					}
+				} else {
+					self::$normalized_locale = $normal_locale;
 				}
 			}
 
@@ -540,8 +549,14 @@ class TTi18n {
 		//asort($retarr);
 
 		// Return supported languages only.
-		$supported_langs = array( 'en', 'da', 'de', 'es', 'id', 'it', 'fr', 'pt', 'zh' );
+		$supported_langs = array( 'en', 'da', 'de', 'es', 'id', 'it', 'fr', 'pt', 'zh');
 		$beta_langs = array( 'da', 'de', 'es', 'id', 'it', 'fr', 'pt', 'zh' );
+
+		if ( PRODUCTION == FALSE ) {
+			//YI is for testing only.
+			$supported_langs[] = 'yi';
+			$beta_langs[] = 'yi';
+		}
 
 		$retarr2 = array();
 		foreach( $supported_langs as $language ) {
@@ -696,6 +711,9 @@ class TTi18n {
 								'wa' => 'wa_BE',	// Walloon	Belgium
 								'we' => 'wen_DE',	// Sorbian	Germany
 								'zh' => 'zh_CN',	// Chinese Simplified
+
+								//Test locale to make sure all strings are translated.
+								'yi' => 'yi_US',
 								);
 
 
@@ -743,6 +761,9 @@ class TTi18n {
 		foreach( $code_arr as $iso_code => $name ) {
 			$retarr[$iso_code] = ''.$iso_code.' - '. $name;
 		}
+		
+		//Add support for Bitcoin (XBT)
+		$retarr['XBT'] = TTi18n::getText('XBT').' - '. TTi18n::getText('Bitcoin');
 
 		return $retarr;
 	}

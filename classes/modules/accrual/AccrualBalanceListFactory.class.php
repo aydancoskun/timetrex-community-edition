@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11925 $
- * $Id: AccrualBalanceListFactory.class.php 11925 2014-01-08 00:13:44Z mikeb $
- * $Date: 2014-01-07 16:13:44 -0800 (Tue, 07 Jan 2014) $
+ * $Revision: 13856 $
+ * $Id: AccrualBalanceListFactory.class.php 13856 2014-07-24 22:44:29Z mikeb $
+ * $Date: 2014-07-24 15:44:29 -0700 (Thu, 24 Jul 2014) $
  */
 
 /**
@@ -213,7 +213,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 						AND b.company_id = ?
 						AND c.enable_pay_stub_balance_display = ?
 						AND a.user_id in ('. $this->getListSQL( $user_id, $ph ) .')
-						AND a.deleted = 0';
+						AND ( a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 

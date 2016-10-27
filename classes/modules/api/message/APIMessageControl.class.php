@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -227,7 +227,7 @@ class APIMessageControl extends APIFactory {
 	}
 
 	/**
-	 * Set message_control data for one or more message_controles.
+	 * Set message_control data for one or more message_controls.
 	 * @param array $data message_control data
 	 * @return array
 	 */
@@ -261,34 +261,13 @@ class APIMessageControl extends APIFactory {
 				$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] > 0 ) {
 					$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Edit permission denied') );
-/*
-					//Modifying existing object.
-					//Get message_control object, so we can only modify just changed data for specific records if needed.
-					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
-					if ( $lf->getRecordCount() == 1 ) {
-						//Object exists, check edit permissions
-						if (
-							$validate_only == TRUE
-							OR
-								(
-								$this->getPermissionObject()->Check('message', 'edit')
-									OR ( $this->getPermissionObject()->Check('message', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
-								) ) {
-
-							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
-							$lf = $lf->getCurrent();
-							$row = array_merge( $lf->getObjectAsArray(), $row );
-						} else {
-							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Edit permission denied') );
-						}
-					} else {
-						//Object doesn't exist.
-						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Edit permission denied, record does not exist') );
-					}
-*/
 				} else {
 					//Adding new object, check ADD permissions.
 					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('message', 'add'), TTi18n::gettext('Add permission denied') );
+
+					//Make sure to_user_ids are within the same company at least.
+					$ulf = TTNew('UserListFactory');
+					$row['to_user_id'] = $ulf->getCompanyValidUserIds( $row['to_user_id'], $this->getCurrentCompanyObject()->getId() );
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 

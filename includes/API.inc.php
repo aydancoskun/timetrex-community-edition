@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -39,6 +39,7 @@
  * $Date: 2008-10-17 15:17:40 -0700 (Fri, 17 Oct 2008) $
  */
 define('TIMETREX_API', TRUE );
+forceNoCacheHeaders(); //Send headers to disable caching.
 
 //Returns valid classes when unauthenticated.
 function getUnauthenticatedAPIClasses() {
@@ -47,32 +48,32 @@ function getUnauthenticatedAPIClasses() {
 
 //Returns session ID from _COOKIE, _POST, then _GET.
 function getSessionID() {
-    if ( isset($_COOKIE['SessionID']) AND $_COOKIE['SessionID'] != '' ) {
-        $session_id = $_COOKIE['SessionID'];
-    } elseif ( isset($_POST['SessionID']) AND $_POST['SessionID'] != '' ) {
-        $session_id = $_POST['SessionID'];
-    } elseif ( isset($_GET['SessionID']) AND $_GET['SessionID'] != '' ) {
-        $session_id = $_GET['SessionID'];
-    } else {
-        $session_id = FALSE;
-    }
+	if ( isset($_COOKIE['SessionID']) AND $_COOKIE['SessionID'] != '' ) {
+		$session_id = $_COOKIE['SessionID'];
+	} elseif ( isset($_POST['SessionID']) AND $_POST['SessionID'] != '' ) {
+		$session_id = $_POST['SessionID'];
+	} elseif ( isset($_GET['SessionID']) AND $_GET['SessionID'] != '' ) {
+		$session_id = $_GET['SessionID'];
+	} else {
+		$session_id = FALSE;
+	}
 
-    return $session_id;
+	return $session_id;
 }
 
 //Returns Station ID from _COOKIE, _POST, then _GET.
 function getStationID() {
-    if ( isset($_COOKIE['StationID']) AND $_COOKIE['StationID'] != '' ) {
-        $station_id = $_COOKIE['StationID'];
-    } elseif ( isset($_POST['StationID']) AND $_POST['StationID'] != '' ) {
-        $station_id = $_POST['StationID'];
-    } elseif ( isset($_GET['StationID']) AND $_GET['StationID'] != '' ) {
-        $station_id = $_GET['StationID'];
-    } else {
-        $station_id = FALSE;
-    }
+	if ( isset($_COOKIE['StationID']) AND $_COOKIE['StationID'] != '' ) {
+		$station_id = $_COOKIE['StationID'];
+	} elseif ( isset($_POST['StationID']) AND $_POST['StationID'] != '' ) {
+		$station_id = $_POST['StationID'];
+	} elseif ( isset($_GET['StationID']) AND $_GET['StationID'] != '' ) {
+		$station_id = $_GET['StationID'];
+	} else {
+		$station_id = FALSE;
+	}
 
-    return $station_id;
+	return $station_id;
 }
 
 //Make sure cron job information is always logged.

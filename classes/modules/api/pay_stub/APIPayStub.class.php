@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -72,6 +72,11 @@ class APIPayStub extends APIFactory {
 			$data['filter_data']['status_id'] = array(40);
 		}
 
+		//Always hide employer rows unless they have permissions to view all pay stubs.
+		if ( $this->getPermissionObject()->Check('pay_stub', 'view') == FALSE ) {
+			$hide_employer_rows = TRUE;
+		}
+
 		$pslf = TTnew( 'PayStubListFactory' );
 		$pslf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $pslf->getRecordCount() .' Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
@@ -88,7 +93,7 @@ class APIPayStub extends APIFactory {
 
 				return Misc::APIFileDownload( 'pay_stub.pdf', 'application/pdf', $output );
 			}
-		} elseif ( strpos( strtolower($format), 'cheque_' ) !== FALSE ) {
+		} elseif ( strpos( strtolower($format), 'cheque_' ) !== FALSE AND $this->getPermissionObject()->Check('pay_stub', 'view') == TRUE ) {
 			if ( $pslf->getRecordCount() > 0 ) {
 				$this->getProgressBarObject()->setDefaultKey( $this->getAMFMessageID() );
 				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pslf->getRecordCount() );
@@ -100,7 +105,7 @@ class APIPayStub extends APIFactory {
 
 				return Misc::APIFileDownload( 'checks_'. str_replace(array('/', ',', ' '), '_', TTDate::getDate('DATE', time() ) ) .'.pdf', 'application/pdf', $output );
 			}
-		} elseif ( strpos( strtolower($format), 'eft_' ) !== FALSE ) {
+		} elseif ( strpos( strtolower($format), 'eft_' ) !== FALSE AND $this->getPermissionObject()->Check('pay_stub', 'view') == TRUE ) {
 			if ( $pslf->getRecordCount() > 0 ) {
 				$this->getProgressBarObject()->setDefaultKey( $this->getAMFMessageID() );
 				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pslf->getRecordCount() );
@@ -140,6 +145,8 @@ class APIPayStub extends APIFactory {
 				}
 
 				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+
+				Debug::Arr($retarr, 'zzzRecord Count: ', __FILE__, __LINE__, __METHOD__, 10);
 
 				return $this->returnHandler( $retarr );
 			}
@@ -434,56 +441,62 @@ class APIPayStub extends APIFactory {
 					}
 					$total_pay_stubs = $ppsulf->getRecordCount();
 
-					$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_pay_stubs, NULL, TTi18n::getText('Generating Paystubs...') );
+					if ( $total_pay_stubs > 0 ) {
+						$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_pay_stubs, NULL, TTi18n::getText('Generating Paystubs...') );
 
-					//Delete existing pay stub. Make sure we only
-					//delete pay stubs that are the same as what we're creating.
-					$pslf = TTnew( 'PayStubListFactory' );
-					$pslf->getByPayPeriodId( $pay_period_obj->getId() );
-					foreach ( $pslf as $pay_stub_obj ) {
-						if ( is_array($user_ids) AND count($user_ids) > 0 AND in_array( $pay_stub_obj->getUser(), $user_ids ) == FALSE ) {
-							continue; //Only generating pay stubs for individual employees, skip ones not in the list.
+						//Delete existing pay stub. Make sure we only
+						//delete pay stubs that are the same as what we're creating.
+						$pslf = TTnew( 'PayStubListFactory' );
+						$pslf->getByPayPeriodId( $pay_period_obj->getId() );
+						foreach ( $pslf as $pay_stub_obj ) {
+							if ( is_array($user_ids) AND count($user_ids) > 0 AND in_array( $pay_stub_obj->getUser(), $user_ids ) == FALSE ) {
+								continue; //Only generating pay stubs for individual employees, skip ones not in the list.
+							}
+							Debug::text('Existing Pay Stub: '. $pay_stub_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+
+							//Check PS End Date to match with PP End Date
+							//So if an ROE was generated, it won't get deleted when they generate all other Pay Stubs
+							//later on.
+							if ( $pay_stub_obj->getStatus() <= 25
+									AND $pay_stub_obj->getTainted() === FALSE
+									AND TTDate::getMiddleDayEpoch( $pay_stub_obj->getEndDate() ) == TTDate::getMiddleDayEpoch( $pay_period_obj->getEndDate() ) ) {
+								Debug::text('Deleting pay stub: '. $pay_stub_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+								$pay_stub_obj->setDeleted(TRUE);
+								$pay_stub_obj->Save();
+							} else {
+								Debug::text('Pay stub does not need regenerating, or it is LOCKED! ID: '. $pay_stub_obj->getID() .' Status: '. $pay_stub_obj->getStatus() .' Tainted: '. (int)$pay_stub_obj->getTainted() .' Pay Stub End Date: '. $pay_stub_obj->getEndDate() .' Pay Period End Date: '. $pay_period_obj->getEndDate(), __FILE__, __LINE__, __METHOD__, 10);
+							}
 						}
-						Debug::text('Existing Pay Stub: '. $pay_stub_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 
-						//Check PS End Date to match with PP End Date
-						//So if an ROE was generated, it won't get deleted when they generate all other Pay Stubs
-						//later on.
-						if ( $pay_stub_obj->getStatus() <= 25
-								AND $pay_stub_obj->getTainted() === FALSE
-								AND TTDate::getMiddleDayEpoch( $pay_stub_obj->getEndDate() ) == TTDate::getMiddleDayEpoch( $pay_period_obj->getEndDate() ) ) {
-							Debug::text('Deleting pay stub: '. $pay_stub_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
-							$pay_stub_obj->setDeleted(TRUE);
-							$pay_stub_obj->Save();
-						} else {
-							Debug::text('Pay stub does not need regenerating, or it is LOCKED! ID: '. $pay_stub_obj->getID() .' Status: '. $pay_stub_obj->getStatus() .' Tainted: '. (int)$pay_stub_obj->getTainted() .' Pay Stub End Date: '. $pay_stub_obj->getEndDate() .' Pay Period End Date: '. $pay_period_obj->getEndDate(), __FILE__, __LINE__, __METHOD__, 10);
+						$i = 1;
+						foreach ($ppsulf as $pay_period_schdule_user_obj) {
+							Debug::text('Pay Period User ID: '. $pay_period_schdule_user_obj->getUser(), __FILE__, __LINE__, __METHOD__, 10);
+							Debug::text('Total Pay Stubs: '. $total_pay_stubs .' - '. ceil( 1 / (100 / $total_pay_stubs) ), __FILE__, __LINE__, __METHOD__, 10);
+
+							$profiler->startTimer( 'Calculating Pay Stub' );
+							//Calc paystubs.
+							$cps = new CalculatePayStub();
+							$cps->setEnableCorrection( (bool)$enable_correction );
+							$cps->setUser( $pay_period_schdule_user_obj->getUser() );
+							$cps->setPayPeriod( $pay_period_obj->getId() );
+							$cps->calculate();
+							unset($cps);
+							$profiler->stopTimer( 'Calculating Pay Stub' );
+
+							$this->getProgressBarObject()->set( $this->getAMFMessageID(), $i );
+
+							//sleep(1); /////////////////////////////// FOR TESTING ONLY //////////////////
+
+							$i++;
 						}
+						unset($ppsulf);
+
+						$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+
+					} else {
+						Debug::text('ERROR: User not assigned to pay period schedule...', __FILE__, __LINE__, __METHOD__, 10);
+						UserGenericStatusFactory::queueGenericStatus( TTi18n::gettext('ERROR'), 10, TTi18n::gettext('Unable to generate pay stub(s), employee(s) may not be assigned to a pay period schedule.' ), NULL );
 					}
-
-					$i = 1;
-					foreach ($ppsulf as $pay_period_schdule_user_obj) {
-						Debug::text('Pay Period User ID: '. $pay_period_schdule_user_obj->getUser(), __FILE__, __LINE__, __METHOD__, 10);
-						Debug::text('Total Pay Stubs: '. $total_pay_stubs .' - '. ceil( 1 / (100 / $total_pay_stubs) ), __FILE__, __LINE__, __METHOD__, 10);
-
-						$profiler->startTimer( 'Calculating Pay Stub' );
-						//Calc paystubs.
-						$cps = new CalculatePayStub();
-						$cps->setEnableCorrection( (bool)$enable_correction );
-						$cps->setUser( $pay_period_schdule_user_obj->getUser() );
-						$cps->setPayPeriod( $pay_period_obj->getId() );
-						$cps->calculate();
-						unset($cps);
-						$profiler->stopTimer( 'Calculating Pay Stub' );
-
-						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $i );
-
-						//sleep(1); /////////////////////////////// FOR TESTING ONLY //////////////////
-
-						$i++;
-					}
-					unset($ppsulf);
-
-					$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 				} else {
 					UserGenericStatusFactory::queueGenericStatus( TTi18n::gettext('ERROR'), 10, TTi18n::gettext('Pay period prior to %1 is not closed, please close all previous pay periods and try again...', array( TTDate::getDate('DATE', $pay_period_obj->getStartDate() ).' -> '. TTDate::getDate('DATE', $pay_period_obj->getEndDate() ) ) ), NULL );
 				}

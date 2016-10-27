@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -128,6 +128,20 @@ class APIAbsencePolicy extends APIFactory {
 			unset( $data['filter_data']['user_id'] );
 		}
 		*/
+
+		if ( isset($data['filter_data']['user_id']) AND !is_array($data['filter_data']['user_id']) ) {
+			$data['filter_data']['user_id'] = (array)$data['filter_data']['user_id'];
+		}
+
+		//Remove any user_id=0 as its for an OPEN shift and no absence policy is ever assigned to this user in the policy groups.
+		if ( isset($data['filter_data']['user_id']) AND in_array( 0, $data['filter_data']['user_id'] ) ) {
+			$open_user_id_key = array_search( 0, $data['filter_data']['user_id']);
+			if ( $open_user_id_key !== FALSE ) {
+				Debug::Text('Removing user_id=0 from filter...', __FILE__, __LINE__, __METHOD__, 10);
+				unset($data['filter_data']['user_id'][$open_user_id_key]);
+			}
+		}
+		
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'absence_policy', 'view' );
 
 		$blf = TTnew( 'AbsencePolicyListFactory' );

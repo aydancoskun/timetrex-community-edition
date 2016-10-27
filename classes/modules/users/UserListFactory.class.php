@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11925 $
- * $Id: UserListFactory.class.php 11925 2014-01-08 00:13:44Z mikeb $
- * $Date: 2014-01-07 16:13:44 -0800 (Tue, 07 Jan 2014) $
+ * $Revision: 13893 $
+ * $Id: UserListFactory.class.php 13893 2014-07-28 21:41:35Z mikeb $
+ * $Date: 2014-07-28 14:41:35 -0700 (Mon, 28 Jul 2014) $
  */
 
 /**
@@ -65,10 +65,10 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 	}
 
 	function getByStatus($status, $where = NULL, $order = NULL) {
-		$key = Option::getByValue($status, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$status = $key;
-		}
+		//$key = Option::getByValue($status, $this->getOptions('status') );
+		//if ($key !== FALSE) {
+		//	$status = $key;
+		//}
 
 		$ph = array(
 					'status_id' => $status,
@@ -109,10 +109,10 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 	}
 
 	function getByCompanyIdAndStatus($company_id, $status, $where = NULL, $order = NULL) {
-		$key = Option::getByValue($status, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$status = $key;
-		}
+		//$key = Option::getByValue($status, $this->getOptions('status') );
+		//if ($key !== FALSE) {
+		//	$status = $key;
+		//}
 
 		$ph = array(
 					'company_id' => $company_id,
@@ -205,6 +205,31 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
+	}
+
+	//Security measure, only returns user_ids that are valid for the specific company.
+	function getCompanyValidUserIds( $id, $company_id ) {
+		if ( $id == '') {
+			return FALSE;
+		}
+
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$ph = array(
+					'company_id' => $company_id,
+					);
+
+		$query = '
+					select	id
+					from	'. $this->getTable() .'
+					where company_id = ?
+						AND id in ('. $this->getListSQL($id, $ph) .')
+						AND deleted = 0';
+
+		//This supports a list of IDs, so we need to make sure paging is also available.
+		return $this->db->GetCol( $query, $ph );
 	}
 
 	function getByUserName($user_name, $where = NULL, $order = NULL) {
@@ -315,13 +340,13 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		$key = Option::getByValue($status, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$status = $key;
-		}
+		//$key = Option::getByValue($status, $this->getOptions('status') );
+		//if ($key !== FALSE) {
+		//	$status = $key;
+		//}
 
 		$ph = array(
-					'user_name' => $user_name,
+					'user_name' => strtolower( trim( $user_name ) ),
 					'status' => $status,
 					);
 
@@ -333,6 +358,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 						AND deleted = 0';
 
 		$this->ExecuteSQL( $query, $ph );
+		Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}
@@ -342,10 +368,10 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		$key = Option::getByValue($status, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$status = $key;
-		}
+		//$key = Option::getByValue($status, $this->getOptions('status') );
+		//if ($key !== FALSE) {
+		//	$status = $key;
+		//}
 
 		$ph = array(
 					'phone_id' => $phone_id,
@@ -364,43 +390,15 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		return $this;
 	}
 
-/*
-	function getByIButtonIdAndStatus($id, $status, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
-		}
-
-		$key = Option::getByValue($status, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$status = $key;
-		}
-
-		$ph = array(
-					'id' => $id,
-					'status' => $status,
-					);
-
-		$query = '
-					select	*
-					from	'. $this->getTable() .'
-					where	ibutton_id = ?
-						AND status_id = ?
-						AND deleted = 0';
-
-		$this->ExecuteSQL( $query, $ph );
-
-		return $this;
-	}
-*/
 	function getByIdAndStatus($id, $status, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
 
-		$key = Option::getByValue($status, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$status = $key;
-		}
+		//$key = Option::getByValue($status, $this->getOptions('status') );
+		//if ($key !== FALSE) {
+		//	$status = $key;
+		//}
 
 		$ph = array(
 					'id' => $id,
@@ -1957,7 +1955,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$query .= '	jf.name as default_job,
-						jif.name as default_job_item, ';
+						jf.manual_id as default_job_manual_id,
+						jif.name as default_job_item,
+						jif.manual_id as default_job_item_manual_id, ';
 		}
 
 		$query .= '			y.first_name as created_by_first_name,

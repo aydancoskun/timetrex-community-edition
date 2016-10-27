@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -60,6 +60,17 @@ class GeneralLedgerSummaryReport extends Report {
 		}
 
 		return FALSE;
+	}
+
+	protected function _validateConfig() {
+		$config = $this->getConfig();
+
+		//Make sure some time period is selected.
+		if ( !isset($config['filter']['time_period']) AND !isset($config['filter']['pay_period_id']) ) {
+			$this->validator->isTrue( 'time_period', FALSE, TTi18n::gettext('No time period defined for this report') );
+		}
+
+		return TRUE;
 	}
 
 	protected function _getOptions( $name, $params = NULL ) {
@@ -738,6 +749,7 @@ class GeneralLedgerSummaryReport extends Report {
 				if ( isset($this->tmp_data['user'][$user_id]) ) {
 					foreach( $level_1 as $date_stamp => $row ) {
 						$replace_arr = array(
+												//*NOTE*: If this changes you must change numeric indexes in calcPercentDistribution().
 												( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getManualID() : NULL,
 												( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID1() : NULL,
 												( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getOtherID2() : NULL,
@@ -758,30 +770,34 @@ class GeneralLedgerSummaryReport extends Report {
 												( is_object($title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]) ) ? $title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]->getOtherID4() : NULL,
 												( is_object($title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]) ) ? $title_code_map[(int)$this->tmp_data['user'][$user_id]['title_id']]->getOtherID5() : NULL,
 
-												NULL, //'#punch_branch#', //12
+												NULL, //'#punch_branch#', //17
 												NULL, //'#punch_branch_other_id1#',
 												NULL, //'#punch_branch_other_id2#',
 												NULL, //'#punch_branch_other_id3#',
 												NULL, //'#punch_branch_other_id4#',
 												NULL, //'#punch_branch_other_id5#',
-												NULL, //'#punch_department#', //18
+
+												NULL, //'#punch_department#', //23
 												NULL, //'#punch_department_other_id1#',
 												NULL, //'#punch_department_other_id2#',
 												NULL, //'#punch_department_other_id3#',
 												NULL, //'#punch_department_other_id4#',
 												NULL, //'#punch_department_other_id5#',
-												NULL, //'#punch_job#',
+
+												NULL, //'#punch_job#', //29
 												NULL, //'#punch_job_other_id1#',
 												NULL, //'#punch_job_other_id2#',
 												NULL, //'#punch_job_other_id3#',
 												NULL, //'#punch_job_other_id4#',
 												NULL, //'#punch_job_other_id5#',
-												NULL, //'#punch_job_item#',
+
+												NULL, //'#punch_job_item#', //35
 												NULL, //'#punch_job_item_other_id1#',
 												NULL, //'#punch_job_item_other_id2#',
 												NULL, //'#punch_job_item_other_id3#',
 												NULL, //'#punch_job_item_other_id4#',
 												NULL, //'#punch_job_item_other_id5#',
+												
 												( isset($this->tmp_data['user'][$user_id]['employee_number']) ) ? $this->tmp_data['user'][$user_id]['employee_number'] : NULL,
 												( isset($this->tmp_data['user'][$user_id]['other_id1']) ) ? $this->tmp_data['user'][$user_id]['other_id1'] : NULL,
 												( isset($this->tmp_data['user'][$user_id]['other_id2']) ) ? $this->tmp_data['user'][$user_id]['other_id2'] : NULL,
@@ -844,39 +860,39 @@ class GeneralLedgerSummaryReport extends Report {
 
 				$account_arr = explode('-', $key );
 				if ( isset($account_arr[0]) AND $account_arr[0] != 0 ) { //Branch
-					$replace_arr[12] = ( is_object($branch_code_map[(int)$account_arr[0]]) ) ? $branch_code_map[(int)$account_arr[0]]->getManualID() : NULL;
-					$replace_arr[13] = ( is_object($branch_code_map[(int)$account_arr[0]]) ) ? $branch_code_map[(int)$account_arr[0]]->getOtherID1() : NULL;
-					$replace_arr[14] = ( is_object($branch_code_map[(int)$account_arr[0]]) ) ? $branch_code_map[(int)$account_arr[0]]->getOtherID2() : NULL;
-					$replace_arr[15] = ( is_object($branch_code_map[(int)$account_arr[0]]) ) ? $branch_code_map[(int)$account_arr[0]]->getOtherID3() : NULL;
-					$replace_arr[16] = ( is_object($branch_code_map[(int)$account_arr[0]]) ) ? $branch_code_map[(int)$account_arr[0]]->getOtherID4() : NULL;
-					$replace_arr[17] = ( is_object($branch_code_map[(int)$account_arr[0]]) ) ? $branch_code_map[(int)$account_arr[0]]->getOtherID5() : NULL;
+					$replace_arr[17] = ( is_object($branch_code_map[(int)$account_arr[0]]) ) ? $branch_code_map[(int)$account_arr[0]]->getManualID() : NULL;
+					$replace_arr[18] = ( is_object($branch_code_map[(int)$account_arr[0]]) ) ? $branch_code_map[(int)$account_arr[0]]->getOtherID1() : NULL;
+					$replace_arr[19] = ( is_object($branch_code_map[(int)$account_arr[0]]) ) ? $branch_code_map[(int)$account_arr[0]]->getOtherID2() : NULL;
+					$replace_arr[20] = ( is_object($branch_code_map[(int)$account_arr[0]]) ) ? $branch_code_map[(int)$account_arr[0]]->getOtherID3() : NULL;
+					$replace_arr[21] = ( is_object($branch_code_map[(int)$account_arr[0]]) ) ? $branch_code_map[(int)$account_arr[0]]->getOtherID4() : NULL;
+					$replace_arr[22] = ( is_object($branch_code_map[(int)$account_arr[0]]) ) ? $branch_code_map[(int)$account_arr[0]]->getOtherID5() : NULL;
 				}
 
 				if ( isset($account_arr[1]) AND $account_arr[1] != 0 ) { //Department
-					$replace_arr[18] = ( is_object($department_code_map[(int)$account_arr[1]]) ) ? $department_code_map[(int)$account_arr[1]]->getManualID() : NULL;
-					$replace_arr[19] = ( is_object($department_code_map[(int)$account_arr[1]]) ) ? $department_code_map[(int)$account_arr[1]]->getOtherID1() : NULL;
-					$replace_arr[20] = ( is_object($department_code_map[(int)$account_arr[1]]) ) ? $department_code_map[(int)$account_arr[1]]->getOtherID2() : NULL;
-					$replace_arr[21] = ( is_object($department_code_map[(int)$account_arr[1]]) ) ? $department_code_map[(int)$account_arr[1]]->getOtherID3() : NULL;
-					$replace_arr[22] = ( is_object($department_code_map[(int)$account_arr[1]]) ) ? $department_code_map[(int)$account_arr[1]]->getOtherID4() : NULL;
-					$replace_arr[23] = ( is_object($department_code_map[(int)$account_arr[1]]) ) ? $department_code_map[(int)$account_arr[1]]->getOtherID5() : NULL;
+					$replace_arr[23] = ( is_object($department_code_map[(int)$account_arr[1]]) ) ? $department_code_map[(int)$account_arr[1]]->getManualID() : NULL;
+					$replace_arr[24] = ( is_object($department_code_map[(int)$account_arr[1]]) ) ? $department_code_map[(int)$account_arr[1]]->getOtherID1() : NULL;
+					$replace_arr[25] = ( is_object($department_code_map[(int)$account_arr[1]]) ) ? $department_code_map[(int)$account_arr[1]]->getOtherID2() : NULL;
+					$replace_arr[26] = ( is_object($department_code_map[(int)$account_arr[1]]) ) ? $department_code_map[(int)$account_arr[1]]->getOtherID3() : NULL;
+					$replace_arr[27] = ( is_object($department_code_map[(int)$account_arr[1]]) ) ? $department_code_map[(int)$account_arr[1]]->getOtherID4() : NULL;
+					$replace_arr[28] = ( is_object($department_code_map[(int)$account_arr[1]]) ) ? $department_code_map[(int)$account_arr[1]]->getOtherID5() : NULL;
 				}
 
 				if ( isset($account_arr[2]) AND $account_arr[2] != 0 ) { //Job
-					$replace_arr[24] = ( is_object($job_code_map[(int)$account_arr[2]]) ) ? $job_code_map[(int)$account_arr[2]]->getManualID() : NULL;
-					$replace_arr[25] = ( is_object($job_code_map[(int)$account_arr[2]]) ) ? $job_code_map[(int)$account_arr[2]]->getOtherID1() : NULL;
-					$replace_arr[26] = ( is_object($job_code_map[(int)$account_arr[2]]) ) ? $job_code_map[(int)$account_arr[2]]->getOtherID2() : NULL;
-					$replace_arr[27] = ( is_object($job_code_map[(int)$account_arr[2]]) ) ? $job_code_map[(int)$account_arr[2]]->getOtherID3() : NULL;
-					$replace_arr[28] = ( is_object($job_code_map[(int)$account_arr[2]]) ) ? $job_code_map[(int)$account_arr[2]]->getOtherID4() : NULL;
-					$replace_arr[29] = ( is_object($job_code_map[(int)$account_arr[2]]) ) ? $job_code_map[(int)$account_arr[2]]->getOtherID5() : NULL;
+					$replace_arr[29] = ( is_object($job_code_map[(int)$account_arr[2]]) ) ? $job_code_map[(int)$account_arr[2]]->getManualID() : NULL;
+					$replace_arr[30] = ( is_object($job_code_map[(int)$account_arr[2]]) ) ? $job_code_map[(int)$account_arr[2]]->getOtherID1() : NULL;
+					$replace_arr[31] = ( is_object($job_code_map[(int)$account_arr[2]]) ) ? $job_code_map[(int)$account_arr[2]]->getOtherID2() : NULL;
+					$replace_arr[32] = ( is_object($job_code_map[(int)$account_arr[2]]) ) ? $job_code_map[(int)$account_arr[2]]->getOtherID3() : NULL;
+					$replace_arr[33] = ( is_object($job_code_map[(int)$account_arr[2]]) ) ? $job_code_map[(int)$account_arr[2]]->getOtherID4() : NULL;
+					$replace_arr[34] = ( is_object($job_code_map[(int)$account_arr[2]]) ) ? $job_code_map[(int)$account_arr[2]]->getOtherID5() : NULL;
 				}
 
 				if ( isset($account_arr[3]) AND $account_arr[3] != 0 ) { //Job Item
-					$replace_arr[30] = ( is_object($job_item_code_map[(int)$account_arr[3]]) ) ? $job_item_code_map[(int)$account_arr[3]]->getManualID() : NULL;
-					$replace_arr[31] = ( is_object($job_item_code_map[(int)$account_arr[3]]) ) ? $job_item_code_map[(int)$account_arr[3]]->getOtherID1() : NULL;
-					$replace_arr[32] = ( is_object($job_item_code_map[(int)$account_arr[3]]) ) ? $job_item_code_map[(int)$account_arr[3]]->getOtherID2() : NULL;
-					$replace_arr[33] = ( is_object($job_item_code_map[(int)$account_arr[3]]) ) ? $job_item_code_map[(int)$account_arr[3]]->getOtherID3() : NULL;
-					$replace_arr[34] = ( is_object($job_item_code_map[(int)$account_arr[3]]) ) ? $job_item_code_map[(int)$account_arr[3]]->getOtherID4() : NULL;
-					$replace_arr[35] = ( is_object($job_item_code_map[(int)$account_arr[3]]) ) ? $job_item_code_map[(int)$account_arr[3]]->getOtherID5() : NULL;
+					$replace_arr[35] = ( is_object($job_item_code_map[(int)$account_arr[3]]) ) ? $job_item_code_map[(int)$account_arr[3]]->getManualID() : NULL;
+					$replace_arr[36] = ( is_object($job_item_code_map[(int)$account_arr[3]]) ) ? $job_item_code_map[(int)$account_arr[3]]->getOtherID1() : NULL;
+					$replace_arr[37] = ( is_object($job_item_code_map[(int)$account_arr[3]]) ) ? $job_item_code_map[(int)$account_arr[3]]->getOtherID2() : NULL;
+					$replace_arr[38] = ( is_object($job_item_code_map[(int)$account_arr[3]]) ) ? $job_item_code_map[(int)$account_arr[3]]->getOtherID3() : NULL;
+					$replace_arr[39] = ( is_object($job_item_code_map[(int)$account_arr[3]]) ) ? $job_item_code_map[(int)$account_arr[3]]->getOtherID4() : NULL;
+					$replace_arr[40] = ( is_object($job_item_code_map[(int)$account_arr[3]]) ) ? $job_item_code_map[(int)$account_arr[3]]->getOtherID5() : NULL;
 				}
 
 				$retarr[] = array(
@@ -923,6 +939,7 @@ class GeneralLedgerSummaryReport extends Report {
 
 	function replaceGLAccountVariables( $subject, $replace_arr = NULL) {
 		$search_arr = array(
+							//*NOTE*: If this changes you must change numeric indexes in calcPercentDistribution().
 							'#default_branch#',
 							'#default_branch_other_id1#',
 							'#default_branch_other_id2#',

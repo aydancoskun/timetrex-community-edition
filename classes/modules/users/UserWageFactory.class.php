@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11942 $
- * $Id: UserWageFactory.class.php 11942 2014-01-09 00:50:10Z mikeb $
- * $Date: 2014-01-08 16:50:10 -0800 (Wed, 08 Jan 2014) $
+ * $Revision: 13893 $
+ * $Id: UserWageFactory.class.php 13893 2014-07-28 21:41:35Z mikeb $
+ * $Date: 2014-07-28 14:41:35 -0700 (Mon, 28 Jul 2014) $
  */
 
 /**
@@ -423,6 +423,28 @@ class UserWageFactory extends Factory {
 		return TRUE;
 	}
 
+	function isUniqueEffectiveDate($effective_date) {
+		$ph = array(
+					'user_id' => (int)$this->getUser(),
+					'wage_group_id' => (int)$this->getWageGroup(),
+					'effective_date' => $this->db->BindDate( $effective_date )
+					);
+
+		$query = 'select id from '. $this->getTable() .' where user_id = ? AND wage_group_id = ? AND effective_date = ? AND deleted = 0';
+		$id = $this->db->GetOne($query, $ph);
+		Debug::Arr($id, 'Unique Wage Entry: Effective Date: '. $effective_date, __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( $id === FALSE ) {
+			return TRUE;
+		} else {
+			if ($id == $this->getId() ) {
+				return TRUE;
+			}
+		}
+
+		return FALSE;
+	}
+
 	function getEffectiveDate( $raw = FALSE ) {
 		if ( isset($this->data['effective_date']) ) {
 			if ( $raw === TRUE ) {
@@ -442,6 +464,11 @@ class UserWageFactory extends Factory {
 		if	(	$this->Validator->isDate(		'effective_date',
 												$epoch,
 												TTi18n::gettext('Incorrect Effective Date'))
+				AND
+					$this->Validator->isTrue(		'effective_date',
+													$this->isUniqueEffectiveDate($epoch),
+													TTi18n::gettext('Employee already has a wage entry on this date for the same wage group. Try using a different date instead.')
+													)
 			) {
 
 			$this->data['effective_date'] = $epoch;
@@ -704,7 +731,6 @@ class UserWageFactory extends Factory {
 											$this->isValidEffectiveDate( $this->getEffectiveDate() ),
 											TTi18n::gettext('An employees first wage entry must be effective on or before the employees hire date').' ('. TTDate::getDate('DATE', $hire_date) .')');
 		}
-
 
 		return TRUE;
 	}

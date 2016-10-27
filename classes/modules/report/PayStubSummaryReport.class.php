@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -62,6 +62,17 @@ class PayStubSummaryReport extends Report {
 		return FALSE;
 	}
 
+	protected function _validateConfig() {
+		$config = $this->getConfig();
+
+		//Make sure some time period is selected.
+		if ( !isset($config['filter']['time_period']) AND !isset($config['filter']['pay_period_id']) ) {
+			$this->validator->isTrue( 'time_period', FALSE, TTi18n::gettext('No time period defined for this report') );
+		}
+
+		return TRUE;
+	}
+
 	protected function _getOptions( $name, $params = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -99,6 +110,8 @@ class PayStubSummaryReport extends Report {
 										'-2070-default_department_id' => TTi18n::gettext('Default Department'),
 										'-2080-currency_id' => TTi18n::gettext('Currency'),
 										'-2100-custom_filter' => TTi18n::gettext('Custom Filter'),
+
+										'-2200-pay_stub_status_id' => TTi18n::gettext('Pay Stub Status'),
 
 										'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
 
@@ -174,6 +187,8 @@ class PayStubSummaryReport extends Report {
 										'-1030-employee_number' => TTi18n::gettext('Employee #'),
 										'-1040-status' => TTi18n::gettext('Status'),
 										'-1050-title' => TTi18n::gettext('Title'),
+										'-1052-ethnic_group' => TTi18n::gettext('Ethnicity'),
+										'-1053-sex' => TTi18n::gettext('Gender'),
 										'-1055-city' => TTi18n::gettext('City'),
 										'-1060-province' => TTi18n::gettext('Province/State'),
 										'-1070-country' => TTi18n::gettext('Country'),

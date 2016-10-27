@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -652,12 +652,13 @@ class Import {
 		if ( isset($raw_row['user_name']) AND $raw_row['user_name'] != '' ) {
 			$filter_data = array( 'user_name' => $raw_row['user_name'] );
 			Debug::Text('Searching for existing record based on User Name: '. $raw_row['user_name'], __FILE__, __LINE__, __METHOD__, 10);
+		} elseif ( isset($raw_row['sin']) AND $raw_row['sin'] != '' ) {
+			//Search for SIN before employee_number, as employee numbers are more likely to change.
+			$filter_data = array( 'sin' => $raw_row['sin'] );
+			Debug::Text('Searching for existing record based on SIN: '. (int)$raw_row['sin'], __FILE__, __LINE__, __METHOD__, 10);
 		} elseif ( isset($raw_row['employee_number']) AND $raw_row['employee_number'] != '' ) {
 			$filter_data = array( 'employee_number' => (int)$raw_row['employee_number'] );
 			Debug::Text('Searching for existing record based on Employee Number: '. (int)$raw_row['employee_number'], __FILE__, __LINE__, __METHOD__, 10);
-		} elseif ( isset($raw_row['sin']) AND $raw_row['sin'] != '' ) {
-			$filter_data = array( 'sin' => $raw_row['sin'] );
-			Debug::Text('Searching for existing record based on SIN: '. (int)$raw_row['sin'], __FILE__, __LINE__, __METHOD__, 10);
 		} else {
 			Debug::Text('No suitable columns for identifying the employee were specified... ', __FILE__, __LINE__, __METHOD__, 10);
 		}
@@ -778,12 +779,16 @@ class Import {
 	}
 
 	function parse_date( $input, $default_value = NULL, $parse_hint = NULL ) {
-		if ( isset($parse_hint) AND $parse_hint != '' ) {
-			TTDate::setDateFormat( $parse_hint );
-			return TTDate::getMiddleDayEpoch( TTDate::parseDateTime( $input ) );
-		} else {
-			return TTDate::getMiddleDayEpoch( TTDate::strtotime( $input ) );
+		if ( $input != '' ) { //Don't try to parse a blank date, this helps in cases where hire/termination dates are imported blank.
+			if ( isset($parse_hint) AND $parse_hint != '' ) {
+				TTDate::setDateFormat( $parse_hint );
+				return TTDate::getMiddleDayEpoch( TTDate::parseDateTime( $input ) );
+			} else {
+				return TTDate::getMiddleDayEpoch( TTDate::strtotime( $input ) );
+			}
 		}
+
+		return $input;
 	}
 
 	function parse_sex( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {

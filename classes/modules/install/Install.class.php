@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12620 $
- * $Id: Install.class.php 12620 2014-03-13 17:11:59Z mikeb $
- * $Date: 2014-03-13 10:11:59 -0700 (Thu, 13 Mar 2014) $
+ * $Revision: 13925 $
+ * $Id: Install.class.php 13925 2014-07-29 18:25:35Z mikeb $
+ * $Date: 2014-07-29 11:25:35 -0700 (Tue, 29 Jul 2014) $
  */
 
 /**
@@ -62,7 +62,7 @@ class Install {
 		$this->config_vars = $config_vars;
 
 		//Disable caching so we don't exceed maximum memory settings.
-		$cache->_onlyMemoryCaching = TRUE;
+		//$cache->_onlyMemoryCaching = TRUE; //This shouldn't be required anymore, as it also breaks invalidating cache files.
 
 		ini_set('default_socket_timeout', 5);
 		ini_set('allow_url_fopen', 1);
@@ -309,6 +309,13 @@ class Install {
 			if ( isset($config_vars['primary_company_id']) AND $config_vars['primary_company_id'] != '' ) {
 				$section['other'] = preg_replace('/^primary_company_id\s*=.*/im', 'primary_company_id = '. $config_vars['primary_company_id'], $section['other']);
 			}
+			if ( isset($config_vars['system_admin_email']) ) { //Allow NULL/FALSE, as well as allow for uncommenting and adding fresh too.
+				if ( stripos( $section['other'], 'system_admin_email' ) === FALSE ) { //Add new entry if it doesn't exist, right below the [other] section.
+					$section['other'] = preg_replace('/^\[other\]/im', '[other]'. PHP_EOL .'system_admin_email = "'. $config_vars['system_admin_email'] .'"', $section['other']);
+				} else {
+					$section['other'] = preg_replace('/^[;\ ]*?system_admin_email\s*=.*/im', 'system_admin_email = "'. $config_vars['system_admin_email'] .'"', $section['other']);
+				}
+			}
 
 			if ( isset($this->config_vars['other']['salt']) AND ( $this->config_vars['other']['salt'] == '' OR $this->config_vars['other']['salt'] == '0' )
 					AND isset($config_vars['salt']) AND $config_vars['salt'] != '' ) {
@@ -316,8 +323,14 @@ class Install {
 			}
 			$contents = str_replace( $section[0], $section['other'], $contents );
 			unset($section);
-			//Debug::Arr( $contents, 'Other Contents (new): ', __FILE__, __LINE__, __METHOD__, 10);
 
+			//Make sure we add back in the parse error for security reasons.
+			//BitRock seems to want to remove this and re-arrange the INI file as well for some odd reason.
+			if ( stripos( $contents, ';<?php' ) === FALSE ) {
+				$contents .= "\n\n\n\n\n\n\n\n\n\n;<?php if (; //Cause parse error to hide from prying eyes, just in case. DO NOT REMOVE?>";
+			}
+
+			//Debug::Arr( $contents, 'Other Contents (new): ', __FILE__, __LINE__, __METHOD__, 10);
 			Debug::text('Modified Config File!', __FILE__, __LINE__, __METHOD__, 9);
 
 			return file_put_contents( CONFIG_FILE, $contents);
@@ -456,7 +469,7 @@ class Install {
 				$schema_group = substr($schema_base_name, -1, 1 );
 				Debug::text('Schema: '. $file .' Group: '. $schema_group, __FILE__, __LINE__, __METHOD__, 9);
 
-				if ($file != "." AND $file != ".."
+				if ($file != '.' AND $file != '..'
 						AND substr($file, 1, 0) != '.'
 						AND in_array($schema_group, $group) ) {
 					$schema_versions[] = basename($file, '.sql');
@@ -555,6 +568,9 @@ class Install {
 				}
 				$x++;
 			}
+
+			$this->initializeSequences();
+			
 			//$this->getDatabaseConnection()->FailTrans();
 			$this->getDatabaseConnection()->CompleteTrans();
 		}
@@ -611,6 +627,48 @@ class Install {
 		return TRUE;
 	}
 
+	//Only required with MySQL, this can help prevent race conditions when creating new tables.
+	//It will also correct any corrupt sequences that don't match their parent tables.
+	function initializeSequences() {
+		require_once( Environment::getBasePath() . DIRECTORY_SEPARATOR . 'includes'. DIRECTORY_SEPARATOR .'TableMap.inc.php');
+		global $global_table_map;
+
+		$db_conn = $this->getDatabaseConnection();
+
+		if ( $db_conn == FALSE ) {
+			return FALSE;
+		}
+
+		$table_arr = $db_conn->MetaTables();
+		
+		foreach( $global_table_map as $table => $class ) {
+			if ( class_exists( $class ) AND in_array( $table, $table_arr ) ) {
+				$obj = new $class;
+
+				if ( $obj->getSequenceName() != '' ) {
+					$next_insert_id = $obj->getNextInsertId();
+					Debug::Text('Table: '. $table .' Class: '. $class .' Next Insert ID: '. $next_insert_id, __FILE__, __LINE__, __METHOD__, 10);
+	
+					if ( strncmp($db_conn->databaseType, 'mysql', 5) == 0 ) {
+						$query = 'select max(id) from '. $table;
+						$max_id = (int)$db_conn->GetOne('select max(id) from '. $table);
+
+						if ( $next_insert_id == 0 OR $next_insert_id < $max_id ) {
+							Debug::Text('  Corrupt sequence table, fixing... Current Max ID: '. $max_id, __FILE__, __LINE__, __METHOD__, 10);
+							if ( $next_insert_id == 0 ) {
+								$db_conn->Execute('insert into '. $obj->getSequenceName() .' VALUES('. ( $max_id + 1 ) .')');
+							} else {
+								$db_conn->Execute('update '. $obj->getSequenceName() .' set ID = '. ( $max_id + 1 ));
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return TRUE;
+	}
+	
 
 	/*
 
@@ -794,25 +852,29 @@ class Install {
 		foreach( $dirs as $dir ) {
 			Debug::Text('Checking directory readable/writable: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
 			if ( is_dir( $dir ) AND is_readable( $dir ) ) {
-				//$rdi = new RecursiveDirectoryIterator( new RecursiveDirectoryIterator($dir) );
-				$rdi = new RecursiveDirectoryIterator( $dir, RecursiveIteratorIterator::SELF_FIRST );
-				foreach ( new RecursiveIteratorIterator($rdi) as $file_name => $cur ) {
-					if ( strcmp(basename($file_name), '.') == 0 OR strcmp( basename($file_name), '..' ) == 0 ) {
-						continue;
-					}
+				try {
+					$rdi = new RecursiveDirectoryIterator( $dir, RecursiveIteratorIterator::SELF_FIRST );
+					foreach ( new RecursiveIteratorIterator($rdi) as $file_name => $cur ) {
+						if ( strcmp(basename($file_name), '.') == 0 OR strcmp( basename($file_name), '..' ) == 0 ) {
+							continue;
+						}
 
-					//Debug::Text('Checking readable/writable: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
-					if ( is_readable( $file_name ) == FALSE ) {
-						Debug::Text('File or directory is not readable: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
-						$this->setExtendedErrorMessage( 'checkFilePermissions', 'Not Readable: '. $file_name );
-						return 1; //Invalid
-					}
+						//Debug::Text('Checking readable/writable: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
+						if ( is_readable( $file_name ) == FALSE ) {
+							Debug::Text('File or directory is not readable: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
+							$this->setExtendedErrorMessage( 'checkFilePermissions', 'Not Readable: '. $file_name );
+							return 1; //Invalid
+						}
 
-					if ( Misc::isWritable( $file_name ) == FALSE ) {
-						Debug::Text('File or directory is not writable: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
-						$this->setExtendedErrorMessage( 'checkFilePermissions', 'Not writable: '. $file_name );
-						return 1; //Invalid
+						if ( Misc::isWritable( $file_name ) == FALSE ) {
+							Debug::Text('File or directory is not writable: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
+							$this->setExtendedErrorMessage( 'checkFilePermissions', 'Not writable: '. $file_name );
+							return 1; //Invalid
+						}
 					}
+				} catch( Exception $e ) {
+					Debug::Text('Failed opening/reading file or directory: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
+					return 1;
 				}
 			}
 		}
@@ -845,7 +907,7 @@ class Install {
 
 					//1st line contains the TT version for the checksums, make sure it matches current version.
 					if ( $i == 0 ) {
-						if ( preg_match( '/\d\.\d\.\d/', $checksum_line, $checksum_version ) ) {
+						if ( preg_match( '/\d+\.\d+\.\d+/', $checksum_line, $checksum_version ) ) {
 							Debug::Text('Checksum version: '. $checksum_version[0], __FILE__, __LINE__, __METHOD__, 10);
 							if ( version_compare( APPLICATION_VERSION, $checksum_version[0], '=') ) {
 								Debug::Text('Checksum version matches!', __FILE__, __LINE__, __METHOD__, 10);
@@ -866,7 +928,8 @@ class Install {
 							if ( file_exists( $file_name ) ) {
 								$my_checksum = sha1_file( $file_name );
 								if ( $my_checksum == $checksum ) {
-									Debug::Text('File: '. $file_name .' Checksum: '. $checksum .' MATCHES', __FILE__, __LINE__, __METHOD__, 10);
+									//Debug::Text('File: '. $file_name .' Checksum: '. $checksum .' MATCHES', __FILE__, __LINE__, __METHOD__, 10);
+									unset($my_checksum); //NoOp
 								} else {
 									Debug::Text('File: '. $file_name .' Checksum: '. $my_checksum .' DOES NOT match provided checksum of: '. $checksum, __FILE__, __LINE__, __METHOD__, 10);
 									$this->setExtendedErrorMessage( 'checkFileChecksums', 'Checksum does not match: '. $file_name );
@@ -965,6 +1028,47 @@ class Install {
 		return FALSE;
 	}
 
+	function isSUDOinstalled() {
+		if ( OPERATING_SYSTEM == 'LINUX' ) {
+			exec( 'which sudo', $output, $exit_code );
+			if ( $exit_code == 0 AND $output != '' ) {
+				return TRUE;
+			}
+		}
+
+		return FALSE;
+	}
+	
+	function getWebServerUser() {
+		if ( OPERATING_SYSTEM == 'LINUX' ) {
+			if ( function_exists('posix_geteuid') AND function_exists('posix_getpwuid') ) {
+				$user = posix_getpwuid( posix_geteuid() );
+				Debug::text('Webserver running as User: '. $user['name'], __FILE__, __LINE__, __METHOD__, 9);
+
+				return $user['name'];
+			}
+		}
+
+		return FALSE;
+	}
+
+	function ScheduleMaintenanceJobs() {
+		if ( OPERATING_SYSTEM == 'LINUX' ) {
+			if ( $this->getWebServerUser() != '' ) {
+				$command = Environment::getBasePath() . 'install_cron.sh ' . $this->getWebServerUser();
+				exec( $command, $output, $exit_code );
+				Debug::Arr($output, 'Schedule Maintenance Jobs Command: '. $command .' Output: ', __FILE__, __LINE__, __METHOD__, 10);
+				if ( $exit_code == 0 ) {
+					return 0;
+				}
+			}
+
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+
 	function getBaseURL() {
 		return Misc::getURLProtocol() .'://'. Misc::getHostName( TRUE ).Environment::getBaseURL().'install/install.php'; //Check for a specific file, so we can be sure its not incorrect.
 	}
@@ -981,7 +1085,37 @@ class Install {
 			return 0; //Found
 		}
 	}
-	
+
+	function getPHPOpenBaseDir() {
+		return ini_get('open_basedir');
+	}
+	function getPHPCLIDirectory() {
+		return dirname( $this->getPHPCLI() );
+	}
+
+	function checkPHPOpenBaseDir() {
+		$open_basedir = $this->getPHPOpenBaseDir();
+		Debug::Text('Open BaseDir: '. $open_basedir, __FILE__, __LINE__, __METHOD__, 9);
+		if ( $open_basedir == '' ) {
+			return 0;
+		} else {
+			if ( $this->getPHPCLI() != '' ) {
+				//Check if PHPCLIDir is contained in open_basedir, or if open_basedir is contained in the PHPCLIDir.
+				//For cases like: open_basedir=/var/www/vhosts/domain/ and php_cli=/var/www/vhosts/domain/usr/bin/
+				// Or for cases: open_basedir=/usr/ and php_cli=/usr/bin/
+				if ( strpos( $open_basedir, $this->getPHPCLIDirectory() ) !== FALSE OR strpos( $this->getPHPCLIDirectory(), $open_basedir ) !== FALSE ) {
+					return 0;
+				} else {
+					Debug::Text('PHP CLI Binary ('. dirname( $this->getPHPCLIDirectory() ) .') NOT found in Open BaseDir: '. $open_basedir, __FILE__, __LINE__, __METHOD__, 9);
+				}
+			} else {
+				return 0;
+			}
+		}
+
+		return 1;
+	}
+
 	function getPHPCLI() {
 		if ( isset($this->config_vars['path']['php_cli']) ) {
 			return $this->config_vars['path']['php_cli'];
@@ -1000,7 +1134,7 @@ class Install {
 	}
 
 	function getPHPCLIRequirementsCommand() {
-		$command = $this->getPHPCLI() .' '. Environment::getBasePath() .'/tools/unattended_upgrade.php --config '. CONFIG_FILE .' --requirements_only';
+		$command = '"'. $this->getPHPCLI() .'" "'. Environment::getBasePath() .'/tools/unattended_upgrade.php" --config "'. CONFIG_FILE .'" --requirements_only --web_installer';
 		return $command;
 	}
 	//Only check this if *not* being called from the CLI to prevent infinite loops.
@@ -1224,24 +1358,26 @@ class Install {
 		return 1;
 	}
 
-	function cleanCacheDirectory() {
+	function cleanCacheDirectory( $exclude_regex_filter = '\.ZIP|upgrade_staging' ) {
 		global $smarty;
 
 		if ( isset($smarty) ) {
 			$smarty->clear_all_cache();
 		}
 
-		return Misc::cleanDir( $this->config_vars['cache']['dir'], TRUE, TRUE );
+		return Misc::cleanDir( $this->config_vars['cache']['dir'], TRUE, TRUE, FALSE, $exclude_regex_filter ); //Don't clean UPGRADE.ZIP file and 'upgrade_staging' directory.
 	}
 
 	function checkCleanCacheDirectory() {
 		if ( DEPLOYMENT_ON_DEMAND == FALSE ) {
-			$raw_cache_files = scandir( $this->config_vars['cache']['dir'] );
+			if ( is_dir( $this->config_vars['cache']['dir'] ) ) {
+				$raw_cache_files = @scandir( $this->config_vars['cache']['dir'] );
 
-			if ( is_array($raw_cache_files) AND count($raw_cache_files) > 0 ) {
-				foreach( $raw_cache_files as $cache_file ) {
-					if ( $cache_file != '.' AND $cache_file != '..' AND stristr( $cache_file, '.lock') === FALSE ) {
-						return 1;
+				if ( is_array($raw_cache_files) AND count($raw_cache_files) > 0 ) {
+					foreach( $raw_cache_files as $cache_file ) {
+						if ( $cache_file != '.' AND $cache_file != '..' AND stristr( $cache_file, '.lock') === FALSE AND stristr( $cache_file, '.ZIP') === FALSE AND stristr( $cache_file, 'upgrade_staging') === FALSE) { //Ignore UPGRADE.ZIP files.
+							return 1;
+						}
 					}
 				}
 			}
@@ -1352,6 +1488,7 @@ class Install {
 			}
 			if ( !is_array( $exclude_check ) OR ( is_array($exclude_check) AND in_array('php_cli', $exclude_check) == FALSE ) ) {
 				$retarr[$this->checkPHPCLIBinary()]++;
+				$retarr[$this->checkPHPOpenBaseDir()]++;
 			}
 			if ( !is_array( $exclude_check ) OR ( is_array($exclude_check) AND in_array('php_cli_requirements', $exclude_check) == FALSE ) ) {
 				$retarr[$this->checkPHPCLIRequirements()]++;
@@ -1453,6 +1590,9 @@ class Install {
 			if ( is_array($exclude_check) AND in_array('php_cli', $exclude_check) == FALSE ) {
 				if ( $fail_all == TRUE OR $this->checkPHPCLIBinary() != 0 ) {
 					$retarr[] = 'PHPCLI';
+				}
+				if ( $fail_all == TRUE OR $this->checkPHPOpenBaseDir() != 0 ) {
+					$retarr[] = 'PHPOpenBaseDir';
 				}
 			}
 			if ( is_array($exclude_check) AND in_array('php_cli_requirements', $exclude_check) == FALSE ) {

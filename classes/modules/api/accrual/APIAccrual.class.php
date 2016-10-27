@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -188,8 +188,8 @@ class APIAccrual extends APIFactory {
 							OR
 								(
 								$this->getPermissionObject()->Check('accrual', 'edit')
-									OR ( $this->getPermissionObject()->Check('accrual', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
-									OR ( $this->getPermissionObject()->Check('accrual', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
+									OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('accrual', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $row['user_id'] ) === TRUE )
+									OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('accrual', 'edit_child') AND $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === TRUE )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -401,7 +401,8 @@ class APIAccrual extends APIFactory {
 		Debug::Text('Received data for: '. count($data) .' Accruals', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$src_rows = $this->stripReturnHandler( $this->getAccrual( array('filter_data' => array('id' => $data) ), TRUE ) );
+		//Make sure only user_type accruals can be copied, not system types.
+		$src_rows = $this->stripReturnHandler( $this->getAccrual( array('filter_data' => array('id' => $data, 'type_id' => array_keys( (array)$this->getOptions('user_type') ) ) ), TRUE ) );
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12528 $
- * $Id: CompanyDeductionFactory.class.php 12528 2014-03-03 23:20:02Z mikeb $
- * $Date: 2014-03-03 15:20:02 -0800 (Mon, 03 Mar 2014) $
+ * $Revision: 12920 $
+ * $Id: CompanyDeductionFactory.class.php 12920 2014-04-14 23:48:25Z mikeb $
+ * $Date: 2014-04-14 16:48:25 -0700 (Mon, 14 Apr 2014) $
  */
 
 /**
@@ -700,7 +700,10 @@ class CompanyDeductionFactory extends Factory {
 	}
 
 	function getStatus() {
-		return (int)$this->data['status_id'];
+		if ( isset($this->data['status_id']) ) {
+			return (int)$this->data['status_id'];
+		}
+		return FALSE;
 	}
 	function setStatus($status) {
 		$status = trim($status);
@@ -710,7 +713,7 @@ class CompanyDeductionFactory extends Factory {
 			$status = $key;
 		}
 
-		if ( $this->Validator->inArrayKey(	'status',
+		if ( $this->Validator->inArrayKey(	'status_id',
 											$status,
 											TTi18n::gettext('Incorrect Status'),
 											$this->getOptions('status')) ) {
@@ -738,7 +741,7 @@ class CompanyDeductionFactory extends Factory {
 			$type = $key;
 		}
 
-		if ( $this->Validator->inArrayKey(	'type',
+		if ( $this->Validator->inArrayKey(	'type_id',
 											$type,
 											TTi18n::gettext('Incorrect Type'),
 											$this->getOptions('type')) ) {
@@ -2723,6 +2726,14 @@ class CompanyDeductionFactory extends Factory {
 	//
 	// Lookback functions.
 	//
+	function isLookbackCalculation() {
+		if ( $this->getCalculation() == 69 AND isset($this->length_of_service_multiplier[(int)$this->getCompanyValue3()]) AND $this->getCompanyValue2() > 0 ) {
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+	
 	function getLookbackCalculationPayStubAmount( $include_account_amount_type_id = NULL, $exclude_account_amount_type_id = NULL ) {
 		$amount = 0;
 		if ( isset($this->lookback_pay_stub_lf) AND $this->lookback_pay_stub_lf->getRecordCount() > 0 ) {
@@ -2741,6 +2752,7 @@ class CompanyDeductionFactory extends Factory {
 		$retarr = array(
 						'start_date' => FALSE,
 						//Make sure we don't include the current transaction date, as we can always access the current amounts with other variables.
+						//This also allows us to calculate lookbacks first and avoid circular dependancies in other calculations.
 						'end_date' => TTDate::getEndDayEpoch( ((int)$pay_period_obj->getTransactionDate() - 86400) ),
 						);
 		if ( $this->getCompanyValue3() == 100 ) { //Pay Periods
@@ -2863,6 +2875,16 @@ class CompanyDeductionFactory extends Factory {
 	}
 
 	function preSave() {
+		if ( $this->getStatus() == '' ) {
+			$this->setStatus( 10 );
+		}
+		if ( $this->getType() == '' ) {
+			$this->setType( 10 );
+		}
+		if ( $this->getName() == '' ) {
+			$this->setName( '' );
+		}
+
 		//Set Length of service in days.
 		$this->setMinimumLengthOfServiceDays( $this->getMinimumLengthOfService() );
 		$this->setMaximumLengthOfServiceDays( $this->getMaximumLengthOfService() );
@@ -2878,7 +2900,7 @@ class CompanyDeductionFactory extends Factory {
 		$this->removeCache( $this->getId() );
 		$this->removeCache( 'include_pay_stub_entry-'. $this->getId() );
 		$this->removeCache( 'exclude_pay_stub_entry-'. $this->getId() );
-
+		
 		if ( $this->getDeleted() == TRUE ) {
 			//Check if any users are assigned to this, if so, delete mappings.
 			$udlf = TTnew( 'UserDeductionListFactory' );

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -52,7 +52,7 @@ extract	(FormVariables::GetVariables(
 												'key'
 												) ) );
 
-//Used to help set cookies across domains.
+//Used to help set cookies across domains. Currently used by Flex
 $authentication = new Authentication();
 if ( $name == '' ) {
 	$name = $authentication->getName();
@@ -65,7 +65,15 @@ if ( $expires == '' ) {
 setcookie( $name, $value, $expires, '/', NULL, Misc::isSSL( TRUE ) );
 
 if ( $redirect != '' ) {
-	Redirect::Page( $redirect );
+	//This can result in a phishing attack, if the user is redirected to an outside site.
+	Debug::Text('Attempting Redirect: '. $redirect .' Current hostname: '. Misc::getHostName(), __FILE__, __LINE__, __METHOD__, 10);
+
+	if ( strpos( str_replace( array('http://', 'https://'), '', $redirect ), Misc::getHostName() ) === 0 ) {
+		Redirect::Page( $redirect );
+	} else {
+		Debug::Text('ERROR, unable to redirect to: '. $redirect .' as it does not contain hostname: '. Misc::getHostName(), __FILE__, __LINE__, __METHOD__, 10);
+		echo "ERROR: Unable to redirect...<br>\n";
+	}
 }
 Debug::writeToLog();
 ?>

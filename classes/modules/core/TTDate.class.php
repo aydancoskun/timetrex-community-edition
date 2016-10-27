@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Payroll and Time Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2013 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2014 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12432 $
- * $Id: TTDate.class.php 12432 2014-02-23 00:04:18Z mikeb $
- * $Date: 2014-02-22 16:04:18 -0800 (Sat, 22 Feb 2014) $
+ * $Revision: 13814 $
+ * $Id: TTDate.class.php 13814 2014-07-22 17:45:46Z mikeb $
+ * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
  */
 
 /**
@@ -137,7 +137,7 @@ class TTDate {
 	public static function getTimeZone() {
 		return self::$time_zone;
 	}
-	public static function setTimeZone($time_zone = NULL) {
+	public static function setTimeZone($time_zone = NULL, $force = FALSE ) {
 		global $config_vars, $current_user_prefs;
 
 		$time_zone = Misc::trimSortPrefix( trim($time_zone) );
@@ -158,7 +158,7 @@ class TTDate {
 			}
 		}
 
-		if ( $time_zone == self::$time_zone ) {
+		if ( $force == FALSE AND $time_zone == self::$time_zone ) {
 			Debug::text('TimeZone already set to: '. $time_zone, __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
 		}
@@ -167,9 +167,19 @@ class TTDate {
 			Debug::text('Setting TimeZone: '. $time_zone, __FILE__, __LINE__, __METHOD__, 10);
 
 			global $db;
-			if ( isset($db) AND is_object($db) AND strncmp($db->databaseType, 'mysql', 5) == 0 ) {
-				if ( @$db->Execute('SET SESSION time_zone='. $db->qstr($time_zone) ) == FALSE ) {
-					return FALSE;
+			if ( isset($db) AND is_object($db) ) {
+				if ( strncmp($db->databaseType, 'postgres', 8) == 0 ) {
+					//PostgreSQL 9.2+ defaults to GMT in many cases, which causes problems with strtotime() and parsing date column types.
+					//Since date columns return times like: 2014-01-01 00:00:00+00, if the timezone in PHP is PST8PDT it parses to 31-Dec-13 4:00 PM
+					if ( @$db->Execute('SET SESSION TIME ZONE '. $db->qstr($time_zone) ) == FALSE ) {
+						Debug::text('ERROR: Setting TimeZone: '. $time_zone .' DB Type: '. $db->databaseType, __FILE__, __LINE__, __METHOD__, 10);
+						return FALSE;
+					}
+				} elseif ( strncmp($db->databaseType, 'mysql', 5) == 0 ) {
+					if ( @$db->Execute('SET SESSION time_zone='. $db->qstr($time_zone) ) == FALSE ) {
+						Debug::text('ERROR: Setting TimeZone: '. $time_zone .' DB Type: '. $db->databaseType, __FILE__, __LINE__, __METHOD__, 10);
+						return FALSE;
+					}
 				}
 			}
 
@@ -469,9 +479,7 @@ class TTDate {
 		$orig_str = $str;
 
 		if ( $str == '' ) {
-			Debug::text('No date to parse! String: '. $str .' Date Format: '. self::$date_format, __FILE__, __LINE__, __METHOD__, 10);
-			//return FALSE;
-
+			//Debug::text('No date to parse! String: '. $str .' Date Format: '. self::$date_format, __FILE__, __LINE__, __METHOD__, 10);
 			//Return NULL so we can determine the difference between a blank/null value and an incorrect parsing.
 			//NULL is required so NULL is used in the database rather than 0. Especially for termination dates for users.
 			return NULL;
@@ -810,20 +818,24 @@ class TTDate {
 		return time();
 	}
 
-	public static function getYears( $seconds ) {
-		return bcdiv( bcdiv( $seconds, 86400 ), 365 );
-	}
-
-	public static function getDays($seconds) {
-		return bcdiv( $seconds, 86400);
+	public static function getSeconds($hours) {
+		return bcmul( $hours, 3600 );
 	}
 
 	public static function getHours($seconds) {
 		return bcdiv( bcdiv( $seconds, 60), 60);
 	}
 
-	public static function getSeconds($hours) {
-		return bcmul( $hours, 3600 );
+	public static function getDays($seconds) {
+		return bcdiv( $seconds, 86400);
+	}
+
+	public static function getWeeks($seconds) {
+		return bcdiv( $seconds, ( 86400 * 7 ) );
+	}
+
+	public static function getYears( $seconds ) {
+		return bcdiv( bcdiv( $seconds, 86400 ), 365 );
 	}
 
 	public static function getDaysInMonth($epoch = NULL ) {
@@ -1029,7 +1041,11 @@ class TTDate {
 	}
 	
 	public static function getDayDifference($start_epoch, $end_epoch) {
-		//FIXME: Be more accurate, take leap years in to account etc...
+		if ( $start_epoch == '' OR $end_epoch == '' ) {
+			return FALSE;
+		}
+
+		//This already matches PHPs DateTime class.
 		$days = ( ($end_epoch - $start_epoch) / 86400 );
 
 		Debug::text('Days Difference: '. $days, __FILE__, __LINE__, __METHOD__, 10);
@@ -1038,38 +1054,50 @@ class TTDate {
 	}
 
 	public static function getWeekDifference($start_epoch, $end_epoch) {
-		//FIXME: Be more accurate, take leap years in to account etc...
-		$weeks = ( ($end_epoch - $start_epoch) / (86400 * 7) );
+		if ( $start_epoch == '' OR $end_epoch == '' ) {
+			return FALSE;
+		}
 
+		//This already matches PHPs DateTime class.
+		$weeks = ( ($end_epoch - $start_epoch) / (86400 * 7) );
 		Debug::text('Week Difference: '. $weeks, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $weeks;
 	}
 
 	public static function getMonthDifference($start_epoch, $end_epoch) {
-		Debug::text('Start Epoch: '. TTDate::getDate('DATE+TIME', $start_epoch) .' End Epoch: '. TTDate::getDate('DATE+TIME', $end_epoch), __FILE__, __LINE__, __METHOD__, 10);
-
-		$epoch_diff = ( $end_epoch - $start_epoch );
-		Debug::text('Diff Epoch: '. $epoch_diff, __FILE__, __LINE__, __METHOD__, 10);
-		$x = floor( ( $epoch_diff / 60 / 60 / 24 / 7 / 4 ) );
-
-		/*
-		$x=-1; //Start at -1 because it'll always match the first month?
-		for($i = $start_epoch; $i < $end_epoch; $i += ( date('t', $i) * 86400) ) {
-			//echo "I: $i ". TTDate::getDate('DATE+TIME', $i) ." <br>\n";
-			Debug::text('I: '. $i.' '. TTDate::getDate('DATE+TIME', $i), __FILE__, __LINE__, __METHOD__, 10);
-			$x++;
+		if ( $start_epoch == '' OR $end_epoch == '' ) {
+			return FALSE;
 		}
-		*/
+
+		//Debug::text('Start Epoch: '. TTDate::getDate('DATE+TIME', $start_epoch) .' End Epoch: '. TTDate::getDate('DATE+TIME', $end_epoch), __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( function_exists('date_diff') ) {
+			//If available, try to be as accurate as possible.
+			$diff = date_diff( new DateTime( '@'.$end_epoch ), new DateTime( '@'.$start_epoch ), FALSE );
+			$x = ( ( ( $diff->y * 12 ) + $diff->m ) + ( $diff->d / 30 ) );
+		} else {
+			$epoch_diff = ( $end_epoch - $start_epoch );
+			//Debug::text('Diff Epoch: '. $epoch_diff, __FILE__, __LINE__, __METHOD__, 10);
+			$x = floor( ( $epoch_diff / ( 86400 * 30.436875 ) ) );
+		}
 		Debug::text('Month Difference: '. $x, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $x;
 	}
 
 	public static function getYearDifference($start_epoch, $end_epoch) {
-		//FIXME: Be more accurate, take leap years in to account etc...
-		$years = ( ( ($end_epoch - $start_epoch) / 86400 ) / 365 );
-
+		if ( $start_epoch == '' OR $end_epoch == '' ) {
+			return FALSE;
+		}
+		
+		if ( function_exists('date_diff') ) {
+			//If available, try to be as accurate as possible.
+			$diff = date_diff( new DateTime( '@'.$start_epoch ), new DateTime( '@'.$end_epoch ), FALSE );
+			$years = ( $diff->y + ( $diff->m / 12 ) + ( $diff->d / 365.25 ) );
+		} else {
+			$years = ( ( ($end_epoch - $start_epoch) / ( 86400 * 365.25 ) ) );
+		}
 		//Debug::text('Years Difference: '. $years, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $years;
@@ -1855,6 +1883,11 @@ class TTDate {
 	}
 
 	public static function getTimeLockedDate($time_epoch, $date_epoch) {
+		//This causes unit tests to fail.
+		//if ( $time_epoch == '' OR $date_epoch == '' ) {
+			//return FALSE;
+		//}
+		
 		$time_arr = getdate($time_epoch);
 		$date_arr = getdate($date_epoch);
 
