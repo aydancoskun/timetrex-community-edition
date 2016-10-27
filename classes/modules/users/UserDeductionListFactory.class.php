@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11599 $
- * $Id: UserDeductionListFactory.class.php 11599 2013-12-04 21:13:42Z mikeb $
- * $Date: 2013-12-04 13:13:42 -0800 (Wed, 04 Dec 2013) $
+ * $Revision: 11830 $
+ * $Id: UserDeductionListFactory.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -46,7 +46,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					WHERE deleted = 0
 				';
@@ -73,7 +73,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 			$ph = array();
 
 			$query = '
-						select 	*
+						select	*
 						from	'. $this->getTable() .'
 						where	id in ('. $this->getListSQL($id, $ph) .')
 							AND deleted = 0';
@@ -83,7 +83,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 			$this->ExecuteSQL( $query, $ph );
 
 			if ( !is_array($id) ) {
-				$this->saveCache($this->rs,$id);
+				$this->saveCache($this->rs, $id);
 			}
 		}
 
@@ -110,7 +110,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $uf->getTable() .' as b
 					where
@@ -139,7 +139,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $uf->getTable() .' as b
 					where
@@ -168,7 +168,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $uf->getTable() .' as b,
 							'. $cdf->getTable() .' as c
@@ -204,7 +204,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $uf->getTable() .' as b
 					where
@@ -237,7 +237,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $uf->getTable() .' as b
 					where
@@ -272,7 +272,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $cdf->getTable() .' as b
 					where
@@ -306,7 +306,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $cdf->getTable() .' as b
 					where
@@ -347,7 +347,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $uf->getTable() .' as b,
 							'. $cdf->getTable() .' as c
@@ -388,7 +388,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $uf->getTable() .' as b
 					where
@@ -423,7 +423,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 			$order = array( 'uf.last_name' => 'asc', 'uf.first_name' => 'asc');
 			$strict = FALSE;
 		} else {
-			//Always sort by last name,first name after other columns
+			//Always sort by last name, first name after other columns
 			if ( !isset($order['uf.last_name']) ) {
 				$order['uf.last_name'] = 'asc';
 			}
@@ -432,8 +432,8 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 			}
 			$strict = TRUE;
 		}
-		//Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$uf = new UserFactory();
 		$cdf = new CompanyDeductionFactory();
@@ -443,7 +443,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 					);
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							uf.first_name as first_name,
 							uf.last_name as last_name,
 							uf.country as country,
@@ -460,7 +460,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 							z.first_name as updated_by_first_name,
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
-					from 	'. $this->getTable() .' as a
+					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $uf->getTable() .' as uf ON ( a.user_id = uf.id AND uf.deleted = 0 )
 						LEFT JOIN '. $cdf->getTable() .' as cdf ON ( a.company_deduction_id = cdf.id AND cdf.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
@@ -479,10 +479,10 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 		$query .= ( isset($filter_data['company_deduction_id']) ) ? $this->getWhereClauseSQL( 'a.company_deduction_id', $filter_data['company_deduction_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['calculation_id']) ) ? $this->getWhereClauseSQL( 'cdf.calculation_id', $filter_data['calculation_id'], 'numeric_list', $ph ) : NULL;
 
-        $query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-        $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
-        
-		$query .= 	'
+		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
+
+		$query .=	'
 						AND a.deleted = 0
 					';
 		$query .= $this->getWhereSQL( $where );

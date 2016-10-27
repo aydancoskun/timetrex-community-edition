@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10991 $
- * $Id: Permission.class.php 10991 2013-09-21 21:05:23Z ipso $
- * $Date: 2013-09-21 14:05:23 -0700 (Sat, 21 Sep 2013) $
+ * $Revision: 11830 $
+ * $Id: Permission.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -49,23 +49,23 @@ class Permission {
 
 		$cache_id = 'permission_all'.$user_id.$company_id;
 		$perm_arr = $plf->getCache($cache_id);
-		//Debug::Arr($perm_arr, 'Cached Perm Arr:', __FILE__, __LINE__, __METHOD__,9);
+		//Debug::Arr($perm_arr, 'Cached Perm Arr:', __FILE__, __LINE__, __METHOD__, 9);
 		if ( $perm_arr === FALSE ) {
 			$plf->getAllPermissionsByCompanyIdAndUserId( $company_id, $user_id );
 			if ( $plf->getRecordCount() > 0 ) {
-				//Debug::Text('Found Permissions in DB!', __FILE__, __LINE__, __METHOD__,9);
+				//Debug::Text('Found Permissions in DB!', __FILE__, __LINE__, __METHOD__, 9);
 				$perm_arr['_system']['last_updated_date'] = NULL;
 				foreach($plf as $p_obj) {
-					//Debug::Text('Perm -  Section: '. $p_obj->getSection(), __FILE__, __LINE__, __METHOD__,9);
+					//Debug::Text('Perm -  Section: '. $p_obj->getSection(), __FILE__, __LINE__, __METHOD__, 9);
 					if ( $p_obj->getUpdatedDate() > $perm_arr['_system']['last_updated_date'] ) {
-						$perm_arr['_system']['last_updated_date'] =  $p_obj->getUpdatedDate();
+						$perm_arr['_system']['last_updated_date'] = $p_obj->getUpdatedDate();
 					}
 					$perm_arr[$p_obj->getSection()][$p_obj->getName()] = $p_obj->getValue();
 				}
 				//Last iteration, grab the permission level.
-				$perm_arr['_system']['level'] =  $p_obj->getColumn('level');
+				$perm_arr['_system']['level'] = $p_obj->getColumn('level');
 
-				$plf->saveCache($perm_arr,$cache_id);
+				$plf->saveCache($perm_arr, $cache_id);
 
 				return $perm_arr;
 			}
@@ -90,14 +90,14 @@ class Permission {
 			$company_id = $current_company->getId();
 		}
 
-		//Debug::Text('Permission Check - Section: '. $section .' Name: '. $name .' User ID: '. $user_id .' Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__,9);
+		//Debug::Text('Permission Check - Section: '. $section .' Name: '. $name .' User ID: '. $user_id .' Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 9);
 		$permission_arr = $this->getPermissions( $user_id, $company_id );
 
 		if ( isset($permission_arr[$section][$name]) ) {
-			//Debug::Text('Permission is Set!', __FILE__, __LINE__, __METHOD__,9);
+			//Debug::Text('Permission is Set!', __FILE__, __LINE__, __METHOD__, 9);
 			$result = $permission_arr[$section][$name];
 		} else {
-			//Debug::Text('Permission is NOT Set!', __FILE__, __LINE__, __METHOD__,9);
+			//Debug::Text('Permission is NOT Set!', __FILE__, __LINE__, __METHOD__, 9);
 			$result = FALSE;
 		}
 
@@ -148,7 +148,7 @@ class Permission {
 	}
 
 	function Query($section, $name, $user_id = NULL, $company_id = NULL) {
-		Debug::Text('Permission Query!' , __FILE__, __LINE__, __METHOD__,9);
+		Debug::Text('Permission Query!', __FILE__, __LINE__, __METHOD__, 9);
 		if ( $user_id == NULL OR $user_id == '') {
 			global $current_user;
 			if ( is_object( $current_user ) ) {
@@ -342,7 +342,7 @@ class Permission {
 		$permission_children_ids = $this->getPermissionHierarchyChildren( $company_id, $user_id );
 
 		//If 'view' is FALSE, we are not returning children to check for edit/delete permissions, so those are denied.
-		//This can be tested with 'users','view', 'users','edit_subordinate' allowed. They won't be able to edit subordinates.
+		//This can be tested with 'users', 'view', 'users', 'edit_subordinate' allowed. They won't be able to edit subordinates.
 		if ( $this->Check( $section, $name ) == FALSE ) {
 			if ( $this->Check( $section, $name.'_child') ) {
 				$retarr = $permission_children_ids;
@@ -352,7 +352,7 @@ class Permission {
 			//there may be cases where they can edit subordinates but not themselves.
 			//Because in the SQL query, we restrict to just the child_ids.
 			//Its different view view_own/view_child as compared to edit_own/edit_child.
-			//  So we need to include the current user if they can only view their own, but exclude the current user when doing is_child checks above.
+			//	So we need to include the current user if they can only view their own, but exclude the current user when doing is_child checks above.
 			//Another way we could handle this is to return an array of children and owner separately, then in SQL queries combine them together.
 			if ( $this->Check( $section, $name.'_own') ) {
 				$retarr[] = $user_id;
@@ -385,7 +385,7 @@ class Permission {
 			$company_id = $current_company->getId();
 		}
 
-		//Debug::Text('Permission Check - Section: '. $section .' Name: '. $name .' User ID: '. $user_id .' Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__,9);
+		//Debug::Text('Permission Check - Section: '. $section .' Name: '. $name .' User ID: '. $user_id .' Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 9);
 		$permission_arr = $this->getPermissions( $user_id, $company_id );
 
 		if ( isset($permission_arr['_system']['last_updated_date']) ) {

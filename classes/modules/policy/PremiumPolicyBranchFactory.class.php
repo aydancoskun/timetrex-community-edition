@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: PremiumPolicyBranchFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 12026 $
+ * $Id: PremiumPolicyBranchFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -65,7 +65,7 @@ class PremiumPolicyBranchFactory extends Factory {
 
 	function getPremiumPolicy() {
 		if ( isset($this->data['premium_policy_id']) ) {
-			return $this->data['premium_policy_id'];
+			return (int)$this->data['premium_policy_id'];
 		}
 	}
 	function setPremiumPolicy($id) {
@@ -96,7 +96,7 @@ class PremiumPolicyBranchFactory extends Factory {
 
 	function getBranch() {
 		if ( isset($this->data['branch_id']) ) {
-			return $this->data['branch_id'];
+			return (int)$this->data['branch_id'];
 		}
 
 		return FALSE;
@@ -168,7 +168,7 @@ class PremiumPolicyBranchFactory extends Factory {
 	function addLog( $log_action ) {
 		$obj = $this->getBranchObject();
 		if ( is_object($obj) ) {
-			return TTLog::addEntry( $this->getPremiumPolicy(), $log_action,  TTi18n::getText('Branch').': '. $obj->getName(), NULL, $this->getTable() );
+			return TTLog::addEntry( $this->getPremiumPolicy(), $log_action, TTi18n::getText('Branch').': '. $obj->getName(), NULL, $this->getTable() );
 		}
 	}
 }

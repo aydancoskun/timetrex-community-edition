@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11545 $
- * $Id: OverTimePolicyFactory.class.php 11545 2013-11-29 02:04:30Z mikeb $
- * $Date: 2013-11-28 18:04:30 -0800 (Thu, 28 Nov 2013) $
+ * $Revision: 12179 $
+ * $Id: OverTimePolicyFactory.class.php 12179 2014-01-30 18:27:00Z mikeb $
+ * $Date: 2014-01-30 10:27:00 -0800 (Thu, 30 Jan 2014) $
  */
 
 /**
@@ -213,7 +213,7 @@ class OverTimePolicyFactory extends Factory {
 
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
-			return $this->data['company_id'];
+			return (int)$this->data['company_id'];
 		}
 
 		return FALSE;
@@ -221,7 +221,7 @@ class OverTimePolicyFactory extends Factory {
 	function setCompany($id) {
 		$id = trim($id);
 
-		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$clf = TTnew( 'CompanyListFactory' );
 
 		if ( $this->Validator->isResultSetWithRows(	'company',
@@ -239,7 +239,7 @@ class OverTimePolicyFactory extends Factory {
 
 	function getType() {
 		if ( isset($this->data['type_id']) ) {
-			return $this->data['type_id'];
+			return (int)$this->data['type_id'];
 		}
 
 		return FALSE;
@@ -273,7 +273,7 @@ class OverTimePolicyFactory extends Factory {
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
 		$id = $this->db->GetOne($query, $ph);
-		Debug::Arr($id,'Unique: '. $name, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($id, 'Unique: '. $name, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id === FALSE ) {
 			return TRUE;
@@ -297,7 +297,7 @@ class OverTimePolicyFactory extends Factory {
 		if (	$this->Validator->isLength(	'name',
 											$name,
 											TTi18n::gettext('Name is too short or too long'),
-											2,50)
+											2, 50)
 				AND
 				$this->Validator->isTrue(	'name',
 											$this->isUniqueName($name),
@@ -322,11 +322,11 @@ class OverTimePolicyFactory extends Factory {
 	function setTriggerTime($int) {
 		$int = trim($int);
 
-		if  ( empty($int) ){
+		if	( empty($int) ) {
 			$int = 0;
 		}
 
-		if 	(	$this->Validator->isNumeric(		'trigger_time',
+		if	(	$this->Validator->isNumeric(		'trigger_time',
 													$int,
 													TTi18n::gettext('Incorrect Trigger Time')) ) {
 			$this->data['trigger_time'] = $int;
@@ -351,11 +351,11 @@ class OverTimePolicyFactory extends Factory {
 	function setRate($int) {
 		$int = trim($int);
 
-		if  ( empty($int) ){
+		if	( empty($int) ) {
 			$int = 0;
 		}
 
-		if 	(	$this->Validator->isFloat(		'rate',
+		if	(	$this->Validator->isFloat(		'rate',
 												$int,
 												TTi18n::gettext('Incorrect Rate')) ) {
 			$this->data['rate'] = $int;
@@ -368,7 +368,7 @@ class OverTimePolicyFactory extends Factory {
 
 	function getWageGroup() {
 		if ( isset($this->data['wage_group_id']) ) {
-			return $this->data['wage_group_id'];
+			return (int)$this->data['wage_group_id'];
 		}
 
 		return FALSE;
@@ -403,11 +403,11 @@ class OverTimePolicyFactory extends Factory {
 	function setAccrualRate($int) {
 		$int = trim($int);
 
-		if  ( empty($int) ){
+		if	( empty($int) ) {
 			$int = 0;
 		}
 
-		if 	(	$this->Validator->isFloat(		'accrual_rate',
+		if	(	$this->Validator->isFloat(		'accrual_rate',
 												$int,
 												TTi18n::gettext('Incorrect Accrual Rate')) ) {
 			$this->data['accrual_rate'] = $int;
@@ -420,7 +420,7 @@ class OverTimePolicyFactory extends Factory {
 
 	function getAccrualPolicyID() {
 		if ( isset($this->data['accrual_policy_id']) ) {
-			return $this->data['accrual_policy_id'];
+			return (int)$this->data['accrual_policy_id'];
 		}
 
 		return FALSE;
@@ -451,7 +451,7 @@ class OverTimePolicyFactory extends Factory {
 
 	function getPayStubEntryAccountId() {
 		if ( isset($this->data['pay_stub_entry_account_id']) ) {
-			return $this->data['pay_stub_entry_account_id'];
+			return (int)$this->data['pay_stub_entry_account_id'];
 		}
 
 		return FALSE;
@@ -459,7 +459,7 @@ class OverTimePolicyFactory extends Factory {
 	function setPayStubEntryAccountId($id) {
 		$id = trim($id);
 
-		Debug::text('Entry Account ID: '. $id , __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Entry Account ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id == '' OR empty($id) ) {
 			$id = NULL;
@@ -467,7 +467,8 @@ class OverTimePolicyFactory extends Factory {
 
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 
-		if (
+		if (	$id == NULL
+				OR
 				$this->Validator->isResultSetWithRows(	'pay_stub_entry_account_id',
 														$psealf->getById($id),
 														TTi18n::gettext('Invalid Pay Stub Account')
@@ -481,7 +482,7 @@ class OverTimePolicyFactory extends Factory {
 	}
 
 	function Validate() {
-		if ( $this->getDeleted() == TRUE ){
+		if ( $this->getDeleted() == TRUE ) {
 			//Check to make sure there are no hours using this OT policy.
 			$udtlf = TTnew( 'UserDateTotalListFactory' );
 			$udtlf->getByOverTimePolicyId( $this->getId() );
@@ -567,7 +568,7 @@ class OverTimePolicyFactory extends Factory {
 	}
 
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action,  TTi18n::getText('OverTime Policy'), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('OverTime Policy'), NULL, $this->getTable(), $this );
 	}
 }
 ?>

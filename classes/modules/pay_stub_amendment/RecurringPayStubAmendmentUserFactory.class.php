@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8561 $
- * $Id: RecurringPayStubAmendmentUserFactory.class.php 8561 2012-12-10 21:10:26Z ipso $
- * $Date: 2012-12-10 13:10:26 -0800 (Mon, 10 Dec 2012) $
+ * $Revision: 12026 $
+ * $Id: RecurringPayStubAmendmentUserFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -64,7 +64,7 @@ class RecurringPayStubAmendmentUserFactory extends Factory {
 	}
 
 	function getRecurringPayStubAmendment() {
-		return $this->data['recurring_ps_amendment_id'];
+		return (int)$this->data['recurring_ps_amendment_id'];
 	}
 	function setRecurringPayStubAmendment($id) {
 		$id = trim($id);
@@ -85,7 +85,7 @@ class RecurringPayStubAmendmentUserFactory extends Factory {
 	}
 
 	function getUser() {
-		return $this->data['user_id'];
+		return (int)$this->data['user_id'];
 	}
 	function setUser($id) {
 		$id = trim($id);
@@ -156,7 +156,7 @@ class RecurringPayStubAmendmentUserFactory extends Factory {
 	function addLog( $log_action ) {
 		$u_obj = $this->getUserObject();
 		if ( is_object($u_obj) ) {
-			return TTLog::addEntry( $this->getRecurringPayStubAmendment(), $log_action, TTi18n::getText('Employee').': '. $u_obj->getFullName( FALSE, TRUE ) , NULL, $this->getTable() );
+			return TTLog::addEntry( $this->getRecurringPayStubAmendment(), $log_action, TTi18n::getText('Employee').': '. $u_obj->getFullName( FALSE, TRUE ), NULL, $this->getTable() );
 		}
 
 		return FALSE;

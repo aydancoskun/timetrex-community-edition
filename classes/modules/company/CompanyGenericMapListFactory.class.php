@@ -46,7 +46,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable();
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -66,7 +66,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 					';
@@ -88,7 +88,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
 					';
@@ -112,7 +112,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 		$ph = array( 'company_id' => $company_id);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					where	a.company_id = ?
 						AND a.object_type_id in ('. $this->getListSQL($id, $ph) .')
@@ -141,7 +141,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 		$ph = array( 'company_id' => $company_id);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					where	a.company_id = ?
 						AND a.object_type_id in ('. $this->getListSQL($object_type_id, $ph) .')
@@ -154,7 +154,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 
 		return $this;
 	}
- 
+
 	function getByCompanyIDAndObjectTypeAndMapID($company_id, $object_type_id, $id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -171,7 +171,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 		$ph = array( 'company_id' => $company_id);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					where	a.company_id = ?
 						AND a.object_type_id in ('. $this->getListSQL($object_type_id, $ph) .')
@@ -184,7 +184,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 		return $this;
 	}
 
-	function getByCompanyIDAndObjectTypeAndObjectIDAndMapID($company_id, $object_type_id, $id, $map_id,  $where = NULL, $order = NULL) {
+	function getByCompanyIDAndObjectTypeAndObjectIDAndMapID($company_id, $object_type_id, $id, $map_id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -200,7 +200,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 		$ph = array( 'company_id' => $company_id);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					where	a.company_id = ?
 						AND a.object_type_id in ('. $this->getListSQL($object_type_id, $ph) .')
@@ -215,7 +215,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 		return $this;
 	}
 
-	function getByCompanyIDAndObjectTypeAndObjectIDAndNotMapID($company_id, $object_type_id, $id, $map_id,  $where = NULL, $order = NULL) {
+	function getByCompanyIDAndObjectTypeAndObjectIDAndNotMapID($company_id, $object_type_id, $id, $map_id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -231,7 +231,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 		$ph = array( 'company_id' => $company_id);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					where	a.company_id = ?
 						AND a.object_type_id in ('. $this->getListSQL($object_type_id, $ph) .')
@@ -254,7 +254,7 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 		$ph = array();
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					where	a.object_type_id in ('. $this->getListSQL($id, $ph) .')
 					';
@@ -278,10 +278,10 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 		$ph = array();
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
-					where	a.object_type_id in ('.  $this->getListSQL($object_type_id, $ph) .')
-						AND a.object_id in ('.  $this->getListSQL($id, $ph) .')
+					where	a.object_type_id in ('.	 $this->getListSQL($object_type_id, $ph) .')
+						AND a.object_id in ('.	$this->getListSQL($id, $ph) .')
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );

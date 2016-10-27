@@ -46,7 +46,7 @@ class LogDetailListFactory extends LogDetailFactory implements IteratorAggregate
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 				';
 		$query .= $this->getWhereSQL( $where );
@@ -67,7 +67,7 @@ class LogDetailListFactory extends LogDetailFactory implements IteratorAggregate
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 					';
@@ -97,7 +97,7 @@ class LogDetailListFactory extends LogDetailFactory implements IteratorAggregate
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 						LEFT JOIN  '. $lf->getTable() .' as lf on a.system_log_id = lf.id
 						LEFT JOIN  '. $uf->getTable() .' as uf on lf.user_id = uf.id
@@ -124,7 +124,7 @@ class LogDetailListFactory extends LogDetailFactory implements IteratorAggregate
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 						LEFT JOIN  '. $lf->getTable() .' as lf on a.system_log_id = lf.id
 						LEFT JOIN  '. $uf->getTable() .' as uf on lf.user_id = uf.id
@@ -163,7 +163,7 @@ class LogDetailListFactory extends LogDetailFactory implements IteratorAggregate
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 						LEFT JOIN  '. $lf->getTable() .' as lf on a.system_log_id = lf.id
 						LEFT JOIN  '. $uf->getTable() .' as uf on lf.user_id = uf.id

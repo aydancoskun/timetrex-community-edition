@@ -59,8 +59,8 @@ class APIAccrualBalance extends APIFactory {
 	 */
 	function getOptions( $name, $parent = NULL ) {
 		if ( $name == 'columns'
-				AND ( !$this->getPermissionObject()->Check('accrual','enabled')
-					OR !( $this->getPermissionObject()->Check('accrual','view') OR $this->getPermissionObject()->Check('accrual','view_child') ) ) ) {
+				AND ( !$this->getPermissionObject()->Check('accrual', 'enabled')
+					OR !( $this->getPermissionObject()->Check('accrual', 'view') OR $this->getPermissionObject()->Check('accrual', 'view_child') ) ) ) {
 			$name = 'list_columns';
 		}
 
@@ -73,8 +73,8 @@ class APIAccrualBalance extends APIFactory {
 	 * @return array
 	 */
 	function getAccrualBalance( $data = NULL, $disable_paging = FALSE ) {
-		if ( !$this->getPermissionObject()->Check('accrual','enabled')
-				OR !( $this->getPermissionObject()->Check('accrual','view') OR $this->getPermissionObject()->Check('accrual','view_own') OR $this->getPermissionObject()->Check('accrual','view_child')  ) ) {
+		if ( !$this->getPermissionObject()->Check('accrual', 'enabled')
+				OR !( $this->getPermissionObject()->Check('accrual', 'view') OR $this->getPermissionObject()->Check('accrual', 'view_own') OR $this->getPermissionObject()->Check('accrual', 'view_child')	) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );

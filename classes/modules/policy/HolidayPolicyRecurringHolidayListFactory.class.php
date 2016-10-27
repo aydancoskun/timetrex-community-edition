@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10788 $
- * $Id: HolidayPolicyRecurringHolidayListFactory.class.php 10788 2013-08-30 23:55:26Z ipso $
- * $Date: 2013-08-30 16:55:26 -0700 (Fri, 30 Aug 2013) $
+ * $Revision: 11830 $
+ * $Id: HolidayPolicyRecurringHolidayListFactory.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -46,7 +46,7 @@ class HolidayPolicyRecurringHolidayListFactory extends HolidayPolicyRecurringHol
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable();
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -66,7 +66,7 @@ class HolidayPolicyRecurringHolidayListFactory extends HolidayPolicyRecurringHol
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 					';
@@ -90,7 +90,7 @@ class HolidayPolicyRecurringHolidayListFactory extends HolidayPolicyRecurringHol
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					LEFT JOIN '. $hpf->getTable() .' as hpf ON a.holiday_policy_id = hpf.id
 					where	hpf.company_id = ?
@@ -115,7 +115,7 @@ class HolidayPolicyRecurringHolidayListFactory extends HolidayPolicyRecurringHol
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					where	a.holiday_policy_id = ?
 					';

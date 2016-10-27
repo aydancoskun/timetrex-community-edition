@@ -56,7 +56,7 @@ class APITest extends APIFactory {
 	}
 
 	function delay( $seconds = 10 ) {
-		Debug::text('delay: '. $seconds, __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('delay: '. $seconds, __FILE__, __LINE__, __METHOD__, 9);
 
 		sleep( $seconds );
 		return TRUE;
@@ -96,7 +96,7 @@ class APITest extends APIFactory {
 		$this->getProgressBarObject()->start( $progress_bar_id, $max_size );
 
 		$retarr = array();
-		for($i=1; $i <= $max_size; $i++ ) {
+		for($i = 1; $i <= $max_size; $i++ ) {
 			$retarr[] = array('foo1' => 'bar1', 'foo2' => 'bar2', 'foo3' => 'bar3');
 			usleep( $delay );
 			$this->getProgressBarObject()->set( $progress_bar_id, $i );

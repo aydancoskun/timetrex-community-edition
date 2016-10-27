@@ -57,8 +57,8 @@ class APIPayStub extends APIFactory {
 	 * @return array
 	 */
 	function getPayStub( $data = NULL, $disable_paging = FALSE, $format = FALSE, $hide_employer_rows = TRUE ) {
-		if ( !$this->getPermissionObject()->Check('pay_stub','enabled')
-				OR !( $this->getPermissionObject()->Check('pay_stub','view') OR $this->getPermissionObject()->Check('pay_stub','view_own')  OR $this->getPermissionObject()->Check('pay_stub','view_child')  ) ) {
+		if ( !$this->getPermissionObject()->Check('pay_stub', 'enabled')
+				OR !( $this->getPermissionObject()->Check('pay_stub', 'view') OR $this->getPermissionObject()->Check('pay_stub', 'view_own') OR $this->getPermissionObject()->Check('pay_stub', 'view_child')  ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
@@ -67,7 +67,7 @@ class APIPayStub extends APIFactory {
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view' );
 
-		if ( $this->getPermissionObject()->Check('pay_stub','view') == FALSE AND $this->getPermissionObject()->Check('pay_stub','view_child') == FALSE ) {
+		if ( $this->getPermissionObject()->Check('pay_stub', 'view') == FALSE AND $this->getPermissionObject()->Check('pay_stub', 'view_child') == FALSE ) {
 			//Only display PAID pay stubs.
 			$data['filter_data']['status_id'] = array(40);
 		}
@@ -98,7 +98,7 @@ class APIPayStub extends APIFactory {
 
 				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
-				return Misc::APIFileDownload( 'checks_'. str_replace(array('/',',',' '), '_', TTDate::getDate('DATE', time() ) ) .'.pdf', 'application/pdf', $output );
+				return Misc::APIFileDownload( 'checks_'. str_replace(array('/', ',', ' '), '_', TTDate::getDate('DATE', time() ) ) .'.pdf', 'application/pdf', $output );
 			}
 		} elseif ( strpos( strtolower($format), 'eft_' ) !== FALSE ) {
 			if ( $pslf->getRecordCount() > 0 ) {
@@ -178,9 +178,9 @@ class APIPayStub extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('pay_stub','enabled')
-				OR !( $this->getPermissionObject()->Check('pay_stub','edit') OR $this->getPermissionObject()->Check('pay_stub','edit_own') OR $this->getPermissionObject()->Check('pay_stub','edit_child') OR $this->getPermissionObject()->Check('pay_stub','add') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('pay_stub', 'enabled')
+				OR !( $this->getPermissionObject()->Check('pay_stub', 'edit') OR $this->getPermissionObject()->Check('pay_stub', 'edit_own') OR $this->getPermissionObject()->Check('pay_stub', 'edit_child') OR $this->getPermissionObject()->Check('pay_stub', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		if ( $validate_only == TRUE ) {
@@ -206,11 +206,11 @@ class APIPayStub extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if (
-							  $validate_only == TRUE
-							  OR
+							$validate_only == TRUE
+							OR
 								(
-								$this->getPermissionObject()->Check('pay_stub','edit')
-									OR ( $this->getPermissionObject()->Check('pay_stub','edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+								$this->getPermissionObject()->Check('pay_stub', 'edit')
+									OR ( $this->getPermissionObject()->Check('pay_stub', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -225,7 +225,7 @@ class APIPayStub extends APIFactory {
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('pay_stub','add'), TTi18n::gettext('Add permission denied') );
+					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('pay_stub', 'add'), TTi18n::gettext('Add permission denied') );
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -304,16 +304,16 @@ class APIPayStub extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('pay_stub','enabled')
-				OR !( $this->getPermissionObject()->Check('pay_stub','delete') OR $this->getPermissionObject()->Check('pay_stub','delete_own') OR $this->getPermissionObject()->Check('pay_stub','delete_child') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('pay_stub', 'enabled')
+				OR !( $this->getPermissionObject()->Check('pay_stub', 'delete') OR $this->getPermissionObject()->Check('pay_stub', 'delete_own') OR $this->getPermissionObject()->Check('pay_stub', 'delete_child') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		Debug::Text('Received data for: '. count($data) .' PayStubs', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-        $validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
+		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
@@ -327,8 +327,8 @@ class APIPayStub extends APIFactory {
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
-						if ( $this->getPermissionObject()->Check('pay_stub','delete')
-								OR ( $this->getPermissionObject()->Check('pay_stub','delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
+						if ( $this->getPermissionObject()->Check('pay_stub', 'delete')
+								OR ( $this->getPermissionObject()->Check('pay_stub', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
 							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
@@ -392,10 +392,10 @@ class APIPayStub extends APIFactory {
 
 	function generatePayStubs( $pay_period_ids, $user_ids = NULL, $enable_correction = FALSE ) {
 		global $profiler;
-		Debug::Text('Generate Pay Stubs!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Generate Pay Stubs!', __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( !$this->getPermissionObject()->Check('pay_period_schedule','enabled')
-				OR !( $this->getPermissionObject()->Check('pay_period_schedule','edit') OR $this->getPermissionObject()->Check('pay_period_schedule','edit_own') ) ) {
+		if ( !$this->getPermissionObject()->Check('pay_period_schedule', 'enabled')
+				OR !( $this->getPermissionObject()->Check('pay_period_schedule', 'edit') OR $this->getPermissionObject()->Check('pay_period_schedule', 'edit_own') ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
@@ -410,7 +410,7 @@ class APIPayStub extends APIFactory {
 		}
 
 		foreach($pay_period_ids as $pay_period_id) {
-			Debug::text('Pay Period ID: '. $pay_period_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Period ID: '. $pay_period_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			$pplf = TTnew( 'PayPeriodListFactory' );
 			$pplf->getByIdAndCompanyId($pay_period_id, $this->getCurrentCompanyObject()->getId() );
@@ -418,13 +418,13 @@ class APIPayStub extends APIFactory {
 			$epoch = TTDate::getTime();
 
 			foreach ($pplf as $pay_period_obj) {
-				Debug::text('Pay Period Schedule ID: '. $pay_period_obj->getPayPeriodSchedule(), __FILE__, __LINE__, __METHOD__,10);
+				Debug::text('Pay Period Schedule ID: '. $pay_period_obj->getPayPeriodSchedule(), __FILE__, __LINE__, __METHOD__, 10);
 
 				if ( $pay_period_obj->isPreviousPayPeriodClosed() == TRUE ) {
 					//Grab all users for pay period
 					$ppsulf = TTnew( 'PayPeriodScheduleUserListFactory' );
 					if ( is_array($user_ids) AND count($user_ids) > 0 ) {
-						Debug::text('Generating pay stubs for specific users...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('Generating pay stubs for specific users...', __FILE__, __LINE__, __METHOD__, 10);
 
 						TTLog::addEntry( $this->getCurrentCompanyObject()->getId(), 500, TTi18n::gettext('Calculating Company Pay Stubs for Pay Period').': '. $pay_period_id, $this->getCurrentUserObject()->getId(), 'pay_stub' ); //Notice
 						$ppsulf->getByCompanyIDAndPayPeriodScheduleIdAndUserID( $this->getCurrentCompanyObject()->getId(), $pay_period_obj->getPayPeriodSchedule(), $user_ids );
@@ -444,7 +444,7 @@ class APIPayStub extends APIFactory {
 						if ( is_array($user_ids) AND count($user_ids) > 0 AND in_array( $pay_stub_obj->getUser(), $user_ids ) == FALSE ) {
 							continue; //Only generating pay stubs for individual employees, skip ones not in the list.
 						}
-						Debug::text('Existing Pay Stub: '. $pay_stub_obj->getId(), __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('Existing Pay Stub: '. $pay_stub_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 
 						//Check PS End Date to match with PP End Date
 						//So if an ROE was generated, it won't get deleted when they generate all other Pay Stubs
@@ -452,18 +452,18 @@ class APIPayStub extends APIFactory {
 						if ( $pay_stub_obj->getStatus() <= 25
 								AND $pay_stub_obj->getTainted() === FALSE
 								AND TTDate::getMiddleDayEpoch( $pay_stub_obj->getEndDate() ) == TTDate::getMiddleDayEpoch( $pay_period_obj->getEndDate() ) ) {
-							Debug::text('Deleting pay stub: '. $pay_stub_obj->getId(), __FILE__, __LINE__, __METHOD__,10);
+							Debug::text('Deleting pay stub: '. $pay_stub_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 							$pay_stub_obj->setDeleted(TRUE);
 							$pay_stub_obj->Save();
 						} else {
-							Debug::text('Pay stub does not need regenerating, or it is LOCKED! ID: '. $pay_stub_obj->getID() .' Status: '. $pay_stub_obj->getStatus() .' Tainted: '. (int)$pay_stub_obj->getTainted() .' Pay Stub End Date: '. $pay_stub_obj->getEndDate() .' Pay Period End Date: '. $pay_period_obj->getEndDate(), __FILE__, __LINE__, __METHOD__,10);
+							Debug::text('Pay stub does not need regenerating, or it is LOCKED! ID: '. $pay_stub_obj->getID() .' Status: '. $pay_stub_obj->getStatus() .' Tainted: '. (int)$pay_stub_obj->getTainted() .' Pay Stub End Date: '. $pay_stub_obj->getEndDate() .' Pay Period End Date: '. $pay_period_obj->getEndDate(), __FILE__, __LINE__, __METHOD__, 10);
 						}
 					}
 
-					$i=1;
+					$i = 1;
 					foreach ($ppsulf as $pay_period_schdule_user_obj) {
-						Debug::text('Pay Period User ID: '. $pay_period_schdule_user_obj->getUser(), __FILE__, __LINE__, __METHOD__,10);
-						Debug::text('Total Pay Stubs: '. $total_pay_stubs .' - '. ceil( 1 / (100 / $total_pay_stubs) ) , __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('Pay Period User ID: '. $pay_period_schdule_user_obj->getUser(), __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('Total Pay Stubs: '. $total_pay_stubs .' - '. ceil( 1 / (100 / $total_pay_stubs) ), __FILE__, __LINE__, __METHOD__, 10);
 
 						$profiler->startTimer( 'Calculating Pay Stub' );
 						//Calc paystubs.

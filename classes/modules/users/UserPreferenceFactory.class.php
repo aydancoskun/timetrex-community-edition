@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11457 $
- * $Id: UserPreferenceFactory.class.php 11457 2013-11-20 00:40:13Z mikeb $
- * $Date: 2013-11-19 16:40:13 -0800 (Tue, 19 Nov 2013) $
+ * $Revision: 12026 $
+ * $Id: UserPreferenceFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -59,26 +59,26 @@ class UserPreferenceFactory extends Factory {
 											'd-M-y'		=> TTi18n::gettext('25-Feb-01 (dd-mmm-yy)'),
 											'd-M-Y'		=> TTi18n::gettext('25-Feb-2001 (dd-mmm-yyyy)'),
 											//PHP 5.1.2 fails to parse these with strtotime it looks like
-											//'d/M/y' 	=> '25/Feb/01 (dd/mmm/yy)',
-											//'d/M/Y' 	=> '25/Feb/2001 (dd/mmm/yyyy)',
-											'dMY' 		=> TTi18n::gettext('25Feb2001 (ddmmmyyyy)'),
-											'd/m/Y' 	=> '25/02/2001 (dd/mm/yyyy)',
-											'd/m/y' 	=> '25/02/01 (dd/mm/yy)',
-											'd-m-y' 	=> '25-02-01 (dd-mm-yy)',
+											//'d/M/y'	=> '25/Feb/01 (dd/mmm/yy)',
+											//'d/M/Y'	=> '25/Feb/2001 (dd/mmm/yyyy)',
+											'dMY'		=> TTi18n::gettext('25Feb2001 (ddmmmyyyy)'),
+											'd/m/Y'		=> '25/02/2001 (dd/mm/yyyy)',
+											'd/m/y'		=> '25/02/01 (dd/mm/yy)',
+											'd-m-y'		=> '25-02-01 (dd-mm-yy)',
 											'd-m-Y'		=> '25-02-2001 (dd-mm-yyyy)',
-											'm/d/y' 	=> '02/25/01 (mm/dd/yy)',
-											'm/d/Y' 	=> '02/25/2001 (mm/dd/yyyy)',
+											'm/d/y'		=> '02/25/01 (mm/dd/yy)',
+											'm/d/Y'		=> '02/25/2001 (mm/dd/yyyy)',
 											'm-d-y'		=> '02-25-01 (mm-dd-yy)',
 											'm-d-Y'		=> '02-25-2001 (mm-dd-yyyy)',
-											'Y-m-d' 	=> '2001-02-25 (yyyy-mm-dd)',
-											//'Ymd' 		=> '20010225 (yyyymmdd)', //This can't be parsed properly due to all integer values, parseDateTime() thinks its an epoch.
-											'M-d-y' 	=> TTi18n::gettext('Feb-25-01 (mmm-dd-yy)'),
-											'M-d-Y' 	=> TTi18n::gettext('Feb-25-2001 (mmm-dd-yyyy)'),
-											'l, F d Y' 	=> TTi18n::gettext('Sunday, February 25 2001'),
-											'D, F d Y' 	=> TTi18n::gettext('Sun, February 25 2001'),
-											'D, M d Y' 	=> TTi18n::gettext('Sun, Feb 25 2001'),
-											'D, d-M-Y' 	=> TTi18n::gettext('Sun, 25-Feb-2001'),
-											'D, dMY' 	=> TTi18n::gettext('Sun, 25Feb2001')
+											'Y-m-d'		=> '2001-02-25 (yyyy-mm-dd)',
+											//'Ymd'			=> '20010225 (yyyymmdd)', //This can't be parsed properly due to all integer values, parseDateTime() thinks its an epoch.
+											'M-d-y'		=> TTi18n::gettext('Feb-25-01 (mmm-dd-yy)'),
+											'M-d-Y'		=> TTi18n::gettext('Feb-25-2001 (mmm-dd-yyyy)'),
+											'l, F d Y'	=> TTi18n::gettext('Sunday, February 25 2001'),
+											'D, F d Y'	=> TTi18n::gettext('Sun, February 25 2001'),
+											'D, M d Y'	=> TTi18n::gettext('Sun, Feb 25 2001'),
+											'D, d-M-Y'	=> TTi18n::gettext('Sun, 25-Feb-2001'),
+											'D, dMY'	=> TTi18n::gettext('Sun, 25Feb2001')
 									);
 
 				if ( defined('TIMETREX_API') == TRUE AND TIMETREX_API == TRUE ) {
@@ -88,15 +88,15 @@ class UserPreferenceFactory extends Factory {
 			// I18n: We use fewer calendar options for non-en langs, as otherwise strtotime chokes.
 			case 'other_date_format':
 				$retval = array(
-											'd/m/Y' 	=> '25/02/2001 (dd/mm/yyyy)',
-											'd/m/y' 	=> '25/02/01 (dd/mm/yy)',
-											'd-m-y' 	=> '25-02-01 (dd-mm-yy)',
+											'd/m/Y'		=> '25/02/2001 (dd/mm/yyyy)',
+											'd/m/y'		=> '25/02/01 (dd/mm/yy)',
+											'd-m-y'		=> '25-02-01 (dd-mm-yy)',
 											'd-m-Y'		=> '25-02-2001 (dd-mm-yyyy)',
-											'm/d/y' 	=> '02/25/01 (mm/dd/yy)',
-											'm/d/Y' 	=> '02/25/2001 (mm/dd/yyyy)',
+											'm/d/y'		=> '02/25/01 (mm/dd/yy)',
+											'm/d/Y'		=> '02/25/2001 (mm/dd/yyyy)',
 											'm-d-y'		=> '02-25-01 (mm-dd-yy)',
 											'm-d-Y'		=> '02-25-2001 (mm-dd-yyyy)',
-											'Y-m-d' 	=> '2001-02-25 (yyyy-mm-dd)',
+											'Y-m-d'		=> '2001-02-25 (yyyy-mm-dd)',
 									);
 
 				if ( defined('TIMETREX_API') == TRUE AND TIMETREX_API == TRUE ) {
@@ -108,23 +108,23 @@ class UserPreferenceFactory extends Factory {
 											//http://www.dynarch.com/demos/jscalendar/doc/html/reference.html#node_sec_5
 											'd-M-y'		=> '%d-%b-%y',
 											'd-M-Y'		=> '%d-%b-%Y',
-											'dMY' 		=> '%d%b%Y',
-											'd/m/Y' 	=> '%d/%m/%Y',
-											'd/m/y' 	=> '%d/%m/%y',
-											'd-m-y' 	=> '%d-%m-%y',
+											'dMY'		=> '%d%b%Y',
+											'd/m/Y'		=> '%d/%m/%Y',
+											'd/m/y'		=> '%d/%m/%y',
+											'd-m-y'		=> '%d-%m-%y',
 											'd-m-Y'		=> '%d-%m-%Y',
-											'm/d/y' 	=> '%m/%d/%y',
-											'm/d/Y' 	=> '%m/%d/%Y',
+											'm/d/y'		=> '%m/%d/%y',
+											'm/d/Y'		=> '%m/%d/%Y',
 											'm-d-y'		=> '%m-%d-%y',
 											'm-d-Y'		=> '%m-%d-%Y',
-											'Y-m-d' 	=> '%Y-%m-%d',
-											'M-d-y' 	=> '%b-%d-%y',
-											'M-d-Y' 	=> '%b-%d-%Y',
+											'Y-m-d'		=> '%Y-%m-%d',
+											'M-d-y'		=> '%b-%d-%y',
+											'M-d-Y'		=> '%b-%d-%Y',
 											'l, F d Y'	=> '%A, %B %d %Y',
 											'D, F d Y'	=> '%a, %B %d %Y',
 											'D, M d Y'	=> '%a, %b %d %Y',
-											'D, d-M-Y' 	=> '%a, %d-%b-%Y',
-											'D, dMY' 	=> '%a, %d%b%Y'
+											'D, d-M-Y'	=> '%a, %d-%b-%Y',
+											'D, dMY'	=> '%a, %d%b%Y'
 									);
 				break;
 			case 'flex_date_format':
@@ -139,87 +139,87 @@ class UserPreferenceFactory extends Factory {
 											'm/d/y'		=> 'MM/DD/YY',
 											'm/d/Y'		=> 'MM/DD/YYYY',
 											'm-d-y'		=> 'MM-DD-YY',
-											'm-d-Y'     => 'MM-DD-YYYY',
+											'm-d-Y'		=> 'MM-DD-YYYY',
 											'Y-m-d'		=> 'YYYY-MM-DD',
 											'M-d-y'		=> 'MMM-DD-yy',
-											'M-d-Y' 	=> 'MMM-DD-YYYY',
-											'l, F d Y'  => 'EEEE,MMMM DD YYYY',
-											'D, F d Y'  => 'EEE,MMMM DD YYYY',
-											'D, M d Y'  => 'EEE,MMM DD YYYY',
-											'D, d-M-Y'  => 'EEE,DD-MMM-YYYY',
-											'D, dMY'	=> 'EEE,DDMMMYYYY'
+											'M-d-Y'		=> 'MMM-DD-YYYY',
+											'l, F d Y'	=> 'EEEE, MMMM DD YYYY',
+											'D, F d Y'	=> 'EEE, MMMM DD YYYY',
+											'D, M d Y'	=> 'EEE, MMM DD YYYY',
+											'D, d-M-Y'	=> 'EEE, DD-MMM-YYYY',
+											'D, dMY'	=> 'EEE, DDMMMYYYY'
 									);
 				break;
-            case 'jquery_date_format':
-                $retval = array(
+			case 'jquery_date_format':
+				$retval = array(
 											'd-M-y'		=> TTi18n::gettext('dd-mmm-yy'),
 											'd-M-Y'		=> TTi18n::gettext('dd-mmm-yyyy'),
 											//PHP 5.1.2 fails to parse these with strtotime it looks like
-											//'d/M/y' 	=> '25/Feb/01 (dd/mmm/yy)',
-											//'d/M/Y' 	=> '25/Feb/2001 (dd/mmm/yyyy)',
-											'dMY' 		=> TTi18n::gettext('ddmmmyyyy'),
-											'd/m/Y' 	=> 'dd/mm/yyyy',
-											'd/m/y' 	=> 'dd/mm/yy',
-											'd-m-y' 	=> 'dd-mm-yy',
+											//'d/M/y'	=> '25/Feb/01 (dd/mmm/yy)',
+											//'d/M/Y'	=> '25/Feb/2001 (dd/mmm/yyyy)',
+											'dMY'		=> TTi18n::gettext('ddmmmyyyy'),
+											'd/m/Y'		=> 'dd/mm/yyyy',
+											'd/m/y'		=> 'dd/mm/yy',
+											'd-m-y'		=> 'dd-mm-yy',
 											'd-m-Y'		=> 'dd-mm-yyyy',
-											'm/d/y' 	=> 'mm/dd/yy',
-											'm/d/Y' 	=> 'mm/dd/yyyy',
+											'm/d/y'		=> 'mm/dd/yy',
+											'm/d/Y'		=> 'mm/dd/yyyy',
 											'm-d-y'		=> 'mm-dd-yy',
 											'm-d-Y'		=> 'mm-dd-yyyy',
-											'Y-m-d' 	=> 'yyyy-mm-dd',
-											//'Ymd' 		=> '20010225 (yyyymmdd)', //This can't be parsed properly due to all integer values, parseDateTime() thinks its an epoch.
-											'M-d-y' 	=> TTi18n::gettext('mmm-dd-yy'),
-											'M-d-Y' 	=> TTi18n::gettext('mmm-dd-yyyy'),
-											'l, F d Y' 	=> TTi18n::gettext('dddd, mmmm dd yyyy'),
-											'D, F d Y' 	=> TTi18n::gettext('ddd, mmmm dd yyyy'),
-											'D, M d Y' 	=> TTi18n::gettext('ddd, mmm dd yyyy'),
-											'D, d-M-Y' 	=> TTi18n::gettext('dddd, dd-mmm-yyyy'),
-											'D, dMY' 	=> TTi18n::gettext('dddd, ddmmmyyyy')
+											'Y-m-d'		=> 'yyyy-mm-dd',
+											//'Ymd'			=> '20010225 (yyyymmdd)', //This can't be parsed properly due to all integer values, parseDateTime() thinks its an epoch.
+											'M-d-y'		=> TTi18n::gettext('mmm-dd-yy'),
+											'M-d-Y'		=> TTi18n::gettext('mmm-dd-yyyy'),
+											'l, F d Y'	=> TTi18n::gettext('dddd, mmmm dd yyyy'),
+											'D, F d Y'	=> TTi18n::gettext('ddd, mmmm dd yyyy'),
+											'D, M d Y'	=> TTi18n::gettext('ddd, mmm dd yyyy'),
+											'D, d-M-Y'	=> TTi18n::gettext('dddd, dd-mmm-yyyy'),
+											'D, dMY'	=> TTi18n::gettext('dddd, ddmmmyyyy')
 									);
 				
 				break;
 			case 'time_format':
 				$retval = array(
-											//'g:i:s A' 	=> TTi18n::gettext('8:09:11 PM'),
-											'g:i A' 	=> TTi18n::gettext('8:09 PM'),
-											//'g:i:s a' 	=> TTi18n::gettext('8:09:11 pm'),
-											'g:i a' 	=> TTi18n::gettext('8:09 pm'),
-											//'G:i:s' 	=> TTi18n::gettext('20:09:11'),
-											'G:i' 		=> TTi18n::gettext('20:09'),
-											'g:i A T' 	=> TTi18n::gettext('8:09 PM GMT'),
-											'G:i T' 	=> TTi18n::gettext('20:09 GMT'),
-											//'Gis' 		=> TTi18n::gettext('200959'), //This sorts to the top
+											//'g:i:s A'		=> TTi18n::gettext('8:09:11 PM'),
+											'g:i A'		=> TTi18n::gettext('8:09 PM'),
+											//'g:i:s a'		=> TTi18n::gettext('8:09:11 pm'),
+											'g:i a'		=> TTi18n::gettext('8:09 pm'),
+											//'G:i:s'	=> TTi18n::gettext('20:09:11'),
+											'G:i'		=> TTi18n::gettext('20:09'),
+											'g:i A T'	=> TTi18n::gettext('8:09 PM GMT'),
+											'G:i T'		=> TTi18n::gettext('20:09 GMT'),
+											//'Gis'			=> TTi18n::gettext('200959'), //This sorts to the top
 									);
 				break;
-            case 'jquery_time_format':
+			case 'jquery_time_format':
 
-                $retval = array(
-                                            //'g:i:s A'     => h:mm:ss TT
-                                            'g:i A'     => 'h:mm TT',
-                                            //'g:i:s a'     => h:mm:ss tt
-                                            'g:i a'     => 'h:mm tt',
-                                            //'G:i:s'     => H:mm:ss
-                                            'G:i'         => 'H:mm',
-                                            'g:i A T'     => 'h:mm TT z',
-                                            'G:i T'     => 'H:mm z'
-                );
-                break;
+				$retval = array(
+											//'g:i:s A'		=> h:mm:ss TT
+											'g:i A'		=> 'h:mm TT',
+											//'g:i:s a'		=> h:mm:ss tt
+											'g:i a'		=> 'h:mm tt',
+											//'G:i:s'	  => H:mm:ss
+											'G:i'		  => 'H:mm',
+											'g:i A T'	  => 'h:mm TT z',
+											'G:i T'		=> 'H:mm z'
+				);
+				break;
 			case 'js_time_format':
 				$retval = array(
-											'g:i A' 	=> '%l:%M %p', //  8:09 PM
-											'g:i a' 	=> '%l:%M %P', //8:09 pm
-											'G:i' 		=> '%k:%M', //20:09
-											'g:i A T' 	=> '%l:%M %p', //8:09 PM GMT
-											'G:i T' 	=> '%k:%M' //20:09 PM GMT
+											'g:i A'		=> '%l:%M %p', //  8:09 PM
+											'g:i a'		=> '%l:%M %P', //8:09 pm
+											'G:i'		=> '%k:%M', //20:09
+											'g:i A T'	=> '%l:%M %p', //8:09 PM GMT
+											'G:i T'		=> '%k:%M' //20:09 PM GMT
 									);
 				break;
 			case 'flex_time_format':
 				$retval = array(
-											'g:i A' 	=> 'L:NN A', //  8:09 PM
-											'g:i a' 	=> 'L:NN a', //8:09 pm
-											'G:i' 		=> 'JJ:NN', //20:09
-											'g:i A T' 	=> 'L:NN A T', //8:09 PM GMT
-											'G:i T' 	=> 'JJ:NN T' //20:09 PM GMT
+											'g:i A'		=> 'L:NN A', //	 8:09 PM
+											'g:i a'		=> 'L:NN a', //8:09 pm
+											'G:i'		=> 'JJ:NN', //20:09
+											'g:i A T'	=> 'L:NN A T', //8:09 PM GMT
+											'G:i T'		=> 'JJ:NN T' //20:09 PM GMT
 									);
 				break;
 			case 'date_time_format':
@@ -230,23 +230,23 @@ class UserPreferenceFactory extends Factory {
 					foreach( $date_formats as $date_format => $date_format_name ) {
 						foreach( $time_formats as $time_format => $time_format_name ) {
 							//Use "|" as a separate so we can later split them back into separate date/time formats.
-							$retval[$date_format.'_'.$time_format] = trim(preg_replace('/\(.*\)/i','', $date_format_name )).' '. $time_format_name;
+							$retval[$date_format.'_'.$time_format] = trim(preg_replace('/\(.*\)/i', '', $date_format_name )).' '. $time_format_name;
 						}
 					}
 				}
 				break;
 			case 'time_unit_format':
 				$retval = array(
-											10 	=> TTi18n::gettext('hh:mm (2:15)'),
-											12 	=> TTi18n::gettext('hh:mm:ss (2:15:59)'),
-											20 	=> TTi18n::gettext('Hours (2.25)'),
-											22 	=> TTi18n::gettext('Hours (2.141)'),
-											30 	=> TTi18n::gettext('Minutes (135)')
+											10	=> TTi18n::gettext('hh:mm (2:15)'),
+											12	=> TTi18n::gettext('hh:mm:ss (2:15:59)'),
+											20	=> TTi18n::gettext('Hours (2.25)'),
+											22	=> TTi18n::gettext('Hours (2.141)'),
+											30	=> TTi18n::gettext('Minutes (135)')
 									);
 				break;
 
 			// I18n: These timezones probably should be translated, but doing so would add ~550
-			//       lines to the translator's workload for each lang.  And these are hard to translate.
+			//		 lines to the translator's workload for each lang.	And these are hard to translate.
 			//		 Probably better to use an already translated timezone class, if one exists.
 			//
 			//Commented out timezones do not work in PostgreSQL 8.2, as they hardcode timezone data into versions.
@@ -741,7 +741,7 @@ class UserPreferenceFactory extends Factory {
 											'Zulu' => 'Zulu',
 
 											'SystemV/AST4ADT' => 'AST4ADT (SysV)', //This appears to only work on Linux.
-											'AST4ADT' => 'AST4ADT',  //This doesn't appear to work on Linux.
+											'AST4ADT' => 'AST4ADT', //This doesn't appear to work on Linux.
 											'CST6CDT' => 'CST6CDT',
 											'EST5EDT' => 'EST5EDT',
 											'MST7MDT' => 'MST7MDT',
@@ -1284,24 +1284,24 @@ class UserPreferenceFactory extends Factory {
 				break;
 			case 'timesheet_view':
 				$retval = array(
-											10 	=> TTi18n::gettext('Calendar'),
-											20 	=> TTi18n::gettext('List')
+											10	=> TTi18n::gettext('Calendar'),
+											20	=> TTi18n::gettext('List')
 									);
 				break;
 
 			case 'start_week_day':
 				$retval = array(
-											0 	=> TTi18n::gettext('Sunday'),
-											1 	=> TTi18n::gettext('Monday'),
-											2 	=> TTi18n::gettext('Tuesday'),
-											3 	=> TTi18n::gettext('Wednesday'),
-											4 	=> TTi18n::gettext('Thursday'),
-											5 	=> TTi18n::gettext('Friday'),
-											6 	=> TTi18n::gettext('Saturday'),
+											0	=> TTi18n::gettext('Sunday'),
+											1	=> TTi18n::gettext('Monday'),
+											2	=> TTi18n::gettext('Tuesday'),
+											3	=> TTi18n::gettext('Wednesday'),
+											4	=> TTi18n::gettext('Thursday'),
+											5	=> TTi18n::gettext('Friday'),
+											6	=> TTi18n::gettext('Saturday'),
 									);
 				break;
-            case 'schedule_icalendar_type':
-                $retval = array(
+			case 'schedule_icalendar_type':
+				$retval = array(
 										0 => TTi18n::gettext('Disabled'),
 										1 => TTi18n::gettext('Enabled (Authenticated)'),
 										2 => TTi18n::gettext('Enabled (UnAuthenticated)'),
@@ -1375,7 +1375,7 @@ class UserPreferenceFactory extends Factory {
 
 										'first_name' => FALSE,
 										'last_name' => FALSE,
-                                        'user_name' => FALSE,
+										'user_name' => FALSE,
 										'user_status_id' => FALSE,
 										'user_status' => FALSE,
 										'group_id' => FALSE,
@@ -1420,27 +1420,27 @@ class UserPreferenceFactory extends Factory {
 										'enable_email_notification_home' => 'EnableEmailNotificationHome',
 
 										//'schedule_icalendar_url' => 'ScheduleIcalendarURL',
-                                        'schedule_icalendar_type_id' => 'ScheduleIcalendarType',
-                                        //'schedule_icalendar_event_name' => 'ScheduleIcalendarEventName',
-                                        'schedule_icalendar_alarm1_working' => 'ScheduleIcalendarAlarm1Working',
-                                        'schedule_icalendar_alarm2_working' => 'ScheduleIcalendarAlarm2Working',
-                                        'schedule_icalendar_alarm1_absence' => 'ScheduleIcalendarAlarm1Absence',
-                                        'schedule_icalendar_alarm2_absence' => 'ScheduleIcalendarAlarm2Absence',
-                                        'schedule_icalendar_alarm1_modified' => 'ScheduleIcalendarAlarm1Modified',
-                                        'schedule_icalendar_alarm2_modified' => 'ScheduleIcalendarAlarm2Modified',
-                                        'enable_save_timesheet_state' => 'EnableSaveTimesheetState',
+										'schedule_icalendar_type_id' => 'ScheduleIcalendarType',
+										//'schedule_icalendar_event_name' => 'ScheduleIcalendarEventName',
+										'schedule_icalendar_alarm1_working' => 'ScheduleIcalendarAlarm1Working',
+										'schedule_icalendar_alarm2_working' => 'ScheduleIcalendarAlarm2Working',
+										'schedule_icalendar_alarm1_absence' => 'ScheduleIcalendarAlarm1Absence',
+										'schedule_icalendar_alarm2_absence' => 'ScheduleIcalendarAlarm2Absence',
+										'schedule_icalendar_alarm1_modified' => 'ScheduleIcalendarAlarm1Modified',
+										'schedule_icalendar_alarm2_modified' => 'ScheduleIcalendarAlarm2Modified',
+										'enable_save_timesheet_state' => 'EnableSaveTimesheetState',
 										'deleted' => 'Deleted',
 										);
 		return $variable_function_map;
 	}
 
-    function getUserObject() {
-        return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
-    }
+	function getUserObject() {
+		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
+	}
 
 	function getUser() {
 		if ( isset($this->data['user_id']) ) {
-			return $this->data['user_id'];
+			return (int)$this->data['user_id'];
 		}
 
 		return FALSE;
@@ -1537,7 +1537,7 @@ class UserPreferenceFactory extends Factory {
 		}
 		Debug::text('Date Format: '. $date_format .' Type: '. gettype($date_format), __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( 	$date_format == ''
+		if (	$date_format == ''
 				OR
 				$this->Validator->inArrayKey(	'date_format',
 												$date_format,
@@ -1599,7 +1599,7 @@ class UserPreferenceFactory extends Factory {
 	}
 
 	function getLocationTimeZone( $country, $province, $work_phone = FALSE, $home_phone = FALSE, $default = FALSE ) {
-		Debug::text('Country: '. $country .' Province: '. $province .' Work Phone: '. $work_phone .' Home Phone: '. $home_phone .' Default: '. $default, __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('Country: '. $country .' Province: '. $province .' Work Phone: '. $work_phone .' Home Phone: '. $home_phone .' Default: '. $default, __FILE__, __LINE__, __METHOD__, 9);
 
 		$location_timezones = $this->getOptions('location_timezone');
 		$area_code_timezone = $this->getOptions('area_code_timezone');
@@ -1614,7 +1614,7 @@ class UserPreferenceFactory extends Factory {
 					AND isset($area_code_timezone[$work_area_code])
 					AND $area_code_timezone[$work_area_code]['time_zone'] != NULL
 					AND $area_code_timezone[$work_area_code]['province'] == $province ) {
-				Debug::text('Using Work Phone for timezone detection...', __FILE__, __LINE__, __METHOD__,9);
+				Debug::text('Using Work Phone for timezone detection...', __FILE__, __LINE__, __METHOD__, 9);
 				return $area_code_timezone[$work_area_code]['time_zone'];
 			}
 		}
@@ -1627,7 +1627,7 @@ class UserPreferenceFactory extends Factory {
 					AND isset($area_code_timezone[$home_area_code])
 					AND $area_code_timezone[$home_area_code]['time_zone'] != NULL
 					AND $area_code_timezone[$home_area_code]['province'] == $province ) {
-				Debug::text('Using Home Phone for timezone detection...', __FILE__, __LINE__, __METHOD__,9);
+				Debug::text('Using Home Phone for timezone detection...', __FILE__, __LINE__, __METHOD__, 9);
 				return $area_code_timezone[$home_area_code]['time_zone'];
 			}
 		}
@@ -1635,20 +1635,20 @@ class UserPreferenceFactory extends Factory {
 		//Country/province is the last option.
 		if ( $country != '' AND isset($location_timezones[$country]) ) {
 			if ( $province != '' AND is_array($location_timezones[$country]) AND isset($location_timezones[$country][$province]) AND $location_timezones[$country][$province] != NULL) {
-				Debug::text('Using Country/Province for timezone detection...', __FILE__, __LINE__, __METHOD__,9);
+				Debug::text('Using Country/Province for timezone detection...', __FILE__, __LINE__, __METHOD__, 9);
 				return Misc::trimSortPrefix( $location_timezones[$country][$province] );
 			} elseif ( isset($location_timezones[$country]) AND !is_array($location_timezones[$country]) AND $location_timezones[$country] != NULL ) {
-				Debug::text('Using Country for timezone detection...', __FILE__, __LINE__, __METHOD__,9);
+				Debug::text('Using Country for timezone detection...', __FILE__, __LINE__, __METHOD__, 9);
 				return Misc::trimSortPrefix( $location_timezones[$country] );
 			}
 		}
 
 		if ( $default != '' ) {
-			Debug::text('Using Default for timezone detection...', __FILE__, __LINE__, __METHOD__,9);
+			Debug::text('Using Default for timezone detection...', __FILE__, __LINE__, __METHOD__, 9);
 			return $default;
 		}
 
-		Debug::text('Using GMT timezone detection...', __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('Using GMT timezone detection...', __FILE__, __LINE__, __METHOD__, 9);
 		return 'GMT';
 	}
 
@@ -1718,7 +1718,7 @@ class UserPreferenceFactory extends Factory {
 	function setItemsPerPage($items_per_page) {
 		$items_per_page = trim($items_per_page);
 
-		if 	($items_per_page != '' AND $items_per_page >= 5 AND $items_per_page <= 2000) {
+		if	($items_per_page != '' AND $items_per_page >= 5 AND $items_per_page <= 2000) {
 
 			$this->data['items_per_page'] = $items_per_page;
 
@@ -1748,7 +1748,7 @@ class UserPreferenceFactory extends Factory {
 
 		TTDate::setDateFormat( $this->getDateFormat() );
 		TTDate::setTimeFormat( $this->getTimeFormat() );
-		TTDate::setTimeUnitFormat(  $this->getTimeUnitFormat() );
+		TTDate::setTimeUnitFormat(	$this->getTimeUnitFormat() );
 
 		return TRUE;
 	}
@@ -1820,7 +1820,7 @@ class UserPreferenceFactory extends Factory {
 	function setShortcutKeySequence($value) {
 		$value = trim($value);
 
-		if 	(
+		if	(
 				$value == ''
 				OR
 				(
@@ -1926,15 +1926,15 @@ class UserPreferenceFactory extends Factory {
 
 		return TRUE;
 	}
-    function getScheduleIcalendarType() {
-        if ( isset($this->data['schedule_icalendar_type_id']) ) {
-			return $this->data['schedule_icalendar_type_id'];
+	function getScheduleIcalendarType() {
+		if ( isset($this->data['schedule_icalendar_type_id']) ) {
+			return (int)$this->data['schedule_icalendar_type_id'];
 		}
 
 		return FALSE;
 	}
 	function setScheduleIcalendarType($type) {
-        $type = trim($type);
+		$type = trim($type);
 
 		if ( $this->Validator->inArrayKey(	'schedule_icalendar_type_id',
 											$type,
@@ -1982,7 +1982,7 @@ class UserPreferenceFactory extends Factory {
 	}
 
 	//Currently used as part of the unauthenticated key, so if this changes the key to access the calendar changes too.
-    function getScheduleIcalendarEventName() {
+	function getScheduleIcalendarEventName() {
 		return $this->fromBool( $this->data['schedule_icalendar_event_name'] );
 	}
 	function setScheduleIcalendarEventName($bool) {
@@ -1990,17 +1990,17 @@ class UserPreferenceFactory extends Factory {
 
 		return TRUE;
 	}
-    function getScheduleIcalendarAlarm1Working() {
+	function getScheduleIcalendarAlarm1Working() {
 
-        if ( isset($this->data['schedule_icalendar_alarm1_working']) ) {
+		if ( isset($this->data['schedule_icalendar_alarm1_working']) ) {
 			return (int)$this->data['schedule_icalendar_alarm1_working'];
 		}
 
 		return FALSE;
 	}
 	function setScheduleIcalendarAlarm1Working($int) {
-        $int = (int)trim($int);
-		if 	(	$this->Validator->isNumeric(		'schedule_icalendar_alarm1_working',
+		$int = (int)trim($int);
+		if	(	$this->Validator->isNumeric(		'schedule_icalendar_alarm1_working',
 													$int,
 													TTi18n::gettext('Invalid time for alarm #1')) ) {
 			$this->data['schedule_icalendar_alarm1_working'] = $int;
@@ -2010,8 +2010,8 @@ class UserPreferenceFactory extends Factory {
 		return FALSE;
 
 	}
-    function getScheduleIcalendarAlarm2Working() {
-        if ( isset($this->data['schedule_icalendar_alarm2_working']) ) {
+	function getScheduleIcalendarAlarm2Working() {
+		if ( isset($this->data['schedule_icalendar_alarm2_working']) ) {
 			return (int)$this->data['schedule_icalendar_alarm2_working'];
 		}
 
@@ -2019,7 +2019,7 @@ class UserPreferenceFactory extends Factory {
 	}
 	function setScheduleIcalendarAlarm2Working($int) {
 		$int = (int)trim($int);
-		if 	(	$this->Validator->isNumeric(		'schedule_icalendar_alarm2_working',
+		if	(	$this->Validator->isNumeric(		'schedule_icalendar_alarm2_working',
 													$int,
 													TTi18n::gettext('Invalid time for alarm #2')) ) {
 			$this->data['schedule_icalendar_alarm2_working'] = $int;
@@ -2029,8 +2029,8 @@ class UserPreferenceFactory extends Factory {
 
 		return FALSE;
 	}
-    function getScheduleIcalendarAlarm1Absence() {
-        if ( isset($this->data['schedule_icalendar_alarm1_absence']) ) {
+	function getScheduleIcalendarAlarm1Absence() {
+		if ( isset($this->data['schedule_icalendar_alarm1_absence']) ) {
 			return (int)$this->data['schedule_icalendar_alarm1_absence'];
 		}
 
@@ -2038,7 +2038,7 @@ class UserPreferenceFactory extends Factory {
 	}
 	function setScheduleIcalendarAlarm1Absence($int) {
 		$int = (int)trim($int);
-		if 	(	$this->Validator->isNumeric(		'schedule_icalendar_alarm1_absence',
+		if	(	$this->Validator->isNumeric(		'schedule_icalendar_alarm1_absence',
 													$int,
 													TTi18n::gettext('Invalid time for alarm #1')) ) {
 			$this->data['schedule_icalendar_alarm1_absence'] = $int;
@@ -2048,7 +2048,7 @@ class UserPreferenceFactory extends Factory {
 
 		return FALSE;
 	}
-    function getScheduleIcalendarAlarm2Absence() {
+	function getScheduleIcalendarAlarm2Absence() {
 		if ( isset($this->data['schedule_icalendar_alarm2_absence']) ) {
 			return (int)$this->data['schedule_icalendar_alarm2_absence'];
 		}
@@ -2057,7 +2057,7 @@ class UserPreferenceFactory extends Factory {
 	}
 	function setScheduleIcalendarAlarm2Absence($int) {
 		$int = (int)trim($int);
-		if 	(	$this->Validator->isNumeric(		'schedule_icalendar_alarm2_absence',
+		if	(	$this->Validator->isNumeric(		'schedule_icalendar_alarm2_absence',
 													$int,
 													TTi18n::gettext('Invalid time for alarm #2')) ) {
 			$this->data['schedule_icalendar_alarm2_absence'] = $int;
@@ -2067,9 +2067,9 @@ class UserPreferenceFactory extends Factory {
 
 		return FALSE;
 	}
-    function getScheduleIcalendarAlarm1Modified() {
+	function getScheduleIcalendarAlarm1Modified() {
 
-        if ( isset($this->data['schedule_icalendar_alarm1_modified']) ) {
+		if ( isset($this->data['schedule_icalendar_alarm1_modified']) ) {
 			return (int)$this->data['schedule_icalendar_alarm1_modified'];
 		}
 
@@ -2077,7 +2077,7 @@ class UserPreferenceFactory extends Factory {
 	}
 	function setScheduleIcalendarAlarm1Modified($int) {
 		$int = (int)trim($int);
-		if 	(	$this->Validator->isNumeric(		'schedule_icalendar_alarm1_modified',
+		if	(	$this->Validator->isNumeric(		'schedule_icalendar_alarm1_modified',
 													$int,
 													TTi18n::gettext('Invalid time for alarm #1')) ) {
 			$this->data['schedule_icalendar_alarm1_modified'] = $int;
@@ -2087,8 +2087,8 @@ class UserPreferenceFactory extends Factory {
 
 		return FALSE;
 	}
-    function getScheduleIcalendarAlarm2Modified() {
-        if ( isset($this->data['schedule_icalendar_alarm2_modified']) ) {
+	function getScheduleIcalendarAlarm2Modified() {
+		if ( isset($this->data['schedule_icalendar_alarm2_modified']) ) {
 			return (int)$this->data['schedule_icalendar_alarm2_modified'];
 		}
 
@@ -2096,7 +2096,7 @@ class UserPreferenceFactory extends Factory {
 	}
 	function setScheduleIcalendarAlarm2Modified($int) {
 		$int = (int)trim($int);
-		if 	(	$this->Validator->isNumeric(		'schedule_icalendar_alarm2_modified',
+		if	(	$this->Validator->isNumeric(		'schedule_icalendar_alarm2_modified',
 													$int,
 													TTi18n::gettext('Invalid time for alarm #2')) ) {
 			$this->data['schedule_icalendar_alarm2_modified'] = $int;
@@ -2106,7 +2106,7 @@ class UserPreferenceFactory extends Factory {
 
 		return FALSE;
 	}
-    function getEnableSaveTimesheetState() {
+	function getEnableSaveTimesheetState() {
 		if ( isset($this->data['enable_save_timesheet_state']) ) {
 			return $this->fromBool( $this->data['enable_save_timesheet_state'] );
 		}
@@ -2172,7 +2172,7 @@ class UserPreferenceFactory extends Factory {
 		return TRUE;
 	}
 
-	//Support setting created_by,updated_by especially for importing data.
+	//Support setting created_by, updated_by especially for importing data.
 	//Make sure data is set based on the getVariableToFunctionMap order.
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
@@ -2212,7 +2212,7 @@ class UserPreferenceFactory extends Factory {
 					switch( $variable ) {
 						case 'first_name':
 						case 'last_name':
-                        case 'user_name':
+						case 'user_name':
 						case 'user_status_id':
 						case 'group_id':
 						case 'user_group':

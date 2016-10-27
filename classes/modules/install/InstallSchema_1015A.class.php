@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: InstallSchema_1015A.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11830 $
+ * $Id: InstallSchema_1015A.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -47,9 +47,9 @@ class InstallSchema_1015A extends InstallSchema_Base {
 	protected $station_users = array();
 
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion() , __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
-		if ( strncmp($this->getDatabaseConnection()->databaseType,'postgres',8) == 0 ) {
+		if ( strncmp($this->getDatabaseConnection()->databaseType, 'postgres', 8) == 0 ) {
 			//Mark old stations that weren't explicitly made, or used since Jan 01/2007 as deleted.
 			$query = 'update station set deleted = 1 where id in ( select a.id from station as a LEFT JOIN station_user as b ON a.id = b.station_id WHERE b.station_id IS NULL AND (a.allowed_date is NULL OR a.allowed_date < 1167609600) )';
 			$this->getDatabaseConnection()->Execute( $query );
@@ -70,9 +70,9 @@ class InstallSchema_1015A extends InstallSchema_Base {
 	function postInstall() {
 		global $cache;
 
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
-		Debug::text('l: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('l: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		if ( is_array($this->station_users) AND count($this->station_users) > 0 ) {
 			foreach( $this->station_users as $station_id => $user_ids ) {
@@ -103,11 +103,11 @@ class InstallSchema_1015A extends InstallSchema_Base {
 		//Add currency updating to cron.
 		$maint_base_path = Environment::getBasePath() . DIRECTORY_SEPARATOR .'maint'. DIRECTORY_SEPARATOR;
 		if ( PHP_OS == 'WINNT' ) {
-			$cron_job_base_command =  'php-win.exe '. $maint_base_path;
+			$cron_job_base_command = 'php-win.exe '. $maint_base_path;
 		} else {
-			$cron_job_base_command =  'php '. $maint_base_path;
+			$cron_job_base_command = 'php '. $maint_base_path;
 		}
-		Debug::text('Cron Job Base Command: '. $cron_job_base_command, __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('Cron Job Base Command: '. $cron_job_base_command, __FILE__, __LINE__, __METHOD__, 9);
 
 		$cjf = TTnew( 'CronJobFactory' );
 		$cjf->setName('TimeClockSync');

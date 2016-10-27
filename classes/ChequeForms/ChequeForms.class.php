@@ -95,7 +95,7 @@ class ChequeForms {
 		//Loop through all objects and combine the output from each into a single document.
 		if ( $type == 'pdf' ) {
             $pdf = new TTPDF();
-			$pdf->setMargins(0,0,0,0);
+			$pdf->setMargins(0, 0, 0, 0);
 			$pdf->SetAutoPageBreak(FALSE);
 			//$pdf->setFontSubsetting(FALSE);
 
@@ -104,7 +104,7 @@ class ChequeForms {
 				$obj->Output( $type );
 			}
 
-			return $pdf->Output('','S');
+			return $pdf->Output('', 'S');
 		}
 	}
 }

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10788 $
- * $Id: CompanyListFactory.class.php 10788 2013-08-30 23:55:26Z ipso $
- * $Date: 2013-08-30 16:55:26 -0700 (Fri, 30 Aug 2013) $
+ * $Revision: 12026 $
+ * $Id: CompanyListFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -57,11 +57,11 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					WHERE a.deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields  );
+		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields	);
 
 		$this->ExecuteSQL( $query, NULL, $limit, $page );
 
@@ -81,12 +81,12 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							(select max(last_login_date) from '. $uf->getTable() .' as uf where uf.company_id = a.id ) as last_login_date
 					from	'. $this->getTable() .' as a
 					WHERE a.deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields  );
+		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields	);
 
 		$this->ExecuteSQL( $query, NULL, $limit, $page );
 
@@ -105,7 +105,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 						);
 
 			$query = '
-						select 	*
+						select	*
 						from	'. $this->getTable() .'
 						where	id = ?
 							AND deleted = 0';
@@ -114,7 +114,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 
 			$this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs,$id);
+			$this->saveCache($this->rs, $id);
 		}
 
 		return $this;
@@ -138,7 +138,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 						AND id = ?
@@ -161,7 +161,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	lower(short_name) = ?
 						AND deleted = 0';
@@ -185,7 +185,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a, '. $uf->getTable() .' as b
 					where	a.id = b.company_id
 						AND b.status_id = 10
@@ -211,7 +211,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a, '. $uf->getTable() .' as b
 					where	a.id = b.company_id
 						AND b.status_id = 10
@@ -279,12 +279,12 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 			}
 		}
 
-		$additional_order_fields = array('status_id','last_login_date', 'total_active_days', 'last_login_days', 'this_month_max_active_users', 'this_month_avg_active_users', 'this_month_min_active_users', 'last_month_max_active_users', 'last_month_avg_active_users', 'last_month_min_active_users' );
+		$additional_order_fields = array('status_id', 'last_login_date', 'total_active_days', 'last_login_days', 'this_month_max_active_users', 'this_month_avg_active_users', 'this_month_min_active_users', 'last_month_max_active_users', 'last_month_avg_active_users', 'last_month_min_active_users' );
 
 		$sort_column_aliases = array(
-									 'status' => 'status_id',
-									 'product_edition' => 'product_edition_id',
-									 );
+									'status' => 'status_id',
+									'product_edition' => 'product_edition_id',
+									);
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 
@@ -296,14 +296,14 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 			if ( !isset($order['status_id']) ) {
 				$order = Misc::prependArray( array('status_id' => 'asc'), $order );
 			}
-			//Always sort by last name,first name after other columns
+			//Always sort by last name, first name after other columns
 			if ( !isset($order['name']) ) {
 				$order['name'] = 'asc';
 			}
 			$strict = TRUE;
 		}
-		//Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$uf = new UserFactory();
 		$cuff = new CompanyUserCountFactory();
@@ -313,7 +313,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							_ADODB_COUNT
 							(select max(last_login_date) from '. $uf->getTable() .' as uf where uf.company_id = a.id ) as last_login_date,
 							((select max(last_login_date) from '. $uf->getTable() .' as uf where uf.company_id = a.id )-a.created_date) as total_active_days,
@@ -321,9 +321,9 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 							(select min(active_users) as min_active_users from '. $cuff->getTable() .' as cuff where cuff.company_id = a.id AND date_stamp >= '. $this->db->qstr( $this->db->BindDate( TTDate::getBeginMonthEpoch() ) ) .' AND date_stamp <= '. $this->db->qstr( $this->db->BindDate( time() ) ) .' ) as this_month_min_active_users,
 							(select avg(active_users) as avg_active_users from '. $cuff->getTable() .' as cuff where cuff.company_id = a.id AND date_stamp >= '. $this->db->qstr( $this->db->BindDate( TTDate::getBeginMonthEpoch() ) ) .' AND date_stamp <= '. $this->db->qstr( $this->db->BindDate( time() ) ) .' ) as this_month_avg_active_users,
 							(select max(active_users) as max_active_users from '. $cuff->getTable() .' as cuff where cuff.company_id = a.id AND date_stamp >= '. $this->db->qstr( $this->db->BindDate( TTDate::getBeginMonthEpoch() ) ) .' AND date_stamp <= '. $this->db->qstr( $this->db->BindDate( time() ) ) .' ) as this_month_max_active_users,
-							(select min(active_users) as min_active_users from '. $cuff->getTable() .' as cuff where cuff.company_id = a.id AND date_stamp >= '. $this->db->qstr( $this->db->BindDate( TTDate::getBeginMonthEpoch( TTDate::getBeginMonthEpoch()-86400 ) ) ) .' AND date_stamp <= '. $this->db->qstr( $this->db->BindDate( TTDate::getEndMonthEpoch( TTDate::getBeginMonthEpoch()-86400 ) ) ) .' ) as last_month_min_active_users,
-							(select avg(active_users) as avg_active_users from '. $cuff->getTable() .' as cuff where cuff.company_id = a.id AND date_stamp >= '. $this->db->qstr( $this->db->BindDate( TTDate::getBeginMonthEpoch( TTDate::getBeginMonthEpoch()-86400 ) ) ) .' AND date_stamp <= '. $this->db->qstr( $this->db->BindDate( TTDate::getEndMonthEpoch( TTDate::getBeginMonthEpoch()-86400 ) ) ) .' ) as last_month_avg_active_users,
-							(select max(active_users) as max_active_users from '. $cuff->getTable() .' as cuff where cuff.company_id = a.id AND date_stamp >= '. $this->db->qstr( $this->db->BindDate( TTDate::getBeginMonthEpoch( TTDate::getBeginMonthEpoch()-86400 ) ) ) .' AND date_stamp <= '. $this->db->qstr( $this->db->BindDate( TTDate::getEndMonthEpoch( TTDate::getBeginMonthEpoch()-86400 ) ) ) .' ) as last_month_max_active_users,
+							(select min(active_users) as min_active_users from '. $cuff->getTable() .' as cuff where cuff.company_id = a.id AND date_stamp >= '. $this->db->qstr( $this->db->BindDate( TTDate::getBeginMonthEpoch( (TTDate::getBeginMonthEpoch() - 86400) ) ) ) .' AND date_stamp <= '. $this->db->qstr( $this->db->BindDate( TTDate::getEndMonthEpoch( (TTDate::getBeginMonthEpoch() - 86400) ) ) ) .' ) as last_month_min_active_users,
+							(select avg(active_users) as avg_active_users from '. $cuff->getTable() .' as cuff where cuff.company_id = a.id AND date_stamp >= '. $this->db->qstr( $this->db->BindDate( TTDate::getBeginMonthEpoch( (TTDate::getBeginMonthEpoch() - 86400) ) ) ) .' AND date_stamp <= '. $this->db->qstr( $this->db->BindDate( TTDate::getEndMonthEpoch( (TTDate::getBeginMonthEpoch() - 86400) ) ) ) .' ) as last_month_avg_active_users,
+							(select max(active_users) as max_active_users from '. $cuff->getTable() .' as cuff where cuff.company_id = a.id AND date_stamp >= '. $this->db->qstr( $this->db->BindDate( TTDate::getBeginMonthEpoch( (TTDate::getBeginMonthEpoch() - 86400) ) ) ) .' AND date_stamp <= '. $this->db->qstr( $this->db->BindDate( TTDate::getEndMonthEpoch( (TTDate::getBeginMonthEpoch() - 86400) ) ) ) .' ) as last_month_max_active_users,
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
 							y.last_name as created_by_last_name,
@@ -331,7 +331,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
 							_ADODB_COUNT
-					from 	'. $this->getTable() .' as a
+					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	1=1
@@ -341,7 +341,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
 
-		if ( isset($filter_data['status']) AND trim($filter_data['status']) != '' AND !isset($filter_data['status_id']) ) {
+		if ( isset($filter_data['status']) AND !is_array($filter_data['status']) AND trim($filter_data['status']) != '' AND !isset($filter_data['status_id']) ) {
 			$filter_data['status_id'] = Option::getByFuzzyValue( $filter_data['status'], $this->getOptions('status') );
 		}
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
@@ -358,16 +358,12 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['postal_code']) ) ? $this->getWhereClauseSQL( 'a.postal_code', $filter_data['postal_code'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['work_phone']) ) ? $this->getWhereClauseSQL( 'a.work_phone', $filter_data['work_phone'], 'phone', $ph ) : NULL;
 		$query .= ( isset($filter_data['fax_phone']) ) ? $this->getWhereClauseSQL( 'a.fax_phone', $filter_data['fax_phone'], 'phone', $ph ) : NULL;
-		$query .= ( isset($filter_data['business_number']) ) ? $this->getWhereClauseSQL( 'a.business_number', $filter_data['businessnumber'], 'text', $ph ) : NULL;
+		$query .= ( isset($filter_data['business_number']) ) ? $this->getWhereClauseSQL( 'a.business_number', $filter_data['business_number'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-        
-        $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
-        
+		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
 
-		$query .= 	'
-						AND a.deleted = 0
-					';
+		$query .=	' AND a.deleted = 0 ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 

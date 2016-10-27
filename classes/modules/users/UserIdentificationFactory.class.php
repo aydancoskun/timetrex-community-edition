@@ -55,8 +55,8 @@ class UserIdentificationFactory extends Factory {
 		switch( $name ) {
 			case 'type':
 				$retval = array(
-											5 	=> TTi18n::gettext('Password History'), //Web interface password history
-											10 	=> TTi18n::gettext('iButton'),
+											5	=> TTi18n::gettext('Password History'), //Web interface password history
+											10	=> TTi18n::gettext('iButton'),
 											20	=> TTi18n::gettext('USB Fingerprint'),
 											//25	=> TTi18n::gettext('LibFingerPrint'),
 											30	=> TTi18n::gettext('Barcode'), //For barcode readers and USB proximity card readers.
@@ -85,7 +85,7 @@ class UserIdentificationFactory extends Factory {
 	}
 
 	function getUser() {
-		return $this->data['user_id'];
+		return (int)$this->data['user_id'];
 	}
 	function setUser($id) {
 		$id = trim($id);
@@ -107,7 +107,7 @@ class UserIdentificationFactory extends Factory {
 
 	function getType() {
 		if ( isset($this->data['type_id']) ) {
-			return $this->data['type_id'];
+			return (int)$this->data['type_id'];
 		}
 
 		return FALSE;
@@ -186,7 +186,7 @@ class UserIdentificationFactory extends Factory {
 						AND a.value = ?
 						AND ( a.deleted = 0 AND b.deleted = 0 )';
 		$id = $this->db->GetOne($query, $ph);
-		//Debug::Arr($id,'Unique Value: '. $value, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($id, 'Unique Value: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id === FALSE ) {
 			return TRUE;
@@ -281,7 +281,7 @@ class UserIdentificationFactory extends Factory {
 
 	function addLog( $log_action ) {
 		//Don't do detail logging for this, as it will store entire figerprints in the log table.
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Employee Identification - Employee'). ': '. UserListFactory::getFullNameById( $this->getUser() ) .' '. TTi18n::getText('Type') . ': '. Option::getByKey($this->getType(), $this->getOptions('type') ) , NULL, $this->getTable() );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Employee Identification - Employee'). ': '. UserListFactory::getFullNameById( $this->getUser() ) .' '. TTi18n::getText('Type') . ': '. Option::getByKey($this->getType(), $this->getOptions('type') ), NULL, $this->getTable() );
 	}
 }
 ?>

@@ -45,14 +45,14 @@
 class InstallSchema_1034A extends InstallSchema_Base {
 
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion() , __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		return TRUE;
 	}
 
 
 	function postInstall() {
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		//Go through all employee wages and update HourlyRate to the accurate annual hourly rate.
 		//Take into account wage entries that don't have the proper effective date based on the employees hire date, force a correct effective_date.

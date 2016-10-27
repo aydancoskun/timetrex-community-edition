@@ -59,6 +59,7 @@ class UserReportDataFactory extends Factory {
 										'-1020-description' => TTi18n::gettext('Description'),
 										'-1030-script_name' => TTi18n::gettext('Report'),
 										'-1040-is_default' => TTi18n::gettext('Default'),
+										'-1050-is_scheduled' => TTi18n::gettext('Scheduled'),
 
 										'-2000-created_by' => TTi18n::gettext('Created By'),
 										'-2010-created_date' => TTi18n::gettext('Created Date'),
@@ -101,6 +102,7 @@ class UserReportDataFactory extends Factory {
 										'script_name' => FALSE,
 										'name' => 'Name',
 										'is_default' => 'Default',
+										'is_scheduled' => FALSE,
 										'description' => 'Description',
 										'data' => 'Data',
 										'deleted' => 'Deleted',
@@ -128,7 +130,7 @@ class UserReportDataFactory extends Factory {
 
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
-			return $this->data['company_id'];
+			return (int)$this->data['company_id'];
 		}
 
 		return FALSE;
@@ -152,7 +154,7 @@ class UserReportDataFactory extends Factory {
 
 	function getUser() {
 		if ( isset($this->data['user_id']) ) {
-			return $this->data['user_id'];
+			return (int)$this->data['user_id'];
 		}
 
 		return FALSE;
@@ -187,7 +189,7 @@ class UserReportDataFactory extends Factory {
 		if (	$this->Validator->isLength(	'script',
 											$value,
 											TTi18n::gettext('Invalid script'),
-											1,250)
+											1, 250)
 						) {
 
 			$this->data['script'] = $value;
@@ -233,7 +235,7 @@ class UserReportDataFactory extends Factory {
 
 		$query .= ' AND deleted = 0';
 		$name_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($name_id,'Unique Name: '. $name , __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $name_id === FALSE ) {
 			return TRUE;
@@ -258,7 +260,7 @@ class UserReportDataFactory extends Factory {
 		if (	$this->Validator->isLength(	'name',
 											$name,
 											TTi18n::gettext('Invalid name'),
-											1,100)
+											1, 100)
 				AND
 				$this->Validator->isTrue(		'name',
 												$this->isUniqueName($name),
@@ -300,7 +302,7 @@ class UserReportDataFactory extends Factory {
 		if (	$this->Validator->isLength(	'description',
 											$description,
 											TTi18n::gettext('Description is invalid'),
-											0,1024) ) {
+											0, 1024) ) {
 
 			$this->data['description'] = $description;
 
@@ -341,7 +343,7 @@ class UserReportDataFactory extends Factory {
 			}
 			if ( $urdlf->getRecordCount() > 0 ) {
 				foreach( $urdlf as $urd_obj ) {
-					Debug::Text('Removing Default Flag From: '. $urd_obj->getId(), __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Removing Default Flag From: '. $urd_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 					$urd_obj->setDefault(FALSE);
 					if ( $urd_obj->isValid() ) {
 						$urd_obj->Save();
@@ -357,7 +359,7 @@ class UserReportDataFactory extends Factory {
 		return str_replace('//', '/', $script_name);
 	}
 
-	//Support setting created_by,updated_by especially for importing data.
+	//Support setting created_by, updated_by especially for importing data.
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -391,6 +393,9 @@ class UserReportDataFactory extends Factory {
 
 					$function = 'get'.$function_stub;
 					switch( $variable ) {
+						case 'is_scheduled':
+							$data[$variable] = $this->getColumn('is_scheduled');
+							break;
 						case 'script_name':
 							$report_obj = $this->getObjectHandler();
 							if ( is_object($report_obj ) ) {

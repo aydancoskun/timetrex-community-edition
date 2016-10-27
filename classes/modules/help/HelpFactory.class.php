@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: HelpFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 12026 $
+ * $Id: HelpFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -60,7 +60,7 @@ class HelpFactory extends Factory {
 			case 'status':
 				$retval = array(
 										10 => TTi18n::gettext('NEW'),
-										15 => TTi18n::gettext('Pending Approval'), 
+										15 => TTi18n::gettext('Pending Approval'),
 										20 => TTi18n::gettext('ACTIVE')
 									);
 				break;
@@ -72,7 +72,7 @@ class HelpFactory extends Factory {
 
 
 	function getType() {
-		return $this->data['type_id'];
+		return (int)$this->data['type_id'];
 	}
 	function setType($type) {
 		$type = trim($type);
@@ -82,7 +82,7 @@ class HelpFactory extends Factory {
 			$type = $key;	
 		}
 		
-		Debug::Text('bType: '. $type , __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('bType: '. $type, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $this->Validator->inArrayKey(	'type',
 											$type,
 											TTi18n::gettext('Incorrect Type'),
@@ -97,7 +97,7 @@ class HelpFactory extends Factory {
 	}
 
 	function getStatus() {
-		return $this->data['status_id'];
+		return (int)$this->data['status_id'];
 	}
 	function setStatus($status) {
 		$status = trim($status);
@@ -131,7 +131,7 @@ class HelpFactory extends Factory {
 				$this->Validator->isLength(	'heading',
 											$value,
 											TTi18n::gettext('Incorrect Heading length'),
-											2,255) ) {
+											2, 255) ) {
 
 			$this->data['heading'] = $value;
 
@@ -152,7 +152,7 @@ class HelpFactory extends Factory {
 				$this->Validator->isLength(	'body',
 											$value,
 											TTi18n::gettext('Incorrect Body length'),
-											2,2048) ) {
+											2, 2048) ) {
 
 			$this->data['body'] = $value;
 
@@ -173,7 +173,7 @@ class HelpFactory extends Factory {
 				$this->Validator->isLength(	'keywords',
 											$value,
 											TTi18n::gettext('Incorrect Keywords length'),
-											2,1024) ) {
+											2, 1024) ) {
 
 			$this->data['keywords'] = $value;
 
@@ -189,7 +189,7 @@ class HelpFactory extends Factory {
 	function setPrivate($bool) {
 		$this->data['private'] = $this->toBool($bool);
 
-		return true;
+		return TRUE;
 	}
 
 }

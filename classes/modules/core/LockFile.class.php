@@ -85,7 +85,7 @@ class LockFile {
 	function exists() {
 		//Ignore lock files older than max_lock_file_age, so if the server crashes or is rebooted during an operation, it will start again the next day.
 		clearstatcache();
-		if ( file_exists( $this->getFileName() ) AND filemtime( $this->getFileName() ) >= ( time()-$this->max_lock_file_age ) ) {
+		if ( file_exists( $this->getFileName() ) AND @filemtime( $this->getFileName() ) >= ( time() - $this->max_lock_file_age ) ) {
 			return TRUE;
 		}
 

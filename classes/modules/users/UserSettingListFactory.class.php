@@ -46,7 +46,7 @@ class UserSettingListFactory extends UserSettingFactory implements IteratorAggre
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -63,11 +63,11 @@ class UserSettingListFactory extends UserSettingFactory implements IteratorAggre
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => $id, 
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 					';
@@ -91,7 +91,7 @@ class UserSettingListFactory extends UserSettingFactory implements IteratorAggre
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					LEFT JOIN '. $uf->getTable() .' as uf ON a.user_id = uf.id
 					where	uf.company_id = ?
@@ -104,11 +104,11 @@ class UserSettingListFactory extends UserSettingFactory implements IteratorAggre
 		return $this;
 	}
 
-	function getByUserIdAndName($user_id, $name) {	    
-        if ( $user_id == '' ) {
-            return FALSE;
-        }
-        
+	function getByUserIdAndName($user_id, $name) {		
+		if ( $user_id == '' ) {
+			return FALSE;
+		}
+		
 		if ( $name == '') {
 			return FALSE;
 		}
@@ -116,22 +116,22 @@ class UserSettingListFactory extends UserSettingFactory implements IteratorAggre
 		$cache_id = $user_id.$name;
 
 		$ph = array(
-                    'user_id' => $user_id,
-					'name' => $name,                    
+					'user_id' => $user_id, 
+					'name' => $name, 
 					);
 
 		$this->rs = $this->getCache($cache_id);
 		if ( $this->rs === FALSE ) {
 			$query = '
-						select 	*
-						from 	'. $this->getTable() .'
+						select	*
+						from	'. $this->getTable() .'
 						where	user_id = ?
 							AND	name = ?
 							AND deleted = 0';
 
 			$this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs,$cache_id);
+			$this->saveCache($this->rs, $cache_id);
 		}
 		
 		return $this;

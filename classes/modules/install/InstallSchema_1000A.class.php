@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: InstallSchema_1000A.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11830 $
+ * $Id: InstallSchema_1000A.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -45,7 +45,7 @@
 class InstallSchema_1000A extends InstallSchema_Base {
 
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion() , __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		return TRUE;
 	}
@@ -54,15 +54,15 @@ class InstallSchema_1000A extends InstallSchema_Base {
 	function postInstall() {
 		global $config_vars;
 
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		$maint_base_path = Environment::getBasePath() . DIRECTORY_SEPARATOR .'maint'. DIRECTORY_SEPARATOR;
 		if ( PHP_OS == 'WINNT' ) {
-			$cron_job_base_command =  'php-win.exe '. $maint_base_path;
+			$cron_job_base_command = 'php-win.exe '. $maint_base_path;
 		} else {
-			$cron_job_base_command =  'php '. $maint_base_path;
+			$cron_job_base_command = 'php '. $maint_base_path;
 		}
-		Debug::text('Cron Job Base Command: '. $cron_job_base_command, __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('Cron Job Base Command: '. $cron_job_base_command, __FILE__, __LINE__, __METHOD__, 9);
 
 		// >> /dev/null 2>&1
 		$cjf = TTnew( 'CronJobFactory' );
@@ -127,7 +127,7 @@ class InstallSchema_1000A extends InstallSchema_Base {
 
 		$cjf = TTnew( 'CronJobFactory' );
 		$cjf->setName('AddRecurringScheduleShift');
-		$cjf->setMinute('20,50');
+		$cjf->setMinute('20, 50');
 		$cjf->setHour('*');
 		$cjf->setDayOfMonth('*');
 		$cjf->setMonth('*');
@@ -137,8 +137,8 @@ class InstallSchema_1000A extends InstallSchema_Base {
 
 		$cjf = TTnew( 'CronJobFactory' );
 		$cjf->setName('CheckForUpdate');
-		$cjf->setMinute( rand(0,59) ); //Random time once a day for load balancing
-		$cjf->setHour( rand(0,23) ); //Random time once a day for load balancing
+		$cjf->setMinute( rand(0, 59) ); //Random time once a day for load balancing
+		$cjf->setHour( rand(0, 23) ); //Random time once a day for load balancing
 		$cjf->setDayOfMonth('*');
 		$cjf->setMonth('*');
 		$cjf->setDayOfWeek('*');

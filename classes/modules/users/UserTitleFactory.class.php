@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10100 $
- * $Id: UserTitleFactory.class.php 10100 2013-06-03 23:16:36Z ipso $
- * $Date: 2013-06-03 16:16:36 -0700 (Mon, 03 Jun 2013) $
+ * $Revision: 12026 $
+ * $Id: UserTitleFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -93,15 +93,15 @@ class UserTitleFactory extends Factory {
 										'other_id4' => 'OtherID4',
 										'other_id5' => 'OtherID5',
 										'deleted' => 'Deleted',
- 										);
+										);
 		return $variable_function_map;
 	}
 
 	function getCompany() {
-	    if ( isset( $this->data['company_id'] ) ) {
-	       return $this->data['company_id'];
-	    }
-        return FALSE;
+		if ( isset( $this->data['company_id'] ) ) {
+			return (int)$this->data['company_id'];
+		}
+		return FALSE;
 	}
 	function setCompany($id) {
 		$id = trim($id);
@@ -132,7 +132,7 @@ class UserTitleFactory extends Factory {
 						AND name = ?
 						AND deleted = 0';
 		$name_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($name_id,'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $name_id === FALSE ) {
 			return TRUE;
@@ -146,15 +146,15 @@ class UserTitleFactory extends Factory {
 	}
 
 	function getName() {
-	    if ( isset( $this->data['name'] ) ) {
-	       return $this->data['name'];
-	    }
-        return FALSE;
+		if ( isset( $this->data['name'] ) ) {
+			return $this->data['name'];
+		}
+		return FALSE;
 	}
 	function setName($name) {
 		$name = trim($name);
 
-		if 	(	$this->Validator->isLength(		'name',
+		if	(	$this->Validator->isLength(		'name',
 												$name,
 												TTi18n::gettext('Name is too short or too long'),
 												2,
@@ -189,7 +189,7 @@ class UserTitleFactory extends Factory {
 				$this->Validator->isLength(	'other_id1',
 											$value,
 											TTi18n::gettext('Other ID 1 is invalid'),
-											1,255) ) {
+											1, 255) ) {
 
 			$this->data['other_id1'] = $value;
 
@@ -214,7 +214,7 @@ class UserTitleFactory extends Factory {
 				$this->Validator->isLength(	'other_id2',
 											$value,
 											TTi18n::gettext('Other ID 2 is invalid'),
-											1,255) ) {
+											1, 255) ) {
 
 			$this->data['other_id2'] = $value;
 
@@ -239,7 +239,7 @@ class UserTitleFactory extends Factory {
 				$this->Validator->isLength(	'other_id3',
 											$value,
 											TTi18n::gettext('Other ID 3 is invalid'),
-											1,255) ) {
+											1, 255) ) {
 
 			$this->data['other_id3'] = $value;
 
@@ -264,7 +264,7 @@ class UserTitleFactory extends Factory {
 				$this->Validator->isLength(	'other_id4',
 											$value,
 											TTi18n::gettext('Other ID 4 is invalid'),
-											1,255) ) {
+											1, 255) ) {
 
 			$this->data['other_id4'] = $value;
 
@@ -289,7 +289,7 @@ class UserTitleFactory extends Factory {
 				$this->Validator->isLength(	'other_id5',
 											$value,
 											TTi18n::gettext('Other ID 5 is invalid'),
-											1,255) ) {
+											1, 255) ) {
 
 			$this->data['other_id5'] = $value;
 
@@ -312,7 +312,7 @@ class UserTitleFactory extends Factory {
 
 	function postSave() {
 		if ( $this->getDeleted() == TRUE ) {
-			Debug::Text('UnAssign title from employees: '. $this->getId(), __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('UnAssign title from employees: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
 			//Unassign hours from this job.
 			$uf = TTnew( 'UserFactory' );
 			$udf = TTnew( 'UserDefaultFactory' );
@@ -325,7 +325,7 @@ class UserTitleFactory extends Factory {
 		}
 	}
 
-	//Support setting created_by,updated_by especially for importing data.
+	//Support setting created_by, updated_by especially for importing data.
 	//Make sure data is set based on the getVariableToFunctionMap order.
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {

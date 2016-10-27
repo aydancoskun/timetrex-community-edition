@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: HelpListFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11830 $
+ * $Id: HelpListFactory.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -53,7 +53,7 @@ class HelpListFactory extends HelpFactory implements IteratorAggregate {
 		}
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					WHERE deleted=0';
 		$query .= $this->getWhereSQL( $where );
@@ -74,7 +74,7 @@ class HelpListFactory extends HelpFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 						AND deleted=0';
@@ -100,7 +100,7 @@ class HelpListFactory extends HelpFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $hgcf->getTable() .' as b,
 							'. $hg->getTable() .' as c
@@ -150,7 +150,7 @@ class HelpListFactory extends HelpFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	a.*, b.name as group_name
+					select	a.*, b.name as group_name
 					from	'. $this->getTable() .' as a,
 							'. $hgcf->getTable() .' as b,
 							'. $hg->getTable() .' as c
@@ -199,7 +199,7 @@ class HelpListFactory extends HelpFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	a.*, b.name as group_name
+					select	a.*, b.name as group_name
 					from	'. $this->getTable() .' as a,
 							'. $hgcf->getTable() .' as b,
 							'. $hg->getTable() .' as c
@@ -244,7 +244,7 @@ class HelpListFactory extends HelpFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	a.*, b.name as group_name
+					select	a.*, b.name as group_name
 					from	'. $this->getTable() .' as a,
 							'. $hgcf->getTable() .' as b,
 							'. $hg->getTable() .' as c

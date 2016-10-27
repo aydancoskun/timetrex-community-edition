@@ -12,5 +12,5 @@ CREATE INDEX accrual_balance_user_id ON accrual_balance(user_id);
 CREATE INDEX permission_user_permission_control_id ON permission_user(permission_control_id);
 CREATE INDEX permission_user_user_id ON permission_user(user_id);
 
-delete from user_preference where id in ( select a.id from ( select user_id from user_preference group by user_id having count(*) > 1 ) as tmp, user_preference as a WHERE a.user_id = tmp.user_id );
+delete from user_preference where id in ( select * from ( select a.id from ( select user_id from user_preference group by user_id having count(*) > 1 ) as tmp, user_preference as a WHERE a.user_id = tmp.user_id ) as tmp );
 CREATE UNIQUE INDEX user_preference_user_id_ukey ON user_preference(user_id);

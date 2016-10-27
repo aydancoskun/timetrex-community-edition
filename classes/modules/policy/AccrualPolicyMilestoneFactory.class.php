@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: AccrualPolicyMilestoneFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 12026 $
+ * $Id: AccrualPolicyMilestoneFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -142,7 +142,7 @@ class AccrualPolicyMilestoneFactory extends Factory {
 
 	function getAccrualPolicy() {
 		if ( isset($this->data['accrual_policy_id']) ) {
-			return $this->data['accrual_policy_id'];
+			return (int)$this->data['accrual_policy_id'];
 		}
 
 		return FALSE;
@@ -177,7 +177,7 @@ class AccrualPolicyMilestoneFactory extends Factory {
 
 		Debug::text('aLength of Service Days: '. $int, __FILE__, __LINE__, __METHOD__, 10);
 
-		if 	(	$int >= 0
+		if	(	$int >= 0
 				AND
 				$this->Validator->isFloat(			'length_of_service'.$this->getLabelID(),
 													$int,
@@ -203,7 +203,7 @@ class AccrualPolicyMilestoneFactory extends Factory {
 
 		Debug::text('bLength of Service: '. $int, __FILE__, __LINE__, __METHOD__, 10);
 
-		if 	(	$int >= 0
+		if	(	$int >= 0
 				AND
 				$this->Validator->isFloat(			'length_of_service'.$this->getLabelID(),
 													$int,
@@ -219,7 +219,7 @@ class AccrualPolicyMilestoneFactory extends Factory {
 
 	function getLengthOfServiceUnit() {
 		if ( isset($this->data['length_of_service_unit_id']) ) {
-			return $this->data['length_of_service_unit_id'];
+			return (int)$this->data['length_of_service_unit_id'];
 		}
 
 		return FALSE;
@@ -255,7 +255,7 @@ class AccrualPolicyMilestoneFactory extends Factory {
 	function setAccrualRate($int) {
 		$int = trim($int);
 
-		if 	(	$int > 0
+		if	(	$int > 0
 				AND
 				$this->Validator->isNumeric(		'accrual_rate'.$this->getLabelID(),
 													$int,
@@ -278,7 +278,7 @@ class AccrualPolicyMilestoneFactory extends Factory {
 	function setMaximumTime($int) {
 		$int = trim($int);
 
-		if 	(	$int == 0
+		if	(	$int == 0
 				OR
 				$this->Validator->isNumeric(		'maximum_time'.$this->getLabelID(),
 													$int,
@@ -301,7 +301,7 @@ class AccrualPolicyMilestoneFactory extends Factory {
 	function setMinimumTime($int) {
 		$int = trim($int);
 
-		if 	(	$int == 0
+		if	(	$int == 0
 				OR
 				$this->Validator->isNumeric(		'minimum_time'.$this->getLabelID(),
 													$int,
@@ -324,7 +324,7 @@ class AccrualPolicyMilestoneFactory extends Factory {
 	function setRolloverTime($int) {
 		$int = trim($int);
 
-		if 	(	$int == 0
+		if	(	$int == 0
 				OR
 				$this->Validator->isNumeric(		'rollover_time'.$this->getLabelID(),
 													$int,
@@ -378,7 +378,7 @@ class AccrualPolicyMilestoneFactory extends Factory {
 					$function = 'get'.$function_stub;
 					switch( $variable ) {
 						/*
-						 //This is not displayed anywhere that needs it in text rather then from the options.
+						//This is not displayed anywhere that needs it in text rather then from the options.
 						case 'length_of_service_unit':
 							//$function = 'getLengthOfServiceUnit';
 							if ( method_exists( $this, $function ) ) {
@@ -402,7 +402,7 @@ class AccrualPolicyMilestoneFactory extends Factory {
 	}
 
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getAccrualPolicy(), $log_action,  TTi18n::getText('Accrual Policy Milestone') .' (ID: '. $this->getID() .')' , NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getAccrualPolicy(), $log_action, TTi18n::getText('Accrual Policy Milestone') .' (ID: '. $this->getID() .')', NULL, $this->getTable(), $this );
 	}
 }
 ?>

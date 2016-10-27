@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8385 $
- * $Id: Interface.inc.php 8385 2012-11-23 23:06:18Z ipso $
- * $Date: 2012-11-23 15:06:18 -0800 (Fri, 23 Nov 2012) $
+ * $Revision: 12173 $
+ * $Id: Interface.inc.php 12173 2014-01-29 16:58:10Z mikeb $
+ * $Date: 2014-01-29 08:58:10 -0800 (Wed, 29 Jan 2014) $
  */
 if ( !isset($disable_cache_control) ) {
 	//Turn caching off.
@@ -210,10 +210,10 @@ if ( isset($authenticate) AND $authenticate === FALSE ) {
 		} elseif ( isset($enable_iphone) AND $enable_iphone == TRUE ) {
 			Redirect::Page( URLBuilder::getURL(NULL, Environment::GetBaseURL().'iphone/login/login.php') );
 		} else {
-			if ( isset($config_vars['other']['default_interface']) AND strtolower(trim($config_vars['other']['default_interface'])) == 'flex' ) {
-				Redirect::Page( URLBuilder::getURL(NULL, Environment::GetBaseURL().'flex/') );
+			if ( isset($config_vars['other']['default_interface']) AND strtolower(trim($config_vars['other']['default_interface'])) == 'html' ) {
+				Redirect::Page( URLBuilder::getURL(NULL, Environment::GetBaseURL().'Login_legacy.php') );
 			} else {
-				Redirect::Page( URLBuilder::getURL(NULL, Environment::GetBaseURL().'Login.php') );
+				Redirect::Page( URLBuilder::getURL(NULL, Environment::GetBaseURL().'flex/') );
 			}
 		}
 

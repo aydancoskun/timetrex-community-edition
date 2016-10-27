@@ -40,8 +40,10 @@
  */
 require_once('PHPUnit/Framework/TestCase.php');
 
+/**
+ * @group CAPayrollDeductionTest2008
+ */
 class CAPayrollDeductionTest2008 extends PHPUnit_Framework_TestCase {
-
     public $company_id = NULL;
 
     public function __construct() {

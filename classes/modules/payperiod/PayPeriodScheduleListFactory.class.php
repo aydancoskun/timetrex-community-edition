@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: PayPeriodScheduleListFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 12026 $
+ * $Id: PayPeriodScheduleListFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -46,7 +46,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 						WHERE deleted=0';
 		$query .= $this->getWhereSQL( $where );
@@ -69,7 +69,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 						);
 
 			$query = '
-						select 	*
+						select	*
 						from	'. $this->getTable() .'
 						where	id = ?
 							AND deleted=0';
@@ -78,7 +78,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 
 			$this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs,$id);
+			$this->saveCache($this->rs, $id);
 		}
 
 		return $this;
@@ -96,10 +96,10 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $ppsulf->getTable() .' as b
-					where 	a.id = b.pay_period_schedule_id
+					where	a.id = b.pay_period_schedule_id
 						AND b.user_id = ?
 						AND a.deleted=0';
 		$query .= $this->getWhereSQL( $where );
@@ -120,7 +120,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .' as a
 					where	company_id = ?
 						AND deleted=0';
@@ -153,15 +153,15 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		$ph = array( 'company_id' => $company_id );
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							b.user_id as user_id
 					from	'. $this->getTable() .' as a,
 							'. $ppsuf->getTable() .' as b
-					where 	a.id = b.pay_period_schedule_id
+					where	a.id = b.pay_period_schedule_id
 						AND a.company_id = ? ';
 
 		if ( isset($user_ids) AND ( $user_ids != '' OR ( is_array($user_ids) AND isset($user_ids[0]) ) ) ) {
-			$query  .=	' AND b.user_id in ('. $this->getListSQL($user_ids, $ph) .') ';
+			$query	.=	' AND b.user_id in ('. $this->getListSQL($user_ids, $ph) .') ';
 		}
 
 		$query .= '	AND a.deleted = 0';
@@ -186,8 +186,8 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 					);
 
 		$query = '
-					select 	*
-					from 	'. $this->getTable() .'
+					select	*
+					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND	id = ?
 						AND deleted=0';
@@ -214,8 +214,8 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		$ppf = new PayPeriodFactory();
 
 		$query = '
-					select 	*
-					from 	'. $this->getTable() .'
+					select	*
+					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND	id in ( select ppf.pay_period_schedule_id from '. $ppf->getTable() .' as ppf where ppf.id in ('. $this->getListSQL($id, $ph) .') )
 						AND deleted=0';
@@ -300,14 +300,14 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 			$order = array( 'name' => 'asc' );
 			$strict = FALSE;
 		} else {
-			//Always sort by last name,first name after other columns
+			//Always sort by last name, first name after other columns
 			if ( !isset($order['name']) ) {
 				$order['name'] = 'asc';
 			}
 			$strict = TRUE;
 		}
-		//Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$uf = new UserFactory();
 		$ppsuf = new PayPeriodScheduleUserFactory();
@@ -328,7 +328,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
 							_ADODB_COUNT
-					from 	'. $this->getTable() .' as a
+					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	a.company_id = ?
@@ -338,19 +338,19 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
 
-		if ( isset($filter_data['type']) AND trim($filter_data['type']) != '' AND !isset($filter_data['type_id']) ) {
+		if ( isset($filter_data['type']) AND !is_array($filter_data['type']) AND trim($filter_data['type']) != '' AND !isset($filter_data['type_id']) ) {
 			$filter_data['type_id'] = Option::getByFuzzyValue( $filter_data['type'], $this->getOptions('type') );
 		}
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['description']) ) ? $this->getWhereClauseSQL( 'a.description', $filter_data['description'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-        
-        $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
-        
+		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 
-		$query .= 	'
+		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
+
+
+		$query .=	'
 						AND a.deleted = 0
 					';
 		$query .= $this->getWhereSQL( $where );

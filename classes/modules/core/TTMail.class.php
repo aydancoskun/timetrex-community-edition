@@ -101,13 +101,14 @@ class TTMail {
 									);
 
 				if ( isset($smtp_config['username']) AND $smtp_config['username'] != '' ) {
-					$mail_config['user_name'] = $smtp_config['username'];
+					//Removed 'user_name' as it wasn't working with postfix.
+					$mail_config['username'] = $smtp_config['username'];
 					$mail_config['password'] = $smtp_config['password'];
 					$mail_config['auth'] = TRUE;
 				}
 
 				$this->mail_obj = Mail::factory('smtp', $mail_config );
-				Debug::Arr($mail_config, 'SMTP Config: ', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Arr($mail_config, 'SMTP Config: ', __FILE__, __LINE__, __METHOD__, 10);
 			}
 		}
 
@@ -117,7 +118,7 @@ class TTMail {
 	function getDeliveryMethod() {
 		global $config_vars;
 
-		$possible_values = array( 'mail','soap','smtp' );
+		$possible_values = array( 'mail', 'soap', 'smtp' );
 		if ( isset( $config_vars['mail']['delivery_method'] ) AND in_array( strtolower( trim($config_vars['mail']['delivery_method']) ), $possible_values ) ) {
 			return $config_vars['mail']['delivery_method'];
 		}
@@ -158,8 +159,8 @@ class TTMail {
 	}
 
 	function getMIMEHeaders() {
-		$mime_headers = @$this->getMIMEObject()->headers( $this->getHeaders() );
-		//Debug::Arr($this->data['headers'], 'MIME Headers: ', __FILE__, __LINE__, __METHOD__,10);
+		$mime_headers = @$this->getMIMEObject()->headers( $this->getHeaders(), TRUE );
+		//Debug::Arr($this->data['headers'], 'MIME Headers: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $mime_headers;
 	}
 	function getHeaders() {
@@ -177,7 +178,7 @@ class TTMail {
 			$this->data['headers']['Content-type'] = 'text/html; charset="UTF-8"';
 		}
 
-		//Debug::Arr($this->data['headers'], 'Headers: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($this->data['headers'], 'Headers: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		return TRUE;
 	}
@@ -209,51 +210,69 @@ class TTMail {
 	}
 
 	function Send() {
-		Debug::Text('Attempting to send email To: '. $this->getTo(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($this->getTo(), 'Attempting to send email To: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $this->getTo() == FALSE ) {
-			Debug::Text('To Address invalid...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('To Address invalid...', __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
 		}
 
 		if ( $this->getBody() == FALSE ) {
-			Debug::Text('Body invalid...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Body invalid...', __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
 		}
 
-		Debug::Text('Sending Email To: '. $this->getTo() .' Body Size: '. strlen( $this->getBody() ) .' Method: '. $this->getDeliveryMethod(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Sending Email: Body Size: '. strlen( $this->getBody() ) .' Method: '. $this->getDeliveryMethod() .' To: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( PRODUCTION == FALSE ) {
-			Debug::Text('Not in production mode, not sending emails...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Not in production mode, not sending emails...', __FILE__, __LINE__, __METHOD__, 10);
 			//$to = 'root@localhost';
 			return FALSE;
 		}
 
 		if ( DEMO_MODE == TRUE ) {
-			Debug::Text('In DEMO mode, not sending emails...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('In DEMO mode, not sending emails...', __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
 		}
 
-		switch ( $this->getDeliveryMethod() ) {
-			case 'smtp':
-			case 'mail':
-				$send_retval = $this->getMailObject()->send( $this->getTo(), $this->getMIMEHeaders(), $this->getBody() );
-				if ( PEAR::isError($send_retval) ) {
-					Debug::Text('Send Email Failed... Error: '. $send_retval->getMessage(), __FILE__, __LINE__, __METHOD__,10);
-					$send_retval = FALSE;
-				}
-				break;
-			case 'soap':
-				$ttsc = new TimeTrexSoapClient();
-				$send_retval = $ttsc->sendEmail( $this->getTo(), $this->getMIMEHeaders(), $this->getBody() );
-				break;
+		//if ( !isset($this->data['headers']['Date']) ) {
+		//	$this->data['headers']['Date'] = date( 'D, d M Y H:i:s O');
+		//}
+
+		if ( !is_array( $this->getTo() ) ) {
+			$to = array( $this->getTo() );
+		} else {
+			$to = $this->getTo();
+		}
+
+		foreach( $to as $recipient ) {
+			//$this->data['headers']['To'] = $recipient; //Always set the TO header to the recipient.
+			//Debug::Arr($this->getMIMEHeaders(), 'Sending Email To: '. $recipient, __FILE__, __LINE__, __METHOD__, 10);
+			switch ( $this->getDeliveryMethod() ) {
+				case 'smtp':
+				case 'mail':
+					$send_retval = $this->getMailObject()->send( $recipient, $this->getMIMEHeaders(), $this->getBody() );
+					if ( PEAR::isError($send_retval) ) {
+						Debug::Text('Send Email Failed... Error: '. $send_retval->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
+						$send_retval = FALSE;
+					}
+					break;
+				case 'soap':
+					$ttsc = new TimeTrexSoapClient();
+					$send_retval = $ttsc->sendEmail( $recipient, $this->getMIMEHeaders(), $this->getBody() );
+					break;
+			}
+
+			if ( $send_retval != TRUE ) {
+				Debug::Arr($send_retval, 'Send Email Failed To: '. $recipient, __FILE__, __LINE__, __METHOD__, 10);
+			}
 		}
 
 		if ( $send_retval == TRUE ) {
 			return TRUE;
 		}
 
-		Debug::Arr($send_retval, 'Send Email Failed!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($send_retval, 'Send Email Failed!', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
 }

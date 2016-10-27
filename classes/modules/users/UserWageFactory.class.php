@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11413 $
- * $Id: UserWageFactory.class.php 11413 2013-11-15 19:49:41Z mikeb $
- * $Date: 2013-11-15 11:49:41 -0800 (Fri, 15 Nov 2013) $
+ * $Revision: 12026 $
+ * $Id: UserWageFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -58,7 +58,7 @@ class UserWageFactory extends Factory {
 		switch( $name ) {
 			case 'type':
 				$retval = array(
-											10 	=> TTi18n::gettext('Hourly'),
+											10	=> TTi18n::gettext('Hourly'),
 											12	=> TTi18n::gettext('Salary (Weekly)'),
 											13	=> TTi18n::gettext('Salary (Bi-Weekly)'),
 											15	=> TTi18n::gettext('Salary (Monthly)'),
@@ -146,9 +146,9 @@ class UserWageFactory extends Factory {
 			return $variable_function_map;
 	}
 
-    function getUserObject() {
-        return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
-    }
+	function getUserObject() {
+		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
+	}
 	
 	function getWageGroupObject() {
 		if ( is_object($this->wage_group_obj) ) {
@@ -170,7 +170,7 @@ class UserWageFactory extends Factory {
 
 	function getUser() {
 		if ( isset($this->data['user_id']) ) {
-			return $this->data['user_id'];
+			return (int)$this->data['user_id'];
 		}
 
 		return FALSE;
@@ -195,7 +195,7 @@ class UserWageFactory extends Factory {
 
 	function getWageGroup() {
 		if ( isset($this->data['wage_group_id']) ) {
-			return $this->data['wage_group_id'];
+			return (int)$this->data['wage_group_id'];
 		}
 
 		return FALSE;
@@ -203,7 +203,7 @@ class UserWageFactory extends Factory {
 	function setWageGroup($id) {
 		$id = trim($id);
 
-		Debug::Text('Wage Group ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Wage Group ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$wglf = TTnew( 'WageGroupListFactory' );
 
 		if (
@@ -224,7 +224,7 @@ class UserWageFactory extends Factory {
 
 	function getType() {
 		if ( isset($this->data['type_id']) ) {
-			return $this->data['type_id'];
+			return (int)$this->data['type_id'];
 		}
 
 		return FALSE;
@@ -332,7 +332,7 @@ class UserWageFactory extends Factory {
 
 	function getWeeklyTime() {
 		if ( isset($this->data['weekly_time']) ) {
-			//Debug::Text('Weekly Time: '. $this->data['weekly_time'], __FILE__, __LINE__, __METHOD__,10);
+			//Debug::Text('Weekly Time: '. $this->data['weekly_time'], __FILE__, __LINE__, __METHOD__, 10);
 
 			return $this->data['weekly_time'];
 		}
@@ -393,7 +393,7 @@ class UserWageFactory extends Factory {
 
 		$uwlf = TTnew( 'UserWageListFactory' );
 		$uwlf->getByUserIdAndGroupIDAndBeforeDate( $this->getUser(), 0, $epoch );
-		//Debug::text(' Total Rows: '. $uwlf->getRecordCount() .' User: '. $this->getUser() .' Epoch: '. $epoch , __FILE__, __LINE__, __METHOD__,10);
+		//Debug::text(' Total Rows: '. $uwlf->getRecordCount() .' User: '. $this->getUser() .' Epoch: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $uwlf->getRecordCount() <= 1 ) {
 			//If it returns one row, we need to check to see if the returned row is the current record.
@@ -437,9 +437,9 @@ class UserWageFactory extends Factory {
 	function setEffectiveDate($epoch) {
 		$epoch = TTDate::getBeginDayEpoch( trim($epoch) );
 
-		Debug::Text('Effective Date: '. TTDate::getDate('DATE+TIME', $epoch ) , __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Effective Date: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 
-		if 	(	$this->Validator->isDate(		'effective_date',
+		if	(	$this->Validator->isDate(		'effective_date',
 												$epoch,
 												TTi18n::gettext('Incorrect Effective Date'))
 			) {
@@ -506,7 +506,7 @@ class UserWageFactory extends Factory {
 			if ( $base_currency_obj->getId() == $this->getUserObject()->getCurrency() ) {
 				return $rate;
 			} else {
-				//Debug::text(' Base Currency Rate: '. $base_currency_obj->getConversionRate() .' Hourly Rate: '. $rate , __FILE__, __LINE__, __METHOD__,10);
+				//Debug::text(' Base Currency Rate: '. $base_currency_obj->getConversionRate() .' Hourly Rate: '. $rate, __FILE__, __LINE__, __METHOD__, 10);
 				return CurrencyFactory::convertCurrency( $this->getUserObject()->getCurrency(), $base_currency_obj->getId(), $rate );
 			}
 		}
@@ -517,7 +517,7 @@ class UserWageFactory extends Factory {
 	function getAnnualWage() {
 		$annual_wage = 0;
 
-		//Debug::text(' Type: '. $this->getType() .' Wage: '. $this->getWage() , __FILE__, __LINE__, __METHOD__,10);
+		//Debug::text(' Type: '. $this->getType() .' Wage: '. $this->getWage(), __FILE__, __LINE__, __METHOD__, 10);
 		switch ( $this->getType() ) {
 			case 10: //Hourly
 				//Hourly wage type, can't have an annual wage.
@@ -562,21 +562,21 @@ class UserWageFactory extends Factory {
 		}
 
 		if ( $accurate_calculation == TRUE ) {
-			Debug::text('EPOCH: '. $epoch , __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('EPOCH: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
 
 			$annual_week_days = TTDate::getAnnualWeekDays( $epoch );
-			Debug::text('Annual Week Days: '. $annual_week_days , __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Annual Week Days: '. $annual_week_days, __FILE__, __LINE__, __METHOD__, 10);
 
 			//Calculate weeks from adjusted annual weekdays
 			//We could use just 52 weeks in a year, but that isn't as accurate.
 			$annual_work_weeks = bcdiv( $annual_week_days, 5);
-			Debug::text('Adjusted annual work weeks : '. $annual_work_weeks , __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Adjusted annual work weeks : '. $annual_work_weeks, __FILE__, __LINE__, __METHOD__, 10);
 		} else {
 			$annual_work_weeks = 52;
 		}
 
 		$average_weekly_hours = TTDate::getHours( $this->getWeeklyTime() );
-		//Debug::text('Average Weekly Hours: '. $average_weekly_hours , __FILE__, __LINE__, __METHOD__,10);
+		//Debug::text('Average Weekly Hours: '. $average_weekly_hours, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $average_weekly_hours == 0 ) {
 			//No default schedule, can't pay them.
@@ -589,8 +589,8 @@ class UserWageFactory extends Factory {
 			}
 			unset($hours_per_year);
 		}
-		//Debug::text('User Wage: '. $this->getWage() , __FILE__, __LINE__, __METHOD__,10);
-		//Debug::text('Annual Hourly Rate: '. $hourly_wage , __FILE__, __LINE__, __METHOD__,10);
+		//Debug::text('User Wage: '. $this->getWage(), __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::text('Annual Hourly Rate: '. $hourly_wage, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $hourly_wage;
 	}
@@ -607,23 +607,23 @@ class UserWageFactory extends Factory {
 		if ( $prev_wage_effective_date == 0 ) {
 			//ProRate salary to termination date if its in the middle of a pay period.
 			if ( $termination_date != '' AND $termination_date > 0 AND $termination_date < $pp_end_date ) {
-				Debug::text(' Setting PP end date to Termination Date: '. TTDate::GetDate('DATE', $termination_date) , __FILE__, __LINE__, __METHOD__,10);
+				Debug::text(' Setting PP end date to Termination Date: '. TTDate::GetDate('DATE', $termination_date), __FILE__, __LINE__, __METHOD__, 10);
 				$pp_end_date = $termination_date;
 			}
 
-			Debug::text(' Using Pay Period End Date: '. TTDate::GetDate('DATE', $pp_end_date) , __FILE__, __LINE__, __METHOD__,10);
+			Debug::text(' Using Pay Period End Date: '. TTDate::GetDate('DATE', $pp_end_date), __FILE__, __LINE__, __METHOD__, 10);
 			$total_wage_effective_days = ceil( TTDate::getDayDifference( $wage_effective_date, $pp_end_date) );
 		} else {
-			Debug::text(' Using Prev Effective Date: '. TTDate::GetDate('DATE', $prev_wage_effective_date ) , __FILE__, __LINE__, __METHOD__,10);
+			Debug::text(' Using Prev Effective Date: '. TTDate::GetDate('DATE', $prev_wage_effective_date ), __FILE__, __LINE__, __METHOD__, 10);
 			$total_wage_effective_days = ceil( TTDate::getDayDifference( $wage_effective_date, $prev_wage_effective_date ) );
 		}
 
-		Debug::text('Salary: '. $salary .' Total Pay Period Days: '. $total_pay_period_days .' Wage Effective Days: '. $total_wage_effective_days , __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Salary: '. $salary .' Total Pay Period Days: '. $total_pay_period_days .' Wage Effective Days: '. $total_wage_effective_days, __FILE__, __LINE__, __METHOD__, 10);
 
 		//$pro_rate_salary = $salary * ($total_wage_effective_days / $total_pay_period_days);
 		$pro_rate_salary = bcmul( $salary, bcdiv($total_wage_effective_days, $total_pay_period_days) );
 
-		Debug::text('Pro Rate Salary: '. $pro_rate_salary, __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Pro Rate Salary: '. $pro_rate_salary, __FILE__, __LINE__, __METHOD__, 10);
 		return $pro_rate_salary;
 	}
 
@@ -636,11 +636,11 @@ class UserWageFactory extends Factory {
 			return FALSE;
 		}
 
-		//Debug::Arr($wage_arr, 'Wage Array: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($wage_arr, 'Wage Array: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		foreach( $wage_arr as $effective_date => $wage ) {
 			if ( $effective_date <= $date ) {
-				Debug::Text('Effective Date: '. TTDate::getDate('DATE+TIME', $effective_date) .' Is Less Than: '. TTDate::getDate('DATE+TIME', $date)  , __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Effective Date: '. TTDate::getDate('DATE+TIME', $effective_date) .' Is Less Than: '. TTDate::getDate('DATE+TIME', $date), __FILE__, __LINE__, __METHOD__, 10);
 				return $wage;
 			}
 		}
@@ -658,7 +658,7 @@ class UserWageFactory extends Factory {
 		}
 
 		$end_epoch = TTDate::getTime();
-		$start_epoch = TTDate::getTime()-(86400*180); //6mths
+		$start_epoch = ( TTDate::getTime() - (86400 * 180) ); //6mths
 
 		$retval = FALSE;
 

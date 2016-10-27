@@ -54,8 +54,8 @@ class TimesheetSummaryReport extends Report {
 	}
 
 	protected function _checkPermissions( $user_id, $company_id ) {
-		if ( $this->getPermissionObject()->Check('report','enabled', $user_id, $company_id )
-				AND $this->getPermissionObject()->Check('report','view_timesheet_summary', $user_id, $company_id ) ) {
+		if ( $this->getPermissionObject()->Check('report', 'enabled', $user_id, $company_id )
+				AND $this->getPermissionObject()->Check('report', 'view_timesheet_summary', $user_id, $company_id ) ) {
 			return TRUE;
 		}
 
@@ -84,7 +84,7 @@ class TimesheetSummaryReport extends Report {
 										'template',
 										'time_period',
 										'columns',
-							   );
+								);
 				break;
 			case 'setup_fields':
 				$retval = array(
@@ -102,8 +102,8 @@ class TimesheetSummaryReport extends Report {
 										'-2070-default_department_id' => TTi18n::gettext('Default Department'),
 										'-2080-punch_branch_id' => TTi18n::gettext('Punch Branch'),
 										'-2090-punch_department_id' => TTi18n::gettext('Punch Department'),
-                                        '-2000-currency_id' => TTi18n::gettext('Currency'),
-                                        '-2100-custom_filter' => TTi18n::gettext('Custom Filter'),
+										'-2000-currency_id' => TTi18n::gettext('Currency'),
+										'-2100-custom_filter' => TTi18n::gettext('Custom Filter'),
 
 										'-4010-pay_period_time_sheet_verify_status_id' => TTi18n::gettext('TimeSheet Verification'),
 										'-4020-include_no_data_rows' => TTi18n::gettext('Include Blank Records'),
@@ -112,7 +112,7 @@ class TimesheetSummaryReport extends Report {
 										'-5010-group' => TTi18n::gettext('Group By'),
 										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
 										'-5030-sort' => TTi18n::gettext('Sort By'),
-							   );
+								);
 				break;
 			case 'time_period':
 				$retval = TTDate::getTimePeriodOptions();
@@ -129,7 +129,7 @@ class TimesheetSummaryReport extends Report {
 					$retval = Misc::addSortPrefix( $other_field_names, 9000 );
 				}
 				break;
-            case 'report_custom_column':
+			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
@@ -139,14 +139,14 @@ class TimesheetSummaryReport extends Report {
 						$retval = Misc::addSortPrefix( $custom_column_labels, 9500 );
 					}
 				}
-                break; 
-            case 'report_custom_filters':
+				break;
+			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
 					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'TimesheetSummaryReport', 'custom_column' );
 				}
-                break;
-            case 'report_dynamic_custom_column':
+				break;
+			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
 					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'TimesheetSummaryReport', 'custom_column' );
@@ -154,8 +154,8 @@ class TimesheetSummaryReport extends Report {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
 					}
 				}
-                break;
-            case 'report_static_custom_column':
+				break;
+			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
 					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'TimesheetSummaryReport', 'custom_column' );
@@ -163,13 +163,13 @@ class TimesheetSummaryReport extends Report {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
 					}
 				}
-                break;
-            case 'formula_columns':
-                $retval = TTMath::formatFormulaColumns( array_merge( array_diff( $this->getOptions('static_columns'), (array)$this->getOptions('report_static_custom_column') ), $this->getOptions('dynamic_columns') ) );
-                break; 
-            case 'filter_columns':
-                $retval = TTMath::formatFormulaColumns( array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') ) );
-                break;
+				break;
+			case 'formula_columns':
+				$retval = TTMath::formatFormulaColumns( array_merge( array_diff( $this->getOptions('static_columns'), (array)$this->getOptions('report_static_custom_column') ), $this->getOptions('dynamic_columns') ) );
+				break;
+			case 'filter_columns':
+				$retval = TTMath::formatFormulaColumns( array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') ) );
+				break;
 			case 'static_columns':
 				$retval = array(
 										//Static Columns - Aggregate functions can't be used on these.
@@ -211,7 +211,7 @@ class TimesheetSummaryReport extends Report {
 
 										'-1510-verified_time_sheet' => TTi18n::gettext('Verified TimeSheet'),
 										'-1515-verified_time_sheet_date' => TTi18n::gettext('Verified TimeSheet Date'),
-							   );
+								);
 
 				$retval = array_merge( $retval, (array)$this->getOptions('date_columns'), (array)$this->getOptions('custom_columns'), (array)$this->getOptions('report_static_custom_column')  );
 				ksort($retval);
@@ -297,7 +297,7 @@ class TimesheetSummaryReport extends Report {
 				}
 				break;
 			case 'columns':
-				$retval = array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') );                
+				$retval = array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') );
 				break;
 			case 'column_format':
 				//Define formatting function for each column.
@@ -311,7 +311,7 @@ class TimesheetSummaryReport extends Report {
 						}
 					}
 				}
-				$retval['verified_time_sheet_date'] = 'time_stamp';                
+				$retval['verified_time_sheet_date'] = 'time_stamp';
 				break;
 			case 'aggregates':
 				$retval = array();
@@ -431,7 +431,7 @@ class TimesheetSummaryReport extends Report {
 
 										'-3000-by_pay_period_by_employee+verified_time_sheet' => TTi18n::gettext('Timesheet Verification by Pay Period/Employee'),
 										'-3010-by_verified_time_sheet_by_pay_period_by_employee+verified_time_sheet' => TTi18n::gettext('Timesheet Verification by Verification/Pay Period/Employee'),
-							   );
+								);
 
 				break;
 			case 'template_config':
@@ -475,14 +475,14 @@ class TimesheetSummaryReport extends Report {
 							break;
 
 						default:
-							Debug::Text(' Parsing template name: '. $template, __FILE__, __LINE__, __METHOD__,10);
+							Debug::Text(' Parsing template name: '. $template, __FILE__, __LINE__, __METHOD__, 10);
 							$retval['-1010-time_period']['time_period'] = 'last_pay_period';
 
 							//Parse template name, and use the keywords separated by '+' to determine settings.
 							$template_keywords = explode('+', $template );
 							if ( is_array($template_keywords) ) {
 								foreach( $template_keywords as $template_keyword ) {
-									Debug::Text(' Keyword: '. $template_keyword, __FILE__, __LINE__, __METHOD__,10);
+									Debug::Text(' Keyword: '. $template_keyword, __FILE__, __LINE__, __METHOD__, 10);
 
 									switch( $template_keyword ) {
 										//Columns
@@ -727,7 +727,7 @@ class TimesheetSummaryReport extends Report {
 					$retval['-5040-sort'] = $retval['sort'];
 					unset($retval['sort']);
 				}
-				Debug::Arr($retval, ' Template Config for: '. $template, __FILE__, __LINE__, __METHOD__,10);
+				Debug::Arr($retval, ' Template Config for: '. $template, __FILE__, __LINE__, __METHOD__, 10);
 
 				break;
 			default:
@@ -748,7 +748,7 @@ class TimesheetSummaryReport extends Report {
 		$otplf->getByCompanyId( $this->getUserObject()->getCompany() );
 		if ( $otplf->getRecordCount() > 0 ) {
 			foreach( $otplf as $otp_obj ) {
-				Debug::Text('Over Time Policy ID: '. $otp_obj->getId() .' Rate: '. $otp_obj->getRate() , __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Over Time Policy ID: '. $otp_obj->getId() .' Rate: '. $otp_obj->getRate(), __FILE__, __LINE__, __METHOD__, 10);
 				$policy_rates['over_time_policy-'.$otp_obj->getId()] = $otp_obj;
 			}
 		}
@@ -777,56 +777,56 @@ class TimesheetSummaryReport extends Report {
 	//Get raw data for report
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array('user_date_total' => array(), 'schedule' => array(), 'worked_days' => array(), 'user' => array(), 'default_branch' => array(), 'default_department' => array(), 'branch' => array(), 'department' => array(), 'verified_timesheet' => array() );
-        
-		$columns = $this->getColumnDataConfig();    
-           
+
+		$columns = $this->getColumnDataConfig();
+
 		$filter_data = $this->getFilterConfig();
 		$policy_hourly_rates = $this->getPolicyHourlyRates();
-        
-        $currency_convert_to_base = $this->getCurrencyConvertToBase();
+
+		$currency_convert_to_base = $this->getCurrencyConvertToBase();
 		$base_currency_obj = $this->getBaseCurrencyObject();
 		$this->handleReportCurrency( $currency_convert_to_base, $base_currency_obj, $filter_data );
 		$currency_options = $this->getOptions('currency');
-        
-		if ( $this->getPermissionObject()->Check('punch','view') == FALSE OR $this->getPermissionObject()->Check('wage','view') == FALSE ) {
+
+		if ( $this->getPermissionObject()->Check('punch', 'view') == FALSE OR $this->getPermissionObject()->Check('wage', 'view') == FALSE ) {
 			$hlf = TTnew( 'HierarchyListFactory' );
 			$permission_children_ids = $wage_permission_children_ids = $hlf->getHierarchyChildrenByCompanyIdAndUserIdAndObjectTypeID( $this->getUserObject()->getCompany(), $this->getUserObject()->getID() );
-			//Debug::Arr($permission_children_ids,'Permission Children Ids:', __FILE__, __LINE__, __METHOD__,10);
+			//Debug::Arr($permission_children_ids, 'Permission Children Ids:', __FILE__, __LINE__, __METHOD__, 10);
 		} else {
 			//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
 			$permission_children_ids = array();
 			$wage_permission_children_ids = array();
 		}
-		if ( $this->getPermissionObject()->Check('punch','view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('punch','view_child') == FALSE ) {
+		if ( $this->getPermissionObject()->Check('punch', 'view') == FALSE ) {
+			if ( $this->getPermissionObject()->Check('punch', 'view_child') == FALSE ) {
 				$permission_children_ids = array();
 			}
-			if ( $this->getPermissionObject()->Check('punch','view_own') ) {
+			if ( $this->getPermissionObject()->Check('punch', 'view_own') ) {
 				$permission_children_ids[] = $this->getUserObject()->getID();
 			}
 
 			$filter_data['permission_children_ids'] = $permission_children_ids;
 		}
 		//Get Wage Permission Hierarchy Children first, as this can be used for viewing, or editing.
-		if ( $this->getPermissionObject()->Check('wage','view') == TRUE ) {
+		if ( $this->getPermissionObject()->Check('wage', 'view') == TRUE ) {
 			$wage_permission_children_ids = TRUE;
-		} elseif ( $this->getPermissionObject()->Check('wage','view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('wage','view_child') == FALSE ) {
+		} elseif ( $this->getPermissionObject()->Check('wage', 'view') == FALSE ) {
+			if ( $this->getPermissionObject()->Check('wage', 'view_child') == FALSE ) {
 				$wage_permission_children_ids = array();
 			}
-			if ( $this->getPermissionObject()->Check('wage','view_own') ) {
+			if ( $this->getPermissionObject()->Check('wage', 'view_own') ) {
 				$wage_permission_children_ids[] = $this->getUserObject()->getID();
 			}
 		}
-		//Debug::Text(' Permission Children: '. count($permission_children_ids) .' Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($permission_children_ids, 'Permission Children: '. count($permission_children_ids), __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($wage_permission_children_ids, 'Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Text(' Permission Children: '. count($permission_children_ids) .' Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($permission_children_ids, 'Permission Children: '. count($permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($wage_permission_children_ids, 'Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
 
 		$pay_period_ids = array();
 
 		$udtlf = TTnew( 'UserDateTotalListFactory' );
 		$udtlf->getTimesheetSummaryReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-		Debug::Text(' Total Rows: '. $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text(' Total Rows: '. $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $udtlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		if ( $udtlf->getRecordCount() > 0 ) {
 			foreach ( $udtlf as $key => $udt_obj ) {
@@ -849,7 +849,7 @@ class TimesheetSummaryReport extends Report {
 					$column = NULL;
 				}
 
-				//Debug::Text('Column: '. $column .' Total Time: '. $udt_obj->getColumn('total_time') .' Status: '. $status_id .' Type: '. $type_id .' Rate: '. $udt_obj->getColumn( 'hourly_rate' ), __FILE__, __LINE__, __METHOD__,10);
+				//Debug::Text('Column: '. $column .' Total Time: '. $udt_obj->getColumn('total_time') .' Status: '. $status_id .' Type: '. $type_id .' Rate: '. $udt_obj->getColumn( 'hourly_rate' ), __FILE__, __LINE__, __METHOD__, 10);
 				if ( ( isset($filter_data['include_no_data_rows']) AND $filter_data['include_no_data_rows'] == 1 )
 						OR ( $date_stamp != '' AND $column != '' AND $udt_obj->getColumn('total_time') != 0 )  ) {
 
@@ -866,7 +866,7 @@ class TimesheetSummaryReport extends Report {
 						$hourly_rate_with_burden = $policy_hourly_rates[$column]->getHourlyRate( $hourly_rate_with_burden );
 					}
 
-					//Split time by user,date,branch,department as that is the lowest level we can split time.
+					//Split time by user, date, branch, department as that is the lowest level we can split time.
 					//We always need to split time as much as possible as it can always be combined together by grouping.
 					//Unless we never add columns together that would ever span a single row is of course
 					if ( !isset($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]) ) {
@@ -936,69 +936,83 @@ class TimesheetSummaryReport extends Report {
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 			}
 		}
-		//Debug::Arr($this->tmp_data['user_date_total'], 'User Date Total Raw Data: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($this->tmp_data['user_date_total'], 'User Date Total Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( isset($columns['schedule_working']) OR isset($columns['schedule_working_diff']) OR isset($columns['schedule_absence']) ) {
 			$slf = TTnew( 'ScheduleListFactory' );
-			$slf->getDayReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+			//$slf->getDayReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+			$slf->getScheduleSummaryReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 			if ( $slf->getRecordCount() > 0 ) {
 				foreach($slf as $s_obj) {
 					$status = strtolower( Option::getByKey($s_obj->getColumn('status_id'), $s_obj->getOptions('status') ) );
 
+					//Check if the user worked on any of the scheduled days, if not insert a dummy day so the scheduled time at least appears still.
+					if ( !isset($this->tmp_data['user_date_total'][(int)$s_obj->getColumn('user_id')][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')]) ) {
+						$this->tmp_data['user_date_total'][(int)$s_obj->getColumn('user_id')][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')] = array(
+							'branch_id' => $s_obj->getColumn('branch_id'),
+							'department_id' => $s_obj->getColumn('department_id'),
+							'pay_period_start_date' => strtotime( $s_obj->getColumn('pay_period_start_date') ),
+							'pay_period_end_date' => strtotime( $s_obj->getColumn('pay_period_end_date') ),
+							'pay_period_transaction_date' => strtotime( $s_obj->getColumn('pay_period_transaction_date') ),
+							'pay_period' => strtotime( $s_obj->getColumn('pay_period_transaction_date') ),
+							'pay_period_id' => $s_obj->getColumn('pay_period_id'),
+							);
+					}
+
 					//Make sure we handle multiple schedules on the same day.
-					if ( isset($this->tmp_data['schedule'][$s_obj->getColumn('user_id')][TTDate::strtotime( $s_obj->getColumn('date_stamp') )]['schedule_'.$status]) ) {
-						$this->tmp_data['schedule'][$s_obj->getColumn('user_id')][TTDate::strtotime( $s_obj->getColumn('date_stamp') )]['schedule_'.$status] += $s_obj->getColumn('total_time');
+					if ( isset($this->tmp_data['schedule'][(int)$s_obj->getColumn('user_id')][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')]['schedule_'.$status]) ) {
+						$this->tmp_data['schedule'][(int)$s_obj->getColumn('user_id')][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')]['schedule_'.$status] += $s_obj->getColumn('total_time');
 					} else {
-						$this->tmp_data['schedule'][$s_obj->getColumn('user_id')][TTDate::strtotime( $s_obj->getColumn('date_stamp') )]['schedule_'.$status] = $s_obj->getColumn('total_time');
+						$this->tmp_data['schedule'][(int)$s_obj->getColumn('user_id')][TTDate::strtotime( $s_obj->getColumn('date_stamp') )][$s_obj->getColumn('branch_id')][$s_obj->getColumn('department_id')]['schedule_'.$status] = $s_obj->getColumn('total_time');
 					}
 				}
 			}
-			//Debug::Arr($this->tmp_data['schedule'], 'Schedule Raw Data: ', __FILE__, __LINE__, __METHOD__,10);
+			//Debug::Arr($this->tmp_data['schedule'], 'Schedule Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 			unset($slf, $s_obj, $status);
 		}
 
 		//Get user data for joining.
 		$ulf = TTnew( 'UserListFactory' );
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$this->getColumnDataConfig(), array('other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE) ) );
 			
-            if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
+			if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
 				$this->tmp_data['user'][$u_obj->getId()]['current_currency'] = Option::getByKey( $base_currency_obj->getId(), $currency_options );
 				$this->tmp_data['user'][$u_obj->getId()]['currency_rate'] = $u_obj->getColumn('currency_rate');
 			} else {
-			    $this->tmp_data['user'][$u_obj->getId()]['current_currency'] =  $u_obj->getColumn('currency');
+				$this->tmp_data['user'][$u_obj->getId()]['current_currency'] =	$u_obj->getColumn('currency');
 			}
-            
-            $this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+
+			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
-        
-        //Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__,10);
+
+		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		
 		$blf = TTnew( 'BranchListFactory' );
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array() ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
-		Debug::Text(' Branch Total Rows: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text(' Branch Total Rows: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $blf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $blf as $key => $b_obj ) {
 			$this->tmp_data['default_branch'][$b_obj->getId()] = Misc::addKeyPrefix( 'default_branch_', (array)$b_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE, 'manual_id' => TRUE, 'other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE ) ) );
 			$this->tmp_data['branch'][$b_obj->getId()] = Misc::addKeyPrefix( 'branch_', (array)$b_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE, 'manual_id' => TRUE, 'other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE ) ) );
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
-		//Debug::Arr($this->tmp_data['default_branch'], 'Default Branch Raw Data: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($this->tmp_data['default_branch'], 'Default Branch Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$dlf = TTnew( 'DepartmentListFactory' );
 		$dlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array() ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
-		Debug::Text(' Department Total Rows: '. $dlf->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text(' Department Total Rows: '. $dlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $dlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $dlf as $key => $d_obj ) {
 			$this->tmp_data['default_department'][$d_obj->getId()] = Misc::addKeyPrefix( 'default_department_', (array)$d_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE, 'manual_id' => TRUE, 'other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE ) ) );
 			$this->tmp_data['department'][$d_obj->getId()] = Misc::addKeyPrefix( 'department_', (array)$d_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE, 'manual_id' => TRUE, 'other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE ) ) );
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
-		//Debug::Arr($this->tmp_data['default_department'], 'Default Department Raw Data: ', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($this->tmp_data['department'], 'Department Raw Data: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($this->tmp_data['default_department'], 'Default Department Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($this->tmp_data['department'], 'Department Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get verified timesheets for all pay periods considered in report.
 		$pay_period_ids = array_keys( $pay_period_ids );
@@ -1014,19 +1028,19 @@ class TimesheetSummaryReport extends Report {
 				}
 			}
 		}
-		//Debug::Arr($this->tmp_data, 'TMP Data: ', __FILE__, __LINE__, __METHOD__,10);          
-        
+		//Debug::Arr($this->tmp_data, 'TMP Data: ', __FILE__, __LINE__, __METHOD__, 10);
+
 		return TRUE;
 	}
 
 	//PreProcess data such as calculating additional columns from raw data etc...
 	function _preProcess() {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['user_date_total']), NULL, TTi18n::getText('Pre-Processing Data...') );
-        
+
 		//Merge time data with user data
-		$key=0;
-        
-		if ( isset($this->tmp_data['user_date_total']) ) {		  
+		$key = 0;
+
+		if ( isset($this->tmp_data['user_date_total']) ) {		
 			foreach( $this->tmp_data['user_date_total'] as $user_id => $level_1 ) {
 				if ( isset($this->tmp_data['user'][$user_id]) ) {
 					foreach( $level_1 as $date_stamp => $level_2 ) {
@@ -1034,7 +1048,7 @@ class TimesheetSummaryReport extends Report {
 							foreach( $level_3 as $department => $row ) {
 
 								$date_columns = TTDate::getReportDates( NULL, $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
-								$processed_data  = array(
+								$processed_data	 = array(
 														//'branch_id' => $branch_id,
 														//'department_id' => $department_id,
 														//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
@@ -1051,21 +1065,24 @@ class TimesheetSummaryReport extends Report {
 								if ( !isset($row['worked_time']) ) {
 									$row['worked_time'] = 0;
 								}
-								if ( isset($this->tmp_data['schedule'][$user_id][$date_stamp]['schedule_working']) ) {
-									$processed_data['schedule_working'] = $this->tmp_data['schedule'][$user_id][$date_stamp]['schedule_working'];
-									$processed_data['schedule_working_diff'] = $row['worked_time'] - $this->tmp_data['schedule'][$user_id][$date_stamp]['schedule_working'];
-									unset($this->tmp_data['schedule'][$user_id][$date_stamp]['schedule_working']);
+
+								if ( isset($this->tmp_data['schedule'][$user_id][$date_stamp][$branch][$department]['schedule_working']) ) {
+									$processed_data['schedule_working'] = $this->tmp_data['schedule'][$user_id][$date_stamp][$branch][$department]['schedule_working'];
+									$processed_data['schedule_working_diff'] = ($row['worked_time'] - $this->tmp_data['schedule'][$user_id][$date_stamp][$branch][$department]['schedule_working']);
+									//We can only include scheduled_time once per user/date combination. Otherwise its duplicates the amounts and makes it incorrect.
+									//So once its used unset it so it can't be used again.
+									unset($this->tmp_data['schedule'][$user_id][$date_stamp][$branch][$department]['schedule_working']);
 								} else {
 									$processed_data['schedule_working'] = 0;
 									$processed_data['schedule_working_diff'] = $row['worked_time'];
 								}
-								if ( isset($this->tmp_data['schedule'][$user_id][$date_stamp]['schedule_absent']) ) {
-									$processed_data['schedule_absent'] = $this->tmp_data['schedule'][$user_id][$date_stamp]['schedule_absent'];
-									unset($this->tmp_data['schedule'][$user_id][$date_stamp]['schedule_absent']);
+								if ( isset($this->tmp_data['schedule'][$user_id][$date_stamp][$branch][$department]['schedule_absent']) ) {
+									$processed_data['schedule_absent'] = $this->tmp_data['schedule'][$user_id][$date_stamp][$branch][$department]['schedule_absent'];
+									unset($this->tmp_data['schedule'][$user_id][$date_stamp][$branch][$department]['schedule_absent']);
 								} else {
 									$processed_data['schedule_absent'] = 0;
 								}
-
+								
 								if ( isset($this->tmp_data['user'][$user_id]['default_branch_id']) AND isset($this->tmp_data['default_branch'][$this->tmp_data['user'][$user_id]['default_branch_id']]) ) {
 									$tmp_default_branch = $this->tmp_data['default_branch'][$this->tmp_data['user'][$user_id]['default_branch_id']];
 								} else {
@@ -1087,10 +1104,9 @@ class TimesheetSummaryReport extends Report {
 								} else {
 									$tmp_department = array();
 								}
-                                
-                                $this->data[] = array_merge( $this->tmp_data['user'][$user_id], $tmp_default_branch, $tmp_default_department, $tmp_branch, $tmp_department, $row, $date_columns, $processed_data );                            
-                                
-                                
+
+								$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $tmp_default_branch, $tmp_default_department, $tmp_branch, $tmp_department, $row, $date_columns, $processed_data );
+
 								$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 								$key++;
 							}
@@ -1100,8 +1116,8 @@ class TimesheetSummaryReport extends Report {
 			}
 			unset($this->tmp_data, $row, $date_columns, $processed_data, $level_1, $level_2, $level_3);
 		}
-		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__,10);
-        return TRUE;
+		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		return TRUE;
 	}
 }
 ?>

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11457 $
- * $Id: UserDefaultFactory.class.php 11457 2013-11-20 00:40:13Z mikeb $
- * $Date: 2013-11-19 16:40:13 -0800 (Tue, 19 Nov 2013) $
+ * $Revision: 12026 $
+ * $Id: UserDefaultFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -123,7 +123,7 @@ class UserDefaultFactory extends Factory {
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND deleted=0';
 		$unique_company_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($unique_company_id,'Unique Company: '. $this->getID(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($unique_company_id, 'Unique Company: '. $this->getID(), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $unique_company_id === FALSE ) {
 			return TRUE;
@@ -138,7 +138,7 @@ class UserDefaultFactory extends Factory {
 
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
-			return $this->data['company_id'];
+			return (int)$this->data['company_id'];
 		}
 
 		return FALSE;
@@ -146,10 +146,10 @@ class UserDefaultFactory extends Factory {
 	function setCompany($id) {
 		$id = trim($id);
 
-		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$clf = TTnew( 'CompanyListFactory' );
 
-		if ( 	$this->Validator->isResultSetWithRows(	'company',
+		if (	$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($id),
 														TTi18n::gettext('Company is invalid')
 				AND
@@ -168,7 +168,7 @@ class UserDefaultFactory extends Factory {
 
 	function getPermissionControl() {
 		if ( isset($this->data['permission_control_id']) ) {
-			return $this->data['permission_control_id'];
+			return (int)$this->data['permission_control_id'];
 		}
 
 		return FALSE;
@@ -192,7 +192,7 @@ class UserDefaultFactory extends Factory {
 
 	function getPayPeriodSchedule() {
 		if ( isset($this->data['pay_period_schedule_id']) ) {
-			return $this->data['pay_period_schedule_id'];
+			return (int)$this->data['pay_period_schedule_id'];
 		}
 
 		return FALSE;
@@ -217,7 +217,7 @@ class UserDefaultFactory extends Factory {
 
 	function getPolicyGroup() {
 		if ( isset($this->data['policy_group_id']) ) {
-			return $this->data['policy_group_id'];
+			return (int)$this->data['policy_group_id'];
 		}
 
 		return FALSE;
@@ -250,7 +250,7 @@ class UserDefaultFactory extends Factory {
 	function setEmployeeNumber($value) {
 		$value = trim($value);
 
-		if 	(
+		if	(
 				$value == ''
 				OR
 					$this->Validator->isLength(		'employee_number',
@@ -269,7 +269,7 @@ class UserDefaultFactory extends Factory {
 
 	function getTitle() {
 		if ( isset($this->data['title_id']) ) {
-			return $this->data['title_id'];
+			return (int)$this->data['title_id'];
 		}
 
 		return FALSE;
@@ -277,7 +277,7 @@ class UserDefaultFactory extends Factory {
 	function setTitle($id) {
 		$id = trim($id);
 
-		Debug::Text('Title ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Title ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$utlf = TTnew( 'UserTitleListFactory' );
 
 		if (
@@ -298,7 +298,7 @@ class UserDefaultFactory extends Factory {
 
 	function getDefaultBranch() {
 		if ( isset($this->data['default_branch_id']) ) {
-			return $this->data['default_branch_id'];
+			return (int)$this->data['default_branch_id'];
 		}
 
 		return FALSE;
@@ -306,7 +306,7 @@ class UserDefaultFactory extends Factory {
 	function setDefaultBranch($id) {
 		$id = trim($id);
 
-		Debug::Text('Branch ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Branch ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$blf = TTnew( 'BranchListFactory' );
 
 		if (
@@ -327,7 +327,7 @@ class UserDefaultFactory extends Factory {
 
 	function getDefaultDepartment() {
 		if ( isset($this->data['default_department_id']) ) {
-			return $this->data['default_department_id'];
+			return (int)$this->data['default_department_id'];
 		}
 
 		return FALSE;
@@ -335,7 +335,7 @@ class UserDefaultFactory extends Factory {
 	function setDefaultDepartment($id) {
 		$id = trim($id);
 
-		Debug::Text('Department ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Department ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$dlf = TTnew( 'DepartmentListFactory' );
 
 		if (
@@ -356,7 +356,7 @@ class UserDefaultFactory extends Factory {
 
 	function getCurrency() {
 		if ( isset($this->data['currency_id']) ) {
-			return $this->data['currency_id'];
+			return (int)$this->data['currency_id'];
 		}
 
 		return FALSE;
@@ -364,7 +364,7 @@ class UserDefaultFactory extends Factory {
 	function setCurrency($id) {
 		$id = trim($id);
 
-		Debug::Text('Currency ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Currency ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$culf = TTnew( 'CurrencyListFactory' );
 
 		if (
@@ -391,7 +391,7 @@ class UserDefaultFactory extends Factory {
 	function setCity($city) {
 		$city = trim($city);
 
-		if 	(
+		if	(
 				$city == ''
 				OR
 				(
@@ -451,7 +451,7 @@ class UserDefaultFactory extends Factory {
 	function setProvince($province) {
 		$province = trim($province);
 
-		Debug::Text('Country: '. $this->getCountry() .' Province: '. $province, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Country: '. $this->getCountry() .' Province: '. $province, __FILE__, __LINE__, __METHOD__, 10);
 
 		$cf = TTnew( 'CompanyFactory' );
 
@@ -488,7 +488,7 @@ class UserDefaultFactory extends Factory {
 	function setWorkPhone($work_phone) {
 		$work_phone = trim($work_phone);
 
-		if 	(
+		if	(
 				$work_phone == ''
 				OR
 				$this->Validator->isPhoneNumber(		'work_phone',
@@ -513,7 +513,7 @@ class UserDefaultFactory extends Factory {
 	function setWorkPhoneExt($work_phone_ext) {
 		$work_phone_ext = $this->Validator->stripNonNumeric( trim($work_phone_ext) );
 
-		if ( 	$work_phone_ext == ''
+		if (	$work_phone_ext == ''
 				OR $this->Validator->isLength(		'work_phone_ext',
 													$work_phone_ext,
 													TTi18n::gettext('Work phone number extension is too short or too long'),
@@ -539,7 +539,7 @@ class UserDefaultFactory extends Factory {
 	function setWorkEmail($work_email) {
 		$work_email = trim($work_email);
 
-		if 	(	$work_email == ''
+		if	(	$work_email == ''
 					OR	$this->Validator->isEmail(	'work_email',
 													$work_email,
 													TTi18n::gettext('Work Email address is invalid')) ) {
@@ -564,7 +564,7 @@ class UserDefaultFactory extends Factory {
 			$epoch = NULL;
 		}
 
-		if 	(	$epoch == ''
+		if	(	$epoch == ''
 				OR
 				$this->Validator->isDate(		'hire_date',
 												$epoch,
@@ -733,7 +733,7 @@ class UserDefaultFactory extends Factory {
 	function setItemsPerPage($items_per_page) {
 		$items_per_page = trim($items_per_page);
 
-		if 	($items_per_page != '' AND $items_per_page >= 1 AND $items_per_page <= 200) {
+		if	($items_per_page != '' AND $items_per_page >= 1 AND $items_per_page <= 200) {
 
 			$this->data['items_per_page'] = $items_per_page;
 
@@ -903,7 +903,7 @@ class UserDefaultFactory extends Factory {
 		return TRUE;
 	}
 
-	//Support setting created_by,updated_by especially for importing data.
+	//Support setting created_by, updated_by especially for importing data.
 	//Make sure data is set based on the getVariableToFunctionMap order.
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
@@ -913,9 +913,9 @@ class UserDefaultFactory extends Factory {
 
 					$function = 'set'.$function;
 					switch( $key ) {
-					    case 'hire_date':
-                            $this->setHireDate( TTDate::parseDateTime( $data['hire_date'] ) );
-                            break;
+						case 'hire_date':
+							$this->setHireDate( TTDate::parseDateTime( $data['hire_date'] ) );
+							break;
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -944,9 +944,9 @@ class UserDefaultFactory extends Factory {
 
 					$function = 'get'.$function_stub;
 					switch( $variable ) {
-					    case 'hire_date':
-                            $data[$variable] = TTDate::getAPIDate( 'DATE', $this->getHireDate() );
-                            break;
+						case 'hire_date':
+							$data[$variable] = TTDate::getAPIDate( 'DATE', $this->getHireDate() );
+							break;
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = $this->$function();

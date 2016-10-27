@@ -476,7 +476,7 @@ class GovernmentForms_CA_T4Sum extends GovernmentForms_CA {
 		//Strip non-digits.
 		$value = $this->stripNonNumeric($value);
 
-		return array( substr($value, 0,3), substr($value, 3,3), substr($value, 6,4) );
+		return array( substr($value, 0, 3), substr($value, 3, 3), substr($value, 6, 4) );
 	}
 
 	function filterCompanyAddress( $value ) {
@@ -524,11 +524,11 @@ class GovernmentForms_CA_T4Sum extends GovernmentForms_CA {
 		$xml->Return->T4->T4Summary->addChild('rpt_tcd', 'O' ); //Report Type Code: O = Originals, A = Amendment, C = Cancel
 
 		$xml->Return->T4->T4Summary->addChild('EMPR_NM'); //Employer name
-		$xml->Return->T4->T4Summary->EMPR_NM->addChild('l1_nm', substr( $this->company_name, 0, 30) );
+		$xml->Return->T4->T4Summary->EMPR_NM->addChild('l1_nm', substr( Misc::stripHTMLSpecialChars( $this->company_name ), 0, 30) );
 
 		$xml->Return->T4->T4Summary->addChild('EMPR_ADDR'); //Employer Address
-		$xml->Return->T4->T4Summary->EMPR_ADDR->addChild('addr_l1_txt', $this->company_address1 );
-		if ( $this->company_address2 != '' ) { $xml->Return->T4->T4Summary->EMPR_ADDR->addChild('addr_l2_txt', $this->company_address2 ); }
+		$xml->Return->T4->T4Summary->EMPR_ADDR->addChild('addr_l1_txt', Misc::stripHTMLSpecialChars( $this->company_address1 ) );
+		if ( $this->company_address2 != '' ) { $xml->Return->T4->T4Summary->EMPR_ADDR->addChild('addr_l2_txt', Misc::stripHTMLSpecialChars( $this->company_address2 ) ); }
 		$xml->Return->T4->T4Summary->EMPR_ADDR->addChild('cty_nm', $this->company_city );
 		$xml->Return->T4->T4Summary->EMPR_ADDR->addChild('prov_cd', $this->company_province );
 		$xml->Return->T4->T4Summary->EMPR_ADDR->addChild('cntry_cd', 'CAN' );

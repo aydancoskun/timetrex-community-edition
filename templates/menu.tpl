@@ -31,7 +31,7 @@ left=0;
 alwaysvisible=1;
 orientation="horizontal";
 {/literal}
-aI("url={$BASE_URL}index.php;image={$IMAGES_URL}home_icon.gif;");
+aI("url={$BASE_URL}index_legacy.php;image={$IMAGES_URL}home_icon.gif;");
 {if $permission->Check('punch','enabled') AND $permission->Check('punch','punch_in_out') }
 	aI("text={t}In / Out{/t};url=javascript:timePunch();");
 {/if}

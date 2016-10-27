@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: HolidayPolicyRecurringHolidayFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 12026 $
+ * $Id: HolidayPolicyRecurringHolidayFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -65,7 +65,7 @@ class HolidayPolicyRecurringHolidayFactory extends Factory {
 
 	function getHolidayPolicy() {
 		if ( isset($this->data['holiday_policy_id']) ) {
-			return $this->data['holiday_policy_id'];
+			return (int)$this->data['holiday_policy_id'];
 		}
 
 		return FALSE;
@@ -76,12 +76,12 @@ class HolidayPolicyRecurringHolidayFactory extends Factory {
 		$hplf = TTnew( 'HolidayPolicyListFactory' );
 
 		if (
-			  $this->Validator->isNumeric(	'holiday_policy',
+			$this->Validator->isNumeric(	'holiday_policy',
 											$id,
 											TTi18n::gettext('Holiday Policy is invalid')
 
 			/*
-			  $this->Validator->isResultSetWithRows(	'holiday_policy',
+			$this->Validator->isResultSetWithRows(	'holiday_policy',
 													$hplf->getByID($id),
 													TTi18n::gettext('Holiday Policy is invalid')
 			 */
@@ -96,7 +96,7 @@ class HolidayPolicyRecurringHolidayFactory extends Factory {
 
 	function getRecurringHoliday() {
 		if ( isset($this->data['recurring_holiday_id']) ) {
-			return $this->data['recurring_holiday_id'];
+			return (int)$this->data['recurring_holiday_id'];
 		}
 	}
 	function setRecurringHoliday($id) {
@@ -170,7 +170,7 @@ class HolidayPolicyRecurringHolidayFactory extends Factory {
 	function addLog( $log_action ) {
 		$obj = $this->getRecurringHolidayObject();
 		if ( is_object($obj) ) {
-			return TTLog::addEntry( $this->getHolidayPolicy(), $log_action,  TTi18n::getText('Recurring Holiday').': '. $obj->getName(), NULL, $this->getTable() );
+			return TTLog::addEntry( $this->getHolidayPolicy(), $log_action, TTi18n::getText('Recurring Holiday').': '. $obj->getName(), NULL, $this->getTable() );
 		}
 	}
 }

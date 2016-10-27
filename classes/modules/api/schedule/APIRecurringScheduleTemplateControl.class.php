@@ -59,8 +59,8 @@ class APIRecurringScheduleTemplateControl extends APIFactory {
 	 */
 	function getOptions( $name, $parent = NULL ) {
 		if ( $name == 'columns'
-				AND ( !$this->getPermissionObject()->Check('recurring_schedule_template','enabled')
-					OR !( $this->getPermissionObject()->Check('recurring_schedule_template','view') OR $this->getPermissionObject()->Check('recurring_schedule_template','view_own') OR $this->getPermissionObject()->Check('recurring_schedule_template','view_child') ) ) ) {
+				AND ( !$this->getPermissionObject()->Check('recurring_schedule_template', 'enabled')
+					OR !( $this->getPermissionObject()->Check('recurring_schedule_template', 'view') OR $this->getPermissionObject()->Check('recurring_schedule_template', 'view_own') OR $this->getPermissionObject()->Check('recurring_schedule_template', 'view_child') ) ) ) {
 			$name = 'list_columns';
 		}
 
@@ -74,7 +74,7 @@ class APIRecurringScheduleTemplateControl extends APIFactory {
 	function getRecurringScheduleTemplateControlDefaultData() {
 		$company_obj = $this->getCurrentCompanyObject();
 
-		Debug::Text('Getting recurring_schedule_template_control default data...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Getting recurring_schedule_template_control default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		$data = array(
 						'company_id' => $company_obj->getId(),
@@ -89,8 +89,8 @@ class APIRecurringScheduleTemplateControl extends APIFactory {
 	 * @return array
 	 */
 	function getRecurringScheduleTemplateControl( $data = NULL, $disable_paging = FALSE ) {
-		if ( !$this->getPermissionObject()->Check('recurring_schedule_template','enabled')
-				OR !( $this->getPermissionObject()->Check('recurring_schedule_template','view') OR $this->getPermissionObject()->Check('recurring_schedule_template','view_own') OR $this->getPermissionObject()->Check('recurring_schedule_template','view_child')  ) ) {
+		if ( !$this->getPermissionObject()->Check('recurring_schedule_template', 'enabled')
+				OR !( $this->getPermissionObject()->Check('recurring_schedule_template', 'view') OR $this->getPermissionObject()->Check('recurring_schedule_template', 'view_own') OR $this->getPermissionObject()->Check('recurring_schedule_template', 'view_child')	) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
@@ -151,9 +151,9 @@ class APIRecurringScheduleTemplateControl extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('recurring_schedule_template','enabled')
-				OR !( $this->getPermissionObject()->Check('recurring_schedule_template','edit') OR $this->getPermissionObject()->Check('recurring_schedule_template','edit_own') OR $this->getPermissionObject()->Check('recurring_schedule_template','edit_child') OR $this->getPermissionObject()->Check('recurring_schedule_template','add') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('recurring_schedule_template', 'enabled')
+				OR !( $this->getPermissionObject()->Check('recurring_schedule_template', 'edit') OR $this->getPermissionObject()->Check('recurring_schedule_template', 'edit_own') OR $this->getPermissionObject()->Check('recurring_schedule_template', 'edit_child') OR $this->getPermissionObject()->Check('recurring_schedule_template', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		if ( $validate_only == TRUE ) {
@@ -179,11 +179,11 @@ class APIRecurringScheduleTemplateControl extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if (
-							  $validate_only == TRUE
-							  OR
+							$validate_only == TRUE
+							OR
 								(
-								$this->getPermissionObject()->Check('recurring_schedule_template','edit')
-									OR ( $this->getPermissionObject()->Check('recurring_schedule_template','edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+								$this->getPermissionObject()->Check('recurring_schedule_template', 'edit')
+									OR ( $this->getPermissionObject()->Check('recurring_schedule_template', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -198,7 +198,7 @@ class APIRecurringScheduleTemplateControl extends APIFactory {
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('recurring_schedule_template','add'), TTi18n::gettext('Add permission denied') );
+					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('recurring_schedule_template', 'add'), TTi18n::gettext('Add permission denied') );
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -206,10 +206,10 @@ class APIRecurringScheduleTemplateControl extends APIFactory {
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
 					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
 
-					$lf->setObjectFromArray( $row );
-
 					//Force Company ID to current company.
-					$lf->setCompany( $this->getCurrentCompanyObject()->getId() );
+					$row['company_id'] = $this->getCurrentCompanyObject()->getId();
+
+					$lf->setObjectFromArray( $row );
 
 					$is_valid = $lf->isValid();
 					if ( $is_valid == TRUE ) {
@@ -273,16 +273,16 @@ class APIRecurringScheduleTemplateControl extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('recurring_schedule_template','enabled')
-				OR !( $this->getPermissionObject()->Check('recurring_schedule_template','delete') OR $this->getPermissionObject()->Check('recurring_schedule_template','delete_own') OR $this->getPermissionObject()->Check('recurring_schedule_template','delete_child') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('recurring_schedule_template', 'enabled')
+				OR !( $this->getPermissionObject()->Check('recurring_schedule_template', 'delete') OR $this->getPermissionObject()->Check('recurring_schedule_template', 'delete_own') OR $this->getPermissionObject()->Check('recurring_schedule_template', 'delete_child') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		Debug::Text('Received data for: '. count($data) .' RecurringScheduleTemplateControls', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-        $validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
+		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
@@ -296,8 +296,8 @@ class APIRecurringScheduleTemplateControl extends APIFactory {
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
-						if ( $this->getPermissionObject()->Check('recurring_schedule_template','delete')
-								OR ( $this->getPermissionObject()->Check('recurring_schedule_template','delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
+						if ( $this->getPermissionObject()->Check('recurring_schedule_template', 'delete')
+								OR ( $this->getPermissionObject()->Check('recurring_schedule_template', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
 							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {

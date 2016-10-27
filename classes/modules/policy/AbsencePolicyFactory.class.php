@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11545 $
- * $Id: AbsencePolicyFactory.class.php 11545 2013-11-29 02:04:30Z mikeb $
- * $Date: 2013-11-28 18:04:30 -0800 (Thu, 28 Nov 2013) $
+ * $Revision: 12026 $
+ * $Id: AbsencePolicyFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -62,7 +62,7 @@ class AbsencePolicyFactory extends Factory {
 									);
 				break;
 			case 'paid_type': //Types that are considered paid.
-				$retval = array(10,12);
+				$retval = array(10, 12);
 				break;
 			case 'columns':
 				$retval = array(
@@ -139,7 +139,7 @@ class AbsencePolicyFactory extends Factory {
 
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
-			return $this->data['company_id'];
+			return (int)$this->data['company_id'];
 		}
 
 		return FALSE;
@@ -147,7 +147,7 @@ class AbsencePolicyFactory extends Factory {
 	function setCompany($id) {
 		$id = trim($id);
 
-		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$clf = TTnew( 'CompanyListFactory' );
 
 		if ( $this->Validator->isResultSetWithRows(	'company',
@@ -171,7 +171,7 @@ class AbsencePolicyFactory extends Factory {
 	}
 	function getType() {
 		if ( isset($this->data['type_id']) ) {
-			return $this->data['type_id'];
+			return (int)$this->data['type_id'];
 		}
 
 		return FALSE;
@@ -205,7 +205,7 @@ class AbsencePolicyFactory extends Factory {
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
 		$id = $this->db->GetOne($query, $ph);
-		Debug::Arr($id,'Unique: '. $name, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($id, 'Unique: '. $name, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id === FALSE ) {
 			return TRUE;
@@ -229,7 +229,7 @@ class AbsencePolicyFactory extends Factory {
 		if (	$this->Validator->isLength(	'name',
 											$name,
 											TTi18n::gettext('Name is too short or too long'),
-											2,50)
+											2, 50)
 				AND
 				$this->Validator->isTrue(	'name',
 											$this->isUniqueName($name),
@@ -248,7 +248,7 @@ class AbsencePolicyFactory extends Factory {
 		if ( $this->getType() == 20 ) { //Unpaid
 			$rate = 0;
 		} elseif( $this->getType() == 30 ) { //Dock
-			$rate = $this->getRate()*-1;
+			$rate = ( $this->getRate() * -1 );
 		} else {
 			$rate = $this->getRate();
 		}
@@ -265,11 +265,11 @@ class AbsencePolicyFactory extends Factory {
 	function setRate($int) {
 		$int = trim($int);
 
-		if  ( empty($int) ){
+		if	( empty($int) ) {
 			$int = 0;
 		}
 
-		if 	(	$this->Validator->isFloat(		'rate',
+		if	(	$this->Validator->isFloat(		'rate',
 												$int,
 												TTi18n::gettext('Incorrect Rate')) ) {
 			$this->data['rate'] = $int;
@@ -282,7 +282,7 @@ class AbsencePolicyFactory extends Factory {
 
 	function getWageGroup() {
 		if ( isset($this->data['wage_group_id']) ) {
-			return $this->data['wage_group_id'];
+			return (int)$this->data['wage_group_id'];
 		}
 
 		return FALSE;
@@ -317,11 +317,11 @@ class AbsencePolicyFactory extends Factory {
 	function setAccrualRate($int) {
 		$int = trim($int);
 
-		if  ( empty($int) ){
+		if	( empty($int) ) {
 			$int = 0;
 		}
 
-		if 	(	$this->Validator->isFloat(		'accrual_rate',
+		if	(	$this->Validator->isFloat(		'accrual_rate',
 												$int,
 												TTi18n::gettext('Incorrect Accrual Rate')) ) {
 			$this->data['accrual_rate'] = $int;
@@ -334,7 +334,7 @@ class AbsencePolicyFactory extends Factory {
 
 	function getAccrualPolicyID() {
 		if ( isset($this->data['accrual_policy_id']) ) {
-			return $this->data['accrual_policy_id'];
+			return (int)$this->data['accrual_policy_id'];
 		}
 
 		return FALSE;
@@ -365,7 +365,7 @@ class AbsencePolicyFactory extends Factory {
 
 	function getPayStubEntryAccountId() {
 		if ( isset($this->data['pay_stub_entry_account_id']) ) {
-			return $this->data['pay_stub_entry_account_id'];
+			return (int)$this->data['pay_stub_entry_account_id'];
 		}
 
 		return FALSE;
@@ -373,7 +373,7 @@ class AbsencePolicyFactory extends Factory {
 	function setPayStubEntryAccountId($id) {
 		$id = trim($id);
 
-		Debug::text('Entry Account ID: '. $id , __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Entry Account ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id == '' OR empty($id) ) {
 			$id = NULL;
@@ -484,7 +484,7 @@ class AbsencePolicyFactory extends Factory {
 	}
 
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action,  TTi18n::getText('Absence Policy'), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Absence Policy'), NULL, $this->getTable(), $this );
 	}
 }
 ?>

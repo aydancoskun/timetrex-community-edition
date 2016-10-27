@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: AccrualBalanceFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 12026 $
+ * $Id: AccrualBalanceFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -71,7 +71,7 @@ class AccrualBalanceFactory extends Factory {
 							);
 				break;
 			case 'list_columns':
-				$retval = Misc::arrayIntersectByKey( array('accrual_policy','balance'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
+				$retval = Misc::arrayIntersectByKey( array('accrual_policy', 'balance'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
 				$retval = array(
@@ -109,7 +109,7 @@ class AccrualBalanceFactory extends Factory {
 
 	function getUser() {
 		if ( isset($this->data['user_id']) ) {
-			return $this->data['user_id'];
+			return (int)$this->data['user_id'];
 		}
 	}
 	function setUser($id) {
@@ -131,7 +131,7 @@ class AccrualBalanceFactory extends Factory {
 
 	function getAccrualPolicyID() {
 		if ( isset($this->data['accrual_policy_id']) ) {
-			return $this->data['accrual_policy_id'];
+			return (int)$this->data['accrual_policy_id'];
 		}
 
 		return FALSE;
@@ -174,7 +174,7 @@ class AccrualBalanceFactory extends Factory {
 			$int = 0;
 		}
 
-		if 	(	$this->Validator->isNumeric(		'balance',
+		if	(	$this->Validator->isNumeric(		'balance',
 													$int,
 													TTi18n::gettext('Incorrect Balance'))
 				) {

@@ -40,8 +40,10 @@
  */
 require_once('PHPUnit/Framework/TestCase.php');
 
+/**
+ * @group USPayrollDeductionTest2006
+ */
 class USPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
-
     public $company_id = NULL;
 
     public function __construct() {

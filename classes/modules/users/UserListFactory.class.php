@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11257 $
- * $Id: UserListFactory.class.php 11257 2013-10-29 19:59:42Z mikeb $
- * $Date: 2013-10-29 12:59:42 -0700 (Tue, 29 Oct 2013) $
+ * $Revision: 12026 $
+ * $Id: UserListFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -53,8 +53,8 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		}
 
 		$query = '
-					select 	*
-					from 	'. $this->getTable() .'
+					select	*
+					from	'. $this->getTable() .'
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -75,7 +75,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where
 						status_id = ?
@@ -98,7 +98,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	distinct a.country
+					select	distinct a.country
 					from	'. $uf->getTable() .' as a
 					where	a.company_id = ?
 						AND ( a.deleted = 0 )';
@@ -120,7 +120,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where
 						company_id = ?
@@ -159,14 +159,14 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 						);
 
 			$query = '
-						select 	*
-						from 	'. $this->getTable() .'
+						select	*
+						from	'. $this->getTable() .'
 						where	id = ?
 							AND deleted = 0';
 
 			$this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs,$id);
+			$this->saveCache($this->rs, $id);
 		}
 
 		return $this;
@@ -193,8 +193,8 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
-					from 	'. $this->getTable() .'
+					select	*
+					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND	id in ('. $this->getListSQL($id, $ph) .')
 						AND deleted = 0';
@@ -217,7 +217,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	user_name = ?
 						AND deleted = 0';
@@ -248,9 +248,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 
 		//Only return users of active companies and active users, as they are the only ones that can login anyways.
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
-					LEFT JOIN 	'. $cf->getTable() .' as cf ON ( a.company_id = cf.id )
+					LEFT JOIN	'. $cf->getTable() .' as cf ON ( a.company_id = cf.id )
 					where cf.status_id = 10
 						AND a.status_id = 10
 						AND ( lower(a.home_email) = ? OR lower(a.work_email) = ? )
@@ -273,7 +273,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where
 						password_reset_key = ?
@@ -299,9 +299,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
-					where 	company_id = ?
+					where	company_id = ?
 						AND user_name = ?
 						AND deleted = 0';
 
@@ -326,7 +326,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	user_name = ?
 						AND status_id = ?
@@ -353,7 +353,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	phone_id = ?
 						AND status_id = ?
@@ -381,7 +381,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	ibutton_id = ?
 						AND status_id = ?
@@ -408,7 +408,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 						AND status_id = ?
@@ -429,9 +429,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
-					where 	currency_id = ?
+					where	currency_id = ?
 						AND deleted = 0';
 
 		$this->ExecuteSQL( $query, $ph );
@@ -464,15 +464,15 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					LEFT JOIN
 					(
-						SELECT g2.*,g1.user_id
+						SELECT g2.*, g1.user_id
 						FROM '. $puf->getTable() .' as g1, '. $pcf->getTable() .' as g2
 						WHERE ( g1.permission_control_id = g2.id AND g2.deleted = 0)
 					) as g ON ( a.id = g.user_id )
-					where 	a.company_id = ?
+					where	a.company_id = ?
 						AND g.level = ?
 						AND a.deleted = 0';
 
@@ -496,9 +496,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
-					where 	company_id = ?
+					where	company_id = ?
 						AND group_id = ?
 						AND deleted = 0';
 
@@ -522,9 +522,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
-					where 	company_id = ?
+					where	company_id = ?
 						AND ibutton_id = ?
 						AND deleted = 0';
 
@@ -548,9 +548,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
-					where 	company_id = ?
+					where	company_id = ?
 						AND rf_id = ?
 						AND deleted = 0';
 
@@ -574,9 +574,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
-					where 	company_id = ?
+					where	company_id = ?
 						AND employee_number = ?
 						AND deleted = 0';
 
@@ -625,8 +625,8 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	a.*
-					from 	'. $this->getTable() .' as a,
+					select	a.*
+					from	'. $this->getTable() .' as a,
 							'. $sf->getTable() .' as z
 					where	a.company_id = ?
 						AND z.id = ?
@@ -660,7 +660,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 			//Append the same date twice for created and updated.
 			$ph[] = $date;
 			$ph[] = $date;
-			$query  .=	' AND ( a.created_date >= ? OR a.updated_date >= ? )';
+			$query	.=	' AND ( a.created_date >= ? OR a.updated_date >= ? )';
 			unset($date_filter);
 		}
 
@@ -719,8 +719,8 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		//so the first supervisor/admin enrolled on a timeclock is properly updated to lock the menu.
 		//Make sure we return distinct user rows so there aren't duplicates.
 		$query = '
-					select 	distinct a.*
-					from 	'. $this->getTable() .' as a
+					select	distinct a.*
+					from	'. $this->getTable() .' as a
 
 					LEFT JOIN '. $sf->getTable() .' as z ON (1=1)
 					LEFT JOIN '. $uif->getTable() .' as uif ON ( a.id = uif.user_id )
@@ -761,14 +761,14 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 			$ph[] = (int)$date;
 			$ph[] = (int)$date;
 			$ph[] = (int)$date;
-			$query  .=	' 		AND ( a.created_date >= ? OR a.updated_date >= ? OR uif.created_date >= ? )
+			$query	.=	'		AND ( a.created_date >= ? OR a.updated_date >= ? OR uif.created_date >= ? )
 								)';
 		} else {
-				$query  .=	'   )';
+				$query	.=	'	)';
 		}
 
 		if ( isset($valid_user_ids) AND is_array($valid_user_ids) AND count($valid_user_ids) > 0 ) {
-			$query  .=	' OR a.id in ('. $this->getListSQL($valid_user_ids, $ph) .') ';
+			$query	.=	' OR a.id in ('. $this->getListSQL($valid_user_ids, $ph) .') ';
 		}
 
 		$query .= '			)
@@ -822,8 +822,8 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		//Also include users with user_identifcation rows that have been *created* after the given date
 		//so the first supervisor/admin enrolled on a timeclock is properly updated to lock the menu.
 		$query = '
-					select 	a.*
-					from 	'. $this->getTable() .' as a
+					select	a.*
+					from	'. $this->getTable() .' as a
 
 					LEFT JOIN '. $sf->getTable() .' as z ON (1=1)
 					where	a.company_id = ?
@@ -862,7 +862,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 
 		$query .= '	AND ( a.deleted = 0 AND z.deleted = 0 )';
 
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -889,8 +889,8 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
-					from 	'. $this->getTable() .'
+					select	*
+					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -918,8 +918,8 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
-					from 	'. $this->getTable() .'
+					select	*
+					from	'. $this->getTable() .'
 					where	company_id = ? ';
 
 		//isset() returns false on NULL.
@@ -1014,7 +1014,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 
 		//INCLUDE Deleted rows in this query.
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where
 							company_id = ?
@@ -1057,7 +1057,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		//Also include users with user_identifcation rows that have been *created* after the given date
 		//so the first supervisor/admin enrolled on a timeclock is properly updated to lock the menu.
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					LEFT JOIN '. $uif->getTable() .' as uif ON ( a.id = uif.user_id )
 					where
@@ -1070,12 +1070,12 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 
 		$this->rs = $this->db->SelectLimit($query, 1, -1, $ph);
 		if ( $this->getRecordCount() > 0 ) {
-			Debug::text('User rows have been modified: '. $this->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('User rows have been modified: '. $this->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
 			return TRUE;
 		}
 
-		Debug::text('User rows have NOT been modified', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('User rows have NOT been modified', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 	}
@@ -1094,7 +1094,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		//however if we left pad it, we can get a similar effect.
 		//Eventually we can change it to an integer field.
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .' as a
 					where	company_id = ?
 						AND id = ( select id
@@ -1153,7 +1153,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 			if ( !isset($order['status_id']) ) {
 				$order = Misc::prependArray( array('status_id' => 'asc'), $order );
 			}
-			//Always sort by last name,first name after other columns
+			//Always sort by last name, first name after other columns
 			if ( !isset($order['last_name']) ) {
 				$order['last_name'] = 'asc';
 			}
@@ -1162,8 +1162,8 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 			}
 			$strict = TRUE;
 		}
-		//Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( isset($filter_data['company_ids']) ) {
 			$filter_data['company_id'] = $filter_data['company_ids'];
@@ -1202,8 +1202,8 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$ph = array();
 
 		$query = '
-					select 	a.*
-					from 	'. $this->getTable() .' as a
+					select	a.*
+					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $bf->getTable() .' as b ON a.default_branch_id = b.id
 						LEFT JOIN '. $df->getTable() .' as c ON a.default_department_id = c.id
 						LEFT JOIN '. $ugf->getTable() .' as d ON a.group_id = d.id
@@ -1212,78 +1212,78 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					';
 
 		if ( isset($filter_data['company_id']) AND isset($filter_data['company_id'][0]) AND !in_array(-1, (array)$filter_data['company_id']) ) {
-			$query  .=	' AND a.company_id in ('. $this->getListSQL($filter_data['company_id'], $ph) .') ';
+			$query	.=	' AND a.company_id in ('. $this->getListSQL($filter_data['company_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query  .=	' AND a.id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
+			$query	.=	' AND a.id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
 		}
 		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query  .=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
+			$query	.=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
 		}
 		if ( isset($filter_data['exclude_id']) AND isset($filter_data['exclude_id'][0]) AND !in_array(-1, (array)$filter_data['exclude_id']) ) {
-			$query  .=	' AND a.id not in ('. $this->getListSQL($filter_data['exclude_id'], $ph) .') ';
+			$query	.=	' AND a.id not in ('. $this->getListSQL($filter_data['exclude_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['status_id']) AND isset($filter_data['status_id'][0]) AND !in_array(-1, (array)$filter_data['status_id']) ) {
-			$query  .=	' AND a.status_id in ('. $this->getListSQL($filter_data['status_id'], $ph) .') ';
+			$query	.=	' AND a.status_id in ('. $this->getListSQL($filter_data['status_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['group_id']) AND isset($filter_data['group_id'][0]) AND !in_array(-1, (array)$filter_data['group_id']) ) {
 			if ( isset($filter_data['include_subgroups']) AND (bool)$filter_data['include_subgroups'] == TRUE ) {
 				$uglf = new UserGroupListFactory();
 				$filter_data['group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['group_id'], TRUE);
 			}
-			$query  .=	' AND a.group_id in ('. $this->getListSQL($filter_data['group_id'], $ph) .') ';
+			$query	.=	' AND a.group_id in ('. $this->getListSQL($filter_data['group_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['default_branch_id']) AND isset($filter_data['default_branch_id'][0]) AND !in_array(-1, (array)$filter_data['default_branch_id']) ) {
-			$query  .=	' AND a.default_branch_id in ('. $this->getListSQL($filter_data['default_branch_id'], $ph) .') ';
+			$query	.=	' AND a.default_branch_id in ('. $this->getListSQL($filter_data['default_branch_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['default_department_id']) AND isset($filter_data['default_department_id'][0]) AND !in_array(-1, (array)$filter_data['default_department_id']) ) {
-			$query  .=	' AND a.default_department_id in ('. $this->getListSQL($filter_data['default_department_id'], $ph) .') ';
+			$query	.=	' AND a.default_department_id in ('. $this->getListSQL($filter_data['default_department_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['title_id']) AND isset($filter_data['title_id'][0]) AND !in_array(-1, (array)$filter_data['title_id']) ) {
-			$query  .=	' AND a.title_id in ('. $this->getListSQL($filter_data['title_id'], $ph) .') ';
+			$query	.=	' AND a.title_id in ('. $this->getListSQL($filter_data['title_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['currency_id']) AND isset($filter_data['currency_id'][0]) AND !in_array(-1, (array)$filter_data['currency_id']) ) {
-			$query  .=	' AND a.currency_id in ('. $this->getListSQL($filter_data['currency_id'], $ph) .') ';
+			$query	.=	' AND a.currency_id in ('. $this->getListSQL($filter_data['currency_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['sex_id']) AND isset($filter_data['sex_id'][0]) AND !in_array(-1, (array)$filter_data['sex_id']) ) {
-			$query  .=	' AND a.sex_id in ('. $this->getListSQL($filter_data['sex_id'], $ph) .') ';
+			$query	.=	' AND a.sex_id in ('. $this->getListSQL($filter_data['sex_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['country']) AND isset($filter_data['country'][0]) AND !in_array(-1, (array)$filter_data['country']) ) {
-			$query  .=	' AND a.country in ('. $this->getListSQL($filter_data['country'], $ph) .') ';
+			$query	.=	' AND a.country in ('. $this->getListSQL($filter_data['country'], $ph) .') ';
 		}
 		if ( isset($filter_data['province']) AND isset($filter_data['province'][0]) AND !in_array( -1, (array)$filter_data['province']) AND !in_array( '00', (array)$filter_data['province']) ) {
-			$query  .=	' AND a.province in ('. $this->getListSQL($filter_data['province'], $ph) .') ';
+			$query	.=	' AND a.province in ('. $this->getListSQL($filter_data['province'], $ph) .') ';
 		}
-		if ( isset($filter_data['city']) AND trim($filter_data['city']) != '' ) {
+		if ( isset($filter_data['city']) AND !is_array($filter_data['city']) AND trim($filter_data['city']) != '' ) {
 			$ph[] = strtolower(trim($filter_data['city']));
-			$query  .=	' AND lower(a.city) LIKE ?';
+			$query	.=	' AND lower(a.city) LIKE ?';
 		}
-		if ( isset($filter_data['first_name']) AND trim($filter_data['first_name']) != '' ) {
+		if ( isset($filter_data['first_name']) AND !is_array($filter_data['first_name']) AND trim($filter_data['first_name']) != '' ) {
 			$ph[] = strtolower(trim($filter_data['first_name']));
-			$query  .=	' AND lower(a.first_name) LIKE ?';
+			$query	.=	' AND lower(a.first_name) LIKE ?';
 		}
-		if ( isset($filter_data['last_name']) AND trim($filter_data['last_name']) != '' ) {
+		if ( isset($filter_data['last_name']) AND !is_array($filter_data['last_name']) AND trim($filter_data['last_name']) != '' ) {
 			$ph[] = strtolower(trim($filter_data['last_name']));
-			$query  .=	' AND lower(a.last_name) LIKE ?';
+			$query	.=	' AND lower(a.last_name) LIKE ?';
 		}
-		if ( isset($filter_data['home_phone']) AND trim($filter_data['home_phone']) != '' ) {
+		if ( isset($filter_data['home_phone']) AND !is_array($filter_data['home_phone']) AND trim($filter_data['home_phone']) != '' ) {
 			$ph[] = trim($filter_data['home_phone']);
-			$query  .=	' AND a.home_phone LIKE ?';
+			$query	.=	' AND a.home_phone LIKE ?';
 		}
-		if ( isset($filter_data['employee_number']) AND trim($filter_data['employee_number']) != '' ) {
+		if ( isset($filter_data['employee_number']) AND !is_array($filter_data['employee_number']) AND trim($filter_data['employee_number']) != '' ) {
 			$ph[] = trim($filter_data['employee_number']);
-			$query  .=	' AND a.employee_number LIKE ?';
+			$query	.=	' AND a.employee_number LIKE ?';
 		}
-		if ( isset($filter_data['user_name']) AND trim($filter_data['user_name']) != '' ) {
+		if ( isset($filter_data['user_name']) AND !is_array($filter_data['user_name']) AND trim($filter_data['user_name']) != '' ) {
 			$ph[] = strtolower(trim($filter_data['user_name']));
-			$query  .=	' AND lower(a.user_name) LIKE ?';
+			$query	.=	' AND lower(a.user_name) LIKE ?';
 		}
-		if ( isset($filter_data['sin']) AND trim($filter_data['sin']) != '' ) {
+		if ( isset($filter_data['sin']) AND !is_array($filter_data['sin']) AND trim($filter_data['sin']) != '' ) {
 			$ph[] = trim($filter_data['sin']);
-			$query  .=	' AND a.sin LIKE ?';
+			$query	.=	' AND a.sin LIKE ?';
 		}
 
-		$query .= 	'
+		$query .=	'
 						AND a.deleted = 0
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -1334,7 +1334,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 			if ( !isset($order['status_id']) ) {
 				$order = Misc::prependArray( array('status_id' => 'asc'), $order );
 			}
-			//Always sort by last name,first name after other columns
+			//Always sort by last name, first name after other columns
 			if ( !isset($order['last_name']) ) {
 				$order['last_name'] = 'asc';
 			}
@@ -1343,8 +1343,8 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 			}
 			$strict = TRUE;
 		}
-		//Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( isset($filter_data['exclude_user_ids']) ) {
 			$filter_data['exclude_id'] = $filter_data['exclude_user_ids'];
@@ -1381,8 +1381,8 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	a.*
-					from 	'. $this->getTable() .' as a
+					select	a.*
+					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $bf->getTable() .' as b ON a.default_branch_id = b.id
 						LEFT JOIN '. $df->getTable() .' as c ON a.default_department_id = c.id
 						LEFT JOIN '. $ugf->getTable() .' as d ON a.group_id = d.id
@@ -1391,75 +1391,75 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					';
 
 		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query  .=	' AND a.id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
+			$query	.=	' AND a.id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
 		}
 		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query  .=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
+			$query	.=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
 		}
 		if ( isset($filter_data['exclude_id']) AND isset($filter_data['exclude_id'][0]) AND !in_array(-1, (array)$filter_data['exclude_id']) ) {
-			$query  .=	' AND a.id not in ('. $this->getListSQL($filter_data['exclude_id'], $ph) .') ';
+			$query	.=	' AND a.id not in ('. $this->getListSQL($filter_data['exclude_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['status_id']) AND isset($filter_data['status_id'][0]) AND !in_array(-1, (array)$filter_data['status_id']) ) {
-			$query  .=	' AND a.status_id in ('. $this->getListSQL($filter_data['status_id'], $ph) .') ';
+			$query	.=	' AND a.status_id in ('. $this->getListSQL($filter_data['status_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['group_id']) AND isset($filter_data['group_id'][0]) AND !in_array(-1, (array)$filter_data['group_id']) ) {
 			if ( isset($filter_data['include_subgroups']) AND (bool)$filter_data['include_subgroups'] == TRUE ) {
 				$uglf = new UserGroupListFactory();
 				$filter_data['group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['group_id'], TRUE);
 			}
-			$query  .=	' AND a.group_id in ('. $this->getListSQL($filter_data['group_id'], $ph) .') ';
+			$query	.=	' AND a.group_id in ('. $this->getListSQL($filter_data['group_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['default_branch_id']) AND isset($filter_data['default_branch_id'][0]) AND !in_array(-1, (array)$filter_data['default_branch_id']) ) {
-			$query  .=	' AND a.default_branch_id in ('. $this->getListSQL($filter_data['default_branch_id'], $ph) .') ';
+			$query	.=	' AND a.default_branch_id in ('. $this->getListSQL($filter_data['default_branch_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['default_department_id']) AND isset($filter_data['default_department_id'][0]) AND !in_array(-1, (array)$filter_data['default_department_id']) ) {
-			$query  .=	' AND a.default_department_id in ('. $this->getListSQL($filter_data['default_department_id'], $ph) .') ';
+			$query	.=	' AND a.default_department_id in ('. $this->getListSQL($filter_data['default_department_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['title_id']) AND isset($filter_data['title_id'][0]) AND !in_array(-1, (array)$filter_data['title_id']) ) {
-			$query  .=	' AND a.title_id in ('. $this->getListSQL($filter_data['title_id'], $ph) .') ';
+			$query	.=	' AND a.title_id in ('. $this->getListSQL($filter_data['title_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['currency_id']) AND isset($filter_data['currency_id'][0]) AND !in_array(-1, (array)$filter_data['currency_id']) ) {
-			$query  .=	' AND a.currency_id in ('. $this->getListSQL($filter_data['currency_id'], $ph) .') ';
+			$query	.=	' AND a.currency_id in ('. $this->getListSQL($filter_data['currency_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['sex_id']) AND isset($filter_data['sex_id'][0]) AND !in_array(-1, (array)$filter_data['sex_id']) ) {
-			$query  .=	' AND a.sex_id in ('. $this->getListSQL($filter_data['sex_id'], $ph) .') ';
+			$query	.=	' AND a.sex_id in ('. $this->getListSQL($filter_data['sex_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['country']) AND isset($filter_data['country'][0]) AND !in_array(-1, (array)$filter_data['country']) ) {
-			$query  .=	' AND a.country in ('. $this->getListSQL($filter_data['country'], $ph) .') ';
+			$query	.=	' AND a.country in ('. $this->getListSQL($filter_data['country'], $ph) .') ';
 		}
 		if ( isset($filter_data['province']) AND isset($filter_data['province'][0]) AND !in_array( -1, (array)$filter_data['province']) AND !in_array( '00', (array)$filter_data['province']) ) {
-			$query  .=	' AND a.province in ('. $this->getListSQL($filter_data['province'], $ph) .') ';
+			$query	.=	' AND a.province in ('. $this->getListSQL($filter_data['province'], $ph) .') ';
 		}
-		if ( isset($filter_data['city']) AND trim($filter_data['city']) != '' ) {
+		if ( isset($filter_data['city']) AND !is_array($filter_data['city']) AND trim($filter_data['city']) != '' ) {
 			$ph[] = strtolower(trim($filter_data['city']));
-			$query  .=	' AND lower(a.city) LIKE ?';
+			$query	.=	' AND lower(a.city) LIKE ?';
 		}
-		if ( isset($filter_data['first_name']) AND trim($filter_data['first_name']) != '' ) {
+		if ( isset($filter_data['first_name']) AND !is_array($filter_data['first_name']) AND trim($filter_data['first_name']) != '' ) {
 			$ph[] = strtolower(trim($filter_data['first_name']));
-			$query  .=	' AND lower(a.first_name) LIKE ?';
+			$query	.=	' AND lower(a.first_name) LIKE ?';
 		}
-		if ( isset($filter_data['last_name']) AND trim($filter_data['last_name']) != '' ) {
+		if ( isset($filter_data['last_name']) AND !is_array($filter_data['last_name']) AND trim($filter_data['last_name']) != '' ) {
 			$ph[] = strtolower(trim($filter_data['last_name']));
-			$query  .=	' AND lower(a.last_name) LIKE ?';
+			$query	.=	' AND lower(a.last_name) LIKE ?';
 		}
-		if ( isset($filter_data['home_phone']) AND trim($filter_data['home_phone']) != '' ) {
+		if ( isset($filter_data['home_phone']) AND !is_array($filter_data['home_phone']) AND trim($filter_data['home_phone']) != '' ) {
 			$ph[] = trim($filter_data['home_phone']);
-			$query  .=	' AND a.home_phone LIKE ?';
+			$query	.=	' AND a.home_phone LIKE ?';
 		}
-		if ( isset($filter_data['employee_number']) AND trim($filter_data['employee_number']) != '' ) {
+		if ( isset($filter_data['employee_number']) AND !is_array($filter_data['employee_number']) AND trim($filter_data['employee_number']) != '' ) {
 			$ph[] = trim($filter_data['employee_number']);
-			$query  .=	' AND a.employee_number LIKE ?';
+			$query	.=	' AND a.employee_number LIKE ?';
 		}
-		if ( isset($filter_data['user_name']) AND trim($filter_data['user_name']) != '' ) {
+		if ( isset($filter_data['user_name']) AND !is_array($filter_data['user_name']) AND trim($filter_data['user_name']) != '' ) {
 			$ph[] = strtolower(trim($filter_data['user_name']));
-			$query  .=	' AND lower(a.user_name) LIKE ?';
+			$query	.=	' AND lower(a.user_name) LIKE ?';
 		}
-		if ( isset($filter_data['sin']) AND trim($filter_data['sin']) != '' ) {
+		if ( isset($filter_data['sin']) AND !is_array($filter_data['sin']) AND trim($filter_data['sin']) != '' ) {
 			$ph[] = trim($filter_data['sin']);
-			$query  .=	' AND a.sin LIKE ?';
+			$query	.=	' AND a.sin LIKE ?';
 		}
 
-		$query .= 	'
+		$query .=	'
 						AND a.deleted = 0
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -1487,22 +1487,22 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
-					from 	'. $this->getTable() .'
+					select	*
+					from	'. $this->getTable() .'
 					where	company_id = ?
 					';
 
 		if ( $status_id != '' AND isset($status_id[0]) AND !in_array(-1, (array)$status_id) ) {
-			$query  .=	' AND status_id in ('. $this->getListSQL($status_id, $ph) .') ';
+			$query	.=	' AND status_id in ('. $this->getListSQL($status_id, $ph) .') ';
 		}
 		if ( $branch_id != '' AND isset($branch_id[0]) AND !in_array(-1, (array)$branch_id) ) {
-			$query  .=	' AND default_branch_id in ('. $this->getListSQL($branch_id, $ph) .') ';
+			$query	.=	' AND default_branch_id in ('. $this->getListSQL($branch_id, $ph) .') ';
 		}
 		if ( $department_id != '' AND ( isset($department_id[0]) AND !in_array(-1, (array)$department_id) ) ) {
-			$query  .=	' AND default_department_id in ('. $this->getListSQL($department_id, $ph) .') ';
+			$query	.=	' AND default_department_id in ('. $this->getListSQL($department_id, $ph) .') ';
 		}
 
-		$query .= 	'
+		$query .=	'
 						AND deleted = 0
 					';
 		$query .= $this->getSortSQL( $order, $strict );
@@ -1535,25 +1535,25 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
-					from 	'. $this->getTable() .'
+					select	*
+					from	'. $this->getTable() .'
 					where	company_id = ?
 					';
 
 		if ( $status_id != '' AND isset($status_id[0]) AND !in_array(-1, (array)$status_id) ) {
-			$query  .=	' AND status_id in ('. $this->getListSQL($status_id, $ph) .') ';
+			$query	.=	' AND status_id in ('. $this->getListSQL($status_id, $ph) .') ';
 		}
 		if ( $group_id != '' AND isset($group_id[0]) AND !in_array(-1, (array)$group_id) ) {
-			$query  .=	' AND group_id in ('. $this->getListSQL($group_id, $ph) .') ';
+			$query	.=	' AND group_id in ('. $this->getListSQL($group_id, $ph) .') ';
 		}
 		if ( $branch_id != '' AND isset($branch_id[0]) AND !in_array(-1, (array)$branch_id) ) {
-			$query  .=	' AND default_branch_id in ('. $this->getListSQL($branch_id, $ph) .') ';
+			$query	.=	' AND default_branch_id in ('. $this->getListSQL($branch_id, $ph) .') ';
 		}
 		if ( $department_id != '' AND ( isset($department_id[0]) AND !in_array(-1, (array)$department_id) ) ) {
-			$query  .=	' AND default_department_id in ('. $this->getListSQL($department_id, $ph) .') ';
+			$query	.=	' AND default_department_id in ('. $this->getListSQL($department_id, $ph) .') ';
 		}
 
-		$query .= 	'
+		$query .=	'
 						AND deleted = 0
 					';
 		$query .= $this->getSortSQL( $order, $strict );
@@ -1590,26 +1590,26 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
-					from 	'. $this->getTable() .'
+					select	*
+					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND	id in ('. $this->getListSQL($user_id, $ph) .')
 					';
 
 		if ( $status_id != '' AND isset($status_id[0]) AND !in_array(-1, (array)$status_id) ) {
-			$query  .=	' AND status_id in ('. $this->getListSQL($status_id, $ph) .') ';
+			$query	.=	' AND status_id in ('. $this->getListSQL($status_id, $ph) .') ';
 		}
 		if ( $group_id != '' AND isset($group_id[0]) AND !in_array(-1, (array)$group_id) ) {
-			$query  .=	' AND group_id in ('. $this->getListSQL($group_id, $ph) .') ';
+			$query	.=	' AND group_id in ('. $this->getListSQL($group_id, $ph) .') ';
 		}
 		if ( $branch_id != '' AND isset($branch_id[0]) AND !in_array(-1, (array)$branch_id) ) {
-			$query  .=	' AND default_branch_id in ('. $this->getListSQL($branch_id, $ph) .') ';
+			$query	.=	' AND default_branch_id in ('. $this->getListSQL($branch_id, $ph) .') ';
 		}
 		if ( $department_id != '' AND ( isset($department_id[0]) AND !in_array(-1, (array)$department_id) ) ) {
-			$query  .=	' AND default_department_id in ('. $this->getListSQL($department_id, $ph) .') ';
+			$query	.=	' AND default_department_id in ('. $this->getListSQL($department_id, $ph) .') ';
 		}
 
-		$query .= 	'
+		$query .=	'
 						AND deleted = 0
 					';
 		$query .= $this->getSortSQL( $order, $strict );
@@ -1636,9 +1636,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	a.*
-					from 	'. $this->getTable() .' as a
-					where 	a.company_id = ?
+					select	a.*
+					from	'. $this->getTable() .' as a
+					where	a.company_id = ?
 
 					';
 
@@ -1659,7 +1659,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 			$filter_query  .=	' AND a.id not in ('. $this->getListSQL($exclude_user_id, $ph) .') ';
 		}
 
-		//If Branch,Dept,Status,Exclude are set, we need to prepend
+		//If Branch, Dept, Status, Exclude are set, we need to prepend
 		//the company_id filter.
 		if ( isset($filter_query) AND $filter_query != '' ) {
 			$query .= $filter_query;
@@ -1678,10 +1678,10 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 			} else {
 				$query .= ' AND ';
 			}
-			$query  .=	' ( a.company_id = ? AND a.id in ('. $this->getListSQL($include_user_id, $ph) .') ) ';
+			$query	.=	' ( a.company_id = ? AND a.id in ('. $this->getListSQL($include_user_id, $ph) .') ) ';
 		}
 
-		$query .= 	'
+		$query .=	'
 						AND a.deleted = 0
 					';
 		$query .= $this->getSortSQL( $order, $strict );
@@ -1717,8 +1717,8 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	c.*,a.*
-					from 	'. $this->getTable() .' as a
+					select	c.*, a.*
+					from	'. $this->getTable() .' as a
 					LEFT JOIN '. $baf->getTable() .' as c ON a.id = c.user_id AND (c.deleted=0 OR c.deleted IS NULL)
 					where
 						a.company_id = ?
@@ -1758,11 +1758,11 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 							a.termination_date,
 							a.created_date,
 							a.last_login_date
-					from 	'. $this->getTable() .' as a
-					LEFT JOIN 	'. $cf->getTable() .' as cf ON ( a.company_id = cf.id )
+					from	'. $this->getTable() .' as a
+					LEFT JOIN	'. $cf->getTable() .' as cf ON ( a.company_id = cf.id )
 					LEFT JOIN
 					(
-						SELECT g2.*,g1.user_id
+						SELECT g2.*, g1.user_id
 						FROM '. $puf->getTable() .' as g1, '. $pcf->getTable() .' as g2
 						WHERE ( g1.permission_control_id = g2.id AND g2.deleted = 0)
 					) as g ON ( a.id = g.user_id )
@@ -1777,33 +1777,33 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 
 		$query .= ( isset($filter_data['product_edition_id']) ) ? $this->getWhereClauseSQL( 'cf.product_edition_id', $filter_data['product_edition_id'], 'numeric_list', $ph ) : NULL;
 
-		if ( isset($filter_data['created_date']) AND trim($filter_data['created_date']) != '' ) {
+		if ( isset($filter_data['created_date']) AND !is_array($filter_data['created_date']) AND trim($filter_data['created_date']) != '' ) {
 			$date_filter = $this->getDateRangeSQL( $filter_data['created_date'], 'a.created_date' );
 			if ( $date_filter != FALSE ) {
-				$query  .=	' AND '. $date_filter;
+				$query	.=	' AND '. $date_filter;
 			}
 			unset($date_filter);
 		}
 
-		if ( isset($filter_data['last_login_date']) AND trim($filter_data['last_login_date']) != '' ) {
+		if ( isset($filter_data['last_login_date']) AND !is_array($filter_data['last_login_date']) AND trim($filter_data['last_login_date']) != '' ) {
 			$date_filter = $this->getDateRangeSQL( $filter_data['last_login_date'], 'a.last_login_date' );
 			if ( $date_filter != FALSE ) {
-				$query  .=	' AND '. $date_filter;
+				$query	.=	' AND '. $date_filter;
 			}
 			unset($date_filter);
 		}
 
-		if ( isset($filter_data['updated_date']) AND trim($filter_data['updated_date']) != '' ) {
+		if ( isset($filter_data['updated_date']) AND !is_array($filter_data['updated_date']) AND trim($filter_data['updated_date']) != '' ) {
 			$date_filter = $this->getDateRangeSQL( $filter_data['updated_date'], 'a.updated_date' );
 			if ( $date_filter != FALSE ) {
-				$query  .=	' AND '. $date_filter;
+				$query	.=	' AND '. $date_filter;
 			}
 			unset($date_filter);
 		}
 
 		$query .= $this->getSortSQL( $order, FALSE );
 
-		Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -1814,7 +1814,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 	 * Return user records based on advanced filter criteria.
 	 *
 	 * @param int $company_id Company ID
-	 * @param array $filter_data Filter criteria in array('id' => array(1,2), 'last_name' => 'smith' ) format, with possible top level array keys as follows: id, exclude_id, status_id, user_group_id, default_branch_id, default_department_id, title_id, currency_id, permission_control_id, pay_period_schedule_id, policy_group_id, sex_id, first_name, last_name, home_phone, work_phone, country, province, city, address1, address2, postal_code, employee_number, user_name, sin, work_email, home_email, tag, last_login_date, created_by, created_date, updated_by, updated_date
+	 * @param array $filter_data Filter criteria in array('id' => array(1, 2), 'last_name' => 'smith' ) format, with possible top level array keys as follows: id, exclude_id, status_id, user_group_id, default_branch_id, default_department_id, title_id, currency_id, permission_control_id, pay_period_schedule_id, policy_group_id, sex_id, first_name, last_name, home_phone, work_phone, country, province, city, address1, address2, postal_code, employee_number, user_name, sin, work_email, home_email, tag, last_login_date, created_by, created_date, updated_by, updated_date
 	 * @param int $limit Optional. Restrict the number of records returned
 	 * @param int $page Optional. Specify the page of records to return
 	 * @param array $where Optional. Additional WHERE clauses in array( 'column' => 'value', 'column' => 'value' ) format.
@@ -1857,13 +1857,13 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 			$filter_data['user_group_id'] = $filter_data['group_id'];
 		}
 
-        if ( isset($filter_data['user_title_id']) ) {
-            $filter_data['title_id'] = $filter_data['user_title_id'];
-        }
+		if ( isset($filter_data['user_title_id']) ) {
+			$filter_data['title_id'] = $filter_data['user_title_id'];
+		}
 
-        if ( isset($filter_data['user_tag']) ) {
-            $filter_data['tag'] = $filter_data['user_tag'];
-        }
+		if ( isset($filter_data['user_tag']) ) {
+			$filter_data['tag'] = $filter_data['user_tag'];
+		}
 
 		//$additional_order_fields = array('b.name', 'c.name', 'd.name', 'e.name');
 		$additional_order_fields = array(	'default_branch',
@@ -1880,11 +1880,11 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 											);
 
 		$sort_column_aliases = array(
-									 'type' => 'type_id',
-									 'status' => 'status_id',
-									 'sex' => 'sex_id',
-									 'full_name' => 'last_name',
-									 );
+									'type' => 'type_id',
+									'status' => 'status_id',
+									'sex' => 'sex_id',
+									'full_name' => 'last_name',
+									);
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 		if ( $order == NULL ) {
@@ -1898,7 +1898,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 			if ( !isset($order['status_id']) ) {
 				$order = Misc::prependArray( array('status_id' => 'asc'), $order );
 			}
-			//Always sort by last name,first name after other columns
+			//Always sort by last name, first name after other columns
 			if ( !isset($order['last_name']) ) {
 				$order['last_name'] = 'asc';
 			}
@@ -1907,8 +1907,8 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 			}
 			$strict = TRUE;
 		}
-		//Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$compf = new CompanyFactory();
 		$bf = new BranchFactory();
@@ -1922,7 +1922,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$ppsf = new PayPeriodScheduleFactory();
 		$pguf = new PolicyGroupUserFactory();
 		$pgf = new PolicyGroupFactory();
-        $egf = new EthnicGroupFactory();
+		$egf = new EthnicGroupFactory();
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jf = new JobFactory();
@@ -1951,7 +1951,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 							h.name as pay_period_schedule,
 							i.id as policy_group_id,
 							i.name as policy_group,
-                            egf.name as ethnic_group, ';
+							egf.name as ethnic_group, ';
 
 		$query .= Permission::getPermissionIsChildIsOwnerSQL( ( isset($filter_data['permission_current_user_id']) ) ? $filter_data['permission_current_user_id'] : 0, 'a.id' );
 
@@ -1966,14 +1966,14 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 							z.first_name as updated_by_first_name,
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
-					from 	'. $this->getTable() .' as a
+					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $compf->getTable() .' as compf ON ( a.company_id = compf.id AND compf.deleted = 0)
 						LEFT JOIN '. $bf->getTable() .' as b ON ( a.default_branch_id = b.id AND b.deleted = 0)
 						LEFT JOIN '. $df->getTable() .' as c ON ( a.default_department_id = c.id AND c.deleted = 0)
 						LEFT JOIN '. $ugf->getTable() .' as d ON ( a.group_id = d.id AND d.deleted = 0 )
 						LEFT JOIN '. $utf->getTable() .' as e ON ( a.title_id = e.id AND e.deleted = 0 )
 						LEFT JOIN '. $cf->getTable() .' as f ON ( a.currency_id = f.id AND f.deleted = 0 )
-                        LEFT JOIN '. $egf->getTable() .' as egf ON ( a.ethnic_group_id = egf.id AND egf.deleted = 0 ) ';
+						LEFT JOIN '. $egf->getTable() .' as egf ON ( a.ethnic_group_id = egf.id AND egf.deleted = 0 ) ';
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$query .= '	LEFT JOIN '. $jf->getTable() .' as jf ON a.default_job_id = jf.id';
@@ -1982,7 +1982,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 
 		$query .= '		LEFT JOIN
 						(
-							SELECT g2.*,g1.user_id
+							SELECT g2.*, g1.user_id
 							FROM '. $puf->getTable() .' as g1, '. $pcf->getTable() .' as g2
 							WHERE ( g1.permission_control_id = g2.id AND g2.deleted = 0)
 						) as g ON ( a.id = g.user_id )
@@ -2012,7 +2012,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
 
-		if ( isset($filter_data['status']) AND trim($filter_data['status']) != '' AND !isset($filter_data['status_id']) ) {
+		if ( isset($filter_data['status']) AND !is_array($filter_data['status']) AND trim($filter_data['status']) != '' AND !isset($filter_data['status_id']) ) {
 			$filter_data['status_id'] = Option::getByFuzzyValue( $filter_data['status'], $this->getOptions('status') );
 		}
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
@@ -2033,25 +2033,25 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'a.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['title']) ) ? $this->getWhereClauseSQL( 'e.name', $filter_data['title'], 'text', $ph ) : NULL;
 
-        $query .= ( isset($filter_data['ethnic_group_id']) ) ? $this->getWhereClauseSQL( 'a.ethnic_group_id', $filter_data['ethnic_group_id'], 'numeric_list', $ph ) : NULL;
-        $query .= ( isset($filter_data['ethnic_group']) ) ? $this->getWhereClauseSQL( 'egf.name', $filter_data['ethnic_group'], 'text', $ph ) : NULL;
-        
+		$query .= ( isset($filter_data['ethnic_group_id']) ) ? $this->getWhereClauseSQL( 'a.ethnic_group_id', $filter_data['ethnic_group_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['ethnic_group']) ) ? $this->getWhereClauseSQL( 'egf.name', $filter_data['ethnic_group'], 'text', $ph ) : NULL;
+
 		$query .= ( isset($filter_data['currency_id']) ) ? $this->getWhereClauseSQL( 'a.currency_id', $filter_data['currency_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['currency']) ) ? $this->getWhereClauseSQL( 'f.name', $filter_data['currency'], 'text', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['permission_control_id']) ) ? $this->getWhereClauseSQL( 'g.id', $filter_data['permission_control_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['permission_control']) ) ? $this->getWhereClauseSQL( 'g.name', $filter_data['permission_control'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['pay_period_schedule_id']) ) ? $this->getWhereClauseSQL( 'i.pay_period_schedule_id', $filter_data['pay_period_schedule_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['pay_period_schedule_id']) ) ? $this->getWhereClauseSQL( 'h.id', $filter_data['pay_period_schedule_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['pay_period_schedule']) ) ? $this->getWhereClauseSQL( 'h.name', $filter_data['pay_period_schedule'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['policy_group_id']) ) ? $this->getWhereClauseSQL( 'k.policy_group_id', $filter_data['policy_group_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['policy_group_id']) ) ? $this->getWhereClauseSQL( 'i.id', $filter_data['policy_group_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['policy_group']) ) ? $this->getWhereClauseSQL( 'i.name', $filter_data['policy_group'], 'text', $ph ) : NULL;
 
-		if ( isset($filter_data['sex']) AND trim($filter_data['sex']) != '' AND !isset($filter_data['sex_id']) ) {
+		if ( isset($filter_data['sex']) AND !is_array($filter_data['sex']) AND trim($filter_data['sex']) != '' AND !isset($filter_data['sex_id']) ) {
 			$filter_data['sex_id'] = Option::getByFuzzyValue( $filter_data['sex'], $this->getOptions('sex') );
 		}
-		$query .= ( isset($filter_data['sex_id']) ) ?$this->getWhereClauseSQL( 'a.sex_id', $filter_data['sex_id'], 'text_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['sex_id']) ) ? $this->getWhereClauseSQL( 'a.sex_id', $filter_data['sex_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['first_name']) ) ? $this->getWhereClauseSQL( 'a.first_name', $filter_data['first_name'], 'text_metaphone', $ph ) : NULL;
 		$query .= ( isset($filter_data['last_name']) ) ? $this->getWhereClauseSQL( 'a.last_name', $filter_data['last_name'], 'text_metaphone', $ph ) : NULL;
@@ -2067,7 +2067,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['user_name']) ) ? $this->getWhereClauseSQL( 'a.user_name', $filter_data['user_name'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['sin']) ) ? $this->getWhereClauseSQL( 'a.sin', $filter_data['sin'], 'numeric', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['email']) ) ? 'AND ('. $this->getWhereClauseSQL( 'a.work_email', $filter_data['email'], 'text', $ph, NULL, FALSE ).' OR '. $this->getWhereClauseSQL( 'a.home_email', $filter_data['email'], 'text', $ph, NULL, FALSE ) .')' : NULL;
+		$query .= ( isset($filter_data['email']) AND !is_array($filter_data['email']) AND $filter_data['email'] != '' ) ? 'AND ('. $this->getWhereClauseSQL( 'a.work_email', $filter_data['email'], 'text', $ph, NULL, FALSE ).' OR '. $this->getWhereClauseSQL( 'a.home_email', $filter_data['email'], 'text', $ph, NULL, FALSE ) .')' : NULL;
 		$query .= ( isset($filter_data['work_email']) ) ? $this->getWhereClauseSQL( 'a.work_email', $filter_data['work_email'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['home_email']) ) ? $this->getWhereClauseSQL( 'a.home_email', $filter_data['home_email'], 'text', $ph ) : NULL;
 
@@ -2075,40 +2075,40 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 
 		//$query .= ( isset($filter_data['longitude']) ) ? $this->getWhereClauseSQL( 'a.longitude', $filter_data['longitude'], 'numeric', $ph ) : NULL;
 
-		if ( isset($filter_data['last_login_date']) AND trim($filter_data['last_login_date']) != '' ) {
+		if ( isset($filter_data['last_login_date']) AND !is_array($filter_data['last_login_date']) AND trim($filter_data['last_login_date']) != '' ) {
 			$date_filter = $this->getDateRangeSQL( $filter_data['last_login_date'], 'a.last_login_date' );
 			if ( $date_filter != FALSE ) {
-				$query  .=	' AND '. $date_filter;
+				$query	.=	' AND '. $date_filter;
 			}
 			unset($date_filter);
 		}
 
-		if ( isset($filter_data['created_date']) AND trim($filter_data['created_date']) != '' ) {
+		if ( isset($filter_data['created_date']) AND !is_array($filter_data['created_date']) AND trim($filter_data['created_date']) != '' ) {
 			$date_filter = $this->getDateRangeSQL( $filter_data['created_date'], 'a.created_date' );
 			if ( $date_filter != FALSE ) {
-				$query  .=	' AND '. $date_filter;
+				$query	.=	' AND '. $date_filter;
 			}
 			unset($date_filter);
 		}
-		if ( isset($filter_data['updated_date']) AND trim($filter_data['updated_date']) != '' ) {
+		if ( isset($filter_data['updated_date']) AND !is_array($filter_data['updated_date']) AND trim($filter_data['updated_date']) != '' ) {
 			$date_filter = $this->getDateRangeSQL( $filter_data['updated_date'], 'a.updated_date' );
 			if ( $date_filter != FALSE ) {
-				$query  .=	' AND '. $date_filter;
+				$query	.=	' AND '. $date_filter;
 			}
 			unset($date_filter);
 		}
 
-		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-        $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
-        
-		$query .= 	'
+		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
+
+		$query .=	'
 						AND ( a.deleted = 0 )
 					';
 
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 

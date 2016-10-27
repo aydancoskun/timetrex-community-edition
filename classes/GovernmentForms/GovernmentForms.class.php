@@ -107,14 +107,14 @@ class GovernmentForms {
 			$dom->loadXML( $xml );
 
 			if ( $dom->schemaValidate( $schema_file ) ) {
-				Debug::Text('Schema is valid!', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Schema is valid!', __FILE__, __LINE__, __METHOD__, 10);
 				return TRUE;
 			} else {
-				Debug::Text('Schema is NOT valid!', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Schema is NOT valid!', __FILE__, __LINE__, __METHOD__, 10);
 
 				$errors = libxml_get_errors();
 				foreach ( $errors as $error ) {
-					Debug::Text('XML Error (Line: '. $error->line.'): '. $error->message, __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('XML Error (Line: '. $error->line.'): '. $error->message, __FILE__, __LINE__, __METHOD__, 10);
 				}
 				
 				return array(
@@ -129,7 +129,7 @@ class GovernmentForms {
 				//return FALSE;
 			}
 		} else {
-			Debug::Text('DomDocument not available!', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('DomDocument not available!', __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
 		}
 
@@ -151,7 +151,7 @@ class GovernmentForms {
 			}
 
 			$pdf = new FPDI( 'P', 'pt' );
-			$pdf->setMargins(0,0,0,0);
+			$pdf->setMargins(0, 0, 0, 0);
 			$pdf->SetAutoPageBreak(FALSE);
 			$pdf->setFontSubsetting(FALSE);
 
@@ -160,7 +160,7 @@ class GovernmentForms {
 				$obj->Output( $type );
 			}
 
-			return $pdf->Output('','S');
+			return $pdf->Output('', 'S');
 		} elseif ( $type == 'efile' ) {
 			foreach( $this->objs as $obj ) {
 				return $obj->Output( $type );

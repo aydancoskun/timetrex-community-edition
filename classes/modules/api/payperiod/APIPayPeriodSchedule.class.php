@@ -59,8 +59,8 @@ class APIPayPeriodSchedule extends APIFactory {
 	 */
 	function getOptions( $name, $parent = NULL ) {
 		if ( $name == 'columns'
-				AND ( !$this->getPermissionObject()->Check('pay_period_schedule','enabled')
-					OR !( $this->getPermissionObject()->Check('pay_period_schedule','view') OR $this->getPermissionObject()->Check('pay_period_schedule','view_own') OR $this->getPermissionObject()->Check('pay_period_schedule','view_child') ) ) ) {
+				AND ( !$this->getPermissionObject()->Check('pay_period_schedule', 'enabled')
+					OR !( $this->getPermissionObject()->Check('pay_period_schedule', 'view') OR $this->getPermissionObject()->Check('pay_period_schedule', 'view_own') OR $this->getPermissionObject()->Check('pay_period_schedule', 'view_child') ) ) ) {
 			$name = 'list_columns';
 		}
 
@@ -74,15 +74,15 @@ class APIPayPeriodSchedule extends APIFactory {
 	function getPayPeriodScheduleDefaultData() {
 		$company_id = $this->getCurrentCompanyObject()->getId();
 
-		Debug::Text('Getting user default data...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Getting user default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		$data = array(
 						'company_id' => $this->getCurrentCompanyObject()->getId(),
 						'anchor_date' => TTDate::getAPIDate( 'DATE', TTDate::getBeginMonthEpoch( time() ) ),
 						'shift_assigned_day_id' => 10,
 						'day_start_time' => 0,
-						'new_day_trigger_time' => (3600*4),
-						'maximum_shift_time' => (3600*16),
+						'new_day_trigger_time' => (3600 * 4),
+						'maximum_shift_time' => (3600 * 16),
 						'time_zone' => $this->getCurrentUserPreferenceObject()->getTimeZone(),
 						'type_id' => 20,
 						'start_week_day_id' => 0,
@@ -103,8 +103,8 @@ class APIPayPeriodSchedule extends APIFactory {
 	 * @return array
 	 */
 	function getPayPeriodSchedule( $data = NULL, $disable_paging = FALSE ) {
-		if ( !$this->getPermissionObject()->Check('pay_period_schedule','enabled')
-				OR !( $this->getPermissionObject()->Check('pay_period_schedule','view') OR $this->getPermissionObject()->Check('pay_period_schedule','view_own')  OR $this->getPermissionObject()->Check('pay_period_schedule','view_child')  ) ) {
+		if ( !$this->getPermissionObject()->Check('pay_period_schedule', 'enabled')
+				OR !( $this->getPermissionObject()->Check('pay_period_schedule', 'view') OR $this->getPermissionObject()->Check('pay_period_schedule', 'view_own') OR $this->getPermissionObject()->Check('pay_period_schedule', 'view_child')	) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
@@ -116,7 +116,7 @@ class APIPayPeriodSchedule extends APIFactory {
 		//Allow getting users from other companies, so we can change admin contacts when using the master company.
 		if ( isset($data['filter_data']['company_id'])
 				AND $data['filter_data']['company_id'] > 0
-				AND ( $this->getPermissionObject()->Check('company','enabled') AND $this->getPermissionObject()->Check('company','view') ) ) {
+				AND ( $this->getPermissionObject()->Check('company', 'enabled') AND $this->getPermissionObject()->Check('company', 'view') ) ) {
 			$company_id = $data['filter_data']['company_id'];
 		} else {
 			$company_id = $this->getCurrentCompanyObject()->getId();
@@ -168,9 +168,9 @@ class APIPayPeriodSchedule extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('pay_period_schedule','enabled')
-				OR !( $this->getPermissionObject()->Check('pay_period_schedule','edit') OR $this->getPermissionObject()->Check('pay_period_schedule','edit_own') OR $this->getPermissionObject()->Check('pay_period_schedule','edit_child') OR $this->getPermissionObject()->Check('pay_period_schedule','add') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('pay_period_schedule', 'enabled')
+				OR !( $this->getPermissionObject()->Check('pay_period_schedule', 'edit') OR $this->getPermissionObject()->Check('pay_period_schedule', 'edit_own') OR $this->getPermissionObject()->Check('pay_period_schedule', 'edit_child') OR $this->getPermissionObject()->Check('pay_period_schedule', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		if ( $validate_only == TRUE ) {
@@ -199,12 +199,12 @@ class APIPayPeriodSchedule extends APIFactory {
 						//Object exists, check edit permissions
 						//Debug::Text('PayPeriodSchedule ID: '. $row['id'] .' Created By: '. $lf->getCurrent()->getCreatedBy() .' Is Owner: '. (int)$this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) .' Is Child: '. (int)$this->getPermissionObject()->isChild( $lf->getCurrent()->getId(), $permission_children_ids ), __FILE__, __LINE__, __METHOD__, 10);
 						if (
-							  $validate_only == TRUE
-							  OR
+							$validate_only == TRUE
+							OR
 								(
-								$this->getPermissionObject()->Check('pay_period_schedule','edit')
-									OR ( $this->getPermissionObject()->Check('pay_period_schedule','edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
-									OR ( $this->getPermissionObject()->Check('pay_period_schedule','edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getId(), $permission_children_ids ) === TRUE )
+								$this->getPermissionObject()->Check('pay_period_schedule', 'edit')
+									OR ( $this->getPermissionObject()->Check('pay_period_schedule', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('pay_period_schedule', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getId(), $permission_children_ids ) === TRUE )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -219,7 +219,7 @@ class APIPayPeriodSchedule extends APIFactory {
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('pay_period_schedule','add'), TTi18n::gettext('Add permission denied') );
+					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('pay_period_schedule', 'add'), TTi18n::gettext('Add permission denied') );
 
 					//Because this class has sub-classes that depend on it, when adding a new record we need to make sure the ID is set first,
 					//so the sub-classes can depend on it. We also need to call Save( TRUE, TRUE ) to force a lookup on isNew()
@@ -234,10 +234,11 @@ class APIPayPeriodSchedule extends APIFactory {
 				$is_valid = $primary_validator->isValid();
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
 					Debug::Text('Attempting to save data...', __FILE__, __LINE__, __METHOD__, 10);
-					$lf->setObjectFromArray( $row );
 
 					//Force Company ID to current company.
-					$lf->setCompany( $this->getCurrentCompanyObject()->getId() );
+					$row['company_id'] = $this->getCurrentCompanyObject()->getId();
+
+					$lf->setObjectFromArray( $row );
 
 					$is_valid = $lf->isValid();
 					if ( $is_valid == TRUE ) {
@@ -297,9 +298,9 @@ class APIPayPeriodSchedule extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('pay_period_schedule','enabled')
-				OR !( $this->getPermissionObject()->Check('pay_period_schedule','delete') OR $this->getPermissionObject()->Check('pay_period_schedule','delete_own') OR $this->getPermissionObject()->Check('pay_period_schedule','delete_child') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('pay_period_schedule', 'enabled')
+				OR !( $this->getPermissionObject()->Check('pay_period_schedule', 'delete') OR $this->getPermissionObject()->Check('pay_period_schedule', 'delete_own') OR $this->getPermissionObject()->Check('pay_period_schedule', 'delete_child') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
@@ -309,7 +310,7 @@ class APIPayPeriodSchedule extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-        $validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
+		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
@@ -322,9 +323,9 @@ class APIPayPeriodSchedule extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						//Debug::Text('PayPeriodSchedule ID: '. $user['id'] .' Created By: '. $lf->getCurrent()->getCreatedBy() .' Is Owner: '. (int)$this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) .' Is Child: '. (int)$this->getPermissionObject()->isChild( $lf->getCurrent()->getId(), $permission_children_ids ), __FILE__, __LINE__, __METHOD__, 10);
-						if ( $this->getPermissionObject()->Check('pay_period_schedule','delete')
-								OR ( $this->getPermissionObject()->Check('pay_period_schedule','delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
-								OR ( $this->getPermissionObject()->Check('pay_period_schedule','delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getId(), $permission_children_ids ) === TRUE )) {
+						if ( $this->getPermissionObject()->Check('pay_period_schedule', 'delete')
+								OR ( $this->getPermissionObject()->Check('pay_period_schedule', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+								OR ( $this->getPermissionObject()->Check('pay_period_schedule', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getId(), $permission_children_ids ) === TRUE )) {
 
 							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
@@ -406,7 +407,7 @@ class APIPayPeriodSchedule extends APIFactory {
 			$retarr = $ppsf->getObjectAsArray();
 
 			//Set name here so it doesn't go through the validation check prior to Flex submitting it back to the API. This avoid the name field being sent through as "false".
-			$retarr['name'] = TTi18n::getText('Default') .' ['. rand(10,99).']';
+			$retarr['name'] = TTi18n::getText('Default') .' ['. rand(10, 99).']';
 			$retarr['anchor_date'] = TTDate::getDate('DATE', $retarr['anchor_date'] );
 
 			Debug::Arr($retarr, 'Detected settings: ', __FILE__, __LINE__, __METHOD__, 10);

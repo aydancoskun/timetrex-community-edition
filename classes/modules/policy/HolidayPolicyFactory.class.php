@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11545 $
- * $Id: HolidayPolicyFactory.class.php 11545 2013-11-29 02:04:30Z mikeb $
- * $Date: 2013-11-28 18:04:30 -0800 (Thu, 28 Nov 2013) $
+ * $Revision: 12026 $
+ * $Id: HolidayPolicyFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -163,7 +163,7 @@ class HolidayPolicyFactory extends Factory {
 	
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
-			return $this->data['company_id'];
+			return (int)$this->data['company_id'];
 		}
 
 		return FALSE;
@@ -171,7 +171,7 @@ class HolidayPolicyFactory extends Factory {
 	function setCompany($id) {
 		$id = trim($id);
 
-		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$clf = TTnew( 'CompanyListFactory' );
 
 		if ( $this->Validator->isResultSetWithRows(	'company',
@@ -189,7 +189,7 @@ class HolidayPolicyFactory extends Factory {
 
 	function getType() {
 		if ( isset($this->data['type_id']) ) {
-			return $this->data['type_id'];
+			return (int)$this->data['type_id'];
 		}
 
 		return FALSE;
@@ -223,7 +223,7 @@ class HolidayPolicyFactory extends Factory {
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
 		$id = $this->db->GetOne($query, $ph);
-		Debug::Arr($id,'Unique: '. $name, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($id, 'Unique: '. $name, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id === FALSE ) {
 			return TRUE;
@@ -247,7 +247,7 @@ class HolidayPolicyFactory extends Factory {
 		if (	$this->Validator->isLength(	'name',
 											$name,
 											TTi18n::gettext('Name is too short or too long'),
-											2,50)
+											2, 50)
 				AND
 				$this->Validator->isTrue(	'name',
 											$this->isUniqueName($name),
@@ -264,7 +264,7 @@ class HolidayPolicyFactory extends Factory {
 
 	function getDefaultScheduleStatus() {
 		if ( isset($this->data['default_schedule_status_id']) ) {
-			return $this->data['default_schedule_status_id'];
+			return (int)$this->data['default_schedule_status_id'];
 		}
 
 		return FALSE;
@@ -302,11 +302,11 @@ class HolidayPolicyFactory extends Factory {
 	function setMinimumEmployedDays($int) {
 		$int = trim($int);
 
-		if  ( empty($int) ){
+		if	( empty($int) ) {
 			$int = 0;
 		}
 
-		if 	(	$this->Validator->isNumeric(		'minimum_employed_days',
+		if	(	$this->Validator->isNumeric(		'minimum_employed_days',
 													$int,
 													TTi18n::gettext('Incorrect Minimum Employed days')) ) {
 			$this->data['minimum_employed_days'] = $int;
@@ -327,11 +327,11 @@ class HolidayPolicyFactory extends Factory {
 	function setMinimumWorkedPeriodDays($int) {
 		$int = trim($int);
 
-		if  ( empty($int) ){
+		if	( empty($int) ) {
 			$int = 0;
 		}
 
-		if 	(	$this->Validator->isNumeric(		'minimum_worked_period_days',
+		if	(	$this->Validator->isNumeric(		'minimum_worked_period_days',
 													$int,
 													TTi18n::gettext('Incorrect Minimum Worked Period days')) ) {
 			$this->data['minimum_worked_period_days'] = $int;
@@ -352,11 +352,11 @@ class HolidayPolicyFactory extends Factory {
 	function setMinimumWorkedDays($int) {
 		$int = trim($int);
 
-		if  ( empty($int) ){
+		if	( empty($int) ) {
 			$int = 0;
 		}
 
-		if 	(	$this->Validator->isNumeric(		'minimum_worked_days',
+		if	(	$this->Validator->isNumeric(		'minimum_worked_days',
 													$int,
 													TTi18n::gettext('Incorrect Minimum Worked days')) ) {
 			$this->data['minimum_worked_days'] = $int;
@@ -377,11 +377,11 @@ class HolidayPolicyFactory extends Factory {
 	function setWorkedScheduledDays($int) {
 		$int = trim($int);
 
-		if  ( empty($int) ){
+		if	( empty($int) ) {
 			$int = 0;
 		}
 
-		if 	(	$this->Validator->isNumeric(		'minimum_worked_period_days',
+		if	(	$this->Validator->isNumeric(		'minimum_worked_period_days',
 													$int,
 													TTi18n::gettext('Incorrect Eligibility Type')) ) {
 			$this->data['worked_scheduled_days'] = $int;
@@ -402,11 +402,11 @@ class HolidayPolicyFactory extends Factory {
 	function setMinimumWorkedAfterPeriodDays($int) {
 		$int = trim($int);
 
-		if  ( empty($int) ){
+		if	( empty($int) ) {
 			$int = 0;
 		}
 
-		if 	(	$this->Validator->isNumeric(		'minimum_worked_after_period_days',
+		if	(	$this->Validator->isNumeric(		'minimum_worked_after_period_days',
 													$int,
 													TTi18n::gettext('Incorrect Minimum Worked After Period days')) ) {
 			$this->data['minimum_worked_after_period_days'] = $int;
@@ -427,11 +427,11 @@ class HolidayPolicyFactory extends Factory {
 	function setMinimumWorkedAfterDays($int) {
 		$int = trim($int);
 
-		if  ( empty($int) ){
+		if	( empty($int) ) {
 			$int = 0;
 		}
 
-		if 	(	$this->Validator->isNumeric(		'minimum_worked_after_days',
+		if	(	$this->Validator->isNumeric(		'minimum_worked_after_days',
 													$int,
 													TTi18n::gettext('Incorrect Minimum Worked After days')) ) {
 			$this->data['minimum_worked_after_days'] = $int;
@@ -452,11 +452,11 @@ class HolidayPolicyFactory extends Factory {
 	function setWorkedAfterScheduledDays($int) {
 		$int = trim($int);
 
-		if  ( empty($int) ){
+		if	( empty($int) ) {
 			$int = 0;
 		}
 
-		if 	(	$this->Validator->isNumeric(		'minimum_worked_after_period_days',
+		if	(	$this->Validator->isNumeric(		'minimum_worked_after_period_days',
 													$int,
 													TTi18n::gettext('Incorrect Eligibility Type')) ) {
 			$this->data['worked_after_scheduled_days'] = $int;
@@ -477,11 +477,11 @@ class HolidayPolicyFactory extends Factory {
 	function setAverageTimeDays($int) {
 		$int = trim($int);
 
-		if  ( empty($int) ){
+		if	( empty($int) ) {
 			$int = 0;
 		}
 
-		if 	(	$this->Validator->isNumeric(		'average_time_days',
+		if	(	$this->Validator->isNumeric(		'average_time_days',
 													$int,
 													TTi18n::gettext('Incorrect Days to Total Time over')) ) {
 			$this->data['average_time_days'] = $int;
@@ -503,11 +503,11 @@ class HolidayPolicyFactory extends Factory {
 	function setAverageDays($int) {
 		$int = trim($int);
 
-		if  ( empty($int) ){
+		if	( empty($int) ) {
 			$int = 0;
 		}
 
-		if 	(	$this->Validator->isNumeric(		'average_days',
+		if	(	$this->Validator->isNumeric(		'average_days',
 													$int,
 													TTi18n::gettext('Incorrect Days to Average Time over')) ) {
 			$this->data['average_days'] = $int;
@@ -539,11 +539,11 @@ class HolidayPolicyFactory extends Factory {
 	function setMinimumTime($int) {
 		$int = trim($int);
 
-		if  ( empty($int) ){
+		if	( empty($int) ) {
 			$int = 0;
 		}
 
-		if 	(	$this->Validator->isNumeric(		'minimum_time',
+		if	(	$this->Validator->isNumeric(		'minimum_time',
 													$int,
 													TTi18n::gettext('Incorrect Minimum Time')) ) {
 			$this->data['minimum_time'] = $int;
@@ -564,11 +564,11 @@ class HolidayPolicyFactory extends Factory {
 	function setMaximumTime($int) {
 		$int = trim($int);
 
-		if  ( empty($int) ){
+		if	( empty($int) ) {
 			$int = 0;
 		}
 
-		if 	(	$this->Validator->isNumeric(		'maximum_time',
+		if	(	$this->Validator->isNumeric(		'maximum_time',
 													$int,
 													TTi18n::gettext('Incorrect Maximum Time')) ) {
 			$this->data['maximum_time'] = $int;
@@ -581,7 +581,7 @@ class HolidayPolicyFactory extends Factory {
 
 	function getRoundIntervalPolicyID() {
 		if ( isset($this->data['round_interval_policy_id']) ) {
-			return $this->data['round_interval_policy_id'];
+			return (int)$this->data['round_interval_policy_id'];
 		}
 
 		return FALSE;
@@ -620,11 +620,11 @@ class HolidayPolicyFactory extends Factory {
 	function setTime($int) {
 		$int = trim($int);
 
-		if  ( empty($int) ){
+		if	( empty($int) ) {
 			$int = 0;
 		}
 
-		if 	(	$this->Validator->isNumeric(		'time',
+		if	(	$this->Validator->isNumeric(		'time',
 													$int,
 													TTi18n::gettext('Incorrect Time')) ) {
 			$this->data['time'] = $int;
@@ -642,7 +642,7 @@ class HolidayPolicyFactory extends Factory {
 	function setPaidAbsenceAsWorked($bool) {
 		$this->data['paid_absence_as_worked'] = $this->toBool($bool);
 
-		return true;
+		return TRUE;
 	}
 
 	//Always applies over time policy even if they are not eligible for the holiday.
@@ -652,7 +652,7 @@ class HolidayPolicyFactory extends Factory {
 	function setForceOverTimePolicy($bool) {
 		$this->data['force_over_time_policy'] = $this->toBool($bool);
 
-		return true;
+		return TRUE;
 	}
 
 	function getIncludeOverTime() {
@@ -661,7 +661,7 @@ class HolidayPolicyFactory extends Factory {
 	function setIncludeOverTime($bool) {
 		$this->data['include_over_time'] = $this->toBool($bool);
 
-		return true;
+		return TRUE;
 	}
 
 	function getIncludePaidAbsenceTime() {
@@ -670,12 +670,12 @@ class HolidayPolicyFactory extends Factory {
 	function setIncludePaidAbsenceTime($bool) {
 		$this->data['include_paid_absence_time'] = $this->toBool($bool);
 
-		return true;
+		return TRUE;
 	}
 
 	function getAbsencePolicyID() {
 		if ( isset($this->data['absence_policy_id']) ) {
-			return $this->data['absence_policy_id'];
+			return (int)$this->data['absence_policy_id'];
 		}
 
 		return FALSE;
@@ -720,7 +720,7 @@ class HolidayPolicyFactory extends Factory {
 	}
 	function setRecurringHoliday($ids) {
 		Debug::text('Setting Recurring Holiday IDs : ', __FILE__, __LINE__, __METHOD__, 10);
-		if (is_array($ids) and count($ids) > 0) {
+		if (is_array($ids) AND count($ids) > 0) {
 			$tmp_ids = array();
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
@@ -830,7 +830,7 @@ class HolidayPolicyFactory extends Factory {
 							break;
 						case 'type':
 						case 'default_schedule_status':
-							$function = 'get'.str_replace('_','',$variable);
+							$function = 'get'.str_replace('_', '', $variable);
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = Option::getByKey( $this->$function(), $this->getOptions( $variable ) );
 							}
@@ -851,7 +851,7 @@ class HolidayPolicyFactory extends Factory {
 	}
 
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action,  TTi18n::getText('Holiday Policy'), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Holiday Policy'), NULL, $this->getTable(), $this );
 	}
 }
 ?>

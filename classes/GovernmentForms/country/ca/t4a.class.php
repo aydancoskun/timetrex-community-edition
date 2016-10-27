@@ -665,7 +665,7 @@ class GovernmentForms_CA_T4A extends GovernmentForms_CA {
 
 			$e=0;
 			foreach( $records as $employee_data ) {
-				Debug::Arr($employee_data, 'Employee Data: ', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Arr($employee_data, 'Employee Data: ', __FILE__, __LINE__, __METHOD__, 10);
 				$this->arrayToObject( $employee_data ); //Convert record array to object
 
 				$xml->Return->T4A->addChild('T4ASlip');
@@ -676,8 +676,8 @@ class GovernmentForms_CA_T4A extends GovernmentForms_CA {
 				if ( $this->filterMiddleName($this->middle_name) != '' ) { $xml->Return->T4A->T4ASlip[$e]->RCPNT_NM->addChild('init', $this->filterMiddleName($this->middle_name) ); }
 
 				$xml->Return->T4A->T4ASlip[$e]->addChild('RCPNT_ADDR'); //Employee Address
-				if ( $this->address1 != '' ) { $xml->Return->T4A->T4ASlip[$e]->RCPNT_ADDR->addChild('addr_l1_txt', substr( $this->address1, 0, 30) ); }
-				if ( $this->address2 != '' ) { $xml->Return->T4A->T4ASlip[$e]->RCPNT_ADDR->addChild('addr_l2_txt', substr( $this->address2, 0, 30) ); }
+				if ( $this->address1 != '' ) { $xml->Return->T4A->T4ASlip[$e]->RCPNT_ADDR->addChild('addr_l1_txt', substr( Misc::stripHTMLSpecialChars( $this->address1 ), 0, 30) ); }
+				if ( $this->address2 != '' ) { $xml->Return->T4A->T4ASlip[$e]->RCPNT_ADDR->addChild('addr_l2_txt', substr( Misc::stripHTMLSpecialChars( $this->address2 ), 0, 30) ); }
 				if ( $this->city != '' ) { $xml->Return->T4A->T4ASlip[$e]->RCPNT_ADDR->addChild('cty_nm', $this->city ); }
 				if ( $this->province != '' ) { $xml->Return->T4A->T4ASlip[$e]->RCPNT_ADDR->addChild('prov_cd', $this->province ); }
 				$xml->Return->T4A->T4ASlip[$e]->RCPNT_ADDR->addChild('cntry_cd', 'CAN' );
@@ -762,7 +762,7 @@ class GovernmentForms_CA_T4A extends GovernmentForms_CA {
 					}
 				}
 
-				if ( $employees_per_page == 1 OR ( $employees_per_page == 2 AND  $e % $employees_per_page != 0 ) ) {
+				if ( $employees_per_page == 1 OR ( $employees_per_page == 2 AND $e % $employees_per_page != 0 ) ) {
 					$this->resetTemplatePage();
 					if ( $this->getShowInstructionPage() == TRUE ) {
 						$this->addPage( array('template_page' => 2) );

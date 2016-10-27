@@ -46,7 +46,7 @@ class CompanyGenericTagFactory extends Factory {
 	protected $table = 'company_generic_tag';
 	protected $pk_sequence_name = 'company_generic_tag_id_seq'; //PK Sequence name
 
-	protected $name_validator_regex = '/^[a-z0-9-_\[\]\(\)=|\.@]{1,250}$/i'; //Deny +,-
+	protected $name_validator_regex = '/^[a-z0-9-_\[\]\(\)=|\.@]{1,250}$/i'; //Deny +, -
 
 	function _getFactoryOptions( $name ) {
 
@@ -67,32 +67,32 @@ class CompanyGenericTagFactory extends Factory {
 										200 => 'users',
 										210 => 'user_wage',
 										220 => 'user_title',
-                                        230 => 'user_contact',
+										230 => 'user_contact',
 
-                                        250 => 'qualification',
-                                        251 => 'user_skill',
-                                        252 => 'user_education',
-                                        253 => 'user_license',
-                                        254 => 'user_language',
-                                        255 => 'user_membership',
+										250 => 'qualification',
+										251 => 'user_skill',
+										252 => 'user_education',
+										253 => 'user_license',
+										254 => 'user_language',
+										255 => 'user_membership',
 
 										300 => 'pay_stub_amendment',
 
-                                        310 => 'kpi',
-                                        320 => 'user_review_control',
-                                        330 => 'user_review',
+										310 => 'kpi',
+										320 => 'user_review_control',
+										330 => 'user_review',
 
-                                        350 => 'job_vacancy',
-                                        360 => 'job_applicant',
-                                        370 => 'job_applicant_location',
-                                        380 => 'job_applicant_employment',
-                                        390 => 'job_applicant_reference',
+										350 => 'job_vacancy',
+										360 => 'job_applicant',
+										370 => 'job_applicant_location',
+										380 => 'job_applicant_employment',
+										390 => 'job_applicant_reference',
 
-                                        391 => 'job_applicant_skill',
-                                        392 => 'job_applicant_education',
-                                        393 => 'job_applicant_language',
-                                        394 => 'job_applicant_license',
-                                        395 => 'job_applicant_membership',
+										391 => 'job_applicant_skill',
+										392 => 'job_applicant_education',
+										393 => 'job_applicant_language',
+										394 => 'job_applicant_license',
+										395 => 'job_applicant_membership',
 
 										400 => 'schedule',
 										410 => 'recurring_schedule_template',
@@ -115,7 +115,7 @@ class CompanyGenericTagFactory extends Factory {
 
 										930 => 'expense',
 
-                                        950 => 'job_application',
+										950 => 'job_application',
 									);
 				break;
 			case 'columns':
@@ -153,7 +153,7 @@ class CompanyGenericTagFactory extends Factory {
 		return $retval;
 	}
 
-    function _getVariableToFunctionMap( $data ) {
+	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 										'id' => 'ID',
 										'company_id' => 'Company',
@@ -194,7 +194,7 @@ class CompanyGenericTagFactory extends Factory {
 
 	function getObjectType() {
 		if ( isset($this->data['object_type_id']) ) {
-			return $this->data['object_type_id'];
+			return (int)$this->data['object_type_id'];
 		}
 
 		return FALSE;
@@ -216,7 +216,7 @@ class CompanyGenericTagFactory extends Factory {
 	}
 
 	function isUniqueName($name) {
-		Debug::Arr($this->getCompany(),'Company: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($this->getCompany(), 'Company: ', __FILE__, __LINE__, __METHOD__, 10);
 		if ( $this->getCompany() == FALSE ) {
 			return FALSE;
 		}
@@ -238,7 +238,7 @@ class CompanyGenericTagFactory extends Factory {
 						AND lower(name) = ?
 						AND deleted = 0';
 		$name_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($name_id,'Unique Name: '. $name , __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $name_id === FALSE ) {
 			return TRUE;
@@ -261,7 +261,7 @@ class CompanyGenericTagFactory extends Factory {
 	function setName($name) {
 		$name = trim($name);
 
-		if 	(	$this->Validator->isLength(		'name',
+		if	(	$this->Validator->isLength(		'name',
 												$name,
 												TTi18n::gettext('Tag is too short or too long'),
 												2,
@@ -295,7 +295,7 @@ class CompanyGenericTagFactory extends Factory {
 	function setNameMetaphone($value) {
 		$value = metaphone( trim($value) );
 
-		if 	( $value != '' ) {
+		if	( $value != '' ) {
 			$this->data['name_metaphone'] = $value;
 
 			return TRUE;
@@ -317,7 +317,7 @@ class CompanyGenericTagFactory extends Factory {
 		if (	$this->Validator->isLength(	'description',
 											$description,
 											TTi18n::gettext('Description is invalid'),
-											0,255) ) {
+											0, 255) ) {
 
 			$this->data['description'] = $description;
 
@@ -333,9 +333,9 @@ class CompanyGenericTagFactory extends Factory {
 	function postSave() {
 		$this->removeCache( $this->getId() );
 
-		if ( $this->getDeleted() == TRUE ) {
+		//if ( $this->getDeleted() == TRUE ) {
 			//Unassign all tagged objects.
-		}
+		//}
 
 		return TRUE;
 	}
@@ -399,13 +399,13 @@ class CompanyGenericTagFactory extends Factory {
 	//Each tag needs a + or -. + Adds new tags, - deletes tags. Tags without these are ignores.
 	//Tags are separated by a comma.
 	static function parseTags($tags) {
-		if ( $tags != '' ) {
+		if ( $tags != '' AND !is_array($tags) ) {
 			$retarr = array(
 							'add' => array(),
 							'delete' => array(),
 							'all' => array(),
 							);
-			$split_tags = explode(',', str_replace( array(' ',';'), ',', $tags) ); //Support " " (space) and ";" and "," as separators.
+			$split_tags = explode(',', str_replace( array(' ', ';'), ',', $tags) ); //Support " " (space) and ";" and ", " as separators.
 			if ( is_array($split_tags) AND count($split_tags) > 0 ) {
 				foreach( $split_tags as $raw_tag ) {
 					$raw_tag = trim( $raw_tag );
@@ -480,7 +480,7 @@ class CompanyGenericTagFactory extends Factory {
 	}
 
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Tag') .': '. $this->getName() , NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Tag') .': '. $this->getName(), NULL, $this->getTable(), $this );
 	}
 
 }

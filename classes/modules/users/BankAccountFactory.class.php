@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10989 $
- * $Id: BankAccountFactory.class.php 10989 2013-09-21 18:27:35Z ipso $
- * $Date: 2013-09-21 11:27:35 -0700 (Sat, 21 Sep 2013) $
+ * $Revision: 12026 $
+ * $Id: BankAccountFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -122,12 +122,12 @@ class BankAccountFactory extends Factory {
 		return $variable_function_map;
 	}
 
-    function getUserObject() {
-        return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
-    }
+	function getUserObject() {
+		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
+	}
 	
 	function getCompany() {
-		return $this->data['company_id'];
+		return (int)$this->data['company_id'];
 	}
 	function setCompany($id) {
 		$id = trim($id);
@@ -149,7 +149,7 @@ class BankAccountFactory extends Factory {
 
 	function getUser() {
 		if ( isset($this->data['user_id']) ) {
-			return $this->data['user_id'];
+			return (int)$this->data['user_id'];
 		}
 
 		return FALSE;
@@ -179,20 +179,20 @@ class BankAccountFactory extends Factory {
 
 		if ( $this->getUser() > 0 ) {
 			$ph = array(
-						'company_id' =>  (int)$this->getCompany(),
+						'company_id' => (int)$this->getCompany(),
 						'user_id' => (int)$this->getUser(),
 						);
 
 			$query = 'select id from '. $this->getTable() .' where company_id = ? AND user_id = ? AND deleted = 0';
 		} else {
 			$ph = array(
-						'company_id' =>  (int)$this->getCompany(),
+						'company_id' => (int)$this->getCompany(),
 						);
 
 			$query = 'select id from '. $this->getTable() .' where company_id = ? AND user_id is NULL AND deleted = 0';
 		}
 		$id = $this->db->GetOne($query, $ph);
-		Debug::Arr($id,'Unique ID: '. $id .' Query: '. $query, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($id, 'Unique ID: '. $id .' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id === FALSE ) {
 			return TRUE;
@@ -275,10 +275,10 @@ class BankAccountFactory extends Factory {
 		}
 
 		//Replace the middle digits leaving only 2 digits on each end, or just 1 digit on each end if the account is too short.
-		$replace_length = ( (strlen($value)-4) >= 4 ) ? strlen($value)-4 : 3;
+		$replace_length = ( (strlen($value) - 4) >= 4 ) ? ( strlen($value) - 4 ) : 3;
 		$start_digit = ( strlen($value) >= 7 ) ? 2 : 1;
 
-		$account = str_replace( substr($value, $start_digit, $replace_length), str_repeat('X', $replace_length) , $value );
+		$account = str_replace( substr($value, $start_digit, $replace_length), str_repeat('X', $replace_length), $value );
 		return $account;
 	}
 	function getAccount() {
@@ -333,7 +333,7 @@ class BankAccountFactory extends Factory {
 
 	function preSave() {
 		if ( $this->getUser() == FALSE ) {
-			Debug::Text('Clearing User value, because this is strictly a company record', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Clearing User value, because this is strictly a company record', __FILE__, __LINE__, __METHOD__, 10);
 			//$this->setUser( 0 ); //COMPANY record.
 		}
 

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9889 $
- * $Id: LogFactory.class.php 9889 2013-05-14 22:49:16Z ipso $
- * $Date: 2013-05-14 15:49:16 -0700 (Tue, 14 May 2013) $
+ * $Revision: 12026 $
+ * $Id: LogFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -161,7 +161,7 @@ class LogFactory extends Factory {
 
 											'user_report_data'					=> TTi18n::getText('Reports'),
 											'report_schedule'					=> TTi18n::getText('Report Schedule'),
-                                            'report_custom_column'              => TTi18n::getText('Report Custom Column'),
+											'report_custom_column'				=> TTi18n::getText('Report Custom Column'),
 
 											'job'								=> TTi18n::getText('Job'),
 											'job_user_branch'					=> TTi18n::getText('Job Branch'),
@@ -188,30 +188,30 @@ class LogFactory extends Factory {
 											'tax_area_policy'					=> TTi18n::getText('Invoice Tax Area Policy'),
 											'tax_policy'						=> TTi18n::getText('Invoice Tax Policy'),
 											'transaction'						=> TTi18n::getText('Invoice Transaction'),
-                                            'user_contact'                      => TTi18n::getText('Employee Contact'),
-                                            'user_expense'                      => TTi18n::getText('Expense'),
-                                            'expense_policy'                    => TTi18n::getText('Expense Policy'),
-                                            'user_review'                       => TTi18n::getText('Review'),
-                                            'user_review_control'               => TTi18n::getText('Review (Control)'),
-                                            'kpi'                               => TTi18n::getText('Key Performance Indicator'),
-                                            'qualification'                     => TTi18n::getText('Qualification'),
-                                            'user_skill'                        => TTi18n::getText('Skill'),
-                                            'user_education'                    => TTi18n::getText('Education'),
-                                            'user_membership'                   => TTi18n::getText('Memberships'),
-                                            'user_license'                      => TTi18n::getText('Licenses'),
-                                            'user_language'                     => TTi18n::getText('Languages'),
-                                            'job_vacancy'                       => TTi18n::getText('Job Vacancy'),
-                                            'job_applicant'                     => TTi18n::getText('Job Applicant'),
-                                            'job_application'                   => TTi18n::getText('Job Application'),
-                                            'job_applicant_location'            => TTi18n::getText('Job Applicant Location'),
-                                            'job_applicant_employment'          => TTi18n::getText('Job Applicant Employment'),
-                                            'job_applicant_reference'           => TTi18n::getText('Job Applicant Reference'),
-                                            'job_applicant_skill'               => TTi18n::getText('Job Applicant Skill'),
-                                            'job_applicant_education'           => TTi18n::getText('Job Applicant Education'),
-                                            'job_applicant_license'             => TTi18n::getText('Job Applicant Licenses'),
-                                            'job_applicant_language'            => TTi18n::getText('Job Applicant Languages'),
-                                            'job_applicant_membership'          => TTi18n::getText('Job Applicant Memberships'),
-                                            'ethnic_group'                      => TTi18n::getText('Ethnic Group'),
+											'user_contact'						=> TTi18n::getText('Employee Contact'),
+											'user_expense'						=> TTi18n::getText('Expense'),
+											'expense_policy'					=> TTi18n::getText('Expense Policy'),
+											'user_review'						=> TTi18n::getText('Review'),
+											'user_review_control'				=> TTi18n::getText('Review (Control)'),
+											'kpi'								=> TTi18n::getText('Key Performance Indicator'),
+											'qualification'						=> TTi18n::getText('Qualification'),
+											'user_skill'						=> TTi18n::getText('Skill'),
+											'user_education'					=> TTi18n::getText('Education'),
+											'user_membership'					=> TTi18n::getText('Memberships'),
+											'user_license'						=> TTi18n::getText('Licenses'),
+											'user_language'						=> TTi18n::getText('Languages'),
+											'job_vacancy'						=> TTi18n::getText('Job Vacancy'),
+											'job_applicant'						=> TTi18n::getText('Job Applicant'),
+											'job_application'					=> TTi18n::getText('Job Application'),
+											'job_applicant_location'			=> TTi18n::getText('Job Applicant Location'),
+											'job_applicant_employment'			=> TTi18n::getText('Job Applicant Employment'),
+											'job_applicant_reference'			=> TTi18n::getText('Job Applicant Reference'),
+											'job_applicant_skill'				=> TTi18n::getText('Job Applicant Skill'),
+											'job_applicant_education'			=> TTi18n::getText('Job Applicant Education'),
+											'job_applicant_license'				=> TTi18n::getText('Job Applicant Licenses'),
+											'job_applicant_language'			=> TTi18n::getText('Job Applicant Languages'),
+											'job_applicant_membership'			=> TTi18n::getText('Job Applicant Memberships'),
+											'ethnic_group'						=> TTi18n::getText('Ethnic Group'),
 
 									);
 				break;
@@ -288,7 +288,7 @@ class LogFactory extends Factory {
 		$link = FALSE;
 
 		//Only show links on add/edit/allow actions.
-		if ( !in_array( $this->getAction(), array(10,20,200) ) ) {
+		if ( !in_array( $this->getAction(), array(10, 20, 200) ) ) {
 			return $link;
 		}
 
@@ -471,7 +471,7 @@ class LogFactory extends Factory {
 	}
 
 	function getUser() {
-		return $this->data['user_id'];
+		return (int)$this->data['user_id'];
 	}
 	function setUser($id) {
 		$id = trim($id);
@@ -498,7 +498,7 @@ class LogFactory extends Factory {
 
 	function getObject() {
 		if ( isset($this->data['object_id']) ) {
-			return $this->data['object_id'];
+			return (int)$this->data['object_id'];
 		}
 
 		return FALSE;
@@ -545,7 +545,7 @@ class LogFactory extends Factory {
 	}
 
 	function getAction() {
-		return $this->data['action_id'];
+		return (int)$this->data['action_id'];
 	}
 	function setAction($action) {
 		$action = trim($action);
@@ -606,7 +606,7 @@ class LogFactory extends Factory {
 			$epoch = TTDate::getTime();
 		}
 
-		if 	(	$this->Validator->isDate(		'date',
+		if	(	$this->Validator->isDate(		'date',
 												$epoch,
 												TTi18n::gettext('Date is invalid')) ) {
 
@@ -658,12 +658,12 @@ class LogFactory extends Factory {
 	function getDetails() {
 		if ( getTTProductEdition() > 10 AND $this->isNew() == FALSE AND is_object( $this->getUserObject() ) ) {
 			//Get class for this table
-			Debug::Text( 'Table: '. $this->getTableName(), __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text( 'Table: '. $this->getTableName(), __FILE__, __LINE__, __METHOD__, 10);
 			require_once( Environment::getBasePath() . DIRECTORY_SEPARATOR . 'includes'. DIRECTORY_SEPARATOR .'TableMap.inc.php');
 			if ( isset($global_table_map[$this->getTableName()]) ) {
 				$table_class = $global_table_map[$this->getTableName()];
 				$class = new $table_class;
-				Debug::Text( 'Table Class: '. $table_class, __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text( 'Table Class: '. $table_class, __FILE__, __LINE__, __METHOD__, 10);
 
 				$ldlf = TTnew( 'LogDetailListFactory' );
 				$ldlf->getBySystemLogIdAndCompanyId( $this->getID(), $this->getUserObject()->getCompany() );
@@ -681,14 +681,14 @@ class LogFactory extends Factory {
 					}
 
 					$detail_row = Sort::multiSort( $detail_row, 'display_field' ) ;
-					//Debug::Arr( $detail_row, 'Detail Row: ', __FILE__, __LINE__, __METHOD__,10);
+					//Debug::Arr( $detail_row, 'Detail Row: ', __FILE__, __LINE__, __METHOD__, 10);
 
 					return $detail_row;
 				}
 			}
 		}
 
-		Debug::Text('No Log Details... ID: '. $this->getID(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('No Log Details... ID: '. $this->getID(), __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
 
@@ -720,7 +720,7 @@ class LogFactory extends Factory {
 
 	function getObjectAsArray( $include_columns = NULL ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
-        $data = array();
+		$data = array();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
 				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {

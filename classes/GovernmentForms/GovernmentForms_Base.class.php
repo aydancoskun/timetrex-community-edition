@@ -95,11 +95,45 @@ class GovernmentForms_Base {
 		return $this->records;
 	}
 	function setRecords( $data ) {
-		$this->records = $data;
+		if ( is_array($data) ) {
+			foreach( $data as $record ) {
+				$this->addRecord( $record ); //Make sure preCalc() is called for each record.
+			}
+		} else {
+			$this->records = $data;
+		}
 		return TRUE;
 	}
 	function addRecord( $data ) {
-		$this->records[] = $data;
+		//Filter functions should only be used for drawing the PDF, they do not modify the actual values themselves.
+		//preCalc functions should be used to modify the actual values themselves, prior to drawing on the PDF, as well prior to totalling.
+		//This is also important for calculating totals, so we can cap maximum contributions and such and get totals based on those properly.
+		//preCalc functions can modify any other value in the record as well.
+		if ( is_array( $data ) ) {
+			if ( method_exists( $this, 'getPreCalcFunction' ) ) {
+				foreach( $data as $key => $value ) {
+					$filter_function = $this->getPreCalcFunction( $key );
+					if ( $filter_function != '' ) {
+						if ( !is_array( $filter_function ) ) {
+							$filter_function = (array)$filter_function;
+						}
+
+						foreach( $filter_function as $function ) {
+							//Call function
+							if ( method_exists( $this, $function ) ) {
+								$value = $this->$function( $value, $key, $data );
+							}
+						}
+						unset($function);
+					}
+
+					$data[$key] = $value;
+				}
+			}
+
+			$this->records[] = $data;
+		}
+
 		return TRUE;
 	}
 	function clearRecords() {
@@ -155,7 +189,7 @@ class GovernmentForms_Base {
 		$float_array = preg_split('/\./', $float);
 
 		if ( isset($float_array[1]) ) {
-			return str_pad($float_array[1],2,'0');
+			return str_pad($float_array[1], 2, '0');
 		}
 
 		return FALSE;
@@ -198,19 +232,19 @@ class GovernmentForms_Base {
 	}
 
 	function stripNonNumeric($value) {
-		$retval = preg_replace('/[^0-9]/','',$value);
+		$retval = preg_replace('/[^0-9]/', '', $value);
 
 		return $retval;
 	}
 
 	function stripNonAlphaNumeric($value) {
-		$retval = preg_replace('/[^A-Za-z0-9]\ /','',$value); //Don't strip spaces
+		$retval = preg_replace('/[^A-Za-z0-9]\ /', '', $value); //Don't strip spaces
 
 		return $retval;
 	}
 
 	function stripNonFloat($value) {
-		$retval = preg_replace('/[^-0-9\.]/','',$value);
+		$retval = preg_replace('/[^-0-9\.]/', '', $value);
 
 		return $retval;
 	}
@@ -221,7 +255,7 @@ class GovernmentForms_Base {
 	 *
 	 */
 	function removeDecimal( $value ) {
-		$retval = str_replace('.','', number_format( $value, 2, '.','') );
+		$retval = str_replace('.', '', number_format( $value, 2, '.', '') );
 
 		return $retval;
 	}
@@ -541,7 +575,7 @@ class GovernmentForms_Base {
 				//Handle combining multiple template together with a X,Y offset.
 				foreach( $schema['combine_templates'] as $combine_template ) {
 					Debug::text('Combining Template Pages... Template: '. $combine_template['template_page'] .' Y: '. $combine_template['y'], __FILE__, __LINE__, __METHOD__, 10);
-					$pdf->useTemplate( $this->template_index[$combine_template['template_page']],$combine_template['x']+$this->getTemplateOffsets('x'), $combine_template['y']+$this->getTemplateOffsets('y') );
+					$pdf->useTemplate( $this->template_index[$combine_template['template_page']], $combine_template['x']+$this->getTemplateOffsets('x'), $combine_template['y']+$this->getTemplateOffsets('y') );
 
 					$this->setPageOffsets( $combine_template['x'], $combine_template['y']);
 					$this->current_template_index = $schema['template_page'];
@@ -550,7 +584,7 @@ class GovernmentForms_Base {
 				unset($combine_templates);
 				$this->setPageOffsets( 0, 0 ); //Reset page offsets after each template is initialized.
 			} else {
-				$pdf->useTemplate( $this->template_index[$schema['template_page']],$this->getTemplateOffsets('x'), $this->getTemplateOffsets('y') );
+				$pdf->useTemplate( $this->template_index[$schema['template_page']], $this->getTemplateOffsets('x'), $this->getTemplateOffsets('y') );
 			}
 		}
 		$this->current_template_index = $schema['template_page'];
@@ -642,13 +676,13 @@ class GovernmentForms_Base {
 			//var_dump( Debug::BackTrace() );
 
 			if ( isset($coordinates['text_color']) AND is_array( $coordinates['text_color'] ) ) {
-				$pdf->setTextColor( $coordinates['text_color'][0],$coordinates['text_color'][1],$coordinates['text_color'][2] );
+				$pdf->setTextColor( $coordinates['text_color'][0], $coordinates['text_color'][1], $coordinates['text_color'][2] );
 			} else {
 				$pdf->setTextColor( 0, 0, 0 ); //Black text.
 			}
 
 			if ( isset($coordinates['fill_color']) AND is_array( $coordinates['fill_color'] ) ) {
-				$pdf->setFillColor( $coordinates['fill_color'][0],$coordinates['fill_color'][1],$coordinates['fill_color'][2] );
+				$pdf->setFillColor( $coordinates['fill_color'][0], $coordinates['fill_color'][1], $coordinates['fill_color'][2] );
 				$coordinates['fill'] = 1;
 			} else {
 				$pdf->setFillColor( 255, 255, 255 ); //White
@@ -658,7 +692,7 @@ class GovernmentForms_Base {
 			$pdf->setXY( $coordinates['x']+$this->getPageOffsets('x'), $coordinates['y']+$this->getPageOffsets('y') );
 
 			if ( $this->getDebug() == TRUE ) {
-				$pdf->setDrawColor( 0, 0 , 255 );
+				$pdf->setDrawColor( 0, 0, 255 );
 				$coordinates['border'] = 1;
 			} else {
 				if ( !isset($coordinates['border']) ) {
@@ -668,16 +702,15 @@ class GovernmentForms_Base {
 
 			if ( isset($schema['multicell']) AND $schema['multicell'] == TRUE ) {
 				//Debug::text('Drawing MultiCell... Value: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-				$pdf->MultiCell( $coordinates['w'],$coordinates['h'], $value , $coordinates['border'], strtoupper($coordinates['halign']), $coordinates['fill'] );
+				$pdf->MultiCell( $coordinates['w'], $coordinates['h'], $value, $coordinates['border'], strtoupper($coordinates['halign']), $coordinates['fill'] );
 			} else {
 				//Debug::text('Drawing Cell... Value: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-				$pdf->Cell( $coordinates['w'],$coordinates['h'], $value , $coordinates['border'], 0, strtoupper($coordinates['halign']), $coordinates['fill'] );
+				$pdf->Cell( $coordinates['w'], $coordinates['h'], $value, $coordinates['border'], 0, strtoupper($coordinates['halign']), $coordinates['fill'] );
 			}
 			unset($coordinates);
 		} else {
 			Debug::text('NOT Drawing Cell... Value: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		}
-
 
 		return TRUE;
 	}

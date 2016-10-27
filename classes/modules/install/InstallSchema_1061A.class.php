@@ -45,38 +45,38 @@
 class InstallSchema_1061A extends InstallSchema_Base {
 
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion() , __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		return TRUE;
 	}
 
 	function postInstall() {
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
-		//Go through each permission group, and enable schedule,view_open for for anyone who has schedule,view
+		//Go through each permission group, and enable schedule, view_open for for anyone who has schedule, view
 		$clf = TTnew( 'CompanyListFactory' );
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
 			foreach( $clf as $c_obj ) {
-				Debug::text('Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__,9);
+				Debug::text('Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
 				if ( $c_obj->getStatus() != 30 ) {
 					$pclf = TTnew( 'PermissionControlListFactory' );
 					$pclf->getByCompanyId( $c_obj->getId(), NULL, NULL, NULL, array( 'name' => 'asc' ) ); //Force order to prevent references to columns that haven't been created yet.
 					if ( $pclf->getRecordCount() > 0 ) {
 						foreach( $pclf as $pc_obj ) {
-							Debug::text('Permission Group: '. $pc_obj->getName(), __FILE__, __LINE__, __METHOD__,9);
+							Debug::text('Permission Group: '. $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
 							$plf = TTnew( 'PermissionListFactory' );
 							$plf->getByCompanyIdAndPermissionControlIdAndSectionAndName( $c_obj->getId(), $pc_obj->getId(), 'schedule', array('view'));
 							if ( $plf->getRecordCount() > 0 ) {
-								Debug::text('Found permission group with schedule,view enabled: '. $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__,9);
+								Debug::text('Found permission group with schedule, view enabled: '. $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9);
 								$pc_obj->setPermission(
-													   array(   'schedule' => array(
+														array(	'schedule' => array(
 																					'view_open' => TRUE,
-																				  )
+																				)
 															)
-													   );
+														);
 							} else {
-								Debug::text('Permission group does NOT have schedule,view_open enabled...', __FILE__, __LINE__, __METHOD__,9);
+								Debug::text('Permission group does NOT have schedule, view_open enabled...', __FILE__, __LINE__, __METHOD__, 9);
 							}
 						}
 					}

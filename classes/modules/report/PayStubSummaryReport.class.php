@@ -54,8 +54,8 @@ class PayStubSummaryReport extends Report {
 	}
 
 	protected function _checkPermissions( $user_id, $company_id ) {
-		if ( $this->getPermissionObject()->Check('report','enabled', $user_id, $company_id )
-				AND $this->getPermissionObject()->Check('report','view_pay_stub_summary', $user_id, $company_id ) ) {
+		if ( $this->getPermissionObject()->Check('report', 'enabled', $user_id, $company_id )
+				AND $this->getPermissionObject()->Check('report', 'view_pay_stub_summary', $user_id, $company_id ) ) {
 			return TRUE;
 		}
 
@@ -81,7 +81,7 @@ class PayStubSummaryReport extends Report {
 										'template',
 										'time_period',
 										'columns',
-							   );
+								);
 				break;
 			case 'setup_fields':
 				$retval = array(
@@ -98,7 +98,7 @@ class PayStubSummaryReport extends Report {
 										'-2060-default_branch_id' => TTi18n::gettext('Default Branch'),
 										'-2070-default_department_id' => TTi18n::gettext('Default Department'),
 										'-2080-currency_id' => TTi18n::gettext('Currency'),
-                                        '-2100-custom_filter' => TTi18n::gettext('Custom Filter'),
+										'-2100-custom_filter' => TTi18n::gettext('Custom Filter'),
 
 										'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
 
@@ -106,7 +106,7 @@ class PayStubSummaryReport extends Report {
 										'-5010-group' => TTi18n::gettext('Group By'),
 										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
 										'-5030-sort' => TTi18n::gettext('Sort By'),
-							   );
+								);
 				break;
 			case 'time_period':
 				$retval = TTDate::getTimePeriodOptions();
@@ -123,7 +123,7 @@ class PayStubSummaryReport extends Report {
 					$retval = Misc::addSortPrefix( $other_field_names, 9000 );
 				}
 				break;
-            case 'report_custom_column':
+			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
@@ -133,14 +133,14 @@ class PayStubSummaryReport extends Report {
 						$retval = Misc::addSortPrefix( $custom_column_labels, 9500 );
 					}
 				}
-                break; 
-            case 'report_custom_filters':
+				break;
+			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
 					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'PayStubSummaryReport', 'custom_column' );
 				}
-                break;
-            case 'report_dynamic_custom_column':
+				break;
+			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
 					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'PayStubSummaryReport', 'custom_column' );
@@ -148,8 +148,8 @@ class PayStubSummaryReport extends Report {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
 					}
 				}
-                break;
-            case 'report_static_custom_column':
+				break;
+			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
 					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'PayStubSummaryReport', 'custom_column' );
@@ -157,13 +157,13 @@ class PayStubSummaryReport extends Report {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
 					}
 				}
-                break;
-            case 'formula_columns':
-                $retval = TTMath::formatFormulaColumns( array_merge( array_diff( $this->getOptions('static_columns'), (array)$this->getOptions('report_static_custom_column') ), $this->getOptions('dynamic_columns') ) );
-                break; 
-            case 'filter_columns':
-                $retval = TTMath::formatFormulaColumns( array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') ) );
-                break;
+				break;
+			case 'formula_columns':
+				$retval = TTMath::formatFormulaColumns( array_merge( array_diff( $this->getOptions('static_columns'), (array)$this->getOptions('report_static_custom_column') ), $this->getOptions('dynamic_columns') ) );
+				break;
+			case 'filter_columns':
+				$retval = TTMath::formatFormulaColumns( array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') ) );
+				break;
 			case 'static_columns':
 				$retval = array(
 										//Static Columns - Aggregate functions can't be used on these.
@@ -191,7 +191,7 @@ class PayStubSummaryReport extends Report {
 										'-1280-sin' => TTi18n::gettext('SIN/SSN'),
 										'-1290-note' => TTi18n::gettext('Note'),
 										'-1295-tag' => TTi18n::gettext('Tags'),
-							   );
+							);
 
 				$retval = array_merge( $retval, (array)$this->getOptions('date_columns'), (array)$this->getOptions('custom_columns'), (array)$this->getOptions('report_static_custom_column') );
 				ksort($retval);
@@ -215,14 +215,14 @@ class PayStubSummaryReport extends Report {
 				$retval = array();
 
 				$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-				$psealf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), 10, array(10,20,30,40,50,60,65) );
+				$psealf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), 10, array(10, 20, 30, 40, 50, 60, 65, 80) );
 				if ( $psealf->getRecordCount() > 0 ) {
 					$type_options  = $psealf->getOptions('type');
 					foreach( $type_options as $key => $val ) {
-						$type_options[$key] = str_replace( array('Employee', 'Employer', 'Deduction', 'Total'), array('EE', 'ER', 'Ded', ''), $val);
+						$type_options[$key] = str_replace( array('Employee', 'Employer', 'Deduction', 'Miscellaneous', 'Total'), array('EE', 'ER', 'Ded', 'Misc', ''), $val);
 					}
 
-					$i=0;
+					$i = 0;
 					foreach( $psealf as $psea_obj ) {
 						//Need to make the PSEA_ID a string so we can array_merge it properly later.
 						if ( $psea_obj->getType() == 40 ) { //Total accounts.
@@ -311,7 +311,7 @@ class PayStubSummaryReport extends Report {
 										'-1230-by_branch_by_pay_period+totals' => TTi18n::gettext('Totals by Branch/Pay Period'),
 										'-1240-by_department_by_pay_period+totals' => TTi18n::gettext('Totals by Department/Pay Period'),
 										'-1250-by_branch_by_department_by_pay_period+totals' => TTi18n::gettext('Totals by Branch/Department/Pay Period'),
-							   );
+								);
 
 				break;
 			case 'template_config':
@@ -334,14 +334,14 @@ class PayStubSummaryReport extends Report {
 
 					switch( $template ) {
 						default:
-							Debug::Text(' Parsing template name: '. $template, __FILE__, __LINE__, __METHOD__,10);
+							Debug::Text(' Parsing template name: '. $template, __FILE__, __LINE__, __METHOD__, 10);
 							$retval['-1010-time_period']['time_period'] = 'last_pay_period';
 
 							//Parse template name, and use the keywords separated by '+' to determine settings.
 							$template_keywords = explode('+', $template );
 							if ( is_array($template_keywords) ) {
 								foreach( $template_keywords as $template_keyword ) {
-									Debug::Text(' Keyword: '. $template_keyword, __FILE__, __LINE__, __METHOD__,10);
+									Debug::Text(' Keyword: '. $template_keyword, __FILE__, __LINE__, __METHOD__, 10);
 
 									switch( $template_keyword ) {
 										//Columns
@@ -596,7 +596,7 @@ class PayStubSummaryReport extends Report {
 					$retval['-5040-sort'] = $retval['sort'];
 					unset($retval['sort']);
 				}
-				Debug::Arr($retval, ' Template Config for: '. $template, __FILE__, __LINE__, __METHOD__,10);
+				Debug::Arr($retval, ' Template Config for: '. $template, __FILE__, __LINE__, __METHOD__, 10);
 
 				break;
 			default:
@@ -614,34 +614,34 @@ class PayStubSummaryReport extends Report {
 		
 		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
-                
+
 		$currency_convert_to_base = $this->getCurrencyConvertToBase();
 		$base_currency_obj = $this->getBaseCurrencyObject();
 		$this->handleReportCurrency( $currency_convert_to_base, $base_currency_obj, $filter_data );
 		$currency_options = $this->getOptions('currency');
-        
+
 		//Don't need to process data unless we're preparing the report.
 		$psf = TTnew( 'PayStubFactory' );
 		$export_type_options = Misc::trimSortPrefix( $psf->getOptions('export_type') );
 		if ( isset($export_type_options[$format]) ) {
-			Debug::Text('Skipping data retrieval for format: '. $format, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Skipping data retrieval for format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
 		}
 		
-		if ( $this->getPermissionObject()->Check('pay_stub','view') == FALSE OR $this->getPermissionObject()->Check('wage','view') == FALSE ) {
+		if ( $this->getPermissionObject()->Check('pay_stub', 'view') == FALSE OR $this->getPermissionObject()->Check('wage', 'view') == FALSE ) {
 			$hlf = TTnew( 'HierarchyListFactory' );
 			$permission_children_ids = $wage_permission_children_ids = $hlf->getHierarchyChildrenByCompanyIdAndUserIdAndObjectTypeID( $this->getUserObject()->getCompany(), $this->getUserObject()->getID() );
-			Debug::Arr($permission_children_ids,'Permission Children Ids:', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Arr($permission_children_ids, 'Permission Children Ids:', __FILE__, __LINE__, __METHOD__, 10);
 		} else {
 			//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
 			$permission_children_ids = array();
 			$wage_permission_children_ids = array();
 		}
-		if ( $this->getPermissionObject()->Check('pay_stub','view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('pay_stub','view_child') == FALSE ) {
+		if ( $this->getPermissionObject()->Check('pay_stub', 'view') == FALSE ) {
+			if ( $this->getPermissionObject()->Check('pay_stub', 'view_child') == FALSE ) {
 				$permission_children_ids = array();
 			}
-			if ( $this->getPermissionObject()->Check('pay_stub','view_own') ) {
+			if ( $this->getPermissionObject()->Check('pay_stub', 'view_own') ) {
 				$permission_children_ids[] = $this->getUserObject()->getID();
 			}
 
@@ -649,21 +649,21 @@ class PayStubSummaryReport extends Report {
 		}
 		//Get Wage Permission Hierarchy Children first, as this can be used for viewing, or editing.
 		/*
-		if ( $this->getPermissionObject()->Check('wage','view') == TRUE ) {
+		if ( $this->getPermissionObject()->Check('wage', 'view') == TRUE ) {
 			$wage_permission_children_ids = TRUE;
-		} elseif ( $this->getPermissionObject()->Check('wage','view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('wage','view_child') == FALSE ) {
+		} elseif ( $this->getPermissionObject()->Check('wage', 'view') == FALSE ) {
+			if ( $this->getPermissionObject()->Check('wage', 'view_child') == FALSE ) {
 				$wage_permission_children_ids = array();
 			}
-			if ( $this->getPermissionObject()->Check('wage','view_own') ) {
+			if ( $this->getPermissionObject()->Check('wage', 'view_own') ) {
 				$wage_permission_children_ids[] = $this->getUserObject()->getID();
 			}
 		}
 		*/
 
-		//Debug::Text(' Permission Children: '. count($permission_children_ids) .' Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($permission_children_ids, 'Permission Children: '. count($permission_children_ids), __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($wage_permission_children_ids, 'Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Text(' Permission Children: '. count($permission_children_ids) .' Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($permission_children_ids, 'Permission Children: '. count($permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($wage_permission_children_ids, 'Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
 
 		$pself = TTnew( 'PayStubEntryListFactory' );
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
@@ -675,8 +675,8 @@ class PayStubSummaryReport extends Report {
 				$branch = $pse_obj->getColumn('default_branch');
 				$department = $pse_obj->getColumn('default_department');
 				$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
-                $currency_rate = $pse_obj->getColumn('currency_rate');
-                $currency_id = $pse_obj->getColumn('currency_id');                
+				$currency_rate = $pse_obj->getColumn('currency_rate');
+				$currency_id = $pse_obj->getColumn('currency_id');
 
 				if ( !isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]) ) {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] = array(
@@ -690,11 +690,11 @@ class PayStubSummaryReport extends Report {
 																'pay_stub_transaction_date' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
 															);
 				}
-                $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['currency_rate'] = $currency_rate;
-                
-                $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['currency'] = $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['current_currency'] = Option::getByKey( $currency_id, $currency_options );
-                
-                if ( isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['PA'.$pay_stub_entry_name_id]) ) {
+				$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['currency_rate'] = $currency_rate;
+
+				$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['currency'] = $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['current_currency'] = Option::getByKey( $currency_id, $currency_options );
+
+				if ( isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['PA'.$pay_stub_entry_name_id]) ) {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['PA'.$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['PA'.$pay_stub_entry_name_id], $pse_obj->getColumn('amount') );
 				} else {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['PA'.$pay_stub_entry_name_id] = $pse_obj->getColumn('amount');
@@ -717,8 +717,8 @@ class PayStubSummaryReport extends Report {
 				} else {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['PY'.$pay_stub_entry_name_id] = $pse_obj->getColumn('ytd_amount');
 				}
-                
-                if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
+
+				if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['current_currency'] = Option::getByKey( $base_currency_obj->getId(), $currency_options );
 				}
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
@@ -728,15 +728,15 @@ class PayStubSummaryReport extends Report {
 		//Get user data for joining.
 		$ulf = TTnew( 'UserListFactory' );
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( $this->getColumnDataConfig() );
 			$this->tmp_data['user'][$u_obj->getId()]['total_pay_stub'] = 1;
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
-		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($this->tmp_data, 'TMP Data: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($this->tmp_data, 'TMP Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		return TRUE;
 	}
 
@@ -745,13 +745,13 @@ class PayStubSummaryReport extends Report {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['pay_stub_entry']), NULL, TTi18n::getText('Pre-Processing Data...') );
 
 		//Merge time data with user data
-		$key=0;
+		$key = 0;
 		if ( isset($this->tmp_data['pay_stub_entry']) ) {
 			foreach( $this->tmp_data['pay_stub_entry'] as $user_id => $level_1 ) {
 				if ( isset($this->tmp_data['user'][$user_id]) ) {
 					foreach( $level_1 as $date_stamp => $row ) {
 						$date_columns = TTDate::getReportDates( 'transaction', $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
-						$processed_data  = array(
+						$processed_data	 = array(
 												//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
 												//'pay_stub' => array('sort' => $row['pay_stub_transaction_date'], 'display' => TTDate::getDate('DATE', $row['pay_stub_transaction_date'] ) ),
 												);
@@ -766,18 +766,18 @@ class PayStubSummaryReport extends Report {
 			}
 			unset($this->tmp_data, $row, $date_columns, $processed_data, $level_1 );
 		}
-		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		return TRUE;
 	}
 
 	function _outputPDFPayStub( $format ) {
-		Debug::Text(' Format: '. $format, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text(' Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
 
 		$filter_data = $this->getFilterConfig();
 
-		if ( !$this->getPermissionObject()->Check('pay_stub','enabled', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() )
-				OR !( $this->getPermissionObject()->Check('pay_stub','view', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() ) OR $this->getPermissionObject()->Check('pay_stub','view_own', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() )  OR $this->getPermissionObject()->Check('pay_stub','view_child', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() )  ) ) {
+		if ( !$this->getPermissionObject()->Check('pay_stub', 'enabled', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() )
+				OR !( $this->getPermissionObject()->Check('pay_stub', 'view', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() ) OR $this->getPermissionObject()->Check('pay_stub', 'view_own', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() ) OR $this->getPermissionObject()->Check('pay_stub', 'view_child', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() )  ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() );
@@ -803,17 +803,17 @@ class PayStubSummaryReport extends Report {
 			return $output;
 		}
 
-		Debug::Text('No data to return...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('No data to return...', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
 
 	function _outputExportPayStub( $format ) {
-		Debug::Text(' Format: '. $format, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text(' Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
 
 		$filter_data = $this->getFilterConfig();
 
-		if ( !$this->getPermissionObject()->Check('pay_stub','enabled', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() )
-				OR !( $this->getPermissionObject()->Check('pay_stub','view', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() ) OR $this->getPermissionObject()->Check('pay_stub','view_own', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() )  OR $this->getPermissionObject()->Check('pay_stub','view_child', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() )  ) ) {
+		if ( !$this->getPermissionObject()->Check('pay_stub', 'enabled', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() )
+				OR !( $this->getPermissionObject()->Check('pay_stub', 'view', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() ) OR $this->getPermissionObject()->Check('pay_stub', 'view_own', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() ) OR $this->getPermissionObject()->Check('pay_stub', 'view_child', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() )  ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() );
@@ -856,14 +856,14 @@ class PayStubSummaryReport extends Report {
 			return array( 'file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $output );
 		}
 
-		Debug::Text('No data to return...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('No data to return...', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
 
 	function _output( $format = NULL ) {
 		$psf = TTnew( 'PayStubFactory' );
 		$export_type_options = Misc::trimSortPrefix( $psf->getOptions('export_type') );
-		//Debug::Arr($export_type_options, 'Format: '. $format, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($export_type_options, 'Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $format == 'pdf_employee_pay_stub' OR $format == 'pdf_employee_pay_stub_print'
 				OR $format == 'pdf_employer_pay_stub' OR $format == 'pdf_employer_pay_stub_print' ) {
 			return $this->_outputPDFPayStub( $format );

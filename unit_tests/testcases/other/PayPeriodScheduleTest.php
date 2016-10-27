@@ -34,14 +34,16 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11220 $
- * $Id: PayPeriodScheduleTest.php 11220 2013-10-22 18:09:39Z mikeb $
- * $Date: 2013-10-22 11:09:39 -0700 (Tue, 22 Oct 2013) $
+ * $Revision: 12091 $
+ * $Id: PayPeriodScheduleTest.php 12091 2014-01-21 16:33:40Z mikeb $
+ * $Date: 2014-01-21 08:33:40 -0800 (Tue, 21 Jan 2014) $
  */
 require_once('PHPUnit/Framework/TestCase.php');
 
+/**
+ * @group PayPeriodSchedule
+ */
 class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
-
     public $company_id = NULL;
 
     public function __construct() {

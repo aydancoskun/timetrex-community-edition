@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10143 $
- * $Id: CurrencyFactory.class.php 10143 2013-06-06 15:49:56Z ipso $
- * $Date: 2013-06-06 08:49:56 -0700 (Thu, 06 Jun 2013) $
+ * $Revision: 12026 $
+ * $Id: CurrencyFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -302,16 +302,16 @@ class CurrencyFactory extends Factory {
 										'ZM' => 'ZMW',
 										'ZW' => 'ZWD',
 									);
-				break;            
-            case 'round_decimal_places':
-                $retval = array(
-                                        0 => 0,
-                                        1 => 1,
-                                        2 => 2,
-                                        3 => 3,
-                                        4 => 4,
-                            );
-                break;            
+				break;
+			case 'round_decimal_places':
+				$retval = array(
+										0 => 0,
+										1 => 1,
+										2 => 2,
+										3 => 3,
+										4 => 4,
+							);
+				break;
 			case 'columns':
 				$retval = array(
 										'-1000-status' => TTi18n::gettext('Status'),
@@ -325,7 +325,7 @@ class CurrencyFactory extends Factory {
 										'-1070-rate_modify_percent' => TTi18n::gettext('Rate Modify Percent'),
 										'-1080-is_default' => TTi18n::gettext('Default Currency'),
 										'-1090-is_base' => TTi18n::gettext('Base Currency'),
-                                        '-1100-round_decimal_places' => TTi18n::gettext('Round Decimal Places'),
+										'-1100-round_decimal_places' => TTi18n::gettext('Round Decimal Places'),
 
 										'-2000-created_by' => TTi18n::gettext('Created By'),
 										'-2010-created_date' => TTi18n::gettext('Created Date'),
@@ -334,7 +334,7 @@ class CurrencyFactory extends Factory {
 							);
 				break;
 			case 'list_columns':
-				$retval = Misc::arrayIntersectByKey( array('name','iso_code','status'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
+				$retval = Misc::arrayIntersectByKey( array('name', 'iso_code', 'status'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
 				$retval = array(
@@ -375,7 +375,7 @@ class CurrencyFactory extends Factory {
 										'rate_modify_percent' => 'RateModifyPercent',
 										'is_default' => 'Default',
 										'is_base' => 'Base',
-                                        'round_decimal_places' => 'RoundDecimalPlaces',
+										'round_decimal_places' => 'RoundDecimalPlaces',
 										'deleted' => 'Deleted',
 										);
 		return $variable_function_map;
@@ -387,7 +387,7 @@ class CurrencyFactory extends Factory {
 
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
-			return $this->data['company_id'];
+			return (int)$this->data['company_id'];
 		}
 
 		return FALSE;
@@ -412,7 +412,7 @@ class CurrencyFactory extends Factory {
 
 	function getStatus() {
 		if ( isset($this->data['status_id']) ) {
-			return $this->data['status_id'];
+			return (int)$this->data['status_id'];
 		}
 
 		return FALSE;
@@ -449,7 +449,7 @@ class CurrencyFactory extends Factory {
 						AND name = ?
 						AND deleted = 0';
 		$name_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($name_id,'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $name_id === FALSE ) {
 			return TRUE;
@@ -472,7 +472,7 @@ class CurrencyFactory extends Factory {
 	function setName($name) {
 		$name = trim($name);
 
-		if 	(	$this->Validator->isLength(		'name',
+		if	(	$this->Validator->isLength(		'name',
 												$name,
 												TTi18n::gettext('Name is too short or too long'),
 												2,
@@ -502,7 +502,7 @@ class CurrencyFactory extends Factory {
 	function setISOCode($value) {
 		$value = trim($value);
 
-		if 	(	$this->Validator->inArrayKey(	'iso_code',
+		if	(	$this->Validator->inArrayKey(	'iso_code',
 												$value,
 												TTi18n::gettext('ISO code is invalid'),
 												$this->getISOCodesArray() ) ) {
@@ -550,7 +550,7 @@ class CurrencyFactory extends Factory {
 	function setAutoUpdate($bool) {
 		$this->data['auto_update'] = $this->toBool($bool);
 
-		return true;
+		return TRUE;
 	}
 
 	function getActualRate() {
@@ -595,7 +595,7 @@ class CurrencyFactory extends Factory {
 			$epoch = TTDate::getTime();
 		}
 
-		if 	(	$this->Validator->isDate(		'actual_rate_updated_date',
+		if	(	$this->Validator->isDate(		'actual_rate_updated_date',
 												$epoch,
 												TTi18n::gettext('Incorrect Updated Date') ) ) {
 
@@ -642,7 +642,7 @@ class CurrencyFactory extends Factory {
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND is_default = 1 AND deleted=0';
 		$id = $this->db->GetOne($query, $ph);
-		Debug::Arr($id,'Unique Currency Default: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($id, 'Unique Currency Default: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id === FALSE ) {
 			return TRUE;
@@ -660,7 +660,7 @@ class CurrencyFactory extends Factory {
 	}
 	function setDefault($bool) {
 
-		if 	(
+		if	(
 				$bool == TRUE
 				AND
 				$this->Validator->isTrue(		'is_default',
@@ -686,7 +686,7 @@ class CurrencyFactory extends Factory {
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND is_base = 1 AND deleted=0';
 		$id = $this->db->GetOne($query, $ph);
-		Debug::Arr($id,'Unique Currency Base: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($id, 'Unique Currency Base: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id === FALSE ) {
 			return TRUE;
@@ -704,7 +704,7 @@ class CurrencyFactory extends Factory {
 	}
 	function setBase($bool) {
 
-		if 	(
+		if	(
 				$bool == TRUE
 				AND
 				$this->Validator->isTrue(		'is_base',
@@ -723,19 +723,19 @@ class CurrencyFactory extends Factory {
 		return TRUE;
 	}
 
-	function getSymbol(){
+	function getSymbol() {
 		return TTi18n::getCurrencySymbol( $this->getISOCode() );
 	}
 
 	function getRoundDecimalPlaces() {
-	    if ( isset($this->data['round_decimal_places']) ) {
-            return $this->data['round_decimal_places']; 
+		if ( isset($this->data['round_decimal_places']) ) {
+			return $this->data['round_decimal_places'];
 		}
 
 		return 2;
 	}
-	function setRoundDecimalPlaces( $value ) {    
-        if ( version_compare( APPLICATION_VERSION, 5.5, '>' ) ) {
+	function setRoundDecimalPlaces( $value ) {
+		if ( version_compare( APPLICATION_VERSION, 5.5, '>' ) ) {
 			$value = trim($value);
 
 			if (
@@ -751,7 +751,7 @@ class CurrencyFactory extends Factory {
 		}
 		
 		return FALSE;
-        
+
 	}
 
 	function round( $value ) {
@@ -768,7 +768,7 @@ class CurrencyFactory extends Factory {
 	}
 
 	static function convertCurrency( $src_currency_id, $dst_currency_id, $amount = 1 ) {
-		//Debug::Text('Source Currency: '. $src_currency_id .' Destination Currency: '. $dst_currency_id .' Amount: '. $amount, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Text('Source Currency: '. $src_currency_id .' Destination Currency: '. $dst_currency_id .' Amount: '. $amount, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $src_currency_id == '' ) {
 			return FALSE;
@@ -791,7 +791,7 @@ class CurrencyFactory extends Factory {
 		if ( $clf->getRecordCount() > 0 ) {
 			$src_currency_obj = $clf->getCurrent();
 		} else {
-			Debug::Text('Source currency does not exist.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Source currency does not exist.', __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
 		}
 
@@ -799,7 +799,7 @@ class CurrencyFactory extends Factory {
 		if ( $clf->getRecordCount() > 0 ) {
 			$dst_currency_obj = $clf->getCurrent();
 		} else {
-			Debug::Text('Destination currency does not exist.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Destination currency does not exist.', __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
 		}
 
@@ -848,7 +848,7 @@ class CurrencyFactory extends Factory {
 			$ttsc = new TimeTrexSoapClient();
 			$currency_rates = $ttsc->getCurrencyExchangeRates( $company_id, $active_currencies, $base_currency );
 		} else {
-			Debug::Text('Invalid Currency Data, not getting rates...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Invalid Currency Data, not getting rates...', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		if ( isset($currency_rates) AND is_array($currency_rates) AND count($currency_rates) > 0 ) {
@@ -869,21 +869,21 @@ class CurrencyFactory extends Factory {
 						}
 					}
 				} else {
-					Debug::Text('Invalid rate from data feed! Currency: '. $currency .' Rate: '. $rate, __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Invalid rate from data feed! Currency: '. $currency .' Rate: '. $rate, __FILE__, __LINE__, __METHOD__, 10);
 				}
 			}
 
 			return TRUE;
 		}
 
-		Debug::Text('Updating Currency Data Failed...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Updating Currency Data Failed...', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 	}
 
 	function Validate() {
 
-		if ( $this->getDeleted() == TRUE ){
+		if ( $this->getDeleted() == TRUE ) {
 			//CHeck to make sure currency isnt in-use by paystubs/employees/wages, if so, don't delete.
 			$invalid = FALSE;
 
@@ -932,14 +932,14 @@ class CurrencyFactory extends Factory {
 		return TRUE;
 	}
 
-	//Support setting created_by,updated_by especially for importing data.
+	//Support setting created_by, updated_by especially for importing data.
 	//Make sure data is set based on the getVariableToFunctionMap order.
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
-            
+
 			foreach( $variable_function_map as $key => $function ) {
-                
+
 				if ( isset($data[$key]) ) {
 
 					$function = 'set'.$function;
@@ -952,7 +952,7 @@ class CurrencyFactory extends Factory {
 					}
 				}
 			}
-            
+
 			$this->setCreatedAndUpdatedColumns( $data );
 
 			return TRUE;
@@ -964,7 +964,7 @@ class CurrencyFactory extends Factory {
 
 	function getObjectAsArray( $include_columns = NULL ) {
 		/*
-		 $include_columns = array(
+		$include_columns = array(
 								'id' => TRUE,
 								'company_id' => TRUE,
 								...
@@ -1004,7 +1004,7 @@ class CurrencyFactory extends Factory {
 	}
 
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action,  TTi18n::getText('Currency').': '. $this->getISOCode() .' '.  TTi18n::getText('Rate').': '. $this->getConversionRate(), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Currency').': '. $this->getISOCode() .' '.  TTi18n::getText('Rate').': '. $this->getConversionRate(), NULL, $this->getTable(), $this );
 	}
 
 }

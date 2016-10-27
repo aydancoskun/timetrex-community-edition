@@ -34,15 +34,15 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: DepartmentBranchUserFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 12026 $
+ * $Id: DepartmentBranchUserFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 /*
 CREATE TABLE department_branch (
-    id serial NOT NULL,
-    department_branch_id integer DEFAULT 0 NOT NULL,
-    user_id integer DEFAULT 0 NOT NULL
+	id serial NOT NULL,
+	department_branch_id integer DEFAULT 0 NOT NULL,
+	user_id integer DEFAULT 0 NOT NULL
 ) WITHOUT OIDS;
 */
 
@@ -53,7 +53,7 @@ class DepartmentBranchUserFactory extends Factory {
 	protected $table = 'department_branch_user';
 	protected $pk_sequence_name = 'department_branch_user_id_seq'; //PK Sequence name
 	function getDepartmentBranch() {
-		return $this->data['department_branch_id'];
+		return (int)$this->data['department_branch_id'];
 	}
 	function setDepartmentBranch($id) {
 		$id = trim($id);
@@ -74,7 +74,7 @@ class DepartmentBranchUserFactory extends Factory {
 	}
 
 	function getUser() {
-		return $this->data['user_id'];
+		return (int)$this->data['user_id'];
 	}
 	function setUser($id) {
 		$id = trim($id);

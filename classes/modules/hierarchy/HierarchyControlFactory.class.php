@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10990 $
- * $Id: HierarchyControlFactory.class.php 10990 2013-09-21 21:03:04Z ipso $
- * $Date: 2013-09-21 14:03:04 -0700 (Sat, 21 Sep 2013) $
+ * $Revision: 12026 $
+ * $Id: HierarchyControlFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -114,7 +114,7 @@ class HierarchyControlFactory extends Factory {
 	}
 
 	function getCompany() {
-		return $this->data['company_id'];
+		return (int)$this->data['company_id'];
 	}
 	function setCompany($id) {
 		$id = trim($id);
@@ -142,7 +142,7 @@ class HierarchyControlFactory extends Factory {
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND name = ? AND deleted = 0';
 		$hierarchy_control_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($hierarchy_control_id,'Unique Hierarchy Control ID: '. $hierarchy_control_id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($hierarchy_control_id, 'Unique Hierarchy Control ID: '. $hierarchy_control_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $hierarchy_control_id === FALSE ) {
 			return TRUE;
@@ -163,7 +163,7 @@ class HierarchyControlFactory extends Factory {
 		if (	$this->Validator->isLength(	'name',
 											$name,
 											TTi18n::gettext('Name is invalid'),
-											2,250)
+											2, 250)
 				AND	$this->Validator->isTrue(	'name',
 												$this->isUniqueName($name),
 												TTi18n::gettext('Name is already in use')
@@ -188,7 +188,7 @@ class HierarchyControlFactory extends Factory {
 				OR $this->Validator->isLength(	'description',
 											$description,
 											TTi18n::gettext('Description is invalid'),
-											1,250) ) {
+											1, 250) ) {
 
 			$this->data['description'] = $description;
 
@@ -379,10 +379,9 @@ class HierarchyControlFactory extends Factory {
 						if ( $ulf->getRecordCount() > 0 ) {
 							$obj = $ulf->getCurrent();
 							TTi18n::gettext('Selected subordinate is invalid or already assigned to another hierarchy with the same objects ').' ('. $obj->getFullName() .')';
-							if ( $this->Validator->isTrue(		'user',
-																$huf->isUniqueUser( $user_id, $this->getID() ),
-																TTi18n::gettext('Selected subordinate is invalid or already assigned to another hierarchy with the same objects ').' ('. $obj->getFullName() .')' )) {
-							}
+							$this->Validator->isTrue(		'user',
+															$huf->isUniqueUser( $user_id, $this->getID() ),
+															TTi18n::gettext('Selected subordinate is invalid or already assigned to another hierarchy with the same objects ').' ('. $obj->getFullName() .')' );
 						} else {
 							TTi18n::gettext('Selected subordinate is invalid or already assigned to another hierarchy with the same object. User ID: '. $user_id);
 						}

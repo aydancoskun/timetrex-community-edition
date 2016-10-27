@@ -55,7 +55,7 @@ class APIPermission extends APIFactory {
 		global $current_company;
 		$company_id = (int)$current_company->getId();
 
-        global $current_company;
+		global $current_company;
 		$ulf = TTNew('UserListFactory');
 		return $ulf->getUniqueCountryByCompanyId( $company_id );
 	}
@@ -82,18 +82,18 @@ class APIPermission extends APIFactory {
 			$section_groups = array( $section_groups );
 		}
 		$section_groups = Misc::trimSortPrefix( $section_groups, TRUE );
-		//Debug::Arr($section_groups, 'aSection Groups: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($section_groups, 'aSection Groups: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$section_options = Misc::trimSortPrefix( $this->getOptions('section') );
 		$section_group_map = Misc::trimSortPrefix( $this->getOptions('section_group_map') );
 
 		if ( in_array( 'all', $section_groups ) ) {
-			//Debug::Text('Returning ALL section Groups: ', __FILE__, __LINE__, __METHOD__,10);
+			//Debug::Text('Returning ALL section Groups: ', __FILE__, __LINE__, __METHOD__, 10);
 			$section_groups = array_keys( $this->getOptions('section_group') );
 			unset($section_groups[0]);
 		}
 
-		//Debug::Arr($section_groups, 'bSection Groups: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($section_groups, 'bSection Groups: ', __FILE__, __LINE__, __METHOD__, 10);
 		foreach( $section_groups as $section_group ) {
 			$section_group = Misc::trimSortPrefix( $section_group );
 			if ( isset($section_group_map[$section_group]) ) {
@@ -104,7 +104,7 @@ class APIPermission extends APIFactory {
 		}
 		
 		if ( isset($retarr) ) {
-			//Debug::Arr($retarr, 'Sections: ', __FILE__, __LINE__, __METHOD__,10);
+			//Debug::Arr($retarr, 'Sections: ', __FILE__, __LINE__, __METHOD__, 10);
 			return $this->returnHandler( Misc::trimSortPrefix( $retarr, 1000 ) );
 		}
 

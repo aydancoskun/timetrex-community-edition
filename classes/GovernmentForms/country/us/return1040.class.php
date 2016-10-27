@@ -91,7 +91,7 @@ class GovernmentForms_US_RETURN1040 extends GovernmentForms_US {
 		//Strip non-digits.
 		$value = $this->stripNonNumeric($value);
 
-		return array( substr($value, 0,3), substr($value, 3,3), substr($value, 6,4) );
+		return array( substr($value, 0, 3), substr($value, 3, 3), substr($value, 6, 4) );
 	}
 
 	function _outputXML() {

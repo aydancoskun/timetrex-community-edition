@@ -41,7 +41,6 @@
 require_once('PHPUnit/Framework/TestCase.php');
 
 class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
-
 	protected $company_id = NULL;
 	protected $user_id = NULL;
 	protected $pay_period_schedule_id = NULL;
@@ -75,7 +74,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 		$this->user_id = $dd->createUser( $this->company_id, 100 );
 		$user_obj = $this->getUserObject( $this->user_id );
-		//Use a consistent hire date, others its difficult to get things correct due to the hire date being in different parts or different pay periods.
+		//Use a consistent hire date, otherwise its difficult to get things correct due to the hire date being in different parts or different pay periods.
 		//Make sure it is not on a pay period start date though.
 		$user_obj->setHireDate( strtotime('05-Mar-2001') );
 		$user_obj->Save(FALSE);
@@ -688,11 +687,12 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		return FALSE;
 	}
 
-	function calcAccrualTime( $company_id, $accrual_policy_id, $start_date, $end_date ) {
+	function calcAccrualTime( $company_id, $accrual_policy_id, $start_date, $end_date, $day_multiplier = 1 ) {
 		$start_date = TTDate::getMiddleDayEpoch( $start_date );
 		$end_date = TTDate::getMiddleDayEpoch( $end_date );
 		$total_days = TTDate::getDays( ($end_date-$start_date) );
-		$offset = 79200;
+		//$offset = 79200;
+		$offset = ( (86400 * $day_multiplier) - 7200 );
 
 		$apf = TTnew( 'AccrualPolicyFactory' );
 		$aplf = TTnew( 'AccrualPolicyListFactory' );
@@ -703,10 +703,10 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 				$aplf->StartTransaction();
 
 				$x=0;
-				for( $i=$start_date; $i < $end_date; $i+=(86400) ) {
-					Debug::Text('Recalculating Accruals for Date: '. TTDate::getDate('DATE+TIME', TTDate::getBeginDayEpoch( $i ) ), __FILE__, __LINE__, __METHOD__,10);
+				for( $i=$start_date; $i < $end_date; $i+=( 86400 * $day_multiplier ) ) { //Try skipping by two days to speed up this test.
+					//Debug::Text('Recalculating Accruals for Date: '. TTDate::getDate('DATE+TIME', TTDate::getBeginDayEpoch( $i ) ), __FILE__, __LINE__, __METHOD__,10);
 					$ap_obj->addAccrualPolicyTime( TTDate::getBeginDayEpoch( $i )+7201, $offset );
-					Debug::Text('----------------------------------', __FILE__, __LINE__, __METHOD__,10);
+					//Debug::Text('----------------------------------', __FILE__, __LINE__, __METHOD__,10);
 
 					$x++;
 				}
@@ -761,6 +761,9 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		Calendar Based - PayPeriod Frequency (5 milestones)
 	*/
 
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualA
+	 */
 	function testCalendarAccrualA() {
 		global $dd;
 
@@ -785,6 +788,9 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, (0*3600) );
 	}
 
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualB
+	 */
 	function testCalendarAccrualB() {
 		global $dd;
 
@@ -809,6 +815,9 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, (0*3600) );
 	}
 
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualC
+	 */
 	function testCalendarAccrualC() {
 		global $dd;
 
@@ -833,6 +842,9 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, (40*3600) );
 	}
 
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualD
+	 */
 	function testCalendarAccrualD() {
 		global $dd;
 
@@ -857,6 +869,9 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, (80*3600) );
 	}
 
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualE
+	 */
 	function testCalendarAccrualE() {
 		global $dd;
 
@@ -881,6 +896,9 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, (1080*3600) );
 	}
 
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualF
+	 */
 	function testCalendarAccrualF() {
 		global $dd;
 
@@ -905,6 +923,9 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, 4038000 );
 	}
 
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualG
+	 */
 	function testCalendarAccrualG() {
 		global $dd;
 
@@ -929,6 +950,9 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, 144000 );
 	}
 
+	/**
+	 * @group AccrualPolicy_testWeeklyCalendarAccrualA
+	 */
 	function testWeeklyCalendarAccrualA() {
 		global $dd;
 
@@ -953,6 +977,10 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, 434733 );
 	}
 
+
+	/**
+	 * @group AccrualPolicy_testWeeklyCalendarAccrualB
+	 */
 	function testWeeklyCalendarAccrualB() {
 		global $dd;
 
@@ -978,6 +1006,9 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	/**
+	 * @group AccrualPolicy_testMonthlyCalendarAccrualA
+	 */
 	function testMonthlyCalendarAccrualA() {
 		global $dd;
 
@@ -996,12 +1027,15 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 									NULL,
 									array( $accrual_policy_id ) );
 
-		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime('+2 years', $current_epoch) );
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime('+2 years', $current_epoch), 10 );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_id );
 
 		$this->assertEquals( $accrual_balance, 432000 );
 	}
 
+	/**
+	 * @group AccrualPolicy_testMonthlyCalendarAccrualB
+	 */
 	function testMonthlyCalendarAccrualB() {
 		global $dd;
 
@@ -1020,12 +1054,15 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 									NULL,
 									array( $accrual_policy_id ) );
 
-		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime('+2 years', $current_epoch) );
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime('+2 years', $current_epoch), 10 );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_id );
 
 		$this->assertEquals( $accrual_balance, 432000 );
 	}
 
+	/**
+	 * @group AccrualPolicy_testMonthlyCalendarAccrualC
+	 */
 	function testMonthlyCalendarAccrualC() {
 		global $dd;
 
@@ -1050,6 +1087,9 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, 432000 );
 	}
 
+	/**
+	 * @group AccrualPolicy_testAnnualCalendarAccrualA
+	 */
 	function testAnnualCalendarAccrualA() {
 		global $dd;
 
@@ -1068,12 +1108,15 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 									NULL,
 									array( $accrual_policy_id ) );
 
-		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime('+5 years', $current_epoch) );
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime('+5 years', $current_epoch), 30 );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_id );
 
 		$this->assertEquals( $accrual_balance, 1296000 );
 	}
 
+	/**
+	 * @group AccrualPolicy_testAnnualCalendarAccrualB
+	 */
 	function testAnnualCalendarAccrualB() {
 		global $dd;
 
@@ -1092,12 +1135,15 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 									NULL,
 									array( $accrual_policy_id ) );
 
-		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime('+5 years', $current_epoch) );
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime('+5 years', $current_epoch), 30 );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_id );
 
 		$this->assertEquals( $accrual_balance, 1296000 );
 	}
 
+	/**
+	 * @group AccrualPolicy_testAnnualCalendarAccrualC
+	 */
 	function testAnnualCalendarAccrualC() {
 		global $dd;
 
@@ -1116,7 +1162,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 									NULL,
 									array( $accrual_policy_id ) );
 
-		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime('+5 years', $current_epoch) );
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime('+5 years', $current_epoch), 30 );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_id );
 
 		$this->assertEquals( $accrual_balance, 1296000 );

@@ -34,28 +34,28 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11416 $
- * $Id: Debug.class.php 11416 2013-11-15 19:53:53Z mikeb $
- * $Date: 2013-11-15 11:53:53 -0800 (Fri, 15 Nov 2013) $
+ * $Revision: 11838 $
+ * $Id: Debug.class.php 11838 2013-12-29 00:35:46Z mikeb $
+ * $Date: 2013-12-28 16:35:46 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
  * @package Core
  */
 class Debug {
-	static protected $enable = FALSE; 			//Enable/Disable debug printing.
-	static protected $verbosity = 5; 			//Display debug info with a verbosity level equal or lesser then this.
-	static protected $buffer_output = TRUE; 	//Enable/Disable output buffering.
-	static protected $debug_buffer = NULL; 		//Output buffer.
-	static protected $enable_tidy = FALSE; 		//Enable/Disable tidying of output
+	static protected $enable = FALSE;			//Enable/Disable debug printing.
+	static protected $verbosity = 5;			//Display debug info with a verbosity level equal or lesser then this.
+	static protected $buffer_output = TRUE;		//Enable/Disable output buffering.
+	static protected $debug_buffer = NULL;		//Output buffer.
+	static protected $enable_tidy = FALSE;		//Enable/Disable tidying of output
 	static protected $enable_display = FALSE;	//Enable/Disable displaying of debug output
-	static protected $enable_log = FALSE; 		//Enable/Disable logging of debug output
+	static protected $enable_log = FALSE;		//Enable/Disable logging of debug output
 	static protected $max_line_size = 200;		//Max line size in characters. This is used to break up long lines.
 	static protected $max_buffer_size = 1000;	//Max buffer size in lines. **Syslog can't handle much more than 1000.
 	static protected $buffer_id = NULL;			//Unique identifier for the debug buffer.
 	static protected $php_errors = 0;			//Count number of PHP errors so we can automatically email the log.
 
-	static protected $buffer_size = 0; 			//Current buffer size in lines.
+	static protected $buffer_size = 0;			//Current buffer size in lines.
 
 	static $tidy_obj = NULL;
 
@@ -77,7 +77,7 @@ class Debug {
 		self::$verbosity = $level;
 
 		if (is_object($db) AND $level == 11) {
-			$db->debug=TRUE;
+			$db->debug = TRUE;
 		}
 	}
 	static function getVerbosity() {
@@ -158,7 +158,7 @@ class Debug {
 
 	//Used to add timing to each debug call.
 	static function getExecutionTime() {
-		return ceil( (microtime( TRUE )-$_SERVER['REQUEST_TIME_FLOAT'])*1000 );
+		return ceil( ( (microtime( TRUE ) - $_SERVER['REQUEST_TIME_FLOAT']) * 1000 ) );
 	}
 
 	//Splits long debug lines or array dumps to prevent syslog overflows.
@@ -238,9 +238,9 @@ class Debug {
 		$retval = '';
 		$trace_arr = debug_backtrace();
 		if ( is_array($trace_arr) ) {
-			$i=0;
+			$i = 0;
 			foreach( $trace_arr as $trace_line ) {
-				if ( isset($trace_line['class']) AND isset($trace_line['type'])  ) {
+				if ( isset($trace_line['class']) AND isset($trace_line['type'])	 ) {
 					$class = $trace_line['class'].$trace_line['type'];
 				} else {
 					$class = NULL;
@@ -269,7 +269,7 @@ class Debug {
 						}
 					}
 				}
-				$retval .= '#'.$i.'.'. $class.$trace_line['function'].'('. implode(', ',$args) .')' ."\n";
+				$retval .= '#'.$i.'.'. $class.$trace_line['function'].'('. implode(', ', $args) .')' ."\n";
 				$i++;
 			}
 		}
@@ -356,7 +356,7 @@ class Debug {
 					$error_name = 'UNKNOWN';
 			}
 
-			$error_name .='('. $error_number.')';
+			$error_name .= '('. $error_number .')';
 
 			$text = 'PHP ERROR - '. $error_name .': '. $error_str .' File: '. $error_file .' Line: '. $error_line;
 
@@ -378,7 +378,7 @@ class Debug {
 				global $amf_message_id;
 				if ( $amf_message_id != '' ) {
 					$progress_bar = new ProgressBar();
-					$progress_bar->start( $amf_message_id,  2, 1, TTi18n::getText('ERROR: Operation cannot be completed.') );
+					$progress_bar->start( $amf_message_id, 2, 1, TTi18n::getText('ERROR: Operation cannot be completed.') );
 					unset($progress_bar);
 				}
 			}
@@ -448,11 +448,11 @@ class Debug {
 			if ( isset($config_vars['debug']['enable_syslog']) AND $config_vars['debug']['enable_syslog'] == TRUE AND OPERATING_SYSTEM != 'WIN' ) {
 				//If using rsyslog, need to set:
 				//$MaxMessageSize 256000 #Above ModuleLoad imtcp
-				openlog( self::getSyslogIdent(), LOG_PID | LOG_NDELAY | LOG_CONS, self::getSyslogFacility( 0 ) );
+				openlog( self::getSyslogIdent(), 11, self::getSyslogFacility( 0 ) ); //11 = LOG_PID | LOG_NDELAY | LOG_CONS
 				syslog( self::getSyslogPriority( 0 ), $output ); //Used to strip_tags output, but that was likely causing problems with SQL queries with >= and <= in them.
 				closelog();
 			} elseif ( is_writable( $config_vars['path']['log'] ) ) {
-				$fp = @fopen( $file_name,'a' );
+				$fp = @fopen( $file_name, 'a' );
 				@fwrite($fp, $output ); //Used to strip_tags output, but that was likely causing problems with SQL queries with >= and <= in them.
 				@fclose($fp);
 				unset($output);
@@ -507,7 +507,7 @@ class Debug {
 
 		}
 		return TRUE;
-    }
+	}
 
 	static function DisplayTidyErrors() {
 		if ( self::$enable_tidy == TRUE

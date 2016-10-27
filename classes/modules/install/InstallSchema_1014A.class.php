@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: InstallSchema_1014A.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11830 $
+ * $Id: InstallSchema_1014A.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -48,13 +48,13 @@ class InstallSchema_1014A extends InstallSchema_Base {
 	protected $permission_group_users = NULL;
 
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion() , __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		/*
 			Permission System Upgrade.
 				- Use direct query to get current permission data and store in memory for postInstall.
 		*/
-		$query = 'select company_id,user_id,section,name,value from permission where deleted = 0 order by company_id, user_id, section, name';
+		$query = 'select company_id, user_id, section, name, value from permission where deleted = 0 order by company_id, user_id, section, name';
 		$rs = $this->getDatabaseConnection()->Execute( $query );
 		foreach( $rs as $row ) {
 			$user_permission_data[$row['company_id']][$row['user_id']][$row['section']][$row['name']] = $row['value'];
@@ -121,13 +121,13 @@ class InstallSchema_1014A extends InstallSchema_Base {
 				}
 				unset($user_permission_data[$company_id]['-1']);
 
-				$x=1;
+				$x = 1;
 				foreach( $user_ids as $user_id => $permission_user_data ) {
 
 					$permission_no_differences_found = FALSE;
 
 					foreach( $this->permission_groups[$company_id] as $group_name => $permission_group_data ) {
-						Debug::text('Company ID: '. $company_id .' Checking Permission Differences Between User ID: '. $user_id .' AND Group: '. $group_name , __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('Company ID: '. $company_id .' Checking Permission Differences Between User ID: '. $user_id .' AND Group: '. $group_name, __FILE__, __LINE__, __METHOD__, 10);
 
 						//Need to diff the arrays both directions, because the diff function only checks in one direction on its own.
 						$forward_permission_diff_arr = Misc::arrayDiffAssocRecursive($permission_user_data, $permission_group_data);
@@ -152,7 +152,7 @@ class InstallSchema_1014A extends InstallSchema_Base {
 						Debug::text('Creating New Permission Group...: '. $x, __FILE__, __LINE__, __METHOD__, 10);
 
 						$pf = TTnew( 'PermissionFactory' );
-						$preset_arr = array(10,18,20,30,40);
+						$preset_arr = array(10, 18, 20, 30, 40);
 						foreach( $preset_arr as $preset ) {
 							$tmp_preset_permissions = $pf->getPresetPermissions( $preset, array() );
 							$preset_permission_diff_arr = Misc::arrayDiffAssocRecursive($permission_user_data, $tmp_preset_permissions);
@@ -204,17 +204,17 @@ class InstallSchema_1014A extends InstallSchema_Base {
 	function postInstall() {
 		global $cache;
 
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
-		Debug::text('l: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('l: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		/*
 			Take permission groups we put into memory from preInstall and create them now,
-			  after schema has been updated.
+			after schema has been updated.
 		*/
 		if ( isset($this->permission_groups) AND is_array($this->permission_groups) ) {
 			//Create permission groups and assign proper employees to each.
-			//Debug::Arr($this->permission_groups, 'All Permission Groups: ', __FILE__, __LINE__, __METHOD__,9);
+			//Debug::Arr($this->permission_groups, 'All Permission Groups: ', __FILE__, __LINE__, __METHOD__, 9);
 			foreach( $this->permission_groups as $company_id => $permission_group_data ) {
 				//Get all active users for this company, so we can assign them
 				//to the default permission group.

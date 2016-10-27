@@ -59,8 +59,8 @@ class APIAbsencePolicy extends APIFactory {
 	 */
 	function getOptions( $name, $parent = NULL ) {
 		if ( $name == 'columns'
-				AND ( !$this->getPermissionObject()->Check('absence_policy','enabled')
-					OR !( $this->getPermissionObject()->Check('absence_policy','view') OR $this->getPermissionObject()->Check('absence_policy','view_own') OR $this->getPermissionObject()->Check('absence_policy','view_child') ) ) ) {
+				AND ( !$this->getPermissionObject()->Check('absence_policy', 'enabled')
+					OR !( $this->getPermissionObject()->Check('absence_policy', 'view') OR $this->getPermissionObject()->Check('absence_policy', 'view_own') OR $this->getPermissionObject()->Check('absence_policy', 'view_child') ) ) ) {
 			$name = 'list_columns';
 		}
 
@@ -74,7 +74,7 @@ class APIAbsencePolicy extends APIFactory {
 	function getAbsencePolicyDefaultData() {
 		$company_obj = $this->getCurrentCompanyObject();
 
-		Debug::Text('Getting absence policy default data...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Getting absence policy default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		$data = array(
 						'company_id' => $company_obj->getId(),
@@ -91,42 +91,43 @@ class APIAbsencePolicy extends APIFactory {
 	 * @return array
 	 */
 	function getAbsencePolicy( $data = NULL, $disable_paging = FALSE ) {
-		if ( !$this->getPermissionObject()->Check('absence_policy','enabled')
-				OR !( $this->getPermissionObject()->Check('absence_policy','view') OR $this->getPermissionObject()->Check('absence_policy','view_own') OR $this->getPermissionObject()->Check('absence_policy','view_child')  ) ) {
+		if ( !$this->getPermissionObject()->Check('absence_policy', 'enabled')
+				OR !( $this->getPermissionObject()->Check('absence_policy', 'view') OR $this->getPermissionObject()->Check('absence_policy', 'view_own') OR $this->getPermissionObject()->Check('absence_policy', 'view_child')	 ) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
-
+		/*
+		//Handle this in the SQL query directly with the user_id filter.
 		//Make sure we filter absence policies to just those assigned to the policy group when user_id filter is passed.
-        if ( isset( $data['filter_data']['user_id'] ) ) {
-            $user_ids = (array)$data['filter_data']['user_id'];
+		if ( isset( $data['filter_data']['user_id'] ) ) {
+			$user_ids = (array)$data['filter_data']['user_id'];
 
-            $pgulf = new PolicyGroupUserListFactory();
-            $pgulf->getByUserId( $user_ids );
-            if ( $pgulf->getRecordCount() > 0 ) {
-                $pguf_obj = $pgulf->getCurrent();
-                $policy_group_id = $pguf_obj->getPolicyGroup();
-            }
-            if ( isset($policy_group_id) ) {
-                $cgmlf = new CompanyGenericMapListFactory();
-                $cgmlf->getByObjectTypeAndObjectID( 170, $policy_group_id );
-                if ( $cgmlf->getRecordCount() > 0 ) {
-                    foreach( $cgmlf as $cgm_obj ) {
-                        $absence_policy_ids[] = $cgm_obj->getMapID();
-                    }
-                }
-            }
+			$pgulf = new PolicyGroupUserListFactory();
+			$pgulf->getByUserId( $user_ids );
+			if ( $pgulf->getRecordCount() > 0 ) {
+				$pguf_obj = $pgulf->getCurrent();
+				$policy_group_id = $pguf_obj->getPolicyGroup();
+			}
+			if ( isset($policy_group_id) ) {
+				$cgmlf = new CompanyGenericMapListFactory();
+				$cgmlf->getByObjectTypeAndObjectID( 170, $policy_group_id );
+				if ( $cgmlf->getRecordCount() > 0 ) {
+					foreach( $cgmlf as $cgm_obj ) {
+						$absence_policy_ids[] = $cgm_obj->getMapID();
+					}
+				}
+			}
 			
-            if ( isset( $absence_policy_ids ) ) {
-                $data['filter_data']['id'] = $absence_policy_ids;
-            } else {
+			if ( isset( $absence_policy_ids ) ) {
+				$data['filter_data']['id'] = $absence_policy_ids;
+			} else {
 				//Make sure that is no absence policies are assigned to the policy group, we don't display any.
 				$data['filter_data']['id'] = array(0);
 			}
-            unset( $data['filter_data']['user_id'] );
-        }
-
+			unset( $data['filter_data']['user_id'] );
+		}
+		*/
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'absence_policy', 'view' );
 
 		$blf = TTnew( 'AbsencePolicyListFactory' );
@@ -175,9 +176,9 @@ class APIAbsencePolicy extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('absence_policy','enabled')
-				OR !( $this->getPermissionObject()->Check('absence_policy','edit') OR $this->getPermissionObject()->Check('absence_policy','edit_own') OR $this->getPermissionObject()->Check('absence_policy','edit_child') OR $this->getPermissionObject()->Check('absence_policy','add') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('absence_policy', 'enabled')
+				OR !( $this->getPermissionObject()->Check('absence_policy', 'edit') OR $this->getPermissionObject()->Check('absence_policy', 'edit_own') OR $this->getPermissionObject()->Check('absence_policy', 'edit_child') OR $this->getPermissionObject()->Check('absence_policy', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		if ( $validate_only == TRUE ) {
@@ -201,11 +202,11 @@ class APIAbsencePolicy extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if (
-							  $validate_only == TRUE
-							  OR
+							$validate_only == TRUE
+							OR
 								(
-								$this->getPermissionObject()->Check('absence_policy','edit')
-									OR ( $this->getPermissionObject()->Check('absence_policy','edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+								$this->getPermissionObject()->Check('absence_policy', 'edit')
+									OR ( $this->getPermissionObject()->Check('absence_policy', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -220,7 +221,7 @@ class APIAbsencePolicy extends APIFactory {
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('absence_policy','add'), TTi18n::gettext('Add permission denied') );
+					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('absence_policy', 'add'), TTi18n::gettext('Add permission denied') );
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -228,10 +229,10 @@ class APIAbsencePolicy extends APIFactory {
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
 					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
 
-					$lf->setObjectFromArray( $row );
-
 					//Force Company ID to current company.
-					$lf->setCompany( $this->getCurrentCompanyObject()->getId() );
+					$row['company_id'] = $this->getCurrentCompanyObject()->getId();
+
+					$lf->setObjectFromArray( $row );
 
 					$is_valid = $lf->isValid();
 					if ( $is_valid == TRUE ) {
@@ -291,16 +292,16 @@ class APIAbsencePolicy extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('absence_policy','enabled')
-				OR !( $this->getPermissionObject()->Check('absence_policy','delete') OR $this->getPermissionObject()->Check('absence_policy','delete_own') OR $this->getPermissionObject()->Check('absence_policy','delete_child') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('absence_policy', 'enabled')
+				OR !( $this->getPermissionObject()->Check('absence_policy', 'delete') OR $this->getPermissionObject()->Check('absence_policy', 'delete_own') OR $this->getPermissionObject()->Check('absence_policy', 'delete_child') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		Debug::Text('Received data for: '. count($data) .' AbsencePolicys', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-        $validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
+		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
@@ -312,8 +313,8 @@ class APIAbsencePolicy extends APIFactory {
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
-						if ( $this->getPermissionObject()->Check('absence_policy','delete')
-								OR ( $this->getPermissionObject()->Check('absence_policy','delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
+						if ( $this->getPermissionObject()->Check('absence_policy', 'delete')
+								OR ( $this->getPermissionObject()->Check('absence_policy', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
 							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
@@ -392,7 +393,7 @@ class APIAbsencePolicy extends APIFactory {
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {
-				unset($src_rows[$key]['id'],$src_rows[$key]['manual_id'] ); //Clear fields that can't be copied
+				unset($src_rows[$key]['id'], $src_rows[$key]['manual_id'] ); //Clear fields that can't be copied
 				$src_rows[$key]['name'] = Misc::generateCopyName( $row['name'] ); //Generate unique name
 			}
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);

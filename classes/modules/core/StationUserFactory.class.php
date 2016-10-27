@@ -34,15 +34,15 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 4104 $
- * $Id: StationUserFactory.class.php 4104 2011-01-04 19:04:05Z ipso $
- * $Date: 2011-01-04 11:04:05 -0800 (Tue, 04 Jan 2011) $
+ * $Revision: 12026 $
+ * $Id: StationUserFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 /*
 CREATE TABLE station_user (
-    id serial NOT NULL,
-    station_id integer DEFAULT 0 NOT NULL,
-    user_id integer DEFAULT 0 NOT NULL
+	id serial NOT NULL,
+	station_id integer DEFAULT 0 NOT NULL,
+	user_id integer DEFAULT 0 NOT NULL
 ) WITHOUT OIDS;
 */
 
@@ -53,7 +53,7 @@ class StationUserFactory extends Factory {
 	protected $table = 'station_user';
 	protected $pk_sequence_name = 'station_user_id_seq'; //PK Sequence name
 	function getStation() {
-		return $this->data['station_id'];
+		return (int)$this->data['station_id'];
 	}
 	function setStation($id) {
 		$id = trim($id);
@@ -74,7 +74,7 @@ class StationUserFactory extends Factory {
 	}
 
 	function getUser() {
-		return $this->data['user_id'];
+		return (int)$this->data['user_id'];
 	}
 	function setUser($id) {
 		$id = trim($id);

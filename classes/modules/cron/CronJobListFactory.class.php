@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: CronJobListFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11830 $
+ * $Id: CronJobListFactory.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -53,7 +53,7 @@ class CronJobListFactory extends CronJobFactory implements IteratorAggregate {
 		}
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -76,7 +76,7 @@ class CronJobListFactory extends CronJobFactory implements IteratorAggregate {
 						);
 
 			$query = '
-						select 	*
+						select	*
 						from	'. $this->getTable() .'
 						where	id = ?
 							AND deleted = 0';
@@ -85,7 +85,7 @@ class CronJobListFactory extends CronJobFactory implements IteratorAggregate {
 
 			$this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs,$id);
+			$this->saveCache($this->rs, $id);
 		}
 
 		return $this;
@@ -106,7 +106,7 @@ class CronJobListFactory extends CronJobFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 						AND status_id = ?
@@ -129,7 +129,7 @@ class CronJobListFactory extends CronJobFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	name = ?
 						AND deleted = 0';
@@ -143,7 +143,7 @@ class CronJobListFactory extends CronJobFactory implements IteratorAggregate {
 
 	function getMostRecentlyRun() {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					WHERE deleted = 0
 					ORDER BY last_run_date DESC

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11599 $
- * $Id: CompanyDeductionFactory.class.php 11599 2013-12-04 21:13:42Z mikeb $
- * $Date: 2013-12-04 13:13:42 -0800 (Wed, 04 Dec 2013) $
+ * $Revision: 12026 $
+ * $Id: CompanyDeductionFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -51,8 +51,8 @@ class CompanyDeductionFactory extends Factory {
 
 	var $lookback_pay_stub_lf = NULL;
 
-	var $country_calculation_ids = array('100','200','300');
-	var	$province_calculation_ids = array('200','300');
+	var $country_calculation_ids = array('100', '200', '300');
+	var	$province_calculation_ids = array('200', '300');
 	var $district_calculation_ids = array('300');
 	var $calculation_id_fields = array(
 										'10' => '10',
@@ -64,7 +64,7 @@ class CompanyDeductionFactory extends Factory {
 										'30' => '30',
 
 										'52' => '52',
-                                        '69' => '69',
+										'69' => '69',
 
 										'80' => '80',
 										'82' => '82',
@@ -251,7 +251,7 @@ class CompanyDeductionFactory extends Factory {
 										52 => TTi18n::gettext('Fixed Amount (w/Target)'),
 
 										//US - Custom Formulas
-                                        69 => TTi18n::gettext('Custom Formula'),
+										69 => TTi18n::gettext('Custom Formula'),
 
 										80 => TTi18n::gettext('US - Advance EIC Formula'),
 										82 => TTi18n::gettext('US - Medicare Formula (Employee)'),
@@ -429,46 +429,46 @@ class CompanyDeductionFactory extends Factory {
 														20 => TTi18n::gettext('Married (Filing Jointly)'),
 									);
 				break;
-            case 'formula_variables':
-                $retval = array(
+			case 'formula_variables':
+				$retval = array(
 
-                                                        '-1010-#pay_stub_amount#' => TTi18n::getText('Pay Stub Amount'),
-                                                        '-1020-#pay_stub_ytd_amount#' => TTi18n::getText('Pay Stub YTD Amount'),
-                                                        '-1030-#pay_stub_units#' => TTi18n::getText('Pay Stub Units'),
-                                                        '-1040-#pay_stub_ytd_units#' => TTi18n::getText('Pay Stub YTD Units'),
+														'-1010-#pay_stub_amount#' => TTi18n::getText('Pay Stub Amount'),
+														'-1020-#pay_stub_ytd_amount#' => TTi18n::getText('Pay Stub YTD Amount'),
+														'-1030-#pay_stub_units#' => TTi18n::getText('Pay Stub Units'),
+														'-1040-#pay_stub_ytd_units#' => TTi18n::getText('Pay Stub YTD Units'),
 
-                                                        '-1050-#include_pay_stub_amount#' => TTi18n::getText('Include Pay Stub Amount'),
-                                                        '-1060-#include_pay_stub_ytd_amount#' => TTi18n::getText('Include Pay Stub YTD Amount'),
-                                                        '-1070-#include_pay_stub_units#' => TTi18n::getText('Include Pay Stub Units'),
-                                                        '-1080-#include_pay_stub_ytd_units#' => TTi18n::getText('Include Pay Stub YTD Units'),
-                                                        '-1090-#exclude_pay_stub_amount#' => TTi18n::getText('Exclude Pay Stub Amount'),
-                                                        '-1100-#exclude_pay_stub_ytd_amount#' => TTi18n::getText('Exclude Pay Stub YTD Amount'),
-                                                        '-1110-#exclude_pay_stub_units#' => TTi18n::getText('Exclude Pay Stub Units'),
-                                                        '-1120-#exclude_pay_stub_ytd_units#' => TTi18n::getText('Exclude Pay Stub YTD Units'),
+														'-1050-#include_pay_stub_amount#' => TTi18n::getText('Include Pay Stub Amount'),
+														'-1060-#include_pay_stub_ytd_amount#' => TTi18n::getText('Include Pay Stub YTD Amount'),
+														'-1070-#include_pay_stub_units#' => TTi18n::getText('Include Pay Stub Units'),
+														'-1080-#include_pay_stub_ytd_units#' => TTi18n::getText('Include Pay Stub YTD Units'),
+														'-1090-#exclude_pay_stub_amount#' => TTi18n::getText('Exclude Pay Stub Amount'),
+														'-1100-#exclude_pay_stub_ytd_amount#' => TTi18n::getText('Exclude Pay Stub YTD Amount'),
+														'-1110-#exclude_pay_stub_units#' => TTi18n::getText('Exclude Pay Stub Units'),
+														'-1120-#exclude_pay_stub_ytd_units#' => TTi18n::getText('Exclude Pay Stub YTD Units'),
 
-                                                        '-1130-#employee_hourly_rate#' => TTi18n::getText('Employee Hourly Rate'),
-                                                        '-1132-#employee_annual_wage#' => TTi18n::getText('Employee Annual Wage'),
-                                                        '-1134-#employee_wage_average_weekly_hours#' => TTi18n::getText('Employee Average Weekly Hours'),
+														'-1130-#employee_hourly_rate#' => TTi18n::getText('Employee Hourly Rate'),
+														'-1132-#employee_annual_wage#' => TTi18n::getText('Employee Annual Wage'),
+														'-1134-#employee_wage_average_weekly_hours#' => TTi18n::getText('Employee Average Weekly Hours'),
 
-                                                        '-1140-#custom_value1#' => TTi18n::getText('Custom Variable 1'),
-                                                        '-1150-#custom_value2#' => TTi18n::getText('Custom Variable 2'),
-                                                        '-1160-#custom_value3#' => TTi18n::getText('Custom Variable 3'),
-                                                        '-1170-#custom_value4#' => TTi18n::getText('Custom Variable 4'),
-                                                        '-1180-#custom_value5#' => TTi18n::getText('Custom Variable 5'),
-                                                        '-1190-#custom_value6#' => TTi18n::getText('Custom Variable 6'),
-                                                        '-1200-#custom_value7#' => TTi18n::getText('Custom Variable 7'),
-                                                        '-1210-#custom_value8#' => TTi18n::getText('Custom Variable 8'),
-                                                        '-1220-#custom_value9#' => TTi18n::getText('Custom Variable 9'),
-                                                        '-1230-#custom_value10#' => TTi18n::getText('Custom Variable 10'),
+														'-1140-#custom_value1#' => TTi18n::getText('Custom Variable 1'),
+														'-1150-#custom_value2#' => TTi18n::getText('Custom Variable 2'),
+														'-1160-#custom_value3#' => TTi18n::getText('Custom Variable 3'),
+														'-1170-#custom_value4#' => TTi18n::getText('Custom Variable 4'),
+														'-1180-#custom_value5#' => TTi18n::getText('Custom Variable 5'),
+														'-1190-#custom_value6#' => TTi18n::getText('Custom Variable 6'),
+														'-1200-#custom_value7#' => TTi18n::getText('Custom Variable 7'),
+														'-1210-#custom_value8#' => TTi18n::getText('Custom Variable 8'),
+														'-1220-#custom_value9#' => TTi18n::getText('Custom Variable 9'),
+														'-1230-#custom_value10#' => TTi18n::getText('Custom Variable 10'),
 
-                                                        '-1240-#annual_pay_periods#' => TTi18n::getText('Annual Pay Periods'),
+														'-1240-#annual_pay_periods#' => TTi18n::getText('Annual Pay Periods'),
 														'-1242-#pay_period_start_date#' => TTi18n::getText('Pay Period - Start Date'),
 														'-1243-#pay_period_end_date#' => TTi18n::getText('Pay Period - End Date'),
 														'-1244-#pay_period_transaction_date#' => TTi18n::getText('Pay Period - Transaction Date'),
 
-                                                        '-1260-#employee_hire_date#' => TTi18n::getText('Employee Hire Date'),
+														'-1260-#employee_hire_date#' => TTi18n::getText('Employee Hire Date'),
 														'-1250-#employee_termination_date#' => TTi18n::getText('Employee Termination Date'),
-                                                        '-1270-#employee_birth_date#' => TTi18n::getText('Employee Birth Date'),
+														'-1270-#employee_birth_date#' => TTi18n::getText('Employee Birth Date'),
 
 														'-1300-#currency_iso_code#' => TTi18n::getText('Currency ISO Code'),
 														'-1305-#currency_conversion_rate#' => TTi18n::getText('Currency Conversion Rate'),
@@ -496,8 +496,8 @@ class CompanyDeductionFactory extends Factory {
 														'-1700-#lookback_exclude_pay_stub_ytd_amount#' => TTi18n::getText('Lookback - Exclude Pay Stub YTD Amount'),
 														'-1710-#lookback_exclude_pay_stub_units#' => TTi18n::getText('Lookback - Exclude Pay Stub Units'),
 														'-1720-#lookback_exclude_pay_stub_ytd_units#' => TTi18n::getText('Lookback - Exclude Pay Stub YTD Units'),
-                                    );
-                break;
+									);
+				break;
 			case 'columns':
 				$retval = array(
 										'-1010-status' => TTi18n::gettext('Status'),
@@ -675,7 +675,7 @@ class CompanyDeductionFactory extends Factory {
 
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
-			return $this->data['company_id'];
+			return (int)$this->data['company_id'];
 		}
 
 		return FALSE;
@@ -683,7 +683,7 @@ class CompanyDeductionFactory extends Factory {
 	function setCompany($id) {
 		$id = trim($id);
 
-		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$clf = TTnew( 'CompanyListFactory' );
 
 		if ( $this->Validator->isResultSetWithRows(	'company',
@@ -725,7 +725,7 @@ class CompanyDeductionFactory extends Factory {
 
 	function getType() {
 		if ( isset($this->data['type_id']) ) {
-			return $this->data['type_id'];
+			return (int)$this->data['type_id'];
 		}
 
 		return FALSE;
@@ -759,7 +759,7 @@ class CompanyDeductionFactory extends Factory {
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND  name = ? AND deleted=0';
 		$id = $this->db->GetOne($query, $ph);
-		//Debug::Arr($id,'Unique Pay Stub Account: '. $name, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($id, 'Unique Pay Stub Account: '. $name, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id === FALSE ) {
 			return TRUE;
@@ -781,7 +781,7 @@ class CompanyDeductionFactory extends Factory {
 	function setName($value) {
 		$value = trim($value);
 
-		if 	(
+		if	(
 					$this->Validator->isLength(		'name',
 													$value,
 													TTi18n::gettext('Name is too short or too long'),
@@ -812,7 +812,7 @@ class CompanyDeductionFactory extends Factory {
 	function setPayStubEntryDescription($value) {
 		$value = trim($value);
 
-		if 	(
+		if	(
 				strlen($value) == 0
 				OR
 				$this->Validator->isLength(		'pay_stub_entry_description',
@@ -844,11 +844,11 @@ class CompanyDeductionFactory extends Factory {
 	function setStartDate($epoch) {
 		$epoch = trim($epoch);
 
-		if ( $epoch == '' ){
+		if ( $epoch == '' ) {
 			$epoch = NULL;
 		}
 
-		if 	(
+		if	(
 				$epoch == NULL
 				OR
 				$this->Validator->isDate(		'start_date',
@@ -878,11 +878,11 @@ class CompanyDeductionFactory extends Factory {
 	function setEndDate($epoch) {
 		$epoch = trim($epoch);
 
-		if ( $epoch == '' ){
+		if ( $epoch == '' ) {
 			$epoch = NULL;
 		}
 
-		if 	(	$epoch == NULL
+		if	(	$epoch == NULL
 				OR
 				$this->Validator->isDate(		'end_date',
 												$epoch,
@@ -929,7 +929,7 @@ class CompanyDeductionFactory extends Factory {
 
 		Debug::text('aLength of Service Days: '. $int, __FILE__, __LINE__, __METHOD__, 10);
 
-		if 	(	$int >= 0
+		if	(	$int >= 0
 				AND
 				$this->Validator->isFloat(			'minimum_length_of_service',
 													$int,
@@ -955,7 +955,7 @@ class CompanyDeductionFactory extends Factory {
 
 		Debug::text('bLength of Service: '. $int, __FILE__, __LINE__, __METHOD__, 10);
 
-		if 	(	$int >= 0
+		if	(	$int >= 0
 				AND
 				$this->Validator->isFloat(			'minimum_length_of_service',
 													$int,
@@ -971,7 +971,7 @@ class CompanyDeductionFactory extends Factory {
 
 	function getMinimumLengthOfServiceUnit() {
 		if ( isset($this->data['minimum_length_of_service_unit_id']) ) {
-			return $this->data['minimum_length_of_service_unit_id'];
+			return (int)$this->data['minimum_length_of_service_unit_id'];
 		}
 
 		return FALSE;
@@ -1005,7 +1005,7 @@ class CompanyDeductionFactory extends Factory {
 
 		Debug::text('aLength of Service Days: '. $int, __FILE__, __LINE__, __METHOD__, 10);
 
-		if 	(	$int >= 0
+		if	(	$int >= 0
 				AND
 				$this->Validator->isFloat(			'maximum_length_of_service',
 													$int,
@@ -1031,7 +1031,7 @@ class CompanyDeductionFactory extends Factory {
 
 		Debug::text('bLength of Service: '. $int, __FILE__, __LINE__, __METHOD__, 10);
 
-		if 	(	$int >= 0
+		if	(	$int >= 0
 				AND
 				$this->Validator->isFloat(			'maximum_length_of_service',
 													$int,
@@ -1047,7 +1047,7 @@ class CompanyDeductionFactory extends Factory {
 
 	function getMaximumLengthOfServiceUnit() {
 		if ( isset($this->data['maximum_length_of_service_unit_id']) ) {
-			return $this->data['maximum_length_of_service_unit_id'];
+			return (int)$this->data['maximum_length_of_service_unit_id'];
 		}
 
 		return FALSE;
@@ -1081,7 +1081,7 @@ class CompanyDeductionFactory extends Factory {
 
 		Debug::text('Minimum User Age: '. $int, __FILE__, __LINE__, __METHOD__, 10);
 
-		if 	(	$int >= 0
+		if	(	$int >= 0
 				AND
 				$this->Validator->isFloat(			'minimum_user_age',
 													$int,
@@ -1107,7 +1107,7 @@ class CompanyDeductionFactory extends Factory {
 
 		Debug::text('Maximum User Age: '. $int, __FILE__, __LINE__, __METHOD__, 10);
 
-		if 	(	$int >= 0
+		if	(	$int >= 0
 				AND
 				$this->Validator->isFloat(			'maximum_user_age',
 													$int,
@@ -1126,7 +1126,7 @@ class CompanyDeductionFactory extends Factory {
 	//
 	function getApplyFrequency() {
 		if ( isset($this->data['apply_frequency_id']) ) {
-			return $this->data['apply_frequency_id'];
+			return (int)$this->data['apply_frequency_id'];
 		}
 
 		return FALSE;
@@ -1290,8 +1290,8 @@ class CompanyDeductionFactory extends Factory {
 				break;
 		}
 
-		$retval = TTDate::inApplyFrequencyWindow( $frequency_id, $pay_period_start_date, $pay_period_end_date, $frequency_criteria  );
-		Debug::Arr($frequency_criteria, 'Frequency: '. $this->getApplyFrequency() .' Retval: '. (int)$retval, __FILE__, __LINE__, __METHOD__,10);
+		$retval = TTDate::inApplyFrequencyWindow( $frequency_id, $pay_period_start_date, $pay_period_end_date, $frequency_criteria	);
+		Debug::Arr($frequency_criteria, 'Frequency: '. $this->getApplyFrequency() .' Retval: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $retval;
 	}
@@ -1313,7 +1313,7 @@ class CompanyDeductionFactory extends Factory {
 		$udtlf = TTnew( 'UserDateTotalListFactory' );
 		$retval = $udtlf->getWorkedTimeSumByUserIDAndStartDateAndEndDate( $user_id, $start_date, $end_date );
 
-		Debug::Text('Worked Seconds: '. (int)$retval .' Before: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Worked Seconds: '. (int)$retval .' Before: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 
 		return $retval;
 	}
@@ -1324,11 +1324,11 @@ class CompanyDeductionFactory extends Factory {
 				OR ( $this->getMaximumLengthOfServiceUnit() == 50 AND $this->getMaximumLengthOfService() > 0 ) ) {
 			//Hour based length of service, get users hours up until this period.
 			$worked_time = TTDate::getHours( $this->getWorkedTimeByUserIdAndEndDate( $u_obj->getId(), $u_obj->getHireDate(), $epoch ) );
-			Debug::Text('&nbsp;&nbsp;Worked Time: '. $worked_time .'hrs', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('&nbsp;&nbsp;Worked Time: '. $worked_time .'hrs', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		$employed_days = TTDate::getDays( ($epoch-$u_obj->getHireDate()) );
-		Debug::Text('&nbsp;&nbsp;Employed Days: '. $employed_days, __FILE__, __LINE__, __METHOD__,10);
+		$employed_days = TTDate::getDays( ($epoch - $u_obj->getHireDate()) );
+		Debug::Text('&nbsp;&nbsp;Employed Days: '. $employed_days, __FILE__, __LINE__, __METHOD__, 10);
 
 		$minimum_length_of_service_result = FALSE;
 		$maximum_length_of_service_result = FALSE;
@@ -1346,7 +1346,7 @@ class CompanyDeductionFactory extends Factory {
 			$maximum_length_of_service_result = TRUE;
 		}
 
-		Debug::Text('&nbsp;&nbsp; Min Result: : '. (int)$minimum_length_of_service_result .' Max Result: '. (int)$maximum_length_of_service_result, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('&nbsp;&nbsp; Min Result: : '. (int)$minimum_length_of_service_result .' Max Result: '. (int)$maximum_length_of_service_result, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $minimum_length_of_service_result == TRUE AND $maximum_length_of_service_result == TRUE ) {
 			return TRUE;
@@ -1357,7 +1357,7 @@ class CompanyDeductionFactory extends Factory {
 
 	function isActiveUserAge( $u_obj, $epoch ) {
 		$user_age = TTDate::getYearDifference( $u_obj->getBirthDate(), $epoch );
-		Debug::Text('User Age: '. $user_age .' Min: '. $this->getMinimumUserAge() .' Max: '. $this->getMaximumUserAge(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('User Age: '. $user_age .' Min: '. $this->getMinimumUserAge() .' Max: '. $this->getMaximumUserAge(), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( ( $this->getMinimumUserAge() == 0 OR $user_age >= $this->getMinimumUserAge() ) AND ( $this->getMaximumUserAge() == 0 OR $user_age <= $this->getMaximumUserAge() ) ) {
 			return TRUE;
@@ -1402,9 +1402,9 @@ class CompanyDeductionFactory extends Factory {
 			$province = $this->getProvince();
 		}
 
-		Debug::Text('Calculation ID: '. $calculation_id .' Country: '. $country .' Province: '. $province, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Calculation ID: '. $calculation_id .' Country: '. $country .' Province: '. $province, __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( in_array($calculation_id , $this->country_calculation_ids )
+		if ( in_array($calculation_id, $this->country_calculation_ids )
 				AND in_array($calculation_id, $this->province_calculation_ids ) ) {
 			$id = $calculation_id.'-'.$country.'-'.$province;
 		} elseif ( in_array($calculation_id, $this->country_calculation_ids ) ) {
@@ -1419,13 +1419,13 @@ class CompanyDeductionFactory extends Factory {
 			$retval = FALSE;
 		}
 
-		Debug::Text('Retval: '. $retval, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Retval: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $retval;
 	}
 	function getCalculation() {
 		if ( isset($this->data['calculation_id']) ) {
-			return $this->data['calculation_id'];
+			return (int)$this->data['calculation_id'];
 		}
 
 		return FALSE;
@@ -1512,7 +1512,7 @@ class CompanyDeductionFactory extends Factory {
 	function setProvince($province) {
 		$province = trim($province);
 
-		Debug::Text('Country: '. $this->getCountry() .' Province: '. $province, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Country: '. $this->getCountry() .' Province: '. $province, __FILE__, __LINE__, __METHOD__, 10);
 
 		$cf = TTnew( 'CompanyFactory' );
 		$options_arr = $cf->getOptions('province');
@@ -1562,7 +1562,7 @@ class CompanyDeductionFactory extends Factory {
 	function setDistrict($district) {
 		$district = trim($district);
 
-		Debug::Text('Country: '. $this->getCountry() .' District: '. $district, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Country: '. $this->getCountry() .' District: '. $district, __FILE__, __LINE__, __METHOD__, 10);
 
 		$cf = TTnew( 'CompanyFactory' );
 		$options_arr = $cf->getOptions('district');
@@ -1595,10 +1595,10 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 	function setCompanyValue1($value) {
-	    
+	
 		$value = trim($value);
 
-		if 	(	$value == ''
+		if	(	$value == ''
 				OR
 				$this->Validator->isLength(		'company_value1',
 												$value,
@@ -1624,7 +1624,7 @@ class CompanyDeductionFactory extends Factory {
 	function setCompanyValue2($value) {
 		$value = trim($value);
 
-		if 	(	$value == ''
+		if	(	$value == ''
 				OR
 				$this->Validator->isLength(		'company_value2',
 												$value,
@@ -1650,7 +1650,7 @@ class CompanyDeductionFactory extends Factory {
 	function setCompanyValue3($value) {
 		$value = trim($value);
 
-		if 	(	$value == ''
+		if	(	$value == ''
 				OR
 				$this->Validator->isLength(		'company_value3',
 												$value,
@@ -1676,7 +1676,7 @@ class CompanyDeductionFactory extends Factory {
 	function setCompanyValue4($value) {
 		$value = trim($value);
 
-		if 	(	$value == ''
+		if	(	$value == ''
 				OR
 				$this->Validator->isLength(		'company_value4',
 												$value,
@@ -1702,7 +1702,7 @@ class CompanyDeductionFactory extends Factory {
 	function setCompanyValue5($value) {
 		$value = trim($value);
 
-		if 	(	$value == ''
+		if	(	$value == ''
 				OR
 				$this->Validator->isLength(		'company_value5',
 												$value,
@@ -1728,7 +1728,7 @@ class CompanyDeductionFactory extends Factory {
 	function setCompanyValue6($value) {
 		$value = trim($value);
 
-		if 	(	$value == ''
+		if	(	$value == ''
 				OR
 				$this->Validator->isLength(		'company_value6',
 												$value,
@@ -1753,7 +1753,7 @@ class CompanyDeductionFactory extends Factory {
 	function setCompanyValue7($value) {
 		$value = trim($value);
 
-		if 	(	$value == ''
+		if	(	$value == ''
 				OR
 				$this->Validator->isLength(		'company_value7',
 												$value,
@@ -1778,7 +1778,7 @@ class CompanyDeductionFactory extends Factory {
 	function setCompanyValue8($value) {
 		$value = trim($value);
 
-		if 	(	$value == ''
+		if	(	$value == ''
 				OR
 				$this->Validator->isLength(		'company_value8',
 												$value,
@@ -1803,7 +1803,7 @@ class CompanyDeductionFactory extends Factory {
 	function setCompanyValue9($value) {
 		$value = trim($value);
 
-		if 	(	$value == ''
+		if	(	$value == ''
 				OR
 				$this->Validator->isLength(		'company_value9',
 												$value,
@@ -1828,7 +1828,7 @@ class CompanyDeductionFactory extends Factory {
 	function setCompanyValue10($value) {
 		$value = trim($value);
 
-		if 	(	$value == ''
+		if	(	$value == ''
 				OR
 				$this->Validator->isLength(		'company_value10',
 												$value,
@@ -1855,7 +1855,7 @@ class CompanyDeductionFactory extends Factory {
 	function setUserValue1($value) {
 		$value = trim($value);
 
-		if 	(	$value == ''
+		if	(	$value == ''
 				OR
 				$this->Validator->isLength(		'user_value1',
 												$value,
@@ -1881,7 +1881,7 @@ class CompanyDeductionFactory extends Factory {
 	function setUserValue2($value) {
 		$value = trim($value);
 
-		if 	(	$value == ''
+		if	(	$value == ''
 				OR
 				$this->Validator->isLength(		'user_value2',
 												$value,
@@ -1907,7 +1907,7 @@ class CompanyDeductionFactory extends Factory {
 	function setUserValue3($value) {
 		$value = trim($value);
 
-		if 	(	$value == ''
+		if	(	$value == ''
 				OR
 				$this->Validator->isLength(		'user_value3',
 												$value,
@@ -1933,7 +1933,7 @@ class CompanyDeductionFactory extends Factory {
 	function setUserValue4($value) {
 		$value = trim($value);
 
-		if 	(	$value == ''
+		if	(	$value == ''
 				OR
 				$this->Validator->isLength(		'user_value4',
 												$value,
@@ -1959,7 +1959,7 @@ class CompanyDeductionFactory extends Factory {
 	function setUserValue5($value) {
 		$value = trim($value);
 
-		if 	(	$value == ''
+		if	(	$value == ''
 				OR
 				$this->Validator->isLength(		'user_value5',
 												$value,
@@ -1985,7 +1985,7 @@ class CompanyDeductionFactory extends Factory {
 	function setUserValue6($value) {
 		$value = trim($value);
 
-		if 	(	$value == ''
+		if	(	$value == ''
 				OR
 				$this->Validator->isLength(		'user_value6',
 												$value,
@@ -2011,7 +2011,7 @@ class CompanyDeductionFactory extends Factory {
 	function setUserValue7($value) {
 		$value = trim($value);
 
-		if 	(	$value == ''
+		if	(	$value == ''
 				OR
 				$this->Validator->isLength(		'user_value7',
 												$value,
@@ -2037,7 +2037,7 @@ class CompanyDeductionFactory extends Factory {
 	function setUserValue8($value) {
 		$value = trim($value);
 
-		if 	(	$value == ''
+		if	(	$value == ''
 				OR
 				$this->Validator->isLength(		'user_value8',
 												$value,
@@ -2063,7 +2063,7 @@ class CompanyDeductionFactory extends Factory {
 	function setUserValue9($value) {
 		$value = trim($value);
 
-		if 	(	$value == ''
+		if	(	$value == ''
 				OR
 				$this->Validator->isLength(		'user_value9',
 												$value,
@@ -2089,7 +2089,7 @@ class CompanyDeductionFactory extends Factory {
 	function setUserValue10($value) {
 		$value = trim($value);
 
-		if 	(	$value == ''
+		if	(	$value == ''
 				OR
 				$this->Validator->isLength(		'user_value10',
 												$value,
@@ -2106,33 +2106,31 @@ class CompanyDeductionFactory extends Factory {
 	}
 
 	function getUserValue1Options() {
-		//Debug::Text('Calculation: '. $this->getCalculation(), __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Text('Calculation: '. $this->getCalculation(), __FILE__, __LINE__, __METHOD__, 10);
 		switch ( $this->getCalculation() ) {
 			case 100:
-				//Debug::Text('Country: '. $this->getCountry(), __FILE__, __LINE__, __METHOD__,10);
-				if ( $this->getCountry() == 'CA' ) {
-				} elseif ( $this->getCountry() == 'US' ) {
-					//$options = $this->federal_filing_status_options;
+				//Debug::Text('Country: '. $this->getCountry(), __FILE__, __LINE__, __METHOD__, 10);
+				//if ( $this->getCountry() == 'CA' ) {
+				//} else
+				if ( $this->getCountry() == 'US' ) {
 					$options = $this->getOptions('federal_filing_status');
 				}
-
 				break;
 			case 200:
-				//Debug::Text('Country: '. $this->getCountry(), __FILE__, __LINE__, __METHOD__,10);
-				//Debug::Text('Province: '. $this->getProvince(), __FILE__, __LINE__, __METHOD__,10);
-				if ( $this->getCountry() == 'CA' ) {
-				} elseif ( $this->getCountry() == 'US' ) {
+				//Debug::Text('Country: '. $this->getCountry(), __FILE__, __LINE__, __METHOD__, 10);
+				//Debug::Text('Province: '. $this->getProvince(), __FILE__, __LINE__, __METHOD__, 10);
+				//if ( $this->getCountry() == 'CA' ) {
+				//} else
+				if ( $this->getCountry() == 'US' ) {
 					$state_options_var = strtolower('state_'. $this->getProvince() .'_filing_status_options');
-					//Debug::Text('Specific State Variable Name: '. $state_options_var, __FILE__, __LINE__, __METHOD__,10);
+					//Debug::Text('Specific State Variable Name: '. $state_options_var, __FILE__, __LINE__, __METHOD__, 10);
 					if ( isset( $this->$state_options_var ) ) {
-						//Debug::Text('Specific State Options: ', __FILE__, __LINE__, __METHOD__,10);
-						//$options = $this->$state_options_var;
+						//Debug::Text('Specific State Options: ', __FILE__, __LINE__, __METHOD__, 10);
 						$options = $this->getOptions($state_options_var);
 					} elseif ( $this->getProvince() == 'IL' ) {
 						$options = FALSE;
 					} else {
-						//Debug::Text('Default State Options: ', __FILE__, __LINE__, __METHOD__,10);
-						//$options = $this->state_filing_status_options;
+						//Debug::Text('Default State Options: ', __FILE__, __LINE__, __METHOD__, 10);
 						$options = $this->getOptions('state_filing_status');
 					}
 				}
@@ -2149,7 +2147,7 @@ class CompanyDeductionFactory extends Factory {
 
 	function getPayStubEntryAccount() {
 		if ( isset($this->data['pay_stub_entry_account_id']) ) {
-			return $this->data['pay_stub_entry_account_id'];
+			return (int)$this->data['pay_stub_entry_account_id'];
 		}
 
 		return FALSE;
@@ -2157,7 +2155,7 @@ class CompanyDeductionFactory extends Factory {
 	function setPayStubEntryAccount($id) {
 		$id = trim($id);
 
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 
 		if (
@@ -2182,7 +2180,7 @@ class CompanyDeductionFactory extends Factory {
 	function setLockUserValue1($bool) {
 		$this->data['lock_user_value1'] = $this->toBool($bool);
 
-		return true;
+		return TRUE;
 	}
 
 	function getLockUserValue2() {
@@ -2191,7 +2189,7 @@ class CompanyDeductionFactory extends Factory {
 	function setLockUserValue2($bool) {
 		$this->data['lock_user_value2'] = $this->toBool($bool);
 
-		return true;
+		return TRUE;
 	}
 
 	function getLockUserValue3() {
@@ -2200,7 +2198,7 @@ class CompanyDeductionFactory extends Factory {
 	function setLockUserValue3($bool) {
 		$this->data['lock_user_value3'] = $this->toBool($bool);
 
-		return true;
+		return TRUE;
 	}
 
 	function getLockUserValue4() {
@@ -2209,7 +2207,7 @@ class CompanyDeductionFactory extends Factory {
 	function setLockUserValue4($bool) {
 		$this->data['lock_user_value4'] = $this->toBool($bool);
 
-		return true;
+		return TRUE;
 	}
 
 	function getLockUserValue5() {
@@ -2218,7 +2216,7 @@ class CompanyDeductionFactory extends Factory {
 	function setLockUserValue5($bool) {
 		$this->data['lock_user_value5'] = $this->toBool($bool);
 
-		return true;
+		return TRUE;
 	}
 
 	function getLockUserValue6() {
@@ -2227,7 +2225,7 @@ class CompanyDeductionFactory extends Factory {
 	function setLockUserValue6($bool) {
 		$this->data['lock_user_value6'] = $this->toBool($bool);
 
-		return true;
+		return TRUE;
 	}
 
 	function getLockUserValue7() {
@@ -2236,7 +2234,7 @@ class CompanyDeductionFactory extends Factory {
 	function setLockUserValue7($bool) {
 		$this->data['lock_user_value7'] = $this->toBool($bool);
 
-		return true;
+		return TRUE;
 	}
 
 	function getLockUserValue8() {
@@ -2245,7 +2243,7 @@ class CompanyDeductionFactory extends Factory {
 	function setLockUserValue8($bool) {
 		$this->data['lock_user_value8'] = $this->toBool($bool);
 
-		return true;
+		return TRUE;
 	}
 
 	function getLockUserValue9() {
@@ -2254,7 +2252,7 @@ class CompanyDeductionFactory extends Factory {
 	function setLockUserValue9($bool) {
 		$this->data['lock_user_value9'] = $this->toBool($bool);
 
-		return true;
+		return TRUE;
 	}
 
 	function getLockUserValue10() {
@@ -2263,7 +2261,7 @@ class CompanyDeductionFactory extends Factory {
 	function setLockUserValue10($bool) {
 		$this->data['lock_user_value10'] = $this->toBool($bool);
 
-		return true;
+		return TRUE;
 	}
 
 	function getAccountAmountTypeMap( $id ) {
@@ -2277,7 +2275,7 @@ class CompanyDeductionFactory extends Factory {
 	}
 
 	function getAccountAmountTypePSEntriesMap( $id ) {
-		if ( isset( $this->account_amount_type_ps_entries_map [$id]) ) {
+		if ( isset( $this->account_amount_type_ps_entries_map[$id]) ) {
 			return $this->account_amount_type_ps_entries_map[$id];
 		}
 
@@ -2289,7 +2287,7 @@ class CompanyDeductionFactory extends Factory {
 
 	function getIncludeAccountAmountType() {
 		if ( isset($this->data['include_account_amount_type_id']) ) {
-			return $this->data['include_account_amount_type_id'];
+			return (int)$this->data['include_account_amount_type_id'];
 		}
 
 		return FALSE;
@@ -2323,9 +2321,7 @@ class CompanyDeductionFactory extends Factory {
 				$list[] = $obj->getPayStubEntryAccount();
 			}
 			$this->saveCache( $list, $cache_id);
-		} else {
-			//Debug::text('Reading Cached Include IDs: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
-		}
+		} //else { //Debug::text('Reading Cached Include IDs: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($list, 'Include IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( isset($list) AND is_array($list) ) {
@@ -2393,7 +2389,7 @@ class CompanyDeductionFactory extends Factory {
 
 	function getExcludeAccountAmountType() {
 		if ( isset($this->data['exclude_account_amount_type_id']) ) {
-			return $this->data['exclude_account_amount_type_id'];
+			return (int)$this->data['exclude_account_amount_type_id'];
 		}
 
 		return FALSE;
@@ -2428,9 +2424,7 @@ class CompanyDeductionFactory extends Factory {
 			}
 
 			$this->saveCache( $list, $cache_id);
-		} else {
-			//Debug::text('Reading Cached Exclude IDs: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
-		}
+		} //else { //Debug::text('Reading Cached Exclude IDs: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( isset($list) AND is_array($list) ) {
 			return $list;
@@ -2573,7 +2567,7 @@ class CompanyDeductionFactory extends Factory {
 	}
 
 	function getExpandedPayStubEntryAccountIDs( $ids ) {
-		//Debug::Arr($ids, 'Total Gross ID: '. $this->getPayStubEntryAccountLinkObject()->getTotalGross() .' IDs:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($ids, 'Total Gross ID: '. $this->getPayStubEntryAccountLinkObject()->getTotalGross() .' IDs:', __FILE__, __LINE__, __METHOD__, 10);
 		$ids = (array)$ids;
 
 		$total_gross_key = array_search( $this->getPayStubEntryAccountLinkObject()->getTotalGross(), $ids);
@@ -2601,7 +2595,7 @@ class CompanyDeductionFactory extends Factory {
 		$psea_ids_from_type_ids = array();
 		if ( isset($type_ids) ) {
 			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-			$psea_ids_from_type_ids = $psealf->getByCompanyIdAndStatusIdAndTypeIdArray( $this->getCompany(), array(10,20), $type_ids, FALSE );
+			$psea_ids_from_type_ids = $psealf->getByCompanyIdAndStatusIdAndTypeIdArray( $this->getCompany(), array(10, 20), $type_ids, FALSE );
 			if ( is_array( $psea_ids_from_type_ids ) ) {
 				$psea_ids_from_type_ids = array_keys( $psea_ids_from_type_ids );
 			}
@@ -2609,7 +2603,7 @@ class CompanyDeductionFactory extends Factory {
 
 		$retval = array_unique( array_merge( $ids, $psea_ids_from_type_ids ) );
 
-		//Debug::Arr($retval, 'Retval: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($retval, 'Retval: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 
 	}
@@ -2622,7 +2616,7 @@ class CompanyDeductionFactory extends Factory {
 
 		$retarr = array_diff( $ret_include_ids, $ret_exclude_ids );
 
-		//Debug::Arr($retarr, 'Retarr: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($retarr, 'Retarr: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $retarr;
 	}
 
@@ -2688,38 +2682,38 @@ class CompanyDeductionFactory extends Factory {
 		$include_ids = $this->getIncludePayStubEntryAccount();
 		$exclude_ids = $this->getExcludePayStubEntryAccount();
 
-        $is_included = FALSE;
-        $is_excluded = FALSE;
+		$is_included = FALSE;
+		$is_excluded = FALSE;
 
 		//This totals up the includes, and minuses the excludes.
-        if ( isset( $include_account_amount_type_id ) ) {
-            $include_account_amount_type = $include_account_amount_type_id;
-            $is_included = TRUE;
-        } else {
-            $include_account_amount_type = $this->getIncludeAccountAmountType();
-        }
+		if ( isset( $include_account_amount_type_id ) ) {
+			$include_account_amount_type = $include_account_amount_type_id;
+			$is_included = TRUE;
+		} else {
+			$include_account_amount_type = $this->getIncludeAccountAmountType();
+		}
 
-        if ( isset( $exclude_account_amount_type_id ) ) {
-            $exclude_account_amount_type = $exclude_account_amount_type_id;
-            $is_excluded = TRUE;
-        } else {
-            $exclude_account_amount_type = $this->getExcludeAccountAmountType();
-        }
+		if ( isset( $exclude_account_amount_type_id ) ) {
+			$exclude_account_amount_type = $exclude_account_amount_type_id;
+			$is_excluded = TRUE;
+		} else {
+			$exclude_account_amount_type = $this->getExcludeAccountAmountType();
+		}
 
 		$include = $this->getPayStubEntryAmountSum( $pay_stub_obj, $include_ids, $this->getAccountAmountTypePSEntriesMap( $include_account_amount_type ), $this->getAccountAmountTypeMap( $include_account_amount_type ) );
 		$exclude = $this->getPayStubEntryAmountSum( $pay_stub_obj, $exclude_ids, $this->getAccountAmountTypePSEntriesMap( $exclude_account_amount_type ), $this->getAccountAmountTypeMap( $exclude_account_amount_type ) );
 		Debug::text('Include Amount: '. $include .' Exclude Amount: '. $exclude, __FILE__, __LINE__, __METHOD__, 10);
 
 		//Allow negative values to be returned, as we need to do calculation on accruals and such that may be negative values.
-        if ( $is_included == TRUE AND $is_excluded == TRUE ) {
-            $amount = bcsub( $include, $exclude);
-        } elseif( $is_included == TRUE ) {
-            $amount = $include;
-        } elseif( $is_excluded == TRUE ) {
-            $amount = $exclude;
-        } else {
-            $amount = bcsub( $include, $exclude);
-        }
+		if ( $is_included == TRUE AND $is_excluded == TRUE ) {
+			$amount = bcsub( $include, $exclude);
+		} elseif( $is_included == TRUE ) {
+			$amount = $include;
+		} elseif( $is_excluded == TRUE ) {
+			$amount = $exclude;
+		} else {
+			$amount = bcsub( $include, $exclude);
+		}
 
 		Debug::text('Amount: '. $amount, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -2742,22 +2736,23 @@ class CompanyDeductionFactory extends Factory {
 		return $amount;
 	}
 
-	//Handle look back period, which is always based on the transaction date *before* the current pay periods transaction date. 
+	//Handle look back period, which is always based on the transaction date *before* the current pay periods transaction date.
 	function getLookbackStartAndEndDates( $pay_period_obj ) {
 		$retarr = array(
 						'start_date' => FALSE,
 						//Make sure we don't include the current transaction date, as we can always access the current amounts with other variables.
-						'end_date' => TTDate::getEndDayEpoch( (int)$pay_period_obj->getTransactionDate()-86400 ),
+						'end_date' => TTDate::getEndDayEpoch( ((int)$pay_period_obj->getTransactionDate() - 86400) ),
 						);
 		if ( $this->getCompanyValue3() == 100 ) { //Pay Periods
 			//Not implemented for now, as it has many issues, things like gaps between pay periods, employees switching between pay period schedules, etc...
 			//We could just count the number of pay stubs, but this has issues with employees leaving and returning and such.
+			unset( $pay_period_obj ); //Satisfy Coding Standards
 		} else {
 			$length_of_service_days = bcmul( (float)$this->getCompanyValue2(), $this->length_of_service_multiplier[(int)$this->getCompanyValue3()], 4);
-			$retarr['start_date'] = TTDate::getBeginDayEpoch( (int)$pay_period_obj->getTransactionDate()-($length_of_service_days*86400) );
+			$retarr['start_date'] = TTDate::getBeginDayEpoch( ( (int)$pay_period_obj->getTransactionDate() - ($length_of_service_days * 86400) ) );
 		}
 
-		Debug::text('Start Date: '. TTDate::getDate('DATE+TIME', $retarr['start_date'] ) .' End Date: '. TTDate::getDate('DATE+TIME', $retarr['end_date'] ) , __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Start Date: '. TTDate::getDate('DATE+TIME', $retarr['start_date'] ) .' End Date: '. TTDate::getDate('DATE+TIME', $retarr['end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
 		return $retarr;
 	}
 	
@@ -2780,7 +2775,7 @@ class CompanyDeductionFactory extends Factory {
 			$retarr['last_pay_stub_transaction_date'] = $this->lookback_pay_stub_lf->getCurrent()->getTransactionDate();
 
 			$retarr['total_pay_stubs'] = $this->lookback_pay_stub_lf->getRecordCount();
-			Debug::text('Total Pay Stubs: '. $retarr['total_pay_stubs'] .' First Transaction Date: '. TTDate::getDate('DATE+TIME', $retarr['first_pay_stub_transaction_date'] ) .' Last Transaction Date: '. TTDate::getDate('DATE+TIME', $retarr['last_pay_stub_transaction_date'] ) , __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text('Total Pay Stubs: '. $retarr['total_pay_stubs'] .' First Transaction Date: '. TTDate::getDate('DATE+TIME', $retarr['first_pay_stub_transaction_date'] ) .' Last Transaction Date: '. TTDate::getDate('DATE+TIME', $retarr['last_pay_stub_transaction_date'] ), __FILE__, __LINE__, __METHOD__, 10);
 
 			$this->lookback_pay_stub_lf->rs->MoveFirst();
 		} else {
@@ -2834,1968 +2829,21 @@ class CompanyDeductionFactory extends Factory {
 		return FALSE;
 	}
 
-	static function addPresets($company_id) {
-		if ( $company_id == '' ) {
-			Debug::text('Company ID: '. $company_id , __FILE__, __LINE__, __METHOD__, 10);
-			return FALSE;
-		}
-
-		$clf = TTnew( 'CompanyListFactory' );
-		$clf->getById( $company_id );
-		if ( $clf->getRecordCount() > 0 ) {
-			$company_obj = $clf->getCurrent();
-			$country = $company_obj->getCountry();
-			$province = $company_obj->getProvince();
-		} else {
-			Debug::text('bCompany ID: '. $company_id , __FILE__, __LINE__, __METHOD__, 10);
-			return FALSE;
-		}
-
-		//Get PayStub Link accounts
-		$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
-		$pseallf->getByCompanyId( $company_id );
-		if  ( $pseallf->getRecordCount() > 0 ) {
-			$psea_obj = $pseallf->getCurrent();
-		} else {
-			Debug::text('cCompany ID: '. $company_id , __FILE__, __LINE__, __METHOD__, 10);
-			return FALSE;
-		}
-
-		require_once( Environment::getBasePath().'/classes/payroll_deduction/PayrollDeduction.class.php');
-		$cdf = TTnew( 'CompanyDeductionFactory' );
-		$cdf->StartTransaction();
-
-		/*
-										10 => 'Percent',
-										15 => 'Advanced Percent',
-										20 => 'Fixed Amount',
-
-										//Federal
-										100 => 'Federal Income Tax Formula',
-
-										//Province/State
-										200 => 'Province/State Income Tax Formula',
-										210 => 'Province/State UI Formula',
-		*/
-
-		Debug::text('Country: '. $country , __FILE__, __LINE__, __METHOD__, 10);
-		switch (strtolower($country)) {
-			case 'ca':
-				$pd_obj = new PayrollDeduction( $country, 'BC' ); //Pick default province for now.
-				$pd_obj->setDate( time() );
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( 'Federal Income Tax' );
-				$cdf->setCalculation( 100 );
-				$cdf->setCalculationOrder( 100 );
-				$cdf->setCountry( 'CA' );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 20, '%Federal Income%') );
-				$cdf->setUserValue1( $pd_obj->getBasicFederalClaimCodeAmount() );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$exclude_ids = array(
-										self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 20, 'Union'),
-										);
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-					//var_dump($exclude_ids);
-					$cdf->setExcludePayStubEntryAccount( $exclude_ids );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( 'Additional Income Tax' );
-				$cdf->setCalculation( 20 );
-				$cdf->setCalculationOrder( 105 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 20, '%Additional Income Tax%') );
-				$cdf->setUserValue1( 0 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( 'CPP - Employee' );
-				$cdf->setCalculation( 90 ); // CPP Formula
-				$cdf->setMinimumUserAge( 18 );
-				$cdf->setMaximumUserAge( 70 );
-
-				$cdf->setCalculationOrder( 80 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 20, 'CPP') );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ));
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( 'CPP - Employer' );
-				$cdf->setCalculation( 10 );
-				$cdf->setCalculationOrder( 85 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 30, '%CPP - Employer%') );
-				$cdf->setUserValue1( 100 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 20, 'CPP') ) );
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( 'EI - Employee' );
-				$cdf->setCalculation( 91 ); //EI Formula
-				$cdf->setCalculationOrder( 90 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 20, 'EI') );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( 'EI - Employer' );
-				$cdf->setCalculation( 10 );
-				$cdf->setCalculationOrder( 95 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 30, '%EI - Employer%') );
-				$cdf->setUserValue1( 140 ); //2006
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 20, 'EI') ) );
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( 'WCB - Employer' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 95 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 30, '%WCB%') );
-				$cdf->setUserValue1( 0.00 ); //Default
-				$cdf->setUserValue2( 0 ); //Annual Wage Base: WCB has this, but can differ between rates/classifications.
-				$cdf->setUserValue3( 0 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 20 ); //Deduction
-				$cdf->setName( 'Vacation Accrual' );
-				$cdf->setCalculation( 10 );
-				$cdf->setCalculationOrder( 50 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 50, 'Vacation Accrual') );
-				$cdf->setUserValue1( 4 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-					$exclude_ids = array(
-										self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Vacation Accrual Release'),
-										self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Vacation Time'),
-										);
-					$cdf->setExcludePayStubEntryAccount( $exclude_ids );
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 20 ); //Deduction
-				$cdf->setName( 'Vacation Release' );
-				$cdf->setCalculation( 10 );
-				$cdf->setCalculationOrder( 51 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Vacation Accrual Release') );
-				$cdf->setUserValue1( 4 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-					$exclude_ids = array(
-										self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Vacation Accrual Release'),
-										self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 10, 'Vacation Time'),
-										);
-					$cdf->setExcludePayStubEntryAccount( $exclude_ids );
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				break;
-			case 'us':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( 'Federal Income Tax' );
-				$cdf->setCalculation( 100 );
-				$cdf->setCalculationOrder( 100 );
-				$cdf->setCountry( 'US' );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 20, '%Federal Income%') );
-				$cdf->setUserValue1( 10 ); //Single
-				$cdf->setUserValue2( 1 ); //0 Allowances
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				/*
-				//Repealed as of 31-Dec-2010.
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( 'Advance Earned Income Credit (EIC)' );
-				$cdf->setCalculation( 80 );
-				$cdf->setCalculationOrder( 105 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 20, '%Advance EIC%') );
-				$cdf->setUserValue1( 10 ); //Single
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				*/
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( 'Federal Unemployment Insurance - Employer' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 80 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 30, 'Fed. Unemployment Ins.') );
-				$cdf->setUserValue1( 0.80 ); //2009
-				$cdf->setUserValue2( 7000 );
-				$cdf->setUserValue3( 0 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ));
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( 'Social Security - Employee' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 80 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 20, 'Social Security (FICA)') );
-				$cdf->setUserValue1( 4.2 ); //2012, differ from employer rate.
-				$cdf->setUserValue2( 110100 );
-				$cdf->setUserValue3( 0 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ));
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( 'Social Security - Employer' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 85 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 30, 'Social Security%') );
-				$cdf->setUserValue1( 6.2 ); //2012, differ from employee rate.
-				$cdf->setUserValue2( 110100 );
-				$cdf->setUserValue3( 0 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ));
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( 'Medicare - Employee' );
-				$cdf->setCalculation( 10 );
-				$cdf->setCalculationOrder( 90 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 20, 'Medicare') );
-				$cdf->setUserValue1( 1.45 ); //2009
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ));
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( 'Medicare - Employer' );
-				$cdf->setCalculation( 10 );
-				$cdf->setCalculationOrder( 95 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 30, 'Medicare') );
-				$cdf->setUserValue1( 100 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					//$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ));
-					$cdf->setIncludePayStubEntryAccount( array( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 20, 'Medicare') ) );
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				break;
-			case 'cr':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( TTi18n::gettext('Income Tax') );
-				$cdf->setCalculation( 100 );
-				$cdf->setCalculationOrder( 100 );
-				$cdf->setCountry( 'CR' );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 20, '%Federal Income%') );
-				$cdf->setUserValue1( 10 ); //Single
-				$cdf->setUserValue2( 0 ); //0 Allowances
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-				   		$cdf->Save();
-					}
-				}
-
-				break;
-		}
-
-		$pd_obj = new PayrollDeduction( $country, $province );
-		$pd_obj->setDate( time() );
-
-		Debug::text('Province/State: '. $province , __FILE__, __LINE__, __METHOD__, 10);
-		switch (strtolower($province)) {
-			//Canada
-			case 'ab':
-			case 'bc':
-			case 'sk':
-			case 'mb':
-			case 'qc':
-			case 'on':
-			case 'nl':
-			case 'nb':
-			case 'ns':
-			case 'pe':
-			case 'nt':
-			case 'yt':
-			case 'nu':
-				$provincial_claim_amount = $pd_obj->getBasicProvinceClaimCodeAmount();
-				break;
-
-			//US
-			case 'al':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 8000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'ak':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance - Employer' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 34600 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance - Employee' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 20, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 34600 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'ar':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 12000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'az':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 7000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Job Training' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Employee Training') );
-				$cdf->setUserValue1( 0.10 ); //2011
-				$cdf->setUserValue2( 7000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				break;
-			case 'ca':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Disability Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 180 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 20, 'State Disability Ins.') );
-				$cdf->setUserValue1( 1.20 ); //2011
-				$cdf->setUserValue2( 93316 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0 ); //2011
-				$cdf->setUserValue2( 7000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Employee Training' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Employee Training') );
-				$cdf->setUserValue1( 0.10 ); //2011
-				$cdf->setUserValue2( 7000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'co':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 10000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'ct':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 15000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'dc':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 9000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'de':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 10500 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'fl':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 7000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'ga':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 8500 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'hi':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 34200 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'ia':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 24700 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'id':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 33300 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'il':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins. - Employer') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 12740 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'in':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 9500 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'ks':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 8000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'ky':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 8000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'la':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 7700 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'ma':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 14000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'md':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 8500 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'me':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 12000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'mi':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 9000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'mn':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 27000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'mo':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 13000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'ms':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 14000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'mt':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 26300 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'nc':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 19700 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'nd':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 25500 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-
-			case 'nh':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 12000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'ne':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 9000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'nj':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance: Employee' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 20, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 29600 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance: Company' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 29600 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'nm':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 21900 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'nv':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 26600 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'ny':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0 ); //2011
-				$cdf->setUserValue2( 8500 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Reemployment Service Fund' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Reemployment') );
-				$cdf->setUserValue1( 0.075 ); //2011
-				$cdf->setUserValue2( 8500 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Disability Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 180 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 20, 'State Disability Ins.') );
-				$cdf->setUserValue1( 0.50 ); //2011
-				$cdf->setUserValue2( 6240 ); //Max $0.60/week
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				break;
-			case 'oh':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 9000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'ok':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 18600 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'or':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Insurance') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 32300 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'pa':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 8000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'ri':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Employment Security' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 19000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'sc':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 10000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'sd':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 11000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'tn':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 9000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'tx':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0 ); //2011
-				$cdf->setUserValue2( 9000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Employee Training' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Employee Training') );
-				$cdf->setUserValue1( 0.10 ); //2011
-				$cdf->setUserValue2( 9000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'ut':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 28600 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'va':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 8000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'vt':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 13000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-
-			case 'wa':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 37300 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'wi':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 13000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'wv':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 12000 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-			case 'wy':
-				$cdf = TTnew( 'CompanyDeductionFactory' );
-				$cdf->setCompany( $company_id );
-				$cdf->setStatus( 10 ); //Enabled
-				$cdf->setType( 10 ); //Tax
-				$cdf->setName( strtoupper($province).' - Unemployment Insurance' );
-				$cdf->setCalculation( 15 );
-				$cdf->setCalculationOrder( 185 );
-				$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 30, 'State Unemployment Ins.') );
-				$cdf->setUserValue1( 0.00 ); //2011
-				$cdf->setUserValue2( 22300 );
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save(FALSE);
-
-					$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-					unset($exclude_ids);
-
-					if ( $cdf->isValid() ) {
-						$cdf->Save();
-					}
-				}
-				break;
-
-		}
-
-		if ( $country == 'CA' ) {
-			$cdf = TTnew( 'CompanyDeductionFactory' );
-			$cdf->setCompany( $company_id );
-			$cdf->setStatus( 10 ); //Enabled
-			$cdf->setType( 10 ); //Tax
-			$cdf->setName( strtoupper($province) .' - Provincial Income Tax' );
-			$cdf->setCalculation( 200 );
-			$cdf->setCalculationOrder( 110 );
-			$cdf->setCountry( 'CA' );
-			$cdf->setProvince( strtoupper($province) );
-			$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 20, '%Provincial Income%') );
-			$cdf->setUserValue1( $provincial_claim_amount );
-
-			if ( $cdf->isValid() ) {
-				$cdf->Save(FALSE);
-
-				$exclude_ids = array(
-									//Not proper way to do it with CPP/EI
-									//self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 'CPP'),
-									//self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 'EI'),
-									self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($company_id, 20, 'Union'),
-									);
-				$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-				$cdf->setExcludePayStubEntryAccount( $exclude_ids );
-
-				unset($exclude_ids);
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save();
-				}
-			}
-		} elseif ( $country == 'US' ) {
-			$cdf = TTnew( 'CompanyDeductionFactory' );
-			$cdf->setCompany( $company_id );
-			$cdf->setStatus( 10 ); //Enabled
-			$cdf->setType( 10 ); //Tax
-			$cdf->setName( 'State Income Tax' );
-			$cdf->setCalculation( 200 );
-			$cdf->setCalculationOrder( 200 );
-			$cdf->setCountry( 'US' );
-			$cdf->setProvince( strtoupper($province) );
-			$cdf->setPayStubEntryAccount( self::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( $company_id, 20, '%State Income%') );
-
-			//FIXME: Not all states are the same. Need to customize UserValues for each one.
-			$cdf->setUserValue1( 10 ); //Single
-			$cdf->setUserValue2( 1 ); //0 Allowances
-
-			if ( $cdf->isValid() ) {
-				$cdf->Save(FALSE);
-
-				$cdf->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ) );
-
-				unset($exclude_ids);
-
-				if ( $cdf->isValid() ) {
-					$cdf->Save();
-				}
+	function Validate() {
+		if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL AND $this->getCalculation() == 69 ) {
+			$valid_formula = TTMath::ValidateFormula( TTMath::translateVariables( $this->getCompanyValue1(), TTMath::clearVariables( Misc::trimSortPrefix( $this->getOptions('formula_variables') ) ) ) );
+
+			if ( $valid_formula != FALSE ) {
+				$this->Validator->isTrue(	'company_value1',
+											FALSE,
+											implode("\n", $valid_formula) );
 			}
 		}
-
-		$cdf->CommitTransaction();
-		//$cdf->FailTransaction();
 
 		return TRUE;
 	}
 
-
-    function Validate() {
-
-        if ( $this->getCalculation() == 69 ) {
-            
-            $valid_formula = TTMath::ValidateFormula( TTMath::translateVariables( $this->getCompanyValue1(), TTMath::clearVariables( Misc::trimSortPrefix( $this->getOptions('formula_variables') ) ) ) ); 
-
-            if ( $valid_formula != FALSE ) {
-                $this->Validator->isTrue(	'company_value1',
-											FALSE,
-											implode("\n", $valid_formula) );
-            }
-
-        }
-
-        return TRUE;
-
-	}
-
-
 	function preSave() {
-
 		//Set Length of service in days.
 		$this->setMinimumLengthOfServiceDays( $this->getMinimumLengthOfService() );
 		$this->setMaximumLengthOfServiceDays( $this->getMaximumLengthOfService() );
@@ -4901,7 +2949,7 @@ class CompanyDeductionFactory extends Factory {
 	}
 
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action,  TTi18n::getText('Tax / Deduction'), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Tax / Deduction'), NULL, $this->getTable(), $this );
 	}
 }
 ?>

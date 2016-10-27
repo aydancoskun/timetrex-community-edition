@@ -96,8 +96,8 @@ class APITimeSheet extends APIFactory {
 
 		$profile_start = microtime(TRUE);
 
-		if ( !$this->getPermissionObject()->Check('punch','enabled')
-				OR !( $this->getPermissionObject()->Check('punch','view') OR $this->getPermissionObject()->Check('punch','view_child') OR $this->getPermissionObject()->Check('punch','view_own')  ) ) {
+		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
+				OR !( $this->getPermissionObject()->Check('punch', 'view') OR $this->getPermissionObject()->Check('punch', 'view_child') OR $this->getPermissionObject()->Check('punch', 'view_own')  ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
@@ -363,7 +363,7 @@ class APITimeSheet extends APIFactory {
 		//
 		$holiday_data = array();
 		$hlf = TTnew( 'HolidayListFactory' );
-		$hlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), array( 'start_date' => $timesheet_dates['start_date'], 'end_date' => $timesheet_dates['end_date'], 'user_id' => $user_id ) , $filter_data['filter_items_per_page'], $filter_data['filter_page'], NULL, $filter_data['filter_sort'] );
+		$hlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), array( 'start_date' => $timesheet_dates['start_date'], 'end_date' => $timesheet_dates['end_date'], 'user_id' => $user_id ), $filter_data['filter_items_per_page'], $filter_data['filter_page'], NULL, $filter_data['filter_sort'] );
 		Debug::Text('Holiday Record Count: '. $hlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $hlf->getRecordCount() > 0 ) {
 			foreach( $hlf as $h_obj ) {
@@ -392,8 +392,8 @@ class APITimeSheet extends APIFactory {
 						'timesheet_verify_data' => $timesheet_verify_data,
 						);
 
-		//Debug::Arr($retarr, 'TimeSheet Data: ', __FILE__, __LINE__, __METHOD__,10);
-		Debug::Text('TimeSheet Data: User ID:'. $user_id .' Base Date: '. $base_date .' in: '. (microtime(TRUE)-$profile_start) .'s', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($retarr, 'TimeSheet Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('TimeSheet Data: User ID:'. $user_id .' Base Date: '. $base_date .' in: '. (microtime(TRUE) - $profile_start) .'s', __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this->returnHandler( $retarr );
 	}
@@ -417,7 +417,7 @@ class APITimeSheet extends APIFactory {
 
 		}
 
-		//Debug::Arr($retarr, 'TimeSheet Total Data: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($retarr, 'TimeSheet Total Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this->returnHandler( $retarr );
 	}
@@ -427,12 +427,12 @@ class APITimeSheet extends APIFactory {
 	 * @return bool
 	 */
 	function reCalculateTimeSheet( $pay_period_ids, $user_ids = NULL ) {
-		//Debug::text('Recalculating Employee Timesheet: User ID: '. $user_ids .' Pay Period ID: '. $pay_period_ids, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::text('Recalculating Employee Timesheet: User ID: '. $user_ids .' Pay Period ID: '. $pay_period_ids, __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::setVerbosity(11);
 
-		if ( !$this->getPermissionObject()->Check('punch','enabled')
-				OR !( $this->getPermissionObject()->Check('punch','edit') OR $this->getPermissionObject()->Check('punch','edit_child') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
+				OR !( $this->getPermissionObject()->Check('punch', 'edit') OR $this->getPermissionObject()->Check('punch', 'edit_child') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		//Make sure pay period is not CLOSED.
@@ -448,7 +448,7 @@ class APITimeSheet extends APIFactory {
 				if ( is_array($user_ids) AND count($user_ids) > 0
 						AND isset($user_ids[0]) AND $user_ids[0] > 0 ) {
 					$udlf->getByUserIdAndPayPeriodID( $user_ids, $pay_period_ids );
-				} elseif ( $this->getPermissionObject()->Check('punch','edit') == TRUE ) { //Make sure they have the permissions to recalculate all employees.
+				} elseif ( $this->getPermissionObject()->Check('punch', 'edit') == TRUE ) { //Make sure they have the permissions to recalculate all employees.
 					TTLog::addEntry( $this->getCurrentCompanyObject()->getId(), TTi18n::gettext('Notice'), TTi18n::gettext('Recalculating Company TimeSheet'), $this->getCurrentUserObject()->getId(), 'user_date_total' );
 					$udlf->getByCompanyIdAndPayPeriodID( $this->getCurrentCompanyObject()->getId(), $pay_period_ids );
 				} else {
@@ -456,18 +456,18 @@ class APITimeSheet extends APIFactory {
 				}
 
 				if ( $udlf->getRecordCount() > 0 ) {
-					Debug::text('Found days to re-calculate: '.$udlf->getRecordCount() , __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text('Found days to re-calculate: '.$udlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
 					$this->getProgressBarObject()->start( $this->getAMFMessageID(), $udlf->getRecordCount(), NULL, TTi18n::getText('ReCalculating...') );
 
-					$x=1;
+					$x = 1;
 					$prev_date_stamp = FALSE;
 					foreach($udlf as $ud_obj ) {
-						Debug::text($x .' / '. $udlf->getRecordCount() .' - User Date Id: '. $ud_obj->getId() .' Date: '.$ud_obj->getDateStamp(TRUE) .' User ID: '. $ud_obj->getUser() , __FILE__, __LINE__, __METHOD__, 10);
-						if ( $prev_date_stamp != FALSE AND abs( $ud_obj->getDateStamp()-$prev_date_stamp ) > 86400 ) {
-							Debug::text('Found gap between user_date rows! - User Date Id: '. $ud_obj->getId() .' Date: '.$ud_obj->getDateStamp(TRUE) .' Previous Date: '. TTDate::getDate('DATE', $prev_date_stamp ) .' User ID: '. $ud_obj->getUser() , __FILE__, __LINE__, __METHOD__, 10);
-							for( $n=$prev_date_stamp; $n < $ud_obj->getDateStamp(); $n += 86400 ) {
-								$tmp_user_date_id = UserDateFactory::findOrInsertUserDate( $ud_obj->getUser(),  TTDate::getBeginDayEpoch( $n ) );
+						Debug::text($x .' / '. $udlf->getRecordCount() .' - User Date Id: '. $ud_obj->getId() .' Date: '.$ud_obj->getDateStamp(TRUE) .' User ID: '. $ud_obj->getUser(), __FILE__, __LINE__, __METHOD__, 10);
+						if ( $prev_date_stamp != FALSE AND abs( $ud_obj->getDateStamp() - $prev_date_stamp ) > 86400 ) {
+							Debug::text('Found gap between user_date rows! - User Date Id: '. $ud_obj->getId() .' Date: '.$ud_obj->getDateStamp(TRUE) .' Previous Date: '. TTDate::getDate('DATE', $prev_date_stamp ) .' User ID: '. $ud_obj->getUser(), __FILE__, __LINE__, __METHOD__, 10);
+							for( $n = $prev_date_stamp; $n < $ud_obj->getDateStamp(); $n += 86400 ) {
+								$tmp_user_date_id = UserDateFactory::findOrInsertUserDate( $ud_obj->getUser(), TTDate::getBeginDayEpoch( $n ) );
 								Debug::text('Filling gap in user_date rows! - Date: '. TTDate::getDate('DATE', $n ) .' User ID: '. $ud_obj->getUser() .' New User Date ID: '. $tmp_user_date_id, __FILE__, __LINE__, __METHOD__, 10);
 								UserDateTotalFactory::reCalculateDay( $tmp_user_date_id, TRUE );
 							}
@@ -507,16 +507,16 @@ class APITimeSheet extends APIFactory {
 	 */
 	function verifyTimeSheet( $user_id, $pay_period_id ) {
 		if ( $user_id > 0 AND $pay_period_id > 0  ) {
-			Debug::text('Verifying Pay Period TimeSheet ', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Verifying Pay Period TimeSheet ', __FILE__, __LINE__, __METHOD__, 10);
 
 			$pptsvlf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' );
 			$pptsvlf->StartTransaction();
 			$pptsvlf->getByPayPeriodIdAndUserId( $pay_period_id, $user_id );
 			if ( $pptsvlf->getRecordCount() == 0 ) {
-				Debug::text('Timesheet NOT verified by employee yet.', __FILE__, __LINE__, __METHOD__,10);
+				Debug::text('Timesheet NOT verified by employee yet.', __FILE__, __LINE__, __METHOD__, 10);
 				$pptsvf = TTnew( 'PayPeriodTimeSheetVerifyFactory' );
 			} else {
-				Debug::text('Timesheet re-verified by employee, or superior...', __FILE__, __LINE__, __METHOD__,10);
+				Debug::text('Timesheet re-verified by employee, or superior...', __FILE__, __LINE__, __METHOD__, 10);
 				$pptsvf = $pptsvlf->getCurrent();
 			}
 

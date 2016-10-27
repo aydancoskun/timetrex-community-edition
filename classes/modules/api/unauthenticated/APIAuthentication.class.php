@@ -125,9 +125,9 @@ class APIAuthentication extends APIFactory {
 		if ( is_object($authentication) AND $authentication->getSessionID() != '' ) {
 			Debug::text('Session ID: '. $authentication->getSessionID(), __FILE__, __LINE__, __METHOD__, 10);
 
-			if ( $this->getPermissionObject()->Check('company','view') AND $this->getPermissionObject()->Check('company','login_other_user') ) {
+			if ( $this->getPermissionObject()->Check('company', 'view') AND $this->getPermissionObject()->Check('company', 'login_other_user') ) {
 				if ( !is_numeric( $user_id ) ) { //If username is used, lookup user_id
-					Debug::Text('Lookup User ID by UserName: '. $user_id, __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Lookup User ID by UserName: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 					$ulf = TTnew( 'UserListFactory' );
 					$ulf->getByUserName( trim($user_id) );
 					if ( $ulf->getRecordCount() == 1 ) {
@@ -140,7 +140,7 @@ class APIAuthentication extends APIFactory {
 				if ( $ulf->getRecordCount() == 1 ) {
 					$new_session_user_obj = $ulf->getCurrent();
 
-					Debug::Text('Login as different user: '. $user_id .' IP Address: '. $ip_address, __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Login as different user: '. $user_id .' IP Address: '. $ip_address, __FILE__, __LINE__, __METHOD__, 10);
 					$new_session_id = $authentication->newSession( $user_id, $ip_address );
 
 					$retarr = array(
@@ -150,10 +150,10 @@ class APIAuthentication extends APIFactory {
 
 					//Add entry in source *AND* destination user log describing who logged in.
 					//Source user log, showing that the source user logged in as someone else.
-					TTLog::addEntry( $this->getCurrentUserObject()->getId(), 'Login',  TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.  TTi18n::getText('To Employee').': '. $new_session_user_obj->getFullName() .'('.$user_id.')', $this->getCurrentUserObject()->getId(), 'authentication');
+					TTLog::addEntry( $this->getCurrentUserObject()->getId(), 'Login', TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.	TTi18n::getText('To Employee').': '. $new_session_user_obj->getFullName() .'('.$user_id.')', $this->getCurrentUserObject()->getId(), 'authentication');
 
 					//Destination user log, showing the destination user was logged in *by* someone else.
-					TTLog::addEntry( $user_id, 'Login',  TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.  TTi18n::getText('By Employee').': '. $this->getCurrentUserObject()->getFullName() .'('.$user_id.')', $user_id, 'authentication');
+					TTLog::addEntry( $user_id, 'Login', TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.  TTi18n::getText('By Employee').': '. $this->getCurrentUserObject()->getFullName() .'('.$user_id.')', $user_id, 'authentication');
 
 					return $this->returnHandler( $retarr );
 				}
@@ -170,9 +170,9 @@ class APIAuthentication extends APIFactory {
 		if ( is_object($authentication) AND $authentication->getSessionID() != '' ) {
 			Debug::text('Session ID: '. $authentication->getSessionID(), __FILE__, __LINE__, __METHOD__, 10);
 
-			if ( $this->getPermissionObject()->Check('company','view') AND $this->getPermissionObject()->Check('company','login_other_user') ) {
+			if ( $this->getPermissionObject()->Check('company', 'view') AND $this->getPermissionObject()->Check('company', 'login_other_user') ) {
 				if ( !is_numeric( $user_id ) ) { //If username is used, lookup user_id
-					Debug::Text('Lookup User ID by UserName: '. $user_id, __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Lookup User ID by UserName: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 					$ulf = TTnew( 'UserListFactory' );
 					$ulf->getByUserName( trim($user_id) );
 					if ( $ulf->getRecordCount() == 1 ) {
@@ -183,19 +183,19 @@ class APIAuthentication extends APIFactory {
 				$ulf = TTnew( 'UserListFactory' );
 				$ulf->getByIdAndStatus( (int)$user_id, 10 );  //Can only switch to Active employees
 				if ( $ulf->getRecordCount() == 1 ) {
-					Debug::Text('Login as different user: '. $user_id, __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Login as different user: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 					$authentication->changeObject( $user_id );
 
 					//Add entry in source *AND* destination user log describing who logged in.
 					//Source user log, showing that the source user logged in as someone else.
-					TTLog::addEntry( $this->getCurrentUserObject()->getId(), 'Login',  TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.  TTi18n::getText('To Employee').': '. $authentication->getObject()->getFullName() .'('.$user_id.')', $this->getCurrentUserObject()->getId(), 'authentication');
+					TTLog::addEntry( $this->getCurrentUserObject()->getId(), 'Login', TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.	TTi18n::getText('To Employee').': '. $authentication->getObject()->getFullName() .'('.$user_id.')', $this->getCurrentUserObject()->getId(), 'authentication');
 
 					//Destination user log, showing the destination user was logged in *by* someone else.
-					TTLog::addEntry( $user_id, 'Login',  TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.  TTi18n::getText('By Employee').': '. $this->getCurrentUserObject()->getFullName() .'('.$user_id.')', $user_id, 'authentication');
+					TTLog::addEntry( $user_id, 'Login', TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.  TTi18n::getText('By Employee').': '. $this->getCurrentUserObject()->getFullName() .'('.$user_id.')', $user_id, 'authentication');
 
 					return TRUE;
 				} else {
-					Debug::Text('User is likely not active: '. $user_id, __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('User is likely not active: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 				}
 			}
 		}
@@ -396,6 +396,7 @@ class APIAuthentication extends APIFactory {
 				'analytics_enabled' => $this->isAnalyticsEnabled(),
 				'registration_key' => $this->getRegistrationKey(),
 				'http_host' => $this->getHTTPHost(),
+				'is_ssl' => Misc::isSSL(),
 				'application_version' => $this->getApplicationVersion(),
 				'is_logged_in' => $this->isLoggedIn(),
 				'language_options' => Misc::addSortPrefix( TTi18n::getLanguageArray() ),
@@ -432,13 +433,13 @@ class APIAuthentication extends APIFactory {
 
 					if ( $current_password != '' ) {
 						if ( $u_obj->checkPassword($current_password, FALSE) !== TRUE ) { //Disable password policy checking on current password.
-							Debug::Text('Password check failed!', __FILE__, __LINE__, __METHOD__,10);
+							Debug::Text('Password check failed!', __FILE__, __LINE__, __METHOD__, 10);
 							$u_obj->Validator->isTrue(	'current_password',
 													FALSE,
 													TTi18n::gettext('Current password is incorrect') );
 						}
 					} else {
-						Debug::Text('Current password not specified', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Current password not specified', __FILE__, __LINE__, __METHOD__, 10);
 						$u_obj->Validator->isTrue(	'current_password',
 												FALSE,
 												TTi18n::gettext('Current password is incorrect') );

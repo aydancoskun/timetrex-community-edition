@@ -58,8 +58,8 @@ class APILog extends APIFactory {
 	 */
 	function getLog( $data = NULL, $disable_paging = FALSE ) {
 		/*
-		if ( !$this->getPermissionObject()->Check('log','enabled')
-				OR !( $this->getPermissionObject()->Check('log','view') OR $this->getPermissionObject()->Check('log','view_child')  ) ) {
+		if ( !$this->getPermissionObject()->Check('log', 'enabled')
+				OR !( $this->getPermissionObject()->Check('log', 'view') OR $this->getPermissionObject()->Check('log', 'view_child')  ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 		*/

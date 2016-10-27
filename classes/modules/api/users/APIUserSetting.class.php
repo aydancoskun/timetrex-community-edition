@@ -50,25 +50,25 @@ class APIUserSetting extends APIFactory {
 
 		return TRUE;
 	}
-    
-    function getUserSetting( $name ) {
-        $retarr = UserSettingFactory::getUserSetting( $this->getCurrentUserObject()->getId(), $name );
-        if ( $retarr == TRUE ) {
-            return $this->returnHandler( $retarr );
-        }
-        
-        return $this->returnHandler( TRUE);
-    }
-    
-    function setUserSetting( $name, $value, $type_id = 10 ) {
-        $retval = UserSettingFactory::setUserSetting( $this->getCurrentUserObject()->getId(), $name, $value, $type_id );
-        return $this->returnHandler($retval);
-    }
-    
-    function deleteUserSetting( $name ) {
-        $retval = UserSettingFactory::deleteUserSetting( $this->getCurrentUserObject()->getId(), $name );
-        return $this->returnHandler($retval);
-    }
+	
+	function getUserSetting( $name ) {
+		$retarr = UserSettingFactory::getUserSetting( $this->getCurrentUserObject()->getId(), $name );
+		if ( $retarr == TRUE ) {
+			return $this->returnHandler( $retarr );
+		}
+		
+		return $this->returnHandler( TRUE);
+	}
+	
+	function setUserSetting( $name, $value, $type_id = 10 ) {
+		$retval = UserSettingFactory::setUserSetting( $this->getCurrentUserObject()->getId(), $name, $value, $type_id );
+		return $this->returnHandler($retval);
+	}
+	
+	function deleteUserSetting( $name ) {
+		$retval = UserSettingFactory::deleteUserSetting( $this->getCurrentUserObject()->getId(), $name );
+		return $this->returnHandler($retval);
+	}
 
 }
 ?>

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: PolicyGroupRoundIntervalPolicyListFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11830 $
+ * $Id: PolicyGroupRoundIntervalPolicyListFactory.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -46,7 +46,7 @@ class PolicyGroupRoundIntervalPolicyListFactory extends PolicyGroupRoundInterval
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable();
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -66,7 +66,7 @@ class PolicyGroupRoundIntervalPolicyListFactory extends PolicyGroupRoundInterval
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 					';
@@ -90,7 +90,7 @@ class PolicyGroupRoundIntervalPolicyListFactory extends PolicyGroupRoundInterval
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $pgf->getTable() .' as b
 					where	b.id = a.policy_group_id

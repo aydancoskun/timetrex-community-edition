@@ -68,7 +68,13 @@ if ( isset($_POST['json']) OR isset($_GET['json']) ) {
 		$arguments = json_decode( $_POST['json'], TRUE );
 	}
 }
-Debug::Arr($arguments, 'Arguments: ', __FILE__, __LINE__, __METHOD__, 10);
+$argument_size = strlen( serialize($arguments) );
+if ( PRODUCTION == TRUE AND $argument_size > (1024*12) ) {
+	Debug::Text('Arguments too large to display... Size: '. $argument_size, __FILE__, __LINE__, __METHOD__, 10);
+} else {
+	Debug::Arr($arguments, 'Arguments: (Size: '. $argument_size .')', __FILE__, __LINE__, __METHOD__, 10);
+}
+unset($argument_size);
 
 if ( isset($_GET['SessionID']) AND $_GET['SessionID'] != '' ) {
 	$authentication = new Authentication();
@@ -155,6 +161,6 @@ if ( isset($_GET['SessionID']) AND $_GET['SessionID'] != '' ) {
 	}
 }
 
-Debug::text('Server Response Time: '. ((float)microtime(TRUE)-$_SERVER['REQUEST_TIME']), __FILE__, __LINE__, __METHOD__, 10);
+Debug::text('Server Response Time: '. ((float)microtime(TRUE)-$_SERVER['REQUEST_TIME_FLOAT']), __FILE__, __LINE__, __METHOD__, 10);
 Debug::writeToLog();
 ?>

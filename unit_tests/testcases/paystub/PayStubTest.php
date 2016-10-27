@@ -34,14 +34,13 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: PayStubTest.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 12091 $
+ * $Id: PayStubTest.php 12091 2014-01-21 16:33:40Z mikeb $
+ * $Date: 2014-01-21 08:33:40 -0800 (Tue, 21 Jan 2014) $
  */
 require_once('PHPUnit/Framework/TestCase.php');
 
 class PayStubTest extends PHPUnit_Framework_TestCase {
-
 	protected $company_id = NULL;
 	protected $user_id = NULL;
 	protected $pay_period_schedule_id = NULL;
@@ -63,7 +62,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$dd->createCurrency( $this->company_id, 10 );
 
-		$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
+		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
 
 		$dd->createUserWageGroups( $this->company_id );
 
@@ -245,6 +244,9 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		return FALSE;
 	}
 
+	/**
+	 * @group PayStub_testSinglePayStub
+	 */
 	function testSinglePayStub() {
 		//Test all parts of a single pay stub.
 
@@ -340,6 +342,9 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PayStub_testSinglePayStubLargeAmounts
+	 */
 	function testSinglePayStubLargeAmounts() {
 		//Test all parts of a single pay stub.
 
@@ -435,6 +440,9 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PayStub_testMultiplePayStub
+	 */
 	function testMultiplePayStub() {
 		//Test all parts of multiple pay stubs that span a year boundary.
 
@@ -713,6 +721,9 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PayStub_testEditMultiplePayStub
+	 */
 	//Test editing pay stub in the middle of the year, and having the other pay stubs YTD re-calculated.
 	function testEditMultiplePayStub() {
 		//Test all parts of multiple pay stubs that span a year boundary.
@@ -1135,6 +1146,9 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PayStub_testMultiplePayStubAccruals
+	 */
 	function testMultiplePayStubAccruals() {
 		//Test all parts of multiple pay stubs that span a year boundary.
 
@@ -1403,7 +1417,6 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '79.25' );
 
 		unset($pse_arr, $pay_stub_id, $pay_stub);
-
 
 		return TRUE;
 	}

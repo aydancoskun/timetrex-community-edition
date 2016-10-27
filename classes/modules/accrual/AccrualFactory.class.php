@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10030 $
- * $Id: AccrualFactory.class.php 10030 2013-05-28 16:31:56Z ipso $
- * $Date: 2013-05-28 09:31:56 -0700 (Tue, 28 May 2013) $
+ * $Revision: 12026 $
+ * $Id: AccrualFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -48,7 +48,7 @@ class AccrualFactory extends Factory {
 
 	var $user_obj = NULL;
 
-	protected $system_type_ids = array(10,20,75); //These all special types reserved for system use only.
+	protected $system_type_ids = array(10, 20, 75); //These all special types reserved for system use only.
 
 	function _getFactoryOptions( $name ) {
 		$retval = NULL;
@@ -77,7 +77,7 @@ class AccrualFactory extends Factory {
 				break;
 			case 'delete_type': //Types that can be deleted
 				$retval = $this->getOptions('type');
-				unset($retval[10],$retval[20]); //Remove just Banked/Used as those can't be deleted.
+				unset($retval[10], $retval[20]); //Remove just Banked/Used as those can't be deleted.
 				break;
 			case 'accrual_policy_type':
 				$apf = TTNew('AccrualPolicyFactory');
@@ -167,7 +167,7 @@ class AccrualFactory extends Factory {
 	}
 	function getUser() {
 		if ( isset($this->data['user_id']) ) {
-			return $this->data['user_id'];
+			return (int)$this->data['user_id'];
 		}
 	}
 	function setUser($id) {
@@ -189,7 +189,7 @@ class AccrualFactory extends Factory {
 
 	function getAccrualPolicyID() {
 		if ( isset($this->data['accrual_policy_id']) ) {
-			return $this->data['accrual_policy_id'];
+			return (int)$this->data['accrual_policy_id'];
 		}
 
 		return FALSE;
@@ -220,7 +220,7 @@ class AccrualFactory extends Factory {
 
 	function getType() {
 		if ( isset($this->data['type_id']) ) {
-			return $this->data['type_id'];
+			return (int)$this->data['type_id'];
 		}
 
 		return FALSE;
@@ -256,8 +256,10 @@ class AccrualFactory extends Factory {
 
 	function getUserDateTotalID() {
 		if ( isset($this->data['user_date_total_id']) ) {
-			return $this->data['user_date_total_id'];
+			return (int)$this->data['user_date_total_id'];
 		}
+
+		return FALSE;
 	}
 	function setUserDateTotalID($id) {
 		$id = trim($id);
@@ -292,7 +294,7 @@ class AccrualFactory extends Factory {
 	function setTimeStamp($epoch) {
 		$epoch = trim($epoch);
 
-		if 	(	$this->Validator->isDate(		'times_tamp',
+		if	(	$this->Validator->isDate(		'times_tamp',
 												$epoch,
 												TTi18n::gettext('Incorrect time stamp'))
 
@@ -307,7 +309,7 @@ class AccrualFactory extends Factory {
 	}
 
 	function isValidAmount($amount) {
-		Debug::text('Type: '. $this->getType() .' Amount: '. $amount , __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Type: '. $this->getType() .' Amount: '. $amount, __FILE__, __LINE__, __METHOD__, 10);
 		//Based on type, set Amount() pos/neg
 		switch ( $this->getType() ) {
 			case 10: // Banked
@@ -343,11 +345,11 @@ class AccrualFactory extends Factory {
 	function setAmount($int) {
 		$int = trim($int);
 
-		if  ( empty($int) ){
+		if	( empty($int) ) {
 			$int = 0;
 		}
 
-		if 	(	$this->Validator->isNumeric(		'amount',
+		if	(	$this->Validator->isNumeric(		'amount',
 													$int,
 													TTi18n::gettext('Incorrect Amount'))
 				AND
@@ -408,7 +410,7 @@ class AccrualFactory extends Factory {
 		//Delete duplicates before saving.
 		//Or orphaned entries on Sum'ing?
 		//Would have to do it on view as well though.
-		if ( $this->getUserDateTotalID() !== FALSE AND $this->getUserDateTotalID() !== 0 ) {
+		if ( $this->getUserDateTotalID() > 0 ) {
 			$alf = TTnew( 'AccrualListFactory' );
 			$alf->getByUserIdAndAccrualPolicyIDAndUserDateTotalID( $this->getUser(), $this->getAccrualPolicyID(), $this->getUserDateTotalID() );
 			Debug::text('Found Duplicate Records: '. (int)$alf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
@@ -505,7 +507,7 @@ class AccrualFactory extends Factory {
 							$data[$variable] = $this->getColumn( $variable );
 							break;
 						case 'accrual_policy_type':
-							$data[$variable] = Option::getByKey( $this->getColumn( 'accrual_policy_type_id' ), $this->getOptions( $variable ) ); ;
+							$data[$variable] = Option::getByKey( $this->getColumn( 'accrual_policy_type_id' ), $this->getOptions( $variable ) );
 							break;
 						case 'type':
 							$function = 'get'.$variable;
@@ -541,7 +543,7 @@ class AccrualFactory extends Factory {
 	function addLog( $log_action ) {
 		$u_obj = $this->getUserObject();
 		if ( is_object($u_obj) ) {
-			return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Accrual') .' - '. TTi18n::getText('Employee').': '. $u_obj->getFullName( FALSE, TRUE ) .' '. TTi18n::getText('Type') .': '. Option::getByKey( $this->getType(), $this->getOptions('type') ) .' '. TTi18n::getText('Date') .': '.  TTDate::getDate('DATE', $this->getTimeStamp() ) .' '. TTi18n::getText('Total Time') .': '. TTDate::getTimeUnit( $this->getAmount() ), NULL, $this->getTable(), $this );
+			return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Accrual') .' - '. TTi18n::getText('Employee').': '. $u_obj->getFullName( FALSE, TRUE ) .' '. TTi18n::getText('Type') .': '. Option::getByKey( $this->getType(), $this->getOptions('type') ) .' '. TTi18n::getText('Date') .': '.	TTDate::getDate('DATE', $this->getTimeStamp() ) .' '. TTi18n::getText('Total Time') .': '. TTDate::getTimeUnit( $this->getAmount() ), NULL, $this->getTable(), $this );
 		}
 
 		return FALSE;

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11545 $
- * $Id: AbsencePolicyListFactory.class.php 11545 2013-11-29 02:04:30Z mikeb $
- * $Date: 2013-11-28 18:04:30 -0800 (Thu, 28 Nov 2013) $
+ * $Revision: 12026 $
+ * $Id: AbsencePolicyListFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -46,7 +46,7 @@ class AbsencePolicyListFactory extends AbsencePolicyFactory implements IteratorA
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -69,7 +69,7 @@ class AbsencePolicyListFactory extends AbsencePolicyFactory implements IteratorA
 						);
 
 			$query = '
-						select 	*
+						select	*
 						from	'. $this->getTable() .'
 						where	id = ?
 							AND deleted = 0';
@@ -78,7 +78,7 @@ class AbsencePolicyListFactory extends AbsencePolicyFactory implements IteratorA
 
 			$this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs,$id);
+			$this->saveCache($this->rs, $id);
 		}
 
 		return $this;
@@ -99,7 +99,7 @@ class AbsencePolicyListFactory extends AbsencePolicyFactory implements IteratorA
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 						AND company_id = ?
@@ -129,7 +129,7 @@ class AbsencePolicyListFactory extends AbsencePolicyFactory implements IteratorA
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					where	a.company_id = ?
 						AND a.deleted = 0';
@@ -154,8 +154,8 @@ class AbsencePolicyListFactory extends AbsencePolicyFactory implements IteratorA
 		$additional_order_fields = array('type_id', 'in_use');
 
 		$sort_column_aliases = array(
-									 'type' => 'type_id',
-									 );
+									'type' => 'type_id',
+									);
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 
@@ -173,21 +173,21 @@ class AbsencePolicyListFactory extends AbsencePolicyFactory implements IteratorA
 			}
 			$strict = TRUE;
 		}
-		//Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$uf = new UserFactory();
 		$apf = new AccrualPolicyFactory();
-        $cgmf = new CompanyGenericMapFactory();
-        $pgf = new PolicyGroupFactory();
-        $pguf = new PolicyGroupUserFactory();
+		$cgmf = new CompanyGenericMapFactory();
+		$pgf = new PolicyGroupFactory();
+		$pguf = new PolicyGroupUserFactory();
 
 		$ph = array(
 					'company_id' => $company_id,
 					);
 
 		$query = '
-					select 	DISTINCT a.*,
+					select	DISTINCT a.*,
 							apf.name as accrual_policy,
 							(
 								CASE WHEN EXISTS ( select 1 from '. $cgmf->getTable() .' as w, '. $pgf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 170 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0 ) THEN 1 ELSE 0 END
@@ -198,10 +198,10 @@ class AbsencePolicyListFactory extends AbsencePolicyFactory implements IteratorA
 							z.first_name as updated_by_first_name,
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
-					from 	'. $this->getTable() .' as a
-                        LEFT JOIN '. $cgmf->getTable() .' as cgmf ON ( a.id = cgmf.map_id AND cgmf.object_type_id = 170 )
-                        LEFT JOIN '. $pgf->getTable() .' as pgf ON ( cgmf.object_id = pgf.id AND pgf.deleted = 0 )
-                        LEFT JOIN '. $pguf->getTable() .' as pguf ON ( pguf.policy_group_id = pgf.id )
+					from	'. $this->getTable() .' as a
+						LEFT JOIN '. $cgmf->getTable() .' as cgmf ON ( a.id = cgmf.map_id AND cgmf.object_type_id = 170 )
+						LEFT JOIN '. $pgf->getTable() .' as pgf ON ( cgmf.object_id = pgf.id AND pgf.deleted = 0 )
+						LEFT JOIN '. $pguf->getTable() .' as pguf ON ( pguf.policy_group_id = pgf.id )
 						LEFT JOIN '. $apf->getTable() .' as apf ON ( a.accrual_policy_id = apf.id AND apf.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
@@ -212,7 +212,7 @@ class AbsencePolicyListFactory extends AbsencePolicyFactory implements IteratorA
 		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
 
-		if ( isset($filter_data['type']) AND trim($filter_data['type']) != '' AND !isset($filter_data['type_id']) ) {
+		if ( isset($filter_data['type']) AND !is_array($filter_data['type']) AND trim($filter_data['type']) != '' AND !isset($filter_data['type_id']) ) {
 			$filter_data['type_id'] = Option::getByFuzzyValue( $filter_data['type'], $this->getOptions('type') );
 		}
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
@@ -225,10 +225,10 @@ class AbsencePolicyListFactory extends AbsencePolicyFactory implements IteratorA
 
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-        $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
 
-		$query .= 	'
+		$query .=	'
 						AND a.deleted = 0
 					';
 		$query .= $this->getWhereSQL( $where );

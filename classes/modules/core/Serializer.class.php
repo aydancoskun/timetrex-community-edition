@@ -45,7 +45,7 @@
 
 //Use this class to serializer arrays in PHP, XML, and JSON formats.
 class Serializer {
-	protected $available_formats = array('PHP','XML','JSON');
+	protected $available_formats = array('PHP', 'XML', 'JSON');
 	protected $format = NULL;
 
 	protected $simple_xml_obj = NULL;
@@ -98,14 +98,14 @@ class Serializer {
 
 			//The first level should be the class name as a key.
 			/*
-			  //Example array:
+			//Example array:
 			array
-			  'UserFactory' =>
+			'UserFactory' =>
 				array
-				  0 =>
+				0 =>
 					array
-					  'id' => string '6217' (length=4)
-					  'company_id' => string '1064' (length=4)
+					'id' => string '6217' (length=4)
+					'company_id' => string '1064' (length=4)
 			*/
 			foreach( $data as $class => $objects ) {
 				$this->simple_xml_obj = new SimpleXMLElement('<timetrex></timetrex>');

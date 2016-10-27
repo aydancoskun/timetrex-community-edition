@@ -55,7 +55,7 @@ class ImportAccrual extends Import {
 		switch( $name ) {
 			case 'columns':
 				$apf = TTNew('AccrualFactory');
-				$retval = Misc::prependArray( $this->getUserIdentificationColumns(), Misc::arrayIntersectByKey( array('accrual_policy','type','amount','date_stamp'), Misc::trimSortPrefix( $apf->getOptions('columns') ) ) );
+				$retval = Misc::prependArray( $this->getUserIdentificationColumns(), Misc::arrayIntersectByKey( array('accrual_policy', 'type', 'amount', 'date_stamp'), Misc::trimSortPrefix( $apf->getOptions('columns') ) ) );
 
 				break;
 			case 'column_aliases':
@@ -85,7 +85,7 @@ class ImportAccrual extends Import {
 
 
 	function _preParseRow( $row_number, $raw_row ) {
-		$retval = $this->getObject()->getAccrualDefaultData();
+		$retval = $this->getObject()->stripReturnHandler( $this->getObject()->getAccrualDefaultData() );
 
 		return $retval;
 	}

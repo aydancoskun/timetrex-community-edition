@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: InstallSchema_1009A.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11830 $
+ * $Id: InstallSchema_1009A.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -45,22 +45,22 @@
 class InstallSchema_1009A extends InstallSchema_Base {
 
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion() , __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		return TRUE;
 	}
 
 	function postInstall() {
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		//Add Calendar Based Accruals to Cron.
 		$maint_base_path = Environment::getBasePath() . DIRECTORY_SEPARATOR .'maint'. DIRECTORY_SEPARATOR;
 		if ( PHP_OS == 'WINNT' ) {
-			$cron_job_base_command =  'php-win.exe '. $maint_base_path;
+			$cron_job_base_command = 'php-win.exe '. $maint_base_path;
 		} else {
-			$cron_job_base_command =  'php '. $maint_base_path;
+			$cron_job_base_command = 'php '. $maint_base_path;
 		}
-		Debug::text('Cron Job Base Command: '. $cron_job_base_command, __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('Cron Job Base Command: '. $cron_job_base_command, __FILE__, __LINE__, __METHOD__, 9);
 		
 		$cjf = TTnew( 'CronJobFactory' );
 		$cjf->setName('AddAccrualPolicyTime');

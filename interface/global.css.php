@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 1981 $
- * $Id: global.css.php 1981 2008-07-10 23:13:44Z ipso $
- * $Date: 2008-07-10 16:13:44 -0700 (Thu, 10 Jul 2008) $
+ * $Revision: 11830 $
+ * $Id: global.css.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 $disable_database_connection=TRUE;
 require_once('../includes/global.inc.php');
@@ -445,4 +445,29 @@ td.taboff {
 /* Used for making SPAN's that don't wrap. */
 .nowrap {
 	white-space: nowrap;
+}
+
+
+
+#popUpDiv {
+    background-color: #FFB3B3;
+    color: #FFF;
+    height: 100px;
+	padding-top:5px;
+    position: absolute;
+	left: 25%;
+	top: 450px;
+    width: 50%;
+	text-align: center;
+	border-style: solid;
+	border-width: 2px;
+	border-color: #FF0000;
+	z-index:99;
+    transition: top 3.5s;
+    -moz-transition: top 3.5s;
+    -webkit-transition: top 3.5s;
+    -o-transition: top 3.5s;
+}
+#popUpDiv.visible {
+	top: 110px;
 }

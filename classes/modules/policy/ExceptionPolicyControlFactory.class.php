@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11545 $
- * $Id: ExceptionPolicyControlFactory.class.php 11545 2013-11-29 02:04:30Z mikeb $
- * $Date: 2013-11-28 18:04:30 -0800 (Thu, 28 Nov 2013) $
+ * $Revision: 12026 $
+ * $Id: ExceptionPolicyControlFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -112,7 +112,7 @@ class ExceptionPolicyControlFactory extends Factory {
 
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
-			return $this->data['company_id'];
+			return (int)$this->data['company_id'];
 		}
 
 		return FALSE;
@@ -120,7 +120,7 @@ class ExceptionPolicyControlFactory extends Factory {
 	function setCompany($id) {
 		$id = trim($id);
 
-		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$clf = TTnew( 'CompanyListFactory' );
 
 		if ( $this->Validator->isResultSetWithRows(	'company',
@@ -144,7 +144,7 @@ class ExceptionPolicyControlFactory extends Factory {
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
 		$id = $this->db->GetOne($query, $ph);
-		Debug::Arr($id,'Unique: '. $name, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($id, 'Unique: '. $name, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id === FALSE ) {
 			return TRUE;
@@ -168,7 +168,7 @@ class ExceptionPolicyControlFactory extends Factory {
 		if (	$this->Validator->isLength(	'name',
 											$name,
 											TTi18n::gettext('Name is too short or too long'),
-											2,50)
+											2, 50)
 				AND
 				$this->Validator->isTrue(	'name',
 											$this->isUniqueName($name),
@@ -185,7 +185,7 @@ class ExceptionPolicyControlFactory extends Factory {
 
 	function Validate() {
 		/*
-		if ( $this->getDeleted() == TRUE ){
+		if ( $this->getDeleted() == TRUE ) {
 			//Check to make sure there are no hours using this OT policy.
 			$udtlf = TTnew( 'UserDateTotalListFactory' );
 			$udtlf->getByAbsencePolicyId( $this->getId() );

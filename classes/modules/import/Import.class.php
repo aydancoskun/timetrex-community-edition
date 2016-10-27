@@ -71,7 +71,7 @@ class Import {
 	}
 
 	function getProgressBarObject() {
-		if  ( !is_object( $this->progress_bar_obj ) ) {
+		if	( !is_object( $this->progress_bar_obj ) ) {
 			$this->progress_bar_obj = new ProgressBar();
 		}
 
@@ -98,7 +98,7 @@ class Import {
 			$retarr = $this->_getFactoryOptions( $name );
 		} else {
 			$retarr = $this->_getFactoryOptions( $name );
-			if ( isset($retarr[$parent]) ){
+			if ( isset($retarr[$parent]) ) {
 				$retarr = $retarr[$parent];
 			}
 		}
@@ -106,7 +106,7 @@ class Import {
 		if ( $name == 'columns' ) {
 			//Remove columns that can never be imported.
 			$retarr = Misc::trimSortPrefix( $retarr );
-			unset($retarr['created_by'],$retarr['created_date'],$retarr['updated_by'],$retarr['updated_date'] );
+			unset($retarr['created_by'], $retarr['created_date'], $retarr['updated_by'], $retarr['updated_date'] );
 			$retarr = Misc::addSortPrefix( $retarr );
 		}
 
@@ -122,15 +122,15 @@ class Import {
 
 	function getRawData( $limit = NULL ) {
 		if ( isset($this->data['raw_data']) ) {
-			Debug::Text('zRaw Data Size: '. count($this->data['raw_data']), __FILE__, __LINE__, __METHOD__,10);
-			//Debug::Arr($this->data['raw_data'], 'Raw Data: ', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('zRaw Data Size: '. count($this->data['raw_data']), __FILE__, __LINE__, __METHOD__, 10);
+			//Debug::Arr($this->data['raw_data'], 'Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			//FIXME: There appears to be a bug in Flex where if the file has a blank column header column, no data is parsed at all in the column map step of the wizard.
 			if ( $limit > 0 ) {
-				Debug::Text('azRaw Data Size: '. count($this->data['raw_data']), __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('azRaw Data Size: '. count($this->data['raw_data']), __FILE__, __LINE__, __METHOD__, 10);
 				return array_slice( $this->data['raw_data'], 0, (int)$limit );
 			} else {
-				Debug::Text('bzRaw Data Size: '. count($this->data['raw_data']), __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('bzRaw Data Size: '. count($this->data['raw_data']), __FILE__, __LINE__, __METHOD__, 10);
 				return $this->data['raw_data'];
 			}
 		}
@@ -139,7 +139,7 @@ class Import {
 	}
 	function setRawData($value) {
 		if ( $value != '' ) {
-			Debug::Text('Raw Data Size: '. count($value), __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Raw Data Size: '. count($value), __FILE__, __LINE__, __METHOD__, 10);
 			$this->data['raw_data'] = $value;
 
 			return TRUE;
@@ -150,17 +150,17 @@ class Import {
 	function getRawDataFromFile() {
 		$file_name = $this->getStoragePath().$this->getLocalFileName();
 		if ( file_exists( $file_name ) ) {
-			Debug::Text('Loading data from file: '. $file_name .'...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Loading data from file: '. $file_name .'...', __FILE__, __LINE__, __METHOD__, 10);
 			return $this->setRawData( Misc::parseCSV( $file_name, TRUE, FALSE, ',', 9216, 0 ) );
 		}
 
-		Debug::Text('Loading data from file: '. $file_name .' Failed!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Loading data from file: '. $file_name .' Failed!', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
 	function saveRawDataToFile( $data ) {
-		Debug::Text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
 		$dir = $this->getStoragePath();
-		Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
 		if ( isset($dir) ) {
 			@mkdir($dir, 0700, TRUE);
 
@@ -178,7 +178,7 @@ class Import {
 				}
 				break;
 			}
-			Debug::Arr($retarr, 'Raw Data Columns: ', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Arr($retarr, 'Raw Data Columns: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			return $retarr;
 		}
@@ -204,10 +204,10 @@ class Import {
 	//Generates a "best fit" column map array.
 	function generateColumnMap() {
 		$raw_data_columns = $this->getRawDataColumns();
-		//Debug::Arr($raw_data_columns, 'Raw Data Columns:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($raw_data_columns, 'Raw Data Columns:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$columns = Misc::trimSortPrefix( $this->getOptions('columns') );
-		//Debug::Arr($columns, 'Object Columns:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($columns, 'Object Columns:', __FILE__, __LINE__, __METHOD__, 10);
 
 		//unset($columns['middle_name']); //This often conflicts with Last Name, so ignore mapping it by default. But then it won't work even for an exact match.
 
@@ -217,10 +217,10 @@ class Import {
 			foreach( $raw_data_columns as $raw_data_key => $raw_data_column ) {
 				$matched_column_key = Misc::findClosestMatch( $raw_data_column, $columns, 60 );
 				if ( $matched_column_key !== FALSE AND isset($columns[$matched_column_key]) ) {
-					Debug::Text('Close match for: '. $raw_data_column .' Match: '. $matched_column_key, __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Close match for: '. $raw_data_column .' Match: '. $matched_column_key, __FILE__, __LINE__, __METHOD__, 10);
 					$matched_columns[$raw_data_column] = $matched_column_key;
 				} else {
-					Debug::Text('No close match for: '. $raw_data_column, __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('No close match for: '. $raw_data_column, __FILE__, __LINE__, __METHOD__, 10);
 				}
 			}
 			unset($raw_data_column, $raw_data_key, $matched_column_key);
@@ -236,7 +236,7 @@ class Import {
 			}
 
 			if ( isset($retval) ) {
-				Debug::Arr($retval, 'Generate Column Map:', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Arr($retval, 'Generate Column Map:', __FILE__, __LINE__, __METHOD__, 10);
 				return $retval;
 			}
 
@@ -268,7 +268,7 @@ class Import {
 		foreach( $import_map_arr as $import_column => $map_cols ) {
 			if ( ( isset( $map_cols['map_column_name'] ) AND isset( $map_cols['default_value'] ) )
 					AND ( $map_cols['map_column_name'] != '' OR $map_cols['default_value'] != '' ) ) {
-				Debug::Text('Import Column: '. $import_column .' => '. $map_cols['map_column_name'] .' Default: '. $map_cols['default_value'] , __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Import Column: '. $import_column .' => '. $map_cols['map_column_name'] .' Default: '. $map_cols['default_value'], __FILE__, __LINE__, __METHOD__, 10);
 
 				$filtered_import_map[$import_column] = array(
 												'import_column' => $import_column,
@@ -278,12 +278,12 @@ class Import {
 												);
 
 			} else {
-				Debug::Text('Import Column: '. $import_column .' Skipping...' , __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Import Column: '. $import_column .' Skipping...', __FILE__, __LINE__, __METHOD__, 10);
 			}
 		}
 
 		if ( isset($filtered_import_map) ) {
-			//Debug::Arr($filtered_import_map, 'Filtered Import Map:', __FILE__, __LINE__, __METHOD__,10);
+			//Debug::Arr($filtered_import_map, 'Filtered Import Map:', __FILE__, __LINE__, __METHOD__, 10);
 			$this->data['column_map'] = $filtered_import_map;
 			return TRUE;
 		}
@@ -297,7 +297,7 @@ class Import {
 				return $this->data['import_options'];
 			} else {
 				if ( isset($this->data['import_options'][$key]) ) {
-					Debug::Text('Found specific import options key: '. $key .' returning: '. $this->data['import_options'][$key] , __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Found specific import options key: '. $key .' returning: '. $this->data['import_options'][$key], __FILE__, __LINE__, __METHOD__, 10);
 					return $this->data['import_options'][$key];
 				} else {
 					return NULL;
@@ -310,7 +310,7 @@ class Import {
 	function setImportOptions( $value ) {
 		if ( is_array($value) ) {
 			$this->data['import_options'] = Misc::trimSortPrefix( $value );
-			Debug::Arr($this->data['import_options'], 'Import Options: ' , __FILE__, __LINE__, __METHOD__,10);
+			Debug::Arr($this->data['import_options'], 'Import Options: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			return TRUE;
 		}
@@ -329,7 +329,7 @@ class Import {
 			if ( function_exists('mb_check_encoding') AND mb_check_encoding( $raw_row[$map_data[$function_name]['map_column_name']], 'UTF-8' ) === TRUE ) {
 				$input = $raw_row[$map_data[$function_name]['map_column_name']];
 			} else {
-				Debug::Text('Bad UTF8 encoding!: '. $input, __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Bad UTF8 encoding!: '. $input, __FILE__, __LINE__, __METHOD__, 10);
 			}
 		}
 
@@ -349,7 +349,7 @@ class Import {
 
 		if ( method_exists( $this, $full_function_name ) ) {
 			$retval = call_user_func( array( $this, $full_function_name ), $input, $default_value, $parse_hint, $map_data, $raw_row );
-			Debug::Text('Input: '. $input .' Parse Hint: '. $parse_hint .' Default Value: '. $default_value .' Retval: '. $retval, __FILE__, __LINE__, __METHOD__,10);
+			//Debug::Arr( $retval, 'Input: '. $input .' Parse Hint: '. $parse_hint .' Default Value: '. $default_value .' Retval: ', __FILE__, __LINE__, __METHOD__, 10);
 			return $retval;
 		} else {
 			if ( $input == '' AND $default_value != '' ) {
@@ -406,30 +406,39 @@ class Import {
 		$column_map = $this->getColumnMap();
 		$parsed_data = array();
 
-		//Debug::Arr($column_map, 'Column Map: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($column_map, 'Column Map: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( !is_array($raw_data) ) {
-			Debug::Text('Invalid raw data...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Invalid raw data...', __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
 		}
 
-		//Debug::Arr($raw_data, 'Raw Data: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($raw_data, 'Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($raw_data), NULL, TTi18n::getText('Parsing import data...') );
 
-		$x=0;
+		$x = 0;
 		foreach( $raw_data as $raw_row ) {
 			$parsed_data[$x] = $this->preParseRow( $x, $raw_row ); //This needs to run for each row so things like manual_ids can get updated automatically.
-			//Debug::Arr($parsed_data[$x], 'Default Data: X: '. $x, __FILE__, __LINE__, __METHOD__,10);
+			//Debug::Arr($parsed_data[$x], 'Default Data: X: '. $x, __FILE__, __LINE__, __METHOD__, 10);
 
 			foreach( $column_map as $import_column => $import_data ) {
-				//Debug::Arr($import_data, 'Import Data X: '. $x .' Column: '. $import_column .' File Column Name: '. $import_data['map_column_name'], __FILE__, __LINE__, __METHOD__,10);
+				//Debug::Arr($import_data, 'Import Data X: '. $x .' Column: '. $import_column .' File Column Name: '. $import_data['map_column_name'], __FILE__, __LINE__, __METHOD__, 10);
 				//Don't allow importing "id" columns.
 				if ( strtolower($import_column) != 'id' AND $import_column !== 0 ) {
 					$parsed_data[$x][$import_column] = $this->callInputParseFunction( $import_column, $column_map, $raw_row );
-					Debug::Text('Import Column: '. $import_column .' Value: '. $parsed_data[$x][$import_column], __FILE__, __LINE__, __METHOD__,10);
+					//Debug::Arr($parsed_data[$x][$import_column], 'Import Column: '. $import_column .' Value: ', __FILE__, __LINE__, __METHOD__, 10);
+				} else {
+					//Don't allow importing "id" columns.
+					unset($parsed_data[$x][$import_data['map_column_name']]);
 				}
-				unset($parsed_data[$x][$import_data['map_column_name']]); //Unset the original unmapped data so it doesn't conflict, especially if its an "id" column.
+				
+				if ( $import_column != $import_data['map_column_name'] ) {
+					//Unset the original unmapped data so it doesn't conflict, especially if its an "id" column.
+					//Only if the two columns don't match though, as there was a bug that if someone tried to import column names that matched the TimeTrex
+					//names exactly, it would just unset them all.
+					unset($parsed_data[$x][$import_data['map_column_name']]);
+				}
 			}
 
 			$parsed_data[$x] = $this->postParseRow( $x, $parsed_data[$x] ); //This needs to run for each row so things like manual_ids can get updated automatically.
@@ -441,7 +450,7 @@ class Import {
 
 		$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
-		Debug::Arr($parsed_data, 'Parsed Data: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($parsed_data, 'Parsed Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this->setParsedData( $parsed_data );
 	}
@@ -530,7 +539,7 @@ class Import {
 
 	function getLocalFileName() {
 		$retval = md5( $this->company_id.$this->user_id );
-		Debug::Text('Local File Name: '. $retval, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Local File Name: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 	}
 
@@ -571,7 +580,7 @@ class Import {
 	function renameLocalFile() {
 		$src_file = $this->getStoragePath().$this->getRemoteFileName();
 		$dst_file = $this->getStoragePath().$this->getLocalFileName();
-		Debug::Text('Src File: '. $src_file .' Dst File: '. $dst_file, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Src File: '. $src_file .' Dst File: '. $dst_file, __FILE__, __LINE__, __METHOD__, 10);
 		if ( file_exists( $src_file ) AND is_file($src_file) ) {
 			$this->deleteLocalFile(); //Delete the dst_file before renaming, just in case.
 			return rename( $src_file, $dst_file );
@@ -584,7 +593,7 @@ class Import {
 		$file = $this->getStoragePath().$this->getLocalFileName();
 
 		if ( file_exists($file) ) {
-			Debug::Text('Deleting Local File: '. $file, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Deleting Local File: '. $file, __FILE__, __LINE__, __METHOD__, 10);
 			@unlink($file);
 		}
 
@@ -595,26 +604,26 @@ class Import {
 	// Generic parser functions.
 	//
 	function findClosestMatch( $input, $options, $match_percent = 50 ) {
-		if ( isset($options[strtoupper($input)]) ) {
-			return $input;
+		//We used to check for the option KEY, but that causes problems if the job code/job name are numeric values
+		//that happen to match the record ID in the database. Use this as a fallback method instead perhaps?
+		//Also consider things like COUNTRY/PROVINCE matches that are not numeric.
+		//if ( isset($options[strtoupper($input)]) ) {
+		//	return $input;
+		//} else {
+
+		if ( $this->getImportOptions('fuzzy_match') == TRUE ) {
+			$retval = Misc::findClosestMatch( $input, $options, $match_percent );
+			if ( $retval !== FALSE ) {
+				return $retval;
+			}
 		} else {
-			if ( $this->getImportOptions('fuzzy_match') == TRUE ) {
-				//Debug::Arr($options, 'Fuzzy Match for: '. $input, __FILE__, __LINE__, __METHOD__,10);
-				$retval = Misc::findClosestMatch( $input, $options, $match_percent );
-				if ( $retval !== FALSE ) {
-					return $retval;
-				}
-			} else {
-				//Debug::Arr($options, 'Exact Match for: '. $input, __FILE__, __LINE__, __METHOD__,10);
-				$retval = array_search( strtolower($input), array_map('strtolower', $options) );
-				if ( $retval !== FALSE ) {
-					return $retval;
-				}
+			$retval = array_search( strtolower($input), array_map('strtolower', $options) );
+			if ( $retval !== FALSE ) {
+				return $retval;
 			}
 		}
 
-		//return $input;
-		return FALSE; //So we know if no match was made.
+		return FALSE; //So we know if no match was made, rather than return $input
 	}
 
 	//Used by sub-classes to get general users while importing data.
@@ -631,7 +640,7 @@ class Import {
 
 	function getUserIdentificationColumns() {
 		$uf = TTNew('UserFactory');
-		$retval = Misc::arrayIntersectByKey( array('user_name','employee_number','sin'), Misc::trimSortPrefix( $uf->getOptions('columns') ) );
+		$retval = Misc::arrayIntersectByKey( array('user_name', 'employee_number', 'sin'), Misc::trimSortPrefix( $uf->getOptions('columns') ) );
 
 		return $retval;
 	}
@@ -642,15 +651,15 @@ class Import {
 		//Actually, the above is no longer the case.
 		if ( isset($raw_row['user_name']) AND $raw_row['user_name'] != '' ) {
 			$filter_data = array( 'user_name' => $raw_row['user_name'] );
-			Debug::Text('Searching for existing record based on User Name: '. $raw_row['user_name'], __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Searching for existing record based on User Name: '. $raw_row['user_name'], __FILE__, __LINE__, __METHOD__, 10);
 		} elseif ( isset($raw_row['employee_number']) AND $raw_row['employee_number'] != '' ) {
 			$filter_data = array( 'employee_number' => (int)$raw_row['employee_number'] );
-			Debug::Text('Searching for existing record based on Employee Number: '. (int)$raw_row['employee_number'], __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Searching for existing record based on Employee Number: '. (int)$raw_row['employee_number'], __FILE__, __LINE__, __METHOD__, 10);
 		} elseif ( isset($raw_row['sin']) AND $raw_row['sin'] != '' ) {
 			$filter_data = array( 'sin' => $raw_row['sin'] );
-			Debug::Text('Searching for existing record based on SIN: '. (int)$raw_row['sin'], __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Searching for existing record based on SIN: '. (int)$raw_row['sin'], __FILE__, __LINE__, __METHOD__, 10);
 		} else {
-			Debug::Text('No suitable columns for identifying the employee were specified... ', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('No suitable columns for identifying the employee were specified... ', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		if ( isset($filter_data) ) {
@@ -658,12 +667,12 @@ class Import {
 			$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, $filter_data );
 			if ( $ulf->getRecordCount() == 1 ) {
 				$tmp_user_obj = $ulf->getCurrent();
-				Debug::Text('Found existing record ID: '. $tmp_user_obj->getID(), __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Found existing record ID: '. $tmp_user_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
 				return $tmp_user_obj->getID();
 			}
 		}
 
-		Debug::Text('NO employee found!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('NO employee found!', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
 
@@ -727,7 +736,7 @@ class Import {
 				break;
 		}
 
-		Debug::Text('Column: '. $column .' Parse Hint: '. $parse_hint .' Retval: '. $retval, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Column: '. $column .' Parse Hint: '. $parse_hint .' Retval: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $retval;
 	}
@@ -795,7 +804,7 @@ class Import {
 		$cf = TTnew('CompanyFactory');
 		$options = $cf->getOptions( 'country' );
 
-		if ( isset($options[$input]) ) {
+		if ( isset($options[strtoupper($input)]) ) {
 			return $input;
 		} else {
 			if ( $this->getImportOptions('fuzzy_match') == TRUE ) {
@@ -808,7 +817,7 @@ class Import {
 
 	function parse_province( $input, $default_value = NULL, $parse_hint = NULL, $map_data = NULL, $raw_row = NULL ) {
 		$country = $this->callInputParseFunction( 'country', $map_data, $raw_row );
-		Debug::Text('Input: '. $input .' Country: '. $country, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Input: '. $input .' Country: '. $country, __FILE__, __LINE__, __METHOD__, 10);
 
 		$options = array();
 		if ( $country != '' ) {

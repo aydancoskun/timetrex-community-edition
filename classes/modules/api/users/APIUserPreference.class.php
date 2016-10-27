@@ -58,13 +58,13 @@ class APIUserPreference extends APIFactory {
 	function getUserPreferenceDefaultData() {
 		$company_id = $this->getCurrentCompanyObject()->getId();
 
-		Debug::Text('Getting UserPreference default data...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Getting UserPreference default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get New Hire Defaults.
 		$udlf = TTnew( 'UserDefaultListFactory' );
 		$udlf->getByCompanyId( $company_id );
 		if ( $udlf->getRecordCount() > 0 ) {
-			Debug::Text('Using User Defaults, as they exist...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Using User Defaults, as they exist...', __FILE__, __LINE__, __METHOD__, 10);
 			$udf_obj = $udlf->getCurrent();
 
 			$data = array(
@@ -83,7 +83,7 @@ class APIUserPreference extends APIFactory {
 		} else {
 			$data = array(
 							'company_id' => $company_id,
-							'language' =>  'en',
+							'language' => 'en',
 							'time_unit_format' => 20, //Hours
 							'items_per_page' => 25,
 							'enable_email_notification_exception' => TRUE,
@@ -101,8 +101,8 @@ class APIUserPreference extends APIFactory {
 	 * @return array
 	 */
 	function getUserPreference( $data = NULL, $disable_paging = FALSE ) {
-		if ( !$this->getPermissionObject()->Check('user_preference','enabled')
-				OR !( $this->getPermissionObject()->Check('user_preference','view') OR $this->getPermissionObject()->Check('user_preference','view_own') OR $this->getPermissionObject()->Check('user_preference','view_child')  ) ) {
+		if ( !$this->getPermissionObject()->Check('user_preference', 'enabled')
+				OR !( $this->getPermissionObject()->Check('user_preference', 'view') OR $this->getPermissionObject()->Check('user_preference', 'view_own') OR $this->getPermissionObject()->Check('user_preference', 'view_child')	) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
@@ -162,9 +162,9 @@ class APIUserPreference extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('user_preference','enabled')
-				OR !( $this->getPermissionObject()->Check('user_preference','edit') OR $this->getPermissionObject()->Check('user_preference','edit_own') OR $this->getPermissionObject()->Check('user_preference','edit_child') OR $this->getPermissionObject()->Check('user_preference','add') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('user_preference', 'enabled')
+				OR !( $this->getPermissionObject()->Check('user_preference', 'edit') OR $this->getPermissionObject()->Check('user_preference', 'edit_own') OR $this->getPermissionObject()->Check('user_preference', 'edit_child') OR $this->getPermissionObject()->Check('user_preference', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		if ( $validate_only == TRUE ) {
@@ -190,11 +190,11 @@ class APIUserPreference extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if (
-							  $validate_only == TRUE
-							  OR
+							$validate_only == TRUE
+							OR
 								(
-								$this->getPermissionObject()->Check('user_preference','edit')
-									OR ( $this->getPermissionObject()->Check('user_preference','edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
+								$this->getPermissionObject()->Check('user_preference', 'edit')
+									OR ( $this->getPermissionObject()->Check('user_preference', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -209,7 +209,7 @@ class APIUserPreference extends APIFactory {
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('user','add'), TTi18n::gettext('Add permission denied') );
+					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('user', 'add'), TTi18n::gettext('Add permission denied') );
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -284,16 +284,16 @@ class APIUserPreference extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('user_preference','enabled')
-				OR !( $this->getPermissionObject()->Check('user_preference','delete') OR $this->getPermissionObject()->Check('user_preference','delete_own') OR $this->getPermissionObject()->Check('user_preference','delete_child') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('user_preference', 'enabled')
+				OR !( $this->getPermissionObject()->Check('user_preference', 'delete') OR $this->getPermissionObject()->Check('user_preference', 'delete_own') OR $this->getPermissionObject()->Check('user_preference', 'delete_child') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		Debug::Text('Received data for: '. count($data) .' UserPreferences', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-        $validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
+		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
@@ -307,8 +307,8 @@ class APIUserPreference extends APIFactory {
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
-						if ( $this->getPermissionObject()->Check('user_preference','delete')
-								OR ( $this->getPermissionObject()->Check('user_preference','delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
+						if ( $this->getPermissionObject()->Check('user_preference', 'delete')
+								OR ( $this->getPermissionObject()->Check('user_preference', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
 							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
@@ -391,7 +391,7 @@ class APIUserPreference extends APIFactory {
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {
-				unset($src_rows[$key]['id'],$src_rows[$key]['manual_id'] ); //Clear fields that can't be copied
+				unset($src_rows[$key]['id'], $src_rows[$key]['manual_id'] ); //Clear fields that can't be copied
 				$src_rows[$key]['name'] = Misc::generateCopyName( $row['name'] ); //Generate unique name
 			}
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);

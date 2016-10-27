@@ -46,7 +46,7 @@ class CompanyGenericTagMapListFactory extends CompanyGenericTagMapFactory implem
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable();
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -66,7 +66,7 @@ class CompanyGenericTagMapListFactory extends CompanyGenericTagMapFactory implem
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 					';
@@ -90,7 +90,7 @@ class CompanyGenericTagMapListFactory extends CompanyGenericTagMapFactory implem
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $cgtf->getTable() .' as cgtf ON a.tag_id = cgtf.id
 					where	cgtf.company_id = ?
@@ -116,7 +116,7 @@ class CompanyGenericTagMapListFactory extends CompanyGenericTagMapFactory implem
 		$ph = array( 'company_id' => $company_id);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					where	a.company_id = ?
 						AND a.object_type_id in ('. $this->getListSQL($id, $ph) .')
@@ -192,7 +192,7 @@ class CompanyGenericTagMapListFactory extends CompanyGenericTagMapFactory implem
 		$ph = array( 'company_id' => $company_id);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					where	a.company_id = ?
 						AND a.object_type_id in ('. $this->getListSQL($object_type_id, $ph) .')
@@ -206,7 +206,7 @@ class CompanyGenericTagMapListFactory extends CompanyGenericTagMapFactory implem
 		return $this;
 	}
 
-	function getByCompanyIDAndObjectTypeAndObjectIDAndTagID($company_id, $object_type_id, $id, $map_id,  $where = NULL, $order = NULL) {
+	function getByCompanyIDAndObjectTypeAndObjectIDAndTagID($company_id, $object_type_id, $id, $map_id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -222,7 +222,7 @@ class CompanyGenericTagMapListFactory extends CompanyGenericTagMapFactory implem
 		$ph = array( 'company_id' => $company_id);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					where	a.company_id = ?
 						AND a.object_type_id in ('. $this->getListSQL($object_type_id, $ph) .')
@@ -237,7 +237,7 @@ class CompanyGenericTagMapListFactory extends CompanyGenericTagMapFactory implem
 		return $this;
 	}
 
-	function getByCompanyIDAndObjectTypeAndObjectIDAndNotTagID($company_id, $object_type_id, $id, $map_id,  $where = NULL, $order = NULL) {
+	function getByCompanyIDAndObjectTypeAndObjectIDAndNotTagID($company_id, $object_type_id, $id, $map_id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -253,7 +253,7 @@ class CompanyGenericTagMapListFactory extends CompanyGenericTagMapFactory implem
 		$ph = array( 'company_id' => $company_id);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					where	a.company_id = ?
 						AND a.object_type_id in ('. $this->getListSQL($object_type_id, $ph) .')
@@ -276,7 +276,7 @@ class CompanyGenericTagMapListFactory extends CompanyGenericTagMapFactory implem
 		$ph = array();
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					where	a.object_type_id in ('. $this->getListSQL($id, $ph) .')
 					';
@@ -300,10 +300,10 @@ class CompanyGenericTagMapListFactory extends CompanyGenericTagMapFactory implem
 		$ph = array();
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
-					where	a.object_type_id in ('.  $this->getListSQL($object_type_id, $ph) .')
-						AND a.object_id in ('.  $this->getListSQL($id, $ph) .')
+					where	a.object_type_id in ('.	 $this->getListSQL($object_type_id, $ph) .')
+						AND a.object_id in ('.	$this->getListSQL($id, $ph) .')
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );

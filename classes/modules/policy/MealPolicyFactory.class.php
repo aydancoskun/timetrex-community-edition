@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11545 $
- * $Id: MealPolicyFactory.class.php 11545 2013-11-29 02:04:30Z mikeb $
- * $Date: 2013-11-28 18:04:30 -0800 (Thu, 28 Nov 2013) $
+ * $Revision: 12026 $
+ * $Id: MealPolicyFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -151,7 +151,7 @@ class MealPolicyFactory extends Factory {
 
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
-			return $this->data['company_id'];
+			return (int)$this->data['company_id'];
 		}
 
 		return FALSE;
@@ -159,7 +159,7 @@ class MealPolicyFactory extends Factory {
 	function setCompany($id) {
 		$id = trim($id);
 
-		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$clf = TTnew( 'CompanyListFactory' );
 
 		if ( $this->Validator->isResultSetWithRows(	'company',
@@ -177,7 +177,7 @@ class MealPolicyFactory extends Factory {
 
 	function getType() {
 		if ( isset($this->data['type_id']) ) {
-			return $this->data['type_id'];
+			return (int)$this->data['type_id'];
 		}
 
 		return FALSE;
@@ -211,7 +211,7 @@ class MealPolicyFactory extends Factory {
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
 		$id = $this->db->GetOne($query, $ph);
-		Debug::Arr($id,'Unique: '. $name, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($id, 'Unique: '. $name, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id === FALSE ) {
 			return TRUE;
@@ -235,7 +235,7 @@ class MealPolicyFactory extends Factory {
 		if (	$this->Validator->isLength(	'name',
 											$name,
 											TTi18n::gettext('Name is too short or too long'),
-											2,50)
+											2, 50)
 				AND
 				$this->Validator->isTrue(	'name',
 											$this->isUniqueName($name),
@@ -260,11 +260,11 @@ class MealPolicyFactory extends Factory {
 	function setTriggerTime($int) {
 		$int = trim($int);
 
-		if  ( empty($int) ){
+		if	( empty($int) ) {
 			$int = 0;
 		}
 
-		if 	(	$this->Validator->isNumeric(		'trigger_time',
+		if	(	$this->Validator->isNumeric(		'trigger_time',
 													$int,
 													TTi18n::gettext('Incorrect Trigger Time')) ) {
 			$this->data['trigger_time'] = $int;
@@ -285,7 +285,7 @@ class MealPolicyFactory extends Factory {
 	function setAmount($value) {
 		$value = trim($value);
 
-		if 	(	$this->Validator->isNumeric(		'amount',
+		if	(	$this->Validator->isNumeric(		'amount',
 													$value,
 													TTi18n::gettext('Incorrect Deduction Amount')) ) {
 
@@ -299,7 +299,7 @@ class MealPolicyFactory extends Factory {
 
 	function getAutoDetectType() {
 		if ( isset($this->data['auto_detect_type_id']) ) {
-			return $this->data['auto_detect_type_id'];
+			return (int)$this->data['auto_detect_type_id'];
 		}
 
 		return FALSE;
@@ -335,7 +335,7 @@ class MealPolicyFactory extends Factory {
 	function setStartWindow($value) {
 		$value = (int)trim($value);
 
-		if 	(	$value == 0
+		if	(	$value == 0
 				OR
 				$this->Validator->isNumeric(		'start_window',
 													$value,
@@ -359,7 +359,7 @@ class MealPolicyFactory extends Factory {
 	function setWindowLength($value) {
 		$value = (int)trim($value);
 
-		if 	(	$value == 0
+		if	(	$value == 0
 				OR
 				$this->Validator->isNumeric(		'window_length',
 													$value,
@@ -383,7 +383,7 @@ class MealPolicyFactory extends Factory {
 	function setMinimumPunchTime($value) {
 		$value = (int)trim($value);
 
-		if 	(	$value == 0
+		if	(	$value == 0
 				OR
 				$this->Validator->isNumeric(		'minimum_punch_time',
 													$value,
@@ -407,7 +407,7 @@ class MealPolicyFactory extends Factory {
 	function setMaximumPunchTime($value) {
 		$value = (int)trim($value);
 
-		if 	(	$value == 0
+		if	(	$value == 0
 				OR
 				$this->Validator->isNumeric(		'maximum_punch_time',
 													$value,
@@ -435,8 +435,8 @@ class MealPolicyFactory extends Factory {
 							If they don't take a lunch, it doesn't include any time.
 
 		If not enabled for:
-		  Auto-Deduct: Always deducts the amount.
-		  Auto-Inlcyde: Always includes the amount.
+		Auto-Deduct: Always deducts the amount.
+		Auto-Inlcyde: Always includes the amount.
 	*/
 	function getIncludeLunchPunchTime() {
 		if ( isset($this->data['include_lunch_punch_time']) ) {
@@ -452,7 +452,7 @@ class MealPolicyFactory extends Factory {
 	}
 
 	function Validate() {
-		if ( $this->getDeleted() == TRUE ){
+		if ( $this->getDeleted() == TRUE ) {
 			//Check to make sure there are no hours using this meal policy.
 			$udtlf = TTnew( 'UserDateTotalListFactory' );
 			$udtlf->getByMealPolicyId( $this->getId() );
@@ -518,7 +518,7 @@ class MealPolicyFactory extends Factory {
 							break;
 						case 'type':
 						case 'auto_detect_type':
-							$function = 'get'.str_replace('_','',$variable);
+							$function = 'get'.str_replace('_', '', $variable);
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = Option::getByKey( $this->$function(), $this->getOptions( $variable ) );
 							}
@@ -539,7 +539,7 @@ class MealPolicyFactory extends Factory {
 	}
 
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action,  TTi18n::getText('Meal Policy'), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Meal Policy'), NULL, $this->getTable(), $this );
 	}
 }
 ?>

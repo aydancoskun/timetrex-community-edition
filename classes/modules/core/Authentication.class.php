@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11417 $
- * $Id: Authentication.class.php 11417 2013-11-15 19:54:21Z mikeb $
- * $Date: 2013-11-15 11:54:21 -0800 (Fri, 15 Nov 2013) $
+ * $Revision: 12265 $
+ * $Id: Authentication.class.php 12265 2014-02-10 16:14:38Z mikeb $
+ * $Date: 2014-02-10 08:14:38 -0800 (Mon, 10 Feb 2014) $
  */
 
 
@@ -179,7 +179,7 @@ class Authentication {
 		$authentication->Write();
 
 		//$authentication->UpdateLastLoginDate(); //Don't do this when switching users.
-		//TTLog::addEntry( $authentication->getObject()->getID(), 100,  TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('Type').': '. $type .' '.  TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.  TTi18n::getText('UserID').': '. $authentication->getObject()->getId(), $authentication->getObject()->getID() , 'authentication'); //Login
+		//TTLog::addEntry( $authentication->getObject()->getID(), 100, TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('Type').': '. $type .' '.  TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.	TTi18n::getText('UserID').': '. $authentication->getObject()->getId(), $authentication->getObject()->getID(), 'authentication'); //Login
 
 		return $authentication->getSessionID();
 	}
@@ -405,13 +405,13 @@ class Authentication {
 
 	private function setCookie() {
 		if ( $this->getSessionID() ) {
-			$cookie_expires = time()+7776000; //90 Days
+			$cookie_expires = ( time() + 7776000 ); //90 Days
 			if ( $this->getEnableExpireSession() === TRUE ) {
 				$cookie_expires = 0; //Expire when browser closes.
 			}
 			Debug::text('Cookie Expires: '. $cookie_expires, __FILE__, __LINE__, __METHOD__, 10);
 
-			setcookie($this->getName(), NULL, time()+9999999, Environment::getBaseURL(), NULL, $this->isSSL() ); //Delete old directory cookie as it can cause a conflict if it stills exists.
+			setcookie($this->getName(), NULL, ( time() + 9999999 ), Environment::getBaseURL(), NULL, $this->isSSL() ); //Delete old directory cookie as it can cause a conflict if it stills exists.
 
 			//Set cookie in root directory so other interfaces can access it.
 			setcookie( $this->getName(), $this->getSessionID(), $cookie_expires, '/', NULL, $this->isSSL() );
@@ -423,7 +423,7 @@ class Authentication {
 	}
 
 	private function destroyCookie() {
-		setcookie($this->getName(), NULL, time()+9999999, '/', NULL, $this->isSSL() );
+		setcookie($this->getName(), NULL, ( time() + 9999999 ), '/', NULL, $this->isSSL() );
 
 		return TRUE;
 	}
@@ -474,7 +474,7 @@ class Authentication {
 		//Assume none are longer then one day though.
 		$query = 'delete from authentication
 						where session_id = ?
-							OR (updated_date - created_date) > '. (86400*2) .'
+							OR (updated_date - created_date) > '. (86400 * 2) .'
 							OR ('. TTDate::getTime() .' - updated_date) > 86400';
 
 		try {
@@ -495,7 +495,7 @@ class Authentication {
 					'updated_date' => $this->getUpdatedDate()
 					);
 
-		$query = 'insert into authentication (session_id,user_id,ip_address,created_date,updated_date)
+		$query = 'insert into authentication (session_id, user_id, ip_address, created_date, updated_date)
 						VALUES(
 								?,
 								?,
@@ -523,7 +523,7 @@ class Authentication {
 		//When using SSL, don't check for IP address changing at all as we use secure cookies.
 		//When *not* using SSL, always require the same IP address for the session.
 		//However we need to still allow multiple sessions for the same user, using different IPs.
-		$query = 'select session_id,user_id,ip_address,created_date,updated_date from authentication
+		$query = 'select session_id, user_id, ip_address, created_date, updated_date from authentication
 					WHERE session_id = ?
 						AND updated_date >= ?
 						';
@@ -562,7 +562,7 @@ class Authentication {
 		$password = html_entity_decode( $password );
 
 		//Checks user_name/password
-        if ( $user_name == '' OR $password == '' ) {
+		if ( $user_name == '' OR $password == '' ) {
 			return FALSE;
 		}
 
@@ -571,7 +571,7 @@ class Authentication {
 			//Prevent brute force attacks by IP address.
 			//Allowed up to 20 attempts in a 30 min period.
 			if ( $this->rl->check() == FALSE ) {
-				Debug::Text('Excessive failed password attempts... Preventing login from: '. $_SERVER['REMOTE_ADDR'] .' for up to 15 minutes...', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Excessive failed password attempts... Preventing login from: '. $_SERVER['REMOTE_ADDR'] .' for up to 15 minutes...', __FILE__, __LINE__, __METHOD__, 10);
 				sleep(5); //Excessive password attempts, sleep longer.
 				return FALSE;
 			}
@@ -622,7 +622,7 @@ class Authentication {
 					$this->UpdateLastLoginDate();
 				}
 
-				TTLog::addEntry( $this->getObject()->getID(), 100,  TTi18n::getText('SourceIP').': '. $this->getIPAddress() .' '. TTi18n::getText('Type').': '. $type .' '.  TTi18n::getText('SessionID') .': '.$this->getSessionID() .' '.  TTi18n::getText('UserID').': '. $this->getObject()->getId(), $this->getObject()->getID() , 'authentication'); //Login
+				TTLog::addEntry( $this->getObject()->getID(), 100, TTi18n::getText('SourceIP').': '. $this->getIPAddress() .' '. TTi18n::getText('Type').': '. $type .' '.	TTi18n::getText('SessionID') .': '.$this->getSessionID() .' '.	TTi18n::getText('UserID').': '. $this->getObject()->getId(), $this->getObject()->getID(), 'authentication'); //Login
 
 				$this->rl->delete(); //Clear failed password rate limit upon successful login.
 
@@ -631,7 +631,7 @@ class Authentication {
 
 			Debug::text('Login Failed! Attempt: '. $this->rl->getAttempts(), __FILE__, __LINE__, __METHOD__, 10);
 
-			sleep( ($this->rl->getAttempts()*0.5) ); //If password is incorrect, sleep for some time to slow down brute force attacks.
+			sleep( ($this->rl->getAttempts() * 0.5) ); //If password is incorrect, sleep for some time to slow down brute force attacks.
 		} catch (Exception $e) {
 			//Database not initialized, or some error, redirect to Install page.
 			throw new DBError($e, 'DBInitialize');
@@ -640,12 +640,12 @@ class Authentication {
 		return FALSE;
 	}
 
-	function Logout( $session_id = NULL ) {
+	function Logout() {
 		$this->destroyCookie();
 		$this->Delete();
 
 		if ( is_object( $this->getObject() ) ) {
-			TTLog::addEntry( $this->getObject()->getID(), 110,  TTi18n::getText('SourceIP').': '. $this->getIPAddress() .' '.  TTi18n::getText('SessionID').': '.$this->getSessionID() .' '.  TTi18n::getText('UserID').': '. $this->getObject()->getId(), $this->getObject()->getID() , 'authentication');
+			TTLog::addEntry( $this->getObject()->getID(), 110, TTi18n::getText('SourceIP').': '. $this->getIPAddress() .' '.  TTi18n::getText('SessionID').': '.$this->getSessionID() .' '.	 TTi18n::getText('UserID').': '. $this->getObject()->getId(), $this->getObject()->getID(), 'authentication');
 		}
 
 		BreadCrumb::Delete();
@@ -677,7 +677,7 @@ class Authentication {
 			}
 		}
 
-		Debug::text('Session ID: '. $session_id .' IP Address: '. $_SERVER['REMOTE_ADDR'] .' URL: '. $_SERVER['REQUEST_URI'] , __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Session ID: '. $session_id .' IP Address: '. $_SERVER['REMOTE_ADDR'] .' URL: '. $_SERVER['REQUEST_URI'], __FILE__, __LINE__, __METHOD__, 10);
 		//Checks session cookie, returns user_id;
 		if ( isset( $session_id ) ) {
 			/*
@@ -711,6 +711,22 @@ class Authentication {
 		$profiler->stopTimer( "Authentication::Check()");
 
 		return FALSE;
+	}
+
+	//When company status changes, logout all users for the company.
+	function logoutCompany( $company_id ) {
+		$ph = array(
+					'company_id' => $company_id,
+					);
+
+		$query = 'delete from authentication as a USING users as b WHERE a.user_id = b.id AND b.company_id = ?';
+					
+		try {
+			Debug::text('Logging out entire company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
+			$this->db->Execute($query, $ph);
+		} catch (Exception $e) {
+			throw new DBError($e);
+		}
 	}
 }
 ?>

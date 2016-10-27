@@ -41,7 +41,6 @@
 require_once('PHPUnit/Framework/TestCase.php');
 
 class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
-
 	protected $company_id = NULL;
 	protected $user_id = NULL;
 	protected $pay_period_schedule_id = NULL;
@@ -80,9 +79,9 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 		$this->user_id = $dd->createUser( $this->company_id, 100 );
 
-		$this->createPayPeriodSchedule();
-		$this->createPayPeriods();
-		$this->getAllPayPeriods();
+		//$this->createPayPeriodSchedule();
+		//$this->createPayPeriods();
+		//$this->getAllPayPeriods();
 
 		$this->absence_policy_id = $dd->createAbsencePolicy( $this->company_id, 10 );
 
@@ -227,7 +226,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 	}
 
-	function createPayPeriods() {
+	function createPayPeriods( $initial_date = FALSE ) {
 		$max_pay_periods = 35;
 
 		$ppslf = new PayPeriodScheduleListFactory();
@@ -237,8 +236,12 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
-					//$end_date = TTDate::getBeginYearEpoch( strtotime('01-Jan-07') );
-					$end_date = TTDate::getBeginYearEpoch( time() );
+					if ( $initial_date !== FALSE ) {
+						$end_date = $initial_date;
+					} else {
+						//$end_date = TTDate::getBeginYearEpoch( strtotime('01-Jan-07') );
+						$end_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() )-(86400*(7*6) ) ) );
+					}
 				} else {
 					$end_date = $end_date + ( (86400*14) );
 				}
@@ -2165,8 +2168,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		Advanced Time+Hour+Branch+Department+Job
 	*/
 
+	/**
+	 * @group PremiumPolicy_testNoPremiumPolicyA
+	 */
 	function testNoPremiumPolicyA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 100 );
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 110 );
@@ -2217,9 +2227,16 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testMinMaxPremiumPolicyA
+	 */
 	function testMinMaxPremiumPolicyA() {
 		global $dd;
 
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 90 );
 		//$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 110 );
 		//$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 120 );
@@ -2274,9 +2291,16 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testMinMaxPremiumPolicyB
+	 */
 	function testMinMaxPremiumPolicyB() {
 		global $dd;
 
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 90 );
 		//$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 110 );
 		//$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 120 );
@@ -2331,8 +2355,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testMinMaxPremiumPolicyC
+	 */
 	function testMinMaxPremiumPolicyC() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 90 );
 		//$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 110 );
@@ -2388,8 +2419,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testMinMaxPremiumPolicyD
+	 */
 	function testMinMaxPremiumPolicyD() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 90 );
 		//$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 110 );
@@ -2445,8 +2483,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testMinMaxPremiumPolicyE
+	 */
 	function testMinMaxPremiumPolicyE() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 90 );
 		//$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 110 );
@@ -2520,8 +2565,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testMinMaxPremiumPolicyF
+	 */
 	function testMinMaxPremiumPolicyF() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 90 );
 		//$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 110 );
@@ -2596,8 +2648,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testMinMaxPremiumPolicyA2
+	 */
 	function testMinMaxPremiumPolicyA2() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 91 );
 
@@ -2651,8 +2710,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testMinMaxPremiumPolicyB2
+	 */
 	function testMinMaxPremiumPolicyB2() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 91 );
 
@@ -2706,8 +2772,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testMinMaxPremiumPolicyC2
+	 */
 	function testMinMaxPremiumPolicyC2() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 91 );
 
@@ -2761,8 +2834,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testMinMaxPremiumPolicyD2
+	 */
 	function testMinMaxPremiumPolicyD2() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 91 );
 
@@ -2816,8 +2896,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testMinMaxPremiumPolicyE2
+	 */
 	function testMinMaxPremiumPolicyE2() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 91 );
 
@@ -2889,8 +2976,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testMinMaxPremiumPolicyF2
+	 */
 	function testMinMaxPremiumPolicyF2() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 91 );
 
@@ -2963,8 +3057,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testEffectiveDaysOnlyPremiumPolicyA
+	 */
 	function testEffectiveDaysOnlyPremiumPolicyA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 129 );
 
@@ -3018,8 +3119,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testEffectiveDaysOnlyPremiumPolicyB
+	 */
 	function testEffectiveDaysOnlyPremiumPolicyB() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 129 );
 
@@ -3070,9 +3178,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-
+	/**
+	 * @group PremiumPolicy_testDatePremiumPolicyA
+	 */
 	function testDatePremiumPolicyA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 100 );
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 110 );
@@ -3128,8 +3242,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testEffectiveDatePremiumPolicyA
+	 */
 	function testEffectiveDatePremiumPolicyA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 100 );
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 110 );
@@ -3230,8 +3351,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testTimeBasedPartialPremiumPolicyA
+	 */
 	function testTimeBasedPartialPremiumPolicyA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 100 );
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 110 );
@@ -3295,9 +3423,16 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testTimeBasedPartialPremiumPolicyB
+	 */
 	function testTimeBasedPartialPremiumPolicyB() {
 		global $dd;
 
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 122 );
 
 		//Create Policy Group
@@ -3350,9 +3485,17 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
+
+	/**
+	 * @group PremiumPolicy_testTimeBasedPartialPremiumPolicyB2
+	 */
 	function testTimeBasedPartialPremiumPolicyB2() {
 		global $dd;
 
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 124 );
 
 		//Create Policy Group
@@ -3406,9 +3549,16 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testTimeBasedPartialPremiumPolicyC
+	 */
 	function testTimeBasedPartialPremiumPolicyC() {
 		global $dd;
 
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 122 );
 
 		//Create Policy Group
@@ -3475,9 +3625,17 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
+
+	/**
+	 * @group PremiumPolicy_testTimeBasedPartialPremiumPolicyC2
+	 */
 	function testTimeBasedPartialPremiumPolicyC2() {
 		global $dd;
 
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 124 );
 
 		//Create Policy Group
@@ -3545,9 +3703,16 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testTimeBasedPartialPremiumPolicyD
+	 */
 	function testTimeBasedPartialPremiumPolicyD() {
 		global $dd;
 
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 122 );
 
 		//Create Policy Group
@@ -3618,9 +3783,17 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
+
+	/**
+	 * @group PremiumPolicy_testTimeBasedPartialPremiumPolicyD2
+	 */
 	function testTimeBasedPartialPremiumPolicyD2() {
 		global $dd;
 
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 124 );
 
 		//Create Policy Group
@@ -3692,8 +3865,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testTimeBasedPartialPremiumPolicyE
+	 */
 	function testTimeBasedPartialPremiumPolicyE() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 122 );
 
@@ -3748,8 +3928,16 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
+
+	/**
+	 * @group PremiumPolicy_testTimeBasedPartialPremiumPolicyE2
+	 */
 	function testTimeBasedPartialPremiumPolicyE2() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 124 );
 
@@ -3805,8 +3993,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testTimeBasedPartialPremiumPolicyF
+	 */
 	function testTimeBasedPartialPremiumPolicyF() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 123 );
 
@@ -3861,8 +4056,16 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
+
+	/**
+	 * @group PremiumPolicy_testTimeBasedPartialPremiumPolicyF2
+	 */
 	function testTimeBasedPartialPremiumPolicyF2() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 125 );
 
@@ -3918,9 +4121,16 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//Test creating punches in one timezone, then recalculating them in another timezone to make sure they are proper.
+	/**
+	 * @group PremiumPolicy_testTimeBasedPartialPremiumPolicyF3
+	 */
 	function testTimeBasedPartialPremiumPolicyF3() {
+		//Test creating punches in one timezone, then recalculating them in another timezone to make sure they are proper.
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		TTDate::setTimeZone('PST8PDT');
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 125 );
@@ -4005,8 +4215,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testTimeBasedPartialPremiumPolicyG
+	 */
 	function testTimeBasedPartialPremiumPolicyG() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 123 );
 
@@ -4061,8 +4278,16 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
+
+	/**
+	 * @group PremiumPolicy_testTimeBasedPartialPremiumPolicyG2
+	 */
 	function testTimeBasedPartialPremiumPolicyG2() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 125 );
 
@@ -4118,8 +4343,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testTimeBasedNoPartialPremiumPolicyA
+	 */
 	function testTimeBasedNoPartialPremiumPolicyA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 100 );
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 110 );
@@ -4178,8 +4410,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testTimeBasedNoPartialPremiumPolicyB
+	 */
 	function testTimeBasedNoPartialPremiumPolicyB() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 132 );
 
@@ -4243,8 +4482,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testTimeBasedNoPartialPremiumPolicyC
+	 */
 	function testTimeBasedNoPartialPremiumPolicyC() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 132 );
 
@@ -4308,9 +4554,17 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//Put a 5hr gap between the two punch pairs to signify a new shift starting, so premium does kick in.
+
+	/**
+	 * @group PremiumPolicy_testTimeBasedNoPartialPremiumPolicyD
+	 */
 	function testTimeBasedNoPartialPremiumPolicyD() {
+		//Put a 5hr gap between the two punch pairs to signify a new shift starting, so premium does kick in.
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 132 );
 
@@ -4379,8 +4633,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testTimeBasedNoPartialPremiumPolicyE
+	 */
 	function testTimeBasedNoPartialPremiumPolicyE() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 132 );
 
@@ -4453,8 +4714,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testTimeBasedNoPartialPremiumPolicyF
+	 */
 	function testTimeBasedNoPartialPremiumPolicyF() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 132 );
 
@@ -4527,9 +4795,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-
+	/**
+	 * @group PremiumPolicy_testDailyHourPremiumPolicyA
+	 */
 	function testDailyHourPremiumPolicyA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 100 );
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 110 );
@@ -4592,8 +4866,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testWeeklyHourPremiumPolicyA
+	 */
 	function testWeeklyHourPremiumPolicyA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 100 );
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 110 );
@@ -4697,8 +4978,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testDailyWeeklyHourPremiumPolicyA
+	 */
 	function testDailyWeeklyHourPremiumPolicyA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 100 );
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 110 );
@@ -4802,8 +5090,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testTimeDailyWeeklyHourPremiumPolicyA
+	 */
 	function testTimeDailyWeeklyHourPremiumPolicyA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 100 );
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 110 );
@@ -4908,8 +5203,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testBranchDifferentialPremiumPolicyA
+	 */
 	function testBranchDifferentialPremiumPolicyA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 100 );
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 110 );
@@ -4997,8 +5299,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testBranchDepartmentDifferentialPremiumPolicyA
+	 */
 	function testBranchDepartmentDifferentialPremiumPolicyA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 100 );
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 110 );
@@ -5086,8 +5395,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testBranchDepartmentDifferentialPremiumPolicyB
+	 */
 	function testBranchDepartmentDifferentialPremiumPolicyB() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		//$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 100 );
 		//$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 110 );
@@ -5167,8 +5483,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testMealPremiumPolicyA
+	 */
 	function testMealPremiumPolicyA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 100 );
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 110 );
@@ -5232,8 +5555,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testMealPremiumPolicyB
+	 */
 	function testMealPremiumPolicyB() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 100 );
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 110 );
@@ -5322,8 +5652,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testMinimumShiftTimeA
+	 */
 	function testMinimumShiftTimeA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 350 );
 
@@ -5480,8 +5817,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testMinimumShiftTimeB
+	 */
 	function testMinimumShiftTimeB() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 351 );
 
@@ -5694,8 +6038,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testHolidayPremiumPolicyA
+	 */
 	function testHolidayPremiumPolicyA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$date_epoch = $this->pay_period_objs[0]->getStartDate()+(86400*3);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
@@ -5779,8 +6130,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testHolidayPremiumPolicyB
+	 */
 	function testHolidayPremiumPolicyB() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$date_epoch1 = $this->pay_period_objs[0]->getStartDate()+(86400*2);
 		$date_stamp1 = TTDate::getDate('DATE', $date_epoch1 );
@@ -5886,8 +6244,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testHolidayDatePremiumPolicyA
+	 */
 	function testHolidayDatePremiumPolicyA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$date_epoch = $this->pay_period_objs[0]->getStartDate()+86400;
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
@@ -5945,8 +6310,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testHolidayDatePremiumPolicyB
+	 */
 	function testHolidayDatePremiumPolicyB() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$date_epoch = $this->pay_period_objs[0]->getStartDate()+86400;
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
@@ -6000,8 +6372,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testWeeklyHourNeverHolidayPremiumPolicyA
+	 */
 	function testWeeklyHourNeverHolidayPremiumPolicyA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 414 );
 
@@ -6231,8 +6610,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testDailyHourBeforePremiumPolicyA
+	 */
 	function testDailyHourBeforePremiumPolicyA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 500 );
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 501 );
@@ -6291,8 +6677,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testWeeklyHourBeforePremiumPolicyA
+	 */
 	function testWeeklyHourBeforePremiumPolicyA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 510 );
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 511 );
@@ -6531,8 +6924,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testLastSecondOfDayDatePremiumPolicyA
+	 */
 	function testLastSecondOfDayDatePremiumPolicyA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 600 );
 		//$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 110 );
@@ -6591,8 +6991,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testDailyAndWeeklyHourBeforeAfterPremiumPolicy
+	 */
 	function testDailyAndWeeklyHourBeforeAfterPremiumPolicy() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 520 );
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 521 );
@@ -6850,11 +7257,17 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testAdvancedActiveAfterWithDifferentialA
+	 */
 	function testAdvancedActiveAfterWithDifferentialA() {
 		global $dd;
 
-		//Test to make sure active after Daily time includes all worked time, not just time matching the differential criteria.
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
+		//Test to make sure active after Daily time includes all worked time, not just time matching the differential criteria.
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 700 );
 
 		//Create Policy Group
@@ -6976,9 +7389,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-
+	/**
+	 * @group PremiumPolicy_testDST
+	 */
 	function testDSTA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods( strtotime('01-Jan-2013') );
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 126 );
 
@@ -7035,8 +7454,16 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
+
+	/**
+	 * @group PremiumPolicy_testDST
+	 */
 	function testDSTA2() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods( strtotime('01-Jan-2013') );
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 126 );
 
@@ -7090,8 +7517,16 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
+
+	/**
+	 * @group PremiumPolicy_testDST
+	 */
 	function testDSTA3() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods( strtotime('01-Jan-2013') );
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 126 );
 
@@ -7145,8 +7580,16 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
+
+	/**
+	 * @group PremiumPolicy_testDST
+	 */
 	function testDSTA4() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods( strtotime('01-Jan-2013') );
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 127 );
 
@@ -7204,8 +7647,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testDST
+	 */
 	function testDSTB() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods( strtotime('01-Jan-2013') );
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 126 );
 
@@ -7262,8 +7712,16 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
+
+	/**
+	 * @group PremiumPolicy_testDST
+	 */
 	function testDSTB2() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods( strtotime('01-Jan-2013') );
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 126 );
 
@@ -7320,8 +7778,16 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
+
+	/**
+	 * @group PremiumPolicy_testDST
+	 */
 	function testDSTB3() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods( strtotime('01-Jan-2013') );
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 126 );
 
@@ -7378,8 +7844,16 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
+
+	/**
+	 * @group PremiumPolicy_testDST
+	 */
 	function testDSTB4() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods( strtotime('01-Jan-2013') );
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 127 );
 
@@ -7437,8 +7911,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testDailyAndWeeklyBeforePremiumPolicyA
+	 */
 	function testDailyAndWeeklyBeforePremiumPolicyA() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 523 );
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 524 );
@@ -7723,8 +8204,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testDailyAndWeeklyBeforePremiumPolicyB
+	 */
 	function testDailyAndWeeklyBeforePremiumPolicyB() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 723 );
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 729 );
@@ -7967,8 +8455,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testDailyAndWeeklyBeforePremiumPolicyC
+	 */
 	function testDailyAndWeeklyBeforePremiumPolicyC() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 723 );
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 724 );
@@ -8273,8 +8768,15 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group PremiumPolicy_testDailyAndWeeklyBeforePremiumPolicyD
+	 */
 	function testDailyAndWeeklyBeforePremiumPolicyD() {
 		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
 
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 723 );
 		$policy_ids['premium'][] = $this->createPremiumPolicy( $this->company_id, 724 );

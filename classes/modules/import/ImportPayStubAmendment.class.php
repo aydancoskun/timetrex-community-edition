@@ -55,7 +55,7 @@ class ImportPayStubAmendment extends Import {
 		switch( $name ) {
 			case 'columns':
 				$psaf = TTNew('PayStubAmendmentFactory');
-				$retval = Misc::prependArray( $this->getUserIdentificationColumns(), Misc::arrayIntersectByKey( array('status','type','pay_stub_entry_name','effective_date','amount','rate','units','description','ytd_adjustment'), Misc::trimSortPrefix( $psaf->getOptions('columns') ) ) );
+				$retval = Misc::prependArray( $this->getUserIdentificationColumns(), Misc::arrayIntersectByKey( array('status', 'type', 'pay_stub_entry_name', 'effective_date', 'amount', 'rate', 'units', 'description', 'ytd_adjustment'), Misc::trimSortPrefix( $psaf->getOptions('columns') ) ) );
 
 				break;
 			case 'column_aliases':
@@ -87,7 +87,7 @@ class ImportPayStubAmendment extends Import {
 
 
 	function _preParseRow( $row_number, $raw_row ) {
-		$retval = $this->getObject()->getPayStubAmendmentDefaultData();
+		$retval = $this->getObject()->stripReturnHandler( $this->getObject()->getPayStubAmendmentDefaultData() );
 
 		return $retval;
 	}
@@ -111,7 +111,7 @@ class ImportPayStubAmendment extends Import {
 	function getPayStubAccountOptions() {
 		//Get accrual policies
 		$psealf = TTNew('PayStubEntryAccountListFactory');
-		$psealf->getByCompanyIdAndTypeId( $this->company_id, array(10,20,30,50,80) );
+		$psealf->getByCompanyIdAndTypeId( $this->company_id, array(10, 20, 30, 50, 80) );
 
 		//Get names with types in front, ie: "Earning - Commission"
 		$this->pay_stub_account_options = (array)$psealf->getArrayByListFactory( $psealf, FALSE, TRUE, TRUE );

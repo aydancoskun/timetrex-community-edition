@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11414 $
- * $Id: PermissionControlFactory.class.php 11414 2013-11-15 19:53:13Z mikeb $
- * $Date: 2013-11-15 11:53:13 -0800 (Fri, 15 Nov 2013) $
+ * $Revision: 12026 $
+ * $Id: PermissionControlFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -100,7 +100,7 @@ class PermissionControlFactory extends Factory {
 							);
 				break;
 			case 'list_columns':
-				$retval = Misc::arrayIntersectByKey( array('name','description','level'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
+				$retval = Misc::arrayIntersectByKey( array('name', 'description', 'level'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
 				$retval = array(
@@ -154,7 +154,7 @@ class PermissionControlFactory extends Factory {
 
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
-			return $this->data['company_id'];
+			return (int)$this->data['company_id'];
 		}
 
 		return FALSE;
@@ -185,7 +185,7 @@ class PermissionControlFactory extends Factory {
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND name = ? AND deleted=0';
 		$permission_control_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($permission_control_id,'Unique Permission Control ID: '. $permission_control_id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($permission_control_id, 'Unique Permission Control ID: '. $permission_control_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $permission_control_id === FALSE ) {
 			return TRUE;
@@ -206,7 +206,7 @@ class PermissionControlFactory extends Factory {
 		if (	$this->Validator->isLength(	'name',
 											$name,
 											TTi18n::gettext('Name is invalid'),
-											2,50)
+											2, 50)
 				AND	$this->Validator->isTrue(	'name',
 												$this->isUniqueName($name),
 												TTi18n::gettext('Name is already in use')
@@ -231,7 +231,7 @@ class PermissionControlFactory extends Factory {
 				OR $this->Validator->isLength(	'description',
 											$description,
 											TTi18n::gettext('Description is invalid'),
-											1,255) ) {
+											1, 255) ) {
 
 			$this->data['description'] = $description;
 
@@ -280,7 +280,7 @@ class PermissionControlFactory extends Factory {
 	}
 	function setUser($ids) {
 		Debug::text('Setting User IDs : ', __FILE__, __LINE__, __METHOD__, 10);
-		if (is_array($ids) and count($ids) > 0) {
+		if ( is_array($ids) AND count($ids) > 0 ) {
 			global $current_user;
 
 			//Remove any of the selected employees from other permission control objects first.
@@ -390,7 +390,7 @@ class PermissionControlFactory extends Factory {
 		$plf = TTnew( 'PermissionListFactory' );
 		$plf->getByCompanyIdAndPermissionControlId( $this->getCompany(), $this->getId() );
 		if ( $plf->getRecordCount() > 0 ) {
-			Debug::Text('Found Permissions: '. $plf->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Found Permissions: '. $plf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			foreach($plf as $p_obj) {
 				$current_permissions[$p_obj->getSection()][$p_obj->getName()] = $p_obj->getValue();
 			}
@@ -418,15 +418,15 @@ class PermissionControlFactory extends Factory {
 			//If we do the permission diff it messes up the HTML interface.
 			if ( !is_array($old_permission_arr) OR ( is_array($old_permission_arr) AND count($old_permission_arr) == 0 ) ) {
 				$old_permission_arr = $this->getPermission();
-				//Debug::Text(' Old Permissions: '. count($old_permission_arr), __FILE__, __LINE__, __METHOD__,10);
+				//Debug::Text(' Old Permissions: '. count($old_permission_arr), __FILE__, __LINE__, __METHOD__, 10);
 			}
 
 			$permission_options = $this->getPermissionOptions();
-			//Debug::Arr($permission_options, ' Permission Options: '. count($permission_options), __FILE__, __LINE__, __METHOD__,10);
+			//Debug::Arr($permission_options, ' Permission Options: '. count($permission_options), __FILE__, __LINE__, __METHOD__, 10);
 
 			$permission_arr = Misc::arrayMergeRecursiveDistinct( (array)$permission_options, (array)$permission_arr );
-			//Debug::Text(' New Permissions: '. count($permission_arr), __FILE__, __LINE__, __METHOD__,10);
-			//Debug::Arr($permission_arr, ' Final Permissions: '. count($permission_arr), __FILE__, __LINE__, __METHOD__,10);
+			//Debug::Text(' New Permissions: '. count($permission_arr), __FILE__, __LINE__, __METHOD__, 10);
+			//Debug::Arr($permission_arr, ' Final Permissions: '. count($permission_arr), __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		$pf = TTnew( 'PermissionFactory' );
@@ -434,11 +434,11 @@ class PermissionControlFactory extends Factory {
 		//Don't Delete all previous permissions, do that in the Permission class.
 		if ( isset($permission_arr) AND is_array($permission_arr) AND count($permission_arr) > 0 ) {
 			foreach ($permission_arr as $section => $permissions) {
-				//Debug::Text('  Section: '. $section, __FILE__, __LINE__, __METHOD__,10);
+				//Debug::Text('	 Section: '. $section, __FILE__, __LINE__, __METHOD__, 10);
 
 				foreach ($permissions as $name => $value) {
-					//Debug::Text('     Name: '. $name .' - Value: '. $value, __FILE__, __LINE__, __METHOD__,10);
-					if ( 	(
+					//Debug::Text('		Name: '. $name .' - Value: '. $value, __FILE__, __LINE__, __METHOD__, 10);
+					if (	(
 							!isset($old_permission_arr[$section][$name])
 								OR (isset($old_permission_arr[$section][$name]) AND $value != $old_permission_arr[$section][$name] )
 							)
@@ -446,7 +446,7 @@ class PermissionControlFactory extends Factory {
 							) {
 
 						if ( $value == 0 OR $value == 1 ) {
-							Debug::Text('    Modifying/Adding Permission: '. $name .' - Value: '. $value, __FILE__, __LINE__, __METHOD__,10);
+							Debug::Text('	 Modifying/Adding Permission: '. $name .' - Value: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 							$tmp_pf = TTnew( 'PermissionFactory' );
 							$tmp_pf->setCompany( $this->getCompanyObject()->getId() );
 							$tmp_pf->setPermissionControl( $this->getId() );
@@ -457,9 +457,7 @@ class PermissionControlFactory extends Factory {
 								$tmp_pf->save();
 							}
 						}
-					} else {
-						//Debug::Text('     Permission didnt change... Skipping', __FILE__, __LINE__, __METHOD__,10);
-					}
+					} //else { //Debug::Text('	   Permission didnt change... Skipping', __FILE__, __LINE__, __METHOD__, 10);
 				}
 			}
 		}
@@ -512,7 +510,7 @@ class PermissionControlFactory extends Factory {
 		}
 	}
 
-	//Support setting created_by,updated_by especially for importing data.
+	//Support setting created_by, updated_by especially for importing data.
 	//Make sure data is set based on the getVariableToFunctionMap order.
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
@@ -567,7 +565,7 @@ class PermissionControlFactory extends Factory {
 	}
 
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action,  TTi18n::getText('Permission Group: '). $this->getName(), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Permission Group: '). $this->getName(), NULL, $this->getTable(), $this );
 	}
 }
 ?>

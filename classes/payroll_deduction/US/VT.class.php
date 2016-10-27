@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: VT.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11830 $
+ * $Id: VT.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -45,6 +45,9 @@
 class PayrollDeduction_US_VT extends PayrollDeduction_US {
 
 	var $state_options = array(
+								1388563200 => array( //01-Jan-14
+													'allowance' => 3950
+													),
 								//01-Jan-10: No Change
 								1230796800 => array( //01-Jan-09
 													'allowance' => 3650

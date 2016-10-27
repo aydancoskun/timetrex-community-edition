@@ -55,7 +55,7 @@ class ImportPayPeriod extends Import {
 		switch( $name ) {
 			case 'columns':
 				$ppf = TTNew('PayPeriodFactory');
-				$retval = Misc::arrayIntersectByKey( array('pay_period_schedule_id','start_date','end_date','transaction_date'), Misc::trimSortPrefix( $ppf->getOptions('columns') ) );
+				$retval = Misc::arrayIntersectByKey( array('pay_period_schedule_id', 'start_date', 'end_date', 'transaction_date'), Misc::trimSortPrefix( $ppf->getOptions('columns') ) );
 				break;
 			case 'column_aliases':
 				//Used for converting column names after they have been parsed.
@@ -85,7 +85,7 @@ class ImportPayPeriod extends Import {
 
 
 	function _preParseRow( $row_number, $raw_row ) {
-		$retval = $this->getObject()->getPayPeriodDefaultData();
+		$retval = $this->getObject()->stripReturnHandler( $this->getObject()->getPayPeriodDefaultData() );
 
 		return $retval;
 	}

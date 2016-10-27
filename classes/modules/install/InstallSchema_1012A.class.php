@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: InstallSchema_1012A.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11830 $
+ * $Id: InstallSchema_1012A.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -45,7 +45,7 @@
 class InstallSchema_1012A extends InstallSchema_Base {
 
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion() , __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		return TRUE;
 	}
@@ -53,7 +53,7 @@ class InstallSchema_1012A extends InstallSchema_Base {
 	function postInstall() {
 		global $cache;
 		
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 		
 		//Get all pay period schedules.
 		$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
@@ -93,7 +93,7 @@ class InstallSchema_1012A extends InstallSchema_Base {
 			}
 		}
 		
-		Debug::text('l: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('l: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 				
 		return TRUE;
 	}

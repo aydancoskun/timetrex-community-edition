@@ -565,7 +565,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 	}
 
 	function filterCompanyAddress( $value ) {
-		Debug::Text('Filtering company address: '. $value, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Text('Filtering company address: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 
 		//Combine company address for multicell display.
 		$retarr[] = $this->company_address1;
@@ -603,7 +603,7 @@ class GovernmentForms_US_W3 extends GovernmentForms_US {
 			$template_page = NULL;
 
 			foreach( $template_schema as $field => $schema ) {
-				Debug::text('Drawing Cell... Field: '. $field, __FILE__, __LINE__, __METHOD__, 10);
+				//Debug::text('Drawing Cell... Field: '. $field, __FILE__, __LINE__, __METHOD__, 10);
 				$this->Draw( $this->$field, $schema );
 			}
 		}

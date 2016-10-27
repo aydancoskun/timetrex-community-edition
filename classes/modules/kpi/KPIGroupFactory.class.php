@@ -84,14 +84,14 @@ class KPIGroupFactory extends Factory {
 		$variable_function_map = array(
 										'id' => 'ID',
 										'company_id' => 'Company',
-                                        'parent_id' => 'Parent',
+										'parent_id' => 'Parent',
 										'name' => 'Name',
 										'deleted' => 'Deleted',
 										);
 		return $variable_function_map;
 	}
 
-    function getFastTreeObject() {
+	function getFastTreeObject() {
 
 		if ( is_object($this->fasttree_obj) ) {
 			return $this->fasttree_obj;
@@ -104,9 +104,9 @@ class KPIGroupFactory extends Factory {
 	}
 
 	function getCompany() {
-	    if( isset( $this->data['company_id'] ) ) {
-	       return $this->data['company_id'];
-	    }
+		if( isset( $this->data['company_id'] ) ) {
+			return (int)$this->data['company_id'];
+		}
 		return FALSE;
 	}
 	function setCompany($id) {
@@ -127,7 +127,7 @@ class KPIGroupFactory extends Factory {
 		return FALSE;
 	}
 
-    //Use this for completly editing a row in the tree
+	//Use this for completly editing a row in the tree
 	//Basically "old_id".
 	function getPreviousParent() {
 		if ( isset($this->tmp_data['previous_parent_id']) ) {
@@ -168,7 +168,7 @@ class KPIGroupFactory extends Factory {
 						AND name = ?
 						AND deleted = 0';
 		$name_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($name_id,'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $name_id === FALSE ) {
 			return TRUE;
@@ -182,15 +182,15 @@ class KPIGroupFactory extends Factory {
 	}
 
 	function getName() {
-	    if ( isset( $this->data['name'] ) ) {
-	       return $this->data['name'];
-	    }
+		if ( isset( $this->data['name'] ) ) {
+			return $this->data['name'];
+		}
 		return FALSE;
 	}
 	function setName($name) {
 		$name = trim($name);
 
-		if 	(	$this->Validator->isLength(		'name',
+		if	(	$this->Validator->isLength(		'name',
 												$name,
 												TTi18n::gettext('Name is too short or too long'),
 												2,
@@ -229,7 +229,7 @@ class KPIGroupFactory extends Factory {
 				}
 
 				if ( is_array($children_ids) AND in_array( $this->getParent(), $children_ids) == TRUE ) {
-					Debug::Text(' Objects cant be re-parented to their own children...' , __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text(' Objects cant be re-parented to their own children...', __FILE__, __LINE__, __METHOD__, 10);
 					$this->Validator->isTrue(	'parent',
 												FALSE,
 												TTi18n::gettext('Unable to change parent to a child of itself')
@@ -241,13 +241,13 @@ class KPIGroupFactory extends Factory {
 		return TRUE;
 	}
 
-    function preSave() {
+	function preSave() {
 
 		if ( $this->isNew() ) {
-			Debug::Text(' Setting Insert Tree TRUE ', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text(' Setting Insert Tree TRUE ', __FILE__, __LINE__, __METHOD__, 10);
 			$this->insert_tree = TRUE;
 		} else {
-			Debug::Text(' Setting Insert Tree FALSE ', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text(' Setting Insert Tree FALSE ', __FILE__, __LINE__, __METHOD__, 10);
 			$this->insert_tree = FALSE;
 		}
 
@@ -263,16 +263,16 @@ class KPIGroupFactory extends Factory {
 		if ( $this->getDeleted() == TRUE ) {
 			//FIXME: Get parent of this object, and re-parent all groups to it.
 			$parent_id = $this->getFastTreeObject()->getParentId( $this->getId() );
-            //Get items by group id.
+			//Get items by group id.
 			$klf = TTnew( 'KPIListFactory' );
-            $cgmlf = TTnew( 'CompanyGenericMapListFactory' );
-            $cgmf = TTnew( 'CompanyGenericMapFactory' );
+			$cgmlf = TTnew( 'CompanyGenericMapListFactory' );
+			$cgmf = TTnew( 'CompanyGenericMapFactory' );
 			$klf->getByCompanyIdAndGroupId( $this->getCompany(), $this->getId() );
-            if ( $klf->getRecordCount() > 0 ) {
+			if ( $klf->getRecordCount() > 0 ) {
 				foreach( $klf as $obj ) {
-					Debug::Text(' Re-Grouping Item: '. $obj->getId(), __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text(' Re-Grouping Item: '. $obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 					$ids[] = $obj->getId();
-                    //$obj->setGroup($parent_id);
+					//$obj->setGroup($parent_id);
 					//$obj->Save();
 				}
 			}
@@ -284,29 +284,29 @@ class KPIGroupFactory extends Factory {
 					$cgm_obj->Delete();
 				}
 			}
-            if ( isset($ids) AND is_array( $ids ) ) {
-                foreach( $ids as $id ) {
-                    if ( $parent_id > 0 ) {
-                        $cgmlf->getByCompanyIDAndObjectTypeAndObjectIDAndMapID( $this->getCompany(), 2020, $id , $parent_id );
-                        if ( $cgmlf->getRecordCount() == 0 ) {
-                            $cgmf->setCompany( $this->getCompany() );
-        					$cgmf->setObjectType( 2020 );
-        					$cgmf->setObjectID( $id );
-        					$cgmf->setMapId( $parent_id );
-        					$cgmf->Save();
-                        }
-                    }
-                    $cgmlf->getByCompanyIDAndObjectTypeAndObjectIDAndMapID($this->getCompany(), 2020, $id, $this->getId());
-                    if ( $cgmlf->getRecordCount() > 0 ) {
-                        foreach( $cgmlf as $cgm_obj ) {
-        					Debug::text('Deleteing from Company Generic Map: '. $cgm_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
-        					$cgm_obj->Delete();
-        				}
-                    }
-                    //$query = 'delete from ' . $cgmf->getTable() . ' where map_id = ' . $this->getId() . ' and object_id = ' . $id . ' and company_id = ' . $this->getCompany() . ' and object_type_id = 2020 ';
-                    //$this->db->Execute($query);
-                }
-            }
+			if ( isset($ids) AND is_array( $ids ) ) {
+				foreach( $ids as $id ) {
+					if ( $parent_id > 0 ) {
+						$cgmlf->getByCompanyIDAndObjectTypeAndObjectIDAndMapID( $this->getCompany(), 2020, $id, $parent_id );
+						if ( $cgmlf->getRecordCount() == 0 ) {
+							$cgmf->setCompany( $this->getCompany() );
+							$cgmf->setObjectType( 2020 );
+							$cgmf->setObjectID( $id );
+							$cgmf->setMapId( $parent_id );
+							$cgmf->Save();
+						}
+					}
+					$cgmlf->getByCompanyIDAndObjectTypeAndObjectIDAndMapID($this->getCompany(), 2020, $id, $this->getId());
+					if ( $cgmlf->getRecordCount() > 0 ) {
+						foreach( $cgmlf as $cgm_obj ) {
+							Debug::text('Deleteing from Company Generic Map: '. $cgm_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
+							$cgm_obj->Delete();
+						}
+					}
+					//$query = 'delete from ' . $cgmf->getTable() . ' where map_id = ' . $this->getId() . ' and object_id = ' . $id . ' and company_id = ' . $this->getCompany() . ' and object_type_id = 2020 ';
+					//$this->db->Execute($query);
+				}
+			}
 			$this->CommitTransaction();
 			return TRUE;
 		} else {
@@ -315,14 +315,14 @@ class KPIGroupFactory extends Factory {
 			//if ( $this->getId() === FALSE ) {
 
 			if ( $this->insert_tree === TRUE ) {
-				Debug::Text(' Adding Node ', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text(' Adding Node ', __FILE__, __LINE__, __METHOD__, 10);
 
-				//echo "Current ID: ".  $this->getID() ."<br>\n";
+				//echo "Current ID: ".	$this->getID() ."<br>\n";
 				//echo "Parent ID: ".  $this->getParent() ."<br>\n";
 
 				//Add node to tree
 				if ( $this->getFastTreeObject()->add( $this->getID(), $this->getParent() ) === FALSE ) {
-					Debug::Text(' Failed adding Node ', __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text(' Failed adding Node ', __FILE__, __LINE__, __METHOD__, 10);
 
 					$this->Validator->isTrue(	'name',
 												FALSE,
@@ -331,10 +331,10 @@ class KPIGroupFactory extends Factory {
 					$retval = FALSE;
 				}
 			} else {
-				Debug::Text(' Editing Node ', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text(' Editing Node ', __FILE__, __LINE__, __METHOD__, 10);
 
 				//Edit node.
-				$retval = $this->getFastTreeObject()->move( $this->getID() , $this->getParent() );
+				$retval = $this->getFastTreeObject()->move( $this->getID(), $this->getParent() );
 			}
 
 			if ( $retval === TRUE ) {
@@ -389,8 +389,8 @@ class KPIGroupFactory extends Factory {
 
 				}
 			}
-            $this->getPermissionColumns( $data, $this->getCreatedBy(), FALSE, $permission_children_ids, $include_columns );
-            
+			$this->getPermissionColumns( $data, $this->getCreatedBy(), FALSE, $permission_children_ids, $include_columns );
+
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
 		}
 

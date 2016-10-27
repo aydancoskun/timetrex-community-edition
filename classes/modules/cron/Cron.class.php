@@ -58,13 +58,13 @@ class Cron {
 		$retval = FALSE;
 		switch ( $name ) {
 			case 'minute':
-				for( $i=0; $i <= 59; $i+=$interval ) {
+				for( $i = 0; $i <= 59; $i += $interval ) {
 					$retval[$i] = $i;
 				}
 				$retval = Misc::prependArray( $all_array_option, $retval );
 				break;
 			case 'hour':
-				for( $i=0; $i <= 23; $i+=$interval ) {
+				for( $i = 0; $i <= 23; $i += $interval ) {
 					$retval[$i] = $i;
 				}
 				$retval = Misc::prependArray( $all_array_option, $retval );
@@ -132,9 +132,9 @@ class Cron {
 	}
 
 	//Parses any column into a complete list of entries.
-	//ie: converts: 	0-59 to an array of: 0,1,2,3,4,5,6,...
-	//					0-2,16,18 to array of 0,1,2,16,18
-	//					*/2 to array of 0,2,4,6,8,...
+	//ie: converts:		0-59 to an array of: 0, 1, 2, 3, 4, 5, 6, ...
+	//					0-2, 16, 18 to array of 0, 1, 2, 16, 18
+	//					*/2 to array of 0, 2, 4, 6, 8, ...
 	static function parseScheduleString( $str, $type ) {
 		if ( $str == '' ) {
 			$str = '*';
@@ -145,9 +145,7 @@ class Cron {
 		if ( count($split_str) == 0 ) {
 			//Debug::text('Schedule String DOES NOT have multiple commas: '. count($split_str), __FILE__, __LINE__, __METHOD__, 10);
 			$split_str = array($split_str);
-		} else {
-			//Debug::text('Schedule String has multiple commas: '. count($split_str), __FILE__, __LINE__, __METHOD__, 10);
-		}
+		} //else { Debug::text('Schedule String has multiple commas: '. count($split_str), __FILE__, __LINE__, __METHOD__, 10);
 
 		$retarr = array();
 		$limit_options = self::$limits;
@@ -166,7 +164,7 @@ class Cron {
 				//get Min/Max of range
 				$str_atom_range = explode('/', $str_atom);
 
-				$retarr = array_merge( $retarr, range($limit_options[$type]['min'],$limit_options[$type]['max'], $str_atom_range[1]) );
+				$retarr = array_merge( $retarr, range($limit_options[$type]['min'], $limit_options[$type]['max'], $str_atom_range[1]) );
 				unset($str_atom_range);
 			} else {
 				//No Range found
@@ -174,7 +172,7 @@ class Cron {
 
 				if ( trim($str_atom) == '*' ) {
 					//Debug::text('Found Full Range!: '. $str_atom, __FILE__, __LINE__, __METHOD__, 10);
-					$retarr = array_merge( $retarr, range($limit_options[$type]['min'],$limit_options[$type]['max']) );
+					$retarr = array_merge( $retarr, range($limit_options[$type]['min'], $limit_options[$type]['max']) );
 				} else {
 					//Debug::text('Singleton: '. $str_atom, __FILE__, __LINE__, __METHOD__, 10);
 					$retarr[] = (int)$str_atom;
@@ -200,7 +198,7 @@ class Cron {
 		$minute_arr = self::parseScheduleString( $min_col, 'minute' );
 
 		$retval = $epoch;
-		$i=0;
+		$i = 0;
 		while ( $i < 500 ) { //Prevent infinite loop
 			$date_arr = getdate( $retval );
 			$i++;
@@ -208,36 +206,36 @@ class Cron {
 			//Order from minute to month, least granular to most granular.
 			if ( !in_array( $date_arr['minutes'], $minute_arr ) ) {
 				$retval = TTDate::incrementDate( $retval, 1, 'minute');
-				//Debug::text(' Minute: Retval: '. TTDate::getDate('DATE+TIME', $retval) .' Current Epoch: '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__,10);
+				//Debug::text(' Minute: Retval: '. TTDate::getDate('DATE+TIME', $retval) .' Current Epoch: '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__, 10);
 				continue;
 			}
 
 			if ( !in_array( $date_arr['hours'], $hour_arr ) ) {
 				$retval = TTDate::incrementDate( $retval, 1, 'hour');
-				//Debug::text(' Hour: Retval: '. TTDate::getDate('DATE+TIME', $retval) .' Current Epoch: '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__,10);
+				//Debug::text(' Hour: Retval: '. TTDate::getDate('DATE+TIME', $retval) .' Current Epoch: '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__, 10);
 				continue;
 			}
 
 			if ( !in_array( $date_arr['mday'], $day_of_month_arr ) OR !in_array( $date_arr['wday'], $day_of_week_arr ) ) {
 				$retval = TTDate::getBeginDayEpoch( TTDate::incrementDate( $retval, 1, 'day') );
-				//Debug::text(' Day: Retval: '. TTDate::getDate('DATE+TIME', $retval) .' Current Epoch: '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__,10);
+				//Debug::text(' Day: Retval: '. TTDate::getDate('DATE+TIME', $retval) .' Current Epoch: '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__, 10);
 				continue;
 			}
 
 			if ( !in_array( $date_arr['mon'], $month_arr ) ) {
 				$retval = TTDate::getBeginDayEpoch( TTDate::incrementDate( $retval, 1, 'month') );
-				//Debug::text(' Month: Retval: '. TTDate::getDate('DATE+TIME', $retval) .' Current Epoch: '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__,10);
+				//Debug::text(' Month: Retval: '. TTDate::getDate('DATE+TIME', $retval) .' Current Epoch: '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__, 10);
 				continue;
 			}
-			//Debug::text(' None: Retval: '. TTDate::getDate('DATE+TIME', $retval) .' Current Epoch: '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__,10);
+			//Debug::text(' None: Retval: '. TTDate::getDate('DATE+TIME', $retval) .' Current Epoch: '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__, 10);
 
 			//Halt the loop...
 			break;
 		}
 
-		Debug::text(' Next Scheduled Date: '. TTDate::getDate('DATE+TIME', $retval) .' Based on Current Epoch: '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__,10);
+		Debug::text(' Next Scheduled Date: '. TTDate::getDate('DATE+TIME', $retval) .' Based on Current Epoch: '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__, 10);
 
-		//Debug::text('  JOB is NOT SCHEDULED TO RUN YET!', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::text('	 JOB is NOT SCHEDULED TO RUN YET!', __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 
 	}
@@ -255,18 +253,18 @@ class Cron {
 			$last_run_date = 0;
 		}
 
-		if ( $last_run_date > (time()+86400) ) {
-			Debug::text(' Last Run Date is in the future: '. TTDate::getDate('DATE+TIME', $last_run_date) .' assuming this is an error and forcing it to run now...', __FILE__, __LINE__, __METHOD__,10);
+		if ( $last_run_date > (time() + 86400) ) {
+			Debug::text(' Last Run Date is in the future: '. TTDate::getDate('DATE+TIME', $last_run_date) .' assuming this is an error and forcing it to run now...', __FILE__, __LINE__, __METHOD__, 10);
 			$last_run_date = 0;
 		}
 
 		$next_schedule_epoch = self::getNextScheduleDate( $min_col, $hour_col, $dom_col, $month_col, $dow_col, $last_run_date );
 		if ( $next_schedule_epoch < $epoch ) {
-			Debug::text('  JOB is SCHEDULED TO RUN NOW!', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('  JOB is SCHEDULED TO RUN NOW!', __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
 		}
 
-		Debug::text('  JOB is NOT scheduled to run right now...' , __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('  JOB is NOT scheduled to run right now...', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
 }

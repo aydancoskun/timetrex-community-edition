@@ -59,8 +59,8 @@ class APIDepartment extends APIFactory {
 	 */
 	function getOptions( $name, $parent = NULL ) {
 		if ( $name == 'columns'
-				AND ( !$this->getPermissionObject()->Check('department','enabled')
-					OR !( $this->getPermissionObject()->Check('department','view') OR $this->getPermissionObject()->Check('department','view_own') OR $this->getPermissionObject()->Check('department','view_child') ) ) ) {
+				AND ( !$this->getPermissionObject()->Check('department', 'enabled')
+					OR !( $this->getPermissionObject()->Check('department', 'view') OR $this->getPermissionObject()->Check('department', 'view_own') OR $this->getPermissionObject()->Check('department', 'view_child') ) ) ) {
 			$name = 'list_columns';
 		}
 
@@ -73,7 +73,7 @@ class APIDepartment extends APIFactory {
 	function getDepartmentDefaultData() {
 		$company_obj = $this->getCurrentCompanyObject();
 
-		Debug::Text('Getting department default data...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Getting department default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		$next_available_manual_id = DepartmentListFactory::getNextAvailableManualId( $company_obj->getId() );
 
@@ -83,7 +83,7 @@ class APIDepartment extends APIFactory {
 						'manual_id' => $next_available_manual_id,
 					);
 
-		Debug::Arr($data, 'Getting department default data...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($data, 'Getting department default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this->returnHandler( $data );
 	}
@@ -95,8 +95,8 @@ class APIDepartment extends APIFactory {
 	 */
 	function getDepartment( $data = NULL, $disable_paging = FALSE ) {
 		//Ignore 'enabled' permission check here, as branches need to be shown in In/Out punch view.
-		if ( !$this->getPermissionObject()->Check('department','enabled')
-				OR !( $this->getPermissionObject()->Check('department','view') OR $this->getPermissionObject()->Check('department','view_child') OR $this->getPermissionObject()->Check('department','view_own') ) ) {
+		if ( !$this->getPermissionObject()->Check('department', 'enabled')
+				OR !( $this->getPermissionObject()->Check('department', 'view') OR $this->getPermissionObject()->Check('department', 'view_child') OR $this->getPermissionObject()->Check('department', 'view_own') ) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
@@ -107,7 +107,7 @@ class APIDepartment extends APIFactory {
 		//Allow getting users from other companies, so we can change admin contacts when using the master company.
 		if ( isset($data['filter_data']['company_id'])
 				AND $data['filter_data']['company_id'] > 0
-				AND ( $this->getPermissionObject()->Check('company','enabled') AND $this->getPermissionObject()->Check('company','view') ) ) {
+				AND ( $this->getPermissionObject()->Check('company', 'enabled') AND $this->getPermissionObject()->Check('company', 'view') ) ) {
 			$company_id = $data['filter_data']['company_id'];
 		} else {
 			$company_id = $this->getCurrentCompanyObject()->getId();
@@ -165,9 +165,9 @@ class APIDepartment extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('department','enabled')
-				OR !( $this->getPermissionObject()->Check('department','edit') OR $this->getPermissionObject()->Check('department','edit_own') OR $this->getPermissionObject()->Check('department','edit_child') OR $this->getPermissionObject()->Check('department','add') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('department', 'enabled')
+				OR !( $this->getPermissionObject()->Check('department', 'edit') OR $this->getPermissionObject()->Check('department', 'edit_own') OR $this->getPermissionObject()->Check('department', 'edit_child') OR $this->getPermissionObject()->Check('department', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		if ( $validate_only == TRUE ) {
@@ -193,11 +193,11 @@ class APIDepartment extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if (
-							  $validate_only == TRUE
-							  OR
+							$validate_only == TRUE
+							OR
 								(
-								$this->getPermissionObject()->Check('department','edit')
-									OR ( $this->getPermissionObject()->Check('department','edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+								$this->getPermissionObject()->Check('department', 'edit')
+									OR ( $this->getPermissionObject()->Check('department', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -212,7 +212,7 @@ class APIDepartment extends APIFactory {
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('department','add'), TTi18n::gettext('Add permission denied') );
+					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('department', 'add'), TTi18n::gettext('Add permission denied') );
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -220,10 +220,10 @@ class APIDepartment extends APIFactory {
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
 					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
 
-					$lf->setObjectFromArray( $row );
-
 					//Force Company ID to current company.
-					$lf->setCompany( $this->getCurrentCompanyObject()->getId() );
+					$row['company_id'] = $this->getCurrentCompanyObject()->getId();
+
+					$lf->setObjectFromArray( $row );
 
 					$is_valid = $lf->isValid();
 					if ( $is_valid == TRUE ) {
@@ -287,16 +287,16 @@ class APIDepartment extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('department','enabled')
-				OR !( $this->getPermissionObject()->Check('department','delete') OR $this->getPermissionObject()->Check('department','delete_own') OR $this->getPermissionObject()->Check('department','delete_child') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('department', 'enabled')
+				OR !( $this->getPermissionObject()->Check('department', 'delete') OR $this->getPermissionObject()->Check('department', 'delete_own') OR $this->getPermissionObject()->Check('department', 'delete_child') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		Debug::Text('Received data for: '. count($data) .' Departments', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-        $validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
+		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
@@ -310,8 +310,8 @@ class APIDepartment extends APIFactory {
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
-						if ( $this->getPermissionObject()->Check('department','delete')
-								OR ( $this->getPermissionObject()->Check('department','delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
+						if ( $this->getPermissionObject()->Check('department', 'delete')
+								OR ( $this->getPermissionObject()->Check('department', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
 							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
@@ -394,7 +394,7 @@ class APIDepartment extends APIFactory {
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {
-				unset($src_rows[$key]['id'],$src_rows[$key]['manual_id'] ); //Clear fields that can't be copied
+				unset($src_rows[$key]['id'], $src_rows[$key]['manual_id'] ); //Clear fields that can't be copied
 				$src_rows[$key]['name'] = Misc::generateCopyName( $row['name'] ); //Generate unique name
 			}
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);

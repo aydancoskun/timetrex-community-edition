@@ -89,7 +89,7 @@ class WageGroupFactory extends Factory {
 	}
 
 	function getCompany() {
-		return $this->data['company_id'];
+		return (int)$this->data['company_id'];
 	}
 	function setCompany($id) {
 		$id = trim($id);
@@ -120,7 +120,7 @@ class WageGroupFactory extends Factory {
 						AND name = ?
 						AND deleted = 0';
 		$name_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($name_id,'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $name_id === FALSE ) {
 			return TRUE;
@@ -139,7 +139,7 @@ class WageGroupFactory extends Factory {
 	function setName($name) {
 		$name = trim($name);
 
-		if 	(	$this->Validator->isLength(		'name',
+		if	(	$this->Validator->isLength(		'name',
 												$name,
 												TTi18n::gettext('Name is too short or too long'),
 												2,
@@ -160,7 +160,7 @@ class WageGroupFactory extends Factory {
 	}
 
 	function Validate() {
-		Debug::Text('Validate...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Validate...', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $this->getDeleted() == TRUE ) {
 			//Check to make sure there are no wage entries using this wage group.

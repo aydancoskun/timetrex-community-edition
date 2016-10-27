@@ -40,8 +40,10 @@
  */
 require_once('PHPUnit/Framework/TestCase.php');
 
+/**
+ * @group PunchDetection
+ */
 class PunchDetectionTest extends PHPUnit_Framework_TestCase {
-
 	protected $company_id = NULL;
 	protected $user_id = NULL;
 	protected $pay_period_schedule_id = NULL;

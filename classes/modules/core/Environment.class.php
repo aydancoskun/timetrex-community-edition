@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11142 $
- * $Id: Environment.class.php 11142 2013-10-14 19:53:23Z ipso $
- * $Date: 2013-10-14 12:53:23 -0700 (Mon, 14 Oct 2013) $
+ * $Revision: 11830 $
+ * $Id: Environment.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -84,14 +84,14 @@ class Environment {
 		global $config_vars;
 
 		//If "interface" appears in the base URL, replace it with API directory
-		$base_url = str_replace( array('/interface','/api'), '', $config_vars['path']['base_url']);
+		$base_url = str_replace( array('/interface', '/api'), '', $config_vars['path']['base_url']);
 
 		if ( $api == '' ) {
 			if ( defined('TIMETREX_AMF_API') AND TIMETREX_AMF_API == TRUE ) {
 				$api = 'amf';
-			} elseif ( defined('TIMETREX_SOAP_API') AND TIMETREX_SOAP_API == TRUE )  {
+			} elseif ( defined('TIMETREX_SOAP_API') AND TIMETREX_SOAP_API == TRUE )	 {
 				$api = 'soap';
-			} elseif ( defined('TIMETREX_JSON_API') AND TIMETREX_JSON_API == TRUE )  {
+			} elseif ( defined('TIMETREX_JSON_API') AND TIMETREX_JSON_API == TRUE )	 {
 				$api = 'json';
 			}
 		}

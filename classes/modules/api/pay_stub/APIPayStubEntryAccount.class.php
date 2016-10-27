@@ -59,8 +59,8 @@ class APIPayStubEntryAccount extends APIFactory {
 	 */
 	function getOptions( $name, $parent = NULL ) {
 		if ( $name == 'columns'
-				AND ( !$this->getPermissionObject()->Check('pay_stub_account','enabled')
-					OR !( $this->getPermissionObject()->Check('pay_stub_account','view') OR $this->getPermissionObject()->Check('pay_stub_account','view_own') OR $this->getPermissionObject()->Check('pay_stub_account','view_child') ) ) ) {
+				AND ( !$this->getPermissionObject()->Check('pay_stub_account', 'enabled')
+					OR !( $this->getPermissionObject()->Check('pay_stub_account', 'view') OR $this->getPermissionObject()->Check('pay_stub_account', 'view_own') OR $this->getPermissionObject()->Check('pay_stub_account', 'view_child') ) ) ) {
 			$name = 'list_columns';
 		}
 
@@ -74,7 +74,7 @@ class APIPayStubEntryAccount extends APIFactory {
 	function getPayStubEntryAccountDefaultData() {
 		$company_obj = $this->getCurrentCompanyObject();
 
-		Debug::Text('Getting paystub_entry_account default data...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Getting paystub_entry_account default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		$data = array(
 						'company_id' => $company_obj->getId(),
@@ -92,8 +92,8 @@ class APIPayStubEntryAccount extends APIFactory {
 	 * @return array
 	 */
 	function getPayStubEntryAccount( $data = NULL, $disable_paging = FALSE ) {
-		if ( !$this->getPermissionObject()->Check('pay_stub_account','enabled')
-				OR !( $this->getPermissionObject()->Check('pay_stub_account','view') OR $this->getPermissionObject()->Check('pay_stub_account','view_child')  ) ) {
+		if ( !$this->getPermissionObject()->Check('pay_stub_account', 'enabled')
+				OR !( $this->getPermissionObject()->Check('pay_stub_account', 'view') OR $this->getPermissionObject()->Check('pay_stub_account', 'view_child')	) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
@@ -146,9 +146,9 @@ class APIPayStubEntryAccount extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('pay_stub_account','enabled')
-				OR !( $this->getPermissionObject()->Check('pay_stub_account','edit') OR $this->getPermissionObject()->Check('pay_stub_account','edit_own') OR $this->getPermissionObject()->Check('pay_stub_account','edit_child') OR $this->getPermissionObject()->Check('pay_stub_account','add') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('pay_stub_account', 'enabled')
+				OR !( $this->getPermissionObject()->Check('pay_stub_account', 'edit') OR $this->getPermissionObject()->Check('pay_stub_account', 'edit_own') OR $this->getPermissionObject()->Check('pay_stub_account', 'edit_child') OR $this->getPermissionObject()->Check('pay_stub_account', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		if ( $validate_only == TRUE ) {
@@ -172,11 +172,11 @@ class APIPayStubEntryAccount extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if (
-							  $validate_only == TRUE
-							  OR
+							$validate_only == TRUE
+							OR
 								(
-								$this->getPermissionObject()->Check('pay_stub_account','edit')
-									OR ( $this->getPermissionObject()->Check('pay_stub_account','edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+								$this->getPermissionObject()->Check('pay_stub_account', 'edit')
+									OR ( $this->getPermissionObject()->Check('pay_stub_account', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -191,7 +191,7 @@ class APIPayStubEntryAccount extends APIFactory {
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('pay_stub_account','add'), TTi18n::gettext('Add permission denied') );
+					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('pay_stub_account', 'add'), TTi18n::gettext('Add permission denied') );
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -199,10 +199,10 @@ class APIPayStubEntryAccount extends APIFactory {
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
 					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
 
-					$lf->setObjectFromArray( $row );
-
 					//Force Company ID to current company.
-					$lf->setCompany( $this->getCurrentCompanyObject()->getId() );
+					$row['company_id'] = $this->getCurrentCompanyObject()->getId();
+
+					$lf->setObjectFromArray( $row );
 
 					$is_valid = $lf->isValid();
 					if ( $is_valid == TRUE ) {
@@ -262,16 +262,16 @@ class APIPayStubEntryAccount extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('pay_stub_account','enabled')
-				OR !( $this->getPermissionObject()->Check('pay_stub_account','delete') OR $this->getPermissionObject()->Check('pay_stub_account','delete_own') OR $this->getPermissionObject()->Check('pay_stub_account','delete_child') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('pay_stub_account', 'enabled')
+				OR !( $this->getPermissionObject()->Check('pay_stub_account', 'delete') OR $this->getPermissionObject()->Check('pay_stub_account', 'delete_own') OR $this->getPermissionObject()->Check('pay_stub_account', 'delete_child') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		Debug::Text('Received data for: '. count($data) .' PayStubEntryAccounts', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-        $validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
+		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) ) {
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
@@ -283,8 +283,8 @@ class APIPayStubEntryAccount extends APIFactory {
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
-						if ( $this->getPermissionObject()->Check('pay_stub_account','delete')
-								OR ( $this->getPermissionObject()->Check('pay_stub_account','delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
+						if ( $this->getPermissionObject()->Check('pay_stub_account', 'delete')
+								OR ( $this->getPermissionObject()->Check('pay_stub_account', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
 							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
@@ -363,7 +363,7 @@ class APIPayStubEntryAccount extends APIFactory {
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {
-				unset($src_rows[$key]['id'],$src_rows[$key]['manual_id'] ); //Clear fields that can't be copied
+				unset($src_rows[$key]['id'], $src_rows[$key]['manual_id'] ); //Clear fields that can't be copied
 				$src_rows[$key]['name'] = Misc::generateCopyName( $row['name'] ); //Generate unique name
 			}
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);

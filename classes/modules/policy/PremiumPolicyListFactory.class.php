@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11545 $
- * $Id: PremiumPolicyListFactory.class.php 11545 2013-11-29 02:04:30Z mikeb $
- * $Date: 2013-11-28 18:04:30 -0800 (Thu, 28 Nov 2013) $
+ * $Revision: 12091 $
+ * $Id: PremiumPolicyListFactory.class.php 12091 2014-01-21 16:33:40Z mikeb $
+ * $Date: 2014-01-21 08:33:40 -0800 (Tue, 21 Jan 2014) $
  */
 
 /**
@@ -46,7 +46,7 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -69,7 +69,7 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 						);
 
 			$query = '
-						select 	*
+						select	*
 						from	'. $this->getTable() .'
 						where	id = ?
 							AND deleted = 0';
@@ -78,7 +78,7 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 
 			$this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs,$id);
+			$this->saveCache($this->rs, $id);
 		}
 
 		return $this;
@@ -105,7 +105,7 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where
 						company_id = ?
@@ -140,7 +140,7 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 					);
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							( select count(*) from '. $cgmf->getTable() .' as w, '. $pgf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 120 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0) as assigned_policy_groups
 					from	'. $this->getTable() .' as a
 					where	a.company_id = ?
@@ -173,12 +173,12 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 					);
 
 		$query = '
-					select 	d.*
-					from 	'. $pguf->getTable() .' as a,
+					select	d.*
+					from	'. $pguf->getTable() .' as a,
 							'. $pgf->getTable() .' as b,
 							'. $cgmf->getTable() .' as c,
 							'. $this->getTable() .' as d
-					where 	a.policy_group_id = b.id
+					where	a.policy_group_id = b.id
 						AND ( b.id = c.object_id AND b.company_id = c.company_id AND c.object_type_id = 120 )
 						AND c.map_id = d.id
 						AND a.user_id = ?
@@ -215,24 +215,24 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 
 		//Make sure we don't include duplicate premium policies
 		//if the premium policy is assigned to the policy group AND the schedule policy.
-		//it could double up on the premium time. 
+		//it could double up on the premium time.
 		$query = '
 					select distinct * from (
-						select 	distinct d.*
-						from 	'. $pguf->getTable() .' as a,
+						select	distinct d.*
+						from	'. $pguf->getTable() .' as a,
 								'. $pgf->getTable() .' as b,
 								'. $cgmf->getTable() .' as c,
 								'. $this->getTable() .' as d
-						where 	a.policy_group_id = b.id
+						where	a.policy_group_id = b.id
 							AND ( b.id = c.object_id AND b.company_id = c.company_id AND c.object_type_id = 120 )
 							AND c.map_id = d.id
 							AND a.user_id = ?
 							AND ( b.deleted = 0 AND d.deleted = 0 )
 						UNION ALL
-							select 	z.*
+							select	z.*
 							from	'. $this->getTable() .' as z,
 									'. $cgmf->getTable() .' as c
-							WHERE 	c.map_id = z.id AND c.object_type_id = 125
+							WHERE	c.map_id = z.id AND c.object_type_id = 125
 									AND c.object_id in ('. $this->getListSQL($id, $ph) .')
 									AND z.deleted = 0
 					) as tmp
@@ -242,7 +242,7 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 
 		$this->ExecuteSQL( $query, $ph );
 
-		//Debug::Arr($ph ,' Query: '. $query, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($ph, ' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}
@@ -262,8 +262,8 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 		$additional_order_fields = array('type_id', 'in_use');
 
 		$sort_column_aliases = array(
-									 'type' => 'type_id',
-									 );
+									'type' => 'type_id',
+									);
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 
@@ -281,8 +281,8 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 			}
 			$strict = TRUE;
 		}
-		//Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$uf = new UserFactory();
 		$pgf = new PolicyGroupFactory();
@@ -294,7 +294,8 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 					);
 
 		$query = '
-					select 	a.*,
+					select	a.*,
+							_ADODB_COUNT
 							(
 								CASE WHEN EXISTS ( select 1 from '. $cgmf->getTable() .' as w, '. $pgf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 120 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0 )
 									THEN 1
@@ -310,7 +311,8 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 							z.first_name as updated_by_first_name,
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
-					from 	'. $this->getTable() .' as a
+							_ADODB_COUNT
+					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	a.company_id = ?
@@ -320,7 +322,7 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
 
-		if ( isset($filter_data['type']) AND trim($filter_data['type']) != '' AND !isset($filter_data['type_id']) ) {
+		if ( isset($filter_data['type']) AND !is_array($filter_data['type']) AND trim($filter_data['type']) != '' AND !isset($filter_data['type_id']) ) {
 			$filter_data['type_id'] = Option::getByFuzzyValue( $filter_data['type'], $this->getOptions('type') );
 		}
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
@@ -329,37 +331,11 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 		$query .= ( isset($filter_data['accrual_policy_id']) ) ? $this->getWhereClauseSQL( 'a.accrual_policy_id', $filter_data['accrual_policy_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
-/*
-		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query  .=	' AND a.created_by in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
-		}
-		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query  .=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
-		}
-		if ( isset($filter_data['exclude_id']) AND isset($filter_data['exclude_id'][0]) AND !in_array(-1, (array)$filter_data['exclude_id']) ) {
-			$query  .=	' AND a.id not in ('. $this->getListSQL($filter_data['exclude_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['type_id']) AND isset($filter_data['type_id'][0]) AND !in_array(-1, (array)$filter_data['type_id']) ) {
-			$query  .=	' AND a.type_id in ('. $this->getListSQL($filter_data['type_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['pay_stub_entry_account_id']) AND isset($filter_data['pay_stub_entry_account_id'][0]) AND !in_array(-1, (array)$filter_data['pay_stub_entry_account_id']) ) {
-			$query  .=	' AND a.pay_stub_entry_account_id in ('. $this->getListSQL($filter_data['pay_stub_entry_account_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['accrual_policy_id']) AND isset($filter_data['accrual_policy_id'][0]) AND !in_array(-1, (array)$filter_data['accrual_policy_id']) ) {
-			$query  .=	' AND a.accrual_policy_id in ('. $this->getListSQL($filter_data['accrual_policy_id'], $ph) .') ';
-		}
 
-		if ( isset($filter_data['name']) AND trim($filter_data['name']) != '' ) {
-			$ph[] = strtolower(trim($filter_data['name']));
-			$query  .=	' AND lower(a.name) LIKE ?';
-		}
-*/
-		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-        $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
-        
-		$query .= 	'
-						AND a.deleted = 0
-					';
+		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
+
+		$query .=	' AND a.deleted = 0 ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 

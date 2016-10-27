@@ -58,7 +58,7 @@ class APIReportSchedule extends APIFactory {
 	function getReportScheduleDefaultData() {
 		//$company_obj = $this->getCurrentCompanyObject();
 
-		Debug::Text('Getting report_schedule default data...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Getting report_schedule default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Default schedule to non-busy times of the day, and only weekdays to reduce load.
 		$data = array(
@@ -67,7 +67,7 @@ class APIReportSchedule extends APIFactory {
 						'hour' => array(1),
 						'day_of_month' => array('*'),
 						'month' => array('*'),
-						'day_of_week' => array(1,2,3,4,5), //Any day, if we limit to just Mon-Fri, it could confuse people who try to restrict to a DOM.
+						'day_of_week' => array(1, 2, 3, 4, 5), //Any day, if we limit to just Mon-Fri, it could confuse people who try to restrict to a DOM.
 					);
 
 		return $this->returnHandler( $data );
@@ -165,10 +165,10 @@ class APIReportSchedule extends APIFactory {
 						//Object doesn't exist.
 						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Edit permission denied, record does not exist') );
 					}
-				} else {
+				} //else {
 					//Adding new object, check ADD permissions.
-					//$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('report_schedule','add'), TTi18n::gettext('Add permission denied') );
-				}
+					//$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('report_schedule', 'add'), TTi18n::gettext('Add permission denied') );
+				//}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 				$is_valid = $primary_validator->isValid();
@@ -246,7 +246,7 @@ class APIReportSchedule extends APIFactory {
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-        $validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
+		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 

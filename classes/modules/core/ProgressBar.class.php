@@ -67,8 +67,8 @@ class ProgressBar {
 		return $this->default_key;
 	}
 
-	function start( $key, $total_iterations = 100, $update_iteration = NULL, $msg = NULL )  {
-		Debug::text('start: \''. $key .'\' Iterations: '. $total_iterations .' Update Iterations: '. $update_iteration .' Key: '. $key .'('.microtime(TRUE).') Message: '. $msg, __FILE__, __LINE__, __METHOD__,9);
+	function start( $key, $total_iterations = 100, $update_iteration = NULL, $msg = NULL ) {
+		Debug::text('start: \''. $key .'\' Iterations: '. $total_iterations .' Update Iterations: '. $update_iteration .' Key: '. $key .'('.microtime(TRUE).') Message: '. $msg, __FILE__, __LINE__, __METHOD__, 9);
 
 		if ( $key == '' ) {
 			$key = $this->getDefaultKey();
@@ -94,12 +94,12 @@ class ProgressBar {
 		$epoch = microtime(TRUE);
 
 		$progress_bar_arr = array(
-					 'start_time' => $epoch,
-					 'current_iteration' => 0,
-					 'total_iterations' => $total_iterations,
-					 'last_update_time' => $epoch,
-					 'message' => $msg,
-					 );
+					'start_time' => $epoch,
+					'current_iteration' => 0,
+					'total_iterations' => $total_iterations,
+					'last_update_time' => $epoch,
+					'message' => $msg,
+					);
 
 		$this->obj->set( $key, $progress_bar_arr );
 
@@ -117,7 +117,7 @@ class ProgressBar {
 			}
 		}
 
-		//Debug::text('stop: '. $key, __FILE__, __LINE__, __METHOD__,9);
+		//Debug::text('stop: '. $key, __FILE__, __LINE__, __METHOD__, 9);
 
 		return $this->obj->delete( $key );
 	}
@@ -132,8 +132,8 @@ class ProgressBar {
 
 		//Add quick IF statement to short circuit any work unless we meet the update_iteration, ie: every X calls do we actually do anything.
 		//When processing long batches though, we need to update every iteration for the first 10 iterations so we can get an accruate estimated time for completion.
-		if ( $current_iteration <= 10 OR $current_iteration % $this->update_iteration == 0 ) {
-			//Debug::text('set: '. $key .' Iteration: '. $current_iteration, __FILE__, __LINE__, __METHOD__,9);
+		if ( $current_iteration <= 10 OR ( $current_iteration % $this->update_iteration ) == 0 ) {
+			//Debug::text('set: '. $key .' Iteration: '. $current_iteration, __FILE__, __LINE__, __METHOD__, 9);
 
 			$progress_bar_arr = $this->obj->get( $key );
 
@@ -173,20 +173,20 @@ class ProgressBar {
 		}
 
 		$retval = $this->obj->get( $key );
-		//Debug::text('get: '. $key .'('.microtime(TRUE).')', __FILE__, __LINE__, __METHOD__,9);
-		//Debug::Arr($retval, 'get: '. $key .'('.microtime(TRUE).')', __FILE__, __LINE__, __METHOD__,9);
+		//Debug::text('get: '. $key .'('.microtime(TRUE).')', __FILE__, __LINE__, __METHOD__, 9);
+		//Debug::Arr($retval, 'get: '. $key .'('.microtime(TRUE).')', __FILE__, __LINE__, __METHOD__, 9);
 
 		return $retval;
 	}
 
 	function test( $key, $total_iterations = 10 ) {
-		Debug::text('testProgressBar: '. $key .' Iterations: '. $total_iterations, __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('testProgressBar: '. $key .' Iterations: '. $total_iterations, __FILE__, __LINE__, __METHOD__, 9);
 
 		$this->start( $key, $total_iterations );
 
-		for($i=1; $i <= $total_iterations; $i++ ) {
+		for($i = 1; $i <= $total_iterations; $i++ ) {
 			$this->set( $key, $i);
-			sleep(rand(1,2));
+			sleep(rand(1, 2));
 		}
 
 		$this->stop( $key );

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10695 $
- * $Id: CurrencyListFactory.class.php 10695 2013-08-16 04:36:19Z ennis $
- * $Date: 2013-08-15 21:36:19 -0700 (Thu, 15 Aug 2013) $
+ * $Revision: 12026 $
+ * $Id: CurrencyListFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -46,7 +46,7 @@ class CurrencyListFactory extends CurrencyFactory implements IteratorAggregate {
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -69,7 +69,7 @@ class CurrencyListFactory extends CurrencyFactory implements IteratorAggregate {
 						);
 
 			$query = '
-						select 	*
+						select	*
 						from	'. $this->getTable() .'
 						where	id = ?
 							AND deleted = 0';
@@ -78,7 +78,7 @@ class CurrencyListFactory extends CurrencyFactory implements IteratorAggregate {
 
 			$this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs,$id);
+			$this->saveCache($this->rs, $id);
 		}
 
 		return $this;
@@ -94,7 +94,7 @@ class CurrencyListFactory extends CurrencyFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	distinct iso_code
+					select	distinct iso_code
 					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND deleted = 0';
@@ -121,7 +121,7 @@ class CurrencyListFactory extends CurrencyFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND deleted = 0';
@@ -148,8 +148,8 @@ class CurrencyListFactory extends CurrencyFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
-					from 	'. $this->getTable() .'
+					select	*
+					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND	id = ?
 						AND deleted = 0';
@@ -175,8 +175,8 @@ class CurrencyListFactory extends CurrencyFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
-					from 	'. $this->getTable() .'
+					select	*
+					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND	iso_code = ?
 						AND deleted = 0';
@@ -204,8 +204,8 @@ class CurrencyListFactory extends CurrencyFactory implements IteratorAggregate {
 						);
 
 			$query = '
-						select 	*
-						from 	'. $this->getTable() .'
+						select	*
+						from	'. $this->getTable() .'
 						where	company_id = ?
 							AND	is_base = ?
 							AND deleted = 0';
@@ -213,7 +213,7 @@ class CurrencyListFactory extends CurrencyFactory implements IteratorAggregate {
 
 			$this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs,$company_id.$is_base);
+			$this->saveCache($this->rs, $company_id.$is_base);
 		}
 
 		return $this;
@@ -234,8 +234,8 @@ class CurrencyListFactory extends CurrencyFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
-					from 	'. $this->getTable() .'
+					select	*
+					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND	is_default = ?
 						AND deleted = 0';
@@ -291,14 +291,14 @@ class CurrencyListFactory extends CurrencyFactory implements IteratorAggregate {
 			$order = array( 'name' => 'asc' );
 			$strict = FALSE;
 		} else {
-			//Always sort by last name,first name after other columns
+			//Always sort by last name, first name after other columns
 			if ( !isset($order['name']) ) {
 				$order['name'] = 'asc';
 			}
 			$strict = TRUE;
 		}
-		//Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$uf = new UserFactory();
 
@@ -307,59 +307,47 @@ class CurrencyListFactory extends CurrencyFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
 							y.last_name as created_by_last_name,
 							z.first_name as updated_by_first_name,
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
-					from 	'. $this->getTable() .' as a
+					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	a.company_id = ?
 					';
-		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query  .=	' AND a.created_by in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
+
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+
+		if ( isset($filter_data['iso_code']) AND isset($filter_data['iso_code'][0]) AND !in_array(-1, (array)$filter_data['iso_code']) ) {
+			$query .= ( isset($filter_data['iso_code']) ) ? $this->getWhereClauseSQL( 'a.iso_code', $filter_data['iso_code'], 'numeric_list', $ph ) : NULL;
 		}
-		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query  .=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
-		}
-		if ( isset($filter_data['exclude_id']) AND isset($filter_data['exclude_id'][0]) AND !in_array(-1, (array)$filter_data['exclude_id']) ) {
-			$query  .=	' AND a.id not in ('. $this->getListSQL($filter_data['exclude_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['iso_code']) AND isset($filter_data['iso_code'][0]) AND !in_array(-1, (array)$filter_data['iso_code']) ) {			
-            $query  .=	' AND a.iso_code in ('. $this->getListSQL($filter_data['iso_code'], $ph) .') ';
-		}
-        if ( isset($filter_data['iso_code']) AND !is_array( $filter_data['iso_code'] ) AND trim($filter_data['iso_code']) != '' AND !is_array($filter_data['iso_code']) ) {
-			$ph[] = strtolower(trim($filter_data['iso_code']));
-			$query  .=	' AND lower(a.iso_code) LIKE ?';
+		if ( isset($filter_data['iso_code']) AND !is_array( $filter_data['iso_code'] ) AND trim($filter_data['iso_code']) != '' AND !is_array($filter_data['iso_code']) ) {
+			$query .= ( isset($filter_data['iso_code']) ) ? $this->getWhereClauseSQL( 'a.iso_code', $filter_data['iso_code'], 'text', $ph ) : NULL;
 		}
 
-		if ( isset($filter_data['name']) AND trim($filter_data['name']) != '' ) {
-			$ph[] = strtolower(trim($filter_data['name']));
-			$query  .=	' AND lower(a.name) LIKE ?';
-		}
-        
-        if ( isset($filter_data['status']) AND trim($filter_data['status']) != '' AND !isset($filter_data['status_id']) ) {
+		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
+
+		if ( isset($filter_data['status']) AND !is_array($filter_data['status']) AND trim($filter_data['status']) != '' AND !isset($filter_data['status_id']) ) {
 			$filter_data['status_id'] = Option::getByFuzzyValue( $filter_data['status'], $this->getOptions('status') );
 		}
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
 
 		//Returns the default currency of a specific user.
-		if ( isset($filter_data['user_id']) AND trim($filter_data['user_id']) != '' ) {
-			$ph[] = (int)$filter_data['user_id'];
-			$query  .=	' AND a.id = (select currency_id from '. $uf->getTable() .' as uf_tmp where uf_tmp.id = ? )';
+		if ( isset($filter_data['user_id']) AND !is_array($filter_data['user_id']) AND trim($filter_data['user_id']) != '' ) {
+			$ph[] = (int)$this->castInteger( $filter_data['user_id'], 'int' );
+			$query	.=	' AND a.id = (select currency_id from '. $uf->getTable() .' as uf_tmp where uf_tmp.id = ? )';
 		}
-        
-        $query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-        
-        $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
-        
 
-		$query .= 	'
-						AND a.deleted = 0
-					';
+		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
+
+		$query .= ' AND a.deleted = 0 ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 

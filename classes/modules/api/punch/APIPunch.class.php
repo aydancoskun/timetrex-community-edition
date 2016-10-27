@@ -62,7 +62,7 @@ class APIPunch extends APIFactory {
 			$epoch = TTDate::getTime();
 		}
 
-		if ( !is_numeric( $user_id  ) ) {
+		if ( !is_numeric( $user_id	) ) {
 			$user_id = $this->getCurrentUserObject()->getId();
 		}
 
@@ -85,9 +85,9 @@ class APIPunch extends APIFactory {
 		}
 		unset($slf);
 
-		Debug::Text('Station ID: '. $station_id .' User ID: '. $user_id .' Epoch: '. $epoch, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Station ID: '. $station_id .' User ID: '. $user_id .' Epoch: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_object($current_station) AND $current_station->checkAllowed( $user_id, $station_id, $station_type ) == TRUE ) {
-			Debug::Text('Station Allowed! ID: '. $station_id .' User ID: '. $user_id .' Epoch: '. $epoch, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Station Allowed! ID: '. $station_id .' User ID: '. $user_id .' Epoch: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
 			//Get user object from ID.
 			$ulf = TTNew('UserListFactory');
 			$ulf->getByIdAndCompanyId( $user_id, $company_id );
@@ -107,12 +107,12 @@ class APIPunch extends APIFactory {
 				$data['station_id'] = $current_station->getId();
 				
 				if ( isset($data ) ) {
-					Debug::Arr($data, 'Punch Data: ', __FILE__, __LINE__, __METHOD__,10);
+					Debug::Arr($data, 'Punch Data: ', __FILE__, __LINE__, __METHOD__, 10);
 					return $this->returnHandler( $data );
 				}
 			}
 		} else {
-			Debug::Text('Station IS NOT Allowed! ID: '. $station_id .' User ID: '. $user_id .' Epoch: '. $epoch, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Station IS NOT Allowed! ID: '. $station_id .' User ID: '. $user_id .' Epoch: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
 			$validator_obj = new Validator();
 			$validator_stats = array('total_records' => 1, 'valid_records' => 0 );
 
@@ -127,8 +127,8 @@ class APIPunch extends APIFactory {
 	}
 
 	function setUserPunch( $data, $validate_only = FALSE ) {
-		if ( !$this->getPermissionObject()->Check('punch','enabled')
-				OR !( $this->getPermissionObject()->Check('punch','punch_in_out') ) ) {
+		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
+				OR !( $this->getPermissionObject()->Check('punch', 'punch_in_out') ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
@@ -142,7 +142,7 @@ class APIPunch extends APIFactory {
 		//Make sure employees don't try to circumvent the disabled timestamp field. By allowing a small variance.
 		//This also prevents them from leaving the punch window open by accident, then submitting an old punch time.
 		$max_variance = 300; //5minutes.
-		if ( isset($data['time_stamp']) AND ( TTDate::parseDateTime( $data['time_stamp'] ) > (TTDate::getTime()+$max_variance) OR TTDate::parseDateTime( $data['time_stamp'] ) < (TTDate::getTime()-$max_variance) ) ) {
+		if ( isset($data['time_stamp']) AND ( TTDate::parseDateTime( $data['time_stamp'] ) > (TTDate::getTime() + $max_variance) OR TTDate::parseDateTime( $data['time_stamp'] ) < (TTDate::getTime() - $max_variance) ) ) {
 			Debug::Text('Punch timestamp outside max variance: '. TTDate::getDate('DATE+TIME', TTDate::parseDateTime( $data['time_stamp'] ) ), __FILE__, __LINE__, __METHOD__, 10);
 			$tmp_epoch = TTDate::getTime();
 			$data['time_stamp'] = TTDate::getDate('DATE+TIME', $tmp_epoch );
@@ -200,8 +200,8 @@ class APIPunch extends APIFactory {
 					$pcf->setEnableCalcException( TRUE );
 					$pcf->setEnablePreMatureException( TRUE ); //Enable pre-mature exceptions at this point.
 
-					Debug::Arr($lf->data, 'Punch Object: ', __FILE__, __LINE__, __METHOD__,10);
-					Debug::Arr($pcf->data, 'Punch Control Object: ', __FILE__, __LINE__, __METHOD__,10);
+					Debug::Arr($lf->data, 'Punch Object: ', __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Arr($pcf->data, 'Punch Control Object: ', __FILE__, __LINE__, __METHOD__, 10);
 					if ( $pcf->isValid() ) {
 						$validator_stats['valid_records']++;
 						if ( $pcf->Save( TRUE, TRUE ) != TRUE ) { //Force isNew() lookup.
@@ -250,11 +250,11 @@ class APIPunch extends APIFactory {
 	function getPunchDefaultData( $user_id = NULL, $date = NULL, $punch_control_id = NULL, $previous_punch_id = NULL ) {
 		$company_obj = $this->getCurrentCompanyObject();
 
-		if ( !is_numeric( $user_id  ) ) {
+		if ( !is_numeric( $user_id	) ) {
 			$user_id = $this->getCurrentUserObject()->getId();
 		}
 
-		Debug::Text('Getting punch default data... User ID: '. $user_id .' Date: '. $date .' Punch Control ID: '. $punch_control_id .' Previous Punch Id: '. $previous_punch_id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Getting punch default data... User ID: '. $user_id .' Date: '. $date .' Punch Control ID: '. $punch_control_id .' Previous Punch Id: '. $previous_punch_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		$data = array(
 						'status_id' => 10,
@@ -300,7 +300,7 @@ class APIPunch extends APIFactory {
 				$prev_punch_obj = $plf->getCurrent();
 				$data['type_id'] = $prev_punch_obj->getNextType();
 				//$data['status_id'] = $prev_punch_obj->getNextStatus(); //Flex handles this.
-				Debug::Text('Getting previous punch default data... Type ID: '. $data['type_id'], __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Getting previous punch default data... Type ID: '. $data['type_id'], __FILE__, __LINE__, __METHOD__, 10);
 			}
 			unset($plf, $prev_punch_obj);
 		}
@@ -341,8 +341,8 @@ class APIPunch extends APIFactory {
 	 * @return array
 	 */
 	function getPunch( $data = NULL, $disable_paging = FALSE ) {
-		if ( !$this->getPermissionObject()->Check('punch','enabled')
-				OR !( $this->getPermissionObject()->Check('punch','view') OR $this->getPermissionObject()->Check('punch','view_own') OR $this->getPermissionObject()->Check('punch','view_child') ) ) {
+		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
+				OR !( $this->getPermissionObject()->Check('punch', 'view') OR $this->getPermissionObject()->Check('punch', 'view_own') OR $this->getPermissionObject()->Check('punch', 'view_child') ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
@@ -423,9 +423,9 @@ class APIPunch extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('punch','enabled')
-				OR !( $this->getPermissionObject()->Check('punch','edit') OR $this->getPermissionObject()->Check('punch','edit_own') OR $this->getPermissionObject()->Check('punch','edit_child') OR $this->getPermissionObject()->Check('punch','add') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
+				OR !( $this->getPermissionObject()->Check('punch', 'edit') OR $this->getPermissionObject()->Check('punch', 'edit_own') OR $this->getPermissionObject()->Check('punch', 'edit_child') OR $this->getPermissionObject()->Check('punch', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		if ( $validate_only == TRUE ) {
@@ -457,18 +457,18 @@ class APIPunch extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if (
-							  $validate_only == TRUE
-							  OR
+							$validate_only == TRUE
+							OR
 								(
-								$this->getPermissionObject()->Check('punch','edit')
-									OR ( $this->getPermissionObject()->Check('punch','edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getPunchControlObject()->getUserDateObject()->getUser() ) === TRUE )
-									OR ( $this->getPermissionObject()->Check('punch','edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getPunchControlObject()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )
+								$this->getPermissionObject()->Check('punch', 'edit')
+									OR ( $this->getPermissionObject()->Check('punch', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getPunchControlObject()->getUserDateObject()->getUser() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('punch', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getPunchControlObject()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
 							//If we make the current object be $lf, it fails saving the punch because extra columns exist.
 							//$lf = $lf->getCurrent();
-							//$row = array_merge( $lf->getObjectAsArray( array('id' => TRUE,'user_id' => TRUE,'transfer' => TRUE,'type_id' => TRUE,'status_id' => TRUE,'time_stamp' => TRUE,'punch_control_id' => TRUE,'actual_time_stamp' => TRUE,'original_time_stamp' => TRUE,'schedule_id' => TRUE,'station_id' => TRUE,'longitude' => TRUE,'latitude' => TRUE,'deleted' => TRUE) ), $row );
+							//$row = array_merge( $lf->getObjectAsArray( array('id' => TRUE, 'user_id' => TRUE, 'transfer' => TRUE, 'type_id' => TRUE, 'status_id' => TRUE, 'time_stamp' => TRUE, 'punch_control_id' => TRUE, 'actual_time_stamp' => TRUE, 'original_time_stamp' => TRUE, 'schedule_id' => TRUE, 'station_id' => TRUE, 'longitude' => TRUE, 'latitude' => TRUE, 'deleted' => TRUE) ), $row );
 							$row = array_merge( $lf->getCurrent()->getObjectAsArray(), $row );
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Edit permission denied') );
@@ -479,14 +479,14 @@ class APIPunch extends APIFactory {
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					if (    !( $validate_only == TRUE
+					if (	!( $validate_only == TRUE
 								OR
-								( $this->getPermissionObject()->Check('punch','add')
+								( $this->getPermissionObject()->Check('punch', 'add')
 									AND
 									(
-										$this->getPermissionObject()->Check('punch','edit')
-										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('punch','edit_own') AND $this->getPermissionObject()->isOwner( FALSE, $row['user_id'] ) === TRUE ) //We don't know the created_by of the user at this point, but only check if the user is assigned to the logged in person.
-										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('punch','edit_child') AND $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === TRUE )
+										$this->getPermissionObject()->Check('punch', 'edit')
+										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('punch', 'edit_own') AND $this->getPermissionObject()->isOwner( FALSE, $row['user_id'] ) === TRUE ) //We don't know the created_by of the user at this point, but only check if the user is assigned to the logged in person.
+										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('punch', 'edit_child') AND $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === TRUE )
 									)
 								)
 							) ) {
@@ -621,9 +621,9 @@ class APIPunch extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('punch','enabled')
-				OR !( $this->getPermissionObject()->Check('punch','delete') OR $this->getPermissionObject()->Check('punch','delete_own') OR $this->getPermissionObject()->Check('punch','delete_child') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
+				OR !( $this->getPermissionObject()->Check('punch', 'delete') OR $this->getPermissionObject()->Check('punch', 'delete_own') OR $this->getPermissionObject()->Check('punch', 'delete_child') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
@@ -648,9 +648,9 @@ class APIPunch extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						//NOTE: Make sure we pass the user the punch is assigned too for proper delete_child permissions to work correctly.
-						if ( $this->getPermissionObject()->Check('punch','delete')
-								OR ( $this->getPermissionObject()->Check('punch','delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
-								OR ( $this->getPermissionObject()->Check('punch','delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getPunchControlObject()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )) {
+						if ( $this->getPermissionObject()->Check('punch', 'delete')
+								OR ( $this->getPermissionObject()->Check('punch', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getPunchControlObject()->getUserDateObject()->getUser() ) === TRUE )
+								OR ( $this->getPermissionObject()->Check('punch', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getPunchControlObject()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )) {
 							Debug::Text('Record Exists, deleting record: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {

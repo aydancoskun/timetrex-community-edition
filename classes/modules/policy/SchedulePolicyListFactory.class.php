@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11512 $
- * $Id: SchedulePolicyListFactory.class.php 11512 2013-11-26 20:54:04Z mikeb $
- * $Date: 2013-11-26 12:54:04 -0800 (Tue, 26 Nov 2013) $
+ * $Revision: 12026 $
+ * $Id: SchedulePolicyListFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -46,7 +46,7 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -70,7 +70,7 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 						);
 
 			$query = '
-						select 	*
+						select	*
 						from	'. $this->getTable() .'
 						where	id = ?
 							AND deleted = 0';
@@ -79,7 +79,7 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 
 			$this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs,$id);
+			$this->saveCache($this->rs, $id);
 		}
 
 		return $this;
@@ -100,7 +100,7 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 						AND company_id = ?
@@ -130,7 +130,7 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					where	a.company_id = ?
 						AND a.deleted = 0';
@@ -164,7 +164,7 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 					);
 
 		$query = '
-					select 	max(start_stop_window)
+					select	max(start_stop_window)
 					from	'. $this->getTable() .' as spf
 					LEFT JOIN '. $rstf->getTable() .' as rstf ON ( spf.id = rstf.schedule_policy_id )
 					where	spf.company_id = ?
@@ -203,18 +203,18 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 			$order = array( 'name' => 'asc');
 			$strict = FALSE;
 		} else {
-			//Always sort by last name,first name after other columns
+			//Always sort by last name, first name after other columns
 			if ( !isset($order['name']) ) {
 				$order['name'] = 'asc';
 			}
-            if ( isset($order['meal_policy']) ) {
+			if ( isset($order['meal_policy']) ) {
 				$order['b.name'] = $order['meal_policy'];
 				unset($order['meal_policy']);
 			}
 			$strict = TRUE;
 		}
-		//Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$uf = new UserFactory();
 		$mpf = new MealPolicyFactory();
@@ -225,7 +225,7 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 					);
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							b.name as meal_policy,
 							c.name as absence_policy,
 							y.first_name as created_by_first_name,
@@ -234,43 +234,30 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 							z.first_name as updated_by_first_name,
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
-					from 	'. $this->getTable() .' as a
+					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $mpf->getTable() .' as b ON a.meal_policy_id = b.id
 						LEFT JOIN '. $apf->getTable() .' as c ON a.absence_policy_id = c.id
 						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	a.company_id = ?
 					';
-		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query  .=	' AND a.created_by in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
-		}
-		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query  .=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
-		}
-		if ( isset($filter_data['exclude_id']) AND isset($filter_data['exclude_id'][0]) AND !in_array(-1, (array)$filter_data['exclude_id']) ) {
-			$query  .=	' AND a.id not in ('. $this->getListSQL($filter_data['exclude_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['meal_policy_id']) AND isset($filter_data['meal_policy_id'][0]) AND !in_array(-1, (array)$filter_data['meal_policy_id']) ) {
-			$query  .=	' AND a.meal_policy_id in ('. $this->getListSQL($filter_data['meal_policy_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['absence_policy_id']) AND isset($filter_data['absence_policy_id'][0]) AND !in_array(-1, (array)$filter_data['absence_policy_id']) ) {
-			$query  .=	' AND a.absence_policy_id in ('. $this->getListSQL($filter_data['absence_policy_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['name']) AND trim($filter_data['name']) != '' ) {
-			$ph[] = strtolower(trim($filter_data['name']));
-			$query  .=	' AND lower(a.name) LIKE ?';
-		}
-		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-        
-        $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
-        
 
-		$query .= 	'
-						AND a.deleted = 0
-					';
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['meal_policy_id']) ) ? $this->getWhereClauseSQL( 'a.meal_policy_id', $filter_data['meal_policy_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['absence_policy_id']) ) ? $this->getWhereClauseSQL( 'a.absence_policy_id', $filter_data['absence_policy_id'], 'numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
+
+		$query .=	' AND a.deleted = 0 ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
-        
+
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;

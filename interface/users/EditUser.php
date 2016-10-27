@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 5453 $
- * $Id: EditUser.php 5453 2011-11-03 20:30:28Z ipso $
- * $Date: 2011-11-03 13:30:28 -0700 (Thu, 03 Nov 2011) $
+ * $Revision: 12173 $
+ * $Id: EditUser.php 12173 2014-01-29 16:58:10Z mikeb $
+ * $Date: 2014-01-29 08:58:10 -0800 (Wed, 29 Jan 2014) $
  */
 require_once('../../includes/global.inc.php');
 require_once(Environment::getBasePath() .'includes/Interface.inc.php');
@@ -111,7 +111,7 @@ switch ($action) {
 
 					TTLog::addEntry( $current_user->getID(), 'Login',  TTi18n::getText('Switch User').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.  TTi18n::getText('UserID').': '. $id, $current_user->getId(), 'authentication');
 
-					Redirect::Page( URLBuilder::getURL( NULL, '../index.php') );
+					Redirect::Page( URLBuilder::getURL( NULL, '../index_legacy.php') );
 				} else {
 					$permission->Redirect( FALSE ); //Redirect
 				}

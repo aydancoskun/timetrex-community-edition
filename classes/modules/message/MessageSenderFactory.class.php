@@ -48,7 +48,7 @@ class MessageSenderFactory extends Factory {
 	protected $obj_handler = NULL;
 
 	function getUser() {
-		return $this->data['user_id'];
+		return (int)$this->data['user_id'];
 	}
 	function setUser($id) {
 		$id = trim($id);
@@ -70,7 +70,7 @@ class MessageSenderFactory extends Factory {
 
 	function getParent() {
 		if ( isset($this->data['parent_id']) ) {
-			return $this->data['parent_id'];
+			return (int)$this->data['parent_id'];
 		}
 
 		return FALSE;
@@ -99,7 +99,7 @@ class MessageSenderFactory extends Factory {
 
 	function getMessageControl() {
 		if ( isset($this->data['message_control_id']) ) {
-			return $this->data['message_control_id'];
+			return (int)$this->data['message_control_id'];
 		}
 
 		return FALSE;

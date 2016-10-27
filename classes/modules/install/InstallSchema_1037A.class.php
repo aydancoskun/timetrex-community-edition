@@ -45,27 +45,27 @@
 class InstallSchema_1037A extends InstallSchema_Base {
 
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion() , __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		return TRUE;
 	}
 
 
 	function postInstall() {
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		//Migrate messages from old system to new system.
 		$mlf = TTnew( 'MessageListFactory' );
 		$mlf->StartTransaction();
-		$mlf->getAll( NULL, NULL, NULL,  array('created_date' => 'asc' ) );
+		$mlf->getAll( NULL, NULL, NULL, array('created_date' => 'asc' ) );
 		if ( $mlf->getRecordCount() > 0 ) {
 			$id_map = array(); //Maps the old_id to the message_sender_id.
 
 			$ulf = TTnew( 'UserListFactory' );
-			$i=0;
-			$e=0;
+			$i = 0;
+			$e = 0;
 			foreach( $mlf as $message) {
-				if ( !in_array( $message->getObjectType(), array(5,50,90) ) ) {
+				if ( !in_array( $message->getObjectType(), array(5, 50, 90) ) ) {
 					continue;
 				}
 
@@ -79,7 +79,7 @@ class InstallSchema_1037A extends InstallSchema_Base {
 				}
 
 				if ( isset($created_by_user_obj) AND is_object($created_by_user_obj) AND $created_by_user_obj->getCompanyObject()->getStatus() != 30 ) {
-					Debug::text('Message: Object Type: '. $message->getObjectType() .' Object ID: '. $message->getObject() .'  From User ID: '. $message->getCreatedBy() .' Subject: '. $message->getSubject() , __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text('Message: Object Type: '. $message->getObjectType() .' Object ID: '. $message->getObject() .'  From User ID: '. $message->getCreatedBy() .' Subject: '. $message->getSubject(), __FILE__, __LINE__, __METHOD__, 10);
 
 					$mcf = TTnew( 'MessageControlFactory' );
 
@@ -87,7 +87,7 @@ class InstallSchema_1037A extends InstallSchema_Base {
 					$mcf->setObjectType( $message->getObjectType() );
 
 					if ( $message->getParent() > 0 AND isset($id_map[$message->getParent()]) AND $id_map[$message->getParent()] > 0 ) {
-						Debug::text('Using Parent ID: '. $id_map[$message->getParent()] , __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('Using Parent ID: '. $id_map[$message->getParent()], __FILE__, __LINE__, __METHOD__, 10);
 						$mcf->setParent( $id_map[$message->getParent()] ); //We need to use our own parent_ids.
 					}
 					$mcf->setFromUserId( $message->getCreatedBy() );
@@ -104,7 +104,7 @@ class InstallSchema_1037A extends InstallSchema_Base {
 						//Try our best though using current hierarchies.
 						$hlf = TTnew( 'HierarchyListFactory' );
 						$request_parent_level_user_ids = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $created_by_user_obj->getCompany(), $message->getCreatedBy(), $message->getObjectType(), TRUE, FALSE ); //Request - Immediate parents only.
-						//Debug::Arr($request_parent_level_user_ids, 'Sending message to current direct Superiors: ', __FILE__, __LINE__, __METHOD__,10);
+						//Debug::Arr($request_parent_level_user_ids, 'Sending message to current direct Superiors: ', __FILE__, __LINE__, __METHOD__, 10);
 						if ( $request_parent_level_user_ids !== FALSE ) {
 							$to_user_ids = (array)$request_parent_level_user_ids;
 						}
@@ -159,20 +159,20 @@ class InstallSchema_1037A extends InstallSchema_Base {
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
 			foreach( $clf as $c_obj ) {
-				Debug::text('Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__,9);
+				Debug::text('Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
 				if ( $c_obj->getStatus() != 30 ) {
 					$pclf = TTnew( 'PermissionControlListFactory' );
 					$pclf->getByCompanyId( $c_obj->getId(), NULL, NULL, NULL, array( 'name' => 'asc' ) ); //Sort order defaults to "level" column in newer versions which doesn't exist when this runs.
 					if ( $pclf->getRecordCount() > 0 ) {
 						foreach( $pclf as $pc_obj ) {
-							Debug::text('Permission Group: '. $pc_obj->getName(), __FILE__, __LINE__, __METHOD__,9);
+							Debug::text('Permission Group: '. $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
 							$plf = TTnew( 'PermissionListFactory' );
 							$plf->getByCompanyIdAndPermissionControlIdAndSectionAndName( $c_obj->getId(), $pc_obj->getId(), 'report', 'view_timesheet_summary');
 							if ( $plf->getRecordCount() > 0 ) {
-								Debug::text('Found permission group with job analysis report enabled: '. $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__,9);
+								Debug::text('Found permission group with job analysis report enabled: '. $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9);
 								$pc_obj->setPermission( array('report' => array('view_schedule_summary' => TRUE) ) );
 							} else {
-								Debug::text('Permission group does NOT have job analysis report enabled...', __FILE__, __LINE__, __METHOD__,9);
+								Debug::text('Permission group does NOT have job analysis report enabled...', __FILE__, __LINE__, __METHOD__, 9);
 							}
 						}
 					}

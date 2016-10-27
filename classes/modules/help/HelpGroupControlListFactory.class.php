@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: HelpGroupControlListFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11830 $
+ * $Id: HelpGroupControlListFactory.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -53,7 +53,7 @@ class HelpGroupControlListFactory extends HelpGroupControlFactory implements Ite
 		}
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					WHERE deleted=0
 				';
@@ -75,7 +75,7 @@ class HelpGroupControlListFactory extends HelpGroupControlFactory implements Ite
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 						AND deleted=0';
@@ -102,7 +102,7 @@ class HelpGroupControlListFactory extends HelpGroupControlFactory implements Ite
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	script_name = ?
 						AND name = ?

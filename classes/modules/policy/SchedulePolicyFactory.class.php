@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10179 $
- * $Id: SchedulePolicyFactory.class.php 10179 2013-06-11 22:39:40Z ipso $
- * $Date: 2013-06-11 15:39:40 -0700 (Tue, 11 Jun 2013) $
+ * $Revision: 12026 $
+ * $Id: SchedulePolicyFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -112,7 +112,7 @@ class SchedulePolicyFactory extends Factory {
 										'deleted' => 'Deleted',
 										);
 		return $variable_function_map;
-	 }
+	}
 
 	function getCompanyObject() {
 		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
@@ -127,7 +127,7 @@ class SchedulePolicyFactory extends Factory {
 			return FALSE;
 		}
 
-		Debug::Text('Break Policy ID: '. $break_policy_id .' Schedule Policy ID: '. $this->getId(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Break Policy ID: '. $break_policy_id .' Schedule Policy ID: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( isset($this->break_policy_obj[$break_policy_id])
 			AND is_object($this->break_policy_obj[$break_policy_id]) ) {
@@ -146,7 +146,7 @@ class SchedulePolicyFactory extends Factory {
 
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
-			return $this->data['company_id'];
+			return (int)$this->data['company_id'];
 		}
 
 		return FALSE;
@@ -154,7 +154,7 @@ class SchedulePolicyFactory extends Factory {
 	function setCompany($id) {
 		$id = trim($id);
 
-		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$clf = TTnew( 'CompanyListFactory' );
 
 		if ( $this->Validator->isResultSetWithRows(	'company',
@@ -178,7 +178,7 @@ class SchedulePolicyFactory extends Factory {
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
 		$id = $this->db->GetOne($query, $ph);
-		Debug::Arr($id,'Unique: '. $name, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($id, 'Unique: '. $name, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id === FALSE ) {
 			return TRUE;
@@ -202,7 +202,7 @@ class SchedulePolicyFactory extends Factory {
 		if (	$this->Validator->isLength(	'name',
 											$name,
 											TTi18n::gettext('Name is too short or too long'),
-											2,50)
+											2, 50)
 				AND
 				$this->Validator->isTrue(	'name',
 											$this->isUniqueName($name),
@@ -265,7 +265,7 @@ class SchedulePolicyFactory extends Factory {
 
 	function getOverTimePolicyID() {
 		if ( isset($this->data['over_time_policy_id']) ) {
-			return $this->data['over_time_policy_id'];
+			return (int)$this->data['over_time_policy_id'];
 		}
 
 		return FALSE;
@@ -295,7 +295,7 @@ class SchedulePolicyFactory extends Factory {
 
 	function getAbsencePolicyID() {
 		if ( isset($this->data['absence_policy_id']) ) {
-			return $this->data['absence_policy_id'];
+			return (int)$this->data['absence_policy_id'];
 		}
 
 		return FALSE;
@@ -341,7 +341,7 @@ class SchedulePolicyFactory extends Factory {
 	function setStartStopWindow($int) {
 		$int = (int)$int;
 
-		if 	(	$this->Validator->isNumeric(		'start_stop_window',
+		if	(	$this->Validator->isNumeric(		'start_stop_window',
 													$int,
 													TTi18n::gettext('Incorrect Start/Stop window')) ) {
 			$this->data['start_stop_window'] = $int;
@@ -362,7 +362,7 @@ class SchedulePolicyFactory extends Factory {
 
 	function postSave() {
 		if ( $this->getDeleted() == TRUE ) {
-			Debug::Text('UnAssign Schedule Policy from Schedule/Recurring Schedules...'. $this->getId(), __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('UnAssign Schedule Policy from Schedule/Recurring Schedules...'. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
 			$sf = TTnew( 'ScheduleFactory' );
 			$rstf = TTnew( 'RecurringScheduleTemplateFactory' );
 
@@ -431,7 +431,7 @@ class SchedulePolicyFactory extends Factory {
 	}
 
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action,  TTi18n::getText('Schedule Policy'), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Schedule Policy'), NULL, $this->getTable(), $this );
 	}
 }
 ?>

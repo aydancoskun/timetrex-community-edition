@@ -335,21 +335,21 @@ class TimeTrexClientAPIReturnHandler {
 		return FALSE;
 	}
 	function getTotalRecords() {
-		if ( isset($this->result_data['api_details']) AND isset($this->result_data['api_details']['record_details'])  AND isset($this->result_data['api_details']['record_details']['total_records']) ) {
+		if ( isset($this->result_data['api_details']) AND isset($this->result_data['api_details']['record_details']) AND isset($this->result_data['api_details']['record_details']['total_records']) ) {
 			return $this->result_data['api_details']['record_details']['total_records'];
 		}
 
 		return FALSE;
 	}
 	function getValidRecords() {
-		if ( isset($this->result_data['api_details']) AND isset($this->result_data['api_details']['record_details'])  AND isset($this->result_data['api_details']['record_details']['valid_records']) ) {
+		if ( isset($this->result_data['api_details']) AND isset($this->result_data['api_details']['record_details']) AND isset($this->result_data['api_details']['record_details']['valid_records']) ) {
 			return $this->result_data['api_details']['record_details']['valid_records'];
 		}
 
 		return FALSE;
 	}
 	function getInValidRecords() {
-		if ( isset($this->result_data['api_details']) AND isset($this->result_data['api_details']['record_details'])  AND isset($this->result_data['api_details']['record_details']['invalid_records']) ) {
+		if ( isset($this->result_data['api_details']) AND isset($this->result_data['api_details']['record_details']) AND isset($this->result_data['api_details']['record_details']['invalid_records']) ) {
 			return $this->result_data['api_details']['record_details']['invalid_records'];
 		}
 

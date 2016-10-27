@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: HelpGroupControlFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11830 $
+ * $Id: HelpGroupControlFactory.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -54,7 +54,7 @@ class HelpGroupControlFactory extends Factory {
 		if (	$this->Validator->isLength(	'script_name',
 											$value,
 											TTi18n::gettext('Incorrect Script Name'),
-											2,255) ) {
+											2, 255) ) {
 
 			$this->data['script_name'] = $value;
 
@@ -75,7 +75,7 @@ class HelpGroupControlFactory extends Factory {
 				$this->Validator->isLength(	'name',
 											$value,
 											TTi18n::gettext('Incorrect Name'),
-											2,255) ) {
+											2, 255) ) {
 
 			$this->data['name'] = $value;
 
@@ -112,11 +112,11 @@ class HelpGroupControlFactory extends Factory {
 			$help_group_entry->Delete();
 		}
 		
-		if (is_array($ids) and count($ids) > 0) {
+		if (is_array($ids) AND count($ids) > 0) {
 
 			//Insert new mappings.
 			$hgf = TTnew( 'HelpGroupFactory' );
-			$i=0;
+			$i = 0;
 			foreach ($ids as $id) {
 				//if ( !in_array($id, $help_ids) ) {
 					$hgf->setHelpGroupControl( $this->getId() );

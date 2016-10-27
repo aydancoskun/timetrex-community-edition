@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11143 $
- * $Id: Install.class.php 11143 2013-10-14 19:57:15Z mikeb $
- * $Date: 2013-10-14 12:57:15 -0700 (Mon, 14 Oct 2013) $
+ * $Revision: 12265 $
+ * $Id: Install.class.php 12265 2014-02-10 16:14:38Z mikeb $
+ * $Date: 2014-02-10 08:14:38 -0800 (Mon, 10 Feb 2014) $
  */
 
 /**
@@ -107,11 +107,11 @@ class Install {
 	function isInstallMode() {
 		if ( isset($this->config_vars['other']['installer_enabled'])
 				AND $this->config_vars['other']['installer_enabled'] == 1 ) {
-			Debug::text('Install Mode is ON', __FILE__, __LINE__, __METHOD__,9);
+			Debug::text('Install Mode is ON', __FILE__, __LINE__, __METHOD__, 9);
 			return TRUE;
 		}
 
-		Debug::text('Install Mode is OFF', __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('Install Mode is OFF', __FILE__, __LINE__, __METHOD__, 9);
 		return FALSE;
 	}
 
@@ -188,7 +188,7 @@ class Install {
 		return FALSE;
 	}
 	function getDatabaseConnection() {
-		if ( isset($this->temp_db) AND ( is_resource($this->temp_db->_connectionID) OR is_object($this->temp_db->_connectionID)  ) ) {
+		if ( isset($this->temp_db) AND ( is_resource($this->temp_db->_connectionID) OR is_object($this->temp_db->_connectionID)	 ) ) {
 			return $this->temp_db;
 		}
 
@@ -205,7 +205,7 @@ class Install {
 			$db->SetFetchMode(ADODB_FETCH_ASSOC);
 			$db->Connect( $host, $user, $password, $database_name);
 			if (Debug::getVerbosity() == 11) {
-				$db->debug=TRUE;
+				$db->debug = TRUE;
 			}
 
 			//MySQLi extension uses an object, not a resource.
@@ -241,7 +241,7 @@ class Install {
 			//Database section
 			//
 			preg_match('/^\[[database^\]\r\n]+](?:\r?\n(?:[^[\r\n].*)?)*/mi', $contents, $section );
-			//Debug::Arr( $section, 'Database Section (original): ', __FILE__, __LINE__, __METHOD__,10);
+			//Debug::Arr( $section, 'Database Section (original): ', __FILE__, __LINE__, __METHOD__, 10);
 			$section['database'] = $section[0];
 			if ( isset($config_vars['host']) AND $config_vars['host'] != '' ) {
 				$section['database'] = preg_replace('/^host\s*=.*/im', 'host = '. trim($config_vars['host']), $section['database']);
@@ -260,13 +260,13 @@ class Install {
 			}
 			$contents = str_replace( $section[0], $section['database'], $contents );
 			unset($section);
-			//Debug::Arr( $contents, 'Database Contents (new): ', __FILE__, __LINE__, __METHOD__,10);
+			//Debug::Arr( $contents, 'Database Contents (new): ', __FILE__, __LINE__, __METHOD__, 10);
 
 			//
 			//Path section
 			//
 			preg_match('/^\[[path^\]\r\n]+](?:\r?\n(?:[^[\r\n].*)?)*/mi', $contents, $section );
-			//Debug::Arr( $section, 'Path Section (original): ', __FILE__, __LINE__, __METHOD__,10);
+			//Debug::Arr( $section, 'Path Section (original): ', __FILE__, __LINE__, __METHOD__, 10);
 			$section['path'] = $section[0];
 			if ( isset($config_vars['base_url']) AND $config_vars['base_url'] != '' ) {
 				$section['path'] = preg_replace('/^base_url\s*=.*/im', 'base_url = '. preg_replace('@^(?:http://)?([^/]+)@i', '', $config_vars['base_url']), $section['path']);
@@ -279,13 +279,13 @@ class Install {
 			}
 			$contents = str_replace( $section[0], $section['path'], $contents );
 			unset($section);
-			//Debug::Arr( $contents, 'Path Contents (new): ', __FILE__, __LINE__, __METHOD__,10);
+			//Debug::Arr( $contents, 'Path Contents (new): ', __FILE__, __LINE__, __METHOD__, 10);
 
 			//
 			//Cache section
 			//
 			preg_match('/^\[[cache^\]\r\n]+](?:\r?\n(?:[^[\r\n].*)?)*/mi', $contents, $section );
-			//Debug::Arr( $section, 'Cache Section (original): ', __FILE__, __LINE__, __METHOD__,10);
+			//Debug::Arr( $section, 'Cache Section (original): ', __FILE__, __LINE__, __METHOD__, 10);
 			$section['cache'] = $section[0];
 			if ( isset($config_vars['cache']['enable']) ) {
 				$section['cache'] = preg_replace('/^enable\s*=.*/im', 'enable = '. $this->HumanBoolean( $config_vars['cache']['enable'] ), $section['cache']);
@@ -295,13 +295,13 @@ class Install {
 			}
 			$contents = str_replace( $section[0], $section['cache'], $contents );
 			unset($section);
-			//Debug::Arr( $contents, 'Cache Contents (new): ', __FILE__, __LINE__, __METHOD__,10);
+			//Debug::Arr( $contents, 'Cache Contents (new): ', __FILE__, __LINE__, __METHOD__, 10);
 
 			//
 			//Other section
 			//
 			preg_match('/^\[[other^\]\r\n]+](?:\r?\n(?:[^[\r\n].*)?)*/mi', $contents, $section );
-			//Debug::Arr( $section, 'Other Section (original): ', __FILE__, __LINE__, __METHOD__,10);
+			//Debug::Arr( $section, 'Other Section (original): ', __FILE__, __LINE__, __METHOD__, 10);
 			$section['other'] = $section[0];
 			if ( isset($config_vars['installer_enabled']) AND $config_vars['installer_enabled'] != '' ) {
 				$section['other'] = preg_replace('/^installer_enabled\s*=.*/im', 'installer_enabled = '. $this->HumanBoolean( $config_vars['installer_enabled'] ), $section['other']);
@@ -311,18 +311,18 @@ class Install {
 			}
 
 			if ( isset($this->config_vars['other']['salt']) AND ( $this->config_vars['other']['salt'] == '' OR $this->config_vars['other']['salt'] == '0' )
-			        AND isset($config_vars['salt']) AND $config_vars['salt'] != '' ) {
+					AND isset($config_vars['salt']) AND $config_vars['salt'] != '' ) {
 				$section['other'] = preg_replace('/^salt\s*=.*/im', 'salt = '. $config_vars['salt'], $section['other']);
 			}
 			$contents = str_replace( $section[0], $section['other'], $contents );
 			unset($section);
-			//Debug::Arr( $contents, 'Other Contents (new): ', __FILE__, __LINE__, __METHOD__,10);
+			//Debug::Arr( $contents, 'Other Contents (new): ', __FILE__, __LINE__, __METHOD__, 10);
 
-			Debug::text('Modified Config File!', __FILE__, __LINE__, __METHOD__,9);
+			Debug::text('Modified Config File!', __FILE__, __LINE__, __METHOD__, 9);
 
 			return file_put_contents( CONFIG_FILE, $contents);
 		} else {
-			Debug::text('Config File Not Writable!', __FILE__, __LINE__, __METHOD__,9);
+			Debug::text('Config File Not Writable!', __FILE__, __LINE__, __METHOD__, 9);
 		}
 
 		return FALSE;
@@ -378,7 +378,7 @@ class Install {
 
 	*/
 	function checkDatabaseExists( $database_name ) {
-		Debug::text('Database Name: '. $database_name, __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('Database Name: '. $database_name, __FILE__, __LINE__, __METHOD__, 9);
 		$db_conn = $this->getDatabaseConnection();
 
 		if ( $db_conn == FALSE ) {
@@ -388,30 +388,30 @@ class Install {
 		$database_arr = $db_conn->MetaDatabases();
 
 		if ( in_array($database_name, $database_arr ) ) {
-			Debug::text('Exists - Database Name: '. $database_name, __FILE__, __LINE__, __METHOD__,9);
+			Debug::text('Exists - Database Name: '. $database_name, __FILE__, __LINE__, __METHOD__, 9);
 			return TRUE;
 		}
 
-		Debug::text('Does not Exist - Database Name: '. $database_name, __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('Does not Exist - Database Name: '. $database_name, __FILE__, __LINE__, __METHOD__, 9);
 		return FALSE;
 	}
 
 	function createDatabase( $database_name ) {
-		Debug::text('Database Name: '. $database_name, __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('Database Name: '. $database_name, __FILE__, __LINE__, __METHOD__, 9);
 
 		require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'adodb'. DIRECTORY_SEPARATOR .'adodb.inc.php');
 
 		if ( $database_name == '' ) {
-			Debug::text('Database Name invalid ', __FILE__, __LINE__, __METHOD__,9);
+			Debug::text('Database Name invalid ', __FILE__, __LINE__, __METHOD__, 9);
 			return FALSE;
 		}
 
 		$db_conn = $this->getDatabaseConnection();
 		if ( $db_conn == FALSE ) {
-			Debug::text('No Database Connection.', __FILE__, __LINE__, __METHOD__,9);
+			Debug::text('No Database Connection.', __FILE__, __LINE__, __METHOD__, 9);
 			return FALSE;
 		}
-		Debug::text('Attempting to Create Database...', __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('Attempting to Create Database...', __FILE__, __LINE__, __METHOD__, 9);
 
 		$dict = NewDataDictionary( $db_conn );
 
@@ -420,7 +420,7 @@ class Install {
 	}
 
 	function checkTableExists( $table_name ) {
-		Debug::text('Table Name: '. $table_name, __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('Table Name: '. $table_name, __FILE__, __LINE__, __METHOD__, 9);
 		$db_conn = $this->getDatabaseConnection();
 
 		if ( $db_conn == FALSE ) {
@@ -430,17 +430,17 @@ class Install {
 		$table_arr = $db_conn->MetaTables();
 
 		if ( in_array($table_name, $table_arr ) ) {
-			Debug::text('Exists - Table Name: '. $table_name, __FILE__, __LINE__, __METHOD__,9);
+			Debug::text('Exists - Table Name: '. $table_name, __FILE__, __LINE__, __METHOD__, 9);
 			return TRUE;
 		}
 
-		Debug::text('Does not Exist - Table Name: '. $table_name, __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('Does not Exist - Table Name: '. $table_name, __FILE__, __LINE__, __METHOD__, 9);
 		return FALSE;
 	}
 
 	//Get all schema versions
 	//A=Community, B=Professional, C=Corporate, D=Enterprise, T=Tax
-	function getAllSchemaVersions( $group = array('A','B','C','D','T') ) {
+	function getAllSchemaVersions( $group = array('A', 'B', 'C', 'D', 'T') ) {
 		if ( !is_array($group) ) {
 			$group = array( $group );
 		}
@@ -452,21 +452,21 @@ class Install {
 		$dir = $is_obj->getSQLFileDirectory();
 		if ( $handle = opendir($dir) ) {
 			while ( FALSE !== ($file = readdir($handle))) {
-				list($schema_base_name,$extension) = explode('.', $file);
-				$schema_group = substr($schema_base_name, -1,1 );
-				Debug::text('Schema: '. $file .' Group: '. $schema_group, __FILE__, __LINE__, __METHOD__,9);
+				list($schema_base_name, $extension) = explode('.', $file);
+				$schema_group = substr($schema_base_name, -1, 1 );
+				Debug::text('Schema: '. $file .' Group: '. $schema_group, __FILE__, __LINE__, __METHOD__, 9);
 
 				if ($file != "." AND $file != ".."
-						AND substr($file,1,0) != '.'
+						AND substr($file, 1, 0) != '.'
 						AND in_array($schema_group, $group) ) {
-					$schema_versions[] = basename($file,'.sql');
+					$schema_versions[] = basename($file, '.sql');
 				}
 			}
 			closedir($handle);
 		}
 
 		sort($schema_versions);
-		Debug::Arr($schema_versions, 'Schema Versions', __FILE__, __LINE__, __METHOD__,9);
+		Debug::Arr($schema_versions, 'Schema Versions', __FILE__, __LINE__, __METHOD__, 9);
 
 		return $schema_versions;
 	}
@@ -479,17 +479,17 @@ class Install {
 			if ( $sslf->getRecordCount() > 0 ) {
 				$ss_obj = $sslf->getCurrent();
 				$system_version = $ss_obj->getValue();
-				Debug::text('System Version: '. $system_version .' Application Version: '. APPLICATION_VERSION, __FILE__, __LINE__, __METHOD__,9);
+				Debug::text('System Version: '. $system_version .' Application Version: '. APPLICATION_VERSION, __FILE__, __LINE__, __METHOD__, 9);
 
 				//If the current version is greater than 7.0 and the system_version in the database is less than 7.0, we know we are upgrading from pre7.0 to post7.0.
 				if ( version_compare( APPLICATION_VERSION, '7.0', '>=' ) AND version_compare( $system_version, '7.0', '<' ) ) {
-					Debug::text('Upgrade schema groups...', __FILE__, __LINE__, __METHOD__,9);
+					Debug::text('Upgrade schema groups...', __FILE__, __LINE__, __METHOD__, 9);
 
 					$sslf->getByName( 'schema_version_group_B' );
 					if ( $sslf->getRecordCount() > 0 ) {
 						$ss_obj = $sslf->getCurrent();
 						$schema_version_group_b = $ss_obj->getValue();
-						Debug::text('Schema Version Group B: '. $schema_version_group_b, __FILE__, __LINE__, __METHOD__,9);
+						Debug::text('Schema Version Group B: '. $schema_version_group_b, __FILE__, __LINE__, __METHOD__, 9);
 
 						$tmp_name = 'schema_version_group_C';
 						$tmp_sslf = TTnew( 'SystemSettingListFactory' );
@@ -519,7 +519,7 @@ class Install {
 
 	//Creates DB schema starting at and including start_version, and ending at, including end version.
 	//Starting at NULL is first version, ending at NULL is last version.
-	function createSchemaRange( $start_version = NULL, $end_version = NULL, $group = array('A','B','C','D','T') ) {
+	function createSchemaRange( $start_version = NULL, $end_version = NULL, $group = array('A', 'B', 'C', 'D', 'T') ) {
 		global $cache, $progress_bar, $config_vars;
 
 		//Disable detailed audit logging during schema upgrades, as it breaks upgrading from pre-audit log versions to post-audit log versions.
@@ -530,12 +530,12 @@ class Install {
 
 		$schema_versions = $this->getAllSchemaVersions( $group );
 
-		Debug::Arr($schema_versions, 'Schema Versions: ', __FILE__, __LINE__, __METHOD__,9);
+		Debug::Arr($schema_versions, 'Schema Versions: ', __FILE__, __LINE__, __METHOD__, 9);
 
 		$total_schema_versions = count($schema_versions);
 		if ( is_array($schema_versions) AND $total_schema_versions > 0 ) {
 			$this->getDatabaseConnection()->StartTrans();
-			$x=0;
+			$x = 0;
 			foreach( $schema_versions as $schema_version ) {
 				if ( ( $start_version === NULL OR $schema_version >= $start_version )
 					AND ( $end_version === NULL OR $schema_version <= $end_version )
@@ -549,7 +549,7 @@ class Install {
 					}
 
 					if ( $create_schema_result === FALSE ) {
-						Debug::text('CreateSchema Failed! On Version: '. $schema_version, __FILE__, __LINE__, __METHOD__,9);
+						Debug::text('CreateSchema Failed! On Version: '. $schema_version, __FILE__, __LINE__, __METHOD__, 9);
 						return FALSE;
 					}
 				}
@@ -571,35 +571,35 @@ class Install {
 
 		$install = FALSE;
 
-		$group = substr( $version,-1,1);
-		$version_number = substr( $version,0,(strlen($version)-1));
+		$group = substr( $version, -1, 1);
+		$version_number = substr( $version, 0, (strlen($version) - 1));
 
-		Debug::text('Version: '. $version .' Version Number: '. $version_number .' Group: '. $group, __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('Version: '. $version .' Version Number: '. $version_number .' Group: '. $group, __FILE__, __LINE__, __METHOD__, 9);
 
 		//Only create schema if current system settings do not exist, or they are
 		//older then this current schema version.
 		if ( $this->checkTableExists( 'system_setting') == TRUE ) {
-			Debug::text('System Setting Table DOES exist...', __FILE__, __LINE__, __METHOD__,9);
+			Debug::text('System Setting Table DOES exist...', __FILE__, __LINE__, __METHOD__, 9);
 
 			$sslf = TTnew( 'SystemSettingListFactory' );
-			$sslf->getByName( 'schema_version_group_'. substr( $version,-1,1) );
+			$sslf->getByName( 'schema_version_group_'. substr( $version, -1, 1) );
 			if ( $sslf->getRecordCount() > 0 ) {
 				$ss_obj = $sslf->getCurrent();
-				Debug::text('Found System Setting Entry: '. $ss_obj->getValue(), __FILE__, __LINE__, __METHOD__,9);
+				Debug::text('Found System Setting Entry: '. $ss_obj->getValue(), __FILE__, __LINE__, __METHOD__, 9);
 
 				if ( $ss_obj->getValue() < $version_number ) {
-					Debug::text('Schema version is older, installing...', __FILE__, __LINE__, __METHOD__,9);
+					Debug::text('Schema version is older, installing...', __FILE__, __LINE__, __METHOD__, 9);
 					$install = TRUE;
 				} else {
-					Debug::text('Schema version is equal, or newer then what we are trying to install...', __FILE__, __LINE__, __METHOD__,9);
+					Debug::text('Schema version is equal, or newer then what we are trying to install...', __FILE__, __LINE__, __METHOD__, 9);
 					$install = FALSE;
 				}
 			} else {
-				Debug::text('Did not find System Setting Entry...', __FILE__, __LINE__, __METHOD__,9);
+				Debug::text('Did not find System Setting Entry...', __FILE__, __LINE__, __METHOD__, 9);
 				$install = TRUE;
 			}
 		} else {
-			Debug::text('System Setting Table does not exist...', __FILE__, __LINE__, __METHOD__,9);
+			Debug::text('System Setting Table does not exist...', __FILE__, __LINE__, __METHOD__, 9);
 			$install = TRUE;
 		}
 
@@ -631,7 +631,7 @@ class Install {
 		if ( $php_version == NULL ) {
 			$php_version = $this->getPHPVersion();
 		}
-		Debug::text('Comparing with Version: '. $php_version, __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('Comparing with Version: '. $php_version, __FILE__, __LINE__, __METHOD__, 9);
 
 		$min_version = '5.0.0';
 		$max_version = '5.5.99'; //Change install.php as well, as some versions break backwards compatibility, so we need early checks as well.
@@ -644,7 +644,7 @@ class Install {
 				v5.3.0+ - Fails due to deprecated functions still in use. This is mostly fixed as of v3.1.0-rc1, leave enabled for now.
 				v5.0.4 - Fails to assign object values by ref. In ViewTimeSheet.php $smarty->assign_by_ref( $pp_obj->getId() ) fails.
 				v5.2.2 - Fails to populate $HTTP_RAW_POST_DATA http://bugs.php.net/bug.php?id=41293
-				 	   - Implemented work around in global.inc.php
+					   - Implemented work around in global.inc.php
 		*/
 		$invalid_versions = array('5.0.4');
 
@@ -673,7 +673,7 @@ class Install {
 			}
 		}
 
-		//Debug::text('RetVal: '. $retval, __FILE__, __LINE__, __METHOD__,9);
+		//Debug::text('RetVal: '. $retval, __FILE__, __LINE__, __METHOD__, 9);
 		return $retval;
 	}
 
@@ -702,9 +702,9 @@ class Install {
 		// INT = limited to that value
 
 		$raw_limit = ini_get('memory_limit');
-		//Debug::text('RAW Limit: '. $raw_limit, __FILE__, __LINE__, __METHOD__,9);
+		//Debug::text('RAW Limit: '. $raw_limit, __FILE__, __LINE__, __METHOD__, 9);
 		$limit = (int)rtrim($raw_limit, 'M');
-		//Debug::text('Limit: '. $limit, __FILE__, __LINE__, __METHOD__,9);
+		//Debug::text('Limit: '. $limit, __FILE__, __LINE__, __METHOD__, 9);
 
 		if ( $raw_limit == '' ) {
 			return NULL;
@@ -775,7 +775,7 @@ class Install {
 
 		$dirs = array();
 
-		//Make sure we check all files inside the log,storage,cache and templates_c directories, in case some files were created with the incorrect permissions and can't be overwritten.
+		//Make sure we check all files inside the log, storage, cache and templates_c directories, in case some files were created with the incorrect permissions and can't be overwritten.
 		if ( isset($this->config_vars['cache']['dir']) ) {
 			$dirs[] = $this->config_vars['cache']['dir'];
 		}
@@ -792,7 +792,7 @@ class Install {
 		$dirs[] = dirname( __FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR;
 
 		foreach( $dirs as $dir ) {
-			Debug::Text('Checking directory readable/writable: '. $dir, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Checking directory readable/writable: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
 			if ( is_dir( $dir ) AND is_readable( $dir ) ) {
 				//$rdi = new RecursiveDirectoryIterator( new RecursiveDirectoryIterator($dir) );
 				$rdi = new RecursiveDirectoryIterator( $dir, RecursiveIteratorIterator::SELF_FIRST );
@@ -801,15 +801,15 @@ class Install {
 						continue;
 					}
 
-					//Debug::Text('Checking readable/writable: '. $file_name, __FILE__, __LINE__, __METHOD__,10);
+					//Debug::Text('Checking readable/writable: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
 					if ( is_readable( $file_name ) == FALSE ) {
-						Debug::Text('File or directory is not readable: '. $file_name, __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('File or directory is not readable: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
 						$this->setExtendedErrorMessage( 'checkFilePermissions', 'Not Readable: '. $file_name );
 						return 1; //Invalid
 					}
 
 					if ( Misc::isWritable( $file_name ) == FALSE ) {
-						Debug::Text('File or directory is not writable: '. $file_name, __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('File or directory is not writable: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
 						$this->setExtendedErrorMessage( 'checkFilePermissions', 'Not writable: '. $file_name );
 						return 1; //Invalid
 					}
@@ -817,7 +817,7 @@ class Install {
 			}
 		}
 
-		Debug::Text('All Files/Directories are readable/writable!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('All Files/Directories are readable/writable!', __FILE__, __LINE__, __METHOD__, 10);
 		return 0;
 	}
 
@@ -840,22 +840,22 @@ class Install {
 			$checksums = explode("\n", $checksum_data );
 			unset($checksum_data);
 			if ( is_array($checksums) ) {
-				$i=0;
+				$i = 0;
 				foreach($checksums as $checksum_line ) {
 
 					//1st line contains the TT version for the checksums, make sure it matches current version.
 					if ( $i == 0 ) {
 						if ( preg_match( '/\d\.\d\.\d/', $checksum_line, $checksum_version ) ) {
-							Debug::Text('Checksum version: '. $checksum_version[0], __FILE__, __LINE__, __METHOD__,10);
+							Debug::Text('Checksum version: '. $checksum_version[0], __FILE__, __LINE__, __METHOD__, 10);
 							if ( version_compare( APPLICATION_VERSION, $checksum_version[0], '=') ) {
-								Debug::Text('Checksum version matches!', __FILE__, __LINE__, __METHOD__,10);
+								Debug::Text('Checksum version matches!', __FILE__, __LINE__, __METHOD__, 10);
 							} else {
-								Debug::Text('Checksum version DOES NOT match! Version: '. APPLICATION_VERSION .' Checksum Version: '. $checksum_version[0], __FILE__, __LINE__, __METHOD__,10);
+								Debug::Text('Checksum version DOES NOT match! Version: '. APPLICATION_VERSION .' Checksum Version: '. $checksum_version[0], __FILE__, __LINE__, __METHOD__, 10);
 								$this->setExtendedErrorMessage( 'checkFileChecksums', 'Application version does not match checksum version: '. $checksum_version[0] );
 								return 1;
 							}
 						} else {
-							Debug::Text('Checksum version not found in file: '. $checksum_line, __FILE__, __LINE__, __METHOD__,10);
+							Debug::Text('Checksum version not found in file: '. $checksum_line, __FILE__, __LINE__, __METHOD__, 10);
 						}
 					} elseif ( strlen( $checksum_line ) > 1 ) {
 						$split_line = explode(' ', $checksum_line );
@@ -866,15 +866,15 @@ class Install {
 							if ( file_exists( $file_name ) ) {
 								$my_checksum = sha1_file( $file_name );
 								if ( $my_checksum == $checksum ) {
-									Debug::Text('File: '. $file_name .' Checksum: '. $checksum .' MATCHES', __FILE__, __LINE__, __METHOD__,10);
+									Debug::Text('File: '. $file_name .' Checksum: '. $checksum .' MATCHES', __FILE__, __LINE__, __METHOD__, 10);
 								} else {
-									Debug::Text('File: '. $file_name .' Checksum: '. $my_checksum .' DOES NOT match provided checksum of: '. $checksum, __FILE__, __LINE__, __METHOD__,10);
+									Debug::Text('File: '. $file_name .' Checksum: '. $my_checksum .' DOES NOT match provided checksum of: '. $checksum, __FILE__, __LINE__, __METHOD__, 10);
 									$this->setExtendedErrorMessage( 'checkFileChecksums', 'Checksum does not match: '. $file_name );
 									return 1; //Invalid
 								}
 								unset($my_checksum);
 							} else {
-								Debug::Text('File does not exist: '. $file_name, __FILE__, __LINE__, __METHOD__,10);
+								Debug::Text('File does not exist: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
 								$this->setExtendedErrorMessage( 'checkFileChecksums', 'File does not exist: '. $file_name );
 								return 1; //Invalid
 							}
@@ -889,7 +889,7 @@ class Install {
 				return 0; //OK
 			}
 		} else {
-			Debug::Text('Checksum file does not exist: '. $checksum_file, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Checksum file does not exist: '. $checksum_file, __FILE__, __LINE__, __METHOD__, 10);
 			$this->setExtendedErrorMessage( 'checkFileChecksums', 'Checksum file does not exist: '. $checksum_file );
 		}
 
@@ -937,34 +937,51 @@ class Install {
 		//
 		// For MySQL only, this checks to make sure InnoDB is enabled!
 		//
-		Debug::Text('Checking DatabaseEngine...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Checking DatabaseEngine...', __FILE__, __LINE__, __METHOD__, 10);
 		if ($this->getDatabaseType() != 'mysql' ) {
 			return TRUE;
 		}
 
 		$db_conn = $this->getDatabaseConnection();
 		if ( $db_conn == FALSE ) {
-			Debug::text('No Database Connection.', __FILE__, __LINE__, __METHOD__,9);
+			Debug::text('No Database Connection.', __FILE__, __LINE__, __METHOD__, 9);
 			return FALSE;
 		}
 
 		$query = 'show engines';
 		$storage_engines = $db_conn->getAll($query);
-		//Debug::Arr($storage_engines, 'Available Storage Engines:', __FILE__, __LINE__, __METHOD__,9);
+		//Debug::Arr($storage_engines, 'Available Storage Engines:', __FILE__, __LINE__, __METHOD__, 9);
 		if ( is_array($storage_engines) ) {
 			foreach( $storage_engines as $key => $data ) {
-				Debug::Text('Engine: '. $data['Engine'] .' Support: '. $data['Support'], __FILE__, __LINE__, __METHOD__,10);
-				if ( strtolower($data['Engine']) == 'innodb' AND ( strtolower($data['Support']) == 'yes' OR strtolower($data['Support']) == 'default' )  ) {
-					Debug::text('InnoDB is available!', __FILE__, __LINE__, __METHOD__,9);
+				Debug::Text('Engine: '. $data['Engine'] .' Support: '. $data['Support'], __FILE__, __LINE__, __METHOD__, 10);
+				if ( strtolower($data['Engine']) == 'innodb' AND ( strtolower($data['Support']) == 'yes' OR strtolower($data['Support']) == 'default' )	 ) {
+					Debug::text('InnoDB is available!', __FILE__, __LINE__, __METHOD__, 9);
 					return TRUE;
 				}
 			}
 		}
 
-		Debug::text('InnoDB is NOT available!', __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('InnoDB is NOT available!', __FILE__, __LINE__, __METHOD__, 9);
 		return FALSE;
 	}
 
+	function getBaseURL() {
+		return 'http://'. Misc::getHostName( TRUE ).Environment::getBaseURL().'install/install.php'; //Check for a specific file, so we can be sure its not incorrect.
+	}
+	function getRecommendedBaseURL() {
+		return str_replace('install', '', dirname( $_SERVER['SCRIPT_NAME'] ) );
+	}
+	function checkBaseURL() {
+		$url = $this->getBaseURL();
+		Debug::text('Checking Base URL: '. $url, __FILE__, __LINE__, __METHOD__, 9);
+		$headers = @get_headers($url);
+		if ( isset($headers[0]) AND stripos($headers[0], '404') !== FALSE ) {
+			return 1; //Not found
+		} else {
+			return 0; //Found
+		}
+	}
+	
 	function checkPEAR() {
 		@include_once('PEAR.php');
 
@@ -1129,6 +1146,14 @@ class Install {
 		return 1;
 	}
 
+	function checkJSON() {
+		if ( function_exists('json_decode') ) {
+			return 0;
+		}
+
+		return 1;
+	}
+
 	//Not currently mandatory, but can be useful to provide better SOAP timeouts.
 	function checkCURL() {
 		if ( function_exists('curl_exec') ) {
@@ -1278,6 +1303,7 @@ class Install {
 		$retarr[$this->checkCALENDAR()]++;
 		$retarr[$this->checkGETTEXT()]++;
 		$retarr[$this->checkGD()]++;
+		$retarr[$this->checkJSON()]++;
 		$retarr[$this->checkSimpleXML()]++;
 		$retarr[$this->checkMAIL()]++;
 
@@ -1285,17 +1311,18 @@ class Install {
 
 		//PEAR modules are bundled as of v1.2.0
 		if ( $post_install_requirements_only == FALSE ) {
+			$retarr[$this->checkBaseURL()]++;
 			$retarr[$this->checkWritableConfigFile()]++;
 			$retarr[$this->checkWritableCacheDirectory()]++;
-			if ( is_array($exclude_check) AND in_array('clean_cache',$exclude_check) == FALSE  ) {
+			if ( is_array($exclude_check) AND in_array('clean_cache', $exclude_check) == FALSE	) {
 				$retarr[$this->checkCleanCacheDirectory()]++;
 			}
 			$retarr[$this->checkWritableStorageDirectory()]++;
 			$retarr[$this->checkWritableLogDirectory()]++;
-			if ( is_array($exclude_check) AND in_array('file_permissions',$exclude_check) == FALSE  ) {
+			if ( is_array($exclude_check) AND in_array('file_permissions', $exclude_check) == FALSE	 ) {
 				$retarr[$this->checkFilePermissions()]++;
 			}
-			if ( is_array($exclude_check) AND in_array('file_checksums',$exclude_check) == FALSE  ) {
+			if ( is_array($exclude_check) AND in_array('file_checksums', $exclude_check) == FALSE  ) {
 				$retarr[$this->checkFileChecksums()]++;
 			}
 		}
@@ -1308,7 +1335,7 @@ class Install {
 			$retarr[$this->checkMCRYPT()]++;
 		}
 
-		//Debug::Arr($retarr, 'RetArr: ', __FILE__, __LINE__, __METHOD__,9);
+		//Debug::Arr($retarr, 'RetArr: ', __FILE__, __LINE__, __METHOD__, 9);
 
 		if ( $retarr[1] > 0 ) {
 			return 1;
@@ -1358,6 +1385,10 @@ class Install {
 			$retarr[] = 'GD';
 		}
 
+		if ( $fail_all == TRUE OR $this->checkJSON() != 0 ) {
+			$retarr[] = 'JSON';
+		}
+
 		if ( $fail_all == TRUE OR $this->checkSimpleXML() != 0 ) {
 			$retarr[] = 'SIMPLEXML';
 		}
@@ -1373,6 +1404,11 @@ class Install {
 		}
 
 		if ( $post_install_requirements_only == FALSE ) {
+			if ( is_array($exclude_check) AND in_array('base_url', $exclude_check) == FALSE ) {
+				if ( $fail_all == TRUE OR $this->checkBaseURL() != 0 ) {
+					$retarr[] = 'BaseURL';
+				}
+			}
 			if ( $fail_all == TRUE OR $this->checkWritableConfigFile() != 0 ) {
 				$retarr[] = 'WConfigFile';
 			}

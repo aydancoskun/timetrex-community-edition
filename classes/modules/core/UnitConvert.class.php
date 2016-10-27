@@ -58,7 +58,7 @@ class UnitConvert {
 						'oz' => 28.349523125,
 						'lb' => 453.59237,
 						'lbs' => 453.59237,
-						'g'  => 1,
+						'g'	 => 1,
 						'kg' => 1000,
 
 						//1 Unit = X MM
@@ -71,8 +71,8 @@ class UnitConvert {
 
 	//Only units in the same array can be converted to one another.
 	static $valid_unit_groups = array(
-									'g' => array('g','oz','lb','lbs','kg'),
-									'mm' => array('mm','in','cm','ft','m')
+									'g' => array('g', 'oz', 'lb', 'lbs', 'kg'),
+									'mm' => array('mm', 'in', 'cm', 'ft', 'm')
 									);
 
 	static function convert( $src_unit, $dst_unit, $measurement, $exponent = 1 ) {
@@ -103,10 +103,10 @@ class UnitConvert {
 			return FALSE;
 		}
 
-		$base_measurement = pow( self::$units[$src_unit], $exponent) * $measurement;
-		//Debug::Text(' Base Measurement: '. $base_measurement, __FILE__, __LINE__, __METHOD__,10);
+		$base_measurement = ( pow( self::$units[$src_unit], $exponent) * $measurement );
+		//Debug::Text(' Base Measurement: '. $base_measurement, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $base_measurement != 0 ) {
-			$retval = (1 / pow(self::$units[$dst_unit], $exponent) ) * $base_measurement;
+			$retval = ( (1 / pow(self::$units[$dst_unit], $exponent) ) * $base_measurement );
 
 			return $retval;
 		}

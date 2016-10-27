@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: HierarchyObjectTypeListFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11830 $
+ * $Id: HierarchyObjectTypeListFactory.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -46,7 +46,7 @@ class HierarchyObjectTypeListFactory extends HierarchyObjectTypeFactory implemen
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 				';
 		$query .= $this->getWhereSQL( $where );
@@ -67,7 +67,7 @@ class HierarchyObjectTypeListFactory extends HierarchyObjectTypeFactory implemen
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 				';
@@ -89,7 +89,7 @@ class HierarchyObjectTypeListFactory extends HierarchyObjectTypeFactory implemen
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	hierarchy_control_id = ?
 				';
@@ -129,7 +129,7 @@ class HierarchyObjectTypeListFactory extends HierarchyObjectTypeFactory implemen
 						);
 
 			$query = '
-						select 	*
+						select	*
 						from	'. $this->getTable() .' as a,
 								'. $hcf->getTable() .' as b,
 								'. $hotf->getTable() .' as c
@@ -145,7 +145,7 @@ class HierarchyObjectTypeListFactory extends HierarchyObjectTypeFactory implemen
 
 			$this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs,$cache_id);
+			$this->saveCache($this->rs, $cache_id);
 		}
 
 		return $this;
@@ -169,7 +169,7 @@ class HierarchyObjectTypeListFactory extends HierarchyObjectTypeFactory implemen
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .' as a,
 							'. $hcf->getTable() .' as b
 

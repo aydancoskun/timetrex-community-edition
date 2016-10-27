@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 4252 $
- * $Id: TTLog.class.php 4252 2011-02-16 01:19:08Z ipso $
- * $Date: 2011-02-15 17:19:08 -0800 (Tue, 15 Feb 2011) $
+ * $Revision: 11830 $
+ * $Id: TTLog.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -83,7 +83,7 @@ class TTLog {
 		if ( $lf->isValid() === TRUE ) {
 			$insert_id = $lf->Save();
 
-			if ( 	(
+			if (	(
 					!isset($config_vars['other']['disable_audit_log_detail'])
 						OR ( isset($config_vars['other']['disable_audit_log_detail']) AND $config_vars['other']['disable_audit_log_detail'] != TRUE )
 					)

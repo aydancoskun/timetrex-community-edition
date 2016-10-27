@@ -34,20 +34,20 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 2095 $
- * $Id: FactoryListIterator.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
+ * $Revision: 11830 $
+ * $Id: FactoryListIterator.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
  * @package Core
  */
 class FactoryListIterator implements Iterator {
-    private $obj;
+	private $obj;
 	private $rs;
 	private $class_name;
 
-    function __construct($obj) {
+	function __construct($obj) {
 		$this->class_name = get_class($obj);
 
 		if ( isset($obj->rs) ) {
@@ -55,29 +55,29 @@ class FactoryListIterator implements Iterator {
 		}
 
 		$this->obj = $obj;
-    }
+	}
 
-    function rewind() {
+	function rewind() {
 		if ( isset($this->obj->rs) ) {
 			$this->obj->rs->MoveFirst();
 		}
 
 		return FALSE;
-    }
+	}
 
-    function valid() {
+	function valid() {
 		if ( isset($this->obj->rs) ) {
 			return !$this->obj->rs->EOF;
 		}
 
 		return FALSE;
-    }
+	}
 
-    function key() {
-        return $this->obj->rs->_currentRow;
-    }
+	function key() {
+		return $this->obj->rs->_currentRow;
+	}
 
-    function current() {
+	function current() {
 		if ( isset($this->obj->rs) ) { //Stop some warnings from coming up?
 
 			//This automatically resets the object during each iteration in a foreach()
@@ -91,11 +91,10 @@ class FactoryListIterator implements Iterator {
 		}
 
 		return $this->obj;
-    }
+	}
 
-    function next() {
-        $this->obj->rs->MoveNext();
-    }
-
+	function next() {
+		$this->obj->rs->MoveNext();
+	}
 }
 ?>

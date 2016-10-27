@@ -119,7 +119,7 @@ class APIReport extends APIFactory {
 		}
 
 		$format = Misc::trimSortPrefix( $format );
-		Debug::Text('Format: '. $format, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
 		$this->getReportObject()->setConfig( $config ); //Set config first, so checkPermissions can check/modify data in the config for Printing timesheets for regular employees.
 		if ( $this->getReportObject()->checkPermissions() == TRUE ) {
 			$this->getReportObject()->setAMFMessageID( $this->getAMFMessageID() ); //This must be set *after* the all constructor functions are called, as its primarily called from JSON.
@@ -138,9 +138,9 @@ class APIReport extends APIFactory {
 						return NULL; //Don't send any additional data, so JSON encoding doesn't corrupt the download.
 					}
 				} elseif ( isset($output_arr['api_retval']) ) { //Pass through validation errors.
-					Debug::Text('Report returned VALIDATION error, passing through...', __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Report returned VALIDATION error, passing through...', __FILE__, __LINE__, __METHOD__, 10);
 					return $this->returnHandler( $output_arr['api_retval'], $output_arr['api_details']['code'], $output_arr['api_details']['description'] );
-					//return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('Please try again later... (zzz)') );
+					//return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('Please try again later...') );
 				} elseif ( $output_arr !== FALSE ) {
 					//Likely RAW data, return untouched.
 					return $this->returnHandler( $output_arr );

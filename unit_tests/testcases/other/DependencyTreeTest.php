@@ -34,14 +34,16 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10912 $
- * $Id: DependencyTreeTest.php 10912 2013-09-12 21:46:19Z ipso $
- * $Date: 2013-09-12 14:46:19 -0700 (Thu, 12 Sep 2013) $
+ * $Revision: 12091 $
+ * $Id: DependencyTreeTest.php 12091 2014-01-21 16:33:40Z mikeb $
+ * $Date: 2014-01-21 08:33:40 -0800 (Tue, 21 Jan 2014) $
  */
 require_once('PHPUnit/Framework/TestCase.php');
 
+/**
+ * @group DependencyTree
+ */
 class DependencyTreeTest extends PHPUnit_Framework_TestCase {
-
     public function __construct() {
         global $db, $cache, $profiler;
 

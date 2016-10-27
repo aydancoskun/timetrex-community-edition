@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10788 $
- * $Id: UserPreferenceListFactory.class.php 10788 2013-08-30 23:55:26Z ipso $
- * $Date: 2013-08-30 16:55:26 -0700 (Fri, 30 Aug 2013) $
+ * $Revision: 12026 $
+ * $Id: UserPreferenceListFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -46,7 +46,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -73,7 +73,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 			$ph = array();
 
 			$query = '
-						select 	*
+						select	*
 						from	'. $this->getTable() .'
 						where	id in ('. $this->getListSQL($id, $ph) .')
 							AND deleted = 0';
@@ -83,7 +83,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 			$this->ExecuteSQL( $query, $ph );
 
 			if ( !is_array($id) ) {
-				$this->saveCache($this->rs,$id);
+				$this->saveCache($this->rs, $id);
 			}
 		}
 
@@ -102,7 +102,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 					);
 
 		$query = '
-					select 	distinct a.language
+					select	distinct a.language
 					from	'. $this->getTable() .' as a,
 							'. $uf->getTable() .' as b
 					where	a.user_id = b.id
@@ -130,7 +130,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 			$ph = array();
 
 			$query = '
-						select 	*
+						select	*
 						from	'. $this->getTable() .'
 						where	user_id in ('. $this->getListSQL($id, $ph) .')
 							AND deleted = 0';
@@ -140,7 +140,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 			$this->ExecuteSQL( $query, $ph );
 
 			if ( !is_array($id) ) {
-				$this->saveCache($this->rs,$id);
+				$this->saveCache($this->rs, $id);
 			}
 		}
 
@@ -159,8 +159,8 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 					);
 
 		$query = '
-					select 	a.*
-					from 	'. $this->getTable() .' as a,
+					select	a.*
+					from	'. $this->getTable() .' as a,
 							'. $uf->getTable() .' as b
 					where	a.user_id = b.id
 						AND	b.company_id = ?
@@ -189,8 +189,8 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 					);
 
 		$query = '
-					select 	a.*
-					from 	'. $this->getTable() .' as a,
+					select	a.*
+					from	'. $this->getTable() .' as a,
 							'. $uf->getTable() .' as b
 					where	a.user_id = b.id
 						AND	b.company_id = ?
@@ -220,10 +220,10 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $uf->getTable() .' as b
-					where 	a.user_id = b.id
+					where	a.user_id = b.id
 						AND	a.user_id = ?
 						AND b.company_id = ?
 						AND (a.deleted = 0 AND b.deleted = 0)';
@@ -254,7 +254,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 			$filter_data['exclude_id'] = $filter_data['exclude_user_id'];
 		}
 
-		$additional_order_fields = array('user_status_id','last_name', 'first_name', 'default_branch', 'default_department', 'user_group', 'title', 'city', 'province', 'country' );
+		$additional_order_fields = array('user_status_id', 'last_name', 'first_name', 'default_branch', 'default_department', 'user_group', 'title', 'city', 'province', 'country' );
 
 		$sort_column_aliases = array(
 									'user_status' => 'user_status_id',
@@ -271,14 +271,14 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 			$order = array( 'last_name' => 'asc' );
 			$strict = FALSE;
 		} else {
-			//Always sort by last name,first name after other columns
+			//Always sort by last name, first name after other columns
 			if ( !isset($order['last_name']) ) {
 				$order['last_name'] = 'asc';
 			}
 			$strict = TRUE;
 		}
-		//Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$uf = new UserFactory();
 		$bf = new BranchFactory();
@@ -291,7 +291,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 					);
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							b.first_name as first_name,
 							b.last_name as last_name,
 							b.user_name as user_name,
@@ -316,7 +316,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 							z.first_name as updated_by_first_name,
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
-					from 	'. $this->getTable() .' as a
+					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $uf->getTable() .' as b ON ( a.user_id = b.id AND b.deleted = 0 )
 						LEFT JOIN '. $bf->getTable() .' as bf ON ( b.default_branch_id = bf.id AND bf.deleted = 0)
 						LEFT JOIN '. $df->getTable() .' as df ON ( b.default_department_id = df.id AND df.deleted = 0)
@@ -333,7 +333,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
 
-		if ( isset($filter_data['status']) AND trim($filter_data['status']) != '' AND !isset($filter_data['status_id']) ) {
+		if ( isset($filter_data['status']) AND !is_array($filter_data['status']) AND trim($filter_data['status']) != '' AND !isset($filter_data['status_id']) ) {
 			$filter_data['status_id'] = Option::getByFuzzyValue( $filter_data['status'], $this->getOptions('status') );
 		}
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'b.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
@@ -354,10 +354,10 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'b.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['title']) ) ? $this->getWhereClauseSQL( 'utf.name', $filter_data['title'], 'text', $ph ) : NULL;
 
-		if ( isset($filter_data['sex']) AND trim($filter_data['sex']) != '' AND !isset($filter_data['sex_id']) ) {
+		if ( isset($filter_data['sex']) AND !is_array($filter_data['sex']) AND trim($filter_data['sex']) != '' AND !isset($filter_data['sex_id']) ) {
 			$filter_data['sex_id'] = Option::getByFuzzyValue( $filter_data['sex'], $this->getOptions('sex') );
 		}
-		$query .= ( isset($filter_data['sex_id']) ) ?$this->getWhereClauseSQL( 'b.sex_id', $filter_data['sex_id'], 'text_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['sex_id']) ) ?$this->getWhereClauseSQL( 'b.sex_id', $filter_data['sex_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['first_name']) ) ? $this->getWhereClauseSQL( 'b.first_name', $filter_data['first_name'], 'text_metaphone', $ph ) : NULL;
 		$query .= ( isset($filter_data['last_name']) ) ? $this->getWhereClauseSQL( 'b.last_name', $filter_data['last_name'], 'text_metaphone', $ph ) : NULL;
@@ -376,14 +376,10 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		$query .= ( isset($filter_data['work_email']) ) ? $this->getWhereClauseSQL( 'b.work_email', $filter_data['work_email'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['home_email']) ) ? $this->getWhereClauseSQL( 'b.home_email', $filter_data['home_email'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-        
-        $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
-        
+		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
 
-		$query .= 	'
-						AND a.deleted = 0
-					';
+		$query .=	' AND a.deleted = 0 ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 

@@ -65,7 +65,7 @@ class ImportSchedule extends Import {
 		switch( $name ) {
 			case 'columns':
 				$sf = TTNew('ScheduleFactory');
-				$retval = Misc::prependArray( $this->getUserIdentificationColumns(), Misc::arrayIntersectByKey( array('status','date_stamp','start_time','end_time','branch','department','job','job_item','schedule_policy','note','absence_policy',), Misc::trimSortPrefix( $sf->getOptions('columns') ) ) );
+				$retval = Misc::prependArray( $this->getUserIdentificationColumns(), Misc::arrayIntersectByKey( array('status', 'date_stamp', 'start_time', 'end_time', 'branch', 'department', 'job', 'job_item', 'schedule_policy', 'note', 'absence_policy', ), Misc::trimSortPrefix( $sf->getOptions('columns') ) ) );
 
 				$retval['schedule_policy'] = TTi18n::getText('Schedule Policy');
 				$retval['absence_policy'] = TTi18n::getText('Absence Policy');
@@ -97,21 +97,21 @@ class ImportSchedule extends Import {
 
 				$retval = array(
 								'branch' => array(
-												    '-1010-name' => TTi18n::gettext('Name'),
+													'-1010-name' => TTi18n::gettext('Name'),
 													'-1010-manual_id' => TTi18n::gettext('Code'),
-												  ),
+												),
 								'department' => array(
-												    '-1010-name' => TTi18n::gettext('Name'),
+													'-1010-name' => TTi18n::gettext('Name'),
 													'-1010-manual_id' => TTi18n::gettext('Code'),
-												  ),
+												),
 								'job' => array(
-												    '-1010-name' => TTi18n::gettext('Name'),
+													'-1010-name' => TTi18n::gettext('Name'),
 													'-1010-manual_id' => TTi18n::gettext('Code'),
-												  ),
+												),
 								'job_item' => array(
-												    '-1010-name' => TTi18n::gettext('Name'),
+													'-1010-name' => TTi18n::gettext('Name'),
 													'-1010-manual_id' => TTi18n::gettext('Code'),
-												  ),
+												),
 								'date_stamp' => $upf->getOptions('date_format'),
 								'start_time' => $upf->getOptions('time_format'),
 								'end_time' => $upf->getOptions('time_format'),
@@ -125,7 +125,7 @@ class ImportSchedule extends Import {
 
 
 	function _preParseRow( $row_number, $raw_row ) {
-		$retval = $this->getObject()->getScheduleDefaultData();
+		$retval = $this->getObject()->stripReturnHandler( $this->getObject()->getScheduleDefaultData() );
 
 		return $retval;
 	}
@@ -140,7 +140,7 @@ class ImportSchedule extends Import {
 		}
 
 		if ( !isset($column_map['start_time_stamp']) AND isset($column_map['date_stamp']) AND isset($column_map['start_time']) AND isset($column_map['end_time']) ) {
-			Debug::Text('Parsing date_stamp/start_time/end_time', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Parsing date_stamp/start_time/end_time', __FILE__, __LINE__, __METHOD__, 10);
 			TTDate::setDateFormat( $column_map['date_stamp']['parse_hint'] );
 			TTDate::setTimeFormat( $column_map['start_time']['parse_hint'] );
 
@@ -148,12 +148,12 @@ class ImportSchedule extends Import {
 			$raw_row['start_time'] = $raw_row['date_stamp'].' '.$raw_row['start_time'];
 			$raw_row['end_time'] = $raw_row['date_stamp'].' '.$raw_row['end_time'];
 		} elseif ( isset($column_map['start_time_stamp']) AND isset($column_map['end_time_stamp']) ) {
-			Debug::Text('Parsing start_time_stamp/end_time_stamp', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Parsing start_time_stamp/end_time_stamp', __FILE__, __LINE__, __METHOD__, 10);
 			$raw_row['start_time'] = $raw_row['start_time_stamp'];
 			$raw_row['end_time'] = $raw_row['end_time_stamp'];
 			unset($raw_row['start_time_stamp'], $raw_row['end_time_stamp']);
 		} else {
-			Debug::Text('zzzNOTParsing start_time_stamp/end_time_stamp', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('NOT Parsing start_time_stamp/end_time_stamp', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return $raw_row;
@@ -337,7 +337,7 @@ class ImportSchedule extends Import {
 			$this->getJobOptions();
 		}
 
-		//Debug::Text('Created new group name: '. $input .' ID: '. $parse_hint, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Text('Created new group name: '. $input .' ID: '. $parse_hint, __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_numeric( $input ) AND strtolower($parse_hint) == 'manual_id' ) {
 			//Find based on manual_id/code.
 			$retval = $this->findClosestMatch( $input, $this->job_manual_id_options, 90 );

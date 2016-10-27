@@ -54,8 +54,8 @@ class TaxSummaryReport extends Report {
 	}
 
 	protected function _checkPermissions( $user_id, $company_id ) {
-		if ( $this->getPermissionObject()->Check('report','enabled', $user_id, $company_id )
-				AND $this->getPermissionObject()->Check('report','view_generic_tax_summary', $user_id, $company_id ) ) {
+		if ( $this->getPermissionObject()->Check('report', 'enabled', $user_id, $company_id )
+				AND $this->getPermissionObject()->Check('report', 'view_generic_tax_summary', $user_id, $company_id ) ) {
 			return TRUE;
 		}
 
@@ -73,14 +73,14 @@ class TaxSummaryReport extends Report {
 										'template',
 										'time_period',
 										'columns',
-							   );
+								);
 				break;
 			case 'setup_fields':
 				$retval = array(
 										//Static Columns - Aggregate functions can't be used on these.
 										'-1000-template' => TTi18n::gettext('Template'),
 										'-1010-time_period' => TTi18n::gettext('Time Period'),
-                                        '-2000-company_deduction_id' => TTi18n::gettext('Tax'),
+										'-2000-company_deduction_id' => TTi18n::gettext('Tax'),
 										'-2010-user_status_id' => TTi18n::gettext('Employee Status'),
 										'-2020-user_group_id' => TTi18n::gettext('Employee Group'),
 										'-2030-user_title_id' => TTi18n::gettext('Employee Title'),
@@ -89,7 +89,7 @@ class TaxSummaryReport extends Report {
 										'-2050-exclude_user_id' => TTi18n::gettext('Employee Exclude'),
 										'-2060-default_branch_id' => TTi18n::gettext('Default Branch'),
 										'-2070-default_department_id' => TTi18n::gettext('Default Department'),
-                                        '-3000-custom_filter' => TTi18n::gettext('Custom Filter'),
+										'-3000-custom_filter' => TTi18n::gettext('Custom Filter'),
 
 										'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
 										
@@ -97,7 +97,7 @@ class TaxSummaryReport extends Report {
 										'-5010-group' => TTi18n::gettext('Group By'),
 										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
 										'-5030-sort' => TTi18n::gettext('Sort By'),
-							   );
+								);
 				break;
 			case 'time_period':
 				$retval = TTDate::getTimePeriodOptions();
@@ -105,7 +105,7 @@ class TaxSummaryReport extends Report {
 			case 'date_columns':
 				$retval = TTDate::getReportDateOptions( 'transaction', TTi18n::getText('Transaction Date'), 13, TRUE );
 				break;
-            case 'report_custom_column':
+			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
@@ -115,14 +115,14 @@ class TaxSummaryReport extends Report {
 						$retval = Misc::addSortPrefix( $custom_column_labels, 9500 );
 					}
 				}
-                break; 
-            case 'report_custom_filters':
+				break;
+			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
 					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'TaxSummaryReport', 'custom_column' );
 				}
-                break;
-            case 'report_dynamic_custom_column':
+				break;
+			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
 					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'TaxSummaryReport', 'custom_column' );
@@ -130,8 +130,8 @@ class TaxSummaryReport extends Report {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
 					}
 				}
-                break;
-            case 'report_static_custom_column':
+				break;
+			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
 					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'TaxSummaryReport', 'custom_column' );
@@ -139,13 +139,13 @@ class TaxSummaryReport extends Report {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
 					}
 				}
-                break;
-            case 'formula_columns':
-                $retval = TTMath::formatFormulaColumns( array_merge( array_diff( $this->getOptions('static_columns'), (array)$this->getOptions('report_static_custom_column') ), $this->getOptions('dynamic_columns') ) );
-                break; 
-            case 'filter_columns':
-                $retval = TTMath::formatFormulaColumns( array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') ) );
-                break;
+				break;
+			case 'formula_columns':
+				$retval = TTMath::formatFormulaColumns( array_merge( array_diff( $this->getOptions('static_columns'), (array)$this->getOptions('report_static_custom_column') ), $this->getOptions('dynamic_columns') ) );
+				break;
+			case 'filter_columns':
+				$retval = TTMath::formatFormulaColumns( array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') ) );
+				break;
 			case 'static_columns':
 				$retval = array(
 										//Static Columns - Aggregate functions can't be used on these.
@@ -174,7 +174,7 @@ class TaxSummaryReport extends Report {
 										'-1290-note' => TTi18n::gettext('Note'),
 										'-1295-tag' => TTi18n::gettext('Tags'),
 
-							   );
+								);
 
 				$retval = array_merge( $retval, $this->getOptions('date_columns'), (array)$this->getOptions('report_static_custom_column') );
 				ksort($retval);
@@ -185,7 +185,7 @@ class TaxSummaryReport extends Report {
 
 										//Take into account wage groups. However hourly_rates for the same hour type, so we need to figure out an average hourly rate for each column?
 										//'-2010-hourly_rate' => TTi18n::gettext('Hourly Rate'),
-                                        '-1430-subject_wages' => TTi18n::gettext('Subject Wages'),
+										'-1430-subject_wages' => TTi18n::gettext('Subject Wages'),
 										'-1440-taxable_wages' => TTi18n::gettext('Taxable Wages'),
 										'-1450-tax_withheld' => TTi18n::gettext('Tax Withheld'),
 
@@ -200,14 +200,14 @@ class TaxSummaryReport extends Report {
 				$retval = array();
 
 				$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-				$psealf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), 10, array(10,20,30,40,50,60,65) );
+				$psealf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), 10, array(10, 20, 30, 40, 50, 60, 65, 80) );
 				if ( $psealf->getRecordCount() > 0 ) {
 					$type_options  = $psealf->getOptions('type');
 					foreach( $type_options as $key => $val ) {
-						$type_options[$key] = str_replace( array('Employee', 'Employer', 'Deduction', 'Total'), array('EE', 'ER', 'Ded', ''), $val);
+						$type_options[$key] = str_replace( array('Employee', 'Employer', 'Deduction', 'Miscellaneous', 'Total'), array('EE', 'ER', 'Ded', 'Misc', ''), $val);
 					}
 
-					$i=0;
+					$i = 0;
 					foreach( $psealf as $psea_obj ) {
 						//Need to make the PSEA_ID a string so we can array_merge it properly later.
 						if ( $psea_obj->getType() == 40 ) { //Total accounts.
@@ -236,14 +236,14 @@ class TaxSummaryReport extends Report {
 				break;
 			case 'pay_stub_account_ytd_columns':
 				break;
-            /*
-            case 'company_deduction_options':
-                //Get Company Tax Deductions
-        		$cdlf = TTnew( 'CompanyDeductionListFactory' );
-        		$cdlf->getByCompanyIdAndTypeId( $this->getUserObject()->getCompany(), 10 );
-        		$retval = $cdlf->getArrayByListFactory( $cdlf, FALSE, TRUE );
-                break;
-            */
+			/*
+			case 'company_deduction_options':
+				//Get Company Tax Deductions
+				$cdlf = TTnew( 'CompanyDeductionListFactory' );
+				$cdlf->getByCompanyIdAndTypeId( $this->getUserObject()->getCompany(), 10 );
+				$retval = $cdlf->getArrayByListFactory( $cdlf, FALSE, TRUE );
+				break;
+			*/
 			case 'columns':
 				$retval = array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') );
 				break;
@@ -285,7 +285,7 @@ class TaxSummaryReport extends Report {
 			case 'templates':
 				$retval = array(
 										'-1010-by_employee+taxes' => TTi18n::gettext('Tax by Employee'),
-							   );
+								);
 
 				break;
 			case 'template_config':
@@ -308,14 +308,14 @@ class TaxSummaryReport extends Report {
 
 					switch( $template ) {
 						default:
-							Debug::Text(' Parsing template name: '. $template, __FILE__, __LINE__, __METHOD__,10);
+							Debug::Text(' Parsing template name: '. $template, __FILE__, __LINE__, __METHOD__, 10);
 							$retval['-1010-time_period']['time_period'] = 'last_quarter';
 
 							//Parse template name, and use the keywords separated by '+' to determine settings.
 							$template_keywords = explode('+', $template );
 							if ( is_array($template_keywords) ) {
 								foreach( $template_keywords as $template_keyword ) {
-									Debug::Text(' Keyword: '. $template_keyword, __FILE__, __LINE__, __METHOD__,10);
+									Debug::Text(' Keyword: '. $template_keyword, __FILE__, __LINE__, __METHOD__, 10);
 
 									switch( $template_keyword ) {
 										//Columns
@@ -418,7 +418,7 @@ class TaxSummaryReport extends Report {
 					$retval['-5040-sort'] = $retval['sort'];
 					unset($retval['sort']);
 				}
-				Debug::Arr($retval, ' Template Config for: '. $template, __FILE__, __LINE__, __METHOD__,10);
+				Debug::Arr($retval, ' Template Config for: '. $template, __FILE__, __LINE__, __METHOD__, 10);
 
 				break;
 			default:
@@ -437,150 +437,150 @@ class TaxSummaryReport extends Report {
 		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
 
-        if ( $this->getPermissionObject()->Check('pay_stub','view') == FALSE OR $this->getPermissionObject()->Check('wage','view') == FALSE ) {
+		if ( $this->getPermissionObject()->Check('pay_stub', 'view') == FALSE OR $this->getPermissionObject()->Check('wage', 'view') == FALSE ) {
 			$hlf = TTnew( 'HierarchyListFactory' );
 			$permission_children_ids = $wage_permission_children_ids = $hlf->getHierarchyChildrenByCompanyIdAndUserIdAndObjectTypeID( $this->getUserObject()->getCompany(), $this->getUserObject()->getID() );
-			Debug::Arr($permission_children_ids,'Permission Children Ids:', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Arr($permission_children_ids, 'Permission Children Ids:', __FILE__, __LINE__, __METHOD__, 10);
 		} else {
 			//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
 			$permission_children_ids = array();
 			$wage_permission_children_ids = array();
 		}
-		if ( $this->getPermissionObject()->Check('pay_stub','view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('pay_stub','view_child') == FALSE ) {
+		if ( $this->getPermissionObject()->Check('pay_stub', 'view') == FALSE ) {
+			if ( $this->getPermissionObject()->Check('pay_stub', 'view_child') == FALSE ) {
 				$permission_children_ids = array();
 			}
-			if ( $this->getPermissionObject()->Check('pay_stub','view_own') ) {
+			if ( $this->getPermissionObject()->Check('pay_stub', 'view_own') ) {
 				$permission_children_ids[] = $this->getUserObject()->getID();
 			}
 
 			$filter_data['permission_children_ids'] = $permission_children_ids;
 		}
 
-        $ulf = TTnew( 'UserListFactory' );
+		$ulf = TTnew( 'UserListFactory' );
 		$ulf->getSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-        if ( $ulf->getRecordCount() > 0 ) {
-                //Get total gross pay stub account IDs
-                $cdf = TTnew( 'CompanyDeductionFactory' );
-                $cdf->setCompany( $this->getUserObject()->getCompany() );
-                $total_gross_psea_ids = $cdf->getExpandedPayStubEntryAccountIDs( $cdf->getPayStubEntryAccountLinkObject()->getTotalGross() );
+		if ( $ulf->getRecordCount() > 0 ) {
+				//Get total gross pay stub account IDs
+				$cdf = TTnew( 'CompanyDeductionFactory' );
+				$cdf->setCompany( $this->getUserObject()->getCompany() );
+				$total_gross_psea_ids = $cdf->getExpandedPayStubEntryAccountIDs( $cdf->getPayStubEntryAccountLinkObject()->getTotalGross() );
 
-                if ( isset( $filter_data['company_deduction_id'] ) == FALSE ) {
-                    $filter_data['company_deduction_id'] = '';
-                }
-                $cdlf = TTnew( 'CompanyDeductionListFactory' );
-                $cdlf->getByCompanyIdAndId( $this->getUserObject()->getCompany(), $filter_data['company_deduction_id'] );
-                if ( $cdlf->getRecordCount() > 0 ) {
-        			$taxable_wages_psea_ids = array();
-        			$tax_withheld_psea_ids = array();
-        			Debug::Text('Found Company Deductions...', __FILE__, __LINE__, __METHOD__,10);
-        			foreach( $cdlf as $cd_obj ) {
+				if ( isset( $filter_data['company_deduction_id'] ) == FALSE ) {
+					$filter_data['company_deduction_id'] = '';
+				}
+				$cdlf = TTnew( 'CompanyDeductionListFactory' );
+				$cdlf->getByCompanyIdAndId( $this->getUserObject()->getCompany(), $filter_data['company_deduction_id'] );
+				if ( $cdlf->getRecordCount() > 0 ) {
+					$taxable_wages_psea_ids = array();
+					$tax_withheld_psea_ids = array();
+					Debug::Text('Found Company Deductions...', __FILE__, __LINE__, __METHOD__, 10);
+					foreach( $cdlf as $cd_obj ) {
 
-        				$taxable_wages_psea_ids = array_merge( $taxable_wages_psea_ids, (array)$cd_obj->getCombinedIncludeExcludePayStubEntryAccount( $cd_obj->getIncludePayStubEntryAccount(),  $cd_obj->getExcludePayStubEntryAccount() ) );
-        				$tax_withheld_psea_ids[] = $cd_obj->getPayStubEntryAccount();
+						$taxable_wages_psea_ids = array_merge( $taxable_wages_psea_ids, (array)$cd_obj->getCombinedIncludeExcludePayStubEntryAccount( $cd_obj->getIncludePayStubEntryAccount(), $cd_obj->getExcludePayStubEntryAccount() ) );
+						$tax_withheld_psea_ids[] = $cd_obj->getPayStubEntryAccount();
 
-        			}
-        			$taxable_wages_psea_ids = array_unique( $taxable_wages_psea_ids );
-        			$tax_withheld_psea_ids = array_unique( $tax_withheld_psea_ids );
-        		}
+					}
+					$taxable_wages_psea_ids = array_unique( $taxable_wages_psea_ids );
+					$tax_withheld_psea_ids = array_unique( $tax_withheld_psea_ids );
+				}
 
-                foreach( $ulf as $u_obj ) {
-    				$filter_data['user_ids'][] = $u_obj->getId();
-    			}
+				foreach( $ulf as $u_obj ) {
+					$filter_data['user_ids'][] = $u_obj->getId();
+				}
 
-                //Get all pay periods by transaction start/end date
-    			if ( isset( $filter_data['start_date'] ) AND isset( $filter_data['start_date'] ) ) {
-                    $pplf = TTnew( 'PayPeriodListFactory' );
-        			$pplf->getByCompanyIdAndTransactionStartDateAndTransactionEndDate( $this->getUserObject()->getCompany(), $filter_data['start_date'], $filter_data['end_date']);
+				//Get all pay periods by transaction start/end date
+				if ( isset( $filter_data['start_date'] ) AND isset( $filter_data['start_date'] ) ) {
+					$pplf = TTnew( 'PayPeriodListFactory' );
+					$pplf->getByCompanyIdAndTransactionStartDateAndTransactionEndDate( $this->getUserObject()->getCompany(), $filter_data['start_date'], $filter_data['end_date']);
 
-                    if ( $pplf->getRecordCount() > 0 ) {
-        				foreach( $pplf as $pp_obj ) {
-        					$pay_period_ids[] = $pp_obj->getId();
-        				}
-        			}
-    			} elseif ( isset( $filter_data['pay_period_id'] ) ) {
-    			     foreach( $filter_data['pay_period_id'] as $pay_period_id ) {
-    			         $pay_period_ids[] = $pay_period_id;
-    			     }
-    			} else {
-                     $pay_period_ids = '';
-    			}
+					if ( $pplf->getRecordCount() > 0 ) {
+						foreach( $pplf as $pp_obj ) {
+							$pay_period_ids[] = $pp_obj->getId();
+						}
+					}
+				} elseif ( isset( $filter_data['pay_period_id'] ) ) {
+					foreach( $filter_data['pay_period_id'] as $pay_period_id ) {
+						$pay_period_ids[] = $pay_period_id;
+					}
+				} else {
+					$pay_period_ids = '';
+				}
 
-    			unset($pplf, $pp_obj);
+				unset($pplf, $pp_obj);
 
-                if ( isset($pay_period_ids) AND isset($filter_data['user_ids']) ) {
+				if ( isset($pay_period_ids) AND isset($filter_data['user_ids']) ) {
 						if ( !isset($filter_data['exclude_ytd_adjustment']) ) {
 							$filter_data['exclude_ytd_adjustment'] = FALSE;
 						}
 						
-                        $pself = TTnew( 'PayStubEntryListFactory' );
-                		//$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-                        $pself->getDateReportByCompanyIdAndUserIdAndPayPeriodId( $this->getUserObject()->getCompany(), $filter_data['user_ids'], $pay_period_ids, $filter_data['exclude_ytd_adjustment'] );
+						$pself = TTnew( 'PayStubEntryListFactory' );
+						//$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+						$pself->getDateReportByCompanyIdAndUserIdAndPayPeriodId( $this->getUserObject()->getCompany(), $filter_data['user_ids'], $pay_period_ids, $filter_data['exclude_ytd_adjustment'] );
 
-                		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pself->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
-                		if ( $pself->getRecordCount() > 0 ) {
+						$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pself->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
+						if ( $pself->getRecordCount() > 0 ) {
 
-                			foreach( $pself as $key => $pse_obj ) {
-                				$user_id = $pse_obj->getColumn('user_id');
-                				$date_stamp = TTDate::strtotime( $pse_obj->getColumn('transaction_date') );
-                				$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
+							foreach( $pself as $key => $pse_obj ) {
+								$user_id = $pse_obj->getColumn('user_id');
+								$date_stamp = TTDate::strtotime( $pse_obj->getColumn('transaction_date') );
+								$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
 
-                                if ( isset($this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id]) ) {
-                                    $this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id], $pse_obj->getColumn('amount') );
-                                } else {
-                					$this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id] = $pse_obj->getColumn('amount');
-                				}
+								if ( isset($this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id]) ) {
+									$this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id], $pse_obj->getColumn('amount') );
+								} else {
+									$this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id] = $pse_obj->getColumn('amount');
+								}
 
-                                if ( isset($this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['PY'.$pay_stub_entry_name_id]) ) {
-                					$this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['PY'.$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['PY'.$pay_stub_entry_name_id], $pse_obj->getColumn('ytd_amount') );
-                				} else {
-                					$this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['PY'.$pay_stub_entry_name_id] = $pse_obj->getColumn('ytd_amount');
-                				}
+								if ( isset($this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['PY'.$pay_stub_entry_name_id]) ) {
+									$this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['PY'.$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['PY'.$pay_stub_entry_name_id], $pse_obj->getColumn('ytd_amount') );
+								} else {
+									$this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['PY'.$pay_stub_entry_name_id] = $pse_obj->getColumn('ytd_amount');
+								}
 
-                                if ( isset($total_gross_psea_ids) AND is_array($total_gross_psea_ids) AND in_array($pay_stub_entry_name_id, $total_gross_psea_ids ) ) {
+								if ( isset($total_gross_psea_ids) AND is_array($total_gross_psea_ids) AND in_array($pay_stub_entry_name_id, $total_gross_psea_ids ) ) {
 									if ( isset($this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['subject_wages']) ) {
-									    $this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['subject_wages'] = bcadd( $this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['subject_wages'], $pse_obj->getColumn('amount') );
+										$this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['subject_wages'] = bcadd( $this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['subject_wages'], $pse_obj->getColumn('amount') );
 									} else {
-				                        $this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['subject_wages'] = $pse_obj->getColumn('amount');
+										$this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['subject_wages'] = $pse_obj->getColumn('amount');
 									}
 
 								}
 
 								if ( isset($taxable_wages_psea_ids) AND is_array($taxable_wages_psea_ids) AND in_array($pay_stub_entry_name_id, $taxable_wages_psea_ids ) ) {
 									if ( isset($this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['taxable_wages']) ) {
-									    $this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['taxable_wages'] = bcadd( $this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['taxable_wages'], $pse_obj->getColumn('amount') );
+										$this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['taxable_wages'] = bcadd( $this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['taxable_wages'], $pse_obj->getColumn('amount') );
 									} else {
-				                        $this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['taxable_wages'] = $pse_obj->getColumn('amount');
+										$this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['taxable_wages'] = $pse_obj->getColumn('amount');
 									}
 								}
 
 								if ( isset($tax_withheld_psea_ids) AND is_array($tax_withheld_psea_ids) AND in_array($pay_stub_entry_name_id, $tax_withheld_psea_ids ) ) {
 									if ( isset($this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['tax_withheld']) ) {
-									    $this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['tax_withheld'] = bcadd( $this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['tax_withheld'], $pse_obj->getColumn('amount') );
+										$this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['tax_withheld'] = bcadd( $this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['tax_withheld'], $pse_obj->getColumn('amount') );
 									} else {
-				                        $this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['tax_withheld'] = $pse_obj->getColumn('amount');
+										$this->tmp_data['pay_stub_entry'][$date_stamp][$user_id]['tax_withheld'] = $pse_obj->getColumn('amount');
 									}
 								}
 
-                				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
-                			}
-                		}
-                }
+								$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+							}
+						}
+				}
 
 
-        }
+		}
 
 		//Get user data for joining.
 		$ulf = TTnew( 'UserListFactory' );
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( $this->getColumnDataConfig() );
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
-		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($this->tmp_data, 'TMP Data: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($this->tmp_data, 'TMP Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		return TRUE;
 	}
 
@@ -589,31 +589,31 @@ class TaxSummaryReport extends Report {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['pay_stub_entry']), NULL, TTi18n::getText('Pre-Processing Data...') );
 
 		//Merge time data with user data
-		$key=0;
+		$key = 0;
 		if ( isset($this->tmp_data['pay_stub_entry']) ) {
 
-            foreach( $this->tmp_data['pay_stub_entry'] as $date_stamp => $level_1 ) {
-                foreach( $level_1 as $user_id => $row ) {
+			foreach( $this->tmp_data['pay_stub_entry'] as $date_stamp => $level_1 ) {
+				foreach( $level_1 as $user_id => $row ) {
 
-                        if ( isset($this->tmp_data['user'][$user_id]) ) {
-                            $date_columns = TTDate::getReportDates( 'transaction', $date_stamp, FALSE, $this->getUserObject() );
-                            $processed_data  = array(
+						if ( isset($this->tmp_data['user'][$user_id]) ) {
+							$date_columns = TTDate::getReportDates( 'transaction', $date_stamp, FALSE, $this->getUserObject() );
+							$processed_data	 = array(
 												//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
 												//'pay_stub' => array('sort' => $row['pay_stub_transaction_date'], 'display' => TTDate::getDate('DATE', $row['pay_stub_transaction_date'] ) ),
 												);
-                            //Need to make sure PSEA IDs are strings not numeric otherwise array_merge will re-key them.
-    						$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $processed_data );
+							//Need to make sure PSEA IDs are strings not numeric otherwise array_merge will re-key them.
+							$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $processed_data );
 
-    						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
-    						$key++;
-                        }
-                }
-            }
+							$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+							$key++;
+						}
+				}
+			}
 
 			unset($this->tmp_data, $row, $date_columns, $processed_data, $level_1 );
 		}
 
-		Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		return TRUE;
 	}

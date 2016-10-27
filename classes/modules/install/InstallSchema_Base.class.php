@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10068 $
- * $Id: InstallSchema_Base.class.php 10068 2013-05-31 00:36:18Z ipso $
- * $Date: 2013-05-30 17:36:18 -0700 (Thu, 30 May 2013) $
+ * $Revision: 11830 $
+ * $Id: InstallSchema_Base.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -79,15 +79,15 @@ class InstallSchema_Base {
 	}
 
 	function getSchemaGroup() {
-		$schema_group = substr( $this->getVersion(), -1,1 );
-		Debug::text('Schema: '. $this->getVersion() .' Group: '. $schema_group, __FILE__, __LINE__, __METHOD__,9);
+		$schema_group = substr( $this->getVersion(), -1, 1 );
+		Debug::text('Schema: '. $this->getVersion() .' Group: '. $schema_group, __FILE__, __LINE__, __METHOD__, 9);
 
 		return strtoupper($schema_group);
 	}
 
 	//Copied from Install class.
 	function checkTableExists( $table_name ) {
-		Debug::text('Table Name: '. $table_name, __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('Table Name: '. $table_name, __FILE__, __LINE__, __METHOD__, 9);
 		$db_conn = $this->getDatabaseConnection();
 
 		if ( $db_conn == FALSE ) {
@@ -97,11 +97,11 @@ class InstallSchema_Base {
 		$table_arr = $db_conn->MetaTables();
 
 		if ( in_array($table_name, $table_arr ) ) {
-			Debug::text('Exists - Table Name: '. $table_name, __FILE__, __LINE__, __METHOD__,9);
+			Debug::text('Exists - Table Name: '. $table_name, __FILE__, __LINE__, __METHOD__, 9);
 			return TRUE;
 		}
 
-		Debug::text('Does not Exist - Table Name: '. $table_name, __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('Does not Exist - Table Name: '. $table_name, __FILE__, __LINE__, __METHOD__, 9);
 		return FALSE;
 	}
 
@@ -109,14 +109,14 @@ class InstallSchema_Base {
 	function getSchemaSQLFileData() {
 		//Read SQL data into memory
 		if ( is_readable( $this->getSchemaSQLFilename() ) ) {
-			Debug::text('Schema SQL File is readable: '. $this->getSchemaSQLFilename(), __FILE__, __LINE__, __METHOD__,9);
+			Debug::text('Schema SQL File is readable: '. $this->getSchemaSQLFilename(), __FILE__, __LINE__, __METHOD__, 9);
 			$contents = file_get_contents( $this->getSchemaSQLFilename() );
 
-			Debug::Arr($contents, 'SQL File Data: ', __FILE__, __LINE__, __METHOD__,9);
+			Debug::Arr($contents, 'SQL File Data: ', __FILE__, __LINE__, __METHOD__, 9);
 			return $contents;
 		}
 
-		Debug::text('Schema SQL File is NOT readable, or is empty!', __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('Schema SQL File is NOT readable, or is empty!', __FILE__, __LINE__, __METHOD__, 9);
 
 		return FALSE;
 	}
@@ -130,7 +130,7 @@ class InstallSchema_Base {
 		}
 
 		if ( $sql !== FALSE AND strlen($sql) > 0 ) {
-			Debug::text('Schema SQL has data, executing commands!', __FILE__, __LINE__, __METHOD__,9);
+			Debug::text('Schema SQL has data, executing commands!', __FILE__, __LINE__, __METHOD__, 9);
 
 			//Split into individual SQL queries, as MySQL apparently doesn't like more then one query
 			//in a single query() call.
@@ -151,12 +151,12 @@ class InstallSchema_Base {
 			}
 		}
 
-		Debug::text('Schema SQL does not have data, not executing commands, continuing...', __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('Schema SQL does not have data, not executing commands, continuing...', __FILE__, __LINE__, __METHOD__, 9);
 		return TRUE;
 	}
 
 	private function _postPostInstall() {
-		Debug::text('Modify Schema version in system settings table!', __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('Modify Schema version in system settings table!', __FILE__, __LINE__, __METHOD__, 9);
 		//Modify schema version in system_settings table.
 
 		$sslf = TTnew( 'SystemSettingListFactory' );
@@ -170,7 +170,7 @@ class InstallSchema_Base {
 		$obj->setName( 'schema_version_group_'. $this->getSchemaGroup() );
 		$obj->setValue( $this->getVersion() );
 		if ( $obj->isValid() ) {
-			Debug::text('Setting Schema Version to: '. $this->getVersion() .' Group: '. $this->getSchemaGroup() , __FILE__, __LINE__, __METHOD__,9);
+			Debug::text('Setting Schema Version to: '. $this->getVersion() .' Group: '. $this->getSchemaGroup(), __FILE__, __LINE__, __METHOD__, 9);
 			$obj->Save();
 
 			return TRUE;
@@ -183,7 +183,7 @@ class InstallSchema_Base {
 
 		$this->getDatabaseConnection()->StartTrans();
 
-		Debug::text('Installing Schema Version: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('Installing Schema Version: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 		if ( $this->preInstall() == TRUE ) {
 			if ( $this->_InstallSchema() == TRUE ) {
 				if ( $this->postInstall() == TRUE ) {

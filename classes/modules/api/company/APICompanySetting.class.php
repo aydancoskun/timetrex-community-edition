@@ -50,25 +50,25 @@ class APICompanySetting extends APIFactory {
 
 		return TRUE;
 	}
-    
-    function getCompanySetting( $name ) {
-        $retarr = CompanySettingFactory::getCompanySetting( $this->getCurrentCompanyObject()->getId(), $name );
-        if ( $retarr == TRUE ) {
-            return $this->returnHandler( $retarr );
-        }
-        
-        return $this->returnHandler( TRUE);
-    }
-    
-    function setCompanySetting( $name, $value, $type_id = 10 ) {
-        $retval = CompanySettingFactory::setCompanySetting( $this->getCurrentCompanyObject()->getId(), $name, $value, $type_id );
-        return $this->returnHandler($retval);
-    }
-    
-    function deleteCompanySetting( $name ) {
-        $retval = CompanySettingFactory::deleteCompanySetting( $this->getCurrentCompanyObject()->getId(), $name );
-        return $this->returnHandler($retval);
-    }
+	
+	function getCompanySetting( $name ) {
+		$retarr = CompanySettingFactory::getCompanySetting( $this->getCurrentCompanyObject()->getId(), $name );
+		if ( $retarr == TRUE ) {
+			return $this->returnHandler( $retarr );
+		}
+		
+		return $this->returnHandler( TRUE);
+	}
+	
+	function setCompanySetting( $name, $value, $type_id = 10 ) {
+		$retval = CompanySettingFactory::setCompanySetting( $this->getCurrentCompanyObject()->getId(), $name, $value, $type_id );
+		return $this->returnHandler($retval);
+	}
+	
+	function deleteCompanySetting( $name ) {
+		$retval = CompanySettingFactory::deleteCompanySetting( $this->getCurrentCompanyObject()->getId(), $name );
+		return $this->returnHandler($retval);
+	}
 
 }
 ?>

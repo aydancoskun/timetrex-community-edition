@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: PayStubEntryAccountLinkListFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 11830 $
+ * $Id: PayStubEntryAccountLinkListFactory.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -46,7 +46,7 @@ class PayStubEntryAccountLinkListFactory extends PayStubEntryAccountLinkFactory 
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					WHERE deleted = 0
 					ORDER BY ps_order ASC';
@@ -66,7 +66,7 @@ class PayStubEntryAccountLinkListFactory extends PayStubEntryAccountLinkFactory 
 		$ph = array();
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id in ('. $this->getListSQL($id, $ph) .')
 						AND deleted = 0';
@@ -91,7 +91,7 @@ class PayStubEntryAccountLinkListFactory extends PayStubEntryAccountLinkFactory 
 						);
 
 			$query = '
-						select 	*
+						select	*
 						from	'. $this->getTable() .'
 						where	company_id = ?
 							AND deleted = 0
@@ -101,7 +101,7 @@ class PayStubEntryAccountLinkListFactory extends PayStubEntryAccountLinkFactory 
 
 			$this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs,$company_id);
+			$this->saveCache($this->rs, $company_id);
 		}
 
 		return $this;

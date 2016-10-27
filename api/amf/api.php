@@ -199,6 +199,6 @@ if ( $session_id != '' AND !isset($_GET['session']) ) { //When Flex calls PING()
 	}
 }
 
-Debug::text('Server Response Time: '. ((float)microtime(TRUE)-$_SERVER['REQUEST_TIME']), __FILE__, __LINE__, __METHOD__, 10);
+Debug::text('Server Response Time: '. ((float)microtime(TRUE)-$_SERVER['REQUEST_TIME_FLOAT']), __FILE__, __LINE__, __METHOD__, 10);
 Debug::writeToLog();
 ?>

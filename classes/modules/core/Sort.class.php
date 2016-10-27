@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 7205 $
- * $Id: Sort.class.php 7205 2012-06-29 22:48:54Z ipso $
- * $Date: 2012-06-29 15:48:54 -0700 (Fri, 29 Jun 2012) $
+ * $Revision: 11830 $
+ * $Id: Sort.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -47,7 +47,7 @@ class Sort {
 		global $profiler;
 
 		$profiler->startTimer( 'multiSort()' );
-		//Debug::Text('Sorting... Col1: '. $col1 .' Col2: '. $col2 .' Col1 Order: '. $col1_order .' Col2 Order: '. $col2_order, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Text('Sorting... Col1: '. $col1 .' Col2: '. $col2 .' Col1 Order: '. $col1_order .' Col2 Order: '. $col2_order, __FILE__, __LINE__, __METHOD__, 10);
 
 		foreach ($data as $key => $row) {
 			if ( isset($row[$col1]) ) {
@@ -129,7 +129,7 @@ class Sort {
 			//we need to jump through hoops to make this an array that we can then later reference.
 			$order_type[$col] = SORT_REGULAR;
 			if ( isset($colarr[$col]['_0']) AND is_numeric($colarr[$col]['_0']) ) {
-				//Debug::Text('Using Numeric Sorting for Column: '. $col .' based on: '. $colarr[$col]['_0'], __FILE__, __LINE__, __METHOD__,10);
+				//Debug::Text('Using Numeric Sorting for Column: '. $col .' based on: '. $colarr[$col]['_0'], __FILE__, __LINE__, __METHOD__, 10);
 				$order_type[$col] = SORT_NUMERIC;
 			}
 
@@ -150,9 +150,9 @@ class Sort {
 			}
 		}
 
-		//Debug::Arr($params, 'aSort Data: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($params, 'aSort Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		call_user_func_array('array_multisort', $params);
-		//Debug::Arr($params, 'bSort Data: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($params, 'bSort Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$retarr = array();
 		$keys = array();
@@ -160,7 +160,7 @@ class Sort {
 		foreach( $colarr as $col => $arr ) {
 			foreach( $arr as $k => $v ) {
 				if ($first) {
-					$keys[$k] = substr($k,1);
+					$keys[$k] = substr($k, 1);
 				}
 				$k = $keys[$k];
 

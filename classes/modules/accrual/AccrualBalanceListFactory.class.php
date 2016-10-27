@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9714 $
- * $Id: AccrualBalanceListFactory.class.php 9714 2013-04-27 17:50:36Z ipso $
- * $Date: 2013-04-27 10:50:36 -0700 (Sat, 27 Apr 2013) $
+ * $Revision: 12026 $
+ * $Id: AccrualBalanceListFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -46,7 +46,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -67,7 +67,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 						AND deleted = 0';
@@ -91,7 +91,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $uf->getTable() .' as b
 					where	a.user_id = b.id
@@ -120,7 +120,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 						AND company_id = ?
@@ -159,11 +159,11 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $uf->getTable() .' as b,
 							'. $apf->getTable() .' as c
-					where 	a.user_id = b.id
+					where	a.user_id = b.id
 						AND a.accrual_policy_id = c.id
 						AND b.company_id = ?
 						AND a.user_id in ('. $this->getListSQL( $user_id, $ph ) .')
@@ -203,12 +203,12 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 					);
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							c.name as name
 					from	'. $this->getTable() .' as a,
 							'. $uf->getTable() .' as b,
 							'. $apf->getTable() .' as c
-					where 	a.user_id = b.id
+					where	a.user_id = b.id
 						AND a.accrual_policy_id = c.id
 						AND b.company_id = ?
 						AND c.enable_pay_stub_balance_display = ?
@@ -237,7 +237,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	user_id = ?
 						AND accrual_policy_id = ?
@@ -262,18 +262,18 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 			}
 		}
 
-		$additional_order_fields = array( 'accrual_policy','accrual_policy_type_id','first_name','last_name','name','default_branch','default_department' );
+		$additional_order_fields = array( 'accrual_policy', 'accrual_policy_type_id', 'first_name', 'last_name', 'name', 'default_branch', 'default_department' );
 		$sort_column_aliases = array(
-									 'accrual_policy_type' => 'accrual_policy_type_id',
-									 'group' => 'e.name',
-									 );
+									'accrual_policy_type' => 'accrual_policy_type_id',
+									'group' => 'e.name',
+									);
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 
 		if ( $order == NULL ) {
 			$order = array( 'last_name' => 'asc', 'accrual_policy_id' => 'asc', );
 			$strict = FALSE;
 		} else {
-			//Always sort by last name,first name after other columns
+			//Always sort by last name, first name after other columns
 			/*
 			if ( !isset($order['effective_date']) ) {
 				$order['effective_date'] = 'desc';
@@ -281,8 +281,8 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 			*/
 			$strict = TRUE;
 		}
-		//Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$uf = new UserFactory();
 		$bf = new BranchFactory();
@@ -297,7 +297,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 					);
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							ab.name as accrual_policy,
 							ab.type_id as accrual_policy_type_id,
 							b.first_name as first_name,
@@ -313,7 +313,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 							e.name as "group",
 							f.id as title_id,
 							f.name as title
-					from 	'. $this->getTable() .' as a
+					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $apf->getTable() .' as ab ON ( a.accrual_policy_id = ab.id AND ab.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as b ON ( a.user_id = b.id AND b.deleted = 0 )
 
@@ -321,7 +321,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 						LEFT JOIN '. $df->getTable() .' as d ON ( b.default_department_id = d.id AND d.deleted = 0)
 						LEFT JOIN '. $ugf->getTable() .' as e ON ( b.group_id = e.id AND e.deleted = 0 )
 						LEFT JOIN '. $utf->getTable() .' as f ON ( b.title_id = f.id AND f.deleted = 0 )
-                        
+
 					where	b.company_id = ?
 						AND EXISTS ( select 1 from '. $af->getTable() .' as af WHERE af.accrual_policy_id = a.accrual_policy_id AND a.user_id = af.user_id AND af.deleted = 0 )
 					';
@@ -331,14 +331,14 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
 
-		if ( isset($filter_data['type']) AND trim($filter_data['type']) != '' AND !isset($filter_data['type_id']) ) {
+		if ( isset($filter_data['type']) AND !is_array( $filter_data['type'] ) AND trim($filter_data['type']) != '' AND !isset($filter_data['type_id']) ) {
 			$filter_data['type_id'] = Option::getByFuzzyValue( $filter_data['type'], $this->getOptions('type') );
 		}
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'ab.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['accrual_policy_id']) ) ? $this->getWhereClauseSQL( 'a.accrual_policy_id', $filter_data['accrual_policy_id'], 'numeric_list', $ph ) : NULL;
 
-		if ( isset($filter_data['status']) AND trim($filter_data['status']) != '' AND !isset($filter_data['status_id']) ) {
+		if ( isset($filter_data['status']) AND !is_array( $filter_data['status'] ) AND trim($filter_data['status']) != '' AND !isset($filter_data['status_id']) ) {
 			$filter_data['status_id'] = Option::getByFuzzyValue( $filter_data['status'], $this->getOptions('status') );
 		}
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'b.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
@@ -352,8 +352,8 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'b.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['default_department']) ) ? $this->getWhereClauseSQL( 'd.name', $filter_data['default_department'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'a.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['title']) ) ? $this->getWhereClauseSQL( 'e.name', $filter_data['title'], 'text', $ph ) : NULL;
+		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'b.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['title']) ) ? $this->getWhereClauseSQL( 'f.name', $filter_data['title'], 'text', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['first_name']) ) ? $this->getWhereClauseSQL( 'b.first_name', $filter_data['first_name'], 'text_metaphone', $ph ) : NULL;
 		$query .= ( isset($filter_data['last_name']) ) ? $this->getWhereClauseSQL( 'b.last_name', $filter_data['last_name'], 'text_metaphone', $ph ) : NULL;
@@ -361,7 +361,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		$query .= ( isset($filter_data['country']) ) ?$this->getWhereClauseSQL( 'b.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['province']) ) ? $this->getWhereClauseSQL( 'b.province', $filter_data['province'], 'upper_text_list', $ph ) : NULL;
 
-		$query .= 	'
+		$query .=	'
 						AND a.deleted = 0
 					';
 		$query .= $this->getWhereSQL( $where );

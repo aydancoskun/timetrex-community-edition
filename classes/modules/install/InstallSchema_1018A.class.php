@@ -47,7 +47,7 @@ class InstallSchema_1018A extends InstallSchema_Base {
 	protected $station_users = array();
 
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion() , __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		return TRUE;
 	}
@@ -55,9 +55,9 @@ class InstallSchema_1018A extends InstallSchema_Base {
 	function postInstall() {
 		global $cache;
 
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
-		Debug::text('l: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('l: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 
 		return TRUE;

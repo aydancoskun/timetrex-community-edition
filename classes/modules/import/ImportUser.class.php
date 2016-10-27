@@ -86,10 +86,10 @@ class ImportUser extends Import {
 				//logged in employee.
 				if ( ( is_object($this->getCompanyObject()) AND $this->getCompanyObject()->getProductEdition() < TT_PRODUCT_CORPORATE )
 						OR ( !is_object($this->getCompanyObject()) AND getTTProductEdition() < TT_PRODUCT_CORPORATE ) ) {
-					unset($retval['-1104-default_job'],$retval['-1105-default_job_item']);
+					unset($retval['-1104-default_job'], $retval['-1105-default_job_item']);
 				}
 
-				if ( is_object( $current_company )  ) {
+				if ( is_object( $current_company )	) {
 					//Get custom fields for import data.
 					$oflf = TTnew( 'OtherFieldListFactory' );
 					$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $current_company->getID(), array(10), array( 10 => '' ) );
@@ -98,7 +98,7 @@ class ImportUser extends Import {
 					}
 				}
 				
-				Debug::Arr($retval, 'ImportUserColumns: ', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Arr($retval, 'ImportUserColumns: ', __FILE__, __LINE__, __METHOD__, 10);
 
 				break;
 			case 'column_aliases':
@@ -135,37 +135,37 @@ class ImportUser extends Import {
 
 				$retval = array(
 								'default_branch' => array(
-												    '-1010-name' => TTi18n::gettext('Name'),
+													'-1010-name' => TTi18n::gettext('Name'),
 													'-1010-manual_id' => TTi18n::gettext('Code'),
-												  ),
+												),
 								'default_department' => array(
-												    '-1010-name' => TTi18n::gettext('Name'),
+													'-1010-name' => TTi18n::gettext('Name'),
 													'-1010-manual_id' => TTi18n::gettext('Code'),
-												  ),
+												),
 								'default_job' => array(
-												    '-1010-name' => TTi18n::gettext('Name'),
+													'-1010-name' => TTi18n::gettext('Name'),
 													'-1010-manual_id' => TTi18n::gettext('Code'),
-												  ),
+												),
 								'default_job_item' => array(
-												    '-1010-name' => TTi18n::gettext('Name'),
+													'-1010-name' => TTi18n::gettext('Name'),
 													'-1010-manual_id' => TTi18n::gettext('Code'),
-												  ),
+												),
 								'first_name' => array(
 														'-1010-first_name' => TTi18n::gettext('First Name'),
 														'-1020-first_last_name' => TTi18n::gettext('FirstName LastName'),
 														'-1030-last_first_name' => TTi18n::gettext('LastName, FirstName'),
 														'-1040-last_first_middle_name' => TTi18n::gettext('LastName, FirstName MiddleInitial'),
-													  ),
+													),
 								'last_name' => array(
 														'-1010-last_name' => TTi18n::gettext('Last Name'),
 														'-1020-first_last_name' => TTi18n::gettext('FirstName LastName'),
 														'-1030-last_first_name' => TTi18n::gettext('LastName, FirstName'),
 														'-1040-last_first_middle_name' => TTi18n::gettext('LastName, FirstName MiddleInitial'),
-													  ),
+													),
 								'middle_name' => array(
 														'-1010-middle_name' => TTi18n::gettext('Middle Name'),
 														'-1040-last_first_middle_name' => TTi18n::gettext('LastName, FirstName MiddleInitial'),
-													  ),
+													),
 								'hire_date' => $upf->getOptions('date_format'),
 								'termination_date' => $upf->getOptions('date_format'),
 								'birth_date' => $upf->getOptions('date_format'),
@@ -190,32 +190,32 @@ class ImportUser extends Import {
 			}
 		}
 
-		//Debug::Arr($retval, 'preParse Row: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($retval, 'preParse Row: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 	}
 
 	function _postParseRow( $row_number, $raw_row ) {
 		if ( $this->getImportOptions('update') == TRUE ) {
-			Debug::Text('Updating existing records, try to find record... ', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Updating existing records, try to find record... ', __FILE__, __LINE__, __METHOD__, 10);
 			$raw_row['id'] = $this->getUserIdByRowData( $raw_row );
 			if ( $raw_row['id'] == FALSE ) {
 				unset($raw_row['id']);
 			}
 		} else {
-			Debug::Text('NOT updating existing records... ', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('NOT updating existing records... ', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		//Check to see if this particular record is new or modifying an existing one.
 		if ( !isset($raw_row['id']) OR ( isset($raw_row['id']) AND $raw_row['id'] == FALSE )  ) {
-			Debug::Text('Unable to find existing employee... Creating a new one...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Unable to find existing employee... Creating a new one...', __FILE__, __LINE__, __METHOD__, 10);
 
-			$default_data = $this->getObject()->getUserDefaultData();
-			//Debug::Arr($default_data, 'Default Data: ', __FILE__, __LINE__, __METHOD__,10);
+			$default_data = $this->getObject()->stripReturnHandler( $this->getObject()->getUserDefaultData() );
+			//Debug::Arr($default_data, 'Default Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			$uf = TTnew('UserFactory');
 
 			if ( !is_array($default_data) ) {
-				$default_data['status'] = 10; //Active
+				$default_data['status_id'] = 10; //Active
 				$default_data['employee_number'] = 1;
 				$default_data['currency_id'] = 1;
 			}
@@ -225,7 +225,7 @@ class ImportUser extends Import {
 			}
 
 			if ( !isset($raw_row['employee_number']) ) {
-				$raw_row['employee_number'] = $default_data['employee_number'] + $row_number; //Auto increment manual_id automatically.
+				$raw_row['employee_number'] = ( $default_data['employee_number'] + $row_number ); //Auto increment manual_id automatically.
 			}
 			if ( !isset($raw_row['password']) ) {
 				$raw_row['password'] = uniqid(); //Default to a unique password.
@@ -238,15 +238,15 @@ class ImportUser extends Import {
 
 					$tmp_user_name = strtolower($tmp_first_name.'.'.$tmp_last_name);
 					if ( $uf->isUniqueUserName( $tmp_user_name ) == FALSE ) {
-						Debug::Text('Autogenerated user name already exists, trying random one: '. $tmp_user_name, __FILE__, __LINE__, __METHOD__,10);
-						$tmp_user_name = strtolower($tmp_first_name.'.'.$tmp_last_name.rand(10,9999) );
+						Debug::Text('Autogenerated user name already exists, trying random one: '. $tmp_user_name, __FILE__, __LINE__, __METHOD__, 10);
+						$tmp_user_name = strtolower($tmp_first_name.'.'.$tmp_last_name.rand(10, 9999) );
 					}
 
-					Debug::Text('Autogenerating user name: '. $tmp_user_name, __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Autogenerating user name: '. $tmp_user_name, __FILE__, __LINE__, __METHOD__, 10);
 
 					$raw_row['user_name'] = $tmp_user_name;
 				} else {
-					Debug::Text('Cant autogenerating user name...', __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Not autogenerating user name...', __FILE__, __LINE__, __METHOD__, 10);
 				}
 			}
 
@@ -257,10 +257,10 @@ class ImportUser extends Import {
 			//Merge the default data with row data.
 			//This must go at the end so it doesn't overwrite imported data.
 			$raw_row = array_merge( (array)$default_data, $raw_row );
-			//Debug::Arr($raw_row, 'Row+Default data: ', __FILE__, __LINE__, __METHOD__,10);
+			//Debug::Arr($raw_row, 'Row+Default data: ', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		//Debug::Arr($raw_row, 'postParse Row: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($raw_row, 'postParse Row: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $raw_row;
 	}
 
@@ -299,7 +299,7 @@ class ImportUser extends Import {
 		//Get job titles
 		$pglf = TTNew('PermissionControlListFactory');
 		$pglf->getByCompanyId( $this->company_id );
-		$this->permission_control_options = (array)$pglf->getArrayByListFactory( $pglf, FALSE, TRUE );
+		$this->permission_control_options = (array)$pglf->getArrayByListFactory( $pglf, FALSE, FALSE ); //Include include in the name level, as it causes problems with exact matching.
 		unset($pglf);
 
 		return TRUE;
@@ -402,7 +402,7 @@ class ImportUser extends Import {
 				if ( $utf->isValid() ) {
 					$new_title_id = $utf->Save();
 					$this->getUserTitleOptions(); //Update group records after we've added a new one.
-					Debug::Text('Created new title name: '. $input .' ID: '. $new_title_id, __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Created new title name: '. $input .' ID: '. $new_title_id, __FILE__, __LINE__, __METHOD__, 10);
 
 					return $new_title_id;
 				}
@@ -517,7 +517,7 @@ class ImportUser extends Import {
 			$this->getJobOptions();
 		}
 
-		//Debug::Text('Created new group name: '. $input .' ID: '. $parse_hint, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Text('Created new group name: '. $input .' ID: '. $parse_hint, __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_numeric( $input ) AND strtolower($parse_hint) == 'manual_id' ) {
 			//Find based on manual_id/code.
 			$retval = $this->findClosestMatch( $input, $this->job_manual_id_options, 90 );
@@ -605,7 +605,7 @@ class ImportUser extends Import {
 				if ( $ugf->isValid() ) {
 					$new_group_id = $ugf->Save();
 					$this->getUserGroupOptions(); //Update group records after we've added a new one.
-					Debug::Text('Created new group name: '. $input .' ID: '. $new_group_id, __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Created new group name: '. $input .' ID: '. $new_group_id, __FILE__, __LINE__, __METHOD__, 10);
 
 					return $new_group_id;
 				}
@@ -636,7 +636,7 @@ class ImportUser extends Import {
 			$this->getHierarchyControlOptions();
 		}
 
-		Debug::Text('Finding hierarchy for: '. $input, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Finding hierarchy for: '. $input, __FILE__, __LINE__, __METHOD__, 10);
 
 		$retval = $this->findClosestMatch( $input, $this->hierarchy_control_options );
 		if ( $retval === FALSE ) {

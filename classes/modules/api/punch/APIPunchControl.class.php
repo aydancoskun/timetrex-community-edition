@@ -59,7 +59,7 @@ class APIPunchControl extends APIFactory {
 	function getPunchControlDefaultData() {
 		$company_obj = $this->getCurrentCompanyObject();
 
-		Debug::Text('Getting punch_control default data...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Getting punch_control default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		$data = array(
 						'status_id' => 10,
@@ -77,8 +77,8 @@ class APIPunchControl extends APIFactory {
 	 * @return array
 	 */
 	function getPunchControl( $data = NULL, $disable_paging = FALSE ) {
-		if ( !$this->getPermissionObject()->Check('punch','enabled')
-				OR !( $this->getPermissionObject()->Check('punch','view') OR $this->getPermissionObject()->Check('punch','view_own') OR $this->getPermissionObject()->Check('punch','view_child')  ) ) {
+		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
+				OR !( $this->getPermissionObject()->Check('punch', 'view') OR $this->getPermissionObject()->Check('punch', 'view_own') OR $this->getPermissionObject()->Check('punch', 'view_child')  ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
@@ -138,9 +138,9 @@ class APIPunchControl extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('punch','enabled')
-				OR !( $this->getPermissionObject()->Check('punch','edit') OR $this->getPermissionObject()->Check('punch','edit_own') OR $this->getPermissionObject()->Check('punch','edit_child') OR $this->getPermissionObject()->Check('punch','add') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
+				OR !( $this->getPermissionObject()->Check('punch', 'edit') OR $this->getPermissionObject()->Check('punch', 'edit_own') OR $this->getPermissionObject()->Check('punch', 'edit_child') OR $this->getPermissionObject()->Check('punch', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		if ( $validate_only == TRUE ) {
@@ -166,11 +166,11 @@ class APIPunchControl extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if (
-							  $validate_only == TRUE
-							  OR
+							$validate_only == TRUE
+							OR
 								(
-								$this->getPermissionObject()->Check('punch','edit')
-									OR ( $this->getPermissionObject()->Check('punch','edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUserDateObject()->getUser() ) === TRUE )
+								$this->getPermissionObject()->Check('punch', 'edit')
+									OR ( $this->getPermissionObject()->Check('punch', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUserDateObject()->getUser() ) === TRUE )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -185,7 +185,7 @@ class APIPunchControl extends APIFactory {
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('punch','add'), TTi18n::gettext('Add permission denied') );
+					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('punch', 'add'), TTi18n::gettext('Add permission denied') );
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -269,9 +269,9 @@ class APIPunchControl extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('punch','enabled')
-				OR !( $this->getPermissionObject()->Check('punch','delete') OR $this->getPermissionObject()->Check('punch','delete_own') OR $this->getPermissionObject()->Check('punch','delete_child') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
+				OR !( $this->getPermissionObject()->Check('punch', 'delete') OR $this->getPermissionObject()->Check('punch', 'delete_own') OR $this->getPermissionObject()->Check('punch', 'delete_child') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		Debug::Text('Received data for: '. count($data) .' PunchControls', __FILE__, __LINE__, __METHOD__, 10);
@@ -292,8 +292,8 @@ class APIPunchControl extends APIFactory {
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
-						if ( $this->getPermissionObject()->Check('punch','delete')
-								OR ( $this->getPermissionObject()->Check('punch','delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
+						if ( $this->getPermissionObject()->Check('punch', 'delete')
+								OR ( $this->getPermissionObject()->Check('punch', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
 							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
@@ -376,7 +376,7 @@ class APIPunchControl extends APIFactory {
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {
-				unset($src_rows[$key]['id'],$src_rows[$key]['manual_id'] ); //Clear fields that can't be copied
+				unset($src_rows[$key]['id'], $src_rows[$key]['manual_id'] ); //Clear fields that can't be copied
 				$src_rows[$key]['name'] = Misc::generateCopyName( $row['name'] ); //Generate unique name
 			}
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -387,10 +387,10 @@ class APIPunchControl extends APIFactory {
 		return $this->returnHandler( FALSE );
 	}
 
-	function dragNdropPunch( $src_punch_id, $dst_punch_id, $dst_status_id = NULL, $position = 0, $action = 0, $dst_date = NULL )	{
-		if ( !$this->getPermissionObject()->Check('punch','enabled')
-				OR !( $this->getPermissionObject()->Check('punch','add') AND ( $this->getPermissionObject()->Check('punch','delete') OR $this->getPermissionObject()->Check('punch','delete_child') OR $this->getPermissionObject()->Check('punch','delete_own') ) ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+	function dragNdropPunch( $src_punch_id, $dst_punch_id, $dst_status_id = NULL, $position = 0, $action = 0, $dst_date = NULL ) {
+		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
+				OR !( $this->getPermissionObject()->Check('punch', 'add') AND ( $this->getPermissionObject()->Check('punch', 'delete') OR $this->getPermissionObject()->Check('punch', 'delete_child') OR $this->getPermissionObject()->Check('punch', 'delete_own') ) ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		return $this->returnHandler( PunchControlFactory::dragNdropPunch( $this->getCurrentCompanyObject()->getId(), $src_punch_id, $dst_punch_id, $dst_status_id, $position, $action, $dst_date ) );

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11219 $
- * $Id: PayPeriodScheduleFactory.class.php 11219 2013-10-22 16:18:05Z mikeb $
- * $Date: 2013-10-22 09:18:05 -0700 (Tue, 22 Oct 2013) $
+ * $Revision: 12026 $
+ * $Id: PayPeriodScheduleFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -60,11 +60,11 @@ class PayPeriodScheduleFactory extends Factory {
 				 */
 				$retval = array(
 											5 => TTi18n::gettext('Manual'),
-											10  => TTi18n::gettext('Weekly (52/year)'),
-											20  => TTi18n::gettext('Bi-Weekly (26/year)'),
-											30  => TTi18n::gettext('Semi-Monthly (24/year)'),
+											10	=> TTi18n::gettext('Weekly (52/year)'),
+											20	=> TTi18n::gettext('Bi-Weekly (26/year)'),
+											30	=> TTi18n::gettext('Semi-Monthly (24/year)'),
 											//40  => TTi18n::gettext('Monthly + Advance'), //Handled with monthly PP schedule and Tax / Deduction to automatically enter advance each month. Advances are paid manually.
-											50  => TTi18n::gettext('Monthly (12/year)') //Must have this here, for ROEs
+											50	=> TTi18n::gettext('Monthly (12/year)') //Must have this here, for ROEs
 										);
 				break;
 			case 'start_week_day':
@@ -87,7 +87,7 @@ class PayPeriodScheduleFactory extends Factory {
 										);
 				break;
 			case 'transaction_date':
-				for ($i=1; $i <= 31; $i++) {
+				for ($i = 1; $i <= 31; $i++) {
 					$retval[$i] = $i;
 				}
 				break;
@@ -186,7 +186,7 @@ class PayPeriodScheduleFactory extends Factory {
 
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
-			return $this->data['company_id'];
+			return (int)$this->data['company_id'];
 		}
 		return FALSE;
 	}
@@ -212,7 +212,7 @@ class PayPeriodScheduleFactory extends Factory {
 		//Have to return the KEY because it should always be a drop down box.
 		//return Option::getByKey($this->data['status_id'], $this->getOptions('status') );
 		if ( isset($this->data['type_id']) ) {
-			return $this->data['type_id'];
+			return (int)$this->data['type_id'];
 		}
 
 		return FALSE;
@@ -240,7 +240,7 @@ class PayPeriodScheduleFactory extends Factory {
 
 	function getStartWeekDay() {
 		if ( isset($this->data['start_week_day_id']) ) {
-			return $this->data['start_week_day_id'];
+			return (int)$this->data['start_week_day_id'];
 		}
 
 		return FALSE;
@@ -268,7 +268,7 @@ class PayPeriodScheduleFactory extends Factory {
 
 	function getShiftAssignedDay() {
 		if ( isset($this->data['shift_assigned_day_id']) ) {
-			return $this->data['shift_assigned_day_id'];
+			return (int)$this->data['shift_assigned_day_id'];
 		}
 
 		return FALSE;
@@ -297,7 +297,7 @@ class PayPeriodScheduleFactory extends Factory {
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND name = ? AND deleted=0';
 		$pay_period_schedule_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($pay_period_schedule_id,'Unique Pay Period Schedule ID: '. $pay_period_schedule_id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($pay_period_schedule_id, 'Unique Pay Period Schedule ID: '. $pay_period_schedule_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $pay_period_schedule_id === FALSE ) {
 			return TRUE;
@@ -321,7 +321,7 @@ class PayPeriodScheduleFactory extends Factory {
 		if (	$this->Validator->isLength(	'name',
 											$name,
 											TTi18n::gettext('Name is invalid'),
-											2,50)
+											2, 50)
 				AND	$this->Validator->isTrue(	'name',
 												$this->isUniqueName($name),
 												TTi18n::gettext('Name is already in use')
@@ -351,7 +351,7 @@ class PayPeriodScheduleFactory extends Factory {
 				$this->Validator->isLength(	'description',
 											$description,
 											TTi18n::gettext('Description is invalid'),
-											2,255) ) {
+											2, 255) ) {
 
 			$this->data['description'] = $description;
 
@@ -441,7 +441,7 @@ class PayPeriodScheduleFactory extends Factory {
 			$val = $key;
 		}
 
-		if ( 	( $val == -1 OR $val == '' OR $val == 0 )
+		if (	( $val == -1 OR $val == '' OR $val == 0 )
 				OR $this->Validator->inArrayKey(	'primary_day_of_month',
 											$val,
 											TTi18n::getText('Incorrect primary day of month'),
@@ -470,7 +470,7 @@ class PayPeriodScheduleFactory extends Factory {
 			$val = $key;
 		}
 
-		if ( 	( $val == -1 OR $val == '' OR $val == 0 )
+		if (	( $val == -1 OR $val == '' OR $val == 0 )
 				OR $this->Validator->inArrayKey(	'secondary_day_of_month',
 											$val,
 											TTi18n::gettext('Incorrect secondary day of month'),
@@ -499,7 +499,7 @@ class PayPeriodScheduleFactory extends Factory {
 			$val = $key;
 		}
 
-		if ( 	( $val == -1 OR $val == '' OR $val == 0 )
+		if (	( $val == -1 OR $val == '' OR $val == 0 )
 				OR $this->Validator->inArrayKey(	'primary_transaction_day_of_month',
 											$val,
 											TTi18n::gettext('Incorrect primary transaction day of month'),
@@ -528,7 +528,7 @@ class PayPeriodScheduleFactory extends Factory {
 			$val = $key;
 		}
 
-		if ( 	( $val == -1 OR $val == '' OR $val == 0 )
+		if (	( $val == -1 OR $val == '' OR $val == 0 )
 				OR $this->Validator->inArrayKey(	'secondary_transaction_day_of_month',
 											$val,
 											TTi18n::gettext('Incorrect secondary transaction day of month'),
@@ -574,7 +574,7 @@ class PayPeriodScheduleFactory extends Factory {
 	function setTransactionDateBusinessDay($bool) {
 		$this->data['transaction_date_bd'] = $this->toBool($bool);
 
-		return true;
+		return TRUE;
 	}
 */
 	function getAnchorDate( $raw = FALSE ) {
@@ -591,7 +591,7 @@ class PayPeriodScheduleFactory extends Factory {
 	function setAnchorDate($epoch) {
 		$epoch = trim($epoch);
 
-		if 	(	$this->Validator->isDate(		'anchor_date',
+		if	(	$this->Validator->isDate(		'anchor_date',
 												$epoch,
 												TTi18n::gettext('Incorrect start date')) ) {
 
@@ -612,7 +612,7 @@ class PayPeriodScheduleFactory extends Factory {
 	function setDayStartTime($int) {
 		$int = (int)$int;
 
-		if 	(	$this->Validator->isNumeric(		'day_start_time',
+		if	(	$this->Validator->isNumeric(		'day_start_time',
 													$int,
 													TTi18n::gettext('Incorrect day start time')) ) {
 			$this->data['day_start_time'] = $int;
@@ -676,7 +676,7 @@ class PayPeriodScheduleFactory extends Factory {
 	function setContinuousTime($int) {
 		$int = (int)$int;
 
-		if 	(	$this->Validator->isNumeric(		'continuous_time',
+		if	(	$this->Validator->isNumeric(		'continuous_time',
 													$int,
 													TTi18n::gettext('Incorrect continuous time')) ) {
 			$this->data['day_continuous_time'] = $int;
@@ -699,7 +699,7 @@ class PayPeriodScheduleFactory extends Factory {
 	function setNewDayTriggerTime($int) {
 		$int = (int)$int;
 
-		if 	(	$this->Validator->isNumeric(		'new_day_trigger_time',
+		if	(	$this->Validator->isNumeric(		'new_day_trigger_time',
 													$int,
 													TTi18n::gettext('Incorrect Minimum Time-Off Between Shifts')) ) {
 			$this->data['new_day_trigger_time'] = $int;
@@ -719,7 +719,7 @@ class PayPeriodScheduleFactory extends Factory {
 	function setMaximumShiftTime($int) {
 		$int = (int)$int;
 
-		if 	(	$this->Validator->isNumeric(		'maximum_shift_time',
+		if	(	$this->Validator->isNumeric(		'maximum_shift_time',
 													$int,
 													TTi18n::gettext('Incorrect Maximum Shift Time'))
 				AND
@@ -750,7 +750,7 @@ class PayPeriodScheduleFactory extends Factory {
 	function setAnnualPayPeriods($int) {
 		$int = (int)$int;
 
-		if 	(	$this->Validator->isNumeric(		'annual_pay_periods',
+		if	(	$this->Validator->isNumeric(		'annual_pay_periods',
 													$int,
 													TTi18n::gettext('Incorrect Annual Pay Periods')) ) {
 			$this->data['annual_pay_periods'] = $int;
@@ -763,7 +763,7 @@ class PayPeriodScheduleFactory extends Factory {
 
 	function getTimeSheetVerifyType() {
 		if ( isset($this->data['timesheet_verify_type_id']) ) {
-			return $this->data['timesheet_verify_type_id'];
+			return (int)$this->data['timesheet_verify_type_id'];
 		}
 
 		return TRUE;
@@ -793,10 +793,10 @@ class PayPeriodScheduleFactory extends Factory {
 	function setTimeSheetVerifyBeforeEndDate($int) {
 		$int = (float)$int; // Do not cast to INT, need to support partial days.
 
-		if 	(	$this->Validator->isNumeric(		'timesheet_verify_before_end_date',
+		if	(	$this->Validator->isNumeric(		'timesheet_verify_before_end_date',
 													$int,
 													TTi18n::gettext('Incorrect value for timesheet verification before/after end date')) ) {
-			$this->data['timesheet_verify_before_end_date'] = ($int*86400);
+			$this->data['timesheet_verify_before_end_date'] = ($int * 86400);
 
 			return TRUE;
 		}
@@ -813,10 +813,10 @@ class PayPeriodScheduleFactory extends Factory {
 	function setTimeSheetVerifyBeforeTransactionDate($int) {
 		$int = (float)$int; // Do not cast to INT, need to support partial days.
 
-		if 	(	$this->Validator->isNumeric(		'timesheet_verify_before_transaction_date',
+		if	(	$this->Validator->isNumeric(		'timesheet_verify_before_transaction_date',
 													$int,
 													TTi18n::gettext('Incorrect value for timesheet verification before/after transaction date')) ) {
-			$this->data['timesheet_verify_before_transaction_date'] = ($int*86400); //Convert to seconds to support partial days. Do not cast to INT!
+			$this->data['timesheet_verify_before_transaction_date'] = ($int * 86400); //Convert to seconds to support partial days. Do not cast to INT!
 
 			return TRUE;
 		}
@@ -834,7 +834,7 @@ class PayPeriodScheduleFactory extends Factory {
 	function setTimeSheetVerifyNoticeBeforeTransactionDate($int) {
 		$int = (int)$int;
 
-		if 	(	$this->Validator->isNumeric(		'timesheet_verify_notice_before_transaction_date',
+		if	(	$this->Validator->isNumeric(		'timesheet_verify_notice_before_transaction_date',
 													$int,
 													TTi18n::gettext('Incorrect value for timesheet verification notice before/after transaction date')) ) {
 			$this->data['timesheet_verify_notice_before_transaction_date'] = $int;
@@ -855,7 +855,7 @@ class PayPeriodScheduleFactory extends Factory {
 	function setTimeSheetVerifyNoticeEmail($bool) {
 		$this->data['timesheet_verify_notice_email'] = $this->toBool($bool);
 
-		return true;
+		return TRUE;
 	}
 
 	function getUser() {
@@ -933,10 +933,10 @@ class PayPeriodScheduleFactory extends Factory {
 
 		if ( count($user_ids) > 0 ) {
 			$hlf = TTnew( 'HolidayListFactory' );
-			$hlf->getByPolicyGroupUserIdAndStartDateAndEndDate( $user_ids, $epoch-(86400*14), $epoch+(86400*2) );
+			$hlf->getByPolicyGroupUserIdAndStartDateAndEndDate( $user_ids, ( $epoch - (86400 * 14) ), ( $epoch + (86400 * 2) ) );
 			if ( $hlf->getRecordCount() > 0 ) {
 				foreach( $hlf as $h_obj ) {
-					Debug::Text('Found Holiday Epoch: '. TTDate::getDate('DATE+TIME', $h_obj->getDateStamp() ) .' Name: '. $h_obj->getName() , __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Text('Found Holiday Epoch: '. TTDate::getDate('DATE+TIME', $h_obj->getDateStamp() ) .' Name: '. $h_obj->getName(), __FILE__, __LINE__, __METHOD__, 10);
 					$holiday_epochs[] = $h_obj->getDateStamp();
 				}
 
@@ -997,7 +997,7 @@ class PayPeriodScheduleFactory extends Factory {
 		//FIXME: This breaks having pay periods with different daily start times.
 		//However, without it, I think DST breaks pay periods.
 		//$last_pay_period_end_date = TTDate::getEndDayEpoch( $last_pay_period_end_date + 1 ) - 86400;
-		$last_pay_period_end_date = TTDate::getEndDayEpoch( $last_pay_period_end_date - (86400/2) );
+		$last_pay_period_end_date = TTDate::getEndDayEpoch( $last_pay_period_end_date - (86400 / 2) );
 		Debug::text('bLast Pay Period End Date: '. TTDate::getDate('DATE+TIME', $last_pay_period_end_date) .' ('.$last_pay_period_end_date .')', __FILE__, __LINE__, __METHOD__, 10);
 
 		/*
@@ -1023,35 +1023,35 @@ class PayPeriodScheduleFactory extends Factory {
 					$tmp_pay_period_end_date = strtotime('next '. TTDate::getDayOfWeekByInt( $this->getStartDayOfWeek(), FALSE ), $last_pay_period_end_date );
 
 					//strtotime doesn't keep time when using "next", it resets it to midnight on the day, so we need to adjust for that.
-					$tmp_pay_period_end_date = TTDate::getTimeLockedDate( TTDate::getBeginDayEpoch($tmp_pay_period_end_date) + $this->getDayStartTime(), $tmp_pay_period_end_date)-1;
+					$tmp_pay_period_end_date = ( TTDate::getTimeLockedDate( ( TTDate::getBeginDayEpoch($tmp_pay_period_end_date) + $this->getDayStartTime() ), $tmp_pay_period_end_date ) - 1 );
 				} else {
 					$tmp_pay_period_end_date = $last_pay_period_end_date;
 
 					//This should fix a bug where if they are creating a new pay period schedule
 					//starting on Monday with the anchor date of 01-Jul-08, it would start on 01-Jul-08 (Tue)
 					//rather moving back to the Monday.
-					if ( TTDate::getDayOfMonth( $tmp_pay_period_end_date ) != TTDate::getDayOfMonth( $tmp_pay_period_end_date+1 ) ) {
+					if ( TTDate::getDayOfMonth( $tmp_pay_period_end_date ) != TTDate::getDayOfMonth( $tmp_pay_period_end_date + 1 ) ) {
 						Debug::text('Right on day boundary, minus an additional second to account for difference...', __FILE__, __LINE__, __METHOD__, 10);
 						$tmp_pay_period_end_date--;
 					}
 				}
 				Debug::text('aTmp Pay Period End Date: '. TTDate::getDate('DATE+TIME', $tmp_pay_period_end_date) .' ('.$tmp_pay_period_end_date .')', __FILE__, __LINE__, __METHOD__, 10);
 
-				$start_date = $tmp_pay_period_end_date+1;
+				$start_date = ( $tmp_pay_period_end_date + 1 );
 
 				if ( $this->getType() == 10 ) { //Weekly
-					$tmp_pay_period_end_date = TTDate::getMiddleDayEpoch($start_date) + (86400*7); //Add one week
+					$tmp_pay_period_end_date = ( TTDate::getMiddleDayEpoch($start_date) + (86400 * 7) ); //Add one week
 				} elseif ( $this->getType() == 20 ) { //Bi-Weekly
-					$tmp_pay_period_end_date = TTDate::getMiddleDayEpoch($start_date) + (86400*14); //Add two weeks
+					$tmp_pay_period_end_date = ( TTDate::getMiddleDayEpoch($start_date) + (86400 * 14) ); //Add two weeks
 				}
 
 				//Use Begin Day Epoch to nullify DST issues.
-				$end_date = TTDate::getBeginDayEpoch( $tmp_pay_period_end_date )-1;
-				$transaction_date = TTDate::getMiddleDayEpoch( TTDate::getMiddleDayEpoch($end_date) + ($this->getTransactionDate()*86400) );
+				$end_date = ( TTDate::getBeginDayEpoch( $tmp_pay_period_end_date ) - 1 );
+				$transaction_date = TTDate::getMiddleDayEpoch( ( TTDate::getMiddleDayEpoch($end_date) + ($this->getTransactionDate() * 86400) ) );
 
 				break;
 			case 30: //Semi-monthly
-				$tmp_last_pay_period_end_day_of_month = TTDate::getDayOfMonth( $last_pay_period_end_date+1 );
+				$tmp_last_pay_period_end_day_of_month = TTDate::getDayOfMonth( $last_pay_period_end_date + 1 );
 				Debug::text('bLast Pay Period End Day Of Month: '. $tmp_last_pay_period_end_day_of_month, __FILE__, __LINE__, __METHOD__, 10);
 
 				if ( $tmp_last_pay_period_end_day_of_month == $this->convertLastDayOfMonth( $this->getPrimaryDayOfMonth() ) ) {
@@ -1063,8 +1063,8 @@ class PayPeriodScheduleFactory extends Factory {
 				} else {
 					Debug::text('Finding if Primary or Secondary is closest...', __FILE__, __LINE__, __METHOD__, 10);
 
-					$primary_date_offset = TTDate::getDateOfNextDayOfMonth( $last_pay_period_end_date, NULL, $this->convertLastDayOfMonth( $this->getPrimaryDayOfMonth() ) ) - $last_pay_period_end_date;
-					$secondary_date_offset = TTDate::getDateOfNextDayOfMonth( $last_pay_period_end_date, NULL, $this->convertLastDayOfMonth( $this->getSecondaryDayOfMonth() ) ) - $last_pay_period_end_date;
+					$primary_date_offset = ( TTDate::getDateOfNextDayOfMonth( $last_pay_period_end_date, NULL, $this->convertLastDayOfMonth( $this->getPrimaryDayOfMonth() ) ) - $last_pay_period_end_date );
+					$secondary_date_offset = ( TTDate::getDateOfNextDayOfMonth( $last_pay_period_end_date, NULL, $this->convertLastDayOfMonth( $this->getSecondaryDayOfMonth() ) ) - $last_pay_period_end_date );
 					Debug::text('Primary Date Offset: '. TTDate::getDays( $primary_date_offset ) .' Secondary Date Offset: '. TTDate::getDays( $secondary_date_offset ), __FILE__, __LINE__, __METHOD__, 10);
 
 					if ( $primary_date_offset <= $secondary_date_offset ) {
@@ -1078,28 +1078,28 @@ class PayPeriodScheduleFactory extends Factory {
 
 						$last_pay_period_end_date = TTDate::getDateOfNextDayOfMonth( $last_pay_period_end_date, NULL, $this->convertLastDayOfMonth( $this->getSecondaryDayOfMonth() ) );
 					}
-					$last_pay_period_end_date = TTDate::getBeginDayEpoch( $last_pay_period_end_date )-1;
+					$last_pay_period_end_date = ( TTDate::getBeginDayEpoch( $last_pay_period_end_date ) - 1 );
 				}
 				unset($tmp_last_pay_period_end_day_of_month);
 				Debug::text('cLast Pay Period End Date: '. TTDate::getDate('DATE+TIME', $last_pay_period_end_date) .' ('.$last_pay_period_end_date .') Primary: '. (int)$primary, __FILE__, __LINE__, __METHOD__, 10);
 
-				$start_date = $last_pay_period_end_date+1;
+				$start_date = ( $last_pay_period_end_date + 1 );
 
 				if ( $primary == TRUE ) {
-					$end_date = TTDate::getBeginDayEpoch( TTDate::getDateOfNextDayOfMonth( $start_date, NULL, $this->convertLastDayOfMonth( $this->getSecondaryDayOfMonth() ) ) ) -1;
+					$end_date = ( TTDate::getBeginDayEpoch( TTDate::getDateOfNextDayOfMonth( $start_date, NULL, $this->convertLastDayOfMonth( $this->getSecondaryDayOfMonth() ) ) ) - 1 );
 					$transaction_date = TTDate::getMiddleDayEpoch( TTDate::getDateOfNextDayOfMonth( TTDate::getMiddleDayEpoch($end_date), NULL, $this->convertLastDayOfMonth( $this->getPrimaryTransactionDayOfMonth() ) ) );
 				} else {
-					$end_date = TTDate::getBeginDayEpoch( TTDate::getDateOfNextDayOfMonth( $start_date, NULL, $this->convertLastDayOfMonth( $this->getPrimaryDayOfMonth() ) ) ) -1;
+					$end_date = ( TTDate::getBeginDayEpoch( TTDate::getDateOfNextDayOfMonth( $start_date, NULL, $this->convertLastDayOfMonth( $this->getPrimaryDayOfMonth() ) ) ) - 1 );
 					$transaction_date = TTDate::getMiddleDayEpoch( TTDate::getDateOfNextDayOfMonth( TTDate::getMiddleDayEpoch($end_date), NULL, $this->convertLastDayOfMonth( $this->getSecondaryTransactionDayOfMonth() ) ) );
 				}
 
 				break;
 			case 50: //Monthly
-				$start_date = $last_pay_period_end_date+1;
+				$start_date = ( $last_pay_period_end_date + 1 );
 
 				//Use Begin Day Epoch to nullify DST issues.
-				$end_date = TTDate::getDateOfNextDayOfMonth( TTDate::getBeginDayEpoch( $start_date+(86400+3600) ), NULL, $this->convertLastDayOfMonth( $this->getPrimaryDayOfMonth() ) );
-				$end_date = TTDate::getBeginDayEpoch( TTDate::getBeginMinuteEpoch($end_date) )-1;
+				$end_date = TTDate::getDateOfNextDayOfMonth( TTDate::getBeginDayEpoch( $start_date + (86400 + 3600) ), NULL, $this->convertLastDayOfMonth( $this->getPrimaryDayOfMonth() ) );
+				$end_date = ( TTDate::getBeginDayEpoch( TTDate::getBeginMinuteEpoch($end_date) ) - 1 );
 
 				$transaction_date = TTDate::getMiddleDayEpoch( TTDate::getDateOfNextDayOfMonth( $end_date, NULL, $this->convertLastDayOfMonth( $this->getPrimaryTransactionDayOfMonth() ) ) );
 
@@ -1111,12 +1111,12 @@ class PayPeriodScheduleFactory extends Factory {
 
 			//We already account for DayStartTime in weekly/bi-weekly start_date cases above, so skip applying it again here.
 			if ( $this->getType() != 10 AND $this->getType() != 20 ) {
-				$start_date = $start_date + $this->getDayStartTime();
+				$start_date = ( $start_date + $this->getDayStartTime() );
 			}
-			$end_date = $end_date + $this->getDayStartTime();
+			$end_date = ( $end_date + $this->getDayStartTime() );
 
 			//Need to do this, otherwise transaction date could be earlier then end date.
-			$transaction_date = $transaction_date + $this->getDayStartTime();
+			$transaction_date = ( $transaction_date + $this->getDayStartTime() );
 		}
 
 		Debug::text('aStart Date('. $start_date .'): '. TTDate::getDate('DATE+TIME', $start_date), __FILE__, __LINE__, __METHOD__, 10);
@@ -1136,18 +1136,18 @@ class PayPeriodScheduleFactory extends Factory {
 								OR $this->getSecondaryDayOfMonth() == -1 )
 							)
 						)
-			 )
-			 OR
-			 (
+			)
+			OR
+			(
 				$this->getType() == 50 AND ( $this->getPrimaryDayOfMonth() == 31 OR $this->getPrimaryDayOfMonth() == -1 )
-			 ) ) {
+			) ) {
 
 			Debug::text('Last day of the month set for start date: ', __FILE__, __LINE__, __METHOD__, 10);
 			if ( $this->getDayStartTime() > 0 ) {
 				//Minus one day, THEN add daily start time, otherwise it will go past the month boundary
-				$end_date = (TTDate::getEndMonthEpoch($end_date)-86400) + ( $this->getDayStartTime() ); //End month epoch is 23:59:59, so don't minus one.
+				$end_date = ( ( TTDate::getEndMonthEpoch($end_date) - 86400 ) + $this->getDayStartTime() ); //End month epoch is 23:59:59, so don't minus one.
 			} else {
-				$end_date = TTDate::getEndMonthEpoch($end_date) + ( $this->getDayStartTime() ); //End month epoch is 23:59:59, so don't minus one.
+				$end_date = ( TTDate::getEndMonthEpoch($end_date) + $this->getDayStartTime() ); //End month epoch is 23:59:59, so don't minus one.
 			}
 		}
 
@@ -1205,15 +1205,15 @@ class PayPeriodScheduleFactory extends Factory {
 		$this->setPayPeriodTimeZone();
 		Debug::text('Pay Period TimeZone: '. TTDate::getTimeZone(), __FILE__, __LINE__, __METHOD__, 10);
 
-		Debug::text('End Date ('. $end_date.'): '. TTDate::getDate('DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('End Date ('. $end_date.'): '. TTDate::getDate('DATE+TIME', $end_date ), __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->getNextPayPeriod($end_date);
 
-		Debug::text('Next pay period starts: '. TTDate::getDate('DATE+TIME', $this->getNextStartDate() ), __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Next pay period starts: '. TTDate::getDate('DATE+TIME', $this->getNextStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
 
 		//If the start date is within 24hrs of now, insert the next pay period.
 		if ( $this->getNextStartDate() <= ( TTDate::getTime() + $offset ) ) {
-			Debug::text('Insert new pay period. Start Date: '. $this->getNextStartDate() .' End Date: '. $this->getNextEndDate() , __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Insert new pay period. Start Date: '. $this->getNextStartDate() .' End Date: '. $this->getNextEndDate(), __FILE__, __LINE__, __METHOD__, 10);
 
 			$ppf = TTnew( 'PayPeriodFactory' );
 			$ppf->setCompany( $this->getCompany() );
@@ -1227,21 +1227,21 @@ class PayPeriodScheduleFactory extends Factory {
 			$ppf->setEnableImportData( TRUE ); //Import punches when creating new pay periods.
 			if ( $ppf->isValid() ) {
 				$new_pay_period_id = $ppf->Save();
-				Debug::text('New Pay Period ID: '. $new_pay_period_id, __FILE__, __LINE__, __METHOD__,10);
+				Debug::text('New Pay Period ID: '. $new_pay_period_id, __FILE__, __LINE__, __METHOD__, 10);
 
 				if ( $new_pay_period_id != '' ) {
 					$this->setOriginalTimeZone();
 
 					return TRUE;
 				} else {
-					Debug::text('aSaving Pay Period Failed!', __FILE__, __LINE__, __METHOD__,10);
+					Debug::text('aSaving Pay Period Failed!', __FILE__, __LINE__, __METHOD__, 10);
 				}
 			} else {
-				Debug::text('bSaving Pay Period Failed!', __FILE__, __LINE__, __METHOD__,10);
+				Debug::text('bSaving Pay Period Failed!', __FILE__, __LINE__, __METHOD__, 10);
 			}
 
 		} else {
-			Debug::text('***NOT inserting or changing status of new pay period yet, not within offset.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('***NOT inserting or changing status of new pay period yet, not within offset.', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		$this->setOriginalTimeZone();
@@ -1314,7 +1314,7 @@ class PayPeriodScheduleFactory extends Factory {
 		if ($epoch == NULL OR $epoch == '') {
 			$epoch = TTDate::getTime();
 		}
-		//Debug::text('Epoch: '. TTDate::getDate('DATE+TIME',$epoch) .' - End Date Epoch: '. TTDate::getDate('DATE+TIME',$end_date_epoch) , __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::text('Epoch: '. TTDate::getDate('DATE+TIME', $epoch) .' - End Date Epoch: '. TTDate::getDate('DATE+TIME', $end_date_epoch), __FILE__, __LINE__, __METHOD__, 10);
 
 /*
 		//FIXME: If a company starts with TimeTrex half way through the year, this will be incorrect.
@@ -1323,7 +1323,7 @@ class PayPeriodScheduleFactory extends Factory {
 		$pplf->getByPayPeriodScheduleIdAndStartTransactionDateAndEndTransactionDate( $this->getId(), TTDate::getBeginYearEpoch( $epoch ), $epoch );
 		$retval = $pplf->getRecordCount();
 
-		Debug::text('Current Pay Period: '. $retval , __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Current Pay Period: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
 */
 
 
@@ -1339,10 +1339,10 @@ class PayPeriodScheduleFactory extends Factory {
 			$next_transaction_date = 0;
 			$next_end_date = $end_date_epoch;
 			$end_year_epoch = TTDate::getEndYearEpoch( $epoch );
-			$i=0;
+			$i = 0;
 
 			while ( $next_transaction_date <= $end_year_epoch AND $i < 100 ) {
-				//Debug::text('I: '. $i .' Looping: Transaction Date: '. TTDate::getDate('DATE+TIME',$next_transaction_date) .' - End Year Epoch: '. TTDate::getDate('DATE+TIME',$end_year_epoch) , __FILE__, __LINE__, __METHOD__, 10);
+				//Debug::text('I: '. $i .' Looping: Transaction Date: '. TTDate::getDate('DATE+TIME', $next_transaction_date) .' - End Year Epoch: '. TTDate::getDate('DATE+TIME', $end_year_epoch), __FILE__, __LINE__, __METHOD__, 10);
 				$this->getNextPayPeriod( $next_end_date );
 
 				$next_transaction_date = $this->getNextTransactionDate();
@@ -1353,13 +1353,13 @@ class PayPeriodScheduleFactory extends Factory {
 				}
 			}
 
-			Debug::text('i: '. $i , __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text('i: '. $i, __FILE__, __LINE__, __METHOD__, 10);
 
-			$retval = $this->getAnnualPayPeriods() - $i;
-			Debug::text('Current Pay Period: '. $retval , __FILE__, __LINE__, __METHOD__, 10);
+			$retval = ( $this->getAnnualPayPeriods() - $i );
+			Debug::text('Current Pay Period: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
 
 			//Cache results
-			$this->saveCache($retval,$id);
+			$this->saveCache($retval, $id);
 		}
 
 		return $retval;
@@ -1384,9 +1384,9 @@ class PayPeriodScheduleFactory extends Factory {
 					$retarr = $pplf->getFirstStartDateAndLastEndDateByPayPeriodScheduleId( $this->getId() );
 					if ( is_array($retarr) AND isset($retarr['first_start_date']) AND isset($retarr['last_end_date']) ) {
 						$retarr['first_start_date'] = TTDate::strtotime( $retarr['first_start_date'] );
-						$retarr['last_end_date']= TTDate::strtotime( $retarr['last_end_date'] );
+						$retarr['last_end_date'] = TTDate::strtotime( $retarr['last_end_date'] );
 
-						$days_per_period = ( ( $retarr['last_end_date'] - $retarr['first_start_date'] ) / $retarr['total']) / 86400;
+						$days_per_period = ( ( ( $retarr['last_end_date'] - $retarr['first_start_date'] ) / $retarr['total']) / 86400 );
 						$retval = floor(365 / round( $days_per_period ) );
 						Debug::text('First Start Date: '. TTDate::getDate('DATE+TIME', $retarr['first_start_date']) .' Last End Date: '. TTDate::getDate('DATE+TIME', $retarr['last_end_date']) .' Total PP: '. $retarr['total'] .' Average Days/Period: '. $days_per_period .'('. round($days_per_period).') Annual Pay Periods: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
 					}
@@ -1424,7 +1424,7 @@ class PayPeriodScheduleFactory extends Factory {
 	function detectPayPeriodScheduleDates( $type_id, $start_date ) {
 		$retarr = FALSE;
 
-		$max=4;
+		$max = 4;
 
 		$start_date = TTDate::parseDateTime( $start_date );
 
@@ -1432,39 +1432,39 @@ class PayPeriodScheduleFactory extends Factory {
 			case 5: //Manual
 				break;
 			case 10: //Weekly
-				for( $i=0; $i < $max; $i++ ) {
-					$end_date = $start_date+(86400*6);
-					$transaction_date = $end_date+(86400*5);
+				for( $i = 0; $i < $max; $i++ ) {
+					$end_date = ( $start_date + (86400 * 6) );
+					$transaction_date = ( $end_date + (86400 * 5) );
 
 					$retarr[] = array(
 										'start_date' => TTDate::getDate('DATE', $start_date ),
 										'end_date' => TTDate::getDate('DATE', $end_date ),
 										'transaction_date' => TTDate::getDate('DATE', $transaction_date ),
-									  );
+									);
 
-					$start_date = $end_date+86400;
+					$start_date = ( $end_date + 86400 );
 				}
 				break;
 			case 20: //BiWeekly
-				for( $i=0; $i < $max; $i++ ) {
-					$end_date = $start_date+(86400*13);
-					$transaction_date = $end_date+(86400*5);
+				for( $i = 0; $i < $max; $i++ ) {
+					$end_date = ( $start_date + (86400 * 13) );
+					$transaction_date = ( $end_date + (86400 * 5) );
 
 					$retarr[] = array(
 										'start_date' => TTDate::getDate('DATE', $start_date ),
 										'end_date' => TTDate::getDate('DATE', $end_date ),
 										'transaction_date' => TTDate::getDate('DATE', $transaction_date ),
-									  );
+									);
 
-					$start_date = $end_date+86400;
+					$start_date = ( $end_date + 86400 );
 				}
 				break;
 			case 30: //Semi-monthly
-				for( $i=0; $i < $max; $i++ ) {
-					$end_date = $start_date+(86400*14);
+				for( $i = 0; $i < $max; $i++ ) {
+					$end_date = ( $start_date + (86400 * 14) );
 
 					//If we're within 4 days of the last day of the month, use the last day.
-					if ( abs($end_date-TTDate::getEndMonthEpoch( $start_date )) < (86400*4) ) {
+					if ( abs( ( $end_date - TTDate::getEndMonthEpoch( $start_date ) ) ) < (86400 * 4) ) {
 						$end_date = TTDate::getEndMonthEpoch( $start_date );
 					}
 					$transaction_date = $end_date;
@@ -1473,23 +1473,23 @@ class PayPeriodScheduleFactory extends Factory {
 										'start_date' => TTDate::getDate('DATE', $start_date ),
 										'end_date' => TTDate::getDate('DATE', $end_date ),
 										'transaction_date' => TTDate::getDate('DATE', $transaction_date ),
-									  );
+									);
 
-					$start_date = $end_date+86400;
+					$start_date = ( $end_date + 86400 );
 				}
 				break;
 			case 50: //Monthly
-				for( $i=0; $i < $max; $i++ ) {
+				for( $i = 0; $i < $max; $i++ ) {
 					$end_date = TTDate::getEndMonthEpoch( $start_date );
-					$transaction_date = $end_date+(86400*0);
+					$transaction_date = ( $end_date + ( 86400 * 0) );
 
 					$retarr[] = array(
 										'start_date' => TTDate::getDate('DATE', $start_date ),
 										'end_date' => TTDate::getDate('DATE', $end_date ),
 										'transaction_date' => TTDate::getDate('DATE', $transaction_date ),
-									  );
+									);
 
-					$start_date = $end_date+86400;
+					$start_date = ( $end_date + 86400 );
 				}
 				break;
 			default:
@@ -1521,7 +1521,7 @@ class PayPeriodScheduleFactory extends Factory {
 
 		$this->setType( $type_id );
 		if ( isset($example_dates[0]['start_date']) ) {
-			$this->setAnchorDate( TTDate::parseDateTime($example_dates[0]['start_date'])-86400 ); //Anchor date one day before first start date.
+			$this->setAnchorDate( ( TTDate::parseDateTime($example_dates[0]['start_date']) - 86400 ) ); //Anchor date one day before first start date.
 		}
 
 		$annual_pay_periods = $this->calcAnnualPayPeriods( $type_id );
@@ -1533,7 +1533,7 @@ class PayPeriodScheduleFactory extends Factory {
 				//Need at least one example.
 				foreach( $example_dates as $example_date ) {
 					$start_dow[] = TTDate::getDayOfWeek( TTDate::parseDateTime( $example_date['start_date'] ) );
-					$transaction_days[] = (int)round( TTDate::getDays( TTDate::parseDateTime( $example_date['transaction_date'] ) - TTDate::parseDateTime( $example_date['end_date'] ) ) );
+					$transaction_days[] = (int)round( TTDate::getDays( ( TTDate::parseDateTime( $example_date['transaction_date'] ) - TTDate::parseDateTime( $example_date['end_date'] ) ) ) );
 				}
 				Debug::Arr($start_dow, 'Start DOW: ', __FILE__, __LINE__, __METHOD__, 10);
 				Debug::Arr($transaction_days, 'Transaction Days: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -1551,9 +1551,9 @@ class PayPeriodScheduleFactory extends Factory {
 				break;
 			case 30: //Semi-monthly
 				//Need at least three examples?
-				$i=0;
+				$i = 0;
 				foreach( $example_dates as $example_date ) {
-					if ( $i % 2 == 0 ) {
+					if ( ($i % 2) == 0 ) {
 						$primary_start_dom[] = TTDate::getDayOfMonth( TTDate::parseDateTime( $example_date['start_date'] ) );
 						$primary_transaction_dom[] = TTDate::getDayOfMonth( TTDate::parseDateTime( $example_date['transaction_date'] ) );
 					} else {
@@ -1610,23 +1610,23 @@ class PayPeriodScheduleFactory extends Factory {
 
 		//
 		//FIXME: During testing always force start_date which is existing behaivor.
-		//       Once this is tested more it can be changed. 
+		//		 Once this is tested more it can be changed.
 		return $start_epoch;
 
 		switch ( $shift_assigned_day_id ) {
 			default:
 			case 10: //Day they start on
 			case 40: //Split at midnight
-				//Debug::Text('Assign Shifts to the day they START on... Date: '. TTDate::getDate('DATE', $start_epoch ) , __FILE__, __LINE__, __METHOD__,10);
+				//Debug::Text('Assign Shifts to the day they START on... Date: '. TTDate::getDate('DATE', $start_epoch ), __FILE__, __LINE__, __METHOD__, 10);
 				$retval = $start_epoch;
 				break;
 			case 20: //Day they end on
-				//Debug::Text('Assign Shifts to the day they END on... Date: '. TTDate::getDate('DATE', $end_epoch ) , __FILE__, __LINE__, __METHOD__,10);
+				//Debug::Text('Assign Shifts to the day they END on... Date: '. TTDate::getDate('DATE', $end_epoch ), __FILE__, __LINE__, __METHOD__, 10);
 				$retval = $end_epoch;
 				break;
 			case 30: //Day with most time worked
 				$day_with_most_time = TTDate::getDayWithMostTime( $start_epoch, $end_epoch );
-				//Debug::Text('Assign Shifts to the day they WORK MOST on... Date: '. TTDate::getDate('DATE', $day_with_most_time ), __FILE__, __LINE__, __METHOD__,10);
+				//Debug::Text('Assign Shifts to the day they WORK MOST on... Date: '. TTDate::getDate('DATE', $day_with_most_time ), __FILE__, __LINE__, __METHOD__, 10);
 				$retval = $day_with_most_time;
 				break;
 		}
@@ -1675,7 +1675,7 @@ class PayPeriodScheduleFactory extends Factory {
 				// The above scenario when adding the last 6:00AM punch on the next day will only look back 14hrs and not find the first
 				// punch pair, therefore allowing more than 14hrs on the same day.
 				// So we need to extend the maximum shift time just when searching for punches and let getShiftData() sort out the proper maximum shift time itself.
-				$plf->getShiftPunchesByUserIDAndEpoch( $user_id, $epoch, $punch_control_id, $maximum_shift_time * 2 );
+				$plf->getShiftPunchesByUserIDAndEpoch( $user_id, $epoch, $punch_control_id, ( $maximum_shift_time * 2 ) );
 				unset($punch_control_id);
 			}
 		}
@@ -1700,7 +1700,7 @@ class PayPeriodScheduleFactory extends Factory {
 				}
 
 				if ( isset($prev_punch_arr) AND $p_obj->getTimeStamp() > $prev_punch_arr['time_stamp'] ) {
-					$shift_data[$shift]['previous_punch_key'] = $i-1;
+					$shift_data[$shift]['previous_punch_key'] = ( $i - 1 );
 					if ( $shift_data[$shift]['previous_punch_key'] < 0 ) {
 						$shift_data[$shift]['previous_punch_key'] = NULL;
 					}
@@ -1737,8 +1737,8 @@ class PayPeriodScheduleFactory extends Factory {
 					//would trigger a new shift, and it wouldn't be detected as lunch/break.
 					//
 					//What happens when the employee takes lunch/break over midnight? Lunch out at 11:30PM Lunch IN at 12:30AM
-					//  We need to split those into two lunches, or two breaks? But then that can affect those policies if they are only allowed one break.
-					// 	Or do we not split the shift at all when this occurs? Currently we don't split at all.
+					//	We need to split those into two lunches, or two breaks? But then that can affect those policies if they are only allowed one break.
+					//	Or do we not split the shift at all when this occurs? Currently we don't split at all.
 					if ( $p_obj->getPunchControlID() != $shift_data[$shift]['last_out']['punch_control_id']
 							AND (
 									( $p_obj->getTimeStamp() - $shift_data[$shift]['last_out']['time_stamp'] ) >= $new_shift_trigger_time
@@ -1757,8 +1757,8 @@ class PayPeriodScheduleFactory extends Factory {
 				} elseif ( $i > 0
 							AND isset($prev_punch_arr['time_stamp'])
 							AND $prev_punch_arr['punch_control_id'] != $p_obj->getPunchControlId()
-							AND abs($prev_punch_arr['time_stamp']-$p_obj->getTimeStamp()) > $maximum_shift_time ) {
-					//Debug::text('  New shift because two punch_control records exist and punch timestamp exceed maximum shift time.', __FILE__, __LINE__, __METHOD__, 10);
+							AND abs( ( $prev_punch_arr['time_stamp'] - $p_obj->getTimeStamp() ) ) > $maximum_shift_time ) {
+					//Debug::text('	 New shift because two punch_control records exist and punch timestamp exceed maximum shift time.', __FILE__, __LINE__, __METHOD__, 10);
 					$shift++;
 				}
 
@@ -1772,7 +1772,7 @@ class PayPeriodScheduleFactory extends Factory {
 				}
 
 				//Determine which shift is closest to the given epoch.
-				$punch_difference_from_epoch = abs($epoch-$p_obj->getTimeStamp());
+				$punch_difference_from_epoch = abs( ( $epoch - $p_obj->getTimeStamp() ) );
 				if ( $nearest_punch_difference === FALSE OR $punch_difference_from_epoch <= $nearest_punch_difference ) {
 					Debug::text('Nearest Shift Determined to be: '. $shift .' Nearest Punch Diff: '. (int)$nearest_punch_difference .' Punch Diff: '. $punch_difference_from_epoch, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1780,7 +1780,7 @@ class PayPeriodScheduleFactory extends Factory {
 					//This is for splitting shifts at exactly midnight.
 					if ( $punch_difference_from_epoch != $nearest_punch_difference
 							OR ( $punch_difference_from_epoch == $nearest_punch_difference AND ( is_object( $tmp_punch_control_obj ) AND $tmp_punch_control_obj->getId() == $p_obj->getPunchControlID() ) ) ) {
-						//Debug::text('Found two punches with the same timestamp... Tmp Punch Control: '.$tmp_punch_control_obj->getId() .' Punch Control: '. $p_obj->getPunchControlID() , __FILE__, __LINE__, __METHOD__, 10);
+						//Debug::text('Found two punches with the same timestamp... Tmp Punch Control: '.$tmp_punch_control_obj->getId() .' Punch Control: '. $p_obj->getPunchControlID(), __FILE__, __LINE__, __METHOD__, 10);
 						$nearest_shift_id = $shift;
 						$nearest_punch_difference = $punch_difference_from_epoch;
 					}
@@ -1832,7 +1832,7 @@ class PayPeriodScheduleFactory extends Factory {
 								$shift_data[$shift]['total_time_per_day'][$begin_day_epoch] += $day_total_time;
 							}
 						}
-						unset($total_time_for_each_day_arr,$begin_day_epoch,$day_total_time, $prev_day_total_time);
+						unset($total_time_for_each_day_arr, $begin_day_epoch, $day_total_time, $prev_day_total_time);
 					} else {
 						$shift_data[$shift]['total_time_per_day'][$punch_day_epoch] += $total_time;
 					}
@@ -1887,12 +1887,12 @@ class PayPeriodScheduleFactory extends Factory {
 						list( $first_in, $last_out ) = array( $last_out, $first_in );
 					}
 
-					if ( TTDate::isTimeOverLap($epoch, $epoch, ($first_in-$new_shift_trigger_time), ($last_out+$new_shift_trigger_time) ) == FALSE ) {
+					if ( TTDate::isTimeOverLap($epoch, $epoch, ($first_in - $new_shift_trigger_time), ($last_out + $new_shift_trigger_time) ) == FALSE ) {
 						Debug::Text('Nearest shift is outside the new shift trigger time... Epoch: '. $epoch .' First In: '. $first_in .' Last Out: '. $last_out .' New Shift Trigger: '. $new_shift_trigger_time, __FILE__, __LINE__, __METHOD__, 10);
 
 						return FALSE;
 					}
-					unset($first_in,$last_out);
+					unset($first_in, $last_out);
 				}
 
 				$profiler->stopTimer( 'PayPeriodScheduleFactory::getShiftData()' );
@@ -1946,14 +1946,14 @@ class PayPeriodScheduleFactory extends Factory {
 		}
 
 		//Start with 7 days initially, then cut back to 5 days eventually.
-		$date = $date-(86400*5); //Give a 5 days grace period after the transaction date to start with.
+		$date = ( $date - (86400 * 5) ); //Give a 5 days grace period after the transaction date to start with.
 
 		$pplf = TTNew('PayPeriodListFactory');
 		$pplf->getByCompanyIDAndPayPeriodScheduleIdAndStatusAndStartTransactionDateAndEndTransactionDate( $this->getCompany(), $this->getID(), 10, 1, $date );
 		Debug::text('Closing Pay Periods: '. $pplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $pplf->getRecordCount() > 0 ) {
 			foreach( $pplf as $pp_obj ) {
-				if ( is_object( $pp_obj->getPayPeriodScheduleObject() ) AND $pp_obj->getPayPeriodScheduleObject()->getCreatedDate() < ($date-(86400*45) ) ) {
+				if ( is_object( $pp_obj->getPayPeriodScheduleObject() ) AND $pp_obj->getPayPeriodScheduleObject()->getCreatedDate() < ($date - (86400 * 45) ) ) {
 					Debug::text('Closing Pay Period ID: '. $pp_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
 					$pp_obj->setStatus( 20 ); //Closed
 					if ( $pp_obj->isValid() ) {
@@ -1980,10 +1980,10 @@ class PayPeriodScheduleFactory extends Factory {
 
 		if ( $this->getShiftAssignedDay() == FALSE ) {
 			$this->setShiftAssignedDay( 10 ); //Day shifts start on
-		} elseif ( $this->getShiftAssignedDay() == 40 ) { //Split at midnight
+		} //elseif ( $this->getShiftAssignedDay() == 40 ) { //Split at midnight
 			//We now support a minimum time-off setting when shifts are set to split at midnight.
 			//$this->setNewDayTriggerTime( 0 ); //Minimum Time-off between shifts must be 0 in these cases.
-		}
+		//}
 
 		if ( $this->getType() != 5 ) { //If schedule is other then manual, automatically calculate annual pay periods
 			$this->setAnnualPayPeriods( $this->calcAnnualPayPeriods() );
@@ -2025,7 +2025,7 @@ class PayPeriodScheduleFactory extends Factory {
 			Debug::text('New Pay Period Schdule, creating pay periods start from ('.$pay_period_schedule_obj->getAnchorDate().'): '. TTDate::getDate('DATE+TIME', $pay_period_schedule_obj->getAnchorDate() ), __FILE__, __LINE__, __METHOD__, 10);
 
 			//Create pay periods up until now, at most 260. (5yrs of weekly ones)
-			for($i=0; $i <= 260; $i++ ) {
+			for($i = 0; $i <= 260; $i++ ) {
 				if ( $pay_period_schedule_obj->createNextPayPeriod() == FALSE ) {
 					Debug::text('createNextPayPeriod returned false, stopping loop.', __FILE__, __LINE__, __METHOD__, 10);
 					break;
@@ -2064,7 +2064,7 @@ class PayPeriodScheduleFactory extends Factory {
 		return TRUE;
 	}
 
-	//Support setting created_by,updated_by especially for importing data.
+	//Support setting created_by, updated_by especially for importing data.
 	//Make sure data is set based on the getVariableToFunctionMap order.
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {

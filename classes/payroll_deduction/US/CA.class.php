@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8720 $
- * $Id: CA.class.php 8720 2012-12-29 01:06:58Z ipso $
- * $Date: 2012-12-28 17:06:58 -0800 (Fri, 28 Dec 2012) $
+ * $Revision: 11830 $
+ * $Id: CA.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -51,6 +51,31 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 */
 
 	var $state_options = array(
+								1388563200 => array( //01-Jan-14
+													//Standard Deduction Table
+													'standard_deduction' => array(
+																				//First entry is 0,1 allowance, second is for 2 or more.
+																				'10' => array(3906.00, 3906.00),
+																				'20' => array(3906.00, 3906.00),
+																				'30' => array(3906.00, 7812.00),
+																				'40' => array(7812.00, 7812.00),
+																				),
+													//Exemption Allowance Table
+													'allowance' => array(
+																				'10' => 116.60,
+																				'20' => 116.60,
+																				'30' => 116.60,
+																				'40' => 116.60,
+																				),
+													//Low Income Exemption Table
+                                                    'minimum_income' => array(
+                                                                                //First entry is 0,1 allowance, 2nd is 2 or more.
+																				'10' => array(12997.00, 12997.00),
+																				'20' => array(12997.00, 12997.00),
+																				'30' => array(12997.00, 25994.00),
+																				'40' => array(25994.00, 25994.00),
+																				),
+													),
 								1357027200 => array( //01-Jan-13
 													'standard_deduction' => array(
 																				//First entry is 0,1 allowance, second is for 2 or more.

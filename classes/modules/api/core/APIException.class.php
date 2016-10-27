@@ -59,8 +59,8 @@ class APIException extends APIFactory {
 	 */
 	function getOptions( $name, $parent = NULL ) {
 		if ( $name == 'columns'
-				AND ( !$this->getPermissionObject()->Check('punch','enabled')
-					OR !( $this->getPermissionObject()->Check('punch','view') OR $this->getPermissionObject()->Check('punch','view_child') ) ) ) {
+				AND ( !$this->getPermissionObject()->Check('punch', 'enabled')
+					OR !( $this->getPermissionObject()->Check('punch', 'view') OR $this->getPermissionObject()->Check('punch', 'view_child') ) ) ) {
 			$name = 'list_columns';
 		}
 
@@ -74,7 +74,7 @@ class APIException extends APIFactory {
 	function getExceptionDefaultData() {
 		$company_obj = $this->getCurrentCompanyObject();
 
-		Debug::Text('Getting exception default data...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Getting exception default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		$data = array(
 						'company_id' => $company_obj->getId(),
@@ -89,8 +89,8 @@ class APIException extends APIFactory {
 	 * @return array
 	 */
 	function getException( $data = NULL, $disable_paging = FALSE ) {
-		if ( !$this->getPermissionObject()->Check('punch','enabled')
-				OR !( $this->getPermissionObject()->Check('punch','view') OR $this->getPermissionObject()->Check('punch','view_own') OR $this->getPermissionObject()->Check('punch','view_child') ) ) {
+		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
+				OR !( $this->getPermissionObject()->Check('punch', 'view') OR $this->getPermissionObject()->Check('punch', 'view_own') OR $this->getPermissionObject()->Check('punch', 'view_child') ) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
@@ -100,7 +100,7 @@ class APIException extends APIFactory {
 
 		//If no pay period is specified, force to showing exceptions only in non-closed pay periods. This is a performance optimization too.
 		if ( !isset($data['filter_data']['pay_period_status_id']) AND !isset($data['filter_data']['pay_period_id']) ) {
-			$data['filter_data']['pay_period_status_id'] = array(10,12,30); //All but closed
+			$data['filter_data']['pay_period_status_id'] = array(10, 12, 30); //All but closed
 		}
 
 		$blf = TTnew( 'ExceptionListFactory' );

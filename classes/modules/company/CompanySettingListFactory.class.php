@@ -46,7 +46,7 @@ class CompanySettingListFactory extends CompanySettingFactory implements Iterato
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -63,11 +63,11 @@ class CompanySettingListFactory extends CompanySettingFactory implements Iterato
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => $id, 
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 					';
@@ -85,11 +85,11 @@ class CompanySettingListFactory extends CompanySettingFactory implements Iterato
 		}
 
 		$ph = array(
-					'id' => $id,
+					'id' => $id, 
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
 					';
@@ -101,11 +101,11 @@ class CompanySettingListFactory extends CompanySettingFactory implements Iterato
 		return $this;
 	}
 
-	function getByCompanyIdAndName($company_id, $name) {	    
-        if ( $company_id == '' ) {
-            return FALSE;
-        }
-        
+	function getByCompanyIdAndName($company_id, $name) {		
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
+		
 		if ( $name == '') {
 			return FALSE;
 		}
@@ -113,22 +113,22 @@ class CompanySettingListFactory extends CompanySettingFactory implements Iterato
 		$cache_id = $company_id.$name;
 
 		$ph = array(
-                    'company_id' => $company_id,
-					'name' => $name,                    
+					'company_id' => $company_id, 
+					'name' => $name, 
 					);
 
 		$this->rs = $this->getCache($cache_id);
 		if ( $this->rs === FALSE ) {
 			$query = '
-						select 	*
-						from 	'. $this->getTable() .'
+						select	*
+						from	'. $this->getTable() .'
 						where	company_id = ?
 							AND	name = ?
 							AND deleted = 0';
 
 			$this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs,$cache_id);
+			$this->saveCache($this->rs, $cache_id);
 		}
 		return $this;
 	}

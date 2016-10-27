@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10788 $
- * $Id: DepartmentBranchUserListFactory.class.php 10788 2013-08-30 23:55:26Z ipso $
- * $Date: 2013-08-30 16:55:26 -0700 (Fri, 30 Aug 2013) $
+ * $Revision: 11830 $
+ * $Id: DepartmentBranchUserListFactory.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -46,7 +46,7 @@ class DepartmentBranchUserListFactory extends DepartmentBranchUserFactory implem
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable();
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -66,7 +66,7 @@ class DepartmentBranchUserListFactory extends DepartmentBranchUserFactory implem
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 					';
@@ -91,7 +91,7 @@ class DepartmentBranchUserListFactory extends DepartmentBranchUserFactory implem
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					LEFT JOIN '. $dbf->getTable() .' as dbf ON a.department_branch_id = dbf.id
 					LEFT JOIN '. $df->getTable() .' as df ON dbf.department_id = df.id
@@ -117,7 +117,7 @@ class DepartmentBranchUserListFactory extends DepartmentBranchUserFactory implem
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a, '. $dbf->getTable() .' as b
 					where	b.id = a.department_branch_id
 						AND department_branch_id = ?

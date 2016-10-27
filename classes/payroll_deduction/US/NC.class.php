@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: NC.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11830 $
+ * $Id: NC.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -51,6 +51,24 @@ class PayrollDeduction_US_NC extends PayrollDeduction_US {
 									);
 */
 	var $state_options = array(
+								//Formula changed for 01-Jan-14
+								1388563200 => array(
+													'standard_deduction' => array(
+																				'10' => 7500.00,
+																				'20' => 7500.00,
+																				'30' => 12000.00,
+																				),
+													'allowance_cutoff' => array(
+																				'10' => 60000.00,
+																				'20' => 50000.00,
+																				'30' => 80000.00,
+																				),
+													'allowance' => array(
+																		1 => 2500,
+																		2 => 2000
+																		),
+													'rate' => 5.8, //Flat 5.8%
+													),
 								//No changes for 01-Jan-09
 								1136102400 => array(
 													'standard_deduction' => array(
@@ -121,10 +139,14 @@ class PayrollDeduction_US_NC extends PayrollDeduction_US {
 
 		}
 
-		if ( $this->getAnnualTaxableIncome() < $this->getStateAllowanceCutOff() ) {
+		if ( $this->getDate() >= strtotime('01-Jan-2014') ) {
 			$allowance_arr = $retarr['allowance'][1];
 		} else {
-			$allowance_arr = $retarr['allowance'][2];
+			if ( $this->getAnnualTaxableIncome() < $this->getStateAllowanceCutOff() ) {
+				$allowance_arr = $retarr['allowance'][1];
+			} else {
+				$allowance_arr = $retarr['allowance'][2];
+			}
 		}
 
 		$retval = bcmul( $this->getStateAllowance(), $allowance_arr );
@@ -140,12 +162,21 @@ class PayrollDeduction_US_NC extends PayrollDeduction_US {
 		$retval = 0;
 
 		if ( $annual_income > 0 ) {
-			$rate = $this->getData()->getStateRate($annual_income);
-			$state_constant = $this->getData()->getStateConstant($annual_income);
-			$state_rate_income = $this->getData()->getStateRatePreviousIncome($annual_income);
+			if ( $this->getDate() >= strtotime('01-Jan-2014') ) {
+				$retarr = $this->getDataFromRateArray($this->getDate(), $this->state_options);
+				if ( $retarr == FALSE ) {
+					return FALSE;
+				}
 
-			//$retval = bcadd( bcmul( bcsub( $annual_income, $state_rate_income ), $rate ), $state_constant );
-			$retval = bcsub( bcmul( $annual_income, $rate), $state_constant);
+				$retval = bcmul( $annual_income, bcdiv( $retarr['rate'], 100 ) );
+			} else {
+				$rate = $this->getData()->getStateRate($annual_income);
+				$state_constant = $this->getData()->getStateConstant($annual_income);
+				$state_rate_income = $this->getData()->getStateRatePreviousIncome($annual_income);
+
+				//$retval = bcadd( bcmul( bcsub( $annual_income, $state_rate_income ), $rate ), $state_constant );
+				$retval = bcsub( bcmul( $annual_income, $rate), $state_constant);
+			}
 		}
 
 		if ( $retval < 0 ) {

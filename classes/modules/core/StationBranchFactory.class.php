@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 5089 $
- * $Id: StationBranchFactory.class.php 5089 2011-08-06 19:51:55Z ipso $
- * $Date: 2011-08-06 12:51:55 -0700 (Sat, 06 Aug 2011) $
+ * $Revision: 12026 $
+ * $Id: StationBranchFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -50,7 +50,7 @@ class StationBranchFactory extends Factory {
 
 	function getStation() {
 		if ( isset($this->data['station_id']) ) {
-			return $this->data['station_id'];
+			return (int)$this->data['station_id'];
 		}
 	}
 	function setStation($id) {
@@ -95,7 +95,7 @@ class StationBranchFactory extends Factory {
 	}
 	function getBranch() {
 		if ( isset($this->data['branch_id']) ) {
-			return $this->data['branch_id'];
+			return (int)$this->data['branch_id'];
 		}
 
 		return FALSE;
@@ -167,7 +167,7 @@ class StationBranchFactory extends Factory {
 	function addLog( $log_action ) {
 		$b_obj = $this->getBranchObject();
 		if ( is_object($b_obj) ) {
-			return TTLog::addEntry( $this->getStation(), $log_action, TTi18n::getText('Branch').': '. $b_obj->getName() , NULL, $this->getTable() );
+			return TTLog::addEntry( $this->getStation(), $log_action, TTi18n::getText('Branch').': '. $b_obj->getName(), NULL, $this->getTable() );
 		}
 
 		return FALSE;

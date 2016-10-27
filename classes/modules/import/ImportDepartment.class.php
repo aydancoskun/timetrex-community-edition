@@ -70,7 +70,7 @@ class ImportDepartment extends Import {
 
 
 	function _preParseRow( $row_number, $raw_row ) {
-		$retval = $this->getObject()->getDepartmentDefaultData();
+		$retval = $this->getObject()->stripReturnHandler( $this->getObject()->getDepartmentDefaultData() );
 		$retval['manual_id'] += $row_number; //Auto increment manual_id automatically.
 
 		return $retval;

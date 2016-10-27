@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: InstallSchema_1007A.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11830 $
+ * $Id: InstallSchema_1007A.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -45,26 +45,26 @@
 class InstallSchema_1007A extends InstallSchema_Base {
 
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion() , __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		return TRUE;
 	}
 
 
 	function postInstall() {
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		//New Pay Period Schedule format, update any current schedules.
 		$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
 		$ppslf->getAll();
-		Debug::text('Found Pay Period Schedules: '. $ppslf->getRecordCount(), __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('Found Pay Period Schedules: '. $ppslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 9);
 		if ( $ppslf->getRecordCount() > 0 ) {
 			foreach( $ppslf as $pps_obj ) {
 				if ( $pps_obj->getType() == 10 OR $pps_obj->getType() == 20 ) {
 					$pps_obj->setStartDayOfWeek( TTDate::getDayOfWeek( TTDate::strtotime( $pps_obj->getColumn('anchor_date') ) ) );
-					$pps_obj->setTransactionDate(  floor( (TTDate::strtotime( $pps_obj->getColumn('primary_transaction_date') ) - TTDate::strtotime(  $pps_obj->getColumn('primary_date') ) ) / 86400 )+1 );
-				} elseif (  $pps_obj->getType() == 30 ) {
-					$pps_obj->setPrimaryDayOfMonth( TTDate::getDayOfMonth( TTDate::strtotime( $pps_obj->getColumn('anchor_date') ) )+1 );
+					$pps_obj->setTransactionDate( ( floor( (TTDate::strtotime( $pps_obj->getColumn('primary_transaction_date') ) - TTDate::strtotime( $pps_obj->getColumn('primary_date') ) ) / 86400 ) + 1 ) );
+				} elseif (	$pps_obj->getType() == 30 ) {
+					$pps_obj->setPrimaryDayOfMonth( ( TTDate::getDayOfMonth( TTDate::strtotime( $pps_obj->getColumn('anchor_date') ) ) + 1 ) );
 					if ( $pps_obj->getColumn('primary_transaction_date_ldom') == 1 ) {
 						$pps_obj->setPrimaryTransactionDayOfMonth( -1 );
 					} else {

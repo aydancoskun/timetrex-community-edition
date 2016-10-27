@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: InstallSchema_1016A.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11830 $
+ * $Id: InstallSchema_1016A.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -47,7 +47,7 @@ class InstallSchema_1016A extends InstallSchema_Base {
 	protected $station_users = array();
 
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion() , __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		return TRUE;
 	}
@@ -55,19 +55,19 @@ class InstallSchema_1016A extends InstallSchema_Base {
 	function postInstall() {
 		global $cache;
 
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
-		Debug::text('l: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('l: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		$cjlf = TTnew( 'CronJobListFactory' );
 		$cjlf->getAll();
 		if ( $cjlf->getRecordCount() > 0 ) {
 			foreach( $cjlf as $cj_obj ) {
-				Debug::text('Original Command: '.  $cj_obj->getCommand(), __FILE__, __LINE__, __METHOD__,9);
+				Debug::text('Original Command: '.  $cj_obj->getCommand(), __FILE__, __LINE__, __METHOD__, 9);
 				$retval = preg_match('/([A-Za-z0-9]+\.php)/i', $cj_obj->getCommand(), $matches );
 
 				if ( isset($matches[0]) AND $matches[0] != '' ) {
-					Debug::text('New Command: '. $matches[0] , __FILE__, __LINE__, __METHOD__,9);
+					Debug::text('New Command: '. $matches[0], __FILE__, __LINE__, __METHOD__, 9);
 					$cj_obj->setCommand( $matches[0] );
 					if ( $cj_obj->isValid() ) {
 						$cj_obj->Save();

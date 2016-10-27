@@ -130,6 +130,22 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 		return TRUE;
 	}
 
+	public function getPreCalcFunction( $name ) {
+		$variable_function_map = array(
+										'l24' => 'preCalcL24',
+										'l26' => 'preCalcL26',
+										'ei_exempt' => 'preCalcEIExempt',
+										'cpp_exempt' => 'preCalcCPPExempt',
+										'ppip_exempt' => 'preCalcPPIPExempt',
+						  );
+
+		if ( isset($variable_function_map[$name]) ) {
+			return $variable_function_map[$name];
+		}
+
+		return FALSE;
+	}
+
 	public function getFilterFunction( $name ) {
 		$variable_function_map = array(
 										'year' => 'isNumeric',
@@ -209,7 +225,7 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 															),
 									),
 								'cpp_exempt' => array(
-										'function' => array('filterCPPExempt', 'drawCheckBox' ),
+										'function' => array( 'drawCheckBox' ),
 										'coordinates' => array(
 																array(
 																	'x' => 202,
@@ -221,7 +237,7 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 															),
 									),
 								'ei_exempt' => array(
-										'function' => array('filterEIExempt', 'drawCheckBox' ),
+										'function' => array( 'drawCheckBox' ),
 										'coordinates' => array(
 																array(
 																	'x' => 226,
@@ -233,7 +249,7 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 															),
 									),
 								'ppip_exempt' => array(
-										'function' => array('filterPPIPExempt', 'drawCheckBox' ),
+										'function' => array( 'drawCheckBox' ),
 										'coordinates' => array(
 																array(
 																	'x' => 252,
@@ -450,7 +466,7 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 																	),
 											),
 								'l24' => array(
-												'function' =>  array( 'filterL24', 'drawSplitDecimalFloat' ),
+												'function' =>  array( 'drawSplitDecimalFloat' ),
 												'coordinates' => array(
 																	array(
 																		'x' => 483,
@@ -469,7 +485,7 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 																	),
 											),
 								'l26' => array(
-												'function' => array( 'filterL26', 'drawSplitDecimalFloat' ),
+												'function' => array( 'drawSplitDecimalFloat' ),
 												'coordinates' => array(
 																	array(
 																		'x' => 483,
@@ -732,6 +748,44 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 		}
 	}
 
+	function preCalcL24( $value, $key, &$array ) {
+		Debug::Text('EI Earning: '. $value .' Maximum: '. $this->getEIMaximumEarnings(), __FILE__, __LINE__, __METHOD__, 10);
+		if ( $value > $this->getEIMaximumEarnings() ) {
+			return $this->getEIMaximumEarnings();
+		}
+
+		return $value;
+	}
+	function preCalcL26( $value, $key, &$array ) {
+		if ( $value > $this->getCPPMaximumEarnings() ) {
+			$value = $this->getCPPMaximumEarnings();
+		}
+
+		return $value;
+	}
+	function preCalcEIExempt( $value, $key, &$array ) {
+		if ( $value == TRUE ) {
+			$array['l24'] = 0;
+		}
+
+		return $value;
+	}
+	function preCalcCPPExempt( $value, $key, &$array ) {
+		if ( $value == TRUE ) {
+			$array['l26'] = 0;
+		}
+
+		return $value;
+	}
+	function preCalcPPIPExempt( $value, $key, &$array ) {
+		if ( $value == TRUE ) {
+			$array['l56'] = 0;
+		}
+
+		return $value;
+	}
+
+
 	function filterMiddleName( $value ) {
 		//Return just initial
 		$value = substr( $value, 0, 1);
@@ -748,47 +802,8 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 		return implode("\n", $retarr );
 	}
 
-	function filterL24( $value ) {
-		Debug::Text('EI Earning: '. $value .' Maximum: '. $this->getEIMaximumEarnings(), __FILE__, __LINE__, __METHOD__,10);
-		if ( $value > $this->getEIMaximumEarnings() ) {
-			return $this->getEIMaximumEarnings();
-		}
-
-		return $value;
-	}
-
-	function filterL26( $value ) {
-		if ( $value > $this->getCPPMaximumEarnings() ) {
-			return $this->getCPPMaximumEarnings();
-		}
-
-		return $value;
-	}
-
-	function filterEIExempt( $value ) {
-		if ( $value == TRUE ) {
-			$this->l24 = 0;
-		}
-
-		return $value;
-	}
-	function filterCPPExempt( $value ) {
-		if ( $value == TRUE ) {
-			$this->l26 = 0;
-		}
-
-		return $value;
-	}
-	function filterPPIPExempt( $value ) {
-		if ( $value == TRUE ) {
-			$this->l56 = 0;
-		}
-
-		return $value;
-	}
 
 	function _outputXML() {
-
 		//Maps other income box codes to XML element names.
 		$other_box_code_map = array(
 									30 => 'hm_brd_lodg_amt',
@@ -852,8 +867,8 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 				if ( $this->filterMiddleName($this->middle_name) != '' ) { $xml->Return->T4->T4Slip[$e]->EMPE_NM->addChild('init', $this->filterMiddleName($this->middle_name) ); }
 
 				$xml->Return->T4->T4Slip[$e]->addChild('EMPE_ADDR'); //Employee Address
-				if ( $this->address1 != '' ) { $xml->Return->T4->T4Slip[$e]->EMPE_ADDR->addChild('addr_l1_txt', substr( $this->address1, 0, 30) ); }
-				if ( $this->address2 != '' ) { $xml->Return->T4->T4Slip[$e]->EMPE_ADDR->addChild('addr_l2_txt', substr( $this->address2, 0, 30) ); }
+				if ( $this->address1 != '' ) { $xml->Return->T4->T4Slip[$e]->EMPE_ADDR->addChild('addr_l1_txt', substr( Misc::stripHTMLSpecialChars( $this->address1 ), 0, 30) ); }
+				if ( $this->address2 != '' ) { $xml->Return->T4->T4Slip[$e]->EMPE_ADDR->addChild('addr_l2_txt', substr( Misc::stripHTMLSpecialChars( $this->address2 ), 0, 30) ); }
 				if ( $this->city != '' ) { $xml->Return->T4->T4Slip[$e]->EMPE_ADDR->addChild('cty_nm', $this->city ); }
 				if ( $this->province != '' ) { $xml->Return->T4->T4Slip[$e]->EMPE_ADDR->addChild('prov_cd', $this->province ); }
 				$xml->Return->T4->T4Slip[$e]->EMPE_ADDR->addChild('cntry_cd', 'CAN' );
@@ -882,8 +897,8 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 				if ( isset($this->l20) AND is_numeric($this->l20) ) { $xml->Return->T4->T4Slip[$e]->T4_AMT->addChild('rpp_cntrb_amt', $this->MoneyFormat( (float)$this->l20, FALSE ) ); }
 				if ( isset($this->l22) AND is_numeric($this->l22) ) { $xml->Return->T4->T4Slip[$e]->T4_AMT->addChild('itx_ddct_amt', $this->MoneyFormat( (float)$this->l22, FALSE ) ); }
 
-				if ( $this->ei_exempt == FALSE AND isset($this->l24) AND is_numeric($this->l24) ) { $xml->Return->T4->T4Slip[$e]->T4_AMT->addChild('ei_insu_ern_amt', $this->MoneyFormat( $this->filterL24( (float)$this->l24 ), FALSE ) ); }
-				if ( $this->cpp_exempt == FALSE AND isset($this->l26) AND is_numeric($this->l26) ) { $xml->Return->T4->T4Slip[$e]->T4_AMT->addChild('cpp_qpp_ern_amt', $this->MoneyFormat( $this->filterL26( (float)$this->l26 ), FALSE ) ); }
+				if ( $this->ei_exempt == FALSE AND isset($this->l24) AND is_numeric($this->l24) ) { $xml->Return->T4->T4Slip[$e]->T4_AMT->addChild('ei_insu_ern_amt', $this->MoneyFormat( (float)$this->l24, FALSE ) ); }
+				if ( $this->cpp_exempt == FALSE AND isset($this->l26) AND is_numeric($this->l26) ) { $xml->Return->T4->T4Slip[$e]->T4_AMT->addChild('cpp_qpp_ern_amt', $this->MoneyFormat( (float)$this->l26, FALSE ) ); }
 				if ( isset($this->l44) AND is_numeric($this->l44) ) { $xml->Return->T4->T4Slip[$e]->T4_AMT->addChild('unn_dues_amt', $this->MoneyFormat( (float)$this->l44, FALSE ) ); }
 				if ( isset($this->l46) AND is_numeric($this->l46) ) { $xml->Return->T4->T4Slip[$e]->T4_AMT->addChild('chrty_dons_amt', $this->MoneyFormat( (float)$this->l46, FALSE ) ); }
 				if ( isset($this->l52) AND is_numeric($this->l52) ) { $xml->Return->T4->T4Slip[$e]->T4_AMT->addChild('padj_amt', $this->MoneyFormat( (float)$this->l52, FALSE ) ); }
@@ -955,7 +970,7 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 					}
 				}
 
-				if ( $employees_per_page == 1 OR ( $employees_per_page == 2 AND  $e % $employees_per_page != 0 ) ) {
+				if ( $employees_per_page == 1 OR ( $employees_per_page == 2 AND $e % $employees_per_page != 0 ) ) {
 					$this->resetTemplatePage();
 					if ( $this->getShowInstructionPage() == TRUE ) {
 						$this->addPage( array('template_page' => 2) );

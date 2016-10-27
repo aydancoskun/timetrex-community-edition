@@ -46,13 +46,13 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL($query,NULL,$limit,$page);
+		$this->ExecuteSQL($query, NULL, $limit, $page);
 
 		return $this;
 	}
@@ -69,22 +69,22 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 						);
 
 			$query = '
-						select 	*
+						select	*
 						from	'. $this->getTable() .'
 						where	id = ?
 							AND deleted = 0';
 			$query .= $this->getWhereSQL( $where );
 			$query .= $this->getSortSQL( $order );
 
-			$this->ExecuteSQL($query,$ph);
+			$this->ExecuteSQL($query, $ph);
 
-			$this->saveCache($this->rs,$id);
+			$this->saveCache($this->rs, $id);
 		}
 
 		return $this;
 	}
 
-    function getByUserReviewControlId($id, $order = NULL) {
+	function getByUserReviewControlId($id, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -94,63 +94,63 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	user_review_control_id = ?
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL($query,$ph);
+		$this->ExecuteSQL($query, $ph);
 
 		return $this;
 	}
 
-    function getByKpiId($id, $order = NULL) {
-        if ( $id == '' ) {
-            return FALSE;
-        }
+	function getByKpiId($id, $order = NULL) {
+		if ( $id == '' ) {
+			return FALSE;
+		}
 
-        $ph = array(
-                        'kpi_id' => $id,
-                    );
-        $query = '
-					select 	*
+		$ph = array(
+						'kpi_id' => $id,
+					);
+		$query = '
+					select	*
 					from	'. $this->getTable() .'
 					where	kpi_id = ?
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL($query,$ph);
+		$this->ExecuteSQL($query, $ph);
 
 		return $this;
-    }
+	}
 
-    function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
 
-        $kf  = new KPIFactory();
+		$kf	 = new KPIFactory();
 
 		$ph = array(
 					'company_id' => $company_id
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
-                        LEFT JOIN  '. $kf->getTable() .' as k ON ( a.kpi_id = k.id AND k.deleted = 0 )
- 					where	k.company_id = ?
+						LEFT JOIN  '. $kf->getTable() .' as k ON ( a.kpi_id = k.id AND k.deleted = 0 )
+					where	k.company_id = ?
 						AND a.deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL($query,$ph);
+		$this->ExecuteSQL($query, $ph);
 
 		return $this;
 	}
 
-    function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
+	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -159,7 +159,7 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 			return FALSE;
 		}
 
-        $kf  = new KPIFactory();
+		$kf	 = new KPIFactory();
 
 		$ph = array(
 					'id' => $id,
@@ -167,25 +167,25 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
-                        LEFT JOIN  '. $kf->getTable() .' as k ON ( a.kpi_id = k.id AND k.deleted = 0 )
- 					where	a.id = ?
+						LEFT JOIN  '. $kf->getTable() .' as k ON ( a.kpi_id = k.id AND k.deleted = 0 )
+					where	a.id = ?
 						AND k.company_id = ?
 						AND a.deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL($query,$ph);
+		$this->ExecuteSQL($query, $ph);
 
 		return $this;
 	}
 
-    function  getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
-
-    	if ( $company_id == '') {
+	function  getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
+		if ( $company_id == '') {
 			return FALSE;
 		}
+		
 		if ( !is_array($order) ) {
 			//Use Filter Data ordering if its set.
 			if ( isset($filter_data['sort_column']) AND $filter_data['sort_order']) {
@@ -195,89 +195,85 @@ class UserReviewListFactory extends UserReviewFactory implements IteratorAggrega
 
 		$additional_order_fields = array();
 
-        $sort_column_aliases = array();
+		$sort_column_aliases = array();
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 
 		if ( $order == NULL ) {
-		    $order = array( 'kf.name' => 'asc');
+			$order = array( 'kf.name' => 'asc');
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;
 		}
-		Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
-        $uf = new UserFactory();
+		$uf = new UserFactory();
 		$kf = new KPIFactory();
-        $urcf = new UserReviewControlFactory();
+		$urcf = new UserReviewControlFactory();
 
 		$ph = array(
 					'company_id' => $company_id,
 					);
 
 		$query = '
-					select 	a.*,
-                            kf.name,
-                            kf.type_id,
-                            kf.status_id,
-                            kf.minimum_rate,
-                            kf.maximum_rate,
-                            kf.description,
+					select	a.*,
+							kf.name,
+							kf.type_id,
+							kf.status_id,
+							kf.minimum_rate,
+							kf.maximum_rate,
+							kf.description,
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
 							y.last_name as created_by_last_name,
 							z.first_name as updated_by_first_name,
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
-					from 	'. $this->getTable() .' as a
-                        LEFT JOIN '. $kf->getTable() .' as kf ON ( a.kpi_id = kf.id AND kf.deleted = 0 )
-                        LEFT JOIN '. $urcf->getTable() .' as urcf ON ( a.user_review_control_id = urcf.id AND urcf.deleted = 0 )
+					from	'. $this->getTable() .' as a
+						LEFT JOIN '. $kf->getTable() .' as kf ON ( a.kpi_id = kf.id AND kf.deleted = 0 )
+						LEFT JOIN '. $urcf->getTable() .' as urcf ON ( a.user_review_control_id = urcf.id AND urcf.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	kf.company_id = ?';
 
 		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
-        $query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-        //$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
+		//$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
 
-        $query .= ( isset($filter_data['user_review_control_id']) ) ? $this->getWhereClauseSQL( 'a.user_review_control_id', $filter_data['user_review_control_id'], 'numeric_list', $ph ) : NULL;
-        $query .= ( isset($filter_data['kpi_id']) ) ? $this->getWhereClauseSQL( 'a.kpi_id', $filter_data['kpi_id'], 'numeric_list', $ph ) : NULL;
-        $query .= ( isset($filter_data['term_id']) ) ? $this->getWhereClauseSQL( 'urcf.term_id', $filter_data['term_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_review_control_id']) ) ? $this->getWhereClauseSQL( 'a.user_review_control_id', $filter_data['user_review_control_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['kpi_id']) ) ? $this->getWhereClauseSQL( 'a.kpi_id', $filter_data['kpi_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['term_id']) ) ? $this->getWhereClauseSQL( 'urcf.term_id', $filter_data['term_id'], 'numeric_list', $ph ) : NULL;
 
-        $query .= ( isset($filter_data['severity_id']) ) ? $this->getWhereClauseSQL( 'urcf.severity_id', $filter_data['severity_id'], 'numeric_list', $ph ) : NULL;
-        $query .= ( isset($filter_data['rating']) ) ? $this->getWhereClauseSQL( 'a.rating', $filter_data['rating'], 'numeric', $ph ) : NULL;
+		$query .= ( isset($filter_data['severity_id']) ) ? $this->getWhereClauseSQL( 'urcf.severity_id', $filter_data['severity_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['rating']) ) ? $this->getWhereClauseSQL( 'a.rating', $filter_data['rating'], 'numeric', $ph ) : NULL;
 
-         $query .= ( isset($filter_data['note']) ) ? $this->getWhereClauseSQL( 'a.note', $filter_data['note'], 'text', $ph ) : NULL;
+		$query .= ( isset($filter_data['note']) ) ? $this->getWhereClauseSQL( 'a.note', $filter_data['note'], 'text', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => $company_id, 'object_type_id' => 330, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 
-        if ( isset($filter_data['created_date']) AND trim($filter_data['created_date']) != '' ) {
+		if ( isset($filter_data['created_date']) AND !is_array($filter_data['created_date']) AND trim($filter_data['created_date']) != '' ) {
 			$date_filter = $this->getDateRangeSQL( $filter_data['created_date'], 'a.created_date' );
 			if ( $date_filter != FALSE ) {
-				$query  .=	' AND '. $date_filter;
+				$query	.=	' AND '. $date_filter;
 			}
 			unset($date_filter);
 		}
-		if ( isset($filter_data['updated_date']) AND trim($filter_data['updated_date']) != '' ) {
+		if ( isset($filter_data['updated_date']) AND !is_array($filter_data['updated_date']) AND trim($filter_data['updated_date']) != '' ) {
 			$date_filter = $this->getDateRangeSQL( $filter_data['updated_date'], 'a.updated_date' );
 			if ( $date_filter != FALSE ) {
-				$query  .=	' AND '. $date_filter;
+				$query	.=	' AND '. $date_filter;
 			}
 			unset($date_filter);
 		}
-        $query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-        
-        $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
-        
+		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
 
-		$query .= 	'
-						AND a.deleted = 0
-					';
+		$query .=	' AND a.deleted = 0 ';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order , $strict, $additional_order_fields);
-        
-		$this->ExecuteSQL($query,$ph,$limit,$page);
+		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields);
+
+		$this->ExecuteSQL($query, $ph, $limit, $page);
 		return $this;
 	}
 }

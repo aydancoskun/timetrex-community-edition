@@ -153,7 +153,7 @@ class BreakPolicyFactory extends Factory {
 
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
-			return $this->data['company_id'];
+			return (int)$this->data['company_id'];
 		}
 
 		return FALSE;
@@ -161,7 +161,7 @@ class BreakPolicyFactory extends Factory {
 	function setCompany($id) {
 		$id = trim($id);
 
-		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$clf = TTnew( 'CompanyListFactory' );
 
 		if ( $this->Validator->isResultSetWithRows(	'company',
@@ -179,7 +179,7 @@ class BreakPolicyFactory extends Factory {
 
 	function getType() {
 		if ( isset($this->data['type_id']) ) {
-			return $this->data['type_id'];
+			return (int)$this->data['type_id'];
 		}
 
 		return FALSE;
@@ -213,7 +213,7 @@ class BreakPolicyFactory extends Factory {
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
 		$id = $this->db->GetOne($query, $ph);
-		Debug::Arr($id,'Unique: '. $name, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($id, 'Unique: '. $name, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id === FALSE ) {
 			return TRUE;
@@ -237,7 +237,7 @@ class BreakPolicyFactory extends Factory {
 		if (	$this->Validator->isLength(	'name',
 											$name,
 											TTi18n::gettext('Name is too short or too long'),
-											2,50)
+											2, 50)
 				AND
 				$this->Validator->isTrue(	'name',
 											$this->isUniqueName($name),
@@ -262,11 +262,11 @@ class BreakPolicyFactory extends Factory {
 	function setTriggerTime($int) {
 		$int = trim($int);
 
-		if  ( empty($int) ){
+		if	( empty($int) ) {
 			$int = 0;
 		}
 
-		if 	(	$this->Validator->isNumeric(		'trigger_time',
+		if	(	$this->Validator->isNumeric(		'trigger_time',
 													$int,
 													TTi18n::gettext('Incorrect Trigger Time')) ) {
 			$this->data['trigger_time'] = $int;
@@ -287,7 +287,7 @@ class BreakPolicyFactory extends Factory {
 	function setAmount($value) {
 		$value = trim($value);
 
-		if 	(	$this->Validator->isNumeric(		'amount',
+		if	(	$this->Validator->isNumeric(		'amount',
 													$value,
 													TTi18n::gettext('Incorrect Deduction Amount')) ) {
 
@@ -301,7 +301,7 @@ class BreakPolicyFactory extends Factory {
 
 	function getAutoDetectType() {
 		if ( isset($this->data['auto_detect_type_id']) ) {
-			return $this->data['auto_detect_type_id'];
+			return (int)$this->data['auto_detect_type_id'];
 		}
 
 		return FALSE;
@@ -337,7 +337,7 @@ class BreakPolicyFactory extends Factory {
 	function setStartWindow($value) {
 		$value = (int)trim($value);
 
-		if 	(	$value == 0
+		if	(	$value == 0
 				OR
 				$this->Validator->isNumeric(		'start_window',
 													$value,
@@ -361,7 +361,7 @@ class BreakPolicyFactory extends Factory {
 	function setWindowLength($value) {
 		$value = (int)trim($value);
 
-		if 	(	$value == 0
+		if	(	$value == 0
 				OR
 				$this->Validator->isNumeric(		'window_length',
 													$value,
@@ -385,7 +385,7 @@ class BreakPolicyFactory extends Factory {
 	function setMinimumPunchTime($value) {
 		$value = (int)trim($value);
 
-		if 	(	$value == 0
+		if	(	$value == 0
 				OR
 				$this->Validator->isNumeric(		'minimum_punch_time',
 													$value,
@@ -409,7 +409,7 @@ class BreakPolicyFactory extends Factory {
 	function setMaximumPunchTime($value) {
 		$value = (int)trim($value);
 
-		if 	(	$value == 0
+		if	(	$value == 0
 				OR
 				$this->Validator->isNumeric(		'maximum_punch_time',
 													$value,
@@ -437,8 +437,8 @@ class BreakPolicyFactory extends Factory {
 							If they don't take a break, it doesn't include any time.
 
 		If not enabled for:
-		  Auto-Deduct: Always deducts the amount.
-		  Auto-Inlcyde: Always includes the amount.
+		Auto-Deduct: Always deducts the amount.
+		Auto-Inlcyde: Always includes the amount.
 	*/
 	function getIncludeBreakPunchTime() {
 		if ( isset($this->data['include_break_punch_time']) ) {
@@ -467,7 +467,7 @@ class BreakPolicyFactory extends Factory {
 	}
 
 	function Validate() {
-		if ( $this->getDeleted() == TRUE ){
+		if ( $this->getDeleted() == TRUE ) {
 			//Check to make sure there are no hours using this break policy.
 			$udtlf = TTnew( 'UserDateTotalListFactory' );
 			$udtlf->getByBreakPolicyId( $this->getId() );
@@ -534,7 +534,7 @@ class BreakPolicyFactory extends Factory {
 							break;
 						case 'type':
 						case 'auto_detect_type':
-							$function = 'get'.str_replace('_','',$variable);
+							$function = 'get'.str_replace('_', '', $variable);
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = Option::getByKey( $this->$function(), $this->getOptions( $variable ) );
 							}
@@ -555,7 +555,7 @@ class BreakPolicyFactory extends Factory {
 	}
 
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action,  TTi18n::getText('Break Policy'), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Break Policy'), NULL, $this->getTable(), $this );
 	}
 }
 ?>

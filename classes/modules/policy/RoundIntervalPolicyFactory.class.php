@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11545 $
- * $Id: RoundIntervalPolicyFactory.class.php 11545 2013-11-29 02:04:30Z mikeb $
- * $Date: 2013-11-28 18:04:30 -0800 (Thu, 28 Nov 2013) $
+ * $Revision: 12026 $
+ * $Id: RoundIntervalPolicyFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -81,12 +81,12 @@ class RoundIntervalPolicyFactory extends Factory {
 				break;
 			case 'punch_type_relation':
 				$retval = array(
-										40 => array(10,20),
-										50 => array(10,30,120),
-										60 => array(10,20,100),
-										70 => array(10,30),
-										80 => array(10,20,110),
-										90 => array(10,30),
+										40 => array(10, 20),
+										50 => array(10, 30, 120),
+										60 => array(10, 20, 100),
+										70 => array(10, 30),
+										80 => array(10, 20, 110),
+										90 => array(10, 30),
 									);
 				break;
 			case 'columns':
@@ -162,7 +162,7 @@ class RoundIntervalPolicyFactory extends Factory {
 
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
-			return $this->data['company_id'];
+			return (int)$this->data['company_id'];
 		}
 
 		return FALSE;
@@ -170,7 +170,7 @@ class RoundIntervalPolicyFactory extends Factory {
 	function setCompany($id) {
 		$id = trim($id);
 
-		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$clf = TTnew( 'CompanyListFactory' );
 
 		if ( $this->Validator->isResultSetWithRows(	'company',
@@ -230,7 +230,7 @@ class RoundIntervalPolicyFactory extends Factory {
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
 		$id = $this->db->GetOne($query, $ph);
-		Debug::Arr($id,'Unique: '. $name, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($id, 'Unique: '. $name, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id === FALSE ) {
 			return TRUE;
@@ -254,7 +254,7 @@ class RoundIntervalPolicyFactory extends Factory {
 		if (	$this->Validator->isLength(	'name',
 											$name,
 											TTi18n::gettext('Name is too short or too long'),
-											2,50)
+											2, 50)
 				AND
 				$this->Validator->isTrue(	'name',
 											$this->isUniqueName($name),
@@ -271,7 +271,7 @@ class RoundIntervalPolicyFactory extends Factory {
 
 	function getRoundType() {
 		if ( isset($this->data['round_type_id']) ) {
-			return $this->data['round_type_id'];
+			return (int)$this->data['round_type_id'];
 		}
 
 		return FALSE;
@@ -299,7 +299,7 @@ class RoundIntervalPolicyFactory extends Factory {
 
 	function getPunchType() {
 		if ( isset($this->data['punch_type_id']) ) {
-			return $this->data['punch_type_id'];
+			return (int)$this->data['punch_type_id'];
 		}
 
 		return FALSE;
@@ -335,7 +335,7 @@ class RoundIntervalPolicyFactory extends Factory {
 	function setInterval($value) {
 		$value = trim($value);
 
-		if 	(	$this->Validator->isNumeric(		'interval',
+		if	(	$this->Validator->isNumeric(		'interval',
 													$value,
 													TTi18n::gettext('Incorrect Interval')) ) {
 
@@ -361,7 +361,7 @@ class RoundIntervalPolicyFactory extends Factory {
 	function setGrace($value) {
 		$value = trim($value);
 
-		if 	(	$this->Validator->isNumeric(		'grace',
+		if	(	$this->Validator->isNumeric(		'grace',
 													$value,
 													TTi18n::gettext('Incorrect grace value')) ) {
 
@@ -382,7 +382,7 @@ class RoundIntervalPolicyFactory extends Factory {
 	function setStrict($bool) {
 		$this->data['strict'] = $this->toBool($bool);
 
-		return true;
+		return TRUE;
 	}
 
 	function Validate() {
@@ -458,7 +458,7 @@ class RoundIntervalPolicyFactory extends Factory {
 	}
 
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action,  TTi18n::getText('Round Interval Policy'), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Round Interval Policy'), NULL, $this->getTable(), $this );
 	}
 }
 ?>

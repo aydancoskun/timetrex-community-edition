@@ -61,7 +61,7 @@ class TaxForms {
 			$this->pdf->setRightMargin( $this->getRightMargin() );
 			$this->pdf->setTopMargin( $this->getTopMargin() );
 
-			//$this->pdf->setHeaderFont( array($this->getDefaultFont(),$this->getDefaultFont(),$this->getDefaultFont() ) );
+			//$this->pdf->setHeaderFont( array($this->getDefaultFont(), $this->getDefaultFont(), $this->getDefaultFont() ) );
 			//$this->pdf->setFooterFont( $this->getDefaultFont() );
 		}
 		return $this->pdf;
@@ -94,7 +94,7 @@ class TaxForms {
 	}
 
 	/*
-	 Default font help functions
+	Default font help functions
 	*/
 	function getDefaultFont() {
 		if ( isset($this->tax_forms['default_font']) ) {
@@ -135,7 +135,7 @@ class TaxForms {
 	}
 
 	/*
-	 Page layout/printing functions
+	Page layout/printing functions
 	 */
 
 	//Show/Hide the background form.
@@ -246,19 +246,19 @@ class TaxForms {
 	}
 
 	/*
-	 Box positioning array, so we can easily change the coordinates of all the boxes.
-	 We should also group these boxes together so we can apply multiple offsets in a single form.
+	Box positioning array, so we can easily change the coordinates of all the boxes.
+	We should also group these boxes together so we can apply multiple offsets in a single form.
 	 */
 
 	/*
-	 Display/Exporting functions.
+	Display/Exporting functions.
 	*/
-	function drawCell( $data, $field_layout_data , $additional_x_offset = 0, $additional_y_offset = 0 ) {
+	function drawCell( $data, $field_layout_data, $additional_x_offset = 0, $additional_y_offset = 0 ) {
 		if ( isset($data) AND $data !== NULL OR $this->getShowBorder() == TRUE ) {
-			Debug::Text('&nbsp;&nbsp;Data: '. $data, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('&nbsp;&nbsp;Data: '. $data, __FILE__, __LINE__, __METHOD__, 10);
 
 			if ( isset($field_layout_data['x']) AND $field_layout_data['y'] ) {
-				$this->getPDFObject()->setXY( Misc::AdjustXY($field_layout_data['x'], $this->getXOffset()+$additional_x_offset ), Misc::AdjustXY($field_layout_data['y'], $this->getYOffset()+$additional_y_offset ) );
+				$this->getPDFObject()->setXY( Misc::AdjustXY($field_layout_data['x'], ( $this->getXOffset() + $additional_x_offset ) ), Misc::AdjustXY($field_layout_data['y'], ( $this->getYOffset() + $additional_y_offset ) ) );
 			}
 
 			if ( !isset($field_layout_data['ln']) ) {
@@ -270,7 +270,7 @@ class TaxForms {
 				if ( !isset($field_layout_data['fontstyle']) ) {
 					$field_layout_data['fontstyle'] = $this->getDefaultFontStyle();
 				}
-				$this->getPDFObject()->SetFont( $this->getDefaultFont(), $field_layout_data['fontstyle'],$field_layout_data['fontsize']);
+				$this->getPDFObject()->SetFont( $this->getDefaultFont(), $field_layout_data['fontstyle'], $field_layout_data['fontsize']);
 			}
 
 			if ( isset($field_layout_data['w']) AND isset($field_layout_data['h']) AND isset($field_layout_data['align'])) {
@@ -279,7 +279,7 @@ class TaxForms {
 				} else {
 					if ( isset($field_layout_data['split_decimal']) ) {
 
-						$this->getPDFObject()->Cell( $field_layout_data['w']-$this->getDecimalFieldSize(), $field_layout_data['h'], Misc::getBeforeDecimal( $data ), $this->getShowBorder(), 0, $field_layout_data['align']);
+						$this->getPDFObject()->Cell( ( $field_layout_data['w'] - $this->getDecimalFieldSize() ), $field_layout_data['h'], Misc::getBeforeDecimal( $data ), $this->getShowBorder(), 0, $field_layout_data['align']);
 						$this->getPDFObject()->Cell( $this->getDecimalFieldSize(), $field_layout_data['h'], Misc::getAfterDecimal( $data ), $this->getShowBorder(), $field_layout_data['ln'], $field_layout_data['align']);
 					} else {
 						$this->getPDFObject()->Cell( $field_layout_data['w'], $field_layout_data['h'], $data, $this->getShowBorder(), $field_layout_data['ln'], $field_layout_data['align']);
@@ -309,7 +309,7 @@ class TaxForms {
 	function getPDF() {
 		$this->_getPDF();
 
-		return $this->getPDFObject()->Output('','S');
+		return $this->getPDFObject()->Output('', 'S');
 	}
 
 

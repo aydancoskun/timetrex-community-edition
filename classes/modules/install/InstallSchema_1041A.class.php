@@ -45,13 +45,13 @@
 class InstallSchema_1041A extends InstallSchema_Base {
 
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion() , __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		return TRUE;
 	}
 
 	function postInstall() {
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		//Modify all hierarchies with the request object type included, to add new request object types.
 		$hclf = TTnew( 'HierarchyControlListFactory' );
@@ -61,7 +61,7 @@ class InstallSchema_1041A extends InstallSchema_Base {
 				$src_object_types = $hc_obj->getObjectType();
 				$request_key = array_search( 50, $src_object_types );
 				if ( $request_key !== FALSE ) {
-					Debug::Text('Found request object type, ID: '. $hc_obj->getId() .' Company ID: '. $hc_obj->getCompany(), __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Found request object type, ID: '. $hc_obj->getId() .' Company ID: '. $hc_obj->getCompany(), __FILE__, __LINE__, __METHOD__, 10);
 					unset($src_object_types[$request_key]);
 
 					$src_object_types[] = 1010;
@@ -76,7 +76,7 @@ class InstallSchema_1041A extends InstallSchema_Base {
 						$hc_obj->Save();
 					}
 				} else {
-					Debug::Text('Request object type not found for ID: '. $hc_obj->getId() .' Company ID: '. $hc_obj->getCompany(), __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Request object type not found for ID: '. $hc_obj->getId() .' Company ID: '. $hc_obj->getCompany(), __FILE__, __LINE__, __METHOD__, 10);
 				}
 			}
 		}

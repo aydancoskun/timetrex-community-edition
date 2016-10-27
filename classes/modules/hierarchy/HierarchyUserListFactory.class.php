@@ -46,7 +46,7 @@ class HierarchyUserListFactory extends HierarchyUserFactory implements IteratorA
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable();
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -66,7 +66,7 @@ class HierarchyUserListFactory extends HierarchyUserFactory implements IteratorA
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 					';
@@ -90,7 +90,7 @@ class HierarchyUserListFactory extends HierarchyUserFactory implements IteratorA
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					LEFT JOIN '. $hcf->getTable() .' as b ON a.hierarchy_control_id = b.id
 					where	 b.company_id = ?
@@ -115,7 +115,7 @@ class HierarchyUserListFactory extends HierarchyUserFactory implements IteratorA
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $hcf->getTable() .' as b
 					where	a.hierarchy_control_id = b.id
@@ -147,7 +147,7 @@ class HierarchyUserListFactory extends HierarchyUserFactory implements IteratorA
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $hcf->getTable() .' as b
 					where	b.id = a.hierarchy_control_id

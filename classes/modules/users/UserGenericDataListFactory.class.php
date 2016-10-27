@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: UserGenericDataListFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 12041 $
+ * $Id: UserGenericDataListFactory.class.php 12041 2014-01-16 16:25:09Z mikeb $
+ * $Date: 2014-01-16 08:25:09 -0800 (Thu, 16 Jan 2014) $
  */
 
 /**
@@ -46,7 +46,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -67,7 +67,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 						AND deleted = 0';
@@ -89,7 +89,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	user_id = ?
 						AND deleted = 0';
@@ -116,7 +116,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	user_id = ?
 						AND id = ?
@@ -144,7 +144,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND id = ? ';
@@ -191,7 +191,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	user_id = ?
 						AND script = ?
@@ -229,7 +229,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	user_id = ?
 						AND script = ?
@@ -283,7 +283,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND ( user_id = 0 OR user_id is NULL )
@@ -311,7 +311,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND ( user_id = 0 OR user_id is NULL )
@@ -349,7 +349,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND ( user_id = 0 OR user_id is NULL )
@@ -384,11 +384,11 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 		$ph = array(
 					'company_id' => $company_id,
 					'script' => $script,
-					'default' =>  $this->toBool($default)
+					'default' => $this->toBool($default)
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND ( user_id = 0 OR user_id is NULL )
@@ -422,50 +422,57 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 		} else {
 			$strict = TRUE;
 		}
-		//Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
-        $uf = new UserFactory();
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
+		$uf = new UserFactory();
 		$ph = array(
 					'company_id' => $company_id,
 					);
 
 		$query = '
-					select 	a.*
-					from 	'. $this->getTable() .' as a
-                        LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
+					select	a.*
+					from	'. $this->getTable() .' as a
+						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	a.company_id = ?
 					';
 
-		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query  .=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
-		}
-		if ( isset($filter_data['user_id']) AND isset($filter_data['user_id'][0]) AND !in_array(-1, (array)$filter_data['user_id']) ) {
-			$query  .=	' AND a.user_id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+
+		if ( isset($filter_data['user_id']) ) {
+			$query	.=	' AND a.user_id in ('. $this->getListSQL($filter_data['user_id'], $ph, 'int') .') ';
 		} else {
-			$query  .=	' AND ( a.user_id = 0 OR a.user_id is NULL ) ';
+			$query	.=	' AND ( a.user_id = 0 OR a.user_id is NULL ) ';
+		}
+
+		$query .= ( isset($filter_data['script']) ) ? $this->getWhereClauseSQL( 'a.script', $filter_data['script'], 'lower_text_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'lower_text_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['is_default']) ) ? $this->getWhereClauseSQL( 'a.is_default', $filter_data['is_default'], 'boolean', $ph ) : NULL;
+/*
+		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
+			$query	.=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
 		}
 		if ( isset($filter_data['script']) AND isset($filter_data['script'][0]) AND !in_array(-1, (array)$filter_data['script']) ) {
-			$query  .=	' AND a.script in ('. $this->getListSQL($filter_data['script'], $ph) .') ';
+			$query	.=	' AND a.script in ('. $this->getListSQL($filter_data['script'], $ph) .') ';
 		}
 		if ( isset($filter_data['name']) AND isset($filter_data['name'][0]) AND !in_array(-1, (array)$filter_data['name']) ) {
-			$query  .=	' AND lower( a.name ) in ('. $this->getListSQL( array_map('strtolower', (array)$filter_data['name']), $ph) .') ';
+			$query	.=	' AND lower( a.name ) in ('. $this->getListSQL( array_map('strtolower', (array)$filter_data['name']), $ph) .') ';
 		}
 
 		if ( isset($filter_data['is_default']) ) {
 			$ph[] = $this->toBool($filter_data['is_default']);
-			$query  .=	' AND a.is_default = ? ';
+			$query	.=	' AND a.is_default = ? ';
 		}
-        $query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-        
-        $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
-        
+*/
+		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
 
-		$query .= 	'
-						AND a.deleted = 0
-					';
+		$query .=	' AND a.deleted = 0 ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 

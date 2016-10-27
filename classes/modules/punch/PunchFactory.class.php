@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11418 $
- * $Id: PunchFactory.class.php 11418 2013-11-15 19:56:08Z mikeb $
- * $Date: 2013-11-15 11:56:08 -0800 (Fri, 15 Nov 2013) $
+ * $Revision: 12173 $
+ * $Id: PunchFactory.class.php 12173 2014-01-29 16:58:10Z mikeb $
+ * $Date: 2014-01-29 08:58:10 -0800 (Wed, 29 Jan 2014) $
  */
 
 /**
@@ -261,23 +261,23 @@ class PunchFactory extends Factory {
 			$retval = $this->getPunchControlID();
 		} else {
 			$pclf = TTnew( 'PunchControlListFactory' );
-			Debug::Text('Checking for incomplete punch control... User: '. $this->getUser() .' TimeStamp: '. $this->getTimeStamp() .' Status: '. $this->getStatus(), __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Checking for incomplete punch control... User: '. $this->getUser() .' TimeStamp: '. $this->getTimeStamp() .' Status: '. $this->getStatus(), __FILE__, __LINE__, __METHOD__, 10);
 
 			//Need to make sure the punch is rounded before we can get the proper punch_control_id. However
 			// roundTimeStamp requires punch_control_id before it can round properly.
 			$retval = (int)$pclf->getInCompletePunchControlIdByUserIdAndEpoch( $this->getUser(), $this->getTimeStamp(), $this->getStatus() );
 			if ( $retval == FALSE ) {
-				Debug::Text('Couldnt find already existing PunchControlID, generating new one...', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Couldnt find already existing PunchControlID, generating new one...', __FILE__, __LINE__, __METHOD__, 10);
 				$retval = (int)$pclf->getNextInsertId();
 			}
 		}
 
-		Debug::Text('Punch Control ID: '. $retval, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Punch Control ID: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 	}
 	function getPunchControlID() {
 		if ( isset($this->data['punch_control_id']) ) {
-			return $this->data['punch_control_id'];
+			return (int)$this->data['punch_control_id'];
 		}
 
 		return FALSE;
@@ -324,7 +324,7 @@ class PunchFactory extends Factory {
 			$prev_punch_obj = $this->getPreviousPunchObject( $time_stamp );
 			//Make sure we check that the previous punch wasn't an out punch from the last shift.
 			if ( !is_object( $prev_punch_obj ) OR ( is_object( $prev_punch_obj ) AND $prev_punch_obj->getStatus() == 20 ) ) {
-				Debug::Text('Previous punch does not exist, or it was an OUT punch, transfer cannot be enabled. EPOCH: '. $time_stamp , __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Previous punch does not exist, or it was an OUT punch, transfer cannot be enabled. EPOCH: '. $time_stamp, __FILE__, __LINE__, __METHOD__, 10);
 				return FALSE;
 			}
 		}
@@ -344,7 +344,7 @@ class PunchFactory extends Factory {
 
 	function getStatus() {
 		if ( isset($this->data['status_id']) ) {
-			return $this->data['status_id'];
+			return (int)$this->data['status_id'];
 		}
 
 		return FALSE;
@@ -352,7 +352,7 @@ class PunchFactory extends Factory {
 	function setStatus($status) {
 		$status = trim($status);
 
-		Debug::text(' Status: '. $status , __FILE__, __LINE__, __METHOD__,10);
+		Debug::text(' Status: '. $status, __FILE__, __LINE__, __METHOD__, 10);
 
 		$key = Option::getByValue($status, $this->getOptions('status') );
 		if ($key !== FALSE) {
@@ -381,7 +381,7 @@ class PunchFactory extends Factory {
 
 		//$this object should always be the previous punch.
 		if ( $epoch > 0 AND $this->getUser() > 0 ) {
-			Debug::Text(' Previous Punch Type: '. $this->getType() .' Status: '. $this->getStatus() .' Epoch: '. $epoch .' User ID: '. $this->getUser(), __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text(' Previous Punch Type: '. $this->getType() .' Status: '. $this->getStatus() .' Epoch: '. $epoch .' User ID: '. $this->getUser(), __FILE__, __LINE__, __METHOD__, 10);
 
 			//Check for break policy window.
 			//With Time Window auto-detection, ideally we would filter on $this->getStatus() != 20, so we don't try to detect explicit OUT punches.
@@ -392,7 +392,7 @@ class PunchFactory extends Factory {
 			if ( $next_type != 30 AND $this->getType() != 30 ) {
 				$this->setScheduleID( $this->findScheduleID( $epoch ) );
 				if ( $this->inBreakPolicyWindow( $epoch, $this->getTimeStamp(), $this->getStatus() ) == TRUE ) {
-					Debug::Text(' Setting Type to Break...', __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text(' Setting Type to Break...', __FILE__, __LINE__, __METHOD__, 10);
 					$next_type = 30;
 				}
 			}
@@ -402,7 +402,7 @@ class PunchFactory extends Factory {
 			if ( $next_type != 20 AND $this->getType() != 20 ) {
 				$this->setScheduleID( $this->findScheduleID( $epoch ) );
 				if ( $this->inMealPolicyWindow( $epoch, $this->getTimeStamp(), $this->getStatus() ) == TRUE ) {
-					Debug::Text(' Setting Type to Lunch...', __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text(' Setting Type to Lunch...', __FILE__, __LINE__, __METHOD__, 10);
 					$next_type = 20;
 				}
 			}
@@ -422,7 +422,7 @@ class PunchFactory extends Factory {
 
 	function getType() {
 		if ( isset($this->data['type_id']) ) {
-			return $this->data['type_id'];
+			return (int)$this->data['type_id'];
 		}
 
 		return FALSE;
@@ -450,7 +450,7 @@ class PunchFactory extends Factory {
 
 	function getStation() {
 		if ( isset($this->data['station_id']) ) {
-			return $this->data['station_id'];
+			return (int)$this->data['station_id'];
 		}
 
 		return FALSE;
@@ -478,27 +478,27 @@ class PunchFactory extends Factory {
 	function roundTimeStamp($epoch) {
 		$original_epoch = $epoch;
 
-		Debug::text(' Rounding Timestamp: '. TTDate::getDate('DATE+TIME', $epoch ) .' Status ID: '. $this->getStatus() .' Type ID: '. $this->getType() , __FILE__, __LINE__, __METHOD__,10);
+		Debug::text(' Rounding Timestamp: '. TTDate::getDate('DATE+TIME', $epoch ) .' Status ID: '. $this->getStatus() .' Type ID: '. $this->getType(), __FILE__, __LINE__, __METHOD__, 10);
 
 		//Punch control is no longer used for rounding.
 		//Check for rounding policies.
 		$riplf = TTnew( 'RoundIntervalPolicyListFactory' );
 		$type_id = $riplf->getPunchTypeFromPunchStatusAndType( $this->getStatus(), $this->getType() );
 
-		Debug::text(' Round Interval Punch Type: '. $type_id .' User: '. $this->getUser(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::text(' Round Interval Punch Type: '. $type_id .' User: '. $this->getUser(), __FILE__, __LINE__, __METHOD__, 10);
 		$riplf->getByPolicyGroupUserIdAndTypeId( $this->getUser(), $type_id );
 		if ( $riplf->getRecordCount() == 1 ) {
 			$round_policy_obj = $riplf->getCurrent();
-			Debug::text(' Found Rounding Policy: '. $round_policy_obj->getId() .' Punch Type: '. $round_policy_obj->getPunchType(), __FILE__, __LINE__, __METHOD__,10);
+			Debug::text(' Found Rounding Policy: '. $round_policy_obj->getId() .' Punch Type: '. $round_policy_obj->getPunchType(), __FILE__, __LINE__, __METHOD__, 10);
 
 			//FIXME: It will only do proper total rounding if they edit the Lunch Out punch.
 			//We need to account for cases when they edit just the Lunch In Punch.
 			if ( $round_policy_obj->getPunchType() == 100 ) {
-				Debug::text('Lunch Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__,10);
+				Debug::text('Lunch Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 
 				//On Lunch Punch In (back from lunch) do the total rounding.
 				if ( $this->getStatus() == 10 AND $this->getType() == 20 ) {
-					Debug::text('bLunch Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__,10);
+					Debug::text('bLunch Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 					//If strict is set, round to scheduled lunch time?
 					//Find Lunch Punch In.
 
@@ -509,61 +509,61 @@ class PunchFactory extends Factory {
 					//this won't round the Lunch In punch because the Lunch Out punch hasn't been designated until changePreviousPunchType() is called in PunchControlFactory::preSave().
 					//which doesn't happen until later.
 					$plf = TTnew( 'PunchListFactory' );
-					$plf->getPreviousPunchByUserIdAndStatusAndTypeAndEpoch( $this->getUser(), 20, array(10,20), $epoch );
+					$plf->getPreviousPunchByUserIdAndStatusAndTypeAndEpoch( $this->getUser(), 20, array(10, 20), $epoch );
 					if ( $plf->getRecordCount() == 1 ) {
-						Debug::text('Found Lunch Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('Found Lunch Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 
-						$total_lunch_time = $epoch - $plf->getCurrent()->getTimeStamp();
-						Debug::text('Total Lunch Time: '. $total_lunch_time, __FILE__, __LINE__, __METHOD__,10);
+						$total_lunch_time = ( $epoch - $plf->getCurrent()->getTimeStamp() );
+						Debug::text('Total Lunch Time: '. $total_lunch_time, __FILE__, __LINE__, __METHOD__, 10);
 
 						//Set the ScheduleID
 						$has_schedule = $this->setScheduleID( $this->findScheduleID( $epoch ) );
 
 						if ( $has_schedule == TRUE AND $round_policy_obj->getGrace() > 0
 								AND is_object( $this->getScheduleObject()->getSchedulePolicyObject() )
-								AND is_object( $this->getScheduleObject()->getSchedulePolicyObject()->getMealPolicyObject() ) )  {
-							Debug::text(' Applying Grace Period: ', __FILE__, __LINE__, __METHOD__,10);
+								AND is_object( $this->getScheduleObject()->getSchedulePolicyObject()->getMealPolicyObject() ) )	 {
+							Debug::text(' Applying Grace Period: ', __FILE__, __LINE__, __METHOD__, 10);
 							$total_lunch_time = TTDate::graceTime($total_lunch_time, $round_policy_obj->getGrace(), $this->getScheduleObject()->getSchedulePolicyObject()->getMealPolicyObject()->getAmount() );
-							Debug::text('After Grace: '. $total_lunch_time, __FILE__, __LINE__, __METHOD__,10);
+							Debug::text('After Grace: '. $total_lunch_time, __FILE__, __LINE__, __METHOD__, 10);
 						}
 
-						if ( $round_policy_obj->getInterval() > 0 )  {
-							Debug::Text(' Rounding to interval: '. $round_policy_obj->getInterval(), __FILE__, __LINE__, __METHOD__,10);
+						if ( $round_policy_obj->getInterval() > 0 )	 {
+							Debug::Text(' Rounding to interval: '. $round_policy_obj->getInterval(), __FILE__, __LINE__, __METHOD__, 10);
 							$total_lunch_time = TTDate::roundTime($total_lunch_time, $round_policy_obj->getInterval(), $round_policy_obj->getRoundType(), $round_policy_obj->getGrace() );
-							Debug::text('After Rounding: '. $total_lunch_time, __FILE__, __LINE__, __METHOD__,10);
+							Debug::text('After Rounding: '. $total_lunch_time, __FILE__, __LINE__, __METHOD__, 10);
 						}
 
 						if (  $has_schedule == TRUE AND $round_policy_obj->getStrict() == TRUE
 								AND is_object( $this->getScheduleObject()->getSchedulePolicyObject() )
 								AND is_object( $this->getScheduleObject()->getSchedulePolicyObject()->getMealPolicyObject() ) ) {
-							Debug::Text(' Snap Time: Round Type: '. $round_policy_obj->getRoundType() , __FILE__, __LINE__, __METHOD__,10);
+							Debug::Text(' Snap Time: Round Type: '. $round_policy_obj->getRoundType(), __FILE__, __LINE__, __METHOD__, 10);
 							if ( $round_policy_obj->getRoundType() == 10 ) {
-								Debug::Text(' Snap Time DOWN ' , __FILE__, __LINE__, __METHOD__,10);
+								Debug::Text(' Snap Time DOWN ', __FILE__, __LINE__, __METHOD__, 10);
 								$total_lunch_time = TTDate::snapTime($total_lunch_time, $this->getScheduleObject()->getSchedulePolicyObject()->getMealPolicyObject()->getAmount(), 'DOWN');
 							} elseif ( $round_policy_obj->getRoundType() == 30 ) {
-								Debug::Text(' Snap Time UP' , __FILE__, __LINE__, __METHOD__,10);
+								Debug::Text(' Snap Time UP', __FILE__, __LINE__, __METHOD__, 10);
 								$total_lunch_time = TTDate::snapTime($total_lunch_time, $this->getScheduleObject()->getSchedulePolicyObject()->getMealPolicyObject()->getAmount(), 'UP');
 							} else {
-								Debug::Text(' Not Snaping Time' , __FILE__, __LINE__, __METHOD__,10);
+								Debug::Text(' Not Snaping Time', __FILE__, __LINE__, __METHOD__, 10);
 							}
 						}
 
-						$epoch = $plf->getCurrent()->getTimeStamp() + $total_lunch_time;
-						Debug::text('Epoch after total rounding is: '. $epoch .' - '. TTDate::getDate('DATE+TIME', $epoch) , __FILE__, __LINE__, __METHOD__, 10);
+						$epoch = ( $plf->getCurrent()->getTimeStamp() + $total_lunch_time );
+						Debug::text('Epoch after total rounding is: '. $epoch .' - '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__, 10);
 
 					} else {
-						Debug::text('DID NOT Find Lunch Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('DID NOT Find Lunch Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 					}
 
 				} else {
-					Debug::text('Skipping Lunch Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__,10);
+					Debug::text('Skipping Lunch Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 				}
 			} elseif ( $round_policy_obj->getPunchType() == 110 ) { //Break Total
-				Debug::text('Break Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__,10);
+				Debug::text('Break Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 
 				//On break Punch In (back from break) do the total rounding.
 				if ( $this->getStatus() == 10 AND $this->getType() == 30 ) {
-					Debug::text('bbreak Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__,10);
+					Debug::text('bbreak Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 					//If strict is set, round to scheduled break time?
 					//Find break Punch In.
 
@@ -571,12 +571,12 @@ class PunchFactory extends Factory {
 					//the previous punch will never be break, just normal, but with Time Window meal policies it will be break. This is critical for break rounding
 					//with Punch Time detection meal policies.
 					$plf = TTnew( 'PunchListFactory' );
-					$plf->getPreviousPunchByUserIdAndStatusAndTypeAndEpoch( $this->getUser(), 20, array(10,30), $epoch );
+					$plf->getPreviousPunchByUserIdAndStatusAndTypeAndEpoch( $this->getUser(), 20, array(10, 30), $epoch );
 					if ( $plf->getRecordCount() == 1 ) {
-						Debug::text('Found break Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('Found break Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 
-						$total_break_time = $epoch - $plf->getCurrent()->getTimeStamp();
-						Debug::text('Total break Time: '. $total_break_time, __FILE__, __LINE__, __METHOD__,10);
+						$total_break_time = ( $epoch - $plf->getCurrent()->getTimeStamp() );
+						Debug::text('Total break Time: '. $total_break_time, __FILE__, __LINE__, __METHOD__, 10);
 
 						//Set the ScheduleID
 						$has_schedule = $this->setScheduleID( $this->findScheduleID( $epoch ) );
@@ -594,65 +594,65 @@ class PunchFactory extends Factory {
 							}
 						}
 						unset($break_policy_id, $break_policy_ids);
-						Debug::text('Break Policy Time: '. $break_policy_time, __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('Break Policy Time: '. $break_policy_time, __FILE__, __LINE__, __METHOD__, 10);
 
-						if ( $has_schedule == TRUE AND $round_policy_obj->getGrace() > 0 )  {
-							Debug::text(' Applying Grace Period: ', __FILE__, __LINE__, __METHOD__,10);
+						if ( $has_schedule == TRUE AND $round_policy_obj->getGrace() > 0 )	{
+							Debug::text(' Applying Grace Period: ', __FILE__, __LINE__, __METHOD__, 10);
 							$total_break_time = TTDate::graceTime($total_break_time, $round_policy_obj->getGrace(), $break_policy_time );
-							Debug::text('After Grace: '. $total_break_time, __FILE__, __LINE__, __METHOD__,10);
+							Debug::text('After Grace: '. $total_break_time, __FILE__, __LINE__, __METHOD__, 10);
 						}
 
-						if ( $round_policy_obj->getInterval() > 0 )  {
-							Debug::Text(' Rounding to interval: '. $round_policy_obj->getInterval(), __FILE__, __LINE__, __METHOD__,10);
+						if ( $round_policy_obj->getInterval() > 0 )	 {
+							Debug::Text(' Rounding to interval: '. $round_policy_obj->getInterval(), __FILE__, __LINE__, __METHOD__, 10);
 							$total_break_time = TTDate::roundTime($total_break_time, $round_policy_obj->getInterval(), $round_policy_obj->getRoundType(), $round_policy_obj->getGrace() );
-							Debug::text('After Rounding: '. $total_break_time, __FILE__, __LINE__, __METHOD__,10);
+							Debug::text('After Rounding: '. $total_break_time, __FILE__, __LINE__, __METHOD__, 10);
 						}
 
 						if (  $has_schedule == TRUE AND $round_policy_obj->getStrict() == TRUE ) {
-							Debug::Text(' Snap Time: Round Type: '. $round_policy_obj->getRoundType() , __FILE__, __LINE__, __METHOD__,10);
+							Debug::Text(' Snap Time: Round Type: '. $round_policy_obj->getRoundType(), __FILE__, __LINE__, __METHOD__, 10);
 							if ( $round_policy_obj->getRoundType() == 10 ) {
-								Debug::Text(' Snap Time DOWN ' , __FILE__, __LINE__, __METHOD__,10);
+								Debug::Text(' Snap Time DOWN ', __FILE__, __LINE__, __METHOD__, 10);
 								$total_break_time = TTDate::snapTime($total_break_time, $break_policy_time, 'DOWN');
 							} elseif ( $round_policy_obj->getRoundType() == 30 ) {
-								Debug::Text(' Snap Time UP' , __FILE__, __LINE__, __METHOD__,10);
+								Debug::Text(' Snap Time UP', __FILE__, __LINE__, __METHOD__, 10);
 								$total_break_time = TTDate::snapTime($total_break_time, $break_policy_time, 'UP');
 							} else {
-								Debug::Text(' Not Snaping Time' , __FILE__, __LINE__, __METHOD__,10);
+								Debug::Text(' Not Snaping Time', __FILE__, __LINE__, __METHOD__, 10);
 							}
 						}
 
-						$epoch = $plf->getCurrent()->getTimeStamp() + $total_break_time;
-						Debug::text('Epoch after total rounding is: '. $epoch .' - '. TTDate::getDate('DATE+TIME', $epoch) , __FILE__, __LINE__, __METHOD__, 10);
+						$epoch = ( $plf->getCurrent()->getTimeStamp() + $total_break_time );
+						Debug::text('Epoch after total rounding is: '. $epoch .' - '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__, 10);
 
 					} else {
-						Debug::text('DID NOT Find break Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('DID NOT Find break Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 					}
 
 				} else {
-					Debug::text('Skipping break Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__,10);
+					Debug::text('Skipping break Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 				}
 
 			} elseif ( $round_policy_obj->getPunchType() == 120 ) { //Day Total Rounding
-				Debug::text('Day Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__,10);
+				Debug::text('Day Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 				if ( $this->getStatus() == 20 AND $this->getType() == 10 ) { //Out, Type Normal
-					Debug::text('bDay Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__,10);
+					Debug::text('bDay Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 
 					//If strict is set, round to scheduled time?
 					$plf = TTnew( 'PunchListFactory' );
 					$plf->getPreviousPunchByUserIdAndEpochAndNotPunchIDAndMaximumShiftTime( $this->getUser(), $epoch, $this->getId() );
 					if ( $plf->getRecordCount() == 1 ) {
-						Debug::text('Found Previous Punch In: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('Found Previous Punch In: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 
 						//Get day total time prior to this punch control.
 						$pclf = TTnew( 'PunchControlListFactory' );
 						$pclf->getByUserDateId( $plf->getCurrent()->getPunchControlObject()->getUserDateID() );
 						if ( $pclf->getRecordCount() > 0 ) {
-							$day_total_time = $epoch - $plf->getCurrent()->getTimeStamp();
-							Debug::text('aDay Total Time: '. $day_total_time .' Current Punch Control ID: '. $this->getPunchControlID(), __FILE__, __LINE__, __METHOD__,10);
+							$day_total_time = ( $epoch - $plf->getCurrent()->getTimeStamp() );
+							Debug::text('aDay Total Time: '. $day_total_time .' Current Punch Control ID: '. $this->getPunchControlID(), __FILE__, __LINE__, __METHOD__, 10);
 
 							foreach( $pclf as $pc_obj ) {
 								if ( $plf->getCurrent()->getPunchControlID() != $pc_obj->getID() ) {
-									Debug::text('Punch Control Total Time: '. $pc_obj->getTotalTime() .' ID: '. $pc_obj->getId(), __FILE__, __LINE__, __METHOD__,10);
+									Debug::text('Punch Control Total Time: '. $pc_obj->getTotalTime() .' ID: '. $pc_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 									$day_total_time += $pc_obj->getTotalTime();
 								}
 							}
@@ -660,18 +660,18 @@ class PunchFactory extends Factory {
 							//Take into account paid meal/breaks when doing day total rounding...
 							$meal_and_break_adjustment = 0;
 							$udtlf = TTnew( 'UserDateTotalListFactory' );
-							$udtlf->getByUserDateIdAndStatusAndType( $plf->getCurrent()->getPunchControlObject()->getUserDateID(), 10, array(100,110) );
+							$udtlf->getByUserDateIdAndStatusAndType( $plf->getCurrent()->getPunchControlObject()->getUserDateID(), 10, array(100, 110) );
 							if ( $udtlf->getRecordCount() > 0 ) {
 								foreach( $udtlf as $udt_obj ) {
 									$meal_and_break_adjustment += $udt_obj->getTotalTime();
 								}
-								Debug::text('Meal and Break Adjustment: '. $meal_and_break_adjustment .' Records: '. $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);
+								Debug::text('Meal and Break Adjustment: '. $meal_and_break_adjustment .' Records: '. $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 							}
 
 							$day_total_time += $meal_and_break_adjustment;
 							$original_day_total_time = $day_total_time;
 
-							Debug::text('cDay Total Time: '. $day_total_time, __FILE__, __LINE__, __METHOD__,10);
+							Debug::text('cDay Total Time: '. $day_total_time, __FILE__, __LINE__, __METHOD__, 10);
 							if ( $day_total_time > 0 ) {
 								//Need to handle split shifts properly, so just like we get all punches for the user_date_id, get all schedules too.
 								$has_schedule = FALSE;
@@ -685,56 +685,56 @@ class PunchFactory extends Factory {
 										//Because auto-deduct meal/break policies are already accounted for in the total schedule time, they will be automatically
 										//deducted once the punch is saved. So if we don't add them back in here they will be deducted twice.
 										//The above happens when adding new punches, but editing existing punches need to account for any already deducted meal/break time.
-										$schedule_day_total_time += $s_obj->getTotalTime()+abs($s_obj->getMealPolicyDeductTime( $s_obj->calcRawTotalTime(), 10 ))+abs($s_obj->getBreakPolicyDeductTime( $s_obj->calcRawTotalTime(), 10 ))+($meal_and_break_adjustment);
+										$schedule_day_total_time += ( $s_obj->getTotalTime() + abs($s_obj->getMealPolicyDeductTime( $s_obj->calcRawTotalTime(), 10 )) + abs($s_obj->getBreakPolicyDeductTime( $s_obj->calcRawTotalTime(), 10 )) + $meal_and_break_adjustment );
 									}
-									Debug::text('Before Grace: '. $day_total_time .' Schedule Day Total: '. $schedule_day_total_time, __FILE__, __LINE__, __METHOD__,10);
+									Debug::text('Before Grace: '. $day_total_time .' Schedule Day Total: '. $schedule_day_total_time, __FILE__, __LINE__, __METHOD__, 10);
 									$day_total_time = TTDate::graceTime($day_total_time, $round_policy_obj->getGrace(), $schedule_day_total_time );
-									Debug::text('After Grace: '. $day_total_time, __FILE__, __LINE__, __METHOD__,10);
+									Debug::text('After Grace: '. $day_total_time, __FILE__, __LINE__, __METHOD__, 10);
 								}
 								unset($slf, $s_obj);
 
-								if ( $round_policy_obj->getInterval() > 0 )  {
-									Debug::Text(' Rounding to interval: '. $round_policy_obj->getInterval(), __FILE__, __LINE__, __METHOD__,10);
+								if ( $round_policy_obj->getInterval() > 0 )	 {
+									Debug::Text(' Rounding to interval: '. $round_policy_obj->getInterval(), __FILE__, __LINE__, __METHOD__, 10);
 									$day_total_time = TTDate::roundTime($day_total_time, $round_policy_obj->getInterval(), $round_policy_obj->getRoundType(), $round_policy_obj->getGrace() );
-									Debug::text('After Rounding: '. $day_total_time, __FILE__, __LINE__, __METHOD__,10);
+									Debug::text('After Rounding: '. $day_total_time, __FILE__, __LINE__, __METHOD__, 10);
 								}
 
 								if (  $has_schedule == TRUE AND $round_policy_obj->getStrict() == TRUE
 										AND $schedule_day_total_time > 0 ) {
-									Debug::Text(' Snap Time: Round Type: '. $round_policy_obj->getRoundType() , __FILE__, __LINE__, __METHOD__,10);
+									Debug::Text(' Snap Time: Round Type: '. $round_policy_obj->getRoundType(), __FILE__, __LINE__, __METHOD__, 10);
 									if ( $round_policy_obj->getRoundType() == 10 ) {
-										Debug::Text(' Snap Time DOWN ' , __FILE__, __LINE__, __METHOD__,10);
+										Debug::Text(' Snap Time DOWN ', __FILE__, __LINE__, __METHOD__, 10);
 										$day_total_time = TTDate::snapTime($day_total_time, $schedule_day_total_time, 'DOWN');
 									} elseif ( $round_policy_obj->getRoundType() == 30 ) {
-										Debug::Text(' Snap Time UP' , __FILE__, __LINE__, __METHOD__,10);
+										Debug::Text(' Snap Time UP', __FILE__, __LINE__, __METHOD__, 10);
 										$day_total_time = TTDate::snapTime($day_total_time, $schedule_day_total_time, 'UP');
 									} else {
-										Debug::Text(' Not Snaping Time' , __FILE__, __LINE__, __METHOD__,10);
+										Debug::Text(' Not Snaping Time', __FILE__, __LINE__, __METHOD__, 10);
 									}
 								}
 
-								Debug::text('cDay Total Time: '. $day_total_time, __FILE__, __LINE__, __METHOD__,10);
+								Debug::text('cDay Total Time: '. $day_total_time, __FILE__, __LINE__, __METHOD__, 10);
 
-								$day_total_time_diff = $day_total_time - $original_day_total_time;
-								Debug::text('Day Total Diff: '. $day_total_time_diff, __FILE__, __LINE__, __METHOD__,10);
+								$day_total_time_diff = ( $day_total_time - $original_day_total_time );
+								Debug::text('Day Total Diff: '. $day_total_time_diff, __FILE__, __LINE__, __METHOD__, 10);
 
-								$epoch = $original_epoch + $day_total_time_diff;
+								$epoch = ( $original_epoch + $day_total_time_diff );
 							}
 						}
 					} else {
-						Debug::text('DID NOT Find Normal Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('DID NOT Find Normal Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 					}
 
 				} else {
-					Debug::text('Skipping Lunch Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__,10);
+					Debug::text('Skipping Lunch Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 				}
 			} else {
-				Debug::text('NOT Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__,10);
+				Debug::text('NOT Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 
-				if ( $this->inScheduleStartStopWindow( $epoch, $this->getStatus() ) AND $round_policy_obj->getGrace() > 0 )  {
-					Debug::text(' Applying Grace Period: ', __FILE__, __LINE__, __METHOD__,10);
+				if ( $this->inScheduleStartStopWindow( $epoch, $this->getStatus() ) AND $round_policy_obj->getGrace() > 0 )	 {
+					Debug::text(' Applying Grace Period: ', __FILE__, __LINE__, __METHOD__, 10);
 					$epoch = TTDate::graceTime($epoch, $round_policy_obj->getGrace(), $this->getScheduleWindowTime() );
-					Debug::text('After Grace: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__,10);
+					Debug::text('After Grace: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 				}
 
 				$grace_time = $round_policy_obj->getGrace();
@@ -746,30 +746,30 @@ class PunchFactory extends Factory {
 					$grace_time = 0;
 				}
 
-				if ( $round_policy_obj->getInterval() > 0 )  {
-					Debug::Text(' Rounding to interval: '. $round_policy_obj->getInterval(), __FILE__, __LINE__, __METHOD__,10);
+				if ( $round_policy_obj->getInterval() > 0 )	 {
+					Debug::Text(' Rounding to interval: '. $round_policy_obj->getInterval(), __FILE__, __LINE__, __METHOD__, 10);
 					$epoch = TTDate::roundTime($epoch, $round_policy_obj->getInterval(), $round_policy_obj->getRoundType(), $grace_time );
-					Debug::text('After Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__,10);
+					Debug::text('After Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 				}
 
 				//ONLY perform strict rounding on Normal punches, not break/lunch punches?
 				//Modify the UI to restrict this as well perhaps?
 				if ( $round_policy_obj->getStrict() == TRUE AND $this->getScheduleWindowTime() !== FALSE ) {
-					Debug::Text(' Snap Time: Round Type: '. $round_policy_obj->getRoundType() , __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text(' Snap Time: Round Type: '. $round_policy_obj->getRoundType(), __FILE__, __LINE__, __METHOD__, 10);
 					if ( $round_policy_obj->getRoundType() == 10 ) {
-						Debug::Text(' Snap Time DOWN ' , __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text(' Snap Time DOWN ', __FILE__, __LINE__, __METHOD__, 10);
 						$epoch = TTDate::snapTime($epoch, $this->getScheduleWindowTime(), 'DOWN');
 					} elseif ( $round_policy_obj->getRoundType() == 30 ) {
-						Debug::Text(' Snap Time UP' , __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text(' Snap Time UP', __FILE__, __LINE__, __METHOD__, 10);
 						$epoch = TTDate::snapTime($epoch, $this->getScheduleWindowTime(), 'UP');
 					} else {
 						//If its an In Punch, snap up, if its out punch, snap down?
-						Debug::Text(' Average rounding type, automatically determining snap direction.' , __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text(' Average rounding type, automatically determining snap direction.', __FILE__, __LINE__, __METHOD__, 10);
 						if ( $this->getStatus() == 10 ) {
-							Debug::Text(' Snap Time UP' , __FILE__, __LINE__, __METHOD__,10);
+							Debug::Text(' Snap Time UP', __FILE__, __LINE__, __METHOD__, 10);
 							$epoch = TTDate::snapTime($epoch, $this->getScheduleWindowTime(), 'UP');
 						} else {
-							Debug::Text(' Snap Time DOWN ' , __FILE__, __LINE__, __METHOD__,10);
+							Debug::Text(' Snap Time DOWN ', __FILE__, __LINE__, __METHOD__, 10);
 							$epoch = TTDate::snapTime($epoch, $this->getScheduleWindowTime(), 'DOWN');
 						}
 					}
@@ -783,20 +783,20 @@ class PunchFactory extends Factory {
 			//Don't implement just yet...
 			/*
 			$plf = TTnew( 'PunchListFactory' );
-			$plf->getPreviousPunchByUserIdAndStatusAndTypeAndEpoch( $this->getUser(), 10, array(10,20,30), $original_epoch );
+			$plf->getPreviousPunchByUserIdAndStatusAndTypeAndEpoch( $this->getUser(), 10, array(10, 20, 30), $original_epoch );
 			if ( $plf->getRecordCount() == 1 ) {
 				if ( $epoch <= $plf->getCurrent()->getTimeStamp() ) {
-					Debug::text(' Rounded TimeStamp is before previous punch, not rounding at all! Previous Punch: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ) .' Rounded Time: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__,10);
+					Debug::text(' Rounded TimeStamp is before previous punch, not rounding at all! Previous Punch: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ) .' Rounded Time: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 					$epoch = $original_epoch;
 				}
 			}
 			unset($plf, $p_obj);
 			*/
 		} else {
-			Debug::text(' NO Rounding Policy(s) Found', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text(' NO Rounding Policy(s) Found', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		Debug::text(' Rounded TimeStamp: '. TTDate::getDate('DATE+TIME', $epoch ) .' Original TimeStamp: '. TTDate::getDate('DATE+TIME', $original_epoch ), __FILE__, __LINE__, __METHOD__,10);
+		Debug::text(' Rounded TimeStamp: '. TTDate::getDate('DATE+TIME', $epoch ) .' Original TimeStamp: '. TTDate::getDate('DATE+TIME', $original_epoch ), __FILE__, __LINE__, __METHOD__, 10);
 
 		return $epoch;
 	}
@@ -823,19 +823,19 @@ class PunchFactory extends Factory {
 		if ( $enable_rounding == TRUE AND ( $this->getTransfer() == FALSE OR $this->getEnableAutoTransfer() == FALSE ) ) {
 			$epoch = $this->roundTimeStamp($epoch);
 		} else {
-			Debug::text(' Rounding Disabled... ', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text(' Rounding Disabled... ', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		//Always round to one min, no matter what. Even on a transfer.
 		$epoch = TTDate::roundTime($epoch, 60);
 
-		if 	(	$this->Validator->isDate(		'time_stamp',
+		if	(	$this->Validator->isDate(		'time_stamp',
 												$epoch,
 												TTi18n::gettext('Incorrect time stamp'))
 
 			) {
 
-			Debug::text(' Set: '. $epoch , __FILE__, __LINE__, __METHOD__,10);
+			Debug::text(' Set: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
 			$this->data['time_stamp'] = $epoch;
 
 			return TRUE;
@@ -861,7 +861,7 @@ class PunchFactory extends Factory {
 	function setOriginalTimeStamp($epoch) {
 		$epoch = trim($epoch);
 
-		if 	(	$this->Validator->isDate(		'original_time_stamp',
+		if	(	$this->Validator->isDate(		'original_time_stamp',
 												$epoch,
 												TTi18n::gettext('Incorrect original time stamp'))
 
@@ -892,7 +892,7 @@ class PunchFactory extends Factory {
 	function setActualTimeStamp($epoch) {
 		$epoch = trim($epoch);
 
-		if 	(	$this->Validator->isDate(		'actual_time_stamp',
+		if	(	$this->Validator->isDate(		'actual_time_stamp',
 												$epoch,
 												TTi18n::gettext('Incorrect actual time stamp'))
 
@@ -999,7 +999,7 @@ class PunchFactory extends Factory {
 	}
 
 	function findScheduleID( $epoch = NULL, $user_id = NULL ) {
-		//Debug::text(' aFinding SchedulePolicyID for this Punch: '. $epoch .' User ID: '. $user_id, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::text(' aFinding SchedulePolicyID for this Punch: '. $epoch .' User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $epoch == '' ) {
 			$epoch = $this->getTimeStamp();
 		}
@@ -1009,12 +1009,12 @@ class PunchFactory extends Factory {
 		}
 
 		if ( $user_id == '' AND $this->getUser() == '' ) {
-			Debug::text(' User ID not specified, cant find schedule... ', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text(' User ID not specified, cant find schedule... ', __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
 		} elseif ( $user_id == '' ) {
 			$user_id = $this->getUser();
 		}
-		//Debug::text(' bFinding SchedulePolicyID for this Punch: '. $epoch .' User ID: '. $user_id, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::text(' bFinding SchedulePolicyID for this Punch: '. $epoch .' User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		//Check to see if this punch is within the start/stop window for the schedule.
 		//We need to make sure we get schedules within about a 24hr
@@ -1023,32 +1023,32 @@ class PunchFactory extends Factory {
 		//In cases where an absence shift ends at the exact same time as working shift begins (Absence: 11:30PM to 7:00AM, WORKING: 7:00AM-3:00PM),
 		//order the working shift first so its used instead of the absence shift.
 		$slf = TTnew( 'ScheduleListFactory' );
-		$slf->getByUserIdAndStartDateAndEndDate( $user_id, ($epoch-43200), ($epoch+43200), NULL, array( 'b.date_stamp' => 'asc', 'a.status_id' => 'asc' ) );
+		$slf->getByUserIdAndStartDateAndEndDate( $user_id, ($epoch - 43200), ($epoch + 43200), NULL, array( 'b.date_stamp' => 'asc', 'a.status_id' => 'asc' ) );
 		if ( $slf->getRecordCount() > 0 ) {
 			$retval = FALSE;
 			$best_diff = FALSE;
 			//Check for schedule policy
 			foreach ( $slf as $s_obj ) {
-				Debug::text(' Checking Schedule ID: '. $s_obj->getID(), __FILE__, __LINE__, __METHOD__,10);
+				Debug::text(' Checking Schedule ID: '. $s_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
 
 				//If the Start/Stop window is large (ie: 6-8hrs) we need to find the closest schedule.
 				$schedule_diff = $s_obj->inScheduleDifference( $epoch, $this->getStatus() );
 				if ( $schedule_diff === 0 ) {
-					Debug::text(' Within schedule times. ', __FILE__, __LINE__, __METHOD__,10);
+					Debug::text(' Within schedule times. ', __FILE__, __LINE__, __METHOD__, 10);
 					return $s_obj->getId();
 				} else {
 					if ( $schedule_diff > 0 AND ( $best_diff === FALSE OR $schedule_diff < $best_diff ) ) {
-						Debug::text(' Within schedule start/stop time by: '. $schedule_diff .' Prev Best Diff: '. $best_diff, __FILE__, __LINE__, __METHOD__,10);
+						Debug::text(' Within schedule start/stop time by: '. $schedule_diff .' Prev Best Diff: '. $best_diff, __FILE__, __LINE__, __METHOD__, 10);
 						$best_diff = $schedule_diff;
 						$retval = $s_obj->getId();
 					}
 				}
 			}
 
-			Debug::text(' Final Schedule ID: '. $retval, __FILE__, __LINE__, __METHOD__,10);
+			Debug::text(' Final Schedule ID: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
 			return $retval;
 		} else {
-			Debug::text(' Did not find Schedule...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text(' Did not find Schedule...', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return FALSE;
@@ -1191,19 +1191,19 @@ class PunchFactory extends Factory {
 		//If the Start/Stop window is excessively long (like 6-8hrs) with strict rounding and an user punches in AND out within that time,
 		//we have to return the schedule time in accordance to the punch status (In/Out) to prevent rounding Out punches to the schedule start time
 		if ( $status_id == 10 AND $this->getScheduleObject()->inStartWindow( $epoch ) == TRUE ) { //Consider In punches only.
-			Debug::text(' Within Start window... Schedule Policy ID: '. $this->getScheduleObject()->getSchedulePolicyID() , __FILE__, __LINE__, __METHOD__,10);
+			Debug::text(' Within Start window... Schedule Policy ID: '. $this->getScheduleObject()->getSchedulePolicyID(), __FILE__, __LINE__, __METHOD__, 10);
 
 			$this->tmp_data['schedule_window_time'] = $this->getScheduleObject()->getStartTime();
 
 			return TRUE;
 		} elseif ( $status_id == 20 AND $this->getScheduleObject()->inStopWindow( $epoch ) == TRUE ) { //Consider Out punches only.
-			Debug::text(' Within Start window... Schedule Policy ID: '. $this->getScheduleObject()->getSchedulePolicyID() , __FILE__, __LINE__, __METHOD__,10);
+			Debug::text(' Within Start window... Schedule Policy ID: '. $this->getScheduleObject()->getSchedulePolicyID(), __FILE__, __LINE__, __METHOD__, 10);
 
 			$this->tmp_data['schedule_window_time'] = $this->getScheduleObject()->getEndTime();
 
 			return TRUE;
 		} else {
-			Debug::text(' NOT Within Start/Stop window.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text(' NOT Within Start/Stop window.', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return FALSE;
@@ -1211,7 +1211,7 @@ class PunchFactory extends Factory {
 
 	//Run this function on the previous punch object normally.
 	function inMealPolicyWindow( $current_epoch, $previous_epoch, $previous_punch_status = NULL ) {
-		Debug::Text(' Checking if we are in meal policy window/punch time...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text(' Checking if we are in meal policy window/punch time...', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $current_epoch == '' ) {
 			return FALSE;
@@ -1221,13 +1221,13 @@ class PunchFactory extends Factory {
 			return FALSE;
 		}
 
-		Debug::Text(' bChecking if we are in meal policy window/punch time...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text(' bChecking if we are in meal policy window/punch time...', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( is_object( $this->getScheduleObject() )
 				AND is_object( $this->getScheduleObject()->getSchedulePolicyObject() )
 				AND is_object($this->getScheduleObject()->getSchedulePolicyObject()->getMealPolicyObject() )
 				) {
-			Debug::Text(' Found Schedule Meal Policy Object: Start Window: '. $this->getScheduleObject()->getSchedulePolicyObject()->getMealPolicyObject()->getStartWindow(), __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text(' Found Schedule Meal Policy Object: Start Window: '. $this->getScheduleObject()->getSchedulePolicyObject()->getMealPolicyObject()->getStartWindow(), __FILE__, __LINE__, __METHOD__, 10);
 
 			$mp_obj = $this->getScheduleObject()->getSchedulePolicyObject()->getMealPolicyObject();
 			$start_epoch = $this->getScheduleObject()->getStartTime();
@@ -1240,9 +1240,9 @@ class PunchFactory extends Factory {
 				$mp_obj = $mplf->getCurrent();
 
 				$start_epoch = $previous_epoch;
-				Debug::Text(' Found NON Schedule Meal Policy start Window: '. $mp_obj->getStartWindow(), __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text(' Found NON Schedule Meal Policy start Window: '. $mp_obj->getStartWindow(), __FILE__, __LINE__, __METHOD__, 10);
 			} else {
-				Debug::Text(' DID NOT Find NON Schedule Meal Policy start Window: ', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text(' DID NOT Find NON Schedule Meal Policy start Window: ', __FILE__, __LINE__, __METHOD__, 10);
 			}
 			unset($mplf);
 		}
@@ -1253,36 +1253,36 @@ class PunchFactory extends Factory {
 			$this->getPunchControlObject()->setPunchObject( $this );
 			$shift_data = $this->getPunchControlObject()->getShiftData();
 			if ( is_array($shift_data) AND isset($shift_data['first_in']) ) {
-				Debug::Text(' Shift First In Punch: '. TTDate::getDate('DATE+TIME', $shift_data['first_in']['time_stamp'] ), __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text(' Shift First In Punch: '. TTDate::getDate('DATE+TIME', $shift_data['first_in']['time_stamp'] ), __FILE__, __LINE__, __METHOD__, 10);
 				$start_epoch = $shift_data['first_in']['time_stamp'];
 			}
 		}
 
 		if ( isset($mp_obj) AND is_object( $mp_obj ) ) {
 			if ( $mp_obj->getAutoDetectType() == 10 ) { //Meal window
-				Debug::Text(' Auto Detect Type: Meal Window...', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text(' Auto Detect Type: Meal Window...', __FILE__, __LINE__, __METHOD__, 10);
 
 				//Make we sure ignore meals if the previous punch status was OUT.
-				if ( 	$previous_punch_status != 20
+				if (	$previous_punch_status != 20
 						AND $current_epoch >= ( $start_epoch + $mp_obj->getStartWindow() )
 						AND $current_epoch <= ( $start_epoch + $mp_obj->getStartWindow() + $mp_obj->getWindowLength() ) ) {
-					Debug::Text(' aPunch is in meal policy window! Current Epoch: '. TTDate::getDate('DATE+TIME', $current_epoch), __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text(' aPunch is in meal policy window! Current Epoch: '. TTDate::getDate('DATE+TIME', $current_epoch), __FILE__, __LINE__, __METHOD__, 10);
 
 					return TRUE;
 				}
 			} else { //Punch time.
-				Debug::Text(' Auto Detect Type: Punch Time...', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text(' Auto Detect Type: Punch Time...', __FILE__, __LINE__, __METHOD__, 10);
 				//Make we sure ignore meals if the previous punch status was IN.
-				if ( 	$previous_punch_status != 10
+				if (	$previous_punch_status != 10
 						AND ( $current_epoch - $previous_epoch ) >= $mp_obj->getMinimumPunchTime()
 						AND ( $current_epoch - $previous_epoch ) <= $mp_obj->getMaximumPunchTime() )  {
-					Debug::Text(' bPunch is in meal policy window!', __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text(' bPunch is in meal policy window!', __FILE__, __LINE__, __METHOD__, 10);
 
 					return TRUE;
 				}
 			}
 		} else {
-			Debug::Text(' Unable to find meal policy object...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text(' Unable to find meal policy object...', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return FALSE;
@@ -1290,7 +1290,7 @@ class PunchFactory extends Factory {
 
 	//Run this function on the previous punch object normally.
 	function inBreakPolicyWindow( $current_epoch, $previous_epoch, $previous_punch_status = NULL ) {
-		Debug::Text(' Checking if we are in break policy window/punch time... Current: '. TTDate::getDate('DATe+TIME', $current_epoch) .' Previous: '. TTDate::getDate('DATe+TIME', $previous_epoch), __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text(' Checking if we are in break policy window/punch time... Current: '. TTDate::getDate('DATe+TIME', $current_epoch) .' Previous: '. TTDate::getDate('DATe+TIME', $previous_epoch), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $current_epoch == '' ) {
 			return FALSE;
@@ -1304,7 +1304,7 @@ class PunchFactory extends Factory {
 				AND is_object( $this->getScheduleObject()->getSchedulePolicyObject() )
 				AND is_array($this->getScheduleObject()->getSchedulePolicyObject()->getBreakPolicy() )
 				) {
-			Debug::Text(' Found Schedule Break Policies...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text(' Found Schedule Break Policies...', __FILE__, __LINE__, __METHOD__, 10);
 			$bp_ids = $this->getScheduleObject()->getSchedulePolicyObject()->getBreakPolicy();
 			foreach( $bp_ids as $bp_id ) {
 				$bp_obj = $this->getScheduleObject()->getSchedulePolicyObject()->getBreakPolicyObject( $bp_id );
@@ -1326,9 +1326,9 @@ class PunchFactory extends Factory {
 				}
 
 				$start_epoch = $previous_epoch; //Keep these here in case PunchControlObject can't be determined.
-				Debug::Text(' Found NON Schedule Break Policy...', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text(' Found NON Schedule Break Policy...', __FILE__, __LINE__, __METHOD__, 10);
 			} else {
-				Debug::Text(' DID NOT Find NON Schedule Break Policy...', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text(' DID NOT Find NON Schedule Break Policy...', __FILE__, __LINE__, __METHOD__, 10);
 			}
 			unset($bplf);
 		}
@@ -1339,7 +1339,7 @@ class PunchFactory extends Factory {
 			$this->getPunchControlObject()->setPunchObject( $this );
 			$shift_data = $this->getPunchControlObject()->getShiftData();
 			if ( is_array($shift_data) AND isset($shift_data['first_in']) ) {
-				Debug::Text(' Shift First In Punch: '. TTDate::getDate('DATE+TIME', $shift_data['first_in']['time_stamp'] ), __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text(' Shift First In Punch: '. TTDate::getDate('DATE+TIME', $shift_data['first_in']['time_stamp'] ), __FILE__, __LINE__, __METHOD__, 10);
 				$start_epoch = $shift_data['first_in']['time_stamp'];
 			}
 		}
@@ -1347,30 +1347,30 @@ class PunchFactory extends Factory {
 		if ( isset($bp_objs) AND is_array( $bp_objs ) ) {
 			foreach( $bp_objs as $bp_obj ) {
 				if ( $bp_obj->getAutoDetectType() == 10 ) { //Meal window
-					Debug::Text(' Auto Detect Type: Break Window... Start Epoch: '. TTDate::getDate('DATE+TIME', $start_epoch) , __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text(' Auto Detect Type: Break Window... Start Epoch: '. TTDate::getDate('DATE+TIME', $start_epoch), __FILE__, __LINE__, __METHOD__, 10);
 
 					//Make we sure ignore breaks if the previous punch status was OUT.
-					if ( 	$previous_punch_status != 20
+					if (	$previous_punch_status != 20
 							AND $current_epoch >= ( $start_epoch + $bp_obj->getStartWindow() )
 							AND $current_epoch <= ( $start_epoch + $bp_obj->getStartWindow() + $bp_obj->getWindowLength() ) ) {
-						Debug::Text(' aPunch is in break policy (ID:'. $bp_obj->getId().') window!', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text(' aPunch is in break policy (ID:'. $bp_obj->getId().') window!', __FILE__, __LINE__, __METHOD__, 10);
 
 						return TRUE;
 					}
 				} else { //Punch time.
 					//Make we sure ignore breaks if the previous punch status was IN.
-					Debug::Text(' Auto Detect Type: Punch Time...', __FILE__, __LINE__, __METHOD__,10);
-					if ( 	$previous_punch_status != 10
+					Debug::Text(' Auto Detect Type: Punch Time...', __FILE__, __LINE__, __METHOD__, 10);
+					if (	$previous_punch_status != 10
 							AND ( $current_epoch - $previous_epoch ) >= $bp_obj->getMinimumPunchTime()
 							AND ( $current_epoch - $previous_epoch ) <= $bp_obj->getMaximumPunchTime() )  {
-						Debug::Text(' bPunch is in break policy (ID:'. $bp_obj->getId().') window!', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text(' bPunch is in break policy (ID:'. $bp_obj->getId().') window!', __FILE__, __LINE__, __METHOD__, 10);
 
 						return TRUE;
 					}
 				}
 			}
 		} else {
-			Debug::Text(' Unable to find break policy object...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text(' Unable to find break policy object...', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return FALSE;
@@ -1388,15 +1388,8 @@ class PunchFactory extends Factory {
 			
 			$prev_punch_obj = $plf->getCurrent();
 			$prev_punch_obj->setUser( $user_obj->getId() );
-			Debug::Text(' Found Previous Punch within Continuous Time from now: '. TTDate::getDate('DATe+TIME', $prev_punch_obj->getTimeStamp() ), __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text(' Found Previous Punch within Continuous Time from now: '. TTDate::getDate('DATe+TIME', $prev_punch_obj->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 			
-			//Don't enable transfer by default if the previous punch was any OUT punch.
-			//Transfer does the OUT punch for them, so if the previous punch is an OUT punch
-			//we don't gain anything anyways.
-			if ( is_object($permission_obj) AND $permission_obj->Check('punch','default_transfer') AND $prev_punch_obj->getStatus() == 10 ) {
-				$transfer = TRUE;
-			}
-
 			//Due to split shifts or multiple schedules on a single day that are close to one another, we have to be smarter about how we default punch settings.
 			//We only base default punch settings on the previous punch if it was *NOT* a Normal Out punch, with the idea that the employee
 			//would likely want to continue working on the same job after they come back from lunch/break, or if they haven't punched out for the end of this shift yet.
@@ -1407,32 +1400,33 @@ class PunchFactory extends Factory {
 				$job_id = $prev_punch_obj->getPunchControlObject()->getJob();
 				$job_item_id = $prev_punch_obj->getPunchControlObject()->getJobItem();
 			} else {
-				Debug::Text(' Not using Previous Punch settings... Prev Status: '. $prev_punch_obj->getStatus() .' Type: '. $prev_punch_obj->getType(), __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text(' Not using Previous Punch settings... Prev Status: '. $prev_punch_obj->getStatus() .' Type: '. $prev_punch_obj->getType(), __FILE__, __LINE__, __METHOD__, 10);
 			}
 		} else {
-			Debug::Text(' DID NOT Find Previous Punch within Continuous Time from now: ', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text(' DID NOT Find Previous Punch within Continuous Time from now: ', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		if ( $branch_id == '' OR empty($branch_id)
 				OR $department_id == '' OR empty($department_id)
 				OR $job_id == '' OR empty($job_id)
 				OR $job_item_id == '' OR empty($job_item_id) ) {
-			Debug::Text(' Null values: Branch: '. $branch_id .' Department: '. $department_id .' Job: '. $job_id .' Task: '. $job_item_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text(' Null values: Branch: '. $branch_id .' Department: '. $department_id .' Job: '. $job_id .' Task: '. $job_item_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			$slf = TTnew( 'ScheduleListFactory' );
 			$s_obj = $slf->getScheduleObjectByUserIdAndEpoch( $user_obj->getId(), $epoch );
+			
 			if ( $branch_id == '' OR empty($branch_id) ) {				
 				if ( is_object($station_obj) AND $station_obj->getDefaultBranch() !== FALSE AND $station_obj->getDefaultBranch() != 0 ) {					
 					$branch_id = $station_obj->getDefaultBranch();
-					//Debug::Text(' aOverriding branch to: '. $branch_id, __FILE__, __LINE__, __METHOD__,10);
+					//Debug::Text(' aOverriding branch to: '. $branch_id, __FILE__, __LINE__, __METHOD__, 10);
 				} elseif ( is_object($s_obj) AND $s_obj->getBranch() != 0 ) {
 					$branch_id = $s_obj->getBranch();
-					//Debug::Text(' bOverriding branch to: '. $branch_id, __FILE__, __LINE__, __METHOD__,10);
+					//Debug::Text(' bOverriding branch to: '. $branch_id, __FILE__, __LINE__, __METHOD__, 10);
 				} elseif ( $user_obj->getDefaultBranch() != 0 ) {
 					$branch_id = $user_obj->getDefaultBranch();
-					//Debug::Text(' cOverriding branch to: '. $branch_id, __FILE__, __LINE__, __METHOD__,10);
+					//Debug::Text(' cOverriding branch to: '. $branch_id, __FILE__, __LINE__, __METHOD__, 10);
 				}
-				Debug::Text(' Overriding branch to: '. $branch_id, __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text(' Overriding branch to: '. $branch_id, __FILE__, __LINE__, __METHOD__, 10);
 			}
 
 			if ( $department_id == '' OR empty($department_id) ) {
@@ -1443,7 +1437,7 @@ class PunchFactory extends Factory {
 				} elseif ( $user_obj->getDefaultDepartment() != 0 ) {
 					$department_id = $user_obj->getDefaultDepartment();
 				}
-				Debug::Text(' Overriding department to: '. $department_id, __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text(' Overriding department to: '. $department_id, __FILE__, __LINE__, __METHOD__, 10);
 			}
 
 			if ( $job_id == '' OR empty($job_id) ) {
@@ -1454,7 +1448,7 @@ class PunchFactory extends Factory {
 				} elseif ( $user_obj->getDefaultJob() != 0 ) {
 					$job_id = $user_obj->getDefaultJob();
 				}
-				Debug::Text(' Overriding job to: '. $job_id, __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text(' Overriding job to: '. $job_id, __FILE__, __LINE__, __METHOD__, 10);
 			}
 
 			if ( $job_item_id == '' OR empty($job_item_id) ) {
@@ -1465,11 +1459,27 @@ class PunchFactory extends Factory {
 				} elseif ( $user_obj->getDefaultJobItem() != 0 ) {
 					$job_item_id = $user_obj->getDefaultJobItem();
 				}
-				Debug::Text(' Overriding task to: '. $job_item_id, __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text(' Overriding task to: '. $job_item_id, __FILE__, __LINE__, __METHOD__, 10);
 			}
 		}
 		
 		if ( $is_previous_punch == TRUE AND is_object( $prev_punch_obj ) ) {
+			//Don't enable transfer by default if the previous punch was any OUT punch.
+			//Transfer does the OUT punch for them, so if the previous punch is an OUT punch
+			//we don't gain anything anyways.
+			if ( is_object($permission_obj) AND $permission_obj->Check('punch', 'default_transfer')
+					AND ( isset($prev_punch_obj) AND is_object($prev_punch_obj) AND $prev_punch_obj->getStatus() == 10 ) ) {
+				//Check to see if the employee is scheduled, if they are past their scheduled out time, then don't default to transfer.
+				//If they are not scheduled default to transfer though.
+				if ( !isset($s_obj) ) {
+					$slf = TTnew( 'ScheduleListFactory' );
+					$s_obj = $slf->getScheduleObjectByUserIdAndEpoch( $user_obj->getId(), $epoch );
+				}
+				if ( !is_object( $s_obj ) OR ( is_object( $s_obj ) AND $epoch < $s_obj->getEndTime() ) ) {
+					$transfer = TRUE;
+				}
+			}
+
 			$next_type = (int)$prev_punch_obj->getNextType( $epoch ); //Detects breaks/lunches too.
 
 			if ( $prev_punch_obj->getNextStatus() == 10 ) {
@@ -1537,7 +1547,7 @@ class PunchFactory extends Factory {
 							);			
 		}
 		
-		Debug::Arr($data, ' Default Punch Settings: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($data, ' Default Punch Settings: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $data;		
 	}
 
@@ -1577,12 +1587,12 @@ class PunchFactory extends Factory {
 		$image_data = $this->getImage();
 		if ( $file_name != '' AND $image_data != '' ) {
 			@mkdir( dirname($file_name), 0700, TRUE);
-			Debug::Text('Saving Image File Name: '. $file_name, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Saving Image File Name: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
 
 			return file_put_contents( $file_name, $image_data );
 		}
 
-		Debug::Arr($image_data, 'NOT Saving Image File Name: '. $file_name, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($image_data, 'NOT Saving Image File Name: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
 
@@ -1600,17 +1610,17 @@ class PunchFactory extends Factory {
 		}
 
 		if ( $company_id == '' ) {
-			Debug::Text('No Company... Company ID: '. $company_id .' User ID: '. $user_id .' Punch ID: '. $punch_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('No Company... Company ID: '. $company_id .' User ID: '. $user_id .' Punch ID: '. $punch_id, __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
 		}
 
 		if ( $user_id == '' ) {
-			Debug::Text('No User... Company ID: '. $company_id .' User ID: '. $user_id .' Punch ID: '. $punch_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('No User... Company ID: '. $company_id .' User ID: '. $user_id .' Punch ID: '. $punch_id, __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
 		}
 
 		if ( $punch_id == '' ) {
-			Debug::Text('No Punch... Company ID: '. $company_id .' User ID: '. $user_id .' Punch ID: '. $punch_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('No Punch... Company ID: '. $company_id .' User ID: '. $user_id .' Punch ID: '. $punch_id, __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
 		}
 
@@ -1621,14 +1631,14 @@ class PunchFactory extends Factory {
 
 		$base_name = Environment::getStorageBasePath() . DIRECTORY_SEPARATOR .'punch_images'. DIRECTORY_SEPARATOR . $company_id . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . $hash_dir[0] . DIRECTORY_SEPARATOR . $hash_dir[1] . DIRECTORY_SEPARATOR . $hash_dir[2] . DIRECTORY_SEPARATOR;
 
-		$punch_image_file_name = $base_name . $punch_id . '.png';
-		Debug::Text('Punch Image File Name: '. $punch_image_file_name .' Company ID: '. $company_id .' User ID: '. $user_id .' Punch ID: '. $punch_id .' CRC32: '. $hash, __FILE__, __LINE__, __METHOD__,10);
+		$punch_image_file_name = $base_name . $punch_id . '.jpg'; //Should be JPEG 75% quality, about 10K in size.
+		Debug::Text('Punch Image File Name: '. $punch_image_file_name .' Company ID: '. $company_id .' User ID: '. $user_id .' Punch ID: '. $punch_id .' CRC32: '. $hash, __FILE__, __LINE__, __METHOD__, 10);
 		return $punch_image_file_name;
 	}
 	function cleanStoragePath( $company_id = NULL, $user_id = NULL, $punch_id = NULL ) {
 		$file_name = $this->getImageFileName( $company_id, $user_id, $punch_id );
 		if ( $file_name != '' ) {
-			Debug::Text('Deleting Image... File Name: '. $file_name, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Deleting Image... File Name: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
 			@unlink($file_name);
 		}
 
@@ -1653,7 +1663,7 @@ class PunchFactory extends Factory {
 			return TRUE;
 		}
 
-		Debug::Text('Not settingg Image data...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Not settingg Image data...', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
 
@@ -1708,22 +1718,22 @@ class PunchFactory extends Factory {
 
 	function preSave() {
 		if ( $this->isNew() ) {
-			Debug::text(' Setting Original TimeStamp: '. $this->getTimeStamp(), __FILE__, __LINE__, __METHOD__,10);
+			Debug::text(' Setting Original TimeStamp: '. $this->getTimeStamp(), __FILE__, __LINE__, __METHOD__, 10);
 			$this->setOriginalTimeStamp( $this->getTimeStamp() );
 		}
 
 		if ( $this->getDeleted() == FALSE ) {
 
 			if ( $this->isNew() AND $this->getTransfer() == TRUE AND $this->getEnableAutoTransfer() == TRUE ) {
-				Debug::text(' Transfer is Enabled, automatic punch out of last punch pair...', __FILE__, __LINE__, __METHOD__,10);
+				Debug::text(' Transfer is Enabled, automatic punch out of last punch pair...', __FILE__, __LINE__, __METHOD__, 10);
 
 				//Use actual time stamp, not rounded timestamp. This should only be called on new punches as well, otherwise Actual Time Stamp could be incorrect.
 				$p_obj = $this->getPreviousPunchObject( $this->getActualTimeStamp() );
 				if ( is_object( $p_obj ) ) {
-					Debug::text(' Found Last Punch: ', __FILE__, __LINE__, __METHOD__,10);
+					Debug::text(' Found Last Punch: ', __FILE__, __LINE__, __METHOD__, 10);
 
 					if ( $p_obj->getStatus() == 10 ) {
-						Debug::text(' Last Punch was in. Auto Punch Out now: ', __FILE__, __LINE__, __METHOD__,10);
+						Debug::text(' Last Punch was in. Auto Punch Out now: ', __FILE__, __LINE__, __METHOD__, 10);
 						//Make sure the current punch status is IN
 						$this->setStatus(10); //In
 						$this->setType(10); //Normal (can't transfer in/out of lunches?)
@@ -1751,16 +1761,16 @@ class PunchFactory extends Factory {
 								if ( $p_obj->getPunchControlObject()->isValid() ) {
 									$p_obj->getPunchControlObject()->Save();
 								} else {
-									Debug::text(' aError saving auto out punch...', __FILE__, __LINE__, __METHOD__,10);
+									Debug::text(' aError saving auto out punch...', __FILE__, __LINE__, __METHOD__, 10);
 								}
 							} else {
-								Debug::text(' bError saving auto out punch...', __FILE__, __LINE__, __METHOD__,10);
+								Debug::text(' bError saving auto out punch...', __FILE__, __LINE__, __METHOD__, 10);
 							}
 						} else {
-							Debug::text(' cError saving auto out punch...', __FILE__, __LINE__, __METHOD__,10);
+							Debug::text(' cError saving auto out punch...', __FILE__, __LINE__, __METHOD__, 10);
 						}
 					} else {
-						Debug::text(' Last Punch was out. No Auto Punch out needed, removing transfer flag from this punch...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::text(' Last Punch was out. No Auto Punch out needed, removing transfer flag from this punch...', __FILE__, __LINE__, __METHOD__, 10);
 						$this->setTransfer( FALSE );
 					}
 
@@ -1775,7 +1785,7 @@ class PunchFactory extends Factory {
 			//FIXME: What happens if a supervisor edits a 11:30PM punch and makes it 5:00AM the next day?
 			//		We can't split punches when editing existing punches, because we have to split punch_control_ids prior to saving etc...
 			//		But we can split when supervisors are adding new punches.
-			//Debug::text('Split at Midnight Enabled: '. $this->getEnableSplitAtMidnight() .' IsNew: '. $this->isNew() .' Status: '. $this->getStatus() .' TimeStamp: '. $this->getTimeStamp() .' Punch Control ID: '. $this->getPunchControlID(), __FILE__, __LINE__, __METHOD__,10);
+			//Debug::text('Split at Midnight Enabled: '. $this->getEnableSplitAtMidnight() .' IsNew: '. $this->isNew() .' Status: '. $this->getStatus() .' TimeStamp: '. $this->getTimeStamp() .' Punch Control ID: '. $this->getPunchControlID(), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $this->isNew() == TRUE
 					AND $this->getStatus() == 20
 					AND $this->getEnableSplitAtMidnight() == TRUE
@@ -1788,10 +1798,10 @@ class PunchFactory extends Factory {
 				$plf->getPreviousPunchByUserIdAndEpoch( $this->getUser(), $this->getTimeStamp() );
 				if ( $plf->getRecordCount() > 0 ) {
 					$p_obj = $plf->getCurrent();
-					Debug::text(' Found Last Punch... ID: '. $p_obj->getId() .' Timestamp: '. $p_obj->getTimeStamp(), __FILE__, __LINE__, __METHOD__,10);
+					Debug::text(' Found Last Punch... ID: '. $p_obj->getId() .' Timestamp: '. $p_obj->getTimeStamp(), __FILE__, __LINE__, __METHOD__, 10);
 
 					if ( $p_obj->getStatus() == 10 AND TTDate::doesRangeSpanMidnight( $this->getTimeStamp(), $p_obj->getTimeStamp() ) ) {
-						Debug::text(' Last Punch was in and this is an out punch that spans midnight. Split Punch at midnight now: ', __FILE__, __LINE__, __METHOD__,10);
+						Debug::text(' Last Punch was in and this is an out punch that spans midnight. Split Punch at midnight now: ', __FILE__, __LINE__, __METHOD__, 10);
 
 						//FIXME: This will fail if a shift spans multiple days!
 
@@ -1811,7 +1821,7 @@ class PunchFactory extends Factory {
 
 						$this->setPunchControlID( $new_punch_control_id );
 
-						Debug::text(' Split Punch: Punching out just before midnight yesterday...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::text(' Split Punch: Punching out just before midnight yesterday...', __FILE__, __LINE__, __METHOD__, 10);
 
 						//
 						//Punch out just before midnight
@@ -1849,7 +1859,7 @@ class PunchFactory extends Factory {
 						}
 						unset($pf, $p_obj, $before_midnight_timestamp);
 
-						Debug::text(' Split Punch: Punching int at midnight today...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::text(' Split Punch: Punching int at midnight today...', __FILE__, __LINE__, __METHOD__, 10);
 
 						//
 						//Punch in again right at midnight.
@@ -1902,7 +1912,7 @@ class PunchFactory extends Factory {
 						unset($pf, $at_midnight_timestamp, $new_punch_control_id, $tmp_punch_control_obj);
 
 					} else {
-						Debug::text(' Last Punch was out. No Auto Punch ', __FILE__, __LINE__, __METHOD__,10);
+						Debug::text(' Last Punch was out. No Auto Punch ', __FILE__, __LINE__, __METHOD__, 10);
 					}
 				}
 			}
@@ -1918,7 +1928,7 @@ class PunchFactory extends Factory {
 			$plf->getByPunchControlId( $this->getPunchControlID() );
 			if ( $plf->getRecordCount() == 0 ) {
 				//Check to see if any other punches are assigned to this punch_control_id
-				Debug::text(' Deleted Last Punch for Punch Control Object.', __FILE__, __LINE__, __METHOD__,10);
+				Debug::text(' Deleted Last Punch for Punch Control Object.', __FILE__, __LINE__, __METHOD__, 10);
 				$this->getPunchControlObject()->setDeleted( TRUE );
 			}
 
@@ -1953,7 +1963,7 @@ class PunchFactory extends Factory {
 
 	//Takes Punch rows and calculates the total breaks/lunches and how long each is.
 	static function calcMealAndBreakTotalTime( $data ) {
-		if ( is_array($data) and count($data) > 0 ) {
+		if ( is_array($data) AND count($data) > 0 ) {
 			//Sort data by date_stamp at the top, so it works for multiple days at a time.
 			foreach ( $data as $key => $row ) {
 				if ( $row['type_id'] != 10 ) {
@@ -2012,13 +2022,13 @@ class PunchFactory extends Factory {
 			if ( isset($data['user_id']) AND $data['user_id'] != ''
 					AND isset($data['date_stamp']) AND $data['date_stamp'] != ''
 					AND isset($data['start_time']) AND $data['start_time'] != '' ) {
-				Debug::text('Setting User Date ID based on User ID:'. $data['user_id'] .' Date Stamp: '. $data['date_stamp'] .' Start Time: '. $data['start_time'] , __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text('Setting User Date ID based on User ID:'. $data['user_id'] .' Date Stamp: '. $data['date_stamp'] .' Start Time: '. $data['start_time'], __FILE__, __LINE__, __METHOD__, 10);
 				$this->setUserDate( $data['user_id'], TTDate::parseDateTime( $data['date_stamp'].' '.$data['start_time'] ) );
 			} elseif ( isset( $data['user_date_id'] ) AND $data['user_date_id'] > 0 ) {
-				Debug::text(' Setting UserDateID: '. $data['user_date_id'], __FILE__, __LINE__, __METHOD__,10);
+				Debug::text(' Setting UserDateID: '. $data['user_date_id'], __FILE__, __LINE__, __METHOD__, 10);
 				$this->setUserDateID( $data['user_date_id'] );
 			} else {
-				Debug::text(' NOT CALLING setUserDate or setUserDateID!', __FILE__, __LINE__, __METHOD__,10);
+				Debug::text(' NOT CALLING setUserDate or setUserDateID!', __FILE__, __LINE__, __METHOD__, 10);
 			}
 
 			if ( isset($data['overwrite']) ) {
@@ -2075,7 +2085,7 @@ class PunchFactory extends Factory {
 							//If this is a new punch or punch_contol_id is not being set, find a new one to use.
 							if ( $data['punch_control_id'] == '' OR $data['punch_control_id'] == 0 ) {
 								$this->setPunchControlID( $this->findPunchControlID() );
-								Debug::text('Setting Punch Control ID: '. $this->getPunchControlID() .' Was passed: '. $data['punch_control_id'] , __FILE__, __LINE__, __METHOD__, 10);
+								Debug::text('Setting Punch Control ID: '. $this->getPunchControlID() .' Was passed: '. $data['punch_control_id'], __FILE__, __LINE__, __METHOD__, 10);
 							} else {
 								Debug::text('Valid Punch Control ID passed...', __FILE__, __LINE__, __METHOD__, 10);
 								$this->$function( $data[$key] );
@@ -2203,7 +2213,7 @@ class PunchFactory extends Factory {
 	}
 
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action,  TTi18n::getText('Punch - Employee').': '. UserListFactory::getFullNameById( $this->getUser() ) .' '. TTi18n::getText('Timestamp').': '. TTDate::getDate('DATE+TIME', $this->getTimeStamp() ) , NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Punch - Employee').': '. UserListFactory::getFullNameById( $this->getUser() ) .' '. TTi18n::getText('Timestamp').': '. TTDate::getDate('DATE+TIME', $this->getTimeStamp() ), NULL, $this->getTable(), $this );
 	}
 }
 ?>

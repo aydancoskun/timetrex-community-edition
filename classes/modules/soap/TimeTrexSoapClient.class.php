@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9743 $
- * $Id: TimeTrexSoapClient.class.php 9743 2013-05-02 21:22:23Z ipso $
- * $Date: 2013-05-02 14:22:23 -0700 (Thu, 02 May 2013) $
+ * $Revision: 12186 $
+ * $Id: TimeTrexSoapClient.class.php 12186 2014-01-31 23:39:57Z mikeb $
+ * $Date: 2014-01-31 15:39:57 -0800 (Fri, 31 Jan 2014) $
  */
 
 /**
@@ -107,8 +107,8 @@ class TimeTrexSoapClient {
 		if ( $sslf->getRecordCount() == 1 ) {
 			$version = $sslf->getCurrent()->getValue();
 
-			$retval =  $this->getSoapObject()->isLatestVersion( $this->getLocalRegistrationKey(), $company_id, $version);
-			Debug::Text(' Current Version: '. $version .' Retval: '. (int)$retval, __FILE__, __LINE__, __METHOD__,10);
+			$retval = $this->getSoapObject()->isLatestVersion( $this->getLocalRegistrationKey(), $company_id, $version);
+			Debug::Text(' Current Version: '. $version .' Retval: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
 
 			return $retval;
 		}
@@ -123,7 +123,7 @@ class TimeTrexSoapClient {
 			$version = $sslf->getCurrent()->getValue();
 
 			$retval = $this->getSoapObject()->isLatestTaxEngineVersion( $this->getLocalRegistrationKey(), $company_id, $version);
-			Debug::Text(' Current Version: '. $version .' Retval: '. (int)$retval, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text(' Current Version: '. $version .' Retval: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
 
 			return $retval;
 		}
@@ -137,8 +137,8 @@ class TimeTrexSoapClient {
 		if ( $sslf->getRecordCount() == 1 ) {
 			$version = $sslf->getCurrent()->getValue();
 
-			$retval =  $this->getSoapObject()->isLatestTaxDataVersion( $this->getLocalRegistrationKey(), $company_id, $version);
-			Debug::Text(' Current Version: '. $version .' Retval: '. (int)$retval, __FILE__, __LINE__, __METHOD__,10);
+			$retval = $this->getSoapObject()->isLatestTaxDataVersion( $this->getLocalRegistrationKey(), $company_id, $version);
+			Debug::Text(' Current Version: '. $version .' Retval: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
 
 			return $retval;
 		}
@@ -182,7 +182,7 @@ class TimeTrexSoapClient {
 
 		$get_new_key = FALSE;
 		if ( $sslf->getRecordCount() > 1 ) {
-			Debug::Text('Too many registration keys, removing them...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Too many registration keys, removing them...', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $sslf as $ss_obj ) {
 				$ss_obj->Delete();
 			}
@@ -200,11 +200,11 @@ class TimeTrexSoapClient {
 		if ( $get_new_key == TRUE OR $sslf->getRecordCount() == 0 ) {
 			//Get registration key from TimeTrex server.
 			$key = trim( $this->getRegistrationKey() );
-			Debug::Text('Registration Key from server: '. $key, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Registration Key from server: '. $key, __FILE__, __LINE__, __METHOD__, 10);
 
 			if ( $this->isValidRegistrationKey( $key ) == FALSE ) {
 				$key = md5( uniqid() );
-				Debug::Text('Failed getting registration key from server...', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Failed getting registration key from server...', __FILE__, __LINE__, __METHOD__, 10);
 			}
 
 			$sslf->setName('registration_key');
@@ -215,14 +215,14 @@ class TimeTrexSoapClient {
 
 			return TRUE;
 		} else {
-			Debug::Text('Registration key is valid, skipping...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Registration key is valid, skipping...', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return TRUE;
 	}
 
 	function sendCompanyVersionData( $company_id ) {
-		Debug::Text('Sending Company Version Data...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Sending Company Version Data...', __FILE__, __LINE__, __METHOD__, 10);
 		$cf = TTnew( 'CompanyFactory' );
 
 		$tt_version_data['registration_key'] = $this->getLocalRegistrationKey();
@@ -285,17 +285,17 @@ class TimeTrexSoapClient {
 		$version_data = array_merge( $tt_version_data, $sys_version_data);
 
 		if ( isset($version_data) AND is_array( $version_data) ) {
-			Debug::Text('Sent Company Version Data!', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Sent Company Version Data!', __FILE__, __LINE__, __METHOD__, 10);
 			$retval = $this->getSoapObject()->saveCompanyVersionData( $version_data );
 
 			if ( $retval == FALSE ) {
-				Debug::Text('Server failed saving data!', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Server failed saving data!', __FILE__, __LINE__, __METHOD__, 10);
 			}
 			//$this->printSoapDebug();
 
 			return $retval;
 		}
-		Debug::Text('NOT Sending Company Version Data!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('NOT Sending Company Version Data!', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 	}
@@ -350,7 +350,7 @@ class TimeTrexSoapClient {
 			if ( $ulf->getRecordCount() > 0 ) {
 				foreach( $ulf as $u_obj ) {
 
-					$key = str_replace(' ','', strtolower( $u_obj->getCity().$u_obj->getCity().$u_obj->getCountry() ) );
+					$key = str_replace(' ', '', strtolower( $u_obj->getCity().$u_obj->getCity().$u_obj->getCountry() ) );
 
 					$location_data['location_data'][$key] = array(
 														'city' => $u_obj->getCity(),
@@ -370,7 +370,7 @@ class TimeTrexSoapClient {
 	}
 
 	function sendCompanyData( $company_id, $force = FALSE ) {
-		Debug::Text('Sending Company Data...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Sending Company Data...', __FILE__, __LINE__, __METHOD__, 10);
 		if ( $company_id == '' ) {
 			return FALSE;
 		}
@@ -447,7 +447,7 @@ class TimeTrexSoapClient {
 					$company_data['last_login_date'] = $ulf->getCurrent()->getLastLoginDate();
 				}
 
-				Debug::Text('Sent Company Data...', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Sent Company Data...', __FILE__, __LINE__, __METHOD__, 10);
 				$retval = $this->getSoapObject()->saveCompanyData( $company_data );
 
 				//$this->printSoapDebug();
@@ -489,6 +489,46 @@ class TimeTrexSoapClient {
 		return FALSE;
 	}
 
+	function getUpgradeFileURL( $force = FALSE ) {
+		global $config_vars;
+
+		if ( !isset( $config_vars['other']['primary_company_id'] ) ) {
+			$config_vars['other']['primary_company_id'] = 1;
+		}
+
+		try {
+			$clf = TTnew( 'CompanyListFactory' );
+			$clf->getById( $config_vars['other']['primary_company_id'] );
+			if ( $clf->getRecordCount() > 0 ) {
+				foreach( $clf as $c_obj ) {
+					$company_data = array(
+											'system_version' => APPLICATION_VERSION,
+											'registration_key' => $this->getLocalRegistrationKey(),
+											'product_edition_id' => $c_obj->getProductEdition(),
+											'product_edition_available' => getTTProductEdition(),
+											'name' => $c_obj->getName(),
+											'short_name' => $c_obj->getShortName(),
+											'work_phone' => $c_obj->getWorkPhone(),
+											'city' => $c_obj->getCity(),
+											'country' => $c_obj->getCountry(),
+											'province' => $c_obj->getProvince(),
+											'postal_code' => $c_obj->getPostalCode(),
+											'force' => $force, 
+										);
+				}
+			}
+		} catch( Exception $e ) {
+			Debug::Text('ERROR: Cant get company data for downloading upgrade file, database is likely down...', __FILE__, __LINE__, __METHOD__, 10);
+			$company_data = NULL;
+		}
+
+		if ( isset($company_data) ) {
+			$retval = $this->getSoapObject()->getUpgradeFileURL( $company_data );
+			return $retval;
+		}
+
+		return FALSE;
+	}
 
 	//
 	// Email relay through SOAP
@@ -517,11 +557,11 @@ class TimeTrexSoapClient {
 											'country' => $c_obj->getCountry(),
 											'province' => $c_obj->getProvince(),
 											'postal_code' => $c_obj->getPostalCode(),
-										  );
+										);
 				}
 			}
 		} catch( Exception $e ) {
-			Debug::Text('ERROR: Cant get company data for sending email, database is likely down...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('ERROR: Cant get company data for sending email, database is likely down...', __FILE__, __LINE__, __METHOD__, 10);
 			$company_data = NULL;
 		}
 
@@ -561,11 +601,11 @@ class TimeTrexSoapClient {
 											'country' => $c_obj->getCountry(),
 											'province' => $c_obj->getProvince(),
 											'postal_code' => $c_obj->getPostalCode(),
-										  );
+										);
 				}
 			}
 		} catch( Exception $e ) {
-			Debug::Text('ERROR: Cant get company data for geocoding, database is likely down...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('ERROR: Cant get company data for geocoding, database is likely down...', __FILE__, __LINE__, __METHOD__, 10);
 			$company_data = NULL;
 		}
 

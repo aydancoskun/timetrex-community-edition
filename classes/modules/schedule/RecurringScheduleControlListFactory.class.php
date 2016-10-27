@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10788 $
- * $Id: RecurringScheduleControlListFactory.class.php 10788 2013-08-30 23:55:26Z ipso $
- * $Date: 2013-08-30 16:55:26 -0700 (Fri, 30 Aug 2013) $
+ * $Revision: 12026 $
+ * $Id: RecurringScheduleControlListFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -46,7 +46,7 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -67,7 +67,7 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 						AND deleted = 0';
@@ -94,7 +94,7 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .' as a
 					where	company_id = ?
 						AND id = ?
@@ -130,7 +130,7 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 					);
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							b.name as name,
 							b.description as description,
 							c.user_id as user_id,
@@ -139,7 +139,7 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 							'. $rstcf->getTable() .' as b,
 							'. $rsuf->getTable() .' as c,
 							'. $uf->getTable() .' as d
-					where 	a.recurring_schedule_template_control_id = b.id
+					where	a.recurring_schedule_template_control_id = b.id
 						AND a.id = c.recurring_schedule_control_id
 						AND c.user_id = d.id
 						AND a.company_id = ?
@@ -197,12 +197,12 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 
 					from	'. $this->getTable() .' as a,
 							'. $rsuf->getTable() .' as b
-					where 	a.id = b.recurring_schedule_control_id
+					where	a.id = b.recurring_schedule_control_id
 
 */
 		$query = '
-					select 	a.*
-					from 	'. $this->getTable() .' as a
+					select	a.*
+					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $rstcf->getTable() .' as b ON a.recurring_schedule_template_control_id = b.id
 						LEFT JOIN '. $rsuf->getTable() .' as c ON a.id = c.recurring_schedule_control_id
 					WHERE c.user_id = ?
@@ -268,10 +268,10 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $rstcf->getTable() .' as b ON a.recurring_schedule_template_control_id = b.id
-					where 	 a.company_id = ?
+					where	 a.company_id = ?
 						AND
 						(
 							(a.start_date >= ? AND a.start_date <= ? AND a.end_date IS NULL )
@@ -307,7 +307,7 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 				$order = array(Misc::trimSortPrefix($filter_data['sort_column']) => $filter_data['sort_order']);
 			}
 		}
-		Debug::Arr($order,'aOrder Data:', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($order, 'aOrder Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$additional_order_fields = array('name', 'description', 'last_name', 'template_id');
 		if ( $order == NULL ) {
@@ -344,8 +344,8 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 
 			$strict = TRUE;
 		}
-		//Debug::Arr($order,'bOrder Data:', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($order, 'bOrder Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$uf = new UserFactory();
 		$rsuf = new RecurringScheduleUserFactory();
@@ -356,12 +356,12 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 					);
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							b.name as name,
 							b.description as description,
 							c.user_id as user_id,
 							d.last_name as last_name
-					from 	'. $this->getTable() .' as a
+					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $rstcf->getTable() .' as b ON a.recurring_schedule_template_control_id = b.id
 						LEFT JOIN '. $rsuf->getTable() .' as c ON a.id = c.recurring_schedule_control_id
 						LEFT JOIN '. $uf->getTable() .' as d ON ( c.user_id = d.id AND d.deleted = 0 )
@@ -369,56 +369,56 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 					';
 
 		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query  .=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
+			$query	.=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
 		}
 		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query  .=	' AND d.id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
+			$query	.=	' AND d.id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
 		}
 		if ( isset($filter_data['user_id']) AND isset($filter_data['user_id'][0]) AND !in_array(-1, (array)$filter_data['user_id']) ) {
-			$query  .=	' AND d.id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
+			$query	.=	' AND d.id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['template_id']) AND isset($filter_data['template_id'][0]) AND !in_array(-1, (array)$filter_data['template_id']) ) {
-			$query  .=	' AND b.id in ('. $this->getListSQL($filter_data['template_id'], $ph) .') ';
+			$query	.=	' AND b.id in ('. $this->getListSQL($filter_data['template_id'], $ph) .') ';
 		}
 
 		if ( isset($filter_data['status_id']) AND isset($filter_data['status_id'][0]) AND !in_array(-1, (array)$filter_data['status_id']) ) {
-			$query  .=	' AND d.status_id in ('. $this->getListSQL($filter_data['status_id'], $ph) .') ';
+			$query	.=	' AND d.status_id in ('. $this->getListSQL($filter_data['status_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['group_id']) AND isset($filter_data['group_id'][0]) AND !in_array(-1, (array)$filter_data['group_id']) ) {
 			if ( isset($filter_data['include_subgroups']) AND (bool)$filter_data['include_subgroups'] == TRUE ) {
 				$uglf = new UserGroupListFactory();
 				$filter_data['group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['group_id'], TRUE);
 			}
-			$query  .=	' AND d.group_id in ('. $this->getListSQL($filter_data['group_id'], $ph) .') ';
+			$query	.=	' AND d.group_id in ('. $this->getListSQL($filter_data['group_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['default_branch_id']) AND isset($filter_data['default_branch_id'][0]) AND !in_array(-1, (array)$filter_data['default_branch_id']) ) {
-			$query  .=	' AND d.default_branch_id in ('. $this->getListSQL($filter_data['default_branch_id'], $ph) .') ';
+			$query	.=	' AND d.default_branch_id in ('. $this->getListSQL($filter_data['default_branch_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['default_department_id']) AND isset($filter_data['default_department_id'][0]) AND !in_array(-1, (array)$filter_data['default_department_id']) ) {
-			$query  .=	' AND d.default_department_id in ('. $this->getListSQL($filter_data['default_department_id'], $ph) .') ';
+			$query	.=	' AND d.default_department_id in ('. $this->getListSQL($filter_data['default_department_id'], $ph) .') ';
 		}
 
 		if ( isset($filter_data['title_id']) AND isset($filter_data['title_id'][0]) AND !in_array(-1, (array)$filter_data['title_id']) ) {
-			$query  .=	' AND d.title_id in ('. $this->getListSQL($filter_data['title_id'], $ph) .') ';
+			$query	.=	' AND d.title_id in ('. $this->getListSQL($filter_data['title_id'], $ph) .') ';
 		}
 
 
-		if ( isset($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
+		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
 			$ph[] = $this->db->BindDate($filter_data['start_date']);
-			$query  .=	' AND a.start_date >= ?';
+			$query	.=	' AND a.start_date >= ?';
 		}
-		if ( isset($filter_data['end_date']) AND trim($filter_data['end_date']) != '' ) {
+		if ( isset($filter_data['end_date']) AND !is_array($filter_data['end_date']) AND trim($filter_data['end_date']) != '' ) {
 			$ph[] = $this->db->BindDate($filter_data['end_date']);
-			$query  .=	' AND a.start_date <= ?';
+			$query	.=	' AND a.start_date <= ?';
 		}
 
-		$query .= 	'
+		$query .=	'
 						AND ( a.deleted = 0 AND b.deleted = 0 )
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
@@ -442,7 +442,7 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 			$order = array( 'recurring_schedule_template_control_id' => 'asc', );
 			$strict = FALSE;
 		} else {
-			//Always sort by last name,first name after other columns
+			//Always sort by last name, first name after other columns
 			/*
 			if ( !isset($order['effective_date']) ) {
 				$order['effective_date'] = 'desc';
@@ -450,8 +450,8 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 			*/
 			$strict = TRUE;
 		}
-		//Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$rsuf = new RecurringScheduleUserFactory();
 		$rstcf = new RecurringScheduleTemplateControlFactory();
@@ -461,10 +461,10 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 					);
 
 		$query = '
-					select 	distinct a.*,
+					select	distinct a.*,
 							ab.name as recurring_schedule_template_control,
 							ab.description as recurring_schedule_template_control_description
-					from 	'. $this->getTable() .' as a
+					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $rstcf->getTable() .' as ab ON ( a.recurring_schedule_template_control_id = ab.id AND ab.deleted = 0 )
 						LEFT JOIN '. $rsuf->getTable() .' as rsuf ON ( a.id = rsuf. recurring_schedule_control_id )
 
@@ -472,31 +472,31 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 					';
 
 		//Make sure supervisor (subordinates only) can see/edit any recurring schedule assigned to their subordinates
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'rsuf.user_id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['recurring_schedule_template_control_id']) ) ? $this->getWhereClauseSQL( 'a.recurring_schedule_template_control_id', $filter_data['recurring_schedule_template_control_id'], 'numeric_list', $ph ) : NULL;
+/*
 		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query  .=	' AND rsuf.user_id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
+			$query	.=	' AND rsuf.user_id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
 		}
 
 		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query  .=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
+			$query	.=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
 		}
 		if ( isset($filter_data['recurring_schedule_template_control_id']) AND isset($filter_data['recurring_schedule_template_control_id'][0]) AND !in_array(-1, (array)$filter_data['recurring_schedule_template_control_id']) ) {
-			$query  .=	' AND a.recurring_schedule_template_control_id in ('. $this->getListSQL($filter_data['recurring_schedule_template_control_id'], $ph) .') ';
+			$query	.=	' AND a.recurring_schedule_template_control_id in ('. $this->getListSQL($filter_data['recurring_schedule_template_control_id'], $ph) .') ';
 		}
+*/
+		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['created_by'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( 'a.updated_by', $filter_data['updated_by'], 'numeric_list', $ph ) : NULL;
 
-		if ( isset($filter_data['created_by']) AND isset($filter_data['created_by'][0]) AND !in_array(-1, (array)$filter_data['created_by']) ) {
-			$query  .=	' AND a.created_by in ('. $this->getListSQL($filter_data['created_by'], $ph) .') ';
-		}
-		if ( isset($filter_data['updated_by']) AND isset($filter_data['updated_by'][0]) AND !in_array(-1, (array)$filter_data['updated_by']) ) {
-			$query  .=	' AND a.updated_by in ('. $this->getListSQL($filter_data['updated_by'], $ph) .') ';
-		}
-
-		$query .= 	'
-						AND a.deleted = 0
-					';
+		$query .=	' AND a.deleted = 0 ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		//Debug::Arr($ph,'Query: '. $query, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
@@ -507,11 +507,11 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 		if ( $company_id == '') {
 			return FALSE;
 		}
-        
-        if ( isset($filter_data['user_status_id']) ) {
-            $filter_data['status_id'] = $filter_data['user_status_id'];
-            unset($filter_data['user_status_id']);
-        }
+
+		if ( isset($filter_data['user_status_id']) ) {
+			$filter_data['status_id'] = $filter_data['user_status_id'];
+			unset($filter_data['user_status_id']);
+		}
 
 		if ( !is_array($order) ) {
 			//Use Filter Data ordering if its set.
@@ -520,12 +520,12 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 			}
 		}
 
-		$additional_order_fields = array('first_name', 'last_name', 'title','user_group', 'default_branch', 'default_department', 'recurring_schedule_template_control', 'recurring_schedule_template_control_description');
+		$additional_order_fields = array('first_name', 'last_name', 'title', 'user_group', 'default_branch', 'default_department', 'recurring_schedule_template_control', 'recurring_schedule_template_control_description');
 		if ( $order == NULL ) {
 			$order = array( 'recurring_schedule_template_control_id' => 'asc', );
 			$strict = FALSE;
 		} else {
-			//Always sort by last name,first name after other columns
+			//Always sort by last name, first name after other columns
 			/*
 			if ( !isset($order['effective_date']) ) {
 				$order['effective_date'] = 'desc';
@@ -533,8 +533,8 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 			*/
 			$strict = TRUE;
 		}
-		//Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$uf = new UserFactory();
 		$bf = new BranchFactory();
@@ -549,7 +549,7 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 					);
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							ac.user_id as user_id,
 							ab.name as recurring_schedule_template_control,
 							ab.description as recurring_schedule_template_control_description,
@@ -566,7 +566,7 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 							e.name as user_group,
 							f.id as title_id,
 							f.name as title
-					from 	'. $this->getTable() .' as a
+					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $rstcf->getTable() .' as ab ON ( a.recurring_schedule_template_control_id = ab.id )
 						LEFT JOIN '. $rsuf->getTable() .' as ac ON a.id = ac.recurring_schedule_control_id
 						LEFT JOIN '. $uf->getTable() .' as b ON ( ac.user_id = b.id AND b.deleted = 0 )
@@ -574,66 +574,79 @@ class RecurringScheduleControlListFactory extends RecurringScheduleControlFactor
 						LEFT JOIN '. $df->getTable() .' as d ON ( b.default_department_id = d.id AND d.deleted = 0)
 						LEFT JOIN '. $ugf->getTable() .' as e ON ( b.group_id = e.id AND e.deleted = 0 )
 						LEFT JOIN '. $utf->getTable() .' as f ON ( b.title_id = f.id AND f.deleted = 0 )
-                        LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
+						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	a.company_id = ?
 					';
 
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'ac.user_id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'ac.user_id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'ac.user_id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['recurring_schedule_template_control_id']) ) ? $this->getWhereClauseSQL( 'a.recurring_schedule_template_control_id', $filter_data['recurring_schedule_template_control_id'], 'numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'b.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'b.group_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'b.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'b.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'b.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['country']) ) ?$this->getWhereClauseSQL( 'b.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['province']) ) ? $this->getWhereClauseSQL( 'b.province', $filter_data['province'], 'upper_text_list', $ph ) : NULL;
+
+/*
 		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query  .=	' AND ac.user_id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
+			$query	.=	' AND ac.user_id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
 		}
 		if ( isset($filter_data['user_id']) AND isset($filter_data['user_id'][0]) AND !in_array(-1, (array)$filter_data['user_id']) ) {
-			$query  .=	' AND ac.user_id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
+			$query	.=	' AND ac.user_id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query  .=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
+			$query	.=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
 		}
 		if ( isset($filter_data['exclude_id']) AND isset($filter_data['exclude_id'][0]) AND !in_array(-1, (array)$filter_data['exclude_id']) ) {
-			$query  .=	' AND ac.user_id not in ('. $this->getListSQL($filter_data['exclude_id'], $ph) .') ';
+			$query	.=	' AND ac.user_id not in ('. $this->getListSQL($filter_data['exclude_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['recurring_schedule_template_control_id']) AND isset($filter_data['recurring_schedule_template_control_id'][0]) AND !in_array(-1, (array)$filter_data['recurring_schedule_template_control_id']) ) {
-			$query  .=	' AND a.recurring_schedule_template_control_id in ('. $this->getListSQL($filter_data['recurring_schedule_template_control_id'], $ph) .') ';
+			$query	.=	' AND a.recurring_schedule_template_control_id in ('. $this->getListSQL($filter_data['recurring_schedule_template_control_id'], $ph) .') ';
 		}
 
 		if ( isset($filter_data['status_id']) AND isset($filter_data['status_id'][0]) AND !in_array(-1, (array)$filter_data['status_id']) ) {
-			$query  .=	' AND b.status_id in ('. $this->getListSQL($filter_data['status_id'], $ph) .') ';
+			$query	.=	' AND b.status_id in ('. $this->getListSQL($filter_data['status_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['group_id']) AND isset($filter_data['group_id'][0]) AND !in_array(-1, (array)$filter_data['group_id']) ) {
 			if ( isset($filter_data['include_subgroups']) AND (bool)$filter_data['include_subgroups'] == TRUE ) {
 				$uglf = new UserGroupListFactory();
 				$filter_data['group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['group_id'], TRUE);
 			}
-			$query  .=	' AND b.group_id in ('. $this->getListSQL($filter_data['group_id'], $ph) .') ';
+			$query	.=	' AND b.group_id in ('. $this->getListSQL($filter_data['group_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['default_branch_id']) AND isset($filter_data['default_branch_id'][0]) AND !in_array(-1, (array)$filter_data['default_branch_id']) ) {
-			$query  .=	' AND b.default_branch_id in ('. $this->getListSQL($filter_data['default_branch_id'], $ph) .') ';
+			$query	.=	' AND b.default_branch_id in ('. $this->getListSQL($filter_data['default_branch_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['default_department_id']) AND isset($filter_data['default_department_id'][0]) AND !in_array(-1, (array)$filter_data['default_department_id']) ) {
-			$query  .=	' AND b.default_department_id in ('. $this->getListSQL($filter_data['default_department_id'], $ph) .') ';
+			$query	.=	' AND b.default_department_id in ('. $this->getListSQL($filter_data['default_department_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['title_id']) AND isset($filter_data['title_id'][0]) AND !in_array(-1, (array)$filter_data['title_id']) ) {
-			$query  .=	' AND b.title_id in ('. $this->getListSQL($filter_data['title_id'], $ph) .') ';
+			$query	.=	' AND b.title_id in ('. $this->getListSQL($filter_data['title_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['country']) AND isset($filter_data['country'][0]) AND !in_array(-1, (array)$filter_data['country']) ) {
-			$query  .=	' AND b.country in ('. $this->getListSQL($filter_data['country'], $ph) .') ';
+			$query	.=	' AND b.country in ('. $this->getListSQL($filter_data['country'], $ph) .') ';
 		}
 		if ( isset($filter_data['province']) AND isset($filter_data['province'][0]) AND !in_array( -1, (array)$filter_data['province']) AND !in_array( '00', (array)$filter_data['province']) ) {
-			$query  .=	' AND b.province in ('. $this->getListSQL($filter_data['province'], $ph) .') ';
+			$query	.=	' AND b.province in ('. $this->getListSQL($filter_data['province'], $ph) .') ';
 		}
+*/
+		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
 
-
-		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-        
-        $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
-        
-
-		$query .= 	'
-						AND ( a.deleted = 0 AND ab.deleted = 0 )
-					';
+		$query .=	' AND ( a.deleted = 0 AND ab.deleted = 0 ) ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		//Debug::Arr($ph,'Query: '. $query, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 

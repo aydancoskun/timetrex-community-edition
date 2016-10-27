@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: MA.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 12026 $
+ * $Id: MA.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -53,6 +53,12 @@ class PayrollDeduction_US_MA extends PayrollDeduction_US {
 */
 
 	var $state_options = array(
+								1388563200 => array( //01-Jan-14
+													'rate' => 5.20,
+													'allowance' => array( 3400, 1000 ), //1 = Base amount, 2 = Per Allowance multiplier
+													'federal_tax_maximum' => 2000,
+													'minimum_income' => 8000,
+													),
 								1325404800 => array( //01-Jan-12
 													'rate' => 5.25,
 													'allowance' => array( 3400, 1000 ), //1 = Base amount, 2 = Per Allowance multiplier
@@ -60,13 +66,13 @@ class PayrollDeduction_US_MA extends PayrollDeduction_US {
 													'minimum_income' => 8000,
 													),
 								1230796800 => array( //01-Jan-09
-													'rate' => 5.3,
+													'rate' => 5.30,
 													'allowance' => array( 3400, 1000 ), //1 = Base amount, 2 = Per Allowance multiplier
 													'federal_tax_maximum' => 2000,
 													'minimum_income' => 8000,
 													),
 								1136102400 => array( //01-Jan-06
-													'rate' => 5.3,
+													'rate' => 5.30,
 													'standard_deduction' => array(
 																			10 => 0,
 																			20 => 2100,

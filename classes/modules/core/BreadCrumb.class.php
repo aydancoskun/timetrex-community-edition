@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 2095 $
- * $Id: BreadCrumb.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
+ * $Revision: 11830 $
+ * $Id: BreadCrumb.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -102,7 +102,7 @@ class BreadCrumb {
 						'created_date' => TTDate::getTime(),
 						);
 
-			$query = 'insert into bread_crumb (user_id,name,url,created_date)
+			$query = 'insert into bread_crumb (user_id, name, url, created_date)
 							VALUES(
 									?,
 									?,
@@ -126,7 +126,7 @@ class BreadCrumb {
 					'user_id' => $current_user->getId(),
 					);
 
-		$query = 'SELECT name,url
+		$query = 'SELECT name, url
 					FROM bread_crumb
 					WHERE user_id = ?
 					ORDER BY created_date DESC
@@ -201,11 +201,9 @@ class BreadCrumb {
 
 		if ( $crumbs != FALSE) {
 			$total_crumbs = count($crumbs);
-			$i=1;
+			$i = 1;
 			foreach ($crumbs as $crumb) {
-				if ($i == 1 AND $crumb['name'] == 'Home') {
-
-				} else {
+				if ( !( $i == 1 AND $crumb['name'] == 'Home' )) {
 					if ($i == $total_crumbs) {
 							$links[] = TTi18n::gettext($crumb['name']);
 					} else {

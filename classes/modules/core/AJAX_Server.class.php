@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8717 $
- * $Id: AJAX_Server.class.php 8717 2012-12-28 22:30:24Z ipso $
- * $Date: 2012-12-28 14:30:24 -0800 (Fri, 28 Dec 2012) $
+ * $Revision: 11830 $
+ * $Id: AJAX_Server.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -226,7 +226,7 @@ class AJAX_Server {
 		Debug::text('User ID: '. $user_id .' Company ID: '. $current_company->getId(), __FILE__, __LINE__, __METHOD__, 10);
 
 		$jlf = TTnew( 'JobListFactory' );
-		return $jlf->getByCompanyIdAndUserIdAndStatusArray( $current_company->getId(),  $user_id, array(10,20,30,40), TRUE );
+		return $jlf->getByCompanyIdAndUserIdAndStatusArray( $current_company->getId(), $user_id, array(10, 20, 30, 40), TRUE );
 	}
 
 	function getJobItemOptions( $job_id, $include_disabled = TRUE ) {
@@ -632,7 +632,7 @@ class AJAX_Server {
 		$psealf->getHighestOrderByCompanyIdAndTypeId( $current_company->getId(), $type_id );
 		if ( $psealf->getRecordCount() > 0 ) {
 			foreach( $psealf as $psea_obj ) {
-				return ($psea_obj->getOrder()+1);
+				return ( $psea_obj->getOrder() + 1 );
 			}
 		}
 

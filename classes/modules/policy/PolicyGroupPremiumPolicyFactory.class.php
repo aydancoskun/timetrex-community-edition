@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: PolicyGroupPremiumPolicyFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 12026 $
+ * $Id: PolicyGroupPremiumPolicyFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -47,7 +47,7 @@ class PolicyGroupPremiumPolicyFactory extends Factory {
 	protected $pk_sequence_name = 'policy_group_premium_policy_id_seq'; //PK Sequence name
 	function getPolicyGroup() {
 		if ( isset($this->data['policy_group_id']) ) {
-			return $this->data['policy_group_id'];
+			return (int)$this->data['policy_group_id'];
 		}
 
 		return FALSE;
@@ -71,7 +71,7 @@ class PolicyGroupPremiumPolicyFactory extends Factory {
 
 	function getPremiumPolicy() {
 		if ( isset($this->data['premium_policy_id']) ) {
-			return $this->data['premium_policy_id'];
+			return (int)$this->data['premium_policy_id'];
 		}
 	}
 	function setPremiumPolicy($id) {

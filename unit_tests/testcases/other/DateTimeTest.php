@@ -34,14 +34,16 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11081 $
- * $Id: DateTimeTest.php 11081 2013-10-08 23:36:53Z ipso $
- * $Date: 2013-10-08 16:36:53 -0700 (Tue, 08 Oct 2013) $
+ * $Revision: 12091 $
+ * $Id: DateTimeTest.php 12091 2014-01-21 16:33:40Z mikeb $
+ * $Date: 2014-01-21 08:33:40 -0800 (Tue, 21 Jan 2014) $
  */
 require_once('PHPUnit/Framework/TestCase.php');
 
+/**
+ * @group DateTime
+ */
 class DateTimeTest extends PHPUnit_Framework_TestCase {
-
     public function __construct() {
         global $db, $cache;
     }

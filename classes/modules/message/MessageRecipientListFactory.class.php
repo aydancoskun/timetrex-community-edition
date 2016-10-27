@@ -46,7 +46,7 @@ class MessageRecipientListFactory extends MessageRecipientFactory implements Ite
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -67,7 +67,7 @@ class MessageRecipientListFactory extends MessageRecipientFactory implements Ite
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 					AND deleted = 0';

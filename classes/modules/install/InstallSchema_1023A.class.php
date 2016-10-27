@@ -44,18 +44,18 @@
  */
 class InstallSchema_1023A extends InstallSchema_Base {
 
-        function preInstall() {
-                Debug::text('preInstall: '. $this->getVersion() , __FILE__, __LINE__, __METHOD__,9);
+		function preInstall() {
+				Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
-                return TRUE;
-        }
+				return TRUE;
+		}
 
 
-        function postInstall() {
-                Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__,9);
+		function postInstall() {
+				Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
-                return TRUE;
+				return TRUE;
 
-        }
+		}
 }
 ?>

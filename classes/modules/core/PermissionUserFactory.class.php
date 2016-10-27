@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11414 $
- * $Id: PermissionUserFactory.class.php 11414 2013-11-15 19:53:13Z mikeb $
- * $Date: 2013-11-15 11:53:13 -0800 (Fri, 15 Nov 2013) $
+ * $Revision: 12026 $
+ * $Id: PermissionUserFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -49,16 +49,17 @@ class PermissionUserFactory extends Factory {
 	var $user_obj = NULL;
 	var $permission_control_obj = NULL;
 
-    function getPermissionControlObject() {
-        return $this->getGenericObject( 'PermissionControlListFactory', $this->getPermissionControl(), 'permission_control_obj' );
-    }
+	function getPermissionControlObject() {
+		return $this->getGenericObject( 'PermissionControlListFactory',
+		$this->getPermissionControl(), 'permission_control_obj' );
+	}
 
-    function getUserObject() {
-        return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
-    }
+	function getUserObject() {
+		return $this->getGenericObject( 'UserListFactory', $this->getUser(), 'user_obj' );
+	}
 
 	function getPermissionControl() {
-		return $this->data['permission_control_id'];
+		return (int)$this->data['permission_control_id'];
 	}
 
 	function setPermissionControl($id) {
@@ -67,10 +68,10 @@ class PermissionUserFactory extends Factory {
 		$pclf = TTnew( 'PermissionControlListFactory' );
 
 		if ( $id != 0
-				OR $this->Validator->isResultSetWithRows(	'permission_control',
+				OR $this->Validator->isResultSetWithRows( 'permission_control',
 															$pclf->getByID($id),
-															TTi18n::gettext('Permission Group is invalid')
-															) ) {
+															TTi18n::gettext('Permission Group is
+															invalid') ) ) {
 			$this->data['permission_control_id'] = $id;
 
 			return TRUE;
@@ -83,12 +84,12 @@ class PermissionUserFactory extends Factory {
 		$pclf = TTnew( 'PermissionControlListFactory' );
 
 		$ph = array(
-					'id' => $id,
+					'id' => $id
 					);
 
-		$query = 'select a.id from '. $this->getTable() .' as a, '. $pclf->getTable() .' as b where a.permission_control_id = b.id AND a.user_id = ? AND b.deleted=0';
+		$query = 'select a.id from '. $this->getTable() .' as a, '. $pclf->getTable() .' as b where a.permission_control_id = b.id AND a.user_id = ? AND b.deleted = 0';
 		$user_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($user_id,'Unique User ID: '. $user_id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($user_id, 'Unique User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $user_id === FALSE ) {
 			return TRUE;
@@ -96,8 +97,9 @@ class PermissionUserFactory extends Factory {
 
 		return FALSE;
 	}
+
 	function getUser() {
-		return $this->data['user_id'];
+		return (int)$this->data['user_id'];
 	}
 	function setUser($id) {
 		$id = trim($id);
@@ -174,7 +176,7 @@ class PermissionUserFactory extends Factory {
 	function addLog( $log_action ) {
 		$u_obj = $this->getUserObject();
 		if ( is_object($u_obj) ) {
-			return TTLog::addEntry( $this->getPermissionControl(), $log_action, TTi18n::getText('Employee').': '. $u_obj->getFullName( FALSE, TRUE ) , NULL, $this->getTable() );
+			return TTLog::addEntry( $this->getPermissionControl(), $log_action, TTi18n::getText('Employee').': '. $u_obj->getFullName( FALSE, TRUE ), NULL, $this->getTable() );
 		}
 
 		return FALSE;

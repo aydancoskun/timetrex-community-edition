@@ -45,33 +45,33 @@
 class InstallSchema_1046A extends InstallSchema_Base {
 
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion() , __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		return TRUE;
 	}
 
 	function postInstall() {
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		//Allow edit password/phone password permissions for all permission groups.
 		$clf = TTnew( 'CompanyListFactory' );
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
 			foreach( $clf as $c_obj ) {
-				Debug::text('Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__,9);
+				Debug::text('Company: '. $c_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
 				if ( $c_obj->getStatus() != 30 ) {
 					$pclf = TTnew( 'PermissionControlListFactory' );
 					$pclf->getByCompanyId( $c_obj->getId(), NULL, NULL, NULL, array( 'name' => 'asc' ) ); //Force order to prevent references to columns that haven't been created yet.
 					if ( $pclf->getRecordCount() > 0 ) {
 						foreach( $pclf as $pc_obj ) {
-							Debug::text('Permission Group: '. $pc_obj->getName(), __FILE__, __LINE__, __METHOD__,9);
+							Debug::text('Permission Group: '. $pc_obj->getName(), __FILE__, __LINE__, __METHOD__, 9);
 							$plf = TTnew( 'PermissionListFactory' );
 							$plf->getByCompanyIdAndPermissionControlIdAndSectionAndName( $c_obj->getId(), $pc_obj->getId(), 'user', 'edit_own');
 							if ( $plf->getRecordCount() > 0 ) {
-								Debug::text('Found permission group with user edit own enabled: '. $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__,9);
+								Debug::text('Found permission group with user edit own enabled: '. $plf->getCurrent()->getValue(), __FILE__, __LINE__, __METHOD__, 9);
 								$pc_obj->setPermission( array('user' => array('edit_own_password' => TRUE, 'edit_own_phone_password' => TRUE) ) );
 							} else {
-								Debug::text('Permission group does NOT have user edit own report enabled...', __FILE__, __LINE__, __METHOD__,9);
+								Debug::text('Permission group does NOT have user edit own report enabled...', __FILE__, __LINE__, __METHOD__, 9);
 							}
 						}
 					}
@@ -90,7 +90,7 @@ class InstallSchema_1046A extends InstallSchema_Base {
 							'first_name_metaphone' => $u_obj->getFirstNameMetaphone( $u_obj->setFirstNameMetaphone( $u_obj->getFirstName() ) ),
 							'last_name_metaphone' => $u_obj->getLastNameMetaphone( $u_obj->setLastNameMetaphone( $u_obj->getLastName() ) ),
 							'id' => (int)$u_obj->getId(),
-						   );
+							);
 				$query = 'update '. $ulf->getTable() .' set first_name_metaphone = ?, last_name_metaphone = ? where id = ?';
 				$this->db->Execute( $query, $ph );
 			}
@@ -104,7 +104,7 @@ class InstallSchema_1046A extends InstallSchema_Base {
 				$ph = array(
 							'name_metaphone' => $c_obj->getNameMetaphone( $c_obj->setNameMetaphone( $c_obj->getName() ) ),
 							'id' => (int)$c_obj->getId(),
-						   );
+							);
 				$query = 'update '. $clf->getTable() .' set name_metaphone = ? where id = ?';
 				$this->db->Execute( $query, $ph );
 			}
@@ -118,7 +118,7 @@ class InstallSchema_1046A extends InstallSchema_Base {
 				$ph = array(
 							'name_metaphone' => $b_obj->getNameMetaphone( $b_obj->setNameMetaphone( $b_obj->getName() ) ),
 							'id' => (int)$b_obj->getId(),
-						   );
+							);
 				$query = 'update '. $blf->getTable() .' set name_metaphone = ? where id = ?';
 				$this->db->Execute( $query, $ph );
 			}
@@ -132,7 +132,7 @@ class InstallSchema_1046A extends InstallSchema_Base {
 				$ph = array(
 							'name_metaphone' => $d_obj->getNameMetaphone( $d_obj->setNameMetaphone( $d_obj->getName() ) ),
 							'id' => (int)$d_obj->getId(),
-						   );
+							);
 				$query = 'update '. $dlf->getTable() .' set name_metaphone = ? where id = ?';
 				$this->db->Execute( $query, $ph );
 			}

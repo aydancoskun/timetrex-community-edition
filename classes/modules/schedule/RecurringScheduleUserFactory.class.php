@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: RecurringScheduleUserFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 12026 $
+ * $Id: RecurringScheduleUserFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -50,7 +50,7 @@ class RecurringScheduleUserFactory extends Factory {
 
 	function getRecurringScheduleControl() {
 		if ( isset($this->data['recurring_schedule_control_id']) ) {
-			return $this->data['recurring_schedule_control_id'];
+			return (int)$this->data['recurring_schedule_control_id'];
 		}
 
 		return FALSE;
@@ -61,7 +61,7 @@ class RecurringScheduleUserFactory extends Factory {
 		$rsclf = TTnew( 'RecurringScheduleControlListFactory' );
 
 		if (
-			  $this->Validator->isNumeric(	'recurring_schedule_control_id',
+			$this->Validator->isNumeric(	'recurring_schedule_control_id',
 											$id,
 											TTi18n::gettext('Recurring Schedule is invalid')
 			/*
@@ -94,7 +94,7 @@ class RecurringScheduleUserFactory extends Factory {
 	}
 	function getUser() {
 		if ( isset($this->data['user_id']) ) {
-			return $this->data['user_id'];
+			return (int)$this->data['user_id'];
 		}
 	}
 	function setUser($id) {
@@ -168,7 +168,7 @@ class RecurringScheduleUserFactory extends Factory {
 	function addLog( $log_action ) {
 		$u_obj = $this->getUserObject();
 		if ( is_object($u_obj) ) {
-			return TTLog::addEntry( $this->getRecurringScheduleControl(), $log_action, TTi18n::getText('Employee').': '. $u_obj->getFullName( FALSE, TRUE ) , NULL, $this->getTable() );
+			return TTLog::addEntry( $this->getRecurringScheduleControl(), $log_action, TTi18n::getText('Employee').': '. $u_obj->getFullName( FALSE, TRUE ), NULL, $this->getTable() );
 		}
 
 		return FALSE;

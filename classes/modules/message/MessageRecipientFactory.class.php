@@ -63,7 +63,7 @@ class MessageRecipientFactory extends Factory {
 	}
 
 	function getUser() {
-		return $this->data['user_id'];
+		return (int)$this->data['user_id'];
 	}
 	function setUser($id) {
 		$id = trim($id);
@@ -85,7 +85,7 @@ class MessageRecipientFactory extends Factory {
 
 	function getMessageSender() {
 		if ( isset($this->data['message_sender_id']) ) {
-			return $this->data['message_sender_id'];
+			return (int)$this->data['message_sender_id'];
 		}
 
 		return FALSE;
@@ -109,7 +109,7 @@ class MessageRecipientFactory extends Factory {
 
 	function getMessageControl() {
 		if ( isset($this->data['message_control_id']) ) {
-			return $this->data['message_control_id'];
+			return (int)$this->data['message_control_id'];
 		}
 
 		return FALSE;
@@ -133,7 +133,7 @@ class MessageRecipientFactory extends Factory {
 
 	function getStatus() {
 		if ( isset($this->data['status_id']) ) {
-			return $this->data['status_id'];
+			return (int)$this->data['status_id'];
 		}
 
 		return FALSE;
@@ -175,7 +175,7 @@ class MessageRecipientFactory extends Factory {
 			$epoch = TTDate::getTime();
 		}
 
-		if 	(	$this->Validator->isDate(		'status_date',
+		if	(	$this->Validator->isDate(		'status_date',
 												$epoch,
 												TTi18n::gettext('Incorrect Date')) ) {
 
@@ -207,7 +207,7 @@ class MessageRecipientFactory extends Factory {
 			$this->setAckBy();
 		}
 
-		return true;
+		return TRUE;
 	}
 
 	function getAckDate() {
@@ -224,7 +224,7 @@ class MessageRecipientFactory extends Factory {
 			$epoch = TTDate::getTime();
 		}
 
-		if 	(	$this->Validator->isDate(		'ack_date',
+		if	(	$this->Validator->isDate(		'ack_date',
 												$epoch,
 												TTi18n::gettext('Invalid Acknowledge Date') ) ) {
 

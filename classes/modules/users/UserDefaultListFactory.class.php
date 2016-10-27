@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: UserDefaultListFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11830 $
+ * $Id: UserDefaultListFactory.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -53,8 +53,8 @@ class UserDefaultListFactory extends UserDefaultFactory implements IteratorAggre
 		}
 
 		$query = '
-					select 	*
-					from 	'. $this->getTable() .'
+					select	*
+					from	'. $this->getTable() .'
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -76,15 +76,15 @@ class UserDefaultListFactory extends UserDefaultFactory implements IteratorAggre
 						);
 
 			$query = '
-						select 	*
-						from 	'. $this->getTable() .'
+						select	*
+						from	'. $this->getTable() .'
 						where	id = ?
 							AND deleted = 0';
 			//$query .= $this->getSortSQL( $order );
 
 			$this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs,$id);
+			$this->saveCache($this->rs, $id);
 		}
 
 		return $this;
@@ -112,8 +112,8 @@ class UserDefaultListFactory extends UserDefaultFactory implements IteratorAggre
 					);
 
 		$query = '
-					select 	*
-					from 	'. $this->getTable() .'
+					select	*
+					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND	id = ?
 						AND deleted = 0';
@@ -134,8 +134,8 @@ class UserDefaultListFactory extends UserDefaultFactory implements IteratorAggre
 					);
 
 		$query = '
-					select 	*
-					from 	'. $this->getTable() .'
+					select	*
+					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND deleted = 0';
 		$query .= $this->getSortSQL( $order );

@@ -91,11 +91,10 @@ class GovernmentForms_CA_T619 extends GovernmentForms_CA {
 		//Strip non-digits.
 		$value = $this->stripNonNumeric($value);
 
-		return array( substr($value, 0,3), substr($value, 3,3), substr($value, 6,4) );
+		return array( substr($value, 0, 3), substr($value, 3, 3), substr($value, 6, 4) );
 	}
 
 	function _outputXML() {
-
 		$xml = new SimpleXMLElement('<Submission xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="layout-topologie.xsd"></Submission>'); //T4 and T4 Summary must be wrapped in <Return></Return>
 		$this->setXMLObject( $xml );
 
@@ -116,12 +115,12 @@ class GovernmentForms_CA_T619 extends GovernmentForms_CA {
 
 		//Transmitter name
 		$xml->T619->addChild('TRNMTR_NM'); //Employee name
-		$xml->T619->TRNMTR_NM->addChild('l1_nm', substr( $this->transmitter_name, 0, 30) ); //Transmitter name, max length 30.
+		$xml->T619->TRNMTR_NM->addChild('l1_nm', substr( Misc::stripHTMLSpecialChars( $this->company_name ), 0, 30) ); //Transmitter name, max length 30.
 
 		//Transmitter Address
 		$xml->T619->addChild('TRNMTR_ADDR');
-		$xml->T619->TRNMTR_ADDR->addChild('addr_l1_txt', $this->transmitter_address1 );
-		if ( $this->transmitter_address2 != '' ) { $xml->T619->TRNMTR_ADDR->addChild('addr_l2_txt', $this->transmitter_address2 ); }
+		$xml->T619->TRNMTR_ADDR->addChild('addr_l1_txt', Misc::stripHTMLSpecialChars( $this->transmitter_address1 ) );
+		if ( $this->transmitter_address2 != '' ) { $xml->T619->TRNMTR_ADDR->addChild('addr_l2_txt', Misc::stripHTMLSpecialChars( $this->transmitter_address2 ) ); }
 		$xml->T619->TRNMTR_ADDR->addChild('cty_nm', $this->transmitter_city );
 		$xml->T619->TRNMTR_ADDR->addChild('prov_cd', $this->transmitter_province );
 		$xml->T619->TRNMTR_ADDR->addChild('cntry_cd', 'CAN' );

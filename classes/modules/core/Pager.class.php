@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 4045 $
- * $Id: Pager.class.php 4045 2010-12-20 22:38:30Z ipso $
- * $Date: 2010-12-20 14:38:30 -0800 (Mon, 20 Dec 2010) $
+ * $Revision: 11830 $
+ * $Id: Pager.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -62,7 +62,7 @@ class Pager {
 
 	function getPreviousPage() {
 		if ( is_object($this->rs) ) {
-			return $this->rs->absolutepage() - 1;
+			return ( $this->rs->absolutepage() - 1 );
 		}
 
 		return FALSE;
@@ -78,7 +78,7 @@ class Pager {
 
 	function getNextPage() {
 		if ( is_object($this->rs) ) {
-			return $this->rs->absolutepage() + 1;
+			return ( $this->rs->absolutepage() + 1 );
 		}
 
 		return FALSE;
@@ -118,7 +118,7 @@ class Pager {
 					} else {
 						//Since we don't know what the actual last page is, just add 100 pages to the current one.
 						//The user may need to click this several times if there are more than 100 pages.
-						return $this->getCurrentPage()+99;
+						return ( $this->getCurrentPage() + 99 );
 					}
 				}
 			} else {
@@ -149,14 +149,14 @@ class Pager {
 	function getPageVariables() {
 		//Make sure the ListFactory function is doing a pageselect
 		$paging_data = array(
-							'previous_page' 	=> $this->getPreviousPage(),
-							'current_page' 		=> $this->getCurrentPage(),
+							'previous_page'		=> $this->getPreviousPage(),
+							'current_page'		=> $this->getCurrentPage(),
 							'next_page'			=> $this->getNextPage(),
 							'is_first_page'		=> $this->isFirstPage(),
 							'is_last_page'		=> $this->isLastPage(),
 							'last_page_number'	=> $this->LastPageNumber(),
-							'rows_per_page' 	=> $this->getRowsPerPage(),
-							'total_rows' 		=> $this->getTotalRows(),
+							'rows_per_page'		=> $this->getRowsPerPage(),
+							'total_rows'		=> $this->getTotalRows(),
 							);
 		//var_dump($paging_data);
 		return $paging_data;

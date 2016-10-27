@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11487 $
- * $Id: TTDate.class.php 11487 2013-11-25 18:48:47Z mikeb $
- * $Date: 2013-11-25 10:48:47 -0800 (Mon, 25 Nov 2013) $
+ * $Revision: 11890 $
+ * $Id: TTDate.class.php 11890 2014-01-03 05:31:27Z mikeb $
+ * $Date: 2014-01-02 21:31:27 -0800 (Thu, 02 Jan 2014) $
  */
 
 /**
@@ -83,44 +83,44 @@ class TTDate {
 		self::setTimeZone();
 	}
 
-	private  static function _get_month_short_names() {
+	private	 static function _get_month_short_names() {
 		// i18n: This private method is not called anywhere in the class. (it is now)
-		//       It's purpose is simply to ensure that the short (3 letter)
-		//       month forms are included in gettext() calls so that they
-		//       will be properly extracted for translation.
+		//		 It's purpose is simply to ensure that the short (3 letter)
+		//		 month forms are included in getText() calls so that they
+		//		 will be properly extracted for translation.
 		return array (
-				1 => TTi18n::gettext('Jan'),
-				2 => TTi18n::gettext('Feb'),
-				3 => TTi18n::gettext('Mar'),
-				4 => TTi18n::gettext('Apr'),
-				5 => TTi18n::gettext('May'),
-				6 => TTi18n::gettext('Jun'),
-				7 => TTi18n::gettext('Jul'),
-				8 => TTi18n::gettext('Aug'),
-				9 => TTi18n::gettext('Sep'),
-				10 => TTi18n::gettext('Oct'),
-				11 => TTi18n::gettext('Nov'),
-				12 => TTi18n::gettext('Dec'),
+				1 => TTi18n::getText('Jan'),
+				2 => TTi18n::getText('Feb'),
+				3 => TTi18n::getText('Mar'),
+				4 => TTi18n::getText('Apr'),
+				5 => TTi18n::getText('May'),
+				6 => TTi18n::getText('Jun'),
+				7 => TTi18n::getText('Jul'),
+				8 => TTi18n::getText('Aug'),
+				9 => TTi18n::getText('Sep'),
+				10 => TTi18n::getText('Oct'),
+				11 => TTi18n::getText('Nov'),
+				12 => TTi18n::getText('Dec'),
 				);
 	}
 
 	private static function _get_month_long_names() {
 		// i18n: It's purpose is simply to ensure that the short (3 letter)
-		//       month forms are included in gettext() calls so that they
-		//       will be properly extracted for translation.
+		//		 month forms are included in getText() calls so that they
+		//		 will be properly extracted for translation.
 		return array (
-				1 => TTi18n::gettext('January'),
-				2 => TTi18n::gettext('February'),
-				3 => TTi18n::gettext('March'),
-				4 => TTi18n::gettext('April'),
-				5 => TTi18n::gettext('May'),
-				6 => TTi18n::gettext('June'),
-				7 => TTi18n::gettext('July'),
-				8 => TTi18n::gettext('August'),
-				9 => TTi18n::gettext('September'),
-				10 => TTi18n::gettext('October'),
-				11 => TTi18n::gettext('November'),
-				12 => TTi18n::gettext('December')
+				1 => TTi18n::getText('January'),
+				2 => TTi18n::getText('February'),
+				3 => TTi18n::getText('March'),
+				4 => TTi18n::getText('April'),
+				5 => TTi18n::getText('May'),
+				6 => TTi18n::getText('June'),
+				7 => TTi18n::getText('July'),
+				8 => TTi18n::getText('August'),
+				9 => TTi18n::getText('September'),
+				10 => TTi18n::getText('October'),
+				11 => TTi18n::getText('November'),
+				12 => TTi18n::getText('December')
 				);
 	}
 
@@ -167,7 +167,7 @@ class TTDate {
 			Debug::text('Setting TimeZone: '. $time_zone, __FILE__, __LINE__, __METHOD__, 10);
 
 			global $db;
-			if ( isset($db) AND is_object($db) AND strncmp($db->databaseType,'mysql',5) == 0 ) {
+			if ( isset($db) AND is_object($db) AND strncmp($db->databaseType, 'mysql', 5) == 0 ) {
 				if ( @$db->Execute('SET SESSION time_zone='. $db->qstr($time_zone) ) == FALSE ) {
 					return FALSE;
 				}
@@ -255,7 +255,7 @@ class TTDate {
 			$new_timezone_offset = ( $tz->getOffset( $d ) / 1000 );
 			Debug::text('Converting time: '. $epoch .' to TimeZone: '. $timezone .' Offset: '. $new_timezone_offset, __FILE__, __LINE__, __METHOD__, 10);
 
-			return $epoch - ( $old_timezone_offset - $new_timezone_offset );
+			return ( $epoch - ( $old_timezone_offset - $new_timezone_offset ) );
 		} catch (Exception $e) {
 			return $epoch;
 		}
@@ -307,11 +307,11 @@ class TTDate {
 
 	public static function parseTimeUnit($time_unit, $format = NULL ) {
 		/*
-			10 	=> 'hh:mm (2:15)',
-			12 	=> 'hh:mm:ss (2:15:59)',
-			20 	=> 'Hours (2.25)',
-			22 	=> 'Hours (2.241)',
-			30 	=> 'Minutes (135)'
+			10	=> 'hh:mm (2:15)',
+			12	=> 'hh:mm:ss (2:15:59)',
+			20	=> 'Hours (2.25)',
+			22	=> 'Hours (2.241)',
+			30	=> 'Minutes (135)'
 		*/
 
 		if ( $format == '' ) {
@@ -324,8 +324,8 @@ class TTDate {
 		}
 
 		//Get rid of any spaces or commas.
-		//ie: 1,100 :10 should still parse correctly
-		$time_unit = trim( str_replace( array(',',' ','"'), '', $time_unit) );
+		//ie: 1, 100 :10 should still parse correctly
+		$time_unit = trim( str_replace( array(',', ' ', '"'), '', $time_unit) );
 		//Debug::text('Time Unit: '. $time_unit .' Enable Rounding: '. (int)$enable_rounding, __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::text('Time Unit Format: '. self::$time_unit_format, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -337,7 +337,7 @@ class TTDate {
 					$time_unit = TTDate::getTimeUnit( self::parseTimeUnit( $time_unit, 20 ), $format );
 				}
 
-				$time_units = explode(':',$time_unit);
+				$time_units = explode(':', $time_unit);
 
 				if (!isset($time_units[0]) ) {
 					$time_units[0] = 0;
@@ -350,14 +350,14 @@ class TTDate {
 				}
 
 				//Check if the first character is '-', or thre are any negative integers.
-				if ( strncmp($time_units[0],'-',1) == 0 OR $time_units[0] < 0 OR $time_units[1] < 0 OR $time_units[2] < 0) {
+				if ( strncmp($time_units[0], '-', 1) == 0 OR $time_units[0] < 0 OR $time_units[1] < 0 OR $time_units[2] < 0) {
 					$negative_number = TRUE;
 				}
 
-				$seconds = ( abs( (int)$time_units[0] ) * 3600) + ( abs( (int)$time_units[1] ) * 60) + abs( (int)$time_units[2] );
+				$seconds = ( ( abs( (int)$time_units[0] ) * 3600 ) + ( abs( (int)$time_units[1] ) * 60 ) + abs( (int)$time_units[2] ) );
 
 				if ( isset($negative_number) ) {
-					$seconds = $seconds * -1;
+					$seconds = ( $seconds * -1 );
 				}
 
 				break;
@@ -372,13 +372,13 @@ class TTDate {
 				//do they can use hh:mm:ss instead.
 				//However accrual policies have to be second accurate (weekly accruals rounded to 1 minute can result in 52minute differences in a year),
 				//so we need a way to disable this rounding as well so the user can properly zero out an accrual balance if needed.
-				$seconds = $time_unit * 3600;
+				$seconds = ( $time_unit * 3600 );
 				if ( $enable_rounding == TRUE ) {
 					$seconds = self::roundTime( $seconds, 60 );
 				}
 				break;
 			case 30: //minutes
-				$seconds = $time_unit * 60;
+				$seconds = ( $time_unit * 60 );
 				break;
 		}
 
@@ -426,13 +426,13 @@ class TTDate {
 					$retval = self::convertSecondsToHMS( $seconds, TRUE );
 					break;
 				case 20: //hours with 2 decimal places
-					$retval = number_format( $seconds / 3600, 2);
+					$retval = number_format( ( $seconds / 3600 ), 2);
 					break;
 				case 22: //hours with 3 decimal places
-					$retval = number_format( $seconds / 3600, 3);
+					$retval = number_format( ( $seconds / 3600 ), 3);
 					break;
 				case 30: //minutes
-					$retval = number_format( $seconds / 60, 0);
+					$retval = number_format( ( $seconds / 60 ), 0);
 					break;
 			}
 		}
@@ -479,51 +479,51 @@ class TTDate {
 
 		//Debug::text('String: '. $str .' Date Format: '. self::$date_format, __FILE__, __LINE__, __METHOD__, 10);
 		if ( !is_numeric($str) AND in_array( self::$date_format, $custom_parse_formats) ) {
-			//Debug::text('  Custom Parse Format detected!', __FILE__, __LINE__, __METHOD__, 10);
+			//Debug::text('	 Custom Parse Format detected!', __FILE__, __LINE__, __METHOD__, 10);
 			//Match to: Year, Month, Day
 			$textual_month = FALSE;
 			switch (self::$date_format) {
 				case 'd-M-y':
 					//Two digit year, custom parsing for it to have more control over 1900 or 2000 years.
 					//PHP handles it like this: values between 00-69 are mapped to 2000-2069 and 70-99 to 1970-1999
-					//Debug::text('  Parsing format: M-d-y', __FILE__, __LINE__, __METHOD__, 10);
+					//Debug::text('	 Parsing format: M-d-y', __FILE__, __LINE__, __METHOD__, 10);
 					$date_pattern = '/([0-9]{1,2})\-([A-Za-z]{3})\-([0-9]{2,4})/';
 					$match_arr = array( 'year' => 3, 'month' => 2, 'day' => 1 );
 					$textual_month = TRUE;
 					break;
 				case 'M-d-y':
 				case 'M-d-Y':
-					//Debug::text('  Parsing format: M-d-y', __FILE__, __LINE__, __METHOD__, 10);
+					//Debug::text('	 Parsing format: M-d-y', __FILE__, __LINE__, __METHOD__, 10);
 					$date_pattern = '/([A-Za-z]{3})\-([0-9]{1,2})\-([0-9]{2,4})/';
 					$match_arr = array( 'year' => 3, 'month' => 1, 'day' => 2 );
 					$textual_month = TRUE;
 					break;
 				case 'm-d-y':
 				case 'm-d-Y':
-					//Debug::text('  Parsing format: m-d-y', __FILE__, __LINE__, __METHOD__, 10);
+					//Debug::text('	 Parsing format: m-d-y', __FILE__, __LINE__, __METHOD__, 10);
 					$date_pattern = '/([0-9]{1,2})\-([0-9]{1,2})\-([0-9]{2,4})/';
 					$match_arr = array( 'year' => 3, 'month' => 1, 'day' => 2 );
 					break;
 				case 'm/d/y':
 				case 'm/d/Y':
-					//Debug::text('  Parsing format: m/d/y', __FILE__, __LINE__, __METHOD__, 10);
+					//Debug::text('	 Parsing format: m/d/y', __FILE__, __LINE__, __METHOD__, 10);
 					$date_pattern = '/([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{2,4})/';
 					$match_arr = array( 'year' => 3, 'month' => 1, 'day' => 2 );
 					break;
 				case 'd/m/y':
 				case 'd/m/Y':
-					//Debug::text('  Parsing format: d/m/y', __FILE__, __LINE__, __METHOD__, 10);
+					//Debug::text('	 Parsing format: d/m/y', __FILE__, __LINE__, __METHOD__, 10);
 					$date_pattern = '/([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{2,4})/';
 					$match_arr = array( 'year' => 3, 'month' => 2, 'day' => 1 );
 					break;
 				case 'd-m-y':
 				case 'd-m-Y':
-					//Debug::text('  Parsing format: d-m-y', __FILE__, __LINE__, __METHOD__, 10);
+					//Debug::text('	 Parsing format: d-m-y', __FILE__, __LINE__, __METHOD__, 10);
 					$date_pattern = '/([0-9]{1,2})\-([0-9]{1,2})\-([0-9]{2,4})/';
 					$match_arr = array( 'year' => 3, 'month' => 2, 'day' => 1 );
 					break;
 				default:
-					//Debug::text('  NO pattern match!', __FILE__, __LINE__, __METHOD__, 10);
+					//Debug::text('	 NO pattern match!', __FILE__, __LINE__, __METHOD__, 10);
 					break;
 			}
 
@@ -532,7 +532,7 @@ class TTDate {
 				$date_result = preg_match( $date_pattern, $str, $date_matches );
 
 				if ( $date_result != 0 ) {
-					//Debug::text('  Custom Date Match Success!', __FILE__, __LINE__, __METHOD__, 10);
+					//Debug::text('	 Custom Date Match Success!', __FILE__, __LINE__, __METHOD__, 10);
 
 					$date_arr = array(
 										'year' => $date_matches[$match_arr['year']],
@@ -543,7 +543,7 @@ class TTDate {
 					//Handle dates less then 1970
 					//If the two digit year is greater then current year plus 10 we assume its a 1900 year.
 					//Debug::text('Passed Year: '. $date_arr['year'] ." Current Year threshold: ". (date('y')+10), __FILE__, __LINE__, __METHOD__, 10);
-					if ( strlen($date_arr['year']) == 2 AND $date_arr['year'] > (date('y')+10) ) {
+					if ( strlen($date_arr['year']) == 2 AND $date_arr['year'] > (date('y') + 10) ) {
 						$date_arr['year'] = (int)'19'.$date_arr['year'];
 					}
 					//Debug::Arr($date_arr, 'Date Match Arr!', __FILE__, __LINE__, __METHOD__, 10);
@@ -551,13 +551,13 @@ class TTDate {
 					//; preg_match('/[a-z]/', $date_arr['month']) != 0
 					if ( $textual_month == TRUE AND isset(self::$month_arr[strtolower($date_arr['month'])]) ) {
 						$numeric_month = self::$month_arr[strtolower($date_arr['month'])];
-						//Debug::text('  Numeric Month: '. $numeric_month, __FILE__, __LINE__, __METHOD__, 10);
+						//Debug::text('	 Numeric Month: '. $numeric_month, __FILE__, __LINE__, __METHOD__, 10);
 						$date_arr['month'] = $numeric_month;
 						unset($numeric_month);
 					}
 
 					$tmp_date = $date_arr['year'].'-'.$date_arr['month'].'-'.$date_arr['day'];
-					//Debug::text('  Tmp Date: '. $tmp_date, __FILE__, __LINE__, __METHOD__, 10);
+					//Debug::text('	 Tmp Date: '. $tmp_date, __FILE__, __LINE__, __METHOD__, 10);
 
 					//Replace the date pattern with NULL leaving only time left to append to the end of the string.
 					$time_result = preg_replace( $date_pattern, '', $str );
@@ -569,10 +569,10 @@ class TTDate {
 		}
 
 		if ( !isset($formatted_date) ) {
-			//Debug::text('  NO Custom Parse Format detected!', __FILE__, __LINE__, __METHOD__, 10);
+			//Debug::text('	 NO Custom Parse Format detected!', __FILE__, __LINE__, __METHOD__, 10);
 			$formatted_date = $str;
 		}
-		//Debug::text('  Parsing Date: '. $formatted_date , __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::text('	 Parsing Date: '. $formatted_date, __FILE__, __LINE__, __METHOD__, 10);
 
 		//On the Recurring Templates, if the user enters "0600", its passed here without a date, and parsed as "600" which is incorrect.
 		//We worked around this in the API by prefixing the date infront of 0600 to make it a string instead
@@ -588,7 +588,7 @@ class TTDate {
 				$epoch = FALSE;
 			}
 
-			//Debug::text('  Parsed Date: '. TTDate::getDate('DATE+TIME', $epoch) .' ('.$epoch.')', __FILE__, __LINE__, __METHOD__, 10);
+			//Debug::text('	 Parsed Date: '. TTDate::getDate('DATE+TIME', $epoch) .' ('.$epoch.')', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return $epoch;
@@ -616,7 +616,7 @@ class TTDate {
 		return date( $format, $epoch);
 	}
 
-	public static function getDate($format = NULL, $epoch = NULL, $nodst = FALSE) {
+	public static function getDate($format = NULL, $epoch = NULL ) {
 		if ( !is_numeric($epoch) OR $epoch == 0 ) {
 			//Debug::text('Epoch is not numeric: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
@@ -662,7 +662,7 @@ class TTDate {
 	}
 
 	public static function getDayOfMonthArray() {
-		for($i=1; $i <= 31; $i++) {
+		for( $i = 1; $i <= 31; $i++ ) {
 			$retarr[$i] = $i;
 		}
 
@@ -686,15 +686,15 @@ class TTDate {
 	public static function getDayOfWeekArray( $translation = TRUE ) {
 		if ( $translation == TRUE AND is_array(self::$day_of_week_arr) == FALSE ) {
 			self::$day_of_week_arr = array(
-											0 => TTi18n::gettext('Sunday'),
-											1 => TTi18n::gettext('Monday'),
-											2 => TTi18n::gettext('Tuesday'),
-											3 => TTi18n::gettext('Wednesday'),
-											4 => TTi18n::gettext('Thursday'),
-											5 => TTi18n::gettext('Friday'),
-											6 => TTi18n::gettext('Saturday')
+											0 => TTi18n::getText('Sunday'),
+											1 => TTi18n::getText('Monday'),
+											2 => TTi18n::getText('Tuesday'),
+											3 => TTi18n::getText('Wednesday'),
+											4 => TTi18n::getText('Thursday'),
+											5 => TTi18n::getText('Friday'),
+											6 => TTi18n::getText('Saturday')
 				);
-	    } else {
+		} else {
 			//Translated days of week can't be piped back into strtotime() for parsing.
 			self::$day_of_week_arr = array(
 											0 => 'Sunday',
@@ -715,9 +715,9 @@ class TTDate {
 		if ( $start_week_day == 0 ) {
 			return $dow;
 		} else {
-			$retval = $dow-$start_week_day;
+			$retval = ( $dow - $start_week_day );
 			if ( $dow < $start_week_day ) {
-				$retval = $dow+(7-$start_week_day);
+				$retval = ( $dow + ( 7 - $start_week_day ) );
 			}
 			return $retval;
 		}
@@ -795,7 +795,7 @@ class TTDate {
 	}
 	public static function getDSTOffset( $start_epoch, $end_epoch ) {
 		if ( date('I', $start_epoch) == 0 AND date('I', $end_epoch) == 1 ) {
-			$retval = +3600; //DST==TRUE: Spring - Spring ahead an hour, which means we lose an hour, so we add one hour from the offset.
+			$retval = 3600; //DST==TRUE: Spring - Spring ahead an hour, which means we lose an hour, so we add one hour from the offset.
 		} elseif ( date('I', $start_epoch) == 1 AND date('I', $end_epoch) == 0 ) {
 			$retval = -3600; //DST==FALSE: Fall - Fall back an hour, which means we gain an hour, or minus one hour to the offset
 		} else {
@@ -848,19 +848,19 @@ class TTDate {
 		//Unit: minute, hour, day
 		switch ( $unit ) {
 			case 'minute':
-				$retval = mktime( $date_arr['hours'], ($date_arr['minutes']+$amount), 0, $date_arr['mon'], $date_arr['mday'], $date_arr['year'] );
+				$retval = mktime( $date_arr['hours'], ($date_arr['minutes'] + $amount), 0, $date_arr['mon'], $date_arr['mday'], $date_arr['year'] );
 				break;
 			case 'hour':
-				$retval = mktime( ($date_arr['hours']+$amount), $date_arr['minutes'], 0, $date_arr['mon'], $date_arr['mday'], $date_arr['year'] );
+				$retval = mktime( ($date_arr['hours'] + $amount), $date_arr['minutes'], 0, $date_arr['mon'], $date_arr['mday'], $date_arr['year'] );
 				break;
 			case 'day':
-				$retval = mktime( $date_arr['hours'], $date_arr['minutes'], 0, $date_arr['mon'], ($date_arr['mday']+$amount), $date_arr['year'] );
+				$retval = mktime( $date_arr['hours'], $date_arr['minutes'], 0, $date_arr['mon'], ($date_arr['mday'] + $amount), $date_arr['year'] );
 				break;
 			case 'month':
-				$retval = mktime( $date_arr['hours'], $date_arr['minutes'], 0, ($date_arr['mon']+$amount), $date_arr['mday'], $date_arr['year'] );
+				$retval = mktime( $date_arr['hours'], $date_arr['minutes'], 0, ($date_arr['mon'] + $amount), $date_arr['mday'], $date_arr['year'] );
 				break;
 			case 'year':
-				$retval = mktime( $date_arr['hours'], $date_arr['minutes'], 0, $date_arr['mon'], $date_arr['mday'], ($date_arr['year']+$amount) );
+				$retval = mktime( $date_arr['hours'], $date_arr['minutes'], 0, $date_arr['mon'], $date_arr['mday'], ($date_arr['year'] + $amount) );
 				break;
 		}
 
@@ -907,20 +907,20 @@ class TTDate {
 				if ( $grace_time > 0 ) {
 					$epoch += $grace_time;
 				}
-				$epoch = $epoch - ( $epoch % $round_value );
+				$epoch = ( $epoch - ( $epoch % $round_value ) );
 				break;
 			case 20: //Average
 				if ( $epoch > 0 ) {
-					$epoch = (int)( ($epoch + ($round_value / 2) ) / $round_value ) * $round_value;
+					$epoch = ( (int)( ($epoch + ($round_value / 2) ) / $round_value ) * $round_value );
 				} else {
-					$epoch = (int)( ($epoch - ($round_value / 2) ) / $round_value ) * $round_value;
+					$epoch = ( (int)( ($epoch - ($round_value / 2) ) / $round_value ) * $round_value );
 				}
 				break;
 			case 30: //Up
 				if ( $grace_time > 0 ) {
 					$epoch -= $grace_time;
 				}
-				$epoch = (int)( ($epoch + ($round_value - 1) ) / $round_value ) * $round_value;
+				$epoch = ( (int)( ($epoch + ($round_value - 1) ) / $round_value ) * $round_value );
 				break;
 		}
 
@@ -931,7 +931,7 @@ class TTDate {
 		//Debug::text('Current Epoch: '. $current_epoch .' Grace Time: '. $grace_time .' Schedule Epoch: '. $schedule_epoch, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $current_epoch <= ($schedule_epoch + $grace_time)
 				AND $current_epoch >= ($schedule_epoch - $grace_time) ) {
-            //Within grace period, return scheduled time.
+			//Within grace period, return scheduled time.
 			return $schedule_epoch;
 		}
 
@@ -979,10 +979,10 @@ class TTDate {
 
 		Debug::text('Year: '. $year .' Month: '. $month .' Day: '. $day .' Hour: '. $hour .' Min: '. $min .' Sec: '. $sec, __FILE__, __LINE__, __METHOD__, 10);
 
-		return self::getTimeStamp($year,$month,$day,$hour,$min,$sec);
+		return self::getTimeStamp($year, $month, $day, $hour, $min, $sec);
 	}
 
-	public static function getTimeStamp($year="",$month="",$day="", $hour=0, $min=0, $sec=0) {
+	public static function getTimeStamp($year="", $month="", $day="", $hour = 0, $min = 0, $sec = 0) {
 		if ( empty($year) ) {
 			$year = strftime("%Y");
 		}
@@ -1009,16 +1009,16 @@ class TTDate {
 
 		//Use adodb time library to support dates earlier then 1970.
 		//require_once( Environment::getBasePath() .'classes/adodb/adodb-time.inc.php');
-		//Debug::text('  - Year: '. $year .' Month: '. $month .' Day: '. $day .' Hour: '. $hour .' Min: '. $min .' Sec: '. $sec, __FILE__, __LINE__, __METHOD__, 10);
-		$epoch = adodb_mktime($hour,$min,$sec,$month,$day,$year);
+		//Debug::text('	 - Year: '. $year .' Month: '. $month .' Day: '. $day .' Hour: '. $hour .' Min: '. $min .' Sec: '. $sec, __FILE__, __LINE__, __METHOD__, 10);
+		$epoch = adodb_mktime($hour, $min, $sec, $month, $day, $year);
 		//Debug::text('Epoch: '. $epoch .' Date: '. self::getDate($epoch), __FILE__, __LINE__, __METHOD__, 10);
 
 		return $epoch;
 	}
 
 	public static function getDayWithMostTime( $start_epoch, $end_epoch ) {
-		$time_on_start_date = TTDate::getEndDayEpoch( $start_epoch ) - $start_epoch;
-		$time_on_end_date = $end_epoch - TTDate::getBeginDayEpoch( $end_epoch );
+		$time_on_start_date = ( TTDate::getEndDayEpoch( $start_epoch ) - $start_epoch );
+		$time_on_end_date = ( $end_epoch - TTDate::getBeginDayEpoch( $end_epoch ) );
 		if ( $time_on_start_date > $time_on_end_date ) {
 			$day_with_most_time = $start_epoch;
 		} else {
@@ -1030,7 +1030,7 @@ class TTDate {
 	
 	public static function getDayDifference($start_epoch, $end_epoch) {
 		//FIXME: Be more accurate, take leap years in to account etc...
-		$days = ($end_epoch - $start_epoch) / 86400;
+		$days = ( ($end_epoch - $start_epoch) / 86400 );
 
 		Debug::text('Days Difference: '. $days, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1039,7 +1039,7 @@ class TTDate {
 
 	public static function getWeekDifference($start_epoch, $end_epoch) {
 		//FIXME: Be more accurate, take leap years in to account etc...
-		$weeks = ($end_epoch - $start_epoch) / (86400 * 7);
+		$weeks = ( ($end_epoch - $start_epoch) / (86400 * 7) );
 
 		Debug::text('Week Difference: '. $weeks, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1047,15 +1047,15 @@ class TTDate {
 	}
 
 	public static function getMonthDifference($start_epoch, $end_epoch) {
-		Debug::text('Start Epoch: '. TTDate::getDate('DATE+TIME', $start_epoch) .' End Epoch: '. TTDate::getDate('DATE+TIME', $end_epoch) , __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Start Epoch: '. TTDate::getDate('DATE+TIME', $start_epoch) .' End Epoch: '. TTDate::getDate('DATE+TIME', $end_epoch), __FILE__, __LINE__, __METHOD__, 10);
 
-		$epoch_diff = $end_epoch - $start_epoch;
-		Debug::text('Diff Epoch: '. $epoch_diff , __FILE__, __LINE__, __METHOD__, 10);
-		$x = floor( $epoch_diff / 60 / 60 / 24 / 7 / 4);
+		$epoch_diff = ( $end_epoch - $start_epoch );
+		Debug::text('Diff Epoch: '. $epoch_diff, __FILE__, __LINE__, __METHOD__, 10);
+		$x = floor( ( $epoch_diff / 60 / 60 / 24 / 7 / 4 ) );
 
 		/*
 		$x=-1; //Start at -1 because it'll always match the first month?
-		for($i = $start_epoch; $i < $end_epoch; $i += ( date('t',$i) * 86400) ) {
+		for($i = $start_epoch; $i < $end_epoch; $i += ( date('t', $i) * 86400) ) {
 			//echo "I: $i ". TTDate::getDate('DATE+TIME', $i) ." <br>\n";
 			Debug::text('I: '. $i.' '. TTDate::getDate('DATE+TIME', $i), __FILE__, __LINE__, __METHOD__, 10);
 			$x++;
@@ -1068,7 +1068,7 @@ class TTDate {
 
 	public static function getYearDifference($start_epoch, $end_epoch) {
 		//FIXME: Be more accurate, take leap years in to account etc...
-		$years = ( ($end_epoch - $start_epoch) / 86400 ) / 365;
+		$years = ( ( ($end_epoch - $start_epoch) / 86400 ) / 365 );
 
 		//Debug::text('Years Difference: '. $years, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1076,8 +1076,8 @@ class TTDate {
 	}
 
 	public static function getDateByMonthOffset($epoch, $month_offset) {
-		//return mktime(0,0,0,date('n', $epoch) + $month_offset,date('j',$epoch),date('Y',$epoch) );
-		return mktime(date('G', $epoch),date('i', $epoch),date('s', $epoch),date('n', $epoch) + $month_offset,date('j',$epoch),date('Y',$epoch) );
+		//return mktime(0, 0, 0, date('n', $epoch) + $month_offset, date('j', $epoch), date('Y', $epoch) );
+		return mktime(date('G', $epoch), date('i', $epoch), date('s', $epoch), ( date('n', $epoch) + $month_offset ), date('j', $epoch), date('Y', $epoch) );
 	}
 
 	public static function getBeginMinuteEpoch($epoch = NULL) {
@@ -1085,8 +1085,8 @@ class TTDate {
 			$epoch = self::getTime();
 		}
 
-		$retval=mktime(date('G',$epoch),date('i', $epoch),0,date('m',$epoch),date('d',$epoch),date('Y',$epoch));
-		//Debug::text('Begin Day Epoch: '. $retval .' - '. TTDate::getDate('DATE+TIME', $retval) , __FILE__, __LINE__, __METHOD__, 10);
+		$retval = mktime(date('G', $epoch), date('i', $epoch), 0, date('m', $epoch), date('d', $epoch), date('Y', $epoch));
+		//Debug::text('Begin Day Epoch: '. $retval .' - '. TTDate::getDate('DATE+TIME', $retval), __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 	}
 
@@ -1095,8 +1095,8 @@ class TTDate {
 			$epoch = self::getTime();
 		}
 
-		$retval=mktime(0,0,0,date('m',$epoch),date('d',$epoch),date('Y',$epoch));
-		//Debug::text('Begin Day Epoch: '. $retval .' - '. TTDate::getDate('DATE+TIME', $retval) .' Epoch: '. $epoch .' - '. TTDate::getDate('DATE+TIME', $epoch) .' TimeZone: '. self::getTimeZone() , __FILE__, __LINE__, __METHOD__, 10);
+		$retval = mktime(0, 0, 0, date('m', $epoch), date('d', $epoch), date('Y', $epoch));
+		//Debug::text('Begin Day Epoch: '. $retval .' - '. TTDate::getDate('DATE+TIME', $retval) .' Epoch: '. $epoch .' - '. TTDate::getDate('DATE+TIME', $epoch) .' TimeZone: '. self::getTimeZone(), __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 	}
 
@@ -1105,8 +1105,8 @@ class TTDate {
 			$epoch = self::getTime();
 		}
 
-		$retval=mktime(12,0,0,date('m',$epoch),date('d',$epoch),date('Y',$epoch));
-		//Debug::text('Middle (noon) Day Epoch: '. $retval .' - '. TTDate::getDate('DATE+TIME', $retval) , __FILE__, __LINE__, __METHOD__, 10);
+		$retval = mktime(12, 0, 0, date('m', $epoch), date('d', $epoch), date('Y', $epoch));
+		//Debug::text('Middle (noon) Day Epoch: '. $retval .' - '. TTDate::getDate('DATE+TIME', $retval), __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 	}
 
@@ -1115,8 +1115,8 @@ class TTDate {
 			$epoch = self::getTime();
 		}
 
-		$retval=mktime(0,0,0,date('m',$epoch),date('d',$epoch)+1,date('Y',$epoch))-1;
-		//Debug::text('Begin Day Epoch: '. $retval .' - '. TTDate::getDate('DATE+TIME', $retval) , __FILE__, __LINE__, __METHOD__, 10);
+		$retval = ( mktime(0, 0, 0, date('m', $epoch), ( date('d', $epoch) + 1 ), date('Y', $epoch)) - 1 );
+		//Debug::text('Begin Day Epoch: '. $retval .' - '. TTDate::getDate('DATE+TIME', $retval), __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 	}
 
@@ -1125,17 +1125,17 @@ class TTDate {
 			$epoch = self::getTime();
 		}
 
-		$retval=mktime(0,0,0,date('m',$epoch),1,date('Y',$epoch));
+		$retval = mktime(0, 0, 0, date('m', $epoch), 1, date('Y', $epoch));
 
 		return $retval;
 	}
 
-	public static function getEndMonthEpoch($epoch = NULL, $preserve_hours = FALSE) {
+	public static function getEndMonthEpoch($epoch = NULL) {
 		if ($epoch == NULL OR $epoch == '' OR !is_numeric($epoch)) {
 			$epoch = self::getTime();
 		}
 
-		$retval=mktime(0,0,0,date('m',$epoch) + 1,1,date('Y',$epoch)) - 1;
+		$retval = ( mktime(0, 0, 0, ( date('m', $epoch) + 1 ), 1, date('Y', $epoch)) - 1 );
 
 		return $retval;
 	}
@@ -1145,7 +1145,7 @@ class TTDate {
 			$epoch = self::getTime();
 		}
 
-		$retval=mktime(0,0,0,1,1,date('Y',$epoch));
+		$retval = mktime(0, 0, 0, 1, 1, date('Y', $epoch));
 
 		return $retval;
 	}
@@ -1155,9 +1155,9 @@ class TTDate {
 			$epoch = self::getTime();
 		}
 
-		//Debug::text('Attempting to Find End Of Year epoch for: '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__,10);
+		//Debug::text('Attempting to Find End Of Year epoch for: '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__, 10);
 
-		$retval=mktime(0,0,0,1,1,date('Y',$epoch) + 1) - 1;
+		$retval = ( mktime(0, 0, 0, 1, 1, ( date('Y', $epoch) + 1 ) ) - 1 );
 
 		return $retval;
 	}
@@ -1224,7 +1224,7 @@ class TTDate {
 
 		$quarter = ceil( date('n', $epoch ) / 3 );
 
-		//Debug::text('Date: '. TTDate::getDate('DATE+TIME', $epoch ) .' is in quarter: '. $quarter, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::text('Date: '. TTDate::getDate('DATE+TIME', $epoch ) .' is in quarter: '. $quarter, __FILE__, __LINE__, __METHOD__, 10);
 		return $quarter;
 	}
 	public static function getYearQuarters( $epoch = NULL, $quarter = NULL ) {
@@ -1234,10 +1234,10 @@ class TTDate {
 
 		$year = TTDate::getYear( $epoch );
 		$quarter_dates = array(
-								1 => array( 'start' => mktime(0,0,0,1,1, $year ),'end' => mktime(0,0,-1,4,1, $year ) ),
-								2 => array( 'start' => mktime(0,0,0,4,1, $year ),'end' => mktime(0,0,-1,7,1, $year ) ),
-								3 => array( 'start' => mktime(0,0,0,7,1, $year ),'end' => mktime(0,0,-1,10,1, $year ) ),
-								4 => array( 'start' => mktime(0,0,0,10,1, $year ),'end' => mktime(0,0,-1,13,1, $year ) ),
+								1 => array( 'start' => mktime(0, 0, 0, 1, 1, $year ), 'end' => mktime(0, 0, -1, 4, 1, $year ) ),
+								2 => array( 'start' => mktime(0, 0, 0, 4, 1, $year ), 'end' => mktime(0, 0, -1, 7, 1, $year ) ),
+								3 => array( 'start' => mktime(0, 0, 0, 7, 1, $year ), 'end' => mktime(0, 0, -1, 10, 1, $year ) ),
+								4 => array( 'start' => mktime(0, 0, 0, 10, 1, $year ), 'end' => mktime(0, 0, -1, 13, 1, $year ) ),
 								);
 
 		if ( $quarter != '' ) {
@@ -1254,9 +1254,9 @@ class TTDate {
 	public static function getDateOfNextDayOfWeek($anchor_epoch, $day_of_week_epoch) {
 		//Anchor Epoch is the anchor date to start searching from.
 		//Day of week epoch is the epoch we use to extract the day of the week from.
-		Debug::text('-------- ', __FILE__, __LINE__, __METHOD__,10);
-		Debug::text('Anchor Epoch: '. TTDate::getDate('DATE+TIME', $anchor_epoch), __FILE__, __LINE__, __METHOD__,10);
-		Debug::text('Day Of Week Epoch: '. TTDate::getDate('DATE+TIME', $day_of_week_epoch), __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('-------- ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Anchor Epoch: '. TTDate::getDate('DATE+TIME', $anchor_epoch), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Day Of Week Epoch: '. TTDate::getDate('DATE+TIME', $day_of_week_epoch), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $anchor_epoch == '' ) {
 			return FALSE;
@@ -1269,25 +1269,25 @@ class TTDate {
 		//Get day of week of the anchor
 		$anchor_dow = date('w', $anchor_epoch);
 		$dst_dow = date('w', $day_of_week_epoch);
-		Debug::text('Anchor DOW: '. $anchor_dow .' Destination DOW: '. $dst_dow, __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Anchor DOW: '. $anchor_dow .' Destination DOW: '. $dst_dow, __FILE__, __LINE__, __METHOD__, 10);
 
 		$days_diff = ($anchor_dow - $dst_dow);
-		Debug::text('Days Diff: '. $days_diff, __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Days Diff: '. $days_diff, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $days_diff > 0 ) {
 			//Add 7 days (1 week) then minus the days diff.
 			$anchor_epoch += 604800;
 		}
 
-		$retval = mktime( 	date('H', $day_of_week_epoch ),
+		$retval = mktime(	date('H', $day_of_week_epoch ),
 							date('i', $day_of_week_epoch ),
 							date('s', $day_of_week_epoch ),
 							date('m', $anchor_epoch ),
-							date('j', $anchor_epoch ) - $days_diff,
+							( date('j', $anchor_epoch ) - $days_diff ),
 							date('Y', $anchor_epoch )
 							);
 
-		Debug::text('Retval: '. TTDate::getDate('DATE+TIME', $retval), __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Retval: '. TTDate::getDate('DATE+TIME', $retval), __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 
 	}
@@ -1295,8 +1295,8 @@ class TTDate {
 	public static function getDateOfNextDayOfMonth($anchor_epoch, $day_of_month_epoch, $day_of_month = NULL ) {
 		//Anchor Epoch is the anchor date to start searching from.
 		//Day of month epoch is the epoch we use to extract the day of the month from.
-		Debug::text('-------- ', __FILE__, __LINE__, __METHOD__,10);
-		Debug::text('Anchor Epoch: '. TTDate::getDate('DATE+TIME', $anchor_epoch) . ' Day Of Month Epoch: '. TTDate::getDate('DATE+TIME', $day_of_month_epoch) .' Day Of Month: '. $day_of_month, __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('-------- ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Anchor Epoch: '. TTDate::getDate('DATE+TIME', $anchor_epoch) . ' Day Of Month Epoch: '. TTDate::getDate('DATE+TIME', $day_of_month_epoch) .' Day Of Month: '. $day_of_month, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $anchor_epoch == '' ) {
 			return FALSE;
@@ -1313,7 +1313,7 @@ class TTDate {
 			}
 			unset($tmp_days_in_month);
 
-			$day_of_month_epoch = mktime( 	date('H', $anchor_epoch ),
+			$day_of_month_epoch = mktime(	date('H', $anchor_epoch ),
 											date('i', $anchor_epoch ),
 											date('s', $anchor_epoch ),
 											date('m', $anchor_epoch ),
@@ -1326,14 +1326,14 @@ class TTDate {
 		//in the NEXT month.
 		$src_dom = date('j', $anchor_epoch);
 		$dst_dom = date('j', $day_of_month_epoch);
-		//Debug::text('Anchor DOM: '. $src_dom .' DST DOM: '. $dst_dom, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::text('Anchor DOM: '. $src_dom .' DST DOM: '. $dst_dom, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $src_dom > $dst_dom ) {
-			//Debug::text('Anchor DOM is greater then Dest DOM', __FILE__, __LINE__, __METHOD__,10);
+			//Debug::text('Anchor DOM is greater then Dest DOM', __FILE__, __LINE__, __METHOD__, 10);
 
 			//Get the epoch of the first day of the next month
 			//Use getMiddleDayEpoch so daylight savings doesn't throw us off.
-			$anchor_epoch = TTDate::getMiddleDayEpoch( TTDate::getEndMonthEpoch( $anchor_epoch ) +1 );
+			$anchor_epoch = TTDate::getMiddleDayEpoch( ( TTDate::getEndMonthEpoch( $anchor_epoch ) + 1 ) );
 
 			//Find out how many days are in this month
 			$days_in_month = TTDate::getDaysInMonth( $anchor_epoch );
@@ -1341,11 +1341,11 @@ class TTDate {
 			if ( $dst_dom > $days_in_month ) {
 				$dst_dom = $days_in_month;
 			}
-			$retval = $anchor_epoch + (($dst_dom-1)*86400);
+			$retval = ( $anchor_epoch + ( ($dst_dom - 1 ) * 86400 ) );
 		} else {
-			//Debug::text('Anchor DOM is equal or LESS then Dest DOM', __FILE__, __LINE__, __METHOD__,10);
+			//Debug::text('Anchor DOM is equal or LESS then Dest DOM', __FILE__, __LINE__, __METHOD__, 10);
 
-			$retval = mktime( 	date('H', $anchor_epoch ),
+			$retval = mktime(	date('H', $anchor_epoch ),
 								date('i', $anchor_epoch ),
 								date('s', $anchor_epoch ),
 								date('m', $anchor_epoch ),
@@ -1360,14 +1360,14 @@ class TTDate {
 	public static function getDateOfNextYear( $anchor_epoch, $year_epoch ) {
 		//Anchor Epoch is the anchor date to start searching from.
 		//Day of year epoch is the epoch we use to extract the day of the year from.
-		Debug::text('-------- ', __FILE__, __LINE__, __METHOD__,10);
-		Debug::text('Anchor Epoch: '. TTDate::getDate('DATE+TIME', $anchor_epoch), __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('-------- ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Anchor Epoch: '. TTDate::getDate('DATE+TIME', $anchor_epoch), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $anchor_epoch == '' ) {
 			return FALSE;
 		}
 
-		$retval = mktime( 	date('H', $anchor_epoch ),
+		$retval = mktime(	date('H', $anchor_epoch ),
 							date('i', $anchor_epoch ),
 							date('s', $anchor_epoch ),
 							date('m', $anchor_epoch ),
@@ -1375,21 +1375,21 @@ class TTDate {
 							date('Y', $year_epoch )
 							);
 
-		Debug::text('Retval: '. TTDate::getDate('DATE+TIME', $retval), __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Retval: '. TTDate::getDate('DATE+TIME', $retval), __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 
 	}
 
 	public static function getLastHireDateAnniversary($hire_date) {
-		Debug::Text('Hire Date: '. $hire_date .' - '. TTDate::getDate('DATE+TIME', $hire_date) , __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Hire Date: '. $hire_date .' - '. TTDate::getDate('DATE+TIME', $hire_date), __FILE__, __LINE__, __METHOD__, 10);
 
 		//Find last hire date anniversery.
-		$last_hire_date_anniversary = gmmktime(12,0,0, date('n',$hire_date), date('j',$hire_date), ( date('Y', TTDate::getTime() ) ) );
+		$last_hire_date_anniversary = gmmktime(12, 0, 0, date('n', $hire_date), date('j', $hire_date), ( date('Y', TTDate::getTime() ) ) );
 		//If its after todays date, minus a year from it.
 		if ( $last_hire_date_anniversary >= TTDate::getTime() ) {
-			$last_hire_date_anniversary = mktime(0,0,0, date('n',$hire_date), date('j',$hire_date), ( date('Y', TTDate::getTime() ) - 1) );
+			$last_hire_date_anniversary = mktime(0, 0, 0, date('n', $hire_date), date('j', $hire_date), ( date('Y', TTDate::getTime() ) - 1) );
 		}
-		Debug::Text('Last Hire Date Anniversary: '. $last_hire_date_anniversary .' - '. TTDate::getDate('DATE+TIME', $last_hire_date_anniversary) , __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Last Hire Date Anniversary: '. $last_hire_date_anniversary .' - '. TTDate::getDate('DATE+TIME', $last_hire_date_anniversary), __FILE__, __LINE__, __METHOD__, 10);
 
 		return $last_hire_date_anniversary;
 	}
@@ -1409,18 +1409,18 @@ class TTDate {
 
 		//Get day of week
 		$day_of_week = date('w', $epoch);
-		//Debug::text('Current Day of week: '. $day_of_week, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::text('Current Day of week: '. $day_of_week, __FILE__, __LINE__, __METHOD__, 10);
 
 		$offset = 0;
 		if ( $day_of_week < $start_day_of_week ) {
-			$offset = 7 + ($day_of_week - $start_day_of_week);
+			$offset = ( 7 + ($day_of_week - $start_day_of_week) );
 		} else {
-			$offset = $day_of_week - $start_day_of_week;
+			$offset = ( $day_of_week - $start_day_of_week );
 		}
 
-		$retval = mktime(0,0,0,date("m",$epoch),( date("j", $epoch) - $offset) ,date("Y",$epoch) );
+		$retval = mktime(0, 0, 0, date("m", $epoch), ( date("j", $epoch) - $offset), date("Y", $epoch) );
 
-		//Debug::text(' Epoch: '. TTDate::getDate('DATE+TIME', $epoch) .' Retval: '. TTDate::getDate('DATE+TIME', $retval) .' Start Day of Week: '. $start_day_of_week .' Offset: '. $offset, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::text(' Epoch: '. TTDate::getDate('DATE+TIME', $epoch) .' Retval: '. TTDate::getDate('DATE+TIME', $retval) .' Start Day of Week: '. $start_day_of_week .' Offset: '. $offset, __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 	}
 
@@ -1429,9 +1429,9 @@ class TTDate {
 			$epoch = self::getTime();
 		}
 
-		$retval = self::getEndDayEpoch( self::getMiddleDayEpoch( self::getBeginWeekEpoch( self::getMiddleDayEpoch($epoch), $start_day_of_week ) ) + (86400*6) );
+		$retval = self::getEndDayEpoch( ( self::getMiddleDayEpoch( self::getBeginWeekEpoch( self::getMiddleDayEpoch($epoch), $start_day_of_week ) ) + ( 86400 * 6 ) ) );
 
-		Debug::text(' Epoch: '. TTDate::getDate('DATE+TIME', $epoch) .' Retval: '. TTDate::getDate('DATE+TIME', $retval) .' Start Day of Week: '. $start_day_of_week, __FILE__, __LINE__, __METHOD__,10);
+		Debug::text(' Epoch: '. TTDate::getDate('DATE+TIME', $epoch) .' Retval: '. TTDate::getDate('DATE+TIME', $retval) .' Start Day of Week: '. $start_day_of_week, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $retval;
 	}
@@ -1446,9 +1446,9 @@ class TTDate {
 		if ( $start_week_day == 1 ) { //Mon
 			$retval = date('W', $epoch );
 		} elseif ( $start_week_day == 0 ) { //Sun
-			$retval = date('W', $epoch+(86400) );
+			$retval = date('W', ( $epoch + 86400 ) );
 		} else { //Tue-Sat
-			$retval = date('W', $epoch-(86400*($start_week_day-1)) );
+			$retval = date('W', ( $epoch - ( 86400 * ( $start_week_day - 1 ) ) ) );
 		}
 
 		return $retval;
@@ -1534,9 +1534,9 @@ class TTDate {
 		//Get the year of the passed epoch
 		$year = date('Y', $epoch);
 
-		$end_date = mktime(0,0,0,1,0, $year + 1 );
-		$end_day_of_week = date("w",$end_date);
-		$second_end_day_of_week = date("w",$end_date - 86400);
+		$end_date = mktime(0, 0, 0, 1, 0, ( $year + 1 ) );
+		$end_day_of_week = date('w', $end_date);
+		$second_end_day_of_week = date('w', ( $end_date - 86400 ) );
 		//Debug::text('End Date: ('.$end_day_of_week.') '. $end_date .' - '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::text('2nd End Date: ('.$second_end_day_of_week.') '. ( $end_date - 86400 ) .' - '. TTDate::getDate('DATE+TIME', ($end_date - 86400 ) ), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1618,8 +1618,8 @@ class TTDate {
 			return FALSE;
 		}
 
-		Debug::text(' Start Day Of Week: '. $start_day_of_week , __FILE__, __LINE__, __METHOD__,10);
-		Debug::text(' Raw Start Date: '. TTDate::getDate('DATE+TIME', $start_date) .' Raw End Date: '. TTDate::getDate('DATE+TIME', $end_date) , __FILE__, __LINE__, __METHOD__,10);
+		Debug::text(' Start Day Of Week: '. $start_day_of_week, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text(' Raw Start Date: '. TTDate::getDate('DATE+TIME', $start_date) .' Raw End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $force_weeks == TRUE ) {
 			$cal_start_date = TTDate::getBeginWeekEpoch($start_date, $start_day_of_week);
@@ -1629,14 +1629,14 @@ class TTDate {
 			$cal_end_date = $end_date;
 		}
 
-		Debug::text(' Cal Start Date: '. TTDate::getDate('DATE+TIME', $cal_start_date) .' Cal End Date: '. TTDate::getDate('DATE+TIME', $cal_end_date) , __FILE__, __LINE__, __METHOD__,10);
+		Debug::text(' Cal Start Date: '. TTDate::getDate('DATE+TIME', $cal_start_date) .' Cal End Date: '. TTDate::getDate('DATE+TIME', $cal_end_date), __FILE__, __LINE__, __METHOD__, 10);
 
-		$prev_month=NULL;
-		$x=0;
+		$prev_month = NULL;
+		$x = 0;
 		//Gotta add more then 86400 because of day light savings time. Causes infinite loop without it.
 		//Don't add 7200 to Cal End Date because that could cause more then one week to be displayed.
 		$retarr = array();
-		for($i=$cal_start_date; $i <= ($cal_end_date); $i+=93600) {
+		for($i = $cal_start_date; $i <= ($cal_end_date); $i += 93600) {
 			if ( $x > 200 ) {
 				break;
 			}
@@ -1660,9 +1660,9 @@ class TTDate {
 
 			//Display only blank boxes if the date is before the filter start date, or after.
 			if ( $i >= $start_date AND $i <= $end_date ) {
-				$day_of_week = TTi18n::gettext( date('D', $i) ); // i18n: these short day strings may not be in .po file.
+				$day_of_week = TTi18n::getText( date('D', $i) ); // i18n: these short day strings may not be in .po file.
 				$day_of_month = date('j', $i);
-				$month_name = TTi18n::gettext( date('F', $i) ); // i18n: these short month strings may not be defined in .po file.
+				$month_name = TTi18n::getText( date('F', $i) ); // i18n: these short month strings may not be defined in .po file.
 			} else {
 				$day_of_week = NULL;
 				$day_of_month = NULL;
@@ -1676,7 +1676,7 @@ class TTDate {
 							'day_of_week' => $day_of_week,
 							'day_of_month' => $day_of_month,
 							'month_name' => $month_name,
-							'month_short_name' => substr($month_name,0,3),
+							'month_short_name' => substr($month_name, 0, 3),
 							'month' => $current_month,
 							'isNewMonth' => $isNewMonth,
 							'isNewWeek' => $isNewWeek
@@ -1684,7 +1684,7 @@ class TTDate {
 
 			$prev_month = $current_month;
 
-			//Debug::text('i: '. $i .' Date: '. TTDate::getDate('DATE+TIME', $i), __FILE__, __LINE__, __METHOD__,10);
+			//Debug::text('i: '. $i .' Date: '. TTDate::getDate('DATE+TIME', $i), __FILE__, __LINE__, __METHOD__, 10);
 			$x++;
 		}
 
@@ -1692,15 +1692,15 @@ class TTDate {
 	}
 
 	public static function inWindow( $epoch, $window_epoch, $window ) {
-		Debug::text(' Epoch: '. TTDate::getDate('DATE+TIME', $epoch ) .' Window Epoch: '. TTDate::getDate('DATE+TIME', $window_epoch ) .' Window: '. $window , __FILE__, __LINE__, __METHOD__,10);
+		Debug::text(' Epoch: '. TTDate::getDate('DATE+TIME', $epoch ) .' Window Epoch: '. TTDate::getDate('DATE+TIME', $window_epoch ) .' Window: '. $window, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $epoch >= ( $window_epoch - $window )
 				AND $epoch <= ( $window_epoch + $window ) ) {
-			Debug::text(' Within Window', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text(' Within Window', __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
 		}
 
-		Debug::text(' NOT Within Window', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text(' NOT Within Window', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 	}
@@ -1712,33 +1712,33 @@ class TTDate {
 			return FALSE;
 		}
 
-		//Debug::text(' Checking if Start Date: '. TTDate::getDate('DATE+TIME', $start_date1 ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date1 ) , __FILE__, __LINE__, __METHOD__,10);
-		//Debug::text('   Overlap Start Date: '. TTDate::getDate('DATE+TIME', $start_date2 ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date2 ) , __FILE__, __LINE__, __METHOD__,10);
+		//Debug::text(' Checking if Start Date: '. TTDate::getDate('DATE+TIME', $start_date1 ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date1 ), __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::text('	  Overlap Start Date: '. TTDate::getDate('DATE+TIME', $start_date2 ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date2 ), __FILE__, __LINE__, __METHOD__, 10);
 
 		/*
- 			  |-----------------------| <-- Date Pair 1
+			  |-----------------------| <-- Date Pair 1
 				1. |-------| <-- Date Pair2
-					2.   |-------------------------|
+					2.	 |-------------------------|
 		3. |-----------------------|
 		4. |------------------------------------------|
 
 		*/
-		if 	( ($start_date2 >= $start_date1 AND $end_date2 <= $end_date1) ) { //Case #1
-			//Debug::text(' Overlap on Case #1: ', __FILE__, __LINE__, __METHOD__,10);
-			$retval = $end_date2 - $start_date2;
+		if	( ($start_date2 >= $start_date1 AND $end_date2 <= $end_date1) ) { //Case #1
+			//Debug::text(' Overlap on Case #1: ', __FILE__, __LINE__, __METHOD__, 10);
+			$retval = ( $end_date2 - $start_date2 );
 		} elseif ( ($start_date2 >= $start_date1 AND $start_date2 <= $end_date1) ) { //Case #2
-			//Debug::text(' Overlap on Case #2: ', __FILE__, __LINE__, __METHOD__,10);
-			$retval = $end_date1 - $start_date2;
+			//Debug::text(' Overlap on Case #2: ', __FILE__, __LINE__, __METHOD__, 10);
+			$retval = ( $end_date1 - $start_date2 );
 		} elseif ( ($end_date2 >= $start_date1 AND $end_date2 <= $end_date1) ) { //Case #3
-			//Debug::text(' Overlap on Case #3: ', __FILE__, __LINE__, __METHOD__,10);
-			$retval = $end_date2 - $start_date1;
+			//Debug::text(' Overlap on Case #3: ', __FILE__, __LINE__, __METHOD__, 10);
+			$retval = ( $end_date2 - $start_date1 );
 		} elseif ( ($start_date2 <= $start_date1 AND $end_date2 >= $end_date1) ) { //Case #4
-			//Debug::text(' Overlap on Case #4: ', __FILE__, __LINE__, __METHOD__,10);
-			$retval = $end_date1 - $start_date1;
+			//Debug::text(' Overlap on Case #4: ', __FILE__, __LINE__, __METHOD__, 10);
+			$retval = ( $end_date1 - $start_date1 );
 		}
 
 		if (  isset($retval) ) {
-			Debug::text(' Overlap Time Difference: '. $retval, __FILE__, __LINE__, __METHOD__,10);
+			Debug::text(' Overlap Time Difference: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
 			return $retval;
 		}
 
@@ -1751,50 +1751,50 @@ class TTDate {
 			return FALSE;
 		}
 
-		//Debug::text(' Checking if Start Date: '. TTDate::getDate('DATE+TIME', $start_date1 ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date1 ) , __FILE__, __LINE__, __METHOD__,10);
-		//Debug::text('   Overlap Start Date: '. TTDate::getDate('DATE+TIME', $start_date2 ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date2 ) , __FILE__, __LINE__, __METHOD__,10);
+		//Debug::text(' Checking if Start Date: '. TTDate::getDate('DATE+TIME', $start_date1 ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date1 ), __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::text('	  Overlap Start Date: '. TTDate::getDate('DATE+TIME', $start_date2 ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date2 ), __FILE__, __LINE__, __METHOD__, 10);
 
 		/*
- 			  |-----------------------|
+			  |-----------------------|
 				1. |-------|
-					2.   |-------------------------|
+					2.	 |-------------------------|
 		3. |-----------------------|
 		4. |------------------------------------------|
-		5.    |-----------------------| (match exactly)
+		5.	  |-----------------------| (match exactly)
 
 		*/
-		if 	( ($start_date2 >= $start_date1 AND $end_date2 <= $end_date1) ) { //Case #1
-			//Debug::text(' Overlap on Case #1: ', __FILE__, __LINE__, __METHOD__,10);
+		if	( ($start_date2 >= $start_date1 AND $end_date2 <= $end_date1) ) { //Case #1
+			//Debug::text(' Overlap on Case #1: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			return TRUE;
 		}
 
 		//Allow case where there are several shifts in a day, ie:
 		// 8:00AM to 1:00PM, 1:00PM to 5:00PM, where the end and start times match exactly.
-		//if 	( ($start_date2 >= $start_date1 AND $start_date2 <= $end_date1) ) { //Case #2
-		if 	( ($start_date2 >= $start_date1 AND $start_date2 < $end_date1) ) { //Case #2
-			//Debug::text(' Overlap on Case #2: ', __FILE__, __LINE__, __METHOD__,10);
+		//if	( ($start_date2 >= $start_date1 AND $start_date2 <= $end_date1) ) { //Case #2
+		if	( ($start_date2 >= $start_date1 AND $start_date2 < $end_date1) ) { //Case #2
+			//Debug::text(' Overlap on Case #2: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			return TRUE;
 		}
 
 		//Allow case where there are several shifts in a day, ie:
 		// 8:00AM to 1:00PM, 1:00PM to 5:00PM, where the end and start times match exactly.
-		//if 	( ($end_date2 >= $start_date1 AND $end_date2 <= $end_date1) ) { //Case #3
-		if 	( ($end_date2 > $start_date1 AND $end_date2 <= $end_date1) ) { //Case #3
-			//Debug::text(' Overlap on Case #3: ', __FILE__, __LINE__, __METHOD__,10);
+		//if	( ($end_date2 >= $start_date1 AND $end_date2 <= $end_date1) ) { //Case #3
+		if	( ($end_date2 > $start_date1 AND $end_date2 <= $end_date1) ) { //Case #3
+			//Debug::text(' Overlap on Case #3: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			return TRUE;
 		}
 
-		if 	( ($start_date2 <= $start_date1 AND $end_date2 >= $end_date1) ) { //Case #4
-			//Debug::text(' Overlap on Case #4: ', __FILE__, __LINE__, __METHOD__,10);
+		if	( ($start_date2 <= $start_date1 AND $end_date2 >= $end_date1) ) { //Case #4
+			//Debug::text(' Overlap on Case #4: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			return TRUE;
 		}
 
-		if 	( ($start_date2 == $start_date1 AND $end_date2 == $end_date1) ) { //Case #5
-			//Debug::text(' Overlap on Case #5: ', __FILE__, __LINE__, __METHOD__,10);
+		if	( ($start_date2 == $start_date1 AND $end_date2 == $end_date1) ) { //Case #5
+			//Debug::text(' Overlap on Case #5: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			return TRUE;
 		}
@@ -1804,18 +1804,18 @@ class TTDate {
 
 	public static function calculateTimeOnEachDayBetweenRange( $start_epoch, $end_epoch ) {
 		if ( TTDate::doesRangeSpanMidnight( $start_epoch, $end_epoch ) == TRUE ) {
-			$total_before_first_midnight = (TTDate::getEndDayEpoch( $start_epoch )+1)-$start_epoch;
+			$total_before_first_midnight = ( ( TTDate::getEndDayEpoch( $start_epoch ) + 1 ) - $start_epoch );
 			if ( $total_before_first_midnight > 0 ) {
 				$retval[TTDate::getBeginDayEpoch($start_epoch)] = $total_before_first_midnight;
 			}
 
-			$loop_start = TTDate::getEndDayEpoch( $start_epoch )+1;
+			$loop_start = ( TTDate::getEndDayEpoch( $start_epoch ) + 1 );
 			$loop_end = TTDate::getBeginDayEpoch( $end_epoch );
-			for( $x=$loop_start; $x < $loop_end; $x+=86400 ) {
+			for( $x = $loop_start; $x < $loop_end; $x += 86400 ) {
 				$retval[TTDate::getBeginDayEpoch($x)] = 86400;
 			}
 
-			$total_after_last_midnight = ($end_epoch-TTDate::getBeginDayEpoch( $end_epoch ));
+			$total_after_last_midnight = ( $end_epoch - TTDate::getBeginDayEpoch( $end_epoch ));
 			if ( $total_after_last_midnight > 0 ) {
 				$retval[TTDate::getBeginDayEpoch($end_epoch)] = $total_after_last_midnight;
 			}
@@ -1835,7 +1835,7 @@ class TTDate {
 			$prev_date = FALSE;
 			foreach( $date_array as $date ) {
 				if ( $prev_date != FALSE ) {
-					$date_diff = TTDate::getMiddleDayEpoch( TTDate::strtotime( $date ) ) - TTDate::getMiddleDayEpoch( TTDate::strtotime( $prev_date ) );
+					$date_diff = ( TTDate::getMiddleDayEpoch( TTDate::strtotime( $date ) ) - TTDate::getMiddleDayEpoch( TTDate::strtotime( $prev_date ) ) );
 					if ( $date_diff <= 86400 ) {
 						$retval = TRUE;
 					} else {
@@ -1847,7 +1847,7 @@ class TTDate {
 				$prev_date = $date;
 			}
 
-			Debug::Text('Days are consecutive: '. count($date_array) .' Retval: '. (int)$retval, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Days are consecutive: '. count($date_array) .' Retval: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
 			return $retval;
 		}
 
@@ -1858,7 +1858,7 @@ class TTDate {
 		$time_arr = getdate($time_epoch);
 		$date_arr = getdate($date_epoch);
 
-		$epoch = mktime( 	$time_arr['hours'],
+		$epoch = mktime(	$time_arr['hours'],
 							$time_arr['minutes'],
 							$time_arr['seconds'],
 							$date_arr['mon'],
@@ -1872,56 +1872,56 @@ class TTDate {
 
 	// Function to return "13 mins ago" text from a given time.
 	public static function getHumanTimeSince($epoch) {
-        if ( time() >= $epoch ) {
-            $epoch_since = time() - $epoch;
+		if ( time() >= $epoch ) {
+			$epoch_since = ( time() - $epoch );
 		} else {
-			$epoch_since = $epoch - time();
+			$epoch_since = ( $epoch - time() );
 		}
 
-		//Debug::text(' Epoch Since: '. $epoch_since, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::text(' Epoch Since: '. $epoch_since, __FILE__, __LINE__, __METHOD__, 10);
 		switch ( TRUE ) {
 			case ($epoch_since > ( 31536000 * 2 ) ):
 					//Years
-					$num = ( ( ( ( ($epoch_since / 60) / 60) / 24 ) / 30 )  / 12 );
-					$suffix = TTi18n::gettext('yr');
+					$num = ( ( ( ( ($epoch_since / 60) / 60) / 24 ) / 30 ) / 12 );
+					$suffix = TTi18n::getText('yr');
 					break;
 			case ($epoch_since > ( ((3600 * 24) * 60) * 2) ):
 					//Months the above number should be 2 months, so we don't get 0 months showing up.
 					$num = ( ( ( ( ($epoch_since / 60) / 60) / 24 ) / 30 ) );
-					$suffix = TTi18n::gettext('mth');
+					$suffix = TTi18n::getText('mth');
 					break;
 			case ($epoch_since > (604800 * 2) ):
 					//Weeks
 					$num = ( ( ( ($epoch_since / 60) / 60) / 24 ) / 7 ) ;
-					$suffix = TTi18n::gettext('wk');
+					$suffix = TTi18n::getText('wk');
 					break;
 			case ($epoch_since > (86400 * 2) ):
 					//Days
 					$num = ( ( ($epoch_since / 60) / 60) / 24 );
-					$suffix = TTi18n::gettext('day');
+					$suffix = TTi18n::getText('day');
 					break;
 			case ($epoch_since > (3600 * 2) ):
 					//Hours
 					$num = ( ($epoch_since / 60) / 60);
-					$suffix = TTi18n::gettext('hr');
+					$suffix = TTi18n::getText('hr');
 					break;
-			case ($epoch_since > (60*2) ):
+			case ($epoch_since > (60 * 2) ):
 					//Mins
 					$num = ($epoch_since / 60);
-					$suffix = TTi18n::gettext('min');
+					$suffix = TTi18n::getText('min');
 					break;
 			default:
 					//Secs
 					$num = $epoch_since;
-					$suffix = TTi18n::gettext('sec');
+					$suffix = TTi18n::getText('sec');
 					break;
 		}
 
 		if ( $num > 1.1 ) { //1.01 Days gets rounded to 1.0 and should not have "s" on the end.
-			$suffix .= TTi18n::gettext('s');
+			$suffix .= TTi18n::getText('s');
 		}
 
-		//Debug::text(' Num: '. $num .' Suffix: '. $suffix, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::text(' Num: '. $num .' Suffix: '. $suffix, __FILE__, __LINE__, __METHOD__, 10);
 		return sprintf("%0.01f", $num)." ".$suffix;
 	}
 
@@ -1932,9 +1932,9 @@ class TTDate {
 			return $str;
 		}
 
-		//Debug::text(' Original String: '. $str, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::text(' Original String: '. $str, __FILE__, __LINE__, __METHOD__, 10);
 		$retval = strtotime($str);
-		//Debug::text(' After strotime String: '. $retval, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::text(' After strotime String: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $retval == -1 OR $retval === FALSE ) {
 			return $str;
@@ -1951,108 +1951,108 @@ class TTDate {
 		return TRUE;
 	}
 
-	public static function getTimePeriodOptions( $include_pay_period = TRUE ) {
+	public static function getTimePeriodOptions() {
 		$retarr = array(
-						'-1000-custom_date' => TTi18n::gettext('Custom Dates'), // Select Start/End dates from calendar.
-						//'-1005-custom_time' => TTi18n::gettext('Custom Date/Time'), // Select Start/End dates & time from calendar.
+						'-1000-custom_date' => TTi18n::getText('Custom Dates'), // Select Start/End dates from calendar.
+						//'-1005-custom_time' => TTi18n::getText('Custom Date/Time'), // Select Start/End dates & time from calendar.
 
-						//'-1000-custom_relative_date' => TTi18n::gettext('Custom Relative Dates'), //Select a Start and End relative date (from this list)
-						'-1008-custom_pay_period' => TTi18n::gettext('Custom Pay Periods'), //Select pay periods individually
-						'-1010-today' => TTi18n::gettext('Today'),
-						'-1020-yesterday' => TTi18n::gettext('Yesterday'),
-						'-1030-last_24_hours' => TTi18n::gettext('Last 24 Hours'),
-						'-1032-last_48_hours' => TTi18n::gettext('Last 48 Hours'),
-						'-1034-last_72_hours' => TTi18n::gettext('Last 72 Hours'),
+						//'-1000-custom_relative_date' => TTi18n::getText('Custom Relative Dates'), //Select a Start and End relative date (from this list)
+						'-1008-custom_pay_period' => TTi18n::getText('Custom Pay Periods'), //Select pay periods individually
+						'-1010-today' => TTi18n::getText('Today'),
+						'-1020-yesterday' => TTi18n::getText('Yesterday'),
+						'-1030-last_24_hours' => TTi18n::getText('Last 24 Hours'),
+						'-1032-last_48_hours' => TTi18n::getText('Last 48 Hours'),
+						'-1034-last_72_hours' => TTi18n::getText('Last 72 Hours'),
 
-						'-1100-this_week' => TTi18n::gettext('This Week'),
-						'-1110-last_week' => TTi18n::gettext('Last Week'),
-						'-1112-last_2_weeks' => TTi18n::gettext('Last 2 Weeks'),
-						'-1120-last_7_days' => TTi18n::gettext('Last 7 Days'),
-						'-1122-last_14_days' => TTi18n::gettext('Last 14 Days'),
+						'-1100-this_week' => TTi18n::getText('This Week'),
+						'-1110-last_week' => TTi18n::getText('Last Week'),
+						'-1112-last_2_weeks' => TTi18n::getText('Last 2 Weeks'),
+						'-1120-last_7_days' => TTi18n::getText('Last 7 Days'),
+						'-1122-last_14_days' => TTi18n::getText('Last 14 Days'),
 
-						'-1200-this_pay_period' => TTi18n::gettext('This Pay Period'), //Select one or more pay period schedules
-						'-1210-last_pay_period' => TTi18n::gettext('Last Pay Period'), //Select one or more pay period schedules
-						'-1212-no_pay_period' => TTi18n::gettext('No Pay Period'), //Data assigned to no pay periods or pay_period_id = 0
+						'-1200-this_pay_period' => TTi18n::getText('This Pay Period'), //Select one or more pay period schedules
+						'-1210-last_pay_period' => TTi18n::getText('Last Pay Period'), //Select one or more pay period schedules
+						'-1212-no_pay_period' => TTi18n::getText('No Pay Period'), //Data assigned to no pay periods or pay_period_id = 0
 
-						'-1300-this_month' => TTi18n::gettext('This Month'),
-						'-1310-last_month' => TTi18n::gettext('Last Month'),
-						'-1312-last_2_months' => TTi18n::gettext('Last 2 Months'),
-						'-1320-last_30_days' => TTi18n::gettext('Last 30 Days'),
-						'-1320-last_45_days' => TTi18n::gettext('Last 45 Days'),
-						'-1322-last_60_days' => TTi18n::gettext('Last 60 Days'),
+						'-1300-this_month' => TTi18n::getText('This Month'),
+						'-1310-last_month' => TTi18n::getText('Last Month'),
+						'-1312-last_2_months' => TTi18n::getText('Last 2 Months'),
+						'-1320-last_30_days' => TTi18n::getText('Last 30 Days'),
+						'-1320-last_45_days' => TTi18n::getText('Last 45 Days'),
+						'-1322-last_60_days' => TTi18n::getText('Last 60 Days'),
 
-						'-1400-this_quarter' => TTi18n::gettext('This Quarter'),
-						'-1410-last_quarter' => TTi18n::gettext('Last Quarter'),
-						'-1420-last_90_days' => TTi18n::gettext('Last 90 Days'),
-						'-1430-this_year_1st_quarter' => TTi18n::gettext('1st Quarter (This Year)'),
-						'-1440-this_year_2nd_quarter' => TTi18n::gettext('2nd Quarter (This Year)'),
-						'-1450-this_year_3rd_quarter' => TTi18n::gettext('3rd Quarter (This Year)'),
-						'-1460-this_year_4th_quarter' => TTi18n::gettext('4th Quarter (This Year)'),
-						'-1470-last_year_1st_quarter' => TTi18n::gettext('1st Quarter (Last Year)'),
-						'-1480-last_year_2nd_quarter' => TTi18n::gettext('2nd Quarter (Last Year)'),
-						'-1490-last_year_3rd_quarter' => TTi18n::gettext('3rd Quarter (Last Year)'),
-						'-1500-last_year_4th_quarter' => TTi18n::gettext('4th Quarter (Last Year)'),
+						'-1400-this_quarter' => TTi18n::getText('This Quarter'),
+						'-1410-last_quarter' => TTi18n::getText('Last Quarter'),
+						'-1420-last_90_days' => TTi18n::getText('Last 90 Days'),
+						'-1430-this_year_1st_quarter' => TTi18n::getText('1st Quarter (This Year)'),
+						'-1440-this_year_2nd_quarter' => TTi18n::getText('2nd Quarter (This Year)'),
+						'-1450-this_year_3rd_quarter' => TTi18n::getText('3rd Quarter (This Year)'),
+						'-1460-this_year_4th_quarter' => TTi18n::getText('4th Quarter (This Year)'),
+						'-1470-last_year_1st_quarter' => TTi18n::getText('1st Quarter (Last Year)'),
+						'-1480-last_year_2nd_quarter' => TTi18n::getText('2nd Quarter (Last Year)'),
+						'-1490-last_year_3rd_quarter' => TTi18n::getText('3rd Quarter (Last Year)'),
+						'-1500-last_year_4th_quarter' => TTi18n::getText('4th Quarter (Last Year)'),
 
-						'-1600-last_3_months' => TTi18n::gettext('Last 3 Months'),
-						'-1610-last_6_months' => TTi18n::gettext('Last 6 Months'),
-						'-1620-last_9_months' => TTi18n::gettext('Last 9 Months'),
-						'-1630-last_12_months' => TTi18n::gettext('Last 12 Months'),
-						'-1640-last_18_months' => TTi18n::gettext('Last 18 Months'),
-						'-1650-last_24_months' => TTi18n::gettext('Last 24 Months'),
+						'-1600-last_3_months' => TTi18n::getText('Last 3 Months'),
+						'-1610-last_6_months' => TTi18n::getText('Last 6 Months'),
+						'-1620-last_9_months' => TTi18n::getText('Last 9 Months'),
+						'-1630-last_12_months' => TTi18n::getText('Last 12 Months'),
+						'-1640-last_18_months' => TTi18n::getText('Last 18 Months'),
+						'-1650-last_24_months' => TTi18n::getText('Last 24 Months'),
 
-						'-1700-this_year' => TTi18n::gettext('This Year (Year-To-Date)'),
-						'-1710-last_year' => TTi18n::gettext('Last Year'),
-						'-1720-last_2_years' => TTi18n::gettext('Last Two Years'),
-						'-1730-last_3_years' => TTi18n::gettext('Last Three Years'),
-						'-1740-last_5_years' => TTi18n::gettext('Last Five Years'),
+						'-1700-this_year' => TTi18n::getText('This Year (Year-To-Date)'),
+						'-1710-last_year' => TTi18n::getText('Last Year'),
+						'-1720-last_2_years' => TTi18n::getText('Last Two Years'),
+						'-1730-last_3_years' => TTi18n::getText('Last Three Years'),
+						'-1740-last_5_years' => TTi18n::getText('Last Five Years'),
 
-						'-1800-to_yesterday' => TTi18n::gettext('Up To Yesterday'),
-						'-1802-to_today' => TTi18n::gettext('Up To Today'),
-						'-1810-to_last_week' => TTi18n::gettext('Up To Last Week'),
-						'-1812-to_this_week' => TTi18n::gettext('Up To This Week'),
-						'-1814-to_7_days' => TTi18n::gettext('Up To 7 Days Ago'),
-						'-1816-to_14_days' => TTi18n::gettext('Up To 14 Days Ago'),
-						'-1820-to_last_pay_period' => TTi18n::gettext('Up To Last Pay Period'),
-						'-1822-to_this_pay_period' => TTi18n::gettext('Up To This Pay Period'),
-						'-1830-to_last_month' => TTi18n::gettext('Up To Last Month'),
-						'-1832-to_this_month' => TTi18n::gettext('Up To This Month'),
-						'-1840-to_30_days' => TTi18n::gettext('Up To 30 Days Ago'),
-						'-1842-to_45_days' => TTi18n::gettext('Up To 45 Days Ago'),
-						'-1844-to_60_days' => TTi18n::gettext('Up To 60 Days Ago'),
-						'-1850-to_last_quarter' => TTi18n::gettext('Up To Last Quarter'),
-						'-1852-to_this_quarter' => TTi18n::gettext('Up To This Quarter'),
-						'-1854-to_90_days' => TTi18n::gettext('Up To 90 Days Ago'),
-						'-1860-to_last_year' => TTi18n::gettext('Up To Last Year'),
-						'-1862-to_this_year' => TTi18n::gettext('Up To This Year'),
+						'-1800-to_yesterday' => TTi18n::getText('Up To Yesterday'),
+						'-1802-to_today' => TTi18n::getText('Up To Today'),
+						'-1810-to_last_week' => TTi18n::getText('Up To Last Week'),
+						'-1812-to_this_week' => TTi18n::getText('Up To This Week'),
+						'-1814-to_7_days' => TTi18n::getText('Up To 7 Days Ago'),
+						'-1816-to_14_days' => TTi18n::getText('Up To 14 Days Ago'),
+						'-1820-to_last_pay_period' => TTi18n::getText('Up To Last Pay Period'),
+						'-1822-to_this_pay_period' => TTi18n::getText('Up To This Pay Period'),
+						'-1830-to_last_month' => TTi18n::getText('Up To Last Month'),
+						'-1832-to_this_month' => TTi18n::getText('Up To This Month'),
+						'-1840-to_30_days' => TTi18n::getText('Up To 30 Days Ago'),
+						'-1842-to_45_days' => TTi18n::getText('Up To 45 Days Ago'),
+						'-1844-to_60_days' => TTi18n::getText('Up To 60 Days Ago'),
+						'-1850-to_last_quarter' => TTi18n::getText('Up To Last Quarter'),
+						'-1852-to_this_quarter' => TTi18n::getText('Up To This Quarter'),
+						'-1854-to_90_days' => TTi18n::getText('Up To 90 Days Ago'),
+						'-1860-to_last_year' => TTi18n::getText('Up To Last Year'),
+						'-1862-to_this_year' => TTi18n::getText('Up To This Year'),
 
-						'-1900-tomorrow' => TTi18n::gettext('Tomorrow'),
-						'-1902-next_24_hours' => TTi18n::gettext('Next 24 Hours'),
-						'-1904-next_48_hours' => TTi18n::gettext('Next 48 Hours'),
-						'-1906-next_72_hours' => TTi18n::gettext('Next 72 Hours'),
-						'-1910-next_week' => TTi18n::gettext('Next Week'),
-						'-1912-next_2_weeks' => TTi18n::gettext('Next 2 Weeks'),
-						'-1914-next_7_days' => TTi18n::gettext('Next 7 Days'),
-						'-1916-next_14_days' => TTi18n::gettext('Next 14 Days'),
-						'-1930-next_month' => TTi18n::gettext('Next Month'),
-						'-1932-next_2_months' => TTi18n::gettext('Next 2 Months'),
-						'-1940-next_30_days' => TTi18n::gettext('Next 30 Days'),
-						'-1942-next_45_days' => TTi18n::gettext('Next 45 Days'),
-						'-1944-next_60_days' => TTi18n::gettext('Next 60 Days'),
-						'-1950-next_quarter' => TTi18n::gettext('Next Quarter'),
-						'-1954-next_90_days' => TTi18n::gettext('Next 90 Days'),
-						'-1960-next_3_months' => TTi18n::gettext('Next 3 Months'),
-						'-1962-next_6_months' => TTi18n::gettext('Next 6 Months'),
-						'-1964-next_9_months' => TTi18n::gettext('Next 9 Months'),
-						'-1966-next_12_months' => TTi18n::gettext('Next 12 Months'),
-						'-1968-next_18_months' => TTi18n::gettext('Next 18 Months'),
-						'-1970-next_24_months' => TTi18n::gettext('Next 24 Months'),
-						'-1980-next_year' => TTi18n::gettext('Next Year'),
-						'-1982-next_2_years' => TTi18n::gettext('Next Two Years'),
-						'-1984-next_3_years' => TTi18n::gettext('Next Three Years'),
-						'-1986-next_5_years' => TTi18n::gettext('Next Five Years'),
+						'-1900-tomorrow' => TTi18n::getText('Tomorrow'),
+						'-1902-next_24_hours' => TTi18n::getText('Next 24 Hours'),
+						'-1904-next_48_hours' => TTi18n::getText('Next 48 Hours'),
+						'-1906-next_72_hours' => TTi18n::getText('Next 72 Hours'),
+						'-1910-next_week' => TTi18n::getText('Next Week'),
+						'-1912-next_2_weeks' => TTi18n::getText('Next 2 Weeks'),
+						'-1914-next_7_days' => TTi18n::getText('Next 7 Days'),
+						'-1916-next_14_days' => TTi18n::getText('Next 14 Days'),
+						'-1930-next_month' => TTi18n::getText('Next Month'),
+						'-1932-next_2_months' => TTi18n::getText('Next 2 Months'),
+						'-1940-next_30_days' => TTi18n::getText('Next 30 Days'),
+						'-1942-next_45_days' => TTi18n::getText('Next 45 Days'),
+						'-1944-next_60_days' => TTi18n::getText('Next 60 Days'),
+						'-1950-next_quarter' => TTi18n::getText('Next Quarter'),
+						'-1954-next_90_days' => TTi18n::getText('Next 90 Days'),
+						'-1960-next_3_months' => TTi18n::getText('Next 3 Months'),
+						'-1962-next_6_months' => TTi18n::getText('Next 6 Months'),
+						'-1964-next_9_months' => TTi18n::getText('Next 9 Months'),
+						'-1966-next_12_months' => TTi18n::getText('Next 12 Months'),
+						'-1968-next_18_months' => TTi18n::getText('Next 18 Months'),
+						'-1970-next_24_months' => TTi18n::getText('Next 24 Months'),
+						'-1980-next_year' => TTi18n::getText('Next Year'),
+						'-1982-next_2_years' => TTi18n::getText('Next Two Years'),
+						'-1984-next_3_years' => TTi18n::getText('Next Three Years'),
+						'-1986-next_5_years' => TTi18n::getText('Next Five Years'),
 
-						'-1990-all_years' => TTi18n::gettext('All Years'),
-					   );
+						'-1990-all_years' => TTi18n::getText('All Years'),
+					);
 		return $retarr;
 	}
 	public static function getTimePeriodDates( $time_period, $epoch = NULL, $user_obj = NULL, $params = NULL ) {
@@ -2100,19 +2100,19 @@ class TTDate {
 				$end_date = TTDate::getEndDayEpoch( $epoch );
 				break;
 			case 'yesterday':
-				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-86400) );
-				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-86400) );
+				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - 86400) );
+				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - 86400) );
 				break;
 			case 'last_24_hours':
-				$start_date = $epoch-86400;
+				$start_date = ( $epoch - 86400 );
 				$end_date = $epoch;
 				break;
 			case 'last_48_hours':
-				$start_date = $epoch-(86400*2);
+				$start_date = ( $epoch - ( 86400 * 2 ) );
 				$end_date = $epoch;
 				break;
 			case 'last_72_hours':
-				$start_date = $epoch-(86400*3);
+				$start_date = ( $epoch - ( 86400 * 3 ) );
 				$end_date = $epoch;
 				break;
 			case 'this_week':
@@ -2120,30 +2120,30 @@ class TTDate {
 				$end_date = TTDate::getEndWeekEpoch( $epoch, $start_week_day );
 				break;
 			case 'last_week':
-				$start_date = TTDate::getBeginWeekEpoch( (TTDate::getMiddleDayEpoch( $epoch )-(86400*7)), $start_week_day );
-				$end_date = TTDate::getEndWeekEpoch( (TTDate::getMiddleDayEpoch( $epoch )-(86400*7)), $start_week_day );
+				$start_date = TTDate::getBeginWeekEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 7)), $start_week_day );
+				$end_date = TTDate::getEndWeekEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 7)), $start_week_day );
 				break;
 			case 'last_2_weeks':
-				$start_date = TTDate::getBeginWeekEpoch( (TTDate::getMiddleDayEpoch( $epoch )-(86400*14)), $start_week_day );
-				$end_date = TTDate::getEndWeekEpoch( (TTDate::getMiddleDayEpoch( $epoch )-(86400*7)), $start_week_day );
+				$start_date = TTDate::getBeginWeekEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 14)), $start_week_day );
+				$end_date = TTDate::getEndWeekEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 7)), $start_week_day );
 				break;
 			case 'last_7_days':
-				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-(86400*7) ) );
-				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-86400) );
+				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 7) ) );
+				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - 86400) );
 				break;
 			case 'last_14_days':
-				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-(86400*14) ) );
-				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-86400) );
+				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 14) ) );
+				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - 86400) );
 				break;
 
 			//Params must be passed if more than one pay period schedule exists.
 			case 'no_pay_period':
 			case 'this_pay_period':
 			case 'last_pay_period':
-				Debug::text('Time Period for Pay Period Schedule selected...', __FILE__, __LINE__, __METHOD__,10);
+				Debug::text('Time Period for Pay Period Schedule selected...', __FILE__, __LINE__, __METHOD__, 10);
 				//Make sure user_obj is set.
 				if ( !is_object( $user_obj ) ) {
-					Debug::text('User Object was not passsed...', __FILE__, __LINE__, __METHOD__,10);
+					Debug::text('User Object was not passsed...', __FILE__, __LINE__, __METHOD__, 10);
 					break;
 				}
 
@@ -2155,7 +2155,7 @@ class TTDate {
 
 				//Since we allow multiple pay_period schedules to be selected, we have to return pay_period_ids, not start/end dates.
 				if ( $time_period == 'this_pay_period' ) {
-					Debug::text('this_pay_period', __FILE__, __LINE__, __METHOD__,10);
+					Debug::text('this_pay_period', __FILE__, __LINE__, __METHOD__, 10);
 					$pplf = TTnew( 'PayPeriodListFactory' );
 					$pplf->getThisPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate( $user_obj->getCompany(), $params['pay_period_schedule_id'], time() );
 					if ( $pplf->getRecordCount() > 0 ) {
@@ -2164,7 +2164,7 @@ class TTDate {
 						}
 					}
 				} elseif ( $time_period == 'last_pay_period' ) {
-					Debug::text('last_pay_period', __FILE__, __LINE__, __METHOD__,10);
+					Debug::text('last_pay_period', __FILE__, __LINE__, __METHOD__, 10);
 					$pplf = TTnew( 'PayPeriodListFactory' );
 					$pplf->getLastPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate( $user_obj->getCompany(), $params['pay_period_schedule_id'], time() );
 					if ( $pplf->getRecordCount() > 0 ) {
@@ -2173,10 +2173,10 @@ class TTDate {
 						}
 					}
 				} else {
-					Debug::text('no_pay_period', __FILE__, __LINE__, __METHOD__,10);
+					Debug::text('no_pay_period', __FILE__, __LINE__, __METHOD__, 10);
 				}
 
-				Debug::Arr($pay_period_ids, 'Pay Period IDs: ', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Arr($pay_period_ids, 'Pay Period IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 				if ( count($pay_period_ids) == 0 ) {
 					unset($pay_period_ids);
 				}
@@ -2186,38 +2186,38 @@ class TTDate {
 				$end_date = TTDate::getEndMonthEpoch( $epoch );
 				break;
 			case 'last_month':
-				$start_date = TTDate::getBeginMonthEpoch( (TTDate::getBeginMonthEpoch( $epoch )-86400) );
-				$end_date = TTDate::getEndMonthEpoch( (TTDate::getBeginMonthEpoch( $epoch )-86400) );
+				$start_date = TTDate::getBeginMonthEpoch( (TTDate::getBeginMonthEpoch( $epoch ) - 86400) );
+				$end_date = TTDate::getEndMonthEpoch( (TTDate::getBeginMonthEpoch( $epoch ) - 86400) );
 				break;
 			case 'last_2_months':
-				$start_date = TTDate::getBeginMonthEpoch( (TTDate::getBeginMonthEpoch( $epoch )-(86400*32)) );
-				$end_date = TTDate::getEndMonthEpoch( (TTDate::getBeginMonthEpoch( $epoch )-86400) );
+				$start_date = TTDate::getBeginMonthEpoch( (TTDate::getBeginMonthEpoch( $epoch ) - (86400 * 32)) );
+				$end_date = TTDate::getEndMonthEpoch( (TTDate::getBeginMonthEpoch( $epoch ) - 86400) );
 				break;
 			case 'last_30_days':
-				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-(86400*30) ) );
-				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-86400) );
+				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 30) ) );
+				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - 86400) );
 				break;
 			case 'last_45_days':
-				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-(86400*45) ) );
-				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-86400) );
+				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 45) ) );
+				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - 86400) );
 				break;
 			case 'last_60_days':
-				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-(86400*60) ) );
-				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-86400) );
+				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 60) ) );
+				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - 86400) );
 				break;
 			case 'this_quarter':
 				$quarter = TTDate::getYearQuarter( $epoch );
 				$quarter_dates = TTDate::getYearQuarters( $epoch, $quarter );
-				//Debug::Arr($quarter_dates, 'Quarter Dates: Quarter: '. $quarter, __FILE__, __LINE__, __METHOD__,10);
+				//Debug::Arr($quarter_dates, 'Quarter Dates: Quarter: '. $quarter, __FILE__, __LINE__, __METHOD__, 10);
 
 				$start_date = $quarter_dates['start'];
 				$end_date = $quarter_dates['end'];
 				break;
 			case 'last_quarter':
-				$quarter = TTDate::getYearQuarter( $epoch )-1;
+				$quarter = ( TTDate::getYearQuarter( $epoch ) - 1 );
 				if ( $quarter == 0 ) {
 					$quarter = 4;
-					$epoch = (TTDate::getBeginYearEpoch()-86400); //Need to jump back into the previous year.
+					$epoch = (TTDate::getBeginYearEpoch() - 86400); //Need to jump back into the previous year.
 				}
 				$quarter_dates = TTDate::getYearQuarters( $epoch, $quarter );
 
@@ -2225,8 +2225,8 @@ class TTDate {
 				$end_date = $quarter_dates['end'];
 				break;
 			case 'last_90_days':
-				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-(86400*90) ) );
-				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-86400) );
+				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 90) ) );
+				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - 86400) );
 				break;
 			case 'this_year_1st_quarter':
 				$quarter = 1;
@@ -2258,108 +2258,108 @@ class TTDate {
 				break;
 			case 'last_year_1st_quarter':
 				$quarter = 1;
-				$quarter_dates = TTDate::getYearQuarters( (TTDate::getBeginYearEpoch( $epoch )-86400), $quarter );
+				$quarter_dates = TTDate::getYearQuarters( (TTDate::getBeginYearEpoch( $epoch ) - 86400), $quarter );
 
 				$start_date = $quarter_dates['start'];
 				$end_date = $quarter_dates['end'];
 				break;
 			case 'last_year_2nd_quarter':
 				$quarter = 2;
-				$quarter_dates = TTDate::getYearQuarters( (TTDate::getBeginYearEpoch( $epoch )-86400), $quarter );
+				$quarter_dates = TTDate::getYearQuarters( (TTDate::getBeginYearEpoch( $epoch ) - 86400), $quarter );
 
 				$start_date = $quarter_dates['start'];
 				$end_date = $quarter_dates['end'];
 				break;
 			case 'last_year_3rd_quarter':
 				$quarter = 3;
-				$quarter_dates = TTDate::getYearQuarters( (TTDate::getBeginYearEpoch( $epoch )-86400), $quarter );
+				$quarter_dates = TTDate::getYearQuarters( (TTDate::getBeginYearEpoch( $epoch ) - 86400), $quarter );
 
 				$start_date = $quarter_dates['start'];
 				$end_date = $quarter_dates['end'];
 				break;
 			case 'last_year_4th_quarter':
 				$quarter = 4;
-				$quarter_dates = TTDate::getYearQuarters( (TTDate::getBeginYearEpoch( $epoch )-86400), $quarter );
+				$quarter_dates = TTDate::getYearQuarters( (TTDate::getBeginYearEpoch( $epoch ) - 86400), $quarter );
 
 				$start_date = $quarter_dates['start'];
 				$end_date = $quarter_dates['end'];
 				break;
 			case 'last_3_months':
-				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-86400) );
-				$start_date = mktime(0,0,0, TTDate::getMonth( $end_date )-3, TTDate::getDayOfMonth( $end_date ), TTDate::getYear( $end_date ) );
+				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - 86400) );
+				$start_date = mktime(0, 0, 0, (TTDate::getMonth( $end_date ) - 3), TTDate::getDayOfMonth( $end_date ), TTDate::getYear( $end_date ) );
 				break;
 			case 'last_6_months':
-				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-86400) );
-				$start_date = mktime(0,0,0, TTDate::getMonth( $end_date )-6, TTDate::getDayOfMonth( $end_date ), TTDate::getYear( $end_date ) );
+				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - 86400) );
+				$start_date = mktime(0, 0, 0, (TTDate::getMonth( $end_date ) - 6), TTDate::getDayOfMonth( $end_date ), TTDate::getYear( $end_date ) );
 				break;
 			case 'last_9_months':
-				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-86400) );
-				$start_date = mktime(0,0,0, TTDate::getMonth( $end_date )-9, TTDate::getDayOfMonth( $end_date ), TTDate::getYear( $end_date ) );
+				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - 86400) );
+				$start_date = mktime(0, 0, 0, (TTDate::getMonth( $end_date ) - 9), TTDate::getDayOfMonth( $end_date ), TTDate::getYear( $end_date ) );
 				break;
 			case 'last_12_months':
-				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-86400) );
-				$start_date = mktime(0,0,0, TTDate::getMonth( $end_date), TTDate::getDayOfMonth( $end_date ), (TTDate::getYear( $end_date )-1) );
+				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - 86400) );
+				$start_date = mktime(0, 0, 0, TTDate::getMonth( $end_date), TTDate::getDayOfMonth( $end_date ), (TTDate::getYear( $end_date ) - 1) );
 				break;
 			case 'last_18_months':
-				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-86400) );
-				$start_date = mktime(0,0,0, TTDate::getMonth( $end_date )-18, TTDate::getDayOfMonth( $end_date ), TTDate::getYear( $end_date ) );
+				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - 86400) );
+				$start_date = mktime(0, 0, 0, (TTDate::getMonth( $end_date ) - 18), TTDate::getDayOfMonth( $end_date ), TTDate::getYear( $end_date ) );
 				break;
 			case 'last_24_months':
-				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-86400) );
-				$start_date = mktime(0,0,0, TTDate::getMonth( $end_date )-24, TTDate::getDayOfMonth( $end_date ), TTDate::getYear( $end_date ) );
+				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - 86400) );
+				$start_date = mktime(0, 0, 0, ( TTDate::getMonth( $end_date ) - 24), TTDate::getDayOfMonth( $end_date ), TTDate::getYear( $end_date ) );
 				break;
 			case 'this_year':
 				$start_date = TTDate::getBeginYearEpoch( $epoch );
 				$end_date = TTDate::getEndYearEpoch( $epoch );
 				break;
 			case 'last_year':
-				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( $epoch )-86400) );
-				$end_date = TTDate::getEndYearEpoch( (TTDate::getBeginYearEpoch( $epoch )-86400) );
+				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( $epoch ) - 86400) );
+				$end_date = TTDate::getEndYearEpoch( (TTDate::getBeginYearEpoch( $epoch ) - 86400) );
 				break;
 			case 'last_2_years':
-				$end_date = TTDate::getEndYearEpoch( (TTDate::getBeginYearEpoch( $epoch )-86400) );
-				$start_date = mktime(0,0,0, TTDate::getMonth( $end_date ), TTDate::getDayOfMonth( $end_date ), TTDate::getYear( $end_date )-2 );
+				$end_date = TTDate::getEndYearEpoch( (TTDate::getBeginYearEpoch( $epoch ) - 86400) );
+				$start_date = mktime(0, 0, 0, TTDate::getMonth( $end_date ), TTDate::getDayOfMonth( $end_date ), ( TTDate::getYear( $end_date ) - 2 ) );
 				break;
 			case 'last_3_years':
-				$end_date = TTDate::getEndYearEpoch( (TTDate::getBeginYearEpoch( $epoch )-86400) );
-				$start_date = mktime(0,0,0, TTDate::getMonth( $end_date ), TTDate::getDayOfMonth( $end_date ), TTDate::getYear( $end_date )-3 );
+				$end_date = TTDate::getEndYearEpoch( (TTDate::getBeginYearEpoch( $epoch ) - 86400) );
+				$start_date = mktime(0, 0, 0, TTDate::getMonth( $end_date ), TTDate::getDayOfMonth( $end_date ), ( TTDate::getYear( $end_date ) - 3 ) );
 				break;
 			case 'last_5_years':
-				$end_date = TTDate::getEndYearEpoch( (TTDate::getBeginYearEpoch( $epoch )-86400) );
-				$start_date = mktime(0,0,0, TTDate::getMonth( $end_date ), TTDate::getDayOfMonth( $end_date ), TTDate::getYear( $end_date )-5 );
+				$end_date = TTDate::getEndYearEpoch( (TTDate::getBeginYearEpoch( $epoch ) - 86400) );
+				$start_date = mktime(0, 0, 0, TTDate::getMonth( $end_date ), TTDate::getDayOfMonth( $end_date ), ( TTDate::getYear( $end_date ) - 5 ) );
 				break;
 
 
 			case 'to_yesterday': //"Up To" means we need to use the end time of the day we go up to.
-				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 )-86400) );
-				$end_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-86400) )-1;
+				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 ) - 86400) );
+				$end_date = ( TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - 86400) ) - 1);
 				break;
 			case 'to_today':
-				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 )-86400) );
-				$end_date = TTDate::getBeginDayEpoch( TTDate::getMiddleDayEpoch( $epoch ) )-1;
+				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 ) - 86400) );
+				$end_date = ( TTDate::getBeginDayEpoch( TTDate::getMiddleDayEpoch( $epoch ) ) - 1);
 				break;
 			case 'to_this_week':
-				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 )-86400) );
-				$end_date = TTDate::getBeginWeekEpoch( $epoch, $start_week_day )-1;
+				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 ) - 86400) );
+				$end_date = ( TTDate::getBeginWeekEpoch( $epoch, $start_week_day ) - 1);
 				break;
 			case 'to_last_week':
-				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 )-86400) );
-				$end_date = TTDate::getBeginWeekEpoch( (TTDate::getMiddleDayEpoch( $epoch )-(86400*7)), $start_week_day )-1;
+				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 ) - 86400) );
+				$end_date = ( TTDate::getBeginWeekEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 7)), $start_week_day ) - 1 );
 				break;
 			case 'to_7_days':
-				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 )-86400) );
-				$end_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-(86400*7) ) )-1;
+				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 ) - 86400) );
+				$end_date = ( TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 7) ) ) - 1 );
 				break;
 			case 'to_14_days':
-				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 )-86400) );
-				$end_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-(86400*14) ) )-1;
+				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 ) - 86400) );
+				$end_date = ( TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 14) ) ) - 1 );
 				break;
 			case 'to_last_pay_period':
 			case 'to_this_pay_period':
-				Debug::text('Time Period for Pay Period Schedule selected...', __FILE__, __LINE__, __METHOD__,10);
+				Debug::text('Time Period for Pay Period Schedule selected...', __FILE__, __LINE__, __METHOD__, 10);
 				//Make sure user_obj is set.
 				if ( !is_object( $user_obj ) ) {
-					Debug::text('User Object was not passsed...', __FILE__, __LINE__, __METHOD__,10);
+					Debug::text('User Object was not passsed...', __FILE__, __LINE__, __METHOD__, 10);
 					break;
 				}
 
@@ -2370,7 +2370,7 @@ class TTDate {
 				$end_date = FALSE;
 				//Since we allow multiple pay_period schedules to be selected, we have to return pay_period_ids, not start/end dates.
 				if ( $time_period == 'to_this_pay_period' ) {
-					Debug::text('to_this_pay_period', __FILE__, __LINE__, __METHOD__,10);
+					Debug::text('to_this_pay_period', __FILE__, __LINE__, __METHOD__, 10);
 					$pplf = TTnew( 'PayPeriodListFactory' );
 					$pplf->getThisPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate( $user_obj->getCompany(), $params['pay_period_schedule_id'], time() );
 					if ( $pplf->getRecordCount() > 0 ) {
@@ -2381,7 +2381,7 @@ class TTDate {
 						}
 					}
 				} elseif ( $time_period == 'to_last_pay_period' ) {
-					Debug::text('to_last_pay_period', __FILE__, __LINE__, __METHOD__,10);
+					Debug::text('to_last_pay_period', __FILE__, __LINE__, __METHOD__, 10);
 					$pplf = TTnew( 'PayPeriodListFactory' );
 					$pplf->getLastPayPeriodByCompanyIdAndPayPeriodScheduleIdAndDate( $user_obj->getCompany(), $params['pay_period_schedule_id'], time() );
 					if ( $pplf->getRecordCount() > 0 ) {
@@ -2393,117 +2393,114 @@ class TTDate {
 					}
 				}
 
-				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 )-86400) );
-				$end_date = $end_date-1;
+				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 ) - 86400) );
+				$end_date--;
 				break;
 			case 'to_last_month':
-				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 )-86400) );
-				$end_date = TTDate::getBeginMonthEpoch( (TTDate::getBeginMonthEpoch( $epoch )-86400) )-1;
+				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 ) - 86400) );
+				$end_date = ( TTDate::getBeginMonthEpoch( (TTDate::getBeginMonthEpoch( $epoch ) - 86400) ) - 1 );
 				break;
 			case 'to_this_month':
-				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 )-86400) );
-				$end_date = TTDate::getBeginMonthEpoch( $epoch )-1;
+				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 ) - 86400) );
+				$end_date = ( TTDate::getBeginMonthEpoch( $epoch ) - 1 );
 				break;
 			case 'to_30_days':
-				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 )-86400) );
-				$end_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-(86400*30) ) )-1;
+				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 ) - 86400) );
+				$end_date = ( TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 30) ) ) - 1 );
 				break;
 			case 'to_45_days':
-				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 )-86400) );
-				$end_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-(86400*45) ) )-1;
+				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 ) - 86400) );
+				$end_date = ( TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 45) ) ) - 1 );
 				break;
 			case 'to_60_days':
-				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 )-86400) );
-				$end_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-(86400*60) ) )-1;
+				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 ) - 86400) );
+				$end_date = ( TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 60) ) ) - 1 );
 				break;
 			case 'to_last_quarter':
-				$quarter = TTDate::getYearQuarter( $epoch )-1;
+				$quarter = ( TTDate::getYearQuarter( $epoch ) - 1 );
 				if ( $quarter == 0 ) {
 					$quarter = 4;
-					$epoch = (TTDate::getBeginYearEpoch()-86400); //Need to jump back into the previous year.
+					$epoch = (TTDate::getBeginYearEpoch() - 86400); //Need to jump back into the previous year.
 				}
 				$quarter_dates = TTDate::getYearQuarters( $epoch, $quarter );
-				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 )-86400) );
-				$end_date = $quarter_dates['start']-1;
+				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 ) - 86400) );
+				$end_date = ( $quarter_dates['start'] - 1 );
 				break;
 			case 'to_this_quarter':
 				$quarter = TTDate::getYearQuarter( $epoch );
 				$quarter_dates = TTDate::getYearQuarters( $epoch, $quarter );
-				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 )-86400) );
-				$end_date = $quarter_dates['start']-1;
+				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 ) - 86400) );
+				$end_date = ( $quarter_dates['start'] - 1 );
 				break;
 			case 'to_90_days':
-				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 )-86400) );
-				$end_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )-(86400*90) ) )-1;
+				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 ) - 86400) );
+				$end_date = ( TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) - (86400 * 90) ) ) - 1 );
 				break;
 			case 'to_this_year':
-				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 )-86400) );
-				$end_date = TTDate::getBeginYearEpoch( $epoch )-1;
+				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 ) - 86400) );
+				$end_date = ( TTDate::getBeginYearEpoch( $epoch ) - 1 );
 				break;
 			case 'to_last_year':
-				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 )-86400) );
-				$end_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( $epoch )-86400) )-1;
+				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 ) - 86400) );
+				$end_date = ( TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( $epoch ) - 86400) ) - 1 );
 				break;
-
-
-
 			case 'tomorrow':
-				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )+86400) );
-				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )+86400) );
+				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + 86400) );
+				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + 86400) );
 				break;
 			case 'next_24_hours':
 				$start_date = $epoch;
-				$end_date = $epoch+86400;
+				$end_date = ( $epoch + 86400 );
 				break;
 			case 'next_48_hours':
 				$start_date = $epoch;
-				$end_date = $epoch+(86400*2);
+				$end_date = ( $epoch + (86400 * 2) );
 				break;
 			case 'next_72_hours':
 				$start_date = $epoch;
-				$end_date = $epoch+(86400*3);
+				$end_date = ( $epoch + (86400 * 3) );
 				break;
 			case 'next_week':
-				$start_date = TTDate::getBeginWeekEpoch( (TTDate::getMiddleDayEpoch( $epoch )+(86400*7)), $start_week_day );
-				$end_date = TTDate::getEndWeekEpoch( (TTDate::getMiddleDayEpoch( $epoch )+(86400*7)), $start_week_day );
+				$start_date = TTDate::getBeginWeekEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + (86400 * 7)), $start_week_day );
+				$end_date = TTDate::getEndWeekEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + (86400 * 7)), $start_week_day );
 				break;
 			case 'next_2_weeks':
-				$start_date = TTDate::getBeginWeekEpoch( (TTDate::getMiddleDayEpoch( $epoch )+(86400*7)), $start_week_day );
-				$end_date = TTDate::getEndWeekEpoch( (TTDate::getMiddleDayEpoch( $epoch )+(86400*14)), $start_week_day );
+				$start_date = TTDate::getBeginWeekEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + (86400 * 7)), $start_week_day );
+				$end_date = TTDate::getEndWeekEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + (86400 * 14)), $start_week_day );
 				break;
 			case 'next_7_days':
-				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )+86400 ) );
-				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )+(86400*7)) );
+				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + 86400 ) );
+				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + (86400 * 7)) );
 				break;
 			case 'next_14_days':
-				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )+86400 ) );
-				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )+(86400*14)) );
+				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + 86400 ) );
+				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + (86400 * 14)) );
 				break;
 			case 'next_month':
-				$start_date = TTDate::getBeginMonthEpoch( (TTDate::getEndMonthEpoch( $epoch )+86400) );
-				$end_date = TTDate::getEndMonthEpoch( (TTDate::getEndMonthEpoch( $epoch )+86400) );
+				$start_date = TTDate::getBeginMonthEpoch( (TTDate::getEndMonthEpoch( $epoch ) + 86400) );
+				$end_date = TTDate::getEndMonthEpoch( (TTDate::getEndMonthEpoch( $epoch ) + 86400) );
 				break;
 			case 'next_2_months':
-				$start_date = TTDate::getBeginMonthEpoch( (TTDate::getEndMonthEpoch( $epoch )+86400) );
-				$end_date = TTDate::getEndMonthEpoch( (TTDate::getEndMonthEpoch( $epoch )+(86400*32)) );
+				$start_date = TTDate::getBeginMonthEpoch( (TTDate::getEndMonthEpoch( $epoch ) + 86400) );
+				$end_date = TTDate::getEndMonthEpoch( (TTDate::getEndMonthEpoch( $epoch ) + (86400 * 32)) );
 				break;
 			case 'next_30_days':
-				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )+86400 ) );
-				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )+(86400*30)) );
+				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + 86400 ) );
+				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + (86400 * 30)) );
 				break;
 			case 'next_45_days':
-				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )+86400 ) );
-				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )+(86400*45)) );
+				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + 86400 ) );
+				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + (86400 * 45)) );
 				break;
 			case 'next_60_days':
-				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )+86400 ) );
-				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )+(86400*60)) );
+				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + 86400 ) );
+				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + (86400 * 60)) );
 				break;
 			case 'next_quarter':
-				$quarter = TTDate::getYearQuarter( $epoch )+1;
+				$quarter = ( TTDate::getYearQuarter( $epoch ) + 1 );
 				if ( $quarter == 5 ) {
 					$quarter = 1;
-					$epoch = (TTDate::getEndYearEpoch()+86400); //Need to jump back into the previous year.
+					$epoch = (TTDate::getEndYearEpoch() + 86400); //Need to jump back into the previous year.
 				}
 				$quarter_dates = TTDate::getYearQuarters( $epoch, $quarter );
 
@@ -2511,64 +2508,62 @@ class TTDate {
 				$end_date = $quarter_dates['end'];
 				break;
 			case 'next_90_days':
-				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )+86400 ) );
-				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )+(86400*90)) );
+				$start_date = TTDate::getBeginDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + 86400 ) );
+				$end_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + (86400 * 90)) );
 				break;
 			case 'next_3_months':
-				$start_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )+86400) );
-				$end_date = mktime(0,0,0, TTDate::getMonth( $start_date )+3, TTDate::getDayOfMonth( $start_date ), TTDate::getYear( $start_date ) );
+				$start_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + 86400) );
+				$end_date = mktime(0, 0, 0, ( TTDate::getMonth( $start_date ) + 3 ), TTDate::getDayOfMonth( $start_date ), TTDate::getYear( $start_date ) );
 				break;
 			case 'next_6_months':
-				$start_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )+86400) );
-				$end_date = mktime(0,0,0, TTDate::getMonth( $start_date )+6, TTDate::getDayOfMonth( $start_date ), TTDate::getYear( $start_date ) );
+				$start_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + 86400) );
+				$end_date = mktime(0, 0, 0, ( TTDate::getMonth( $start_date ) + 6 ), TTDate::getDayOfMonth( $start_date ), TTDate::getYear( $start_date ) );
 				break;
 			case 'next_9_months':
-				$start_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )+86400) );
-				$end_date = mktime(0,0,0, TTDate::getMonth( $start_date )+9, TTDate::getDayOfMonth( $start_date ), TTDate::getYear( $start_date ) );
+				$start_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + 86400) );
+				$end_date = mktime(0, 0, 0, ( TTDate::getMonth( $start_date ) + 9 ), TTDate::getDayOfMonth( $start_date ), TTDate::getYear( $start_date ) );
 				break;
 			case 'next_12_months':
-				$start_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )+86400) );
-				$end_date = mktime(0,0,0, TTDate::getMonth( $start_date )+12, TTDate::getDayOfMonth( $start_date ), TTDate::getYear( $start_date ) );
+				$start_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + 86400) );
+				$end_date = mktime(0, 0, 0, ( TTDate::getMonth( $start_date ) + 12 ), TTDate::getDayOfMonth( $start_date ), TTDate::getYear( $start_date ) );
 				break;
 			case 'next_18_months':
-				$start_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )+86400) );
-				$end_date = mktime(0,0,0, TTDate::getMonth( $start_date )+18, TTDate::getDayOfMonth( $start_date ), TTDate::getYear( $start_date ) );
+				$start_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + 86400) );
+				$end_date = mktime(0, 0, 0, ( TTDate::getMonth( $start_date ) + 18 ), TTDate::getDayOfMonth( $start_date ), TTDate::getYear( $start_date ) );
 				break;
 			case 'next_24_months':
-				$start_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch )+86400) );
-				$end_date = mktime(0,0,0, TTDate::getMonth( $start_date )+24, TTDate::getDayOfMonth( $start_date ), TTDate::getYear( $start_date ) );
+				$start_date = TTDate::getEndDayEpoch( (TTDate::getMiddleDayEpoch( $epoch ) + 86400) );
+				$end_date = mktime(0, 0, 0, ( TTDate::getMonth( $start_date ) + 24 ), TTDate::getDayOfMonth( $start_date ), TTDate::getYear( $start_date ) );
 				break;
 			case 'next_year':
-				$start_date = TTDate::getBeginYearEpoch( (TTDate::getEndYearEpoch( $epoch )+86400) );
-				$end_date = TTDate::getEndYearEpoch( (TTDate::getEndYearEpoch( $epoch )+86400) );
+				$start_date = TTDate::getBeginYearEpoch( (TTDate::getEndYearEpoch( $epoch ) + 86400) );
+				$end_date = TTDate::getEndYearEpoch( (TTDate::getEndYearEpoch( $epoch ) + 86400) );
 				break;
 			case 'next_2_years':
-				$start_date = TTDate::getEndYearEpoch( (TTDate::getEndYearEpoch( $epoch )+86400) );
-				$end_date = mktime(0,0,0, TTDate::getMonth( $start_date ), TTDate::getDayOfMonth( $start_date ), TTDate::getYear( $start_date )+2 );
+				$start_date = TTDate::getEndYearEpoch( (TTDate::getEndYearEpoch( $epoch ) + 86400) );
+				$end_date = mktime(0, 0, 0, TTDate::getMonth( $start_date ), TTDate::getDayOfMonth( $start_date ), ( TTDate::getYear( $start_date ) + 2 ) );
 				break;
 			case 'next_3_years':
-				$start_date = TTDate::getEndYearEpoch( (TTDate::getEndYearEpoch( $epoch )+86400) );
-				$end_date = mktime(0,0,0, TTDate::getMonth( $start_date ), TTDate::getDayOfMonth( $start_date ), TTDate::getYear( $start_date )+3 );
+				$start_date = TTDate::getEndYearEpoch( (TTDate::getEndYearEpoch( $epoch ) + 86400) );
+				$end_date = mktime(0, 0, 0, TTDate::getMonth( $start_date ), TTDate::getDayOfMonth( $start_date ), ( TTDate::getYear( $start_date ) + 3 ) );
 				break;
 			case 'next_5_years':
-				$start_date = TTDate::getEndYearEpoch( (TTDate::getEndYearEpoch( $epoch )+86400) );
-				$end_date = mktime(0,0,0, TTDate::getMonth( $start_date ), TTDate::getDayOfMonth( $start_date ), TTDate::getYear( $start_date )+5 );
+				$start_date = TTDate::getEndYearEpoch( (TTDate::getEndYearEpoch( $epoch ) + 86400) );
+				$end_date = mktime(0, 0, 0, TTDate::getMonth( $start_date ), TTDate::getDayOfMonth( $start_date ), ( TTDate::getYear( $start_date ) + 5 ) );
 				break;
-
-
 			case 'all_years':
-				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 )-86400) );
-				$end_date = TTDate::getEndYearEpoch( time()+(86400*(365*2)) );
+				$start_date = TTDate::getBeginYearEpoch( (TTDate::getBeginYearEpoch( 31564800 ) - 86400) );
+				$end_date = TTDate::getEndYearEpoch( time() + (86400 * (365 * 2)) );
 				break;
 			default:
 				break;
 		}
 
 		if ( isset($start_date) AND isset($end_date) ) {
-			//Debug::text('Period: '. $time_period .' Start: '. TTDate::getDate('DATE+TIME', $start_date ) .'('.$start_date.') End: '. TTDate::getDate('DATE+TIME', $end_date ) .'('.$end_date.')', __FILE__, __LINE__, __METHOD__,10);
+			//Debug::text('Period: '. $time_period .' Start: '. TTDate::getDate('DATE+TIME', $start_date ) .'('.$start_date.') End: '. TTDate::getDate('DATE+TIME', $end_date ) .'('.$end_date.')', __FILE__, __LINE__, __METHOD__, 10);
 			return array('start_date' => $start_date, 'end_date' => $end_date );
 		} elseif ( isset($pay_period_ids) ) {
-			//Debug::text('Period: '. $time_period .' returning just pay_period_ids...', __FILE__, __LINE__, __METHOD__,10);
+			//Debug::text('Period: '. $time_period .' returning just pay_period_ids...', __FILE__, __LINE__, __METHOD__, 10);
 			return array('pay_period_id' => $pay_period_ids );
 		}
 
@@ -2581,7 +2576,7 @@ class TTDate {
 		}
 
 		if ( $column_name == '' ) {
-			$column_name = TTi18n::gettext('Date');
+			$column_name = TTi18n::getText('Date');
 		}
 
 		if ( $column_name_prefix != '' ) {
@@ -2589,40 +2584,42 @@ class TTDate {
 		}
 
 		$retarr = array(
-						'-'.$sort_prefix.'00-'. $column_name_prefix .'date_stamp' 				=> $column_name,
-						'-'.$sort_prefix.'01-'. $column_name_prefix .'time_stamp' 				=> $column_name.' - '. TTi18n::gettext('Time of Day'),
-						'-'.$sort_prefix.'01-'. $column_name_prefix .'date_time_stamp' 			=> $column_name.' - '. TTi18n::gettext('w/Time'),
+						'-'.$sort_prefix.'00-'. $column_name_prefix .'date_stamp'				=> $column_name,
+						'-'.$sort_prefix.'01-'. $column_name_prefix .'time_stamp'				=> $column_name.' - '. TTi18n::getText('Time of Day'),
+						'-'.$sort_prefix.'01-'. $column_name_prefix .'date_time_stamp'			=> $column_name.' - '. TTi18n::getText('w/Time'),
 
-						'-'.$sort_prefix.'10-'. $column_name_prefix .'date_dow' 				=> $column_name.' - '. TTi18n::gettext('Day of Week'),
-						'-'.$sort_prefix.'12-'. $column_name_prefix .'date_dow_week' 			=> $column_name.' - '. TTi18n::gettext('Day of Week+Week'),
-						'-'.$sort_prefix.'14-'. $column_name_prefix .'date_dow_month' 			=> $column_name.' - '. TTi18n::gettext('Day of Week+Month'),
-						'-'.$sort_prefix.'16-'. $column_name_prefix .'date_dow_month_year'		=> $column_name.' - '. TTi18n::gettext('Day of Week+Month+Year'),
-						'-'.$sort_prefix.'18-'. $column_name_prefix .'date_dow_dom_month_year'	=> $column_name.' - '. TTi18n::gettext('Day of Week+Day Of Month+Year'),
+						'-'.$sort_prefix.'04-'. $column_name_prefix .'hour_of_day'				=> $column_name.' - '. TTi18n::getText('Hour of Day'),
 
-						'-'.$sort_prefix.'20-'. $column_name_prefix .'date_week' 				=> $column_name.' - '. TTi18n::gettext('Week'),
-						'-'.$sort_prefix.'22-'. $column_name_prefix .'date_week_month' 			=> $column_name.' - '. TTi18n::gettext('Week+Month'),
-						'-'.$sort_prefix.'24-'. $column_name_prefix .'date_week_month_year'		=> $column_name.' - '. TTi18n::gettext('Week+Month+Year'),
+						'-'.$sort_prefix.'10-'. $column_name_prefix .'date_dow'					=> $column_name.' - '. TTi18n::getText('Day of Week'),
+						'-'.$sort_prefix.'12-'. $column_name_prefix .'date_dow_week'			=> $column_name.' - '. TTi18n::getText('Day of Week+Week'),
+						'-'.$sort_prefix.'14-'. $column_name_prefix .'date_dow_month'			=> $column_name.' - '. TTi18n::getText('Day of Week+Month'),
+						'-'.$sort_prefix.'16-'. $column_name_prefix .'date_dow_month_year'		=> $column_name.' - '. TTi18n::getText('Day of Week+Month+Year'),
+						'-'.$sort_prefix.'18-'. $column_name_prefix .'date_dow_dom_month_year'	=> $column_name.' - '. TTi18n::getText('Day of Week+Day Of Month+Year'),
 
-						'-'.$sort_prefix.'30-'. $column_name_prefix .'date_dom' 				=> $column_name.' - '. TTi18n::gettext('Day of Month'),
-						'-'.$sort_prefix.'32-'. $column_name_prefix .'date_dom_month' 			=> $column_name.' - '. TTi18n::gettext('Day of Month+Month'),
-						'-'.$sort_prefix.'34-'. $column_name_prefix .'date_dom_month_year' 		=> $column_name.' - '. TTi18n::gettext('Day of Month+Month+Year'),
+						'-'.$sort_prefix.'20-'. $column_name_prefix .'date_week'				=> $column_name.' - '. TTi18n::getText('Week'),
+						'-'.$sort_prefix.'22-'. $column_name_prefix .'date_week_month'			=> $column_name.' - '. TTi18n::getText('Week+Month'),
+						'-'.$sort_prefix.'24-'. $column_name_prefix .'date_week_month_year'		=> $column_name.' - '. TTi18n::getText('Week+Month+Year'),
 
-						'-'.$sort_prefix.'40-'. $column_name_prefix .'date_month' 				=> $column_name.' - '. TTi18n::gettext('Month'),
-						'-'.$sort_prefix.'42-'. $column_name_prefix .'date_month_year'		 	=> $column_name.' - '. TTi18n::gettext('Month+Year'),
+						'-'.$sort_prefix.'30-'. $column_name_prefix .'date_dom'					=> $column_name.' - '. TTi18n::getText('Day of Month'),
+						'-'.$sort_prefix.'32-'. $column_name_prefix .'date_dom_month'			=> $column_name.' - '. TTi18n::getText('Day of Month+Month'),
+						'-'.$sort_prefix.'34-'. $column_name_prefix .'date_dom_month_year'		=> $column_name.' - '. TTi18n::getText('Day of Month+Month+Year'),
 
-						'-'.$sort_prefix.'50-'. $column_name_prefix .'date_quarter' 			=> $column_name.' - '. TTi18n::gettext('Quarter'),
-						'-'.$sort_prefix.'52-'. $column_name_prefix .'date_quarter_year'	 	=> $column_name.' - '. TTi18n::gettext('Quarter+Year'),
+						'-'.$sort_prefix.'40-'. $column_name_prefix .'date_month'				=> $column_name.' - '. TTi18n::getText('Month'),
+						'-'.$sort_prefix.'42-'. $column_name_prefix .'date_month_year'			=> $column_name.' - '. TTi18n::getText('Month+Year'),
 
-						'-'.$sort_prefix.'60-'. $column_name_prefix .'date_year' 				=> $column_name.' - '. TTi18n::gettext('Year'),
-					   );
+						'-'.$sort_prefix.'50-'. $column_name_prefix .'date_quarter'				=> $column_name.' - '. TTi18n::getText('Quarter'),
+						'-'.$sort_prefix.'52-'. $column_name_prefix .'date_quarter_year'		=> $column_name.' - '. TTi18n::getText('Quarter+Year'),
+
+						'-'.$sort_prefix.'60-'. $column_name_prefix .'date_year'				=> $column_name.' - '. TTi18n::getText('Year'),
+					);
 
 		if ( $include_pay_period == TRUE ) {
 			//Don't use the $column_name on these, as there is only one type of pay period columns.
 			$pay_period_arr = array(
-						'-'.$sort_prefix.'70-'. $column_name_prefix .'pay_period' 				=> TTi18n::gettext('Pay Period'),
-						'-'.$sort_prefix.'71-'. $column_name_prefix .'pay_period_start_date' 	=> TTi18n::gettext('Pay Period - Start Date'),
-						'-'.$sort_prefix.'72-'. $column_name_prefix .'pay_period_end_date' 		=> TTi18n::gettext('Pay Period - End Date'),
-						'-'.$sort_prefix.'73-'. $column_name_prefix .'pay_period_transaction_date' => TTi18n::gettext('Pay Period - Transaction Date'),
+						'-'.$sort_prefix.'70-'. $column_name_prefix .'pay_period'				=> TTi18n::getText('Pay Period'),
+						'-'.$sort_prefix.'71-'. $column_name_prefix .'pay_period_start_date'	=> TTi18n::getText('Pay Period - Start Date'),
+						'-'.$sort_prefix.'72-'. $column_name_prefix .'pay_period_end_date'		=> TTi18n::getText('Pay Period - End Date'),
+						'-'.$sort_prefix.'73-'. $column_name_prefix .'pay_period_transaction_date' => TTi18n::getText('Pay Period - Transaction Date'),
 					);
 			$retarr = array_merge( $retarr, $pay_period_arr );
 		}
@@ -2637,14 +2634,14 @@ class TTDate {
 			return array();
 		}
 		
-	    $column = Misc::trimSortPrefix( $column );
-        
+		$column = Misc::trimSortPrefix( $column );
+
 		//Trim off a column_name_prefix, or everything before the "-"
 		$tmp_column = explode( '-', $column );
 		if ( isset($tmp_column[1]) ) {
 			$column = $tmp_column[1];
 		}
-        
+
 		//Don't use todays date, as that can cause a lot of confusion in reports, especially when displaying time not assigned to a pay period
 		//and the pay period dates all show today. Just leave blank.
 		//if ($epoch == NULL OR $epoch == '' ) { //Epoch can be a string sometimes.
@@ -2669,11 +2666,14 @@ class TTDate {
 					$retval = TTDate::getDate( 'DATE', $epoch );
 					break;
 				case 'date_stamp':
-                    $epoch = is_numeric( $epoch ) ? $epoch : strtotime($epoch);
-                    $retval = TTDate::getDate( 'DATE', $epoch );
+					$epoch = is_numeric( $epoch ) ? $epoch : strtotime($epoch);
+					$retval = TTDate::getDate( 'DATE', $epoch );
 					break;
 				case 'time_stamp':
 					$retval = TTDate::getDate( 'TIME', is_numeric( $epoch ) ? $epoch : strtotime($epoch) );
+					break;
+				case 'hour_of_day':
+					$retval = TTDate::getDate( 'TIME', is_numeric( $epoch ) ? TTDate::roundTime($epoch, 3600, 10 ) : TTDate::roundTime( strtotime($epoch), 3600, 10 ) ); //Round down to the nearest hour.
 					break;
 				case 'date_time_stamp':
 					$retval = TTDate::getDate( 'DATE+TIME', is_numeric( $epoch ) ? $epoch : strtotime($epoch) );
@@ -2730,10 +2730,10 @@ class TTDate {
 					$retval = $params;
 					break;
 				default:
-					Debug::text('Date Column does not match!: '. $column, __FILE__, __LINE__, __METHOD__,10);
+					Debug::text('Date Column does not match!: '. $column, __FILE__, __LINE__, __METHOD__, 10);
 					break;
 			}
-			//Debug::text('Column: '. $column .' Input: '. $epoch .' Retval: '. $retval, __FILE__, __LINE__, __METHOD__,10);
+			//Debug::text('Column: '. $column .' Input: '. $epoch .' Retval: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
 		} else {
 			//Return data for *all* columns at once.
 			if ($epoch == NULL OR $epoch == '' OR !is_numeric($epoch) ) { //Epoch must be numeric
@@ -2747,6 +2747,7 @@ class TTDate {
 			$retval = array(
 				$column_prefix.'date_stamp' => date('Y-m-d', $epoch ),
 				$column_prefix.'time_stamp' => $epoch,
+				$column_prefix.'hour_of_day' => TTDate::roundTime( $epoch, 3600, 10 ),
 				$column_prefix.'date_time_stamp' => $epoch,
 				$column_prefix.'date_dow' => date('w', $epoch),
 				$column_prefix.'date_dow_week' => date('W-w', $epoch ),
@@ -2788,38 +2789,38 @@ class TTDate {
 
 		return FALSE;
 	}
-    
-    public static function getISO8601Duration($time) {
-        $units = array(
-            "Y" => 365*24*3600,
-            "D" =>     24*3600,
-            "H" =>        3600,
-            "M" =>          60,
-            "S" =>           1,
-        );
-    
-        $str = "P";
-        $istime = false;
-    
-        foreach ($units as $unitName => &$unit) {
-            $quot  = intval($time / $unit);
-            $time -= $quot * $unit;
-            $unit  = $quot;
-            if ($unit > 0) {
-                if (!$istime AND in_array($unitName, array("H", "M", "S"))) { // There may be a better way to do this
-                    $str .= "T";
-                    $istime = true;
-                }
-                $str .= strval($unit) . $unitName;
-            }
-        }
-    
-        return $str;
-    }
+
+	public static function getISO8601Duration($time) {
+		$units = array(
+			'Y' => ( 365 * 24 * 3600 ),
+			'D' => ( 24 * 3600 ),
+			'H' => 3600,
+			'M' => 60,
+			'S' => 1,
+		);
+
+		$str = 'P';
+		$istime = FALSE;
+
+		foreach ($units as $unitName => &$unit) {
+			$quot  = intval($time / $unit);
+			$time -= ( $quot * $unit );
+			$unit  = $quot;
+			if ($unit > 0) {
+				if (!$istime AND in_array($unitName, array('H', 'M', 'S'))) { // There may be a better way to do this
+					$str .= 'T';
+					$istime = TRUE;
+				}
+				$str .= strval($unit) . $unitName;
+			}
+		}
+
+		return $str;
+	}
 
 	static function inApplyFrequencyWindow( $frequency_id, $start_date, $end_date, $frequency_criteria = array() ) {
 		/*
-		 Frequency IDs:
+		Frequency IDs:
 												20 => 'Annually',
 												25 => 'Quarterly',
 												30 => 'Monthly',
@@ -2844,16 +2845,16 @@ class TTDate {
 			$frequency_criteria['date'] = 0;
 		}
 
-		//Debug::Arr($frequency_criteria, 'Freq ID: '. $frequency_id .' Date: Start: '. TTDate::getDate('DATE+TIME', $start_date) .'('.$start_date.') End: '. TTDate::getDate('DATE+TIME', $end_date) .'('.$end_date.')', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($frequency_criteria, 'Freq ID: '. $frequency_id .' Date: Start: '. TTDate::getDate('DATE+TIME', $start_date) .'('.$start_date.') End: '. TTDate::getDate('DATE+TIME', $end_date) .'('.$end_date.')', __FILE__, __LINE__, __METHOD__, 10);
 		$retval = FALSE;
 		switch ( $frequency_id ) {
 			case 20: //Annually
 				$year_epoch1 = mktime( TTDate::getHour($start_date), TTDate::getMinute($start_date), TTDate::getSecond($start_date), $frequency_criteria['month'], $frequency_criteria['day_of_month'], TTDate::getYear( $start_date ) );
 				$year_epoch2 = mktime( TTDate::getHour($end_date), TTDate::getMinute($end_date), TTDate::getSecond($end_date), $frequency_criteria['month'], $frequency_criteria['day_of_month'], TTDate::getYear( $end_date ) );
-				//Debug::Text('Year1 EPOCH: '. TTDate::getDate('DATE+TIME', $year_epoch1) .'('. $year_epoch1 .')', __FILE__, __LINE__, __METHOD__,10);
-				//Debug::Text('Year2 EPOCH: '. TTDate::getDate('DATE+TIME', $year_epoch2) .'('. $year_epoch2 .')', __FILE__, __LINE__, __METHOD__,10);
+				//Debug::Text('Year1 EPOCH: '. TTDate::getDate('DATE+TIME', $year_epoch1) .'('. $year_epoch1 .')', __FILE__, __LINE__, __METHOD__, 10);
+				//Debug::Text('Year2 EPOCH: '. TTDate::getDate('DATE+TIME', $year_epoch2) .'('. $year_epoch2 .')', __FILE__, __LINE__, __METHOD__, 10);
 
-				if ( 	( $year_epoch1 >= $start_date AND $year_epoch1 <= $end_date)
+				if (	( $year_epoch1 >= $start_date AND $year_epoch1 <= $end_date)
 						OR
 						( $year_epoch2 >= $start_date AND $year_epoch2 <= $end_date)
 						) {
@@ -2862,10 +2863,10 @@ class TTDate {
 				break;
 			case 25: //Quarterly
 				//Handle quarterly like month, we just need to set the specific month from quarter_month.
-				if ( abs($end_date-$start_date) > (86400*93) ) { //3 months
+				if ( abs($end_date - $start_date) > (86400 * 93) ) { //3 months
 					$retval = TRUE;
 				} else {
-					for( $i=TTDate::getMiddleDayEpoch($start_date); $i <= TTDate::getMiddleDayEpoch($end_date); $i+=(86400*1) ) {
+					for( $i = TTDate::getMiddleDayEpoch($start_date); $i <= TTDate::getMiddleDayEpoch($end_date); $i += (86400 * 1) ) {
 						if ( self::getYearQuarterMonthNumber( $i ) == $frequency_criteria['quarter_month']
 								AND $frequency_criteria['day_of_month'] == self::getDayOfMonth( $i ) ) {
 							$retval = TRUE;
@@ -2882,16 +2883,16 @@ class TTDate {
 					if ( TTDate::getDaysInMonth( $end_date ) < $frequency_criteria['day_of_month'] ) {
 						$frequency_criteria['day_of_month'] = TTDate::getDaysInMonth( $end_date );
 					}
-					//Debug::Text('Apply frequency day of month exceeds days in this month, using last day of the month instead: '. $frequency_criteria['day_of_month'], __FILE__, __LINE__, __METHOD__,10);
+					//Debug::Text('Apply frequency day of month exceeds days in this month, using last day of the month instead: '. $frequency_criteria['day_of_month'], __FILE__, __LINE__, __METHOD__, 10);
 				}
 
 				$month_epoch1 = mktime( TTDate::getHour($start_date), TTDate::getMinute($start_date), TTDate::getSecond($start_date), TTDate::getMonth( $start_date ), $frequency_criteria['day_of_month'], TTDate::getYear( $start_date ) );
 				$month_epoch2 = mktime( TTDate::getHour($end_date), TTDate::getMinute($end_date), TTDate::getSecond($end_date), TTDate::getMonth( $end_date ), $frequency_criteria['day_of_month'], TTDate::getYear( $end_date ) );
-				//Debug::Text('Day of Month: '. $frequency_criteria['day_of_month'] .' Month EPOCH: '. TTDate::getDate('DATE+TIME', $month_epoch1) .' Current Month: '. TTDate::getMonth( $start_date ), __FILE__, __LINE__, __METHOD__,10);
-				//Debug::Text('Month1 EPOCH: '. TTDate::getDate('DATE+TIME', $month_epoch1) .'('. $month_epoch1 .') Greater Than: '. TTDate::getDate('DATE+TIME', ($start_date)) .' Less Than: '.  TTDate::getDate('DATE+TIME', $end_date) .'('. $end_date .')', __FILE__, __LINE__, __METHOD__,10);
-				//Debug::Text('Month2 EPOCH: '. TTDate::getDate('DATE+TIME', $month_epoch2) .'('. $month_epoch2 .') Greater Than: '. TTDate::getDate('DATE+TIME', ($start_date)) .' Less Than: '.  TTDate::getDate('DATE+TIME', $end_date) .'('. $end_date .')', __FILE__, __LINE__, __METHOD__,10);
+				//Debug::Text('Day of Month: '. $frequency_criteria['day_of_month'] .' Month EPOCH: '. TTDate::getDate('DATE+TIME', $month_epoch1) .' Current Month: '. TTDate::getMonth( $start_date ), __FILE__, __LINE__, __METHOD__, 10);
+				//Debug::Text('Month1 EPOCH: '. TTDate::getDate('DATE+TIME', $month_epoch1) .'('. $month_epoch1 .') Greater Than: '. TTDate::getDate('DATE+TIME', ($start_date)) .' Less Than: '.  TTDate::getDate('DATE+TIME', $end_date) .'('. $end_date .')', __FILE__, __LINE__, __METHOD__, 10);
+				//Debug::Text('Month2 EPOCH: '. TTDate::getDate('DATE+TIME', $month_epoch2) .'('. $month_epoch2 .') Greater Than: '. TTDate::getDate('DATE+TIME', ($start_date)) .' Less Than: '.  TTDate::getDate('DATE+TIME', $end_date) .'('. $end_date .')', __FILE__, __LINE__, __METHOD__, 10);
 
-				if ( 	( $month_epoch1 >= $start_date AND $month_epoch1 <= $end_date )
+				if (	( $month_epoch1 >= $start_date AND $month_epoch1 <= $end_date )
 						OR
 						( $month_epoch2 >= $start_date AND $month_epoch2 <= $end_date )
 						) {
@@ -2907,10 +2908,10 @@ class TTDate {
 						) {
 					$retval = TRUE;
 				} else {
-					if ( ($end_date-$start_date) > (86400*7) ) {
+					if ( ($end_date - $start_date) > (86400 * 7) ) {
 						$retval = TRUE;
 					} else {
-						for( $i=TTDate::getMiddleDayEpoch($start_date); $i <= TTDate::getMiddleDayEpoch($end_date); $i+=86400 ) {
+						for( $i = TTDate::getMiddleDayEpoch($start_date); $i <= TTDate::getMiddleDayEpoch($end_date); $i += 86400 ) {
 							if ( self::getDayOfWeek($i) == $frequency_criteria['day_of_week'] ) {
 								$retval = TRUE;
 								break;
@@ -2920,14 +2921,14 @@ class TTDate {
 				}
 				break;
 			case 100: //Specific date
-				Debug::Text('Specific Date: '. TTDate::getDate('DATE+TIME', $frequency_criteria['date']), __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Specific Date: '. TTDate::getDate('DATE+TIME', $frequency_criteria['date']), __FILE__, __LINE__, __METHOD__, 10);
 				if ( $frequency_criteria['date'] >= $start_date AND $frequency_criteria['date'] <= $end_date ) {
 					$retval = TRUE;
 				}
 				break;
 		}
 
-		Debug::Text('Retval '. (int)$retval, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Retval '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
 	}
 

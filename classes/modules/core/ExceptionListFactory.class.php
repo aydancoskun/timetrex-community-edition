@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11491 $
- * $Id: ExceptionListFactory.class.php 11491 2013-11-25 23:51:42Z mikeb $
- * $Date: 2013-11-25 15:51:42 -0800 (Mon, 25 Nov 2013) $
+ * $Revision: 12265 $
+ * $Id: ExceptionListFactory.class.php 12265 2014-02-10 16:14:38Z mikeb $
+ * $Date: 2014-02-10 08:14:38 -0800 (Mon, 10 Feb 2014) $
  */
 
 /**
@@ -46,7 +46,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -67,7 +67,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 						AND deleted = 0';
@@ -89,7 +89,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	user_date_id = ?
 						AND deleted = 0';
@@ -125,7 +125,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					LEFT JOIN '. $epf->getTable() .' as epf ON a.exception_policy_id = epf.id
 					LEFT JOIN '. $epcf->getTable() .' as epcf ON epf.exception_policy_control_id = epcf.id
@@ -154,7 +154,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					LEFT JOIN '. $epf->getTable() .' as epf ON a.exception_policy_id = epf.id
 					LEFT JOIN '. $epcf->getTable() .' as epcf ON epf.exception_policy_control_id = epcf.id
@@ -198,7 +198,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 					);
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							b.date_stamp as user_date_stamp,
 							d.severity_id as severity_id,
 							d.type_id as exception_policy_type_id
@@ -236,13 +236,13 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 
 		$ph = array(
 					'user_id' => $user_id,
-					'date_stamp1' => $this->db->BindDate( TTDate::getBeginDayEpoch( TTDate::getTime()-(32*86400) ) ), //Narrow down the date range as a performance optimizaiton.
+					'date_stamp1' => $this->db->BindDate( TTDate::getBeginDayEpoch( ( TTDate::getTime() - (32 * 86400) ) ) ), //Narrow down the date range as a performance optimizaiton.
 					'date_stamp2' => $this->db->BindDate( TTDate::getBeginDayEpoch( TTDate::getTime() ) ), //Exclude any exceptions after today, but we must include todays exceptions because missing IN punches could exist.
 					'status_id' => $pay_period_status,
 					);
 
 		$query = '
-					select 	d.severity_id as severity_id,
+					select	d.severity_id as severity_id,
 							count(*) as total
 					from	'. $this->getTable() .' as a
 					LEFT JOIN '. $udf->getTable() .' as b ON a.user_date_id = b.id
@@ -286,7 +286,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 
 		//Ignore pre-mature exceptions when counting exceptions.
 		$query = '
-					select 	d.severity_id as severity_id,
+					select	d.severity_id as severity_id,
 							count(*) as count
 					from	'. $this->getTable() .' as a
 					LEFT JOIN '. $udf->getTable() .' as b ON a.user_date_id = b.id
@@ -334,7 +334,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 					);
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							b.date_stamp as user_date_stamp,
 							d.severity_id as severity_id,
 							d.type_id as exception_policy_type_id,
@@ -388,7 +388,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 					);
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							b.date_stamp as user_date_stamp,
 							d.severity_id as severity_id,
 							d.type_id as exception_policy_type_id,
@@ -444,7 +444,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 					);
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							b.date_stamp as user_date_stamp,
 							d.severity_id as severity_id,
 							d.type_id as exception_policy_type_id,
@@ -468,7 +468,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getReportByTimePeriodAndUserIdAndCompanyIdAndStartDateAndEndDate($time_period, $user_ids, $company_id, $start_date, $end_date, $where = NULL, $order = NULL) {
+	function getReportByTimePeriodAndUserIdAndCompanyIdAndStartDateAndEndDate($time_period, $user_ids, $company_id, $start_date, $end_date ) {
 		if ( $time_period == '' ) {
 			return FALSE;
 		}
@@ -509,11 +509,11 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		switch (strtolower($time_period)) {
 			case 'week':
 				$total_date_units = round( TTDate::getWeekDifference($start_date, $end_date) );
-				Debug::Text('Total Weeks: '. $total_date_units, __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Total Weeks: '. $total_date_units, __FILE__, __LINE__, __METHOD__, 10);
 				break;
 			case 'month':
 				$total_date_units = ceil( TTDate::getMonthDifference($start_date, $end_date) );
-				Debug::Text('Total Months: '. $total_date_units, __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Total Months: '. $total_date_units, __FILE__, __LINE__, __METHOD__, 10);
 				break;
 		}
 		//Avoid division by 0 error.
@@ -528,7 +528,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 					);
 
 		$query = '
-					select 	user_id,
+					select	user_id,
 							exception_policy_id,
 							(sum(total) / '. $total_date_units .') as avg,
 							min(total) as min,
@@ -536,11 +536,11 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 							sum(total) as total
 					from (
 
-						select 	b.user_id,
+						select	b.user_id,
 								(EXTRACT('.$time_period.' FROM b.date_stamp) ) as date,
 								a.exception_policy_id,
 								CASE WHEN count(*) > 0 THEN count(*) ELSE 0 END as total
-						from 	'. $udf->getTable() .' as b
+						from	'. $udf->getTable() .' as b
 						LEFT JOIN '. $this->getTable() .' as a ON a.user_date_id = b.id
 						LEFT JOIN '. $uf->getTable() .' as c ON b.user_id = c.id
 						where
@@ -550,10 +550,10 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 							AND b.user_id in ('. $this->getListSQL($user_ids, $ph) .')
 							AND a.exception_policy_id is not NULL
 							AND ( ( a.deleted = 0 OR a.deleted is NULL ) AND b.deleted=0 AND c.deleted=0)
-							GROUP BY user_id,(EXTRACT('.$time_period.' FROM b.date_stamp) ),a.exception_policy_id
+							GROUP BY user_id, (EXTRACT('.$time_period.' FROM b.date_stamp) ), a.exception_policy_id
 						) tmp
-					GROUP BY user_id,exception_policy_id
-					ORDER BY user_id,sum(total) desc
+					GROUP BY user_id, exception_policy_id
+					ORDER BY user_id, sum(total) desc
 					';
 		//$query .= $this->getWhereSQL( $where );
 		//$query .= $this->getSortSQL( $order );
@@ -563,7 +563,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		return $this;
 	}
 
-	function getDOWReportByUserIdAndCompanyIdAndStartDateAndEndDate($user_ids, $company_id, $start_date, $end_date, $where = NULL, $order = NULL) {
+	function getDOWReportByUserIdAndCompanyIdAndStartDateAndEndDate($user_ids, $company_id, $start_date, $end_date ) {
 		if ( $user_ids == '' ) {
 			return FALSE;
 		}
@@ -602,18 +602,18 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 					'end_date' => $this->db->BindDate( $end_date ),
 					);
 
-		if ( strncmp($this->db->databaseType,'mysql',5) == 0 ) {
+		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
 			$dow_sql = '(dayofweek( b.date_stamp)-1)';
 		} else {
 			$dow_sql = '(date_part(\'DOW\', b.date_stamp))';
 		}
 
 		$query = '
-						select 	b.user_id,
+						select	b.user_id,
 								'. $dow_sql .' as dow,
 								a.exception_policy_id,
 								CASE WHEN count(*) > 0 THEN count(*) ELSE 0 END as total
-						from 	'. $udf->getTable() .' as b
+						from	'. $udf->getTable() .' as b
 						LEFT JOIN '. $this->getTable() .' as a ON a.user_date_id = b.id
 						LEFT JOIN '. $uf->getTable() .' as c ON b.user_id = c.id
 						where
@@ -623,17 +623,17 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 							AND b.user_id in ('. $this->getListSQL($user_ids, $ph) .')
 							AND a.exception_policy_id is not NULL
 							AND ( ( a.deleted = 0 OR a.deleted is NULL ) AND b.deleted=0 AND c.deleted=0)
-							GROUP BY b.user_id,'. $dow_sql .',a.exception_policy_id
-						ORDER BY b.user_id,'. $dow_sql .'
+							GROUP BY b.user_id, '. $dow_sql .', a.exception_policy_id
+						ORDER BY b.user_id, '. $dow_sql .'
 					';
 
 /*
 		$query = '
-						select 	b.user_id,
+						select	b.user_id,
 								(date_part(\'DOW\', b.date_stamp)) as dow,
 								a.exception_policy_id,
 								CASE WHEN count(*) > 0 THEN count(*) ELSE 0 END as total
-						from 	'. $udf->getTable() .' as b
+						from	'. $udf->getTable() .' as b
 						LEFT JOIN '. $this->getTable() .' as a ON a.user_date_id = b.id
 						LEFT JOIN '. $uf->getTable() .' as c ON b.user_id = c.id
 						where
@@ -643,8 +643,8 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 							AND b.user_id in ('. $this->getListSQL($user_ids, $ph) .')
 							AND a.exception_policy_id is not NULL
 							AND ( ( a.deleted = 0 OR a.deleted is NULL ) AND b.deleted=0 AND c.deleted=0)
-							GROUP BY b.user_id,(date_part(\'DOW\', b.date_stamp)),a.exception_policy_id
-						ORDER BY b.user_id,(date_part(\'DOW\', b.date_stamp))
+							GROUP BY b.user_id, (date_part(\'DOW\', b.date_stamp)), a.exception_policy_id
+						ORDER BY b.user_id, (date_part(\'DOW\', b.date_stamp))
 					';
 */
 		//$query .= $this->getWhereSQL( $where );
@@ -667,7 +667,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 			}
 		}
 
-		$additional_order_fields = array('d.name', 'e.name', 'f.name', 'g.name', 'h.status_id','i.severity_id','i.type_id','c.first_name','c.last_name', 'b.date_stamp');
+		$additional_order_fields = array('d.name', 'e.name', 'f.name', 'g.name', 'h.status_id', 'i.severity_id', 'i.type_id', 'c.first_name', 'c.last_name', 'b.date_stamp');
 		if ( $order == NULL ) {
 			//$order = array( 'status_id' => 'asc', 'last_name' => 'asc', 'first_name' => 'asc', 'middle_name' => 'asc');
 			$order = array( 'i.severity_id' => 'desc', 'c.last_name' => 'asc', 'b.date_stamp' => 'asc', 'i.type_id' => 'asc' );
@@ -726,7 +726,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 				unset($order['date_stamp']);
 			}
 
-			//Always sort by last name,first name after other columns
+			//Always sort by last name, first name after other columns
 			if ( !isset($order['c.last_name']) ) {
 				$order['c.last_name'] = 'asc';
 			}
@@ -742,8 +742,8 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 
 			$strict = TRUE;
 		}
-		//Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$udf = new UserDateFactory();
 		$uf = new UserFactory();
@@ -759,12 +759,12 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 					);
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							b.date_stamp as user_date_stamp,
 							i.severity_id as severity_id,
 							i.type_id as exception_policy_type_id,
 							b.user_id as user_id
-					from 	'. $this->getTable() .' as a
+					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $udf->getTable() .' as b ON a.user_date_id = b.id
 						LEFT JOIN '. $uf->getTable() .' as c ON b.user_id = c.id
 						LEFT JOIN '. $bf->getTable() .' as d ON c.default_branch_id = d.id
@@ -777,56 +777,56 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 					';
 
 		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query  .=	' AND c.id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
+			$query	.=	' AND c.id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
 		}
 		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query  .=	' AND c.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
+			$query	.=	' AND c.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
 		}
 		if ( isset($filter_data['user_id']) AND isset($filter_data['user_id'][0]) AND !in_array(-1, (array)$filter_data['user_id']) ) {
-			$query  .=	' AND c.id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
+			$query	.=	' AND c.id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['status_id']) AND isset($filter_data['status_id'][0]) AND !in_array(-1, (array)$filter_data['status_id']) ) {
-			$query  .=	' AND c.status_id in ('. $this->getListSQL($filter_data['status_id'], $ph) .') ';
+			$query	.=	' AND c.status_id in ('. $this->getListSQL($filter_data['status_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['type_id']) AND isset($filter_data['type_id'][0]) AND !in_array(-1, (array)$filter_data['type_id']) ) {
-			$query  .=	' AND a.type_id in ('. $this->getListSQL($filter_data['type_id'], $ph) .') ';
+			$query	.=	' AND a.type_id in ('. $this->getListSQL($filter_data['type_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['severity_id']) AND isset($filter_data['severity_id'][0]) AND !in_array(-1, (array)$filter_data['severity_id']) ) {
-			$query  .=	' AND i.severity_id in ('. $this->getListSQL($filter_data['severity_id'], $ph) .') ';
+			$query	.=	' AND i.severity_id in ('. $this->getListSQL($filter_data['severity_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['exception_policy_type_id']) AND isset($filter_data['exception_policy_type_id'][0]) AND !in_array(-1, (array)$filter_data['exception_policy_type_id']) ) {
-			$query  .=	' AND i.type_id in ('. $this->getListSQL($filter_data['exception_policy_type_id'], $ph) .') ';
+			$query	.=	' AND i.type_id in ('. $this->getListSQL($filter_data['exception_policy_type_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['pay_period_id']) AND isset($filter_data['pay_period_id'][0]) AND !in_array(-1, (array)$filter_data['pay_period_id']) ) {
-			$query  .=	' AND b.pay_period_id in ('. $this->getListSQL($filter_data['pay_period_id'], $ph) .') ';
+			$query	.=	' AND b.pay_period_id in ('. $this->getListSQL($filter_data['pay_period_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['pay_period_status_id']) AND isset($filter_data['pay_period_status_id'][0]) AND !in_array(-1, (array)$filter_data['pay_period_status_id']) ) {
-			$query  .=	' AND h.status_id in ('. $this->getListSQL($filter_data['pay_period_status_id'], $ph) .') ';
+			$query	.=	' AND h.status_id in ('. $this->getListSQL($filter_data['pay_period_status_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['group_id']) AND isset($filter_data['group_id'][0]) AND !in_array(-1, (array)$filter_data['group_id']) ) {
 			if ( isset($filter_data['include_subgroups']) AND (bool)$filter_data['include_subgroups'] == TRUE ) {
 				$uglf = new UserGroupListFactory();
 				$filter_data['group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['group_id'], TRUE);
 			}
-			$query  .=	' AND c.group_id in ('. $this->getListSQL($filter_data['group_id'], $ph) .') ';
+			$query	.=	' AND c.group_id in ('. $this->getListSQL($filter_data['group_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['default_branch_id']) AND isset($filter_data['default_branch_id'][0]) AND !in_array(-1, (array)$filter_data['default_branch_id']) ) {
-			$query  .=	' AND c.default_branch_id in ('. $this->getListSQL($filter_data['default_branch_id'], $ph) .') ';
+			$query	.=	' AND c.default_branch_id in ('. $this->getListSQL($filter_data['default_branch_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['default_department_id']) AND isset($filter_data['default_department_id'][0]) AND !in_array(-1, (array)$filter_data['default_department_id']) ) {
-			$query  .=	' AND c.default_department_id in ('. $this->getListSQL($filter_data['default_department_id'], $ph) .') ';
+			$query	.=	' AND c.default_department_id in ('. $this->getListSQL($filter_data['default_department_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['title_id']) AND isset($filter_data['title_id'][0]) AND !in_array(-1, (array)$filter_data['title_id']) ) {
-			$query  .=	' AND c.title_id in ('. $this->getListSQL($filter_data['title_id'], $ph) .') ';
+			$query	.=	' AND c.title_id in ('. $this->getListSQL($filter_data['title_id'], $ph) .') ';
 		}
 		/*
-		if ( isset($filter_data['sin']) AND trim($filter_data['sin']) != '' ) {
+		if ( isset($filter_data['sin']) AND !is_array($filter_data['sin']) AND trim($filter_data['sin']) != '' ) {
 			$ph[] = trim($filter_data['sin']);
-			$query  .=	' AND a.sin LIKE ?';
+			$query	.=	' AND a.sin LIKE ?';
 		}
 		*/
 
-		$query .= 	'
+		$query .=	'
 						AND ( a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0 AND h.deleted = 0 )
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -849,24 +849,24 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 			}
 		}
 
-        if ( isset( $filter_data['user_group_id'] ) ) {
-            $filter_data['group_id'] = $filter_data['user_group_id'];
-        }
-        if ( isset( $filter_data['user_title_id'] ) ) {
-            $filter_data['title_id'] = $filter_data['user_title_id'];
-        }
-        if ( isset( $filter_data['include_user_id'] ) ) {
-            $filter_data['user_id'] = $filter_data['include_user_id'];
-        }
-        if ( isset( $filter_data['exception_policy_severity_id'] ) ) {
-            $filter_data['severity_id'] = $filter_data['exception_policy_severity_id'];
-        }
+		if ( isset( $filter_data['user_group_id'] ) ) {
+			$filter_data['group_id'] = $filter_data['user_group_id'];
+		}
+		if ( isset( $filter_data['user_title_id'] ) ) {
+			$filter_data['title_id'] = $filter_data['user_title_id'];
+		}
+		if ( isset( $filter_data['include_user_id'] ) ) {
+			$filter_data['user_id'] = $filter_data['include_user_id'];
+		}
+		if ( isset( $filter_data['exception_policy_severity_id'] ) ) {
+			$filter_data['severity_id'] = $filter_data['exception_policy_severity_id'];
+		}
 
-		$additional_order_fields = array('d.name', 'e.name', 'f.name', 'g.name', 'h.status_id','i.severity_id','i.type_id','c.first_name','c.last_name', 'c.country', 'c.province', 'b.date_stamp', 'pgf.name', 'pscf.name', 'ppsf.name');
+		$additional_order_fields = array('d.name', 'e.name', 'f.name', 'g.name', 'h.status_id', 'i.severity_id', 'i.type_id', 'c.first_name', 'c.last_name', 'c.country', 'c.province', 'b.date_stamp', 'pgf.name', 'pscf.name', 'ppsf.name');
 		$sort_column_aliases = array(
-									 'status' => 'status_id',
-									 'type' => 'type_id',
-									 );
+									'status' => 'status_id',
+									'type' => 'type_id',
+									);
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 
 		if ( $order == NULL ) {
@@ -922,7 +922,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 				$order['c.last_name'] = $order['last_name'];
 				unset($order['last_name']);
 			}
-            if ( isset($order['country']) ) {
+			if ( isset($order['country']) ) {
 				$order['c.country'] = $order['country'];
 				unset($order['country']);
 			}
@@ -934,20 +934,20 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 				$order['b.date_stamp'] = $order['date_stamp'];
 				unset($order['date_stamp']);
 			}
-            if ( isset($order['policy_group']) ) {
-                $order['pgf.name'] = $order['policy_group'];
-                unset($order['policy_group']);
-            }
-            if ( isset($order['permission_group']) ) {
-                $order['pscf.name'] = $order['permission_group'];
-                unset($order['permission_group']);
-            }
-            if ( isset($order['pay_period_schedule']) ) {
-                $order['ppsf.name'] = $order['pay_period_schedule'];
-                unset($order['pay_period_schedule']);
-            }
+			if ( isset($order['policy_group']) ) {
+				$order['pgf.name'] = $order['policy_group'];
+				unset($order['policy_group']);
+			}
+			if ( isset($order['permission_group']) ) {
+				$order['pscf.name'] = $order['permission_group'];
+				unset($order['permission_group']);
+			}
+			if ( isset($order['pay_period_schedule']) ) {
+				$order['ppsf.name'] = $order['pay_period_schedule'];
+				unset($order['pay_period_schedule']);
+			}
 
-			//Always sort by last name,first name after other columns
+			//Always sort by last name, first name after other columns
 			if ( !isset($order['c.last_name']) ) {
 				$order['c.last_name'] = 'asc';
 			}
@@ -963,8 +963,8 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 
 			$strict = TRUE;
 		}
-		//Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$udf = new UserDateFactory();
 		$uf = new UserFactory();
@@ -973,22 +973,22 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		$ugf = new UserGroupFactory();
 		$utf = new UserTitleFactory();
 		$ppf = new PayPeriodFactory();
-        $ppsf = new PayPeriodScheduleFactory();
+		$ppsf = new PayPeriodScheduleFactory();
 		$epf = new ExceptionPolicyFactory();
-        $epcf = new ExceptionPolicyControlFactory();
+		$epcf = new ExceptionPolicyControlFactory();
 		$pguf = new PolicyGroupUserFactory();
-        $pgf = new PolicyGroupFactory();
+		$pgf = new PolicyGroupFactory();
 		$pf = new PunchFactory();
 		$pcf = new PunchControlFactory();
-        $pscf = new PermissionControlFactory();
-        $puf = new PermissionUserFactory();
+		$pscf = new PermissionControlFactory();
+		$puf = new PermissionUserFactory();
 
 		$ph = array(
 					'company_id' => $company_id,
 					);
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							b.date_stamp as date_stamp,
 							b.pay_period_id as pay_period_id,
 							h.pay_period_schedule_id as pay_period_schedule_id,
@@ -1026,7 +1026,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 							z.first_name as updated_by_first_name,
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
-					from 	'. $this->getTable() .' as a
+					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $epf->getTable() .' as i ON a.exception_policy_id = i.id
 						LEFT JOIN '. $epcf->getTable() .' as epcf ON epcf.id = i.exception_policy_control_id
 						LEFT JOIN '. $udf->getTable() .' as b ON a.user_date_id = b.id
@@ -1049,79 +1049,102 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	c.company_id = ? ';
 
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'c.id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'c.id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'c.id', $filter_data['exclude_user_id'], 'not_numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['user_status_id']) ) ? $this->getWhereClauseSQL( 'c.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['severity_id']) ) ? $this->getWhereClauseSQL( 'i.severity_id', $filter_data['severity_id'], 'numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['exception_policy_type_id']) ) ? $this->getWhereClauseSQL( 'i.type_id', $filter_data['exception_policy_type_id'], 'upper_text_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'b.pay_period_id', $filter_data['pay_period_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['pay_period_status_id']) ) ? $this->getWhereClauseSQL( 'h.status_id', $filter_data['pay_period_status_id'], 'numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'c.group_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'c.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'c.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'c.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['branch_id']) ) ? $this->getWhereClauseSQL( 'pcf.branch_id', $filter_data['branch_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['department_id']) ) ? $this->getWhereClauseSQL( 'pcf.department_id', $filter_data['department_id'], 'numeric_list', $ph ) : NULL;
+
+/*
 		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query  .=	' AND c.id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
+			$query	.=	' AND c.id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
 		}
 		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query  .=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
+			$query	.=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
 		}
 		if ( isset($filter_data['user_id']) AND isset($filter_data['user_id'][0]) AND !in_array(-1, (array)$filter_data['user_id']) ) {
-			$query  .=	' AND c.id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
+			$query	.=	' AND c.id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
 		}
-        $query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'c.id', $filter_data['exclude_user_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'c.id', $filter_data['exclude_user_id'], 'not_numeric_list', $ph ) : NULL;
 
 		if ( isset($filter_data['user_status_id']) AND isset($filter_data['user_status_id'][0]) AND !in_array(-1, (array)$filter_data['user_status_id']) ) {
-			$query  .=	' AND c.status_id in ('. $this->getListSQL($filter_data['user_status_id'], $ph) .') ';
+			$query	.=	' AND c.status_id in ('. $this->getListSQL($filter_data['user_status_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['type_id']) AND isset($filter_data['type_id'][0]) AND !in_array(-1, (array)$filter_data['type_id']) ) {
-			$query  .=	' AND a.type_id in ('. $this->getListSQL($filter_data['type_id'], $ph) .') ';
+			$query	.=	' AND a.type_id in ('. $this->getListSQL($filter_data['type_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['severity_id']) AND isset($filter_data['severity_id'][0]) AND !in_array(-1, (array)$filter_data['severity_id']) ) {
-			$query  .=	' AND i.severity_id in ('. $this->getListSQL($filter_data['severity_id'], $ph) .') ';
+			$query	.=	' AND i.severity_id in ('. $this->getListSQL($filter_data['severity_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['exception_policy_type_id']) AND isset($filter_data['exception_policy_type_id'][0]) AND !in_array(-1, (array)$filter_data['exception_policy_type_id']) ) {
-			$query  .=	' AND i.type_id in ('. $this->getListSQL($filter_data['exception_policy_type_id'], $ph) .') ';
+			$query	.=	' AND i.type_id in ('. $this->getListSQL($filter_data['exception_policy_type_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['pay_period_id']) AND isset($filter_data['pay_period_id'][0]) AND !in_array(-1, (array)$filter_data['pay_period_id']) ) {
-			$query  .=	' AND b.pay_period_id in ('. $this->getListSQL($filter_data['pay_period_id'], $ph) .') ';
+			$query	.=	' AND b.pay_period_id in ('. $this->getListSQL($filter_data['pay_period_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['pay_period_status_id']) AND isset($filter_data['pay_period_status_id'][0]) AND !in_array(-1, (array)$filter_data['pay_period_status_id']) ) {
-			$query  .=	' AND h.status_id in ('. $this->getListSQL($filter_data['pay_period_status_id'], $ph) .') ';
+			$query	.=	' AND h.status_id in ('. $this->getListSQL($filter_data['pay_period_status_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['group_id']) AND isset($filter_data['group_id'][0]) AND !in_array(-1, (array)$filter_data['group_id']) ) {
 			if ( isset($filter_data['include_subgroups']) AND (bool)$filter_data['include_subgroups'] == TRUE ) {
 				$uglf = new UserGroupListFactory();
 				$filter_data['group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['group_id'], TRUE);
 			}
-			$query  .=	' AND c.group_id in ('. $this->getListSQL($filter_data['group_id'], $ph) .') ';
+			$query	.=	' AND c.group_id in ('. $this->getListSQL($filter_data['group_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['default_branch_id']) AND isset($filter_data['default_branch_id'][0]) AND !in_array(-1, (array)$filter_data['default_branch_id']) ) {
-			$query  .=	' AND c.default_branch_id in ('. $this->getListSQL($filter_data['default_branch_id'], $ph) .') ';
+			$query	.=	' AND c.default_branch_id in ('. $this->getListSQL($filter_data['default_branch_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['default_department_id']) AND isset($filter_data['default_department_id'][0]) AND !in_array(-1, (array)$filter_data['default_department_id']) ) {
-			$query  .=	' AND c.default_department_id in ('. $this->getListSQL($filter_data['default_department_id'], $ph) .') ';
+			$query	.=	' AND c.default_department_id in ('. $this->getListSQL($filter_data['default_department_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['title_id']) AND isset($filter_data['title_id'][0]) AND !in_array(-1, (array)$filter_data['title_id']) ) {
-			$query  .=	' AND c.title_id in ('. $this->getListSQL($filter_data['title_id'], $ph) .') ';
+			$query	.=	' AND c.title_id in ('. $this->getListSQL($filter_data['title_id'], $ph) .') ';
 		}
 
 		if ( isset($filter_data['branch_id']) AND isset($filter_data['branch_id'][0]) AND !in_array(-1, (array)$filter_data['branch_id']) ) {
-			$query  .=	' AND pcf.branch_id in ('. $this->getListSQL($filter_data['branch_id'], $ph) .') ';
+			$query	.=	' AND pcf.branch_id in ('. $this->getListSQL($filter_data['branch_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['department_id']) AND isset($filter_data['department_id'][0]) AND !in_array(-1, (array)$filter_data['department_id']) ) {
-			$query  .=	' AND pcf.department_id in ('. $this->getListSQL($filter_data['department_id'], $ph) .') ';
+			$query	.=	' AND pcf.department_id in ('. $this->getListSQL($filter_data['department_id'], $ph) .') ';
+		}
+*/
+		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
+			$ph[] = $this->db->BindDate( (int)$filter_data['start_date'] );
+			$query	.=	' AND b.date_stamp >= ?';
+		}
+		if ( isset($filter_data['end_date']) AND !is_array($filter_data['end_date']) AND trim($filter_data['end_date']) != '' ) {
+			$ph[] = $this->db->BindDate( (int)$filter_data['end_date'] );
+			$query	.=	' AND b.date_stamp <= ?';
 		}
 
-		if ( isset($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
-			$ph[] = $this->db->BindDate($filter_data['start_date']);
-			$query  .=	' AND b.date_stamp >= ?';
-		}
-		if ( isset($filter_data['end_date']) AND trim($filter_data['end_date']) != '' ) {
-			$ph[] = $this->db->BindDate($filter_data['end_date']);
-			$query  .=	' AND b.date_stamp <= ?';
-		}
-        
-        $query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-        $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
 
 		//Make sure we accept exception rows assign to pay_period_id = 0 (no pay period), as this can happen when punches exist in the future.
-		$query .= 	'
-						AND ( a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0 AND pgf.deleted = 0 AND ( h.deleted = 0 OR h.deleted is NULL ) )
-					';
+		$query .=	' AND ( a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0 AND pgf.deleted = 0 AND ( h.deleted = 0 OR h.deleted is NULL ) ) ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 

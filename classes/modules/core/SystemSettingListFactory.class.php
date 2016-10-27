@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 7121 $
- * $Id: SystemSettingListFactory.class.php 7121 2012-06-22 22:55:40Z ipso $
- * $Date: 2012-06-22 15:55:40 -0700 (Fri, 22 Jun 2012) $
+ * $Revision: 11830 $
+ * $Id: SystemSettingListFactory.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -46,7 +46,7 @@ class SystemSettingListFactory extends SystemSettingFactory implements IteratorA
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -67,7 +67,7 @@ class SystemSettingListFactory extends SystemSettingFactory implements IteratorA
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 					';
@@ -91,7 +91,7 @@ class SystemSettingListFactory extends SystemSettingFactory implements IteratorA
 		$this->rs = $this->getCache($name);
 		if ( $this->rs === FALSE ) {
 			$query = '
-						select 	*
+						select	*
 						from	'. $this->getTable() .'
 						where	name = ?
 						';
@@ -100,7 +100,7 @@ class SystemSettingListFactory extends SystemSettingFactory implements IteratorA
 
 			$this->ExecuteSQL( $query, $ph );
 
-			$this->saveCache($this->rs,$name);
+			$this->saveCache($this->rs, $name);
 		}
 		
 		return $this;
@@ -118,7 +118,7 @@ class SystemSettingListFactory extends SystemSettingFactory implements IteratorA
 					$retarr[$ss_obj->getName()] = $ss_obj->getValue();
 				}
 
-				$this->saveCache($retarr,$id);
+				$this->saveCache($retarr, $id);
 
 				return $retarr;
 			} else {

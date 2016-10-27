@@ -77,7 +77,7 @@ class HierarchyUserFactory extends Factory {
 
 	function getHierarchyControl() {
 		if ( isset($this->data['hierarchy_control_id']) ) {
-			return $this->data['hierarchy_control_id'];
+			return (int)$this->data['hierarchy_control_id'];
 		}
 
 		return FALSE;
@@ -126,7 +126,7 @@ class HierarchyUserFactory extends Factory {
 					AND a.hierarchy_control_id != ?
 					AND c.deleted = 0
 				';
-		//Debug::Arr($ph,'Query: '. $query, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 		$user_id = $this->db->GetOne($query, $ph);
 
 		if ( $user_id === FALSE ) {
@@ -137,7 +137,7 @@ class HierarchyUserFactory extends Factory {
 	}
 	function getUser() {
 		if ( isset($this->data['user_id']) ) {
-			return $this->data['user_id'];
+			return (int)$this->data['user_id'];
 		}
 	}
 	function setUser($id) {
@@ -229,7 +229,7 @@ class HierarchyUserFactory extends Factory {
 	function addLog( $log_action ) {
 		$u_obj = $this->getUserObject();
 		if ( is_object($u_obj) ) {
-			return TTLog::addEntry( $this->getHierarchyControl(), $log_action, TTi18n::getText('Suborindate').': '. $u_obj->getFullName( FALSE, TRUE ) , NULL, $this->getTable() );
+			return TTLog::addEntry( $this->getHierarchyControl(), $log_action, TTi18n::getText('Suborindate').': '. $u_obj->getFullName( FALSE, TRUE ), NULL, $this->getTable() );
 		}
 
 		return FALSE;

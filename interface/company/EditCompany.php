@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8051 $
- * $Id: EditCompany.php 8051 2012-10-22 18:52:36Z ipso $
- * $Date: 2012-10-22 11:52:36 -0700 (Mon, 22 Oct 2012) $
+ * $Revision: 12173 $
+ * $Id: EditCompany.php 12173 2014-01-29 16:58:10Z mikeb $
+ * $Date: 2014-01-29 08:58:10 -0800 (Wed, 29 Jan 2014) $
  */
 require_once('../../includes/global.inc.php');
 require_once(Environment::getBasePath() .'includes/Interface.inc.php');
@@ -151,7 +151,7 @@ switch ($action) {
 			if ( $permission->Check('company','edit') ) {
 				Redirect::Page( URLBuilder::getURL(NULL, 'CompanyList.php') );
 			} else {
-				Redirect::Page( URLBuilder::getURL(NULL, '../index.php') );
+				Redirect::Page( URLBuilder::getURL(NULL, '../index_legacy.php') );
 			}
 
 			break;

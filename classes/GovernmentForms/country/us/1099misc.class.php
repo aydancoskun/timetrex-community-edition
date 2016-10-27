@@ -477,7 +477,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 		return $value;
 	}
 	function filterCompanyAddress( $value ) {
-		Debug::Text('Filtering company address: '. $value, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Filtering company address: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 
 		//Combine company address for multicell display.
 		$retarr[] = $this->company_address1;
@@ -528,7 +528,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 				$this->template_index[$tp] = $pdf->ImportPage($tp);
 			}
 		}
-		Debug::Arr($this->template_index, 'Template Index ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($this->template_index, 'Template Index ', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $this->year == ''  ) {
 			$this->year = $this->getYear();
@@ -551,7 +551,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 
 			foreach( $form_template_pages as $form_template_page ) {
 				//Set the template used.
-				Debug::Text('Template Page: '. $form_template_page, __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Template Page: '. $form_template_page, __FILE__, __LINE__, __METHOD__, 10);
 				$template_schema[0]['template_page'] = $form_template_page;
 
 				if ( $this->getType() == 'government' AND count($records) > 1 ) {
@@ -560,7 +560,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 																	array( 'template_page' => $form_template_page, 'x'=> 0, 'y' => 400) //Place two templates on the same page.
 																);
 				} else {
-					Debug::Text('zTemplate Page: '. $form_template_page .' C: '. count($records) .' B: '. $this->getShowBackground() .' D: '. $this->getType() .' X: '. $this->_type, __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('zTemplate Page: '. $form_template_page .' C: '. count($records) .' B: '. $this->getShowBackground() .' D: '. $this->getType() .' X: '. $this->_type, __FILE__, __LINE__, __METHOD__, 10);
 				}
 
 				$e=0;
@@ -583,7 +583,7 @@ class GovernmentForms_US_1099MISC extends GovernmentForms_US {
 						}
 					}
 
-					if ( $employees_per_page == 1 OR ( $employees_per_page == 2 AND  $e % $employees_per_page != 0 ) ) {
+					if ( $employees_per_page == 1 OR ( $employees_per_page == 2 AND $e % $employees_per_page != 0 ) ) {
 						$this->resetTemplatePage();
 						//if ( $this->getShowInstructionPage() == TRUE ) {
 						//	$this->addPage( array('template_page' => 2) );

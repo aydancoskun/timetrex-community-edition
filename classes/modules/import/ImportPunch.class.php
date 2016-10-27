@@ -131,21 +131,21 @@ class ImportPunch extends Import {
 
 				$retval = array(
 								'branch' => array(
-												    '-1010-name' => TTi18n::gettext('Name'),
+													'-1010-name' => TTi18n::gettext('Name'),
 													'-1010-manual_id' => TTi18n::gettext('Code'),
-												  ),
+												),
 								'department' => array(
-												    '-1010-name' => TTi18n::gettext('Name'),
+													'-1010-name' => TTi18n::gettext('Name'),
 													'-1010-manual_id' => TTi18n::gettext('Code'),
-												  ),
+												),
 								'job' => array(
-												    '-1010-name' => TTi18n::gettext('Name'),
+													'-1010-name' => TTi18n::gettext('Name'),
 													'-1010-manual_id' => TTi18n::gettext('Code'),
-												  ),
+												),
 								'job_item' => array(
-												    '-1010-name' => TTi18n::gettext('Name'),
+													'-1010-name' => TTi18n::gettext('Name'),
 													'-1010-manual_id' => TTi18n::gettext('Code'),
-												  ),
+												),
 								//Not sure how we can define the format to parse the date/time in one field.
 								'time_stamp' => $upf->getOptions('date_time_format'),
 								'in_time_stamp' => $upf->getOptions('date_time_format'),
@@ -167,7 +167,7 @@ class ImportPunch extends Import {
 	}
 
 	function _preParseRow( $row_number, $raw_row ) {
-		//Debug::Arr($raw_row, 'preParse Row: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($raw_row, 'preParse Row: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $raw_row;
 	}
 
@@ -182,51 +182,51 @@ class ImportPunch extends Import {
 
 		//Handle one punch per row.
 		if ( isset($column_map['time_stamp']) ) {
-			Debug::Text('Parsing time_stamp column...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Parsing time_stamp column...', __FILE__, __LINE__, __METHOD__, 10);
 			$date_time_format = $column_map['time_stamp']['parse_hint'].'_'.$column_map['time_stamp']['parse_hint'];
 		} elseif ( !isset($column_map['time_stamp']) AND isset($column_map['date']) AND isset($column_map['time']) ) {
-			Debug::Text('Parsing date/time column...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Parsing date/time column...', __FILE__, __LINE__, __METHOD__, 10);
 			//$raw_row['time_stamp'] = $raw_row[$column_map['date']['map_column_name']].' '. $raw_row[$column_map['time']['map_column_name']];
 			$raw_row['time_stamp'] = $raw_row['date'].' '. $raw_row['time'];
 			$date_time_format = $column_map['date']['parse_hint'].'_'.$column_map['time']['parse_hint'];
-			unset($raw_row['date'],$raw_row['time']);
+			unset($raw_row['date'], $raw_row['time']);
 		} else {
 			$date_time_format = 'd-M-y_g:i A T';
 		}
 		if ( isset($raw_row['time_stamp']) ) {
 			$split_date_time_format = explode('_', $date_time_format );
-			//Debug::Arr($split_date_time_format, 'Date/Time Format: '. $date_time_format, __FILE__, __LINE__, __METHOD__,10);
+			//Debug::Arr($split_date_time_format, 'Date/Time Format: '. $date_time_format, __FILE__, __LINE__, __METHOD__, 10);
 			TTDate::setDateFormat( $split_date_time_format[0] );
 			TTDate::setTimeFormat( $split_date_time_format[1] );
 			$raw_row['time_stamp'] = TTDate::parseDateTime( $raw_row['time_stamp'] );
 		}
 
-		//Debug::Arr($column_map, 'Column Map', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($raw_row, 'Raw Row', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($column_map, 'Column Map', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($raw_row, 'Raw Row', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Handle two punches per row.
 		if ( isset($column_map['in_time_stamp']) AND isset($column_map['out_time_stamp']) ) {
-			Debug::Text('Parsing Two punches per row...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Parsing Two punches per row...', __FILE__, __LINE__, __METHOD__, 10);
 			$in_date_time_format = $column_map['in_time_stamp']['parse_hint'].'_'.$column_map['in_time_stamp']['parse_hint'];
 			$out_date_time_format = $column_map['out_time_stamp']['parse_hint'].'_'.$column_map['out_time_stamp']['parse_hint'];
-			unset($raw_row['status'],$raw_row['type']);
+			unset($raw_row['status'], $raw_row['type']);
 		} elseif ( !isset($column_map['in_time_stamp']) AND !isset($column_map['out_time_stamp'])
 					AND isset($column_map['in_punch_date']) AND isset($column_map['in_punch_time'])
 					AND isset($column_map['out_punch_date']) AND isset($column_map['out_punch_time']) ) {
-			Debug::Text('Parsing Two punches per row with separte date/time columns...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Parsing Two punches per row with separte date/time columns...', __FILE__, __LINE__, __METHOD__, 10);
 			$raw_row['in_time_stamp'] = $raw_row['in_punch_date'].' '. $raw_row['in_punch_time'];
 			$in_date_time_format = $column_map['in_punch_date']['parse_hint'].'_'.$column_map['in_punch_time']['parse_hint'];
-			unset($raw_row['in_punch_date'],$raw_row['in_punch_time']);
+			unset($raw_row['in_punch_date'], $raw_row['in_punch_time']);
 
 			$raw_row['out_time_stamp'] = $raw_row['out_punch_date'].' '. $raw_row['out_punch_time'];
 			$out_date_time_format = $column_map['out_punch_date']['parse_hint'].'_'.$column_map['out_punch_time']['parse_hint'];
-			unset($raw_row['out_punch_date'],$raw_row['out_punch_time']);
-			unset($raw_row['status'],$raw_row['type']);
+			unset($raw_row['out_punch_date'], $raw_row['out_punch_time']);
+			unset($raw_row['status'], $raw_row['type']);
 		} else {
 			$in_date_time_format = $out_date_time_format = $date_time_format = 'd-M-y_g:i A T';
 		}
 		if ( isset($raw_row['in_time_stamp']) AND isset($raw_row['out_time_stamp']) ) {
-			Debug::Text('bParsing Two punches per row...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('bParsing Two punches per row...', __FILE__, __LINE__, __METHOD__, 10);
 			$split_in_date_time_format = explode('_', $in_date_time_format );
 			TTDate::setDateFormat( $split_in_date_time_format[0] );
 			TTDate::setTimeFormat( $split_in_date_time_format[1] );
@@ -239,12 +239,12 @@ class ImportPunch extends Import {
 		}
 
 		if ( !isset($raw_row['in_type']) AND !isset($raw_row['out_type']) AND !isset($raw_row['type']) AND ( !isset($raw_row['type_id']) OR (isset($raw_row['type_id']) AND $raw_row['type_id'] == '') ) ) {
-			Debug::Text('Defaulting to normal punch type...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Defaulting to normal punch type...', __FILE__, __LINE__, __METHOD__, 10);
 			$raw_row['type_id'] = 10; //Normal
 		}
 
 		if ( !isset($raw_row['in_status']) AND !isset($raw_row['out_status']) AND !isset($raw_row['status']) AND ( !isset($raw_row['status_id']) OR (isset($raw_row['status_id']) AND $raw_row['status_id'] == '') ) ) {
-			Debug::Text('Defaulting to IN punch status...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Defaulting to IN punch status...', __FILE__, __LINE__, __METHOD__, 10);
 			$raw_row['status_id'] = 10; //IN
 		}
 
@@ -253,7 +253,7 @@ class ImportPunch extends Import {
 		}
 		unset($raw_row['date'], $raw_row['time'] );
 
-		Debug::Arr($raw_row, 'postParse Row: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($raw_row, 'postParse Row: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $raw_row;
 	}
 
@@ -262,7 +262,7 @@ class ImportPunch extends Import {
 		$parsed_data = $this->getParsedData();
 
 		if ( isset($parsed_data[0]['in_time_stamp']) AND isset($parsed_data[0]['out_time_stamp']) ) {
-			Debug::Arr($parsed_data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Arr($parsed_data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 			if ( is_array( $parsed_data ) ) {
 				foreach( $parsed_data as $key => $data ) {
 					foreach( $data as $column_key => $column_value ) {
@@ -295,10 +295,10 @@ class ImportPunch extends Import {
 				}
 			}
 
-			Debug::Arr($retarr, 'preProcess Data Results ', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Arr($retarr, 'preProcess Data Results ', __FILE__, __LINE__, __METHOD__, 10);
 			$this->setParsedData( $retarr );
 		} else {
-			Debug::Text('Not two punches per row... Skipping preProcess step...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Not two punches per row... Skipping preProcess step...', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return TRUE;

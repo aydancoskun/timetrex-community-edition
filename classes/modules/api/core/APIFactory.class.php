@@ -72,7 +72,7 @@ abstract class APIFactory {
 
 	function getProtocolVersion() {
 		if ( isset($_GET['v']) AND $_GET['v'] != '' ) {
-			return (int)$_GET['v'];  //1=Initial, 2=Always return detailed
+			return (int)$_GET['v'];	 //1=Initial, 2=Always return detailed
 		}
 
 		return 1;
@@ -121,7 +121,7 @@ abstract class APIFactory {
 	}
 
 	function getProgressBarObject() {
-		if  ( !is_object( $this->progress_bar_obj ) ) {
+		if	( !is_object( $this->progress_bar_obj ) ) {
 			$this->progress_bar_obj = new ProgressBar();
 		}
 
@@ -129,7 +129,7 @@ abstract class APIFactory {
 	}
 
 	function setPagerObject( $lf ) {
-		if  ( is_object( $lf ) ) {
+		if	( is_object( $lf ) ) {
 			$this->pager_obj = new Pager($lf);
 		}
 
@@ -147,7 +147,7 @@ abstract class APIFactory {
 	//Mainly used for the APIReport class.
 	function setMainClassObject( $obj ) {
 		if ( is_object( $obj ) ) {
-			$this->main_class_obj =  $obj;
+			$this->main_class_obj =	$obj;
 			return TRUE;
 		}
 
@@ -181,7 +181,7 @@ abstract class APIFactory {
 		return $data;
 	}
 
-	//In cases where data can be displayed in just a list_view (dropdown boxes), ie: branch,department,job,task in In/Out punch view
+	//In cases where data can be displayed in just a list_view (dropdown boxes), ie: branch, department, job, task in In/Out punch view
 	//restrict the dropdown box to just a subset of columns, so not all data is shown.
 	function handlePermissionFilterColumns( $filter_columns, $allowed_columns ) {
 		$allowed_columns['id'] = TRUE; //Always allow ID column to be returned.
@@ -239,8 +239,8 @@ abstract class APIFactory {
 
 	//Controls returning information to client in a standard format.
 	//FIXME: Need to return the original request (with any modified values due to restrictions/validation issues)
-	//       Also need to return paging data variables here too, as JSON can't make multiple calls.
-	//       In order to do this we need to always return a special data structure that includes this information.
+	//		 Also need to return paging data variables here too, as JSON can't make multiple calls.
+	//		 In order to do this we need to always return a special data structure that includes this information.
 	//		 static function returnHandler( $retval = TRUE, $args = array( 'code' => FALSE, 'description' => FALSE, 'details' = FALSE, 'validator_stats' => FALSE, 'user_generic_status_batch_id' => FALSE ) ) {
 	//		 The above will require too many changes, just add two more variables at the end, as it will only really be used by API->get*() functions.
 	//FIXME: Use a requestHandler() to handle all input requests, so we can parse out things like validate_only, ignore_warning (for user acknowledgable warnings) and handling all parameter parsing in a central place.
@@ -249,14 +249,14 @@ abstract class APIFactory {
 		if ( $this->getProtocolVersion() == 1 ) {
 			if ( $retval === FALSE OR ( $retval === TRUE AND $code !== FALSE ) OR ( $user_generic_status_batch_id !== FALSE ) ) {
 				if ( $retval === FALSE ) {
-					if  ( $code == '' ) {
+					if	( $code == '' ) {
 						$code = 'GENERAL';
 					}
 					if ( $description == '' ) {
 						$description = 'Insufficient data to carry out action';
 					}
 				} elseif ( $retval === TRUE ) {
-					if  ( $code == '' ) {
+					if	( $code == '' ) {
 						$code = 'SUCCESS';
 					}
 				}
@@ -271,10 +271,10 @@ abstract class APIFactory {
 												'record_details' => array(
 																		'total' => $validator_stats['total_records'],
 																		'valid' => $validator_stats['valid_records'],
-																		'invalid' => ($validator_stats['total_records']-$validator_stats['valid_records'])
+																		'invalid' => ($validator_stats['total_records'] - $validator_stats['valid_records'])
 																		),
 												'user_generic_status_batch_id' => $user_generic_status_batch_id,
-												'details' =>  $details,
+												'details' => $details,
 												)
 								);
 
@@ -289,14 +289,14 @@ abstract class APIFactory {
 			return $retval;
 		} else {
 			if ( $retval === FALSE ) {
-				if  ( $code == '' ) {
+				if	( $code == '' ) {
 					$code = 'GENERAL';
 				}
 				if ( $description == '' ) {
 					$description = 'Insufficient data to carry out action';
 				}
 			} elseif ( $retval === TRUE ) {
-				if  ( $code == '' ) {
+				if	( $code == '' ) {
 					$code = 'SUCCESS';
 				}
 			}
@@ -311,14 +311,14 @@ abstract class APIFactory {
 											'record_details' => array(
 																	'total' => $validator_stats['total_records'],
 																	'valid' => $validator_stats['valid_records'],
-																	'invalid' => ($validator_stats['total_records']-$validator_stats['valid_records'])
+																	'invalid' => ($validator_stats['total_records'] - $validator_stats['valid_records'])
 																	),
 											'user_generic_status_batch_id' => $user_generic_status_batch_id,
 											//Allows the API to modify the original request data to send back to the UI for notifying the user.
 											//We would like to implement validation on non-set*() calls as well perhaps?
 											'request' => $request_data,
 											'pager' => $this->getPagerData(),
-											'details' =>  $details,
+											'details' => $details,
 											)
 							);
 

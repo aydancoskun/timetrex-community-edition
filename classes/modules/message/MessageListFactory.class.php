@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: MessageListFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11830 $
+ * $Id: MessageListFactory.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -46,7 +46,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -67,7 +67,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 					AND deleted = 0';
@@ -134,7 +134,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 					FROM '. $this->getTable() .' as a
 						LEFT JOIN '. $uf->getTable() .' as b ON a.created_by = b.id
 					WHERE
-							a.object_type_id in (5,50)
+							a.object_type_id in (5, 50)
 							AND a.id = ?
 							AND a.created_by = ?
 							AND b.company_id = ?
@@ -165,7 +165,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 					SELECT a.*
 					FROM '. $this->getTable() .' as a
 					WHERE
-							a.object_type_id in (5,50)
+							a.object_type_id in (5, 50)
 							AND ( a.id = ?
 									OR a.parent_id = ( select z.parent_id from '. $this->getTable() .' as z where z.id = ? AND z.parent_id != 0 )
 									OR a.id = ( select z.parent_id from '. $this->getTable() .' as z where z.id = ? )
@@ -209,7 +209,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 							LEFT JOIN '. $udf->getTable() .' as c ON b.user_date_id = c.id
 							LEFT JOIN '. $pptsvf->getTable() .' as e ON a.object_type_id = 90 AND a.object_id = e.id
 						WHERE
-								a.object_type_id in (5,50,90)
+								a.object_type_id in (5, 50, 90)
 								AND a.status_id = 10
 								AND
 								(
@@ -234,7 +234,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 						';
 			$unread_messages = (int)$this->db->GetOne($query, $ph);
 
-			$this->saveCache($unread_messages,$user_id);
+			$this->saveCache($unread_messages, $user_id);
 		}
 		return $unread_messages;
 	}
@@ -303,7 +303,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 						LEFT JOIN '. $udf->getTable() .' as c ON b.user_date_id = c.id
 						LEFT JOIN '. $pptsvf->getTable() .' as e ON a.object_type_id = 90 AND a.object_id = e.id
 					WHERE
-							a.object_type_id in (5,50,90)
+							a.object_type_id in (5, 50, 90)
 							AND
 							(
 
@@ -332,7 +332,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, array('sent_to_user_id') );
 
-		//Debug::text('Query: '. $query , __FILE__, __LINE__, __METHOD__,9);
+		//Debug::text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 9);
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
@@ -353,7 +353,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	object_type_id = ?
 						AND object_id = ?
@@ -379,7 +379,7 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	object_type_id = ?
 						AND object_id = ?

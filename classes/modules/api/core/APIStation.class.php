@@ -57,10 +57,10 @@ class APIStation extends APIFactory {
 	 */
 	function getAvailableStationTypeIDs() {
 		//Check if the user is a supervisor or not, so we determine if KIOSK mode is available.
-		$retarr = array(28,60); //Single user mode.
+		$retarr = array(28, 60); //Single user mode.
 
 		//Check if user is supervisor or not.
-		if ( $this->getPermissionObject()->Check('user','view') OR $this->getPermissionObject()->Check('user','view_child') ) {
+		if ( $this->getPermissionObject()->Check('user', 'view') OR $this->getPermissionObject()->Check('user', 'view_child') ) {
 			$sf = TTnew( 'StationFactory' );
 			$station_type_ids = $sf->getOptions('type');
 
@@ -72,7 +72,7 @@ class APIStation extends APIFactory {
 			}
 		}
 
-		Debug::Arr($retarr, 'Available Station Type IDs: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($retarr, 'Available Station Type IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $this->returnHandler( $retarr );
 	}
 
@@ -99,7 +99,7 @@ class APIStation extends APIFactory {
 	function getStationDefaultData() {
 		$company_obj = $this->getCurrentCompanyObject();
 
-		Debug::Text('Getting station default data...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Getting station default data...', __FILE__, __LINE__, __METHOD__, 10);
 		$time_zone = FALSE;
 		if ( is_object( $company_obj->getUserDefaultObject() ) ) {
 			$time_zone = $company_obj->getUserDefaultObject()->getTimeZone();
@@ -120,8 +120,8 @@ class APIStation extends APIFactory {
 	 * @return array
 	 */
 	function getStation( $data = NULL, $disable_paging = FALSE ) {
-		if ( !$this->getPermissionObject()->Check('station','enabled')
-				OR !( $this->getPermissionObject()->Check('station','view') OR $this->getPermissionObject()->Check('station','view_own') OR $this->getPermissionObject()->Check('station','view_child') ) ) {
+		if ( !$this->getPermissionObject()->Check('station', 'enabled')
+				OR !( $this->getPermissionObject()->Check('station', 'view') OR $this->getPermissionObject()->Check('station', 'view_own') OR $this->getPermissionObject()->Check('station', 'view_child') ) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
 			//Edit Punch view needs to display the name of the station, so people who can edit punches must also be able to view stations.
 			//Rather then permission denied, restrict to just 'list_view' columns.
@@ -185,9 +185,9 @@ class APIStation extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('station','enabled')
-				OR !( $this->getPermissionObject()->Check('station','edit') OR $this->getPermissionObject()->Check('station','edit_own') OR $this->getPermissionObject()->Check('station','edit_child') OR $this->getPermissionObject()->Check('station','add') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('station', 'enabled')
+				OR !( $this->getPermissionObject()->Check('station', 'edit') OR $this->getPermissionObject()->Check('station', 'edit_own') OR $this->getPermissionObject()->Check('station', 'edit_child') OR $this->getPermissionObject()->Check('station', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		if ( $validate_only == TRUE ) {
@@ -213,11 +213,11 @@ class APIStation extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if (
-							  $validate_only == TRUE
-							  OR
+							$validate_only == TRUE
+							OR
 								(
-								$this->getPermissionObject()->Check('station','edit')
-									OR ( $this->getPermissionObject()->Check('station','edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+								$this->getPermissionObject()->Check('station', 'edit')
+									OR ( $this->getPermissionObject()->Check('station', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -232,7 +232,7 @@ class APIStation extends APIFactory {
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('station','add'), TTi18n::gettext('Add permission denied') );
+					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('station', 'add'), TTi18n::gettext('Add permission denied') );
 
 					//Because this class has sub-classes that depend on it, when adding a new record we need to make sure the ID is set first,
 					//so the sub-classes can depend on it. We also need to call Save( TRUE, TRUE ) to force a lookup on isNew()
@@ -245,7 +245,7 @@ class APIStation extends APIFactory {
 					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
 
 					//Force Company ID to current company.
-					if ( !isset($row['company_id']) OR !$this->getPermissionObject()->Check('company','add') ) {
+					if ( !isset($row['company_id']) OR !$this->getPermissionObject()->Check('company', 'add') ) {
 						$row['company_id'] = $this->getCurrentCompanyObject()->getId();
 					}
 
@@ -317,16 +317,16 @@ class APIStation extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('station','enabled')
-				OR !( $this->getPermissionObject()->Check('station','delete') OR $this->getPermissionObject()->Check('station','delete_own') OR $this->getPermissionObject()->Check('station','delete_child') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('station', 'enabled')
+				OR !( $this->getPermissionObject()->Check('station', 'delete') OR $this->getPermissionObject()->Check('station', 'delete_own') OR $this->getPermissionObject()->Check('station', 'delete_child') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		Debug::Text('Received data for: '. count($data) .' Stations', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-        $validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
+		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
@@ -340,8 +340,8 @@ class APIStation extends APIFactory {
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
-						if ( $this->getPermissionObject()->Check('station','delete')
-								OR ( $this->getPermissionObject()->Check('station','delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
+						if ( $this->getPermissionObject()->Check('station', 'delete')
+								OR ( $this->getPermissionObject()->Check('station', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
 							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
@@ -451,7 +451,7 @@ class APIStation extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		Debug::Text('Time Clock Command: '. $command, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Time Clock Command: '. $command, __FILE__, __LINE__, __METHOD__, 10);
 
 		Debug::Text('Received data for: '. count($data) .' Stations', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -570,7 +570,7 @@ class APIStation extends APIFactory {
 						break;
 				}
 
-				TTLog::addEntry( $s_obj->getId(), 500,  TTi18n::getText('TimeClock Manual Command').': '. ucwords( str_replace('_', ' ', $command ) ) .' '.TTi18n::getText('Result').': '. $result_str, NULL, $s_obj->getTable() );
+				TTLog::addEntry( $s_obj->getId(), 500, TTi18n::getText('TimeClock Manual Command').': '. ucwords( str_replace('_', ' ', $command ) ) .' '.TTi18n::getText('Result').': '. $result_str, NULL, $s_obj->getTable() );
 
 				if ( isset($s_obj) ) {
 					$row['last_poll_date'] = $s_obj->getLastPollDate();

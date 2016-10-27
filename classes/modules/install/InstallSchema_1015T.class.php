@@ -45,7 +45,7 @@
 class InstallSchema_1015T extends InstallSchema_Base {
 
 	function preInstall() {
-		Debug::text('preInstall: '. $this->getVersion() , __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		return TRUE;
 	}
@@ -54,7 +54,7 @@ class InstallSchema_1015T extends InstallSchema_Base {
 	function postInstall() {
 		global $config_vars;
 
-		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__,9);
+		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		$sslf = TTnew( 'SystemSettingListFactory' );
 
@@ -72,7 +72,7 @@ class InstallSchema_1015T extends InstallSchema_Base {
 		$obj->setName( 'tax_data_version' );
 		$obj->setValue( $tax_data_version );
 		if ( $obj->isValid() ) {
-			Debug::text('Setting Tax Data Version to: '. $tax_data_version, __FILE__, __LINE__, __METHOD__,9);
+			Debug::text('Setting Tax Data Version to: '. $tax_data_version, __FILE__, __LINE__, __METHOD__, 9);
 			$obj->Save();
 		}
 
@@ -90,7 +90,7 @@ class InstallSchema_1015T extends InstallSchema_Base {
 		$obj->setName( 'tax_engine_version' );
 		$obj->setValue( $tax_engine_version );
 		if ( $obj->isValid() ) {
-			Debug::text('Setting Tax Engine Version to: '. $tax_engine_version, __FILE__, __LINE__, __METHOD__,9);
+			Debug::text('Setting Tax Engine Version to: '. $tax_engine_version, __FILE__, __LINE__, __METHOD__, 9);
 			$obj->Save();
 		}
 

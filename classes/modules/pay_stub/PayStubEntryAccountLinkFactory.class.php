@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: PayStubEntryAccountLinkFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 12026 $
+ * $Id: PayStubEntryAccountLinkFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -66,7 +66,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND id != ? AND deleted=0';
 		$id = $this->db->GetOne($query, $ph);
-		Debug::Arr($company_id, 'Company ID: '. $company_id .' ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($company_id, 'Company ID: '. $company_id .' ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id === FALSE ) {
 			return TRUE;
@@ -81,7 +81,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
-			return $this->data['company_id'];
+			return (int)$this->data['company_id'];
 		}
 
 		return FALSE;
@@ -89,9 +89,9 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	function setCompany($id) {
 		$id = trim($id);
 
-		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$clf = TTnew( 'CompanyListFactory' );
-		if ( 		$this->Validator->isResultSetWithRows(	'company',
+		if (		$this->Validator->isResultSetWithRows(	'company',
 													$clf->getByID($id),
 													TTi18n::gettext('Company is invalid')
 													)
@@ -120,7 +120,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	function setTotalGross($id) {
 		$id = trim($id);
 
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 
 		if (
@@ -149,7 +149,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	function setTotalEmployeeDeduction($id) {
 		$id = trim($id);
 
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 
 		if (
@@ -178,7 +178,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	function setTotalEmployerDeduction($id) {
 		$id = trim($id);
 
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 
 		if (
@@ -207,7 +207,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	function setTotalNetPay($id) {
 		$id = trim($id);
 
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 
 		if (
@@ -236,7 +236,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	function setRegularTime($id) {
 		$id = trim($id);
 
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 
 		if (
@@ -265,7 +265,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	function setEmployeeCPP($id) {
 		$id = trim($id);
 
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 
 		if (
@@ -294,7 +294,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	function setEmployeeEI($id) {
 		$id = trim($id);
 
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 
 		if (
@@ -323,7 +323,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	function setMonthlyAdvance($id) {
 		$id = trim($id);
 
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 
 		if (
@@ -352,7 +352,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	function setMonthlyAdvanceDeduction($id) {
 		$id = trim($id);
 
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 
 		if (
@@ -388,7 +388,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	}
 
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action,  TTi18n::getText('Pay Stub Account Links'), NULL, $this->getTable() );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Pay Stub Account Links'), NULL, $this->getTable() );
 	}
 }
 ?>

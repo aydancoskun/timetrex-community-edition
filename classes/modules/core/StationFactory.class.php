@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11513 $
- * $Id: StationFactory.class.php 11513 2013-11-26 23:33:58Z mikeb $
- * $Date: 2013-11-26 15:33:58 -0800 (Tue, 26 Nov 2013) $
+ * $Revision: 12026 $
+ * $Id: StationFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 include_once('Net/IPv4.php');
 
@@ -55,13 +55,13 @@ class StationFactory extends Factory {
 		switch( $name ) {
 			case 'status':
 				$retval = array(
-											10 	=> TTi18n::gettext('DISABLED'),
+											10	=> TTi18n::gettext('DISABLED'),
 											20	=> TTi18n::gettext('ENABLED')
 									);
 				break;
 			case 'type':
 				$retval = array(
-											10 	=> TTi18n::gettext('PC'),
+											10	=> TTi18n::gettext('PC'),
 									);
 
 				if ( getTTProductEdition() >= 15 ) {
@@ -168,32 +168,32 @@ class StationFactory extends Factory {
 									);
 				break;
 			case 'mode_flag':
-				Debug::Text('Mode Flag Type ID: '. $parent, __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Mode Flag Type ID: '. $parent, __FILE__, __LINE__, __METHOD__, 10);
 				if ( $parent == '' ) {
 					$parent = 0;
 				}
 				switch ( (int)$parent ) { //Params should be the station type_id.
 					case 28: //Mobile App
 						$retval[$parent] = array(
-												1 		=> TTi18n::gettext('-- Default --'),
-												//2 		=> TTi18n::gettext('Punch Mode: Quick Punch'), //Enabled by default.
-												//4 		=> TTi18n::gettext('Punch Mode: QRCode'),
-												//8 		=> TTi18n::gettext('Punch Mode: QRCode+Face Detection'),
-												//16 		=> TTi18n::gettext('Punch Mode: Face Recognition'),
-												//32 		=> TTi18n::gettext('Punch Mode: Face Recognition+QRCode'),
-												//64 		=> TTi18n::gettext('Punch Mode: Barcode'),
-												//128 		=> TTi18n::gettext('Punch Mode: iButton'),
+												1		=> TTi18n::gettext('-- Default --'),
+												//2			=> TTi18n::gettext('Punch Mode: Quick Punch'), //Enabled by default.
+												//4			=> TTi18n::gettext('Punch Mode: QRCode'),
+												//8			=> TTi18n::gettext('Punch Mode: QRCode+Face Detection'),
+												//16		=> TTi18n::gettext('Punch Mode: Face Recognition'),
+												//32		=> TTi18n::gettext('Punch Mode: Face Recognition+QRCode'),
+												//64		=> TTi18n::gettext('Punch Mode: Barcode'),
+												//128		=> TTi18n::gettext('Punch Mode: iButton'),
 												//256
 												//512
 												//1024
-												//2048 	=> TTi18n::gettext('Enable: Kiosk Mode'),
-												//4096 	=> TTi18n::gettext('Enable: Punch Images'),
-												//8192 	=> TTi18n::gettext('Enable: Screensaver'),
-												16384 	=> TTi18n::gettext('Enable: Auto-Login'),
-												32768  	=> TTi18n::gettext('Enable: WIFI Detection - Punch'),
-												65536  	=> TTi18n::gettext('Enable: WIFI Detection - Alert'),
+												//2048	=> TTi18n::gettext('Enable: Kiosk Mode'),
+												4096	=> TTi18n::gettext('Enable: Punch Images'),
+												//8192	=> TTi18n::gettext('Enable: Screensaver'),
+												16384	=> TTi18n::gettext('Enable: Auto-Login'),
+												32768	=> TTi18n::gettext('Enable: WIFI Detection - Punch'),
+												65536	=> TTi18n::gettext('Enable: WIFI Detection - Alert'),
 
-												//131072 	=> TTi18n::gettext('QRCodes: Allow Multiple'),
+												//131072	=> TTi18n::gettext('QRCodes: Allow Multiple'),
 												//262144	=> TTi18n::gettext('QRCodes: Allow MACROs'),
 												//1048576	=> TTi18n::gettext('Enable: External Barcode Reader'),
 												2097152 => TTi18n::gettext('Enable: Pre-Punch Message'),
@@ -205,25 +205,25 @@ class StationFactory extends Factory {
 					case 61: //PC Station in KIOSK mode.
 					case 65: //Mobile App in KIOSK mode.
 						$retval[$parent] = array(
-												1 		=> TTi18n::gettext('-- Default --'),
-												2 		=> TTi18n::gettext('Punch Mode: Quick Punch'),
-												4 		=> TTi18n::gettext('Punch Mode: QRCode'),
-												8 		=> TTi18n::gettext('Punch Mode: QRCode+Face Detection'),
-												//16 		=> TTi18n::gettext('Punch Mode: Face Recognition'),
-												//32 		=> TTi18n::gettext('Punch Mode: Face Recognition+QRCode'),
-												//64 		=> TTi18n::gettext('Punch Mode: Barcode'),
-												//128 		=> TTi18n::gettext('Punch Mode: iButton'),
+												1		=> TTi18n::gettext('-- Default --'),
+												2		=> TTi18n::gettext('Punch Mode: Quick Punch'),
+												4		=> TTi18n::gettext('Punch Mode: QRCode'),
+												8		=> TTi18n::gettext('Punch Mode: QRCode+Face Detection'),
+												//16		=> TTi18n::gettext('Punch Mode: Face Recognition'),
+												//32		=> TTi18n::gettext('Punch Mode: Face Recognition+QRCode'),
+												//64		=> TTi18n::gettext('Punch Mode: Barcode'),
+												//128		=> TTi18n::gettext('Punch Mode: iButton'),
 												//256
 												//512
 												//1024
-												//2048 	=> TTi18n::gettext('Enable: Kiosk Mode'), //Enabled by default.
-												4096 	=> TTi18n::gettext('Enable: Punch Images'),
-												8192 	=> TTi18n::gettext('Disable: Screensaver'),
-												//16384 	=>
-												//32768  	=> TTi18n::gettext('Enable: WIFI Detection - Punch'),
-												//65536  	=> TTi18n::gettext('Enable: WIFI Detection - Alert'),
+												//2048	=> TTi18n::gettext('Enable: Kiosk Mode'), //Enabled by default.
+												4096	=> TTi18n::gettext('Enable: Punch Images'),
+												8192	=> TTi18n::gettext('Disable: Screensaver'),
+												//16384		=>
+												//32768		=> TTi18n::gettext('Enable: WIFI Detection - Punch'),
+												//65536		=> TTi18n::gettext('Enable: WIFI Detection - Alert'),
 
-												131072 	=> TTi18n::gettext('QRCodes: Allow Multiple'),
+												131072	=> TTi18n::gettext('QRCodes: Allow Multiple'),
 												262144	=> TTi18n::gettext('QRCodes: Allow MACROs'),
 												//1048576	=> TTi18n::gettext('Enable: External Barcode Reader'),
 												2097152 => TTi18n::gettext('Enable: Pre-Punch Message'),
@@ -236,19 +236,19 @@ class StationFactory extends Factory {
 					case 150: //TimeClock
 					default:
 						$retval[$parent] = array(
-												1 		=> TTi18n::gettext('-- Default --'),
-												2 		=> TTi18n::gettext('Must Select In/Out Status'),
-												//4 	=> TTi18n::gettext('Enable Work Code (Mode 1)'),
-												//8 	=> TTi18n::gettext('Enable Work Code (Mode 2)'),
-												4 		=> TTi18n::gettext('Disable Out Status'),
-												8 		=> TTi18n::gettext('Enable: Breaks'),
-												16 		=> TTi18n::gettext('Enable: Lunches'),
-												32  	=> TTi18n::gettext('Enable: Branch'),
-												64  	=> TTi18n::gettext('Enable: Department'),
+												1		=> TTi18n::gettext('-- Default --'),
+												2		=> TTi18n::gettext('Must Select In/Out Status'),
+												//4		=> TTi18n::gettext('Enable Work Code (Mode 1)'),
+												//8		=> TTi18n::gettext('Enable Work Code (Mode 2)'),
+												4		=> TTi18n::gettext('Disable Out Status'),
+												8		=> TTi18n::gettext('Enable: Breaks'),
+												16		=> TTi18n::gettext('Enable: Lunches'),
+												32		=> TTi18n::gettext('Enable: Branch'),
+												64		=> TTi18n::gettext('Enable: Department'),
 
-												32768  	=> TTi18n::gettext('Authentication: Fingerprint & Password'),
-												65536  	=> TTi18n::gettext('Authentication: Fingerprint & Proximity Card'),
-												131072 	=> TTi18n::gettext('Authentication: PIN & Fingerprint'),
+												32768	=> TTi18n::gettext('Authentication: Fingerprint & Password'),
+												65536	=> TTi18n::gettext('Authentication: Fingerprint & Proximity Card'),
+												131072	=> TTi18n::gettext('Authentication: PIN & Fingerprint'),
 												262144	=> TTi18n::gettext('Authentication: Proximity Card & Password'),
 
 												1048576	=> TTi18n::gettext('Enable: External Proximity Card Reader'),
@@ -373,7 +373,7 @@ class StationFactory extends Factory {
 										'deleted' => 'Deleted',
 										);
 		return $variable_function_map;
-	 }
+	}
 
 	function getCompanyObject() {
 		if ( is_object($this->company_obj) ) {
@@ -387,7 +387,7 @@ class StationFactory extends Factory {
 	}
 
 	function getCompany() {
-		return $this->data['company_id'];
+		return (int)$this->data['company_id'];
 	}
 	function setCompany($id) {
 		$id = trim($id);
@@ -409,7 +409,7 @@ class StationFactory extends Factory {
 
 	function getStatus() {
 		if ( isset($this->data['status_id']) ) {
-			return $this->data['status_id'];
+			return (int)$this->data['status_id'];
 		}
 
 		return FALSE;
@@ -437,7 +437,7 @@ class StationFactory extends Factory {
 
 	function getType() {
 		if ( isset($this->data['type_id']) ) {
-			return $this->data['type_id'];
+			return (int)$this->data['type_id'];
 		}
 
 		return FALSE;
@@ -471,7 +471,7 @@ class StationFactory extends Factory {
 
 		$query = 'select id from '. $this->table .' where company_id = ? AND station_id = ? AND deleted=0';
 		$id = $this->db->GetOne($query, $ph);
-		Debug::Arr($id,'Unique Station: '. $station, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($id, 'Unique Station: '. $station, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id === FALSE ) {
 			return TRUE;
@@ -486,7 +486,7 @@ class StationFactory extends Factory {
 
 	function getStation() {
 		if ( isset($this->data['station_id']) ) {
-			return $this->data['station_id'];
+			return (string)$this->data['station_id']; //Should not be cast to INT!
 		}
 
 		return FALSE;
@@ -530,7 +530,7 @@ class StationFactory extends Factory {
 	function setSource($source) {
 		$source = trim($source);
 
-		if ( 	in_array(strtolower($source), $this->getOptions('source_reserved_word') )
+		if (	in_array(strtolower($source), $this->getOptions('source_reserved_word') )
 				OR
 				(
 				$source != NULL
@@ -643,7 +643,7 @@ class StationFactory extends Factory {
 			$id = 0;
 		}
 
-		Debug::Text('Job ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Job ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jlf = TTnew( 'JobListFactory' );
 		}
@@ -678,7 +678,7 @@ class StationFactory extends Factory {
 			$id = 0;
 		}
 
-		Debug::Text('Job Item ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Job Item ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jilf = TTnew( 'JobItemListFactory' );
 		}
@@ -728,7 +728,7 @@ class StationFactory extends Factory {
 
 	function getGroupSelectionType() {
 		if ( isset($this->data['user_group_selection_type_id']) ) {
-			return $this->data['user_group_selection_type_id'];
+			return (int)$this->data['user_group_selection_type_id'];
 		}
 
 		return FALSE;
@@ -821,7 +821,7 @@ class StationFactory extends Factory {
 
 	function getBranchSelectionType() {
 		if ( isset($this->data['branch_selection_type_id']) ) {
-			return $this->data['branch_selection_type_id'];
+			return (int)$this->data['branch_selection_type_id'];
 		}
 
 		return FALSE;
@@ -914,7 +914,7 @@ class StationFactory extends Factory {
 
 	function getDepartmentSelectionType() {
 		if ( isset($this->data['department_selection_type_id']) ) {
-			return $this->data['department_selection_type_id'];
+			return (int)$this->data['department_selection_type_id'];
 		}
 
 		return FALSE;
@@ -1258,7 +1258,7 @@ class StationFactory extends Factory {
 	function setPushFrequency($value) {
 		$value = trim($value);
 
-		if ( 	$value == 0
+		if (	$value == 0
 				OR
 				$this->Validator->inArrayKey(	'push_frequency',
 												$value,
@@ -1376,7 +1376,7 @@ class StationFactory extends Factory {
 						'last_punch_date' => $this->db->BindTimeStamp( $last_punch_date ),
 						'id' => $id,
 						);
-			$query = 'UPDATE '. $this->getTable() .' set last_poll_date = ?,last_punch_time_stamp = ? where id = ?';
+			$query = 'UPDATE '. $this->getTable() .' set last_poll_date = ?, last_punch_time_stamp = ? where id = ?';
 			$this->db->Execute($query, $ph);
 
 			return TRUE;
@@ -1471,7 +1471,7 @@ class StationFactory extends Factory {
 			$epoch = TTDate::getTime();
 		}
 
-		if 	(	$this->Validator->isDate(		'last_punch_time_stamp',
+		if	(	$this->Validator->isDate(		'last_punch_time_stamp',
 												$epoch,
 												TTi18n::gettext('Incorrect last punch date')) ) {
 
@@ -1498,7 +1498,7 @@ class StationFactory extends Factory {
 			$epoch = TTDate::getTime();
 		}
 
-		if 	(	$this->Validator->isDate(		'last_poll_date',
+		if	(	$this->Validator->isDate(		'last_poll_date',
 												$epoch,
 												TTi18n::gettext('Incorrect last poll date')) ) {
 
@@ -1548,7 +1548,7 @@ class StationFactory extends Factory {
 			$epoch = TTDate::getTime();
 		}
 
-		if 	(	$this->Validator->isDate(		'last_push_date',
+		if	(	$this->Validator->isDate(		'last_push_date',
 												$epoch,
 												TTi18n::gettext('Incorrect last push date')) ) {
 
@@ -1598,7 +1598,7 @@ class StationFactory extends Factory {
 			$epoch = TTDate::getTime();
 		}
 
-		if 	(	$this->Validator->isDate(		'last_partial_push_date',
+		if	(	$this->Validator->isDate(		'last_partial_push_date',
 												$epoch,
 												TTi18n::gettext('Incorrect last partial push date')) ) {
 
@@ -1649,7 +1649,7 @@ class StationFactory extends Factory {
 				$this->Validator->isLength(	'user_value_1',
 											$value,
 											TTi18n::gettext('User Value 1 is invalid'),
-											1,255) ) {
+											1, 255) ) {
 
 			$this->data['user_value_1'] = $value;
 
@@ -1674,7 +1674,7 @@ class StationFactory extends Factory {
 				$this->Validator->isLength(	'user_value_2',
 											$value,
 											TTi28n::gettext('User Value 2 is invalid'),
-											2,255) ) {
+											2, 255) ) {
 
 			$this->data['user_value_2'] = $value;
 
@@ -1699,7 +1699,7 @@ class StationFactory extends Factory {
 				$this->Validator->isLength(	'user_value_3',
 											$value,
 											TTi38n::gettext('User Value 3 is invalid'),
-											3,255) ) {
+											3, 255) ) {
 
 			$this->data['user_value_3'] = $value;
 
@@ -1724,7 +1724,7 @@ class StationFactory extends Factory {
 				$this->Validator->isLength(	'user_value_4',
 											$value,
 											TTi48n::gettext('User Value 4 is invalid'),
-											4,255) ) {
+											4, 255) ) {
 
 			$this->data['user_value_4'] = $value;
 
@@ -1749,7 +1749,7 @@ class StationFactory extends Factory {
 				$this->Validator->isLength(	'user_value_5',
 											$value,
 											TTi58n::gettext('User Value 5 is invalid'),
-											5,255) ) {
+											5, 255) ) {
 
 			$this->data['user_value_5'] = $value;
 
@@ -1768,7 +1768,7 @@ class StationFactory extends Factory {
 	function setCookie() {
 		if ( $this->getStation() ) {
 
-			setcookie('StationID', $this->getStation(), time()+157680000, Environment::getBaseURL() );
+			setcookie('StationID', $this->getStation(), (time() + 157680000), Environment::getBaseURL() );
 
 			return TRUE;
 		}
@@ -1777,7 +1777,7 @@ class StationFactory extends Factory {
 	}
 
 	function destroyCookie() {
-		setcookie('StationID', NULL, time()+9999999, Environment::getBaseURL() );
+		setcookie('StationID', NULL, (time() + 9999999), Environment::getBaseURL() );
 
 		return TRUE;
 	}
@@ -1802,7 +1802,7 @@ class StationFactory extends Factory {
 			$query = 'UPDATE '. $this->getTable() .' set allowed_date = ? where id = ?';
 			$this->db->Execute($query, $ph);
 
-			TTLog::addEntry( $id, 200,  TTi18n::getText('Access from station Allowed'), $user_id, $this->getTable() ); //Allow
+			TTLog::addEntry( $id, 200, TTi18n::getText('Access from station Allowed'), $user_id, $this->getTable() ); //Allow
 
 			return TRUE;
 		}
@@ -1824,7 +1824,7 @@ class StationFactory extends Factory {
 			$epoch = TTDate::getTime();
 		}
 
-		if 	(	$this->Validator->isDate(		'allowed_date',
+		if	(	$this->Validator->isDate(		'allowed_date',
 												$epoch,
 												TTi18n::gettext('Incorrect allowed date')) ) {
 
@@ -1834,7 +1834,6 @@ class StationFactory extends Factory {
 		}
 
 		return FALSE;
-
 	}
 
 	function checkSource( $source, $current_station_id ) {
@@ -1858,11 +1857,11 @@ class StationFactory extends Factory {
 		//$remote_addr = '192.168.1.10';
 		//$remote_addr = '127.0.0.1';
 
-		if ( in_array( $this->getType(), array(10,25) ) AND preg_match('/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(\/[0-9]{1,2})*/', $source) ) {
+		if ( in_array( $this->getType(), array(10, 25) ) AND preg_match('/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(\/[0-9]{1,2})*/', $source) ) {
 			Debug::text('Source is an IP address!', __FILE__, __LINE__, __METHOD__, 10);
-		} elseif ( in_array( $this->getType(), array(10,25,100) ) AND !in_array( strtolower( $this->getStation() ), $this->getOptions('station_reserved_word') ) )  {
+		} elseif ( in_array( $this->getType(), array(10, 25, 100) ) AND !in_array( strtolower( $this->getStation() ), $this->getOptions('station_reserved_word') ) )  {
 			//Do hostname lookups for TTA8 timeclocks as well.
-			Debug::text('Source is NOT an IP address, do hostname lookup: '. $source , __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text('Source is NOT an IP address, do hostname lookup: '. $source, __FILE__, __LINE__, __METHOD__, 10);
 
 			$hostname_lookup = $this->getCache( $remote_addr.$source );
 			if ( $hostname_lookup === FALSE ) {
@@ -1883,7 +1882,7 @@ class StationFactory extends Factory {
 		}
 
 		Debug::text('Source: '. $source .' Remote IP: '. $remote_addr .' Behind Proxy IP: '. $x_forwarded_for, __FILE__, __LINE__, __METHOD__, 10);
-		if ( 	(
+		if (	(
 					$current_station_id == $this->getStation()
 						OR in_array( strtolower( $this->getStation() ), $this->getOptions('station_reserved_word') )
 				)
@@ -1898,7 +1897,7 @@ class StationFactory extends Factory {
 					OR
 						( Net_IPv4::ipInNetwork( $remote_addr, $source) )
 					OR
-						in_array( $this->getType(), array(100,110,120,200) )
+						in_array( $this->getType(), array(100, 110, 120, 200) )
 				)
 
 			) {
@@ -1919,7 +1918,7 @@ class StationFactory extends Factory {
 		}
 		//Debug::text('User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 
-		if ($current_station_id == NULL OR $current_station_id == ''){
+		if ($current_station_id == NULL OR $current_station_id == '') {
 			global $current_station;
 			$current_station_id = $current_station->getStation();
 		}
@@ -1932,7 +1931,7 @@ class StationFactory extends Factory {
 
 		$retval = FALSE;
 
-		Debug::text('User ID: '. $user_id .' Station ID: '. $current_station_id .' Status: '. $this->getStatus() .' Current Station: '. $this->getStation() , __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('User ID: '. $user_id .' Station ID: '. $current_station_id .' Status: '. $this->getStatus() .' Current Station: '. $this->getStation(), __FILE__, __LINE__, __METHOD__, 10);
 
 		//Handle IP Addresses/Hostnames
 		if ( $this->getType() == 10
@@ -2007,7 +2006,7 @@ class StationFactory extends Factory {
 			Debug::text('Checking Station ID: '. $station->getId(), __FILE__, __LINE__, __METHOD__, 10);
 
 			if ( $station->isAllowed( $user_id, $station_id, $station->getId() ) === TRUE) {
-				Debug::text('Station IS allowed! '. $station_id .' - ID: '. $station->getId() , __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text('Station IS allowed! '. $station_id .' - ID: '. $station->getId(), __FILE__, __LINE__, __METHOD__, 10);
 				return TRUE;
 			}
 		}
@@ -2020,17 +2019,28 @@ class StationFactory extends Factory {
 		
 		$slf = new StationListFactory();
 		$slf->getByStationIdandCompanyId( $station_id, $company_id );
-		//$slf->getByStationIdAndStatusIdAndTypeId( trim($station_id), array(10,20), array($type_id) );
 		if ( $slf->getRecordCount() == 1 ) {
 			//Handle disabled station here, but only for KIOSK type stations.
-			//As non-kiosk stations still need to be able to revert back to the wildcard ANY station and check that for access. Where KIOSK stations will not do that. 
-			if ( $slf->getCurrent()->getStatus() == 10 AND in_array( $slf->getCurrent()->getType(), array(61,65) ) ) { //Disabled
-				Debug::text('Station is disabled...'. $station_id, __FILE__, __LINE__, __METHOD__, 10);
+			//As non-kiosk stations still need to be able to revert back to the wildcard ANY station and check that for access. Where KIOSK stations will not do that.
+			if ( $slf->getCurrent()->getStatus() == 10 AND in_array( $slf->getCurrent()->getType(), array(61, 65) ) ) { //Disabled
+				Debug::text('aStation is disabled...'. $station_id, __FILE__, __LINE__, __METHOD__, 10);
 				$slf->Validator->isTrue(		'status_id',
 												FALSE,
 												TTi18n::gettext('Waiting for Administrator approval to activate this device' ));
 
 				return $slf;
+			} elseif ( $slf->getCurrent()->getStatus() == 10 AND in_array( $slf->getCurrent()->getType(), array(28) ) ) {
+				//Check isAllowed for any wildcard stations first...
+				if ( $slf->getCurrent()->checkAllowed( $user_obj->getId() ) == TRUE ) {
+					$retval = $slf->getCurrent()->getStation();
+				} else {
+					Debug::text('bStation is disabled...'. $station_id, __FILE__, __LINE__, __METHOD__, 10);
+					$slf->Validator->isTrue(		'status_id',
+													FALSE,
+													TTi18n::gettext('You are not authorized to punch in or out from this station!' ));
+
+					return $slf;
+				}
 			} else {
 				$retval = $slf->getCurrent()->getStation();
 			}
@@ -2053,7 +2063,7 @@ class StationFactory extends Factory {
 				case 60: //Desktop App
 					$flex_app = FALSE;
 					if ( stripos( $_SERVER['HTTP_USER_AGENT'], 'AdobeAIR' ) !== FALSE ) {
-						Debug::Text('Flex App Detected...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Flex App Detected...', __FILE__, __LINE__, __METHOD__, 10);
 						$flex_app = TRUE;
 					}
 
@@ -2080,14 +2090,15 @@ class StationFactory extends Factory {
 						//If the currently logged in user is higher than regular employee permissions, allow all records.
 						//Otherwise just allow the users own records to be synced.
 						//FIXME: Now that non-kiosk stations are logged in to download data, I don't think this is needed anymore.
-						//       But we will need to allow at least one user so the station isn't automatically disabled in isActiveForAnyEmployee()
-						if ( is_object( $permission_obj ) AND ( $permission_obj->Check('user','view') OR $permission_obj->Check('user','view_child') ) ) {
-							Debug::Text('Supervisor or higher, allowing all employees for potential team punch...', __FILE__, __LINE__, __METHOD__,10);
+						//		 But we will need to allow at least one user so the station isn't automatically disabled in isActiveForAnyEmployee()
+						//FIXME: Maybe check for a wildcard station of the same type, and if it exists allow new stations to work for the same user selection?
+						if ( is_object( $permission_obj ) AND ( $permission_obj->Check('user', 'view') OR $permission_obj->Check('user', 'view_child') ) ) {
+							Debug::Text('Supervisor or higher, allowing all employees for potential team punch...', __FILE__, __LINE__, __METHOD__, 10);
 							$sf->setGroupSelectionType( 10 ); //All allowed
 							$sf->setBranchSelectionType( 10 ); //All allowed
 							$sf->setDepartmentSelectionType( 10 ); //All allowed
 						} else {
-							Debug::Text('Regular employee, defaulting to single-user mode...', __FILE__, __LINE__, __METHOD__,10);
+							Debug::Text('Regular employee, defaulting to single-user mode...', __FILE__, __LINE__, __METHOD__, 10);
 							//The station must be active for the app to allow punches.
 							$sf->setGroupSelectionType( 20 ); //Only selected
 							$sf->setBranchSelectionType( 20 ); //Only selected
@@ -2101,7 +2112,7 @@ class StationFactory extends Factory {
 					break;
 				case 61: //Kiosk: Desktop
 				case 65: //Kiosk: Mobile App (iOS/Android)
-					Debug::Text('KIOSK station...', __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('KIOSK station...', __FILE__, __LINE__, __METHOD__, 10);
 					$status_id = 10; //Initially create as disabled and admin must manually enable it.
 
 					$sf->setType( $type_id ); //Need to set thie before setModeFlag()
@@ -2121,7 +2132,7 @@ class StationFactory extends Factory {
 					
 					$sf->setModeFlag( array( 8, 4096 ) ); //Default QRCode+Face, Capture Images in KIOSK mode.
 
-					if ( is_object( $sf->getCompanyObject() ) ) {
+					if ( is_object( $sf->getCompanyObject() ) AND is_object( $sf->getCompanyObject()->getUserDefaultObject() ) ) {
 						$sf->setTimeZone( $sf->getCompanyObject()->getUserDefaultObject()->getTimeZone() );
 					}
 
@@ -2129,13 +2140,13 @@ class StationFactory extends Factory {
 			}
 
 			//Since we change the station_id (add type_id) for KIOSK stations, check to see if the modified station_id exists and return it.
-			if ( in_array($type_id, array(28,60,61,65) ) ) {
+			if ( in_array($type_id, array(28, 60, 61, 65) ) ) {
 				$slf->getByStationIdandCompanyId( $station, $company_id );
 				if ( $slf->getRecordCount() == 1 ) {
-					Debug::Text('Station already exists with modified station_id, returning that instead.', __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Station already exists with modified station_id, returning that instead.', __FILE__, __LINE__, __METHOD__, 10);
 					return $slf->getCurrent()->getStation();
 				} else {
-					Debug::Text('Station definitely does not exist, attempting to create it...', __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Station definitely does not exist, attempting to create it...', __FILE__, __LINE__, __METHOD__, 10);
 				}
 			}
 
@@ -2149,7 +2160,7 @@ class StationFactory extends Factory {
 					$retval = $sf->getStation();
 				}
 			} else {
-				Debug::Text('Station is invalid, returning object...', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Station is invalid, returning object...', __FILE__, __LINE__, __METHOD__, 10);
 				$retval = $sf;
 			}
 
@@ -2327,7 +2338,7 @@ class StationFactory extends Factory {
 
 	function addLog( $log_action ) {
 		if ( !( $log_action == 10 AND $this->getType() == 10 ) ) {
-			return TTLog::addEntry( $this->getId(), $log_action,  TTi18n::getText('Station'), NULL, $this->getTable(), $this );
+			return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Station'), NULL, $this->getTable(), $this );
 		}
 	}
 }

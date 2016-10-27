@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: PayStubPDF.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11830 $
+ * $Id: PayStubPDF.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -60,7 +60,7 @@ class PayStubPDF {
 	function __construct() {
 		require_once(Environment::getBasePath().'classes/pdflib/phppdflib.class.php');
 
-        //2.835 pdf units = 1mm  ---- (0,0) = 0,792.0990 (MAX,0) = 611.5095,0
+		//2.835 pdf units = 1mm	 ---- (0, 0) = 0, 792.0990 (MAX, 0) = 611.5095, 0
 		$this->pdf = new pdffile;
 
 		$this->pdf->debug = 10;
@@ -101,7 +101,7 @@ class PayStubPDF {
 			foreach ($pself as $pay_stub_entry) {
 				$description_subscript = NULL;
 
-				$pay_stub_entry_name_obj = $psenlf->getById( $pay_stub_entry->getPayStubEntryNameId() ) ->getCurrent();
+				$pay_stub_entry_name_obj = $psenlf->getById( $pay_stub_entry->getPayStubEntryNameId() )->getCurrent();
 
 				if ( $prev_type == 40 OR $pay_stub_entry_name_obj->getType() != 40 ) {
 					$type = $pay_stub_entry_name_obj->getType();
@@ -197,11 +197,11 @@ class PayStubPDF {
 
 	function getPageTop() {
 		//return 792.0990 - $this->margin;
-		return 792.0990 - ($this->margin * 2) - 1;
+		return (792.0990 - ($this->margin * 2) - 1 );
 	}
 
 	function getPageRight() {
-		return 611.5095 - ($this->margin * 2) - 1;
+		return ( 611.5095 - ($this->margin * 2) - 1 );
 	}
 
 	function getPageBottom() {
@@ -223,27 +223,27 @@ class PayStubPDF {
 	function topLeft() {
 		$this->getTopAttributes();
 
-		$param["width"] = 0.5;
+		$param['width'] = 0.5;
 		$this->pdf->draw_rectangle(
 									$this->getPageTop(),
 									$this->getPageLeft(),
-									$this->getPageTop() - $this->top_attributes['height'],
-									$this->getPageLeft() + $this->top_attributes['width'],
+									( $this->getPageTop() - $this->top_attributes['height'] ),
+									( $this->getPageLeft() + $this->top_attributes['width'] ),
 									$this->page,
 									$param
 								);
 		unset($param);
 
-		$param["height"] = 25;
-		$param["align"] = "center";
-		//$param["fillcolor"] = $this->pdf->get_color('#ff3333');
+		$param['height'] = 25;
+		$param['align'] = 'center';
+		//$param['fillcolor'] = $this->pdf->get_color('#ff3333');
 
 		$this->pdf->draw_one_paragraph(
 									$this->getPageTop(),
 									$this->getPageLeft(),
-									$this->getPageTop() - $this->top_attributes['height'],
-									$this->getPageLeft() + $this->top_attributes['width'],
-									"TimeTrex",
+									( $this->getPageTop() - $this->top_attributes['height'] ),
+									( $this->getPageLeft() + $this->top_attributes['width'] ),
+									APPLICATION_NAME,
 									$this->page,
 									$param
 						);
@@ -252,13 +252,13 @@ class PayStubPDF {
 	}
 
 	function topMiddle() {
-		$param["width"] = 0.5;
+		$param['width'] = 0.5;
 
 		$this->pdf->draw_rectangle(
 									$this->getPageTop(),
-									$this->getPageLeft() + $this->top_attributes['width'],
-									$this->getPageTop() - $this->top_attributes['height'],
-									$this->getPageLeft() + ($this->top_attributes['width'] * 2),
+									( $this->getPageLeft() + $this->top_attributes['width'] ),
+									( $this->getPageTop() - $this->top_attributes['height'] ),
+									( $this->getPageLeft() + ($this->top_attributes['width'] * 2) ),
 									$this->page,
 									$param
 								);
@@ -271,15 +271,15 @@ class PayStubPDF {
 		}
 		$company_name .= $this->company_obj->getCity().', '.$this->company_obj->getProvince().' '.$this->company_obj->getPostalCode();
 */
-		$param["align"] = "center";
-		$param["height"] = 10;
-		$param["font"] = 'Helvetica-Bold';
+		$param['align'] = 'center';
+		$param['height'] = 10;
+		$param['font'] = 'Helvetica-Bold';
 
 		$this->pdf->draw_paragraph(
 									$this->getPageTop(),
-									$this->getPageLeft() + $this->top_attributes['width'],
-									$this->getPageTop() - $this->top_attributes['height'],
-									$this->getPageLeft() + ($this->top_attributes['width'] * 2),
+									( $this->getPageLeft() + $this->top_attributes['width'] ),
+									( $this->getPageTop() - $this->top_attributes['height'] ),
+									( $this->getPageLeft() + ($this->top_attributes['width'] * 2) ),
 									$company_name,
 									$this->page,
 									$param
@@ -289,21 +289,21 @@ class PayStubPDF {
 	}
 
 	function topRight() {
-		$param["width"] = 0.5;
+		$param['width'] = 0.5;
 
 		$this->pdf->draw_rectangle(
 									$this->getPageTop(),
-									$this->getPageLeft() + ($this->top_attributes['width'] * 2),
-									$this->getPageTop() - $this->top_attributes['height'],
-									$this->getPageLeft() + ($this->top_attributes['width'] * 3),
+									( $this->getPageLeft() + ($this->top_attributes['width'] * 2) ),
+									( $this->getPageTop() - $this->top_attributes['height'] ),
+									( $this->getPageLeft() + ($this->top_attributes['width'] * 3) ),
 									$this->page,
 									$param
 								);
 		unset($param);
 
-		$param["align"] = "right";
-		$param["height"] = 10;
-		$param["font"] = 'Helvetica-Bold';
+		$param['align'] = 'right';
+		$param['height'] = 10;
+		$param['font'] = 'Helvetica-Bold';
 
 
 		$text = TTi18n::gettext('Start Date:').' '. $this->pay_period['start_date']."\n";
@@ -312,9 +312,9 @@ class PayStubPDF {
 
 		$this->pdf->draw_paragraph(
 									$this->getPageTop(),
-									$this->getPageLeft() + ( $this->top_attributes['width'] * 2),
-									$this->getPageTop() - $this->top_attributes['height'],
-									$this->getPageLeft() + ($this->top_attributes['width'] * 3) - 3,
+									( $this->getPageLeft() + ( $this->top_attributes['width'] * 2) ),
+									( $this->getPageTop() - $this->top_attributes['height'] ),
+									( $this->getPageLeft() + ($this->top_attributes['width'] * 3) - 3 ),
 									$text,
 									$this->page,
 									$param
@@ -325,28 +325,27 @@ class PayStubPDF {
 	}
 
 	function title() {
-
-		$param["width"] = 0.5;
+		$param['width'] = 0.5;
 		$this->pdf->draw_rectangle(
-									$this->getPageTop() - ($this->top_attributes['height'] + 2),
+									( $this->getPageTop() - ($this->top_attributes['height'] + 2) ),
 									$this->getPageLeft(),
-									$this->getPageTop() - ($this->top_attributes['height'] + 15),
+									( $this->getPageTop() - ($this->top_attributes['height'] + 15) ),
 									$this->getPageRight(),
 									$this->page,
 									$param
 								);
 		unset($param);
 
-		$param["align"] = "center";
-		$param["height"] = 12;
-		$param["font"] = 'Helvetica-Bold';
+		$param['align'] = 'center';
+		$param['height'] = 12;
+		$param['font'] = 'Helvetica-Bold';
 
 		$this->pdf->draw_one_paragraph(
-									$this->getPageTop() - ($this->top_attributes['height'] ),
+									( $this->getPageTop() - ($this->top_attributes['height'] ) ),
 									$this->getPageLeft(),
-									$this->getPageTop() - ($this->top_attributes['height'] + 15),
+									( $this->getPageTop() - ($this->top_attributes['height'] + 15) ),
 									$this->getPageRight(),
-									'STATEMENT OF EARNINGS AND DEDUCTIONS',
+									TTi18n::getText( 'STATEMENT OF EARNINGS AND DEDUCTIONS' ),
 									$this->page,
 									$param
 						);
@@ -356,11 +355,11 @@ class PayStubPDF {
 
 	//Converts horizontal percent to units.
 	function XPercentToUnits($percent) {
-		return ( $this->getPageRight() - $this->getPageLeft() ) * ($percent / 100);
+		return(  ( $this->getPageRight() - $this->getPageLeft() ) * ($percent / 100) );
 	}
 
 	function Earnings() {
-		$start_top = $this->getPageTop() - ($this->top_attributes['height'] + 20);
+		$start_top = ( $this->getPageTop() - ($this->top_attributes['height'] + 20) );
 		$start_left = $this->getPageLeft();
 
 		$height = 20;
@@ -374,9 +373,9 @@ class PayStubPDF {
 							'ytd_amount' => array('value' => 'YTD Amount', 'width' => 16.6)
 						);
 
-		$param["width"] = 0.5;
+		$param['width'] = 0.5;
 
-		$i=0;
+		$i = 0;
 		foreach($columns as $key => $column_data) {
 			if ($i == 0) {
 				$top = $start_top;
@@ -388,13 +387,13 @@ class PayStubPDF {
 				$left = $prev_right;
 			}
 
-			$bottom = $top - $height;
+			$bottom = ( $top - $height );
 
 
 			if ( $i == 0) {
-				$right = $start_left + $this->XPercentToUnits( $column_data['width'] );
+				$right = ( $start_left + $this->XPercentToUnits( $column_data['width'] ) );
 			} else {
-				$right = $prev_right + $this->XPercentToUnits( $column_data['width'] );
+				$right = ( $prev_right + $this->XPercentToUnits( $column_data['width'] ) );
 			}
 
 			//$right = $prev_right + 40;
@@ -417,10 +416,6 @@ class PayStubPDF {
 			$prev_right = $right;
 
 			$i++;
-
-			if ($i == 2) {
-				//return true;
-			}
 		}
 
 		unset($param);
@@ -434,13 +429,10 @@ class PayStubPDF {
 									$this->getPageBottom(),
 									$this->getPageRight(),
 									$this->page
-
 								);
-
 	}
 
 	function done() {
-
 		$this->topLeft();
 		$this->topMiddle();
 		$this->topRight();

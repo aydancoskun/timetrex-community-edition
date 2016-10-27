@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11414 $
- * $Id: PermissionListFactory.class.php 11414 2013-11-15 19:53:13Z mikeb $
- * $Date: 2013-11-15 11:53:13 -0800 (Fri, 15 Nov 2013) $
+ * $Revision: 11830 $
+ * $Id: PermissionListFactory.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -45,7 +45,7 @@
 class PermissionListFactory extends PermissionFactory implements IteratorAggregate {
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 						WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -66,7 +66,7 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 						AND deleted = 0';
@@ -90,10 +90,10 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		$pcf = new PermissionControlFactory();
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $pcf->getTable() .' as b
-					where 	b.id = a.permission_control_id
+					where	b.id = a.permission_control_id
 						AND b.company_id = ?
 						AND ( a.deleted = 0 AND b.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
@@ -121,10 +121,10 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		$pcf = new PermissionControlFactory();
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $pcf->getTable() .' as b
-					where 	b.id = a.permission_control_id
+					where	b.id = a.permission_control_id
 						AND b.company_id = ?
 						AND a.permission_control_id = ?
 						AND ( a.deleted = 0 AND b.deleted = 0 )';
@@ -163,10 +163,10 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		$pcf = new PermissionControlFactory();
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $pcf->getTable() .' as b
-					where 	b.id = a.permission_control_id
+					where	b.id = a.permission_control_id
 						AND b.company_id = ?
 						AND a.permission_control_id = ?
 						AND a.section = ?
@@ -200,10 +200,10 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		$pcf = new PermissionControlFactory();
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $pcf->getTable() .' as b
-					where 	b.id = a.permission_control_id
+					where	b.id = a.permission_control_id
 						AND b.company_id = ?
 						AND (
 								(
@@ -213,13 +213,13 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 			//Append the same date twice for created and updated.
 			$ph[] = (int)$date;
 			$ph[] = (int)$date;
-			$query  .=	' 		AND ( a.created_date >= ? OR a.updated_date >= ? ) ) ';
+			$query	.=	'		AND ( a.created_date >= ? OR a.updated_date >= ? ) ) ';
 		} else {
-			$query  .=	' ) ';
+			$query	.=	' ) ';
 		}
 
 		if ( isset($valid_ids) AND is_array($valid_ids) AND count($valid_ids) > 0 ) {
-			$query  .=	' OR a.id in ('. $this->getListSQL($valid_ids, $ph) .') ';
+			$query	.=	' OR a.id in ('. $this->getListSQL($valid_ids, $ph) .') ';
 		}
 
 		$query .= '	)
@@ -250,7 +250,7 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 		$puf = new PermissionUserFactory();
 
 		$query = '
-					select  a.*,
+					select	a.*,
 							b.level as level
 					from	'. $this->getTable() .' as a,
 							'. $pcf->getTable() .' as b,
@@ -286,13 +286,13 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 
 		//INCLUDE Deleted rows in this query.
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $pcf->getTable() .' as b
 					where
 							b.company_id = ?
 						AND
-							( a.created_date >=  ? OR a.updated_date >= ? )
+							( a.created_date >=	 ? OR a.updated_date >= ? )
 					LIMIT 1
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -300,11 +300,11 @@ class PermissionListFactory extends PermissionFactory implements IteratorAggrega
 
 		$this->ExecuteSQL( $query, $ph );
 		if ( $this->getRecordCount() > 0 ) {
-			Debug::text('Rows have been modified: '. $this->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Rows have been modified: '. $this->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
 			return TRUE;
 		}
-		Debug::text('Rows have NOT been modified', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Rows have NOT been modified', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
 }

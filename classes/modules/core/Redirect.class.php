@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 2055 $
- * $Id: Redirect.class.php 2055 2008-08-20 15:27:04Z ipso $
- * $Date: 2008-08-20 08:27:04 -0700 (Wed, 20 Aug 2008) $
+ * $Revision: 11830 $
+ * $Id: Redirect.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -48,7 +48,7 @@ class Redirect {
 			$url = $_SERVER['HTTP_REFERER'];
 		}
 
-		Debug::Text('Redirect URL: '. $url, __FILE__, __LINE__, __METHOD__,11);
+		Debug::Text('Redirect URL: '. $url, __FILE__, __LINE__, __METHOD__, 11);
 
 		if ( Debug::getVerbosity() != 11 ) {
 			header("Location: $url\n\n");

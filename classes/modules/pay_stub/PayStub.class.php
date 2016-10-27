@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: PayStub.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 11830 $
+ * $Id: PayStub.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -53,7 +53,7 @@ class PayStub extends PayStubFactory {
 
 
 	function Done() {
-		Debug::Arr($this->tmp_data, 'Pay Stub TMP Data: ' , __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($this->tmp_data, 'Pay Stub TMP Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Call pre-save() first, so calculates the totals.
 		$this->setEnableCalcTotal(TRUE);
 		$this->preSave();

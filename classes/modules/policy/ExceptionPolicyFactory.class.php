@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10728 $
- * $Id: ExceptionPolicyFactory.class.php 10728 2013-08-22 22:57:35Z ipso $
- * $Date: 2013-08-22 15:57:35 -0700 (Thu, 22 Aug 2013) $
+ * $Revision: 12026 $
+ * $Id: ExceptionPolicyFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -46,8 +46,8 @@ class ExceptionPolicyFactory extends Factory {
 	protected $table = 'exception_policy';
 	protected $pk_sequence_name = 'exception_policy_id_seq'; //PK Sequence name
 
-	protected $enable_grace = array('S3', 'S4', 'S5', 'S6', 'S7', 'S8', 'S9', 'L1', 'L2', 'B1','B2', 'V1', 'C1' );
-	protected $enable_watch_window = array('S3', 'S4', 'S5', 'S6', 'O1','O2');
+	protected $enable_grace = array('S3', 'S4', 'S5', 'S6', 'S7', 'S8', 'S9', 'L1', 'L2', 'B1', 'B2', 'V1', 'C1' );
+	protected $enable_watch_window = array('S3', 'S4', 'S5', 'S6', 'O1', 'O2');
 
 	//M1 - Missing In Punch is not considered pre-mature, as the employee can't go back and punch in after the fact anyways.
 	protected static $premature_exceptions = array('M2', 'M3', 'M4', 'L3', 'B4', 'B5', 'S8');
@@ -108,10 +108,10 @@ class ExceptionPolicyFactory extends Factory {
 										'V1' => TTi18n::gettext('TimeSheet Not Verified'),
 
 										//Job Exceptions
-										'J1' /* T J1 */  => TTi18n::gettext('Not Allowed On Job'),
-										'J2' /* U J2 */  => TTi18n::gettext('Not Allowed On Task'),
-										'J3' /* V J3 */  => TTi18n::gettext('Job Completed'),
-										'J4' /* W J4 */  => TTi18n::gettext('No Job or Task'),
+										'J1' /* T J1 */	 => TTi18n::gettext('Not Allowed On Job'),
+										'J2' /* U J2 */	 => TTi18n::gettext('Not Allowed On Task'),
+										'J3' /* V J3 */	 => TTi18n::gettext('Job Completed'),
+										'J4' /* W J4 */	 => TTi18n::gettext('No Job or Task'),
 										//'J5' => TTi18n::gettext('No Task'), //Make J4 No Job only?
 										//Add location based exceptions, ie: Restricted Location.
 									);
@@ -175,7 +175,7 @@ class ExceptionPolicyFactory extends Factory {
 
 	function getExceptionPolicyControl() {
 		if ( isset($this->data['exception_policy_control_id']) ) {
-			return $this->data['exception_policy_control_id'];
+			return (int)$this->data['exception_policy_control_id'];
 		}
 
 		return FALSE;
@@ -359,7 +359,7 @@ class ExceptionPolicyFactory extends Factory {
 												'demerit' => 2,
 												'grace' => 0,
 												'is_enabled_grace' => $this->isEnabledGrace( $type_id ),
-												'watch_window' => (3600*8),
+												'watch_window' => (3600 * 8),
 												'is_enabled_watch_window' => $this->isEnabledWatchWindow( $type_id )
 												);
 					break;
@@ -374,7 +374,7 @@ class ExceptionPolicyFactory extends Factory {
 												'demerit' => 5,
 												'grace' => 0,
 												'is_enabled_grace' => $this->isEnabledGrace( $type_id ),
-												'watch_window' => (3600*40),
+												'watch_window' => (3600 * 40),
 												'is_enabled_watch_window' => $this->isEnabledWatchWindow( $type_id )
 												);
 					break;
@@ -597,7 +597,7 @@ class ExceptionPolicyFactory extends Factory {
 												'severity_id' => 25,
 												'email_notification_id' => 100,
 												'demerit' => 5,
-												'grace' => (48*3600), //48hrs grace period
+												'grace' => (48 * 3600), //48hrs grace period
 												'is_enabled_grace' => $this->isEnabledGrace( $type_id ),
 												'watch_window' => 0,
 												'is_enabled_watch_window' => $this->isEnabledWatchWindow( $type_id )
@@ -692,7 +692,7 @@ class ExceptionPolicyFactory extends Factory {
 		$options = $this->getOptions('type');
 
 		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE OR $product_edition < 20 ) {
-			$corporate_exceptions = array('J1','J2','J3','J4');
+			$corporate_exceptions = array('J1', 'J2', 'J3', 'J4');
 			foreach( $corporate_exceptions as $corporate_exception ) {
 				unset($options[$corporate_exception]);
 			}
@@ -703,7 +703,7 @@ class ExceptionPolicyFactory extends Factory {
 
 	function getType() {
 		if ( isset($this->data['type_id']) ) {
-			return $this->data['type_id'];
+			return (string)$this->data['type_id']; //Should not be cast to int.
 		}
 
 		return FALSE;
@@ -726,7 +726,7 @@ class ExceptionPolicyFactory extends Factory {
 
 	function getSeverity() {
 		if ( isset($this->data['severity_id']) ) {
-			return $this->data['severity_id'];
+			return (int)$this->data['severity_id'];
 		}
 
 		return FALSE;
@@ -762,7 +762,7 @@ class ExceptionPolicyFactory extends Factory {
 	function setWatchWindow($value) {
 		$value = trim($value);
 
-		if 	(	$value == 0
+		if	(	$value == 0
 				OR $this->Validator->isNumeric(		'watch_window',
 													$value,
 													TTi18n::gettext('Incorrect Watch Window')) ) {
@@ -785,7 +785,7 @@ class ExceptionPolicyFactory extends Factory {
 	function setGrace($value) {
 		$value = trim($value);
 
-		if 	(	$value == 0
+		if	(	$value == 0
 				OR $this->Validator->isNumeric(		'grace',
 													$value,
 													TTi18n::gettext('Incorrect grace value')) ) {
@@ -808,7 +808,7 @@ class ExceptionPolicyFactory extends Factory {
 	function setDemerit($value) {
 		$value = trim($value);
 
-		if 	(	$value == 0
+		if	(	$value == 0
 				OR $this->Validator->isNumeric(		'demerit',
 													$value,
 													TTi18n::gettext('Incorrect demerit value')) ) {
@@ -823,7 +823,7 @@ class ExceptionPolicyFactory extends Factory {
 
 	function getEmailNotification() {
 		if ( isset($this->data['email_notification_id']) ) {
-			return $this->data['email_notification_id'];
+			return (int)$this->data['email_notification_id'];
 		}
 
 		return FALSE;
@@ -884,7 +884,7 @@ class ExceptionPolicyFactory extends Factory {
 
 		return FALSE;
 	}
-	// static function,avoid PHP strict error
+	// static function, avoid PHP strict error
 	static function calcExceptions( $user_date_id, $enable_premature_exceptions = FALSE, $enable_future_exceptions = TRUE ) {
 		global $profiler;
 		$profiler->startTimer( "ExceptionPolicy::calcExceptions()");
@@ -892,7 +892,7 @@ class ExceptionPolicyFactory extends Factory {
 		if ( $user_date_id == '' ) {
 			return FALSE;
 		}
-		Debug::text(' User Date ID: '. $user_date_id .' PreMature: '. (int)$enable_premature_exceptions , __FILE__, __LINE__, __METHOD__,10);
+		Debug::text(' User Date ID: '. $user_date_id .' PreMature: '. (int)$enable_premature_exceptions, __FILE__, __LINE__, __METHOD__, 10);
 
 		$current_epoch = TTDate::getTime();
 
@@ -915,7 +915,7 @@ class ExceptionPolicyFactory extends Factory {
 		if ( is_object($user_date_obj->getPayPeriodObject())
 				AND is_object($user_date_obj->getPayPeriodObject()->getPayPeriodScheduleObject()) ) {
 			self::$premature_delay = $user_date_obj->getPayPeriodObject()->getPayPeriodScheduleObject()->getMaximumShiftTime();
-			Debug::text(' Setting preMature Exception delay to maximum shift time: '. self::$premature_delay , __FILE__, __LINE__, __METHOD__,10);
+			Debug::text(' Setting preMature Exception delay to maximum shift time: '. self::$premature_delay, __FILE__, __LINE__, __METHOD__, 10);
 		} else {
 			self::$premature_delay = 57600;
 		}
@@ -943,13 +943,13 @@ class ExceptionPolicyFactory extends Factory {
 		$plf = TTnew( 'PunchListFactory' );
 		$plf->getByUserDateId( $user_date_id );
 		if ( $plf->getRecordCount() > 0 ) {
-			Debug::text(' Found Punches: '.  $plf->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);
+			Debug::text(' Found Punches: '.	 $plf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		$slf = TTnew( 'ScheduleListFactory' );
 		$slf->getByUserDateIdAndStatusId( $user_date_id, 10 );
 		if ( $slf->getRecordCount() > 0 ) {
-			Debug::text(' Found Schedule: '.  $slf->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);
+			Debug::text(' Found Schedule: '.  $slf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		$schedule_id_cache = NULL; //Cache schedule IDs so we don't need to do a lookup for every exception.
@@ -960,21 +960,21 @@ class ExceptionPolicyFactory extends Factory {
 		$eplf = TTnew( 'ExceptionPolicyListFactory' );
 		$eplf->getByPolicyGroupUserIdAndActive( $user_date_obj->getUser(), TRUE );
 		if ( $eplf->getRecordCount() > 0 ) {
-			Debug::text(' Found Active Exceptions: '.  $eplf->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);
+			Debug::text(' Found Active Exceptions: '.  $eplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
 			foreach ( $eplf as $ep_obj )  {
-				//Debug::text(' Found Exception Type: '. $ep_obj->getType() .' ID: '. $ep_obj->getID() .' Control ID: '. $ep_obj->getExceptionPolicyControl(), __FILE__, __LINE__, __METHOD__,10);
+				//Debug::text(' Found Exception Type: '. $ep_obj->getType() .' ID: '. $ep_obj->getID() .' Control ID: '. $ep_obj->getExceptionPolicyControl(), __FILE__, __LINE__, __METHOD__, 10);
 
 				if ( $enable_premature_exceptions == TRUE AND self::isPreMature( $ep_obj->getType() ) == TRUE ) {
-					//Debug::text(' Premature Exception: '. $ep_obj->getType() , __FILE__, __LINE__, __METHOD__,10);
+					//Debug::text(' Premature Exception: '. $ep_obj->getType(), __FILE__, __LINE__, __METHOD__, 10);
 					$type_id = 5; //Pre-Mature
 				} else {
-					//Debug::text(' NOT Premature Exception: '. $ep_obj->getType() , __FILE__, __LINE__, __METHOD__,10);
+					//Debug::text(' NOT Premature Exception: '. $ep_obj->getType(), __FILE__, __LINE__, __METHOD__, 10);
 					$type_id = 50; //Active
 				}
 
 				switch ( strtolower( $ep_obj->getType() ) ) {
-					case 's1': 	//Unscheduled Absence... Anytime they are scheduled and have not punched in.
+					case 's1':	//Unscheduled Absence... Anytime they are scheduled and have not punched in.
 								//Ignore these exceptions if the schedule is after today (not including today),
 								//so if a supervisors schedules an employee two days in advance they don't get a unscheduled
 								//absence appearing right away.
@@ -984,14 +984,14 @@ class ExceptionPolicyFactory extends Factory {
 								//the most time is worked (ie: the next day).
 								//Handle split shifts too...
 								//- This has a side affect that if the schedule policy start/stop time is set to 0, it will trigger both a UnScheduled Absence
-								//  and a Not Scheduled exception for the same schedule/punch.
+								//	and a Not Scheduled exception for the same schedule/punch.
 
 						//Loop through all schedules, then find punches to match.
 						if ( $slf->getRecordCount() > 0 ) {
 							foreach( $slf as $s_obj ) {
 								if ( $s_obj->getStatus() == 10 AND ( $current_epoch >= $s_obj->getEndTime() ) ) {
 									$add_exception = TRUE;
-									//Debug::text(' Found Schedule: Start Time: '. TTDate::getDate('DATE+TIME', $s_obj->getStartTime() ), __FILE__, __LINE__, __METHOD__,10);
+									//Debug::text(' Found Schedule: Start Time: '. TTDate::getDate('DATE+TIME', $s_obj->getStartTime() ), __FILE__, __LINE__, __METHOD__, 10);
 									//Find punches that fall within this schedule time including start/stop window.
 									if ( TTDate::doesRangeSpanMidnight( $s_obj->getStartTime(), $s_obj->getEndTime() )
 											AND is_object($user_date_obj)
@@ -1000,11 +1000,11 @@ class ExceptionPolicyFactory extends Factory {
 										//Get punches from both days.
 										$plf_tmp = TTnew( 'PunchListFactory' );
 										$plf_tmp->getShiftPunchesByUserIDAndEpoch( $user_date_obj->getUser(), $s_obj->getStartTime(), 0, $user_date_obj->getPayPeriodObject()->getPayPeriodScheduleObject()->getMaximumShiftTime() );
-										Debug::text(' Schedule spans midnight... Found rows from expanded search: '. $plf_tmp->getRecordCount() , __FILE__, __LINE__, __METHOD__,10);
+										Debug::text(' Schedule spans midnight... Found rows from expanded search: '. $plf_tmp->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 										if ( $plf_tmp->getRecordCount() > 0 ) {
 											foreach( $plf_tmp as $p_obj_tmp ) {
 												if ( $s_obj->inSchedule( $p_obj_tmp->getTimeStamp() ) ) {
-													Debug::text(' aFound punch for schedule...', __FILE__, __LINE__, __METHOD__,10);
+													Debug::text(' aFound punch for schedule...', __FILE__, __LINE__, __METHOD__, 10);
 													$add_exception = FALSE;
 													break;
 												}
@@ -1015,7 +1015,7 @@ class ExceptionPolicyFactory extends Factory {
 										//Get punches from just this day.
 										foreach( $plf as $p_obj ) {
 											if ( $s_obj->inSchedule( $p_obj->getTimeStamp() ) ) {
-												//Debug::text(' bFound punch for schedule...', __FILE__, __LINE__, __METHOD__,10);
+												//Debug::text(' bFound punch for schedule...', __FILE__, __LINE__, __METHOD__, 10);
 												$add_exception = FALSE;
 												break;
 											}
@@ -1023,7 +1023,7 @@ class ExceptionPolicyFactory extends Factory {
 									}
 
 									if ( $add_exception == TRUE ) {
-										//Debug::text(' Adding S1 exception...', __FILE__, __LINE__, __METHOD__,10);
+										//Debug::text(' Adding S1 exception...', __FILE__, __LINE__, __METHOD__, 10);
 										$current_exceptions[] = array(
 																		'user_date_id' => $user_date_id,
 																		'exception_policy_id' => $ep_obj->getId(),
@@ -1055,7 +1055,7 @@ class ExceptionPolicyFactory extends Factory {
 									//Check if no schedule exists, or an absent schedule exists. If they work when not scheduled (no schedule) or schedule absent, both should trigger this.
 									if ( $p_obj->setScheduleID( $scheduled_id_cache[$p_obj->getID()] ) == FALSE
 											OR ( is_object( $p_obj->getScheduleObject() ) AND $p_obj->getScheduleObject()->getStatus() == 20 ) ) {
-										//Debug::text(' Worked when wasnt scheduled', __FILE__, __LINE__, __METHOD__,10);
+										//Debug::text(' Worked when wasnt scheduled', __FILE__, __LINE__, __METHOD__, 10);
 										$current_exceptions[] = array(
 																		'user_date_id' => $user_date_id,
 																		'exception_policy_id' => $ep_obj->getId(),
@@ -1065,7 +1065,7 @@ class ExceptionPolicyFactory extends Factory {
 																	);
 
 									} else {
-										Debug::text('    Schedule Found', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text('	 Schedule Found', __FILE__, __LINE__, __METHOD__, 10);
 									}
 								}
 								$prev_punch_time_stamp = $p_obj->getTimeStamp();
@@ -1086,9 +1086,9 @@ class ExceptionPolicyFactory extends Factory {
 									if ( $p_obj->setScheduleID( $scheduled_id_cache[$p_obj->getID()] ) == TRUE ) {
 										if ( $p_obj->getTimeStamp() < $p_obj->getScheduleObject()->getStartTime() ) {
 											if ( TTDate::inWindow( $p_obj->getTimeStamp(), $p_obj->getScheduleObject()->getStartTime(), $ep_obj->getGrace() ) == TRUE ) {
-												Debug::text('    Within Grace time, IGNORE EXCEPTION: ', __FILE__, __LINE__, __METHOD__,10);
+												Debug::text('	 Within Grace time, IGNORE EXCEPTION: ', __FILE__, __LINE__, __METHOD__, 10);
 											} elseif ( TTDate::inWindow( $p_obj->getTimeStamp(), $p_obj->getScheduleObject()->getStartTime(), $ep_obj->getWatchWindow() ) == TRUE ) {
-												Debug::text('    NOT Within Grace time, SET EXCEPTION: ', __FILE__, __LINE__, __METHOD__,10);
+												Debug::text('	 NOT Within Grace time, SET EXCEPTION: ', __FILE__, __LINE__, __METHOD__, 10);
 												$current_exceptions[] = array(
 																				'user_date_id' => $user_date_id,
 																				'exception_policy_id' => $ep_obj->getId(),
@@ -1101,7 +1101,7 @@ class ExceptionPolicyFactory extends Factory {
 											}
 										}
 									} else {
-										Debug::text('    NO Schedule Found', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text('	 NO Schedule Found', __FILE__, __LINE__, __METHOD__, 10);
 									}
 								}
 								$prev_punch_time_stamp = $p_obj->getTimeStamp();
@@ -1112,7 +1112,7 @@ class ExceptionPolicyFactory extends Factory {
 						if ( $plf->getRecordCount() > 0 ) {
 							$prev_punch_time_stamp = FALSE;
 							foreach ( $plf as $p_obj ) {
-								Debug::text('    In Late. Punch: '. TTDate::getDate('DATE+TIME', $p_obj->getTimeStamp() ), __FILE__, __LINE__, __METHOD__,10);
+								Debug::text('	 In Late. Punch: '. TTDate::getDate('DATE+TIME', $p_obj->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 								//Ignore punches that have the exact same timestamp and/or punches with the transfer flag, as they are likely transfer punches.
 								if ( $prev_punch_time_stamp != $p_obj->getTimeStamp() AND $p_obj->getTransfer() == FALSE AND $p_obj->getType() == 10 AND $p_obj->getStatus() == 10 ) { //Normal In
 									if ( !isset($scheduled_id_cache[$p_obj->getID()]) ) {
@@ -1121,9 +1121,9 @@ class ExceptionPolicyFactory extends Factory {
 									if ( $p_obj->setScheduleID( $scheduled_id_cache[$p_obj->getID()] ) == TRUE ) {
 										if ( $p_obj->getTimeStamp() > $p_obj->getScheduleObject()->getStartTime() ) {
 											if ( TTDate::inWindow( $p_obj->getTimeStamp(), $p_obj->getScheduleObject()->getStartTime(), $ep_obj->getGrace() ) == TRUE ) {
-												Debug::text('    Within Grace time, IGNORE EXCEPTION: ', __FILE__, __LINE__, __METHOD__,10);
-											} elseif (  TTDate::inWindow( $p_obj->getTimeStamp(), $p_obj->getScheduleObject()->getStartTime(), $ep_obj->getWatchWindow() ) == TRUE ) {
-												Debug::text('    NOT Within Grace time, SET EXCEPTION: ', __FILE__, __LINE__, __METHOD__,10);
+												Debug::text('	 Within Grace time, IGNORE EXCEPTION: ', __FILE__, __LINE__, __METHOD__, 10);
+											} elseif (	TTDate::inWindow( $p_obj->getTimeStamp(), $p_obj->getScheduleObject()->getStartTime(), $ep_obj->getWatchWindow() ) == TRUE ) {
+												Debug::text('	 NOT Within Grace time, SET EXCEPTION: ', __FILE__, __LINE__, __METHOD__, 10);
 												$current_exceptions[] = array(
 																				'user_date_id' => $user_date_id,
 																				'exception_policy_id' => $ep_obj->getId(),
@@ -1136,7 +1136,7 @@ class ExceptionPolicyFactory extends Factory {
 											}
 										}
 									} else {
-										Debug::text('    NO Schedule Found', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text('	 NO Schedule Found', __FILE__, __LINE__, __METHOD__, 10);
 									}
 								}
 								$prev_punch_time_stamp = $p_obj->getTimeStamp();
@@ -1145,16 +1145,16 @@ class ExceptionPolicyFactory extends Factory {
 						unset($scheduled_id_cache);
 
 						//Late Starting their shift, with no punch yet, trigger exception if:
-						//  - Schedule is found
+						//	- Schedule is found
 						//	- Current time is after schedule start time and before schedule end time.
-						// 	- Current time is after exception grace time
+						//	- Current time is after exception grace time
 						//Make sure we take into account split shifts.
-						Debug::text('    Checking Late Starting Shift exception... Current time: '. TTDate::getDate('DATE+TIME', $current_epoch ), __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('	 Checking Late Starting Shift exception... Current time: '. TTDate::getDate('DATE+TIME', $current_epoch ), __FILE__, __LINE__, __METHOD__, 10);
 						if ( $slf->getRecordCount() > 0 ) {
 							foreach ( $slf as $s_obj ) {
 								if ( $s_obj->getStatus() == 10 AND ( $current_epoch >= $s_obj->getStartTime() AND $current_epoch <= $s_obj->getEndTime() ) ) {
 									if ( TTDate::inWindow( $current_epoch, $s_obj->getStartTime(), $ep_obj->getGrace() ) == TRUE ) {
-										Debug::text('    Within Grace time, IGNORE EXCEPTION: ', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text('	 Within Grace time, IGNORE EXCEPTION: ', __FILE__, __LINE__, __METHOD__, 10);
 									} else {
 										//See if we can find a punch within the schedule time, if so assume we already created the exception above.
 										//Make sure we take into account the schedule policy start/stop window.
@@ -1165,7 +1165,7 @@ class ExceptionPolicyFactory extends Factory {
 										//Also need to take into account shifts that span midnight, ie: 10:30PM to 6:00AM, as its important the schedules/punches match up properly.
 
 										$add_exception = TRUE;
-										Debug::text(' Found Schedule: Start Time: '. TTDate::getDate('DATE+TIME', $s_obj->getStartTime() ), __FILE__, __LINE__, __METHOD__,10);
+										Debug::text(' Found Schedule: Start Time: '. TTDate::getDate('DATE+TIME', $s_obj->getStartTime() ), __FILE__, __LINE__, __METHOD__, 10);
 										//Find punches that fall within this schedule time including start/stop window.
 										if ( TTDate::doesRangeSpanMidnight( $s_obj->getStartTime(), $s_obj->getEndTime() )
 												AND is_object($user_date_obj)
@@ -1174,11 +1174,11 @@ class ExceptionPolicyFactory extends Factory {
 											//Get punches from both days.
 											$plf_tmp = TTnew( 'PunchListFactory' );
 											$plf_tmp->getShiftPunchesByUserIDAndEpoch( $user_date_obj->getUser(), $s_obj->getStartTime(), 0, $user_date_obj->getPayPeriodObject()->getPayPeriodScheduleObject()->getMaximumShiftTime() );
-											Debug::text(' Schedule spans midnight... Found rows from expanded search: '. $plf_tmp->getRecordCount() , __FILE__, __LINE__, __METHOD__,10);
+											Debug::text(' Schedule spans midnight... Found rows from expanded search: '. $plf_tmp->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 											if ( $plf_tmp->getRecordCount() > 0 ) {
 												foreach( $plf_tmp as $p_obj_tmp ) {
 													if ( $s_obj->inSchedule( $p_obj_tmp->getTimeStamp() ) ) {
-														Debug::text('    Found punch for this schedule, skipping schedule...', __FILE__, __LINE__, __METHOD__,10);
+														Debug::text('	 Found punch for this schedule, skipping schedule...', __FILE__, __LINE__, __METHOD__, 10);
 														$add_exception = FALSE;
 														continue 2; //Skip to next schedule without creating exception.
 													}
@@ -1189,7 +1189,7 @@ class ExceptionPolicyFactory extends Factory {
 											//Get punches from just this day.
 											foreach( $plf as $p_obj ) {
 												if ( $s_obj->inSchedule( $p_obj->getTimeStamp() ) ) {
-													Debug::text(' bFound punch for schedule...', __FILE__, __LINE__, __METHOD__,10);
+													Debug::text(' bFound punch for schedule...', __FILE__, __LINE__, __METHOD__, 10);
 													$add_exception = FALSE;
 													break;
 												}
@@ -1197,7 +1197,7 @@ class ExceptionPolicyFactory extends Factory {
 										}
 
 										if ( $add_exception == TRUE ) {
-											Debug::text('    NOT Within Grace time, SET EXCEPTION: ', __FILE__, __LINE__, __METHOD__,10);
+											Debug::text('	 NOT Within Grace time, SET EXCEPTION: ', __FILE__, __LINE__, __METHOD__, 10);
 											$current_exceptions[] = array(
 																			'user_date_id' => $user_date_id,
 																			'exception_policy_id' => $ep_obj->getId(),
@@ -1211,7 +1211,7 @@ class ExceptionPolicyFactory extends Factory {
 								}
 							}
 						} else {
-							Debug::text('    NO Schedule Found', __FILE__, __LINE__, __METHOD__,10);
+							Debug::text('	 NO Schedule Found', __FILE__, __LINE__, __METHOD__, 10);
 						}
 						break;
 					case 's5': //Out Early
@@ -1219,7 +1219,7 @@ class ExceptionPolicyFactory extends Factory {
 							//Loop through each punch, find out if they are scheduled, and if they are in early
 							$prev_punch_time_stamp = FALSE;
 							$total_punches = $plf->getRecordCount();
-							$x=1;
+							$x = 1;
 							foreach ( $plf as $p_obj ) {
 								//Ignore punches that have the exact same timestamp and/or punches with the transfer flag, as they are likely transfer punches.
 								//For Out Early, we have to wait until we are at the last punch, or there is a subsequent punch
@@ -1232,9 +1232,9 @@ class ExceptionPolicyFactory extends Factory {
 									if ( $p_obj->setScheduleID( $scheduled_id_cache[$p_obj->getID()] ) == TRUE ) {
 										if ( $p_obj->getTimeStamp() < $p_obj->getScheduleObject()->getEndTime() ) {
 											if ( TTDate::inWindow( $p_obj->getTimeStamp(), $p_obj->getScheduleObject()->getEndTime(), $ep_obj->getGrace() ) == TRUE ) {
-												Debug::text('    Within Grace time, IGNORE EXCEPTION: ', __FILE__, __LINE__, __METHOD__,10);
+												Debug::text('	 Within Grace time, IGNORE EXCEPTION: ', __FILE__, __LINE__, __METHOD__, 10);
 											} elseif ( TTDate::inWindow( $p_obj->getTimeStamp(), $p_obj->getScheduleObject()->getEndTime(), $ep_obj->getWatchWindow() ) == TRUE ) {
-												Debug::text('    NOT Within Grace time, SET EXCEPTION: ', __FILE__, __LINE__, __METHOD__,10);
+												Debug::text('	 NOT Within Grace time, SET EXCEPTION: ', __FILE__, __LINE__, __METHOD__, 10);
 
 												$tmp_exception = array(
 																				'user_date_id' => $user_date_id,
@@ -1248,13 +1248,11 @@ class ExceptionPolicyFactory extends Factory {
 
 												if ( $x	== $total_punches ) { //Trigger exception if we're the last punch.
 													$current_exceptions[] = $tmp_exception;
-												} else {
-													//Save exception to be triggered if the next punch doesn't match the same time.
-												}
+												} //else { //Save exception to be triggered if the next punch doesn't match the same time.
 											}
 										}
 									} else {
-										Debug::text('    NO Schedule Found', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text('	 NO Schedule Found', __FILE__, __LINE__, __METHOD__, 10);
 									}
 								} elseif ( $p_obj->getType() == 10 AND $p_obj->getStatus() == 10 ) { //Normal In
 									//This comes after an OUT punch, so we need to check if there are two punches
@@ -1273,7 +1271,7 @@ class ExceptionPolicyFactory extends Factory {
 						unset($tmp_exception, $x, $prev_punch_time_stamp);
 						break;
 					case 's6': //Out Late
-						if ( $plf->getRecordCount() > 0  ) {
+						if ( $plf->getRecordCount() > 0	 ) {
 							$prev_punch_time_stamp = FALSE;
 							foreach ( $plf as $p_obj ) {
 								$punch_pairs[$p_obj->getPunchControlID()][] = array( 'status_id' => $p_obj->getStatus(), 'punch_control_id' => $p_obj->getPunchControlID(), 'time_stamp' => $p_obj->getTimeStamp() );
@@ -1285,9 +1283,9 @@ class ExceptionPolicyFactory extends Factory {
 									if ( $p_obj->setScheduleID( $scheduled_id_cache[$p_obj->getID()] ) == TRUE ) {
 										if ( $p_obj->getTimeStamp() > $p_obj->getScheduleObject()->getEndTime() ) {
 											if ( TTDate::inWindow( $p_obj->getTimeStamp(), $p_obj->getScheduleObject()->getEndTime(), $ep_obj->getGrace() ) == TRUE ) {
-												Debug::text('    Within Grace time, IGNORE EXCEPTION: ', __FILE__, __LINE__, __METHOD__,10);
+												Debug::text('	 Within Grace time, IGNORE EXCEPTION: ', __FILE__, __LINE__, __METHOD__, 10);
 											} elseif ( TTDate::inWindow( $p_obj->getTimeStamp(), $p_obj->getScheduleObject()->getEndTime(), $ep_obj->getWatchWindow() ) == TRUE ) {
-												Debug::text('    NOT Within Grace time, SET EXCEPTION: ', __FILE__, __LINE__, __METHOD__,10);
+												Debug::text('	 NOT Within Grace time, SET EXCEPTION: ', __FILE__, __LINE__, __METHOD__, 10);
 												$current_exceptions[] = array(
 																				'user_date_id' => $user_date_id,
 																				'exception_policy_id' => $ep_obj->getId(),
@@ -1300,36 +1298,36 @@ class ExceptionPolicyFactory extends Factory {
 											}
 										}
 									} else {
-										Debug::text('    NO Schedule Found', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text('	 NO Schedule Found', __FILE__, __LINE__, __METHOD__, 10);
 									}
 								}
 								$prev_punch_time_stamp = $p_obj->getTimeStamp();
 							}
 
 							//Trigger exception if no out punch and we have passed schedule out time.
-							//  - Schedule is found
+							//	- Schedule is found
 							//	- Make sure the user is missing an OUT punch.
 							//	- Current time is after schedule end time
-							// 	- Current time is after exception grace time
-							//  - Current time is before schedule end time + maximum shift time.
+							//	- Current time is after exception grace time
+							//	- Current time is before schedule end time + maximum shift time.
 							if ( isset($punch_pairs) AND $slf->getRecordCount() > 0 ) {
 								foreach($punch_pairs as $punch_control_id => $punch_pair) {
 									if ( count($punch_pair) != 2 ) {
-										Debug::text('aFound Missing Punch: ', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text('aFound Missing Punch: ', __FILE__, __LINE__, __METHOD__, 10);
 
 										if ( $punch_pair[0]['status_id'] == 10 ) { //Missing Out Punch
-											Debug::text('bFound Missing Out Punch: ', __FILE__, __LINE__, __METHOD__,10);
+											Debug::text('bFound Missing Out Punch: ', __FILE__, __LINE__, __METHOD__, 10);
 
 											foreach ( $slf as $s_obj ) {
-												Debug::text('Punch: '. TTDate::getDate('DATE+TIME', $punch_pair[0]['time_stamp'] ) .' Schedule Start Time: '. TTDate::getDate('DATE+TIME', $s_obj->getStartTime() ) .' End Time: '. TTDate::getDate('DATE+TIME', $s_obj->getEndTime() ), __FILE__, __LINE__, __METHOD__,10);
+												Debug::text('Punch: '. TTDate::getDate('DATE+TIME', $punch_pair[0]['time_stamp'] ) .' Schedule Start Time: '. TTDate::getDate('DATE+TIME', $s_obj->getStartTime() ) .' End Time: '. TTDate::getDate('DATE+TIME', $s_obj->getEndTime() ), __FILE__, __LINE__, __METHOD__, 10);
 												//Because this is just an IN punch, make sure the IN punch is before the schedule end time
 												//So we can eliminate split shift schedules.
 												if ( $punch_pair[0]['time_stamp'] <= $s_obj->getEndTime()
-														AND $current_epoch >= $s_obj->getEndTime() AND $current_epoch <= ($s_obj->getEndTime()+self::$premature_delay) ) {
+														AND $current_epoch >= $s_obj->getEndTime() AND $current_epoch <= ($s_obj->getEndTime() + self::$premature_delay) ) {
 													if ( TTDate::inWindow( $current_epoch, $s_obj->getEndTime(), $ep_obj->getGrace() ) == TRUE ) {
-														Debug::text('    Within Grace time, IGNORE EXCEPTION: ', __FILE__, __LINE__, __METHOD__,10);
+														Debug::text('	 Within Grace time, IGNORE EXCEPTION: ', __FILE__, __LINE__, __METHOD__, 10);
 													} else {
-														Debug::text('    NOT Within Grace time, SET EXCEPTION: ', __FILE__, __LINE__, __METHOD__,10);
+														Debug::text('	 NOT Within Grace time, SET EXCEPTION: ', __FILE__, __LINE__, __METHOD__, 10);
 														$current_exceptions[] = array(
 																						'user_date_id' => $user_date_id,
 																						'exception_policy_id' => $ep_obj->getId(),
@@ -1343,7 +1341,7 @@ class ExceptionPolicyFactory extends Factory {
 											}
 										}
 									} else {
-										Debug::text('No Missing Punches...', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text('No Missing Punches...', __FILE__, __LINE__, __METHOD__, 10);
 									}
 								}
 							}
@@ -1353,9 +1351,9 @@ class ExceptionPolicyFactory extends Factory {
 					case 'm1': //Missing In Punch
 						if ( $plf->getRecordCount() > 0 ) {
 							foreach ( $plf as $p_obj ) {
-								//Debug::text(' Punch: Status: '. $p_obj->getStatus() .' Punch Control ID: '. $p_obj->getPunchControlID() .' Punch ID: '. $p_obj->getId() .' TimeStamp: '. $p_obj->getTimeStamp(), __FILE__, __LINE__, __METHOD__,10);
+								//Debug::text(' Punch: Status: '. $p_obj->getStatus() .' Punch Control ID: '. $p_obj->getPunchControlID() .' Punch ID: '. $p_obj->getId() .' TimeStamp: '. $p_obj->getTimeStamp(), __FILE__, __LINE__, __METHOD__, 10);
 
-								if ( $type_id == 5 AND $p_obj->getTimeStamp() < ($current_epoch-self::$premature_delay) ) {
+								if ( $type_id == 5 AND $p_obj->getTimeStamp() < ($current_epoch - self::$premature_delay) ) {
 									$type_id = 50;
 								}
 
@@ -1364,13 +1362,13 @@ class ExceptionPolicyFactory extends Factory {
 
 							if ( isset($punch_pairs) ) {
 								foreach($punch_pairs as $punch_control_id => $punch_pair) {
-									//Debug::Arr($punch_pair, 'Punch Pair for Control ID:'. $punch_control_id, __FILE__, __LINE__, __METHOD__,10);
+									//Debug::Arr($punch_pair, 'Punch Pair for Control ID:'. $punch_control_id, __FILE__, __LINE__, __METHOD__, 10);
 
 									if ( count($punch_pair) != 2 ) {
-										Debug::text('a1Found Missing Punch: ', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text('a1Found Missing Punch: ', __FILE__, __LINE__, __METHOD__, 10);
 
 										if ( $punch_pair[0]['status_id'] == 20 ) { //Missing In Punch
-											Debug::text('b1Found Missing In Punch: ', __FILE__, __LINE__, __METHOD__,10);
+											Debug::text('b1Found Missing In Punch: ', __FILE__, __LINE__, __METHOD__, 10);
 											$current_exceptions[] = array(
 																			'user_date_id' => $user_date_id,
 																			'exception_policy_id' => $ep_obj->getId(),
@@ -1380,7 +1378,7 @@ class ExceptionPolicyFactory extends Factory {
 																		);
 										}
 									} else {
-										Debug::text('No Missing Punches...', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text('No Missing Punches...', __FILE__, __LINE__, __METHOD__, 10);
 									}
 								}
 							}
@@ -1390,11 +1388,11 @@ class ExceptionPolicyFactory extends Factory {
 					case 'm2': //Missing Out Punch
 						if ( $plf->getRecordCount() > 0 ) {
 							foreach ( $plf as $p_obj ) {
-								Debug::text(' Punch: Status: '. $p_obj->getStatus() .' Punch Control ID: '. $p_obj->getPunchControlID() .' Punch ID: '. $p_obj->getId() .' TimeStamp: '. $p_obj->getTimeStamp(), __FILE__, __LINE__, __METHOD__,10);
+								Debug::text(' Punch: Status: '. $p_obj->getStatus() .' Punch Control ID: '. $p_obj->getPunchControlID() .' Punch ID: '. $p_obj->getId() .' TimeStamp: '. $p_obj->getTimeStamp(), __FILE__, __LINE__, __METHOD__, 10);
 
 								//This causes the exception to trigger if the first punch pair is more than the Maximum Shift time away from the current punch,
 								//ie: In: 1:00AM, Out: 2:00AM, In 3:00PM (Maximum Shift Time less than 12hrs). The missing punch exception will be triggered immediately upon the 3:00PM punch.
-								//if ( $type_id == 5 AND $p_obj->getTimeStamp() < ($current_epoch-self::$premature_delay) ) {
+								//if ( $type_id == 5 AND $p_obj->getTimeStamp() < ($current_epoch - self::$premature_delay) ) {
 								//	$type_id = 50;
 								//}
 
@@ -1404,16 +1402,16 @@ class ExceptionPolicyFactory extends Factory {
 							if ( isset($punch_pairs) ) {
 								foreach($punch_pairs as $punch_control_id => $punch_pair) {
 									if ( count($punch_pair) != 2 ) {
-										Debug::text('a2Found Missing Punch: ', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text('a2Found Missing Punch: ', __FILE__, __LINE__, __METHOD__, 10);
 
 										if ( $punch_pair[0]['status_id'] == 10 ) { //Missing Out Punch
-											Debug::text('b2Found Missing Out Punch: ', __FILE__, __LINE__, __METHOD__,10);
+											Debug::text('b2Found Missing Out Punch: ', __FILE__, __LINE__, __METHOD__, 10);
 
 											//Make sure we are at least MaximumShift Time from the matching In punch before trigging this exception.
 											//Even when an supervisor is entering punches for today, make missing out punch pre-mature if the maximum shift time isn't exceeded.
 											//This will prevent timesheet recalculations from having missing punches for everyone today.
-											//if ( $type_id == 5 AND $punch_pair[0]['time_stamp'] < ($current_epoch-self::$premature_delay) ) {
-											if ( $punch_pair[0]['time_stamp'] < ($current_epoch-self::$premature_delay) ) {
+											//if ( $type_id == 5 AND $punch_pair[0]['time_stamp'] < ($current_epoch - self::$premature_delay) ) {
+											if ( $punch_pair[0]['time_stamp'] < ($current_epoch - self::$premature_delay) ) {
 												$type_id = 50;
 											} else {
 												$type_id = 5;
@@ -1428,7 +1426,7 @@ class ExceptionPolicyFactory extends Factory {
 																		);
 										}
 									} else {
-										Debug::text('No Missing Punches...', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text('No Missing Punches...', __FILE__, __LINE__, __METHOD__, 10);
 									}
 								}
 							}
@@ -1441,7 +1439,7 @@ class ExceptionPolicyFactory extends Factory {
 							//We need to account for cases where they may punch IN from lunch first, then Out.
 							//As well as just a Lunch In punch and nothing else.
 							foreach ( $plf as $p_obj ) {
-								if ( $type_id == 5 AND $p_obj->getTimeStamp() < ($current_epoch-self::$premature_delay) ) {
+								if ( $type_id == 5 AND $p_obj->getTimeStamp() < ($current_epoch - self::$premature_delay) ) {
 									$type_id = 50;
 								}
 
@@ -1451,19 +1449,19 @@ class ExceptionPolicyFactory extends Factory {
 							if ( isset($punches) AND is_array($punches) ) {
 								foreach( $punches as $key => $p_obj ) {
 									if ( $p_obj->getType() == 20 ) { //Lunch
-										Debug::text(' Punch: Status: '. $p_obj->getStatus() .' Punch Control ID: '. $p_obj->getPunchControlID() .' TimeStamp: '. $p_obj->getTimeStamp(), __FILE__, __LINE__, __METHOD__,10);
+										Debug::text(' Punch: Status: '. $p_obj->getStatus() .' Punch Control ID: '. $p_obj->getPunchControlID() .' TimeStamp: '. $p_obj->getTimeStamp(), __FILE__, __LINE__, __METHOD__, 10);
 										if ( $p_obj->getStatus() == 10 ) {
 											//Make sure previous punch is Lunch/Out
-											if ( !isset($punches[$key-1])
-													OR ( isset($punches[$key-1]) AND is_object($punches[$key-1])
-															AND ( $punches[$key-1]->getType() != 20
-																OR $punches[$key-1]->getStatus() != 20 ) ) ) {
+											if ( !isset($punches[($key - 1)])
+													OR ( isset($punches[($key - 1)]) AND is_object($punches[($key - 1)])
+															AND ( $punches[($key - 1)]->getType() != 20
+																OR $punches[($key - 1)]->getStatus() != 20 ) ) ) {
 												//Invalid punch
 												$invalid_punches[] = array('punch_id' => $p_obj->getId() );
 											}
 										} else {
 											//Make sure next punch is Lunch/In
-											if ( !isset($punches[$key+1]) OR ( isset($punches[$key+1]) AND is_object($punches[$key+1]) AND ( $punches[$key+1]->getType() != 20 OR $punches[$key+1]->getStatus() != 10 ) ) ) {
+											if ( !isset($punches[($key + 1)]) OR ( isset($punches[($key + 1)]) AND is_object($punches[($key + 1)]) AND ( $punches[($key + 1)]->getType() != 20 OR $punches[($key + 1)]->getStatus() != 10 ) ) ) {
 												//Invalid punch
 												$invalid_punches[] = array('punch_id' => $p_obj->getId() );
 											}
@@ -1474,7 +1472,7 @@ class ExceptionPolicyFactory extends Factory {
 
 								if ( isset($invalid_punches) AND count($invalid_punches) > 0 ) {
 									foreach( $invalid_punches as $invalid_punch_arr ) {
-										Debug::text('Found Missing Lunch In/Out Punch: ', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text('Found Missing Lunch In/Out Punch: ', __FILE__, __LINE__, __METHOD__, 10);
 										$current_exceptions[] = array(
 																		'user_date_id' => $user_date_id,
 																		'exception_policy_id' => $ep_obj->getId(),
@@ -1485,7 +1483,7 @@ class ExceptionPolicyFactory extends Factory {
 									}
 									unset($invalid_punch_arr);
 								} else {
-									Debug::text('Lunch Punches match up.', __FILE__, __LINE__, __METHOD__,10);
+									Debug::text('Lunch Punches match up.', __FILE__, __LINE__, __METHOD__, 10);
 								}
 								unset($invalid_punches);
 							}
@@ -1496,7 +1494,7 @@ class ExceptionPolicyFactory extends Factory {
 							//We need to account for cases where they may punch IN from break first, then Out.
 							//As well as just a break In punch and nothing else.
 							foreach ( $plf as $p_obj ) {
-								if ( $type_id == 5 AND $p_obj->getTimeStamp() < ($current_epoch-self::$premature_delay) ) {
+								if ( $type_id == 5 AND $p_obj->getTimeStamp() < ($current_epoch - self::$premature_delay) ) {
 									$type_id = 50;
 								}
 
@@ -1506,19 +1504,19 @@ class ExceptionPolicyFactory extends Factory {
 							if ( isset($punches) AND is_array($punches) ) {
 								foreach( $punches as $key => $p_obj ) {
 									if ( $p_obj->getType() == 30 ) { //Break
-										Debug::text(' Punch: Status: '. $p_obj->getStatus() .' Type: '. $p_obj->getType() .' Punch Control ID: '. $p_obj->getPunchControlID() .' TimeStamp: '. $p_obj->getTimeStamp(), __FILE__, __LINE__, __METHOD__,10);
+										Debug::text(' Punch: Status: '. $p_obj->getStatus() .' Type: '. $p_obj->getType() .' Punch Control ID: '. $p_obj->getPunchControlID() .' TimeStamp: '. $p_obj->getTimeStamp(), __FILE__, __LINE__, __METHOD__, 10);
 										if ( $p_obj->getStatus() == 10 ) {
 											//Make sure previous punch is Break/Out
-											if ( !isset($punches[$key-1])
-													OR ( isset($punches[$key-1]) AND is_object($punches[$key-1])
-															AND ( $punches[$key-1]->getType() != 30
-																OR $punches[$key-1]->getStatus() != 20 ) ) ) {
+											if ( !isset($punches[($key - 1)])
+													OR ( isset($punches[($key - 1)]) AND is_object($punches[($key - 1)])
+															AND ( $punches[($key - 1)]->getType() != 30
+																OR $punches[($key - 1)]->getStatus() != 20 ) ) ) {
 												//Invalid punch
 												$invalid_punches[] = array('punch_id' => $p_obj->getId() );
 											}
 										} else {
 											//Make sure next punch is Break/In
-											if ( !isset($punches[$key+1]) OR ( isset($punches[$key+1]) AND is_object($punches[$key+1]) AND ( $punches[$key+1]->getType() != 30 OR $punches[$key+1]->getStatus() != 10 ) ) ) {
+											if ( !isset($punches[($key + 1)]) OR ( isset($punches[($key + 1)]) AND is_object($punches[($key + 1)]) AND ( $punches[($key + 1)]->getType() != 30 OR $punches[($key + 1)]->getStatus() != 10 ) ) ) {
 												//Invalid punch
 												$invalid_punches[] = array('punch_id' => $p_obj->getId() );
 											}
@@ -1529,7 +1527,7 @@ class ExceptionPolicyFactory extends Factory {
 
 								if ( isset($invalid_punches) AND count($invalid_punches) > 0 ) {
 									foreach( $invalid_punches as $invalid_punch_arr ) {
-										Debug::text('Found Missing Break In/Out Punch: ', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text('Found Missing Break In/Out Punch: ', __FILE__, __LINE__, __METHOD__, 10);
 										$current_exceptions[] = array(
 																		'user_date_id' => $user_date_id,
 																		'exception_policy_id' => $ep_obj->getId(),
@@ -1540,7 +1538,7 @@ class ExceptionPolicyFactory extends Factory {
 									}
 									unset($invalid_punch_arr);
 								} else {
-									Debug::text('Lunch Punches match up.', __FILE__, __LINE__, __METHOD__,10);
+									Debug::text('Lunch Punches match up.', __FILE__, __LINE__, __METHOD__, 10);
 								}
 								unset($invalid_punches);
 							}
@@ -1552,14 +1550,14 @@ class ExceptionPolicyFactory extends Factory {
 							$prev_punch_time_stamp = FALSE;
 							$prev_punch_obj = FALSE;
 
-							$x=1;
+							$x = 1;
 							foreach ( $plf as $p_obj ) {
-								Debug::text('   Missed Check-In Punch: '. TTDate::getDate('DATE+TIME', $p_obj->getTimeStamp() ) .' Delay: '. self::$premature_delay .' Current Epoch: '. $current_epoch, __FILE__, __LINE__, __METHOD__,10);
+								Debug::text('	Missed Check-In Punch: '. TTDate::getDate('DATE+TIME', $p_obj->getTimeStamp() ) .' Delay: '. self::$premature_delay .' Current Epoch: '. $current_epoch, __FILE__, __LINE__, __METHOD__, 10);
 
 								//Handle punch pairs below. Only trigger on OUT punches.
 								if ( is_object($prev_punch_obj) AND $prev_punch_obj->getStatus() == 10
-									AND $p_obj->getStatus() == 20 AND ( $p_obj->getTimeStamp()-$prev_punch_time_stamp ) > $ep_obj->getGrace() ) { //Only check OUT punches when paired.
-									Debug::text('   Triggering excepetion as employee missed check-in within: '. ( $p_obj->getTimeStamp()-$prev_punch_time_stamp ), __FILE__, __LINE__, __METHOD__,10);
+									AND $p_obj->getStatus() == 20 AND ( $p_obj->getTimeStamp() - $prev_punch_time_stamp ) > $ep_obj->getGrace() ) { //Only check OUT punches when paired.
+									Debug::text('	Triggering excepetion as employee missed check-in within: '. ( $p_obj->getTimeStamp() - $prev_punch_time_stamp ), __FILE__, __LINE__, __METHOD__, 10);
 									$current_exceptions[] = array(
 																	'user_date_id' => $user_date_id,
 																	'exception_policy_id' => $ep_obj->getId(),
@@ -1570,17 +1568,17 @@ class ExceptionPolicyFactory extends Factory {
 																	'schedule_obj' => $p_obj->getScheduleObject(),
 																);
 								} elseif ( $prev_punch_time_stamp !== FALSE ) {
-									Debug::text('   Employee Checked-In within: '. ( $p_obj->getTimeStamp()-$prev_punch_time_stamp ), __FILE__, __LINE__, __METHOD__,10);
+									Debug::text('	Employee Checked-In within: '. ( $p_obj->getTimeStamp() - $prev_punch_time_stamp ), __FILE__, __LINE__, __METHOD__, 10);
 								}
 
 								//Handle cases where there is a IN punch but no OUT punch yet.
 								//However ignore cases where there is a OUT punch but no IN punch.
 								if ( $x == $plf->getRecordCount()
 										AND $p_obj->getStatus() == 10
-										AND ( $current_epoch-$p_obj->getTimeStamp() ) > $ep_obj->getGrace()
-										AND $p_obj->getTimeStamp() > ($current_epoch-self::$premature_delay)
+										AND ( $current_epoch - $p_obj->getTimeStamp() ) > $ep_obj->getGrace()
+										AND $p_obj->getTimeStamp() > ($current_epoch - self::$premature_delay)
 										) {
-									Debug::text('   Triggering excepetion as employee hasnt checked in yet, within: '. ( $current_epoch-$prev_punch_time_stamp ), __FILE__, __LINE__, __METHOD__,10);
+									Debug::text('	Triggering excepetion as employee hasnt checked in yet, within: '. ( $current_epoch - $prev_punch_time_stamp ), __FILE__, __LINE__, __METHOD__, 10);
 									$current_exceptions[] = array(
 																	'user_date_id' => $user_date_id,
 																	'exception_policy_id' => $ep_obj->getId(),
@@ -1645,7 +1643,7 @@ class ExceptionPolicyFactory extends Factory {
 							if ( $slf->getRecordCount() > 0 ) {
 								//Check for schedule policy
 								foreach ( $slf as $s_obj ) {
-									Debug::text(' Schedule Total Time: '. $s_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__,10);
+									Debug::text(' Schedule Total Time: '. $s_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10);
 									$schedule_total_time += $s_obj->getTotalTime();
 								}
 
@@ -1665,10 +1663,10 @@ class ExceptionPolicyFactory extends Factory {
 										}
 									}
 
-									Debug::text(' Daily Total Time: '. $daily_total_time .' Schedule Total Time: '. $schedule_total_time, __FILE__, __LINE__, __METHOD__,10);
+									Debug::text(' Daily Total Time: '. $daily_total_time .' Schedule Total Time: '. $schedule_total_time, __FILE__, __LINE__, __METHOD__, 10);
 
 									if ( $daily_total_time > 0 AND $daily_total_time > ( $schedule_total_time + $ep_obj->getGrace() ) ) {
-										Debug::text(' Worked Over Scheduled Hours', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text(' Worked Over Scheduled Hours', __FILE__, __LINE__, __METHOD__, 10);
 
 										$current_exceptions[] = array(
 																		'user_date_id' => $user_date_id,
@@ -1678,11 +1676,11 @@ class ExceptionPolicyFactory extends Factory {
 																		'punch_control_id' => FALSE,
 																	);
 									} else {
-										Debug::text(' DID NOT Work Over Scheduled Hours', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text(' DID NOT Work Over Scheduled Hours', __FILE__, __LINE__, __METHOD__, 10);
 									}
 								}
 							} else {
-								Debug::text(' Not Scheduled', __FILE__, __LINE__, __METHOD__,10);
+								Debug::text(' Not Scheduled', __FILE__, __LINE__, __METHOD__, 10);
 							}
 						}
 						break;
@@ -1695,7 +1693,7 @@ class ExceptionPolicyFactory extends Factory {
 							if ( $slf->getRecordCount() > 0 ) {
 								//Check for schedule policy
 								foreach ( $slf as $s_obj ) {
-									Debug::text(' Schedule Total Time: '. $s_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__,10);
+									Debug::text(' Schedule Total Time: '. $s_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10);
 									$schedule_total_time += $s_obj->getTotalTime();
 								}
 
@@ -1715,12 +1713,12 @@ class ExceptionPolicyFactory extends Factory {
 										}
 									}
 
-									Debug::text(' Daily Total Time: '. $daily_total_time .' Schedule Total Time: '. $schedule_total_time, __FILE__, __LINE__, __METHOD__,10);
+									Debug::text(' Daily Total Time: '. $daily_total_time .' Schedule Total Time: '. $schedule_total_time, __FILE__, __LINE__, __METHOD__, 10);
 
 									if ( $daily_total_time < ( $schedule_total_time - $ep_obj->getGrace() ) ) {
-										Debug::text(' Worked Under Scheduled Hours', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text(' Worked Under Scheduled Hours', __FILE__, __LINE__, __METHOD__, 10);
 
-										if ( $type_id == 5 AND $user_date_obj->getDateStamp() < TTDate::getBeginDayEpoch( ($current_epoch-self::$premature_delay) ) ) {
+										if ( $type_id == 5 AND $user_date_obj->getDateStamp() < TTDate::getBeginDayEpoch( ($current_epoch - self::$premature_delay) ) ) {
 											$type_id = 50;
 										}
 
@@ -1732,11 +1730,11 @@ class ExceptionPolicyFactory extends Factory {
 																		'punch_control_id' => FALSE,
 																	);
 									} else {
-										Debug::text(' DID NOT Work Under Scheduled Hours', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text(' DID NOT Work Under Scheduled Hours', __FILE__, __LINE__, __METHOD__, 10);
 									}
 								}
 							} else {
-								Debug::text(' Not Scheduled', __FILE__, __LINE__, __METHOD__,10);
+								Debug::text(' Not Scheduled', __FILE__, __LINE__, __METHOD__, 10);
 							}
 						}
 						break;
@@ -1761,10 +1759,10 @@ class ExceptionPolicyFactory extends Factory {
 								}
 							}
 
-							Debug::text(' Daily Total Time: '. $daily_total_time .' Watch Window: '. $ep_obj->getWatchWindow() .' User Date ID: '. $user_date_id, __FILE__, __LINE__, __METHOD__,10);
+							Debug::text(' Daily Total Time: '. $daily_total_time .' Watch Window: '. $ep_obj->getWatchWindow() .' User Date ID: '. $user_date_id, __FILE__, __LINE__, __METHOD__, 10);
 
 							if ( $daily_total_time > 0 AND $daily_total_time > $ep_obj->getWatchWindow() ) {
-								Debug::text(' Worked Over Daily Hours', __FILE__, __LINE__, __METHOD__,10);
+								Debug::text(' Worked Over Daily Hours', __FILE__, __LINE__, __METHOD__, 10);
 
 								$current_exceptions[] = array(
 																'user_date_id' => $user_date_id,
@@ -1774,7 +1772,7 @@ class ExceptionPolicyFactory extends Factory {
 																'punch_control_id' => FALSE,
 															);
 							} else {
-								Debug::text(' DID NOT Work Over Scheduled Hours', __FILE__, __LINE__, __METHOD__,10);
+								Debug::text(' DID NOT Work Over Scheduled Hours', __FILE__, __LINE__, __METHOD__, 10);
 							}
 						}
 						break;
@@ -1818,12 +1816,12 @@ class ExceptionPolicyFactory extends Factory {
 							$udtlf = TTnew( 'UserDateTotalListFactory' );
 							$weekly_total_time = $udtlf->getWorkedTimeSumByUserIDAndStartDateAndEndDate( $user_date_obj->getUser(), TTDate::getBeginWeekEpoch($user_date_obj->getDateStamp(), $start_week_day_id), $user_date_obj->getDateStamp() );
 
-							Debug::text(' Weekly Total Time: '. $weekly_total_time .' Weekly Scheduled Total Time: '. $weekly_scheduled_total_time .' Watch Window: '. $ep_obj->getWatchWindow() .' Grace: '. $ep_obj->getGrace() .' User Date ID: '. $user_date_id, __FILE__, __LINE__, __METHOD__,10);
+							Debug::text(' Weekly Total Time: '. $weekly_total_time .' Weekly Scheduled Total Time: '. $weekly_scheduled_total_time .' Watch Window: '. $ep_obj->getWatchWindow() .' Grace: '. $ep_obj->getGrace() .' User Date ID: '. $user_date_id, __FILE__, __LINE__, __METHOD__, 10);
 							//Don't trigger either of these exceptions unless both the worked and scheduled time is greater than 0. If they aren't scheduled at all
 							//it should trigger a Unscheduled Absence exception instead of a over weekly scheduled time exception.
 							if ( ( strtolower( $ep_obj->getType() ) == 'o2' AND $weekly_total_time > 0 AND $weekly_total_time > $ep_obj->getWatchWindow() )
 									OR ( strtolower( $ep_obj->getType() ) == 's9' AND $weekly_scheduled_total_time > 0 AND $weekly_total_time > 0 AND $weekly_total_time > ( $weekly_scheduled_total_time + $ep_obj->getGrace() ) ) ) {
-								Debug::text(' Worked Over Weekly Hours', __FILE__, __LINE__, __METHOD__,10);
+								Debug::text(' Worked Over Weekly Hours', __FILE__, __LINE__, __METHOD__, 10);
 								$current_exceptions[] = array(
 																'user_date_id' => $user_date_id,
 																'exception_policy_id' => $ep_obj->getId(),
@@ -1832,7 +1830,7 @@ class ExceptionPolicyFactory extends Factory {
 																'punch_control_id' => FALSE,
 															);
 							} else {
-								Debug::text(' DID NOT Work Over Scheduled Hours', __FILE__, __LINE__, __METHOD__,10);
+								Debug::text(' DID NOT Work Over Scheduled Hours', __FILE__, __LINE__, __METHOD__, 10);
 							}
 						}
 
@@ -1861,7 +1859,7 @@ class ExceptionPolicyFactory extends Factory {
 							}
 
 							if ( isset($lunch_punch_arr) ) {
-								//Debug::Arr($lunch_punch_arr, 'Lunch Punch Array: ', __FILE__, __LINE__, __METHOD__,10);
+								//Debug::Arr($lunch_punch_arr, 'Lunch Punch Array: ', __FILE__, __LINE__, __METHOD__, 10);
 
 								foreach( $lunch_punch_arr as $pair => $time_stamp_arr ) {
 									if ( isset($time_stamp_arr[10]) AND isset($time_stamp_arr[20]) ) {
@@ -1945,19 +1943,19 @@ class ExceptionPolicyFactory extends Factory {
 							//Use scheduled meal policy first.
 							$meal_policy_obj = NULL;
 							if ( $slf->getRecordCount() > 0 ) {
-								Debug::text('Schedule Found...', __FILE__, __LINE__, __METHOD__,10);
+								Debug::text('Schedule Found...', __FILE__, __LINE__, __METHOD__, 10);
 								foreach ( $slf as $s_obj ) {
 									if ( $s_obj->getSchedulePolicyObject() !== FALSE
 											AND $s_obj->getSchedulePolicyObject()->getMealPolicyObject() !== FALSE
 											AND $s_obj->getSchedulePolicyObject()->getMealPolicyObject()->getType() != 10 ) {
-										Debug::text('Found Schedule Meal Policy... Trigger Time: '. $s_obj->getSchedulePolicyObject()->getMealPolicyObject()->getTriggerTime(), __FILE__, __LINE__, __METHOD__,10);
+										Debug::text('Found Schedule Meal Policy... Trigger Time: '. $s_obj->getSchedulePolicyObject()->getMealPolicyObject()->getTriggerTime(), __FILE__, __LINE__, __METHOD__, 10);
 										$meal_policy_obj = $s_obj->getSchedulePolicyObject()->getMealPolicyObject();
 									} else {
-										Debug::text('Schedule Meal Policy does not exist, or is auto-deduct?', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text('Schedule Meal Policy does not exist, or is auto-deduct?', __FILE__, __LINE__, __METHOD__, 10);
 									}
 								}
 							} else {
-								Debug::text('No Schedule Found...', __FILE__, __LINE__, __METHOD__,10);
+								Debug::text('No Schedule Found...', __FILE__, __LINE__, __METHOD__, 10);
 
 								//Check if they have a meal policy, with no schedule.
 								$mplf = TTnew( 'MealPolicyListFactory' );
@@ -1965,7 +1963,7 @@ class ExceptionPolicyFactory extends Factory {
 								if ( $mplf->getRecordCount() > 0 ) {
 									foreach( $mplf as $mp_obj ) {
 										if ( $mp_obj->getType() != 10 ) {
-											Debug::text('Found UnScheduled meal Policy... Trigger Time: '. $mp_obj->getTriggerTime(), __FILE__, __LINE__, __METHOD__,10);
+											Debug::text('Found UnScheduled meal Policy... Trigger Time: '. $mp_obj->getTriggerTime(), __FILE__, __LINE__, __METHOD__, 10);
 											$meal_policy_obj = $mp_obj;
 										}
 									}
@@ -1974,7 +1972,7 @@ class ExceptionPolicyFactory extends Factory {
 									//There is no  meal policy or schedule policy with a meal policy assigned to it
 									//With out this we could still apply No meal exceptions, but they will happen even on
 									//a 2minute shift.
-									Debug::text('No Lunch policy, applying No meal exception.', __FILE__, __LINE__, __METHOD__,10);
+									Debug::text('No Lunch policy, applying No meal exception.', __FILE__, __LINE__, __METHOD__, 10);
 									$meal_policy_obj = TRUE;
 								}
 							}
@@ -1991,8 +1989,8 @@ class ExceptionPolicyFactory extends Factory {
 										$punch_control_total_time[$udt_obj->getPunchControlID()] = $udt_obj->getTotalTime();
 									}
 								}
-								Debug::text('Day Total Time: '. $daily_total_time, __FILE__, __LINE__, __METHOD__,10);
-								//Debug::Arr($punch_control_total_time, 'Punch Control Total Time: ', __FILE__, __LINE__, __METHOD__,10);
+								Debug::text('Day Total Time: '. $daily_total_time, __FILE__, __LINE__, __METHOD__, 10);
+								//Debug::Arr($punch_control_total_time, 'Punch Control Total Time: ', __FILE__, __LINE__, __METHOD__, 10);
 
 								if ( $daily_total_time > 0 AND ( $meal_policy_obj === TRUE OR $daily_total_time > $meal_policy_obj->getTriggerTime() ) ) {
 									//Check for meal punch.
@@ -2001,7 +1999,7 @@ class ExceptionPolicyFactory extends Factory {
 									$tmp_punch_control_ids = array();
 									foreach ( $plf as $p_obj ) {
 										if ( $p_obj->getType() == 20 ) { //20 = Lunch
-											Debug::text('Found meal Punch: '. $p_obj->getTimeStamp(), __FILE__, __LINE__, __METHOD__,10);
+											Debug::text('Found meal Punch: '. $p_obj->getTimeStamp(), __FILE__, __LINE__, __METHOD__, 10);
 											$meal_punch = TRUE;
 											break;
 										}
@@ -2009,7 +2007,7 @@ class ExceptionPolicyFactory extends Factory {
 										if ( isset($punch_control_total_time[$p_obj->getPunchControlID()]) AND !isset($tmp_punch_control_ids[$p_obj->getPunchControlID()]) ) {
 											$tmp_punch_total_time += $punch_control_total_time[$p_obj->getPunchControlID()];
 											if ( $punch_control_id === FALSE AND ( $meal_policy_obj === TRUE OR $tmp_punch_total_time > $meal_policy_obj->getTriggerTime() ) ) {
-												Debug::text('Found punch control for exception: '. $p_obj->getPunchControlID() .' Total Time: '. $tmp_punch_total_time, __FILE__, __LINE__, __METHOD__,10);
+												Debug::text('Found punch control for exception: '. $p_obj->getPunchControlID() .' Total Time: '. $tmp_punch_total_time, __FILE__, __LINE__, __METHOD__, 10);
 												$punch_control_id = $p_obj->getPunchControlID();
 												//Don't meal the loop here, as we have to continue on and check for other meals.
 											}
@@ -2019,7 +2017,7 @@ class ExceptionPolicyFactory extends Factory {
 									unset($tmp_punch_total_time, $tmp_punch_control_ids);
 
 									if ( $meal_punch == FALSE ) {
-										Debug::text('Triggering No Lunch exception!', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text('Triggering No Lunch exception!', __FILE__, __LINE__, __METHOD__, 10);
 										$current_exceptions[] = array(
 																		'user_date_id' => $user_date_id,
 																		'exception_policy_id' => $ep_obj->getId(),
@@ -2057,7 +2055,7 @@ class ExceptionPolicyFactory extends Factory {
 							unset($pair);
 
 							if ( isset($break_punch_arr) ) {
-								//Debug::Arr($break_punch_arr, 'Break Punch Array: ', __FILE__, __LINE__, __METHOD__,10);
+								//Debug::Arr($break_punch_arr, 'Break Punch Array: ', __FILE__, __LINE__, __METHOD__, 10);
 
 								foreach( $break_punch_arr as $pair => $time_stamp_arr ) {
 									if ( isset($time_stamp_arr[10]) AND isset($time_stamp_arr[20]) ) {
@@ -2178,7 +2176,7 @@ class ExceptionPolicyFactory extends Factory {
 								}
 							}
 
-							Debug::text(' Daily Total Time: '. $daily_total_time .' User Date ID: '. $user_date_id, __FILE__, __LINE__, __METHOD__,10);
+							Debug::text(' Daily Total Time: '. $daily_total_time .' User Date ID: '. $user_date_id, __FILE__, __LINE__, __METHOD__, 10);
 
 							//Make sure we take into account how long they have currently worked, so we don't
 							//say too few breaks for 3hr shift that they employee took one break on.
@@ -2186,7 +2184,7 @@ class ExceptionPolicyFactory extends Factory {
 							if ( isset($break_punch_arr) ) {
 								$total_breaks = count($break_punch_arr);
 
-								//Debug::Arr($break_punch_arr, 'Break Punch Array: ', __FILE__, __LINE__, __METHOD__,10);
+								//Debug::Arr($break_punch_arr, 'Break Punch Array: ', __FILE__, __LINE__, __METHOD__, 10);
 
 								foreach( $break_punch_arr as $pair => $time_stamp_arr ) {
 									if ( isset($time_stamp_arr[10]) AND isset($time_stamp_arr[20]) ) {
@@ -2225,7 +2223,7 @@ class ExceptionPolicyFactory extends Factory {
 
 										if ( $add_exception == TRUE
 												AND ( strtolower( $ep_obj->getType() ) == 'b4'
-													 OR ( strtolower( $ep_obj->getType() ) == 'b3' AND $pair > ($allowed_breaks-1) )  ) ) {
+													OR ( strtolower( $ep_obj->getType() ) == 'b3' AND $pair > ($allowed_breaks - 1) )  ) ) {
 											Debug::text('Adding Exception! '. $ep_obj->getType(), __FILE__, __LINE__, __METHOD__, 10);
 
 											if ( isset($time_stamp_arr['punch_id']) AND strtolower( $ep_obj->getType() ) == 'b3' ) {
@@ -2262,7 +2260,7 @@ class ExceptionPolicyFactory extends Factory {
 							//Use scheduled break policy first.
 							$break_policy_obj = NULL;
 							if ( $slf->getRecordCount() > 0 ) {
-								Debug::text('Schedule Found...', __FILE__, __LINE__, __METHOD__,10);
+								Debug::text('Schedule Found...', __FILE__, __LINE__, __METHOD__, 10);
 								foreach ( $slf as $s_obj ) {
 									if ( $s_obj->getSchedulePolicyObject() !== FALSE ) {
 										$break_policy_ids = $s_obj->getSchedulePolicyObject()->getBreakPolicy();
@@ -2282,13 +2280,13 @@ class ExceptionPolicyFactory extends Factory {
 									unset($s_obj, $break_policy_ids, $bplf, $bp_obj);
 								}
 							} else {
-								Debug::text('No Schedule Found...', __FILE__, __LINE__, __METHOD__,10);
+								Debug::text('No Schedule Found...', __FILE__, __LINE__, __METHOD__, 10);
 
 								//Check if they have a break policy, with no schedule.
 								$bplf = TTnew( 'BreakPolicyListFactory' );
 								$bplf->getByPolicyGroupUserId( $user_date_obj->getUser() );
 								if ( $bplf->getRecordCount() > 0 ) {
-									Debug::text('Found UnScheduled Break Policy...', __FILE__, __LINE__, __METHOD__,10);
+									Debug::text('Found UnScheduled Break Policy...', __FILE__, __LINE__, __METHOD__, 10);
 									foreach( $bplf as $bp_obj ) {
 										if ( $bp_obj->getType() != 10 ) {
 											$break_policy_obj = $bp_obj;
@@ -2300,7 +2298,7 @@ class ExceptionPolicyFactory extends Factory {
 									//There is no  break policy or schedule policy with a break policy assigned to it
 									//With out this we could still apply No Break exceptions, but they will happen even on
 									//a 2minute shift.
-									Debug::text('No break policy, applying No break exception.', __FILE__, __LINE__, __METHOD__,10);
+									Debug::text('No break policy, applying No break exception.', __FILE__, __LINE__, __METHOD__, 10);
 									$break_policy_obj = TRUE;
 								}
 							}
@@ -2317,8 +2315,8 @@ class ExceptionPolicyFactory extends Factory {
 										$punch_control_total_time[$udt_obj->getPunchControlID()] = $udt_obj->getTotalTime();
 									}
 								}
-								Debug::text('Day Total Time: '. $daily_total_time, __FILE__, __LINE__, __METHOD__,10);
-								//Debug::Arr($punch_control_total_time, 'Punch Control Total Time: ', __FILE__, __LINE__, __METHOD__,10);
+								Debug::text('Day Total Time: '. $daily_total_time, __FILE__, __LINE__, __METHOD__, 10);
+								//Debug::Arr($punch_control_total_time, 'Punch Control Total Time: ', __FILE__, __LINE__, __METHOD__, 10);
 
 								if ( $daily_total_time > 0 AND ( $break_policy_obj === TRUE OR $daily_total_time > $break_policy_obj->getTriggerTime() ) ) {
 									//Check for break punch.
@@ -2327,7 +2325,7 @@ class ExceptionPolicyFactory extends Factory {
 									$tmp_punch_control_ids = array();
 									foreach ( $plf as $p_obj ) {
 										if ( $p_obj->getType() == 30 ) { //30 = Break
-											Debug::text('Found break Punch: '. $p_obj->getTimeStamp(), __FILE__, __LINE__, __METHOD__,10);
+											Debug::text('Found break Punch: '. $p_obj->getTimeStamp(), __FILE__, __LINE__, __METHOD__, 10);
 											$break_punch = TRUE;
 											break;
 										}
@@ -2335,7 +2333,7 @@ class ExceptionPolicyFactory extends Factory {
 										if ( isset($punch_control_total_time[$p_obj->getPunchControlID()]) AND !isset($tmp_punch_control_ids[$p_obj->getPunchControlID()]) ) {
 											$tmp_punch_total_time += $punch_control_total_time[$p_obj->getPunchControlID()];
 											if ( $punch_control_id === FALSE AND ( $break_policy_obj === TRUE OR $tmp_punch_total_time > $break_policy_obj->getTriggerTime() ) ) {
-												Debug::text('Found punch control for exception: '. $p_obj->getPunchControlID(), __FILE__, __LINE__, __METHOD__,10);
+												Debug::text('Found punch control for exception: '. $p_obj->getPunchControlID(), __FILE__, __LINE__, __METHOD__, 10);
 												$punch_control_id = $p_obj->getPunchControlID();
 												//Don't break the loop here, as we have to continue on and check for other breaks.
 											}
@@ -2345,7 +2343,7 @@ class ExceptionPolicyFactory extends Factory {
 									unset($tmp_punch_total_time, $tmp_punch_control_ids);
 
 									if ( $break_punch == FALSE ) {
-										Debug::text('Triggering No Break exception!', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text('Triggering No Break exception!', __FILE__, __LINE__, __METHOD__, 10);
 										$current_exceptions[] = array(
 																		'user_date_id' => $user_date_id,
 																		'exception_policy_id' => $ep_obj->getId(),
@@ -2363,14 +2361,14 @@ class ExceptionPolicyFactory extends Factory {
 						if ( is_object($user_date_obj->getPayPeriodObject())
 								AND is_object($user_date_obj->getPayPeriodObject()->getPayPeriodScheduleObject())
 								AND $user_date_obj->getPayPeriodObject()->getPayPeriodScheduleObject()->getTimeSheetVerifyType() > 10 ) {
-							Debug::text('Verification enabled... Window Start: '. TTDate::getDate('DATE+TIME', $user_date_obj->getPayPeriodObject()->getTimeSheetVerifyWindowStartDate() ) .' Grace Time: '. $ep_obj->getGrace() , __FILE__, __LINE__, __METHOD__,10);
+							Debug::text('Verification enabled... Window Start: '. TTDate::getDate('DATE+TIME', $user_date_obj->getPayPeriodObject()->getTimeSheetVerifyWindowStartDate() ) .' Grace Time: '. $ep_obj->getGrace(), __FILE__, __LINE__, __METHOD__, 10);
 
 							//*Only* trigger this exception on the last day of the pay period, because when the pay period is verified it has to force the last day to be recalculated.
 							//Ignore timesheets without any time, (worked and absence). Or we could use the Watch Window to specify the minimum time required on
 							//a timesheet to trigger this instead?
 							//Make sure we are after the timesheet window start date + the grace period.
 							if (	$user_date_obj->getPayPeriodObject()->getStatus() != 50
-									AND $current_epoch >= ($user_date_obj->getPayPeriodObject()->getTimeSheetVerifyWindowStartDate()+$ep_obj->getGrace())
+									AND $current_epoch >= ($user_date_obj->getPayPeriodObject()->getTimeSheetVerifyWindowStartDate() + $ep_obj->getGrace())
 									AND TTDate::getBeginDayEpoch( $user_date_obj->getDateStamp() ) == TTDate::getBeginDayEpoch( $user_date_obj->getPayPeriodObject()->getEndDate() )
 									) {
 
@@ -2399,17 +2397,17 @@ class ExceptionPolicyFactory extends Factory {
 																			'enable_email_notification' => TRUE,
 																		);
 										} else {
-											Debug::text('TimeSheet has already been authorized!', __FILE__, __LINE__, __METHOD__,10);
+											Debug::text('TimeSheet has already been authorized!', __FILE__, __LINE__, __METHOD__, 10);
 										}
 									} else {
-										Debug::text('Timesheet does not have any worked or paid absence time...', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text('Timesheet does not have any worked or paid absence time...', __FILE__, __LINE__, __METHOD__, 10);
 									}
 									unset($udtlf, $total_time);
 							} else {
-								Debug::text('Not within timesheet verification window, or not after grace time.', __FILE__, __LINE__, __METHOD__,10);
+								Debug::text('Not within timesheet verification window, or not after grace time.', __FILE__, __LINE__, __METHOD__, 10);
 							}
 						} else {
-							Debug::text('No Pay Period Schedule or TimeSheet Verificiation disabled...', __FILE__, __LINE__, __METHOD__,10);
+							Debug::text('No Pay Period Schedule or TimeSheet Verificiation disabled...', __FILE__, __LINE__, __METHOD__, 10);
 						}
 						break;
 					case 'j1': //Not Allowed on Job
@@ -2432,14 +2430,12 @@ class ExceptionPolicyFactory extends Factory {
 																				'punch_control_id' => $p_obj->getPunchControlId(),
 																			);
 											} else {
-												Debug::text('    User allowed on Job!', __FILE__, __LINE__, __METHOD__,10);
+												Debug::text('	 User allowed on Job!', __FILE__, __LINE__, __METHOD__, 10);
 											}
 										} else {
-											Debug::text('    Job not found!', __FILE__, __LINE__, __METHOD__,10);
+											Debug::text('	 Job not found!', __FILE__, __LINE__, __METHOD__, 10);
 										}
-									} else {
-										//Debug::text('    Not a Job Punch...', __FILE__, __LINE__, __METHOD__,10);
-									}
+									} //else { //Debug::text('	   Not a Job Punch...', __FILE__, __LINE__, __METHOD__, 10);
 								}
 							}
 							unset($j_obj);
@@ -2465,14 +2461,12 @@ class ExceptionPolicyFactory extends Factory {
 																				'punch_control_id' => $p_obj->getPunchControlId(),
 																			);
 											} else {
-												Debug::text('    Job item allowed on job!', __FILE__, __LINE__, __METHOD__,10);
+												Debug::text('	 Job item allowed on job!', __FILE__, __LINE__, __METHOD__, 10);
 											}
 										} else {
-											Debug::text('    Job not found!', __FILE__, __LINE__, __METHOD__,10);
+											Debug::text('	 Job not found!', __FILE__, __LINE__, __METHOD__, 10);
 										}
-									} else {
-										//Debug::text('    Not a Job Punch...', __FILE__, __LINE__, __METHOD__,10);
-									}
+									} //else { //Debug::text('	   Not a Job Punch...', __FILE__, __LINE__, __METHOD__, 10);
 								}
 							}
 
@@ -2501,13 +2495,13 @@ class ExceptionPolicyFactory extends Factory {
 																				'punch_control_id' => $p_obj->getPunchControlId(),
 																			);
 											} else {
-												Debug::text('    Job Not Completed!', __FILE__, __LINE__, __METHOD__,10);
+												Debug::text('	 Job Not Completed!', __FILE__, __LINE__, __METHOD__, 10);
 											}
 										} else {
-											Debug::text('    Job not found!', __FILE__, __LINE__, __METHOD__,10);
+											Debug::text('	 Job not found!', __FILE__, __LINE__, __METHOD__, 10);
 										}
 									} else {
-										Debug::text('    Not a Job Punch...', __FILE__, __LINE__, __METHOD__,10);
+										Debug::text('	 Not a Job Punch...', __FILE__, __LINE__, __METHOD__, 10);
 									}
 								}
 							}
@@ -2554,7 +2548,7 @@ class ExceptionPolicyFactory extends Factory {
 						}
 						break;
 					default:
-						Debug::text('BAD, should never get here: ', __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('BAD, should never get here: ', __FILE__, __LINE__, __METHOD__, 10);
 						break;
 				}
 			}
@@ -2564,7 +2558,7 @@ class ExceptionPolicyFactory extends Factory {
 		$exceptions = self::diffExistingAndCurrentExceptions( $existing_exceptions, $current_exceptions );
 		if ( is_array($exceptions) ) {
 			if ( isset($exceptions['create_exceptions']) AND is_array($exceptions['create_exceptions']) AND count($exceptions['create_exceptions']) > 0 ) {
-				Debug::text('Creating new exceptions... Total: '. count($exceptions['create_exceptions']), __FILE__, __LINE__, __METHOD__,10);
+				Debug::text('Creating new exceptions... Total: '. count($exceptions['create_exceptions']), __FILE__, __LINE__, __METHOD__, 10);
 				foreach( $exceptions['create_exceptions'] as $tmp_exception ) {
 					$ef = TTnew( 'ExceptionFactory' );
 					$ef->setUserDateID( $tmp_exception['user_date_id'] );
@@ -2587,7 +2581,7 @@ class ExceptionPolicyFactory extends Factory {
 								$ef->emailException( $user_date_obj->getUserObject(), $user_date_obj, ( isset($tmp_exception['punch_obj']) ) ? $tmp_exception['punch_obj'] : NULL, ( isset($tmp_exception['schedule_obj']) ) ? $tmp_exception['schedule_obj'] : NULL, $ep_obj );
 							}
 						} else {
-							Debug::text('Not emailing new exception: User Date ID: '. $tmp_exception['user_date_id'] .' Type ID: '. $tmp_exception['type_id'] .' Enable PreMature: '. (int)$enable_premature_exceptions, __FILE__, __LINE__, __METHOD__,10);
+							Debug::text('Not emailing new exception: User Date ID: '. $tmp_exception['user_date_id'] .' Type ID: '. $tmp_exception['type_id'] .' Enable PreMature: '. (int)$enable_premature_exceptions, __FILE__, __LINE__, __METHOD__, 10);
 						}
 					}
 					unset($ef);
@@ -2595,7 +2589,7 @@ class ExceptionPolicyFactory extends Factory {
 			}
 
 			if ( isset($exceptions['delete_exceptions']) AND is_array($exceptions['delete_exceptions']) AND count($exceptions['delete_exceptions']) > 0 ) {
-				Debug::Text('Deleting no longer valid exceptions... Total: '. count($exceptions['delete_exceptions']), __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Deleting no longer valid exceptions... Total: '. count($exceptions['delete_exceptions']), __FILE__, __LINE__, __METHOD__, 10);
 				$ef = TTnew( 'ExceptionFactory' );
 				$ef->bulkDelete( $exceptions['delete_exceptions'] );
 			}
@@ -2607,8 +2601,8 @@ class ExceptionPolicyFactory extends Factory {
 
 	//This function needs to determine which new exceptions to create, and which old exceptions are no longer valid and to delete.
 	static function diffExistingAndCurrentExceptions( $existing_exceptions, $current_exceptions ) {
-		//Debug::Arr($existing_exceptions, 'Existing Exceptions: ', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($current_exceptions, 'Current Exceptions: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($existing_exceptions, 'Existing Exceptions: ', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($current_exceptions, 'Current Exceptions: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( is_array($existing_exceptions) AND count($existing_exceptions) == 0 ) {
 			//No existing exceptions, nothing to delete or compare, just create new exceptions.
@@ -2629,7 +2623,7 @@ class ExceptionPolicyFactory extends Factory {
 		foreach( $current_exceptions as $current_key => $current_exception ) {
 			foreach( $existing_exceptions as $existing_key => $existing_exception ) {
 				//Need to match all elements except 'id'.
-				if ( 	$current_exception['exception_policy_id'] == $existing_exception['exception_policy_id']
+				if (	$current_exception['exception_policy_id'] == $existing_exception['exception_policy_id']
 						AND
 						$current_exception['type_id'] == $existing_exception['type_id']
 						AND
@@ -2639,11 +2633,9 @@ class ExceptionPolicyFactory extends Factory {
 						AND
 						$current_exception['punch_id'] == $existing_exception['punch_id']
 					) {
-					//Debug::text('Removing current exception that matches existing exception: '. $current_key, __FILE__, __LINE__, __METHOD__,10);
+					//Debug::text('Removing current exception that matches existing exception: '. $current_key, __FILE__, __LINE__, __METHOD__, 10);
 					unset($new_exceptions[$current_key]);
-				} else {
-					//Debug::text('NOT Removing current exception that matches existing exception: Current: '. $current_key .' Existing: '. $existing_key, __FILE__, __LINE__, __METHOD__,10);
-				}
+				} //else { //Debug::text('NOT Removing current exception that matches existing exception: Current: '. $current_key .' Existing: '. $existing_key, __FILE__, __LINE__, __METHOD__, 10);
 			}
 		}
 
@@ -2659,17 +2651,17 @@ class ExceptionPolicyFactory extends Factory {
 				if ( !( $current_exception['exception_policy_id'] == $existing_exception['exception_policy_id'] AND $current_exception['type_id'] == $existing_exception['type_id'] AND $current_exception['user_date_id'] == $existing_exception['user_date_id'] AND $current_exception['punch_control_id'] == $existing_exception['punch_control_id'] AND $current_exception['punch_id'] == $existing_exception['punch_id'] ) ) {
 					$match_count--;
 				}
-				//Debug::text('aDetermining if we should delete this exception... Match Count: '. $match_count .' Total: '. $total_current_exceptions .' Existing Key: '. $existing_key, __FILE__, __LINE__, __METHOD__,10);
+				//Debug::text('aDetermining if we should delete this exception... Match Count: '. $match_count .' Total: '. $total_current_exceptions .' Existing Key: '. $existing_key, __FILE__, __LINE__, __METHOD__, 10);
 			}
 
 			if ( $match_count == 0 ) {
-				//Debug::text('bDetermining if we should delete this exception... Match Count: '. $match_count .' Total: '. $total_current_exceptions .' Existing Key: '. $existing_key, __FILE__, __LINE__, __METHOD__,10);
+				//Debug::text('bDetermining if we should delete this exception... Match Count: '. $match_count .' Total: '. $total_current_exceptions .' Existing Key: '. $existing_key, __FILE__, __LINE__, __METHOD__, 10);
 				$delete_exceptions[] = $existing_exception['id'];
 			}
 		}
 
 		$retarr = array( 'create_exceptions' => $new_exceptions, 'delete_exceptions' => $delete_exceptions );
-		//Debug::Arr($retarr, 'RetArr Exceptions: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($retarr, 'RetArr Exceptions: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $retarr;
 	}
 
@@ -2682,7 +2674,7 @@ class ExceptionPolicyFactory extends Factory {
 
 		$query = 'select id from '. $this->getTable() .' where exception_policy_control_id = ? AND type_id = ? AND id != ? AND deleted = 0';
 		$id = $this->db->GetOne($query, $ph);
-		Debug::Arr($id,'Unique Exception Control ID: '. $exception_policy_control_id .' Type ID: '. $type_id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($id, 'Unique Exception Control ID: '. $exception_policy_control_id .' Type ID: '. $type_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id === FALSE ) {
 			return TRUE;

@@ -54,7 +54,7 @@ class T4 extends TaxForms {
 	var $t4asum_data; //Holds all T4a summary data.
 
 	var $form_layout_data = array(
-								  't4_summary' => array(
+								't4_summary' => array(
 													'year' => array('x' => 74, 'y' => 15.5, 'w' => 10, 'h' => 6, 'align' => 'C', 'fontsize' => 16, 'fontstyle' => 'B' ),
 													'business_number' => array('x' => 96, 'y' => 28, 'w' => 75, 'h' => 7, 'align' => 'C' ),
 
@@ -73,7 +73,7 @@ class T4 extends TaxForms {
 													'income_tax' => array('x' => 91, 'y' => 125, 'w' => 55, 'h' => 6.5, 'align' => 'C', 'split_decimal' => TRUE ),
 													'total_deduction' => array('x' => 91, 'y' => 138, 'w' => 55, 'h' => 6.5, 'align' => 'C', 'split_decimal' => TRUE ),
 													),
-								  't4' => array(
+								't4' => array(
 													'company_name' => array('x' => 12, 'y' => 10, 'w' => 70, 'h' => 5, 'align' => 'L' ),
 													'company_address' => array('x' => 12, 'y' => 15, 'w' => 70, 'h' => 5, 'align' => 'L', 'multicell' => TRUE),
 													'year' => array('x' => 122, 'y' => 13, 'w' => 20, 'h' => 6, 'align' => 'C', 'fontsize' => 16 ),
@@ -149,7 +149,7 @@ class T4 extends TaxForms {
 													'pension_adjustment' => array('x' => 92, 'y' => 31, 'w' => 28, 'h' => 5, 'align' => 'C', 'split_decimal' => TRUE ),
 
 													'charity' => array('x' => 8, 'y' => 43.5, 'w' => 28, 'h' => 5, 'align' => 'C', 'split_decimal' => TRUE ),
-												   ),
+													),
 									't4a_summary' => array(
 													'year' => array('x' => 64, 'y' => 17.5, 'w' => 10, 'h' => 6, 'align' => 'C', 'fontsize' => 16, 'fontstyle' => 'B' ),
 
@@ -172,8 +172,8 @@ class T4 extends TaxForms {
 													'pension_adjustment' => array('x' => 150, 'y' => 133, 'w' => 34, 'h' => 4.5, 'align' => 'C', 'split_decimal' => TRUE ),
 
 													'income_tax' => array('x' => 157, 'y' => 149, 'w' => 34, 'h' => 4.5, 'align' => 'C', 'split_decimal' => TRUE ),
-												   ),
-								  );
+													),
+								);
 
 	function __construct() {
 		$this->src_pdf_t4 = Environment::getBasePath().'interface'. DIRECTORY_SEPARATOR .'forms'. DIRECTORY_SEPARATOR .'ca'. DIRECTORY_SEPARATOR .'tax'. DIRECTORY_SEPARATOR .'t4flat-06b.pdf';
@@ -200,7 +200,7 @@ class T4 extends TaxForms {
 	}
 
 	/*
-	 Primary dataset, used across more then one forms.
+	Primary dataset, used across more then one forms.
 	*/
 	function getYear() {
 		return $this->data['year'];
@@ -274,7 +274,7 @@ class T4 extends TaxForms {
 	}
 
 	/*
-	 Handling functions for additional forms/pages
+	Handling functions for additional forms/pages
 	*/
 	function addT4Employee( $obj ) {
 		$this->t4_data[] = $obj->t4_data;
@@ -296,7 +296,7 @@ class T4 extends TaxForms {
 	}
 
 	/*
-	 Filter functions for PDF
+	Filter functions for PDF
 	*/
 	function filterPDFGetCPP_Exempt( $ee_data ) {
 		$data = NULL;
@@ -318,9 +318,9 @@ class T4 extends TaxForms {
 	function filterPDFGetSIN( $ee_data ) {
 		$data = NULL;
 
-		$data .= substr($ee_data['sin'],0,3);
-		$data .= '   '.substr($ee_data['sin'],3,3);
-		$data .= '   '.substr($ee_data['sin'],6,3);
+		$data .= substr($ee_data['sin'], 0, 3);
+		$data .= '	 '.substr($ee_data['sin'], 3, 3);
+		$data .= '	 '.substr($ee_data['sin'], 6, 3);
 
 		return $data;
 	}
@@ -354,10 +354,10 @@ class T4 extends TaxForms {
 		if ( isset($ee_data['address1']) AND $ee_data['address1'] != '' ) {
 			$data .= $ee_data['address1'] ."\n";
 		}
-		if ( isset($ee_data['address2']) AND $ee_data['address2'] != ''  ) {
+		if ( isset($ee_data['address2']) AND $ee_data['address2'] != ''	 ) {
 			$data .= $ee_data['address2'] ."\n";
 		}
-		if ( isset($ee_data['address3']) AND $ee_data['address3'] != ''  ) {
+		if ( isset($ee_data['address3']) AND $ee_data['address3'] != ''	 ) {
 			$data .= $ee_data['address3'] ."\n";
 		}
 		if ( isset($ee_data['city']) ) {
@@ -374,7 +374,7 @@ class T4 extends TaxForms {
 	}
 
 	/*
-	 Display/Exporting functions.
+	Display/Exporting functions.
 	*/
 	function compileT4Summary() {
 		//Import original Gov't supplied PDF.
@@ -385,7 +385,7 @@ class T4 extends TaxForms {
 		$this->setFont(); //Default font settings;
 		$this->setDecimalFieldSize(11);
 
-		Debug::Arr($this->form_layout_data, 'Form Layout Data', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($this->form_layout_data, 'Form Layout Data', __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->getPDFObject()->AddPage();
 		if ( $this->getShowBackGround() == TRUE ) {
@@ -397,10 +397,10 @@ class T4 extends TaxForms {
 			//Use this switch statement to have custom formatting based on the column name.
 			switch( $field ) {
 				case 'year':
-					$this->drawCell(substr($this->data['year'],2,2), $field_layout_data );
+					$this->drawCell(substr($this->data['year'], 2, 2), $field_layout_data );
 					break;
 				default:
-					Debug::Text('Field: '. $field, __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Field: '. $field, __FILE__, __LINE__, __METHOD__, 10);
 					if ( isset($sum_data[$field]) ) {
 						$data = $sum_data[$field];
 					} elseif ( isset($this->data[$field]) ) {
@@ -448,31 +448,31 @@ class T4 extends TaxForms {
 
 		if ( $this->getType() == 'government') {
 			$employees_per_page = 2;
-			$n=1; //Loop the same employee twice.
+			$n = 1; //Loop the same employee twice.
 		} else {
 			$employees_per_page = 1;
-			$n=2; //Loop the same employee twice.
+			$n = 2; //Loop the same employee twice.
 		}
 
-		Debug::Arr($this->form_layout_data, 'Form Layout Data', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($this->form_layout_data, 'Form Layout Data', __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_array( $this->t4_data ) ) {
-			$e=0;
+			$e = 0;
 			foreach( $this->t4_data as $ee_row => $ee_data ) {
-				if ( $e == 0 OR $e % $employees_per_page == 0 ) {
+				if ( $e == 0 OR ($e % $employees_per_page) == 0 ) {
 					$this->getPDFObject()->AddPage();
 					if ( $this->getShowBackGround() == TRUE ) {
 						$this->getPDFObject()->useTemplate($tplidx, -5, 0 );
 					}
 				}
 
-				for( $i=0; $i < $n; $i++ ) {
+				for( $i = 0; $i < $n; $i++ ) {
 					$bottom_y_offset = 0;
 					if ( $employees_per_page == 2 ) {
-						if ( $e > 0 AND $e % $employees_per_page != 0 ) {
+						if ( $e > 0 AND ($e % $employees_per_page) != 0 ) {
 							$bottom_y_offset = 139.5;
 						}
 					} else {
-						if ( $i % 2 == 0 ) {
+						if ( ($i % 2) == 0 ) {
 							$bottom_y_offset = 139.5;
 						}
 					}
@@ -481,7 +481,7 @@ class T4 extends TaxForms {
 						//Use this switch statement to have custom formatting based on the column name.
 						switch( $field ) {
 							default:
-								Debug::Text('Field: '. $field, __FILE__, __LINE__, __METHOD__,10);
+								Debug::Text('Field: '. $field, __FILE__, __LINE__, __METHOD__, 10);
 								if ( isset($ee_data[$field]) ) {
 									$data = $ee_data[$field];
 								} elseif ( isset($this->data[$field]) ) {
@@ -510,11 +510,11 @@ class T4 extends TaxForms {
 						unset($data);
 					}
 				}
-				$i=0;
+				$i = 0;
 				$e++;
 
 				if ( $this->getShowInstructionPage() == TRUE ) {
-					if ( $employees_per_page == 1 OR ( $employees_per_page == 2 AND  $e % $employees_per_page == 0 ) ) {
+					if ( $employees_per_page == 1 OR ( $employees_per_page == 2 AND $e % $employees_per_page == 0 ) ) {
 						$this->getPDFObject()->AddPage();
 						$this->getPDFObject()->useTemplate($tplidx_back, 0, 0);
 					}
@@ -535,32 +535,32 @@ class T4 extends TaxForms {
 
 		if ( $this->getType() == 'government') {
 			$employees_per_page = 3;
-			$n=1; //Loop the same employee twice.
+			$n = 1; //Loop the same employee twice.
 		} else {
 			$employees_per_page = 1;
-			$n=3; //Loop the same employee twice.
+			$n = 3; //Loop the same employee twice.
 		}
 
-		Debug::Arr($this->form_layout_data, 'Form Layout Data', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($this->form_layout_data, 'Form Layout Data', __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_array( $this->t4a_data ) ) {
-			$e=0;
+			$e = 0;
 			foreach( $this->t4a_data as $ee_row => $ee_data ) {
-				if ( $e == 0 OR $e % $employees_per_page == 0 ) {
+				if ( $e == 0 OR ($e % $employees_per_page) == 0 ) {
 					$this->getPDFObject()->AddPage();
 					if ( $this->getShowBackGround() == TRUE ) {
 						$this->getPDFObject()->useTemplate($tplidx, -5, 0 );
 					}
 				}
 
-				for( $i=0; $i < $n; $i++ ) {
+				for( $i = 0; $i < $n; $i++ ) {
 					$bottom_y_offset = 0;
 					if ( $employees_per_page == 3 ) {
-						if ( $e > 0 AND $e % $employees_per_page != 0 ) {
-							$bottom_y_offset = ($e % 3)*101+(($e % 3)*0.55);
+						if ( $e > 0 AND ($e % $employees_per_page) != 0 ) {
+							$bottom_y_offset = ( ($e % 3) * 101 + (($e % 3) * 0.55) );
 						}
 					} else {
 						if ( $i > 0 ) {
-							$bottom_y_offset = ($i % 3)*101+(($i % 3)*0.55);
+							$bottom_y_offset = ( ($i % 3) * 101 + (($i % 3) * 0.55) );
 						}
 					}
 
@@ -568,7 +568,7 @@ class T4 extends TaxForms {
 						//Use this switch statement to have custom formatting based on the column name.
 						switch( $field ) {
 							default:
-								Debug::Text('Field: '. $field, __FILE__, __LINE__, __METHOD__,10);
+								Debug::Text('Field: '. $field, __FILE__, __LINE__, __METHOD__, 10);
 								if ( isset($ee_data[$field]) ) {
 									$data = $ee_data[$field];
 								} elseif ( isset($this->data[$field]) ) {
@@ -597,11 +597,11 @@ class T4 extends TaxForms {
 						unset($data);
 					}
 				}
-				$i=0;
+				$i = 0;
 				$e++;
 
 				if ( $this->getShowInstructionPage() == TRUE ) {
-					if ( $employees_per_page == 1 OR ( $employees_per_page == 3 AND  $e % $employees_per_page == 0 ) ) {
+					if ( $employees_per_page == 1 OR ( $employees_per_page == 3 AND $e % $employees_per_page == 0 ) ) {
 						$this->getPDFObject()->AddPage();
 						$this->getPDFObject()->useTemplate($tplidx_back, 0, -100);
 					}
@@ -620,7 +620,7 @@ class T4 extends TaxForms {
 		$this->setFont(); //Default font settings;
 		$this->setDecimalFieldSize(6.5);
 
-		Debug::Arr($this->form_layout_data, 'Form Layout Data', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($this->form_layout_data, 'Form Layout Data', __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->getPDFObject()->AddPage();
 		if ( $this->getShowBackGround() == TRUE ) {
@@ -632,10 +632,10 @@ class T4 extends TaxForms {
 			//Use this switch statement to have custom formatting based on the column name.
 			switch( $field ) {
 				case 'year':
-					$this->drawCell(substr($this->data['year'],2,2), $field_layout_data );
+					$this->drawCell(substr($this->data['year'], 2, 2), $field_layout_data );
 					break;
 				default:
-					Debug::Text('Field: '. $field, __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Field: '. $field, __FILE__, __LINE__, __METHOD__, 10);
 					if ( isset($sum_data[$field]) ) {
 						$data = $sum_data[$field];
 					} elseif ( isset($this->data[$field]) ) {
@@ -686,7 +686,7 @@ class T4Employee {
 	var $t4_data; //Holds all data.
 
 	/*
-	 Employee contact information
+	Employee contact information
 	*/
 	function getFirstName() {
 		return $this->t4_data['first_name'];
@@ -777,7 +777,7 @@ class T4Employee {
 	}
 
 	/*
-	 T4 form data
+	T4 form data
 	*/
 	function getExemptCPP() {
 		return $this->t4_data['cpp_exempt'];
@@ -1047,7 +1047,7 @@ class T4AEmployee {
 	var $t4a_data; //Holds all data.
 
 	/*
-	 Employee contact information
+	Employee contact information
 	*/
 	function getFirstName() {
 		return $this->t4a_data['first_name'];
@@ -1130,7 +1130,7 @@ class T4AEmployee {
 	}
 
 	/*
-	 T4a form data
+	T4a form data
 	*/
 	function getLumpSumPayment() {
 		return $this->t4a_data['lump_sum_payment'];
@@ -1206,7 +1206,7 @@ class T4ASummary {
 	var $t4asum_data; //Holds all data.
 
 	/*
-	 T4a Summary form data
+	T4a Summary form data
 	*/
 	function getTotalT4As() {
 		return $this->t4asum_data['total_t4a'];

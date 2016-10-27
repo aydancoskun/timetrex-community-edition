@@ -56,8 +56,8 @@ class RemittanceSummaryReport extends Report {
 	}
 
 	protected function _checkPermissions( $user_id, $company_id ) {
-		if ( $this->getPermissionObject()->Check('report','enabled', $user_id, $company_id )
-				AND $this->getPermissionObject()->Check('report','view_remittance_summary', $user_id, $company_id ) ) {
+		if ( $this->getPermissionObject()->Check('report', 'enabled', $user_id, $company_id )
+				AND $this->getPermissionObject()->Check('report', 'view_remittance_summary', $user_id, $company_id ) ) {
 			return TRUE;
 		}
 
@@ -75,7 +75,7 @@ class RemittanceSummaryReport extends Report {
 										'template',
 										'time_period',
 										'columns',
-							   );
+								);
 
 				break;
 			case 'setup_fields':
@@ -91,8 +91,8 @@ class RemittanceSummaryReport extends Report {
 										'-2050-exclude_user_id' => TTi18n::gettext('Employee Exclude'),
 										'-2060-default_branch_id' => TTi18n::gettext('Default Branch'),
 										'-2070-default_department_id' => TTi18n::gettext('Default Department'),
-                                        
-                                        '-3000-custom_filter' => TTi18n::gettext('Custom Filter'),
+
+										'-3000-custom_filter' => TTi18n::gettext('Custom Filter'),
 
 										'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
 
@@ -100,7 +100,7 @@ class RemittanceSummaryReport extends Report {
 										'-5010-group' => TTi18n::gettext('Group By'),
 										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
 										'-5030-sort' => TTi18n::gettext('Sort By'),
-							   );
+								);
 				break;
 			case 'time_period':
 				$retval = TTDate::getTimePeriodOptions();
@@ -108,7 +108,7 @@ class RemittanceSummaryReport extends Report {
 			case 'date_columns':
 				$retval = TTDate::getReportDateOptions( NULL, TTi18n::getText('Date'), 13, TRUE );
 				break;
-            case 'report_custom_column':
+			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
@@ -118,14 +118,14 @@ class RemittanceSummaryReport extends Report {
 						$retval = Misc::addSortPrefix( $custom_column_labels, 9500 );
 					}
 				}
-                break; 
-            case 'report_custom_filters':
+				break;
+			case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
 					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'RemittanceSummaryReport', 'custom_column' );
 				}
-                break;
-            case 'report_dynamic_custom_column':
+				break;
+			case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
 					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'RemittanceSummaryReport', 'custom_column' );
@@ -133,8 +133,8 @@ class RemittanceSummaryReport extends Report {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
 					}
 				}
-                break;
-            case 'report_static_custom_column':
+				break;
+			case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
 					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'RemittanceSummaryReport', 'custom_column' );
@@ -142,13 +142,13 @@ class RemittanceSummaryReport extends Report {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
 					}
 				}
-                break;
-            case 'formula_columns':
-                $retval = TTMath::formatFormulaColumns( array_merge( array_diff( $this->getOptions('static_columns'), (array)$this->getOptions('report_static_custom_column') ), $this->getOptions('dynamic_columns') ) );
-                break; 
-            case 'filter_columns':
-                $retval = TTMath::formatFormulaColumns( array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') ) );
-                break;
+				break;
+			case 'formula_columns':
+				$retval = TTMath::formatFormulaColumns( array_merge( array_diff( $this->getOptions('static_columns'), (array)$this->getOptions('report_static_custom_column') ), $this->getOptions('dynamic_columns') ) );
+				break;
+			case 'filter_columns':
+				$retval = TTMath::formatFormulaColumns( array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') ) );
+				break;
 			case 'static_columns':
 				$retval = array(
 										//Static Columns - Aggregate functions can't be used on these.
@@ -177,7 +177,7 @@ class RemittanceSummaryReport extends Report {
 										'-1400-permission_control' => TTi18n::gettext('Permission Group'),
 										'-1410-pay_period_schedule' => TTi18n::gettext('Pay Period Schedule'),
 										'-1420-policy_group' => TTi18n::gettext('Policy Group'),
-							   );
+								);
 
 				$retval = array_merge( $retval, $this->getOptions('date_columns'), (array)$this->getOptions('report_static_custom_column') );
 				ksort($retval);
@@ -239,7 +239,7 @@ class RemittanceSummaryReport extends Report {
 										'-1130-by_month_by_department' => TTi18n::gettext('by Month/Department'),
 										'-1140-by_month_by_branch_by_department' => TTi18n::gettext('by Month/Branch/Department'),
 
-							   );
+								);
 
 				break;
 			case 'template_config':
@@ -260,14 +260,14 @@ class RemittanceSummaryReport extends Report {
 
 							break;
 						default:
-							Debug::Text(' Parsing template name: '. $template, __FILE__, __LINE__, __METHOD__,10);
+							Debug::Text(' Parsing template name: '. $template, __FILE__, __LINE__, __METHOD__, 10);
 							$retval['-1010-time_period']['time_period'] = 'last_month';
 
 							//Parse template name, and use the keywords separated by '+' to determine settings.
 							$template_keywords = explode('+', $template );
 							if ( is_array($template_keywords) ) {
 								foreach( $template_keywords as $template_keyword ) {
-									Debug::Text(' Keyword: '. $template_keyword, __FILE__, __LINE__, __METHOD__,10);
+									Debug::Text(' Keyword: '. $template_keyword, __FILE__, __LINE__, __METHOD__, 10);
 
 									switch( $template_keyword ) {
 										//Columns
@@ -444,7 +444,7 @@ class RemittanceSummaryReport extends Report {
 					$retval['-5040-sort'] = $retval['sort'];
 					unset($retval['sort']);
 				}
-				Debug::Arr($retval, ' Template Config for: '. $template, __FILE__, __LINE__, __METHOD__,10);
+				Debug::Arr($retval, ' Template Config for: '. $template, __FILE__, __LINE__, __METHOD__, 10);
 
 				break;
 			default:
@@ -460,9 +460,9 @@ class RemittanceSummaryReport extends Report {
 		$default_include_exclude_arr = array( 'include_pay_stub_entry_account' => array(), 'exclude_pay_stub_entry_account' => array() );
 
 		$default_arr = array(
-                'ei' => $default_include_exclude_arr,
-                'cpp' => $default_include_exclude_arr,
-                'tax' => $default_include_exclude_arr,
+				'ei' => $default_include_exclude_arr,
+				'cpp' => $default_include_exclude_arr,
+				'tax' => $default_include_exclude_arr,
 			);
 
 		$retarr = array_merge( $default_arr, (array)$this->getFormConfig() );
@@ -483,12 +483,13 @@ class RemittanceSummaryReport extends Report {
 			$pseal_obj = $pseallf->getCurrent();
 		}
 
+		$this->user_ids = array();
+		
 		$pself = TTnew( 'PayStubEntryListFactory' );
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		if ( $pself->getRecordCount() > 0 ) {
 			foreach( $pself as $pse_obj ) {
-
-				$user_id = $this->user_ids[] = $pse_obj->getColumn('user_id');
+				$user_id = $pse_obj->getColumn('user_id');
 				$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_stub_transaction_date') );
 				$branch = $pse_obj->getColumn('default_branch');
 				$department = $pse_obj->getColumn('default_department');
@@ -517,11 +518,20 @@ class RemittanceSummaryReport extends Report {
 				foreach($this->tmp_data['pay_stub_entry'] as $user_id => $data_a) {
 					foreach($data_a as $date_stamp => $data_b) {
 
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['ei_total'] 				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['ei']['include_pay_stub_entry_account'], 				$form_data['ei']['exclude_pay_stub_entry_account'] );
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_total'] 				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['cpp']['include_pay_stub_entry_account'], 				$form_data['cpp']['exclude_pay_stub_entry_account'] );
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['tax_total'] 				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['tax']['include_pay_stub_entry_account'], 				$form_data['tax']['exclude_pay_stub_entry_account'] );
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total'] 					= $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['ei_total'] + $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_total'] + $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['tax_total'];
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['gross_payroll'] 			= Misc::calculateMultipleColumns( $data_b['psen_ids'], (array)$pseal_obj->getTotalGross(), array() );
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['ei_total']				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['ei']['include_pay_stub_entry_account'], $form_data['ei']['exclude_pay_stub_entry_account'] );
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_total']				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['cpp']['include_pay_stub_entry_account'],	$form_data['cpp']['exclude_pay_stub_entry_account'] );
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['tax_total']				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['tax']['include_pay_stub_entry_account'],	$form_data['tax']['exclude_pay_stub_entry_account'] );
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total']					= ( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['ei_total'] + $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_total'] + $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['tax_total'] );
+						if ( isset($form_data['gross_payroll']['include_pay_stub_entry_account']) AND is_array($form_data['gross_payroll']['include_pay_stub_entry_account']) ) {
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['gross_payroll']		= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['gross_payroll']['include_pay_stub_entry_account'],	$form_data['gross_payroll']['exclude_pay_stub_entry_account'] );
+						} else {
+							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['gross_payroll']		= Misc::calculateMultipleColumns( $data_b['psen_ids'], (array)$pseal_obj->getTotalGross(), array() );
+						}
+
+						//Only count users who have some gross payroll or deductions.
+						if ( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total'] > 0 OR isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['gross_payroll']) AND $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['gross_payroll'] > 0 ) {
+							$this->user_ids[] = $user_id;
+						}
 					}
 				}
 			}
@@ -532,13 +542,13 @@ class RemittanceSummaryReport extends Report {
 		//Get user data for joining.
 		$ulf = TTnew( 'UserListFactory' );
 		$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( $this->getColumnDataConfig() );
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
-		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		return TRUE;
 	}
@@ -548,12 +558,12 @@ class RemittanceSummaryReport extends Report {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->tmp_data['pay_stub_entry']), NULL, TTi18n::getText('Pre-Processing Data...') );
 
 		//Merge time data with user data
-		$key=0;
+		$key = 0;
 		if ( isset($this->tmp_data['pay_stub_entry']) ) {
 			foreach( $this->tmp_data['pay_stub_entry'] as $user_id => $level_1 ) {
 				foreach( $level_1 as $date_stamp => $row ) {
 					$date_columns = TTDate::getReportDates( NULL, $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
-					$processed_data  = array(
+					$processed_data	 = array(
 											//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
 											);
 
@@ -565,7 +575,7 @@ class RemittanceSummaryReport extends Report {
 			}
 			unset($this->tmp_data, $row, $date_columns, $processed_data, $level_1, $level_2, $level_3);
 		}
-		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		return TRUE;
 	}
@@ -592,11 +602,12 @@ class RemittanceSummaryReport extends Report {
 									'employees' => TRUE,
 									'end_remitting_period' => TRUE,
 									'due_date' => TRUE,
-							 );
+							);
 
 			$header_layout = $this->config['other']['layout']['header'];
 
 			$margins = $this->pdf->getMargins();
+			$page_width = ($this->pdf->getPageWidth() - $margins['left'] - $margins['right']);
 
 			//Draw report information
 			if ( $this->pdf->getPage() > 1 ) {
@@ -604,7 +615,7 @@ class RemittanceSummaryReport extends Report {
 			}
 
 			if ( is_array($columns) AND count($columns) > 0 ) {
-				$this->pdf->SetFont($this->config['other']['default_font'],'B', $this->_pdf_fontSize( $this->config['other']['table_header_font_size'] ) );
+				$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize( $this->config['other']['table_header_font_size'] ) );
 				$this->pdf->setTextColor(0);
 				$this->pdf->setDrawColor(0);
 				$this->pdf->setFillColor(240); //Grayscale only.
@@ -614,15 +625,15 @@ class RemittanceSummaryReport extends Report {
 				foreach( $columns as $column => $tmp ) {
 					if ( isset($column_options[$column]) AND isset($column_widths[$column]) ) {
 						$cell_width = $column_widths[$column];
-						if ( ($this->pdf->getX()+$cell_width) > $this->pdf->getPageWidth() ) {
-							Debug::Text(' Page not wide enough, it should be at least: '. ($this->pdf->getX()+$cell_width) .' Page Width: '. $this->pdf->getPageWidth(), __FILE__, __LINE__, __METHOD__,10);
+						if ( ($this->pdf->getX() + $cell_width) > $this->pdf->getPageWidth() ) {
+							Debug::Text(' Page not wide enough, it should be at least: '. ($this->pdf->getX() + $cell_width) .' Page Width: '. $this->pdf->getPageWidth(), __FILE__, __LINE__, __METHOD__, 10);
 							$this->pdf->Ln();
 						}
 						$this->pdf->Cell( $cell_width, $this->_pdf_fontSize( $header_layout['height'] ), $column_options[$column], $header_layout['border'], 0, $header_layout['align'], $header_layout['fill'], '', $header_layout['stretch'] );
 						//Wrapping shouldn't be needed as the cell widths should expand to at least fit the header. Wrapping may be needed on regular rows though.
 						//$this->pdf->MultiCell( $cell_width, $cell_height, $column_options[$column], 0, $header_layout['align'], $header_layout['fill'], 0 );
 					} else {
-						Debug::Text(' Invalid Column: '. $column, __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text(' Invalid Column: '. $column, __FILE__, __LINE__, __METHOD__, 10);
 					}
 				}
 				$this->pdf->Ln();
@@ -631,7 +642,7 @@ class RemittanceSummaryReport extends Report {
 
 
 				//Reset all styles/fills after page break.
-				$this->pdf->SetFont($this->config['other']['default_font'],'', $this->_pdf_fontSize( $this->config['other']['table_row_font_size'] ) );
+				$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize( $this->config['other']['table_row_font_size'] ) );
 				$this->pdf->SetTextColor(0);
 				$this->pdf->SetDrawColor(0);
 				$this->pdf->setFillColor(255);
@@ -652,7 +663,7 @@ class RemittanceSummaryReport extends Report {
 				$this->form_data['pay_period'] = array_unique( (array)$this->form_data['pay_period'] );
 				ksort( $this->form_data['pay_period'] );
 				$transaction_date = current( (array)$this->form_data['pay_period']);
-				Debug::Text('Transaction Date: '. TTDate::getDate('DATE', $transaction_date) .'('.  $transaction_date .')', __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('Transaction Date: '. TTDate::getDate('DATE', $transaction_date) .'('.	$transaction_date .')', __FILE__, __LINE__, __METHOD__, 10);
 
 				$summary_table_data = $this->total_row;
 				$summary_table_data['cpp_total'] = TTi18n::formatCurrency( ( isset($summary_table_data['cpp_total']) ) ? $summary_table_data['cpp_total'] : 0 );
@@ -669,10 +680,30 @@ class RemittanceSummaryReport extends Report {
 					$value = $summary_table_data[$column];
 					$cell_width = ( isset($column_widths[$column]) ) ? $column_widths[$column] : 30;
 
+					if ( $column == 'total' ) { //Highlight current payment.
+						$this->pdf->setTextColor(255,0,0);
+					}
 					$this->pdf->Cell( $cell_width, $this->_pdf_fontSize( $row_layout['height'] ), $value, $border, 0, $row_layout['align'], $row_layout['fill'], '', $row_layout['stretch'] );
+					$this->pdf->setTextColor(0);
 				}
 				$this->pdf->Ln();
 				$this->_pdf_drawLine( 0.75 ); //Slightly smaller than first/last lines.
+
+				$this->pdf->Ln( 1.0 );
+
+				$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize( 16 ) );
+				$this->pdf->setTextColor(0);
+				$this->pdf->setDrawColor(255,0,0);
+				$this->pdf->setFillColor(240); //Grayscale only.
+				$this->pdf->setLineWidth( 1 );
+
+				$this->pdf->writeHTMLcell( 100, 5, (($this->pdf->getPageWidth()-100)/2), $this->pdf->getY(),  '<a href="http://www.timetrex.com/r.php?id=10100">PAY ONLINE NOW</>', 1, 0, FALSE, TRUE, 'C');
+								
+				$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize( $this->config['other']['table_row_font_size'] ) );
+				$this->pdf->SetTextColor(0);
+				$this->pdf->SetDrawColor(0);
+				$this->pdf->setFillColor(255);
+				$this->pdf->Ln( 2.0 );
 
 				$this->pdf->Ln();
 				$this->_pdf_drawLine( 0.75 ); //Slightly smaller than first/last lines.

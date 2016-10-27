@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10903 $
- * $Id: Wage.class.php 10903 2013-09-12 15:06:13Z ipso $
- * $Date: 2013-09-12 08:06:13 -0700 (Thu, 12 Sep 2013) $
+ * $Revision: 12026 $
+ * $Id: Wage.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -175,26 +175,26 @@ class Wage {
 	}
 
 	static function getRemittanceDueDate($transaction_epoch, $avg_monthly_remittance) {
-		Debug::text('Transaction Date: '. TTDate::getDate('DATE+TIME', $transaction_epoch) , __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Transaction Date: '. TTDate::getDate('DATE+TIME', $transaction_epoch), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $transaction_epoch > 0 ) {
 			if ( $avg_monthly_remittance < 15000 ) {
-				Debug::text('Regular Monthly' , __FILE__, __LINE__, __METHOD__,10);
+				Debug::text('Regular Monthly', __FILE__, __LINE__, __METHOD__, 10);
 				//15th of the month FOLLOWING transaction_epoch.
-				$due_date = mktime(0,0,0,date('n',$transaction_epoch)+1,15,date('y',$transaction_epoch) );
+				$due_date = mktime(0, 0, 0, ( date('n', $transaction_epoch) + 1), 15, date('y', $transaction_epoch) );
 			} elseif ( $avg_monthly_remittance >= 15000 AND $avg_monthly_remittance < 49999.99 ) {
-				Debug::text('Accelerated Threshold 1' , __FILE__, __LINE__, __METHOD__,10);
+				Debug::text('Accelerated Threshold 1', __FILE__, __LINE__, __METHOD__, 10);
 				/*
 				Amounts you deduct or withhold from remuneration paid in the first 15 days of the month
 				are due by the 25th of the same month. Amounts you withhold from the 16th to the end of
 				the month are due by the 10th day of the following month.
 				*/
 				if ( date('j', $transaction_epoch) <= 15 ) {
-					$due_date = mktime(0,0,0,date('n',$transaction_epoch),25,date('y',$transaction_epoch) );
+					$due_date = mktime(0, 0, 0, date('n', $transaction_epoch), 25, date('y', $transaction_epoch) );
 				} else {
-					$due_date = mktime(0,0,0,date('n',$transaction_epoch)+1,10,date('y',$transaction_epoch) );
+					$due_date = mktime(0, 0, 0, ( date('n', $transaction_epoch) + 1), 10, date('y', $transaction_epoch) );
 				}
 			} elseif ( $avg_monthly_remittance > 50000) {
-				Debug::text('Accelerated Threshold 2' , __FILE__, __LINE__, __METHOD__,10);
+				Debug::text('Accelerated Threshold 2', __FILE__, __LINE__, __METHOD__, 10);
 				/*
 				Amounts you deduct or withhold from remuneration you pay any time during the month are due by the third working day (not counting Saturdays, Sundays, or holidays) after the end of the following periods:
 
@@ -233,9 +233,9 @@ class Wage {
 	}
 
 	function getMaximumPayPeriodWage( $user_wage_id ) {
-		Debug::text('Absolute Maximum Pay Period NO Advance: User Wage ID: '. $user_wage_id .'  Annual Wage: '. $this->getUserWageObject( $user_wage_id )->getAnnualWage() .' Annual Pay Periods: '. $this->getPayPeriodScheduleObject()->getAnnualPayPeriods(), __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Absolute Maximum Pay Period NO Advance: User Wage ID: '. $user_wage_id .'	Annual Wage: '. $this->getUserWageObject( $user_wage_id )->getAnnualWage() .' Annual Pay Periods: '. $this->getPayPeriodScheduleObject()->getAnnualPayPeriods(), __FILE__, __LINE__, __METHOD__, 10);
 		$maximum_pay_period_wage = bcdiv( $this->getUserWageObject( $user_wage_id )->getAnnualWage(), $this->getPayPeriodScheduleObject()->getAnnualPayPeriods() );
-		Debug::text('Absolute Maximum Pay Period Wage: '. $maximum_pay_period_wage, __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Absolute Maximum Pay Period Wage: '. $maximum_pay_period_wage, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $maximum_pay_period_wage;
 	}
@@ -250,10 +250,10 @@ class Wage {
 
 			//$pay_period_end_date = $this->getPayPeriodObject()->getAdvanceEndDate();
 			$advance_pos_sum = $psalf->getAmountSumByUserIdAndTypeIdAndAuthorizedAndStartDateAndEndDate( $this->getUser(), 10, TRUE, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getAdvanceEndDate() );
-			Debug::text('Pay Stub Amendment Advance Earnings: '. $advance_pos_sum , __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub Amendment Advance Earnings: '. $advance_pos_sum, __FILE__, __LINE__, __METHOD__, 10);
 
 			$full_pos_sum = $psalf->getAmountSumByUserIdAndTypeIdAndAuthorizedAndStartDateAndEndDate( $this->getUser(), 10, TRUE, $this->getPayPeriodObject()->getAdvanceEndDate(), $this->getPayPeriodObject()->getEndDate() );
-			Debug::text('Pay Stub Amendment Full Earnings: '. $full_pos_sum , __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub Amendment Full Earnings: '. $full_pos_sum, __FILE__, __LINE__, __METHOD__, 10);
 			//Take the full amount of PS amendments BEFORE the advance end date, and half of any AFTER the advance end date.
 			//$pos_sum = $advance_pos_sum + ($full_pos_sum / 2);
 			$pos_sum = bcadd( $advance_pos_sum, bcdiv( $full_pos_sum, 2 ) );
@@ -263,7 +263,7 @@ class Wage {
 		}
 		//$neg_sum = $psalf->getAmountSumByUserIdAndTypeIdAndTaxExemptAndAuthorizedAndStartDateAndEndDate( $this->getUser(), 20, FALSE, TRUE, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() )*-1;
 
-		Debug::text('Pay Stub Amendment Total Earnings: '. $pos_sum , __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Pay Stub Amendment Total Earnings: '. $pos_sum, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $pos_sum;
 	}
@@ -278,10 +278,10 @@ class Wage {
 
 			//$pay_period_end_date = $this->getPayPeriodObject()->getAdvanceEndDate();
 			$advance_neg_sum = $psalf->getAmountSumByUserIdAndTypeIdAndAuthorizedAndStartDateAndEndDate( $this->getUser(), 20, TRUE, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getAdvanceEndDate() );
-			Debug::text('Pay Stub Amendment Advance Deductions: '. $advance_neg_sum , __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub Amendment Advance Deductions: '. $advance_neg_sum, __FILE__, __LINE__, __METHOD__, 10);
 
 			$full_neg_sum = $psalf->getAmountSumByUserIdAndTypeIdAndAuthorizedAndStartDateAndEndDate( $this->getUser(), 20, TRUE, $this->getPayPeriodObject()->getAdvanceEndDate(), $this->getPayPeriodObject()->getEndDate() );
-			Debug::text('Pay Stub Amendment Full Deductions: '. $full_neg_sum , __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub Amendment Full Deductions: '. $full_neg_sum, __FILE__, __LINE__, __METHOD__, 10);
 			//Take the full amount of PS amendments BEFORE the advance end date, and half of any AFTER the advance end date.
 			//$neg_sum = $advance_neg_sum + ($full_neg_sum / 2);
 			$neg_sum = bcadd( $advance_neg_sum, bcdiv( $full_neg_sum, 2 ) );
@@ -292,7 +292,7 @@ class Wage {
 		//$neg_sum = $psalf->getAmountSumByUserIdAndTypeIdAndTaxExemptAndAuthorizedAndStartDateAndEndDate( $this->getUser(), 20, FALSE, TRUE, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() )*-1;
 
 
-		Debug::text('Pay Stub Amendment Total Deductions: '. $neg_sum , __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Pay Stub Amendment Total Deductions: '. $neg_sum, __FILE__, __LINE__, __METHOD__, 10);
 
 		return bcmul( $neg_sum, -1 );
 	}
@@ -309,7 +309,7 @@ class Wage {
 			}
 		}
 
-		Debug::text('Raw Gross Wage: '. $wage , __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Raw Gross Wage: '. $wage, __FILE__, __LINE__, __METHOD__, 10);
 		return $wage;
 	}
 
@@ -317,7 +317,7 @@ class Wage {
 
 		$wage = $this->getRawGrossWage();
 
-		Debug::text('Gross Wage (NOT incl amendments) $'. $wage , __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Gross Wage (NOT incl amendments) $'. $wage, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $wage;
 	}
@@ -331,12 +331,13 @@ class Wage {
 		return $this->setUserDateTotalArray();
 		//return FALSE;
 	}
-
+	
 	function setUserDateTotalArray() {
-
 		//Loop through unique UserDateTotal rows... Adding entries to pay stubs.
 		$udtlf = TTnew( 'UserDateTotalListFactory' );
 		$udtlf->getByUserIdAndPayPeriodIdAndEndDate( $this->getUser(), $this->getPayPeriod(), $this->getPayPeriodObject()->getEndDate() );
+
+		$calculate_salary = FALSE;
 
 		$dock_absence_time = 0;
 		$paid_absence_time = 0;
@@ -345,31 +346,39 @@ class Wage {
 		$prev_wage_effective_date = 0;
 		if ( $udtlf->getRecordCount() > 0 ) {
 			foreach( $udtlf as $udt_obj ) {
-				Debug::text('User Total Row... Type: '. $udt_obj->getType() .' OverTime Policy ID: '. $udt_obj->getOverTimePolicyID() .' User Wage ID: '. $udt_obj->getColumn('user_wage_id') , __FILE__, __LINE__, __METHOD__,10);
+				Debug::text('User Total Row... Type: '. $udt_obj->getType() .' OverTime Policy ID: '. $udt_obj->getOverTimePolicyID() .' User Wage ID: '. $udt_obj->getColumn('user_wage_id'), __FILE__, __LINE__, __METHOD__, 10);
 
 				if ( $udt_obj->getStatus() == 10 AND $udt_obj->getType() == 20 ) { //Regular Time
-					Debug::text('User Total Row... Regular Time: '. $udt_obj->getTotalTime()  , __FILE__, __LINE__, __METHOD__,10);
+					Debug::text('User Total Row... Regular Time: '. $udt_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10);
 
 					//Check if they are a salary user...
 					//Use WORKED time to calculate regular time. Not just regular time.
 					if ( is_object($this->getUserWageObject( $udt_obj->getColumn('user_wage_id') ))
 							AND $this->getUserWageObject( $udt_obj->getColumn('user_wage_id') )->getType() != 10 ) {
 						//Salary
-						Debug::text('Strict Salary Wage: Reduce Regular Pay By: Dock Time: '. $dock_absence_time .' and Paid Absence: '. $paid_absence_time, __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('Strict Salary Wage: Reduce Regular Pay By: Dock Time: '. $dock_absence_time .' and Paid Absence: '. $paid_absence_time, __FILE__, __LINE__, __METHOD__, 10);
 
+						$calculate_salary = TRUE;
+
+						if ( !isset($salary_regular_time[$udt_obj->getColumn('user_wage_id')]) ) {
+							$salary_regular_time[$udt_obj->getColumn('user_wage_id')] = 0;
+						}
+						$salary_regular_time[$udt_obj->getColumn('user_wage_id')] += $udt_obj->getTotalTime();
+
+						/*
 						if ( isset($dock_absence_amount_arr[$udt_obj->getColumn('user_wage_id')]) ) {
-							$dock_absence_wage = $dock_absence_amount_arr[$udt_obj->getColumn('user_wage_id')];
+								$dock_absence_wage = $dock_absence_amount_arr[$udt_obj->getColumn('user_wage_id')];
 						} else {
-							$dock_absence_wage = 0;
+								$dock_absence_wage = 0;
 						}
 						if ( isset($reduce_salary_absence_amount_arr[$udt_obj->getColumn('user_wage_id')]) ) {
-							$paid_absence_wage = $reduce_salary_absence_amount_arr[$udt_obj->getColumn('user_wage_id')];
+								$paid_absence_wage = $reduce_salary_absence_amount_arr[$udt_obj->getColumn('user_wage_id')];
 						} else {
-							$paid_absence_wage = 0;
+								$paid_absence_wage = 0;
 						}
-						Debug::text('Wage ID: '. $udt_obj->getColumn('user_wage_id') .' Dock Absence Wage: '. $dock_absence_wage .' Paid Absence Wage: '. $paid_absence_wage, __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('Wage ID: '. $udt_obj->getColumn('user_wage_id') .' Dock Absence Wage: '. $dock_absence_wage .' Paid Absence Wage: '. $paid_absence_wage, __FILE__, __LINE__, __METHOD__, 10);
 
-						$maximum_wage_salary = UserWageFactory::proRateSalary( $this->getMaximumPayPeriodWage( $udt_obj->getColumn('user_wage_id') ) , $this->getUserWageObject( $udt_obj->getColumn('user_wage_id') )->getEffectiveDate(), $prev_wage_effective_date, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate(), $this->getUserObject()->getTerminationDate() );
+						$maximum_wage_salary = UserWageFactory::proRateSalary( $this->getMaximumPayPeriodWage( $udt_obj->getColumn('user_wage_id') ), $this->getUserWageObject( $udt_obj->getColumn('user_wage_id') )->getEffectiveDate(), $prev_wage_effective_date, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate(), $this->getUserObject()->getTerminationDate() );
 
 						$prev_wage_effective_date = $this->getUserWageObject( $udt_obj->getColumn('user_wage_id') )->getEffectiveDate();
 
@@ -379,47 +388,46 @@ class Wage {
 						$pay_stub_entry = $this->getPayStubEntryAccountLinkObject()->getRegularTime();
 
 						unset($dock_absence_wage, $paid_absence_wage);
+						*/
 					} else {
 						//Hourly
-						Debug::text('Hourly or Hourly + Bonus Wage', __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('Hourly or Hourly + Bonus Wage', __FILE__, __LINE__, __METHOD__, 10);
 						$pay_stub_entry = $this->getPayStubEntryAccountLinkObject()->getRegularTime();
 						$total_time = $udt_obj->getTotalTime();
 						$rate = $this->getHourlyRate( $udt_obj->getColumn('user_wage_id') );
 						$amount = $this->getWage( $udt_obj->getTotalTime(), $rate );
+						Debug::text('aPay Stub Entry Account ID: '. $pay_stub_entry .' Amount: '. $amount, __FILE__, __LINE__, __METHOD__, 10);
 					}
-					Debug::text('aPay Stub Entry Account ID: '. $pay_stub_entry .' Amount: '. $amount, __FILE__, __LINE__, __METHOD__,10);
 				} elseif ( $udt_obj->getStatus() == 10 AND $udt_obj->getType() == 30 ) { //Overtime
-					Debug::text('User Total Row... Overtime Time: '. $udt_obj->getTotalTime() , __FILE__, __LINE__, __METHOD__,10);
+					Debug::text('User Total Row... Overtime Time: '. $udt_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10);
 
 					//Get overtime policy info. Allow negative rates so they withdraw from pay stub accounts.
 					if ( $udt_obj->getOverTimePolicyObject()->getRate() != 0 ) {
-						Debug::text('Paid Overtime Time Policy... Rate: '. $udt_obj->getOverTimePolicyObject()->getRate(), __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('Paid Overtime Time Policy... Rate: '. $udt_obj->getOverTimePolicyObject()->getRate(), __FILE__, __LINE__, __METHOD__, 10);
 						$pay_stub_entry = $udt_obj->getOverTimePolicyObject()->getPayStubEntryAccountId();
 						$total_time = $udt_obj->getTotalTime();
 						$rate = bcmul( $this->getHourlyRate( $udt_obj->getColumn('over_time_policy_wage_id') ), $udt_obj->getOverTimePolicyObject()->getRate() );
 						$amount = $this->getWage( $udt_obj->getTotalTime(), $rate );
-						Debug::text('bPay Stub Entry Account ID: '. $pay_stub_entry .' Amount: '. $amount .' Rate: '. $rate, __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('bPay Stub Entry Account ID: '. $pay_stub_entry .' Amount: '. $amount .' Rate: '. $rate, __FILE__, __LINE__, __METHOD__, 10);
 					} else {
-						Debug::text('NOT Paid Overtime Time Policy: ', __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('NOT Paid Overtime Time Policy: ', __FILE__, __LINE__, __METHOD__, 10);
 					}
 
 				} elseif ( $udt_obj->getStatus() == 30 AND $udt_obj->getType() == 10) { //Absence
-					Debug::text('User Total Row... Absence Time: '. $udt_obj->getTotalTime()  , __FILE__, __LINE__, __METHOD__,10);
+					Debug::text('User Total Row... Absence Time: '. $udt_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10);
 
 					if ( is_object( $udt_obj->getAbsencePolicyObject() )
 							AND ( $udt_obj->getAbsencePolicyObject()->getType() == 10 OR $udt_obj->getAbsencePolicyObject()->getType() == 12 )
 							AND $udt_obj->getAbsencePolicyObject()->getPayStubEntryAccountID() != '') { //Paid
-						Debug::text('Paid Absence Time: '. $udt_obj->getTotalTime() , __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('Paid Absence Time: '. $udt_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10);
 
 						$pay_stub_entry = (int)$udt_obj->getAbsencePolicyObject()->getPayStubEntryAccountID();
 						$total_time = $udt_obj->getTotalTime();
 						$rate = bcmul( $this->getHourlyRate( $udt_obj->getColumn('absence_policy_wage_id') ), $udt_obj->getAbsencePolicyObject()->getRate() );
 						$amount = $this->getWage( $udt_obj->getTotalTime(), $rate );
-						//$rate = $this->getHourlyRate( $udt_obj->getColumn('absence_policy_wage_id') );
-						//$amount = $this->getWage( $udt_obj->getTotalTime(), $this->getHourlyRate( $udt_obj->getColumn('absence_policy_wage_id') ) );
 
-						//Debug::text('Paid Absence Info: '. $udt_obj->getTotalTime() , __FILE__, __LINE__, __METHOD__,10);
-						Debug::text('cPay Stub Entry Account ID: '. $pay_stub_entry .' Amount: '. $amount .' Rate: '. $rate, __FILE__, __LINE__, __METHOD__,10);
+						//Debug::text('Paid Absence Info: '. $udt_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('cPay Stub Entry Account ID: '. $pay_stub_entry .' Amount: '. $amount .' Rate: '. $rate, __FILE__, __LINE__, __METHOD__, 10);
 
 						$paid_absence_time = bcadd($paid_absence_time, $udt_obj->getTotalTime() );
 						$paid_absence_amount = bcadd( $paid_absence_amount, $amount);
@@ -447,40 +455,92 @@ class Wage {
 						//$amount = $this->getWage( $udt_obj->getTotalTime(), $this->getHourlyRate( $udt_obj->getColumn('absence_policy_wage_id') ) );
 						$dock_absence_amount = bcadd( $dock_absence_amount, $amount );
 						$dock_absence_amount_arr[$udt_obj->getColumn('absence_policy_wage_id')] = $amount;
-						Debug::text('DOCK Absence Time.. Adding: '. $udt_obj->getTotalTime() .' Total: '. $dock_absence_time .' Rate: '. $rate, __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('DOCK Absence Time.. Adding: '. $udt_obj->getTotalTime() .' Total: '. $dock_absence_time .' Rate: '. $rate, __FILE__, __LINE__, __METHOD__, 10);
 						unset($rate);
 					}
-				} elseif (  $udt_obj->getStatus() == 10 AND $udt_obj->getType() == 40 ) { //Premium
-					Debug::text('User Total Row... Premium Time: '. $udt_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__,10);
+				} elseif (	$udt_obj->getStatus() == 10 AND $udt_obj->getType() == 40 ) { //Premium
+					Debug::text('User Total Row... Premium Time: '. $udt_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10);
 
 					//Get premium policy info.
 					if ( is_object( $udt_obj->getPremiumPolicyObject() ) AND $udt_obj->getPremiumPolicyObject()->getRate() != 0 ) {
-						Debug::text('Paid Premium Time Policy... Rate: '. $udt_obj->getPremiumPolicyObject()->getRate(), __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('Paid Premium Time Policy... Rate: '. $udt_obj->getPremiumPolicyObject()->getRate(), __FILE__, __LINE__, __METHOD__, 10);
 
 						$rate = $udt_obj->getPremiumPolicyObject()->getHourlyRate( $this->getHourlyRate( $udt_obj->getColumn('premium_policy_wage_id') ) );
 						$pay_stub_entry = $udt_obj->getPremiumPolicyObject()->getPayStubEntryAccountId();
 						$total_time = $udt_obj->getTotalTime();
 						$amount = $this->getWage( $udt_obj->getTotalTime(), $rate );
-						Debug::text('dPay Stub Entry Account ID: '. $pay_stub_entry .' Amount: '. $amount .' Rate: '. $rate, __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('dPay Stub Entry Account ID: '. $pay_stub_entry .' Amount: '. $amount .' Rate: '. $rate, __FILE__, __LINE__, __METHOD__, 10);
 					} else {
-						Debug::text('NOT Paid Premium Time Policy: ', __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('NOT Paid Premium Time Policy: ', __FILE__, __LINE__, __METHOD__, 10);
 					}
 
 				}
 
 				if ( isset($pay_stub_entry) AND $pay_stub_entry != '' ) {
-					Debug::text('zPay Stub Entry Account ID: '. $pay_stub_entry .' Amount: '. $amount, __FILE__, __LINE__, __METHOD__,10);
+					Debug::text('zPay Stub Entry Account ID: '. $pay_stub_entry .' Amount: '. $amount, __FILE__, __LINE__, __METHOD__, 10);
 					$ret_arr['entries'][] = array(	'user_wage_id' => $udt_obj->getColumn('user_wage_id'),
 													'pay_stub_entry' => $pay_stub_entry,
-													'total_time' =>  $total_time,
+													'total_time' => $total_time,
 													'amount' => $amount,
 													'rate' => $rate
 												);
 				}
 				unset($pay_stub_entry, $amount, $total_time, $rate);
 			}
+
+			if ( $calculate_salary == TRUE ) {
+				//When the employee is salary and their wage changes in the middle of the pay period and they don't have any regular time worked
+				//in any one of the periods that either wage is effective, the period without any regular time was not being paid before.
+				//Therefore we moved the salary calcuations to the very end and if there is any regular time in the entire pay period
+				//we simply loop through all salaried wages and calculate the pro-rated amounts. Even if no regular time exists in one of the wage periods.
+				Debug::text('Calculating Salary...', __FILE__, __LINE__, __METHOD__, 10);
+
+				//Get all wages that apply in this period so we can determine pro-rating for salaries.
+				$uwlf = TTNew('UserWageListFactory');
+				$uwlf->getByUserIdAndStartDateAndEndDate( $this->getUser(), $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() );
+				if ( $uwlf->getRecordCount() > 0 ) {
+					foreach( $uwlf as $uw_obj ) {
+						if ( $uw_obj->getType() != 10 ) {
+							if ( isset($dock_absence_amount_arr[$uw_obj->getID()]) ) {
+								$dock_absence_wage = $dock_absence_amount_arr[$uw_obj->getID()];
+							} else {
+								$dock_absence_wage = 0;
+							}
+							if ( isset($reduce_salary_absence_amount_arr[$uw_obj->getID()]) ) {
+								$paid_absence_wage = $reduce_salary_absence_amount_arr[$uw_obj->getID()];
+							} else {
+								$paid_absence_wage = 0;
+							}
+							Debug::text('Wage ID: '. $uw_obj->getID() .' Dock Absence Wage: '. $dock_absence_wage .' Paid Absence Wage: '. $paid_absence_wage, __FILE__, __LINE__, __METHOD__, 10);
+
+							$maximum_wage_salary = UserWageFactory::proRateSalary( $this->getMaximumPayPeriodWage( $uw_obj->getID() ), $this->getUserWageObject( $uw_obj->getID() )->getEffectiveDate(), $prev_wage_effective_date, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate(), $this->getUserObject()->getTerminationDate() );
+
+							$prev_wage_effective_date = $this->getUserWageObject( $uw_obj->getID() )->getEffectiveDate();
+
+							$amount = bcsub( $maximum_wage_salary, bcadd( $dock_absence_wage, $paid_absence_wage ) );
+							//Include time if we have it, otherwise use 0.
+							$total_time = ( isset($salary_regular_time[$uw_obj->getID()]) ) ? $salary_regular_time[$uw_obj->getID()] : 0; //Dont minus dock/paid absence time. Because its already not included.
+							$rate = NULL;
+							$pay_stub_entry = $this->getPayStubEntryAccountLinkObject()->getRegularTime();
+							unset($dock_absence_wage, $paid_absence_wage);
+
+							if ( isset($pay_stub_entry) AND $pay_stub_entry != '' ) {
+								Debug::text('zPay Stub Entry Account ID: '. $pay_stub_entry .' Amount: '. $amount, __FILE__, __LINE__, __METHOD__, 10);
+								$ret_arr['entries'][] = array(	'user_wage_id' => $udt_obj->getColumn('user_wage_id'),
+																'pay_stub_entry' => $pay_stub_entry,
+																'total_time' => $total_time,
+																'amount' => $amount,
+																'rate' => $rate
+															);
+							}
+							unset($pay_stub_entry, $amount, $total_time, $rate);
+						}
+					}
+				}
+				unset($uwlf, $uw_obj);
+			}
 		} else {
-			Debug::text('NO UserDate Total entries found.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('NO UserDate Total entries found.', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		$ret_arr['other']['paid_absence_time'] = $paid_absence_time;
@@ -490,7 +550,7 @@ class Wage {
 		$ret_arr['other']['dock_absence_amount'] = $dock_absence_amount;
 
 		if ( isset($ret_arr) ) {
-			Debug::Arr($ret_arr, 'UserDateTotal Array', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Arr($ret_arr, 'UserDateTotal Array', __FILE__, __LINE__, __METHOD__, 10);
 			return $this->user_date_total_arr = $ret_arr;
 		}
 

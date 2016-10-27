@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: HierarchyObjectTypeFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 12026 $
+ * $Id: HierarchyObjectTypeFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -69,7 +69,7 @@ class HierarchyObjectTypeFactory extends Factory {
 										80 => TTi18n::gettext('Exception'),
 										90 => TTi18n::gettext('TimeSheet'),
 										100 => TTi18n::gettext('Permission'),
-                                        200 => TTi18n::gettext('Expense'),
+										200 => TTi18n::gettext('Expense'),
 									);
 				break;
 			case 'short_object_type': //Defines a short form of the names.
@@ -90,7 +90,7 @@ class HierarchyObjectTypeFactory extends Factory {
 										80 => TTi18n::gettext('Exception'),
 										90 => TTi18n::gettext('TimeSheet'),
 										100 => TTi18n::gettext('Permission'),
-                                        200 => TTi18n::gettext('Expense'),
+										200 => TTi18n::gettext('Expense'),
 									);
 				break;
 
@@ -112,7 +112,7 @@ class HierarchyObjectTypeFactory extends Factory {
 
 	function getHierarchyControl() {
 		if ( isset($this->data['hierarchy_control_id']) ) {
-			return $this->data['hierarchy_control_id'];
+			return (int)$this->data['hierarchy_control_id'];
 		}
 
 		return FALSE;
@@ -121,7 +121,7 @@ class HierarchyObjectTypeFactory extends Factory {
 		$id = trim($id);
 
 		$hclf = TTnew( 'HierarchyControlListFactory' );
-		Debug::Text('Hierarchy Control ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Hierarchy Control ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id != 0
 				OR $this->Validator->isResultSetWithRows(	'hierarchy_control_id',
@@ -148,7 +148,7 @@ class HierarchyObjectTypeFactory extends Factory {
 			}
 		}
 
-		if ( isset($assigned_object_types) AND is_array($assigned_object_types) AND in_array( $object_type, $assigned_object_types) ){
+		if ( isset($assigned_object_types) AND is_array($assigned_object_types) AND in_array( $object_type, $assigned_object_types) ) {
 			return FALSE;
 		}
 */
@@ -156,7 +156,7 @@ class HierarchyObjectTypeFactory extends Factory {
 	}
 
 	function getObjectType() {
-		return $this->data['object_type_id'];
+		return (int)$this->data['object_type_id'];
 	}
 	function setObjectType($id) {
 		$id = trim($id);

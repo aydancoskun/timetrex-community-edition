@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8720 $
- * $Id: OR.class.php 8720 2012-12-29 01:06:58Z ipso $
- * $Date: 2012-12-28 17:06:58 -0800 (Fri, 28 Dec 2012) $
+ * $Revision: 12026 $
+ * $Id: OR.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -50,6 +50,34 @@
 class PayrollDeduction_US_OR extends PayrollDeduction_US {
 	var $original_filing_status = NULL;
 	var $state_options = array(
+								1388563200 => array( //01-Jan-14
+												'standard_deduction' => array(
+																			'10' => 2115,
+																			'20' => 4230,
+																			),
+												'allowance' => 191,
+												'federal_tax_maximum' => 6350,
+												'phase_out' => array(
+																		'10' => array(
+																						50000 =>  6350,
+																						125000 => 6350,
+																						130000 => 5050,
+																						135000 => 3800,
+																						140000 => 2500,
+																						145000 => 1250,
+																						145000 => 0,
+																					 ),
+																		'20' => array(
+																						50000 =>  6350,
+																						250000 => 6350,
+																						260000 => 5050,
+																						270000 => 3800,
+																						280000 => 2500,
+																						290000 => 1250,
+																						290000 => 0,
+																					 ),
+																	),
+												),
 								1357027200 => array( //01-Jan-13
 												'standard_deduction' => array(
 																			'10' => 2080,

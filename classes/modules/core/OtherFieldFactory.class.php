@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11465 $
- * $Id: OtherFieldFactory.class.php 11465 2013-11-20 18:19:37Z mikeb $
- * $Date: 2013-11-20 10:19:37 -0800 (Wed, 20 Nov 2013) $
+ * $Revision: 12026 $
+ * $Id: OtherFieldFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -58,17 +58,17 @@ class OtherFieldFactory extends Factory {
 											2  => TTi18n::gettext('Company'),
 											4  => TTi18n::gettext('Branch'),
 											5  => TTi18n::gettext('Department'),
-											10  => TTi18n::gettext('Employee'),
-											12  => TTi18n::gettext('Employee Title'),
-											15  => TTi18n::gettext('Punch'),
-											20  => TTi18n::gettext('Job'),
-											30  => TTi18n::gettext('Task'),
-											50  => TTi18n::gettext('Client'),
-											55  => TTi18n::gettext('Client Contact'),
+											10	=> TTi18n::gettext('Employee'),
+											12	=> TTi18n::gettext('Employee Title'),
+											15	=> TTi18n::gettext('Punch'),
+											20	=> TTi18n::gettext('Job'),
+											30	=> TTi18n::gettext('Task'),
+											50	=> TTi18n::gettext('Client'),
+											55	=> TTi18n::gettext('Client Contact'),
 											//57  => TTi18n::gettext('Client Payment'),
-											60  => TTi18n::gettext('Product'),
-											70  => TTi18n::gettext('Invoice'),
-											80  => TTi18n::gettext('Document'),
+											60	=> TTi18n::gettext('Product'),
+											70	=> TTi18n::gettext('Invoice'),
+											80	=> TTi18n::gettext('Document'),
 									);
 				break;
 			case 'columns':
@@ -147,7 +147,7 @@ class OtherFieldFactory extends Factory {
 
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
-			return $this->data['company_id'];
+			return (int)$this->data['company_id'];
 		}
 
 		return FALSE;
@@ -155,7 +155,7 @@ class OtherFieldFactory extends Factory {
 	function setCompany($id) {
 		$id = trim($id);
 
-		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Company ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$clf = TTnew( 'CompanyListFactory' );
 
 		if ( $this->Validator->isResultSetWithRows(	'company',
@@ -182,7 +182,7 @@ class OtherFieldFactory extends Factory {
 						AND type_id = ?
 						AND deleted = 0';
 		$type_id = $this->db->GetOne($query, $ph);
-		Debug::Arr($type_id,'Unique Type: '. $type, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($type_id, 'Unique Type: '. $type, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $type_id === FALSE ) {
 			return TRUE;
@@ -197,14 +197,14 @@ class OtherFieldFactory extends Factory {
 
 	function getType() {
 		if ( isset($this->data['type_id']) ) {
-			return $this->data['type_id'];
+			return (int)$this->data['type_id'];
 		}
 
 		return FALSE;
 	}
 	function setType($type) {
 		$type = trim($type);
-		Debug::text('Attempting to set Type To: '. $type , __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Attempting to set Type To: '. $type, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $this->Validator->inArrayKey(	'type_id',
 											$type,
@@ -236,7 +236,7 @@ class OtherFieldFactory extends Factory {
 				$this->Validator->isLength(	'other_id1',
 											$value,
 											TTi18n::gettext('Other ID1 is invalid'),
-											1,255) ) {
+											1, 255) ) {
 
 			$this->data['other_id1'] = $value;
 
@@ -257,7 +257,7 @@ class OtherFieldFactory extends Factory {
 				$this->Validator->isLength(	'other_id2',
 											$value,
 											TTi18n::gettext('Other ID2 is invalid'),
-											1,255) ) {
+											1, 255) ) {
 
 			$this->data['other_id2'] = $value;
 
@@ -278,7 +278,7 @@ class OtherFieldFactory extends Factory {
 				$this->Validator->isLength(	'other_id3',
 											$value,
 											TTi18n::gettext('Other ID3 is invalid'),
-											1,255) ) {
+											1, 255) ) {
 
 			$this->data['other_id3'] = $value;
 
@@ -299,7 +299,7 @@ class OtherFieldFactory extends Factory {
 				$this->Validator->isLength(	'other_id4',
 											$value,
 											TTi18n::gettext('Other ID4 is invalid'),
-											1,255) ) {
+											1, 255) ) {
 
 			$this->data['other_id4'] = $value;
 
@@ -320,7 +320,7 @@ class OtherFieldFactory extends Factory {
 				$this->Validator->isLength(	'other_id5',
 											$value,
 											TTi18n::gettext('Other ID5 is invalid'),
-											1,255) ) {
+											1, 255) ) {
 
 			$this->data['other_id5'] = $value;
 
@@ -341,7 +341,7 @@ class OtherFieldFactory extends Factory {
 				$this->Validator->isLength(	'other_id6',
 											$value,
 											TTi18n::gettext('Other ID6 is invalid'),
-											1,255) ) {
+											1, 255) ) {
 
 			$this->data['other_id6'] = $value;
 
@@ -362,7 +362,7 @@ class OtherFieldFactory extends Factory {
 				$this->Validator->isLength(	'other_id7',
 											$value,
 											TTi18n::gettext('Other ID7 is invalid'),
-											1,255) ) {
+											1, 255) ) {
 
 			$this->data['other_id7'] = $value;
 
@@ -383,7 +383,7 @@ class OtherFieldFactory extends Factory {
 				$this->Validator->isLength(	'other_id8',
 											$value,
 											TTi18n::gettext('Other ID8 is invalid'),
-											1,255) ) {
+											1, 255) ) {
 
 			$this->data['other_id8'] = $value;
 
@@ -404,7 +404,7 @@ class OtherFieldFactory extends Factory {
 				$this->Validator->isLength(	'other_id9',
 											$value,
 											TTi18n::gettext('Other ID9 is invalid'),
-											1,255) ) {
+											1, 255) ) {
 
 			$this->data['other_id9'] = $value;
 
@@ -425,7 +425,7 @@ class OtherFieldFactory extends Factory {
 				$this->Validator->isLength(	'other_id10',
 											$value,
 											TTi18n::gettext('Other ID10 is invalid'),
-											1,255) ) {
+											1, 255) ) {
 
 			$this->data['other_id10'] = $value;
 
@@ -490,7 +490,7 @@ class OtherFieldFactory extends Factory {
 	}
 
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action,  TTi18n::getText('Other Fields'), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Other Fields'), NULL, $this->getTable(), $this );
 	}
 }
 ?>

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11599 $
- * $Id: PolicyGroupListFactory.class.php 11599 2013-12-04 21:13:42Z mikeb $
- * $Date: 2013-12-04 13:13:42 -0800 (Wed, 04 Dec 2013) $
+ * $Revision: 12026 $
+ * $Id: PolicyGroupListFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -46,7 +46,7 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -67,7 +67,7 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 						AND deleted = 0';
@@ -94,7 +94,7 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 						AND company_id = ?
@@ -124,11 +124,11 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 		$ph = array();
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							b.user_id as user_id
 					from	'. $this->getTable() .' as a,
 							'. $pguf->getTable() .' as b
-					where 	a.id = b.policy_group_id
+					where	a.id = b.policy_group_id
 						AND b.user_id in  ('. $this->getListSQL($ids, $ph) .')
 						AND a.deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -158,15 +158,15 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 		$ph = array( 'company_id' => $company_id );
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							b.user_id as user_id
 					from	'. $this->getTable() .' as a,
 							'. $pguf->getTable() .' as b
-					where 	a.id = b.policy_group_id
+					where	a.id = b.policy_group_id
 						AND a.company_id = ? ';
 
 		if ( $user_ids AND is_array($user_ids) AND isset($user_ids[0]) ) {
-			$query  .=	' AND b.user_id in ('. $this->getListSQL($user_ids, $ph) .') ';
+			$query	.=	' AND b.user_id in ('. $this->getListSQL($user_ids, $ph) .') ';
 		}
 
 		$query .= '	AND a.deleted = 0';
@@ -193,7 +193,7 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .' as a
 					where	company_id = ?
 						AND deleted = 0';
@@ -222,8 +222,8 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 		} else {
 			$strict = TRUE;
 		}
-		//Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pguf = new PolicyGroupUserFactory();
 		$cgmf = new CompanyGenericMapFactory();
@@ -233,8 +233,8 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 					);
 
 		$query = '
-					select 	distinct a.*
-					from 	'. $this->getTable() .' as a
+					select	distinct a.*
+					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $pguf->getTable() .' as b ON a.id = b.policy_group_id
 						LEFT JOIN '. $cgmf->getTable() .' as c ON ( a.id = c.object_id AND c.company_id = a.company_id AND c.object_type_id = 130)
 						LEFT JOIN '. $cgmf->getTable() .' as d ON ( a.id = d.object_id AND d.company_id = a.company_id AND d.object_type_id = 110)
@@ -245,31 +245,31 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 					';
 
 		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query  .=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
+			$query	.=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
 		}
 		if ( isset($filter_data['exception_policy_control_id']) AND isset($filter_data['exception_policy_control_id'][0]) AND !in_array(-1, (array)$filter_data['exception_policy_control_id']) ) {
-			$query  .=	' AND a.exception_policy_control_id in ('. $this->getListSQL($filter_data['exception_policy_control_id'], $ph) .') ';
+			$query	.=	' AND a.exception_policy_control_id in ('. $this->getListSQL($filter_data['exception_policy_control_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['holiday_policy']) AND isset($filter_data['holiday_policy'][0]) AND !in_array(-1, (array)$filter_data['holiday_policy']) ) {
-			$query  .=	' AND g.map_id in ('. $this->getListSQL($filter_data['holiday_policy'], $ph) .') ';
+			$query	.=	' AND g.map_id in ('. $this->getListSQL($filter_data['holiday_policy'], $ph) .') ';
 		}
 		if ( isset($filter_data['user_policy_id']) AND isset($filter_data['user_policy_id'][0]) AND !in_array(-1, (array)$filter_data['user_policy_id']) ) {
-			$query  .=	' AND b.user_policy_id in ('. $this->getListSQL($filter_data['user_policy_id'], $ph) .') ';
+			$query	.=	' AND b.user_policy_id in ('. $this->getListSQL($filter_data['user_policy_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['round_interval_policy_id']) AND isset($filter_data['round_interval_policy_id'][0]) AND !in_array(-1, (array)$filter_data['round_interval_policy_id']) ) {
-			$query  .=	' AND c.map_id in ('. $this->getListSQL($filter_data['round_interval_policy_id'], $ph) .') ';
+			$query	.=	' AND c.map_id in ('. $this->getListSQL($filter_data['round_interval_policy_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['over_time_policy_id']) AND isset($filter_data['over_time_policy_id'][0]) AND !in_array(-1, (array)$filter_data['over_time_policy_id']) ) {
-			$query  .=	' AND d.map_id in ('. $this->getListSQL($filter_data['over_time_policy_id'], $ph) .') ';
+			$query	.=	' AND d.map_id in ('. $this->getListSQL($filter_data['over_time_policy_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['premium_policy_id']) AND isset($filter_data['premium_policy_id'][0]) AND !in_array(-1, (array)$filter_data['premium_policy_id']) ) {
-			$query  .=	' AND e.map_id in ('. $this->getListSQL($filter_data['premium_policy_id'], $ph) .') ';
+			$query	.=	' AND e.map_id in ('. $this->getListSQL($filter_data['premium_policy_id'], $ph) .') ';
 		}
 		if ( isset($filter_data['accrual_policy_id']) AND isset($filter_data['accrual_policy_id'][0]) AND !in_array(-1, (array)$filter_data['accrual_policy_id']) ) {
-			$query  .=	' AND f.map_id in ('. $this->getListSQL($filter_data['accrual_policy_id'], $ph) .') ';
+			$query	.=	' AND f.map_id in ('. $this->getListSQL($filter_data['accrual_policy_id'], $ph) .') ';
 		}
 
-		$query .= 	'
+		$query .=	'
 						AND a.deleted = 0
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -349,24 +349,28 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 			}
 		}
 
+		if ( isset($filter_data['user']) ) {
+			$filter_data['user_id'] = $filter_data['user'];
+		}
+
 		$additional_order_fields = array();
 
 		$sort_column_aliases = array(
-									 );
+									);
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 		if ( $order == NULL ) {
 			$order = array( 'name' => 'asc' );
 			$strict = FALSE;
 		} else {
-			//Always sort by last name,first name after other columns
+			//Always sort by last name, first name after other columns
 			if ( !isset($order['name']) ) {
 				$order['name'] = 'asc';
 			}
 			$strict = TRUE;
 		}
-		//Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$uf = new UserFactory();
 		$pguf = new PolicyGroupUserFactory();
@@ -379,67 +383,52 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 		//Count total users in PolicyGroup factory, so we can disable it when needed. That way it doesn't slow down Policy Group dropdown boxes.
 		//(select count(*) from '. $pguf->getTable() .' as pguf_tmp where pguf_tmp.policy_group_id = a.id ) as total_users,
 		$query = '
-					select 	distinct a.*,
+					select	distinct a.*,
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
 							y.last_name as created_by_last_name,
 							z.first_name as updated_by_first_name,
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
-					from 	'. $this->getTable() .' as a
+					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $pguf->getTable() .' as b ON a.id = b.policy_group_id
 						LEFT JOIN '. $cgmf->getTable() .' as c ON ( a.id = c.object_id AND c.company_id = a.company_id AND c.object_type_id = 130)
 						LEFT JOIN '. $cgmf->getTable() .' as d ON ( a.id = d.object_id AND d.company_id = a.company_id AND d.object_type_id = 110)
 						LEFT JOIN '. $cgmf->getTable() .' as e ON ( a.id = e.object_id AND e.company_id = a.company_id AND e.object_type_id = 120)
 						LEFT JOIN '. $cgmf->getTable() .' as f ON ( a.id = f.object_id AND f.company_id = a.company_id AND f.object_type_id = 140)
 						LEFT JOIN '. $cgmf->getTable() .' as g ON ( a.id = g.object_id AND g.company_id = a.company_id AND g.object_type_id = 180)
+						LEFT JOIN '. $cgmf->getTable() .' as h ON ( a.id = h.object_id AND h.company_id = a.company_id AND h.object_type_id = 170)
 						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	a.company_id = ?
 					';
-		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query  .=	' AND a.created_by in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
-		}
-		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query  .=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
-		}
-		if ( isset($filter_data['exception_policy_control']) AND isset($filter_data['exception_policy_control'][0]) AND !in_array(-1, (array)$filter_data['exception_policy_control']) ) {
-			$query  .=	' AND a.exception_policy_control_id in ('. $this->getListSQL($filter_data['exception_policy_control'], $ph) .') ';
-		}
-		if ( isset($filter_data['holiday_policy']) AND isset($filter_data['holiday_policy'][0]) AND !in_array(-1, (array)$filter_data['holiday_policy']) ) {
-			$query  .=	' AND g.map_id in ('. $this->getListSQL($filter_data['holiday_policy'], $ph) .') ';
-		}
-		if ( isset($filter_data['user']) AND isset($filter_data['user'][0]) AND !in_array(-1, (array)$filter_data['user']) ) {
-			$query  .=	' AND b.user_id in ('. $this->getListSQL($filter_data['user'], $ph) .') ';
-		}
-		if ( isset($filter_data['round_interval_policy']) AND isset($filter_data['round_interval_policy'][0]) AND !in_array(-1, (array)$filter_data['round_interval_policy']) ) {
-			$query  .=	' AND c.map_id in ('. $this->getListSQL($filter_data['round_interval_policy'], $ph) .') ';
-		}
-		if ( isset($filter_data['over_time_policy']) AND isset($filter_data['over_time_policy'][0]) AND !in_array(-1, (array)$filter_data['over_time_policy']) ) {
-			$query  .=	' AND d.map_id in ('. $this->getListSQL($filter_data['over_time_policy'], $ph) .') ';
-		}
-		if ( isset($filter_data['premium_policy']) AND isset($filter_data['premium_policy'][0]) AND !in_array(-1, (array)$filter_data['premium_policy']) ) {
-			$query  .=	' AND e.map_id in ('. $this->getListSQL($filter_data['premium_policy'], $ph) .') ';
-		}
-		if ( isset($filter_data['accrual_policy']) AND isset($filter_data['accrual_policy'][0]) AND !in_array(-1, (array)$filter_data['accrual_policy']) ) {
-			$query  .=	' AND f.map_id in ('. $this->getListSQL($filter_data['accrual_policy'], $ph) .') ';
-		}
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.created_by', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_id']) ) ? $this->getWhereClauseSQL( 'b.user_id', $filter_data['user_id'], 'numeric_list', $ph ) : NULL;
 
-		if ( isset($filter_data['name']) AND trim($filter_data['name']) != '' ) {
-			$ph[] = strtolower(trim($filter_data['name']));
-			$query  .=	' AND lower(a.name) LIKE ?';
-		}
-		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-        
-        $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
-        
-		$query .= 	'
+		$query .= ( isset($filter_data['exception_policy_control']) ) ? $this->getWhereClauseSQL( 'a.exception_policy_control_id', $filter_data['exception_policy_control'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['holiday_policy']) ) ? $this->getWhereClauseSQL( 'g.map_id', $filter_data['holiday_policy'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['round_interval_policy']) ) ? $this->getWhereClauseSQL( 'c.map_id', $filter_data['round_interval_policy'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['over_time_policy']) ) ? $this->getWhereClauseSQL( 'd.map_id', $filter_data['over_time_policy'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['premium_policy']) ) ? $this->getWhereClauseSQL( 'e.map_id', $filter_data['premium_policy'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['accrual_policy']) ) ? $this->getWhereClauseSQL( 'f.map_id', $filter_data['accrual_policy'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['absence_policy']) ) ? $this->getWhereClauseSQL( 'h.map_id', $filter_data['absence_policy'], 'numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
+
+		$query .=	'
 						AND a.deleted = 0
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
-
+		
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}

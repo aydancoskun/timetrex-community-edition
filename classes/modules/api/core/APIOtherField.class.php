@@ -59,8 +59,8 @@ class APIOtherField extends APIFactory {
 	 */
 	function getOptions( $name, $parent = NULL ) {
 		if ( $name == 'columns'
-				AND ( !$this->getPermissionObject()->Check('other_field','enabled')
-					OR !( $this->getPermissionObject()->Check('other_field','view') OR $this->getPermissionObject()->Check('other_field','view_own') OR $this->getPermissionObject()->Check('other_field','view_child') ) ) ) {
+				AND ( !$this->getPermissionObject()->Check('other_field', 'enabled')
+					OR !( $this->getPermissionObject()->Check('other_field', 'view') OR $this->getPermissionObject()->Check('other_field', 'view_own') OR $this->getPermissionObject()->Check('other_field', 'view_child') ) ) ) {
 			$name = 'list_columns';
 		}
 
@@ -74,7 +74,7 @@ class APIOtherField extends APIFactory {
 	function getOtherFieldDefaultData() {
 		$company_obj = $this->getCurrentCompanyObject();
 
-		Debug::Text('Getting other_field default data...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Getting other_field default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		$data = array(
 						'type_id' => 10,
@@ -89,8 +89,8 @@ class APIOtherField extends APIFactory {
 	 * @return array
 	 */
 	function getOtherField( $data = NULL, $disable_paging = FALSE ) {
-		if ( !$this->getPermissionObject()->Check('other_field','enabled')
-				OR !( $this->getPermissionObject()->Check('other_field','view') OR $this->getPermissionObject()->Check('other_field','view_own') OR $this->getPermissionObject()->Check('other_field','view_child')  ) ) {
+		if ( !$this->getPermissionObject()->Check('other_field', 'enabled')
+				OR !( $this->getPermissionObject()->Check('other_field', 'view') OR $this->getPermissionObject()->Check('other_field', 'view_own') OR $this->getPermissionObject()->Check('other_field', 'view_child')	) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
 			//Rather then permission denied, restrict to just 'list_view' columns.
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
@@ -151,9 +151,9 @@ class APIOtherField extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('other_field','enabled')
-				OR !( $this->getPermissionObject()->Check('other_field','edit') OR $this->getPermissionObject()->Check('other_field','edit_own') OR $this->getPermissionObject()->Check('other_field','edit_child') OR $this->getPermissionObject()->Check('other_field','add') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('other_field', 'enabled')
+				OR !( $this->getPermissionObject()->Check('other_field', 'edit') OR $this->getPermissionObject()->Check('other_field', 'edit_own') OR $this->getPermissionObject()->Check('other_field', 'edit_child') OR $this->getPermissionObject()->Check('other_field', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		if ( $validate_only == TRUE ) {
@@ -179,11 +179,11 @@ class APIOtherField extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if (
-							  $validate_only == TRUE
-							  OR
+							$validate_only == TRUE
+							OR
 								(
-								$this->getPermissionObject()->Check('other_field','edit')
-									OR ( $this->getPermissionObject()->Check('other_field','edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+								$this->getPermissionObject()->Check('other_field', 'edit')
+									OR ( $this->getPermissionObject()->Check('other_field', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -198,7 +198,7 @@ class APIOtherField extends APIFactory {
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('other_field','add'), TTi18n::gettext('Add permission denied') );
+					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('other_field', 'add'), TTi18n::gettext('Add permission denied') );
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -273,16 +273,16 @@ class APIOtherField extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('other_field','enabled')
-				OR !( $this->getPermissionObject()->Check('other_field','delete') OR $this->getPermissionObject()->Check('other_field','delete_own') OR $this->getPermissionObject()->Check('other_field','delete_child') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('other_field', 'enabled')
+				OR !( $this->getPermissionObject()->Check('other_field', 'delete') OR $this->getPermissionObject()->Check('other_field', 'delete_own') OR $this->getPermissionObject()->Check('other_field', 'delete_child') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		Debug::Text('Received data for: '. count($data) .' OtherFields', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-        $validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
+		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
@@ -296,8 +296,8 @@ class APIOtherField extends APIFactory {
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
-						if ( $this->getPermissionObject()->Check('other_field','delete')
-								OR ( $this->getPermissionObject()->Check('other_field','delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
+						if ( $this->getPermissionObject()->Check('other_field', 'delete')
+								OR ( $this->getPermissionObject()->Check('other_field', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
 							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11542 $
- * $Id: TTi18n.class.php 11542 2013-11-28 23:42:32Z mikeb $
- * $Date: 2013-11-28 15:42:32 -0800 (Thu, 28 Nov 2013) $
+ * $Revision: 11838 $
+ * $Id: TTi18n.class.php 11838 2013-12-29 00:35:46Z mikeb $
+ * $Date: 2013-12-28 16:35:46 -0800 (Sat, 28 Dec 2013) $
  */
 
 /*
@@ -68,7 +68,7 @@ class TTi18n {
 		if ( self::$locale_handler === NULL ) {
 			require_once('I18Nv2.php');
 
-            // If first param is not NULL, (eg 'en_US') then I18n throws php notices on debian/ubuntu.
+			// If first param is not NULL, (eg 'en_US') then I18n throws php notices on debian/ubuntu.
 			//Set second param (paranoid) to TRUE so it doesn't break FPDF/TCPDF
 			self::$locale_handler = &I18Nv2::createLocale( NULL, TRUE );
 		}
@@ -92,9 +92,9 @@ class TTi18n {
 
 		if ( $use_gettext === NULL ) {
 			// Here we check that:
-			//  1) gettext extension is loaded
-			//  2) we are running under apache
-			//  3) the apache prefork module is loaded.  so we are not multi-threaded.
+			//	1) gettext extension is loaded
+			//	2) we are running under apache
+			//	3) the apache prefork module is loaded.	 so we are not multi-threaded.
 			if ( extension_loaded( 'gettext' ) ) {
 				$sapi_name = php_sapi_name();
 
@@ -120,18 +120,18 @@ class TTi18n {
 	static public function getTranslationHandler() {
 		if ( self::$translation_handler === NULL ) {
 			if ( self::useGetTextExtension() == TRUE ) {
-				//Debug::Text('Using getText()...', __FILE__, __LINE__, __METHOD__,10);
+				//Debug::Text('Using getText()...', __FILE__, __LINE__, __METHOD__, 10);
 				return new NativeGettextTranslationHandler();
 			} else {
-				//Debug::Text('Using Translation2...', __FILE__, __LINE__, __METHOD__,10);
+				//Debug::Text('Using Translation2...', __FILE__, __LINE__, __METHOD__, 10);
 				require_once( 'Translation2.php' );
 
 				$locale_dir = Environment::getBasePath() . DIRECTORY_SEPARATOR . 'interface' . DIRECTORY_SEPARATOR . 'locale' .DIRECTORY_SEPARATOR;
 
 				// The Translation2 Gettext example has this comment:
 				//
-				//    "Better set prefetch to FALSE for the gettext container, so we don't need
-				//     to read in the whole MO file with File_Gettext on every request."
+				//	  "Better set prefetch to FALSE for the gettext container, so we don't need
+				//	   to read in the whole MO file with File_Gettext on every request."
 				//
 				// I haven't investigated this fully yet.  So for now I am doing as they advise.
 				// Probably worth checking out for performance purposes. Also, it is unclear
@@ -139,22 +139,22 @@ class TTi18n {
 				//
 				// NOTE: getText extension caches data within Apache itself, you must restart Apache to clear the cache.
 				$params = array(
-					'prefetch'          => FALSE,
-					'langs_avail_file'  => $locale_dir . 'langs.ini',
+					'prefetch'			=> FALSE,
+					'langs_avail_file'	=> $locale_dir . 'langs.ini',
 					'domains_path_file' => $locale_dir . 'domains.ini',
-					'default_domain'    => 'messages',
-					'file_type'         => 'mo',
+					'default_domain'	=> 'messages',
+					'file_type'			=> 'mo',
 					'cacheDir'			=> '/tmp/timetrex/',
-					'lifeTime'			=> 86400*7,
+					'lifeTime'			=> ( 86400 * 7 ),
 				);
 				self::$translation_handler = Translation2::factory('gettext', $params);
 				//self::$translation_handler->getDecorator('CacheLiteFunction');
 
 				// Okay, this is super-gross, as we are modifying private data of the
-				// Translation2::storage object.  Why do we do it?  Because the
+				// Translation2::storage object.  Why do we do it?	Because the
 				// brain-dead Translation2 api for gettext only allows specifying
 				// fixed paths via domains.ini file.  Our path depends on our environment
-				// and we need to tell it that.  So, it appears we either do this nasty
+				// and we need to tell it that.	 So, it appears we either do this nasty
 				// hack, or we have to start modifying the Translation2 code directly.
 				self::$translation_handler->storage->_domains = array( 'messages' => $locale_dir );
 			}
@@ -230,7 +230,7 @@ class TTi18n {
 				//an array that is basically empty or uses 127 for everything.
 				//This is fixed in Pear::I18Nv2->setLocale(), so it defaults to english values if it fails.
 				if ( isset( $windows_locales[$tmp_locale] ) ) {
-					Debug::Text('Found valid windows locale: '. $windows_locales[$tmp_locale] .' Linux locale: '. $tmp_locale,  __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Found valid windows locale: '. $windows_locales[$tmp_locale] .' Linux locale: '. $tmp_locale, __FILE__, __LINE__, __METHOD__, 10);
 					$valid_locale = $tmp_locale;
 					break;
 				}
@@ -238,7 +238,7 @@ class TTi18n {
 				/*
 				$windows_locale = self::getLocaleHandler()->setLocale( $tmp_locale, 'LC_ALL');
 				if ( $windows_locale !== FALSE ) {
-					Debug::Text('Found valid windows locale: '. $windows_locale .' Linux locale: '. $tmp_locale,  __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Found valid windows locale: '. $windows_locale .' Linux locale: '. $tmp_locale, __FILE__, __LINE__, __METHOD__, 10);
 					//Returning $windows_locale appears to fix issues with some systems, but then it causes problems with language selection since its a long locale name that doens't match pt_PT for example.
 					$valid_locale = $tmp_locale;
 					break;
@@ -248,12 +248,12 @@ class TTi18n {
 		}
 
 		if ( $valid_locale != '' ) {
-			Debug::Text('Found valid locale: '. $valid_locale,  __FILE__, __LINE__, __METHOD__,11);
+			Debug::Text('Found valid locale: '. $valid_locale, __FILE__, __LINE__, __METHOD__, 11);
 
 			return $valid_locale;
 		}
 
-		Debug::Text('FAILED TRYING LOCALE: '. self::getLocaleArrayAsString( $locale ),  __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('FAILED TRYING LOCALE: '. self::getLocaleArrayAsString( $locale ), __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 	}
@@ -290,7 +290,7 @@ class TTi18n {
 			$retarr = $locale_arr;
 		}
 
-		Debug::Text('Array of Locales to try in order for "'.$locale_arg.'": '. self::getLocaleArrayAsString( $retarr ), __FILE__, __LINE__, __METHOD__,11);
+		Debug::Text('Array of Locales to try in order for "'.$locale_arg.'": '. self::getLocaleArrayAsString( $retarr ), __FILE__, __LINE__, __METHOD__, 11);
 
 		return $retarr;
 	}
@@ -308,7 +308,7 @@ class TTi18n {
 			$locale = self::getLocale();
 		}
 
-		setcookie( 'language', $locale, time()+9999999, Environment::getBaseURL() );
+		setcookie( 'language', $locale, ( time() + 9999999 ), Environment::getBaseURL() );
 
 		return TRUE;
 	}
@@ -325,7 +325,7 @@ class TTi18n {
 			$locale = self::getLocale();
 		}
 
-		Debug::Text('Locale: '. $locale, __FILE__, __LINE__, __METHOD__,11);
+		Debug::Text('Locale: '. $locale, __FILE__, __LINE__, __METHOD__, 11);
 
 		$language = substr( $locale, 0, 2);
 		$language_arr = self::getLanguageArray();
@@ -354,20 +354,20 @@ class TTi18n {
 		return self::$locale;
 	}
 	static public function setLocale( $locale_arg = NULL, $category = LC_ALL ) {
-		Debug::Text('Generated/Passed In Locale: '. $locale_arg, __FILE__, __LINE__, __METHOD__,11);
+		Debug::Text('Generated/Passed In Locale: '. $locale_arg, __FILE__, __LINE__, __METHOD__, 11);
 		$locale = self::tryLocale( self::generateLocale( $locale_arg ) );
 
-		Debug::Text('Attempting to set Locale(s) to: '. $locale .' Category: '. $category .' Current Locale: '. self::getLocale() , __FILE__, __LINE__, __METHOD__,11);
+		Debug::Text('Attempting to set Locale(s) to: '. $locale .' Category: '. $category .' Current Locale: '. self::getLocale(), __FILE__, __LINE__, __METHOD__, 11);
 
 		//In order to validate Windows locales with tryLocale() we have to always force the locale to be set, otherwise
 		//if tryLocale() doesn't get it right on the first try, the locale is reverted to something that may not work.
 		if ( $locale != self::getLocale() ) {
 			if ( in_array( $category, array( LC_ALL, LC_MONETARY, LC_NUMERIC ) ) ) {
-				Debug::Text('Setting currency/numeric Locale to: '. $locale, __FILE__, __LINE__, __METHOD__,11);
+				Debug::Text('Setting currency/numeric Locale to: '. $locale, __FILE__, __LINE__, __METHOD__, 11);
 				//if ( self::getLocaleHandler()->setLocale( $locale, $category ) != $locale ) {
 				//Setting the locale in Windows can cause the locale names to not match at all, so check for FALSE
 				if ( self::getLocaleHandler()->setLocale( $locale, $category ) == FALSE ) {
-					Debug::Text('Failed setting currency/numeric locale: '. $locale, __FILE__, __LINE__, __METHOD__,11);
+					Debug::Text('Failed setting currency/numeric locale: '. $locale, __FILE__, __LINE__, __METHOD__, 11);
 				}
 			}
 
@@ -376,12 +376,12 @@ class TTi18n {
 				// to avoid having to maintain lots of mostly duplicate translation files
 				// for each lang/country combination.
 				$normal_locale = self::_normalizeLocale( $locale );
-				Debug::Text('Setting translator to normalized locale: '. $normal_locale, __FILE__, __LINE__, __METHOD__,11);
+				Debug::Text('Setting translator to normalized locale: '. $normal_locale, __FILE__, __LINE__, __METHOD__, 11);
 				if ( self::getTranslationHandler()->setLang( $normal_locale ) === FALSE ) {
 					//Fall back on non-normalized locale
-					Debug::Text('Failed setting translator normalized locale: '. $normal_locale .' Falling back to: '. $locale, __FILE__, __LINE__, __METHOD__,10);
+					Debug::Text('Failed setting translator normalized locale: '. $normal_locale .' Falling back to: '. $locale, __FILE__, __LINE__, __METHOD__, 10);
 					if ( self::getTranslationHandler()->setLang( $locale ) === FALSE ) {
-						Debug::Text('Failed setting translator locale: '. $locale, __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Failed setting translator locale: '. $locale, __FILE__, __LINE__, __METHOD__, 10);
 						return FALSE;
 					}
 				}
@@ -396,52 +396,52 @@ class TTi18n {
 				}
 			}
 
-			Debug::Text('Set Master Locale To: '. $locale, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Set Master Locale To: '. $locale, __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return TRUE;
 	}
 
-   /**
-     *
-     * @param string|array $user_locale_pref
-     * @return string|boolean
+	/**
+	 *
+	 * @param string|array $user_locale_pref
+	 * @return string|boolean
 	 * @author Dan Libby <dan@osc.co.cr>
-     */
-   static public function getBrowserLanguage() {
-      $list = array();
+	 */
+	static public function getBrowserLanguage() {
+		$list = array();
 
-      if ( isset( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ) {
-		  Debug::text('HTTP_ACCEPT_LANGUAGE: ' . $_SERVER['HTTP_ACCEPT_LANGUAGE'],  __FILE__, __LINE__, __METHOD__,10);
+		if ( isset( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ) {
+			Debug::text('HTTP_ACCEPT_LANGUAGE: ' . $_SERVER['HTTP_ACCEPT_LANGUAGE'], __FILE__, __LINE__, __METHOD__, 10);
 
-         $accept = str_replace( ',', ';', $_SERVER['HTTP_ACCEPT_LANGUAGE'] );
-         $accept = str_replace( '-', '_', $accept );
-         $locales = explode( ';', $accept );
+			$accept = str_replace( ',', ';', $_SERVER['HTTP_ACCEPT_LANGUAGE'] );
+			$accept = str_replace( '-', '_', $accept );
+			$locales = explode( ';', $accept );
 
-         foreach( $locales as $l ) {
-            if ( substr( $l, 0, 2 ) != "q=" ) {
-               $list[] = $l;
-            }
-         }
-      }
+			foreach( $locales as $l ) {
+				if ( substr( $l, 0, 2 ) != "q=" ) {
+					$list[] = $l;
+				}
+			}
+		}
 
-      return $list;
-   }
+		return $list;
+	}
 
-   /**
-     * Determines the most appropriate locale, based on user metadata including
-     * the user's saved locale preference (if any), the user's browser lang pref,
-     * and the application's default locale. It also allows an override via
-     * setting URL param 'ttlang' to a valid locale.
-     *
-     * Returns the best locale, or false if unable to find and set a locale.
-     *
-     * @param string|array $user_locale_pref
-     * @return string|boolean
+	/**
+	 * Determines the most appropriate locale, based on user metadata including
+	 * the user's saved locale preference (if any), the user's browser lang pref,
+	 * and the application's default locale. It also allows an override via
+	 * setting URL param 'ttlang' to a valid locale.
+	 *
+	 * Returns the best locale, or false if unable to find and set a locale.
+	 *
+	 * @param string|array $user_locale_pref
+	 * @return string|boolean
 	 * @author Dan Libby <dan@osc.co.cr>
-     */
-   static public function chooseBestLocale( $user_locale_pref = NULL) {
-		Debug::text('Choosing Best Locale...',  __FILE__, __LINE__, __METHOD__,11);
+	 */
+	static public function chooseBestLocale( $user_locale_pref = NULL) {
+		Debug::text('Choosing Best Locale...', __FILE__, __LINE__, __METHOD__, 11);
 
 		$success = FALSE;
 		$category = LC_ALL; //LC_MESSAGES isn't defined on Windows.
@@ -449,44 +449,44 @@ class TTi18n {
 		// First, we'll check if 'ttlang' url param (override) is specified.
 		//Check cookie first, as we want GET/POST to override the cookie, incase of form errors on Login page etc...
 		if ( TTi18n::getLocaleCookie() != FALSE ) {
-			Debug::text('Using Language from cookie: ' . TTi18n::getLocaleCookie(),  __FILE__, __LINE__, __METHOD__,11);
+			Debug::text('Using Language from cookie: ' . TTi18n::getLocaleCookie(), __FILE__, __LINE__, __METHOD__, 11);
 			$success = TTi18n::setLocale( TTi18n::getLocaleCookie(), $category );
 		}
 
 		if ( isset( $_GET['language'] ) AND $_GET['language'] != '' ) {
-			Debug::text('Using Language from _GET: ' . $_GET['language'],  __FILE__, __LINE__, __METHOD__,11);
+			Debug::text('Using Language from _GET: ' . $_GET['language'], __FILE__, __LINE__, __METHOD__, 11);
 			$success = self::setLocale( $_GET['language'] );
 		}
 
 		if ( isset( $_POST['language'] ) AND $_POST['language'] != '' ) {
-			Debug::text('Using Language from _POST: ' . $_POST['language'],  __FILE__, __LINE__, __METHOD__,11);
+			Debug::text('Using Language from _POST: ' . $_POST['language'], __FILE__, __LINE__, __METHOD__, 11);
 			$success = self::setLocale( $_POST['language'] );
 		}
 
 		if ( $success == FALSE ) {
-		   // Check for a user pref first.
-		   if ( $user_locale_pref != '' ) {
-			  // Could be an array of preferred locales.
-			  if ( is_array( $user_locale_pref ) ) {
-				 foreach( $user_locale_pref as $locale ) {
-					  Debug::text('aSetting Locale: ' . $user_locale_pref,  __FILE__, __LINE__, __METHOD__,11);
-					  if ( $success == self::setLocale( $locale, $category ) ) {
-						 break;
-					  }
-				 }
-			  } else {
-				  Debug::text('bSetting Locale: ' . $user_locale_pref,  __FILE__, __LINE__, __METHOD__,11);
-				  // or a single locale
-				 $success = self::setLocale( $user_locale_pref, $category );
-			  }
-		   }
+			// Check for a user pref first.
+			if ( $user_locale_pref != '' ) {
+				// Could be an array of preferred locales.
+				if ( is_array( $user_locale_pref ) ) {
+					foreach( $user_locale_pref as $locale ) {
+						Debug::text('aSetting Locale: ' . $user_locale_pref, __FILE__, __LINE__, __METHOD__, 11);
+						if ( $success == self::setLocale( $locale, $category ) ) {
+							break;
+						}
+					}
+				} else {
+					Debug::text('bSetting Locale: ' . $user_locale_pref, __FILE__, __LINE__, __METHOD__, 11);
+					// or a single locale
+					$success = self::setLocale( $user_locale_pref, $category );
+				}
+			}
 		}
 
 		// Otherwise, check for lang prefs from the browser
 		if ( $success == FALSE ) {
-		   // browser can specify more than one, so we get an array.
-		   $browser_lang_prefs = self::getBrowserLanguage();
-		   foreach( $browser_lang_prefs as $locale ) {
+			// browser can specify more than one, so we get an array.
+			$browser_lang_prefs = self::getBrowserLanguage();
+			foreach( $browser_lang_prefs as $locale ) {
 				//The country code needs to be upper case for locales to work correctly.
 				if ( strpos($locale, '_') !== FALSE ) {
 					$split_locale = explode('_', $locale);
@@ -495,11 +495,11 @@ class TTi18n {
 					}
 				}
 
-				Debug::text('cSetting Locale: ' . $locale,  __FILE__, __LINE__, __METHOD__,11);
+				Debug::text('cSetting Locale: ' . $locale, __FILE__, __LINE__, __METHOD__, 11);
 				if ( $success == self::setLocale( $locale, $category ) ) {
 					break;
 				}
-		   }
+			}
 		}
 
 		if ( $success == FALSE ) {
@@ -507,20 +507,20 @@ class TTi18n {
 
 			//Use system locale if its set from timetrex.ini.php
 			if ( isset($config_vars['other']['system_locale']) AND $config_vars['other']['system_locale'] != '' ) {
-				Debug::text('Using system locale from .ini: ' . $config_vars['other']['system_locale'],  __FILE__, __LINE__, __METHOD__,11);
+				Debug::text('Using system locale from .ini: ' . $config_vars['other']['system_locale'], __FILE__, __LINE__, __METHOD__, 11);
 				$success = self::setLocale( $config_vars['other']['system_locale'], $category );
 			}
 		}
 
 		// If it worked, then we save this for future reference.
 		if ( $success !== FALSE ) {
-			Debug::text('Using Locale: ' . self::getLocale(),  __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Using Locale: ' . self::getLocale(), __FILE__, __LINE__, __METHOD__, 10);
 		} else {
-			Debug::text('Unable to find and set a locale.',  __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Unable to find and set a locale.', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return TRUE;
-   }
+	}
 
 	/*
 
@@ -558,7 +558,7 @@ class TTi18n {
 				$args = (array)$args;
 			}
 
-			$i=1;
+			$i = 1;
 			foreach( $args as $arg ) {
 				$tr['%'.$i] = $arg;
 
@@ -619,7 +619,7 @@ class TTi18n {
 								'fj' => 'fj_FJ',	// Fijian	Fiji
 								'fo' => 'fo_FO',	// Faroese	Faeroe Islands
 								'fr' => 'fr_FR',	// French	France
-								'fr_CA' => 'fr_CA',	// French	Canada
+								'fr_CA' => 'fr_CA',		// French	Canada
 								'ga' => 'ga_IE',	// Irish	Ireland
 								'gd' => 'gd_GB',	// Scots	Britain
 								'gu' => 'gu_IN',	// Gujarati	India
@@ -664,7 +664,7 @@ class TTi18n {
 								'pl' => 'pl_PL',	// Polish	Poland
 								'ps' => 'ps_AF',	// Pashto	Afghanistan
 								'pt' => 'pt_PT',	// Portuguese	Portugal
-								'pt_BR' => 'pt_BR',	// Portuguese	Brazilian
+								'pt_BR' => 'pt_BR',		// Portuguese	Brazilian
 								'rm' => 'rm_CH',	// Rhaeto-Roman	Switzerland
 								'rn' => 'rn_BI',	// Kirundi	Burundi
 								'ro' => 'ro_RO',	// Romanian	Romania
@@ -702,7 +702,7 @@ class TTi18n {
 		} else {
 			$lang = trim( substr( $locale, 0, 2 ) );
 			if ( isset($language[$lang]) ) {
-				return $language[$lang];// . '.UTF-8';  // setlocale fails on ubuntu if UTF-8 not specified
+				return $language[$lang];// . '.UTF-8';	// setlocale fails on ubuntu if UTF-8 not specified
 			}
 		}
 
@@ -721,7 +721,7 @@ class TTi18n {
 			return 'helvetica'; //Core PDF font, works with setFontSubsetting(TRUE) and is fast with small PDF sizes.
 		}
 
-		Debug::text('Using international font: freeserif', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Using international font: freeserif', __FILE__, __LINE__, __METHOD__, 10);
 		return 'freeserif'; //Slow with setFontSubsetting(TRUE), produces PDFs at least 1mb.
 	}
 
@@ -758,12 +758,12 @@ class TTi18n {
 				$custom_format = self::getLocaleHandler()->numberFormats[I18Nv2_NUMBER_FLOAT];
 			} else {
 				$custom_format = array(
-									   'float' => array(
+									'float' => array(
 														0 => 2,
 														1 => '.',
-														2 => ',',
-											        )
-									   );
+														2 => ', ',
+													)
+									);
 			}
 
 			$custom_format[0] = $decimal_places;
@@ -804,171 +804,171 @@ class TTi18n {
 	static function getCurrencySymbol( $iso_code ) {
 		static $currency_symbols = array (
 										'AED' => 'د.إ', //('United Arab Emirates')
-										'AFA' => 'نی',  //('Afghanistan')
-										'ALL' => 'Lek',  //('Albania')
-										'AMD' => 'դր.',    // ('Armenia')
-										'ANG' => 'ƒ',    //('Netherlands Antilles')
-										'AON' => 'Kz',   //('Angola')
-										'ARA' => '$',    //('Argentina'),
-										'AUD' => '$',    //('Australia')('Christmas Island')('Cocos (Keeling) Islands')('Heard Island and Mcdonald Islands')('Kiribati')('Nauru')('Tuvalu')
-										'AWG' => 'ƒ',    //('Aruba')
-										'AZM' => 'm',    //('Azerbaijan')
-										'BAM' => 'KM',   //('Bosnia and Herzegovina')
-										'BBD' => '$',    //('Barbados')
-										'BDT' => 'Tk',   //('Bangladesh')
-										'BGL' => 'лв',   //('Bulgaria')
-										'BHD' => 'دج',  //('Bahrain')
-										'BIF' => '₣',    //('Burundi')
-										'BMD' => '$',    //('Bermuda')
-										'BND' => '$',    //('Brunei Darussalam')
-										'BOB' => '$b',   //('Bolivia')
-										'BRR' => 'R$',   //('Brazil')
-										'BSD' => '$',    //('Bahamas')
-										'BTN' => 'Nu',   //('Bhutan')
-										'BWP' => 'P',    //('Botswana')
-										'BYR' => 'p.',   //('Belarus')
-										'BZD' => 'BZ$',  //('Belize')
-										'CAD' => '$',    //('Canada')
-										'CDF' => 'F',    //('Congo, Democratic Republic')
-										'CDZ' => 'CDZ',  //('Congo, the Democratic Republic of')
-										'CHF' => '₣',    //('Liechtenstein')('Switzerland')
-										'CLF' => '$',    //('Chile')
-										'CNY' => '¥',    //('China')
-										'COP' => '$',    //('Colombia')
-										'CRC' => '₡',    //Costa Rica
-										'CSD' => 'دج',  //('Serbia and Montenegro')
-										'CUP' => '$',    //('Cuba')
-										'CVE' => '$',    //('Cape Verde')
-										'CYP' => '£',    //('Cyprus')
-										'CZK' => 'Kč',   //('Czech Republic')
- 										'DJF' => '₣',    //('Djibouti')
-										'DKK' => 'kr',   //('Denmark')('Faroe Islands')('Greenland')
-										'DOP' => 'RD$',  //('Dominican Republic')
-										'DZD' => 'دج',  //('Algeria')
-										'EEK' => 'kr',   //('Estonia')
-										'EGP' => '£',    //('Egypt')
-										'ERN' => 'Nfk',  //('Eritrea')
-										'ETB' => 'Br',   //('Ethiopia')
-										'EUR' => '€',    //('Germany')('Andorra')('Austria')('Belgium')('Finland')('France')('Greece')('French Guiana')('French Southern Territories')('Guadeloupe')('Holy See (Vatican City State)')('Ireland')('Italy')('Luxembourg')('Martinique')('Mayotte')('Monaco')('Netherlands')('Portugal')('Reunion')('San Marino')('Spain')('Saint Pierre and Miquelon')
-										'FJD' => '$',    //'Fiji')
-										'FKP' => '£',    //('Falkland Islands (Malvinas)')
-										'GBP' => '£',    //('United Kingdom')('British Indian Ocean Territory')('South Georgia, South Sandwich Islands')
-										'GEL' => '$',    //('Georgia')
-										'GHC' => '₵',    //('Ghana')
-										'GIP' => '£',    //('Gibraltar')
-										'GMD' => 'D',    //('Gambia')
-										'GNS' => '$',    //('Guinea')
-										'GTQ' => 'Q',    //('Guatemala')
-										'GWP' => '$',    //('Guinea-Bissau')
-										'GYD' => '$',    //('Guyana')
-										'HKD' => 'HK$',  //('Hong Kong')
-										'HNL' => 'L',    //('Honduras')
-										'HRK' => 'kn',   //('Croatia')
-										'HTG' => 'G',    //('Haiti')
-										'HUF' => 'Ft',   //('Hungary')
-										'IDR' => 'Rp',   //('Indonesia')
-										'ILS' => '₪',    //('Israel')
-										'INR' => '₨',   //('India')
+										'AFA' => 'نی', //('Afghanistan')
+										'ALL' => 'Lek', //('Albania')
+										'AMD' => 'դր.', // ('Armenia')
+										'ANG' => 'ƒ', //('Netherlands Antilles')
+										'AON' => 'Kz', //('Angola')
+										'ARA' => '$', //('Argentina'),
+										'AUD' => '$', //('Australia')('Christmas Island')('Cocos (Keeling) Islands')('Heard Island and Mcdonald Islands')('Kiribati')('Nauru')('Tuvalu')
+										'AWG' => 'ƒ', //('Aruba')
+										'AZM' => 'm', //('Azerbaijan')
+										'BAM' => 'KM', //('Bosnia and Herzegovina')
+										'BBD' => '$', //('Barbados')
+										'BDT' => 'Tk', //('Bangladesh')
+										'BGL' => 'лв', //('Bulgaria')
+										'BHD' => 'دج', //('Bahrain')
+										'BIF' => '₣', //('Burundi')
+										'BMD' => '$', //('Bermuda')
+										'BND' => '$', //('Brunei Darussalam')
+										'BOB' => '$b', //('Bolivia')
+										'BRR' => 'R$', //('Brazil')
+										'BSD' => '$', //('Bahamas')
+										'BTN' => 'Nu', //('Bhutan')
+										'BWP' => 'P', //('Botswana')
+										'BYR' => 'p.', //('Belarus')
+										'BZD' => 'BZ$', //('Belize')
+										'CAD' => '$', //('Canada')
+										'CDF' => 'F', //('Congo, Democratic Republic')
+										'CDZ' => 'CDZ', //('Congo, the Democratic Republic of')
+										'CHF' => '₣', //('Liechtenstein')('Switzerland')
+										'CLF' => '$', //('Chile')
+										'CNY' => '¥', //('China')
+										'COP' => '$', //('Colombia')
+										'CRC' => '₡', //Costa Rica
+										'CSD' => 'دج', //('Serbia and Montenegro')
+										'CUP' => '$', //('Cuba')
+										'CVE' => '$', //('Cape Verde')
+										'CYP' => '£', //('Cyprus')
+										'CZK' => 'Kč', //('Czech Republic')
+										'DJF' => '₣', //('Djibouti')
+										'DKK' => 'kr', //('Denmark')('Faroe Islands')('Greenland')
+										'DOP' => 'RD$', //('Dominican Republic')
+										'DZD' => 'دج', //('Algeria')
+										'EEK' => 'kr', //('Estonia')
+										'EGP' => '£', //('Egypt')
+										'ERN' => 'Nfk', //('Eritrea')
+										'ETB' => 'Br', //('Ethiopia')
+										'EUR' => '€', //('Germany')('Andorra')('Austria')('Belgium')('Finland')('France')('Greece')('French Guiana')('French Southern Territories')('Guadeloupe')('Holy See (Vatican City State)')('Ireland')('Italy')('Luxembourg')('Martinique')('Mayotte')('Monaco')('Netherlands')('Portugal')('Reunion')('San Marino')('Spain')('Saint Pierre and Miquelon')
+										'FJD' => '$', //'Fiji')
+										'FKP' => '£', //('Falkland Islands (Malvinas)')
+										'GBP' => '£', //('United Kingdom')('British Indian Ocean Territory')('South Georgia, South Sandwich Islands')
+										'GEL' => '$', //('Georgia')
+										'GHC' => '₵', //('Ghana')
+										'GIP' => '£', //('Gibraltar')
+										'GMD' => 'D', //('Gambia')
+										'GNS' => '$', //('Guinea')
+										'GTQ' => 'Q', //('Guatemala')
+										'GWP' => '$', //('Guinea-Bissau')
+										'GYD' => '$', //('Guyana')
+										'HKD' => 'HK$', //('Hong Kong')
+										'HNL' => 'L', //('Honduras')
+										'HRK' => 'kn', //('Croatia')
+										'HTG' => 'G', //('Haiti')
+										'HUF' => 'Ft', //('Hungary')
+										'IDR' => 'Rp', //('Indonesia')
+										'ILS' => '₪', //('Israel')
+										'INR' => '₨', //('India')
 										'IQD' => 'ع.د', //('Iraq')
-										'IRR' => '﷼',   //('Iran, Islamic Republic of')
-										'ISK' => 'kr',   //('Iceland'),
-										'JMD' => 'J$',   //('Jamaica')
+										'IRR' => '﷼', //('Iran, Islamic Republic of')
+										'ISK' => 'kr', //('Iceland'),
+										'JMD' => 'J$', //('Jamaica')
 										'JOD' => 'ع.د', //('Jordan')
-										'JPY' => '¥',    //('Japan')
-										'KES' => 'KSh',  //('Kenya')
-										'KGS' => 'лв',   //('Kyrgyzstan')
- 										'KHR' => '$',    //('Cambodia')
-										'KMF' => '₣',    //('Comoros')
-										'KPW' => '₩',   //('Korea, Democratic People\'s Republic of')
-										'KRW' => '₩',   //('Korea, Republic of')
+										'JPY' => '¥', //('Japan')
+										'KES' => 'KSh', //('Kenya')
+										'KGS' => 'лв', //('Kyrgyzstan')
+										'KHR' => '$', //('Cambodia')
+										'KMF' => '₣', //('Comoros')
+										'KPW' => '₩', //('Korea, Democratic People\'s Republic of')
+										'KRW' => '₩', //('Korea, Republic of')
 										'KWD' => 'د.ك', //('Kuwait')
-										'KYD' => '$',    //('Cayman Islands')
-										'KZT' => 'лв',   //('Kazakhstan')
-										'LAK' => '₭',    //('Lao People\'s Democratic Republic')
-										'LBP' => '£',    //('Lebanon')
-										'LKR' => '₨',   //('Sri Lanka')
-										'LRD' => '$',    //('Liberia')
-										'LSL' => 'L',    //('Lesotho')
-										'LTL' => 'Lt',   //('Lithuania')
-										'LVL' => 'Ls',   //('Latvia')
+										'KYD' => '$', //('Cayman Islands')
+										'KZT' => 'лв', //('Kazakhstan')
+										'LAK' => '₭', //('Lao People\'s Democratic Republic')
+										'LBP' => '£', //('Lebanon')
+										'LKR' => '₨', //('Sri Lanka')
+										'LRD' => '$', //('Liberia')
+										'LSL' => 'L', //('Lesotho')
+										'LTL' => 'Lt', //('Lithuania')
+										'LVL' => 'Ls', //('Latvia')
 										'LYD' => 'ل.د', //('Libyan Arab Jamahiriya')
 										'MAD' => 'د.م', //('Morocco')('Western Sahara')
-										'MDL' => 'L',    //('Moldova, Republic of')
-										'MGF' => '₣',    //('Madagascar')
-										'MKD' => 'ден',  //('Macedonia, Former Yugoslav Republic of')
-										'MMK' => 'K',    //('Myanmar')
-										'MNT' => '₮',    //('Mongolia')
+										'MDL' => 'L', //('Moldova, Republic of')
+										'MGF' => '₣', //('Madagascar')
+										'MKD' => 'ден', //('Macedonia, Former Yugoslav Republic of')
+										'MMK' => 'K', //('Myanmar')
+										'MNT' => '₮', //('Mongolia')
 										'MOP' => 'MOP$', //('Macao')
-										'MRO' => 'UM',   //('Mauritania')
-										'MTL' => 'Lm',   //('Malta')
-										'MUR' => '₨',   //('Mauritius')
-										'MVR' => 'Rf',   //('Maldives')
-										'MWK' => 'MK',   //('Malawi')
-										'MXN' => '$',    //('Mexico')
-										'MYR' => 'RM',   //('Malaysia')
-										'MZM' => 'MTn',  //('Mozambique')
-										'NAD' => '$',    //('Namibia')
-										'NGN' => '₦',    //('Nigeria')
-										'NIC' => 'C$',   //('Nicaragua')
-										'NOK' => 'kr',   //('Antarctica')('Bouvet Island')('Norway')('Svalbard and Jan Mayen')
-										'NPR' => '₨',   //('Nepal')
-										'NZD' => '$',    //('New Zealand')
-										'OMR' => '﷼',   //('Oman')
-										'PAB' => '$',    //('Panama')
-										'PEI' => 'I/.',  //('Peru')
-										'PGK' => 'K',    //('Papua New Guinea')
-										'PHP' => 'Php',  //('Philippines')
-										'PKR' => '₨',   //('Pakistan')
-										'PLN' => 'zł',   //('Poland')
-										'PYG' => 'Gs',   //('Paraguay')
-										'QAR' => '﷼',   //('Qatar')
-										'ROL' => 'L',    //('Romania')
-										'RUB' => 'руб',  //('Russian Federation')
-										'RWF' => '₣',    //('Rwanda')
-										'SAR' => '﷼',   //('Saudi Arabia')
-										'SBD' => '$',    //('Solomon Islands')
-										'SCR' => '₨',   //('Seychelles')
-										'SDP' => '£Sd',  //('Sudan')
-										'SEK' => 'kr',   //('Sweden')
-										'SGD' => '$',    //('Singapore')
-										'SHP' => '£',    //('Saint Helena')
-										'SIT' => 'SIT',  //('Slovenia')
-										'SKK' => 'kr',   //('Slovakia')
-										'SLL' => 'Le',   //('Sierra Leone')
-										'SOS' => 'S',    //('Somalia')
-										'SRG' => 'ƒ',    //('Suriname')
-										'STD' => 'Db',   //('Sao Tome and Principe')
+										'MRO' => 'UM', //('Mauritania')
+										'MTL' => 'Lm', //('Malta')
+										'MUR' => '₨', //('Mauritius')
+										'MVR' => 'Rf', //('Maldives')
+										'MWK' => 'MK', //('Malawi')
+										'MXN' => '$', //('Mexico')
+										'MYR' => 'RM', //('Malaysia')
+										'MZM' => 'MTn', //('Mozambique')
+										'NAD' => '$', //('Namibia')
+										'NGN' => '₦', //('Nigeria')
+										'NIC' => 'C$', //('Nicaragua')
+										'NOK' => 'kr', //('Antarctica')('Bouvet Island')('Norway')('Svalbard and Jan Mayen')
+										'NPR' => '₨', //('Nepal')
+										'NZD' => '$', //('New Zealand')
+										'OMR' => '﷼', //('Oman')
+										'PAB' => '$', //('Panama')
+										'PEI' => 'I/.', //('Peru')
+										'PGK' => 'K', //('Papua New Guinea')
+										'PHP' => 'Php', //('Philippines')
+										'PKR' => '₨', //('Pakistan')
+										'PLN' => 'zł', //('Poland')
+										'PYG' => 'Gs', //('Paraguay')
+										'QAR' => '﷼', //('Qatar')
+										'ROL' => 'L', //('Romania')
+										'RUB' => 'руб', //('Russian Federation')
+										'RWF' => '₣', //('Rwanda')
+										'SAR' => '﷼', //('Saudi Arabia')
+										'SBD' => '$', //('Solomon Islands')
+										'SCR' => '₨', //('Seychelles')
+										'SDP' => '£Sd', //('Sudan')
+										'SEK' => 'kr', //('Sweden')
+										'SGD' => '$', //('Singapore')
+										'SHP' => '£', //('Saint Helena')
+										'SIT' => 'SIT', //('Slovenia')
+										'SKK' => 'kr', //('Slovakia')
+										'SLL' => 'Le', //('Sierra Leone')
+										'SOS' => 'S', //('Somalia')
+										'SRG' => 'ƒ', //('Suriname')
+										'STD' => 'Db', //('Sao Tome and Principe')
 										'SUR' => 'руб',
-										'SVC' => '₡',    //('El Salvador')
-										'SYP' => '£',    //('Syrian Arab Republic')
-										'SZL' => 'L',    //('Swaziland')
-										'THB' => '฿',    //('Thailand')
-										'TMM' => 'm',    //('Turkmenistan')
+										'SVC' => '₡', //('El Salvador')
+										'SYP' => '£', //('Syrian Arab Republic')
+										'SZL' => 'L', //('Swaziland')
+										'THB' => '฿', //('Thailand')
+										'TMM' => 'm', //('Turkmenistan')
 										'TND' => 'د.ت', //('Tunisia')
-										'TOP' => 'T$',   //('Tonga')
+										'TOP' => 'T$', //('Tonga')
 										'TPE' => '$',
-										'TRL' => '₤',    //('Turkey')
-										'TTD' => '$',    //('Trinidad and Tobago')
-										'TWD' => '$',    //('Taiwan, Province of China')
-										'TZS' => 'x/y',  //('Tanzania, United Republic of')
-										'UAH' => '₴',    //('Ukraine')
-										'UGS' => 'USh',  //('Uganda')
-										'USD' => '$', 	 //('United States')('American Samoa')('Ecuador')('Guam')('Marshall Islands')('Micronesia, Federated States of')('Northern Mariana Islands')('Palau')('Puerto Rico')('Turks and Caicos Islands')('United States Minor Outlying Islands')('Virgin Islands, British')('Virgin Islands, U.s.')
-										'UYU' => '$U',   //('Uruguay')
-										'UZS' => 'лв',   //('Uzbekistan')
-										'VEB' => 'Bs',   //('Venezuela')
-										'VND' => '₫',    //('Viet Nam')
-										'VUV' => 'Vt',   //('Vanuatu')
-										'WST' => 'WS$',  //('Samoa')
-										'XAF' => '₣',    //('Benin')
-										'XCD' => '$',    //('Anguilla')('Antigua and Barbuda')('Dominica')('Grenada')('Montserrat')('Saint Kitts and Nevis')('Saint Lucia')('Saint Vincent, Grenadines')
-										'XOF' => '₣',    //('Niger')('Senegal')
-										'XPF' => '₣',    //('Wallis and Futuna')('French Polynesia')('New Caledonia')
-										'YER' => '﷼',   //('Yemen')
-										'ZAR' => 'R',    //('South Africa')
-										'ZMK' => 'ZK',   //('Zambia')
-										'ZMW' => 'ZK',   //('Zambia') new as of August 2012
-										'ZWD' => 'Z$',   //('Zimbabwe')
+										'TRL' => '₤', //('Turkey')
+										'TTD' => '$', //('Trinidad and Tobago')
+										'TWD' => '$', //('Taiwan, Province of China')
+										'TZS' => 'x/y', //('Tanzania, United Republic of')
+										'UAH' => '₴', //('Ukraine')
+										'UGS' => 'USh', //('Uganda')
+										'USD' => '$',	 //('United States')('American Samoa')('Ecuador')('Guam')('Marshall Islands')('Micronesia, Federated States of')('Northern Mariana Islands')('Palau')('Puerto Rico')('Turks and Caicos Islands')('United States Minor Outlying Islands')('Virgin Islands, British')('Virgin Islands, U.s.')
+										'UYU' => '$U', //('Uruguay')
+										'UZS' => 'лв', //('Uzbekistan')
+										'VEB' => 'Bs', //('Venezuela')
+										'VND' => '₫', //('Viet Nam')
+										'VUV' => 'Vt', //('Vanuatu')
+										'WST' => 'WS$', //('Samoa')
+										'XAF' => '₣', //('Benin')
+										'XCD' => '$', //('Anguilla')('Antigua and Barbuda')('Dominica')('Grenada')('Montserrat')('Saint Kitts and Nevis')('Saint Lucia')('Saint Vincent, Grenadines')
+										'XOF' => '₣', //('Niger')('Senegal')
+										'XPF' => '₣', //('Wallis and Futuna')('French Polynesia')('New Caledonia')
+										'YER' => '﷼', //('Yemen')
+										'ZAR' => 'R', //('South Africa')
+										'ZMK' => 'ZK', //('Zambia')
+										'ZMW' => 'ZK', //('Zambia') new as of August 2012
+										'ZWD' => 'Z$', //('Zimbabwe')
 								);
 
 		if ( isset($currency_symbols[$iso_code]) ) {
@@ -1012,7 +1012,7 @@ class NativeGettextTranslationHandler implements TranslationHandler {
 
 		// Beware: this is changing the locale process-wide.
 		// But *only* for LC_MESSAGES, not other LC_*.
-		// This is not thread-safe.  For threaded web servers,
+		// This is not thread-safe.	 For threaded web servers,
 		// the slower Translation2 classes should be used.
 
 		//Setting the locale again here overrides what i18Nv2 just set
@@ -1024,7 +1024,7 @@ class NativeGettextTranslationHandler implements TranslationHandler {
 
 			/* This often reports failure even if it works.
 			if ( $rc == 0 ) {
-				Debug::text('setLocale failed!: '. (int)$rc .' Locale: '. $locale, __FILE__, __LINE__, __METHOD__,10);
+				Debug::text('setLocale failed!: '. (int)$rc .' Locale: '. $locale, __FILE__, __LINE__, __METHOD__, 10);
 			}
 			*/
 		}
@@ -1032,7 +1032,7 @@ class NativeGettextTranslationHandler implements TranslationHandler {
 		// Normally, setting env var(s) would not be necessary, but I18Nv2
 		// is explicitly setting LANG* env variables, which seem to be
 		// overriding setlocale(). Setting the env var here, fixes it.
-		// Yes, I know it seems backwards.  YMMV.
+		// Yes, I know it seems backwards.	YMMV.
 		@putEnv('LANGUAGE=' . $locale);
 
 		$domain = 'messages';

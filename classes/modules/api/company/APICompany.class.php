@@ -59,8 +59,8 @@ class APICompany extends APIFactory {
 	 */
 	function getOptions( $name, $parent = NULL ) {
 		if ( $name == 'columns'
-				AND ( !$this->getPermissionObject()->Check('company','enabled')
-					OR !( $this->getPermissionObject()->Check('company','view') OR $this->getPermissionObject()->Check('company','view_own') OR $this->getPermissionObject()->Check('company','view_child') ) ) ) {
+				AND ( !$this->getPermissionObject()->Check('company', 'enabled')
+					OR !( $this->getPermissionObject()->Check('company', 'view') OR $this->getPermissionObject()->Check('company', 'view_own') OR $this->getPermissionObject()->Check('company', 'view_child') ) ) ) {
 			$name = 'list_columns';
 		}
 
@@ -92,20 +92,20 @@ class APICompany extends APIFactory {
 	 * @return array
 	 */
 	function getCompany( $data = NULL, $disable_paging = FALSE ) {
-		if ( !$this->getPermissionObject()->Check('company','enabled')
-				OR !( $this->getPermissionObject()->Check('company','view') OR $this->getPermissionObject()->Check('company','view_own') OR $this->getPermissionObject()->Check('company','view_child')  ) ) {
+		if ( !$this->getPermissionObject()->Check('company', 'enabled')
+				OR !( $this->getPermissionObject()->Check('company', 'view') OR $this->getPermissionObject()->Check('company', 'view_own') OR $this->getPermissionObject()->Check('company', 'view_child')	) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
-		if ( !$this->getPermissionObject()->Check('company','view') ) {
+		if ( !$this->getPermissionObject()->Check('company', 'view') ) {
 			//Force ID to current company.
 			$data['filter_data']['id'] = $this->getCurrentCompanyObject()->getId();
 		}
 
 		//FIXME: This filters company by created_by.
-		//if ( $this->getPermissionObject()->Check('company','view') == FALSE AND $this->getPermissionObject()->Check('company','view_own') == TRUE ) {
+		//if ( $this->getPermissionObject()->Check('company', 'view') == FALSE AND $this->getPermissionObject()->Check('company', 'view_own') == TRUE ) {
 		//	$data['filter_data']['permission_children_ids'] = $this->getCurrentUserObject()->getId(); //The created_by is unlikely to be the first user in the system, so this isn't going to work.
 		//}
 
@@ -165,9 +165,9 @@ class APICompany extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('company','enabled')
-				OR !( $this->getPermissionObject()->Check('company','edit') OR $this->getPermissionObject()->Check('company','edit_own') OR $this->getPermissionObject()->Check('company','edit_child') OR $this->getPermissionObject()->Check('company','add') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('company', 'enabled')
+				OR !( $this->getPermissionObject()->Check('company', 'edit') OR $this->getPermissionObject()->Check('company', 'edit_own') OR $this->getPermissionObject()->Check('company', 'edit_child') OR $this->getPermissionObject()->Check('company', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		if ( $validate_only == TRUE ) {
@@ -190,7 +190,7 @@ class APICompany extends APIFactory {
 					//Modifying existing object.
 					//Get company object, so we can only modify just changed data for specific records if needed.
 					//$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
-					if ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] )  {
+					if ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] )	{
 						$lf->getById( $row['id'] );
 					} else {
 						$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
@@ -199,11 +199,11 @@ class APICompany extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if (
-							  $validate_only == TRUE
-							  OR
+							$validate_only == TRUE
+							OR
 								(
-								$this->getPermissionObject()->Check('company','edit')
-									OR ( $this->getPermissionObject()->Check('company','edit_own') AND $this->getCurrentCompanyObject()->getId() == $lf->getCurrent()->getID() )
+								$this->getPermissionObject()->Check('company', 'edit')
+									OR ( $this->getPermissionObject()->Check('company', 'edit_own') AND $this->getCurrentCompanyObject()->getId() == $lf->getCurrent()->getID() )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -218,7 +218,7 @@ class APICompany extends APIFactory {
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('company','add'), TTi18n::gettext('Add permission denied') );
+					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('company', 'add'), TTi18n::gettext('Add permission denied') );
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -227,13 +227,13 @@ class APICompany extends APIFactory {
 					Debug::Text('Attempting to save data...', __FILE__, __LINE__, __METHOD__, 10);
 
 					//Don't allow changing edition unless they can edit all companies, or its the primary company (for On-Site installs)
-					if ( !( ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) OR $this->getPermissionObject()->Check('company','edit') ) ) {
+					if ( !( ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) OR $this->getPermissionObject()->Check('company', 'edit') ) ) {
 						unset($row['product_edition_id'], $row['status_id']);
 					}
 
 					$lf->setObjectFromArray( $row );
 
-					if ( !$this->getPermissionObject()->Check('company','edit') ) {
+					if ( !$this->getPermissionObject()->Check('company', 'edit') ) {
 						//Force ID to current company.
 						$lf->setID( $this->getCurrentCompanyObject()->getId() );
 					}
@@ -311,16 +311,16 @@ class APICompany extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('company','enabled')
-				OR !( $this->getPermissionObject()->Check('company','delete') OR $this->getPermissionObject()->Check('company','delete_own') OR $this->getPermissionObject()->Check('company','delete_child') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('company', 'enabled')
+				OR !( $this->getPermissionObject()->Check('company', 'delete') OR $this->getPermissionObject()->Check('company', 'delete_own') OR $this->getPermissionObject()->Check('company', 'delete_child') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		Debug::Text('Received data for: '. count($data) .' Companys', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$total_records = count($data);
-        $validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
+		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
@@ -331,15 +331,15 @@ class APICompany extends APIFactory {
 				if ( is_numeric($id) ) {
 					//Modifying existing object.
 					//Get company object, so we can only modify just changed data for specific records if needed.
-					if ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] )  {
+					if ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] )	{
 						$lf->getById( $id );
 					} else {
 						$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
 					}
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
-						if ( $this->getPermissionObject()->Check('company','delete')
-								OR ( $this->getPermissionObject()->Check('company','delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
+						if ( $this->getPermissionObject()->Check('company', 'delete')
+								OR ( $this->getPermissionObject()->Check('company', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
 							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
@@ -413,7 +413,7 @@ class APICompany extends APIFactory {
 			foreach( $src_rows as $key => $row ) {
 				unset($src_rows[$key]['id']); //Clear fields that can't be copied
 				$src_rows[$key]['name'] = Misc::generateCopyName( $row['name'] ); //Generate unique name
-				$src_rows[$key]['short_name'] = rand(1000,9999);
+				$src_rows[$key]['short_name'] = rand(1000, 9999);
 			}
 			Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -437,17 +437,17 @@ class APICompany extends APIFactory {
 	 * @return array
 	 */
 	function getCompanyMinAvgMaxUserCounts( $data = NULL, $disable_paging = FALSE ) {
-		if ( !$this->getPermissionObject()->Check('company','enabled')
-				OR !( $this->getPermissionObject()->Check('company','view') OR $this->getPermissionObject()->Check('company','view_own') OR $this->getPermissionObject()->Check('company','view_child')  ) ) {
+		if ( !$this->getPermissionObject()->Check('company', 'enabled')
+				OR !( $this->getPermissionObject()->Check('company', 'view') OR $this->getPermissionObject()->Check('company', 'view_own') OR $this->getPermissionObject()->Check('company', 'view_child')	) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
-		if ( $this->getPermissionObject()->Check('company','view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('company','view_child') ) {
+		if ( $this->getPermissionObject()->Check('company', 'view') == FALSE ) {
+			if ( $this->getPermissionObject()->Check('company', 'view_child') ) {
 				$data['filter_data']['company_id'] = $this->getCurrentCompanyObject()->getId();
 			}
-			if ( $this->getPermissionObject()->Check('company','view_own') ) {
+			if ( $this->getPermissionObject()->Check('company', 'view_own') ) {
 				$data['filter_data']['company_id'] = $this->getCurrentCompanyObject()->getId();
 			}
 		}
@@ -487,7 +487,7 @@ class APICompany extends APIFactory {
 									'min_deleted_users' => $cuc_obj->getColumn('min_deleted_users'),
 									'avg_deleted_users' => $cuc_obj->getColumn('avg_deleted_users'),
 									'max_deleted_users' => $cuc_obj->getColumn('max_deleted_users'),
-								 );
+								);
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $cuclf->getCurrentRow() );
 			}
@@ -506,17 +506,17 @@ class APICompany extends APIFactory {
 	 * @return array
 	 */
 	function getCompanyEmailAddresses( $data = NULL, $disable_paging = FALSE ) {
-		if ( !$this->getPermissionObject()->Check('company','enabled')
-				OR !( $this->getPermissionObject()->Check('company','view') OR $this->getPermissionObject()->Check('company','view_own') OR $this->getPermissionObject()->Check('company','view_child')  ) ) {
+		if ( !$this->getPermissionObject()->Check('company', 'enabled')
+				OR !( $this->getPermissionObject()->Check('company', 'view') OR $this->getPermissionObject()->Check('company', 'view_own') OR $this->getPermissionObject()->Check('company', 'view_child')	) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
-		if ( $this->getPermissionObject()->Check('company','view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('company','view_child') ) {
+		if ( $this->getPermissionObject()->Check('company', 'view') == FALSE ) {
+			if ( $this->getPermissionObject()->Check('company', 'view_child') ) {
 				$data['filter_data']['company_id'] = $this->getCurrentCompanyObject()->getId();
 			}
-			if ( $this->getPermissionObject()->Check('company','view_own') ) {
+			if ( $this->getPermissionObject()->Check('company', 'view_own') ) {
 				$data['filter_data']['company_id'] = $this->getCurrentCompanyObject()->getId();
 			}
 		}
@@ -551,17 +551,17 @@ class APICompany extends APIFactory {
 
 	//We should be able to support multiple companies as well, or getting data for all companies by not specifying the company filter.
 	function getCompanyPhonePunchData( $data = NULL, $disable_paging = FALSE ) {
-		if ( !$this->getPermissionObject()->Check('company','enabled')
-				OR !( $this->getPermissionObject()->Check('company','view') OR $this->getPermissionObject()->Check('company','view_own') OR $this->getPermissionObject()->Check('company','view_child')  ) ) {
+		if ( !$this->getPermissionObject()->Check('company', 'enabled')
+				OR !( $this->getPermissionObject()->Check('company', 'view') OR $this->getPermissionObject()->Check('company', 'view_own') OR $this->getPermissionObject()->Check('company', 'view_child')	) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
-		if ( $this->getPermissionObject()->Check('company','view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('company','view_child') ) {
+		if ( $this->getPermissionObject()->Check('company', 'view') == FALSE ) {
+			if ( $this->getPermissionObject()->Check('company', 'view_child') ) {
 				$data['filter_data']['company_id'] = $this->getCurrentCompanyObject()->getId();
 			}
-			if ( $this->getPermissionObject()->Check('company','view_own') ) {
+			if ( $this->getPermissionObject()->Check('company', 'view_own') ) {
 				$data['filter_data']['company_id'] = $this->getCurrentCompanyObject()->getId();
 			}
 		}
@@ -592,7 +592,7 @@ class APICompany extends APIFactory {
 									'billable_minutes' => $l_obj->getColumn('billable_units'),
 									'calls' => $l_obj->getColumn('calls'),
 									'unique_users' => $l_obj->getColumn('unique_users'),
-								 );
+								);
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $llf->getCurrentRow() );
 			}

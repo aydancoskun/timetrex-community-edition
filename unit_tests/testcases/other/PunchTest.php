@@ -41,7 +41,6 @@
 require_once('PHPUnit/Framework/TestCase.php');
 
 class PunchTest extends PHPUnit_Framework_TestCase {
-
 	protected $company_id = NULL;
 	protected $user_id = NULL;
 	protected $pay_period_schedule_id = NULL;
@@ -211,7 +210,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 	}
 
-	function createPayPeriods() {
+	function createPayPeriods( $initial_date = FALSE ) {
 		$max_pay_periods = 35;
 
 		$ppslf = new PayPeriodScheduleListFactory();
@@ -219,11 +218,14 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		if ( $ppslf->getRecordCount() > 0 ) {
 			$pps_obj = $ppslf->getCurrent();
 
-
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
-					//$end_date = TTDate::getBeginYearEpoch( strtotime('01-Jan-07') );
-					$end_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() )-(86400*(7*6) ) ) );
+					if ( $initial_date !== FALSE ) {
+						$end_date = $initial_date;
+					} else {
+						//$end_date = TTDate::getBeginYearEpoch( strtotime('01-Jan-07') );
+						$end_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() )-(86400*(7*6) ) ) );
+					}
 				} else {
 					$end_date = $end_date + ( (86400*14) );
 				}
@@ -494,6 +496,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		- Make sure we can't assign a punch to some random punch_control_id for another user/company.
 
 	*/
+
+	/**
+	 * @group Punch_testDayShiftStartsBasicA
+	 */
 	function testDayShiftStartsBasicA() {
 		global $dd;
 
@@ -533,6 +539,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testDayShiftStartsBasicB
+	 */
 	function testDayShiftStartsBasicB() {
 		global $dd;
 
@@ -589,7 +598,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-
+	/**
+	 * @group Punch_testDayShiftStartsBasicC
+	 */
 	function testDayShiftStartsBasicC() {
 		global $dd;
 
@@ -648,6 +659,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testDayShiftStartsBasicD
+	 */
 	function testDayShiftStartsBasicD() {
 		global $dd;
 
@@ -690,6 +704,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testDayShiftStartsBasicE
+	 */
 	function testDayShiftStartsBasicE() {
 		global $dd;
 
@@ -748,8 +765,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//Special test to fix a bug when there is a 2hr gap between punches, but a new shift is only triggered after 4hrs.
+	/**
+	 * @group Punch_testDayShiftStartsBasicF
+	 */
 	function testDayShiftStartsBasicF() {
+		//Special test to fix a bug when there is a 2hr gap between punches, but a new shift is only triggered after 4hrs.
 		global $dd;
 
 		$this->createPayPeriodSchedule( 10 );
@@ -821,10 +841,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//
-	//  Test when shifts are assigned to the day they end on.
-	//
+	/**
+	 * @group Punch_testDayShiftEndsBasicA
+	 */
 	function testDayShiftEndsBasicA() {
+		//  Test when shifts are assigned to the day they end on.
 		global $dd;
 
 		$this->createPayPeriodSchedule( 20 );
@@ -863,6 +884,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testDayShiftEndsBasicB
+	 */
 	function testDayShiftEndsBasicB() {
 		global $dd;
 
@@ -906,6 +930,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testDayShiftEndsBasicC
+	 */
 	function testDayShiftEndsBasicC() {
 		global $dd;
 
@@ -967,10 +994,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 
-	//
-	//  Test when shifts are assigned to the day most worked on.
-	//
+	/**
+	 * @group Punch_testDayMostWorkedBasicA
+	 */
 	function testDayMostWorkedBasicA() {
+		//  Test when shifts are assigned to the day most worked on.
 		global $dd;
 
 		$this->createPayPeriodSchedule( 30 );
@@ -1009,6 +1037,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testDayMostWorkedBasicB
+	 */
 	function testDayMostWorkedBasicB() {
 		global $dd;
 
@@ -1051,6 +1082,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testDayMostWorkedBasicC
+	 */
 	function testDayMostWorkedBasicC() {
 		global $dd;
 
@@ -1096,6 +1130,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testDayMostWorkedBasicD
+	 */
 	function testDayMostWorkedBasicD() {
 		global $dd;
 
@@ -1170,10 +1207,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//
-	//  Test when shifts are split at midnight.
-	//
+	/**
+	 * @group Punch_testSplitAtMidnightBasicA
+	 */
 	function testSplitAtMidnightBasicA() {
+		//  Test when shifts are split at midnight.
 		global $dd;
 
 		$this->createPayPeriodSchedule( 40 );
@@ -1212,6 +1250,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testSplitAtMidnightBasicB
+	 */
 	function testSplitAtMidnightBasicB() {
 		global $dd;
 
@@ -1259,6 +1300,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testSplitAtMidnightBasicC
+	 */
 	function testSplitAtMidnightBasicC() {
 		global $dd;
 
@@ -1304,6 +1348,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testSplitAtMidnightBasicD
+	 */
 	function testSplitAtMidnightBasicD() {
 		global $dd;
 
@@ -1339,6 +1386,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testSplitAtMidnightBasicE
+	 */
 	function testSplitAtMidnightBasicE() {
 		global $dd;
 
@@ -1372,6 +1422,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testSplitAtMidnightBasicF
+	 */
 	function testSplitAtMidnightBasicF() {
 		global $dd;
 
@@ -1405,6 +1458,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testPunchControlMatchingA
+	 */
 	function testPunchControlMatchingA() {
 		global $dd;
 
@@ -1488,6 +1544,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testPunchControlMatchingB
+	 */
 	function testPunchControlMatchingB() {
 		global $dd;
 
@@ -1542,6 +1601,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testPunchControlMatchingC
+	 */
 	function testPunchControlMatchingC() {
 		global $dd;
 
@@ -1606,6 +1668,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testPunchControlMatchingD
+	 */
 	function testPunchControlMatchingD() {
 		global $dd;
 
@@ -1666,6 +1731,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testPunchControlMatchingE
+	 */
 	function testPunchControlMatchingE() {
 		global $dd;
 
@@ -1724,6 +1792,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testPunchEditingA
+	 */
 	function testPunchEditingA() {
 		global $dd;
 
@@ -1802,6 +1873,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testPunchEditingB
+	 */
 	function testPunchEditingB() {
 		global $dd;
 
@@ -1894,6 +1968,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testPunchEditingC
+	 */
 	function testPunchEditingC() {
 		global $dd;
 
@@ -1985,8 +2062,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//Test moving shifts from one day to the next when punches are edited.
+	/**
+	 * @group Punch_testPunchEditingShiftDayChangeA
+	 */
 	function testPunchEditingShiftDayChangeA() {
+		//Test moving shifts from one day to the next when punches are edited.
 		global $dd;
 
 		$this->createPayPeriodSchedule( 10 ); //Day shift starts on.
@@ -2087,8 +2167,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//Test moving shifts from one day to the next when punches are edited.
+	/**
+	 * @group Punch_testPunchEditingShiftDayChangeB
+	 */
 	function testPunchEditingShiftDayChangeB() {
+		//Test moving shifts from one day to the next when punches are edited.
 		global $dd;
 
 		$this->createPayPeriodSchedule( 10 ); //Day shift starts on.
@@ -2185,6 +2268,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testPunchEditingD
+	 */
 	function testPunchEditingD() {
 		global $dd;
 
@@ -2277,6 +2363,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testPunchDeletingA
+	 */
 	function testPunchDeletingA() {
 		global $dd;
 
@@ -2352,6 +2441,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testPunchDeletingB
+	 */
 	function testPunchDeletingB() {
 		global $dd;
 
@@ -2481,6 +2573,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testValidationA
+	 */
 	function testValidationA() {
 		global $dd;
 
@@ -2541,6 +2636,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testValidationA2
+	 */
 	function testValidationA2() {
 		global $dd;
 
@@ -2602,6 +2700,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testValidationB
+	 */
 	function testValidationB() {
 		global $dd;
 
@@ -2662,6 +2763,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testValidationC
+	 */
 	function testValidationC() {
 		global $dd;
 
@@ -2730,7 +2834,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
-
+	/**
+	 * @group Punch_testValidationD
+	 */
 	function testValidationD() {
 		global $dd;
 
@@ -2823,6 +2929,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testValidationE
+	 */
 	function testValidationE() {
 		global $dd;
 
@@ -2906,7 +3015,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-
+	/**
+	 * @group Punch_testValidationF
+	 */
 	function testValidationF() {
 		global $dd;
 
@@ -2960,6 +3071,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testValidationG
+	 */
 	function testValidationG() {
 		global $dd;
 
@@ -2992,6 +3106,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testRoundingA
+	 */
 	function testRoundingA() {
 		global $dd;
 
@@ -3045,6 +3162,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testRoundingB
+	 */
 	function testRoundingB() {
 		global $dd;
 
@@ -3111,6 +3231,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testRoundingC
+	 */
 	function testRoundingC() {
 		global $dd;
 
@@ -3208,6 +3331,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testRoundingD
+	 */
 	function testRoundingD() {
 		global $dd;
 
@@ -3306,13 +3432,16 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//DST time should be recorded based on the time the employee actually works, therefore one hour more on this day.
-	//See US department of labor description: http://www.dol.gov/elaws/esa/flsa/hoursworked/screenER11.asp
+	/**
+	 * @group Punch_testDST
+	 */
 	function testDSTFall() {
+		//DST time should be recorded based on the time the employee actually works, therefore one hour more on this day.
+		//See US department of labor description: http://www.dol.gov/elaws/esa/flsa/hoursworked/screenER11.asp
 		global $dd;
 
 		$this->createPayPeriodSchedule( 10 );
-		$this->createPayPeriods();
+		$this->createPayPeriods( strtotime('01-Jan-2013') );
 		$this->getAllPayPeriods();
 
 		$date_epoch = strtotime('02-Nov-2013'); //Use current year
@@ -3366,12 +3495,16 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
-	//DST time should be recorded based on the time the employee actually works, therefore one hour more on this day.
+
+	/**
+	 * @group Punch_testDST
+	 */
 	function testDSTFallB() {
+		//DST time should be recorded based on the time the employee actually works, therefore one hour more on this day.
 		global $dd;
 
 		$this->createPayPeriodSchedule( 10 );
-		$this->createPayPeriods();
+		$this->createPayPeriods( strtotime('01-Jan-2013') );
 		$this->getAllPayPeriods();
 
 		$date_epoch = strtotime('02-Nov-2013'); //Use current year
@@ -3412,12 +3545,15 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//DST time should be recorded based on the time the employee actually works, therefore one hour less on this day.
+	/**
+	 * @group Punch_testDST
+	 */
 	function testDSTSpring() {
+		//DST time should be recorded based on the time the employee actually works, therefore one hour less on this day.
 		global $dd;
 
 		$this->createPayPeriodSchedule( 10 );
-		$this->createPayPeriods();
+		$this->createPayPeriods( strtotime('01-Jan-2013') );
 		$this->getAllPayPeriods();
 
 		$date_epoch = strtotime('09-Mar-2013'); //Use current year
@@ -3471,12 +3607,16 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
-	//DST time should be recorded based on the time the employee actually works, therefore one hour less on this day.
+
+	/**
+	 * @group Punch_testDST
+	 */
 	function testDSTSpringB() {
+		//DST time should be recorded based on the time the employee actually works, therefore one hour less on this day.
 		global $dd;
 
 		$this->createPayPeriodSchedule( 10 );
-		$this->createPayPeriods();
+		$this->createPayPeriods( strtotime('01-Jan-2013') );
 		$this->getAllPayPeriods();
 
 		$date_epoch = strtotime('09-Mar-2013'); //Use current year
@@ -3518,6 +3658,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 
+	/**
+	 * @group Punch_testScheduleMatchingA
+	 */
 	function testScheduleMatchingA() {
 		global $dd;
 
@@ -3571,6 +3714,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testScheduleMatchingB
+	 */
 	function testScheduleMatchingB() {
 		global $dd;
 
@@ -3641,6 +3787,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testScheduleMatchingC
+	 */
 	function testScheduleMatchingC() {
 		global $dd;
 
@@ -3697,6 +3846,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testScheduleMatchingD
+	 */
 	function testScheduleMatchingD() {
 		global $dd;
 
@@ -3754,6 +3906,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testScheduleMatchingE
+	 */
 	function testScheduleMatchingE() {
 		global $dd;
 
@@ -3811,9 +3966,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	
-	//No defaults in station or employee profile.
+	/**
+	 * @group Punch_testDefaultPunchSettingsNoScheduleA
+	 */
 	function testDefaultPunchSettingsNoScheduleA() {
+		//No defaults in station or employee profile.
 		global $dd;
 		
 		$this->createPayPeriodSchedule( 10 );
@@ -3844,8 +4001,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//Test with default branch/department set in employee profile
+	/**
+	 * @group Punch_testDefaultPunchSettingsNoScheduleB
+	 */
 	function testDefaultPunchSettingsNoScheduleB() {
+		//Test with default branch/department set in employee profile
 		global $dd;
 				
 		$this->tmp_branch_id[] = $this->branch_id; 
@@ -3886,8 +4046,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	//Test with default branch/department set in employee profile and station.
 	//
 	
-	//Test with previous Normal punch.
+	/**
+	 * @group Punch_testDefaultPunchSettingsNoScheduleD
+	 */
 	function testDefaultPunchSettingsNoScheduleD() {
+		//Test with previous Normal punch.
 		global $dd;
 
 		$this->tmp_branch_id[] = $this->branch_id; 
@@ -3940,8 +4103,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//Test with previous Break punch.
+	/**
+	 * @group Punch_testDefaultPunchSettingsNoScheduleE
+	 */
 	function testDefaultPunchSettingsNoScheduleE() {
+		//Test with previous Break punch.
 		global $dd;
 
 		$this->tmp_branch_id[] = $this->branch_id; 
@@ -3994,8 +4160,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//Test with previous Lunch punch.
+	/**
+	 * @group Punch_testDefaultPunchSettingsNoScheduleF
+	 */
 	function testDefaultPunchSettingsNoScheduleF() {
+		//Test with previous Lunch punch.
 		global $dd;
 
 		$this->tmp_branch_id[] = $this->branch_id; 
@@ -4048,8 +4217,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//Test with split shift.
+	/**
+	 * @group Punch_testDefaultPunchSettingsNoScheduleG
+	 */
 	function testDefaultPunchSettingsNoScheduleG() {
+		//Test with split shift.
 		global $dd;
 
 		$this->tmp_branch_id[] = $this->branch_id; 
@@ -4102,8 +4274,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//Test with split shift (B)
+	/**
+	 * @group Punch_testDefaultPunchSettingsNoScheduleGB
+	 */
 	function testDefaultPunchSettingsNoScheduleGB() {
+		//Test with split shift (B)
 		global $dd;
 
 		$this->tmp_branch_id[] = $this->branch_id; 
@@ -4160,9 +4335,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 
 
-
-	//No defaults in station or employee profile.
+	/**
+	 * @group Punch_testDefaultPunchSettingsScheduleA
+	 */
 	function testDefaultPunchSettingsScheduleA() {
+		//No defaults in station or employee profile.
 		global $dd;
 
 		$this->tmp_branch_id[] = $this->branch_id; 
@@ -4212,8 +4389,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//No defaults in station or employee profile.
+	/**
+	 * @group Punch_testDefaultPunchSettingsScheduleB
+	 */
 	function testDefaultPunchSettingsScheduleB() {
+		//No defaults in station or employee profile.
 		global $dd;
 
 		$this->tmp_branch_id[] = $this->branch_id; 
@@ -4263,9 +4443,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-
-	//Test with previous Normal punch.
+	/**
+	 * @group Punch_testDefaultPunchSettingsScheduleC
+	 */
 	function testDefaultPunchSettingsScheduleC() {
+		//Test with previous Normal punch.
 		global $dd;
 
 		$this->tmp_branch_id[] = $this->branch_id; 
@@ -4328,8 +4510,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//Test with previous Break punch.
+	/**
+	 * @group Punch_testDefaultPunchSettingsScheduleD
+	 */
 	function testDefaultPunchSettingsScheduleD() {
+		//Test with previous Break punch.
 		global $dd;
 
 		$this->tmp_branch_id[] = $this->branch_id; 
@@ -4392,8 +4577,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//Test with previous Lunch punch.
+	/**
+	 * @group Punch_testDefaultPunchSettingsScheduleE
+	 */
 	function testDefaultPunchSettingsScheduleE() {
+		//Test with previous Lunch punch.
 		global $dd;
 
 		$this->tmp_branch_id[] = $this->branch_id; 
@@ -4456,9 +4644,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-
-	//Test with split shift.
+	/**
+	 * @group Punch_testDefaultPunchSettingsScheduleF
+	 */
 	function testDefaultPunchSettingsScheduleF() {
+		//Test with split shift.
 		global $dd;
 
 		$this->tmp_branch_id[] = $this->branch_id; 
@@ -4521,8 +4711,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//Test with split shift (B)
+	/**
+	 * @group Punch_testDefaultPunchSettingsScheduleFB
+	 */
 	function testDefaultPunchSettingsScheduleFB() {
+		//Test with split shift (B)
 		global $dd;
 
 		$this->tmp_branch_id[] = $this->branch_id; 
@@ -4585,8 +4778,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 	
-	//Test with split shift (C)
+	/**
+	 * @group Punch_testDefaultPunchSettingsScheduleFC
+	 */
 	function testDefaultPunchSettingsScheduleFC() {
+		//Test with split shift (C)
 		global $dd;
 
 		$this->tmp_branch_id[] = $this->branch_id; 
@@ -4657,8 +4853,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//Test with split shift (D)
+	/**
+	 * @group Punch_testDefaultPunchSettingsScheduleFD
+	 */
 	function testDefaultPunchSettingsScheduleFD() {
+		//Test with split shift (D)
 		global $dd;
 
 		$this->tmp_branch_id[] = $this->branch_id; 
@@ -4729,8 +4928,11 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
-	//Test with split shift (E)
+	/**
+	 * @group Punch_testDefaultPunchSettingsScheduleFE
+	 */
 	function testDefaultPunchSettingsScheduleFE() {
+		//Test with split shift (E)
 		global $dd;
 
 		$this->tmp_branch_id[] = $this->branch_id; 
@@ -4801,7 +5003,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 	
-
+	/**
+	 * @group Punch_testMaximumShiftTimeA
+	 */
 	function testMaximumShiftTimeA() {
 		global $dd;
 
@@ -4845,6 +5049,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testMaximumShiftTimeB
+	 */
 	function testMaximumShiftTimeB() {
 		global $dd;
 
@@ -4885,6 +5092,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testMaximumShiftTimeC
+	 */
 	function testMaximumShiftTimeC() {
 		global $dd;
 
@@ -4947,6 +5157,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	/**
+	 * @group Punch_testMaximumShiftTimeD
+	 */
 	function testMaximumShiftTimeD() {
 		global $dd;
 

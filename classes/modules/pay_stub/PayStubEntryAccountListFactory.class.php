@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10849 $
- * $Id: PayStubEntryAccountListFactory.class.php 10849 2013-09-06 15:36:13Z ipso $
- * $Date: 2013-09-06 08:36:13 -0700 (Fri, 06 Sep 2013) $
+ * $Revision: 12026 $
+ * $Id: PayStubEntryAccountListFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -46,7 +46,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					WHERE deleted = 0
 					ORDER BY ps_order ASC';
@@ -73,7 +73,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 			$ph = array();
 
 			$query = '
-						select 	*
+						select	*
 						from	'. $this->getTable() .'
 						where	id in ('. $this->getListSQL($id, $ph) .')
 							AND deleted = 0';
@@ -83,7 +83,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 			$this->ExecuteSQL( $query, $ph );
 
 			if ( !is_array($id) ) {
-				$this->saveCache($this->rs,$id);
+				$this->saveCache($this->rs, $id);
 			}
 		}
 
@@ -100,7 +100,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND deleted = 0
@@ -128,7 +128,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND id = ?
@@ -157,7 +157,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND accrual_pay_stub_entry_account_id = ?
@@ -185,9 +185,9 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
-					where 	company_id = ?
+					where	company_id = ?
 						AND status_id in ('. $this->getListSQL($status_id, $ph) .')
 						AND deleted = 0
 					ORDER BY ps_order ASC';
@@ -213,9 +213,9 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
-					where 	company_id = ?
+					where	company_id = ?
 						AND type_id in ('. $this->getListSQL($type_id, $ph) .')
 						AND deleted = 0
 					ORDER BY ps_order ASC';
@@ -246,7 +246,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	company_id = ?
 						AND lower(name) LIKE lower(?)
@@ -269,7 +269,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		$ph = array();
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	type_id in ('. $this->getListSQL($type_id, $ph) .')
 						AND deleted = 0
@@ -298,9 +298,9 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .' as a
-					where 	company_id = ?
+					where	company_id = ?
 						AND id = (
 								select id
 									from '. $this->getTable() .'
@@ -337,9 +337,9 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
-					where 	company_id = ?
+					where	company_id = ?
 						AND status_id in ('. $this->getListSQL($status_id, $ph) .')
 						AND type_id in ('. $this->getListSQL($type_id, $ph) .')
 						AND deleted = 0
@@ -366,12 +366,12 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 
 		$additional_order_fields = array(
 										'type_id'
-										 );
+										);
 
 		$sort_column_aliases = array(
-									 'type' => 'type_id',
-									 'status' => 'status_id',
-									 );
+									'type' => 'type_id',
+									'status' => 'status_id',
+									);
 
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 
@@ -395,8 +395,8 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 
 			$strict = TRUE;
 		}
-		//Debug::Arr($order,'Order Data:', __FILE__, __LINE__, __METHOD__,10);
-		//Debug::Arr($filter_data,'Filter Data:', __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$uf = new UserFactory();
 
@@ -405,14 +405,14 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 					);
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
 							y.last_name as created_by_last_name,
 							z.first_name as updated_by_first_name,
 							z.middle_name as updated_by_middle_name,
 							z.last_name as updated_by_last_name
-					from 	'. $this->getTable() .' as a
+					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	a.company_id = ?
@@ -422,30 +422,28 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
 
-		if ( isset($filter_data['status']) AND trim($filter_data['status']) != '' AND !isset($filter_data['status_id']) ) {
+		if ( isset($filter_data['status']) AND !is_array($filter_data['status']) AND trim($filter_data['status']) != '' AND !isset($filter_data['status_id']) ) {
 			$filter_data['status_id'] = Option::getByFuzzyValue( $filter_data['status'], $this->getOptions('status') );
 		}
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
 
-		if ( isset($filter_data['type']) AND trim($filter_data['type']) != '' AND !isset($filter_data['type_id']) ) {
+		if ( isset($filter_data['type']) AND !is_array($filter_data['type']) AND trim($filter_data['type']) != '' AND !isset($filter_data['type_id']) ) {
 			$filter_data['type_id'] = Option::getByFuzzyValue( $filter_data['type'], $this->getOptions('type') );
 		}
 
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-        
-        $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
-        
+		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
+		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
 
-		$query .= 	'
+		$query .=	'
 						AND a.deleted = 0
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		//Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 

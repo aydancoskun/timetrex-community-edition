@@ -34,16 +34,16 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 5166 $
- * $Id: FormVariables.class.php 5166 2011-08-26 23:01:36Z ipso $
- * $Date: 2011-08-26 16:01:36 -0700 (Fri, 26 Aug 2011) $
+ * $Revision: 11830 $
+ * $Id: FormVariables.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
  * @package Core
  */
 class FormVariables {
-	static function getVariables($form_variables, $form_type = 'BOTH', $filter_input = TRUE, $filter_ignore_name_arr = array('next_page','batch_next_page') ) {
+	static function getVariables($form_variables, $form_type = 'BOTH', $filter_input = TRUE, $filter_ignore_name_arr = array('next_page', 'batch_next_page') ) {
 		$form_type = trim(strtoupper($form_type));
 
 		if ( is_array($form_variables) ) {

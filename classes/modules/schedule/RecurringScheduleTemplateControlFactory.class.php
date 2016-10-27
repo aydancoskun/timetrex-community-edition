@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11545 $
- * $Id: RecurringScheduleTemplateControlFactory.class.php 11545 2013-11-29 02:04:30Z mikeb $
- * $Date: 2013-11-28 18:04:30 -0800 (Thu, 28 Nov 2013) $
+ * $Revision: 12026 $
+ * $Id: RecurringScheduleTemplateControlFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -101,7 +101,7 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
-			return $this->data['company_id'];
+			return (int)$this->data['company_id'];
 		}
 
 		return FALSE;
@@ -142,7 +142,7 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 		if (	$this->Validator->isLength(	'name',
 											$name,
 											TTi18n::gettext('Name is invalid'),
-											2,50)
+											2, 50)
 						) {
 
 			$this->data['name'] = $name;
@@ -166,7 +166,7 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 		if (	$this->Validator->isLength(	'description',
 											$description,
 											TTi18n::gettext('Description is invalid'),
-											0,255) ) {
+											0, 255) ) {
 
 			$this->data['description'] = $description;
 
@@ -229,7 +229,7 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 	}
 
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action,  TTi18n::getText('Recurring Schedule Template'), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Recurring Schedule Template'), NULL, $this->getTable(), $this );
 	}
 }
 ?>

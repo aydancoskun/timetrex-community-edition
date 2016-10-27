@@ -1031,7 +1031,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 		//Combine city province for multicell display.
 
         if ( $this->employee_city != '' ) {
-			$retarr[] = $this->employee_city;
+			$retarr[] = $this->employee_city.' ';
 		}
 		if ( $this->employee_province != '' ) {
 			$retarr[] = $this->employee_province;
@@ -1050,7 +1050,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
     function _outputXML() {
 
 		$records = $this->getRecords();
-        Debug::Arr($records, 'Output XML Records: ',__FILE__, __LINE__, __METHOD__, 10);
+        Debug::Arr($records, 'Output XML Records: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( is_array($records) AND count($records) > 0 ) {
 
@@ -1084,11 +1084,11 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
                     $xml->Roe[$e]->addChild('B3', substr( $this->payroll_reference_number, 0, 15)); //maxLength 15  minOccurs="0"
                 }
                 // Box5
-                $xml->Roe[$e]->addChild('B5', substr($this->business_number,0,15)); //maxLength 15
+                $xml->Roe[$e]->addChild('B5', substr($this->business_number, 0, 15)); //maxLength 15
                 // Box6
                 $xml->Roe[$e]->addChild('B6', $pay_period_type_options[$this->pay_period_type_id]); //maxLength 1
                 // Box8
-                $xml->Roe[$e]->addChild('B8', substr($this->sin,0,9)); //maxLength 9
+                $xml->Roe[$e]->addChild('B8', substr($this->sin, 0, 9)); //maxLength 9
                 // Box9
                 $xml->Roe[$e]->addChild('B9');
                 $xml->Roe[$e]->B9->addChild('FN', $this->first_name); //maxLength 20
@@ -1123,9 +1123,9 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
                 }
 
                 // Box15A
-                $xml->Roe[$e]->addChild('B15A', substr(round($this->insurable_hours),0,4)); //maxLength 4
+                $xml->Roe[$e]->addChild('B15A', substr(round($this->insurable_hours), 0, 4)); //maxLength 4
                 // Box15B
-                $xml->Roe[$e]->addChild('B15B', (float)substr($this->insurable_earnings,-9,9)); //maxLength 9
+                $xml->Roe[$e]->addChild('B15B', (float)substr($this->insurable_earnings, -9, 9)); //maxLength 9
                 // Box15C
                 $xml->Roe[$e]->addChild('B15C');
 
@@ -1138,7 +1138,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
                         }
                         $xml->Roe[$e]->B15C->addChild('PP'); //maxOccurs="53"
                         $xml->Roe[$e]->B15C->PP[$x]->addAttribute('nbr', $i);
-                        $xml->Roe[$e]->B15C->PP[$x]->addChild('AMT', (float)substr($pay_period_earning,-9,9) ); //maxLength 9
+                        $xml->Roe[$e]->B15C->PP[$x]->addChild('AMT', (float)substr($pay_period_earning, -9, 9) ); //maxLength 9
 						$i++;
 						$x++;
                     }
@@ -1168,7 +1168,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 
                 // Box17A
                 if ( $this->vacation_pay > 0 ) {
-                    $xml->Roe[$e]->addChild('B17A', (float)substr($this->vacation_pay,-9,9)); // maxLength 9   minOccurs="0"
+                    $xml->Roe[$e]->addChild('B17A', (float)substr($this->vacation_pay, -9, 9)); // maxLength 9   minOccurs="0"
                 }
 
                 // Box17B
@@ -1187,7 +1187,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
                             $xml->Roe[$e]->B17B->addChild('SH'); //minOccurs="0" maxOccurs="3"
                             $xml->Roe[$e]->B17B->SH[$x]->addAttribute('nbr', $i);
                             $xml->Roe[$e]->B17B->SH[$x]->addChild('DT', date('dmY', $holiday['date'] )); //maxLength 8
-                            $xml->Roe[$e]->B17B->SH[$x]->addChild('AMT', (float)substr($holiday['amount'],-9,9)); //maxLength 9
+                            $xml->Roe[$e]->B17B->SH[$x]->addChild('AMT', (float)substr($holiday['amount'], -9, 9)); //maxLength 9
 
                             $x++;
                             $i++;
@@ -1216,7 +1216,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
                             $xml->Roe[$e]->B17C->addChild('OM'); //minOccurs="0" maxOccurs="3"
                             $xml->Roe[$e]->B17C->OM[$x]->addAttribute('nbr', $i);
                             $xml->Roe[$e]->B17C->OM[$x]->addChild('CD', $monies['other_monies_code']); //maxLength 1
-                            $xml->Roe[$e]->B17C->OM[$x]->addChild('AMT', (float)substr($monies['amount'],-9,9)); //maxLength 9
+                            $xml->Roe[$e]->B17C->OM[$x]->addChild('AMT', (float)substr($monies['amount'], -9, 9)); //maxLength 9
 
                             $x++;
                             $i++;

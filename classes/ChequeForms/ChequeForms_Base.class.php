@@ -120,7 +120,7 @@ class ChequeForms_Base {
 
         if ( isset( $this->amount ) ) {
             $numbers_words = new Numbers_Words();
-            $value =  str_pad( ucwords( $numbers_words->toWords( floor($this->amount),"en_US") ).' ', 65, "-", STR_PAD_RIGHT );
+            $value =  str_pad( ucwords( $numbers_words->toWords( floor($this->amount), 'en_US' ) ).' ', 65, "-", STR_PAD_RIGHT );
         }
         return $value;
     }
@@ -147,7 +147,7 @@ class ChequeForms_Base {
     */
     function filterAmountPadded( $value ) {
         if ( isset( $this->amount ) ) {
-            $value = str_pad( Misc::MoneyFormat( $this->amount ),12,'*', STR_PAD_LEFT);
+            $value = str_pad( Misc::MoneyFormat( $this->amount ), 12, '*', STR_PAD_LEFT);
         }
         if ( get_class($this) === 'ChequeForms_9085' ) {
             return ' ' . $this->symbol . $value;
@@ -338,7 +338,7 @@ class ChequeForms_Base {
 				//Handle combining multiple template together with a X,Y offset.
 				foreach( $schema['combine_templates'] as $combine_template ) {
 					Debug::text('Combining Template Pages... Template: '. $combine_template['template_page'] .' Y: '. $combine_template['y'], __FILE__, __LINE__, __METHOD__, 10);
-					$pdf->useTemplate( $this->template_index[$combine_template['template_page']],$combine_template['x']+$this->getTemplateOffsets('x'), $combine_template['y']+$this->getTemplateOffsets('y') );
+					$pdf->useTemplate( $this->template_index[$combine_template['template_page']], $combine_template['x']+$this->getTemplateOffsets('x'), $combine_template['y']+$this->getTemplateOffsets('y') );
 
 					$this->setPageOffsets( $combine_template['x'], $combine_template['y']);
 					$this->current_template_index = $schema['template_page'];
@@ -347,7 +347,7 @@ class ChequeForms_Base {
 				unset($combine_templates);
 				$this->setPageOffsets( 0, 0 ); //Reset page offsets after each template is initialized.
 			} else {
-				$pdf->useTemplate( $this->template_index[$schema['template_page']],$this->getTemplateOffsets('x'), $this->getTemplateOffsets('y') );
+				$pdf->useTemplate( $this->template_index[$schema['template_page']], $this->getTemplateOffsets('x'), $this->getTemplateOffsets('y') );
 			}
 		}
 		$this->current_template_index = $schema['template_page'];
@@ -439,13 +439,13 @@ class ChequeForms_Base {
 			//var_dump( Debug::BackTrace() );
 
 			if ( isset($coordinates['text_color']) AND is_array( $coordinates['text_color'] ) ) {
-				$pdf->setTextColor( $coordinates['text_color'][0],$coordinates['text_color'][1],$coordinates['text_color'][2] );
+				$pdf->setTextColor( $coordinates['text_color'][0], $coordinates['text_color'][1], $coordinates['text_color'][2] );
 			} else {
 				$pdf->setTextColor( 0, 0, 0 ); //Black text.
 			}
 
 			if ( isset($coordinates['fill_color']) AND is_array( $coordinates['fill_color'] ) ) {
-				$pdf->setFillColor( $coordinates['fill_color'][0],$coordinates['fill_color'][1],$coordinates['fill_color'][2] );
+				$pdf->setFillColor( $coordinates['fill_color'][0], $coordinates['fill_color'][1], $coordinates['fill_color'][2] );
 				$coordinates['fill'] = 1;
 			} else {
 				$pdf->setFillColor( 255, 255, 255 ); //White
@@ -455,7 +455,7 @@ class ChequeForms_Base {
 			$pdf->setXY( $coordinates['x']+$this->getPageOffsets('x'), $coordinates['y']+$this->getPageOffsets('y') );
 
 			if ( $this->getDebug() == TRUE ) {
-				$pdf->setDrawColor( 0, 0 , 255 );
+				$pdf->setDrawColor( 0, 0, 255 );
 				$coordinates['border'] = 1;
 			} else {
 				if ( !isset($coordinates['border']) ) {
@@ -465,10 +465,10 @@ class ChequeForms_Base {
 
 			if ( isset($schema['multicell']) AND $schema['multicell'] == TRUE ) {
 				//Debug::text('Drawing MultiCell... Value: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-				$pdf->MultiCell( $coordinates['w'],$coordinates['h'], $value , $coordinates['border'], strtoupper($coordinates['halign']), $coordinates['fill'] );
+				$pdf->MultiCell( $coordinates['w'], $coordinates['h'], $value, $coordinates['border'], strtoupper($coordinates['halign']), $coordinates['fill'] );
 			} else {
 				//Debug::text('Drawing Cell... Value: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-				$pdf->Cell( $coordinates['w'],$coordinates['h'], $value , $coordinates['border'], 0, strtoupper($coordinates['halign']), $coordinates['fill'] );
+				$pdf->Cell( $coordinates['w'], $coordinates['h'], $value, $coordinates['border'], 0, strtoupper($coordinates['halign']), $coordinates['fill'] );
 			}
 			unset($coordinates);
 		} else {

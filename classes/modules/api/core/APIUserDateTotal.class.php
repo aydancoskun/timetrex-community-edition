@@ -58,7 +58,7 @@ class APIUserDateTotal extends APIFactory {
 	function getUserDateTotalDefaultData( $user_id = NULL, $date = NULL ) {
 		$company_obj = $this->getCurrentCompanyObject();
 
-		Debug::Text('Getting user_date_total default data...', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Getting user_date_total default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		$data = array(
 						'branch_id' => $this->getCurrentUserObject()->getDefaultBranch(),
@@ -79,7 +79,7 @@ class APIUserDateTotal extends APIFactory {
 		}
 		unset($ulf, $user_obj);
 
-		Debug::Arr($data, 'Default data: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Arr($data, 'Default data: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $this->returnHandler( $data );
 	}
 
@@ -89,8 +89,8 @@ class APIUserDateTotal extends APIFactory {
 	 * @return array
 	 */
 	function getCombinedUserDateTotal( $data = NULL ) {
-		if ( !$this->getPermissionObject()->Check('punch','enabled')
-				OR !( $this->getPermissionObject()->Check('punch','view') OR $this->getPermissionObject()->Check('punch','view_child')  ) ) {
+		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
+				OR !( $this->getPermissionObject()->Check('punch', 'view') OR $this->getPermissionObject()->Check('punch', 'view_child')  ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
@@ -111,12 +111,12 @@ class APIUserDateTotal extends APIFactory {
 	 * @return array
 	 */
 	function getUserDateTotal( $data = NULL, $disable_paging = FALSE ) {
-		//if ( !$this->getPermissionObject()->Check('punch','enabled')
-		//OR !( $this->getPermissionObject()->Check('punch','view') OR $this->getPermissionObject()->Check('punch','view_child')  ) ) {
+		//if ( !$this->getPermissionObject()->Check('punch', 'enabled')
+		//OR !( $this->getPermissionObject()->Check('punch', 'view') OR $this->getPermissionObject()->Check('punch', 'view_child')	) ) {
 
 		//Regular employees with permissions to edit their own absences need this.
-		if ( !$this->getPermissionObject()->Check('punch','enabled')
-				OR !( $this->getPermissionObject()->Check('punch','view') OR $this->getPermissionObject()->Check('punch','view_own') OR $this->getPermissionObject()->Check('punch','view_child') ) ) {
+		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
+				OR !( $this->getPermissionObject()->Check('punch', 'view') OR $this->getPermissionObject()->Check('punch', 'view_own') OR $this->getPermissionObject()->Check('punch', 'view_child') ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
@@ -177,9 +177,9 @@ class APIUserDateTotal extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('punch','enabled')
-				OR !( $this->getPermissionObject()->Check('punch','edit') OR $this->getPermissionObject()->Check('punch','edit_own') OR $this->getPermissionObject()->Check('punch','edit_child') OR $this->getPermissionObject()->Check('punch','add') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
+				OR !( $this->getPermissionObject()->Check('punch', 'edit') OR $this->getPermissionObject()->Check('punch', 'edit_own') OR $this->getPermissionObject()->Check('punch', 'edit_child') OR $this->getPermissionObject()->Check('punch', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		if ( $validate_only == TRUE ) {
@@ -211,12 +211,12 @@ class APIUserDateTotal extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if (
-							  $validate_only == TRUE
-							  OR
+							$validate_only == TRUE
+							OR
 								(
-								$this->getPermissionObject()->Check('punch','edit')
-									OR ( $this->getPermissionObject()->Check('punch','edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
-									OR ( $this->getPermissionObject()->Check('punch','edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )
+								$this->getPermissionObject()->Check('punch', 'edit')
+									OR ( $this->getPermissionObject()->Check('punch', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('punch', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -224,7 +224,7 @@ class APIUserDateTotal extends APIFactory {
 
 							//When editing a record if the date changes, we need to recalculate the old date.
 							//This must occur before we merge the data together.
-							if ( 	( isset($row['user_date_id'])
+							if (	( isset($row['user_date_id'])
 										AND $lf->getUserDateID() != $row['user_date_id'] )
 									OR
 									( isset($row['date_stamp'])
@@ -245,14 +245,14 @@ class APIUserDateTotal extends APIFactory {
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					if (    !( $validate_only == TRUE
+					if (	!( $validate_only == TRUE
 								OR
-								( $this->getPermissionObject()->Check('punch','add')
+								( $this->getPermissionObject()->Check('punch', 'add')
 									AND
 									(
-										$this->getPermissionObject()->Check('punch','edit')
-										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('punch','edit_own') AND $this->getPermissionObject()->isOwner( FALSE, $row['user_id'] ) === TRUE ) //We don't know the created_by of the user at this point, but only check if the user is assigned to the logged in person.
-										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('punch','edit_child') AND $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === TRUE )
+										$this->getPermissionObject()->Check('punch', 'edit')
+										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('punch', 'edit_own') AND $this->getPermissionObject()->isOwner( FALSE, $row['user_id'] ) === TRUE ) //We don't know the created_by of the user at this point, but only check if the user is assigned to the logged in person.
+										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('punch', 'edit_child') AND $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === TRUE )
 									)
 								)
 							) ) {
@@ -343,9 +343,9 @@ class APIUserDateTotal extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('punch','enabled')
-				OR !( $this->getPermissionObject()->Check('punch','delete') OR $this->getPermissionObject()->Check('punch','delete_own') OR $this->getPermissionObject()->Check('punch','delete_child') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
+				OR !( $this->getPermissionObject()->Check('punch', 'delete') OR $this->getPermissionObject()->Check('punch', 'delete_own') OR $this->getPermissionObject()->Check('punch', 'delete_child') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
@@ -369,9 +369,9 @@ class APIUserDateTotal extends APIFactory {
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
-						if ( $this->getPermissionObject()->Check('punch','delete')
-								OR ( $this->getPermissionObject()->Check('punch','delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
-								OR ( $this->getPermissionObject()->Check('punch','delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )) {
+						if ( $this->getPermissionObject()->Check('punch', 'delete')
+								OR ( $this->getPermissionObject()->Check('punch', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+								OR ( $this->getPermissionObject()->Check('punch', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )) {
 							Debug::Text('Record Exists, deleting record: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
@@ -459,7 +459,7 @@ class APIUserDateTotal extends APIFactory {
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {
-				unset($src_rows[$key]['id'],$src_rows[$key]['manual_id'] ); //Clear fields that can't be copied
+				unset($src_rows[$key]['id'], $src_rows[$key]['manual_id'] ); //Clear fields that can't be copied
 				$src_rows[$key]['name'] = Misc::generateCopyName( $row['name'] ); //Generate unique name
 			}
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);

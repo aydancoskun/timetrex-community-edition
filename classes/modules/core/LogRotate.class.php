@@ -47,25 +47,25 @@
  - Example config array:
 
  $log_rotate_config[] = array(
-                            'directory' => '/var/log/timetrex',
-                            'recurse' => TRUE,
-                            'file' => '*',
-                            'frequency' => 'DAILY',
-                            'history' =>  5 );
+							'directory' => '/var/log/timetrex',
+							'recurse' => TRUE,
+							'file' => '*',
+							'frequency' => 'DAILY',
+							'history' =>  5 );
 */
 class LogRotate {
 
-    private $config_arr = array();
+	private $config_arr = array();
 
-    function __construct( $config_arr = NULL ) {
-        $this->config_arr = $config_arr;
+	function __construct( $config_arr = NULL ) {
+		$this->config_arr = $config_arr;
 		return TRUE;
-    }
+	}
 
-    function addConfig( $arr ) {
-        $this->config_arr[] = $arr;
-        return TRUE;
-    }
+	function addConfig( $arr ) {
+		$this->config_arr[] = $arr;
+		return TRUE;
+	}
 
 	function getFileList( $start_dir, $regex_filter = NULL, $recurse = FALSE ) {
 		return Misc::getFileList( $start_dir, $regex_filter, $recurse );
@@ -95,7 +95,7 @@ class LogRotate {
 	//Checks to see if the file has a numeric extension signifying that it is not a primary file and has already been rotated.
 	function isFileRotatable( $file ) {
 		$extension = pathinfo( $file, PATHINFO_EXTENSION );
-		//Debug::Text(' File:  '. $file .' Extension: '. $extension , __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Text(' File:  '. $file .' Extension: '. $extension, __FILE__, __LINE__, __METHOD__, 10);
 
 		//Only rotate if the file size is greater then 0 bytes.
 		if ( !is_numeric( $extension ) AND file_exists($file) AND filesize( $file ) > 0 ) {
@@ -108,7 +108,7 @@ class LogRotate {
 	function getRotatedHistoryFiles( $files, $primary_file ) {
 		if ( is_array($files) ) {
 			foreach( $files as $key => $filename ) {
-				$pattern = '/'. str_replace( array('/','\\'), array('\\','\\\\'), $primary_file) .'\.[0-9]{1,2}/i';
+				$pattern = '/'. str_replace( array('/', '\\'), array('\\', '\\\\'), $primary_file) .'\.[0-9]{1,2}/i';
 				//Debug::Text(' Pattern: '. $pattern, __FILE__, __LINE__, __METHOD__, 10);
 				if ( preg_match( $pattern, $filename) == 1 ) {
 					$retarr[] = $filename;
@@ -138,7 +138,7 @@ class LogRotate {
 			foreach( $files as $key => $filename ) {
 				$path_info = pathinfo( $filename );
 
-				$new_extension = $this->padExtension( ((int)$path_info['extension']+1), $history );
+				$new_extension = $this->padExtension( ((int)$path_info['extension'] + 1), $history );
 				$new_file = $path_info['dirname'] . DIRECTORY_SEPARATOR . $path_info['filename'] . '.' . $new_extension;
 
 				if ( $new_extension > $history AND is_writable( $filename ) ) {
@@ -168,7 +168,7 @@ class LogRotate {
 					Debug::Text(' File IS a primary log file: '. $filename, __FILE__, __LINE__, __METHOD__, 10);
 
 					if ( $this->isFileReadyToRotate( $filename, $rotate_config['frequency']) == TRUE ) {
-						Debug::Text(' File is old enough to be rotated: '. $filename , __FILE__, __LINE__, __METHOD__, 10);
+						Debug::Text(' File is old enough to be rotated: '. $filename, __FILE__, __LINE__, __METHOD__, 10);
 
 						$this->handleHistoryFiles( $this->getRotatedHistoryFiles( $files, $filename ), $rotate_config['history'] );
 
@@ -183,7 +183,7 @@ class LogRotate {
 						unset($new_file);
 
 					} else {
-						Debug::Text(' File does not need to be rotated yet: '. $filename , __FILE__, __LINE__, __METHOD__, 10);
+						Debug::Text(' File does not need to be rotated yet: '. $filename, __FILE__, __LINE__, __METHOD__, 10);
 					}
 				} else {
 					Debug::Text(' File is not a primary log file: '. $filename, __FILE__, __LINE__, __METHOD__, 10);
@@ -194,7 +194,7 @@ class LogRotate {
 		return TRUE;
 	}
 
-    function Rotate() {
+	function Rotate() {
 		//Loop through config entries
 		if ( is_array($this->config_arr) AND isset($this->config_arr[0]) ) {
 			foreach( $this->config_arr as $rotate_config ) {
@@ -216,7 +216,7 @@ class LogRotate {
 			Debug::Text(' No config loaded!', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-        return TRUE;
-    }
+		return TRUE;
+	}
 }
 ?>

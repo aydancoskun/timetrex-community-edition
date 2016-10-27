@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 5166 $
- * $Id: EditUserPassword.php 5166 2011-08-26 23:01:36Z ipso $
- * $Date: 2011-08-26 16:01:36 -0700 (Fri, 26 Aug 2011) $
+ * $Revision: 12173 $
+ * $Id: EditUserPassword.php 12173 2014-01-29 16:58:10Z mikeb $
+ * $Date: 2014-01-29 08:58:10 -0800 (Wed, 29 Jan 2014) $
  */
 require_once('../../includes/global.inc.php');
 require_once(Environment::getBasePath() .'includes/Interface.inc.php');
@@ -120,7 +120,7 @@ switch ($action) {
 					//Probably coming from the user list.
 					Redirect::Page( URLBuilder::getURL(NULL, 'UserList.php') );
 				} else {
-					Redirect::Page( URLBuilder::getURL(NULL, '../index.php') );
+					Redirect::Page( URLBuilder::getURL(NULL, '../index_legacy.php') );
 				}
 
 				break;

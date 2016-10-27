@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: UserDefaultCompanyDeductionFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 12026 $
+ * $Id: UserDefaultCompanyDeductionFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -48,7 +48,7 @@ class UserDefaultCompanyDeductionFactory extends Factory {
 	
 	function getUserDefault() {
 		if ( isset($this->data['user_default_id']) ) {
-			return $this->data['user_default_id'];
+			return (int)$this->data['user_default_id'];
 		}
 
 		return FALSE;
@@ -56,7 +56,7 @@ class UserDefaultCompanyDeductionFactory extends Factory {
 	function setUserDefault($id) {
 		$id = trim($id);
 
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$udlf = TTnew( 'UserDefaultListFactory' );
 
 		if (
@@ -75,7 +75,7 @@ class UserDefaultCompanyDeductionFactory extends Factory {
 
 	function getCompanyDeduction() {
 		if ( isset($this->data['company_deduction_id']) ) {
-			return $this->data['company_deduction_id'];
+			return (int)$this->data['company_deduction_id'];
 		}
 
 		return FALSE;
@@ -83,7 +83,7 @@ class UserDefaultCompanyDeductionFactory extends Factory {
 	function setCompanyDeduction($id) {
 		$id = trim($id);
 
-		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$cdlf = TTnew( 'CompanyDeductionListFactory' );
 
 		if (

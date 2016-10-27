@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11513 $
- * $Id: StationBranchListFactory.class.php 11513 2013-11-26 23:33:58Z mikeb $
- * $Date: 2013-11-26 15:33:58 -0800 (Tue, 26 Nov 2013) $
+ * $Revision: 11830 $
+ * $Id: StationBranchListFactory.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -46,7 +46,7 @@ class StationBranchListFactory extends StationBranchFactory implements IteratorA
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable();
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -66,7 +66,7 @@ class StationBranchListFactory extends StationBranchFactory implements IteratorA
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 					';
@@ -90,7 +90,7 @@ class StationBranchListFactory extends StationBranchFactory implements IteratorA
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $sf->getTable() .' as b
 					where	b.id = a.station_id
@@ -118,7 +118,7 @@ class StationBranchListFactory extends StationBranchFactory implements IteratorA
 		//When adding a new station, since we can set data in child tables
 		//we need to return data even if no station record exists yet, but never if the station record is deleted.
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 							LEFT JOIN '. $sf->getTable() .' as b ON ( b.id = a.station_id )
 					where	a.station_id = ?

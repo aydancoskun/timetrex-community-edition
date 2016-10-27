@@ -34,15 +34,15 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: HierarchyShareFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 12026 $
+ * $Id: HierarchyShareFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 /*
 CREATE TABLE hierarchy_share (
-    id serial NOT NULL,
-    hierarchy_control_id integer DEFAULT 0 NOT NULL,
-    user_id integer DEFAULT 0 NOT NULL
+	id serial NOT NULL,
+	hierarchy_control_id integer DEFAULT 0 NOT NULL,
+	user_id integer DEFAULT 0 NOT NULL
 ) WITHOUT OIDS;
 */
 
@@ -53,7 +53,7 @@ class HierarchyShareFactory extends Factory {
 	protected $table = 'hierarchy_share';
 	protected $pk_sequence_name = 'hierarchy_share_id_seq'; //PK Sequence name
 	function getHierarchyControl() {
-		return $this->data['hierarchy_control_id'];
+		return (int)$this->data['hierarchy_control_id'];
 	}
 	function setHierarchyControl($id) {
 		$id = trim($id);
@@ -73,7 +73,7 @@ class HierarchyShareFactory extends Factory {
 	}
 
 	function getUser() {
-		return $this->data['user_id'];
+		return (int)$this->data['user_id'];
 	}
 	function setUser($id) {
 		$id = trim($id);

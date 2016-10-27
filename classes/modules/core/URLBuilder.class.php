@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 2095 $
- * $Id: URLBuilder.class.php 2095 2008-09-01 07:04:25Z ipso $
- * $Date: 2008-09-01 00:04:25 -0700 (Mon, 01 Sep 2008) $
+ * $Revision: 11830 $
+ * $Id: URLBuilder.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -93,9 +93,8 @@ class URLBuilder {
 			$array = array_merge(self::$data, $array);
 		} elseif ($array == NULL AND $merge == TRUE) {
 			$array = self::$data;
-		} else {
-			//Use $array as is.
-		}
+		} //else Use $array as is.
+
 		//Debug::Arr($array, 'bAfter: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ($script == NULL) {

@@ -40,8 +40,10 @@
  */
 require_once('PHPUnit/Framework/TestCase.php');
 
+/**
+ * @group Schedule
+ */
 class ScheduleTest extends PHPUnit_Framework_TestCase {
-
 	protected $company_id = NULL;
 	protected $user_id = NULL;
 	protected $pay_period_schedule_id = NULL;
@@ -214,7 +216,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 
 	}
 
-	function createPayPeriods() {
+	function createPayPeriods( $initial_date = FALSE ) {
 		$max_pay_periods = 35;
 
 		$ppslf = new PayPeriodScheduleListFactory();
@@ -222,11 +224,14 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		if ( $ppslf->getRecordCount() > 0 ) {
 			$pps_obj = $ppslf->getCurrent();
 
-
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
-					//$end_date = TTDate::getBeginYearEpoch( strtotime('01-Jan-07') );
-					$end_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() )-(86400*(7*6) ) ) );
+					if ( $initial_date !== FALSE ) {
+						$end_date = $initial_date;
+					} else {
+						//$end_date = TTDate::getBeginYearEpoch( strtotime('01-Jan-07') );
+						$end_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() )-(86400*(7*6) ) ) );
+					}
 				} else {
 					$end_date = $end_date + ( (86400*14) );
 				}
@@ -240,7 +245,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
-
+	
 	function createMealPolicy( $type_id ) {
 		$mpf = TTnew( 'MealPolicyFactory' );
 
@@ -661,13 +666,13 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 
 		$this->createPayPeriodSchedule( 10 );
-		$this->createPayPeriods();
+		$this->createPayPeriods( strtotime('01-Jan-2013') );
 		$this->getAllPayPeriods();
 
-		$date_epoch = strtotime('02-Nov'); //Use current year
+		$date_epoch = strtotime('02-Nov-2013'); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = strtotime('03-Nov'); //Use current year
+		$date_epoch2 = strtotime('03-Nov-2013'); //Use current year
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
@@ -695,13 +700,13 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 
 		$this->createPayPeriodSchedule( 10 );
-		$this->createPayPeriods();
+		$this->createPayPeriods( strtotime('01-Jan-2013') );
 		$this->getAllPayPeriods();
 
-		$date_epoch = strtotime('09-Mar'); //Use current year
+		$date_epoch = strtotime('09-Mar-2013'); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = strtotime('10-Mar'); //Use current year
+		$date_epoch2 = strtotime('10-Mar-2013'); //Use current year
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(

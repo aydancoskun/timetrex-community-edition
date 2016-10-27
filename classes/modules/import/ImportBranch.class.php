@@ -70,7 +70,7 @@ class ImportBranch extends Import {
 
 
 	function _preParseRow( $row_number, $raw_row ) {
-		$retval = $this->getObject()->getBranchDefaultData();
+		$retval = $this->getObject()->stripReturnHandler( $this->getObject()->getBranchDefaultData() );
 		$retval['manual_id'] += $row_number; //Auto increment manual_id automatically.
 
 		return $retval;

@@ -74,7 +74,7 @@ class CompanyGenericTagMapFactory extends Factory {
 
 	function getObjectType() {
 		if ( isset($this->data['object_type_id']) ) {
-			return $this->data['object_type_id'];
+			return (int)$this->data['object_type_id'];
 		}
 
 		return FALSE;
@@ -97,7 +97,7 @@ class CompanyGenericTagMapFactory extends Factory {
 
 	function getObjectID() {
 		if ( isset($this->data['object_id']) ) {
-			return $this->data['object_id'];
+			return (int)$this->data['object_id'];
 		}
 
 		return FALSE;
@@ -121,7 +121,7 @@ class CompanyGenericTagMapFactory extends Factory {
 
 	function getTagID() {
 		if ( isset($this->data['tag_id']) ) {
-			return $this->data['tag_id'];
+			return (int)$this->data['tag_id'];
 		}
 
 		return FALSE;

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: HelpGroupFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 12026 $
+ * $Id: HelpGroupFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -46,7 +46,7 @@ class HelpGroupFactory extends Factory {
 	protected $table = 'help_group';
 	protected $pk_sequence_name = 'help_group_id_seq'; //PK Sequence name
 	function getHelpGroupControl() {
-		return $this->data['help_group_control_id'];
+		return (int)$this->data['help_group_control_id'];
 	}
 	function setHelpGroupControl($id) {
 		$id = trim($id);
@@ -66,7 +66,7 @@ class HelpGroupFactory extends Factory {
 	}
 
 	function getHelp() {
-		return $this->data['help_id'];
+		return (int)$this->data['help_id'];
 	}
 	function setHelp($id) {
 		$id = trim($id);

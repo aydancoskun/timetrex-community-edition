@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10788 $
- * $Id: UserGenericStatusListFactory.class.php 10788 2013-08-30 23:55:26Z ipso $
- * $Date: 2013-08-30 16:55:26 -0700 (Fri, 30 Aug 2013) $
+ * $Revision: 11830 $
+ * $Id: UserGenericStatusListFactory.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -46,7 +46,7 @@ class UserGenericStatusListFactory extends UserGenericStatusFactory implements I
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
@@ -67,7 +67,7 @@ class UserGenericStatusListFactory extends UserGenericStatusFactory implements I
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 						AND deleted = 0';
@@ -79,7 +79,7 @@ class UserGenericStatusListFactory extends UserGenericStatusFactory implements I
 		return $this;
 	}
 
-    function getByCompanyId($company_id, $where = NULL, $order = NULL) {
+	function getByCompanyId($company_id, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -91,7 +91,7 @@ class UserGenericStatusListFactory extends UserGenericStatusFactory implements I
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 						LEFT JOIN  '. $uf->getTable() .' as b on a.user_id = b.id
 					where	b.company_id = ?
@@ -99,12 +99,12 @@ class UserGenericStatusListFactory extends UserGenericStatusFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL($query,$ph);
+		$this->ExecuteSQL($query, $ph);
 
 		return $this;
 	}
 
-    function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
+	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
 		}
@@ -121,7 +121,7 @@ class UserGenericStatusListFactory extends UserGenericStatusFactory implements I
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 						LEFT JOIN  '. $uf->getTable() .' as b on a.user_id = b.id
 					where	a.id = ?
@@ -130,7 +130,7 @@ class UserGenericStatusListFactory extends UserGenericStatusFactory implements I
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL($query,$ph);
+		$this->ExecuteSQL($query, $ph);
 
 		return $this;
 	}
@@ -145,7 +145,7 @@ class UserGenericStatusListFactory extends UserGenericStatusFactory implements I
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	user_id = ?
 						AND deleted = 0';
@@ -184,7 +184,7 @@ class UserGenericStatusListFactory extends UserGenericStatusFactory implements I
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	user_id = ?
 						AND batch_id = ?
@@ -217,7 +217,7 @@ class UserGenericStatusListFactory extends UserGenericStatusFactory implements I
 					);
 
 		$query = '
-					select 	status_id,count(*) as total
+					select	status_id, count(*) as total
 					from	'. $this->getTable() .'
 					where	user_id = ?
 						AND batch_id = ?
@@ -230,7 +230,7 @@ class UserGenericStatusListFactory extends UserGenericStatusFactory implements I
 
 		$total = 0;
 		foreach( $result as $row ) {
-			$total = $total + $row['total'];
+			$total = ( $total + $row['total'] );
 		}
 		$retarr['total'] = $total;
 
@@ -241,7 +241,7 @@ class UserGenericStatusListFactory extends UserGenericStatusFactory implements I
 								);
 
 		foreach( $result as $row ) {
-			$retarr['status'][$row['status_id']] = array('total' => $row['total'], 'percent' => round( ($row['total'] / $total) * 100, 1 ) );
+			$retarr['status'][$row['status_id']] = array('total' => $row['total'], 'percent' => round( ( ($row['total'] / $total) * 100 ), 1 ) );
 		}
 
 		if ( isset($retarr) ) {

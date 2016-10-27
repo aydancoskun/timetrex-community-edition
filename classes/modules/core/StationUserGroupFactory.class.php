@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 5089 $
- * $Id: StationUserGroupFactory.class.php 5089 2011-08-06 19:51:55Z ipso $
- * $Date: 2011-08-06 12:51:55 -0700 (Sat, 06 Aug 2011) $
+ * $Revision: 12026 $
+ * $Id: StationUserGroupFactory.class.php 12026 2014-01-15 22:23:00Z mikeb $
+ * $Date: 2014-01-15 14:23:00 -0800 (Wed, 15 Jan 2014) $
  */
 
 /**
@@ -50,7 +50,7 @@ class StationUserGroupFactory extends Factory {
 
 	function getStation() {
 		if ( isset($this->data['station_id']) ) {
-			return $this->data['station_id'];
+			return (int)$this->data['station_id'];
 		}
 	}
 	function setStation($id) {
@@ -95,7 +95,7 @@ class StationUserGroupFactory extends Factory {
 	}
 	function getGroup() {
 		if ( isset($this->data['group_id']) ) {
-			return $this->data['group_id'];
+			return (int)$this->data['group_id'];
 		}
 
 		return FALSE;
@@ -168,7 +168,7 @@ class StationUserGroupFactory extends Factory {
 	function addLog( $log_action ) {
 		$g_obj = $this->getGroupObject();
 		if ( is_object($g_obj) ) {
-			return TTLog::addEntry( $this->getStation(), $log_action, TTi18n::getText('Group').': '. $g_obj->getName() , NULL, $this->getTable() );
+			return TTLog::addEntry( $this->getStation(), $log_action, TTi18n::getText('Group').': '. $g_obj->getName(), NULL, $this->getTable() );
 		}
 
 		return FALSE;

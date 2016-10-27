@@ -51,7 +51,7 @@ class APIUserContact extends APIFactory {
 		return TRUE;
 	}
 
-    /**
+	/**
 	 * Get options for dropdown boxes.
 	 * @param string $name Name of options to return, ie: 'columns', 'type', 'status'
 	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
@@ -59,8 +59,8 @@ class APIUserContact extends APIFactory {
 	 */
 	function getOptions( $name, $parent = NULL ) {
 		if ( $name == 'columns'
-				AND ( !$this->getPermissionObject()->Check('user_contact','enabled')
-					OR !( $this->getPermissionObject()->Check('user_contact','view') OR $this->getPermissionObject()->Check('user_contact','view_own') OR $this->getPermissionObject()->Check('user_contact','view_child') ) ) ) {
+				AND ( !$this->getPermissionObject()->Check('user_contact', 'enabled')
+					OR !( $this->getPermissionObject()->Check('user_contact', 'view') OR $this->getPermissionObject()->Check('user_contact', 'view_own') OR $this->getPermissionObject()->Check('user_contact', 'view_child') ) ) ) {
 			$name = 'list_columns';
 		}
 
@@ -74,13 +74,13 @@ class APIUserContact extends APIFactory {
 
 		//Allow getting default data from other companies, so it makes it easier to create the first employee of a company.
 		$company_id = $this->getCurrentCompanyObject()->getId();
-		Debug::Text('Getting user contact default data for Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Getting user contact default data for Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get New Hire Defaults.
 		$udlf = TTnew( 'UserDefaultListFactory' );
 		$udlf->getByCompanyId( $company_id );
 		if ( $udlf->getRecordCount() > 0 ) {
-			Debug::Text('Using User Defaults, as they exist...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Using User Defaults, as they exist...', __FILE__, __LINE__, __METHOD__, 10);
 			$udf_obj = $udlf->getCurrent();
 
 			$data = array(
@@ -103,13 +103,13 @@ class APIUserContact extends APIFactory {
 	 * @return array
 	 */
 	function getUserContact( $data = NULL, $disable_paging = FALSE ) {
-		if ( !$this->getPermissionObject()->Check('user_contact','enabled')
-				OR !( $this->getPermissionObject()->Check('user_contact','view') OR $this->getPermissionObject()->Check('user_contact','view_own') OR $this->getPermissionObject()->Check('user_contact','view_child')  ) ) {
+		if ( !$this->getPermissionObject()->Check('user_contact', 'enabled')
+				OR !( $this->getPermissionObject()->Check('user_contact', 'view') OR $this->getPermissionObject()->Check('user_contact', 'view_own') OR $this->getPermissionObject()->Check('user_contact', 'view_child')  ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
-		//We need to take into account different permissions, ie: punch->view,view_child,view_own when displaying the dropdown
+		//We need to take into account different permissions, ie: punch->view, view_child, view_own when displaying the dropdown
 		//box in the TimeSheet view and other views as well. Allow the caller of this function to pass a "permission_section"
 		//that can be used to determine this.
 		if ( isset($data['permission_section']) AND $data['permission_section'] != '' ) {
@@ -126,7 +126,7 @@ class APIUserContact extends APIFactory {
 		//Allow getting users from other companies, so we can change admin contacts when using the master company.
 		if ( isset($data['filter_data']['company_id'])
 				AND $data['filter_data']['company_id'] > 0
-				AND ( $this->getPermissionObject()->Check('company','enabled') AND $this->getPermissionObject()->Check('company','edit') ) ) {
+				AND ( $this->getPermissionObject()->Check('company', 'enabled') AND $this->getPermissionObject()->Check('company', 'edit') ) ) {
 			$company_id = $data['filter_data']['company_id'];
 		} else {
 			$company_id = $this->getCurrentCompanyObject()->getId();
@@ -143,7 +143,7 @@ class APIUserContact extends APIFactory {
 				$user_data = $uc_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
 				//Hide SIN if user doesn't have permissions to see it.
-				if ( isset($user_data['sin']) AND $user_data['sin'] != '' AND $this->getPermissionObject()->Check('user_contact','view_sin') == FALSE ) {
+				if ( isset($user_data['sin']) AND $user_data['sin'] != '' AND $this->getPermissionObject()->Check('user_contact', 'view_sin') == FALSE ) {
 					$user_data['sin'] = $uc_obj->getSecureSIN();
 				}
 
@@ -190,9 +190,9 @@ class APIUserContact extends APIFactory {
 		if ( !is_array($data) ) {
 			return $this->returnHandler( FALSE );
 		}
-		if ( !$this->getPermissionObject()->Check('user_contact','enabled')
-				OR !( $this->getPermissionObject()->Check('user_contact','edit') OR $this->getPermissionObject()->Check('user_contact','edit_own') OR $this->getPermissionObject()->Check('user_contact','edit_child') OR $this->getPermissionObject()->Check('user_contact','add') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('user_contact', 'enabled')
+				OR !( $this->getPermissionObject()->Check('user_contact', 'edit') OR $this->getPermissionObject()->Check('user_contact', 'edit_own') OR $this->getPermissionObject()->Check('user_contact', 'edit_child') OR $this->getPermissionObject()->Check('user_contact', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		if ( $validate_only == TRUE ) {
@@ -223,12 +223,12 @@ class APIUserContact extends APIFactory {
 						//Object exists, check edit permissions
 						//Debug::Text('User ID: '. $row['id'] .' Created By: '. $lf->getCurrent()->getCreatedBy() .' Is Owner: '. (int)$this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) .' Is Child: '. (int)$this->getPermissionObject()->isChild( $lf->getCurrent()->getId(), $permission_children_ids ), __FILE__, __LINE__, __METHOD__, 10);
 						if (
-							  $validate_only == TRUE
-							  OR
+							$validate_only == TRUE
+							OR
 								(
-								$this->getPermissionObject()->Check('user_contact','edit')
-									OR ( $this->getPermissionObject()->Check('user_contact','edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
-									OR ( $this->getPermissionObject()->Check('user_contact','edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
+								$this->getPermissionObject()->Check('user_contact', 'edit')
+									OR ( $this->getPermissionObject()->Check('user_contact', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('user_contact', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -243,14 +243,14 @@ class APIUserContact extends APIFactory {
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					if (    !( $validate_only == TRUE
+					if (	!( $validate_only == TRUE
 								OR
-								( $this->getPermissionObject()->Check('user_contact','add')
+								( $this->getPermissionObject()->Check('user_contact', 'add')
 									AND
 									(
-										$this->getPermissionObject()->Check('user_contact','edit')
-										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('user_contact','edit_own') AND $this->getPermissionObject()->isOwner( FALSE, $row['user_id'] ) === TRUE ) //We don't know the created_by of the user at this point, but only check if the user is assigned to the logged in person.
-										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('user_contact','edit_child') AND $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === TRUE )
+										$this->getPermissionObject()->Check('user_contact', 'edit')
+										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('user_contact', 'edit_own') AND $this->getPermissionObject()->isOwner( FALSE, $row['user_id'] ) === TRUE ) //We don't know the created_by of the user at this point, but only check if the user is assigned to the logged in person.
+										OR ( isset($row['user_id']) AND $this->getPermissionObject()->Check('user_contact', 'edit_child') AND $this->getPermissionObject()->isChild( $row['user_id'], $permission_children_ids ) === TRUE )
 									)
 								)
 							) ) {
@@ -272,7 +272,7 @@ class APIUserContact extends APIFactory {
 					//If the user doesn't have permissions to change the hierarchy_control, unset that data.
 
 					//Force Company ID to current company.
-					if ( !isset($row['company_id']) OR !$this->getPermissionObject()->Check('company','add') ) {
+					if ( !isset($row['company_id']) OR !$this->getPermissionObject()->Check('company', 'add') ) {
 						//$lf->setCompany( $this->getCurrentCompanyObject()->getId() );
 						$row['company_id'] = $this->getCurrentCompanyObject()->getId();
 					}
@@ -309,7 +309,7 @@ class APIUserContact extends APIFactory {
 						$validator[$key] = $lf->Validator->getErrorsArray();
 					}
 				} elseif ( $validate_only == TRUE ) {
-					//Always fail transaction when valididate only is used, as  is saved to different tables immediately.
+					//Always fail transaction when valididate only is used, as	is saved to different tables immediately.
 					$lf->FailTransaction();
 				}
 
@@ -348,9 +348,9 @@ class APIUserContact extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('user_contact','enabled')
-				OR !( $this->getPermissionObject()->Check('user_contact','delete') OR $this->getPermissionObject()->Check('user_contact','delete_own') OR $this->getPermissionObject()->Check('user_contact','delete_child') ) ) {
-			return  $this->getPermissionObject()->PermissionDenied();
+		if ( !$this->getPermissionObject()->Check('user_contact', 'enabled')
+				OR !( $this->getPermissionObject()->Check('user_contact', 'delete') OR $this->getPermissionObject()->Check('user_contact', 'delete_own') OR $this->getPermissionObject()->Check('user_contact', 'delete_child') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
@@ -375,9 +375,9 @@ class APIUserContact extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						//Debug::Text('User ID: '. $user['id'] .' Created By: '. $lf->getCurrent()->getCreatedBy() .' Is Owner: '. (int)$this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) .' Is Child: '. (int)$this->getPermissionObject()->isChild( $lf->getCurrent()->getId(), $permission_children_ids ), __FILE__, __LINE__, __METHOD__, 10);
-						if ( $this->getPermissionObject()->Check('user_contact','delete')
-								OR ( $this->getPermissionObject()->Check('user_contact','delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
-								OR ( $this->getPermissionObject()->Check('user_contact','delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )) {
+						if ( $this->getPermissionObject()->Check('user_contact', 'delete')
+								OR ( $this->getPermissionObject()->Check('user_contact', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
+								OR ( $this->getPermissionObject()->Check('user_contact', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )) {
 
 							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();

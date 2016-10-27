@@ -55,7 +55,7 @@ class ImportBankAccount extends Import {
 		switch( $name ) {
 			case 'columns':
 				$baf = TTNew('BankAccountFactory');
-				$retval = Misc::prependArray( $this->getUserIdentificationColumns(), Misc::arrayIntersectByKey( array('transit','institution','account'), Misc::trimSortPrefix( $baf->getOptions('columns') ) ) );
+				$retval = Misc::prependArray( $this->getUserIdentificationColumns(), Misc::arrayIntersectByKey( array('transit', 'institution', 'account'), Misc::trimSortPrefix( $baf->getOptions('columns') ) ) );
 
 				break;
 			case 'column_aliases':
@@ -86,7 +86,7 @@ class ImportBankAccount extends Import {
 
 
 	function _preParseRow( $row_number, $raw_row ) {
-		$retval = $this->getObject()->getBankAccountDefaultData();
+		$retval = $this->getObject()->stripReturnHandler( $this->getObject()->getBankAccountDefaultData() );
 
 		return $retval;
 	}

@@ -194,6 +194,20 @@
 								</td>
 							</tr>
 
+							<tr>
+								<td class="cellLeftEditTable">
+									{t}JSON Enabled:{/t}
+								</td>
+								<td class="cellRightEditTable">
+									{if $install_obj->checkJSON() == 0}
+										<span class="">{t}OK{/t}
+									{elseif $install_obj->checkJSON() == 1}
+										<span class="tblDataError">{t}Warning: Not Installed. (JSON extension must be enabled){/t}
+									{/if}
+									</span>
+								</td>
+							</tr>
+
 							{if $install_obj->getTTProductEdition() >= 20}
 							<tr>
 								<td class="cellLeftEditTable">
@@ -300,6 +314,20 @@
 									<div align="center">
 										{t}Other Requirements{/t}
 									</div>
+								</td>
+							</tr>
+
+							<tr>
+								<td class="cellLeftEditTable">
+									{t}Base URL:{/t}
+								</td>
+								<td class="cellRightEditTable">
+									{if $install_obj->checkBaseURL() == 0}
+										<span class="">{t}OK{/t}
+									{else}
+										<span class="tblDataError"><b>{t escape="no" 1=$install_obj->getRecommendedBaseURL()}Warning: base_url in timetrex.ini.php is incorrect, perhaps it should be "%1" instead.{/t}</b>
+									{/if}
+									</span>
 								</td>
 							</tr>
 

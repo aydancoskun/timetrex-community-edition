@@ -55,9 +55,9 @@ class APIImport extends APIFactory {
 			$this->import_obj = new $this->main_class;
 			$this->import_obj->company_id = $this->getCurrentCompanyObject()->getID();
 			$this->import_obj->user_id = $this->getCurrentUserObject()->getID();
-			Debug::Text('Setting main class: '. $this->main_class .' Company ID: '. $this->import_obj->company_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Setting main class: '. $this->main_class .' Company ID: '. $this->import_obj->company_id, __FILE__, __LINE__, __METHOD__, 10);
 		} else {
-			Debug::Text('NOT Setting main class... Company ID: '. $this->getCurrentCompanyObject()->getID(), __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('NOT Setting main class... Company ID: '. $this->getCurrentCompanyObject()->getID(), __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return TRUE;
@@ -79,7 +79,7 @@ class APIImport extends APIFactory {
 						'-1150-schedule' => TTi18n::getText('Scheduled Shifts'),
 						'-1200-paystubamendment' => TTi18n::getText('Pay Stub Amendments'),
 						'-1300-accrual' => TTi18n::getText('Accruals'),
-					 );
+					);
 
 		//Get company data so we know if its professional edition or not.
 		if ( $this->getCurrentCompanyObject()->getProductEdition() >= 20 ) {

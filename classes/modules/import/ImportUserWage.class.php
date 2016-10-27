@@ -55,7 +55,7 @@ class ImportUserWage extends Import {
 		switch( $name ) {
 			case 'columns':
 				$uwf = TTNew('UserWageFactory');
-				$retval = Misc::prependArray( $this->getUserIdentificationColumns(), Misc::arrayIntersectByKey( array('wage_group','type','wage','effective_date','hourly_rate','labor_burden_percent','weekly_time','note'), Misc::trimSortPrefix( $uwf->getOptions('columns') ) ) );
+				$retval = Misc::prependArray( $this->getUserIdentificationColumns(), Misc::arrayIntersectByKey( array('wage_group', 'type', 'wage', 'effective_date', 'hourly_rate', 'labor_burden_percent', 'weekly_time', 'note'), Misc::trimSortPrefix( $uwf->getOptions('columns') ) ) );
 
 				break;
 			case 'column_aliases':
@@ -86,7 +86,7 @@ class ImportUserWage extends Import {
 
 
 	function _preParseRow( $row_number, $raw_row ) {
-		$retval = $this->getObject()->getUserWageDefaultData();
+		$retval = $this->getObject()->stripReturnHandler( $this->getObject()->getUserWageDefaultData() );
 
 		return $retval;
 	}

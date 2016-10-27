@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11451 $
- * $Id: PermissionUserListFactory.class.php 11451 2013-11-19 18:44:52Z mikeb $
- * $Date: 2013-11-19 10:44:52 -0800 (Tue, 19 Nov 2013) $
+ * $Revision: 11830 $
+ * $Id: PermissionUserListFactory.class.php 11830 2013-12-28 22:10:01Z mikeb $
+ * $Date: 2013-12-28 14:10:01 -0800 (Sat, 28 Dec 2013) $
  */
 
 /**
@@ -46,7 +46,7 @@ class PermissionUserListFactory extends PermissionUserFactory implements Iterato
 
 	function getAll($limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable();
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -66,7 +66,7 @@ class PermissionUserListFactory extends PermissionUserFactory implements Iterato
 					);
 
 		$query = '
-					select 	*
+					select	*
 					from	'. $this->getTable() .'
 					where	id = ?
 					';
@@ -90,7 +90,7 @@ class PermissionUserListFactory extends PermissionUserFactory implements Iterato
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $pcf->getTable() .' as b
 					where	a.permission_control_id = b.id
@@ -126,7 +126,7 @@ class PermissionUserListFactory extends PermissionUserFactory implements Iterato
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a,
 							'. $pcf->getTable() .' as b
 					where	a.permission_control_id = b.id
@@ -159,12 +159,12 @@ class PermissionUserListFactory extends PermissionUserFactory implements Iterato
 		$pcf = new PermissionControlFactory();
 		
 		$query = '
-					select 	a.*,
+					select	a.*,
 							b.updated_date as updated_date,
 							b.updated_by as updated_by
 					from	'. $this->getTable() .' as a,
 							'. $pcf->getTable() .' as b
-					where 	b.id = a.permission_control_id
+					where	b.id = a.permission_control_id
 						AND b.company_id = ?
 						AND (
 								(
@@ -174,13 +174,13 @@ class PermissionUserListFactory extends PermissionUserFactory implements Iterato
 			//Append the same date twice for created and updated.
 			$ph[] = (int)$date;
 			$ph[] = (int)$date;
-			$query  .=	' 		AND ( b.created_date >= ? OR b.updated_date >= ? ) )';
+			$query	.=	'		AND ( b.created_date >= ? OR b.updated_date >= ? ) )';
 		} else {
-			$query  .=	' ) ';
+			$query	.=	' ) ';
 		}
 		
 		if ( isset($valid_ids) AND is_array($valid_ids) AND count($valid_ids) > 0 ) {
-			$query  .=	' OR a.id in ('. $this->getListSQL($valid_ids, $ph) .') ';
+			$query	.=	' OR a.id in ('. $this->getListSQL($valid_ids, $ph) .') ';
 		}
 
 		$query .= '	)
@@ -210,9 +210,9 @@ class PermissionUserListFactory extends PermissionUserFactory implements Iterato
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
-					where 	a.permission_control_id = ?
+					where	a.permission_control_id = ?
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -237,7 +237,7 @@ class PermissionUserListFactory extends PermissionUserFactory implements Iterato
 					);
 
 		$query = '
-					select 	a.*
+					select	a.*
 					from	'. $this->getTable() .' as a
 					where	a.permission_control_id = ?
 						AND a.user_id = ?
@@ -285,15 +285,15 @@ class PermissionUserListFactory extends PermissionUserFactory implements Iterato
 		$pcf = new PermissionControlFactory();
 
 		$query = '
-					select 	a.*,
+					select	a.*,
 							b.updated_date as updated_date,
 							b.updated_by as updated_by
 					from	'. $this->getTable() .' as a,
 							'. $pcf->getTable() .' as b
-					where 	b.id = a.permission_control_id
+					where	b.id = a.permission_control_id
 						AND b.company_id = ?
 						AND
-							( b.created_date >=  ? OR b.updated_date >= ? )
+							( b.created_date >=	 ? OR b.updated_date >= ? )
 					LIMIT 1
 					';
 		$query .= $this->getWhereSQL( $where );
@@ -301,11 +301,11 @@ class PermissionUserListFactory extends PermissionUserFactory implements Iterato
 
 		$this->ExecuteSQL( $query, $ph );
 		if ( $this->getRecordCount() > 0 ) {
-			Debug::text('Rows have been modified: '. $this->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Rows have been modified: '. $this->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
 			return TRUE;
 		}
-		Debug::text('Rows have NOT been modified', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Rows have NOT been modified', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
 
