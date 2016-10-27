@@ -34,13 +34,13 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11811 $
- * $Id: RecurringPayStubAmendmentUserListFactory.class.php 11811 2013-12-26 23:56:23Z mikeb $
- * $Date: 2013-12-26 15:56:23 -0800 (Thu, 26 Dec 2013) $
+ * $Revision: 14800 $
+ * $Id: RecurringPayStubAmendmentUserListFactory.class.php 14800 2014-10-16 19:27:31Z mikeb $
+ * $Date: 2014-10-16 12:27:31 -0700 (Thu, 16 Oct 2014) $
  */
 
 /**
- * @package Modules_Pay_Stub\Amendment
+ * @package Modules\PayStubAmendment
  */
 class RecurringPayStubAmendmentUserListFactory extends RecurringPayStubAmendmentUserFactory implements IteratorAggregate {
 

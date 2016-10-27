@@ -1,12 +1,12 @@
 # translation of messages.po to
 # $License$
 #
-# $Revision: 13814 $
-# $Id: messages.po 13814 2014-07-22 17:45:46Z mikeb $
-# $Revision: 13814 $
-# $Id: messages.po 13814 2014-07-22 17:45:46Z mikeb $
+# $Revision: 14408 $
+# $Id: messages.po 14408 2014-09-12 19:02:59Z mikeb $
+# $Revision: 14408 $
+# $Id: messages.po 14408 2014-09-12 19:02:59Z mikeb $
 #
-# $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $.
+# $Date: 2014-09-12 12:02:59 -0700 (Fri, 12 Sep 2014) $.
 # Dan Libby <dan@libby.com>, 2007.
 # Luis Sanchez <luis@osc.co.cr>, 2007.
 # Luis Sanchez <luis@localhost.localdomain>, 2007.
@@ -18,7 +18,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: timetrex\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-07-22 10:20-0700\n"
+"POT-Creation-Date: 2014-09-02 14:13-0700\n"
 "PO-Revision-Date: 2013-07-31 18:07+0000\n"
 "Last-Translator: Alvaro Gonzalez <operacionesmedellin@sky.net.co>\n"
 "Language-Team: Spanish <es@li.org>\n"
@@ -38,6 +38,9 @@ msgstr ""
 msgid " expected)"
 msgstr ""
 
+msgid " requires a modern HTML5 standards compatible web browser, click here for more information."
+msgstr ""
+
 msgid "#"
 msgstr "#"
 
@@ -47,8 +50,23 @@ msgstr ""
 msgid "% (ie: 25% burden)"
 msgstr "% (ej: 25% de carga)"
 
+msgid "%1 database has not been initialized yet, please run the installer again and follow the on screen instructions. <a href=\"%2\">Click here to run the installer now.</a>"
+msgstr ""
+
+msgid "%1 database query has timed-out, if you were trying to run a report it may be too large, please narrow your search criteria and try again."
+msgstr ""
+
+msgid "%1 experienced a general error, please contact technical support."
+msgstr ""
+
 msgid "%1 for %2"
 msgstr "%1 para %2"
+
+msgid "%1 is currently undergoing maintenance. We're sorry for any inconvenience this may cause. Please try again in 15 minutes."
+msgstr ""
+
+msgid "%1 is unable to connect to its database, please make sure that the database service on your own local %1 server has been started and is running. If you are unsure, try rebooting your server."
+msgstr ""
 
 msgid "(A) Shortage of Work"
 msgstr "(A) Corto de Trabajo"
@@ -3522,6 +3540,12 @@ msgstr ""
 msgid "Claim Amount"
 msgstr "Cantidad Reclamada"
 
+msgid "Class %1 does not exist, or unauthenticated."
+msgstr ""
+
+msgid "Class %1 does not exist."
+msgstr ""
+
 msgid "Clear"
 msgstr "Limpiar"
 
@@ -3832,6 +3856,9 @@ msgid "Company Value 8 is too short or too long"
 msgstr ""
 
 msgid "Company Value 9 is too short or too long"
+msgstr ""
+
+msgid "Company does not exist."
 msgstr ""
 
 msgid "Company is invalid"
@@ -4517,6 +4544,9 @@ msgstr ""
 
 msgid "Date:"
 msgstr "Fecha:"
+
+msgid "Dates"
+msgstr ""
 
 msgid "Davao Oriental"
 msgstr "Davao Oriental"
@@ -5751,6 +5781,9 @@ msgstr "Edición de permisos denegada, el empleado no existe"
 msgid "Edit permission denied, record does not exist"
 msgstr "Edición de permisos Denegada, el registro no existe"
 
+msgid "Edit<br>Client"
+msgstr ""
+
 msgid "Edit<br>Employee"
 msgstr ""
 
@@ -5922,10 +5955,7 @@ msgstr "Correo electrónico no fue especificado"
 msgid "Email:"
 msgstr "Correo Electrónico:"
 
-msgid "Emailed Scheduled Report"
-msgstr ""
-
-msgid "Emailing Report"
+msgid "Emailed Report"
 msgstr ""
 
 msgid "Emergency Contact"
@@ -6231,6 +6261,9 @@ msgstr "Lista de Sueldo de los Empleados"
 msgid "Employee Wages"
 msgstr ""
 
+msgid "Employee already has a wage entry on this date for the same wage group. Try using a different date instead."
+msgstr ""
+
 msgid "Employee can not have duplicate entries on the same day"
 msgstr "Empleado no puede tener un duplicado"
 
@@ -6300,6 +6333,9 @@ msgstr "Empleado:"
 msgid "Employee<br>Contacts"
 msgstr ""
 
+msgid "Employee<br>Pay Stubs"
+msgstr ""
+
 msgid "Employee<br>Reports"
 msgstr ""
 
@@ -6360,9 +6396,6 @@ msgstr "EI del Empleador:"
 msgid "Employer Pay Stub"
 msgstr ""
 
-msgid "Employer Pay Stubs"
-msgstr ""
-
 msgid "Employer Pay<br>Stubs"
 msgstr ""
 
@@ -6374,6 +6407,9 @@ msgstr ""
 
 msgid "Employer Total Contributions"
 msgstr "Total Contribuciones del Empleador"
+
+msgid "Employer<br>Pay Stubs"
+msgstr ""
 
 msgid "Employment"
 msgstr ""
@@ -6897,6 +6933,9 @@ msgstr ""
 msgid "Expense policy name already exists"
 msgstr ""
 
+msgid "Expense<br>Authorization"
+msgstr ""
+
 msgid "Expense<br>Authorizations"
 msgstr ""
 
@@ -7085,6 +7124,9 @@ msgstr "Impuesto sobre la Renta Federal Retenido (Recuadro 4):"
 
 msgid "Federal Tax Exempt:"
 msgstr "Exento del Impuesto Federal:"
+
+msgid "Fees for Services (Box: 48)"
+msgstr ""
 
 msgid "Feet (ft)"
 msgstr "Pies (ft)"
@@ -7322,6 +7364,9 @@ msgstr "Para soporte de instalación, por favor únase a nuestra comunidad de %1
 
 msgid "For more information please click here."
 msgstr "Para mas información haga clic aquí."
+
+msgid "For more information please visit"
+msgstr ""
 
 msgid "For searching the LDAP user. (ie: AD: sAMAccountName, openLDAP: dn, Mac OSX: dn)"
 msgstr ""
@@ -9651,6 +9696,9 @@ msgstr "Tamaño de Descripción no valida"
 msgid "Invalid District"
 msgstr "Distrito Incorrecto"
 
+msgid "Invalid Email address"
+msgstr ""
+
 msgid "Invalid Employee"
 msgstr "Empleado no valido"
 
@@ -9888,6 +9936,9 @@ msgstr "Etiqueta no valida"
 msgid "Invalid last date"
 msgstr "Ultima Fecha no valida"
 
+msgid "Invalid license file"
+msgstr ""
+
 msgid "Invalid link"
 msgstr "Enlace no valido"
 
@@ -9910,6 +9961,9 @@ msgid "Invalid recall date"
 msgstr "Fecha de retorno no valida"
 
 msgid "Invalid records have been skipped, all other records have been imported successfully."
+msgstr ""
+
+msgid "Invalid referrer, possible CSRF."
 msgstr ""
 
 msgid "Invalid review control"
@@ -9941,6 +9995,9 @@ msgstr "Único Usuario y/o Periodo de Pago no valido"
 
 msgid "Invalid vacation pay"
 msgstr "Pago de Vacaciones no valido"
+
+msgid "Invalid view name"
+msgstr ""
 
 msgid "Invalid, PGSQL or MySQLi PHP extensions are required"
 msgstr "Invalido, Las extensiones PostGreSQL o MySQLi para PHP son Requeridas"
@@ -11280,6 +11337,9 @@ msgstr ""
 msgid "Lump-sum Payments (18)"
 msgstr "Pagos a Plazo Fijo (18)"
 
+msgid "Lump-sum Payments (Box: 18)"
+msgstr ""
+
 msgid "Lump-sum Payments (Box: 18):"
 msgstr "Pagos a Plazo Fijo (Recuadro: 18):"
 
@@ -11846,6 +11906,9 @@ msgstr ""
 
 msgid "Meta"
 msgstr "Meta"
+
+msgid "Method %1 does not exist."
+msgstr ""
 
 msgid "Metropolitan Manila"
 msgstr "Metropolitan Manila"
@@ -12462,6 +12525,9 @@ msgstr "New Mexico"
 msgid "New Password"
 msgstr ""
 
+msgid "New Password (Confirm)"
+msgstr ""
+
 msgid "New Password (confirm):"
 msgstr "Nueva Clave (confirmar):"
 
@@ -12494,6 +12560,12 @@ msgstr "Nueva Zelanda"
 
 msgid "New message waiting in"
 msgstr "Nuevo Mensaje esperando en"
+
+msgid "New password can't be empty"
+msgstr ""
+
+msgid "New password does not match"
+msgstr ""
 
 msgid "New value is invalid"
 msgstr ""
@@ -12907,6 +12979,9 @@ msgid "Not Scheduled Branch or Department"
 msgstr ""
 
 msgid "Not Scheduled Job or Task"
+msgstr ""
+
+msgid "Not Specified"
 msgstr ""
 
 msgid "Not Verified"
@@ -13629,6 +13704,9 @@ msgstr ""
 msgid "PENDING ACTIVATION - Automatic KIOSK Setup"
 msgstr ""
 
+msgid "PENDING ACTIVATION [ADDITIONAL FEE REQUIRED] - Automatic KIOSK Setup"
+msgstr ""
+
 msgid "PENDING AUTHORIZATION"
 msgstr "AUTORIZACION PENDIENTE"
 
@@ -13688,6 +13766,9 @@ msgstr "Información Bancaria"
 
 msgid "Packing Slip"
 msgstr "Albarán"
+
+msgid "Packing<br>Slip"
+msgstr ""
 
 msgid "Padua"
 msgstr ""
@@ -13873,6 +13954,9 @@ msgid "Password for"
 msgstr "Clave para"
 
 msgid "Password has already been used in the past, please choose a new one"
+msgstr ""
+
+msgid "Password has been changed successfully, you may now login"
 msgstr ""
 
 msgid "Password is too short"
@@ -14365,6 +14449,9 @@ msgid "Pension Adjustment (Box: 52):"
 msgstr "Ajuste de la Pensión (Recuadro: 52):"
 
 msgid "Pension Or Superannuation (16)"
+msgstr ""
+
+msgid "Pension Or Superannuation (Box: 16)"
 msgstr ""
 
 msgid "Pension Or Superannuation (Box: 16):"
@@ -15120,6 +15207,9 @@ msgstr "Productos"
 msgid "Professional"
 msgstr "Profesional"
 
+msgid "Professional, Corporate, or Enterprise Editions."
+msgstr ""
+
 msgid "Professional, Scientific and Technical Services"
 msgstr ""
 
@@ -15232,6 +15322,12 @@ msgid "Punch In/Out"
 msgstr "Marca Entrada / Salida"
 
 msgid "Punch List"
+msgstr ""
+
+msgid "Punch Mode: Face Recognition"
+msgstr ""
+
+msgid "Punch Mode: Face Recognition+QRCode"
 msgstr ""
 
 msgid "Punch Mode: QRCode"
@@ -15611,6 +15707,9 @@ msgstr ""
 
 msgid "Rajasthan"
 msgstr "Rajasthan"
+
+msgid "Range"
+msgstr ""
 
 msgid "Rate"
 msgstr "Tasa"
@@ -16044,6 +16143,9 @@ msgstr ""
 msgid "Renfrewshire"
 msgstr ""
 
+msgid "Renwal Date"
+msgstr ""
+
 msgid "Repeat Absence for:"
 msgstr "Repetir Ausencia para:"
 
@@ -16081,6 +16183,9 @@ msgid "Report Setup:"
 msgstr "Configuración del Reporte:"
 
 msgid "Report shared by"
+msgstr ""
+
+msgid "Report shared successfully"
 msgstr ""
 
 msgid "Reports"
@@ -16430,6 +16535,9 @@ msgstr ""
 
 msgid "Run Now"
 msgstr "Ejecutar Ahora"
+
+msgid "Running Scheduled Report"
+msgstr ""
 
 msgid "Russian Federation"
 msgstr "Rusia"
@@ -16932,6 +17040,9 @@ msgstr ""
 msgid "Select one or more employees"
 msgstr ""
 
+msgid "Select one or more employees to share report with"
+msgstr ""
+
 msgid "Select one or more jobs you wish to invoice"
 msgstr ""
 
@@ -16939,6 +17050,9 @@ msgid "Select one or more pay periods"
 msgstr ""
 
 msgid "Select one or more pay periods to process payroll for"
+msgstr ""
+
+msgid "Select one or more saved report you wish to share"
 msgstr ""
 
 msgid "Select the date range"
@@ -17110,6 +17224,9 @@ msgstr "Criterio de Selección"
 msgid "Selection Type"
 msgstr "Tipo de Selección"
 
+msgid "Self-Employed Commisions  (Box: 20)"
+msgstr ""
+
 msgid "Semi-Monthly (24/year)"
 msgstr ""
 
@@ -17185,6 +17302,9 @@ msgstr "Servidor:"
 msgid "Service"
 msgstr "Servicio"
 
+msgid "Session expired, please login again."
+msgstr ""
+
 msgid "Session timed out, please login again."
 msgstr ""
 
@@ -17235,6 +17355,15 @@ msgstr "Sexo:"
 
 msgid "Seychelles"
 msgstr "Seychelles"
+
+msgid "Share"
+msgstr ""
+
+msgid "Share Report Wizard"
+msgstr ""
+
+msgid "Share<br>Report"
+msgstr ""
 
 msgid "Shared"
 msgstr "Compartido"
@@ -17351,6 +17480,9 @@ msgid "Shortcut key sequence is too short or too long"
 msgstr ""
 
 msgid "Show All"
+msgstr ""
+
+msgid "Show Duplicate Values"
 msgstr ""
 
 msgid "Show Pre-Mature"
@@ -18710,6 +18842,9 @@ msgstr "Este empleado no tiene ningún salario configurado para el grupo salaria
 msgid "This employee is at the final authorization level."
 msgstr "El usuario esta al final del nivel de autorización."
 
+msgid "This functionality is only available in"
+msgstr ""
+
 msgid "This functionality is only available in "
 msgstr ""
 
@@ -19956,6 +20091,9 @@ msgstr "Valor 9 del Usuario es muy corto o muy largo"
 msgid "User authorizing this object is not a parent of it"
 msgstr "Usuario autorizando este objeto no es padre de el"
 
+msgid "User does not exist."
+msgstr ""
+
 msgid "User is invalid"
 msgstr "Usuario no valido"
 
@@ -21059,6 +21197,9 @@ msgstr ""
 msgid "You have already submitted this form! Please wait..."
 msgstr "Usted ya envió este formulario! Por favor espere..."
 
+msgid "You have modified Form Setup data without saving, would you like to save your Form Setup data now?"
+msgstr ""
+
 msgid "You have modified data without saving, are you sure you want to continue and lose your changes"
 msgstr ""
 
@@ -21217,6 +21358,9 @@ msgid "database, please wait..."
 msgstr "base de datos, por favor esperar..."
 
 msgid "date( Year, Month, Day, Hour, Minute )"
+msgstr ""
+
+msgid "dates selected"
 msgstr ""
 
 msgid "day"

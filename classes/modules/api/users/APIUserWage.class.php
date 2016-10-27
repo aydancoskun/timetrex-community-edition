@@ -99,7 +99,7 @@ class APIUserWage extends APIFactory {
 	 * @param array $data filter data
 	 * @return array
 	 */
-	function getUserWage( $data = NULL, $disable_paging = FALSE ) {
+	function getUserWage( $data = NULL, $disable_paging = FALSE, $last_user_wage_only = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('wage', 'enabled')
 				OR !( $this->getPermissionObject()->Check('wage', 'view') OR $this->getPermissionObject()->Check('wage', 'view_own') OR $this->getPermissionObject()->Check('wage', 'view_child')  ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
@@ -110,7 +110,12 @@ class APIUserWage extends APIFactory {
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'wage', 'view' );
 
 		$blf = TTnew( 'UserWageListFactory' );
-		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
+		if ( $last_user_wage_only == TRUE ) {
+			Debug::Text('Using APILastWageSearch...', __FILE__, __LINE__, __METHOD__, 10);
+			$blf->getAPILastWageSearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
+		} else {
+			$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
+		}
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $blf->getRecordCount() );

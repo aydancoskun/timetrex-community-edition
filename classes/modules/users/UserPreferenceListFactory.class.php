@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11925 $
- * $Id: UserPreferenceListFactory.class.php 11925 2014-01-08 00:13:44Z mikeb $
- * $Date: 2014-01-07 16:13:44 -0800 (Tue, 07 Jan 2014) $
+ * $Revision: 13966 $
+ * $Id: UserPreferenceListFactory.class.php 13966 2014-08-01 18:25:20Z mikeb $
+ * $Date: 2014-08-01 11:25:20 -0700 (Fri, 01 Aug 2014) $
  */
 
 /**
@@ -229,6 +229,112 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 						AND (a.deleted = 0 AND b.deleted = 0)';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getIsModifiedByCompanyIdAndDate($company_id, $date, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $date == '') {
+			return FALSE;
+		}
+
+		$ph = array(
+					'company_id' => $company_id,
+					'created_date' => $date,
+					'updated_date' => $date,
+					);
+
+		$uf = new UserFactory();
+
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a
+					LEFT JOIN '. $uf->getTable() .' as b ON a.user_id = b.id
+					where
+							b.company_id = ?
+						AND
+							( a.created_date >= ? OR a.updated_date >= ? )
+					';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->rs = $this->db->SelectLimit($query, 1, -1, $ph);
+		if ( $this->getRecordCount() > 0 ) {
+			Debug::text('User preference rows have been modified: '. $this->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+
+			return TRUE;
+		}
+
+		Debug::text('User preference rows have NOT been modified', __FILE__, __LINE__, __METHOD__, 10);
+
+		return FALSE;
+	}
+
+	function getByCompanyIdAndDateAndValidUserIDs($company_id, $date = NULL, $valid_user_ids = array(), $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $date == '') {
+			$date = 0;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'a.user_id' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$uf = new UserFactory();
+
+		$ph = array(
+					'company_id' => $company_id,
+					);
+
+		//If the user record is modified, we have to consider the identification record to be modified as well,
+		//otherwise a terminated employee re-hired will not have their old prox/fingerprint records put back on the clock.
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a,
+							'. $uf->getTable() .' as b
+					where	a.user_id = b.id
+						AND	b.company_id = ?
+						AND b.status_id = 10
+				';
+
+		if ( ( isset($date) AND $date > 0) OR ( isset($valid_user_ids) AND is_array($valid_user_ids) AND count($valid_user_ids) > 0 ) ) {
+			$query .= ' AND ( ';
+
+			if ( isset($date) AND $date > 0 ) {
+				//Append the same date twice for created and updated.
+				$ph[] = (int)$date;
+				$ph[] = (int)$date;
+				$ph[] = (int)$date;
+				$ph[] = (int)$date;
+				$query	.=	'	( ( a.created_date >= ? OR a.updated_date >= ? ) OR ( b.created_date >= ? OR b.updated_date >= ? ) ) ';
+			}
+
+			//Valid USER IDs is an "OR", so if any IDs are specified they should *always* be included, regardless of the $date variable.
+			if ( isset($valid_user_ids) AND is_array($valid_user_ids) AND count($valid_user_ids) > 0 ) {
+				if ( isset($date) AND $date > 0 ) {
+					$query .= ' OR ';
+				}
+				$query	.=	' a.user_id in ('. $this->getListSQL($valid_user_ids, $ph) .') ';
+			}
+
+			$query .= ' ) ';
+		}
+
+		$query .= ' AND ( a.deleted = 0 AND b.deleted = 0 )';
+
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 

@@ -40,7 +40,7 @@
  */
 
 /**
- * @package API_APIQualification
+ * @package API\Qualification
  */
 class APIQualification extends APIFactory {
 	protected $main_class = 'QualificationFactory';
@@ -92,9 +92,7 @@ class APIQualification extends APIFactory {
 	function getQualification( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('qualification', 'enabled')
 				OR !( $this->getPermissionObject()->Check('qualification', 'view') OR $this->getPermissionObject()->Check('qualification', 'view_own') OR $this->getPermissionObject()->Check('qualification', 'view_child')  ) ) {
-			//return $this->getPermissionObject()->PermissionDenied();
-			//Rather then permission denied, restrict to just 'list_view' columns.
-			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
+			return $this->getPermissionObject()->PermissionDenied();
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 

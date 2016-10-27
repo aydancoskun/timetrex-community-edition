@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11925 $
- * $Id: AuthorizationListFactory.class.php 11925 2014-01-08 00:13:44Z mikeb $
- * $Date: 2014-01-07 16:13:44 -0800 (Tue, 07 Jan 2014) $
+ * $Revision: 15145 $
+ * $Id: AuthorizationListFactory.class.php 15145 2014-11-13 22:42:19Z mikeb $
+ * $Date: 2014-11-13 14:42:19 -0800 (Thu, 13 Nov 2014) $
  */
 
 /**
@@ -295,6 +295,10 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 
 		$query .= ( isset($filter_data['object_type_id']) ) ? $this->getWhereClauseSQL( 'a.object_type_id', $filter_data['object_type_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['object_id']) ) ? $this->getWhereClauseSQL( 'a.object_id', $filter_data['object_id'], 'numeric_list', $ph ) : NULL;
+
+		if ( isset($filter_data['object_type_id']) AND in_array( $filter_data['object_type_id'], array(90) ) ) { //TimeSheet
+			$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'pptsvf.pay_period_id', $filter_data['pay_period_id'], 'numeric_list', $ph ) : NULL;
+		}
 
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;

@@ -138,7 +138,7 @@ class APIUserReportData extends APIFactory {
 
 				$is_valid = $primary_validator->isValid();
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
-					Debug::Text('Attempting to save User Data...', __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Text('Attempting to save User Report Data...', __FILE__, __LINE__, __METHOD__, 10);
 
 					//Force Company ID to current company.
 					$row['company_id'] = $this->getCurrentCompanyObject()->getId();

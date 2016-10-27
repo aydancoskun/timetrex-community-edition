@@ -525,10 +525,14 @@ class APICompany extends APIFactory {
 			$data['filter_data']['company_id'] = $this->getCurrentCompanyObject()->getId();
 		}
 
+		if ( !isset($data['filter_sort']) ) {
+			$data['filter_sort'] = array( array( 'company_id' => 'asc' ), array( 'a.last_name' => 'asc' ) );
+		}
+
 		Debug::Arr($data, 'Final Filter Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$ulf = TTnew( 'UserListFactory' );
-		$ulf->getAPIEmailAddressDataByArrayCriteria( $data['filter_data'] );
+		$ulf->getAPIEmailAddressDataByArrayCriteria( $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $ulf->getRecordCount() > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount() );
@@ -549,7 +553,11 @@ class APICompany extends APIFactory {
 		return $this->returnHandler( TRUE ); //No records returned.
 	}
 
-	//We should be able to support multiple companies as well, or getting data for all companies by not specifying the company filter.
+	/**
+	 * Get phone minutes for a single company. We should be able to support multiple companies as well, or getting data for all companies by not specifying the company filter.
+	 * @param array $data filter data
+	 * @return array
+	 */
 	function getCompanyPhonePunchData( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('company', 'enabled')
 				OR !( $this->getPermissionObject()->Check('company', 'view') OR $this->getPermissionObject()->Check('company', 'view_own') OR $this->getPermissionObject()->Check('company', 'view_child')	) ) {
@@ -592,6 +600,62 @@ class APICompany extends APIFactory {
 									'billable_minutes' => $l_obj->getColumn('billable_units'),
 									'calls' => $l_obj->getColumn('calls'),
 									'unique_users' => $l_obj->getColumn('unique_users'),
+								);
+
+				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $llf->getCurrentRow() );
+			}
+
+			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+
+			return $this->returnHandler( $retarr );
+		}
+
+		return $this->returnHandler( TRUE ); //No records returned.
+	}
+
+	/**
+	 * Get station counts for a single company. We should be able to support multiple companies as well, or getting data for all companies by not specifying the company filter.
+	 * @param array $data filter data
+	 * @return array
+	 */
+	function getCompanyStationCounts( $data = NULL, $disable_paging = FALSE ) {
+		if ( !$this->getPermissionObject()->Check('company', 'enabled')
+				OR !( $this->getPermissionObject()->Check('company', 'view') OR $this->getPermissionObject()->Check('company', 'view_own') OR $this->getPermissionObject()->Check('company', 'view_child')	) ) {
+			return $this->getPermissionObject()->PermissionDenied();
+		}
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
+		if ( $this->getPermissionObject()->Check('company', 'view') == FALSE ) {
+			if ( $this->getPermissionObject()->Check('company', 'view_child') ) {
+				$data['filter_data']['company_id'] = $this->getCurrentCompanyObject()->getId();
+			}
+			if ( $this->getPermissionObject()->Check('company', 'view_own') ) {
+				$data['filter_data']['company_id'] = $this->getCurrentCompanyObject()->getId();
+			}
+		}
+
+		if ( !isset($data['filter_data']['company_id']) ) {
+			$data['filter_data']['company_id'] = $this->getCurrentCompanyObject()->getId();
+		}
+
+		$llf = TTnew( 'StationListFactory' );
+		if ( !isset($data['filter_data']['type_id']) ) {
+			//$data['filter_data']['type_id'] = array_keys( Misc::trimSortPrefix( $llf->getOptions('type') ) );
+			$data['filter_data']['type_id'] = array(61, 65);
+		}
+
+		$llf->getCountByCompanyIdAndTypeId( $data['filter_data']['company_id'], $data['filter_data']['type_id'] );
+		Debug::Text('Record Count: '. $llf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		if ( $llf->getRecordCount() > 0 ) {
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $llf->getRecordCount() );
+
+			$this->setPagerObject( $llf );
+
+			foreach( $llf as $l_obj ) {
+				$retarr[] = array(
+									'company_id' => $l_obj->getColumn('company_id'),
+									'type_id' => $l_obj->getColumn('type_id'),
+									'total' => $l_obj->getColumn('total'),
 								);
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $llf->getCurrentRow() );

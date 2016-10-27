@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11942 $
- * $Id: UserDefaultFactory.class.php 11942 2014-01-09 00:50:10Z mikeb $
- * $Date: 2014-01-08 16:50:10 -0800 (Wed, 08 Jan 2014) $
+ * $Revision: 14797 $
+ * $Id: UserDefaultFactory.class.php 14797 2014-10-16 19:00:06Z mikeb $
+ * $Date: 2014-10-16 12:00:06 -0700 (Thu, 16 Oct 2014) $
  */
 
 /**
@@ -837,12 +837,11 @@ class UserDefaultFactory extends Factory {
 		}
 
 		if ( is_array($ids) ) {
+			$tmp_ids = array();
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
 				$udcdlf = TTnew( 'UserDefaultCompanyDeductionListFactory' );
 				$udcdlf->getByUserDefaultId( $this->getId() );
-
-				$tmp_ids = array();
 				foreach ($udcdlf as $obj) {
 					$id = $obj->getCompanyDeduction();
 					Debug::text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
@@ -858,8 +857,6 @@ class UserDefaultFactory extends Factory {
 					}
 				}
 				unset($id, $obj);
-			} else {
-				$tmp_ids = array();
 			}
 
 			//Insert new mappings.

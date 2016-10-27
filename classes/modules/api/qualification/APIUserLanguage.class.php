@@ -40,7 +40,7 @@
  */
 
 /**
- * @package API_APIQualification
+ * @package API\Qualification
  */
 class APIUserLanguage extends APIFactory {
 	protected $main_class = 'UserLanguageFactory';
@@ -85,9 +85,7 @@ class APIUserLanguage extends APIFactory {
 	function getUserLanguage( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('user_language', 'enabled')
 				OR !( $this->getPermissionObject()->Check('user_language', 'view') OR $this->getPermissionObject()->Check('user_language', 'view_own') OR $this->getPermissionObject()->Check('user_language', 'view_child')  ) ) {
-			//return $this->getPermissionObject()->PermissionDenied();
-			//Rather then permission denied, restrict to just 'list_view' columns.
-			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
+			return $this->getPermissionObject()->PermissionDenied();
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 

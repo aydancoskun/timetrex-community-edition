@@ -34,13 +34,13 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: SystemSettings.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 14958 $
+ * $Id: SystemSettings.php 14958 2014-10-28 14:00:49Z mikeb $
+ * $Date: 2014-10-28 07:00:49 -0700 (Tue, 28 Oct 2014) $
  */
 require_once('../../includes/global.inc.php');
 
-$authenticate=FALSE;
+$authenticate = FALSE;
 require_once(Environment::getBasePath() .'includes/Interface.inc.php');
 
 $smarty->assign('title', TTi18n::gettext($title = '4. System Settings')); // See index.php
@@ -63,19 +63,32 @@ if ( $install_obj->isInstallMode() == FALSE ) {
 $action = Misc::findSubmitButton();
 switch ($action) {
 	case 'back':
-		Debug::Text('Back', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Back', __FILE__, __LINE__, __METHOD__, 10);
 
 		Redirect::Page( URLBuilder::getURL(NULL, 'DatabaseConfig.php') );
 		break;
 
 	case 'next':
 		//Debug::setVerbosity(11);
-		Debug::Text('Next', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Next', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Set salt if it isn't already.
-		$data['salt'] = md5( uniqid() );
+		$tmp_config_data['other']['salt'] = md5( uniqid() );
 
-		$install_obj->writeConfigFile( $data );
+		if ( isset($data['base_url']) AND $data['base_url'] != '' ) {
+			$tmp_config_data['path']['base_url'] = $data['base_url'];
+		}
+		if ( isset($data['log_dir']) AND $data['log_dir'] != '' ) {
+			$tmp_config_data['path']['log_dir'] = $data['log_dir'];
+		}
+		if ( isset($data['storage_dir']) AND $data['storage_dir'] != '' ) {
+			$tmp_config_data['path']['storage_dir'] = $data['storage_dir'];
+		}
+		if ( isset($data['cache_dir']) AND $data['cache_dir'] != '' ) {
+			$tmp_config_data['cache']['dir'] = $data['cache_dir'];
+		}
+
+		$install_obj->writeConfigFile( $tmp_config_data );
 
 		//Write auto_update feature to system settings.
 		$sslf = TTnew( 'SystemSettingListFactory' );
@@ -126,7 +139,7 @@ switch ($action) {
 		Redirect::Page( URLBuilder::getURL( array('external_installer' => $external_installer), 'Company.php') );
 		break;
 	default:
-		Debug::Text('Request URI: '. $_SERVER['REQUEST_URI'], __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Request URI: '. $_SERVER['REQUEST_URI'], __FILE__, __LINE__, __METHOD__, 10);
 
 		$data = array(
 					'host_name' => $_SERVER['HTTP_HOST'],

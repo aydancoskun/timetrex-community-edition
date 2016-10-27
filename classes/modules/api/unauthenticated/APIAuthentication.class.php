@@ -417,6 +417,7 @@ class APIAuthentication extends APIFactory {
 				'api_json_url' => Environment::getAPIURL( 'json' ),
 				'images_url' => Environment::getImagesURL(),
 				'powered_by_logo_enabled' => $this->isPoweredByLogoEnabled(),
+				'is_application_branded' => $this->isApplicationBranded(),
 				'application_name' => $this->getApplicationName(),
 				'organization_url' => $this->getOrganizationURL(),
 				'copyright_notice' => COPYRIGHT_NOTICE,
@@ -434,12 +435,13 @@ class APIAuthentication extends APIFactory {
 				'application_build' => $this->getApplicationBuild(),
 				'is_logged_in' => $this->isLoggedIn(),
 				'session_idle_timeout' => $this->getSessionIdle(),
- 				'language_options' => Misc::addSortPrefix( TTi18n::getLanguageArray() ),
+				'footer_left_html' => ( isset($config_vars['other']['footer_left_html']) AND $config_vars['other']['footer_left_html'] != '' ) ? $config_vars['other']['footer_left_html'] : FALSE,
+				'footer_right_html' => ( isset($config_vars['other']['footer_right_html']) AND $config_vars['other']['footer_right_html'] != '' ) ? $config_vars['other']['footer_right_html'] : FALSE,
+				'language_options' => Misc::addSortPrefix( TTi18n::getLanguageArray() ),
 				//Make sure locale is set properly before this function is called, either in api.php or APIGlobal.js.php for example.
+				'enable_default_language_translation' => ( isset($config_vars['other']['enable_default_language_translation']) ) ? $config_vars['other']['enable_default_language_translation'] : FALSE,
 				'language' => TTi18n::getLanguage(),
 				'locale' => TTi18n::getNormalizedLocale(), //Needed for HTML5 interface to load proper translation file.
-				//'language' => TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ),
-				//'locale' => $this->getLocale( TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) ),
 			);
 	}
 
@@ -456,7 +458,7 @@ class APIAuthentication extends APIFactory {
 			$subject = TTi18n::gettext('Flex Error Report');
 		}
 
-		Misc::sendSystemMail( $subject, $data, $attachments );
+		Misc::sendSystemMail( $subject, $data, $attachments, TRUE ); //Always force these emails to be sent, even when PRODUCTION=FALSE
 
 		//return APPLICATION_BUILD so JS can check if its correct and notify the user to refresh/clear cache.
 		return APPLICATION_BUILD;

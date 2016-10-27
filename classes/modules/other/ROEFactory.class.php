@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13814 $
- * $Id: ROEFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
- * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
+ * $Revision: 13399 $
+ * $Id: ROEFactory.class.php 13399 2014-06-12 22:06:00Z mikeb $
+ * $Date: 2014-06-12 15:06:00 -0700 (Thu, 12 Jun 2014) $
  */
 
 /**

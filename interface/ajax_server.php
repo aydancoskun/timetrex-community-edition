@@ -34,31 +34,33 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 3224 $
- * $Id: ajax_server.php 3224 2009-12-26 18:10:21Z ipso $
- * $Date: 2009-12-26 10:10:21 -0800 (Sat, 26 Dec 2009) $
+ * $Revision: 14568 $
+ * $Id: ajax_server.php 14568 2014-09-26 16:32:15Z mikeb $
+ * $Date: 2014-09-26 09:32:15 -0700 (Fri, 26 Sep 2014) $
  */
 
 require_once('../includes/global.inc.php');
 if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == 1)
 		OR ( isset($_SERVER['HTTP_REFERER']) AND stristr( $_SERVER['HTTP_REFERER'], 'quick_punch') ) ) {
-        Debug::text('AJAX Server - Installer enabled, or using quickpunch... NOT AUTHENTICATING...', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('AJAX Server - Installer enabled, or using quickpunch... NOT AUTHENTICATING...', __FILE__, __LINE__, __METHOD__, 10);
 		$authenticate = FALSE;
 }
 $skip_message_check = TRUE;
+
+unset( $_GET['cb'], $_POST['cb'] ); //Prevent usage of a callback function which could result in an exploit.
 
 require_once(Environment::getBasePath() .'includes/Interface.inc.php');
 require_once('HTML/AJAX/Server.php');
 
 class AutoServer extends HTML_AJAX_Server {
-        // this flag must be set for your init methods to be used
-        var $initMethods = true;
+		// this flag must be set for your init methods to be used
+		var $initMethods = TRUE;
 
-        // init method for my ajax class
-        function initAJAX_Server() {
+		// init method for my ajax class
+		function initAJAX_Server() {
 			$ajax = new AJAX_Server();
 			$this->registerClass($ajax);
-        }
+		}
 }
 
 $server = new AutoServer();

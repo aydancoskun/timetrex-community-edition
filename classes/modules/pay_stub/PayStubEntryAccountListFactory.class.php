@@ -34,13 +34,13 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11925 $
- * $Id: PayStubEntryAccountListFactory.class.php 11925 2014-01-08 00:13:44Z mikeb $
- * $Date: 2014-01-07 16:13:44 -0800 (Tue, 07 Jan 2014) $
+ * $Revision: 14800 $
+ * $Id: PayStubEntryAccountListFactory.class.php 14800 2014-10-16 19:27:31Z mikeb $
+ * $Date: 2014-10-16 12:27:31 -0700 (Thu, 16 Oct 2014) $
  */
 
 /**
- * @package Modules_Pay\Stub
+ * @package Modules\PayStub
  */
 class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implements IteratorAggregate {
 

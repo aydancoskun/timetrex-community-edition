@@ -40,7 +40,7 @@
  */
 
 /**
- * @package API_APIUser
+ * @package API\Users
  */
 class APIUserContact extends APIFactory {
 	protected $main_class = 'UserContactFactory';

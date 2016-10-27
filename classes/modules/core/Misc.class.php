@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13814 $
- * $Id: Misc.class.php 13814 2014-07-22 17:45:46Z mikeb $
- * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
+ * $Revision: 15145 $
+ * $Id: Misc.class.php 15145 2014-11-13 22:42:19Z mikeb $
+ * $Date: 2014-11-13 14:42:19 -0800 (Thu, 13 Nov 2014) $
  */
 
 /**
@@ -213,6 +213,94 @@ class Misc {
 		}
 
 		return $retarr;
+	}
+
+	static function arrayColumn( $input = NULL, $columnKey = NULL, $indexKey = NULL ) {
+		if ( function_exists('array_column') ) {
+			return array_column( (array)$input, $columnKey, $indexKey );
+		} else {
+			// Using func_get_args() in order to check for proper number of
+			// parameters and trigger errors exactly as the built-in array_column()
+			// does in PHP 5.5.
+			$argc = func_num_args();
+			$params = func_get_args();
+
+			$params[0] = (array)$params[0];
+
+			if ($argc < 2) {
+				trigger_error("array_column() expects at least 2 parameters, {$argc} given", E_USER_WARNING);
+				return NULL;
+			}
+
+			if (!is_array($params[0])) {
+				trigger_error('array_column() expects parameter 1 to be array, ' . gettype($params[0]) . ' given', E_USER_WARNING);
+				return NULL;
+			}
+
+			if (!is_int($params[1])
+				AND !is_float($params[1])
+				AND !is_string($params[1])
+				AND $params[1] !== NULL
+				AND !(is_object($params[1]) AND method_exists($params[1], '__toString'))
+			) {
+				trigger_error('array_column(): The column key should be either a string or an integer', E_USER_WARNING);
+				return FALSE;
+			}
+
+			if (isset($params[2])
+				AND !is_int($params[2])
+				AND !is_float($params[2])
+				AND !is_string($params[2])
+				AND !(is_object($params[2]) AND method_exists($params[2], '__toString'))
+			) {
+				trigger_error('array_column(): The index key should be either a string or an integer', E_USER_WARNING);
+				return FALSE;
+			}
+
+			$paramsInput = $params[0];
+			$paramsColumnKey = ($params[1] !== NULL) ? (string)$params[1] : NULL;
+
+			$paramsIndexKey = NULL;
+			if (isset($params[2])) {
+				if (is_float($params[2]) OR is_int($params[2])) {
+					$paramsIndexKey = (int)$params[2];
+				} else {
+					$paramsIndexKey = (string)$params[2];
+				}
+			}
+
+			$resultArray = array();
+
+			foreach ($paramsInput as $row) {
+
+				$key = $value = NULL;
+				$keySet = $valueSet = FALSE;
+
+				if ($paramsIndexKey !== NULL AND array_key_exists($paramsIndexKey, $row)) {
+					$keySet = TRUE;
+					$key = (string)$row[$paramsIndexKey];
+				}
+
+				if ($paramsColumnKey === NULL ) {
+					$valueSet = TRUE;
+					$value = $row;
+				} elseif (is_array($row) AND array_key_exists($paramsColumnKey, $row)) {
+					$valueSet = TRUE;
+					$value = $row[$paramsColumnKey];
+				}
+
+				if ($valueSet) {
+					if ($keySet) {
+						$resultArray[$key] = $value;
+					} else {
+						$resultArray[] = $value;
+					}
+				}
+
+			}
+
+			return $resultArray;
+		}
 	}
 
 	static function flattenArray($array, $preserve = FALSE, $r = array() ) {
@@ -1018,14 +1106,16 @@ class Misc {
 	//This function is used to quickly preset array key => value pairs so we don't
 	//have to have so many isset() checks throughout the code.
 	static function preSetArrayValues( $arr, $keys, $preset_value = NULL ) {
-		foreach( $keys as $key ) {
-			if ( is_object( $arr ) ) {
-				if ( !isset($arr->$key) ) {
-					$arr->$key = $preset_value;
-				}
-			} else {
-				if ( !isset($arr[$key]) ) {
-					$arr[$key] = $preset_value;
+		if ( is_array( $keys ) ) {
+			foreach( $keys as $key ) {
+				if ( is_object( $arr ) ) {
+					if ( !isset($arr->$key) ) {
+						$arr->$key = $preset_value;
+					}
+				} else {
+					if ( !isset($arr[$key]) ) {
+						$arr[$key] = $preset_value;
+					}
 				}
 			}
 		}
@@ -1033,6 +1123,55 @@ class Misc {
 		return $arr;
 	}
 	
+	static function getMimeType( $file_name, $buffer = FALSE, $keep_charset = FALSE ) {
+		if ( function_exists('finfo_buffer') ) { //finfo extension in PHP v5.3+
+			if ( $buffer == FALSE AND file_exists( $file_name ) ) {
+				//Its a filename passed in.
+				$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type ala mimetype extension
+				$retval = finfo_file($finfo, $file_name );
+				finfo_close($finfo);
+			} elseif ( $buffer = TRUE AND $file_name != '' ) {
+				//Its a string buffer;
+				$finfo = new finfo( FILEINFO_MIME );
+				$retval = $finfo->buffer( $file_name );
+			}
+
+			if ( isset($retval) ) {
+				if ( $keep_charset == FALSE ) {
+					$split_retval = explode(';', $retval );
+					if ( is_array($split_retval) AND isset($split_retval[0]) ) {
+						$retval = $split_retval[0];
+					}
+				}
+				Debug::text('MimeType: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+				return $retval;
+			}
+		} else {
+			//Attempt to detect mime type manually when finfo extension is not installed (windows)
+			if ( $buffer == FALSE AND file_exists( $file_name ) ) {
+				$extension = strtolower( pathinfo($file_name, PATHINFO_EXTENSION) );
+				switch( $extension ) {
+					case 'jpg':
+						$retval = 'image/jpeg';
+						break;
+					case 'png':
+						$retval = 'image/png';
+						break;
+					case 'gif':
+						$retval = 'image/gif';
+						break;
+					default:
+						$retval = FALSE;
+						break;
+				}
+
+				return $retval;
+			}
+		}
+
+		return FALSE;
+	}
+
 	static function parseCSV($file, $head = FALSE, $first_column = FALSE, $delim=',', $len = 9216, $max_lines = NULL ) {
 		if ( !file_exists($file) ) {
 			Debug::text('Files does not exist: '. $file, __FILE__, __LINE__, __METHOD__, 10);
@@ -1042,7 +1181,7 @@ class Misc {
 		//mime_content_type is being deprecated in PHP, and it doesn't work properly on Windows. So if its not available just accept any file type.
 		if ( function_exists('mime_content_type') ) {
 			$mime_type = mime_content_type($file);
-			if ( $mime_type !== FALSE AND !in_array( $mime_type, array('text/plain', 'plain/text', 'text/comma-separated-values', 'text/csv', 'application/csv', 'text/anytext') ) ) {
+			if ( $mime_type !== FALSE AND !in_array( $mime_type, array('text/plain', 'plain/text', 'text/comma-separated-values', 'text/csv', 'application/csv', 'text/anytext', 'text/x-c') ) ) {
 				Debug::text('Invalid MIME TYPE: '. $mime_type, __FILE__, __LINE__, __METHOD__, 10);
 				return FALSE;
 			}
@@ -1137,7 +1276,7 @@ class Misc {
 	}
 
 	static function encrypt( $str, $key = NULL ) {
-		if ( $str == '' ) {
+		if ( $str == '' OR $str === FALSE OR empty($str) ) {
 			return FALSE;
 		}
 
@@ -1146,21 +1285,21 @@ class Misc {
 			$key = $config_vars['other']['salt'];
 		}
 
-		$td = mcrypt_module_open('tripledes', '', 'ecb', '');
-		$iv = mcrypt_create_iv (mcrypt_enc_get_iv_size($td), MCRYPT_RAND);
-		$max_key_size = mcrypt_enc_get_key_size($td);
-		mcrypt_generic_init($td, substr($key, 0, $max_key_size), $iv);
+		$td = mcrypt_module_open( 'tripledes', '', 'ecb', '' );
+		$iv = mcrypt_create_iv( mcrypt_enc_get_iv_size( $td ), MCRYPT_RAND );
+		$max_key_size = mcrypt_enc_get_key_size( $td );
+		mcrypt_generic_init( $td, substr( $key, 0, $max_key_size ), $iv );
 
-		$encrypted_data = base64_encode( mcrypt_generic($td, trim($str) ) );
+		$encrypted_data = base64_encode( mcrypt_generic( $td, trim($str) ) );
 
-		mcrypt_generic_deinit($td);
-		mcrypt_module_close($td);
+		mcrypt_generic_deinit( $td );
+		mcrypt_module_close( $td );
 
 		return $encrypted_data;
 	}
 
 	static function decrypt( $str, $key = NULL ) {
-		if (  $key == NULL OR $key == '' ) {
+		if ( $key == NULL OR $key == '' ) {
 			global $config_vars;
 			$key = $config_vars['other']['salt'];
 		}
@@ -1169,15 +1308,21 @@ class Misc {
 			return FALSE;
 		}
 
-		$td = mcrypt_module_open('tripledes', '', 'ecb', '');
-		$iv = mcrypt_create_iv (mcrypt_enc_get_iv_size($td), MCRYPT_RAND);
-		$max_key_size = mcrypt_enc_get_key_size($td);
-		mcrypt_generic_init($td, substr($key, 0, $max_key_size), $iv);
+		//Check to make sure str is actually base64_encoded.
+		if ( base64_encode( base64_decode($str, TRUE) ) !== $str ) {
+			Debug::Arr($str, 'ERROR: String is not base64_encoded...', __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		}
 
-		$unencrypted_data = rtrim( mdecrypt_generic($td, base64_decode( $str ) ) );
+		$td = mcrypt_module_open( 'tripledes', '', 'ecb', '' );
+		$iv = mcrypt_create_iv( mcrypt_enc_get_iv_size($td), MCRYPT_RAND );
+		$max_key_size = mcrypt_enc_get_key_size( $td );
+		mcrypt_generic_init( $td, substr($key, 0, $max_key_size ), $iv );
 
-		mcrypt_generic_deinit($td);
-		mcrypt_module_close($td);
+		$unencrypted_data = rtrim( mdecrypt_generic( $td, base64_decode( $str ) ) );
+
+		mcrypt_generic_deinit( $td );
+		mcrypt_module_close( $td );
 
 		return $unencrypted_data;
 	}
@@ -1253,6 +1398,68 @@ class Misc {
 		return $retval;
 	}
 
+	static function getEmailDomain() {
+		global $config_vars;
+		
+		if ( isset($config_vars['other']['email_domain']) AND $config_vars['other']['email_domain'] != '' ) {
+			$domain = $config_vars['other']['email_domain'];
+		} else {
+			Debug::Text( 'No From Email Domain set, falling back to regular hostname...', __FILE__, __LINE__, __METHOD__, 10);
+			$domain = self::getHostName( FALSE );
+		}
+
+		return $domain;
+	}
+
+	//Checks refer to help mitigate CSRF attacks.
+	static function checkValidReferer( $referer = FALSE ) {
+		global $config_vars;
+		
+		if ( PRODUCTION == TRUE AND isset($config_vars['other']['enable_csrf_validation']) AND $config_vars['other']['enable_csrf_validation'] == TRUE ) {
+			if ( $referer == FALSE ) {
+				if ( isset($_SERVER['HTTP_ORIGIN']) AND $_SERVER['HTTP_ORIGIN'] != '' ) {
+					//IE9 doesn't send this, but if it exists use it instead as its likely more trustworthy.
+					//Debug::Text( 'Using Referer from Origin header...', __FILE__, __LINE__, __METHOD__, 10);
+					$referer = $_SERVER['HTTP_ORIGIN'];
+					if ( $referer == 'file://' ) { //Mobile App and some browsers can send the origin as: file://
+						return TRUE;
+					}
+				} elseif ( isset($_SERVER['HTTP_REFERER']) AND $_SERVER['HTTP_REFERER'] != '' ) {
+					$referer = $_SERVER['HTTP_REFERER'];
+				} else {
+					$referer = '';
+				}
+			}
+
+			//Debug::Text( 'Raw Referer: '. $referer, __FILE__, __LINE__, __METHOD__, 10);
+			$referer = parse_url( $referer, PHP_URL_HOST );
+
+			//Use HTTP_HOST rather than getHostName() as the same site can be referenced with multiple different host names
+			//Especially considering on-site installs that default to 'localhost'
+			//If deployment ondemand is set, then we assume SERVER_NAME is correct and revert to using that instead of HTTP_HOST which has potential to be forged.
+			if ( DEPLOYMENT_ON_DEMAND == FALSE AND isset( $_SERVER['HTTP_HOST'] ) ) {
+				$host_name = $_SERVER['HTTP_HOST'];
+			} elseif ( isset( $_SERVER['SERVER_NAME'] ) ) {
+				$host_name = $_SERVER['SERVER_NAME'];
+			} elseif ( isset( $_SERVER['HOSTNAME'] ) ) {
+				$host_name = $_SERVER['HOSTNAME'];
+			} else {
+				$host_name = '';
+			}
+			$host_name = ( $host_name != '' ) ? parse_url( 'http://'.$host_name, PHP_URL_HOST ) : ''; //Need to add 'http://' so parse_url() can strip it off again.
+			//Debug::Text( 'Parsed Referer: '. $referer .' Hostname: '. $host_name, __FILE__, __LINE__, __METHOD__, 10);
+
+			if ( $referer == $host_name OR $host_name == '' ) {
+				return TRUE;
+			}
+
+			Debug::Text( 'CSRF check failed... Parsed Referer: '. $referer .' Hostname: '. $host_name, __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		}
+
+		return TRUE;
+	}
+	
 	static function getHostNameWithoutSubDomain( $host_name ) {
 		$split_host_name = explode('.', $host_name );
 		if ( count($split_host_name) > 2 ) {
@@ -1262,7 +1469,7 @@ class Misc {
 
 		return $host_name;
 	}
-
+	
 	static function getHostName( $include_port = TRUE ) {
 		global $config_vars;
 
@@ -1432,18 +1639,24 @@ class Misc {
 		$name = str_replace( TTi18n::getText('Copy of'), '', $name );
 
 		if ( $strict === TRUE ) {
-			return TTi18n::getText('Copy of').' '. $name;
+			$retval = TTi18n::getText('Copy of').' '. $name;
 		} else {
-			return TTi18n::getText('Copy of').' '. $name .' ['. rand(1, 99) .']';
+			$retval = TTi18n::getText('Copy of').' '. $name .' ['. rand(1, 99) .']';
 		}
+
+		$retval = substr( $retval, 0, 99 ); //Make sure the name doesn't get too long.
+		return $retval;
 	}
 
 	static function generateShareName( $from, $name, $strict = FALSE ) {
 		if ( $strict === TRUE ) {
-			return $name .' ('. TTi18n::getText('Shared by').': '. $from .')';
+			$retval = $name .' ('. TTi18n::getText('Shared by').': '. $from .')';
 		} else {
-			return $name .' ('. TTi18n::getText('Shared by').': '. $from .') ['. rand(1, 99) .']';
+			$retval = $name .' ('. TTi18n::getText('Shared by').': '. $from .') ['. rand(1, 99) .']';
 		}
+
+		$retval = substr( $retval, 0, 99 ); //Make sure the name doesn't get too long.
+		return $retval;
 	}
 
 	/** Delete all files in directory
@@ -1643,7 +1856,7 @@ class Misc {
 		return FALSE;
 	}
 
-	static function sendSystemMail( $subject, $body, $attachments = NULL ) {
+	static function sendSystemMail( $subject, $body, $attachments = NULL, $force = FALSE ) {
 		if ( $subject == '' OR $body == '' ) {
 			return FALSE;
 		}
@@ -1688,7 +1901,7 @@ class Misc {
 
 		$mail->setBody( $mail->getMIMEObject()->get( $mail->default_mime_config ) );
 
-		$retval = $mail->Send();
+		$retval = $mail->Send( $force );
 
 		return $retval;
 	}
@@ -1699,7 +1912,7 @@ class Misc {
 		if ( PRODUCTION == TRUE ) {
 			//Disable caching to prevent stale cache data from being read, and further cache errors.
 			$install_obj = new Install();
-			$tmp_config_vars['cache']['enable'] = FALSE;
+			$tmp_config_vars['cache']['enable'] = 'FALSE';
 			$write_config_result = $install_obj->writeConfigFile( $tmp_config_vars );
 			unset($install_obj, $tmp_config_vars);
 
@@ -1840,6 +2053,64 @@ class Misc {
 		}
 
 		return FALSE;
+	}
+
+	static function redirectUnSupportedBrowser() {
+		if ( self::isUnSupportedBrowser() == TRUE ) {
+			Redirect::Page( URLBuilder::getURL( array('tt_version' => APPLICATION_VERSION, 'tt_edition' => getTTProductEdition() ), 'http://www.timetrex.com/supported_web_browsers.php' ) );
+		}
+
+		return TRUE;
+	}
+
+	static function isUnSupportedBrowser( $useragent = NULL ) {
+		if ( $useragent == '' ) {
+			if ( isset($_SERVER['HTTP_USER_AGENT']) ) {
+				$useragent = $_SERVER['HTTP_USER_AGENT'];
+			} else {
+				return FALSE;
+			}
+		}
+
+		$retval = FALSE;
+
+		if ( !class_exists('Browser') ) {
+			require_once( Environment::getBasePath().'/classes/other/Browser.php');
+		}
+
+		$browser = new Browser( $useragent );
+
+		//This is for the full web interface
+		//IE < 9
+		//Firefox < 24
+		//Chrome < 32
+		//Safari < 5
+		//Opera < 12
+		if ( $browser->getBrowser() == Browser::BROWSER_IE AND version_compare( $browser->getVersion(), 9, '<' ) ) {
+			$retval = TRUE;
+		}
+
+		if ( $browser->getBrowser() == Browser::BROWSER_FIREFOX AND version_compare( $browser->getVersion(), 24, '<' ) ) {
+			$retval = TRUE;
+		}
+
+		if ( $browser->getBrowser() == Browser::BROWSER_CHROME AND version_compare( $browser->getVersion(), 30, '<' ) ) {
+			$retval = TRUE;
+		}
+
+		if ( $browser->getBrowser() == Browser::BROWSER_SAFARI AND version_compare( $browser->getVersion(), 5, '<' ) ) {
+			$retval = TRUE;
+		}
+
+		if ( $browser->getBrowser() == Browser::BROWSER_OPERA AND version_compare( $browser->getVersion(), 12, '<' ) ) {
+			$retval = TRUE;
+		}
+
+		if ( $retval == TRUE ) {
+			Debug::Text('Unsupported Browser: '. $browser->getBrowser() .' Version: '. $browser->getVersion(), __FILE__, __LINE__, __METHOD__, 10);
+		}
+
+		return $retval;
 	}
 
 	static function detectMobileBrowser( $useragent = NULL ) {
@@ -1986,7 +2257,12 @@ class Misc {
 		//ignore_force_ssl is used for things like cookies where we need to determine if SSL is *currently* in use, vs. if we want it to be used or not.
 		if ( $ignore_force_ssl == FALSE AND isset($config_vars['other']['force_ssl']) AND ( $config_vars['other']['force_ssl'] == TRUE ) ) {
 			return TRUE;
-		} elseif ( isset($_SERVER['HTTPS']) AND ( strtolower($_SERVER['HTTPS']) == 'on' OR $_SERVER['HTTPS'] == '1' ) ) {
+		} elseif (
+					( isset($_SERVER['HTTPS']) AND ( strtolower($_SERVER['HTTPS']) == 'on' OR $_SERVER['HTTPS'] == '1' ) )
+					OR
+					//Handle load balancer/proxy forwarding with SSL offloading.
+					( isset($_SERVER['X-Forwarded-Proto']) AND strtolower($_SERVER['X-Forwarded-Proto']) == 'https'  )
+				) {
 			return TRUE;
 		} elseif ( isset($_SERVER['SERVER_PORT']) AND ( $_SERVER['SERVER_PORT'] == '443' ) ) {
 			return TRUE;
@@ -2081,6 +2357,58 @@ class Misc {
 		return $retval;
 	}
 
+	static function checkValidImage( $file_data ) {
+		$mime_type = Misc::getMimeType( $file_data, TRUE );
+		if ( strpos( $mime_type, 'image' ) !== FALSE ) {
+			$file_size = strlen( $file_data );
+			
+			//use getimagesize() to make sure image isn't too large and actually is an image.
+			$image_size = getimagesizefromstring( $file_data );
+			Debug::Arr($size, 'Mime Type: '. $mime_type .' Bytes: '. $file_size .' Size: ', __FILE__, __LINE__, __METHOD__, 10);
 
+			if ( isset($size) AND isset($size[0]) AND isset($size[1]) ) {
+				$bytes_to_image_size_ratio = ( $file_size / ( $size[0] * $size[1] ) );
+				Debug::Text('Bytes to image ratio: '. $bytes_to_image_size_ratio, __FILE__, __LINE__, __METHOD__, 10);
+
+				//UNFINISHED!
+				
+				return TRUE;
+			}
+
+			return FALSE;
+		}
+
+		Debug::Text('Not a image, unable to process: Mime Type: '. $mime_type, __FILE__, __LINE__, __METHOD__, 10);
+		return TRUE; //Isnt an image, don't bother processing...
+	}
+
+	static function formatAddress( $name, $address1 = FALSE, $address2 = FALSE, $city = FALSE, $province = FALSE, $postal_code = FALSE ) {
+		if ( $name != '' ) {
+			$retarr[] = $name;
+		}
+		
+		if ( $address1 != '' ) {
+			$retarr[] = $address1;
+		}
+		if ( $address2 != '' ) {
+			$retarr[] = $address2;
+		}
+
+		if ( $city != '' ) {
+			$city_arr[] = $city;
+		}
+		if ( $province != '' ) {
+			$city_arr[] = $province;
+		}
+		if ( $postal_code != '' ) {
+			$city_arr[] = $postal_code;
+		}
+
+		if ( is_array($city_arr) ) {
+			$retarr[] = implode(' ', $city_arr);
+		}
+		
+		return implode("\n", $retarr );
+	}
 }
 ?>

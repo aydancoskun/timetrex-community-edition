@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13814 $
- * $Id: AccrualPolicyFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
- * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
+ * $Revision: 14958 $
+ * $Id: AccrualPolicyFactory.class.php 14958 2014-10-28 14:00:49Z mikeb $
+ * $Date: 2014-10-28 07:00:49 -0700 (Tue, 28 Oct 2014) $
  */
 
 /**
@@ -1075,7 +1075,7 @@ class AccrualPolicyFactory extends Factory {
 				//Get all users assigned to this policy group.
 				if ( is_array($user_ids) AND count($user_ids) > 0 AND !in_array( -1, $user_ids ) ) {
 					Debug::Text('Using users passed in by filter...', __FILE__, __LINE__, __METHOD__, 10);
-					$policy_group_users = $user_ids;
+					$policy_group_users = array_intersect( (array)$pg_obj->getUser(), (array)$user_ids );
 				} else {
 					Debug::Text('Using users assigned to policy group...', __FILE__, __LINE__, __METHOD__, 10);
 					$policy_group_users = $pg_obj->getUser();

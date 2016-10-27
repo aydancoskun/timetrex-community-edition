@@ -184,22 +184,7 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 										'font' => array(
 																'size' => 12,
 																'type' => '' ),
-										'multicell' => FALSE,
-									),
-								'company_province' => array( //Province of employee
-										'function' => array('filterCompanyProvince', 'drawNormal'),
-										'coordinates' => array(
-															'x' => 35,
-															'y' => 120,
-															'h' => 10,
-															'w' => 224,
-															'halign' => 'L',
-
-															),
-										'font' => array(
-																'size' => 12,
-																'type' => '' ),
-										'multicell' => FALSE,
+										'multicell' => TRUE,
 									),
 								'company_postal_code' => array(
 
@@ -259,25 +244,8 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 										'font' => array(
 																'size' => 12,
 																'type' => '' ),
-										'multicell' => FALSE,
+										'multicell' => TRUE,
 									),
-
-								'employee_province' => array( //Province of employee
-										'function' => array('filterEmployeeProvince', 'drawNormal'),
-										'coordinates' => array(
-															'x' => 35,
-															'y' => 195,
-															'h' => 10,
-															'w' => 310,
-															'halign' => 'L',
-
-															),
-										'font' => array(
-																'size' => 12,
-																'type' => '' ),
-										'multicell' => FALSE,
-									),
-
 
 								//Pay Period Type
 								'pay_period_type' => array(
@@ -996,48 +964,13 @@ class GovernmentForms_CA_ROE extends GovernmentForms_CA {
 	}
 	function filterCompanyAddress( $value ) {
 		//Combine company address for multicell display.
-		$retarr[] = $this->company_address1;
-		if ( $this->company_address2 != '' ) {
-			$retarr[] = $this->company_address2;
-		}
-		//$retarr[] = $this->city. ', '.$this->province . ' ' . $this->postal_code;
-
-		return implode("\n", $retarr );
-	}
-	function filterCompanyProvince( $value ) {
-		//Combine city province for multicell display.
-
-		if ( $this->company_city != '' ) {
-			$retarr[] = $this->company_city;
-		}
-		if ( $this->company_province != '' ) {
-			$retarr[] = $this->company_province;
-		}
-
-		return implode("\n", $retarr );
+		//Dont specify postal code though, as thats in a separate box.
+		return Misc::formatAddress( NULL, $this->company_address1, $this->company_address2, $this->company_city, $this->company_province );
 	}
 
 	function filterEmployeeAddress( $value ) {
 		//Combine employee address for multicell display.
-		$retarr[] = $this->employee_address1;
-		if ( $this->employee_address2 != '' ) {
-			$retarr[] = $this->employee_address2;
-		}
-		//$retarr[] = $this->city. ', '.$this->province . ' ' . $this->postal_code;
-
-		return implode("\n", $retarr );
-	}
-	function filterEmployeeProvince( $value ) {
-		//Combine city province for multicell display.
-
-		if ( $this->employee_city != '' ) {
-			$retarr[] = $this->employee_city.' ';
-		}
-		if ( $this->employee_province != '' ) {
-			$retarr[] = $this->employee_province;
-		}
-
-		return implode("\n", $retarr );
+		return Misc::formatAddress( NULL, $this->employee_address1, $this->employee_address2, $this->employee_city, $this->employee_province, $this->employee_postal_code );
 	}
 	function filterDate( $value ) {
 		if ( $value != '' OR $value != NULL ) {

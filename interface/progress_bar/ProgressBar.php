@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13271 $
- * $Id: ProgressBar.php 13271 2014-05-26 18:07:38Z mikeb $
- * $Date: 2014-05-26 11:07:38 -0700 (Mon, 26 May 2014) $
+ * $Revision: 13095 $
+ * $Id: ProgressBar.php 13095 2014-05-01 17:39:56Z mikeb $
+ * $Date: 2014-05-01 10:39:56 -0700 (Thu, 01 May 2014) $
  */
 require_once('../../includes/global.inc.php');
 require_once(Environment::getBasePath() .'includes/Interface.inc.php');

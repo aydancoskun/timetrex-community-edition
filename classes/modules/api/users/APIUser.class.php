@@ -160,8 +160,10 @@ class APIUser extends APIFactory {
 		//Debug::Arr($data['filter_data']['permission_children_ids'], 'Permission Section: '. $permission_section .' Child IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Allow getting users from other companies, so we can change admin contacts when using the master company.
+		//Need to allow -1 to be accepted for Edit Company view to not show any employees in Contact dropdowns when creating a new company.
+		//But show the proper employees (for that company) in Contact dropdowns when editing an existing company.
 		if ( isset($data['filter_data']['company_id'])
-				AND $data['filter_data']['company_id'] > 0
+				AND !empty($data['filter_data']['company_id'])
 				AND ( $this->getPermissionObject()->Check('company', 'enabled') AND $this->getPermissionObject()->Check('company', 'view') ) ) {
 			$company_id = $data['filter_data']['company_id'];
 		} else {
@@ -587,83 +589,95 @@ class APIUser extends APIFactory {
 	 * @return bool
 	 */
 	function changePassword( $current_password, $new_password, $new_password2, $type = 'web' ) {
-
 		$ulf = TTnew( 'UserListFactory' );
 		$ulf->getByIdAndCompanyId( $this->getCurrentUserObject()->getId(), $this->getCurrentCompanyObject()->getId() );
 		if ( $ulf->getRecordCount() == 1 ) {
 			$uf = $ulf->getCurrent();
 
-			switch ( strtolower($type) ) {
-				case 'quick_punch':
-				case 'phone':
-					if ( $this->getPermissionObject()->Check('user', 'edit_own_phone_password') == FALSE ) {
-						return $this->getPermissionObject()->PermissionDenied();
-					}
+			global $authentication;
+			if ( $authentication->rl->check() == FALSE ) {
+				Debug::Text('Excessive failed password attempts... Preventing password change from: '. $_SERVER['REMOTE_ADDR'] .' for up to 15 minutes...', __FILE__, __LINE__, __METHOD__, 10);
+				sleep(5); //Excessive password attempts, sleep longer.
 
-					$log_description = TTi18n::getText('Password - Phone');
-					if ( $current_password != '' ) {
-						if ( $uf->checkPhonePassword($current_password) !== TRUE ) {
-							Debug::Text('Password check failed!', __FILE__, __LINE__, __METHOD__, 10);
+				$uf->Validator->isTrue(	'current_password',
+										FALSE,
+										TTi18n::gettext('Current password is incorrect') .' (z)' );
+			} else {
+				switch ( strtolower($type) ) {
+					case 'quick_punch':
+					case 'phone':
+						if ( $this->getPermissionObject()->Check('user', 'edit_own_phone_password') == FALSE ) {
+							return $this->getPermissionObject()->PermissionDenied();
+						}
+
+						$log_description = TTi18n::getText('Password - Phone');
+						if ( $current_password != '' ) {
+							if ( $uf->checkPhonePassword($current_password) !== TRUE ) {
+								Debug::text('Password check failed! Attempt: '. $authentication->rl->getAttempts(), __FILE__, __LINE__, __METHOD__, 10);
+								sleep( ($authentication->rl->getAttempts() * 0.5) ); //If password is incorrect, sleep for some time to slow down brute force attacks.
+
+								$uf->Validator->isTrue(	'current_password',
+														FALSE,
+														TTi18n::gettext('Current password is incorrect') );
+							}
+						} else {
+							Debug::Text('Current password not specified', __FILE__, __LINE__, __METHOD__, 10);
 							$uf->Validator->isTrue(	'current_password',
 													FALSE,
 													TTi18n::gettext('Current password is incorrect') );
 						}
-					} else {
-						Debug::Text('Current password not specified', __FILE__, __LINE__, __METHOD__, 10);
-						$uf->Validator->isTrue(	'current_password',
-												FALSE,
-												TTi18n::gettext('Current password is incorrect') );
-					}
 
-					if ( $new_password != '' OR $new_password2 != ''  ) {
-						if ( $new_password == $new_password2 ) {
-							$uf->setPhonePassword($new_password);
+						if ( $new_password != '' OR $new_password2 != ''  ) {
+							if ( $new_password == $new_password2 ) {
+								$uf->setPhonePassword($new_password);
+							} else {
+								$uf->Validator->isTrue(	'password',
+														FALSE,
+														TTi18n::gettext('Passwords don\'t match') );
+							}
 						} else {
 							$uf->Validator->isTrue(	'password',
 													FALSE,
 													TTi18n::gettext('Passwords don\'t match') );
 						}
-					} else {
-						$uf->Validator->isTrue(	'password',
-												FALSE,
-												TTi18n::gettext('Passwords don\'t match') );
-					}
 
-					break;
-				case 'web':
-					if ( $this->getPermissionObject()->Check('user', 'edit_own_password') == FALSE ) {
-						return $this->getPermissionObject()->PermissionDenied();
-					}
+						break;
+					case 'web':
+						if ( $this->getPermissionObject()->Check('user', 'edit_own_password') == FALSE ) {
+							return $this->getPermissionObject()->PermissionDenied();
+						}
 
-					$log_description = TTi18n::getText('Password - Web');
-					if ( $current_password != '' ) {
-						if ( $uf->checkPassword($current_password) !== TRUE ) {
-							Debug::Text('Password check failed!', __FILE__, __LINE__, __METHOD__, 10);
+						$log_description = TTi18n::getText('Password - Web');
+						if ( $current_password != '' ) {
+							if ( $uf->checkPassword($current_password) !== TRUE ) {
+								Debug::text('Password check failed! Attempt: '. $authentication->rl->getAttempts(), __FILE__, __LINE__, __METHOD__, 10);
+								sleep( ($authentication->rl->getAttempts() * 0.5) ); //If password is incorrect, sleep for some time to slow down brute force attacks.
+								$uf->Validator->isTrue(	'current_password',
+														FALSE,
+														TTi18n::gettext('Current password is incorrect') );
+							}
+						} else {
+							Debug::Text('Current password not specified', __FILE__, __LINE__, __METHOD__, 10);
 							$uf->Validator->isTrue(	'current_password',
 													FALSE,
 													TTi18n::gettext('Current password is incorrect') );
 						}
-					} else {
-						Debug::Text('Current password not specified', __FILE__, __LINE__, __METHOD__, 10);
-						$uf->Validator->isTrue(	'current_password',
-												FALSE,
-												TTi18n::gettext('Current password is incorrect') );
-					}
 
-					if ( $new_password != '' OR $new_password2 != ''  ) {
-						if ( $new_password == $new_password2 ) {
-							$uf->setPassword($new_password);
+						if ( $new_password != '' OR $new_password2 != ''  ) {
+							if ( $new_password == $new_password2 ) {
+								$uf->setPassword($new_password);
+							} else {
+								$uf->Validator->isTrue(	'password',
+														FALSE,
+														TTi18n::gettext('Passwords don\'t match') );
+							}
 						} else {
 							$uf->Validator->isTrue(	'password',
 													FALSE,
 													TTi18n::gettext('Passwords don\'t match') );
 						}
-					} else {
-						$uf->Validator->isTrue(	'password',
-												FALSE,
-												TTi18n::gettext('Passwords don\'t match') );
-					}
-					break;
+						break;
+				}
 			}
 
 			if ( $uf->isValid() ) {
@@ -672,6 +686,9 @@ class APIUser extends APIFactory {
 					return $this->returnHandler( TRUE );
 				} else {
 					TTLog::addEntry( $this->getCurrentUserObject()->getId(), 20, $log_description, NULL, $uf->getTable() );
+
+					$authentication->rl->delete(); //Clear failed password rate limit upon successful login.
+
 					return $this->returnHandler( $uf->Save() ); //Single valid record
 				}
 			} else {

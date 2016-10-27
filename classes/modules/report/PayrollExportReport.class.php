@@ -778,8 +778,15 @@ class PayrollExportReport extends TimesheetSummaryReport {
 							$data .= str_pad( '', 9, ' ', STR_PAD_LEFT); //Amount. This can always be calculated from hours and hourly rate above though.
 							$data .= str_pad( '', 13, ' ', STR_PAD_LEFT); //Blank space
 							if ( isset($setup_data['paychex_preview_advanced_job']['state_columns']) ) {
-								$data .= str_pad( ( isset($row[$setup_data['paychex_preview_advanced_job']['state_columns']]) ) ? $row[$setup_data['paychex_preview_advanced_job']['state_columns']] : NULL, 2, ' ', STR_PAD_LEFT); //State
+								$data .= str_pad( ( isset($row[$setup_data['paychex_preview_advanced_job']['state_columns']]) ) ? $row[$setup_data['paychex_preview_advanced_job']['state_columns']] : NULL, 2, ' ', STR_PAD_LEFT); //Override State
 							}
+							$data .= str_pad( '', 10, ' ', STR_PAD_LEFT); //Override Local
+							if ( isset($setup_data['paychex_preview_advanced_job']['state_columns'])
+									AND isset($row[$setup_data['paychex_preview_advanced_job']['state_columns']])
+									AND $row[$setup_data['paychex_preview_advanced_job']['state_columns']] != '' ) {
+								$data .= 'S'; //State/Local Misc Field, needs 'S' to trigger override state column above.
+							}
+
 							$data .= "\n";
 						}
 					}

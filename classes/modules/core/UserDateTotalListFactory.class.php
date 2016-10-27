@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12528 $
- * $Id: UserDateTotalListFactory.class.php 12528 2014-03-03 23:20:02Z mikeb $
- * $Date: 2014-03-03 15:20:02 -0800 (Mon, 03 Mar 2014) $
+ * $Revision: 15145 $
+ * $Id: UserDateTotalListFactory.class.php 15145 2014-11-13 22:42:19Z mikeb $
+ * $Date: 2014-11-13 14:42:19 -0800 (Thu, 13 Nov 2014) $
  */
 
 /**
@@ -3648,8 +3648,8 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 							ppf.end_date as pay_period_end_date,
 							ppf.transaction_date as pay_period_transaction_date,
 							b.date_stamp as date_stamp,
-							bf.name as branch,
-							df.name as department,
+							a.branch_id as branch_id,
+							a.department_id as department_id,
 							a.status_id as status_id,
 							a.type_id as type_id,
 
@@ -3751,7 +3751,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		//This isn't needed as it lists every status: AND a.status_id in (10, 20, 30)
 		$query .= '
 						AND ( a.deleted = 0 AND b.deleted = 0 )
-					group by b.user_id, ppf.id, ppf.start_date, ppf.end_date, ppf.transaction_date, bf.name, df.name, b.date_stamp, z.hourly_rate, z.labor_burden_percent, a.status_id, a.type_id, a.over_time_policy_id, a.absence_policy_id, a.premium_policy_id, min_punch.time_stamp, max_punch.time_stamp
+					group by b.user_id, ppf.id, ppf.start_date, ppf.end_date, ppf.transaction_date, a.branch_id, a.department_id, b.date_stamp, z.hourly_rate, z.labor_burden_percent, a.status_id, a.type_id, a.over_time_policy_id, a.absence_policy_id, a.premium_policy_id, min_punch.time_stamp, max_punch.time_stamp
 					';
 
 		$query .= $this->getSortSQL( $order, FALSE );

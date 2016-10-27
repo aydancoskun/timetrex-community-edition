@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11984 $
- * $Id: ScheduleFactory.class.php 11984 2014-01-13 18:27:11Z mikeb $
- * $Date: 2014-01-13 10:27:11 -0800 (Mon, 13 Jan 2014) $
+ * $Revision: 14797 $
+ * $Id: ScheduleFactory.class.php 14797 2014-10-16 19:00:06Z mikeb $
+ * $Date: 2014-10-16 12:00:06 -0700 (Thu, 16 Oct 2014) $
  */
 
 /**
@@ -54,6 +54,15 @@ class ScheduleFactory extends Factory {
 	protected $pay_period_schedule_obj = NULL;
 
 	function _getFactoryOptions( $name ) {
+
+		//Attempt to get the edition of the currently logged in users company, so we can better tailor the columns to them.
+		$product_edition_id = getTTProductEdition();
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+			global $current_company;
+			if ( is_object($current_company) ) {
+				$product_edition_id = $current_company->getProductEdition();
+			}
+		}
 
 		$retval = NULL;
 		switch( $name ) {
@@ -104,7 +113,7 @@ class ScheduleFactory extends Factory {
 										'-2030-updated_date' => TTi18n::gettext('Updated Date'),
 							);
 
-				if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+				if ( $product_edition_id >= TT_PRODUCT_CORPORATE ) {
 					$retval['-1180-job'] = TTi18n::gettext('Job');
 					$retval['-1190-job_item'] = TTi18n::gettext('Task');
 				}
@@ -141,7 +150,7 @@ class ScheduleFactory extends Factory {
 								'department',
 								);
 
-				if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+				if ( $product_edition_id >= TT_PRODUCT_CORPORATE ) {
 					$retval[] = 'job';
 					$retval[] = 'job_item';
 

@@ -402,7 +402,7 @@ class APIUserPreference extends APIFactory {
 		return $this->returnHandler( FALSE );
 	}
 
-	function getScheduleIcalendarURL( $user_name, $type_id ) {
+	function getScheduleIcalendarURL( $user_name = NULL, $type_id = NULL ) {
 		$current_user_prefs = $this->getCurrentUserObject()->getUserPreferenceObject();
 		if ( is_object($current_user_prefs) ) {
 			return $this->returnHandler( $current_user_prefs->getScheduleIcalendarURL( $user_name, $type_id ) );

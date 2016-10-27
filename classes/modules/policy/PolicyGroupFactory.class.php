@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11942 $
- * $Id: PolicyGroupFactory.class.php 11942 2014-01-09 00:50:10Z mikeb $
- * $Date: 2014-01-08 16:50:10 -0800 (Wed, 08 Jan 2014) $
+ * $Revision: 14797 $
+ * $Id: PolicyGroupFactory.class.php 14797 2014-10-16 19:00:06Z mikeb $
+ * $Date: 2014-10-16 12:00:06 -0700 (Thu, 16 Oct 2014) $
  */
 
 /**
@@ -210,12 +210,11 @@ class PolicyGroupFactory extends Factory {
 		}
 
 		if ( is_array($ids) ) {
+			$tmp_ids = array();
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
 				$pgulf = TTnew( 'PolicyGroupUserListFactory' );
 				$pgulf->getByPolicyGroupId( $this->getId() );
-
-				$tmp_ids = array();
 				foreach ($pgulf as $obj) {
 					$id = $obj->getUser();
 					Debug::text('Policy ID: '. $obj->getPolicyGroup() .' ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
@@ -263,8 +262,7 @@ class PolicyGroupFactory extends Factory {
 
 	function getTotalUsers() {
 		$pgulf = TTnew( 'PolicyGroupUserListFactory' );
-		$pgulf->getByPolicyGroupId( $this->getId() );
-		return $pgulf->getRecordCount();
+		return $pgulf->getTotalByPolicyGroupId( $this->getId() );
 	}
 
 	function getOverTimePolicy() {

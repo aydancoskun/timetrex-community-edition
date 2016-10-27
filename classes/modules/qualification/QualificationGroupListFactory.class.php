@@ -40,7 +40,7 @@
  */
 
 /**
- * @package Module_Users
+ * @package Modules\Qualification
  */
 class QualificationGroupListFactory extends QualificationGroupFactory implements IteratorAggregate {
 

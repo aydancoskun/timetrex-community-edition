@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13893 $
- * $Id: UserListFactory.class.php 13893 2014-07-28 21:41:35Z mikeb $
- * $Date: 2014-07-28 14:41:35 -0700 (Mon, 28 Jul 2014) $
+ * $Revision: 15145 $
+ * $Id: UserListFactory.class.php 15145 2014-11-13 22:42:19Z mikeb $
+ * $Date: 2014-11-13 14:42:19 -0800 (Thu, 13 Nov 2014) $
  */
 
 /**
@@ -80,6 +80,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					where
 						status_id = ?
 						AND deleted = 0';
+
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -126,6 +129,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 						company_id = ?
 						AND status_id = ?
 						AND deleted = 0';
+
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -247,6 +253,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					where	user_name = ?
 						AND deleted = 0';
 
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
 		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
@@ -330,6 +339,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 						AND user_name = ?
 						AND deleted = 0';
 
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
 		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
@@ -357,8 +369,11 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 						AND status_id = ?
 						AND deleted = 0';
 
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
 		$this->ExecuteSQL( $query, $ph );
-		Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}
@@ -384,6 +399,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					where	phone_id = ?
 						AND status_id = ?
 						AND deleted = 0';
+
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -412,6 +430,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 						AND status_id = ?
 						AND deleted = 0';
 
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
 		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
@@ -431,6 +452,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					from	'. $this->getTable() .'
 					where	currency_id = ?
 						AND deleted = 0';
+
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -474,6 +498,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 						AND g.level = ?
 						AND a.deleted = 0';
 
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
 		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
@@ -499,6 +526,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					where	company_id = ?
 						AND group_id = ?
 						AND deleted = 0';
+
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -526,6 +556,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 						AND ibutton_id = ?
 						AND deleted = 0';
 
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
 		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
@@ -552,6 +585,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 						AND rf_id = ?
 						AND deleted = 0';
 
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
 		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
@@ -577,6 +613,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					where	company_id = ?
 						AND employee_number = ?
 						AND deleted = 0';
+
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -623,7 +662,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 					);
 
 		$query = '
-					select	a.*
+					select	_ADODB_COUNT
+						a.*
+						_ADODB_COUNT
 					from	'. $this->getTable() .' as a,
 							'. $sf->getTable() .' as z
 					where	a.company_id = ?
@@ -820,7 +861,9 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		//Also include users with user_identifcation rows that have been *created* after the given date
 		//so the first supervisor/admin enrolled on a timeclock is properly updated to lock the menu.
 		$query = '
-					select	a.*
+					select	_ADODB_COUNT
+						a.*
+						_ADODB_COUNT
 					from	'. $this->getTable() .' as a
 
 					LEFT JOIN '. $sf->getTable() .' as z ON (1=1)
@@ -1770,7 +1813,6 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['company_id']) ) ? $this->getWhereClauseSQL( 'a.company_id', $filter_data['company_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['company_status_id']) ) ? $this->getWhereClauseSQL( 'cf.status_id', $filter_data['company_status_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['permission_level']) ) ? $this->getWhereClauseSQL( 'g.level', $filter_data['permission_level'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['product_edition_id']) ) ? $this->getWhereClauseSQL( 'cf.product_edition_id', $filter_data['product_edition_id'], 'numeric_list', $ph ) : NULL;
@@ -2055,6 +2097,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 
 		$query .= ( isset($filter_data['first_name']) ) ? $this->getWhereClauseSQL( 'a.first_name', $filter_data['first_name'], 'text_metaphone', $ph ) : NULL;
 		$query .= ( isset($filter_data['last_name']) ) ? $this->getWhereClauseSQL( 'a.last_name', $filter_data['last_name'], 'text_metaphone', $ph ) : NULL;
+		$query .= ( isset($filter_data['full_name']) ) ? $this->getWhereClauseSQL( 'a.last_name', $filter_data['full_name'], 'text_metaphone', $ph ) : NULL;
 		$query .= ( isset($filter_data['home_phone']) ) ? $this->getWhereClauseSQL( 'a.home_phone', $filter_data['home_phone'], 'phone', $ph ) : NULL;
 		$query .= ( isset($filter_data['work_phone']) ) ? $this->getWhereClauseSQL( 'a.work_phone', $filter_data['work_phone'], 'phone', $ph ) : NULL;
 		$query .= ( isset($filter_data['country']) ) ?$this->getWhereClauseSQL( 'a.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;

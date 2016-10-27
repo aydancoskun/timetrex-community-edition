@@ -40,7 +40,7 @@
  */
 
 /**
- * @package Module_KPI
+ * @package Modules\KPI
  */
 class KPIListFactory extends KPIFactory implements IteratorAggregate {
 

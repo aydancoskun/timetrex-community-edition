@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: timetrex\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-07-22 10:20-0700\n"
+"POT-Creation-Date: 2014-09-02 14:13-0700\n"
 "PO-Revision-Date: 2013-10-21 04:07+0000\n"
 "Last-Translator: Noke Nahuway <it-tech_yajasi@yajasi.org>\n"
 "Language-Team: Indonesian <id@li.org>\n"
@@ -27,6 +27,9 @@ msgstr ""
 msgid " expected)"
 msgstr ""
 
+msgid " requires a modern HTML5 standards compatible web browser, click here for more information."
+msgstr ""
+
 msgid "#"
 msgstr "#"
 
@@ -36,8 +39,23 @@ msgstr ""
 msgid "% (ie: 25% burden)"
 msgstr "% (contoh: 25% tanggungan)"
 
+msgid "%1 database has not been initialized yet, please run the installer again and follow the on screen instructions. <a href=\"%2\">Click here to run the installer now.</a>"
+msgstr ""
+
+msgid "%1 database query has timed-out, if you were trying to run a report it may be too large, please narrow your search criteria and try again."
+msgstr ""
+
+msgid "%1 experienced a general error, please contact technical support."
+msgstr ""
+
 msgid "%1 for %2"
 msgstr "%1 untuk %2"
+
+msgid "%1 is currently undergoing maintenance. We're sorry for any inconvenience this may cause. Please try again in 15 minutes."
+msgstr ""
+
+msgid "%1 is unable to connect to its database, please make sure that the database service on your own local %1 server has been started and is running. If you are unsure, try rebooting your server."
+msgstr ""
 
 msgid "(A) Shortage of Work"
 msgstr "(A) Kekurangan Kerja"
@@ -3508,6 +3526,12 @@ msgstr "Clackmannanshire"
 msgid "Claim Amount"
 msgstr "klaim Jumlah"
 
+msgid "Class %1 does not exist, or unauthenticated."
+msgstr ""
+
+msgid "Class %1 does not exist."
+msgstr ""
+
 msgid "Clear"
 msgstr "Hapus"
 
@@ -3818,6 +3842,9 @@ msgid "Company Value 8 is too short or too long"
 msgstr ""
 
 msgid "Company Value 9 is too short or too long"
+msgstr ""
+
+msgid "Company does not exist."
 msgstr ""
 
 msgid "Company is invalid"
@@ -4503,6 +4530,9 @@ msgstr "Tanggal / Waktu tidak benar, atau periode pembayaran tidak ada untuk tan
 
 msgid "Date:"
 msgstr "Tanggal:"
+
+msgid "Dates"
+msgstr ""
 
 msgid "Davao Oriental"
 msgstr "Davao Oriental"
@@ -5737,6 +5767,9 @@ msgstr "Mengedit izin ditolak, karyawan tidak ada"
 msgid "Edit permission denied, record does not exist"
 msgstr "Mengedit izin ditolak, catatan tidak ada"
 
+msgid "Edit<br>Client"
+msgstr ""
+
 msgid "Edit<br>Employee"
 msgstr ""
 
@@ -5908,11 +5941,8 @@ msgstr "Email tidak ditentukan"
 msgid "Email:"
 msgstr "Surel:"
 
-msgid "Emailed Scheduled Report"
-msgstr "Diemail Laporan Terjadwal"
-
-msgid "Emailing Report"
-msgstr "email Laporan"
+msgid "Emailed Report"
+msgstr ""
 
 msgid "Emergency Contact"
 msgstr ""
@@ -6217,6 +6247,9 @@ msgstr "Daftar Gaji Karyawan"
 msgid "Employee Wages"
 msgstr "Gaji Pegawai"
 
+msgid "Employee already has a wage entry on this date for the same wage group. Try using a different date instead."
+msgstr ""
+
 msgid "Employee can not have duplicate entries on the same day"
 msgstr "Karyawan tidak dapat memiliki duplikat entri pada hari yang sama"
 
@@ -6286,6 +6319,9 @@ msgstr "Karyawan:"
 msgid "Employee<br>Contacts"
 msgstr ""
 
+msgid "Employee<br>Pay Stubs"
+msgstr ""
+
 msgid "Employee<br>Reports"
 msgstr ""
 
@@ -6346,9 +6382,6 @@ msgstr "majikan EI:"
 msgid "Employer Pay Stub"
 msgstr ""
 
-msgid "Employer Pay Stubs"
-msgstr ""
-
 msgid "Employer Pay<br>Stubs"
 msgstr ""
 
@@ -6360,6 +6393,9 @@ msgstr ""
 
 msgid "Employer Total Contributions"
 msgstr "Majikan Jumlah Kontribusi"
+
+msgid "Employer<br>Pay Stubs"
+msgstr ""
 
 msgid "Employment"
 msgstr ""
@@ -6883,6 +6919,9 @@ msgstr ""
 msgid "Expense policy name already exists"
 msgstr ""
 
+msgid "Expense<br>Authorization"
+msgstr ""
+
 msgid "Expense<br>Authorizations"
 msgstr ""
 
@@ -7071,6 +7110,9 @@ msgstr "Pajak Penghasilan Federal Dirahasiakan (Kotak 4):"
 
 msgid "Federal Tax Exempt:"
 msgstr "Pajak Federal Bebaskan:"
+
+msgid "Fees for Services (Box: 48)"
+msgstr ""
 
 msgid "Feet (ft)"
 msgstr "Kaki (ft)"
@@ -7308,6 +7350,9 @@ msgstr "Untuk dukungan teknis instalasi, silakan bergabung dengan komunitas kami
 
 msgid "For more information please click here."
 msgstr "Untuk informasi lebih lanjut silahkan klik di sini."
+
+msgid "For more information please visit"
+msgstr ""
 
 msgid "For searching the LDAP user. (ie: AD: sAMAccountName, openLDAP: dn, Mac OSX: dn)"
 msgstr ""
@@ -9637,6 +9682,9 @@ msgstr "Memperpanjang Uraian yang tidak berlaku"
 msgid "Invalid District"
 msgstr "Wilayah yang tidak berlaku"
 
+msgid "Invalid Email address"
+msgstr ""
+
 msgid "Invalid Employee"
 msgstr "Karyawan yang tidak berlaku"
 
@@ -9874,6 +9922,9 @@ msgstr "Label yang tidak sah"
 msgid "Invalid last date"
 msgstr "Tanggal lalu yang tidak sah"
 
+msgid "Invalid license file"
+msgstr ""
+
 msgid "Invalid link"
 msgstr "penghubung yang tidak sah"
 
@@ -9896,6 +9947,9 @@ msgid "Invalid recall date"
 msgstr "mengingatkan tanggal yang tidak sah"
 
 msgid "Invalid records have been skipped, all other records have been imported successfully."
+msgstr ""
+
+msgid "Invalid referrer, possible CSRF."
 msgstr ""
 
 msgid "Invalid review control"
@@ -9927,6 +9981,9 @@ msgstr "Periode bayaran atau/dan pengguna unik yang tidak sah"
 
 msgid "Invalid vacation pay"
 msgstr "bayaran liburan yang tidak sah"
+
+msgid "Invalid view name"
+msgstr ""
 
 msgid "Invalid, PGSQL or MySQLi PHP extensions are required"
 msgstr "yang tidak sah, pgsql atau ekstensi PHP MySQLi diperlukan"
@@ -11266,6 +11323,9 @@ msgstr "Lucca"
 msgid "Lump-sum Payments (18)"
 msgstr "Pembayaran lump-sum (18)"
 
+msgid "Lump-sum Payments (Box: 18)"
+msgstr ""
+
 msgid "Lump-sum Payments (Box: 18):"
 msgstr "Pembayaran lump-sum (18):"
 
@@ -11832,6 +11892,9 @@ msgstr "Messina"
 
 msgid "Meta"
 msgstr "Meta"
+
+msgid "Method %1 does not exist."
+msgstr ""
 
 msgid "Metropolitan Manila"
 msgstr "Metropolitan Manila"
@@ -12448,6 +12511,9 @@ msgstr "New Mexico"
 msgid "New Password"
 msgstr ""
 
+msgid "New Password (Confirm)"
+msgstr ""
+
 msgid "New Password (confirm):"
 msgstr "Kata Sandi Baru( yang pasti )"
 
@@ -12480,6 +12546,12 @@ msgstr "Selandia Baru"
 
 msgid "New message waiting in"
 msgstr "Pesan Baru sedang menunggu"
+
+msgid "New password can't be empty"
+msgstr ""
+
+msgid "New password does not match"
+msgstr ""
 
 msgid "New value is invalid"
 msgstr "Nilai baru yang tidak sah"
@@ -12893,6 +12965,9 @@ msgid "Not Scheduled Branch or Department"
 msgstr ""
 
 msgid "Not Scheduled Job or Task"
+msgstr ""
+
+msgid "Not Specified"
 msgstr ""
 
 msgid "Not Verified"
@@ -13615,6 +13690,9 @@ msgstr "Tunda"
 msgid "PENDING ACTIVATION - Automatic KIOSK Setup"
 msgstr ""
 
+msgid "PENDING ACTIVATION [ADDITIONAL FEE REQUIRED] - Automatic KIOSK Setup"
+msgstr ""
+
 msgid "PENDING AUTHORIZATION"
 msgstr "Kuasa untuk Penundaan"
 
@@ -13674,6 +13752,9 @@ msgstr "informasi Pengepakan"
 
 msgid "Packing Slip"
 msgstr "Slip Pengepakan"
+
+msgid "Packing<br>Slip"
+msgstr ""
 
 msgid "Padua"
 msgstr "Padua"
@@ -13860,6 +13941,9 @@ msgstr "Kata sandi untuk"
 
 msgid "Password has already been used in the past, please choose a new one"
 msgstr "Sandi telah digunakan di masa lalu, silahkan pilih yang baru"
+
+msgid "Password has been changed successfully, you may now login"
+msgstr ""
 
 msgid "Password is too short"
 msgstr "Sandi terlalu pendek"
@@ -14352,6 +14436,9 @@ msgstr "Penyesuaian pensiun (Kotak:52):"
 
 msgid "Pension Or Superannuation (16)"
 msgstr "Pensiun Atau Superannuation (16)"
+
+msgid "Pension Or Superannuation (Box: 16)"
+msgstr ""
 
 msgid "Pension Or Superannuation (Box: 16):"
 msgstr "Pensiun Atau Superannuation (Kotak:16):"
@@ -15106,6 +15193,9 @@ msgstr "Produk-produk"
 msgid "Professional"
 msgstr "profesional yang"
 
+msgid "Professional, Corporate, or Enterprise Editions."
+msgstr ""
+
 msgid "Professional, Scientific and Technical Services"
 msgstr "Layanan Profesional, Ilmiah dan Teknis"
 
@@ -15219,6 +15309,12 @@ msgstr "Coblos Masuk / Keluar"
 
 msgid "Punch List"
 msgstr "Daftar Coblos"
+
+msgid "Punch Mode: Face Recognition"
+msgstr ""
+
+msgid "Punch Mode: Face Recognition+QRCode"
+msgstr ""
 
 msgid "Punch Mode: QRCode"
 msgstr ""
@@ -15597,6 +15693,9 @@ msgstr "Ragusa"
 
 msgid "Rajasthan"
 msgstr "Rajasthan"
+
+msgid "Range"
+msgstr ""
 
 msgid "Rate"
 msgstr "Tarif"
@@ -16030,6 +16129,9 @@ msgstr ""
 msgid "Renfrewshire"
 msgstr "Renfrewshire"
 
+msgid "Renwal Date"
+msgstr ""
+
 msgid "Repeat Absence for:"
 msgstr "Ulangi Absen untuk:"
 
@@ -16068,6 +16170,9 @@ msgstr "Laporkan Setup"
 
 msgid "Report shared by"
 msgstr "Laporan bersama oleh"
+
+msgid "Report shared successfully"
+msgstr ""
 
 msgid "Reports"
 msgstr "Laporan"
@@ -16416,6 +16521,9 @@ msgstr ""
 
 msgid "Run Now"
 msgstr "Jalankan Sekarang"
+
+msgid "Running Scheduled Report"
+msgstr ""
 
 msgid "Russian Federation"
 msgstr "Federasi Rusia"
@@ -16918,6 +17026,9 @@ msgstr ""
 msgid "Select one or more employees"
 msgstr ""
 
+msgid "Select one or more employees to share report with"
+msgstr ""
+
 msgid "Select one or more jobs you wish to invoice"
 msgstr ""
 
@@ -16925,6 +17036,9 @@ msgid "Select one or more pay periods"
 msgstr ""
 
 msgid "Select one or more pay periods to process payroll for"
+msgstr ""
+
+msgid "Select one or more saved report you wish to share"
 msgstr ""
 
 msgid "Select the date range"
@@ -17096,6 +17210,9 @@ msgstr "Kriteria Seleksi"
 msgid "Selection Type"
 msgstr "Tipe Pemilihan"
 
+msgid "Self-Employed Commisions  (Box: 20)"
+msgstr ""
+
 msgid "Semi-Monthly (24/year)"
 msgstr "Semi-Bulanan (24/Tahun)"
 
@@ -17171,6 +17288,9 @@ msgstr "Server:"
 msgid "Service"
 msgstr "Layanan"
 
+msgid "Session expired, please login again."
+msgstr ""
+
 msgid "Session timed out, please login again."
 msgstr "Sesi habis, silahkan login lagi."
 
@@ -17221,6 +17341,15 @@ msgstr "Jenis Kelamin:"
 
 msgid "Seychelles"
 msgstr "Seychelles"
+
+msgid "Share"
+msgstr ""
+
+msgid "Share Report Wizard"
+msgstr ""
+
+msgid "Share<br>Report"
+msgstr ""
 
 msgid "Shared"
 msgstr "Pakai bersama"
@@ -17337,6 +17466,9 @@ msgid "Shortcut key sequence is too short or too long"
 msgstr "Urutan tombol pintas terlalu pendek atau terlalu panjang"
 
 msgid "Show All"
+msgstr ""
+
+msgid "Show Duplicate Values"
 msgstr ""
 
 msgid "Show Pre-Mature"
@@ -18694,6 +18826,9 @@ msgstr "Karyawan ini tidak memiliki satu set upah untuk kelompok upah standar, k
 msgid "This employee is at the final authorization level."
 msgstr "Karyawan ini adalah pada tingkat otorisasi akhir."
 
+msgid "This functionality is only available in"
+msgstr ""
+
 msgid "This functionality is only available in "
 msgstr "Fungsi ini hanya tersedia dalam   Ada terkemuka / spasi di sini. Masing-masing mewakili karakter spasi. Masukkan ruang dalam posisi setara dalam terjemahan. "
 
@@ -19940,6 +20075,9 @@ msgstr "Nilai Pengguna 9 terlalu pendek atau terlalu panjang"
 msgid "User authorizing this object is not a parent of it"
 msgstr "Pengguna otorisasi obyek ini bukan orangtua itu"
 
+msgid "User does not exist."
+msgstr ""
+
 msgid "User is invalid"
 msgstr "Pengguna tidak sah"
 
@@ -21051,6 +21189,9 @@ msgstr ""
 msgid "You have already submitted this form! Please wait..."
 msgstr "Anda sudah mengirimkan formulir ini! Harap tunggu ..."
 
+msgid "You have modified Form Setup data without saving, would you like to save your Form Setup data now?"
+msgstr ""
+
 msgid "You have modified data without saving, are you sure you want to continue and lose your changes"
 msgstr ""
 
@@ -21211,6 +21352,9 @@ msgid "database, please wait..."
 msgstr "Database, harap tunggu ..."
 
 msgid "date( Year, Month, Day, Hour, Minute )"
+msgstr ""
+
+msgid "dates selected"
 msgstr ""
 
 msgid "day"
@@ -21590,6 +21734,12 @@ msgstr "Umur"
 
 #~ msgid "East Flanders "
 #~ msgstr "Flanders Timur "
+
+#~ msgid "Emailed Scheduled Report"
+#~ msgstr "Diemail Laporan Terjadwal"
+
+#~ msgid "Emailing Report"
+#~ msgstr "email Laporan"
 
 #~ msgid "Error generating report..."
 #~ msgstr "Kesalahan menghasilkan laporan ..."

@@ -102,6 +102,8 @@ class Report {
 	protected $data_column_widths = NULL;
 	public $pdf = NULL;
 
+	private $option_cache = array(); //Cache getOption() calls as some of them may involve SQL queries.
+
 	protected $chart_images = array();
 
 	protected $form_obj = NULL; //Government forms
@@ -593,7 +595,7 @@ class Report {
 				$retarr[$prefix.'pay_period_id'] = 0; //This can actually find data not assigned to a pay period.
 			}
 
-			if ( $force_dates_for_pay_periods == TRUE ) {
+			if ( $force_dates_for_pay_periods == TRUE AND isset($retarr[$prefix.'pay_period_id']) ) {
 				Debug::Text('Attempting to convert pay periods to start/end dates...', __FILE__, __LINE__, __METHOD__, 10);
 				$pplf = TTNew('PayPeriodListFactory');
 				$pplf->getByIdList( $retarr[$prefix.'pay_period_id'], NULL, array('start_date' => 'asc' ) );
@@ -1067,10 +1069,19 @@ class Report {
 
 	//Return options from sub-class for things like columns, sorting columns, grouping columns, sub-total columns, etc...
 	function getOptions($name, $params = NULL) {
+		//Cache getOption() calls as it could require several SQL queries.
+		$id = $name . serialize( $params );
+
 		if ( $params == NULL OR $params == '') {
-			return $this->_getOptions( $name );
+			if ( !isset($this->option_cache[$id]) ) {
+				$this->option_cache[$id] = $this->_getOptions( $name );
+			}
+			return $this->option_cache[$id];
 		} else {
-			return $this->_getOptions( $name, $params );
+			if ( !isset($this->option_cache[$id]) ) {
+				$this->option_cache[$id] = $this->_getOptions( $name, $params );
+			}
+			return $this->option_cache[$id];
 		}
 
 		return FALSE;
@@ -2020,7 +2031,10 @@ class Report {
 				}
 
 				if ( is_object( $report_schedule_obj ) AND $report_schedule_obj->getOtherEmail() != '' ) {
-					$secondary_email .= ' '. $report_schedule_obj->getOtherEmail();
+					if ( $secondary_email != '' ) {
+						$secondary_email .= ', ';
+					}
+					$secondary_email .= $report_schedule_obj->getOtherEmail();
 				}
 			} else {
 				$primary_email = $this->getUserObject()->getHomeEmail();
@@ -2046,10 +2060,10 @@ class Report {
 			//Debug::Text('Email Subject: '. $subject, __FILE__, __LINE__, __METHOD__, 10);
 			//Debug::Text('Email Body: '. $body, __FILE__, __LINE__, __METHOD__, 10);
 
-			TTLog::addEntry( 0, 500, TTi18n::getText('Emailing Report').': '. $this->title .' '. TTi18n::getText('To') .': '. $primary_email, NULL, $this->getTable() );
+			TTLog::addEntry( $this->getUserObject()->getId(), 500, TTi18n::getText('Emailed Report').': '. $this->title .' '. TTi18n::getText('To') .': '. $primary_email .' '. TTi18n::getText('CC') .': '. $secondary_email, NULL, 'user_report_data' );
 
 			$headers = array(
-								'From'	  => '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Reports') .'"<DoNotReply@'. Misc::getHostName( FALSE ) .'>',
+								'From'	  => '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Reports') .'"<DoNotReply@'. Misc::getEmailDomain() .'>',
 								'Subject' => $subject,
 								'Cc'	  => $secondary_email,
 							);
@@ -2071,14 +2085,15 @@ class Report {
 	}
 
 	function _pdf_detectPageSize( $column_options, $columns ) {
-		$min_dimensions = array(216, 279); //Letter size, in mm
+		$min_dimensions = array(216, 279); //Letter size, in mm. Exact size is: 215.9x279.4
 
 		//Compare size of table header with larger bold font compared to table data with smaller font.
 		$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize( $this->config['other']['table_header_font_size'] ) );
 		$table_column_name_widths = $this->_pdf_getTableColumnWidths( array_intersect_key($column_options, (array)$columns), $this->config['other']['layout']['header'], TRUE, $this->config['other']['table_header_word_wrap'] ); //Table header column names
 
+		//Only fill page with column headers, not table data, otherwise the minimum page size will almost always be larger than the default setting.
 		$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize( $this->config['other']['table_row_font_size'] ) );
-		$table_data_column_widths = $this->_pdf_getTableColumnWidths( $this->getLargestColumnData( array_intersect_key($column_options, (array)$columns), FALSE ), $this->config['other']['layout']['header'], TRUE, $this->config['other']['table_data_word_wrap'] ); //Table largest column data
+		$table_data_column_widths = $this->_pdf_getTableColumnWidths( $this->getLargestColumnData( array_intersect_key($column_options, (array)$columns), FALSE ), $this->config['other']['layout']['header'], FALSE, $this->config['other']['table_data_word_wrap'] ); //Table largest column data
 
 		$width = 0;
 		foreach( $table_column_name_widths as $column => $column_width ) {
@@ -2290,13 +2305,13 @@ class Report {
 		if ( $this->config['other']['page_orientation'] == 'L' ) {
 			//Landscape
 			$width = $min_width;
-			$height = ( $min_width * 0.784946236559 );
+			$height = ( $min_width * 0.774193548 );
 		} else {
 			//Portrait
 			$width = $min_width;
-			$height = ( $min_width * 1.2739726027397260274 );
+			$height = ( $min_width * 1.291666667 );
 		}
-		//Debug::Text(' Orientation: '. $this->config['other']['page_orientation'] .' Width: '. $width .' Height: '. $height, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text(' Orientation: '. $this->config['other']['page_orientation'] .' Width: '. $width .' Height: '. $height, __FILE__, __LINE__, __METHOD__, 10);
 		//return array( $width, $width*1.2739726027397260274 );
 		return array( $width, $height );
 	}
@@ -2368,11 +2383,6 @@ class Report {
 
 		//Draw report information
 		if ( $this->pdf->getPage() == 1 ) {
-			//Report Title top left.
-			$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(18) );
-			$this->pdf->Cell( 100, $this->_pdf_fontSize(10), $this->title, 0, 0, 'L', 0, '', 0);
-			$this->pdf->Ln();
-
 			//Logo - top right
 			$image_width = $this->pdf->pixelsToUnits( $this->_pdf_scaleSize( 167 ) );
 			$image_height = $this->pdf->pixelsToUnits( $this->_pdf_scaleSize( 42 ) );
@@ -2381,22 +2391,33 @@ class Report {
 			$logo_image_y = ( $margins['top'] + $image_height );
 			//$this->pdf->setY( $this->pdf->getY()+5 ); //Place Abscissa below image.
 
-			//Set font to small for report filter description
-			$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(6) );
-
 			//Report Name
 			$report_name = $this->getDescription('report_name');
 			if ( $report_name != '' ) {
-				$this->pdf->Cell( $this->_pdf_scaleSize(15), $this->_pdf_fontSize(3), TTi18n::getText('Name').':', 0, 0, 'L', 0, '', 0);
-				$this->pdf->Cell( $this->_pdf_scaleSize(100), $this->_pdf_fontSize(3), $report_name, 0, 0, 'L', 0, '', 0);
+				//When a report name is specified, make that the large bold font, and just add in smaller font the report name itself.
+				$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(18) );
+				$this->pdf->Cell( $this->_pdf_scaleSize(160), $this->_pdf_fontSize(10), $report_name, 0, 0, 'L', 0, '', 1);
+				$this->pdf->Ln();
+
+				$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(6) );
+				$this->pdf->Cell( $this->_pdf_scaleSize(15), $this->_pdf_fontSize(3), TTi18n::getText('Report').':', 0, 0, 'L', 0, '', 0);
+				$this->pdf->Cell( $this->_pdf_scaleSize(150), $this->_pdf_fontSize(3), $this->title, 0, 0, 'L', 0, '', 1);
+				$this->pdf->Ln();
+			} else {
+				//Report Title top left.
+				$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(18) );
+				$this->pdf->Cell( 160, $this->_pdf_fontSize(10), $this->title, 0, 0, 'L', 0, '', 1);
 				$this->pdf->Ln();
 			}
+
+			//Set font to small for report filter description
+			$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(6) );
 
 			//Time Period: start/end date, or pay period.
 			$description = $this->getDescription('time_period');
 			if ( $description != '' ) {
 				$this->pdf->Cell($this->_pdf_scaleSize(15), $this->_pdf_fontSize(3), TTi18n::getText('Time Period').':', 0, 0, 'L', 0, '', 0);
-				$this->pdf->Cell($this->_pdf_scaleSize(100), $this->_pdf_fontSize(3), $description, 0, 0, 'L', 0, '', 0);
+				$this->pdf->Cell($this->_pdf_scaleSize(190), $this->_pdf_fontSize(3), $description, 0, 0, 'L', 0, '', 1);
 				$this->pdf->Ln();
 			}
 
@@ -2404,7 +2425,7 @@ class Report {
 			$description = $this->getDescription('filter');
 			if ( $description != '' ) {
 				$this->pdf->Cell($this->_pdf_scaleSize(15), $this->_pdf_fontSize(3), TTi18n::getText('Filter').':', 0, 0, 'L', 0, '', 0);
-				$this->pdf->Cell($this->_pdf_scaleSize(100), $this->_pdf_fontSize(3), $description, 0, 0, 'L', 0, '', 0);
+				$this->pdf->Cell($this->_pdf_scaleSize(190), $this->_pdf_fontSize(3), $description, 0, 0, 'L', 0, '', 1);
 				$this->pdf->Ln();
 			}
 
@@ -2412,7 +2433,7 @@ class Report {
 			$description = $this->getDescription('group');
 			if ( $description != '' ) {
 				$this->pdf->Cell($this->_pdf_scaleSize(15), $this->_pdf_fontSize(3), TTi18n::getText('Group').':', 0, 0, 'L', 0, '', 0);
-				$this->pdf->Cell($this->_pdf_scaleSize(100), $this->_pdf_fontSize(3), $description, 0, 0, 'L', 0, '', 0);
+				$this->pdf->Cell($this->_pdf_scaleSize(170), $this->_pdf_fontSize(3), $description, 0, 0, 'L', 0, '', 1);
 				$this->pdf->Ln();
 			}
 
@@ -2420,7 +2441,7 @@ class Report {
 			$description = $this->getDescription('sub_total');
 			if ( $description != '' ) {
 				$this->pdf->Cell($this->_pdf_scaleSize(15), $this->_pdf_fontSize(3), TTi18n::getText('SubTotal').':', 0, 0, 'L', 0, '', 0);
-				$this->pdf->Cell($this->_pdf_scaleSize(100), $this->_pdf_fontSize(3), $description, 0, 0, 'L', 0, '', 0);
+				$this->pdf->Cell($this->_pdf_scaleSize(170), $this->_pdf_fontSize(3), $description, 0, 0, 'L', 0, '', 1);
 				$this->pdf->Ln();
 			}
 
@@ -2428,7 +2449,7 @@ class Report {
 			$description = $this->getDescription('sort');
 			if ( $description != '' ) {
 				$this->pdf->Cell($this->_pdf_scaleSize(15), $this->_pdf_fontSize(3), TTi18n::getText('Sort').':', 0, 0, 'L', 0, '', 0);
-				$this->pdf->Cell($this->_pdf_scaleSize(100), $this->_pdf_fontSize(3), $description, 0, 0, 'L', 0, '', 0);
+				$this->pdf->Cell($this->_pdf_scaleSize(170), $this->_pdf_fontSize(3), $description, 0, 0, 'L', 0, '', 1);
 				$this->pdf->Ln();
 			}
 
@@ -2436,7 +2457,7 @@ class Report {
 			$description = $this->getDescription('custom_filter');
 			if ( $description != '' ) {
 				$this->pdf->Cell($this->_pdf_scaleSize(15), $this->_pdf_fontSize(3), TTi18n::getText('Custom Filter').':', 0, 0, 'L', 0, '', 0);
-				$this->pdf->Cell($this->_pdf_scaleSize(100), $this->_pdf_fontSize(3), $description, 0, 0, 'L', 0, '', 0);
+				$this->pdf->Cell($this->_pdf_scaleSize(170), $this->_pdf_fontSize(3), $description, 0, 0, 'L', 0, '', 1);
 				$this->pdf->Ln();
 			}
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: timetrex\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-07-22 10:20-0700\n"
+"POT-Creation-Date: 2014-09-02 14:13-0700\n"
 "PO-Revision-Date: 2013-03-20 00:24+0000\n"
 "Last-Translator: Aputsiaq Niels Janussen <aj@isit.gl>\n"
 "Language-Team: Danish <da@li.org>\n"
@@ -27,6 +27,9 @@ msgstr ""
 msgid " expected)"
 msgstr ""
 
+msgid " requires a modern HTML5 standards compatible web browser, click here for more information."
+msgstr ""
+
 msgid "#"
 msgstr "#"
 
@@ -36,8 +39,23 @@ msgstr ""
 msgid "% (ie: 25% burden)"
 msgstr "% (dvs: 25% byrde)"
 
+msgid "%1 database has not been initialized yet, please run the installer again and follow the on screen instructions. <a href=\"%2\">Click here to run the installer now.</a>"
+msgstr ""
+
+msgid "%1 database query has timed-out, if you were trying to run a report it may be too large, please narrow your search criteria and try again."
+msgstr ""
+
+msgid "%1 experienced a general error, please contact technical support."
+msgstr ""
+
 msgid "%1 for %2"
 msgstr "%1 for %2"
+
+msgid "%1 is currently undergoing maintenance. We're sorry for any inconvenience this may cause. Please try again in 15 minutes."
+msgstr ""
+
+msgid "%1 is unable to connect to its database, please make sure that the database service on your own local %1 server has been started and is running. If you are unsure, try rebooting your server."
+msgstr ""
 
 msgid "(A) Shortage of Work"
 msgstr "(A) Arbejdsmangel"
@@ -3508,6 +3526,12 @@ msgstr ""
 msgid "Claim Amount"
 msgstr "Tilgodehavende beløb"
 
+msgid "Class %1 does not exist, or unauthenticated."
+msgstr ""
+
+msgid "Class %1 does not exist."
+msgstr ""
+
 msgid "Clear"
 msgstr "Ryd"
 
@@ -3818,6 +3842,9 @@ msgid "Company Value 8 is too short or too long"
 msgstr ""
 
 msgid "Company Value 9 is too short or too long"
+msgstr ""
+
+msgid "Company does not exist."
 msgstr ""
 
 msgid "Company is invalid"
@@ -4503,6 +4530,9 @@ msgstr ""
 
 msgid "Date:"
 msgstr "Dato:"
+
+msgid "Dates"
+msgstr ""
 
 msgid "Davao Oriental"
 msgstr ""
@@ -5737,6 +5767,9 @@ msgstr ""
 msgid "Edit permission denied, record does not exist"
 msgstr ""
 
+msgid "Edit<br>Client"
+msgstr ""
+
 msgid "Edit<br>Employee"
 msgstr ""
 
@@ -5908,10 +5941,7 @@ msgstr "Email blev ikke angivet"
 msgid "Email:"
 msgstr "Email:"
 
-msgid "Emailed Scheduled Report"
-msgstr ""
-
-msgid "Emailing Report"
+msgid "Emailed Report"
 msgstr ""
 
 msgid "Emergency Contact"
@@ -6217,6 +6247,9 @@ msgstr "Liste over medarbejderlønninger"
 msgid "Employee Wages"
 msgstr ""
 
+msgid "Employee already has a wage entry on this date for the same wage group. Try using a different date instead."
+msgstr ""
+
 msgid "Employee can not have duplicate entries on the same day"
 msgstr "Medarbejder kan ikke have dublet indførsler på den samme dag"
 
@@ -6286,6 +6319,9 @@ msgstr "Medarbejder:"
 msgid "Employee<br>Contacts"
 msgstr ""
 
+msgid "Employee<br>Pay Stubs"
+msgstr ""
+
 msgid "Employee<br>Reports"
 msgstr ""
 
@@ -6346,9 +6382,6 @@ msgstr "Medarbejder arbejdsløshedsforsikring:"
 msgid "Employer Pay Stub"
 msgstr ""
 
-msgid "Employer Pay Stubs"
-msgstr ""
-
 msgid "Employer Pay<br>Stubs"
 msgstr ""
 
@@ -6360,6 +6393,9 @@ msgstr ""
 
 msgid "Employer Total Contributions"
 msgstr "Arbejdsgiver totale bidrag"
+
+msgid "Employer<br>Pay Stubs"
+msgstr ""
 
 msgid "Employment"
 msgstr ""
@@ -6883,6 +6919,9 @@ msgstr ""
 msgid "Expense policy name already exists"
 msgstr ""
 
+msgid "Expense<br>Authorization"
+msgstr ""
+
 msgid "Expense<br>Authorizations"
 msgstr ""
 
@@ -7071,6 +7110,9 @@ msgstr "Tilbageholdt føderal indkomstskat (Boks 4):"
 
 msgid "Federal Tax Exempt:"
 msgstr "Stats skattefritagelse:"
+
+msgid "Fees for Services (Box: 48)"
+msgstr ""
 
 msgid "Feet (ft)"
 msgstr "Fod (ft)"
@@ -7308,6 +7350,9 @@ msgstr "For installationssupport, så meld dig venligst ind i vores fællesskabs
 
 msgid "For more information please click here."
 msgstr "For mere information klik venligst her."
+
+msgid "For more information please visit"
+msgstr ""
 
 msgid "For searching the LDAP user. (ie: AD: sAMAccountName, openLDAP: dn, Mac OSX: dn)"
 msgstr ""
@@ -9637,6 +9682,9 @@ msgstr "Ugyldig beskrivelseslængde"
 msgid "Invalid District"
 msgstr "Ugyldigt distrikt"
 
+msgid "Invalid Email address"
+msgstr ""
+
 msgid "Invalid Employee"
 msgstr "Ugyldig medarbejder"
 
@@ -9874,6 +9922,9 @@ msgstr "Ugyldig label"
 msgid "Invalid last date"
 msgstr "Ugyldig sidste dato"
 
+msgid "Invalid license file"
+msgstr ""
+
 msgid "Invalid link"
 msgstr "Ugyldigt link"
 
@@ -9896,6 +9947,9 @@ msgid "Invalid recall date"
 msgstr "Ugyldig tilbagekaldelsesdato"
 
 msgid "Invalid records have been skipped, all other records have been imported successfully."
+msgstr ""
+
+msgid "Invalid referrer, possible CSRF."
 msgstr ""
 
 msgid "Invalid review control"
@@ -9927,6 +9981,9 @@ msgstr "Ugyldig unik bruger og/eller lønperiode"
 
 msgid "Invalid vacation pay"
 msgstr "Ugyldig ferieløn"
+
+msgid "Invalid view name"
+msgstr ""
 
 msgid "Invalid, PGSQL or MySQLi PHP extensions are required"
 msgstr ""
@@ -11266,6 +11323,9 @@ msgstr ""
 msgid "Lump-sum Payments (18)"
 msgstr ""
 
+msgid "Lump-sum Payments (Box: 18)"
+msgstr ""
+
 msgid "Lump-sum Payments (Box: 18):"
 msgstr ""
 
@@ -11831,6 +11891,9 @@ msgid "Messina"
 msgstr ""
 
 msgid "Meta"
+msgstr ""
+
+msgid "Method %1 does not exist."
 msgstr ""
 
 msgid "Metropolitan Manila"
@@ -12448,6 +12511,9 @@ msgstr "New Mexico"
 msgid "New Password"
 msgstr ""
 
+msgid "New Password (Confirm)"
+msgstr ""
+
 msgid "New Password (confirm):"
 msgstr "Ny adgangskode (bekræft):"
 
@@ -12480,6 +12546,12 @@ msgstr "New Zealand"
 
 msgid "New message waiting in"
 msgstr "Ny besked venter i"
+
+msgid "New password can't be empty"
+msgstr ""
+
+msgid "New password does not match"
+msgstr ""
 
 msgid "New value is invalid"
 msgstr ""
@@ -12893,6 +12965,9 @@ msgid "Not Scheduled Branch or Department"
 msgstr ""
 
 msgid "Not Scheduled Job or Task"
+msgstr ""
+
+msgid "Not Specified"
 msgstr ""
 
 msgid "Not Verified"
@@ -13615,6 +13690,9 @@ msgstr ""
 msgid "PENDING ACTIVATION - Automatic KIOSK Setup"
 msgstr ""
 
+msgid "PENDING ACTIVATION [ADDITIONAL FEE REQUIRED] - Automatic KIOSK Setup"
+msgstr ""
+
 msgid "PENDING AUTHORIZATION"
 msgstr "AFVENDTENDE GODKENDELSE"
 
@@ -13674,6 +13752,9 @@ msgstr "Pakningsinformation"
 
 msgid "Packing Slip"
 msgstr "Forsendelses slip"
+
+msgid "Packing<br>Slip"
+msgstr ""
 
 msgid "Padua"
 msgstr ""
@@ -13859,6 +13940,9 @@ msgid "Password for"
 msgstr "Adgangskode for"
 
 msgid "Password has already been used in the past, please choose a new one"
+msgstr ""
+
+msgid "Password has been changed successfully, you may now login"
 msgstr ""
 
 msgid "Password is too short"
@@ -14351,6 +14435,9 @@ msgid "Pension Adjustment (Box: 52):"
 msgstr ""
 
 msgid "Pension Or Superannuation (16)"
+msgstr ""
+
+msgid "Pension Or Superannuation (Box: 16)"
 msgstr ""
 
 msgid "Pension Or Superannuation (Box: 16):"
@@ -15104,6 +15191,9 @@ msgstr "Produkter"
 msgid "Professional"
 msgstr "Professionel"
 
+msgid "Professional, Corporate, or Enterprise Editions."
+msgstr ""
+
 msgid "Professional, Scientific and Technical Services"
 msgstr ""
 
@@ -15217,6 +15307,12 @@ msgstr "Stempling ind/ud"
 
 msgid "Punch List"
 msgstr "Liste over stemplinger"
+
+msgid "Punch Mode: Face Recognition"
+msgstr ""
+
+msgid "Punch Mode: Face Recognition+QRCode"
+msgstr ""
 
 msgid "Punch Mode: QRCode"
 msgstr ""
@@ -15594,6 +15690,9 @@ msgid "Ragusa"
 msgstr ""
 
 msgid "Rajasthan"
+msgstr ""
+
+msgid "Range"
 msgstr ""
 
 msgid "Rate"
@@ -16028,6 +16127,9 @@ msgstr ""
 msgid "Renfrewshire"
 msgstr ""
 
+msgid "Renwal Date"
+msgstr ""
+
 msgid "Repeat Absence for:"
 msgstr "Gentag fravær for:"
 
@@ -16065,6 +16167,9 @@ msgid "Report Setup:"
 msgstr "Rapportopsætning:"
 
 msgid "Report shared by"
+msgstr ""
+
+msgid "Report shared successfully"
 msgstr ""
 
 msgid "Reports"
@@ -16414,6 +16519,9 @@ msgstr ""
 
 msgid "Run Now"
 msgstr "Kør nu"
+
+msgid "Running Scheduled Report"
+msgstr ""
 
 msgid "Russian Federation"
 msgstr "Russiske føderation"
@@ -16916,6 +17024,9 @@ msgstr ""
 msgid "Select one or more employees"
 msgstr ""
 
+msgid "Select one or more employees to share report with"
+msgstr ""
+
 msgid "Select one or more jobs you wish to invoice"
 msgstr ""
 
@@ -16923,6 +17034,9 @@ msgid "Select one or more pay periods"
 msgstr ""
 
 msgid "Select one or more pay periods to process payroll for"
+msgstr ""
+
+msgid "Select one or more saved report you wish to share"
 msgstr ""
 
 msgid "Select the date range"
@@ -17094,6 +17208,9 @@ msgstr "Valg kriterie"
 msgid "Selection Type"
 msgstr "Valg type"
 
+msgid "Self-Employed Commisions  (Box: 20)"
+msgstr ""
+
 msgid "Semi-Monthly (24/year)"
 msgstr ""
 
@@ -17169,6 +17286,9 @@ msgstr "Server:"
 msgid "Service"
 msgstr "Tjeneste"
 
+msgid "Session expired, please login again."
+msgstr ""
+
 msgid "Session timed out, please login again."
 msgstr ""
 
@@ -17219,6 +17339,15 @@ msgstr "Køn:"
 
 msgid "Seychelles"
 msgstr "Seychellerne"
+
+msgid "Share"
+msgstr ""
+
+msgid "Share Report Wizard"
+msgstr ""
+
+msgid "Share<br>Report"
+msgstr ""
 
 msgid "Shared"
 msgstr "Delt"
@@ -17335,6 +17464,9 @@ msgid "Shortcut key sequence is too short or too long"
 msgstr ""
 
 msgid "Show All"
+msgstr ""
+
+msgid "Show Duplicate Values"
 msgstr ""
 
 msgid "Show Pre-Mature"
@@ -18687,6 +18819,9 @@ msgstr ""
 msgid "This employee is at the final authorization level."
 msgstr "Denne medarbejder er på sidste godkendelsesniveau."
 
+msgid "This functionality is only available in"
+msgstr ""
+
 msgid "This functionality is only available in "
 msgstr ""
 
@@ -19933,6 +20068,9 @@ msgstr "Bruger værdi 9 er for lang eller for kort"
 msgid "User authorizing this object is not a parent of it"
 msgstr "Bruger der godkender dette objekt er ikke overordnet for det"
 
+msgid "User does not exist."
+msgstr ""
+
 msgid "User is invalid"
 msgstr "Bruger er ugyldig"
 
@@ -21036,6 +21174,9 @@ msgstr ""
 msgid "You have already submitted this form! Please wait..."
 msgstr "Du har allerede indsendt denne formular! Vent venligst..."
 
+msgid "You have modified Form Setup data without saving, would you like to save your Form Setup data now?"
+msgstr ""
+
 msgid "You have modified data without saving, are you sure you want to continue and lose your changes"
 msgstr ""
 
@@ -21192,6 +21333,9 @@ msgid "database, please wait..."
 msgstr "database, vent venligst..."
 
 msgid "date( Year, Month, Day, Hour, Minute )"
+msgstr ""
+
+msgid "dates selected"
 msgstr ""
 
 msgid "day"

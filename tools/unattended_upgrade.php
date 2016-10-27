@@ -107,6 +107,12 @@ function setAutoUpgradeFailed( $value = 1 ) {
 		$obj->Save();
 	}
 
+	if ( $value == 1 ) {
+		Debug::Text('ERROR: AutoUpgrade Failed, setting failed flag...', __FILE__, __LINE__, __METHOD__, 10);
+	} else {
+		Debug::Text('AutoUpgrade Success, clearing failed flag...', __FILE__, __LINE__, __METHOD__, 10);
+	}
+
 	return TRUE;
 }
 
@@ -337,7 +343,8 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 					//Make sure we disable the installer even if an error has occurred.
 					//Since v7.3.0 had a bug where the installer never disabled, force it disabled here for at least one version just in case.
 					//Even though we have switched to using the variable only, and this isn't needed anymore.
-					$data['installer_enabled'] = 'FALSE';
+					$data['other']['installer_enabled'] = 'FALSE';
+					$data['other']['default_interface'] = 'html5';
 					$install_obj->writeConfigFile( $data );
 
 					CLIExit(0);
@@ -371,8 +378,6 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 			CLIExit(1);
 		}
 
-		//$data['installer_enabled'] = 'TRUE';
-		//$install_obj->writeConfigFile( $data );
 		//No need to write install file, as it just adds potential for problems if it doesn't get disabled again.
 		$config_vars['other']['installer_enabled'] = TRUE;
 

@@ -124,7 +124,7 @@ class TimesheetSummaryReport extends Report {
 				//Get custom fields for report data.
 				$oflf = TTnew( 'OtherFieldListFactory' );
 				//User and Punch fields conflict as they are merged together in a secondary process.
-				$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), array(10), array( 10 => '' ) );
+				$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), array(4, 5, 10), array( 4 => 'branch_', 5 => 'department_', 10 => '' ) );
 				if ( is_array($other_field_names) ) {
 					$retval = Misc::addSortPrefix( $other_field_names, 9000 );
 				}
@@ -197,8 +197,10 @@ class TimesheetSummaryReport extends Report {
 										'-1420-policy_group' => TTi18n::gettext('Policy Group'),
 
 										'-1430-branch_name' => TTi18n::gettext('Branch'),
+										'-1431-branch_manual_id' => TTi18n::gettext('Branch Code'),
 										'-1440-department_name' => TTi18n::gettext('Department'),
-
+										'-1441-department_manual_id' => TTi18n::gettext('Department Code'),
+										
 										//This can't be a secure SIN otherwise it doesn't make much sense putting it on here... But if its here then
 										//supervisors can see it and it may be a security concern.
 										//'-1480-sin' => TTi18n::gettext('SIN/SSN'),

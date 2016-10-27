@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12203 $
- * $Id: ExceptionListFactory.class.php 12203 2014-02-06 17:01:15Z mikeb $
- * $Date: 2014-02-06 09:01:15 -0800 (Thu, 06 Feb 2014) $
+ * $Revision: 14958 $
+ * $Id: ExceptionListFactory.class.php 14958 2014-10-28 14:00:49Z mikeb $
+ * $Date: 2014-10-28 07:00:49 -0700 (Tue, 28 Oct 2014) $
  */
 
 /**
@@ -111,7 +111,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		}
 
 		if ( $order == NULL ) {
-			$order = array( 'type_id' => 'asc', 'trigger_time' => 'desc' );
+			$order = array( 'type_id' => 'asc' );
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;
@@ -131,7 +131,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 					LEFT JOIN '. $epcf->getTable() .' as epcf ON epf.exception_policy_control_id = epcf.id
 					where
 						epcf.company_id = ?
-						a.id in ('. $this->getListSQL($id, $ph) .')
+						AND a.id in ('. $this->getListSQL($id, $ph) .')
 						AND ( a.deleted = 0 AND epf.deleted = 0 AND epcf.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
@@ -517,7 +517,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 				break;
 		}
 		//Avoid division by 0 error.
-		if ( $total_date_units == 0 ) {
+		if ( !isset($total_date_units) OR $total_date_units == 0 ) {
 			$total_date_units = 1;
 		}
 

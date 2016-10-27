@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13814 $
- * $Id: RecurringScheduleTemplateFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
- * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
+ * $Revision: 14408 $
+ * $Id: RecurringScheduleTemplateFactory.class.php 14408 2014-09-12 19:02:59Z mikeb $
+ * $Date: 2014-09-12 12:02:59 -0700 (Fri, 12 Sep 2014) $
  */
 
 /**
@@ -791,14 +791,14 @@ class RecurringScheduleTemplateFactory extends Factory {
 															'default_department_id' => (int)$this->getColumn('default_department_id'),
 															'default_department' => $this->getColumn('default_department'),
 
-															'job_id' => (int)$this->getJob(),
+															'job_id' => (int)$this->getColumn('job_id'),
 															'job' => $this->getColumn('job'),
 															'job_status_id' => (int)$this->getColumn('job_status_id'),
 															'job_manual_id' => (int)$this->getColumn('job_manual_id'),
 															'job_branch_id' => (int)$this->getColumn('job_branch_id'),
 															'job_department_id' => (int)$this->getColumn('job_department_id'),
 															'job_group_id' => (int)$this->getColumn('job_group_id'),
-															'job_item_id' => (int)$this->getJobItem(),
+															'job_item_id' => (int)$this->getColumn('job_item_id'),
 															'job_item' => $this->getColumn('job_item'),
 
 															'type_id' => 20, //Recurring

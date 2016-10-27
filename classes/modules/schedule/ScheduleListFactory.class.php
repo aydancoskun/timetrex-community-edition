@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12226 $
- * $Id: ScheduleListFactory.class.php 12226 2014-02-07 23:48:52Z mikeb $
- * $Date: 2014-02-07 15:48:52 -0800 (Fri, 07 Feb 2014) $
+ * $Revision: 14408 $
+ * $Id: ScheduleListFactory.class.php 14408 2014-09-12 19:02:59Z mikeb $
+ * $Date: 2014-09-12 12:02:59 -0700 (Fri, 12 Sep 2014) $
  */
 
 /**
@@ -318,18 +318,18 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		$order = array( 'b.date_stamp' => 'asc' );	//When direction is after, we need to get the days in the proper order (ASC)
-		if ( strtolower($direction) == 'before' ) {
-			$order = array( 'b.date_stamp' => 'desc' ); //When direction is before, we need to get the days in the proper order (DESC)
-			$direction = '<';
-		} elseif ( strtolower($direction) == 'after' ) {
-			$direction = '>';
-		} else {
-			return FALSE;
-		}
-
 		if ( $order == NULL ) {
 			$strict = FALSE;
+
+			$order = array( 'b.date_stamp' => 'asc' );	//When direction is after, we need to get the days in the proper order (ASC)
+			if ( strtolower($direction) == 'before' ) {
+				$order = array( 'b.date_stamp' => 'desc' ); //When direction is before, we need to get the days in the proper order (DESC)
+				$direction = '<';
+			} elseif ( strtolower($direction) == 'after' ) {
+				$direction = '>';
+			} else {
+				return FALSE;
+			}
 		} else {
 			$strict = TRUE;
 		}

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11925 $
- * $Id: PayPeriodTimeSheetVerifyListFactory.class.php 11925 2014-01-08 00:13:44Z mikeb $
- * $Date: 2014-01-07 16:13:44 -0800 (Tue, 07 Jan 2014) $
+ * $Revision: 15145 $
+ * $Id: PayPeriodTimeSheetVerifyListFactory.class.php 15145 2014-11-13 22:42:19Z mikeb $
+ * $Date: 2014-11-13 14:42:19 -0800 (Thu, 13 Nov 2014) $
  */
 
 /**
@@ -354,6 +354,13 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 			}
 		}
 
+		if ( isset($filter_data['include_user_id']) ) {
+			$filter_data['user_id'] = $filter_data['include_user_id'];
+		}
+		if ( isset($filter_data['exclude_user_id']) ) {
+			$filter_data['exclude_id'] = $filter_data['exclude_user_id'];
+		}
+
 		$additional_order_fields = array('start_date', 'end_date', 'transaction_date', 'user_status_id', 'last_name', 'first_name', 'default_branch', 'default_department', 'user_group', 'title' );
 
 		$sort_column_aliases = array(
@@ -446,54 +453,6 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 
 		$query .= ( isset($filter_data['authorized']) ) ? $this->getWhereClauseSQL( 'a.authorized', $filter_data['authorized'], 'numeric_list', $ph ) : NULL;
 
-/*
-		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query	.=	' AND a.user_id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
-		}
-		if ( isset($filter_data['user_id']) AND isset($filter_data['user_id'][0]) AND !in_array(-1, (array)$filter_data['user_id']) ) {
-			$query	.=	' AND a.user_id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-			$query	.=	' AND a.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
-		}
-		if ( isset($filter_data['exclude_id']) AND isset($filter_data['exclude_id'][0]) AND !in_array(-1, (array)$filter_data['exclude_id']) ) {
-			$query	.=	' AND a.user_id not in ('. $this->getListSQL($filter_data['exclude_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['status_id']) AND isset($filter_data['status_id'][0]) AND !in_array(-1, (array)$filter_data['status_id']) ) {
-			$query	.=	' AND a.status_id in ('. $this->getListSQL($filter_data['status_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['pay_period_id']) AND isset($filter_data['pay_period_id'][0]) AND !in_array(-1, (array)$filter_data['pay_period_id']) ) {
-			$query	.=	' AND a.pay_period_id in ('. $this->getListSQL($filter_data['pay_period_id'], $ph) .') ';
-		}
-
-		if ( isset($filter_data['group_id']) AND isset($filter_data['group_id'][0]) AND !in_array(-1, (array)$filter_data['group_id']) ) {
-			if ( isset($filter_data['include_subgroups']) AND (bool)$filter_data['include_subgroups'] == TRUE ) {
-				$uglf = new UserGroupListFactory();
-				$filter_data['group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['group_id'], TRUE);
-			}
-			$query	.=	' AND b.group_id in ('. $this->getListSQL($filter_data['group_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['default_branch_id']) AND isset($filter_data['default_branch_id'][0]) AND !in_array(-1, (array)$filter_data['default_branch_id']) ) {
-			$query	.=	' AND b.default_branch_id in ('. $this->getListSQL($filter_data['default_branch_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['default_department_id']) AND isset($filter_data['default_department_id'][0]) AND !in_array(-1, (array)$filter_data['default_department_id']) ) {
-			$query	.=	' AND b.default_department_id in ('. $this->getListSQL($filter_data['default_department_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['title_id']) AND isset($filter_data['title_id'][0]) AND !in_array(-1, (array)$filter_data['title_id']) ) {
-			$query	.=	' AND b.title_id in ('. $this->getListSQL($filter_data['title_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['country']) AND isset($filter_data['country'][0]) AND !in_array(-1, (array)$filter_data['country']) ) {
-			$query	.=	' AND b.country in ('. $this->getListSQL($filter_data['country'], $ph) .') ';
-		}
-		if ( isset($filter_data['province']) AND isset($filter_data['province'][0]) AND !in_array( -1, (array)$filter_data['province']) AND !in_array( '00', (array)$filter_data['province']) ) {
-			$query	.=	' AND b.province in ('. $this->getListSQL($filter_data['province'], $ph) .') ';
-		}
-
-		//Handle authorize list criteria here.
-		if ( isset($filter_data['authorized']) AND isset($filter_data['authorized'][0]) AND !in_array(-1, (array)$filter_data['authorized']) ) {
-			$query	.=	' AND a.authorized in ('. $this->getListSQL($filter_data['authorized'], $ph) .') ';
-		}
-*/
 		if ( isset($filter_data['hierarchy_level_map']) AND is_array($filter_data['hierarchy_level_map']) ) {
 			$query	.= ' AND  huf.id IS NOT NULL '; //Make sure the user maps to a hierarchy.
 			//$query	.= ' AND ( '. HierarchyLevelFactory::convertHierarchyLevelMapToSQL( $filter_data['hierarchy_level_map'], 'a.', 'huf.' ) .' )';
@@ -517,61 +476,5 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 
 		return $this;
 	}
-
-/*
-	function getByUserIdListAndStatusAndNotAuthorized($id, $status, $parent_level_user_ids, $current_level_user_ids, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		$key = Option::getByValue($status, $this->getOptions('status') );
-		if ($key !== FALSE) {
-			$status = $key;
-		}
-
-		$strict_order = TRUE;
-		if ( $order == NULL ) {
-			$order = array('a.user_id' => 'asc', 'b.start_date' => 'asc');
-			$strict_order = FALSE;
-		}
-
-		$af = new AuthorizationFactory();
-		$ppf = new PayPeriodFactory();
-		$uf = new UserFactory();
-
-		$ph = array(
-					'status' => $status,
-					);
-
-		$query = '
-					select	a.*
-					from	'. $this->getTable() .' as a,
-							'. $ppf->getTable() .' as b
-					where	a.pay_period_id = b.id
-						AND	a.status_id = ?
-						AND ( a.user_id in ('. $this->getListSQL($id, $ph).')
-								OR a.id in ( select object_id from '. $af->getTable() .' as x
-												WHERE x.object_type_id = 90
-													AND x.created_by in ('. $this->getListSQL($id, $ph).') ) )
-						AND	( select count(*) from '. $af->getTable() .' as z
-								where z.object_type_id = 90
-									AND z.object_id = a.id
-									AND (  ( created_by in ('. $this->getListSQL($parent_level_user_ids, $ph) .')
-												OR created_by in ('. $this->getListSQL($current_level_user_ids, $ph) .')
-											)
-											OR
-											(
-											created_by in ('. $this->getListSQL($id, $ph) .')
-												AND z.authorized = 0
-											)
-										)
-									AND z.created_date >= a.updated_date
-									) = 0
-						AND ( a.deleted = 0 AND b.deleted = 0 )
-				';
-		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order, $strict_order );
-
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
-
-		return $this;
-	}
-*/
 }
 ?>

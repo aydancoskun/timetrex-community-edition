@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13814 $
- * $Id: UserDeductionFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
- * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
+ * $Revision: 15145 $
+ * $Id: UserDeductionFactory.class.php 15145 2014-11-13 22:42:19Z mikeb $
+ * $Date: 2014-11-13 14:42:19 -0800 (Thu, 13 Nov 2014) $
  */
 
 /**
@@ -616,6 +616,9 @@ class UserDeductionFactory extends Factory {
 		$cd_obj = $this->getCompanyDeductionObject();
 
 		$annual_pay_periods = $pay_period_obj->getPayPeriodScheduleObject()->getAnnualPayPeriods();
+		if ( $annual_pay_periods <= 0 ) {
+			$annual_pay_periods = 1;
+		}
 
 		if ( !is_object($cd_obj) ) {
 			return FALSE;

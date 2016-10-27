@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13083 $
- * $Id: CLI.inc.php 13083 2014-04-30 21:22:36Z mikeb $
- * $Date: 2014-04-30 14:22:36 -0700 (Wed, 30 Apr 2014) $
+ * $Revision: 14040 $
+ * $Id: CLI.inc.php 14040 2014-08-08 16:02:58Z mikeb $
+ * $Date: 2014-08-08 09:02:58 -0700 (Fri, 08 Aug 2014) $
  */
 //Allow both CLI and CGI PHP binaries to call maint scripts.
 if ( PHP_SAPI != 'cli' AND PHP_SAPI != 'cgi' AND PHP_SAPI != 'cgi-fcgi') {
@@ -62,6 +62,9 @@ if ( $install_obj->checkAllRequirements( TRUE ) == 1 ) {
 	echo "Minimum PHP Requirements are NOT met!!\n";
 	echo "--------------------------------------\n";
 	echo "Failed Requirements: ".implode(',', (array)$failed_requirements )." \n";
+	echo "--------------------------------------\n";
+	echo "PHP INI: ". $install_obj->getPHPConfigFile() ." \n";
+	echo "Process Owner: ". $install_obj->getWebServerUser() ." \n";
 	echo "--------------------------------------\n\n\n";
 }
 unset($install_obj);

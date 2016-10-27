@@ -40,7 +40,7 @@
  */
 
 /**
- * @package API_APIEthnicGroup
+ * @package API\Users
  */
 class APIEthnicGroup extends APIFactory {
 	protected $main_class = 'EthnicGroupFactory';

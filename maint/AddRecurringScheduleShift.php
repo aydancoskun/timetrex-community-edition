@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13271 $
- * $Id: AddRecurringScheduleShift.php 13271 2014-05-26 18:07:38Z mikeb $
- * $Date: 2014-05-26 11:07:38 -0700 (Mon, 26 May 2014) $
+ * $Revision: 13223 $
+ * $Id: AddRecurringScheduleShift.php 13223 2014-05-21 17:18:47Z mikeb $
+ * $Date: 2014-05-21 10:18:47 -0700 (Wed, 21 May 2014) $
  */
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');

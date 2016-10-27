@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12350 $
- * $Id: RecurringHolidayFactory.class.php 12350 2014-02-14 21:19:25Z mikeb $
- * $Date: 2014-02-14 13:19:25 -0800 (Fri, 14 Feb 2014) $
+ * $Revision: 12334 $
+ * $Id: RecurringHolidayFactory.class.php 12334 2014-02-14 00:52:54Z mikeb $
+ * $Date: 2014-02-13 16:52:54 -0800 (Thu, 13 Feb 2014) $
  */
 
 /**

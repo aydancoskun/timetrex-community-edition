@@ -40,7 +40,7 @@
  */
 
 /**
- * @package
+ * @package Modules\Qualification
  */
 class QualificationFactory extends Factory {
 	protected $table = 'qualification';

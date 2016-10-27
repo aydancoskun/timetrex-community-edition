@@ -84,21 +84,6 @@ class CompanyGenericTagListFactory extends CompanyGenericTagFactory implements I
 		return $this;
 	}
 
-	static function getNameById( $id ) {
-		if ( $id == '') {
-			return FALSE;
-		}
-
-		$lf = new CompanyGenericTagListFactory();
-		$lf = $lf->getById( $id );
-		if ( $lf->getRecordCount() > 0 ) {
-			$obj = $lf->getCurrent();
-			return $obj->getName();
-		}
-
-		return FALSE;
-	}
-
 	function getByCompanyId($id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
@@ -200,7 +185,7 @@ class CompanyGenericTagListFactory extends CompanyGenericTagFactory implements I
 					where	company_id = ?
 						AND	object_type_id = ?';
 
-		$query .= $this->getWhereClauseSQL( 'AND ( lower(name) LIKE ? OR a.name_metaphone LIKE ? )', $name, 'text_metaphone', $ph );
+		$query .= ( isset($name) ) ? $this->getWhereClauseSQL( 'name', $name, 'text_metaphone', $ph ) : NULL;
 
 		$query .= ' AND deleted = 0';
 		$query .= $this->getSortSQL( $order );

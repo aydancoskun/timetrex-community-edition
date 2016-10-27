@@ -40,7 +40,7 @@
  */
 
 /**
- * @package
+ * @package Modules\Qualification
  */
 class UserEducationFactory extends Factory {
 	protected $table = 'user_education';
@@ -134,7 +134,6 @@ class UserEducationFactory extends Factory {
 	}
 
 	function getQualificationObject() {
-
 		return $this->getGenericObject( 'QualificationListFactory', $this->getQualification(), 'qualification_obj' );
 	}
 
@@ -185,10 +184,6 @@ class UserEducationFactory extends Factory {
 		return FALSE;
 	}
 
-
-
-
-
 	function getInstitute() {
 		if ( isset($this->data['institute']) ) {
 			return $this->data['institute'];
@@ -221,7 +216,6 @@ class UserEducationFactory extends Factory {
 		return FALSE;
 	}
 
-
 	function setMajor( $major ) {
 		$major = trim($major);
 
@@ -237,9 +231,6 @@ class UserEducationFactory extends Factory {
 
 		return FALSE;
 	}
-
-
-
 
 	function getMinor() {
 		if ( isset( $this->data['minor'] ) ) {
@@ -264,8 +255,6 @@ class UserEducationFactory extends Factory {
 
 		return FALSE;
 	}
-
-
 
 	function getGraduateDate( ) {
 		if ( isset($this->data['graduate_date']) ) {
@@ -303,7 +292,6 @@ class UserEducationFactory extends Factory {
 		return FALSE;
 	}
 
-
 	function setGradeScore( $grade_score ) {
 		$grade_score = trim($grade_score);
 		// $grade_score = $this->Validator->stripNonFloat( $grade_score );
@@ -329,8 +317,6 @@ class UserEducationFactory extends Factory {
 
 		return FALSE;
 	}
-
-
 
 	function getStartDate() {
 		if ( isset($this->data['start_date']) ) {
@@ -411,8 +397,6 @@ class UserEducationFactory extends Factory {
 	}
 
 	function Validate() {
-		//$this->setProvince( $this->getProvince() ); //Not sure why this was there, but it causes duplicate errors if the province is incorrect.
-
 		return TRUE;
 	}
 
@@ -422,6 +406,7 @@ class UserEducationFactory extends Factory {
 
 	function postSave() {
 		$this->removeCache( $this->getId() );
+		$this->removeCache( $this->getUser().$this->getQualification() );
 
 		if ( $this->getDeleted() == FALSE ) {
 			Debug::text('Setting Tags...', __FILE__, __LINE__, __METHOD__, 10);

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13838 $
- * $Id: ForgotPassword.php 13838 2014-07-24 00:06:53Z mikeb $
- * $Date: 2014-07-23 17:06:53 -0700 (Wed, 23 Jul 2014) $
+ * $Revision: 13971 $
+ * $Id: ForgotPassword.php 13971 2014-08-04 15:59:55Z mikeb $
+ * $Date: 2014-08-04 08:59:55 -0700 (Mon, 04 Aug 2014) $
  */
 require_once('../includes/global.inc.php');
 
@@ -79,9 +79,7 @@ switch ($action) {
 			//Make sure passwords match
 			if ( $password == $password2 ) {
 				//Change password
-				$user_obj->setPassword( $password );
-				$user_obj->setPasswordResetKey('');
-				$user_obj->setPasswordResetDate('');
+				$user_obj->setPassword( $password ); //Password reset key is cleared when password is changed.
 				if ( $user_obj->isValid() ) {
 					$user_obj->Save(FALSE);
 					Debug::Text('Password Change succesful!', __FILE__, __LINE__, __METHOD__, 10);
@@ -163,6 +161,15 @@ switch ($action) {
 		}
 		break;
 	default:
+		if ( $email_sent == TRUE ) {
+			//Make sure we don't allow malicious users to use some long email address like:
+			//"This is the FBI, you have been fired if you don't..."
+			if ( $validator->isEmail( 'email', $email, TTi18n::getText('Invalid Email address') ) == FALSE ) {
+				$email = NULL;
+				$email_sent = FALSE;
+			}
+		}
+
 		break;
 }
 

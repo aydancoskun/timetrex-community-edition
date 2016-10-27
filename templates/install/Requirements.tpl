@@ -241,6 +241,19 @@
 
 							<tr>
 								<td class="cellLeftEditTable">
+									{t}ZIP Enabled:{/t}
+								</td>
+								<td class="cellRightEditTable">
+									{if $install_obj->checkZIP() == 0}
+										<span class="">{t}OK{/t}
+									{elseif $install_obj->checkZIP() == 1}
+										<span class="tblDataError">{t}Warning: Not Installed. (ZIP extension must be enabled){/t}
+									{/if}
+									</span>
+								</td>
+							</tr>
+							<tr>
+								<td class="cellLeftEditTable">
 									{t}MAIL Enabled:{/t}
 								</td>
 								<td class="cellRightEditTable">

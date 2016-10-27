@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: timetrex\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-07-22 10:20-0700\n"
+"POT-Creation-Date: 2014-09-02 14:13-0700\n"
 "PO-Revision-Date: 2013-11-20 13:50+0000\n"
 "Last-Translator: Rudolf Schnapka <rs@techno-flex.de>\n"
 "Language-Team: German <de@li.org>\n"
@@ -27,6 +27,9 @@ msgstr ""
 msgid " expected)"
 msgstr ""
 
+msgid " requires a modern HTML5 standards compatible web browser, click here for more information."
+msgstr ""
+
 msgid "#"
 msgstr "Nr."
 
@@ -36,8 +39,23 @@ msgstr ""
 msgid "% (ie: 25% burden)"
 msgstr "% (IE: 25% Belastung)"
 
+msgid "%1 database has not been initialized yet, please run the installer again and follow the on screen instructions. <a href=\"%2\">Click here to run the installer now.</a>"
+msgstr ""
+
+msgid "%1 database query has timed-out, if you were trying to run a report it may be too large, please narrow your search criteria and try again."
+msgstr ""
+
+msgid "%1 experienced a general error, please contact technical support."
+msgstr ""
+
 msgid "%1 for %2"
 msgstr "%1 für %2"
+
+msgid "%1 is currently undergoing maintenance. We're sorry for any inconvenience this may cause. Please try again in 15 minutes."
+msgstr ""
+
+msgid "%1 is unable to connect to its database, please make sure that the database service on your own local %1 server has been started and is running. If you are unsure, try rebooting your server."
+msgstr ""
 
 msgid "(A) Shortage of Work"
 msgstr "(A) Mangel an Arbeit"
@@ -3508,6 +3526,12 @@ msgstr "Clackmannanshire"
 msgid "Claim Amount"
 msgstr "Forderungsmenge:"
 
+msgid "Class %1 does not exist, or unauthenticated."
+msgstr ""
+
+msgid "Class %1 does not exist."
+msgstr ""
+
 msgid "Clear"
 msgstr "Löschen"
 
@@ -3818,6 +3842,9 @@ msgid "Company Value 8 is too short or too long"
 msgstr ""
 
 msgid "Company Value 9 is too short or too long"
+msgstr ""
+
+msgid "Company does not exist."
 msgstr ""
 
 msgid "Company is invalid"
@@ -4503,6 +4530,9 @@ msgstr "Datum/Zeit ist ungültig oder Bezugsperiode besteht für dieses Datum ni
 
 msgid "Date:"
 msgstr "Datum:"
+
+msgid "Dates"
+msgstr ""
 
 msgid "Davao Oriental"
 msgstr "Davao Oriental"
@@ -5737,6 +5767,9 @@ msgstr ""
 msgid "Edit permission denied, record does not exist"
 msgstr ""
 
+msgid "Edit<br>Client"
+msgstr ""
+
 msgid "Edit<br>Employee"
 msgstr ""
 
@@ -5908,10 +5941,7 @@ msgstr "Email wurde nicht festgelegt"
 msgid "Email:"
 msgstr "Email:"
 
-msgid "Emailed Scheduled Report"
-msgstr ""
-
-msgid "Emailing Report"
+msgid "Emailed Report"
 msgstr ""
 
 msgid "Emergency Contact"
@@ -6217,6 +6247,9 @@ msgstr "Beschäftigten Lohn- / Gehaltliste"
 msgid "Employee Wages"
 msgstr ""
 
+msgid "Employee already has a wage entry on this date for the same wage group. Try using a different date instead."
+msgstr ""
+
 msgid "Employee can not have duplicate entries on the same day"
 msgstr "Beschäftigter kann nicht an einem Tag doppelte Einträge haben"
 
@@ -6286,6 +6319,9 @@ msgstr "Beschäftigter:"
 msgid "Employee<br>Contacts"
 msgstr ""
 
+msgid "Employee<br>Pay Stubs"
+msgstr ""
+
 msgid "Employee<br>Reports"
 msgstr ""
 
@@ -6346,9 +6382,6 @@ msgstr "Arbeitsgeber Arbeitslosenversicherung:"
 msgid "Employer Pay Stub"
 msgstr ""
 
-msgid "Employer Pay Stubs"
-msgstr ""
-
 msgid "Employer Pay<br>Stubs"
 msgstr ""
 
@@ -6360,6 +6393,9 @@ msgstr ""
 
 msgid "Employer Total Contributions"
 msgstr "Arbeitgeber-Gesamtbeiträge"
+
+msgid "Employer<br>Pay Stubs"
+msgstr ""
 
 msgid "Employment"
 msgstr ""
@@ -6883,6 +6919,9 @@ msgstr ""
 msgid "Expense policy name already exists"
 msgstr ""
 
+msgid "Expense<br>Authorization"
+msgstr ""
+
 msgid "Expense<br>Authorizations"
 msgstr ""
 
@@ -7071,6 +7110,9 @@ msgstr "Einbehaltene Bundeseinkommenssteuern (Kästchen 4):"
 
 msgid "Federal Tax Exempt:"
 msgstr "Steuerbefreiung des Bundes:"
+
+msgid "Fees for Services (Box: 48)"
+msgstr ""
 
 msgid "Feet (ft)"
 msgstr "Fuß (ft)"
@@ -7308,6 +7350,9 @@ msgstr "Um Installation-Support zu erhalten, treten Sie bitter unserer Community
 
 msgid "For more information please click here."
 msgstr "Für zusätzliche Informationen bitte hier klicken."
+
+msgid "For more information please visit"
+msgstr ""
 
 msgid "For searching the LDAP user. (ie: AD: sAMAccountName, openLDAP: dn, Mac OSX: dn)"
 msgstr ""
@@ -9637,6 +9682,9 @@ msgstr "Ungültige Länge Beschreibung"
 msgid "Invalid District"
 msgstr "Ungültiger Bezirk"
 
+msgid "Invalid Email address"
+msgstr ""
+
 msgid "Invalid Employee"
 msgstr "Ungültiger Beschäftigter"
 
@@ -9874,6 +9922,9 @@ msgstr "Ungültige Bezeichnung"
 msgid "Invalid last date"
 msgstr "Falsches letztes Datum"
 
+msgid "Invalid license file"
+msgstr ""
+
 msgid "Invalid link"
 msgstr "Ungültiger Verweis"
 
@@ -9896,6 +9947,9 @@ msgid "Invalid recall date"
 msgstr "Ungültiges Rückrufdatum"
 
 msgid "Invalid records have been skipped, all other records have been imported successfully."
+msgstr ""
+
+msgid "Invalid referrer, possible CSRF."
 msgstr ""
 
 msgid "Invalid review control"
@@ -9927,6 +9981,9 @@ msgstr "Falscher individueller Benutzer und / oder Zahlungsperiode"
 
 msgid "Invalid vacation pay"
 msgstr "Ungültiges Urlaubsgeld"
+
+msgid "Invalid view name"
+msgstr ""
 
 msgid "Invalid, PGSQL or MySQLi PHP extensions are required"
 msgstr ""
@@ -11266,6 +11323,9 @@ msgstr "Lucca"
 msgid "Lump-sum Payments (18)"
 msgstr ""
 
+msgid "Lump-sum Payments (Box: 18)"
+msgstr ""
+
 msgid "Lump-sum Payments (Box: 18):"
 msgstr ""
 
@@ -11832,6 +11892,9 @@ msgstr "Messina"
 
 msgid "Meta"
 msgstr "Meta"
+
+msgid "Method %1 does not exist."
+msgstr ""
 
 msgid "Metropolitan Manila"
 msgstr ""
@@ -12448,6 +12511,9 @@ msgstr "New Mexico"
 msgid "New Password"
 msgstr ""
 
+msgid "New Password (Confirm)"
+msgstr ""
+
 msgid "New Password (confirm):"
 msgstr "Neues Kennwort (bestätigen):"
 
@@ -12480,6 +12546,12 @@ msgstr "Neuseeland"
 
 msgid "New message waiting in"
 msgstr "Neue Nachricht in"
+
+msgid "New password can't be empty"
+msgstr ""
+
+msgid "New password does not match"
+msgstr ""
 
 msgid "New value is invalid"
 msgstr "Neuer Wert ist ungültig"
@@ -12893,6 +12965,9 @@ msgid "Not Scheduled Branch or Department"
 msgstr ""
 
 msgid "Not Scheduled Job or Task"
+msgstr ""
+
+msgid "Not Specified"
 msgstr ""
 
 msgid "Not Verified"
@@ -13615,6 +13690,9 @@ msgstr "AUSSTEHEND"
 msgid "PENDING ACTIVATION - Automatic KIOSK Setup"
 msgstr ""
 
+msgid "PENDING ACTIVATION [ADDITIONAL FEE REQUIRED] - Automatic KIOSK Setup"
+msgstr ""
+
 msgid "PENDING AUTHORIZATION"
 msgstr "ANSTEHENDE AUTORISIERUNG"
 
@@ -13674,6 +13752,9 @@ msgstr ""
 
 msgid "Packing Slip"
 msgstr "Lieferschein"
+
+msgid "Packing<br>Slip"
+msgstr ""
 
 msgid "Padua"
 msgstr ""
@@ -13859,6 +13940,9 @@ msgid "Password for"
 msgstr "Kennwort für"
 
 msgid "Password has already been used in the past, please choose a new one"
+msgstr ""
+
+msgid "Password has been changed successfully, you may now login"
 msgstr ""
 
 msgid "Password is too short"
@@ -14351,6 +14435,9 @@ msgid "Pension Adjustment (Box: 52):"
 msgstr ""
 
 msgid "Pension Or Superannuation (16)"
+msgstr ""
+
+msgid "Pension Or Superannuation (Box: 16)"
 msgstr ""
 
 msgid "Pension Or Superannuation (Box: 16):"
@@ -15106,6 +15193,9 @@ msgstr "Produkte"
 msgid "Professional"
 msgstr "Professionell"
 
+msgid "Professional, Corporate, or Enterprise Editions."
+msgstr ""
+
 msgid "Professional, Scientific and Technical Services"
 msgstr ""
 
@@ -15218,6 +15308,12 @@ msgid "Punch In/Out"
 msgstr "Hinein/Heraus stempeln"
 
 msgid "Punch List"
+msgstr ""
+
+msgid "Punch Mode: Face Recognition"
+msgstr ""
+
+msgid "Punch Mode: Face Recognition+QRCode"
 msgstr ""
 
 msgid "Punch Mode: QRCode"
@@ -15597,6 +15693,9 @@ msgstr "Ragusa"
 
 msgid "Rajasthan"
 msgstr "Rajasthan"
+
+msgid "Range"
+msgstr ""
 
 msgid "Rate"
 msgstr "Rate"
@@ -16030,6 +16129,9 @@ msgstr ""
 msgid "Renfrewshire"
 msgstr ""
 
+msgid "Renwal Date"
+msgstr ""
+
 msgid "Repeat Absence for:"
 msgstr "Abwesenheit wiederholen für:"
 
@@ -16067,6 +16169,9 @@ msgid "Report Setup:"
 msgstr "Bericht einrichten:"
 
 msgid "Report shared by"
+msgstr ""
+
+msgid "Report shared successfully"
 msgstr ""
 
 msgid "Reports"
@@ -16416,6 +16521,9 @@ msgstr ""
 
 msgid "Run Now"
 msgstr "Jetzt starten"
+
+msgid "Running Scheduled Report"
+msgstr ""
 
 msgid "Russian Federation"
 msgstr "Russische Föderation"
@@ -16918,6 +17026,9 @@ msgstr ""
 msgid "Select one or more employees"
 msgstr ""
 
+msgid "Select one or more employees to share report with"
+msgstr ""
+
 msgid "Select one or more jobs you wish to invoice"
 msgstr ""
 
@@ -16925,6 +17036,9 @@ msgid "Select one or more pay periods"
 msgstr ""
 
 msgid "Select one or more pay periods to process payroll for"
+msgstr ""
+
+msgid "Select one or more saved report you wish to share"
 msgstr ""
 
 msgid "Select the date range"
@@ -17096,6 +17210,9 @@ msgstr "Auswahlkriterien"
 msgid "Selection Type"
 msgstr "Stationsart auswählen"
 
+msgid "Self-Employed Commisions  (Box: 20)"
+msgstr ""
+
 msgid "Semi-Monthly (24/year)"
 msgstr ""
 
@@ -17171,6 +17288,9 @@ msgstr "Server:"
 msgid "Service"
 msgstr "Dienst"
 
+msgid "Session expired, please login again."
+msgstr ""
+
 msgid "Session timed out, please login again."
 msgstr ""
 
@@ -17221,6 +17341,15 @@ msgstr "Geschlecht:"
 
 msgid "Seychelles"
 msgstr "Seychellen"
+
+msgid "Share"
+msgstr ""
+
+msgid "Share Report Wizard"
+msgstr ""
+
+msgid "Share<br>Report"
+msgstr ""
 
 msgid "Shared"
 msgstr "Geteilt"
@@ -17337,6 +17466,9 @@ msgid "Shortcut key sequence is too short or too long"
 msgstr ""
 
 msgid "Show All"
+msgstr ""
+
+msgid "Show Duplicate Values"
 msgstr ""
 
 msgid "Show Pre-Mature"
@@ -18692,6 +18824,9 @@ msgstr ""
 msgid "This employee is at the final authorization level."
 msgstr "Dieser Beschäftigte befindet sich auf der endgültigen Autorisationsebene."
 
+msgid "This functionality is only available in"
+msgstr ""
+
 msgid "This functionality is only available in "
 msgstr ""
 
@@ -19938,6 +20073,9 @@ msgstr "Benutzerwert 9 ist zu kurz oder zu lang"
 msgid "User authorizing this object is not a parent of it"
 msgstr "Benutzer, der dieses Objekt autorisiert ist nicht dessen Elternelement"
 
+msgid "User does not exist."
+msgstr ""
+
 msgid "User is invalid"
 msgstr "Benutzer ist ungültig"
 
@@ -21038,6 +21176,9 @@ msgstr ""
 msgid "You have already submitted this form! Please wait..."
 msgstr "Sie haben dieses Formular bereits übermittelt! Bitte warten..."
 
+msgid "You have modified Form Setup data without saving, would you like to save your Form Setup data now?"
+msgstr ""
+
 msgid "You have modified data without saving, are you sure you want to continue and lose your changes"
 msgstr ""
 
@@ -21196,6 +21337,9 @@ msgid "database, please wait..."
 msgstr "Datenbank, bitte warten..."
 
 msgid "date( Year, Month, Day, Hour, Minute )"
+msgstr ""
+
+msgid "dates selected"
 msgstr ""
 
 msgid "day"

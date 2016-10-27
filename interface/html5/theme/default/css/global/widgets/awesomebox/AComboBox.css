@@ -1,0 +1,107 @@
+.a-combobox {
+    background: url("../../../../images/combobox_up.png") no-repeat scroll 0 0 transparent;
+    float: left;
+    height: 24px;
+    width: 162px;
+    cursor: pointer;
+    text-align: left;
+
+}
+
+.a-error-tip {
+    background: url("../../../../images/combobox_error.png") no-repeat scroll 0 0 transparent !important;
+
+}
+
+.a-combobox-readonly {
+    background: none;
+    cursor: default;
+}
+
+.a-combobox .focus-input {
+    width: 1px;
+    height: 1px;
+    border: 0px;
+    padding: 0px;
+    position: absolute;
+    opacity: 0;
+}
+
+.a-combobox:hover {
+    background: url("../../../../images/combobox_down.png") no-repeat scroll 0 0 transparent;
+    float: left;
+    height: 24px;
+    width: 162px;
+    cursor: pointer;
+
+}
+
+.a-combobox-readonly:hover {
+    background: none;
+    cursor: default;
+}
+
+.a-combobox .clickable-space {
+    display: block;
+    float: left;
+    width: 30px;
+    height: 24px;
+
+}
+
+.a-combobox .a-combobox-label {
+    color: #362B36;
+    cursor: pointer;
+    display: block;
+    height: 21px;
+    font-size: 12px;
+    left: 7px;
+    line-height: 23px;
+    width: 132px;
+    overflow: hidden;
+    position: relative;
+    top: 1px;
+    float: left;
+    word-wrap: break-word;
+    word-break: break-all;
+
+}
+
+.focus {
+    border: 1px dotted;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+.a-combobox .edit-columnIcon-div {
+    float: left;
+    margin-left: 3px;
+    margin-top: 5px;
+    width: 20px;
+
+}
+
+.a-combobox .edit-columnIcon-div .edit_column_icon {
+
+}
+
+.a-dropdown-div {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    cursor: default;
+    position: absolute;
+    top: 400px;
+    background: none repeat scroll 0 0 #EAEAEA;
+    border: 1px solid #BDBDBD;
+    border-radius: 5px 5px 5px 5px;
+    padding: 5px;
+    box-shadow: 6px 6px 10px 0 #666666;
+    -moz-box-shadow: 6px 6px 10px 0 #666666;
+    -webkit-box-shadow: 6px 6px 10px 0 #666666;
+    z-index: 100;
+
+}

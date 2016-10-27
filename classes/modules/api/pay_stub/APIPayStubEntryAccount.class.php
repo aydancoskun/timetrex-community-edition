@@ -81,6 +81,8 @@ class APIPayStubEntryAccount extends APIFactory {
 						'status_id' => 10,
 						'type_id' => 10,
 						'amount' => '0.00',
+						'accrual_pay_stub_entry_account_id' => 0,
+						'accrual_type_id' => 10,
 					);
 
 		return $this->returnHandler( $data );

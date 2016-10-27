@@ -68,7 +68,8 @@ if ( $redirect != '' ) {
 	//This can result in a phishing attack, if the user is redirected to an outside site.
 	Debug::Text('Attempting Redirect: '. $redirect .' Current hostname: '. Misc::getHostName(), __FILE__, __LINE__, __METHOD__, 10);
 
-	if ( strpos( str_replace( array('http://', 'https://'), '', $redirect ), Misc::getHostName() ) === 0 ) {
+	if ( str_replace( array('http://', 'https://'), '', $redirect ) == Misc::getHostName()
+			OR strpos( str_replace( array('http://', 'https://'), '', $redirect ), Misc::getHostName().'/' ) === 0 ) { //Make sure we match exactly or with a '/' at the end to prevent ondemand.mydomain.com.phish.com from being accepted.
 		Redirect::Page( $redirect );
 	} else {
 		Debug::Text('ERROR, unable to redirect to: '. $redirect .' as it does not contain hostname: '. Misc::getHostName(), __FILE__, __LINE__, __METHOD__, 10);

@@ -146,8 +146,6 @@ class APIPayStub extends APIFactory {
 
 				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
-				Debug::Arr($retarr, 'zzzRecord Count: ', __FILE__, __LINE__, __METHOD__, 10);
-
 				return $this->returnHandler( $retarr );
 			}
 

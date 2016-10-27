@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11925 $
- * $Id: PayPeriodListFactory.class.php 11925 2014-01-08 00:13:44Z mikeb $
- * $Date: 2014-01-07 16:13:44 -0800 (Tue, 07 Jan 2014) $
+ * $Revision: 15179 $
+ * $Id: PayPeriodListFactory.class.php 15179 2014-11-17 16:48:55Z mikeb $
+ * $Date: 2014-11-17 08:48:55 -0800 (Mon, 17 Nov 2014) $
  */
 
 /**
@@ -548,6 +548,60 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 	}
 
 	//Gets all pay periods that start or end between the two dates. Ideal for finding all pay periods that affect a given week.
+	function getByCompanyIdAndOverlapStartDateAndEndDate($company_id, $start_date, $end_date, $where = NULL, $order = NULL) {
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $end_date == '' ) {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'a.start_date' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$ppsf = new PayPeriodScheduleFactory();
+
+		$ph = array(
+					'company_id' => $company_id,
+					'start_date' => $this->db->BindTimeStamp( $start_date ),
+					'end_date' => $this->db->BindTimeStamp( $end_date ),
+					'start_date2' => $this->db->BindTimeStamp( $start_date ),
+					'end_date2' => $this->db->BindTimeStamp( $end_date ),
+					'start_date3' => $this->db->BindTimeStamp( $start_date ),
+					'end_date3' => $this->db->BindTimeStamp( $end_date ),
+					);
+
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a,
+							'. $ppsf->getTable() .' as b
+					where	a.pay_period_schedule_id = b.id
+						AND	a.company_id = ?
+						AND
+						(
+							( a.start_date >= ? AND a.start_date <= ? )
+							OR
+							( a.end_date >= ? AND a.end_date <= ? )
+							OR
+							( a.start_date <= ? AND a.end_date >= ? )
+						)
+						AND ( a.deleted=0 AND b.deleted=0 )';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+	
+	//Gets all pay periods that start or end between the two dates. Ideal for finding all pay periods that affect a given week.
 	function getByUserIdAndOverlapStartDateAndEndDate($user_id, $start_date, $end_date, $where = NULL, $order = NULL) {
 		if ( $user_id == '' ) {
 			return FALSE;
@@ -1013,7 +1067,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $epoch;
 	}
 
-	function getPreviousPayPeriodById($id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+	function getPreviousPayPeriodById($id) {
 		if ( $id == '' ) {
 			return FALSE;
 		}
@@ -1039,10 +1093,8 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 						AND deleted=0
 					ORDER BY id desc
 					LIMIT 1';
-		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
-
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
+					
+		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}

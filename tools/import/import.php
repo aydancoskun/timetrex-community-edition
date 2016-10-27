@@ -40,6 +40,9 @@
  */
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'api'. DIRECTORY_SEPARATOR .'client'. DIRECTORY_SEPARATOR .'TimeTrexClientAPI.class.php');
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1 ); //Try to display any errors that may arise from the API.
+
 if ( $argc < 3 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	$help_output = "Usage: import.php [OPTIONS] [Column MAP file] [CSV File]\n";
 	$help_output .= "\n";
@@ -48,14 +51,14 @@ if ( $argc < 3 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	$help_output .= "    -username <username>		API username\n";
 	$help_output .= "    -password <password>		API password\n";
 	$help_output .= "    -object <object>			Object to import (ie: User,Branch,Punch)\n";
-	$help_output .= "    -f <flag>				Custom flags\n";
+	$help_output .= "    -f <flag>				Custom flags, ie: fuzzy_match,update\n";
 	$help_output .= "    -n 					Dry-run, display the first two lines to confirm mapping is correct\n";
 
 	echo $help_output;
 
 } else {
 	//Handle command line arguments
-	$last_arg = count($argv)-1;
+	$last_arg = ( count($argv) - 1 );
 
 	if ( in_array('-n', $argv) ) {
 		$dry_run = TRUE;
@@ -64,34 +67,50 @@ if ( $argc < 3 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	}
 
 	if ( in_array('-server', $argv) ) {
-		$api_url = strtolower( trim($argv[array_search('-server', $argv)+1]) );
+		$api_url = strtolower( trim($argv[( array_search('-server', $argv) + 1)]) );
 	} else {
 		$api_url = FALSE;
 	}
 
 	if ( in_array('-username', $argv) ) {
-		$username = strtolower( trim($argv[array_search('-username', $argv)+1]) );
+		$username = strtolower( trim($argv[(array_search('-username', $argv) + 1)]) );
 	} else {
 		$username = FALSE;
 	}
 
 	if ( in_array('-password', $argv) ) {
-		$password = strtolower( trim($argv[array_search('-password', $argv)+1]) );
+		$password = strtolower( trim($argv[(array_search('-password', $argv) + 1)]) );
 	} else {
 		$password = FALSE;
 	}
 
 	if ( in_array('-object', $argv) ) {
-		$object = trim($argv[array_search('-object', $argv)+1]);
+		$object = trim($argv[( array_search('-object', $argv) + 1)]);
 	} else {
 		$object = FALSE;
 	}
 
-	if ( isset($argv[$last_arg-1]) AND $argv[$last_arg-1] != '' ) {
-		if ( !file_exists( $argv[$last_arg-1] ) OR !is_readable( $argv[$last_arg-1] ) ) {
-			echo "Column MAP File: ". $argv[$last_arg-1] ." does not exist or is not readable!\n";
+	if ( in_array('-f', $argv) ) {
+		$raw_flags = trim($argv[( array_search('-f', $argv) + 1 )]);
+		if ( strpos( $raw_flags, ',') !== FALSE ) {
+			$raw_flag_split = explode(',', $raw_flags );
+			if ( is_array( $raw_flag_split ) ) {
+				foreach( $raw_flag_split as $tmp_flag ) {
+					$flags[$tmp_flag] = TRUE;
+				}
+			}
 		} else {
-			$column_map_file = $argv[$last_arg-1];
+			$flags = array( $raw_flags => TRUE );
+		}
+	} else {
+		$flags = array();
+	}
+
+	if ( isset($argv[($last_arg - 1)]) AND $argv[($last_arg - 1)] != '' ) {
+		if ( !file_exists( $argv[($last_arg - 1)] ) OR !is_readable( $argv[($last_arg - 1)] ) ) {
+			echo "Column MAP File: ". $argv[($last_arg - 1)] ." does not exist or is not readable!\n";
+		} else {
+			$column_map_file = $argv[($last_arg - 1)];
 		}
 	}
 
@@ -114,27 +133,27 @@ if ( $argc < 3 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 			return FALSE;
 		}
 
-		$return = false;
+		$return = FALSE;
 		$handle = fopen($file, "r");
 		if ( $head !== FALSE ) {
 			if ( $first_column !== FALSE ) {
-			   while ( ($header = fgetcsv($handle, $len, $delim) ) !== FALSE) {
-				   if ( $header[0] == $first_column ) {
-					   //echo "FOUND HEADER!<br>\n";
-					   $found_header = TRUE;
-					   break;
-				   }
-			   }
+				while ( ($header = fgetcsv($handle, $len, $delim) ) !== FALSE) {
+					if ( $header[0] == $first_column ) {
+						//echo "FOUND HEADER!<br>\n";
+						$found_header = TRUE;
+						break;
+					}
+				}
 
-			   if ( $found_header !== TRUE ) {
-				   return FALSE;
-			   }
+				if ( $found_header !== TRUE ) {
+					return FALSE;
+				}
 			} else {
-			   $header = fgetcsv($handle, $len, $delim);
+				$header = fgetcsv($handle, $len, $delim);
 			}
 		}
 
-		$i=1;
+		$i = 1;
 		while ( ($data = fgetcsv($handle, $len, $delim) ) !== FALSE) {
 			if ( $head AND isset($header) ) {
 				foreach ($header as $key => $heading) {
@@ -181,13 +200,18 @@ if ( $argc < 3 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 		$obj->setRawData( file_get_contents( $import_csv_file ) );
 		//var_dump( $obj->getOptions('columns') );
 
-		$retval = $obj->Import( $column_map_arr, array('fuzzy_match' => TRUE), $dry_run );
-		if ( $retval->getResult() == TRUE ) {
+		$retval = $obj->Import( $column_map_arr, $flags, $dry_run );
+		if ( is_object($retval) AND $retval->getResult() == TRUE ) {
 			echo "Import successful!\n";
 		} else {
+			echo "ERROR: Failed importing data...\n";
 			echo $retval;
 			exit(1);
 		}
+	} else {
+		echo "ERROR: Object argument not specified!\n";
+		exit(1);
 	}
 }
+echo "Done!\n";
 ?>

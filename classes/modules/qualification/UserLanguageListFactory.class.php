@@ -40,7 +40,7 @@
  */
 
 /**
- * @package
+ * @package Modules\Qualification
  */
 class UserLanguageListFactory extends UserLanguageFactory implements IteratorAggregate {
 
@@ -213,7 +213,7 @@ class UserLanguageListFactory extends UserLanguageFactory implements IteratorAgg
 
 			$this->ExecuteSQL($query, $ph);
 
-			$this->saveCache($this->rs, $id.$user_id);
+			$this->saveCache($this->rs, $user_id.$qualification_id);
 		}
 
 		return $this;

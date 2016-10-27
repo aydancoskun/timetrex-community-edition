@@ -40,7 +40,7 @@
  */
 
 /**
- * @package Module_Users
+ * @package Modules\Users
  */
 class EthnicGroupFactory extends Factory {
 	protected $table = 'ethnic_group';

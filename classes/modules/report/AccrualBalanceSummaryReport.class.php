@@ -261,7 +261,6 @@ class AccrualBalanceSummaryReport extends Report {
 							$retval['columns'][] = 'accrual_policy';
 
 							$retval['columns'][] = 'type';
-							$retval['columns'][] = 'date_stamp';
 							$retval['columns'][] = 'amount';
 
 							$retval['group'][] = 'accrual_policy';
@@ -272,7 +271,6 @@ class AccrualBalanceSummaryReport extends Report {
 
 							$retval['columns'][] = 'accrual_policy';
 							$retval['columns'][] = 'amount';
-							$retval['columns'][] = 'date_stamp';
 
 							$retval['group'][] = 'type';
 
@@ -285,7 +283,6 @@ class AccrualBalanceSummaryReport extends Report {
 
 							$retval['columns'][] = 'accrual_policy';
 							$retval['columns'][] = 'amount';
-							$retval['columns'][] = 'date_stamp';
 
 							$retval['group'][] = 'type';
 							$retval['group'][] = 'first_name';
@@ -303,7 +300,6 @@ class AccrualBalanceSummaryReport extends Report {
 							$retval['columns'][] = 'last_name';
 
 							$retval['columns'][] = 'amount';
-							$retval['columns'][] = 'date_stamp';
 
 							$retval['group'][] = 'accrual_policy';
 							$retval['group'][] = 'last_name';
@@ -322,7 +318,6 @@ class AccrualBalanceSummaryReport extends Report {
 							$retval['columns'][] = 'last_name';
 
 							$retval['columns'][] = 'amount';
-							$retval['columns'][] = 'date_stamp';
 
 							$retval['group'][] = 'accrual_policy';
 							$retval['group'][] = 'type';

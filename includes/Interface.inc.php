@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13838 $
- * $Id: Interface.inc.php 13838 2014-07-24 00:06:53Z mikeb $
- * $Date: 2014-07-23 17:06:53 -0700 (Wed, 23 Jul 2014) $
+ * $Revision: 13825 $
+ * $Id: Interface.inc.php 13825 2014-07-23 16:44:25Z mikeb $
+ * $Date: 2014-07-23 09:44:25 -0700 (Wed, 23 Jul 2014) $
  */
 //Help prevent XSS or frame clickjacking.
 Header('X-XSS-Protection: 1; mode=block');

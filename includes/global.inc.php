@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13895 $
- * $Id: global.inc.php 13895 2014-07-28 21:43:41Z mikeb $
- * $Date: 2014-07-28 14:43:41 -0700 (Mon, 28 Jul 2014) $
+ * $Revision: 15146 $
+ * $Id: global.inc.php 15146 2014-11-13 22:42:41Z mikeb $
+ * $Date: 2014-11-13 14:42:41 -0800 (Thu, 13 Nov 2014) $
  */
 //PHP v5.1.0 introduced $_SERVER['REQUEST_TIME'], but it doesn't include microseconds until v5.4.0.
 if ( !isset($_SERVER['REQUEST_TIME_FLOAT']) OR version_compare(PHP_VERSION, '5.4.0', '<') == TRUE ) {
@@ -61,8 +61,8 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '7.3.10' );
-define('APPLICATION_VERSION_DATE', @strtotime('29-Jul-2014') ); // Release date of version.
+define('APPLICATION_VERSION', '7.4.7' );
+define('APPLICATION_VERSION_DATE', @strtotime('14-Nov-2014') ); // Release date of version.
 
 if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'WIN' ) { define('OPERATING_SYSTEM', 'WIN' ); } else { define('OPERATING_SYSTEM', 'LINUX' ); }
 
@@ -305,10 +305,18 @@ function TTnew( $class_name ) { //Unlimited arguments are supported.
 
 //Force no caching of file.
 function forceNoCacheHeaders() {
+
+	//CSP headers break many things at this stage, unless "unsafe" is used for almost everything.
+	//Header('Content-Security-Policy: default-src *; script-src \'self\' *.google-analytics.com *.google.com');
+	Header('Content-Security-Policy: default-src * \'unsafe-inline\'; script-src \'unsafe-eval\' \'unsafe-inline\' \'self\' *.google-analytics.com *.google.com');
+
 	//Help prevent XSS or frame clickjacking.
 	Header('X-XSS-Protection: 1; mode=block');
 	Header('X-Frame-Options: SAMEORIGIN');
 
+	//Reduce MIME-TYPE security risks.
+	Header('X-Content-Type-Options: nosniff');
+	
 	//Turn caching off.
 	header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
 	header('Last-Modified: ' . gmdate("D, d M Y H:i:s") . ' GMT');
@@ -316,7 +324,14 @@ function forceNoCacheHeaders() {
 	// IE gets: "file could not be written to cache"
 	// It works on some IE installs though.
 	header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0');
-	header('Pragma: token'); //If set to no-cache it breaks IE downloading reports, with error that the site is not available.
+	if ( isset($_SERVER['HTTP_USER_AGENT']) AND stripos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE ) {
+		header('Pragma: token'); //If set to no-cache it breaks IE downloading reports, with error that the site is not available.
+		if ( preg_match('/(?i)MSIE [5-9]/i', $_SERVER['HTTP_USER_AGENT'] ) ) {
+			header('Connection: close'); //ie6-9 may send empty POST requests causing API errors due to poor keepalive handling, so force all connections to close instead.
+		}
+	} else {
+		header('Pragma: no-cache');
+	}
 
 	//Only when force_ssl is enabled and the user is using SSL, include the STS header.
 	global $config_vars;
@@ -419,7 +434,7 @@ set_include_path(
 require_once(Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'core'. DIRECTORY_SEPARATOR .'Exception.class.php');
 require_once(Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'core'. DIRECTORY_SEPARATOR .'Debug.class.php');
 																																																							//**REMOVING OR CHANGING THIS COPYRIGHT NOTICE IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT**//
-																																																							if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) { define( 'COPYRIGHT_NOTICE', 'Copyright &copy; '. date('Y') .' <a href="http://'. ORGANIZATION_URL .'" class="footerLink">'. ORGANIZATION_NAME .'</a>. The Program is free software provided AS IS, without warranty. Licensed under <a href="http://www.fsf.org/licensing/licenses/agpl-3.0.html" target="_blank">AGPLv3.</a>' ); } else { define( 'COPYRIGHT_NOTICE', 'Copyright &copy; '. date('Y') .' <a href="http://'. ORGANIZATION_URL .'" class="footerLink">'. ORGANIZATION_NAME .'</a>. All Rights Reserved.' ); }
+																																																							if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) { define( 'COPYRIGHT_NOTICE', 'Copyright &copy; '. date('Y') .' <a href="http://'. ORGANIZATION_URL .'" class="footerLink">'. ORGANIZATION_NAME .'</a>. The Program is free software provided AS IS, without warranty. Licensed under <a href="http://www.fsf.org/licensing/licenses/agpl-3.0.html" class="footerLink" target="_blank">AGPLv3.</a>' ); } else { define( 'COPYRIGHT_NOTICE', 'Copyright &copy; '. date('Y') .' <a href="http://'. ORGANIZATION_URL .'" class="footerLink">'. ORGANIZATION_NAME .'</a>. All Rights Reserved.' ); }
 Debug::setEnable( (bool)$config_vars['debug']['enable'] );
 Debug::setEnableTidy( FALSE );
 Debug::setEnableDisplay( (bool)$config_vars['debug']['enable_display'] );
@@ -469,6 +484,6 @@ header('Access-Control-Allow-Origin: '. $origin_url );
 header('Access-Control-Allow-Headers: Content-Type' );
 unset($origin_url);
 
-require_once('Cache.inc.php');
 require_once('Database.inc.php');
+require_once('Cache.inc.php'); //Put cache after Database so we can handle our own DB caching.
 ?>

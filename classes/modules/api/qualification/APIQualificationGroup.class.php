@@ -40,7 +40,7 @@
  */
 
 /**
- * @package API_APIQualificationGroup
+ * @package API\Qualification
  */
 class APIQualificationGroup extends APIFactory {
 	protected $main_class = 'QualificationGroupFactory';
@@ -93,9 +93,7 @@ class APIQualificationGroup extends APIFactory {
 	function getQualificationGroup( $data = NULL, $disable_paging = FALSE, $mode = 'flat' ) {	
 		if ( !$this->getPermissionObject()->Check('qualification', 'enabled')
 				OR !( $this->getPermissionObject()->Check('qualification', 'view') OR $this->getPermissionObject()->Check('qualification', 'view_own') OR $this->getPermissionObject()->Check('qualification', 'view_child') ) ) {
-			//return $this->getPermissionObject()->PermissionDenied();
-			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
-		
+			return $this->getPermissionObject()->PermissionDenied();
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 

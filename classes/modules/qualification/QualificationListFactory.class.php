@@ -40,7 +40,7 @@
  */
 
 /**
- * @package
+ * @package Modules\Qualification
  */
 class QualificationListFactory extends QualificationFactory implements IteratorAggregate {
 
@@ -82,21 +82,6 @@ class QualificationListFactory extends QualificationFactory implements IteratorA
 		}
 
 		return $this;
-	}
-
-	static function getNameById( $id ) {
-		if ( $id == '') {
-			return FALSE;
-		}
-
-		$lf = new QualificationListFactory();
-		$lf = $lf->getById( $id );
-		if ( $lf->getRecordCount() > 0 ) {
-			$obj = $lf->getCurrent();
-			return $obj->getName();
-		}
-
-		return FALSE;
 	}
 
 	function getByCompanyId($id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {

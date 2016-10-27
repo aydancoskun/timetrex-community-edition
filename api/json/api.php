@@ -45,6 +45,146 @@ require_once('../../includes/global.inc.php');
 require_once('../../includes/API.inc.php');
 Header('Content-Type: application/json'); //Make sure content type is not text/HTML to help avoid XSS.
 
+function getJSONError() {
+	$retval = FALSE;
+
+	if ( function_exists('json_last_error') ) { //Handle PHP v5.3 and older.
+		switch( json_last_error() ) {
+			case JSON_ERROR_NONE:
+				break;
+			case JSON_ERROR_DEPTH:
+				$retval = 'Maximum stack depth exceeded';
+				break;
+			case JSON_ERROR_STATE_MISMATCH:
+				$retval = 'Underflow or the modes mismatch';
+				break;
+			case JSON_ERROR_CTRL_CHAR:
+				$retval = 'Unexpected control character found';
+				break;
+			case JSON_ERROR_SYNTAX:
+				$retval = 'Syntax error, malformed JSON';
+				break;
+			case JSON_ERROR_UTF8:
+				$retval = 'Malformed UTF-8 characters, possibly incorrectly encoded';
+				break;
+			default:
+				$retval = 'Unknown error';
+				break;
+		}
+	}
+
+	return $retval;
+}
+
+function unauthenticatedInvokeService( $class_name, $method, $arguments, $message_id, $api_auth ) {
+	global $obj;
+	
+	TTi18n::chooseBestLocale(); //Make sure we set the locale as best we can when not logged in
+
+	Debug::text('Handling UNAUTHENTICATED JSON Call To API Factory: '.  $class_name .' Method: '. $method .' Message ID: '. $message_id, __FILE__, __LINE__, __METHOD__, 10);
+	$valid_unauthenticated_classes = getUnauthenticatedAPIClasses();
+	if ( $class_name != '' AND in_array( $class_name, $valid_unauthenticated_classes ) AND class_exists( $class_name ) ) {
+		$obj = new $class_name;
+		$obj->setAMFMessageID( $message_id ); //Sets AMF message ID so progress bar continues to work.
+		if ( $method != '' AND method_exists( $obj, $method ) ) {
+			$retval = call_user_func_array( array($obj, $method), (array)$arguments );
+			//If the function returns anything else, encode into JSON and return it.
+			//Debug::Arr($retval, 'Retval: ', __FILE__, __LINE__, __METHOD__, 10);
+			echo json_encode( $retval );
+			$json_error = getJSONError();
+			if ( $json_error !== FALSE ) {
+				Debug::Arr($retval, 'ERROR: JSON: '. $json_error, __FILE__, __LINE__, __METHOD__, 10);
+				echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', 'ERROR: JSON: '. $json_error ) );
+			}
+		} else {
+			$validator = TTnew('Validator');
+			Debug::text('Method: '. $method .' does not exist!', __FILE__, __LINE__, __METHOD__, 10);
+			echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('Method %1 does not exist.', array( $validator->escapeHTML( $method ) ) ) ) );
+		}
+	} else {
+		$validator = TTnew('Validator');
+		Debug::text('Class: '. $class_name .' does not exist! (unauth)', __FILE__, __LINE__, __METHOD__, 10);
+		echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('Class %1 does not exist, or unauthenticated.', array( $validator->escapeHTML( $class_name ) ) ) ) );
+	}
+
+	return TRUE;
+}
+
+function authenticatedInvokeService(  $class_name, $method, $arguments, $message_id, $authentication, $api_auth ) {
+	global $current_user, $current_user_prefs, $current_company, $obj;
+	
+	$current_user = $authentication->getObject();
+
+	if ( is_object( $current_user ) ) {
+		$current_user->getUserPreferenceObject()->setDateTimePreferences();
+		$current_user_prefs = $current_user->getUserPreferenceObject();
+
+		Debug::text('Locale Cookie: '. TTi18n::getLocaleCookie(), __FILE__, __LINE__, __METHOD__, 10);
+		if ( TTi18n::getLocaleCookie() != '' AND $current_user_prefs->getLanguage() !== TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) ) {
+			Debug::text('Changing User Preference Language to match cookie...', __FILE__, __LINE__, __METHOD__, 10);
+			$current_user_prefs->setLanguage( TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) );
+			if ( $current_user_prefs->isValid() ) {
+				$current_user_prefs->Save(FALSE);
+			}
+		} else {
+			Debug::text('User Preference Language matches cookie!', __FILE__, __LINE__, __METHOD__, 10);
+		}
+		if ( isset($_GET['language']) AND $_GET['language'] != '' ) {
+			TTi18n::setLocale( $_GET['language'] ); //Sets master locale
+		} else {
+			TTi18n::setLanguage( $current_user_prefs->getLanguage() );
+			TTi18n::setCountry( $current_user->getCountry() );
+			TTi18n::setLocale(); //Sets master locale
+		}
+		TTi18n::setLocaleCookie(); //Make sure locale cookie is set so APIGlobal.js.php can read it.
+
+		$clf = new CompanyListFactory();
+		$current_company = $clf->getByID( $current_user->getCompany() )->getCurrent();
+
+		if ( is_object( $current_company ) ) {
+			//Debug::text('Handling JSON Call To API Factory: '.  $class_name .' Method: '. $method .' Message ID: '. $message_id .' UserName: '. $current_user->getUserName(), __FILE__, __LINE__, __METHOD__, 10);
+			if ( $class_name != '' AND class_exists( $class_name ) ) {
+				$obj = new $class_name;
+				if ( method_exists( $obj, 'setAMFMessageID') ) {
+					$obj->setAMFMessageID( $message_id ); //Sets AMF message ID so progress bar continues to work.
+				}
+
+				if ( $method != '' AND method_exists( $obj, $method ) ) {
+					$retval = call_user_func_array( array($obj, $method), (array)$arguments );
+					if ( $retval !== NULL ) {
+						if ( !is_object( $retval ) ) { //Make sure we never return a raw object to end-user, as too much information could be included in it.
+							echo json_encode( $retval );
+							$json_error = getJSONError();
+							if ( $json_error !== FALSE ) {
+								Debug::Arr($retval, 'ERROR: JSON: '. $json_error, __FILE__, __LINE__, __METHOD__, 10);
+								echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', 'ERROR: JSON: '. $json_error ) );
+							}
+						} else {
+							Debug::text('OBJECT return value, not JSON encoding any additional data.', __FILE__, __LINE__, __METHOD__, 10);
+						}
+					} else {
+						Debug::text('NULL return value, not JSON encoding any additional data.', __FILE__, __LINE__, __METHOD__, 10);
+					}
+				} else {
+					Debug::text('Method: '. $method .' does not exist!', __FILE__, __LINE__, __METHOD__, 10);
+					echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', TTi18n::getText('Method %1 does not exist.', array( $current_company->Validator->escapeHTML( $method ) ) ) ) );
+				}
+			} else {
+				Debug::text('Class: '. $class_name .' does not exist!', __FILE__, __LINE__, __METHOD__, 10);
+				echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', TTi18n::getText('Class %1 does not exist.', array( $current_company->Validator->escapeHTML( $class_name ) ) ) ) );
+			}
+		} else {
+			Debug::text('Failed to get Company Object!', __FILE__, __LINE__, __METHOD__, 10);
+			echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('Company does not exist.' ) ) );
+		}
+	} else {
+		Debug::text('Failed to get User Object!', __FILE__, __LINE__, __METHOD__, 10);
+		echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('User does not exist.' ) ) );
+	}
+
+	return TRUE;
+}
+
 /*
  Arguments:
 	GET: SessionID
@@ -119,96 +259,27 @@ if ( PRODUCTION == TRUE AND $argument_size > (1024 * 12) ) {
 unset($argument_size);
 
 $api_auth = TTNew('APIAuthentication'); //Used to handle error cases and display error messages.
-
-if ( isset($_GET['SessionID']) AND $_GET['SessionID'] != '' AND $method != 'isLoggedIn' ) { //When interface calls PING() on a regular basis we need to skip this check and pass it to APIAuthentication immediately to avoid updating the session time.
+$session_id = getSessionID();
+if ( $session_id != '' AND !in_array( strtolower($method), array('isloggedin', 'ping' ) ) ) { //When interface calls PING() on a regular basis we need to skip this check and pass it to APIAuthentication immediately to avoid updating the session time.
 	$authentication = new Authentication();
 
-	Debug::text('Session ID: '. $_GET['SessionID'] .' Source IP: '. $_SERVER['REMOTE_ADDR'], __FILE__, __LINE__, __METHOD__, 10);
-	if ( $authentication->Check( $_GET['SessionID'] ) === TRUE ) {
-		$current_user = $authentication->getObject();
-
-		if ( is_object( $current_user ) ) {
-			$current_user->getUserPreferenceObject()->setDateTimePreferences();
-			$current_user_prefs = $current_user->getUserPreferenceObject();
-
-			Debug::text('Locale Cookie: '. TTi18n::getLocaleCookie(), __FILE__, __LINE__, __METHOD__, 10);
-			if ( TTi18n::getLocaleCookie() != '' AND $current_user_prefs->getLanguage() !== TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) ) {
-				Debug::text('Changing User Preference Language to match cookie...', __FILE__, __LINE__, __METHOD__, 10);
-				$current_user_prefs->setLanguage( TTi18n::getLanguageFromLocale( TTi18n::getLocaleCookie() ) );
-				if ( $current_user_prefs->isValid() ) {
-					$current_user_prefs->Save(FALSE);
-				}
-			} else {
-				Debug::text('User Preference Language matches cookie!', __FILE__, __LINE__, __METHOD__, 10);
-			}
-			if ( isset($_GET['language']) AND $_GET['language'] != '' ) {
-				TTi18n::setLocale( $_GET['language'] ); //Sets master locale
-			} else {
-				TTi18n::setLanguage( $current_user_prefs->getLanguage() );
-				TTi18n::setCountry( $current_user->getCountry() );
-				TTi18n::setLocale(); //Sets master locale
-			}
-
-			$clf = new CompanyListFactory();
-			$current_company = $clf->getByID( $current_user->getCompany() )->getCurrent();
-
-			if ( is_object( $current_company ) ) {
-				//Debug::text('Handling JSON Call To API Factory: '.  $class_name .' Method: '. $method .' Message ID: '. $message_id .' UserName: '. $current_user->getUserName(), __FILE__, __LINE__, __METHOD__, 10);
-				if ( $class_name != '' AND class_exists( $class_name ) ) {
-					$obj = new $class_name;
-					if ( method_exists( $obj, 'setAMFMessageID') ) {
-						$obj->setAMFMessageID( $message_id ); //Sets AMF message ID so progress bar continues to work.
-					}
-
-					if ( $method != '' AND method_exists( $obj, $method ) ) {
-						$retval = call_user_func_array( array($obj, $method), (array)$arguments );
-						if ( $retval !== NULL ) {
-							echo json_encode( $retval );
-						} else {
-							Debug::text('NULL return value, not JSON encoding any additional data.', __FILE__, __LINE__, __METHOD__, 10);
-						}
-					} else {
-						Debug::text('Method: '. $method .' does not exist!', __FILE__, __LINE__, __METHOD__, 10);
-						echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', TTi18n::getText('Method %1 does not exist.', array( $method ) ) ) );
-					}
-				} else {
-					Debug::text('Class: '. $class_name .' does not exist!', __FILE__, __LINE__, __METHOD__, 10);
-					echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', TTi18n::getText('Class %1 does not exist.', array( $class_name ) ) ) );
-				}
-			} else {
-				Debug::text('Failed to get Company Object!', __FILE__, __LINE__, __METHOD__, 10);
-				echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('Company does not exist.' ) ) );
-			}
+	Debug::text('Session ID: '. $session_id .' Source IP: '. $_SERVER['REMOTE_ADDR'], __FILE__, __LINE__, __METHOD__, 10);
+	if ( $authentication->Check( $session_id ) === TRUE ) {
+		if ( Misc::checkValidReferer() == TRUE ) { //Help prevent CSRF attacks with this, but this is only needed when the user is already logged in.
+			authenticatedInvokeService( $class_name, $method, $arguments, $message_id, $authentication, $api_auth );
 		} else {
-			Debug::text('Failed to get User Object!', __FILE__, __LINE__, __METHOD__, 10);
-			echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('User does not exist.' ) ) );
+			echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', TTi18n::getText('Invalid referrer, possible CSRF.' ) ) );
 		}
 	} else {
-		Debug::text('User not authenticated!', __FILE__, __LINE__, __METHOD__, 10);
-		//echo "User not authenticated!<br>\n";
-		echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('User is not unauthenticated.' ) ) );
+		Debug::text('SessionID set but user not authenticated!', __FILE__, __LINE__, __METHOD__, 10);
+		//echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('User is not authenticated.' ) ) );
+
+		//Rather than fail with session error, switch over to using unauthenticated calls, which if its calling to authenticated method will cause a SESSION error at that time.
+		unauthenticatedInvokeService( $class_name, $method, $arguments, $message_id, $api_auth );
 	}
 } else {
-	TTi18n::chooseBestLocale(); //Make sure we set the locale as best we can when not logged in
-	Debug::text('Handling UNAUTHENTICATED JSON Call To API Factory: '.  $class_name .' Method: '. $method .' Message ID: '. $message_id, __FILE__, __LINE__, __METHOD__, 10);
-
-	$valid_unauthenticated_classes = getUnauthenticatedAPIClasses();
-	if ( $class_name != '' AND in_array( $class_name, $valid_unauthenticated_classes ) AND class_exists( $class_name ) ) {
-		$obj = new $class_name;
-		$obj->setAMFMessageID( $message_id ); //Sets AMF message ID so progress bar continues to work.
-		if ( $method != '' AND method_exists( $obj, $method ) ) {
-			$retval = call_user_func_array( array($obj, $method), (array)$arguments );
-			//If the function returns anything else, encode into JSON and return it.
-			//Debug::Arr($retval, 'Retval: ', __FILE__, __LINE__, __METHOD__, 10);
-			echo json_encode( $retval );
-		} else {
-			Debug::text('Method: '. $method .' does not exist!', __FILE__, __LINE__, __METHOD__, 10);
-			echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('Method %1 does not exist.', array( $method ) ) ) );
-		}
-	} else {
-		Debug::text('Class: '. $class_name .' does not exist! (unauth)', __FILE__, __LINE__, __METHOD__, 10);
-		echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('Class %1 does not exist, or unauthenticated.', array( $class_name ) ) ) );
-	}
+	Debug::text('No SessionID or calling non-authenticated function...', __FILE__, __LINE__, __METHOD__, 10);
+	unauthenticatedInvokeService( $class_name, $method, $arguments, $message_id, $api_auth );
 }
 
 Debug::text('Server Response Time: '. ((float)microtime(TRUE) - $_SERVER['REQUEST_TIME_FLOAT']), __FILE__, __LINE__, __METHOD__, 10);

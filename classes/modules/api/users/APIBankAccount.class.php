@@ -185,12 +185,9 @@ class APIBankAccount extends APIFactory {
 							$validate_only == TRUE
 							OR
 								(
-
 								$this->getPermissionObject()->Check('user', 'edit_bank')
 									OR ( $this->getPermissionObject()->Check('user', 'edit_own_bank') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
-									OR ( $this->getPermissionObject()->Check('user', 'edit_child_bank') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getId(), $permission_children_ids ) === TRUE )
-								//$this->getPermissionObject()->Check('user', 'edit_bank')
-								//	OR ( $this->getPermissionObject()->Check('user', 'edit_own_bank') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('user', 'edit_child_bank') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -218,7 +215,7 @@ class APIBankAccount extends APIFactory {
 						//Current user
 						$row['company_id'] = $this->getCurrentCompanyObject()->getId();
 						$row['user_id'] = $this->getCurrentUserObject()->getId();
-					} elseif ( $row['user_id'] != '' AND $row['company_id'] == '' AND $this->getPermissionObject()->Check('user', 'edit_bank') ) {
+					} elseif ( $row['user_id'] != '' AND ( $row['company_id'] == '' OR $row['company_id'] == $this->getCurrentCompanyObject()->getId() ) AND $this->getPermissionObject()->Check('user', 'edit_bank') ) {
 						Debug::Text('Specified User', __FILE__, __LINE__, __METHOD__, 10);
 						//Specified User
 						$row['company_id'] = $this->getCurrentCompanyObject()->getId();
@@ -228,8 +225,12 @@ class APIBankAccount extends APIFactory {
 						$row['company_id'] = $this->getCurrentCompanyObject()->getId();
 					} else {
 						Debug::Text('No Company or User ID specified...', __FILE__, __LINE__, __METHOD__, 10);
+						//Assume its always the currently logged in users account.
 						$row['company_id'] = $this->getCurrentCompanyObject()->getId();
-						//$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Edit permission denied') );
+
+						if ( !isset($row['user_id']) OR $this->getPermissionObject()->Check('company', 'edit_bank') == FALSE ) {
+							$row['user_id'] = $this->getCurrentUserObject()->getId();
+						}
 					}
 
 					$lf->setObjectFromArray( $row );
@@ -297,10 +298,10 @@ class APIBankAccount extends APIFactory {
 		}
 
 		if ( !$this->getPermissionObject()->Check('user', 'enabled')
-				OR !( $this->getPermissionObject()->Check('user', 'delete') OR $this->getPermissionObject()->Check('user', 'delete_own') OR $this->getPermissionObject()->Check('user', 'delete_child') ) ) {
+				OR !( $this->getPermissionObject()->Check('user', 'edit_bank') OR $this->getPermissionObject()->Check('user', 'edit_own_bank') OR $this->getPermissionObject()->Check('user', 'edit_child_bank') ) ) {
 			return	$this->getPermissionObject()->PermissionDenied();
 		}
-
+		
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
 		$permission_children_ids = $this->getPermissionChildren();
 
@@ -322,11 +323,10 @@ class APIBankAccount extends APIFactory {
 					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
-						if ( $this->getPermissionObject()->Check('user', 'delete')
-								OR ( $this->getPermissionObject()->Check('user', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
-								OR ( $this->getPermissionObject()->Check('user', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getId(), $permission_children_ids ) === TRUE )) {
-						//if ( $this->getPermissionObject()->Check('user', 'delete')
-						//		OR ( $this->getPermissionObject()->Check('user', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
+						if (	$this->getPermissionObject()->Check('user', 'edit_bank')
+									OR ( $this->getPermissionObject()->Check('user', 'edit_own_bank') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('user', 'edit_child_bank') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getId(), $permission_children_ids ) === TRUE )
+							) {
 							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {

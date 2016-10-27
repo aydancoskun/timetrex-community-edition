@@ -74,6 +74,21 @@ class MessageControlFactory extends Factory {
 										100 => 'user' //For notes assigned to users?
 									);
 				break;
+			case 'type_to_api_map': //Maps the object_type_id to an API class that we can use to determine if the user has access to view the specific records or not.
+				$retval = array(
+										//5 => 'email', //Email is never linked to another class
+										//10 => 'default_schedule',
+										//20 => 'schedule_amendment',
+										//30 => 'shift_amendment',
+										40 => 'APIAuthorization',
+										50 => 'APIRequest',
+										60 => 'APIJob',
+										70 => 'APIJobItem',
+										80 => 'APIClient',
+										90 => 'APITimeSheet',
+										100 => 'APIUser' //For notes assigned to users?
+									);
+				break;
 			case 'object_type':
 			case 'object_name':
 				$retval = array(
@@ -563,7 +578,7 @@ class MessageControlFactory extends Factory {
 			return FALSE;
 		}
 
-		$from = $reply_to = 'DoNotReply@'. Misc::getHostName( FALSE );
+		$from = $reply_to = '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Message') .'"<DoNotReply@'. Misc::getEmailDomain() .'>';
 
 		global $current_user, $config_vars;
 		if ( is_object($current_user) AND $current_user->getWorkEmail() != '' ) {
@@ -759,8 +774,10 @@ class MessageControlFactory extends Factory {
 						case 'from_first_name':
 						case 'from_middle_name':
 						case 'from_last_name':
-						case 'status_id':
 							$data[$variable] = $this->getColumn( $variable );
+							break;
+						case 'status_id':
+							$data[$variable] = $this->getStatus(); //Make sure this is returned as an INT.
 							break;
 						case 'object_type':
 							$data[$variable] = Option::getByKey( $this->getObjectType(), $this->getOptions( $variable ) );

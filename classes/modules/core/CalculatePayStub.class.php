@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12703 $
- * $Id: CalculatePayStub.class.php 12703 2014-03-20 16:14:55Z mikeb $
- * $Date: 2014-03-20 09:14:55 -0700 (Thu, 20 Mar 2014) $
+ * $Revision: 12635 $
+ * $Id: CalculatePayStub.class.php 12635 2014-03-14 17:03:35Z mikeb $
+ * $Date: 2014-03-14 10:03:35 -0700 (Fri, 14 Mar 2014) $
  */
 
 /**

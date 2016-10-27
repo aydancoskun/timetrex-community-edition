@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12453 $
- * $Id: MessageFactory.class.php 12453 2014-02-25 16:10:34Z mikeb $
- * $Date: 2014-02-25 08:10:34 -0800 (Tue, 25 Feb 2014) $
+ * $Revision: 14125 $
+ * $Id: MessageFactory.class.php 14125 2014-08-14 18:21:35Z mikeb $
+ * $Date: 2014-08-14 11:21:35 -0700 (Thu, 14 Aug 2014) $
  */
 
 /**
@@ -557,7 +557,7 @@ class MessageFactory extends Factory {
 			return FALSE;
 		}
 
-		$from = $reply_to = 'DoNotReply@'. Misc::getHostName( FALSE );
+		$from = $reply_to = '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Message') .'"<DoNotReply@'. Misc::getEmailDomain() .'>';
 
 		global $current_user, $config_vars;
 		if ( is_object($current_user) AND $current_user->getWorkEmail() != '' ) {

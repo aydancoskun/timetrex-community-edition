@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13814 $
- * $Id: StationFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
- * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
+ * $Revision: 15145 $
+ * $Id: StationFactory.class.php 15145 2014-11-13 22:42:19Z mikeb $
+ * $Date: 2014-11-13 14:42:19 -0800 (Thu, 13 Nov 2014) $
  */
 include_once('Net/IPv4.php');
 
@@ -186,7 +186,7 @@ class StationFactory extends Factory {
 												//256
 												//512
 												//1024
-												//2048	=> TTi18n::gettext('Enable: Kiosk Mode'),
+												2048	=> TTi18n::gettext('Disable: GPS'),
 												4096	=> TTi18n::gettext('Enable: Punch Images'),
 												//8192	=> TTi18n::gettext('Enable: Screensaver'),
 												16384	=> TTi18n::gettext('Enable: Auto-Login'),
@@ -209,14 +209,14 @@ class StationFactory extends Factory {
 												2		=> TTi18n::gettext('Punch Mode: Quick Punch'),
 												4		=> TTi18n::gettext('Punch Mode: QRCode'),
 												8		=> TTi18n::gettext('Punch Mode: QRCode+Face Detection'),
-												//16		=> TTi18n::gettext('Punch Mode: Face Recognition'),
-												//32		=> TTi18n::gettext('Punch Mode: Face Recognition+QRCode'),
+												16		=> TTi18n::gettext('Punch Mode: Facial Recognition'),
+												32		=> TTi18n::gettext('Punch Mode: Facial Recognition+QRCode'),
 												//64		=> TTi18n::gettext('Punch Mode: Barcode'),
 												//128		=> TTi18n::gettext('Punch Mode: iButton'),
 												//256
 												//512
 												//1024
-												//2048	=> TTi18n::gettext('Enable: Kiosk Mode'), //Enabled by default.
+												2048	=> TTi18n::gettext('Disable: GPS'),
 												4096	=> TTi18n::gettext('Enable: Punch Images'),
 												8192	=> TTi18n::gettext('Disable: Screensaver'),
 												//16384		=>
@@ -1844,6 +1844,9 @@ class StationFactory extends Factory {
 		} else {
 			$remote_addr = NULL;
 		}
+
+		//Required for load balancers, however we may need to add another config option to restrict
+		//the REMOTE_ADDR <-> HTTP_X_FORWARDED_FOR combination, so when not be a load balancer/proxy it ignores this header.
 		if ( isset($_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
 			$x_forwarded_for = $_SERVER['HTTP_X_FORWARDED_FOR'];
 		} else {
@@ -1891,7 +1894,7 @@ class StationFactory extends Factory {
 					in_array( strtolower( $this->getSource() ), $this->getOptions('source_reserved_word') )
 					OR
 						( $source == $remote_addr
-							/*OR $source == $x_forwarded_for*/ )
+							OR $source == $x_forwarded_for )
 					OR
 						( $current_station_id == $this->getSource() )
 					OR
@@ -2118,7 +2121,12 @@ class StationFactory extends Factory {
 				case 61: //Kiosk: Desktop
 				case 65: //Kiosk: Mobile App (iOS/Android)
 					Debug::Text('KIOSK station...', __FILE__, __LINE__, __METHOD__, 10);
-					$status_id = 10; //Initially create as disabled and admin must manually enable it.
+
+					if ( DEMO_MODE == TRUE ) {
+						$status_id = 20; //Always activate immediately when using demo.
+					} else {
+						$status_id = 10; //Initially create as disabled and admin must manually enable it.
+					}
 
 					$sf->setType( $type_id ); //Need to set thie before setModeFlag()
 
@@ -2130,7 +2138,12 @@ class StationFactory extends Factory {
 					} else {
 						$station = $station_id;
 					}
-					$description = TTi18n::getText('PENDING ACTIVATION - Automatic KIOSK Setup');
+
+					if ( DEPLOYMENT_ON_DEMAND == TRUE ) {
+						$description = TTi18n::getText('PENDING ACTIVATION [ADDITIONAL FEE REQUIRED] - Automatic KIOSK Setup');
+					} else {
+						$description = TTi18n::getText('PENDING ACTIVATION - Automatic KIOSK Setup');
+					}
 					$source = 'ANY';
 
 					$sf->setPollFrequency( 600 );
@@ -2140,7 +2153,7 @@ class StationFactory extends Factory {
 					$sf->setBranchSelectionType( 10 ); //All allowed
 					$sf->setDepartmentSelectionType( 10 ); //All allowed
 					
-					$sf->setModeFlag( array( 8, 4096 ) ); //Default QRCode+Face, Capture Images in KIOSK mode.
+					$sf->setModeFlag( array( 4, 4096 ) ); //Default QRCode (without face), Capture Images in KIOSK mode.
 
 					if ( is_object( $sf->getCompanyObject() ) AND is_object( $sf->getCompanyObject()->getUserDefaultObject() ) ) {
 						$sf->setTimeZone( $sf->getCompanyObject()->getUserDefaultObject()->getTimeZone() );
@@ -2295,7 +2308,7 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 
-	function getObjectAsArray( $include_columns = NULL ) {
+	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
@@ -2340,6 +2353,7 @@ class StationFactory extends Factory {
 
 				}
 			}
+			$this->getPermissionColumns( $data, $this->getID(), $this->getCreatedBy(), $permission_children_ids, $include_columns );
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
 		}
 

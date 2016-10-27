@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11925 $
- * $Id: StationListFactory.class.php 11925 2014-01-08 00:13:44Z mikeb $
- * $Date: 2014-01-07 16:13:44 -0800 (Tue, 07 Jan 2014) $
+ * $Revision: 14854 $
+ * $Id: StationListFactory.class.php 14854 2014-10-22 14:57:54Z mikeb $
+ * $Date: 2014-10-22 07:57:54 -0700 (Wed, 22 Oct 2014) $
  */
 
 /**
@@ -441,6 +441,41 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		}
 
 		return $branch_list;
+	}
+
+	function getCountByCompanyIdAndTypeId($company_id, $type_id, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $type_id == '') {
+			return FALSE;
+		}
+
+		$ph = array(
+					//'company_id' => $company_id,
+					);
+
+		//Only include ENABLED stations.
+		$query = '
+					select	company_id,
+							type_id,
+							count(*) as total
+					from	'. $this->getTable() .'
+					where
+							status_id = 20
+							AND type_id in ('. $this->getListSQL($type_id, $ph) .') ';
+							
+		if ( $company_id != '' AND ( isset($company_id[0]) AND !in_array(-1, (array)$company_id) ) ) {
+			$query	.=	' AND company_id in ('. $this->getListSQL($company_id, $ph) .') ';
+		}
+
+		$query .= ' AND deleted = 0 GROUP BY company_id, type_id';
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
 	}
 
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {

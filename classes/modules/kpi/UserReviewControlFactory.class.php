@@ -40,7 +40,7 @@
  */
 
 /**
- * @package Module_KPI
+ * @package Modules\KPI
  */
 class UserReviewControlFactory extends Factory {
 	protected $table = 'user_review_control';
@@ -62,6 +62,7 @@ class UserReviewControlFactory extends Factory {
 								38 => TTi18n::gettext('Drug Test'),
 								40 => TTi18n::gettext('Entrance Interview'),
 								45 => TTi18n::gettext('Exit Interview'),
+								100 => TTi18n::gettext('Miscellaneous'),
 							);
 				break;
 			case 'term':

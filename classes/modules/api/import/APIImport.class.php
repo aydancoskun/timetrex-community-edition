@@ -121,7 +121,7 @@ class APIImport extends APIFactory {
 	}
 
 	function getRawData( $limit = NULL ) {
-		if ( $this->getImportObject()->getRawDataFromFile() == FALSE ) {
+		if ( !is_object( $this->getImportObject() ) OR $this->getImportObject()->getRawDataFromFile() == FALSE ) {
 			$this->returnFileValidationError();
 		}
 

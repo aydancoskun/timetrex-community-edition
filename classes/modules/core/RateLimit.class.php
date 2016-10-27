@@ -46,7 +46,6 @@
 class RateLimit {
 	protected $sleep = FALSE; //When rate limit is reached, do we sleep or return FALSE?
 
-
 	protected $id = 1;
 	protected $group = 'rate_limit';
 
@@ -136,10 +135,11 @@ class RateLimit {
 			}
 
 			$rate_data['attempts']++;
-			return $this->setRateData( $rate_data );
+			$this->setRateData( $rate_data );
+			return TRUE; //Don't return result of setRateData() so if it can't write the data to shared memory it fails "OPEN".
 		}
 
-		return FALSE;
+		return TRUE; //Return TRUE is no ID is specified, so it fails "OPEN".
 	}
 
 	function delete() {

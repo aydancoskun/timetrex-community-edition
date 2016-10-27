@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13075 $
- * $Id: CompanyListFactory.class.php 13075 2014-04-30 17:38:44Z mikeb $
- * $Date: 2014-04-30 10:38:44 -0700 (Wed, 30 Apr 2014) $
+ * $Revision: 14958 $
+ * $Id: CompanyListFactory.class.php 14958 2014-10-28 14:00:49Z mikeb $
+ * $Date: 2014-10-28 07:00:49 -0700 (Tue, 28 Oct 2014) $
  */
 
 /**
@@ -81,8 +81,10 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 
 		$query = '
-					select	a.*,
+					select	_ADODB_COUNT
+						a.*,
 							(select max(last_login_date) from '. $uf->getTable() .' as uf where uf.company_id = a.id ) as last_login_date
+						_ADODB_COUNT
 					from	'. $this->getTable() .' as a
 					WHERE a.deleted = 0';
 		$query .= $this->getWhereSQL( $where );

@@ -73,7 +73,7 @@ class APISchedule extends APIFactory {
 
 		//If user_id is specified, use their default branch/department.
 		$ulf = TTnew( 'UserListFactory' );
-		$ulf->getByIdAndCompanyId( $user_id, $company_obj->getID() );
+		$ulf->getByIdAndCompanyId( (int)$user_id, $company_obj->getID() );
 		if ( $ulf->getRecordCount() == 1 ) {
 			$user_obj = $ulf->getCurrent();
 

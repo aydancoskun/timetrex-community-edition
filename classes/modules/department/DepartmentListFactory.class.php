@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11925 $
- * $Id: DepartmentListFactory.class.php 11925 2014-01-08 00:13:44Z mikeb $
- * $Date: 2014-01-07 16:13:44 -0800 (Tue, 07 Jan 2014) $
+ * $Revision: 14958 $
+ * $Id: DepartmentListFactory.class.php 14958 2014-10-28 14:00:49Z mikeb $
+ * $Date: 2014-10-28 07:00:49 -0700 (Tue, 28 Oct 2014) $
  */
 
 /**
@@ -82,21 +82,6 @@ class DepartmentListFactory extends DepartmentFactory implements IteratorAggrega
 		}
 
 		return $this;
-	}
-
-	static function getNameById( $id ) {
-		if ( $id == '') {
-			return FALSE;
-		}
-
-		$lf = new DepartmentListFactory();
-		$lf = $lf->getById( $id );
-		if ( $lf->getRecordCount() > 0 ) {
-			$obj = $lf->getCurrent();
-			return $obj->getName();
-		}
-
-		return FALSE;
 	}
 
 	function getByCompanyId($id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {

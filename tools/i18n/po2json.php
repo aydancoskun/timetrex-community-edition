@@ -92,10 +92,11 @@ class PoeditParser {
 	public function getJSON() {
 		$str = array();
 		foreach ($this->strings as $s) {
-			if ($s->value /*&& strlen($s->value) > 0*/){
-        $str[$s->key] = $s->value;
+			echo "String: Key: ". $s->key ." Value: ". $s->value ."\n";
+			if ($s->value /*&& strlen($s->value) > 0*/) {
+				$str[$s->key] = $s->value;
 			} else {
-  			$str[$s->key] = $s->key;
+				//$str[$s->key] = $s->key; //Don't export strings that haven't been translated to save space.
 			}		
 		}
 		return json_encode($str);

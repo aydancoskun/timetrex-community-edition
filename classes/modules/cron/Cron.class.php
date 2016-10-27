@@ -91,7 +91,7 @@ class Cron {
 			return FALSE;
 		}
 
-		if ( is_array($value_arr) AND is_array($limit_arr) ) {
+		if ( is_array($value_arr) AND is_array($limit_arr) AND count($value_arr) > 0 ) {
 			//Debug::Arr($value_arr, 'Value Arr: ', __FILE__, __LINE__, __METHOD__, 10);
 			//Debug::Arr($limit_arr, 'Limit Arr: ', __FILE__, __LINE__, __METHOD__, 10);
 

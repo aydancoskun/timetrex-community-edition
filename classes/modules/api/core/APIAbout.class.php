@@ -74,7 +74,8 @@ class APIAbout extends APIFactory {
 		//$current_user_prefs = $current_user->getUserPreferenceObject();
 		$data = $system_settings;
 
-		if ( isset($data['new_version']) AND $data['new_version'] == TRUE  ) {
+		//Only show new version notice if they are ONSITE or PRIMARY company.
+		if ( ( isset($data['new_version']) AND $data['new_version'] == TRUE ) AND ( ( DEPLOYMENT_ON_DEMAND == FALSE AND $current_company->getId() == 1 ) OR ( isset($config_vars['other']['primary_company_id']) AND $current_company->getId() == $config_vars['other']['primary_company_id'] ) ) ) {
 			$data['new_version'] = TRUE;
 		} else {
 			$data['new_version'] = FALSE;

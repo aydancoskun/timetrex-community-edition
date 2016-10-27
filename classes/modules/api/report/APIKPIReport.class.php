@@ -40,7 +40,7 @@
  */
 
 /**
- * @package API_Report
+ * @package API\Report
  */
 class APIKPIReport extends APIReport {
 	protected $main_class = 'KPIReport';

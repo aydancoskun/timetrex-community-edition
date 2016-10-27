@@ -50,13 +50,15 @@ class SharedMemory {
 		global $config_vars;
 
 		$shared_memory = new System_SharedMemory();
-		if ( OPERATING_SYSTEM == 'WIN' ) {
-			//$this->obj = &System_SharedMemory::Factory( 'File', array('tmp' => $config_vars['cache']['dir'] ) );
-			$this->obj = $shared_memory->Factory( 'File', array('tmp' => $config_vars['cache']['dir'] ) );
+		if ( isset($config_vars['cache']['redis_host']) AND $config_vars['cache']['redis_host'] != '' ) {
+			$this->obj = $shared_memory->Factory( 'Redis', array('host' => $config_vars['cache']['redis_host'], 'timeout' => 1 ) );
 		} else {
-			//$this->obj = &System_SharedMemory::Factory( 'File', array('tmp' => $config_vars['cache']['dir'] ) );
-			$this->obj = $shared_memory->Factory( 'File', array('tmp' => $config_vars['cache']['dir'] ) );
-			////$this->obj = &System_SharedMemory::Factory( 'Systemv', array( 'size' => $size ) ); //Run into size issues all the time.
+			if ( OPERATING_SYSTEM == 'WIN' ) {
+				$this->obj = $shared_memory->Factory( 'File', array('tmp' => $config_vars['cache']['dir'] ) );
+			} else {
+				$this->obj = $shared_memory->Factory( 'File', array('tmp' => $config_vars['cache']['dir'] ) );
+				////$this->obj = &System_SharedMemory::Factory( 'Systemv', array( 'size' => $size ) ); //Run into size issues all the time.
+			}
 		}
 
 		return TRUE;

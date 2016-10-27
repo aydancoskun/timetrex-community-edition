@@ -34,17 +34,17 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8678 $
- * $Id: Company.php 8678 2012-12-21 22:44:01Z ipso $
- * $Date: 2012-12-21 14:44:01 -0800 (Fri, 21 Dec 2012) $
+ * $Revision: 14797 $
+ * $Id: Company.php 14797 2014-10-16 19:00:06Z mikeb $
+ * $Date: 2014-10-16 12:00:06 -0700 (Thu, 16 Oct 2014) $
  */
 require_once('../../includes/global.inc.php');
 
 //Debug::setVerbosity( 11 );
 
-$authenticate=FALSE;
+$authenticate = FALSE;
 //Disable database connection for Interface so we don't attempt to get company information before its created causing the cache file to be created with no records.
-$disable_database_connection=TRUE;
+$disable_database_connection = TRUE;
 require_once(Environment::getBasePath() .'includes/Interface.inc.php');
 
 $smarty->assign('title', TTi18n::gettext($title = '5. Company Information')); // See index.php
@@ -70,13 +70,13 @@ $cf = TTnew( 'CompanyFactory' );
 $action = Misc::findSubmitButton();
 switch ($action) {
 	case 'back':
-		Debug::Text('Back', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Back', __FILE__, __LINE__, __METHOD__, 10);
 
 		Redirect::Page( URLBuilder::getURL(NULL, 'SystemSettings.php') );
 		break;
 
 	case 'next':
-		Debug::Text('Submit!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Submit!', __FILE__, __LINE__, __METHOD__, 10);
 
 
 		//$cf->setParent($company_data['parent']);
@@ -104,7 +104,7 @@ switch ($action) {
 		if ( $cf->isValid() ) {
 			$company_id = $cf->Save();
 
-			$install_obj->writeConfigFile( array('primary_company_id' => $company_id ) );
+			$install_obj->writeConfigFile( array( 'other' => array( 'primary_company_id' => $company_id ) ) );
 
 			Redirect::Page( URLBuilder::getURL( array('company_id' => $company_id, 'external_installer' => $external_installer), 'User.php') );
 

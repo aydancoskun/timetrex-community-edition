@@ -144,7 +144,7 @@ class TimesheetDetailReport extends Report {
 				//Get custom fields for report data.
 				$oflf = TTnew( 'OtherFieldListFactory' );
 				//User and Punch fields conflict as they are merged together in a secondary process.
-				$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), array(10), array( 10 => '' ) );
+				$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), array(4, 5, 10), array( 4 => 'branch_', 5 => 'department_', 10 => '' ) );
 				if ( is_array($other_field_names) ) {
 					$retval = Misc::addSortPrefix( $other_field_names, 9000 );
 				}
@@ -219,8 +219,10 @@ class TimesheetDetailReport extends Report {
 										//Handled in date_columns above.
 										//'-1430-pay_period' => TTi18n::gettext('Pay Period'),
 
-										'-1430-branch' => TTi18n::gettext('Branch'),
-										'-1440-department' => TTi18n::gettext('Department'),
+										'-1430-branch' => TTi18n::gettext('Branch'), //Need to keep legacy key as to no break saved reports.
+										'-1431-branch_manual_id' => TTi18n::gettext('Branch Code'),
+										'-1440-department' => TTi18n::gettext('Department'), //Need to keep legacy key as to no break saved reports.
+										'-1441-department_manual_id' => TTi18n::gettext('Department Code'),
 
 										'-1480-sin' => TTi18n::gettext('SIN/SSN'),
 
@@ -908,7 +910,7 @@ class TimesheetDetailReport extends Report {
 
 	//Get raw data for report
 	function _getData( $format = NULL ) {
-		$this->tmp_data = array('user_date_total' => array(), 'schedule' => array(), 'worked_days' => array(), 'user' => array(), 'verified_timesheet' => array(), 'punch_rows' => array(), 'pay_period_schedule' => array(), 'pay_period' => array() );
+		$this->tmp_data = array('user_date_total' => array(), 'schedule' => array(), 'worked_days' => array(), 'user' => array(), 'timesheet_authorization' => array(), 'verified_timesheet' => array(), 'punch_rows' => array(), 'pay_period_schedule' => array(), 'pay_period' => array() );
 
 		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
@@ -966,8 +968,8 @@ class TimesheetDetailReport extends Report {
 				$user_id = $udt_obj->getColumn('user_id');
 
 				$date_stamp = TTDate::strtotime( $udt_obj->getColumn('date_stamp') );
-				$branch = $udt_obj->getColumn('branch');
-				$department = $udt_obj->getColumn('department');
+				$branch = $udt_obj->getColumn('branch_id');
+				$department = $udt_obj->getColumn('department_id');
 				$status_id = $udt_obj->getColumn('status_id');
 				$type_id = $udt_obj->getColumn('type_id');
 
@@ -983,7 +985,7 @@ class TimesheetDetailReport extends Report {
 				
 				//Debug::Text('Column: '. $column .' Total Time: '. $udt_obj->getColumn('total_time') .' Status: '. $status_id .' Type: '. $type_id .' Rate: '. $udt_obj->getColumn( 'hourly_rate' ), __FILE__, __LINE__, __METHOD__, 10);
 				if ( ( isset($filter_data['include_no_data_rows']) AND $filter_data['include_no_data_rows'] == 1 )
-						OR ( !isset($filter_data['include_no_data_rows']) AND $date_stamp != '' AND $column != '' AND $udt_obj->getColumn('total_time') != 0 )	 ) {
+						OR ( ( !isset($filter_data['include_no_data_rows']) OR ( isset($filter_data['include_no_data_rows']) AND $filter_data['include_no_data_rows'] == 0 ) ) AND $date_stamp != '' AND $column != '' AND $udt_obj->getColumn('total_time') != 0 )	 ) {
 
 					$hourly_rate = 0;
 					$hourly_rate_with_burden = 0;
@@ -1000,10 +1002,10 @@ class TimesheetDetailReport extends Report {
 					//We always need to split time as much as possible as it can always be combined together by grouping.
 					if ( !isset($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department]) ) {
 						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch][$department] = array(
-															//'branch_id' => $udt_obj->getColumn('branch_id'),
-															'branch' => $udt_obj->getColumn('branch'),
-															//'department_id' => $udt_obj->getColumn('department_id'),
-															'department' => $udt_obj->getColumn('department'),
+															'branch_id' => $udt_obj->getColumn('branch_id'),
+															//'branch' => $udt_obj->getColumn('branch'),
+															'department_id' => $udt_obj->getColumn('department_id'),
+															//'department' => $udt_obj->getColumn('department'),
 															'pay_period_start_date' => strtotime( $udt_obj->getColumn('pay_period_start_date') ),
 															'pay_period_end_date' => strtotime( $udt_obj->getColumn('pay_period_end_date') ),
 															'pay_period_transaction_date' => strtotime( $udt_obj->getColumn('pay_period_transaction_date') ),
@@ -1068,12 +1070,11 @@ class TimesheetDetailReport extends Report {
 					//
 					if ( strpos($format, 'pdf_') !== FALSE ) {
 						if ( !isset($this->form_data['user_date_total'][$user_id]['data'][$date_stamp]) ) {
-
 							$this->form_data['user_date_total'][$user_id]['data'][$date_stamp] = array(
-																//'branch_id' => $udt_obj->getColumn('branch_id'),
-																'branch' => $udt_obj->getColumn('branch'),
-																//'department_id' => $udt_obj->getColumn('department_id'),
-																'department' => $udt_obj->getColumn('department'),
+																'branch_id' => $udt_obj->getColumn('branch_id'),
+																//'branch' => $udt_obj->getColumn('branch'),
+																'department_id' => $udt_obj->getColumn('department_id'),
+																//'department' => $udt_obj->getColumn('department'),
 																//'pay_period_start_date' => strtotime( $udt_obj->getColumn('pay_period_start_date') ),
 																//'pay_period_end_date' => strtotime( $udt_obj->getColumn('pay_period_end_date') ),
 																//'pay_period_transaction_date' => strtotime( $udt_obj->getColumn('pay_period_transaction_date') ),
@@ -1086,14 +1087,18 @@ class TimesheetDetailReport extends Report {
 																'max_punch_time_stamp' => ( $udt_obj->getColumn('max_punch_time_stamp') != '' ) ? TTDate::getTimeLockedDate( strtotime( $udt_obj->getColumn('max_punch_time_stamp') ), 86400) : NULL,
 																);
 						} else {
-							if ( strtotime( $udt_obj->getColumn('min_punch_time_stamp') ) < $this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['min_punch_time_stamp'] ) {
-								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['min_punch_time_stamp'] = strtotime( $udt_obj->getColumn('min_punch_time_stamp') );
+							//Make sure we ignore NULL/blank timestamps, so the IN time displayed on the printable timesheet is not blank.
+							$tmp_min_punch_time_stamp = TTDate::getTimeLockedDate( strtotime( $udt_obj->getColumn('min_punch_time_stamp') ), 86400);
+							if ( $udt_obj->getColumn('min_punch_time_stamp') != '' AND $tmp_min_punch_time_stamp < $this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['min_punch_time_stamp'] ) {
+								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['min_punch_time_stamp'] = $tmp_min_punch_time_stamp;
 							}
-							if ( strtotime( $udt_obj->getColumn('max_punch_time_stamp') ) > $this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['max_punch_time_stamp'] ) {
-								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['max_punch_time_stamp'] = strtotime( $udt_obj->getColumn('max_punch_time_stamp') );
+							$tmp_max_punch_time_stamp = TTDate::getTimeLockedDate( strtotime( $udt_obj->getColumn('max_punch_time_stamp') ), 86400);
+							if ( $udt_obj->getColumn('max_punch_time_stamp') != '' AND $tmp_max_punch_time_stamp > $this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['max_punch_time_stamp'] ) {
+								$this->form_data['user_date_total'][$user_id]['data'][$date_stamp]['max_punch_time_stamp'] = $tmp_max_punch_time_stamp;
 							}
-
+							unset($tmp_min_punch_time_stamp, $tmp_max_punch_time_stamp);
 						}
+
 						if ( isset($this->form_data['user_date_total'][$user_id]['data'][$date_stamp][$column]) ) {
 							$this->form_data['user_date_total'][$user_id]['data'][$date_stamp][$column] += $udt_obj->getColumn('total_time');
 						} else {
@@ -1186,14 +1191,61 @@ class TimesheetDetailReport extends Report {
 		//Debug::Arr($this->form_data, 'zUser Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
+		$blf = TTnew( 'BranchListFactory' );
+		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array() ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
+		Debug::Text(' Branch Total Rows: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $blf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
+		foreach ( $blf as $key => $b_obj ) {
+			$this->tmp_data['default_branch'][$b_obj->getId()] = Misc::addKeyPrefix( 'default_branch_', (array)$b_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE, 'manual_id' => TRUE, 'other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE ) ) );
+			$this->tmp_data['branch'][$b_obj->getId()] = Misc::addKeyPrefix( 'branch_', (array)$b_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE, 'manual_id' => TRUE, 'other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE ) ) );
+			//For backwards compatibility with saved reports, use "branch" and "branch_name" as the same thing.
+			$this->tmp_data['branch'][$b_obj->getId()]['branch'] = $this->tmp_data['branch'][$b_obj->getId()]['branch_name'];
+			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+		}
+		//Debug::Arr($this->tmp_data['default_branch'], 'Default Branch Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		$dlf = TTnew( 'DepartmentListFactory' );
+		$dlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array() ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
+		Debug::Text(' Department Total Rows: '. $dlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $dlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
+		foreach ( $dlf as $key => $d_obj ) {
+			$this->tmp_data['default_department'][$d_obj->getId()] = Misc::addKeyPrefix( 'default_department_', (array)$d_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE, 'manual_id' => TRUE, 'other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE ) ) );
+			$this->tmp_data['department'][$d_obj->getId()] = Misc::addKeyPrefix( 'department_', (array)$d_obj->getObjectAsArray( array('id' => TRUE, 'name' => TRUE, 'manual_id' => TRUE, 'other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE ) ) );
+
+			//For backwards compatibility with saved reports, use "branch" and "branch_name" as the same thing.
+			$this->tmp_data['department'][$d_obj->getId()]['department'] = $this->tmp_data['department'][$d_obj->getId()]['department_name'];
+
+			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+		}
+		//Debug::Arr($this->tmp_data['default_department'], 'Default Department Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($this->tmp_data['department'], 'Department Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
+
 		//Get verified timesheets for all pay periods considered in report.
 		$pay_period_ids = array_unique( array_keys( $pay_period_ids ) );
 		if ( isset($pay_period_ids) AND count($pay_period_ids) > 0 ) {
+			//Get timesheet verification authorizations by pay period so we can list the supervisors who authorized timesheets too.
+			$alf = TTNew('AuthorizationListFactory');
+			$alf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array( 'object_type_id' => 90, 'pay_period_id' => $pay_period_ids ) );
+			if ( $alf->getRecordCount() > 0 ) {
+				foreach( $alf as $a_obj ) {
+					$this->tmp_data['timesheet_authorization'][$a_obj->getObject()][] = array(
+																							'first_name' => $a_obj->getColumn('created_by_first_name'),
+																							'last_name' => $a_obj->getColumn('created_by_last_name'),
+																							'created_date' => $a_obj->getCreatedDate(),
+																							);
+				}
+			}
+			unset($alf, $a_obj);
+
+			$filter_data['pay_period_id'] = $pay_period_ids;
+
 			$pptsvlf = TTnew( 'PayPeriodTimeSheetVerifyListFactory' );
-			$pptsvlf->getByPayPeriodIdAndCompanyId( $pay_period_ids, $this->getUserObject()->getCompany() );
+			//$pptsvlf->getByPayPeriodIdAndCompanyId( $pay_period_ids, $this->getUserObject()->getCompany() );
+			$pptsvlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 			if ( $pptsvlf->getRecordCount() > 0 ) {
 				foreach( $pptsvlf as $pptsv_obj ) {
 					$this->tmp_data['verified_timesheet'][$pptsv_obj->getUser()][$pptsv_obj->getPayPeriod()] = array(
+																									'id' => $pptsv_obj->getID(),
 																									'user_verified' => $pptsv_obj->getUserVerified(),
 																									'user_verified_date' => $pptsv_obj->getUserVerifiedDate(),
 																									'status_id' => $pptsv_obj->getStatus(),
@@ -1273,11 +1325,14 @@ class TimesheetDetailReport extends Report {
 															);
 
 									if ( isset( $this->tmp_data['verified_timesheet'][$user_id][$row['pay_period_id']]) ) {
+										$processed_data['verified_time_sheet_id'] = $this->tmp_data['verified_timesheet'][$user_id][$row['pay_period_id']]['id'];
 										$processed_data['verified_time_sheet_user_verified'] = $this->tmp_data['verified_timesheet'][$user_id][$row['pay_period_id']]['user_verified'];
 										$processed_data['verified_time_sheet_user_verified_date'] = $this->tmp_data['verified_timesheet'][$user_id][$row['pay_period_id']]['user_verified_date'];
 										$processed_data['verified_time_sheet_status_id'] = $this->tmp_data['verified_timesheet'][$user_id][$row['pay_period_id']]['status_id'];
 										$processed_data['verified_time_sheet'] = $this->tmp_data['verified_timesheet'][$user_id][$row['pay_period_id']]['status'];
 										$processed_data['verified_time_sheet_date'] = $this->tmp_data['verified_timesheet'][$user_id][$row['pay_period_id']]['updated_date'];
+
+										$this->form_data['timesheet_authorization'][$processed_data['verified_time_sheet_id']] = ( isset($this->tmp_data['timesheet_authorization'][$processed_data['verified_time_sheet_id']]) ) ? $this->tmp_data['timesheet_authorization'][$processed_data['verified_time_sheet_id']] : FALSE;
 									} else {
 										$processed_data['verified_time_sheet_status_id'] = $processed_data['verified_time_sheet_user_verified'] = $processed_data['verified_time_sheet_user_verified_date'] = FALSE;
 										$processed_data['verified_time_sheet'] = TTi18n::getText('No');
@@ -1309,8 +1364,30 @@ class TimesheetDetailReport extends Report {
 										$processed_data['schedule_absent'] = 0;
 									}
 
+									if ( isset($this->tmp_data['user'][$user_id]['default_branch_id']) AND isset($this->tmp_data['default_branch'][$this->tmp_data['user'][$user_id]['default_branch_id']]) ) {
+										$tmp_default_branch = $this->tmp_data['default_branch'][$this->tmp_data['user'][$user_id]['default_branch_id']];
+									} else {
+										$tmp_default_branch = array();
+									}
+									if ( isset($this->tmp_data['user'][$user_id]['default_department_id']) AND isset($this->tmp_data['default_department'][$this->tmp_data['user'][$user_id]['default_department_id']]) ) {
+										$tmp_default_department = $this->tmp_data['default_department'][$this->tmp_data['user'][$user_id]['default_department_id']];
+									} else {
+										$tmp_default_department = array();
+									}
+
+									if ( isset($this->tmp_data['branch'][$row['branch_id']]) ) {
+										$tmp_branch = $this->tmp_data['branch'][$row['branch_id']];
+									} else {
+										$tmp_branch = array();
+									}
+									if ( isset($this->tmp_data['department'][$row['department_id']]) ) {
+										$tmp_department = $this->tmp_data['department'][$row['department_id']];
+									} else {
+										$tmp_department = array();
+									}
+
 									if ( strpos($format, 'pdf_') === FALSE ) {
-										$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $hire_date_columns, $processed_data );
+										$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $tmp_default_branch, $tmp_default_department, $tmp_branch, $tmp_department, $row, $date_columns, $hire_date_columns, $processed_data );
 									} else {
 										$this->form_data['user_date_total'][$user_id]['data'][$date_stamp] = array_merge( $this->form_data['user_date_total'][$user_id]['data'][$date_stamp], $date_columns, $hire_date_columns, $processed_data );
 										//$this->form_data[$user_id]['data'][] = array_merge( $row, $date_columns, $processed_data );
@@ -1362,19 +1439,19 @@ class TimesheetDetailReport extends Report {
 		$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(12) );
 		$this->pdf->Cell(30, $this->_pdf_scaleSize(5), TTi18n::gettext('Employee').':', $border, 0, 'R');
 		$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(12) );
-		$this->pdf->Cell( (70 + (($total_width - 200) / 2)), $this->_pdf_scaleSize(5), $user_data['first_name'] .' '. $user_data['last_name'] .' (#'. $user_data['employee_number'] .')', $border, 0, 'L');
+		$this->pdf->Cell( (70 + (($total_width - 200) / 2)), $this->_pdf_scaleSize(5), $user_data['first_name'] .' '. $user_data['last_name'] .' (#'. $user_data['employee_number'] .')', $border, 0, 'L', 0, '', 1);
 
 		$this->pdf->SetFont('', '', $this->_pdf_fontSize(12) );
 		$this->pdf->Cell(40, $this->_pdf_scaleSize(5), TTi18n::gettext('Title').':', $border, 0, 'R');
 		$this->pdf->SetFont('', 'B', $this->_pdf_fontSize(12) );
-		$this->pdf->Cell( ( 60 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize(5), $user_data['title'], $border, 0, 'L');
+		$this->pdf->Cell( ( 60 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize(5), $user_data['title'], $border, 0, 'L', 0, '', 1);
 		$this->pdf->Ln( $this->_pdf_scaleSize(5) );
 
 		$this->pdf->SetFont('', '', $this->_pdf_fontSize(12) );
 		$this->pdf->Cell(30, $this->_pdf_scaleSize(5), TTi18n::gettext('Branch').':', $border, 0, 'R');
-		$this->pdf->Cell( (70 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize(5), $user_data['default_branch'], $border, 0, 'L');
+		$this->pdf->Cell( (70 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize(5), $user_data['default_branch'], $border, 0, 'L', 0, '', 1);
 		$this->pdf->Cell(40, $this->_pdf_scaleSize(5), TTi18n::gettext('Department').':', $border, 0, 'R');
-		$this->pdf->Cell( ( 60 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize(5), $user_data['default_department'], $border, 0, 'L');
+		$this->pdf->Cell( ( 60 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize(5), $user_data['default_department'], $border, 0, 'L', 0, '', 1);
 		$this->pdf->Ln( $this->_pdf_scaleSize(5) );
 
 		$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(10) );
@@ -1727,6 +1804,15 @@ class TimesheetDetailReport extends Report {
 			$this->pdf->Cell(200, $line_h, TTi18n::gettext('TimeSheet electronically signed by').' '. $user_data['first_name'] .' '. $user_data['last_name'] .' '. TTi18n::gettext('on') .' '. TTDate::getDate('DATE+TIME', $data['verified_time_sheet_user_verified_date'] ), $border, 0, 'C');
 		}
 
+		//Make sure we display the superior authorization even if the user hasn't hasn't verified the timesheet yet, or at all.
+		if ( isset($data['verified_time_sheet_id']) AND isset($this->form_data['timesheet_authorization'][$data['verified_time_sheet_id']]) AND is_array($this->form_data['timesheet_authorization'][$data['verified_time_sheet_id']]) ) {
+			foreach( $this->form_data['timesheet_authorization'][$data['verified_time_sheet_id']] as $timesheet_authorization_data ) {
+				$this->pdf->Ln( $line_h );
+				$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(10) );
+				$this->pdf->Cell(200, $line_h, TTi18n::gettext('TimeSheet electronically authorized by').' '. $timesheet_authorization_data['first_name'] .' '. $timesheet_authorization_data['last_name'] .' '. TTi18n::gettext('on') .' '. TTDate::getDate('DATE+TIME', $timesheet_authorization_data['created_date'] ), $border, 0, 'C');
+			}
+		}
+
 		return TRUE;
 	}
 
@@ -1896,6 +1982,7 @@ class TimesheetDetailReport extends Report {
 			Debug::Text('Drawing timesheets...', __FILE__, __LINE__, __METHOD__, 10);
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->form_data['user_date_total']), NULL, TTi18n::getText('Generating TimeSheets...') );
 			$key = 0;
+			$page_count = 0;
 			foreach( $this->form_data['user_date_total'] as $user_data ) {
 				if ( $this->_pdf_checkMaximumPageLimit() == FALSE ) {
 					Debug::Text('Exceeded maximum page count...', __FILE__, __LINE__, __METHOD__, 10);
@@ -1905,9 +1992,6 @@ class TimesheetDetailReport extends Report {
 				}
 
 				if ( isset($user_data['first_name']) AND isset($user_data['last_name']) AND isset($user_data['employee_number']) ) {
-					$this->pdf->AddPage( 'P', 'Letter' );
-
-					$this->timesheetHeader( $user_data );
 
 					//Use percentages so it properly scales to landscape mode.
 					$column_widths = array(
@@ -1921,8 +2005,11 @@ class TimesheetDetailReport extends Report {
 										'over_time' => ($total_width * 0.20), //Was: 40.6
 										'absence_time' => ($total_width * 0.225), //Was: 45
 										);
-					
+
 					if ( isset($user_data['data']) AND is_array($user_data['data']) ) {
+						$this->pdf->AddPage( 'P', 'Letter' );
+						$this->timesheetHeader( $user_data );
+
 						$user_data['data'] = Sort::arrayMultiSort( $user_data['data'], array( 'time_stamp' => SORT_ASC ) );
 
 						$this->timesheet_week_totals = Misc::preSetArrayValues( NULL, array( 'worked_time', 'absence_time', 'regular_time', 'over_time' ), 0 );
@@ -1989,12 +2076,20 @@ class TimesheetDetailReport extends Report {
 
 						$this->timesheetSignature( $user_data, $data );
 
+						$this->timesheetFooter( $pdf_created_date, $adjust_x, $adjust_y );
 						unset($data, $prev_data);
-					} else {
-						$this->timesheetNoData();
-					}
 
-					$this->timesheetFooter( $pdf_created_date, $adjust_x, $adjust_y );
+						$page_count++;
+					} else {
+						if ( isset($filter_data['include_no_data_rows']) AND $filter_data['include_no_data_rows'] == 1 ) {
+							$this->pdf->AddPage( 'P', 'Letter' );						
+							$this->timesheetHeader( $user_data );
+							$this->timesheetNoData();
+							$this->timesheetFooter( $pdf_created_date, $adjust_x, $adjust_y );
+
+							$page_count++;
+						}
+					}
 				}
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
@@ -2004,10 +2099,16 @@ class TimesheetDetailReport extends Report {
 				$key++;
 			}
 
+			//Make sure we display something if no data matches.
+			if ( $page_count == 0 ) {
+				$this->pdf->AddPage( 'P', 'Letter' );
+				$this->timesheetNoData();
+				$this->timesheetFooter( $pdf_created_date, $adjust_x, $adjust_y );
+			}
+
 			$output = $this->pdf->Output('', 'S');
 
 			return $output;
-
 		}
 
 		Debug::Text('No data to return...', __FILE__, __LINE__, __METHOD__, 10);

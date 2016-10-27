@@ -40,7 +40,7 @@
  */
 
 /**
- * @package API_APIKPIGroup
+ * @package API\KPI
  */
 class APIKPIGroup extends APIFactory {
 	protected $main_class = 'KPIGroupFactory';
@@ -93,9 +93,7 @@ class APIKPIGroup extends APIFactory {
 	function getKPIGroup( $data = NULL, $disable_paging = FALSE, $mode = 'flat' ) {	
 		if ( !$this->getPermissionObject()->Check('kpi', 'enabled')
 				OR !( $this->getPermissionObject()->Check('kpi', 'view') OR $this->getPermissionObject()->Check('kpi', 'view_own') OR $this->getPermissionObject()->Check('kpi', 'view_child') ) ) {
-			//return $this->getPermissionObject()->PermissionDenied();
-			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
-		
+			return $this->getPermissionObject()->PermissionDenied();
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 

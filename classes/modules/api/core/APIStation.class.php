@@ -129,7 +129,12 @@ class APIStation extends APIFactory {
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
-		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'station', 'view' );
+		//View/Edit Punch looks for stations by ID, but they can't be returned if its a supervisor who has subordinates only permissions and it didn't happen to match.
+		if ( !isset($data['filter_data']['id']) ) {
+			$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'station', 'view' );
+		} else {
+			$data['filter_data']['permission_children_ids'] = array();
+		}
 
 		$slf = TTnew( 'StationListFactory' );
 		$slf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
@@ -140,7 +145,7 @@ class APIStation extends APIFactory {
 			$this->setPagerObject( $slf );
 
 			foreach( $slf as $b_obj ) {
-				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'] );
+				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $slf->getCurrentRow() );
 			}

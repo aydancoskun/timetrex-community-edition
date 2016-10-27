@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12920 $
- * $Id: MaintenanceJobs.php 12920 2014-04-14 23:48:25Z mikeb $
- * $Date: 2014-04-14 16:48:25 -0700 (Mon, 14 Apr 2014) $
+ * $Revision: 14575 $
+ * $Id: MaintenanceJobs.php 14575 2014-09-26 18:07:26Z mikeb $
+ * $Date: 2014-09-26 11:07:26 -0700 (Fri, 26 Sep 2014) $
  */
 require_once('../../includes/global.inc.php');
 
@@ -52,7 +52,8 @@ extract	(FormVariables::GetVariables(
 										array	(
 												'action',
 												'company_id',
-												'user_data'
+												'user_data',
+												'external_installer',
 												) ) );
 
 $install_obj = new Install();
@@ -88,11 +89,14 @@ switch ($action) {
 $handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'maintenance'), 'pre_install.php'), "r");
 @fclose($handle);
 
-if ( $install_obj->ScheduleMaintenanceJobs() == 0 ) { //Add scheduled maintenance jobs to cron, if it succeeds move to next step automatically.
+if ( $install_obj->ScheduleMaintenanceJobs() == 0 ) { //Add scheduled maintenance jobs to cron/schtask, if it succeeds move to next step automatically.
 	Redirect::Page( URLBuilder::getURL( NULL, 'Done.php') );
 }
 
 $smarty->assign_by_ref('uf', $uf);
+$schedule_maintenance_job_command = $install_obj->getScheduleMaintenanceJobsCommand();
+$smarty->assign_by_ref('schedule_maintenance_job_command', $schedule_maintenance_job_command );
+
 $cron_file = Environment::getBasePath().'maint'. DIRECTORY_SEPARATOR .'cron.php';
 $smarty->assign_by_ref('cron_file', $cron_file);
 

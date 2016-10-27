@@ -7,16 +7,34 @@ msgstr ""
 msgid " expected)"
 msgstr ""
 
+msgid " requires a modern HTML5 standards compatible web browser, click here for more information."
+msgstr ""
+
 msgid "#"
 msgstr ""
 
 msgid "%"
-msgstr ""
+msgstr "Z"
 
 msgid "% (ie: 25% burden)"
 msgstr "Z"
 
+msgid "%1 database has not been initialized yet, please run the installer again and follow the on screen instructions. <a href=\"%2\">Click here to run the installer now.</a>"
+msgstr "Z"
+
+msgid "%1 database query has timed-out, if you were trying to run a report it may be too large, please narrow your search criteria and try again."
+msgstr "Z"
+
+msgid "%1 experienced a general error, please contact technical support."
+msgstr "Z"
+
 msgid "%1 for %2"
+msgstr "Z"
+
+msgid "%1 is currently undergoing maintenance. We're sorry for any inconvenience this may cause. Please try again in 15 minutes."
+msgstr "Z"
+
+msgid "%1 is unable to connect to its database, please make sure that the database service on your own local %1 server has been started and is running. If you are unsure, try rebooting your server."
 msgstr "Z"
 
 msgid "(A) Shortage of Work"
@@ -3488,6 +3506,12 @@ msgstr "Z"
 msgid "Claim Amount"
 msgstr "Z"
 
+msgid "Class %1 does not exist, or unauthenticated."
+msgstr "Z"
+
+msgid "Class %1 does not exist."
+msgstr "Z"
+
 msgid "Clear"
 msgstr "Z"
 
@@ -3798,6 +3822,9 @@ msgid "Company Value 8 is too short or too long"
 msgstr "Z"
 
 msgid "Company Value 9 is too short or too long"
+msgstr "Z"
+
+msgid "Company does not exist."
 msgstr "Z"
 
 msgid "Company is invalid"
@@ -4482,6 +4509,9 @@ msgid "Date/Time is incorrect, or pay period does not exist for this date. Pleas
 msgstr "Z"
 
 msgid "Date:"
+msgstr "Z"
+
+msgid "Dates"
 msgstr "Z"
 
 msgid "Davao Oriental"
@@ -5717,6 +5747,9 @@ msgstr "Z"
 msgid "Edit permission denied, record does not exist"
 msgstr "Z"
 
+msgid "Edit<br>Client"
+msgstr "Z"
+
 msgid "Edit<br>Employee"
 msgstr "Z"
 
@@ -5888,10 +5921,7 @@ msgstr "Z"
 msgid "Email:"
 msgstr "Z"
 
-msgid "Emailed Scheduled Report"
-msgstr "Z"
-
-msgid "Emailing Report"
+msgid "Emailed Report"
 msgstr "Z"
 
 msgid "Emergency Contact"
@@ -6197,6 +6227,9 @@ msgstr "Z"
 msgid "Employee Wages"
 msgstr "Z"
 
+msgid "Employee already has a wage entry on this date for the same wage group. Try using a different date instead."
+msgstr "Z"
+
 msgid "Employee can not have duplicate entries on the same day"
 msgstr "Z"
 
@@ -6266,6 +6299,9 @@ msgstr "Z"
 msgid "Employee<br>Contacts"
 msgstr "Z"
 
+msgid "Employee<br>Pay Stubs"
+msgstr "Z"
+
 msgid "Employee<br>Reports"
 msgstr "Z"
 
@@ -6326,9 +6362,6 @@ msgstr "Z"
 msgid "Employer Pay Stub"
 msgstr "Z"
 
-msgid "Employer Pay Stubs"
-msgstr "Z"
-
 msgid "Employer Pay<br>Stubs"
 msgstr "Z"
 
@@ -6339,6 +6372,9 @@ msgid "Employer State ID Numbers"
 msgstr "Z"
 
 msgid "Employer Total Contributions"
+msgstr "Z"
+
+msgid "Employer<br>Pay Stubs"
 msgstr "Z"
 
 msgid "Employment"
@@ -6863,6 +6899,9 @@ msgstr "Z"
 msgid "Expense policy name already exists"
 msgstr "Z"
 
+msgid "Expense<br>Authorization"
+msgstr "Z"
+
 msgid "Expense<br>Authorizations"
 msgstr "Z"
 
@@ -7050,6 +7089,9 @@ msgid "Federal Income Tax Withheld (Box 4):"
 msgstr "Z"
 
 msgid "Federal Tax Exempt:"
+msgstr "Z"
+
+msgid "Fees for Services (Box: 48)"
 msgstr "Z"
 
 msgid "Feet (ft)"
@@ -7287,6 +7329,9 @@ msgid "For installation support, please join our community %1forums%2 or contact
 msgstr "Z"
 
 msgid "For more information please click here."
+msgstr "Z"
+
+msgid "For more information please visit"
 msgstr "Z"
 
 msgid "For searching the LDAP user. (ie: AD: sAMAccountName, openLDAP: dn, Mac OSX: dn)"
@@ -9617,6 +9662,9 @@ msgstr "Z"
 msgid "Invalid District"
 msgstr "Z"
 
+msgid "Invalid Email address"
+msgstr "Z"
+
 msgid "Invalid Employee"
 msgstr "Z"
 
@@ -9854,6 +9902,9 @@ msgstr "Z"
 msgid "Invalid last date"
 msgstr "Z"
 
+msgid "Invalid license file"
+msgstr "Z"
+
 msgid "Invalid link"
 msgstr "Z"
 
@@ -9876,6 +9927,9 @@ msgid "Invalid recall date"
 msgstr "Z"
 
 msgid "Invalid records have been skipped, all other records have been imported successfully."
+msgstr "Z"
+
+msgid "Invalid referrer, possible CSRF."
 msgstr "Z"
 
 msgid "Invalid review control"
@@ -9906,6 +9960,9 @@ msgid "Invalid unique User and/or Pay Period"
 msgstr "Z"
 
 msgid "Invalid vacation pay"
+msgstr "Z"
+
+msgid "Invalid view name"
 msgstr "Z"
 
 msgid "Invalid, PGSQL or MySQLi PHP extensions are required"
@@ -11246,6 +11303,9 @@ msgstr "Z"
 msgid "Lump-sum Payments (18)"
 msgstr "Z"
 
+msgid "Lump-sum Payments (Box: 18)"
+msgstr "Z"
+
 msgid "Lump-sum Payments (Box: 18):"
 msgstr "Z"
 
@@ -11811,6 +11871,9 @@ msgid "Messina"
 msgstr "Z"
 
 msgid "Meta"
+msgstr "Z"
+
+msgid "Method %1 does not exist."
 msgstr "Z"
 
 msgid "Metropolitan Manila"
@@ -12428,6 +12491,9 @@ msgstr "Z"
 msgid "New Password"
 msgstr "Z"
 
+msgid "New Password (Confirm)"
+msgstr "Z"
+
 msgid "New Password (confirm):"
 msgstr "Z"
 
@@ -12459,6 +12525,12 @@ msgid "New Zealand"
 msgstr "Z"
 
 msgid "New message waiting in"
+msgstr "Z"
+
+msgid "New password can't be empty"
+msgstr "Z"
+
+msgid "New password does not match"
 msgstr "Z"
 
 msgid "New value is invalid"
@@ -12873,6 +12945,9 @@ msgid "Not Scheduled Branch or Department"
 msgstr "Z"
 
 msgid "Not Scheduled Job or Task"
+msgstr "Z"
+
+msgid "Not Specified"
 msgstr "Z"
 
 msgid "Not Verified"
@@ -13595,6 +13670,9 @@ msgstr "Z"
 msgid "PENDING ACTIVATION - Automatic KIOSK Setup"
 msgstr "Z"
 
+msgid "PENDING ACTIVATION [ADDITIONAL FEE REQUIRED] - Automatic KIOSK Setup"
+msgstr "Z"
+
 msgid "PENDING AUTHORIZATION"
 msgstr "Z"
 
@@ -13653,6 +13731,9 @@ msgid "Packing Information"
 msgstr "Z"
 
 msgid "Packing Slip"
+msgstr "Z"
+
+msgid "Packing<br>Slip"
 msgstr "Z"
 
 msgid "Padua"
@@ -13839,6 +13920,9 @@ msgid "Password for"
 msgstr "Z"
 
 msgid "Password has already been used in the past, please choose a new one"
+msgstr "Z"
+
+msgid "Password has been changed successfully, you may now login"
 msgstr "Z"
 
 msgid "Password is too short"
@@ -14331,6 +14415,9 @@ msgid "Pension Adjustment (Box: 52):"
 msgstr "Z"
 
 msgid "Pension Or Superannuation (16)"
+msgstr "Z"
+
+msgid "Pension Or Superannuation (Box: 16)"
 msgstr "Z"
 
 msgid "Pension Or Superannuation (Box: 16):"
@@ -15084,6 +15171,9 @@ msgstr "Z"
 msgid "Professional"
 msgstr "Z"
 
+msgid "Professional, Corporate, or Enterprise Editions."
+msgstr "Z"
+
 msgid "Professional, Scientific and Technical Services"
 msgstr "Z"
 
@@ -15196,6 +15286,12 @@ msgid "Punch In/Out"
 msgstr "Z"
 
 msgid "Punch List"
+msgstr "Z"
+
+msgid "Punch Mode: Face Recognition"
+msgstr "Z"
+
+msgid "Punch Mode: Face Recognition+QRCode"
 msgstr "Z"
 
 msgid "Punch Mode: QRCode"
@@ -15574,6 +15670,9 @@ msgid "Ragusa"
 msgstr "Z"
 
 msgid "Rajasthan"
+msgstr "Z"
+
+msgid "Range"
 msgstr "Z"
 
 msgid "Rate"
@@ -16008,6 +16107,9 @@ msgstr "Z"
 msgid "Renfrewshire"
 msgstr "Z"
 
+msgid "Renwal Date"
+msgstr "Z"
+
 msgid "Repeat Absence for:"
 msgstr "Z"
 
@@ -16045,6 +16147,9 @@ msgid "Report Setup:"
 msgstr "Z"
 
 msgid "Report shared by"
+msgstr "Z"
+
+msgid "Report shared successfully"
 msgstr "Z"
 
 msgid "Reports"
@@ -16393,6 +16498,9 @@ msgid "Run"
 msgstr "Z"
 
 msgid "Run Now"
+msgstr "Z"
+
+msgid "Running Scheduled Report"
 msgstr "Z"
 
 msgid "Russian Federation"
@@ -16896,6 +17004,9 @@ msgstr "Z"
 msgid "Select one or more employees"
 msgstr "Z"
 
+msgid "Select one or more employees to share report with"
+msgstr "Z"
+
 msgid "Select one or more jobs you wish to invoice"
 msgstr "Z"
 
@@ -16903,6 +17014,9 @@ msgid "Select one or more pay periods"
 msgstr "Z"
 
 msgid "Select one or more pay periods to process payroll for"
+msgstr "Z"
+
+msgid "Select one or more saved report you wish to share"
 msgstr "Z"
 
 msgid "Select the date range"
@@ -17074,6 +17188,9 @@ msgstr "Z"
 msgid "Selection Type"
 msgstr "Z"
 
+msgid "Self-Employed Commisions  (Box: 20)"
+msgstr "Z"
+
 msgid "Semi-Monthly (24/year)"
 msgstr "Z"
 
@@ -17149,6 +17266,9 @@ msgstr "Z"
 msgid "Service"
 msgstr "Z"
 
+msgid "Session expired, please login again."
+msgstr "Z"
+
 msgid "Session timed out, please login again."
 msgstr "Z"
 
@@ -17198,6 +17318,15 @@ msgid "Sex:"
 msgstr "Z"
 
 msgid "Seychelles"
+msgstr "Z"
+
+msgid "Share"
+msgstr "Z"
+
+msgid "Share Report Wizard"
+msgstr "Z"
+
+msgid "Share<br>Report"
 msgstr "Z"
 
 msgid "Shared"
@@ -17315,6 +17444,9 @@ msgid "Shortcut key sequence is too short or too long"
 msgstr "Z"
 
 msgid "Show All"
+msgstr "Z"
+
+msgid "Show Duplicate Values"
 msgstr "Z"
 
 msgid "Show Pre-Mature"
@@ -18667,6 +18799,9 @@ msgstr "Z"
 msgid "This employee is at the final authorization level."
 msgstr "Z"
 
+msgid "This functionality is only available in"
+msgstr "Z"
+
 msgid "This functionality is only available in "
 msgstr "Z"
 
@@ -19913,6 +20048,9 @@ msgstr "Z"
 msgid "User authorizing this object is not a parent of it"
 msgstr "Z"
 
+msgid "User does not exist."
+msgstr "Z"
+
 msgid "User is invalid"
 msgstr "Z"
 
@@ -21013,6 +21151,9 @@ msgstr "Z"
 msgid "You have already submitted this form! Please wait..."
 msgstr "Z"
 
+msgid "You have modified Form Setup data without saving, would you like to save your Form Setup data now?"
+msgstr "Z"
+
 msgid "You have modified data without saving, are you sure you want to continue and lose your changes"
 msgstr "Z"
 
@@ -21169,6 +21310,9 @@ msgid "database, please wait..."
 msgstr "Z"
 
 msgid "date( Year, Month, Day, Hour, Minute )"
+msgstr "Z"
+
+msgid "dates selected"
 msgstr "Z"
 
 msgid "day"

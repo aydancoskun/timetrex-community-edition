@@ -40,7 +40,7 @@
  */
 
 /**
- * @package API_Report
+ * @package API\Report
  */
 class APIUserQualificationReport extends APIReport {
 	protected $main_class = 'UserQualificationReport';

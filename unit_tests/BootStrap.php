@@ -19,6 +19,14 @@ Debug::setBufferOutput(FALSE);
 Debug::setEnable(FALSE); //Set to TRUE to see debug output. Leave buffer output FALSE.
 Debug::setVerbosity(10);
 
+//Use this command to launch the Selenium server: java -jar /opt/selenium-server/selenium-server-standalone-2.43.0.jar
+$selenium_config = array(
+							'host' => '10.7.5.31',
+							'browser' => '*firefox',
+							'default_url' => 'http://mikeb.dev1.office.timetrex.com/timetrex/trunk/interface/html5/',
+							'default_timeout' => 30,
+						);
+
 //This prevent PHPUnit from creating a mock ADODB-lib class and causing a fatal error on redeclaration of its functions.
 //See for a possible fix? http://sebastian-bergmann.de/archives/797-Global-Variables-and-PHPUnit.html#content
 //Must use --no-globals-backup to get tests to run properly.

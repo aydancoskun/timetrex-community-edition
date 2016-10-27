@@ -44,11 +44,7 @@ Misc::redirectMobileBrowser(); //Redirect mobile browsers automatically.
 
 //Check if HTML5 interface is default, and that the referrer isn't the HTML5 interface.
 //Redirect back to HTML5 interface, this works around users bookmarking /interface/flex
-if ( stripos( Environment::getDefaultInterfaceBaseURL(), 'html' ) !== FALSE
-		AND
-		( !isset($_SERVER['HTTP_REFERER'])
-			OR isset($_SERVER['HTTP_REFERER']) AND stripos( $_SERVER['HTTP_REFERER'], 'html' ) === FALSE )
-		) {
+if ( stripos( Environment::getDefaultInterfaceBaseURL(), 'html' ) !== FALSE AND ( !isset($_GET['force']) ) ) {
 	Debug::Text('Default HTML5 interface and NOT Referred from HTML5 interface, redirecting back...', __FILE__, __LINE__, __METHOD__, 10);
 	Redirect::Page( URLBuilder::getURL( NULL, Environment::getDefaultInterfaceBaseURL() ) );
 }

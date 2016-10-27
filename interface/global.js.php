@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10118 $
- * $Id: global.js.php 10118 2013-06-05 17:05:52Z ipso $
- * $Date: 2013-06-05 10:05:52 -0700 (Wed, 05 Jun 2013) $
+ * $Revision: 14568 $
+ * $Id: global.js.php 14568 2014-09-26 16:32:15Z mikeb $
+ * $Date: 2014-09-26 09:32:15 -0700 (Fri, 26 Sep 2014) $
  */
 $disable_cache_control = TRUE;
 require_once('..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR.'global.inc.php');
@@ -1759,8 +1759,12 @@ TIMETREX.punch = function() {
 				clearSelect( document.getElementById('job_item_id') );
 				job = document.getElementById('job_id').value;
 
+				user_id = document.getElementById('user_id').value;
+				login_time = document.getElementById('login_time').value;
+				key = document.getElementById('key').value;
+
 				if ( TTProductEdition >= 20 ) {
-					remoteHW.getJobItemOptions( job, include_disabled );
+					remoteHW.getJobItemOptions( job, user_id, login_time, key, include_disabled );
 				}
 			}
 		}

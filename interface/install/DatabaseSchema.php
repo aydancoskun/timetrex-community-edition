@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13814 $
- * $Id: DatabaseSchema.php 13814 2014-07-22 17:45:46Z mikeb $
- * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
+ * $Revision: 13708 $
+ * $Id: DatabaseSchema.php 13708 2014-07-15 16:32:53Z mikeb $
+ * $Date: 2014-07-15 09:32:53 -0700 (Tue, 15 Jul 2014) $
  */
 require_once('../../includes/global.inc.php');
 require_once('HTML/Progress.php');

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13925 $
- * $Id: Install.class.php 13925 2014-07-29 18:25:35Z mikeb $
- * $Date: 2014-07-29 11:25:35 -0700 (Tue, 29 Jul 2014) $
+ * $Revision: 14962 $
+ * $Id: Install.class.php 14962 2014-10-28 15:31:47Z mikeb $
+ * $Date: 2014-10-28 08:31:47 -0700 (Tue, 28 Oct 2014) $
  */
 
 /**
@@ -231,109 +231,101 @@ class Install {
 		}
 	}
 
-	function writeConfigFile( $config_vars ) {
+	function writeConfigFile( $new_config_vars ) {
 		if ( is_writeable( CONFIG_FILE ) ) {
-			$contents = file_get_contents( CONFIG_FILE );
 
-			//Need to handle INI sections properly.
+			require_once('Config.php');
+			$config = new Config();
+			$data = $config->parseConfig( CONFIG_FILE, 'inicommented' );
+			if ( is_object($data) AND get_class( $data ) == 'PEAR_Error' ) {
+				Debug::Arr($data, 'ERROR modifying Config File!', __FILE__, __LINE__, __METHOD__, 9);
+			} else {
+				global $config_vars;
 
-			//
-			//Database section
-			//
-			preg_match('/^\[[database^\]\r\n]+](?:\r?\n(?:[^[\r\n].*)?)*/mi', $contents, $section );
-			//Debug::Arr( $section, 'Database Section (original): ', __FILE__, __LINE__, __METHOD__, 10);
-			$section['database'] = $section[0];
-			if ( isset($config_vars['host']) AND $config_vars['host'] != '' ) {
-				$section['database'] = preg_replace('/^host\s*=.*/im', 'host = '. trim($config_vars['host']), $section['database']);
-			}
-			if ( isset($config_vars['type']) AND $config_vars['type'] != '' ) {
-				$section['database'] = preg_replace('/^type\s*=.*/im', 'type = '. trim($config_vars['type']), $section['database']);
-			}
-			if ( isset($config_vars['database_name']) AND $config_vars['database_name'] != '' ) {
-				$section['database'] = preg_replace('/^database_name\s*=.*/im', 'database_name = "'. trim($config_vars['database_name']) .'"', $section['database']);
-			}
-			if ( isset($config_vars['user']) AND $config_vars['user'] != '') {
-				$section['database'] = preg_replace('/^user\s*=.*/im', 'user = "'. trim($config_vars['user']) .'"', $section['database']);
-			}
-			if ( isset($config_vars['password']) AND $config_vars['password'] != '' ) {
-				$section['database'] = preg_replace('/^password\s*=.*/im', 'password = "'. trim($config_vars['password']) .'"', $section['database']);
-			}
-			$contents = str_replace( $section[0], $section['database'], $contents );
-			unset($section);
-			//Debug::Arr( $contents, 'Database Contents (new): ', __FILE__, __LINE__, __METHOD__, 10);
+				//Debug::Arr($data, 'Current Config File!', __FILE__, __LINE__, __METHOD__, 9);
+				if ( isset($new_config_vars['path']['base_url']) ) {
+					$tmp_base_url = $new_config_vars['path']['base_url'];
+				} elseif ( isset($config_vars['path']['base_url']) ) {
+					$tmp_base_url = $config_vars['path']['base_url'];
+				}
+				if ( isset($tmp_base_url) ) {
+					$new_config_vars['path']['base_url'] = preg_replace('@^(?:http://)?([^/]+)@i', '', $tmp_base_url );
+					unset($tmp_base_url);
+				}
 
-			//
-			//Path section
-			//
-			preg_match('/^\[[path^\]\r\n]+](?:\r?\n(?:[^[\r\n].*)?)*/mi', $contents, $section );
-			//Debug::Arr( $section, 'Path Section (original): ', __FILE__, __LINE__, __METHOD__, 10);
-			$section['path'] = $section[0];
-			if ( isset($config_vars['base_url']) AND $config_vars['base_url'] != '' ) {
-				$section['path'] = preg_replace('/^base_url\s*=.*/im', 'base_url = '. preg_replace('@^(?:http://)?([^/]+)@i', '', $config_vars['base_url']), $section['path']);
-			}
-			if ( isset($config_vars['storage_dir']) AND $config_vars['storage_dir'] != '' ) {
-				$section['path'] = preg_replace('/^storage\s*=.*/im', 'storage = '. $config_vars['storage_dir'], $section['path']);
-			}
-			if ( isset($config_vars['log_dir']) AND $config_vars['log_dir'] != '' ) {
-				$section['path'] = preg_replace('/^log\s*=.*/im', 'log = '. $config_vars['log_dir'], $section['path']);
-			}
-			$contents = str_replace( $section[0], $section['path'], $contents );
-			unset($section);
-			//Debug::Arr( $contents, 'Path Contents (new): ', __FILE__, __LINE__, __METHOD__, 10);
+				//Check for bug instroducd in v7.4.5 that removed all backslashes from paths, to attempt to put them back automatically.
+				//This should be able to be removed by v8.0.
+				if ( PRODUCTION == FALSE OR OPERATING_SYSTEM == 'WIN' ) {
+					if ( !isset($new_config_vars['path']['php_cli']) AND isset($config_vars['path']['php_cli']) AND strpos( $config_vars['path']['php_cli'], '\\' ) === FALSE  ) {
+						Debug::Text('Found php_cli path without backslash, trying to correct...', __FILE__, __LINE__, __METHOD__, 9);
+						$new_config_vars['path']['php_cli'] = str_ireplace(':TimeTrexphpphp-win.exe', ':\TimeTrex\php\php-win.exe', $config_vars['path']['php_cli'] );
+					}
+					if ( !isset($new_config_vars['path']['storage']) AND isset($config_vars['path']['storage']) AND strpos( $config_vars['path']['storage'], '\\' ) === FALSE  ) {
+						Debug::Text('Found storage path without backslash, trying to correct...', __FILE__, __LINE__, __METHOD__, 9);
+						$new_config_vars['path']['storage'] = str_ireplace(':TimeTrexstorage', ':\TimeTrex\storage', $config_vars['path']['storage'] );
+					}
+					if ( !isset($new_config_vars['path']['log']) AND isset($config_vars['path']['log']) AND strpos( $config_vars['path']['log'], '\\' ) === FALSE  ) {
+						Debug::Text('Found log path without backslash, trying to correct...', __FILE__, __LINE__, __METHOD__, 9);
+						$new_config_vars['path']['log'] = str_ireplace(':TimeTrexlog', ':\TimeTrex\log', $config_vars['path']['log'] );
+					}
+					if ( !isset($new_config_vars['cache']['dir']) AND isset($config_vars['cache']['dir']) AND strpos( $config_vars['cache']['dir'], '\\' ) === FALSE  ) {
+						Debug::Text('Found cache path without backslash, trying to correct...', __FILE__, __LINE__, __METHOD__, 9);
+						$new_config_vars['cache']['dir'] = str_ireplace(':TimeTrexcache', ':\TimeTrex\cache', $config_vars['cache']['dir'] );
+					}
+				}
+				//Clear erroneous INI sections due to same above bug.
+				$new_config_vars['installer_enabled'] = 'TT_DELETE';
+				$new_config_vars['default_interface'] = 'TT_DELETE';
 
-			//
-			//Cache section
-			//
-			preg_match('/^\[[cache^\]\r\n]+](?:\r?\n(?:[^[\r\n].*)?)*/mi', $contents, $section );
-			//Debug::Arr( $section, 'Cache Section (original): ', __FILE__, __LINE__, __METHOD__, 10);
-			$section['cache'] = $section[0];
-			if ( isset($config_vars['cache']['enable']) ) {
-				$section['cache'] = preg_replace('/^enable\s*=.*/im', 'enable = '. $this->HumanBoolean( $config_vars['cache']['enable'] ), $section['cache']);
-			}
-			if ( isset($config_vars['cache_dir']) AND $config_vars['cache_dir'] != '' ) {
-				$section['cache'] = preg_replace('/^dir\s*=.*/im', 'dir = '. $config_vars['cache_dir'], $section['cache']);
-			}
-			$contents = str_replace( $section[0], $section['cache'], $contents );
-			unset($section);
-			//Debug::Arr( $contents, 'Cache Contents (new): ', __FILE__, __LINE__, __METHOD__, 10);
+				//Allow passing any empty array that will just rewrite the existing .INI file fixing any problems.
+				if ( is_array($new_config_vars) ) {
+					foreach( $new_config_vars as $section => $key_value_map ) {
 
-			//
-			//Other section
-			//
-			preg_match('/^\[[other^\]\r\n]+](?:\r?\n(?:[^[\r\n].*)?)*/mi', $contents, $section );
-			//Debug::Arr( $section, 'Other Section (original): ', __FILE__, __LINE__, __METHOD__, 10);
-			$section['other'] = $section[0];
-			if ( isset($config_vars['installer_enabled']) AND $config_vars['installer_enabled'] != '' ) {
-				$section['other'] = preg_replace('/^installer_enabled\s*=.*/im', 'installer_enabled = '. $this->HumanBoolean( $config_vars['installer_enabled'] ), $section['other']);
-			}
-			if ( isset($config_vars['primary_company_id']) AND $config_vars['primary_company_id'] != '' ) {
-				$section['other'] = preg_replace('/^primary_company_id\s*=.*/im', 'primary_company_id = '. $config_vars['primary_company_id'], $section['other']);
-			}
-			if ( isset($config_vars['system_admin_email']) ) { //Allow NULL/FALSE, as well as allow for uncommenting and adding fresh too.
-				if ( stripos( $section['other'], 'system_admin_email' ) === FALSE ) { //Add new entry if it doesn't exist, right below the [other] section.
-					$section['other'] = preg_replace('/^\[other\]/im', '[other]'. PHP_EOL .'system_admin_email = "'. $config_vars['system_admin_email'] .'"', $section['other']);
-				} else {
-					$section['other'] = preg_replace('/^[;\ ]*?system_admin_email\s*=.*/im', 'system_admin_email = "'. $config_vars['system_admin_email'] .'"', $section['other']);
+						if ( !is_array( $key_value_map ) AND $key_value_map == 'TT_DELETE' ) {
+							$item = $data->searchPath( array( $section ) );
+							if ( is_object( $item ) ) {
+								$item->removeItem();
+							}
+						} else {
+
+							$key_value_map = (array)$key_value_map;
+							foreach( $key_value_map as $key => $value ) {
+								$item = $data->searchPath( array( $section, $key ) );
+								if ( is_object( $item ) ) {
+									$item->setContent( $value );
+								} else {
+									$item = $data->searchPath( array( $section ) );
+									if ( is_object( $item ) ) {
+										$item->createDirective( $key, $value, NULL, 'top' );
+									} else {
+										$item = $data->createSection( $section );
+										$item->createDirective( $key, $value, NULL, 'top' );
+									}
+
+								}
+							}
+
+						}
+					}
+
+					Debug::text('Modified Config File!', __FILE__, __LINE__, __METHOD__, 9);
+					//Debug::Arr($data, 'New Config File!', __FILE__, __LINE__, __METHOD__, 9);
+					$retval = $config->writeConfig( CONFIG_FILE, 'inicommented' );
+
+					//Make sure the first line in the file contains "die".
+					$contents = file_get_contents( CONFIG_FILE );
+
+					//Make sure we add back in the PHP code for security reasons.
+					//BitRock seems to want to remove this and re-arrange the INI file as well for some odd reason.
+					if ( stripos( $contents, ';<?php' ) === FALSE ) {
+						Debug::text('Adding back in security feature...', __FILE__, __LINE__, __METHOD__, 9);
+						$contents = ";<?php die('Unauthorized Access...'); //SECURITY MECHANISM, DO NOT REMOVE//?>\n".$contents;
+					}
+					file_put_contents( CONFIG_FILE, $contents );
+
+					return $retval;
 				}
 			}
-
-			if ( isset($this->config_vars['other']['salt']) AND ( $this->config_vars['other']['salt'] == '' OR $this->config_vars['other']['salt'] == '0' )
-					AND isset($config_vars['salt']) AND $config_vars['salt'] != '' ) {
-				$section['other'] = preg_replace('/^salt\s*=.*/im', 'salt = '. $config_vars['salt'], $section['other']);
-			}
-			$contents = str_replace( $section[0], $section['other'], $contents );
-			unset($section);
-
-			//Make sure we add back in the parse error for security reasons.
-			//BitRock seems to want to remove this and re-arrange the INI file as well for some odd reason.
-			if ( stripos( $contents, ';<?php' ) === FALSE ) {
-				$contents .= "\n\n\n\n\n\n\n\n\n\n;<?php if (; //Cause parse error to hide from prying eyes, just in case. DO NOT REMOVE?>";
-			}
-
-			//Debug::Arr( $contents, 'Other Contents (new): ', __FILE__, __LINE__, __METHOD__, 10);
-			Debug::text('Modified Config File!', __FILE__, __LINE__, __METHOD__, 9);
-
-			return file_put_contents( CONFIG_FILE, $contents);
 		} else {
 			Debug::text('Config File Not Writable!', __FILE__, __LINE__, __METHOD__, 9);
 		}
@@ -627,6 +619,29 @@ class Install {
 		return TRUE;
 	}
 
+	function initializeSequence( $obj, $table, $class, $db_conn ) {
+		$next_insert_id = $obj->getNextInsertId();
+		Debug::Text('Table: '. $table .' Class: '. $class .' Next Insert ID: '. $next_insert_id, __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( strncmp($db_conn->databaseType, 'mysql', 5) == 0 ) {
+			$query = 'select max(id) from '. $table;
+			$max_id = (int)$db_conn->GetOne('select max(id) from '. $table);
+
+			if ( $next_insert_id == 0 OR $next_insert_id < $max_id ) {
+				Debug::Text('  Out-of-sync sequence table, fixing... Current Max ID: '. $max_id .' Next ID: '. $next_insert_id, __FILE__, __LINE__, __METHOD__, 10);
+				if ( $next_insert_id == 0 ) {
+					$db_conn->Execute('insert into '. $obj->getSequenceName() .' VALUES('. ( $max_id + 1 ) .')');
+				} else {
+					$db_conn->Execute('update '. $obj->getSequenceName() .' set ID = '. ( $max_id + 1 ));
+				}
+			} else {
+				Debug::Text('  Sequence is in sync, not updating...', __FILE__, __LINE__, __METHOD__, 10);
+			}
+		}
+
+		return TRUE;
+	}
+
 	//Only required with MySQL, this can help prevent race conditions when creating new tables.
 	//It will also correct any corrupt sequences that don't match their parent tables.
 	function initializeSequences() {
@@ -646,30 +661,15 @@ class Install {
 				$obj = new $class;
 
 				if ( $obj->getSequenceName() != '' ) {
-					$next_insert_id = $obj->getNextInsertId();
-					Debug::Text('Table: '. $table .' Class: '. $class .' Next Insert ID: '. $next_insert_id, __FILE__, __LINE__, __METHOD__, 10);
-	
-					if ( strncmp($db_conn->databaseType, 'mysql', 5) == 0 ) {
-						$query = 'select max(id) from '. $table;
-						$max_id = (int)$db_conn->GetOne('select max(id) from '. $table);
-
-						if ( $next_insert_id == 0 OR $next_insert_id < $max_id ) {
-							Debug::Text('  Corrupt sequence table, fixing... Current Max ID: '. $max_id, __FILE__, __LINE__, __METHOD__, 10);
-							if ( $next_insert_id == 0 ) {
-								$db_conn->Execute('insert into '. $obj->getSequenceName() .' VALUES('. ( $max_id + 1 ) .')');
-							} else {
-								$db_conn->Execute('update '. $obj->getSequenceName() .' set ID = '. ( $max_id + 1 ));
-							}
-						}
-					}
+					$this->initializeSequence( $obj, $table, $class, $db_conn );
 				}
 			}
 		}
 
 		return TRUE;
 	}
-	
 
+	
 	/*
 
 		System Requirements
@@ -854,8 +854,10 @@ class Install {
 			if ( is_dir( $dir ) AND is_readable( $dir ) ) {
 				try {
 					$rdi = new RecursiveDirectoryIterator( $dir, RecursiveIteratorIterator::SELF_FIRST );
-					foreach ( new RecursiveIteratorIterator($rdi) as $file_name => $cur ) {
-						if ( strcmp(basename($file_name), '.') == 0 OR strcmp( basename($file_name), '..' ) == 0 ) {
+					foreach ( new RecursiveIteratorIterator( $rdi ) as $file_name => $cur ) {
+						if ( strcmp( basename($file_name), '.') == 0
+								OR strcmp( basename($file_name), '..' ) == 0
+								OR strcmp( basename($file_name), '.htaccess' ) == 0 ) { //.htaccess files often aren't writable by the webserver.
 							continue;
 						}
 
@@ -1052,21 +1054,33 @@ class Install {
 		return FALSE;
 	}
 
-	function ScheduleMaintenanceJobs() {
+	function getScheduleMaintenanceJobsCommand() {
+		$command = FALSE;
 		if ( OPERATING_SYSTEM == 'LINUX' ) {
 			if ( $this->getWebServerUser() != '' ) {
 				$command = Environment::getBasePath() . 'install_cron.sh ' . $this->getWebServerUser();
-				exec( $command, $output, $exit_code );
-				Debug::Arr($output, 'Schedule Maintenance Jobs Command: '. $command .' Output: ', __FILE__, __LINE__, __METHOD__, 10);
-				if ( $exit_code == 0 ) {
-					return 0;
-				}
 			}
-
-			return 1;
-		} else {
-			return 0;
+		} elseif ( OPERATING_SYSTEM == 'WIN' ) {
+			$system_root = getenv('SystemRoot');
+			if ( $system_root != '' ) {
+				$command = $system_root . '\system32\schtasks /create /SC minute /TN timetrex_maintenance /TR ""'. Environment::getBasePath() . '..\php\php-win.exe" "' . Environment::getBasePath() . 'maint\cron.php""';
+			}
 		}
+
+		return $command;
+	}
+
+	function ScheduleMaintenanceJobs() {
+		$command = $this->getScheduleMaintenanceJobsCommand();
+		if ( $command != '' ) {
+			exec( $command, $output, $exit_code );
+			Debug::Arr($output, 'Schedule Maintenance Jobs Command: '. $command .' Exit Code: '. $exit_code .' Output: ', __FILE__, __LINE__, __METHOD__, 10);
+			if ( $exit_code == 0 ) {
+				return 0;
+			}
+		}
+		
+		return 1; //Fail so we can display the command to the user instead.
 	}
 
 	function getBaseURL() {
@@ -1145,6 +1159,8 @@ class Install {
 			Debug::Arr($output, 'PHP CLI Requirements Command: '. $command .' Output: ', __FILE__, __LINE__, __METHOD__, 10);
 			if ( $exit_code == 0 ) {
 				return 0;
+			} else {
+				$this->setExtendedErrorMessage( 'checkPHPCLIRequirements', 'PHP CLI Requirements Output: '. '<br>'.implode('<br>', (array)$output ) );
 			}
 		}
 
@@ -1245,6 +1261,14 @@ class Install {
 		include_once('Mail/mime.php');
 
 		if ( class_exists('Mail_Mime') ) {
+			return 0;
+		}
+
+		return 1;
+	}
+
+	function checkZIP() {
+		if ( class_exists('ZipArchive') ) {
 			return 0;
 		}
 
@@ -1467,6 +1491,8 @@ class Install {
 						2 => 0
 						);
 
+		//$retarr[1]++; //Test failed requirements.
+
 		$retarr[$this->checkPHPVersion()]++;
 		$retarr[$this->checkDatabaseType()]++;
 		$retarr[$this->checkSOAP()]++;
@@ -1477,6 +1503,7 @@ class Install {
 		$retarr[$this->checkGD()]++;
 		$retarr[$this->checkJSON()]++;
 		$retarr[$this->checkSimpleXML()]++;
+		$retarr[$this->checkZIP()]++;
 		$retarr[$this->checkMAIL()]++;
 
 		$retarr[$this->checkPEAR()]++;
@@ -1574,6 +1601,10 @@ class Install {
 
 		if ( $fail_all == TRUE OR $this->checkMAIL() != 0 ) {
 			$retarr[] = 'MAIL';
+		}
+
+		if ( $fail_all == TRUE OR $this->checkZIP() != 0 ) {
+			$retarr[] = 'ZIP';
 		}
 
 		//Bundled PEAR modules require the base PEAR package at least

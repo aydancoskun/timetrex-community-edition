@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13838 $
- * $Id: Authentication.class.php 13838 2014-07-24 00:06:53Z mikeb $
- * $Date: 2014-07-23 17:06:53 -0700 (Wed, 23 Jul 2014) $
+ * $Revision: 14408 $
+ * $Id: Authentication.class.php 14408 2014-09-12 19:02:59Z mikeb $
+ * $Date: 2014-09-12 12:02:59 -0700 (Fri, 12 Sep 2014) $
  */
 
 
@@ -212,19 +212,22 @@ class Authentication {
 	}
 	function setObject($user_id) {
 		if ( !empty($user_id) ) {
-
 			$ulf = TTnew( 'UserListFactory' );
-
 			$ulf->getByID($user_id);
+			if ( $ulf->getRecordCount() == 1 ) {
+				foreach ($ulf as $user) {
+					$this->obj = $user;
 
-			foreach ($ulf as $user) {
-				$this->obj = $user;
-
-				return TRUE;
+					return TRUE;
+				}
 			}
 		}
 
 		return FALSE;
+	}
+
+	function getSecureSessionID() {
+		return substr_replace( $this->getSessionID(), '...', ( strlen( $this->getSessionID() ) / 3 ), ( strlen( $this->getSessionID() ) / 3 ) );
 	}
 
 	function getSessionID() {
@@ -624,7 +627,8 @@ class Authentication {
 					$this->UpdateLastLoginDate();
 				}
 
-				TTLog::addEntry( $this->getObject()->getID(), 100, TTi18n::getText('SourceIP').': '. $this->getIPAddress() .' '. TTi18n::getText('Type').': '. $type .' '.	TTi18n::getText('SessionID') .': '.$this->getSessionID() .' '.	TTi18n::getText('UserID').': '. $this->getObject()->getId(), $this->getObject()->getID(), 'authentication'); //Login
+				//Truncate SessionID for security reasons, so someone with access to the audit log can't steal sessions.
+				TTLog::addEntry( $this->getObject()->getID(), 100, TTi18n::getText('SourceIP').': '. $this->getIPAddress() .' '. TTi18n::getText('Type').': '. $type .' '.	TTi18n::getText('SessionID') .': '. $this->getSecureSessionID() .' '.	TTi18n::getText('UserID').': '. $this->getObject()->getId(), $this->getObject()->getID(), 'authentication'); //Login
 
 				$this->rl->delete(); //Clear failed password rate limit upon successful login.
 
@@ -647,7 +651,7 @@ class Authentication {
 		$this->Delete();
 
 		if ( is_object( $this->getObject() ) ) {
-			TTLog::addEntry( $this->getObject()->getID(), 110, TTi18n::getText('SourceIP').': '. $this->getIPAddress() .' '.  TTi18n::getText('SessionID').': '.$this->getSessionID() .' '.	 TTi18n::getText('UserID').': '. $this->getObject()->getId(), $this->getObject()->getID(), 'authentication');
+			TTLog::addEntry( $this->getObject()->getID(), 110, TTi18n::getText('SourceIP').': '. $this->getIPAddress() .' '.  TTi18n::getText('SessionID').': '. $this->getSecureSessionID() .' '. TTi18n::getText('UserID').': '. $this->getObject()->getId(), $this->getObject()->getID(), 'authentication');
 		}
 
 		BreadCrumb::Delete();

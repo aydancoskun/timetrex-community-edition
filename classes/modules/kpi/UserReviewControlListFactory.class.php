@@ -40,7 +40,7 @@
  */
 
 /**
- * @package
+ * @package Modules\KPI
  */
 class UserReviewControlListFactory extends UserReviewControlFactory implements IteratorAggregate {
 
@@ -346,6 +346,8 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields);
 
 		$this->ExecuteSQL($query, $ph, $limit, $page);
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}

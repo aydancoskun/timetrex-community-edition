@@ -40,7 +40,7 @@
  */
 
 /**
- * @package Module_Install
+ * @package Modules\Install
  */
 class InstallSchema_1058A extends InstallSchema_Base {
 

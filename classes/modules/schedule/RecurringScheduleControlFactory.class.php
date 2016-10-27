@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13366 $
- * $Id: RecurringScheduleControlFactory.class.php 13366 2014-06-09 17:15:19Z mikeb $
- * $Date: 2014-06-09 10:15:19 -0700 (Mon, 09 Jun 2014) $
+ * $Revision: 14797 $
+ * $Id: RecurringScheduleControlFactory.class.php 14797 2014-10-16 19:00:06Z mikeb $
+ * $Date: 2014-10-16 12:00:06 -0700 (Thu, 16 Oct 2014) $
  */
 
 /**
@@ -301,12 +301,11 @@ class RecurringScheduleControlFactory extends Factory {
 		}
 
 		if ( is_array($ids) AND count($ids) > 0 ) {
+			$tmp_ids = array();
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
 				$rsulf = TTnew( 'RecurringScheduleUserListFactory' );
 				$rsulf->getByRecurringScheduleControlId( $this->getId() );
-
-				$tmp_ids = array();
 				foreach ($rsulf as $obj) {
 					$id = $obj->getUser();
 					Debug::text('Recurring Schedule ID: '. $obj->getRecurringScheduleControl() .' ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);

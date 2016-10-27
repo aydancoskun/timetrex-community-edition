@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13814 $
- * $Id: PunchFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
- * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
+ * $Revision: 13595 $
+ * $Id: PunchFactory.class.php 13595 2014-07-03 22:55:39Z mikeb $
+ * $Date: 2014-07-03 15:55:39 -0700 (Thu, 03 Jul 2014) $
  */
 
 /**

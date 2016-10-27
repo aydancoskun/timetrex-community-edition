@@ -231,24 +231,28 @@ class CompanyGenericMapFactory extends Factory {
 		if ( !is_array($ids) AND is_numeric( $ids ) ) {
 			$ids = array($ids);
 		}
+
 		//Debug::Arr($ids, 'Object Type ID: '. $object_type_id .' Object ID: '. $object_id .' IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_array($ids) ) {
+			$ids = array_unique( $ids ); //Make sure the IDs are unique to help avoid duplicates.
+
+			$tmp_ids = array();
 			if ( $is_new == FALSE ) {
 				//If needed, delete mappings first.
 				$cgmlf = TTnew( 'CompanyGenericMapListFactory' );
 				$cgmlf->getByCompanyIDAndObjectTypeAndObjectID( $company_id, $object_type_id, $object_id );
-				$tmp_ids = array();
 				foreach ($cgmlf as $obj) {
 					$id = $obj->getMapID();
 					Debug::text('Object Type ID: '. $object_type_id .' Object ID: '. $obj->getObjectID() .' ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
-					//Delete objects that are not selected.
-					if ( !in_array($id, $ids) ) {
+					//Delete objects that are not selected
+					//Also check for duplicate IDs and delete them too.
+					if ( !in_array($id, $ids) OR in_array( $id, $tmp_ids ) ) {
 						Debug::text('Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 						$obj->Delete();
 					} else {
 						//Save ID's that need to be updated.
-						Debug::text('NOT Deleting : '. $id, __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('NOT Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 						$tmp_ids[] = $id;
 					}
 				}

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11942 $
- * $Id: PermissionControlFactory.class.php 11942 2014-01-09 00:50:10Z mikeb $
- * $Date: 2014-01-08 16:50:10 -0800 (Wed, 08 Jan 2014) $
+ * $Revision: 14797 $
+ * $Id: PermissionControlFactory.class.php 14797 2014-10-16 19:00:06Z mikeb $
+ * $Date: 2014-10-16 12:00:06 -0700 (Thu, 16 Oct 2014) $
  */
 
 /**
@@ -304,8 +304,6 @@ class PermissionControlFactory extends Factory {
 				//If needed, delete mappings first.
 				$pulf = TTnew( 'PermissionUserListFactory' );
 				$pulf->getByPermissionControlId( $this->getId() );
-
-				$tmp_ids = array();
 				foreach ($pulf as $obj) {
 					$id = $obj->getUser();
 					Debug::text('Permission Control ID: '. $obj->getPermissionControl() .' ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);

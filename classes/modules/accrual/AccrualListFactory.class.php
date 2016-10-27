@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11925 $
- * $Id: AccrualListFactory.class.php 11925 2014-01-08 00:13:44Z mikeb $
- * $Date: 2014-01-07 16:13:44 -0800 (Tue, 07 Jan 2014) $
+ * $Revision: 14958 $
+ * $Id: AccrualListFactory.class.php 14958 2014-10-28 14:00:49Z mikeb $
+ * $Date: 2014-10-28 07:00:49 -0700 (Tue, 28 Oct 2014) $
  */
 
 /**
@@ -511,12 +511,12 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 
 		$total = $this->db->GetOne($query, $ph);
 
-		if ($total === FALSE ) {
+		if ( $total === FALSE ) {
 			$total = 0;
 		}
 		Debug::text('Balance: '. $total, __FILE__, __LINE__, __METHOD__, 10);
 
-		return $total;
+		return (float)$total;
 	}
 
 	function getSumByUserIdAndAccrualPolicyIdAndAfterDate($user_id, $accrual_policy_id, $epoch ) {
@@ -559,7 +559,7 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		}
 		Debug::text('Balance After Date: '. $total, __FILE__, __LINE__, __METHOD__, 10);
 
-		return $total;
+		return (float)$total;
 	}
 
 	function getByAccrualPolicyId($accrual_policy_id, $where = NULL, $order = NULL) {

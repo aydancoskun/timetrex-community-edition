@@ -34,15 +34,15 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13814 $
- * $Id: PayStubFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
- * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
+ * $Revision: 14800 $
+ * $Id: PayStubFactory.class.php 14800 2014-10-16 19:27:31Z mikeb $
+ * $Date: 2014-10-16 12:27:31 -0700 (Thu, 16 Oct 2014) $
  */
 require_once( 'Numbers/Words.php');
 
 
 /**
- * @package Modules_Pay\Stub
+ * @package Modules\PayStub
  */
 class PayStubFactory extends Factory {
 	protected $table = 'pay_stub';
@@ -103,8 +103,9 @@ class PayStubFactory extends Factory {
 										'-2020-cheque_9209p' => TTi18n::gettext('NEBS #9209P'),
 										'-2030-cheque_dlt103' => TTi18n::gettext('NEBS #DLT103'),
 										'-2040-cheque_dlt104' => TTi18n::gettext('NEBS #DLT104'),
-										'-2050-cheque_cr_standard_form_1' => TTi18n::gettext('Costa Rica - Std Form 1'),
-										'-2060-cheque_cr_standard_form_2' => TTi18n::gettext('Costa Rica - Std Form 2'),
+										//Disable Costa Rica formats for now as they don't appear to be correct anymore.
+										//'-2050-cheque_cr_standard_form_1' => TTi18n::gettext('Costa Rica - Std Form 1'),
+										//'-2060-cheque_cr_standard_form_2' => TTi18n::gettext('Costa Rica - Std Form 2'),
 									);
 				break;
 			case 'export_general_ledger':
@@ -1990,7 +1991,7 @@ class PayStubFactory extends Factory {
 			return FALSE;
 		}
 
-		$from = $reply_to = 'DoNotReply@'. Misc::getHostName( FALSE );
+		$from = $reply_to = '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Pay Stub') .'"<DoNotReply@'. Misc::getEmailDomain() .'>';
 		Debug::Text('From: '. $from, __FILE__, __LINE__, __METHOD__, 10);
 
 		$to = array_shift( $email_to_arr );
@@ -2175,7 +2176,7 @@ class PayStubFactory extends Factory {
 
 				}
 			}
-			$this->getPermissionColumns( $data, $this->getID(), $this->getUser(), $permission_children_ids, $include_columns );
+			$this->getPermissionColumns( $data, $this->getUser(), $this->getCreatedBy(), $permission_children_ids, $include_columns );
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
 		}
 
@@ -2566,51 +2567,57 @@ class PayStubFactory extends Factory {
 
 							//Get Pay Period information
 							$pplf = TTnew( 'PayPeriodListFactory' );
-							$pay_period_obj = $pplf->getById( $pay_stub_obj->getPayPeriod() )->getCurrent();
+							$pplf->getById( $pay_stub_obj->getPayPeriod() );
+							if ( $pplf->getRecordCount() > 0 ) {
+								$pay_period_obj = $pplf->getCurrent();
 
-							$pp_start_date = $pay_period_obj->getStartDate();
-							$pp_end_date = $pay_period_obj->getEndDate();
-							$pp_transaction_date = $pay_period_obj->getTransactionDate();
+								$pp_start_date = $pay_period_obj->getStartDate();
+								$pp_end_date = $pay_period_obj->getEndDate();
+								$pp_transaction_date = $pay_period_obj->getTransactionDate();
 
-							//Get pay period numbers
-							$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
-							$pay_period_schedule_obj = $ppslf->getById( $pay_period_obj->getPayPeriodSchedule() )->getCurrent();
+								//Get pay period numbers
+								$ppslf = TTnew( 'PayPeriodScheduleListFactory' );
+								$ppslf->getById( $pay_period_obj->getPayPeriodSchedule() );
+								if ( $ppslf->getRecordCount() > 0 ) {
+									$pay_period_schedule_obj = $ppslf->getCurrent();
 
-							$pay_period_data = array(
-													'start_date' => TTDate::getDate('DATE', $pp_start_date ),
-													'end_date' => TTDate::getDate('DATE', $pp_end_date ),
-													'transaction_date' => TTDate::getDate('DATE', $pp_transaction_date ),
-													//'pay_period_number' => $pay_period_schedule_obj->getCurrentPayPeriodNumber( $pay_period_obj->getTransactionDate(), $pay_period_obj->getEndDate() ),
-													'annual_pay_periods' => $pay_period_schedule_obj->getAnnualPayPeriods()
-													);
+									$pay_period_data = array(
+															'start_date' => TTDate::getDate('DATE', $pp_start_date ),
+															'end_date' => TTDate::getDate('DATE', $pp_end_date ),
+															'transaction_date' => TTDate::getDate('DATE', $pp_transaction_date ),
+															//'pay_period_number' => $pay_period_schedule_obj->getCurrentPayPeriodNumber( $pay_period_obj->getTransactionDate(), $pay_period_obj->getEndDate() ),
+															'annual_pay_periods' => $pay_period_schedule_obj->getAnnualPayPeriods()
+															);
 
-							$ps_data = array(
-									'date' => $pay_stub_obj->getTransactionDate(),
-									'amount' => $pay_stub['entries'][40][0]['amount'],
-									'stub_left_column' => $user_obj->getFullName() . "\n".
-													TTi18n::gettext("Identification #: ") . $pay_stub['display_id'] . "\n".
-													TTi18n::gettext("Net Pay: ") . $pay_stub_obj->getCurrencyObject()->getSymbol() . TTi18n::formatNumber( $pay_stub['entries'][40][0]['amount'], TRUE, $pay_stub_obj->getCurrencyObject()->getRoundDecimalPlaces() ),
+									$ps_data = array(
+											'date' => $pay_stub_obj->getTransactionDate(),
+											'amount' => $pay_stub['entries'][40][0]['amount'],
+											'stub_left_column' => $user_obj->getFullName() . "\n".
+															TTi18n::gettext("Identification #: ") . $pay_stub['display_id'] . "\n".
+															TTi18n::gettext("Net Pay: ") . $pay_stub_obj->getCurrencyObject()->getSymbol() . TTi18n::formatNumber( $pay_stub['entries'][40][0]['amount'], TRUE, $pay_stub_obj->getCurrencyObject()->getRoundDecimalPlaces() ),
 
-									'stub_right_column' => TTi18n::gettext('Pay Start Date: ') . TTDate::getDate('DATE', $pay_stub['start_date'] ) . "\n".
-													TTi18n::gettext('Pay End Date: ') . TTDate::getDate('DATE', $pay_stub['end_date'] ) . "\n".
-													TTi18n::gettext('Payment Date: ') . TTDate::getDate('DATE', $pay_stub['transaction_date'] ),
-									'start_date' => $pay_stub['start_date'],
-									'end_date' => $pay_stub['end_date'],
-									'full_name' => $user_obj->getFullName(),
-									'address1' => $user_obj->getAddress1(),
-									'address2' => $user_obj->getAddress2(),
-									'city' => $user_obj->getCity(),
-									'province' => $user_obj->getProvince(),
-									'postal_code' => $user_obj->getPostalCode(),
-									'country' => $user_obj->getCountry(),
+											'stub_right_column' => TTi18n::gettext('Pay Start Date: ') . TTDate::getDate('DATE', $pay_stub['start_date'] ) . "\n".
+															TTi18n::gettext('Pay End Date: ') . TTDate::getDate('DATE', $pay_stub['end_date'] ) . "\n".
+															TTi18n::gettext('Payment Date: ') . TTDate::getDate('DATE', $pay_stub['transaction_date'] ),
+											'start_date' => $pay_stub['start_date'],
+											'end_date' => $pay_stub['end_date'],
+											'full_name' => $user_obj->getFullName(),
+											'address1' => $user_obj->getAddress1(),
+											'address2' => $user_obj->getAddress2(),
+											'city' => $user_obj->getCity(),
+											'province' => $user_obj->getProvince(),
+											'postal_code' => $user_obj->getPostalCode(),
+											'country' => $user_obj->getCountry(),
 
-									'company_name' => $company_obj->getName(),
+											'company_name' => $company_obj->getName(),
 
-									'symbol' => $pay_stub_obj->getCurrencyObject()->getSymbol(),
-							);
+											'symbol' => $pay_stub_obj->getCurrencyObject()->getSymbol(),
+									);
 
-							$cheque_form_obj->addRecord( $ps_data );
-							$this->getFormObject()->addForm( $cheque_form_obj );
+									$cheque_form_obj->addRecord( $ps_data );
+									$this->getFormObject()->addForm( $cheque_form_obj );
+								}
+							}
 						}
 
 						$this->getProgressBarObject()->set( NULL, $i );

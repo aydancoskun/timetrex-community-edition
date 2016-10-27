@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13366 $
- * $Id: Done.php 13366 2014-06-09 17:15:19Z mikeb $
- * $Date: 2014-06-09 10:15:19 -0700 (Mon, 09 Jun 2014) $
+ * $Revision: 14797 $
+ * $Id: Done.php 14797 2014-10-16 19:00:06Z mikeb $
+ * $Date: 2014-10-16 12:00:06 -0700 (Thu, 16 Oct 2014) $
  */
 require_once('../../includes/global.inc.php');
 
@@ -66,8 +66,9 @@ if ( $install_obj->isInstallMode() == FALSE ) {
 }
 
 //Disable installer now that we're done.
-$data['installer_enabled'] = 'FALSE';
-$install_obj->writeConfigFile( $data );
+$tmp_config_data['other']['installer_enabled'] = 'FALSE';
+$tmp_config_data['other']['default_interface'] = 'html5';
+$install_obj->writeConfigFile( $tmp_config_data );
 
 //Reset new_version flag.
 $sslf = TTnew( 'SystemSettingListFactory' );

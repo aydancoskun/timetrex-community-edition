@@ -372,9 +372,6 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		$uf = new UserFactory();
 
 		$ph = array(
-					'user_id' => $user_id,
-					'user_id_b' => $user_id,
-					//'user_id_c' => $user_id,
 					'company_id' => $company_id,
 					'object_type_id' => $object_type_id,
 					'object_id' => $object_id,
@@ -387,13 +384,16 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		//	without this we are unable to mark messages as read, because we are returning essentially random message_recipient id's.
 		//	Because PostgreSQL/MySQL don't come with first() aggregate functions, this is pretty much the fastest way to work around it.
 		$query = '
-					SELECT	a.*,
-							(select xx.id from message_recipient as zz LEFT JOIN message_sender as xx ON zz.message_sender_id = xx.id where xx.message_control_id = a.id order by zz.user_id = ? desc limit 1 ) as id,
-							(select zz.status_id from message_recipient as zz LEFT JOIN message_sender as xx ON zz.message_sender_id = xx.id where xx.message_control_id = a.id order by zz.user_id = ? desc limit 1 ) as status_id,
+					SELECT
+							_ADODB_COUNT
+							a.*,
+							( SELECT xx.id FROM message_recipient as zz LEFT JOIN message_sender as xx ON zz.message_sender_id = xx.id WHERE xx.message_control_id = a.id ORDER BY zz.user_id = '. (int)$user_id .' DESC LIMIT 1 ) as id,
+							( SELECT zz.status_id FROM message_recipient as zz LEFT JOIN message_sender as xx ON zz.message_sender_id = xx.id WHERE xx.message_control_id = a.id ORDER BY zz.user_id = '. (int)$user_id .' DESC LIMIT 1 ) as status_id,
 							b.user_id as from_user_id,
 							bb.first_name as from_first_name,
 							bb.middle_name as from_middle_name,
 							bb.last_name as from_last_name
+							_ADODB_COUNT
 					FROM '. $this->getTable() .' as a
 						LEFT JOIN ( select message_control_id, min(a.id) as message_sender_id from '. $msf->getTable() .' as a group by a.message_control_id ) as z ON a.id = z.message_control_id
 						LEFT JOIN '. $msf->getTable() .'	as b ON b.id = z.message_sender_id
@@ -737,9 +737,7 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		$uf = new UserFactory();
 		$udf = new UserDateFactory();
 		$pptsvf = new PayPeriodTimeSheetVerifyFactory();
-
-
-
+		
 		$ph = array(
 					'company_id' => $company_id,
 

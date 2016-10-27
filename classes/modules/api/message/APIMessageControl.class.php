@@ -148,6 +148,10 @@ class APIMessageControl extends APIFactory {
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
+		if ( !isset($data['filter_data']['id']) ) {
+			return $this->returnHandler( TRUE ); //No records returned.
+		}
+
 		$data['filter_data']['current_user_id'] = $this->getCurrentUserObject()->getId();
 
 		$blf = TTnew( 'MessageControlListFactory' );
@@ -184,10 +188,37 @@ class APIMessageControl extends APIFactory {
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
-		$blf = TTnew( 'MessageControlListFactory' );
-		//$blf->getAPIMessageByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
-		$blf->getByCompanyIDAndUserIdAndObjectTypeAndObject( $this->getCurrentCompanyObject()->getId(), $this->getCurrentUserObject()->getId(), $data['filter_data']['object_type_id'], $data['filter_data']['object_id'] );
+		if ( isset($data['filter_data']['object_type_id']) AND $data['filter_data']['object_type_id'] == 5 ) {
+			Debug::Text('ERROR: Emails cant be embedded!', __FILE__, __LINE__, __METHOD__, 10);
+			return $this->getPermissionObject()->PermissionDenied();
+		}
 
+		$type_to_api_map = $this->getOptions('type_to_api_map');
+		if ( isset($data['filter_data']['object_type_id']) AND isset($type_to_api_map[$data['filter_data']['object_type_id']])
+				AND isset($data['filter_data']['object_id']) ) {
+			$tmp_apif = TTnew( $type_to_api_map[$data['filter_data']['object_type_id']] );
+			$get_function = 'get'. str_replace('API', '', $type_to_api_map[$data['filter_data']['object_type_id']] );
+			Debug::Text('API Class Name: '. $type_to_api_map[$data['filter_data']['object_type_id']] .' GET Function: '. $get_function, __FILE__, __LINE__, __METHOD__, 10);
+
+			if ( method_exists( $tmp_apif, $get_function ) ) {
+				$result = $this->stripReturnHandler( $tmp_apif->$get_function( array('filter_data' => array( 'id' => $data['filter_data']['object_id'] ), 'filter_items_per_page' => 1, 'filter_columns' => array('id' => TRUE) ) ) );
+				if ( !( isset($result[0]) AND count($result[0]) > 0 ) ) {
+					Debug::Text('ERROR: Permission denied, unable to find record for supplied object_id...', __FILE__, __LINE__, __METHOD__, 10);
+					return $this->getPermissionObject()->PermissionDenied();
+				}
+			} else {
+				Debug::Text('ERROR: Object Type ID is invalid...', __FILE__, __LINE__, __METHOD__, 10);
+				return $this->returnHandler( FALSE ); //No records returned.
+			}
+		} else {
+			Debug::Text('Object Type ID not defined...', __FILE__, __LINE__, __METHOD__, 10);
+			//MyAccount -> Document doesn't send object_type_id
+			//return $this->returnHandler( FALSE ); //No records returned.
+		}
+
+
+		$blf = TTnew( 'MessageControlListFactory' );
+		$blf->getByCompanyIDAndUserIdAndObjectTypeAndObject( $this->getCurrentCompanyObject()->getId(), $this->getCurrentUserObject()->getId(), $data['filter_data']['object_type_id'], $data['filter_data']['object_id'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $blf->getRecordCount() );
@@ -264,10 +295,9 @@ class APIMessageControl extends APIFactory {
 				} else {
 					//Adding new object, check ADD permissions.
 					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('message', 'add'), TTi18n::gettext('Add permission denied') );
-
-					//Make sure to_user_ids are within the same company at least.
-					$ulf = TTNew('UserListFactory');
-					$row['to_user_id'] = $ulf->getCompanyValidUserIds( $row['to_user_id'], $this->getCurrentCompanyObject()->getId() );
+					
+					//Security check, make sure any data passed as to_user_id is within the list of users available.
+					$row['to_user_id'] = Misc::arrayColumn( $this->stripReturnHandler( $this->getUser( array( 'filter_data' => array( 'id' => $row['to_user_id'] ), 'filter_columns' => array( 'id' => TRUE ) ), TRUE ) ), 'id' );
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -549,6 +579,7 @@ class APIMessageControl extends APIFactory {
 			return $this->returnHandler( $retarr );
 		}
 
+		return $this->returnHandler( FALSE );
 	}
 
 	/**

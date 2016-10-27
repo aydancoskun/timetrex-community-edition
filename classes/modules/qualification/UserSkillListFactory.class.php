@@ -40,7 +40,7 @@
  */
 
 /**
- * @package
+ * @package Modules\Qualification
  */
 class UserSkillListFactory extends UserSkillFactory implements IteratorAggregate {
 
@@ -52,7 +52,7 @@ class UserSkillListFactory extends UserSkillFactory implements IteratorAggregate
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
-		$this->ExecuteSQL($query, NULL, $limit, $ph);
+		$this->ExecuteSQL($query, NULL, $limit, $page);
 
 		return $this;
 	}
@@ -213,7 +213,7 @@ class UserSkillListFactory extends UserSkillFactory implements IteratorAggregate
 
 			$this->ExecuteSQL($query, $ph);
 
-			$this->saveCache($this->rs, $id.$user_id);
+			$this->saveCache($this->rs, $user_id.$qualification_id);
 		}
 
 		return $this;

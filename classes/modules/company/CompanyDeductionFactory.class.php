@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12920 $
- * $Id: CompanyDeductionFactory.class.php 12920 2014-04-14 23:48:25Z mikeb $
- * $Date: 2014-04-14 16:48:25 -0700 (Mon, 14 Apr 2014) $
+ * $Revision: 14797 $
+ * $Id: CompanyDeductionFactory.class.php 14797 2014-10-16 19:00:06Z mikeb $
+ * $Date: 2014-10-16 12:00:06 -0700 (Thu, 16 Oct 2014) $
  */
 
 /**
@@ -1349,7 +1349,7 @@ class CompanyDeductionFactory extends Factory {
 			$maximum_length_of_service_result = TRUE;
 		}
 
-		Debug::Text('&nbsp;&nbsp; Min Result: : '. (int)$minimum_length_of_service_result .' Max Result: '. (int)$maximum_length_of_service_result, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('&nbsp;&nbsp; Min Result: '. (int)$minimum_length_of_service_result .' Max Result: '. (int)$maximum_length_of_service_result, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $minimum_length_of_service_result == TRUE AND $maximum_length_of_service_result == TRUE ) {
 			return TRUE;
@@ -2442,12 +2442,11 @@ class CompanyDeductionFactory extends Factory {
 		}
 
 		if ( is_array($ids) ) {
+			$tmp_ids = array();
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
 				$cdpsealf = TTnew( 'CompanyDeductionPayStubEntryAccountListFactory' );
 				$cdpsealf->getByCompanyDeductionIdAndTypeId( $this->getId(), 20 );
-
-				$tmp_ids = array();
 				foreach ($cdpsealf as $obj) {
 					$id = $obj->getPayStubEntryAccount();
 					Debug::text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
@@ -2512,12 +2511,11 @@ class CompanyDeductionFactory extends Factory {
 		}
 
 		if ( is_array($ids) ) {
+			$tmp_ids = array();
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
 				$udlf = TTnew( 'UserDeductionListFactory' );
 				$udlf->getByCompanyIdAndCompanyDeductionId( $this->getCompany(), $this->getId() );
-
-				$tmp_ids = array();
 				foreach ($udlf as $obj) {
 					$id = $obj->getUser();
 					Debug::text('ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);

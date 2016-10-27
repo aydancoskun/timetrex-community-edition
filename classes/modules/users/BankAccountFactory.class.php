@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11942 $
- * $Id: BankAccountFactory.class.php 11942 2014-01-09 00:50:10Z mikeb $
- * $Date: 2014-01-08 16:50:10 -0800 (Wed, 08 Jan 2014) $
+ * $Revision: 14156 $
+ * $Id: BankAccountFactory.class.php 14156 2014-08-19 18:55:48Z mikeb $
+ * $Date: 2014-08-19 11:55:48 -0700 (Tue, 19 Aug 2014) $
  */
 
 /**
@@ -192,7 +192,7 @@ class BankAccountFactory extends Factory {
 			$query = 'select id from '. $this->getTable() .' where company_id = ? AND user_id is NULL AND deleted = 0';
 		}
 		$id = $this->db->GetOne($query, $ph);
-		Debug::Arr($id, 'Unique ID: '. $id .' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Arr($ph, 'Unique ID: '. $id .' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id === FALSE ) {
 			return TRUE;

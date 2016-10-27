@@ -549,6 +549,14 @@ class KPIReport extends Report {
 								$this->data[] = array_merge( $start_date_columns, $end_date_columns, $due_date_columns, $processed_data );
 
 						}
+					} else {
+						//If no KPIs are assigned to a review, still display as much data as we can.
+						//As reviews can be scheduled in the future and aren't likely to have KPIs.
+						if ( is_array( $user_review_control ) ) {
+							$processed_data = array_merge( $processed_data, $user_review_control );
+						}
+
+						$this->data[] = array_merge( $start_date_columns, $end_date_columns, $due_date_columns, $processed_data );
 					}
 
 				}
@@ -557,7 +565,7 @@ class KPIReport extends Report {
 			}
 			unset($this->tmp_data, $kpi, $user_review_control, $start_date_columns, $end_date_columns, $due_date_columns, $processed_data );
 		}
-		Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		return TRUE;
 	}
 }

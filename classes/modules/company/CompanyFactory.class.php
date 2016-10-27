@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13814 $
- * $Id: CompanyFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
- * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
+ * $Revision: 14797 $
+ * $Id: CompanyFactory.class.php 14797 2014-10-16 19:00:06Z mikeb $
+ * $Date: 2014-10-16 12:00:06 -0700 (Thu, 16 Oct 2014) $
  */
 
 /**
@@ -1714,7 +1714,11 @@ class CompanyFactory extends Factory {
 
 	function getProductEdition() {
 		if ( isset($this->data['product_edition_id']) ) {
-			return (int)$this->data['product_edition_id'];
+			if ( $this->data['product_edition_id'] > getTTProductEdition() ) {
+				return (int)getTTProductEdition();
+			} else {
+				return (int)$this->data['product_edition_id'];
+			}
 		}
 
 		return FALSE;
@@ -2812,7 +2816,9 @@ class CompanyFactory extends Factory {
 	function setLDAPAuthenticationType($type) {
 		$type = trim($type);
 
-		if ( $this->Validator->inArrayKey(	'ldap_authentication_type_id',
+		if ( DEMO_MODE == FALSE
+				AND
+				$this->Validator->inArrayKey(	'ldap_authentication_type_id',
 											$type,
 											TTi18n::gettext('Incorrect LDAP authentication type'),
 											$this->getOptions('ldap_authentication_type')) ) {
@@ -3125,7 +3131,7 @@ class CompanyFactory extends Factory {
 											FALSE,
 											TTi18n::gettext('Unable to delete the primary company'));
 		}
-																																												$obj_class = "\124\124\114\x69\x63\x65\x6e\x73\x65"; $obj_function = "\166\x61\154\x69\144\x61\164\145\114\x69\x63\145\x6e\x73\x65"; $obj_error_msg_function = "\x67\x65\x74\x46\x75\154\154\105\162\x72\x6f\x72\115\x65\x73\163\141\x67\x65"; @$obj = new $obj_class; $retval = $obj->{$obj_function}(); if ( $retval !== TRUE ) { $this->Validator->isTrue( 'lic_obj', FALSE, $obj->{$obj_error_msg_function}($retval) ); }
+																																												if ( $this->isNew() == TRUE ) { $obj_class = "\124\124\114\x69\x63\x65\x6e\x73\x65"; $obj_function = "\166\x61\154\x69\144\x61\164\145\114\x69\x63\145\x6e\x73\x65"; $obj_error_msg_function = "\x67\x65\x74\x46\x75\154\154\105\162\x72\x6f\x72\115\x65\x73\163\141\x67\x65"; @$obj = new $obj_class; $retval = $obj->{$obj_function}(); if ( $retval !== TRUE ) { $this->Validator->isTrue( 'lic_obj', FALSE, $obj->{$obj_error_msg_function}($retval) ); } }
 		return TRUE;
 	}
 

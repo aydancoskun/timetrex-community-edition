@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12453 $
- * $Id: ExceptionFactory.class.php 12453 2014-02-25 16:10:34Z mikeb $
- * $Date: 2014-02-25 08:10:34 -0800 (Tue, 25 Feb 2014) $
+ * $Revision: 14280 $
+ * $Id: ExceptionFactory.class.php 14280 2014-08-29 16:43:40Z mikeb $
+ * $Date: 2014-08-29 09:43:40 -0700 (Fri, 29 Aug 2014) $
  */
 
 /**
@@ -521,7 +521,7 @@ class ExceptionFactory extends Factory {
 			return FALSE;
 		}
 
-		$from = $reply_to = 'DoNotReply@'. Misc::getHostName( FALSE );
+		$from = $reply_to = '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Exception') .'"<DoNotReply@'. Misc::getEmailDomain() .'>';
 		Debug::Text('To: '. implode(',', $email_to_arr), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( is_array($email_to_arr) ) {
@@ -665,7 +665,7 @@ class ExceptionFactory extends Factory {
 		return FALSE;
 	}
 
-	function getObjectAsArray( $include_columns = NULL ) {
+	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE  ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
 
 		$epf = TTnew( 'ExceptionPolicyFactory' );
@@ -741,6 +741,7 @@ class ExceptionFactory extends Factory {
 
 				}
 			}
+			$this->getPermissionColumns( $data, $this->getColumn( 'user_id' ), $this->getCreatedBy(), $permission_children_ids, $include_columns );
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
 		}
 

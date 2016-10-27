@@ -45,12 +45,6 @@ require_once('../../includes/global.inc.php');
 require_once('../../includes/API.inc.php');
 Header('Content-Type: application/xml; charset=utf-8');
 
-Debug::setEnable(TRUE);
-Debug::setEnableDisplay(TRUE);
-Debug::setEnableLog(TRUE);
-Debug::setEnableTidy(FALSE);
-Debug::setVerbosity(10);
-
 $class_prefix = 'API';
 $class_name = FALSE;
 

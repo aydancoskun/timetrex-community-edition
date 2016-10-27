@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11811 $
- * $Id: PolicyGroupUserListFactory.class.php 11811 2013-12-26 23:56:23Z mikeb $
- * $Date: 2013-12-26 15:56:23 -0800 (Thu, 26 Dec 2013) $
+ * $Revision: 14797 $
+ * $Id: PolicyGroupUserListFactory.class.php 14797 2014-10-16 19:00:06Z mikeb $
+ * $Date: 2014-10-16 12:00:06 -0700 (Thu, 16 Oct 2014) $
  */
 
 /**
@@ -129,6 +129,30 @@ class PolicyGroupUserListFactory extends PolicyGroupUserFactory implements Itera
 		return $this;
 	}
 
+	function getTotalByPolicyGroupId($id, $where = NULL, $order = NULL) {
+		if ( $id == '') {
+			return FALSE;
+		}
+
+		$pgf = new PolicyGroupFactory();
+
+		$ph = array(
+					'id' => $id,
+					);
+
+		$query = '
+					select	count(*)
+					from	'. $this->getTable() .' as a,
+							'. $pgf->getTable() .' as b
+					where	b.id = a.policy_group_id
+						AND a.policy_group_id = ?
+					';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		//$this->ExecuteSQL( $query, $ph );
+		return (int)$this->db->getOne( $query, $ph );
+	}
 
 	function getByUserId($id, $where = NULL, $order = NULL) {
 		if ( $id == '') {

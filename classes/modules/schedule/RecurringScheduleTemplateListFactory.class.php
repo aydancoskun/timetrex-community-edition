@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11925 $
- * $Id: RecurringScheduleTemplateListFactory.class.php 11925 2014-01-08 00:13:44Z mikeb $
- * $Date: 2014-01-07 16:13:44 -0800 (Tue, 07 Jan 2014) $
+ * $Revision: 14408 $
+ * $Id: RecurringScheduleTemplateListFactory.class.php 14408 2014-09-12 19:02:59Z mikeb $
+ * $Date: 2014-09-12 12:02:59 -0700 (Fri, 12 Sep 2014) $
  */
 
 /**
@@ -304,6 +304,7 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 							';
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$query .= ',
+						x.id as job_id,
 						x.name as job,
 						x.status_id as job_status_id,
 						x.manual_id as job_manual_id,
@@ -311,6 +312,7 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 						x.department_id as job_department_id,
 						x.group_id as job_group_id,
 
+						y.id as job_item_id,
 						y.name as job_item,
 						y.manual_id as job_item_manual_id,
 						y.group_id as job_item_group_id';
@@ -351,8 +353,8 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 						';
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-			$query .= '	LEFT JOIN '. $jf->getTable() .' as x ON a.job_id = x.id';
-			$query .= '	LEFT JOIN '. $jif->getTable() .' as y ON a.job_item_id = y.id';
+			$query .= '	LEFT JOIN '. $jf->getTable() .' as x ON ( CASE WHEN a.job_id = -1 THEN d.default_job_id = x.id ELSE a.job_id = x.id END AND x.deleted = 0 )';
+			$query .= '	LEFT JOIN '. $jif->getTable() .' as y ON ( CASE WHEN a.job_item_id = -1 THEN d.default_job_item_id = y.id ELSE a.job_item_id = y.id END AND y.deleted = 0 )';
 		}
 
 		$query .= ' where	b.company_id = ? ';

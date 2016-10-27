@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12387 $
- * $Id: LogFactory.class.php 12387 2014-02-19 00:50:23Z mikeb $
- * $Date: 2014-02-18 16:50:23 -0800 (Tue, 18 Feb 2014) $
+ * $Revision: 14958 $
+ * $Id: LogFactory.class.php 14958 2014-10-28 14:00:49Z mikeb $
+ * $Date: 2014-10-28 07:00:49 -0700 (Tue, 28 Oct 2014) $
  */
 
 /**
@@ -78,7 +78,7 @@ class LogFactory extends Factory {
 											'accrual'							=> TTi18n::getText('Accrual'),
 											'authorizations'					=> TTi18n::getText('Authorizations'),
 											'request'							=> TTi18n::getText('Request'),
-											'message'							=> TTi18n::getText('Messages'), //Old version
+											//'message'							=> TTi18n::getText('Messages'), //Old version
 											'message_control'					=> TTi18n::getText('Messages'),
 											'holidays'							=> TTi18n::getText('Holidays'),
 											'bank_account'						=> TTi18n::getText('Bank Account'),
@@ -212,9 +212,155 @@ class LogFactory extends Factory {
 											'job_applicant_language'			=> TTi18n::getText('Job Applicant Languages'),
 											'job_applicant_membership'			=> TTi18n::getText('Job Applicant Memberships'),
 											'ethnic_group'						=> TTi18n::getText('Ethnic Group'),
-
 									);
 				asort( $retval ); //Sort by name so its easier to find objects.
+				break;
+			case 'table_name_permission_map':
+				$retval = array(
+											'authentication'					=> array('user'),
+											'company'							=> array('company'),
+											'branch'							=> array('branch'),
+											'department'						=> array('department'),
+											'currency'							=> array('currency'),
+											'accrual'							=> array('accrual'),
+											'authorizations'					=> array('user'),
+											'request'							=> array('request'),
+											'message'							=> array('message'),
+											'message_control'					=> array('message'),
+											'holidays'							=> array('holiday_policy'),
+											'bank_account'						=> array('user'),
+											'roe'								=> array('user'),
+											'station'							=> array('station'),
+											'station_user_group'				=> array('station'),
+											'station_branch'					=> array('station'),
+											'station_department'				=> array('station'),
+											'station_include_user'				=> array('station'),
+											'station_exclude_user'				=> array('station'),
+											'station'							=> array('station'),
+											'punch'								=> array('punch'),
+											'punch_control'						=> array('punch'),
+											'exception'							=> array('punch'),
+											'schedule'							=> array('schedule'),
+											'other_field'						=> array('company'),
+											'system_setting'					=> array('company'),
+											'cron'								=> array('company'),
+											'permission_control'				=> array('permission'),
+											'permission_user'					=> array('permission'),
+											'permission'						=> array('permission'),
+
+											'policy_group'						=> array('policy_group'),
+											'policy_group_user'					=> array('policy_group'),
+											'schedule_policy'					=> array('schedule_policy'),
+											'round_interval_policy'				=> array('round_policy'),
+											'meal_policy'						=> array('meal_policy'),
+											'break_policy'						=> array('break_policy'),
+											'accrual_policy'					=> array('accrual_policy'),
+											'accrual_policy_milestone'			=> array('accrual_policy'),
+											'over_time_policy'					=> array('over_time_policy'),
+											'premium_policy'					=> array('premium_policy'),
+											'premium_policy_branch'				=> array('premium_policy'),
+											'premium_policy_department'			=> array('premium_policy'),
+											'premium_policy_job_group'			=> array('premium_policy'),
+											'premium_policy_job'				=> array('premium_policy'),
+											'premium_policy_job_item_group'		=> array('premium_policy'),
+											'premium_policy_job_item'			=> array('premium_policy'),
+											'absence_policy'					=> array('absence_policy'),
+											'exception_policy_control'			=> array('exception_policy'),
+											'exception_policy'					=> array('excepton_policy'),
+											'holiday_policy'					=> array('holiday_policy'),
+											'holiday_policy_recurring_holiday'	=> array('holiday_policy'),
+
+											'pay_period'						=> array('pay_period_schedule'),
+											'pay_period_schedule'				=> array('pay_period_schedule'),
+											'pay_period_schedule_user'			=> array('pay_period_schedule'),
+											'pay_period_time_sheet_verify'		=> array('user'),
+
+											'pay_stub'							=> array('pay_stub'),
+											'pay_stub_amendment'				=> array('pay_stub_amendment'),
+											'pay_stub_entry_account'			=> array('pay_stub_account'),
+											'pay_stub_entry_account_link'		=> array('pay_stub_account'),
+
+											'recurring_holiday'					=> array('pay_stub_amendment'),
+											'recurring_ps_amendment'			=> array('pay_stub_amendment'),
+											'recurring_ps_amendment_user'		=> array('pay_stub_amendment'),
+											'recurring_schedule_control'		=> array('recurring_schedule'),
+											'recurring_schedule_user'			=> array('recurring_schedule'),
+											'recurring_schedule_template_control' => array('recurring_schedule_template'),
+											'recurring_schedule_template'		=> array('recurring_schedule_template'),
+
+											'user_date_total'					=> array('punch'),
+											'user_default'						=> array('company'),
+											'user_generic_data'					=> array('user'),
+											'user_preference'					=> array('user_preference'),
+											'users'								=> array('user'),
+											'user_identification'				=> array('user'),
+											'company_deduction'					=> array('company_tax_deduction'),
+											'company_deduction_pay_stub_entry_account' => array('company_tax_deduction'),
+											'user_deduction'					=> array('user_tax_deduction'),
+											'user_title'						=> array('user'),
+											'user_wage'							=> array('wage'),
+
+											'hierarchy_control'					=> array('hierarchy'),
+											'hierarchy_object_type'				=> array('hierarchy'),
+											'hierarchy_user'					=> array('hierarchy'),
+											'hierarchy_level'					=> array('hierarchy'),
+											'hierarchy'							=> array('hierarchy'),
+
+											'user_report_data'					=> array('user'),
+											'report_schedule'					=> array('user'),
+											'report_custom_column'				=> array('report_custom_column'),
+
+											'job'								=> array('job'),
+											'job_user_branch'					=> array('job'),
+											'job_user_department'				=> array('job'),
+											'job_user_group'					=> array('job'),
+											'job_include_user'					=> array('job'),
+											'job_exclude_user'					=> array('job'),
+											'job_job_item_group'				=> array('job'),
+											'job_include_job_item'				=> array('job'),
+											'job_exclude_job_item'				=> array('job'),
+											'job_item'							=> array('job'),
+											'job_item_amendment'				=> array('job'),
+											'document'							=> array('document'),
+											'document_revision'					=> array('document'),
+											'client'							=> array('client'),
+											'client_contact'					=> array('client_contact'),
+											'client_payment'					=> array('client_payment'),
+											'invoice'							=> array('invoice'),
+											'invoice_config'					=> array('invoice_config'),
+											'invoice_transaction'				=> array('invoice'),
+											'product'							=> array('product'),
+											'product_price'						=> array('product'),
+											'product_tax_policy'				=> array('product'),
+											'tax_area_policy'					=> array('area_policy'),
+											'tax_policy'						=> array('tax_policy'),
+											'transaction'						=> array('transaction'),
+											'user_contact'						=> array('user_contact'),
+											'user_expense'						=> array('user_expense'),
+											'expense_policy'					=> array('expense_policy'),
+											'user_review'						=> array('user_review'),
+											'user_review_control'				=> array('user_review'),
+											'kpi'								=> array('kpi'),
+											'qualification'						=> array('qualification'),
+											'user_skill'						=> array('user_skill'),
+											'user_education'					=> array('user_education'),
+											'user_membership'					=> array('user_membership'),
+											'user_license'						=> array('user_license'),
+											'user_language'						=> array('user_language'),
+											'job_vacancy'						=> array('job_vacancy'),
+											'job_applicant'						=> array('job_applicant'),
+											'job_application'					=> array('job_application'),
+											'job_applicant_location'			=> array('job_applicant'),
+											'job_applicant_employment'			=> array('job_applicant'),
+											'job_applicant_reference'			=> array('job_applicant'),
+											'job_applicant_skill'				=> array('job_applicant'),
+											'job_applicant_education'			=> array('job_applicant'),
+											'job_applicant_license'				=> array('job_applicant'),
+											'job_applicant_language'			=> array('job_applicant'),
+											'job_applicant_membership'			=> array('job_applicant'),
+											'ethnic_group'						=> array('user'),
+									);
+
 				break;
 			case 'columns':
 				$retval = array(

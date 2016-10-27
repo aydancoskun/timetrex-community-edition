@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 4279 $
- * $Id: Cache.inc.php 4279 2011-02-22 00:11:42Z ipso $
- * $Date: 2011-02-21 16:11:42 -0800 (Mon, 21 Feb 2011) $
+ * $Revision: 14408 $
+ * $Id: Cache.inc.php 14408 2014-09-12 19:02:59Z mikeb $
+ * $Date: 2014-09-12 12:02:59 -0700 (Fri, 12 Sep 2014) $
  */
 require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'pear'. DIRECTORY_SEPARATOR .'Cache'. DIRECTORY_SEPARATOR .'Lite.php');
 
@@ -59,7 +59,14 @@ $cache_options = array(
 		'automaticSerialization' => TRUE,
 		'hashedDirectoryLevel' => 1,
 		'fileNameProtection' => FALSE,
+		'redisHost' => ( isset($config_vars['cache']['redis_host']) ) ? $config_vars['cache']['redis_host'] : '',
+		'redisDB' => ( isset($config_vars['cache']['redis_db']) ) ? $config_vars['cache']['redis_db'] : '',
 );
 
-$cache = new Cache_Lite($cache_options);
+if ( isset($config_vars['cache']['redis_host']) AND $config_vars['cache']['redis_host'] != '' ) {
+	require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'other'. DIRECTORY_SEPARATOR .'Redis_Cache_Lite.class.php');
+	$cache = $ADODB_CACHE = new Redis_Cache_Lite($cache_options);
+} else {
+	$cache = new Cache_Lite($cache_options);
+}
 ?>

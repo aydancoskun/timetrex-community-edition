@@ -399,7 +399,7 @@ class APIPayPeriodSchedule extends APIFactory {
 		$ppsf = TTnew('PayPeriodScheduleFactory');
 
 		//Start with default data...
-		$ppsf->setObjectFromArray( $this->getPayPeriodScheduleDefaultData() );
+		$ppsf->setObjectFromArray( $this->stripReturnHandler( $this->getPayPeriodScheduleDefaultData() ) );
 
 		$ppsf->setCompany( $this->getCurrentCompanyObject()->getId() );
 

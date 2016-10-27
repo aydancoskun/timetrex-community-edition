@@ -1,0 +1,49 @@
+.inside-editor {
+    text-align: center;
+}
+
+.inside-editor .title {
+    font-weight: bold;
+
+}
+
+.inside-editor .render-div {
+    margin-top: 10px;
+}
+
+.inside-editor-render {
+    border-collapse: collapse;
+}
+
+.inside-editor-render .title {
+    font-weight: bold;
+
+}
+
+.inside-editor-render .cell {
+    text-align: center;
+    width: 15px;
+}
+
+.inside-editor-render .awesome-box-cell {
+    padding-left: 20px;
+}
+
+.inside-editor-render td {
+    border-collapse: collapse;
+}
+
+.inside-editor-row {
+
+}
+
+.inside-editor-row td {
+    vertical-align: top;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    border-bottom: 1px solid #c7c7c7;
+}
+
+.inside-editor .no-line {
+    border-bottom: none !important;
+}

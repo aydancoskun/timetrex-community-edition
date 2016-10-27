@@ -40,7 +40,7 @@
  */
 
 /**
- * @package
+ * @package Modules\Qualification
  */
 class UserMembershipFactory extends Factory {
 	protected $table = 'user_membership';
@@ -379,6 +379,8 @@ class UserMembershipFactory extends Factory {
 
 	function postSave() {
 		$this->removeCache( $this->getId() );
+		$this->removeCache( $this->getUser().$this->getQualification() );
+		
 		if ( $this->getDeleted() == FALSE ) {
 			Debug::text('Setting Tags...', __FILE__, __LINE__, __METHOD__, 10);
 			CompanyGenericTagMapFactory::setTags( $this->getQualificationObject()->getCompany(), 255, $this->getID(), $this->getTag() );

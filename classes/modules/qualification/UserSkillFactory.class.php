@@ -40,7 +40,7 @@
  */
 
 /**
- * @package
+ * @package Modules\Qualification
  */
 class UserSkillFactory extends Factory {
 	protected $table = 'user_skill';
@@ -148,7 +148,6 @@ class UserSkillFactory extends Factory {
 
 
 	function getQualificationObject() {
-		
 		return $this->getGenericObject( 'QualificationListFactory', $this->getQualification(), 'qualification_obj' );
 	}
 
@@ -451,6 +450,7 @@ class UserSkillFactory extends Factory {
 
 	function postSave() {
 		$this->removeCache( $this->getId() );
+		$this->removeCache( $this->getUser().$this->getQualification() );
 
 		if ( $this->getDeleted() == FALSE ) {
 			Debug::text('Setting Tags...', __FILE__, __LINE__, __METHOD__, 10);

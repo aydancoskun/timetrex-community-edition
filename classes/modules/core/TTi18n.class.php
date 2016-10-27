@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13814 $
- * $Id: TTi18n.class.php 13814 2014-07-22 17:45:46Z mikeb $
- * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
+ * $Revision: 14496 $
+ * $Id: TTi18n.class.php 14496 2014-09-23 19:59:47Z mikeb $
+ * $Date: 2014-09-23 12:59:47 -0700 (Tue, 23 Sep 2014) $
  */
 
 /*
@@ -64,6 +64,7 @@ class TTi18n {
 	static private $master_locale = NULL;
 	static private $locale = NULL;
 	static private $normalized_locale = NULL;
+	static private $is_default_locale = TRUE;
 
 	static public function getLocaleHandler() {
 		if ( self::$locale_handler === NULL ) {
@@ -177,7 +178,7 @@ class TTi18n {
 		return self::$language;
 	}
 	static public function setLanguage( $language ) {
-		if ( $language == '' ) {
+		if ( $language == '' OR strlen( $language ) > 7 ) {
 			$language = 'en';
 		}
 
@@ -190,7 +191,7 @@ class TTi18n {
 		return self::$country;
 	}
 	static public function setCountry( $country ) {
-		if (  $country == '' ) {
+		if ( $country == '' OR strlen( $country ) > 7 ) {
 			$country = 'US';
 		}
 
@@ -252,7 +253,13 @@ class TTi18n {
 		}
 
 		if ( $valid_locale != '' ) {
-			Debug::Text('Found valid locale: '. $valid_locale, __FILE__, __LINE__, __METHOD__, 11);
+			//Check if the locale is the default locale, so we can more quickly determine if translation is needed or not.
+			global $config_vars;
+			if ( ( isset($config_vars['other']['enable_default_language_translation']) AND $config_vars['other']['enable_default_language_translation'] == TRUE )
+					OR strpos( $valid_locale, 'en_US' ) === FALSE ) {
+				self::$is_default_locale = FALSE;
+			}
+			Debug::Text('Found valid locale: '. $valid_locale .' Default: '. (int)self::$is_default_locale, __FILE__, __LINE__, __METHOD__, 11);
 
 			return $valid_locale;
 		}
@@ -269,7 +276,7 @@ class TTi18n {
 		//3. Just Language
 		//4a. If Linux then try with ".UTF8" appended to all of the above.
 		//4b. If windows, let i18Nv2 normalize to windows locale names.
-		if ( $locale_arg != '' ) {
+		if ( $locale_arg != '' AND strlen( $locale_arg ) <= 7 ) {
 			$locale_arr[] = $locale_arg;
 			$locale_arr[] = self::_normalizeLocale( $locale_arg );
 		}
@@ -312,12 +319,15 @@ class TTi18n {
 			$locale = self::getLocale();
 		}
 
-		setcookie( 'language', $locale, ( time() + 9999999 ), Environment::getBaseURL() );
+		if ( self::getLocaleCookie() != $locale ) {
+			Debug::Text('Setting Locale cookie: '. $locale, __FILE__, __LINE__, __METHOD__, 11);
+			setcookie( 'language', $locale, ( time() + 9999999 ), Environment::getBaseURL() );
+		}
 
 		return TRUE;
 	}
 	static public function getLocaleCookie() {
-		if ( isset($_COOKIE['language']) ) {
+		if ( isset($_COOKIE['language']) AND strlen( $_COOKIE['language'] ) <= 7 ) { //Prevent user supplied locale from attempting XSS/SQL injection.
 			return $_COOKIE['language'];
 		}
 
@@ -593,6 +603,11 @@ class TTi18n {
 		if ( $args != '' ) {
 			$str = self::getTextStringArgs( $str, $args );
 		}
+
+		if ( self::$is_default_locale == TRUE ) { //Optimization: If default locale and config isn't set to enable default translation, just return the string immediately.
+			return $str;
+		}
+		
 		return self::getTranslationHandler()->get( $str );
 	}
 
@@ -1066,7 +1081,7 @@ class NativeGettextTranslationHandler implements TranslationHandler {
 		textdomain( $domain );
 
 		// Tell gettext where to find the locale translation files.
-		bindtextdomain("$domain", Environment::getBasePath() .DIRECTORY_SEPARATOR .'interface' . DIRECTORY_SEPARATOR . 'locale');
+		bindtextdomain( $domain, Environment::getBasePath() . DIRECTORY_SEPARATOR . 'interface' . DIRECTORY_SEPARATOR . 'locale');
 
 		// Tell gettext which codeset to use for output.
 		bind_textdomain_codeset( $domain, 'UTF-8');

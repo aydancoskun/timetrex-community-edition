@@ -40,7 +40,7 @@
  */
 
 /**
- * @package
+ * @package Modules\Qualification
  */
 class UserLanguageFactory extends Factory {
 	protected $table = 'user_language';
@@ -288,6 +288,8 @@ class UserLanguageFactory extends Factory {
 
 	function postSave() {
 		$this->removeCache( $this->getId() );
+		$this->removeCache( $this->getUser().$this->getQualification() );
+		
 		if ( $this->getDeleted() == FALSE ) {
 			Debug::text('Setting Tags...', __FILE__, __LINE__, __METHOD__, 10);
 			CompanyGenericTagMapFactory::setTags( $this->getQualificationObject()->getCompany(), 254, $this->getID(), $this->getTag() );

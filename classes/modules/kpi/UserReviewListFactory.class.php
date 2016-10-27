@@ -40,7 +40,7 @@
  */
 
 /**
- * @package
+ * @package Modules\KPI
  */
 class UserReviewListFactory extends UserReviewFactory implements IteratorAggregate
 {

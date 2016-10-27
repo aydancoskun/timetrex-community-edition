@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11942 $
- * $Id: CurrencyFactory.class.php 11942 2014-01-09 00:50:10Z mikeb $
- * $Date: 2014-01-08 16:50:10 -0800 (Wed, 08 Jan 2014) $
+ * $Revision: 14568 $
+ * $Id: CurrencyFactory.class.php 14568 2014-09-26 16:32:15Z mikeb $
+ * $Date: 2014-09-26 09:32:15 -0700 (Fri, 26 Sep 2014) $
  */
 
 /**
@@ -334,7 +334,7 @@ class CurrencyFactory extends Factory {
 							);
 				break;
 			case 'list_columns':
-				$retval = Misc::arrayIntersectByKey( array('name', 'iso_code', 'status'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
+				$retval = Misc::arrayIntersectByKey( array('name', 'iso_code', 'symbol', 'status'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
 				$retval = array(

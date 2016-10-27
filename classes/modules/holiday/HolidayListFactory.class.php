@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11925 $
- * $Id: HolidayListFactory.class.php 11925 2014-01-08 00:13:44Z mikeb $
- * $Date: 2014-01-07 16:13:44 -0800 (Tue, 07 Jan 2014) $
+ * $Revision: 14958 $
+ * $Id: HolidayListFactory.class.php 14958 2014-10-28 14:00:49Z mikeb $
+ * $Date: 2014-10-28 07:00:49 -0700 (Tue, 28 Oct 2014) $
  */
 
 /**
@@ -99,6 +99,8 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		$query .= $this->getSortSQL( $order );
 
 		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
 	}
 
 	function getByIDAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
@@ -134,6 +136,8 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
 	}
 
 	function getByIdAndHolidayPolicyID($id, $holiday_policy_id, $where = NULL, $order = NULL) {
@@ -183,6 +187,8 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
 	}
 
 	function getByCompanyIdAndHolidayPolicyId($company_id, $id, $where = NULL, $order = NULL) {
@@ -216,6 +222,8 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
 	}
 
 	function getByPolicyGroupUserId($user_id, $where = NULL, $order = NULL) {
@@ -233,6 +241,7 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		$pgf = new PolicyGroupFactory();
 		$pguf = new PolicyGroupUserFactory();
 		$hpf = new HolidayPolicyFactory();
+		$cgmf = new CompanyGenericMapFactory();
 
 		$ph = array(
 					'user_id' => $user_id,
@@ -243,12 +252,14 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 					from	'. $pguf->getTable() .' as a,
 							'. $pgf->getTable() .' as b,
 							'. $hpf->getTable() .' as c,
+							'. $cgmf->getTable() .' as z,
 							'. $this->getTable() .' as d
 					where	a.policy_group_id = b.id
-						AND b.holiday_policy_id = c.id
-						AND c.id = d.holiday_policy_id
+						AND ( b.id = z.object_id AND z.company_id = b.company_id AND z.object_type_id = 180)
+						AND z.map_id = d.holiday_policy_id
+						AND d.holiday_policy_id = c.id
 						AND a.user_id = ?
-						AND ( c.deleted = 0 AND d.deleted = 0 AND b.deleted = 0)
+						AND ( c.deleted = 0 AND d.deleted = 0 AND b.deleted = 0 )
 						';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );

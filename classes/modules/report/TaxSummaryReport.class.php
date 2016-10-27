@@ -570,6 +570,16 @@ class TaxSummaryReport extends Report {
 								$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_stub_transaction_date') );
 								$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
 
+								if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]) ) {
+									$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id] = array(
+																		'pay_period_start_date' => strtotime( $pse_obj->getColumn('pay_stub_start_date') ),
+																		'pay_period_end_date' => strtotime( $pse_obj->getColumn('pay_stub_end_date') ),
+																		'pay_period_transaction_date' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
+																		'pay_period' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
+																		'pay_period_id' => $pse_obj->getColumn('pay_period_id'),
+																		);
+								}
+
 								if ( isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id]) ) {
 									$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id], $pse_obj->getColumn('amount') );
 								} else {
@@ -645,7 +655,7 @@ class TaxSummaryReport extends Report {
 									}
 								}
 
-								$pay_period_weeks = round( TTDate::getWeeks( ( TTDate::getBeginDayEpoch( TTDate::strtotime( $pse_obj->getColumn('pay_stub_end_date') ) ) - TTDate::getBeginDayEpoch( TTDate::strtotime( $pse_obj->getColumn('pay_stub_start_date') ) ) ) ), 2 );
+								$pay_period_weeks = round( TTDate::getWeeks( ( TTDate::getEndDayEpoch( TTDate::strtotime( $pse_obj->getColumn('pay_stub_end_date') ) ) - TTDate::getBeginDayEpoch( TTDate::strtotime( $pse_obj->getColumn('pay_stub_start_date') ) ) ) ), 2 );
 
 								//For unemployment reports, we need to know the weeks where renumeration was received, so count weeks between start/end date of pay period
 								//Set pay period weeks once per transaction date (pay period)
@@ -685,6 +695,16 @@ class TaxSummaryReport extends Report {
 						$user_id = $pse_obj->getColumn('user_id');
 						$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_stub_transaction_date') );
 						$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
+
+						if ( !isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]) ) {
+							$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id] = array(
+																'pay_period_start_date' => strtotime( $pse_obj->getColumn('pay_stub_start_date') ),
+																'pay_period_end_date' => strtotime( $pse_obj->getColumn('pay_stub_end_date') ),
+																'pay_period_transaction_date' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
+																'pay_period' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
+																'pay_period_id' => $pse_obj->getColumn('pay_period_id'),
+																);
+						}
 
 						if ( isset($this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id]) ) {
 							$this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id] = bcadd( $this->tmp_data['pay_stub_entry'][$company_deduction_id][$date_stamp][$user_id]['PA'.$pay_stub_entry_name_id], $pse_obj->getColumn('amount') );
@@ -760,7 +780,7 @@ class TaxSummaryReport extends Report {
 							}
 						}
 
-						$pay_period_weeks = round( TTDate::getWeeks( ( TTDate::getBeginDayEpoch( TTDate::strtotime( $pse_obj->getColumn('pay_stub_end_date') ) ) - TTDate::getBeginDayEpoch( TTDate::strtotime( $pse_obj->getColumn('pay_stub_start_date') ) ) ) ), 2 );
+						$pay_period_weeks = round( TTDate::getWeeks( ( TTDate::getEndDayEpoch( TTDate::strtotime( $pse_obj->getColumn('pay_stub_end_date') ) ) - TTDate::getBeginDayEpoch( TTDate::strtotime( $pse_obj->getColumn('pay_stub_start_date') ) ) ) ), 2 );
 
 						//For unemployment reports, we need to know the weeks where renumeration was received, so count weeks between start/end date of pay period
 						//Set pay period weeks once per transaction date (pay period)
@@ -832,7 +852,7 @@ class TaxSummaryReport extends Report {
 				foreach( $level_1 as $date_stamp => $level_2 ) {
 					foreach( $level_2 as $user_id => $row ) {
 						if ( isset($this->tmp_data['user'][$user_id]) ) {
-							$date_columns = TTDate::getReportDates( 'transaction', $date_stamp, FALSE, $this->getUserObject() );
+							$date_columns = TTDate::getReportDates( 'transaction', $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
 							$processed_data	 = array(
 												//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
 												//'pay_stub' => array('sort' => $row['pay_stub_transaction_date'], 'display' => TTDate::getDate('DATE', $row['pay_stub_transaction_date'] ) ),

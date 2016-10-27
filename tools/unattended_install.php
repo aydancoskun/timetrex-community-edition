@@ -118,7 +118,7 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 					$install_obj->cleanCacheDirectory();
 					$cache->clean();
 
-					$data['installer_enabled'] = 'FALSE';
+					$data['other']['installer_enabled'] = 'FALSE';
 					$install_obj->writeConfigFile( $data );
 
 
@@ -145,7 +145,7 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 					$cf->setEnableAddRecurringHolidayPreset( TRUE );
 					if ( $cf->isValid() ) {
 						$company_id = $cf->Save();
-						$install_obj->writeConfigFile( array('primary_company_id' => $company_id ) );
+						$install_obj->writeConfigFile( array('other' => array( 'primary_company_id' => $company_id ) ) );
 
 						//Setup admin user.
 						$uf = TTnew( 'UserFactory' );

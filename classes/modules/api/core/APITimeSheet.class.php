@@ -403,8 +403,8 @@ class APITimeSheet extends APIFactory {
 	 * @return array
 	 */
 	function getTimeSheetTotalData( $user_id, $base_date) {
-		$timesheet_data = $this->getTimeSheetData( $user_id, $base_date );
-
+		$timesheet_data = $this->stripReturnHandler( $this->getTimeSheetData( $user_id, $base_date ) );
+		
 		if ( is_array( $timesheet_data ) ) {
 			$retarr = array(
 								'timesheet_dates' => $timesheet_data['timesheet_dates'],

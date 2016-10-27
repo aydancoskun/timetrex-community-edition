@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12920 $
- * $Id: PunchControlFactory.class.php 12920 2014-04-14 23:48:25Z mikeb $
- * $Date: 2014-04-14 16:48:25 -0700 (Mon, 14 Apr 2014) $
+ * $Revision: 15145 $
+ * $Id: PunchControlFactory.class.php 15145 2014-11-13 22:42:19Z mikeb $
+ * $Date: 2014-11-13 14:42:19 -0800 (Thu, 13 Nov 2014) $
  */
 
 /**
@@ -1660,6 +1660,7 @@ class PunchControlFactory extends Factory {
 					$punch_obj->setTimeStamp( $new_time_stamp, FALSE );
 					$punch_obj->setActualTimeStamp( $new_time_stamp );
 					$punch_obj->setOriginalTimeStamp( $new_time_stamp );
+					$punch_obj->setTransfer( FALSE ); //Always set transfer to FALSE so we don't try to create In/Out punch automatically later.
 
 					//When drag&drop copying punches, clear some fields that shouldn't be copied.
 					if ( $action == 0 ) { //Copy

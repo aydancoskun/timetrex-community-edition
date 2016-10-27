@@ -775,6 +775,59 @@ class PurgeDatabase {
 							//$query[] = 'delete from '. $table .' where id in ( select a.id from '. $table .' as a LEFT JOIN users as b ON a.user_id = b.id WHERE b.id is NULL AND ( a.date <= '. (time()-(86400*($expire_days))) .' ) )';
 							//NOTE: Make sure NOT EXISTS is a strict join query without any other where clauses, as that can cause unintended results.
 							$query[] = 'delete from '. $table .' as a where a.date <= '. (time() - (86400 * (($expire_days * 2)))) .' AND NOT EXISTS ( select 1 from users as b WHERE a.user_id = b.id )';
+
+							//Delete non-critical audit log entries that bloat the database
+							// 45 Days
+							//  - Station ( Allowed )
+
+							// 180 Days
+							//  - Authentication
+							//  - UserDateTotal ( Notice - Recalculating )
+							//  - Exception ( Notice - Emails )
+							//  - ReportSchedule ( Notice - Emailing )
+							//  - Punch ( Telephone Start records )
+
+							// 1.5 Years
+							//  - PayStubAmendment ( Edit )
+							//  - PunchControl ( Add )
+							//  - Punch ( Add )
+							//  - Schedule ( Add )
+							$query[] = 'delete from '. $table .' as a where
+								(
+									a.date <= '. (time() - (86400 * (($expire_days * 1)))) .'
+									AND (
+											( table_name = \'station\' AND action_id = 200 )
+										)
+								)
+								OR
+								(
+									a.date <= '. (time() - (86400 * (($expire_days * 4)))) .'
+									AND (
+											( table_name = \'authentication\' )
+											OR
+											( table_name = \'user_date_total\' AND action_id = 500 )
+											OR
+											( table_name = \'exception\' AND action_id = 500 )
+											OR
+											( table_name = \'report_schedule\' AND action_id = 500 )
+											OR
+											( table_name = \'punch\' AND ( action_id = 500 AND description LIKE \'Telephone Punch Start%\' ) )
+										)
+								)
+								OR
+								(
+									a.date <= '. (time() - (86400 * (($expire_days * 12)))) .'
+									AND (
+											( table_name = \'pay_stub_amendment\' AND action_id = 20 )
+											OR
+											( table_name = \'punch_control\' AND action_id = 10 )
+											OR
+											( table_name = \'punch\' AND action_id = 10 )
+											OR
+											( table_name = \'schedule\' AND action_id = 10 )
+										)
+								)
+								';
 							break;
 						case 'system_log_detail':
 							//Only delete system_log_detail rows when the corresponding system_log rows are already deleted
@@ -853,7 +906,9 @@ class PurgeDatabase {
 
 							//Delete rows where the parent table rows are already deleted.
 							$query[] = 'delete from '. $table .' as a where NOT EXISTS ( select 1 from company as b WHERE a.company_id = b.id )';
-							$query[] = 'delete from '. $table .' as a where a.user_id is NOT NULL AND NOT EXISTS ( select 1 from users as b WHERE a.user_id = b.id )';
+
+							//bank_account can have user_id is NULL or user_id = 0, we don't want to purge those records in either case.
+							$query[] = 'delete from '. $table .' as a where ( a.user_id is NOT NULL AND a.user_id != 0 ) AND NOT EXISTS ( select 1 from users as b WHERE a.user_id = b.id )';
 							break;
 						case 'user_group_tree':
 						case 'document_group_tree':

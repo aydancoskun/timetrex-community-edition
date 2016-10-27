@@ -34,13 +34,13 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11811 $
- * $Id: PayStubEntryAccountLinkListFactory.class.php 11811 2013-12-26 23:56:23Z mikeb $
- * $Date: 2013-12-26 15:56:23 -0800 (Thu, 26 Dec 2013) $
+ * $Revision: 14958 $
+ * $Id: PayStubEntryAccountLinkListFactory.class.php 14958 2014-10-28 14:00:49Z mikeb $
+ * $Date: 2014-10-28 07:00:49 -0700 (Tue, 28 Oct 2014) $
  */
 
 /**
- * @package Modules_Pay\Stub
+ * @package Modules\PayStub
  */
 class PayStubEntryAccountLinkListFactory extends PayStubEntryAccountLinkFactory implements IteratorAggregate {
 
@@ -48,8 +48,7 @@ class PayStubEntryAccountLinkListFactory extends PayStubEntryAccountLinkFactory 
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
-					WHERE deleted = 0
-					ORDER BY ps_order ASC';
+					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 

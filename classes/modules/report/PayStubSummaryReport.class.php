@@ -229,6 +229,21 @@ class PayStubSummaryReport extends Report {
 				//Get all pay stub accounts
 				$retval = array();
 
+				$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
+				$pseallf->getByCompanyId( $this->getUserObject()->getCompany() );
+				if ( $pseallf->getRecordCount() > 0 ) {
+					$pseal_obj = $pseallf->getCurrent();
+
+					$default_linked_columns = array(
+												$pseal_obj->getTotalGross(),
+												$pseal_obj->getTotalNetPay(),
+												$pseal_obj->getTotalEmployeeDeduction(),
+												$pseal_obj->getTotalEmployerDeduction() );
+				} else {
+					$default_linked_columns = array();
+				}
+				unset($pseallf, $pseal_obj);
+
 				$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 				$psealf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), 10, array(10, 20, 30, 40, 50, 60, 65, 80) );
 				if ( $psealf->getRecordCount() > 0 ) {
@@ -250,6 +265,11 @@ class PayStubSummaryReport extends Report {
 
 						if ( $psea_obj->getType() == 10 ) { //Earnings only can see units.
 							$retval['-4'. str_pad( $i, 3, 0, STR_PAD_LEFT).'-PR'.$psea_obj->getID()] = $prefix.$psea_obj->getName() .' ['. TTi18n::getText('Rate') .']';
+							$retval['-5'. str_pad( $i, 3, 0, STR_PAD_LEFT).'-PU'.$psea_obj->getID()] = $prefix.$psea_obj->getName() .' ['. TTi18n::getText('Units') .']';
+						}
+
+						//Add units for Total Gross so they can get a total number of hours/units that way too.
+						if ( $psea_obj->getType() == 40 AND isset($default_linked_columns[0]) AND $default_linked_columns[0] == $psea_obj->getID() ) {
 							$retval['-5'. str_pad( $i, 3, 0, STR_PAD_LEFT).'-PU'.$psea_obj->getID()] = $prefix.$psea_obj->getName() .' ['. TTi18n::getText('Units') .']';
 						}
 

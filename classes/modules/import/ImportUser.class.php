@@ -73,7 +73,7 @@ class ImportUser extends Import {
 				global $current_company;
 
 				$uf = TTNew('UserFactory');
-				$retval = Misc::trimSortPrefix( $uf->getOptions('columns') );
+				$retval = $uf->getOptions('columns');
 
 				$retval['-1025-password'] = TTi18n::getText('Password');
 				$retval['-1026-phone_password'] = TTi18n::getText('Quick Punch Password');
@@ -97,7 +97,9 @@ class ImportUser extends Import {
 						$retval = array_merge( (array)$retval, (array)$other_field_names );
 					}
 				}
-				
+
+				$retval = Misc::trimSortPrefix( $retval );
+
 				Debug::Arr($retval, 'ImportUserColumns: ', __FILE__, __LINE__, __METHOD__, 10);
 
 				break;
@@ -136,19 +138,19 @@ class ImportUser extends Import {
 				$retval = array(
 								'default_branch' => array(
 													'-1010-name' => TTi18n::gettext('Name'),
-													'-1010-manual_id' => TTi18n::gettext('Code'),
+													'-1020-manual_id' => TTi18n::gettext('Code'),
 												),
 								'default_department' => array(
 													'-1010-name' => TTi18n::gettext('Name'),
-													'-1010-manual_id' => TTi18n::gettext('Code'),
+													'-1020-manual_id' => TTi18n::gettext('Code'),
 												),
 								'default_job' => array(
 													'-1010-name' => TTi18n::gettext('Name'),
-													'-1010-manual_id' => TTi18n::gettext('Code'),
+													'-1020-manual_id' => TTi18n::gettext('Code'),
 												),
 								'default_job_item' => array(
 													'-1010-name' => TTi18n::gettext('Name'),
-													'-1010-manual_id' => TTi18n::gettext('Code'),
+													'-1020-manual_id' => TTi18n::gettext('Code'),
 												),
 								'first_name' => array(
 														'-1010-first_name' => TTi18n::gettext('First Name'),

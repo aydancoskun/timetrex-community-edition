@@ -40,7 +40,7 @@
  */
 
 /**
- * @package API_APIQualification
+ * @package API\Qualification
  */
 class APIUserEducation extends APIFactory {
 	protected $main_class = 'UserEducationFactory';
@@ -85,9 +85,7 @@ class APIUserEducation extends APIFactory {
 	function getUserEducation( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('user_education', 'enabled')
 				OR !( $this->getPermissionObject()->Check('user_education', 'view') OR $this->getPermissionObject()->Check('user_education', 'view_own') OR $this->getPermissionObject()->Check('user_education', 'view_child')	 ) ) {
-			//return $this->getPermissionObject()->PermissionDenied();
-			//Rather then permission denied, restrict to just 'list_view' columns.
-			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
+			return $this->getPermissionObject()->PermissionDenied();
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 

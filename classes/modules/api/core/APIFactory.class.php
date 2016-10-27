@@ -176,7 +176,7 @@ abstract class APIFactory {
 			$data['filter_items_per_page'] = $data['filter_page'] = FALSE;
 		}
 
-		Debug::Arr($data, 'Getting Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($data, 'Getting Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		return $data;
 	}
@@ -189,6 +189,14 @@ abstract class APIFactory {
 			$retarr = Misc::arrayIntersectByKey( $allowed_columns, $filter_columns );
 		} else {
 			$retarr = $allowed_columns;
+		}
+
+		//If no valid columns are being returned, revert back to allowed columns.
+		//Never return *NULL* or a blank array from here, as that will allow all columns to be displayed.
+		if ( !is_array($retarr) ) {
+			//Return all allowed columns
+			$retarr = $allowed_columns;
+
 		}
 
 		return $retarr;

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13814 $
- * $Id: DateTimeTest.php 13814 2014-07-22 17:45:46Z mikeb $
- * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
+ * $Revision: 13501 $
+ * $Id: DateTimeTest.php 13501 2014-06-26 16:59:38Z mikeb $
+ * $Date: 2014-06-26 09:59:38 -0700 (Thu, 26 Jun 2014) $
  */
 require_once('PHPUnit/Framework/TestCase.php');
 

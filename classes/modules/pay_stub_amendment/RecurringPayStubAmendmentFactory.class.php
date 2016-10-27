@@ -34,20 +34,17 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11942 $
- * $Id: RecurringPayStubAmendmentFactory.class.php 11942 2014-01-09 00:50:10Z mikeb $
- * $Date: 2014-01-08 16:50:10 -0800 (Wed, 08 Jan 2014) $
+ * $Revision: 14800 $
+ * $Id: RecurringPayStubAmendmentFactory.class.php 14800 2014-10-16 19:27:31Z mikeb $
+ * $Date: 2014-10-16 12:27:31 -0700 (Thu, 16 Oct 2014) $
  */
 
 /**
- * @package Modules_Pay_Stub\Amendment
+ * @package Modules\PayStubAmendment
  */
 class RecurringPayStubAmendmentFactory extends Factory {
 	protected $table = 'recurring_ps_amendment';
 	protected $pk_sequence_name = 'recurring_ps_amendment_id_seq'; //PK Sequence name
-/*
-*/
-
 
 	function _getFactoryOptions( $name ) {
 
@@ -364,12 +361,11 @@ class RecurringPayStubAmendmentFactory extends Factory {
 				$ids = array(-1);
 			}
 
+			$tmp_ids = array();
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
 				$rpsaulf = TTnew( 'RecurringPayStubAmendmentUserListFactory' );
 				$rpsaulf->getByRecurringPayStubAmendment( $this->getId() );
-
-				$tmp_ids = array();
 				foreach ($rpsaulf as $obj) {
 					$id = $obj->getUser();
 					Debug::text('Recurring Schedule ID: '. $obj->getRecurringPayStubAmendment() .' ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
@@ -759,8 +755,8 @@ class RecurringPayStubAmendmentFactory extends Factory {
 
 		//Due to Cron running late, we want to still be able to insert
 		//Recurring PS amendments up to two days after the end date.
-		if ( ( $this->getEndDate() == '' AND $epoch >= $this->getStartDate() )
-				OR ( $this->getEndDate() != ''
+		if ( ( ( $this->getEndDate() == 0 OR $this->getEndDate() == '' ) AND $epoch >= $this->getStartDate() )
+				OR ( ( $this->getEndDate() != 0 AND $this->getEndDate() != '' )
 					AND ( $epoch >= $this->getStartDate() AND $epoch <= ($this->getEndDate() + (86400 * 2)) ) ) ) {
 			Debug::text('IN TimeFrame: '. TTDate::getDATE('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;

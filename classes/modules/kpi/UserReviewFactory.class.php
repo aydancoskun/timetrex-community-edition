@@ -40,7 +40,7 @@
  */
 
 /**
- * @package
+ * @package Modules\KPI
  */
 class UserReviewFactory extends Factory {
 	protected $table = 'user_review';

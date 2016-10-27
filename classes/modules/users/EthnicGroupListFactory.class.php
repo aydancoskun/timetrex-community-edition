@@ -40,7 +40,7 @@
  */
 
 /**
- * @package Module_Users
+ * @package Modules\Users
  */
 class EthnicGroupListFactory extends EthnicGroupFactory implements IteratorAggregate {
 

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12944 $
- * $Id: PayPeriodScheduleFactory.class.php 12944 2014-04-15 17:53:17Z mikeb $
- * $Date: 2014-04-15 10:53:17 -0700 (Tue, 15 Apr 2014) $
+ * $Revision: 12943 $
+ * $Id: PayPeriodScheduleFactory.class.php 12943 2014-04-15 17:50:25Z mikeb $
+ * $Date: 2014-04-15 10:50:25 -0700 (Tue, 15 Apr 2014) $
  */
 
 /**

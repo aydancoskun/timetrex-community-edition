@@ -98,19 +98,19 @@ class ImportSchedule extends Import {
 				$retval = array(
 								'branch' => array(
 													'-1010-name' => TTi18n::gettext('Name'),
-													'-1010-manual_id' => TTi18n::gettext('Code'),
+													'-1020-manual_id' => TTi18n::gettext('Code'),
 												),
 								'department' => array(
 													'-1010-name' => TTi18n::gettext('Name'),
-													'-1010-manual_id' => TTi18n::gettext('Code'),
+													'-1020-manual_id' => TTi18n::gettext('Code'),
 												),
 								'job' => array(
 													'-1010-name' => TTi18n::gettext('Name'),
-													'-1010-manual_id' => TTi18n::gettext('Code'),
+													'-1020-manual_id' => TTi18n::gettext('Code'),
 												),
 								'job_item' => array(
 													'-1010-name' => TTi18n::gettext('Name'),
-													'-1010-manual_id' => TTi18n::gettext('Code'),
+													'-1020-manual_id' => TTi18n::gettext('Code'),
 												),
 								'date_stamp' => $upf->getOptions('date_format'),
 								'start_time' => $upf->getOptions('time_format'),

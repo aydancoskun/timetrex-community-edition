@@ -40,7 +40,7 @@
  */
 
 /**
- * @package
+ * @package Modules\Qualification
  */
 class UserEducationListFactory extends UserEducationFactory implements IteratorAggregate {
 
@@ -213,7 +213,7 @@ class UserEducationListFactory extends UserEducationFactory implements IteratorA
 
 			$this->ExecuteSQL($query, $ph);
 
-			$this->saveCache($this->rs, $id.$user_id);
+			$this->saveCache($this->rs, $user_id.$qualification_id);
 		}
 
 		return $this;

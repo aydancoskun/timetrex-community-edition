@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13814 $
- * $Id: PunchListFactory.class.php 13814 2014-07-22 17:45:46Z mikeb $
- * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
+ * $Revision: 15145 $
+ * $Id: PunchListFactory.class.php 15145 2014-11-13 22:42:19Z mikeb $
+ * $Date: 2014-11-13 14:42:19 -0800 (Thu, 13 Nov 2014) $
  */
 
 /**
@@ -1032,7 +1032,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 					from	'. $this->getTable() .' as a,
 							'. $pcf->getTable() .' as b
 					where	a.punch_control_id = b.id
-						AND	b.user_date_id = (select z.user_date_id from '. $pcf->getTable() .' as z where z.id = b.punch_control_id)
+						AND	b.user_date_id = ( select z.user_date_id from '. $pcf->getTable() .' as z where z.id = a.punch_control_id )
 						AND a.id = ?
 						AND ( a.deleted = 0 AND b.deleted=0 )
 					ORDER BY a.time_stamp asc, a.status_id desc, a.punch_control_id asc
@@ -1144,8 +1144,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		//punch doesn't have OUT yet, it defaults to IN
 		// with a.status_id asc...
 		$query = '
-					select	c.user_id as user_id,
-
+					select	c.user_id as user_id
 					from	'. $this->getTable() .' as a,
 							'. $pcf->getTable() .' as b,
 							'. $udf->getTable() .' as c,
@@ -1303,7 +1302,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 							c.pay_period_id as pay_period_id
 					from	'. $this->getTable() .' as a
 							LEFT JOIN '. $pcf->getTable() .' as b ON a.punch_control_id = b.id
-							LEFT JOIN '. $udf->getTable() .' as c ON a.user_date_id = c.id
+							LEFT JOIN '. $udf->getTable() .' as c ON b.user_date_id = c.id
 					';
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$query .= '	LEFT JOIN '. $jf->getTable() .' as d ON b.job_id = d.id';
@@ -2287,8 +2286,8 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$additional_order_fields = array('first_name', 'last_name', 'date_stamp', 'time_stamp', 'type_id', 'status_id', 'branch', 'department', 'default_branch', 'default_department', 'group', 'title');
 
 		$sort_column_aliases = array(
-									'status' => 'status_id',
-									'type' => 'type_id',
+									'status' => 'a.status_id',
+									'type' => 'a.type_id',
 									'first_name' => 'd.first_name',
 									'last_name' => 'd.last_name',
 									'station_station_id' => 'l.station_id',

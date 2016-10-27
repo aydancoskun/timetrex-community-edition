@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13856 $
- * $Id: PermissionFactory.class.php 13856 2014-07-24 22:44:29Z mikeb $
- * $Date: 2014-07-24 15:44:29 -0700 (Thu, 24 Jul 2014) $
+ * $Revision: 14408 $
+ * $Id: PermissionFactory.class.php 14408 2014-09-12 19:02:59Z mikeb $
+ * $Date: 2014-09-12 12:02:59 -0700 (Fri, 12 Sep 2014) $
  */
 
 /**
@@ -2630,6 +2630,14 @@ class PermissionFactory extends Factory {
 			$query = 'INSERT INTO '. $this->getTable() .'(PERMISSION_CONTROL_ID, SECTION, NAME, VALUE, CREATED_DATE) VALUES'. implode(',', $data );
 			Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 			$this->db->Execute($query, $ph);
+
+			//Make sure we keep the seqenence in sync, only required for MySQL.
+			if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
+				Debug::Text('Keeping MySQL sequence in sync...', __FILE__, __LINE__, __METHOD__, 10);
+				$install = TTNew('Install');
+				$install->initializeSequence( $this, $this->getTable(), get_class( $this ), $this->db );
+				unset($install);
+			}
 
 			//Debug::Text('Logged detail records in: '. (microtime(TRUE) - $start_time), __FILE__, __LINE__, __METHOD__, 10);
 			TTLog::addEntry( $permission_control_id, 20, TTi18n::getText('Applying Permission Preset').': '. Option::getByKey( $preset, $this->getOptions('preset') ), NULL, $pclf->getTable(), $this );

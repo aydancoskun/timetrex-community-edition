@@ -1,0 +1,251 @@
+.wizard {
+    background-color: #f8f8f8;
+    border-bottom: 2px solid #355f87;
+    border-top: 30px solid #355f87;;
+    border-left: 2px solid #355f87;;
+    border-right: 2px solid #355f87;;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -315px 0 0 -500px;
+    height: auto;
+    height: 600px;
+    width: 1000px;
+    font-size: 12px;
+    text-align: center;
+    z-index: 50;
+    border-radius: 10px;
+    -moz-box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
+    -webkit-box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
+    box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
+    /* For IE 8 */
+    -ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000')";
+    /* For IE 5.5 - 7 */
+    filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000');
+
+}
+
+.wizard .bottom-actions {
+    border-top: 1px solid #999999;
+    bottom: 40px;
+    padding-top: 5px;
+    position: absolute;
+    width: 100%;
+}
+
+.wizard .move-buttons-div {
+    left: 470px;
+    position: absolute;
+}
+
+.wizard .confirm-buttons-div {
+    position: absolute;
+    right: 10px;
+}
+
+.wizard .back-btn {
+    background-image: url("../../global/widgets/ribbon/icons/back-35x35.png");
+    background-color: transparent;
+    background-position: 0px 0px;
+    border: medium none;
+    height: 35px;
+    width: 35px;
+    cursor: pointer;
+    padding: 0px;
+}
+
+.wizard .forward-btn {
+    background-image: url("../../global/widgets/ribbon/icons/next-35x35.png");
+    background-color: transparent;
+    background-position: 0px 0px;
+    border: medium none;
+    height: 35px;
+    width: 35px;
+    cursor: pointer;
+    padding: 0px;
+}
+
+.wizard .done-btn {
+    background-image: url("../../global/widgets/ribbon/icons/done-35x35.png");
+    background-color: transparent;
+    background-position: 0px 0px;
+    border: medium none;
+    height: 35px;
+    width: 35px;
+    cursor: pointer;
+    padding: 0px;
+}
+
+.wizard .close-btn {
+    background-image: url("../../global/widgets/ribbon/icons/close_misc-35x35.png");
+    background-color: transparent;
+    background-position: 0px 0px;
+    border: medium none;
+    height: 35px;
+    width: 35px;
+    cursor: pointer;
+    padding: 0px;
+}
+
+.wizard .title {
+    color: #FFFFFF;
+    font-size: 12px;
+    left: 15px;
+    position: absolute;
+    top: -22px;
+}
+
+.wizard .title-1-div {
+    margin-bottom: 5px;
+    margin-left: 15px;
+    text-align: left;
+    float: left;
+}
+
+.wizard .title-1 {
+    display: block;
+    float: left;
+    font-size: 22px;
+    font-weight: bold;
+    margin-left: 10px;
+    margin-top: 7px;
+    text-align: left;
+}
+
+.wizard .progress-bar {
+    border-bottom: 1px solid #999999;
+    position: absolute;
+    top: 10px;
+    width: 100%;
+}
+
+.wizard .progress {
+    height: 35px;
+    width: 97%;
+    background-color: #eaeaea;
+}
+
+progress::-webkit-progress-bar {
+    background-color: #eaeaea;
+}
+
+progress::-webkit-progress-value {
+    background: #eaeaea;
+    background: -moz-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #57beff), color-stop(100%, #12a3ff));
+    background: -webkit-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+    background: -o-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+    background: -ms-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+    background: linear-gradient(to bottom, #57beff 0%, #12a3ff 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#57beff', endColorstr='#12a3ff', GradientType=0);
+
+}
+
+progress::-moz-progress-bar {
+    background: #eaeaea;
+    background: -moz-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #57beff), color-stop(100%, #12a3ff));
+    background: -webkit-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+    background: -o-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+    background: -ms-linear-gradient(top, #57beff 0%, #12a3ff 100%);
+    background: linear-gradient(to bottom, #57beff 0%, #12a3ff 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#57beff', endColorstr='#12a3ff', GradientType=0);
+
+}
+
+.wizard .steps {
+    display: block;
+    position: relative;
+    top: -25px;
+}
+
+.wizard .logo {
+    background: url("../../global/widgets/ribbon/icons/wizard2-35x35.png");
+    width: 35px;
+    height: 35px;
+    float: left;
+}
+
+.wizard .content {
+    height: 453px;
+    position: absolute;
+    top: 101px;
+    width: 100%;
+}
+
+.wizard .wizard-label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 15px;
+    margin-top: 10px;
+    clear: both;
+}
+
+.wizard .wizard-acombobox-div {
+    float: left;
+    margin-left: 420px;
+    margin-bottom: 15px;
+}
+
+.wizard .ribbon-button-bar {
+    border-top: 1px solid #999999;
+    bottom: 5px;
+    padding-top: 5px;
+    position: absolute;
+    width: 100%;
+}
+
+.wizard .menu ul {
+
+}
+
+.wizard .wizard-grid-div {
+    padding-left: 5px;
+}
+
+.wizard .wizard-form-item-div {
+    clear: both;
+    float: left;
+    margin-left: 280px;
+    margin-bottom: 10px;
+    text-align: right;
+}
+
+.wizard .wizard-form-item-div .form-item-label {
+    float: left;
+    min-width: 180px;
+    margin-right: 10px;
+}
+
+.wizard .wizard-form-item-div .form-item-input-div {
+    float: left;
+}
+
+.wizard .top-des {
+    display: inline-block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    margin-left: 5px;
+    margin-top: 5px;
+    text-align: left;
+    width: 100%;
+}
+
+.wizard .bottom-des {
+    display: inline-block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    margin-left: 5px;
+    margin-top: 5px;
+    text-align: left;
+    width: 100%;
+}
+
+.wizard-inside-editor {
+    margin-left: 280px;
+}
+
+.wizard-image-preview {
+    width: 400;
+    height: 300;
+}

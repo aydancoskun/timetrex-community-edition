@@ -89,11 +89,15 @@ class APIROE extends APIFactory {
 				'pay_period_type_id' => $pay_period['pay_period_type_id'],
 				'first_date' => TTDate::getAPIDate('DATE', $first_date),
 				'last_date' => TTDate::getAPIDate('DATE', $last_date),
-				'pay_period_end_date' => TTDate::getAPIDate('DATE', $pay_period['pay_period_end_date'])
+				'pay_period_end_date' => TTDate::getAPIDate('DATE', $pay_period['pay_period_end_date']),
+				'release_accruals' => TRUE,
+				'generate_pay_stub' => TRUE,
 			);
 		} else {
 			$data = array(
 				'company_id' => $company_obj->getId(),
+				'release_accruals' => TRUE,
+				'generate_pay_stub' => TRUE,
 			);
 		}
 
@@ -108,14 +112,13 @@ class APIROE extends APIFactory {
 	function getROE( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('roe', 'enabled')
 				OR !( $this->getPermissionObject()->Check('roe', 'view') OR $this->getPermissionObject()->Check('roe', 'view_own') OR $this->getPermissionObject()->Check('roe', 'view_child')	) ) {
-			//return $this->getPermissionObject()->PermissionDenied();
+			return $this->getPermissionObject()->PermissionDenied();
 			//Rather then permission denied, restrict to just 'list_view' columns.
-			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
+			//$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'roe', 'view' );
-
 
 		$rlf = TTnew( 'ROEListFactory' );
 		$rlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );

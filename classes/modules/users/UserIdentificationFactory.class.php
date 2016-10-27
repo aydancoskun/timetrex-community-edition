@@ -62,7 +62,8 @@ class UserIdentificationFactory extends Factory {
 											30	=> TTi18n::gettext('Barcode'), //For barcode readers and USB proximity card readers.
 											35	=> TTi18n::gettext('QRcode'), //For cameras to read QR code badges.
 											40	=> TTi18n::gettext('Proximity Card'), //Mainly for proximity cards on timeclocks.
-											75	=> TTi18n::gettext('Facial Recognition'),
+											70	=> TTi18n::gettext('Face Image'), //Raw image of cropped face in as high of quality as possible.
+											75	=> TTi18n::gettext('Facial Recognition'), //Luxand v5 SDK templates.
 											100	=> TTi18n::gettext('TimeClock FingerPrint (v9)'), //TimeClocks v9 algo
 											101	=> TTi18n::gettext('TimeClock FingerPrint (v10)'), //TimeClocks v10 algo
 									);

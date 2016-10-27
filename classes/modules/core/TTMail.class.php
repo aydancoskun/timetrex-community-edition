@@ -209,7 +209,7 @@ class TTMail {
 		return TRUE;
 	}
 
-	function Send() {
+	function Send( $force = FALSE ) {
 		Debug::Arr($this->getTo(), 'Attempting to send email To: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $this->getTo() == FALSE ) {
@@ -224,7 +224,7 @@ class TTMail {
 
 		Debug::Text('Sending Email: Body Size: '. strlen( $this->getBody() ) .' Method: '. $this->getDeliveryMethod() .' To: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( PRODUCTION == FALSE ) {
+		if ( PRODUCTION == FALSE AND $force !== TRUE ) {
 			Debug::Text('Not in production mode, not sending emails...', __FILE__, __LINE__, __METHOD__, 10);
 			//$to = 'root@localhost';
 			return FALSE;

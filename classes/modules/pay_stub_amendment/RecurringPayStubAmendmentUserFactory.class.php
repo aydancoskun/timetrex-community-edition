@@ -34,13 +34,13 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11942 $
- * $Id: RecurringPayStubAmendmentUserFactory.class.php 11942 2014-01-09 00:50:10Z mikeb $
- * $Date: 2014-01-08 16:50:10 -0800 (Wed, 08 Jan 2014) $
+ * $Revision: 14800 $
+ * $Id: RecurringPayStubAmendmentUserFactory.class.php 14800 2014-10-16 19:27:31Z mikeb $
+ * $Date: 2014-10-16 12:27:31 -0700 (Thu, 16 Oct 2014) $
  */
 
 /**
- * @package Modules_Pay_Stub\Amendment
+ * @package Modules\PayStubAmendment
  */
 class RecurringPayStubAmendmentUserFactory extends Factory {
 	protected $table = 'recurring_ps_amendment_user';

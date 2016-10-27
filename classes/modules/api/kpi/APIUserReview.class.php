@@ -40,7 +40,7 @@
  */
 
 /**
- * @package API_APIUserReview
+ * @package API\KPI
  */
 class APIUserReview extends APIFactory {
 	protected $main_class = 'UserReviewFactory';
@@ -89,8 +89,7 @@ class APIUserReview extends APIFactory {
 	function getUserReview( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('user_review', 'enabled')
 				OR !( $this->getPermissionObject()->Check('user_review', 'view') OR $this->getPermissionObject()->Check('user_review', 'view_own') OR $this->getPermissionObject()->Check('user_review', 'view_child')	) ) {
-			//return $this->getPermissionObject()->PermissionDenied();
-			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
+			return $this->getPermissionObject()->PermissionDenied();
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user_review', 'view' );

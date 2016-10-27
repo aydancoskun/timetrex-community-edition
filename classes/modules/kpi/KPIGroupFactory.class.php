@@ -40,7 +40,7 @@
  */
 
 /**
- * @package Module_KPI
+ * @package Modules\KPI
  */
 class KPIGroupFactory extends Factory {
 	protected $table = 'kpi_group';

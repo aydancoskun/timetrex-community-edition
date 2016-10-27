@@ -26,10 +26,10 @@
 						<div style="background-color: #eee; width:75%;" >
 						<br>
 						{if PHP_OS == 'WINNT'}
-							In Windows simply run this command as Administrator. Be sure that php-win.exe is in your path!
+							In Windows simply run this command as Administrator.
 							<br>
 							<br>
-							schtasks /create /tn "TimeTrex Scheduled Jobs" /tr "<b>php-win.exe</b> {$cron_file}" /sc minute
+							{$schedule_maintenance_job_command}
 						{else}
 							In most Linux distributions, you can run the following command{if $is_sudo_installed == FALSE} as root{/if}:<br>
 							<b>{if $is_sudo_installed}sudo{/if} crontab -u {$web_server_user} -e</b><br>

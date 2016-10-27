@@ -1,3 +1,4 @@
+;<?php die('Access denied...');?>
 ;
 ;
 ; TimeTrex Configuration File
@@ -96,7 +97,7 @@ hostname = localhost
 ; System Administrators Email address to send critical errors to if necessary. Set to FALSE to disable completely.
 ;system_admin_email = "sysadmin@mydomain.com"
 
-default_interface = flex
+default_interface = html5
 
 ;WARNING: DO NOT CHANGE THIS AFTER YOU HAVE INSTALLED TIMETREX.
 ;If you do it will cause all your passwords to become invalid,
@@ -104,36 +105,3 @@ default_interface = flex
 salt = 0
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-;<?php if (; //Cause parse error to hide from prying eyes, just in case. DO NOT REMOVE?>

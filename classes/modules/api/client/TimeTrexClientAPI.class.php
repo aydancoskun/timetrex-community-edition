@@ -256,7 +256,11 @@ class TimeTrexClientAPIReturnHandler {
 		$output = array();
 		$output[] = '=====================================';
 		$output[] = 'Function: '. $this->getFunction() .'()';
-		$output[] = 'Args: '. $this->getArgs();
+		if ( is_object( $this->getArgs() ) OR is_array( $this->getArgs() ) ) {
+			$output[] = 'Args: '. count( $this->getArgs() );
+		} else {
+			$output[] = 'Args: '. $this->getArgs();
+		}
 		$output[] = '-------------------------------------';
 		$output[] = 'Returned:';
 		$output[] = ( $this->isValid() === TRUE ) ? 'IsValid: YES' : 'IsValid: NO';

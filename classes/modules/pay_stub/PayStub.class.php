@@ -34,13 +34,13 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 11775 $
- * $Id: PayStub.class.php 11775 2013-12-24 00:24:18Z mikeb $
- * $Date: 2013-12-23 16:24:18 -0800 (Mon, 23 Dec 2013) $
+ * $Revision: 14800 $
+ * $Id: PayStub.class.php 14800 2014-10-16 19:27:31Z mikeb $
+ * $Date: 2014-10-16 12:27:31 -0700 (Thu, 16 Oct 2014) $
  */
 
 /**
- * @package Modules_Pay\Stub
+ * @package Modules\PayStub
  */
 class PayStub extends PayStubFactory {
 	protected $tmp_data = NULL;

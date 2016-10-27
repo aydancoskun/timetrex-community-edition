@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 12920 $
- * $Id: UserFactory.class.php 12920 2014-04-14 23:48:25Z mikeb $
- * $Date: 2014-04-14 16:48:25 -0700 (Mon, 14 Apr 2014) $
+ * $Revision: 15145 $
+ * $Id: UserFactory.class.php 15145 2014-11-13 22:42:19Z mikeb $
+ * $Date: 2014-11-13 14:42:19 -0800 (Thu, 13 Nov 2014) $
  */
 
 /**
@@ -272,15 +272,18 @@ class UserFactory extends Factory {
 										'other_id4' => 'OtherID4',
 										'other_id5' => 'OtherID5',
 										'note' => 'Note',
-										'password_reset_key' => 'PasswordResetKey',
-										'password_reset_date' => 'PasswordResetDate',
 										'longitude' => 'Longitude',
 										'latitude' => 'Latitude',
 										'tag' => 'Tag',
 										'last_login_date' => 'LastLoginDate',
 										'hierarchy_control_display' => FALSE,
 										'hierarchy_level_display' => FALSE,
-										'password_updated_date' => 'PasswordUpdatedDate', //Needs to be defined otherwise password_updated_date never gets set.
+
+										//These must be defined, but they are ignored in setObjectFromArray() due to security risks.
+										'password_reset_key' => 'PasswordResetKey', 
+										'password_reset_date' => 'PasswordResetDate',
+										'password_updated_date' => 'PasswordUpdatedDate', //Needs to be defined otherwise password_updated_date never gets set. Also needs to go before setPassword() as it updates the date too.
+
 										'deleted' => 'Deleted',
 										);
 		return $variable_function_map;
@@ -813,14 +816,15 @@ class UserFactory extends Factory {
 	}
 	function setPassword($password, $password_confirm = NULL ) {
 		$password = trim(strtolower($password));
+		$password_confirm = ( $password_confirm !== NULL ) ? trim(strtolower($password_confirm)) : $password_confirm;
 
-		$password_confirm = trim(strtolower($password_confirm));
-		if ( $password != '' AND $password_confirm != '' AND $password != $password_confirm ) {
-			$passwords_match = FALSE;
-		} else {
+		//Make sure we accept just $password being set otherwise setObjectFromArray() won't work correctly.
+		if ( ( $password != '' AND $password_confirm != '' AND $password === $password_confirm ) OR ( $password != '' AND $password_confirm === NULL ) ) {
 			$passwords_match = TRUE;
+		} else {
+			$passwords_match = FALSE;
 		}
-		//Debug::Text('Password: '. $password .' Confirm: '. $password_confirm .' Match: '. (int)$passwords_match, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('Password: '. $password .' Confirm: '. $password_confirm .' Match: '. (int)$passwords_match, __FILE__, __LINE__, __METHOD__, 10);
 
 		$modify_password = FALSE;
 		if ( $this->getCurrentUserPermissionLevel() >= $this->getPermissionLevel() ) {
@@ -887,8 +891,10 @@ class UserFactory extends Factory {
 			} //else { //Debug::Text('Password Policy disabled or does not apply to this user.', __FILE__, __LINE__, __METHOD__, 10);
 
 			if ( $update_password === TRUE ) {
+				Debug::Text('Setting new password...', __FILE__, __LINE__, __METHOD__, 10);
 				$this->data['password'] = $this->encryptPassword( $password );
 				$this->setPasswordUpdatedDate( time() );
+				$this->setEnableClearPasswordResetData( TRUE ); //Clear any outstanding password reset key to prevent unexpected changes later on.
 			}
 
 			return TRUE;
@@ -925,6 +931,7 @@ class UserFactory extends Factory {
 												$epoch,
 												TTi18n::gettext('Password updated date is invalid')) ) {
 
+			Debug::Text('Setting new password date: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 			$this->data['password_updated_date'] = $epoch;
 
 			return TRUE;
@@ -2294,6 +2301,7 @@ class UserFactory extends Factory {
 				) {
 
 			$this->data['home_email'] = $home_email;
+			$this->setEnableClearPasswordResetData( TRUE ); //Clear any outstanding password reset key to prevent unexpected changes later on.
 
 			return TRUE;
 		}
@@ -2336,6 +2344,7 @@ class UserFactory extends Factory {
 					) {
 
 			$this->data['work_email'] = $work_email;
+			$this->setEnableClearPasswordResetData( TRUE ); //Clear any outstanding password reset key to prevent unexpected changes later on.
 
 			return TRUE;
 		}
@@ -2748,7 +2757,7 @@ class UserFactory extends Factory {
 			TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Employee Password Reset By').': '. $_SERVER['REMOTE_ADDR'] .' '. TTi18n::getText('Key').': '. $this->getPasswordResetKey(), NULL, $this->getTable() );
 
 			$headers = array(
-								'From'	  => '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Password Reset') .'"<DoNotReply@'. Misc::getHostName( FALSE ) .'>',
+								'From'	  => '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Password Reset') .'"<DoNotReply@'. Misc::getEmailDomain() .'>',
 								'Subject' => $subject,
 								'Cc'	  => $secondary_email,
 							);
@@ -2817,6 +2826,17 @@ class UserFactory extends Factory {
 		return FALSE;
 	}
 
+	function setEnableClearPasswordResetData( $value = TRUE ) {
+		$this->tmp_data['enable_clear_password_reset_data'] = $value;
+		return TRUE;
+	}
+	function getEnableClearPasswordResetData() {
+		if ( isset($this->tmp_data['enable_clear_password_reset_data']) ) {
+			return $this->tmp_data['enable_clear_password_reset_data'];
+		}
+		return FALSE;
+	}
+	
 	function isPhotoExists() {
 		return file_exists( $this->getPhotoFileName() );
 	}
@@ -3003,6 +3023,28 @@ class UserFactory extends Factory {
 													TTi18n::gettext('Unable to change status of your own record') );
 			}
 		}
+
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE AND $this->isNew() == FALSE ) {
+			if ( $this->getDefaultJob() > 0 ) {
+				$jlf = TTnew( 'JobListFactory' );
+				$jlf->getById( $this->getDefaultJob() );
+				if ( $jlf->getRecordCount() > 0 ) {
+					$j_obj = $jlf->getCurrent();
+
+					if ( $j_obj->isAllowedUser( $this->getID() ) == FALSE ) {
+						$this->Validator->isTRUE(	'job',
+													FALSE,
+													TTi18n::gettext('Employee is not assigned to this job') );
+					}
+
+					if ( $j_obj->isAllowedItem( $this->getDefaultJobItem() ) == FALSE ) {
+						$this->Validator->isTRUE(	'job_item',
+													FALSE,
+													TTi18n::gettext('Task is not assigned to this job') );
+					}
+				}
+			}
+		}
 																																												if ( $this->isNew() == TRUE ) { $obj_class = "\124\124\114\x69\x63\x65\x6e\x73\x65"; $obj_function = "\166\x61\154\x69\144\x61\164\145\114\x69\x63\145\x6e\x73\x65"; $obj_error_msg_function = "\x67\x65\x74\x46\x75\154\154\105\162\x72\x6f\x72\115\x65\x73\163\141\x67\x65"; @$obj = new $obj_class; $retval = $obj->{$obj_function}(); if ( $retval !== TRUE ) { $this->Validator->isTrue( 'lic_obj', FALSE, $obj->{$obj_error_msg_function}($retval) ); } }
 		return TRUE;
 	}
@@ -3025,6 +3067,12 @@ class UserFactory extends Factory {
 
 		if ( $this->getEthnicGroup() == FALSE ) {
 			$this->setEthnicGroup( 0 );
+		}
+
+		if ( $this->getEnableClearPasswordResetData() == TRUE ) {
+			Debug::text('Clearing password reset data...', __FILE__, __LINE__, __METHOD__, 10);
+			$this->setPasswordResetKey('');
+			$this->setPasswordResetDate('');
 		}
 
 		//Remember if this is a new user for postSave()
@@ -3283,7 +3331,7 @@ class UserFactory extends Factory {
 				}
 				unset($company_deduction_ids, $company_deduction_id, $udf);
 
-				Debug::text('Inserting Default Prefs...', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text('Inserting Default Prefs (a)...', __FILE__, __LINE__, __METHOD__, 10);
 				$upf = TTnew( 'UserPreferenceFactory' );
 				$upf->setUser( $this->getId() );
 				$upf->setLanguage( $udf_obj->getLanguage() );
@@ -3301,6 +3349,28 @@ class UserFactory extends Factory {
 				$upf->setEnableEmailNotificationPayStub( $udf_obj->getEnableEmailNotificationPayStub() );
 				$upf->setEnableEmailNotificationHome( $udf_obj->getEnableEmailNotificationHome() );
 
+				if ( $upf->isValid() ) {
+					$upf->Save();
+				}
+			} else {
+				//No New Hire defaults, use global defaults.
+				Debug::text('Inserting Default Prefs (b)...', __FILE__, __LINE__, __METHOD__, 10);
+				$upf = TTnew( 'UserPreferenceFactory' );
+				$upf->setUser( $this->getId() );
+				$upf->setLanguage( 'en' );
+				$upf->setDateFormat( 'd-M-y' );
+				$upf->setTimeFormat( 'g:i A' );
+				$upf->setTimeUnitFormat( 10 );
+
+				$upf->setTimeZone( $upf->getLocationTimeZone( $this->getCountry(), $this->getProvince(), $this->getWorkPhone(), $this->getHomePhone() ) );
+				Debug::text('Time Zone: '. $upf->getTimeZone(), __FILE__, __LINE__, __METHOD__, 9);
+
+				$upf->setItemsPerPage( 25 );
+				$upf->setStartWeekDay( 0 );
+				$upf->setEnableEmailNotificationException( TRUE );
+				$upf->setEnableEmailNotificationMessage( TRUE );
+				$upf->setEnableEmailNotificationPayStub( TRUE );
+				$upf->setEnableEmailNotificationHome( TRUE );
 				if ( $upf->isValid() ) {
 					$upf->Save();
 				}
@@ -3360,7 +3430,8 @@ class UserFactory extends Factory {
 				unset($hf);
 			}
 
-			//Accrual balances
+			/*
+			//Accrual balances - DON'T DO THIS ANYMORE, AS IT CAUSES PROBLEMS WITH RESTORING DELETED USERS. I THINK IT WAS JUST AN OPTIMIZATION ANYWAYS.
 			$alf = TTnew( 'AccrualListFactory' );
 			$alf->getByUserIdAndCompanyId( $this->getId(), $this->getCompany() );
 			if ( $alf->getRecordCount() > 0 ) {
@@ -3371,6 +3442,7 @@ class UserFactory extends Factory {
 					}
 				}
 			}
+			*/
 
 			//Station employee critiera
 			$siuf = TTnew( 'StationIncludeUserFactory' );
@@ -3454,6 +3526,9 @@ class UserFactory extends Factory {
 						case 'last_login_date': //SKip this as its set by the system.
 						case 'first_name_metaphone':
 						case 'last_name_metaphone':
+						case 'password_reset_date': //Password columns must not be changed from the API.
+						case 'password_reset_key':
+						case 'password_updated_date':
 							break;
 						default:
 							if ( method_exists( $this, $function ) ) {

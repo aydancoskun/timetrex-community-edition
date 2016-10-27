@@ -40,7 +40,7 @@
  */
 
 /**
- * @package Module_Users
+ * @package Modules\Users
 */
 
 class UserContactFactory extends Factory {

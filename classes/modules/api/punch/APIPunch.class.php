@@ -141,15 +141,13 @@ class APIPunch extends APIFactory {
 
 		//Make sure employees don't try to circumvent the disabled timestamp field. By allowing a small variance.
 		//This also prevents them from leaving the punch window open by accident, then submitting an old punch time.
+		$tmp_epoch = TTDate::getTime();
 		$max_variance = 300; //5minutes.
-		if ( isset($data['time_stamp']) AND ( TTDate::parseDateTime( $data['time_stamp'] ) > (TTDate::getTime() + $max_variance) OR TTDate::parseDateTime( $data['time_stamp'] ) < (TTDate::getTime() - $max_variance) ) ) {
+		if ( isset( $data['time_stamp'] ) AND ( TTDate::parseDateTime( $data['time_stamp'] ) > ( $tmp_epoch + $max_variance ) OR TTDate::parseDateTime( $data['time_stamp'] ) < ( $tmp_epoch - $max_variance ) ) ) {
 			Debug::Text('Punch timestamp outside max variance: '. TTDate::getDate('DATE+TIME', TTDate::parseDateTime( $data['time_stamp'] ) ), __FILE__, __LINE__, __METHOD__, 10);
-			$tmp_epoch = TTDate::getTime();
 			$data['time_stamp'] = TTDate::getDate('DATE+TIME', $tmp_epoch );
-			$data['punch_date'] = TTDate::getDate('DATE', $tmp_epoch );
-			$data['punch_time'] = TTDate::getDate('TIME', $tmp_epoch );
-			unset($tmp_epoch);
 		}
+		unset( $tmp_epoch, $data['punch_date'], $data['punch_time'], $data['actual_time_stamp'], $data['original_time_stamp']); //Only accept full time_stamp field, ignore punch_date/punch_time. This also helps prevent circumvention by the user.
 
 		$validator_stats = array('total_records' => 1, 'valid_records' => 0 );
 

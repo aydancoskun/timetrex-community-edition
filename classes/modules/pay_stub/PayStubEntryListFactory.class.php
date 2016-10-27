@@ -34,13 +34,13 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13366 $
- * $Id: PayStubEntryListFactory.class.php 13366 2014-06-09 17:15:19Z mikeb $
- * $Date: 2014-06-09 10:15:19 -0700 (Mon, 09 Jun 2014) $
+ * $Revision: 14958 $
+ * $Id: PayStubEntryListFactory.class.php 14958 2014-10-28 14:00:49Z mikeb $
+ * $Date: 2014-10-28 07:00:49 -0700 (Tue, 28 Oct 2014) $
  */
 
 /**
- * @package Modules_Pay\Stub
+ * @package Modules\PayStub
  */
 class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAggregate {
 
@@ -1084,7 +1084,6 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 			return FALSE;
 		}
 
-		//$psenlf = new PayStubEntryNameListFactory();
 		$psealf = new PayStubEntryAccountListFactory();
 
 		$ph = array(
@@ -1120,14 +1119,16 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 			return FALSE;
 		}
 
+		$psealf = new PayStubEntryAccountListFactory();
+		
 		$ph = array(
 					'name' => $name,
 					);
 
 		$query = '
 					select	a.*
-					from	'. $this->getTable() .' as a
-							'. $psenlf->getTable() .' as b
+					from	'. $this->getTable() .' as a,
+							'. $psealf->getTable() .' as b
 					where	a.pay_stub_entry_name_id = b.id
 						AND b.name = ?
 						AND a.deleted = 0';

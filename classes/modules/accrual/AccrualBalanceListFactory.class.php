@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13856 $
- * $Id: AccrualBalanceListFactory.class.php 13856 2014-07-24 22:44:29Z mikeb $
- * $Date: 2014-07-24 15:44:29 -0700 (Thu, 24 Jul 2014) $
+ * $Revision: 14958 $
+ * $Id: AccrualBalanceListFactory.class.php 14958 2014-10-28 14:00:49Z mikeb $
+ * $Date: 2014-10-28 07:00:49 -0700 (Tue, 28 Oct 2014) $
  */
 
 /**
@@ -105,34 +105,6 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 		return $this;
 	}
 
-	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
-		}
-
-		if ( $company_id == '') {
-			return FALSE;
-		}
-
-		$ph = array(
-					'id' => $id,
-					'company_id' => $company_id,
-					);
-
-		$query = '
-					select	*
-					from	'. $this->getTable() .'
-					where	id = ?
-						AND company_id = ?
-						AND deleted = 0';
-		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
-
-		$this->ExecuteSQL( $query, $ph );
-
-		return $this;
-	}
-
 	function getByUserIdAndCompanyId($user_id, $company_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
@@ -159,10 +131,12 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 					);
 
 		$query = '
-					select	a.*
+					select	_ADODB_COUNT 
+						a.* 
+						_ADODB_COUNT
 					from	'. $this->getTable() .' as a,
-							'. $uf->getTable() .' as b,
-							'. $apf->getTable() .' as c
+						'. $uf->getTable() .' as b,
+						'. $apf->getTable() .' as c
 					where	a.user_id = b.id
 						AND a.accrual_policy_id = c.id
 						AND b.company_id = ?

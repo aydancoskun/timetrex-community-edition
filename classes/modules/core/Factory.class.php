@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13814 $
- * $Id: Factory.class.php 13814 2014-07-22 17:45:46Z mikeb $
- * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
+ * $Revision: 14797 $
+ * $Id: Factory.class.php 14797 2014-10-16 19:00:06Z mikeb $
+ * $Date: 2014-10-16 12:00:06 -0700 (Thu, 16 Oct 2014) $
  */
 
 /**
@@ -125,7 +125,12 @@ abstract class Factory {
 	 */
 	function getCache($cache_id) {
 		if ( is_object($this->cache) ) {
-			return $this->cache->get($cache_id, $this->getTable(TRUE) );
+			$retval = $this->cache->get($cache_id, $this->getTable(TRUE) );
+			if ( is_object($retval) AND get_class( $retval ) == 'PEAR_Error' ) {
+				Debug::Arr($retval, 'WARNING: Unable to read cache file, likely due to permissions or locking! Cache ID: '. $cache_id .' Table: '. $this->getTable(TRUE) .' File: '. $this->cache->_file, __FILE__, __LINE__, __METHOD__, 10);
+			} else {
+				return $retval;
+			}
 		}
 
 		return FALSE;
@@ -654,7 +659,7 @@ abstract class Factory {
 	}
 
 	function getRecordCount() {
-		if ( isset($this->rs) ) {
+		if ( isset($this->rs->_numOfRows) ) { //Check a deep variable to make sure it is in fact a valid ADODB record set, just in case some other object is passed in.
 			return $this->rs->RecordCount();
 		}
 

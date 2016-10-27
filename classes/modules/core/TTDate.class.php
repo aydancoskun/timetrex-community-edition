@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 13814 $
- * $Id: TTDate.class.php 13814 2014-07-22 17:45:46Z mikeb $
- * $Date: 2014-07-22 10:45:46 -0700 (Tue, 22 Jul 2014) $
+ * $Revision: 14568 $
+ * $Id: TTDate.class.php 14568 2014-09-26 16:32:15Z mikeb $
+ * $Date: 2014-09-26 09:32:15 -0700 (Fri, 26 Sep 2014) $
  */
 
 /**
@@ -455,6 +455,11 @@ class TTDate {
 	}
 
 	public static function parseDateTime($str) {
+		if ( is_array($str) OR is_object($str) ) {
+			Debug::Arr($str, 'Date is array or object, unable to parse...', __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		}
+		
 		//List of all formats that require custom parsing.
 		$custom_parse_formats = array(
 									'd-M-y',

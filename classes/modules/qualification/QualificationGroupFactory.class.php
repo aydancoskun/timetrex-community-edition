@@ -40,7 +40,7 @@
  */
 
 /**
- * @package Module_Users
+ * @package Modules\Qualification
  */
 class QualificationGroupFactory extends Factory {
 	protected $table = 'qualification_group';

@@ -67,7 +67,7 @@ switch ($object_type) {
 		if ( $permission->Check('invoice_config', 'add') OR $permission->Check('invoice_config', 'edit') OR $permission->Check('invoice_config', 'edit_child') OR $permission->Check('invoice_config', 'edit_own') ) {
 			if ( isset($_POST['file_data']) ) {
 				Debug::Text('HTML5 Base64 encoded upload...', __FILE__, __LINE__, __METHOD__, 10);
-				$allowed_upload_content_types = array('image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png');
+				$allowed_upload_content_types = array(FALSE, 'image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png');
 
 				$icf = TTnew( 'InvoiceConfigFactory' );
 				$icf->cleanStoragePath( $current_company->getId() );
@@ -75,25 +75,32 @@ switch ($object_type) {
 				Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
 				if ( isset($dir) ) {
 					@mkdir($dir, 0700, TRUE);
-					if ( disk_free_space( $dir ) > ( $max_upload_file_size * 2 )
+					if ( @disk_free_space( $dir ) > ( $max_upload_file_size * 2 )
 							AND isset($_POST['mime_type'])
 							AND in_array( strtolower( trim($_POST['mime_type']) ), $allowed_upload_content_types ) ) {
+						
 						$file_name = $dir . DIRECTORY_SEPARATOR . 'logo.img';
 						$file_data = base64_decode( $_POST['file_data'] );
 						$file_size = strlen( $file_data );
-						if ( $file_size <= $max_upload_file_size ) {
-							$success = file_put_contents( $file_name, $file_data );
-							if ( $success == FALSE ) {
-								Debug::Text('bUpload Failed! Unable to write data to: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
-								$error = TTi18n::gettext('Unable to upload photo');
+
+						if ( in_array( Misc::getMimeType( $file_data, TRUE ), $allowed_upload_content_types ) ) {
+							if ( $file_size <= $max_upload_file_size ) {
+								$success = file_put_contents( $file_name, $file_data );
+								if ( $success == FALSE ) {
+									Debug::Text('bUpload Failed! Unable to write data to: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
+									$error = TTi18n::gettext('Unable to upload photo');
+								}
+							} else {
+								Debug::Text('cUpload Failed! File too large: '. $file_size, __FILE__, __LINE__, __METHOD__, 10);
+								$error = TTi18n::gettext('File size is too large, must be less than %1 bytes', $max_upload_file_size );
 							}
 						} else {
-							Debug::Text('cUpload Failed! File too large: '. $file_size, __FILE__, __LINE__, __METHOD__, 10);
-							$error = TTi18n::gettext('File size is too large, must be less than %1 bytes', $max_upload_file_size );
+							Debug::Text('dUpload Failed! Incorrect mime_type: '. $_POST['mime_type'], __FILE__, __LINE__, __METHOD__, 10);
+							$error = TTi18n::gettext('Incorrect file type, must be a JPG or PNG image') .' (b)';
 						}
 					} else {
 						Debug::Text('dUpload Failed! Incorrect mime_type: '. $_POST['mime_type'], __FILE__, __LINE__, __METHOD__, 10);
-						$error = TTi18n::gettext('Incorrect file type, must be a JPG or PNG image');
+						$error = TTi18n::gettext('Incorrect file type, must be a JPG or PNG image') .' (a)';
 					}
 				}
 				unset($uf, $ulf);
@@ -163,7 +170,7 @@ switch ($object_type) {
 				if ( isset($dir) ) {
 					@mkdir($dir, 0700, TRUE);
 
-					if ( disk_free_space( $dir ) > ( $max_upload_file_size * 2 ) ) {
+					if ( @disk_free_space( $dir ) > ( $max_upload_file_size * 2 ) ) {
 						$upload_result = $upload->upload('filedata', $dir); //'filedata' is case sensitive
 						//Debug::Arr($_FILES, 'FILES Vars: ', __FILE__, __LINE__, __METHOD__, 10);
 						if ($upload_result) {
@@ -210,7 +217,7 @@ switch ($object_type) {
 		if ( DEMO_MODE == FALSE AND ( $permission->Check('company', 'add') OR $permission->Check('company', 'edit') OR $permission->Check('company', 'edit_child') OR $permission->Check('company', 'edit_own') ) ) {
 			if ( isset($_POST['file_data']) ) { //Only required for images due the image wizard.
 				Debug::Text('HTML5 Base64 encoded upload...', __FILE__, __LINE__, __METHOD__, 10);
-				$allowed_upload_content_types = array('image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png');
+				$allowed_upload_content_types = array(FALSE, 'image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png');
 
 				$cf = TTnew( 'CompanyFactory' );
 				$cf->cleanStoragePath( $current_company->getId() );
@@ -218,25 +225,31 @@ switch ($object_type) {
 				Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
 				if ( isset($dir)  ) {
 					@mkdir($dir, 0700, TRUE);
-					if (	disk_free_space( $dir ) > ( $max_upload_file_size * 2 )
+					if (	@disk_free_space( $dir ) > ( $max_upload_file_size * 2 )
 							AND isset($_POST['mime_type'])
 							AND in_array( strtolower( trim($_POST['mime_type']) ), $allowed_upload_content_types ) ) {
 						$file_name = $dir . DIRECTORY_SEPARATOR . 'logo.img';
 						$file_data = base64_decode( $_POST['file_data'] );
 						$file_size = strlen( $file_data );
-						if ( $file_size <= $max_upload_file_size ) {
-							$success = file_put_contents( $file_name, $file_data );
-							if ( $success == FALSE ) {
-								Debug::Text('bUpload Failed! Unable to write data to: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
-								$error = TTi18n::gettext('Unable to upload photo');
+
+						if ( in_array( Misc::getMimeType( $file_data, TRUE ), $allowed_upload_content_types ) ) {
+							if ( $file_size <= $max_upload_file_size ) {
+								$success = file_put_contents( $file_name, $file_data );
+								if ( $success == FALSE ) {
+									Debug::Text('bUpload Failed! Unable to write data to: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
+									$error = TTi18n::gettext('Unable to upload photo');
+								}
+							} else {
+								Debug::Text('cUpload Failed! File too large: '. $file_size, __FILE__, __LINE__, __METHOD__, 10);
+								$error = TTi18n::gettext('File size is too large, must be less than %1 bytes', $max_upload_file_size );
 							}
 						} else {
-							Debug::Text('cUpload Failed! File too large: '. $file_size, __FILE__, __LINE__, __METHOD__, 10);
-							$error = TTi18n::gettext('File size is too large, must be less than %1 bytes', $max_upload_file_size );
+							Debug::Text('dUpload Failed! Incorrect mime_type: '. $_POST['mime_type'], __FILE__, __LINE__, __METHOD__, 10);
+							$error = TTi18n::gettext('Incorrect file type, must be a JPG or PNG image') .' (b)';
 						}
 					} else {
 						Debug::Text('dUpload Failed! Incorrect mime_type: '. $_POST['mime_type'], __FILE__, __LINE__, __METHOD__, 10);
-						$error = TTi18n::gettext('Incorrect file type, must be a JPG or PNG image');
+						$error = TTi18n::gettext('Incorrect file type, must be a JPG or PNG image') .' (a)';
 					}
 				}
 				unset($uf, $ulf);
@@ -255,7 +268,7 @@ switch ($object_type) {
 				if ( isset($dir) ) {
 					@mkdir($dir, 0700, TRUE);
 
-					if ( disk_free_space( $dir ) > ( $max_upload_file_size * 2 ) ) {
+					if ( @disk_free_space( $dir ) > ( $max_upload_file_size * 2 ) ) {
 						//$upload_result = $upload->upload("userfile", $dir);
 						$upload_result = $upload->upload('filedata', $dir); //'filedata' is case sensitive
 						//var_dump($upload ); //file data
@@ -300,7 +313,7 @@ switch ($object_type) {
 
 				if ( isset($_POST['file_data']) ) { //Only required for images due the image wizard.
 					Debug::Text('HTML5 Base64 encoded upload...', __FILE__, __LINE__, __METHOD__, 10);
-					$allowed_upload_content_types = array('image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png');
+					$allowed_upload_content_types = array(FALSE, 'image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png');
 
 					if ( $ulf->getRecordCount() == 1 ) {
 						$uf = TTnew( 'UserFactory' );
@@ -309,25 +322,31 @@ switch ($object_type) {
 						Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
 						if ( isset($dir) ) {
 							@mkdir($dir, 0700, TRUE);
-							if ( disk_free_space( $dir ) > ( $max_upload_file_size * 2 )
+							if ( @disk_free_space( $dir ) > ( $max_upload_file_size * 2 )
 									AND isset($_POST['mime_type'])
 									AND in_array( strtolower( trim($_POST['mime_type']) ), $allowed_upload_content_types ) ) {
 								$file_name = $dir . DIRECTORY_SEPARATOR . (int)$object_id .'.img';
 								$file_data = base64_decode( $_POST['file_data'] );
 								$file_size = strlen( $file_data );
-								if ( $file_size <= $max_upload_file_size ) {
-									$success = file_put_contents( $file_name, $file_data );
-									if ( $success == FALSE ) {
-										Debug::Text('bUpload Failed! Unable to write data to: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
-										$error = TTi18n::gettext('Unable to upload photo');
+
+								if ( in_array( Misc::getMimeType( $file_data, TRUE ), $allowed_upload_content_types ) ) {
+									if ( $file_size <= $max_upload_file_size ) {
+										$success = file_put_contents( $file_name, $file_data );
+										if ( $success == FALSE ) {
+											Debug::Text('bUpload Failed! Unable to write data to: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
+											$error = TTi18n::gettext('Unable to upload photo');
+										}
+									} else {
+										Debug::Text('cUpload Failed! File too large: '. $file_size, __FILE__, __LINE__, __METHOD__, 10);
+										$error = TTi18n::gettext('File size is too large, must be less than %1 bytes', $max_upload_file_size );
 									}
 								} else {
-									Debug::Text('cUpload Failed! File too large: '. $file_size, __FILE__, __LINE__, __METHOD__, 10);
-									$error = TTi18n::gettext('File size is too large, must be less than %1 bytes', $max_upload_file_size );
+									Debug::Text('dUpload Failed! Incorrect mime_type: '. $_POST['mime_type'], __FILE__, __LINE__, __METHOD__, 10);
+									$error = TTi18n::gettext('Incorrect file type, must be a JPG or PNG image') .' (b)';
 								}
 							} else {
 								Debug::Text('dUpload Failed! Incorrect mime_type: '. $_POST['mime_type'], __FILE__, __LINE__, __METHOD__, 10);
-								$error = TTi18n::gettext('Incorrect file type, must be a JPG or PNG image');
+								$error = TTi18n::gettext('Incorrect file type, must be a JPG or PNG image') .' (a)';
 							}
 						}
 					} else {
@@ -350,7 +369,7 @@ switch ($object_type) {
 						if ( isset($dir) ) {
 							@mkdir($dir, 0700, TRUE);
 
-							if ( disk_free_space( $dir ) > ( $max_upload_file_size * 2 ) ) {
+							if ( @disk_free_space( $dir ) > ( $max_upload_file_size * 2 ) ) {
 								$upload_result = $upload->upload('filedata', $dir); //'filedata' is case sensitive
 								if ($upload_result) {
 									$success = $upload_result .' '. TTi18n::gettext('Successfully Uploaded');
@@ -392,7 +411,7 @@ switch ($object_type) {
 			if ( isset($dir) ) {
 				@mkdir($dir, 0700, TRUE);
 
-				if ( disk_free_space( $dir ) > ( $max_upload_file_size * 2 ) ) {
+				if ( @disk_free_space( $dir ) > ( $max_upload_file_size * 2 ) ) {
 					$upload_result = $upload->upload("filedata", $dir);
 					//var_dump($upload ); //file data
 					if ($upload_result) {
@@ -441,10 +460,14 @@ switch ($object_type) {
 			$import = TTnew( 'Import' );
 			$import->company_id = $current_company->getId();
 			$import->user_id = $current_user->getId();
+			$import->deleteLocalFile(); //Make sure we delete the original file upon uploading, so if there is an error and the file upload is denied we don't show old files.
+
+			//Sometimes Excel uploads .CSV files as application/vnd.ms-excel
+			$valid_mime_types = array('text/plain','plain/text','text/comma-separated-values', 'text/csv', 'application/csv', 'text/anytext', 'application/octet-stream' );  // comma separated string, or array
 
 			//Debug::setVerbosity(11);
 			$upload->set_max_filesize($max_upload_file_size); //128mb or less, though I'm not 100% sure this is even working.
-			$upload->set_acceptable_types( array('text/plain','plain/text','text/comma-separated-values', 'text/csv', 'application/csv', 'text/anytext', 'application/octet-stream' ) ); // comma separated string, or array
+			//$upload->set_acceptable_types( $valid_mime_types ); //Ignore mime type sent by browser and use mime extension instead.
 			$upload->set_overwrite_mode(1); //Overwrite
 
 			$dir = $import->getStoragePath();
@@ -452,15 +475,16 @@ switch ($object_type) {
 			if ( isset($dir) ) {
 				@mkdir($dir, 0700, TRUE);
 
-				if ( disk_free_space( $dir ) > ( $max_upload_file_size * 2 ) ) {
+				if ( @disk_free_space( $dir ) > ( $max_upload_file_size * 2 ) ) {
 					$upload_result = $upload->upload('filedata', $dir); //'filedata' is case sensitive
 					//Debug::Arr($_FILES, 'FILES Vars: ', __FILE__, __LINE__, __METHOD__, 10);
+					//Debug::Arr($upload->get_file(), 'File Upload Data: ', __FILE__, __LINE__, __METHOD__, 10);
 					if ($upload_result) {
 						$upload_file_arr = $upload->get_file();
 
 						//mime_content_type is being deprecated in PHP, and it doesn't work properly on Windows. So if its not available just accept any file type.
 						$mime_type = ( function_exists('mime_content_type') ) ? mime_content_type( $dir.'/'.$upload_file_arr['name'] ) : FALSE;
-						if ( $mime_type === FALSE OR in_array( $mime_type, array('text/plain','plain/text','text/comma-separated-values', 'text/csv', 'application/csv', 'text/anytext') ) ) {
+						if ( $mime_type === FALSE OR in_array( $mime_type, $valid_mime_types ) ) {
 							Debug::Text('Upload Success: '. $upload_result, __FILE__, __LINE__, __METHOD__, 10);
 							$success = $upload_result .' '. TTi18n::gettext('Successfully Uploaded');
 						} else {
