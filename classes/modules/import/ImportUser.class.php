@@ -197,6 +197,8 @@ class ImportUser extends Import {
 			Debug::Text('Unable to find existing employee... Creating a new one...', __FILE__, __LINE__, __METHOD__,10);
 
 			$default_data = $this->getObject()->getUserDefaultData();
+			//Debug::Arr($default_data, 'Default Data: ', __FILE__, __LINE__, __METHOD__,10);
+
 			$uf = TTnew('UserFactory');
 
 			if ( !is_array($default_data) ) {
@@ -234,6 +236,10 @@ class ImportUser extends Import {
 				$raw_row['currency_id'] = $default_data['currency_id'];
 			}
 
+			//Merge the default data with row data.
+			//This must go at the end so it doesn't overwrite imported data.
+			$raw_row = array_merge( (array)$default_data, $raw_row );
+			//Debug::Arr($raw_row, 'Row+Default data: ', __FILE__, __LINE__, __METHOD__,10);
 		}
 
 		//Debug::Arr($raw_row, 'postParse Row: ', __FILE__, __LINE__, __METHOD__,10);
@@ -493,7 +499,7 @@ class ImportUser extends Import {
 			$this->getJobOptions();
 		}
 
-		Debug::Text('zzzCreated new group name: '. $input .' ID: '. $parse_hint, __FILE__, __LINE__, __METHOD__,10);
+		//Debug::Text('Created new group name: '. $input .' ID: '. $parse_hint, __FILE__, __LINE__, __METHOD__,10);
 		if ( is_numeric( $input ) AND strtolower($parse_hint) == 'manual_id' ) {
 			//Find based on manual_id/code.
 			$retval = $this->findClosestMatch( $input, $this->job_manual_id_options, 90 );
@@ -687,25 +693,5 @@ class ImportUser extends Import {
 
 		return $retval;
 	}
-
-	function parse_bank_institution( $input, $default_value = NULL, $parse_hint = NULL ) {
-		$val = new Validator();
-		$retval = $val->stripNonNumeric($input);
-
-		return $retval;
-	}
-	function parse_bank_transit( $input, $default_value = NULL, $parse_hint = NULL ) {
-		$val = new Validator();
-		$retval = $val->stripNonNumeric($input);
-
-		return $retval;
-	}
-	function parse_bank_account( $input, $default_value = NULL, $parse_hint = NULL ) {
-		$val = new Validator();
-		$retval = $val->stripNonNumeric($input);
-
-		return $retval;
-	}
-
 }
 ?>

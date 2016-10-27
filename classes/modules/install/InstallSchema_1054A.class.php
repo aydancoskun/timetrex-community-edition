@@ -129,7 +129,10 @@ class InstallSchema_1054A extends InstallSchema_Base {
                                 }
                                 unset($udlf, $ud_obj);
 
-								$cd_obj->Save();
+								$cd_obj->ignore_column_list = TRUE; //Prevents SQL errors due to new columns being added later on.
+								if ( $cd_obj->isValid() ) {
+									$cd_obj->Save();
+								}
 							}
 
 						}
@@ -150,6 +153,8 @@ class InstallSchema_1054A extends InstallSchema_Base {
                             Debug::text('Medicare Employer Tax / Deduction Matches... Adjusting specific formula Percent...', __FILE__, __LINE__, __METHOD__,9);
 							$include_pay_stub_accounts = $cd_obj->getIncludePayStubEntryAccount();
 							$exclude_pay_stub_accounts = $cd_obj->getExcludePayStubEntryAccount();
+							
+							$cd_obj->ignore_column_list = TRUE; //Prevents SQL errors due to new columns being added later on.
 							if ( $cd_obj->isValid() ) {
 								$cd_obj->Save();
 							}
@@ -171,6 +176,8 @@ class InstallSchema_1054A extends InstallSchema_Base {
                             Debug::text('SS Employee Tax / Deduction Matches... Adjusting specific formula Percent...', __FILE__, __LINE__, __METHOD__,9);
 							$include_pay_stub_accounts = $cd_obj->getIncludePayStubEntryAccount();
 							$exclude_pay_stub_accounts = $cd_obj->getExcludePayStubEntryAccount();
+
+							$cd_obj->ignore_column_list = TRUE; //Prevents SQL errors due to new columns being added later on.
 							if ( $cd_obj->isValid() ) {
 								$cd_obj->Save();
 							}
@@ -184,6 +191,7 @@ class InstallSchema_1054A extends InstallSchema_Base {
 					$cdlf->getByCompanyIdAndName($c_obj->getID(), 'Social Security - Employer' );
 					if ( $cdlf->getRecordCount() == 1 ) {
 						$cd_obj = $cdlf->getCurrent();
+
 						Debug::text('Found SS Employer Tax / Deduction, ID: '. $c_obj->getID() .' Percent: '. $cd_obj->getUserValue1() .' Wage Base: '. $cd_obj->getUserValue2(), __FILE__, __LINE__, __METHOD__,9);
 
 						if ( ( $cd_obj->getCalculation() == 10 ) OR ( $cd_obj->getCalculation() == 15 ) ) {
@@ -201,6 +209,7 @@ class InstallSchema_1054A extends InstallSchema_Base {
 								$cd_obj->setIncludePayStubEntryAccount( array( $psea_obj->getTotalGross() ));
 							}
 
+							$cd_obj->ignore_column_list = TRUE; //Prevents SQL errors due to new columns being added later on.
 							if ( $cd_obj->isValid() ) {
 								$cd_obj->Save();
 							}

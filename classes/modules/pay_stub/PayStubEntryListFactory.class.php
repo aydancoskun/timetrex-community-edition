@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8371 $
- * $Id: PayStubEntryListFactory.class.php 8371 2012-11-22 21:18:57Z ipso $
- * $Date: 2012-11-22 13:18:57 -0800 (Thu, 22 Nov 2012) $
+ * $Revision: 10322 $
+ * $Id: PayStubEntryListFactory.class.php 10322 2013-07-01 19:04:23Z ipso $
+ * $Date: 2013-07-01 12:04:23 -0700 (Mon, 01 Jul 2013) $
  */
 
 /**
@@ -1322,7 +1322,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		return $this;
 	}
 
-	function getDateReportByCompanyIdAndUserIdAndPayPeriodId($company_id, $user_ids, $pay_period_ids, $where = NULL, $order = NULL) {
+	function getDateReportByCompanyIdAndUserIdAndPayPeriodId($company_id, $user_ids, $pay_period_ids, $exclude_ytd_adjustments = FALSE, $where = NULL, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -1337,6 +1337,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 
 		$psf = new PayStubFactory();
 		$uf = new UserFactory();
+		$psaf = new PayStubAmendmentFactory();
 
 		$ph = array(
 					'company_id' => $company_id,
@@ -1346,18 +1347,21 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 					select 	b.user_id as user_id,
 							a.pay_stub_entry_name_id as pay_stub_entry_name_id,
 							b.transaction_date as transaction_date,
-							sum(amount) as amount,
-							max(ytd_amount) as ytd_amount
-					from	'. $this->getTable() .' as a,
-							'. $psf->getTable() .' as b,
-							'. $uf->getTable() .' as c
-					where 	a.pay_stub_id = b.id
-						AND b.user_id = c.id
-						AND	c.company_id = ?
+							sum(a.amount) as amount,
+							max(a.ytd_amount) as ytd_amount
+					from	'. $this->getTable() .' as a
+						LEFT JOIN '. $psaf->getTable() .' as d ON a.pay_stub_amendment_id = d.id
+						LEFT JOIN '. $psf->getTable() .' as b ON a.pay_stub_id = b.id
+						LEFT JOIN '. $uf->getTable() .' as c ON b.user_id = c.id
+					where c.company_id = ?
 					';
 
 		if ( $pay_period_ids != '' AND isset($pay_period_ids[0]) AND !in_array(-1, (array)$pay_period_ids) ) {
 			$query .= ' AND b.pay_period_id in ('. $this->getListSQL($pay_period_ids, $ph) .') ';
+		}
+
+		if ( isset($exclude_ytd_adjustments) AND (bool)$exclude_ytd_adjustments == TRUE ) {
+			$query .= ' AND ( d.ytd_adjustment is NULL OR d.ytd_adjustment = 0 )';
 		}
 
 		$query .= '
@@ -1589,6 +1593,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		$utf = new UserTitleFactory();
 		$psf = new PayStubFactory();
 		$uf = new UserFactory();
+		$psaf = new PayStubAmendmentFactory();
 
 		$ph = array(
 					'company_id' => $company_id,
@@ -1620,6 +1625,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 								sum(aa.amount) as amount,
 								max(aa.ytd_amount) as ytd_amount
 							from '. $this->getTable() .' as aa
+							LEFT JOIN '. $psaf->getTable() .' as hh ON aa.pay_stub_amendment_id = hh.id
 							LEFT JOIN '. $psf->getTable() .' as bb ON aa.pay_stub_id = bb.id
 							LEFT JOIN '. $uf->getTable() .' as cc ON bb.user_id = cc.id
 							LEFT JOIN '. $bf->getTable() .' as dd ON cc.default_branch_id = dd.id
@@ -1635,6 +1641,10 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 							$query .= ( isset($filter_data['include_user_id']) ) ? $this->getWhereClauseSQL( 'cc.id', $filter_data['include_user_id'], 'numeric_list', $ph ) : NULL;
 							$query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'cc.id', $filter_data['exclude_user_id'], 'not_numeric_list', $ph ) : NULL;
 							$query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'cc.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
+
+							if ( isset($filter_data['exclude_ytd_adjustments']) AND (bool)$filter_data['exclude_ytd_adjustments'] == TRUE ) {
+								$query .= ' AND ( hh.ytd_adjustment is NULL OR hh.ytd_adjustment = 0 )';
+							}
 
 							if ( isset($filter_data['include_subgroups']) AND (bool)$filter_data['include_subgroups'] == TRUE ) {
 								$uglf = new UserGroupListFactory();
@@ -1652,55 +1662,6 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 
 							//$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => $company_id, 'object_type_id' => 200, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 
-/*
-							if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-								$query  .=	' AND cc.id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
-							}
-							if ( isset($filter_data['id']) AND isset($filter_data['id'][0]) AND !in_array(-1, (array)$filter_data['id']) ) {
-								$query  .=	' AND cc.id in ('. $this->getListSQL($filter_data['id'], $ph) .') ';
-							}
-							if ( isset($filter_data['user_id']) AND isset($filter_data['user_id'][0]) AND !in_array(-1, (array)$filter_data['user_id']) ) {
-								$query  .=	' AND cc.id in ('. $this->getListSQL($filter_data['user_id'], $ph) .') ';
-							}
-							if ( isset($filter_data['include_user_id']) AND isset($filter_data['include_user_id'][0]) AND !in_array(-1, (array)$filter_data['include_user_id']) ) {
-								$query  .=	' AND cc.id in ('. $this->getListSQL($filter_data['include_user_id'], $ph) .') ';
-							}
-							if ( isset($filter_data['exclude_user_id']) AND isset($filter_data['exclude_user_id'][0]) AND !in_array(-1, (array)$filter_data['exclude_user_id']) ) {
-								$query  .=	' AND cc.id not in ('. $this->getListSQL($filter_data['exclude_user_id'], $ph) .') ';
-							}
-
-							if ( isset($filter_data['exclude_id']) AND isset($filter_data['exclude_id'][0]) AND !in_array(-1, (array)$filter_data['exclude_id']) ) {
-								$query  .=	' AND cc.id not in ('. $this->getListSQL($filter_data['exclude_id'], $ph) .') ';
-							}
-							if ( isset($filter_data['status_id']) AND isset($filter_data['status_id'][0]) AND !in_array(-1, (array)$filter_data['status_id']) ) {
-								$query  .=	' AND cc.status_id in ('. $this->getListSQL($filter_data['status_id'], $ph) .') ';
-							}
-							if ( isset($filter_data['group_id']) AND isset($filter_data['group_id'][0]) AND !in_array(-1, (array)$filter_data['group_id']) ) {
-								if ( isset($filter_data['include_subgroups']) AND (bool)$filter_data['include_subgroups'] == TRUE ) {
-									$uglf = new UserGroupListFactory();
-									$filter_data['group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['group_id'], TRUE);
-								}
-								$query  .=	' AND cc.group_id in ('. $this->getListSQL($filter_data['group_id'], $ph) .') ';
-							}
-							if ( isset($filter_data['default_branch_id']) AND isset($filter_data['default_branch_id'][0]) AND !in_array(-1, (array)$filter_data['default_branch_id']) ) {
-								$query  .=	' AND cc.default_branch_id in ('. $this->getListSQL($filter_data['default_branch_id'], $ph) .') ';
-							}
-							if ( isset($filter_data['default_department_id']) AND isset($filter_data['default_department_id'][0]) AND !in_array(-1, (array)$filter_data['default_department_id']) ) {
-								$query  .=	' AND cc.default_department_id in ('. $this->getListSQL($filter_data['default_department_id'], $ph) .') ';
-							}
-							if ( isset($filter_data['title_id']) AND isset($filter_data['title_id'][0]) AND !in_array(-1, (array)$filter_data['title_id']) ) {
-								$query  .=	' AND cc.title_id in ('. $this->getListSQL($filter_data['title_id'], $ph) .') ';
-							}
-							if ( isset($filter_data['sex_id']) AND isset($filter_data['sex_id'][0]) AND !in_array(-1, (array)$filter_data['sex_id']) ) {
-								$query  .=	' AND cc.sex_id in ('. $this->getListSQL($filter_data['sex_id'], $ph) .') ';
-							}
-							if ( isset($filter_data['currency_id']) AND isset($filter_data['currency_id'][0]) AND !in_array(-1, (array)$filter_data['currency_id']) ) {
-								$query  .=	' AND bb.currency_id in ('. $this->getListSQL($filter_data['currency_id'], $ph) .') ';
-							}
-							if ( isset($filter_data['pay_period_id']) AND isset($filter_data['pay_period_id'][0]) AND !in_array(-1, (array)$filter_data['pay_period_id']) ) {
-								$query .= 	' AND bb.pay_period_id in ('. $this->getListSQL($filter_data['pay_period_id'], $ph) .') ';
-							}
-*/
 							if ( isset($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
 								$ph[] = $this->db->BindTimeStamp( strtolower(trim($filter_data['start_date'])) );
 								$query  .=	' AND bb.transaction_date >= ?';

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9968 $
- * $Id: AddRecurringScheduleShift.php 9968 2013-05-23 00:32:49Z ipso $
- * $Date: 2013-05-22 17:32:49 -0700 (Wed, 22 May 2013) $
+ * $Revision: 10483 $
+ * $Id: AddRecurringScheduleShift.php 10483 2013-07-18 17:05:08Z ipso $
+ * $Date: 2013-07-18 10:05:08 -0700 (Thu, 18 Jul 2013) $
  */
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
@@ -122,14 +122,15 @@ if ( $clf->getRecordCount() > 0 ) {
 							Debug::text('Start Date: '. TTDate::getDate('DATE+TIME', $start_date ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date ) .' Max Start/Stop Window: '. $max_start_stop_window, __FILE__, __LINE__, __METHOD__, 10);
 
 							//Make sure employee is employed in this time frame.
+							//Need to handle the hire_date and lookup_shift_offset properly so shifts can be created on the employees hire date.
 							if ( isset($user_obj) AND
 									(
-										( $user_obj->getHireDate() != '' AND $start_date <= $user_obj->getHireDate() )
+										( $user_obj->getHireDate() != '' AND $start_date <= TTDate::getBeginDayEpoch( ($user_obj->getHireDate() - $lookup_shift_offset) ) )
 										OR
 										( $user_obj->getTerminationDate() != '' AND $start_date > $user_obj->getTerminationDate() )
 									)
 									) {
-								Debug::text('Skipping User due to hire/termination date...'. $user_id, __FILE__, __LINE__, __METHOD__, 10);
+								Debug::text('Skipping User due to hire/termination date... '. $user_id  .' Start Date: '. TTDate::getDate('DATE+TIME', $start_date ) .' Hire Date: '. TTDate::getDate('DATE+TIME', $user_obj->getHireDate() ), __FILE__, __LINE__, __METHOD__, 10);
 								continue; //Skip user.
 							}
 
@@ -233,8 +234,9 @@ if ( $clf->getRecordCount() > 0 ) {
 
 												//Only for holidays do we calculate the day right away.
 												//So they don't have to wait 24hrs to see stat time.
-												if ( $status_id == 20
-														AND $rsc_obj->getAutoFill() == FALSE ) {
+												//Also need to recalculate if the schedule was added after the schedule has already started.
+												if ( ( $status_id == 20 AND $rsc_obj->getAutoFill() == FALSE )
+														OR $sf->getStartTime() <= $current_epoch ) {
 													$sf->setEnableReCalculateDay(TRUE);
 												} else {
 													$sf->setEnableReCalculateDay(FALSE); //Don't need to re-calc right now?

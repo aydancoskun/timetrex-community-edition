@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 6919 $
- * $Id: EditPayStubAmendment.php 6919 2012-05-31 18:55:06Z ipso $
- * $Date: 2012-05-31 11:55:06 -0700 (Thu, 31 May 2012) $
+ * $Revision: 10417 $
+ * $Id: EditPayStubAmendment.php 10417 2013-07-11 22:21:13Z ipso $
+ * $Date: 2013-07-11 15:21:13 -0700 (Thu, 11 Jul 2013) $
  */
 require_once('../../includes/global.inc.php');
 require_once(Environment::getBasePath() .'includes/Interface.inc.php');
@@ -104,6 +104,7 @@ switch ($action) {
 				}
 
 				$psaf->setDescription($pay_stub_amendment_data['description']);
+				$psaf->setPrivateDescription($pay_stub_amendment_data['private_description']);
 
 				$psaf->setEffectiveDate( $pay_stub_amendment_data['effective_date'] );
 
@@ -167,6 +168,7 @@ switch ($action) {
 									'percent_amount_entry_name_id' => $pay_stub_amendment->getPercentAmountEntryNameId(),
 
 									'description' => $pay_stub_amendment->getDescription(),
+									'private_description' => $pay_stub_amendment->getPrivateDescription(),
 
 									'authorized' => $pay_stub_amendment->getAuthorized(),
 									'ytd_adjustment' => $pay_stub_amendment->getYTDAdjustment(),

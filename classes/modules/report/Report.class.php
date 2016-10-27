@@ -1081,6 +1081,7 @@ class Report {
 	//Group Data - Automatically include all static columns that are also selected to be viewed, so the user doesn't have to re-select all columns twice.
 	//				Its actually the opposite, select on NON-static columns, and ignore all static columns except the grouped columns.
 	function group() {
+
 		$this->profiler->startTimer( 'group' );
 
 		if ( is_array( $this->formatGroupConfig() ) AND count( $this->formatGroupConfig() ) > 0 ) {
@@ -1100,15 +1101,21 @@ class Report {
 
 	//Sort data
 	function sort() {
+
+        if ( is_array( $this->data ) == FALSE ) {
+            return TRUE;
+        }
 		$this->profiler->startTimer( 'sort' );
 		if ( is_array( $this->getSortConfig() ) AND count( $this->getSortConfig() ) > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->data), NULL, TTi18n::getText('Sorting Data...') );
 
 			Debug::Arr($this->getSortConfig(), 'Sort Config: ', __FILE__, __LINE__, __METHOD__,10);
+
 			$this->data = Sort::arrayMultiSort( $this->data, $this->getSortConfig() );
 
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), count($this->data) );
 		}
+
 		$this->profiler->stopTimer( 'sort' );
 
 		//Debug::Arr($this->data, 'Sort Data: ', __FILE__, __LINE__, __METHOD__,10);
@@ -1164,7 +1171,7 @@ class Report {
 			if ( $selected_static_columns > 0 ) {
 				$grand_total_column = $this->getReportColumns( $sub_total_columns_count );
 				if ( isset($static_column_options[$grand_total_column]) ) {
-					$total[0][$grand_total_column] = TTi18n::getText('Grand Total').'['. count($this->data) .']:';
+					$total[0][$grand_total_column] = array('display' => TTi18n::getText('Grand Total').'['. count($this->data) .']:'); //Use 'display' array so column formatter isn't run on this.
 				} else {
 					Debug::Text('Skipping Grand Total label due to not being static...', __FILE__, __LINE__, __METHOD__,10);
 				}
@@ -1494,8 +1501,24 @@ class Report {
 			foreach( $this->data as $key => $row ) {
 				if ( is_array($row) ) {
 					foreach( $row as $column => $value ) {
+						if ( is_array($row[$column]) AND isset($row[$column]['display']) ) { //Found sorting array, use display column.
+							$this->data[$key][$column] = $row[$column]['display'];
+						} else {
+							if ( isset($column_format_config[$column]) ) {
+								//Optimization to lower memory usage when the column formatter doesn't do anything, prevent overwriting the data in the array.
+								//$this->profiler->startTimer( 'columnFormatter' );
+								$formatted_value = $this->columnFormatter( $column_format_config[$column], $column, $value, $format );
+								if ( $formatted_value != $value ) {
+									$this->data[$key][$column] = $formatted_value;
+								}
+								//$this->profiler->stopTimer( 'columnFormatter' );
+							} else {
+								//Don't modify any data.
+							}
+						}
+
+						/*
 						if ( isset($column_format_config[$column]) ) {
-							//$this->data[$key][$column] = $this->columnFormatter( $column_format_config[$column], $column, $value, $format );
 							//Optimization to lower memory usage when the column formatter doesn't do anything, prevent overwriting the data in the array.
 							//$this->profiler->startTimer( 'columnFormatter' );
                             $formatted_value = $this->columnFormatter( $column_format_config[$column], $column, $value, $format );
@@ -1510,6 +1533,7 @@ class Report {
 								//Don't modify any data.
 							}
 						}
+						*/
 					}
 				}
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
@@ -1770,22 +1794,29 @@ class Report {
 			return FALSE;
 		}
 
-		$this->preProcess( $format );  
+		$this->preProcess( $format );
         
         $this->currencyConvertToBase();
 
-        $this->calculateCustomColumns();        
+        $this->calculateCustomColumns( 20 ); //Pre-Group
+
         $this->calculateCustomColumnFilters( 30 ); //Pre-Group
+
 		$this->group();
+
+		$this->calculateCustomColumns( 21 ); //Post-Group: things like round() functions normally need to be done post-group, otherwise they are rounding already rounded values.
+
         $this->calculateCustomColumnFilters( 31 ); //Post-Group //Put after grouping is handled, otherwise the user might get unexpected results based on the data they actually see.
-             
-        
+
 		$this->sort(); //Sort needs to come before subTotal, as subTotal will need to re-sort the data in order to fit the sub-totals in.
+
 		//if ( $format != 'csv' AND $format != 'xml' ) { //Exclude total/sub-totals for CSV/XML format
 		if ( $format == 'pdf' OR $format == 'raw' OR stripos( $format, 'pdf_' ) !== FALSE ) {  //Only total/subtotal for PDF/RAW formats.
 			$this->Total();
 			$this->subTotal();
 		}
+
+
 
 		//Rekey data array starting at 0 sequentially.
 		//This prevents the progress bar from jumping all over or moving in reverse.
@@ -1798,8 +1829,13 @@ class Report {
 			//But we need to size the PDF *after* postProcess runs.
 			$this->chart();
 		}
+
         
 		$this->postProcess( $format );
+
+
+
+
 		$this->_pdf_Initialize(); //Size page after postProcess() is done. This will resize the page if its already been initialized for charting purposes.
         
 		//Check after data is postProcessed to make sure we are still below our load threshold.
@@ -2789,7 +2825,7 @@ class Report {
 							if ( is_object( $value ) ) {
 								$this->profiler->startTimer( 'Draw Cell Object' );
 								$cell_obj_start_x = $this->pdf->getX();
-								$value->display( 'pdf', $cell_width, $row_cell_height );
+								$value->display( 'pdf', $cell_width, $row_cell_height, $r );
 								$this->pdf->setX( $cell_obj_start_x+$cell_width ); //Make sure we always make the cell the proper width.
 								unset($cell_obj_start_x);
 								$this->profiler->stopTimer( 'Draw Cell Object' );
@@ -2924,10 +2960,10 @@ class Report {
         return FALSE;
     }
 
-    function calculateCustomColumns() {
+    function calculateCustomColumns( $type_id ) {
 		if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 			$this->profiler->startTimer( 'calculateCustomColumns' );
-			ReportCustomColumnFactory::calculateCustomColumns( $this );
+			ReportCustomColumnFactory::calculateCustomColumns( $this, $type_id );
 			$this->profiler->stopTimer( 'calculateCustomColumns' );
 		}
 
@@ -2991,7 +3027,7 @@ class ReportCellBarcode extends ReportCell {
 		return $this->report_obj->_pdf_scaleSize( 50 );
 	}
 
-	function display( $format, $max_width, $max_height ) {
+	function display( $format, $max_width, $max_height, $row_i = 0 ) {
 		if ( $format == 'pdf' ) {
 			$style = array(
 				//'position' => '',
@@ -3035,14 +3071,35 @@ class ReportCellQRcode extends ReportCell {
 		return $this->report_obj->_pdf_scaleSize( 25 );
 	}
 
-	function display( $format, $max_width, $max_height ) {
+	function display( $format, $max_width, $max_height, $row_i = 0 ) {
 		if ( $format == 'pdf' ) {
-			$style = array(
-				'align' => 'R',
-				'stretch' => TRUE,
-			);
 
-			$this->report_obj->pdf->write2DBarcode( $this->value, 'QRCODE,H', $this->report_obj->pdf->getX(), '', $max_width, $max_height-2, '', $style, 'T');
+			$width = $max_width;
+			$height = $max_height;
+
+			//Make sure we don't stretch the QRcode as it makes it difficult to read.
+			if ( $width > $height ) {
+				$width = $height;
+			}
+			if ( $height > $width ) {
+				$height = $width;
+			}
+
+			if ( $row_i % 2 == 0 ) {
+				$bgcolor = 255;
+			} else {
+				$bgcolor = 250;
+			}
+
+			$style = array(
+				'vpadding' => 3,
+				'hpadding' => (($max_width-$width)/2)-3,
+				'position' => 'R',
+				'bgcolor' => $bgcolor,
+			);
+			
+			//Debug::Arr($style, ' Width: '. $width .' Height: '. $height .' Max Width: '. $max_width, __FILE__, __LINE__, __METHOD__,10);
+			$this->report_obj->pdf->write2DBarcode( $this->value, 'QRCODE,H', $this->report_obj->pdf->getX(), '', $max_width, $max_height, $style, 'T', TRUE );
 		}
 	}
 }

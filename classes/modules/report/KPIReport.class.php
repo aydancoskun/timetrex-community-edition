@@ -101,8 +101,11 @@ class KPIReport extends Report {
                                         '-2140-kpi_type_id' => TTi18n::gettext('KPI Type'),
                                         '-2150-user_review_control_status_id' => TTi18n::gettext('Review Status'),
                                         '-2160-user_review_control_type_id' => TTi18n::gettext('Review Type'),
+
                                         '-2170-term_id' => TTi18n::gettext('Review Terms'),
                                         '-2180-severity_id' => TTi18n::gettext('Review Severity/Importance'),
+
+                                        '-2188-review_tag' => TTi18n::gettext('Review Tags'),
 
                                         '-3000-custom_filter' => TTi18n::gettext('Custom Filter'),
                                         
@@ -127,7 +130,7 @@ class KPIReport extends Report {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
 					// So just get custom columns with Selection and Formula.
-					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), array(10,20),NULL, 'KPIReport', 'custom_column' );
+					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'),NULL, 'KPIReport', 'custom_column' );
 					if ( is_array($custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $custom_column_labels, 9500 );
 					}
@@ -136,13 +139,13 @@ class KPIReport extends Report {
             case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
-					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), array(30,31), NULL, 'KPIReport', 'custom_column' );
+					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'KPIReport', 'custom_column' );
 				}
                 break;
             case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
-					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), array(10,20), array(10,40,50,90), 'KPIReport', 'custom_column' );
+                    $report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'KPIReport', 'custom_column' );
 					if ( is_array($report_dynamic_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
 					}
@@ -151,7 +154,7 @@ class KPIReport extends Report {
             case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
-					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), array(10,20), array(20,30,60,70,80,100,110), 'KPIReport', 'custom_column' );
+                    $report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'KPIReport', 'custom_column' );
 					if ( is_array($report_static_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
 					}
@@ -196,12 +199,14 @@ class KPIReport extends Report {
 										'-1220-user.work_email' => TTi18n::gettext('Work Email'),
                                         '-1230-user.address1' => TTi18n::gettext('Address 1'),
 										'-1240-user.address2' => TTi18n::gettext('Address 2'),
+                                        '-1244-user.tag' => TTi18n::getText('Employee Tags'),
 
                                         '-1250-user_review_control.reviewer_user' => TTi18n::gettext('Reviewer Name'),
                                         '-1260-user_review_control.status' => TTi18n::gettext('Review Status'),
                                         '-1270-user_review_control.type' => TTi18n::gettext('Review Type'),
                                         '-1280-user_review_control.term' => TTi18n::gettext('Review Terms'),
                                         '-1290-user_review_control.severity' => TTi18n::gettext('Review Severity/Importance'),
+                                        '-1292-user_review_control.tag' => TTi18n::gettext('Review Tags'),
 
                                         '-1300-user_review.note' => TTi18n::gettext('KPI Notes'),
                                         '-1350-user.note' => TTi18n::gettext('Employee Notes'),
@@ -485,6 +490,7 @@ class KPIReport extends Report {
 
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
+
 		$urlf = TTnew( 'UserReviewListFactory' );
 		$urlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Review Rows: '. $urlf->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);
@@ -493,6 +499,7 @@ class KPIReport extends Report {
 			$this->tmp_data['user_review'][$ur_obj->getUserReviewControl()][$ur_obj->getKPI()] = Misc::addKeyPrefix('user_review.', (array)$ur_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_review.', $columns ) ));
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
+
 		//Debug::Arr($this->tmp_data, ' TMP Rows: ', __FILE__, __LINE__, __METHOD__,10);
 
 		return TRUE;

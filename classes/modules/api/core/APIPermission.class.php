@@ -51,6 +51,15 @@ class APIPermission extends APIFactory {
 		return TRUE;
 	}
 
+	function getUniqueCountry() {
+		global $current_company;
+		$company_id = (int)$current_company->getId();
+
+        global $current_company;
+		$ulf = TTNew('UserListFactory');
+		return $ulf->getUniqueCountryByCompanyId( $company_id );
+	}
+
 	function getPermissions( $user_id = NULL, $company_id = NULL ) {
 		if ( $user_id == NULL OR $user_id == '' ) {
 			global $current_user;

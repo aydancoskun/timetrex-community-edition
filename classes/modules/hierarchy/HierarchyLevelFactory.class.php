@@ -200,6 +200,7 @@ class HierarchyLevelFactory extends Factory {
 
 		//Shouldn't allow the same superior to be assigned at multiple levels. Can't check that properly here though, must be done at the Hierarchy Control level?
 
+
 		//Don't allow a level to be set without a superior assigned to it.
 		//$id == 0
 		if (
@@ -209,7 +210,14 @@ class HierarchyLevelFactory extends Factory {
 														TTi18n::gettext('No superior defined for level').' ('. (int)$this->getLevel().')'
 														)
 				AND
-				(
+					/*
+					//Allow superiors to be assigned as subordinates in the same hierarchy to make it easier to administer hierarchies
+					//that have superiors sharing responsibility.
+					//For example Super1 and Super2 look after 10 subordinates as well as each other. This would require 3 hierarchies normally,
+					//but if we allow Super1 and Super2 to be subordinates in the same hierarchy, it can be done with a single hierarchy.
+					//The key with this though is to have Permission->getPermissionChildren() *not* return the current user, even if they are a subordinates,
+					//as that could cause a conflict with view_own and view_child permissions (as a child would imply view_own)
+					(
 					$ulf->getRecordCount() > 0
 					AND
 					$this->Validator->isNotResultSetWithRows(	'user',
@@ -218,6 +226,7 @@ class HierarchyLevelFactory extends Factory {
 																)
 					)
 					AND
+					*/
 					(
 						$this->Validator->hasError('user') == FALSE
 						AND

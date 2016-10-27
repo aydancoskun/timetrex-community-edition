@@ -142,7 +142,7 @@ class APIUserDeduction extends APIFactory {
 
 		extract( $this->convertToMultipleRecords($data) );
 		Debug::Text('Received data for: '. $total_records .' UserDeductions', __FILE__, __LINE__, __METHOD__, 10);
-		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		if ( is_array($data) ) {
@@ -180,7 +180,7 @@ class APIUserDeduction extends APIFactory {
 					//Adding new object, check ADD permissions.
 					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('user_tax_deduction','add'), TTi18n::gettext('Add permission denied') );
 				}
-				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
+				//Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 				$is_valid = $primary_validator->isValid();
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.

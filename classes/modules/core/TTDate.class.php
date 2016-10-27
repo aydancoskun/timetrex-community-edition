@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9714 $
- * $Id: TTDate.class.php 9714 2013-04-27 17:50:36Z ipso $
- * $Date: 2013-04-27 10:50:36 -0700 (Sat, 27 Apr 2013) $
+ * $Revision: 10609 $
+ * $Id: TTDate.class.php 10609 2013-07-31 17:29:20Z ipso $
+ * $Date: 2013-07-31 10:29:20 -0700 (Wed, 31 Jul 2013) $
  */
 
 /**
@@ -719,6 +719,7 @@ class TTDate {
 			return $retval;
 		}
 	}
+
 	public static function getDayOfWeekName( $dow ) {
 		return self::getDayOfWeekByInt( $dow );
 	}
@@ -1420,26 +1421,22 @@ class TTDate {
 		return $retval;
 	}
 
-	public static function getWeek( $epoch = NULL, $start_day_of_week = 0 ) {
+	//This could also be called: getWeekOfYear
+	public static function getWeek( $epoch = NULL, $start_week_day = 0 ) {
 		//Default start_day_of_week to 1 (Monday) as that is what PHP defaults to.
 		if ($epoch == NULL OR $epoch == '') {
 			$epoch = self::getTime();
 		}
 
-		if ( $start_day_of_week == 1 ) { //PHP starts weeks on Monday.
-			return date('W', $epoch);
-		} else {
-			if ( $start_day_of_week == 0 ) {
-				return date('W', strtotime('+1 day', $epoch ) );
-			} else {
-				$day_of_week = TTDate::getDayOfWeek( $epoch, 1); //Monday
-
-				$offset = $start_day_of_week - 1;
-				//Debug::text(' Offset: '. $offset .' Day Of Week: '. $day_of_week .' Start Day Of Week: '. $start_day_of_week, __FILE__, __LINE__, __METHOD__,10);
-
-				return date('W', strtotime('-'. $offset .' day', $epoch ) );
-			}
+		if ( $start_week_day == 1 ) { //Mon
+			$retval = date('W', $epoch );
+		} elseif ( $start_week_day == 0 ) { //Sun
+			$retval = date('W', $epoch+(86400) );
+		} else { //Tue-Sat
+			$retval = date('W', $epoch-(86400*($start_week_day-1)) );
 		}
+
+		return $retval;
 	}
 
 	public static function getYear($epoch = NULL) {
@@ -2132,7 +2129,7 @@ class TTDate {
 							$pay_period_ids[] = $pp_obj->getId();
 						}
 					}
-				} elseif ( $time_period == 'last_pay_period' ) {
+				} else {
 					Debug::text('no_pay_period', __FILE__, __LINE__, __METHOD__,10);
 				}
 
@@ -2627,10 +2624,10 @@ class TTDate {
                     $retval = TTDate::getDate( 'DATE', $epoch );
 					break;
 				case 'time_stamp':
-					$retval = TTDate::getDate( 'TIME', strtotime($epoch) );
+					$retval = TTDate::getDate( 'TIME', is_numeric( $epoch ) ? $epoch : strtotime($epoch) );
 					break;
 				case 'date_time_stamp':
-					$retval = TTDate::getDate( 'DATE+TIME', strtotime($epoch) );
+					$retval = TTDate::getDate( 'DATE+TIME', is_numeric( $epoch ) ? $epoch : strtotime($epoch) );
 					break;
 				case 'date_dow':
 					$retval = TTDate::getDayOfWeekName( $epoch );
@@ -2707,7 +2704,7 @@ class TTDate {
 				$column_prefix.'date_dow_month' => date('m-w', $epoch ),
 				$column_prefix.'date_dow_month_year' => date('Y-m-w', $epoch ),
 				$column_prefix.'date_dow_dom_month_year' => date('Y-m-w-W', $epoch ),
-				$column_prefix.'date_week' => date('W', $epoch ),
+				$column_prefix.'date_week' => self::getWeek( $epoch, $start_week_day ),
 				$column_prefix.'date_week_month' => date('m-W', $epoch ),
 				$column_prefix.'date_week_month_year' => date('Y-m-W', $epoch ),
 				$column_prefix.'date_dom' => date('d', $epoch ),
@@ -2734,6 +2731,7 @@ class TTDate {
 				$retval[$column_prefix.'pay_period_transaction_date'] = $params['pay_period_transaction_date'];
 			}
 		}
+
 
 		if ( isset( $retval ) ) {
 			return $retval;
@@ -2769,6 +2767,120 @@ class TTDate {
     
         return $str;
     }
+
+	static function inApplyFrequencyWindow( $frequency_id, $start_date, $end_date, $frequency_criteria = array() ) {
+		/*
+		 Frequency IDs:
+												20 => 'Annually',
+												25 => 'Quarterly',
+												30 => 'Monthly',
+												40 => 'Weekly',
+												100 => 'Specific Date', //Pay Period Dates, Hire Dates, Termination Dates, etc...
+
+		 */
+
+		if ( !isset($frequency_criteria['month']) ) {
+			$frequency_criteria['month'] = 0;
+		}
+		if ( !isset($frequency_criteria['day_of_month']) ) {
+			$frequency_criteria['day_of_month'] = 0;
+		}
+		if ( !isset($frequency_criteria['day_of_week']) ) {
+			$frequency_criteria['day_of_week'] = 0;
+		}
+		if ( !isset($frequency_criteria['quarter_month']) ) {
+			$frequency_criteria['quarter_month'] = 0;
+		}
+		if ( !isset($frequency_criteria['date']) ) {
+			$frequency_criteria['date'] = 0;
+		}
+
+		//Debug::Arr($frequency_criteria, 'Freq ID: '. $frequency_id .' Date: Start: '. TTDate::getDate('DATE+TIME', $start_date) .'('.$start_date.') End: '. TTDate::getDate('DATE+TIME', $end_date) .'('.$end_date.')', __FILE__, __LINE__, __METHOD__,10);
+		$retval = FALSE;
+		switch ( $frequency_id ) {
+			case 20: //Annually
+				$year_epoch1 = mktime( TTDate::getHour($start_date), TTDate::getMinute($start_date), TTDate::getSecond($start_date), $frequency_criteria['month'], $frequency_criteria['day_of_month'], TTDate::getYear( $start_date ) );
+				$year_epoch2 = mktime( TTDate::getHour($end_date), TTDate::getMinute($end_date), TTDate::getSecond($end_date), $frequency_criteria['month'], $frequency_criteria['day_of_month'], TTDate::getYear( $end_date ) );
+				//Debug::Text('Year1 EPOCH: '. TTDate::getDate('DATE+TIME', $year_epoch1) .'('. $year_epoch1 .')', __FILE__, __LINE__, __METHOD__,10);
+				//Debug::Text('Year2 EPOCH: '. TTDate::getDate('DATE+TIME', $year_epoch2) .'('. $year_epoch2 .')', __FILE__, __LINE__, __METHOD__,10);
+
+				if ( 	( $year_epoch1 >= $start_date AND $year_epoch1 <= $end_date)
+						OR
+						( $year_epoch2 >= $start_date AND $year_epoch2 <= $end_date)
+						) {
+					$retval = TRUE;
+				}
+				break;
+			case 25: //Quarterly
+				//Handle quarterly like month, we just need to set the specific month from quarter_month.
+				if ( abs($end_date-$start_date) > (86400*93) ) { //3 months
+					$retval = TRUE;
+				} else {
+					for( $i=TTDate::getMiddleDayEpoch($start_date); $i <= TTDate::getMiddleDayEpoch($end_date); $i+=(86400*1) ) {
+						if ( self::getYearQuarterMonthNumber( $i ) == $frequency_criteria['quarter_month']
+								AND $frequency_criteria['day_of_month'] == self::getDayOfMonth( $i ) ) {
+							$retval = TRUE;
+							break;
+						}
+					}
+				}
+				break;
+			case 30: //Monthly
+				//Make sure if they specify the day of month to be 31, that is still works for months with 30, or 28-29 days, assuming 31 basically means the last day of the month
+				if ( $frequency_criteria['day_of_month'] > TTDate::getDaysInMonth( $start_date )
+						OR $frequency_criteria['day_of_month'] > TTDate::getDaysInMonth( $end_date ) ) {
+					$frequency_criteria['day_of_month'] = TTDate::getDaysInMonth( $start_date );
+					if ( TTDate::getDaysInMonth( $end_date ) < $frequency_criteria['day_of_month'] ) {
+						$frequency_criteria['day_of_month'] = TTDate::getDaysInMonth( $end_date );
+					}
+					//Debug::Text('Apply frequency day of month exceeds days in this month, using last day of the month instead: '. $frequency_criteria['day_of_month'], __FILE__, __LINE__, __METHOD__,10);
+				}
+
+				$month_epoch1 = mktime( TTDate::getHour($start_date), TTDate::getMinute($start_date), TTDate::getSecond($start_date), TTDate::getMonth( $start_date ), $frequency_criteria['day_of_month'], TTDate::getYear( $start_date ) );
+				$month_epoch2 = mktime( TTDate::getHour($end_date), TTDate::getMinute($end_date), TTDate::getSecond($end_date), TTDate::getMonth( $end_date ), $frequency_criteria['day_of_month'], TTDate::getYear( $end_date ) );
+				//Debug::Text('Day of Month: '. $frequency_criteria['day_of_month'] .' Month EPOCH: '. TTDate::getDate('DATE+TIME', $month_epoch1) .' Current Month: '. TTDate::getMonth( $start_date ), __FILE__, __LINE__, __METHOD__,10);
+				//Debug::Text('Month1 EPOCH: '. TTDate::getDate('DATE+TIME', $month_epoch1) .'('. $month_epoch1 .') Greater Than: '. TTDate::getDate('DATE+TIME', ($start_date)) .' Less Than: '.  TTDate::getDate('DATE+TIME', $end_date) .'('. $end_date .')', __FILE__, __LINE__, __METHOD__,10);
+				//Debug::Text('Month2 EPOCH: '. TTDate::getDate('DATE+TIME', $month_epoch2) .'('. $month_epoch2 .') Greater Than: '. TTDate::getDate('DATE+TIME', ($start_date)) .' Less Than: '.  TTDate::getDate('DATE+TIME', $end_date) .'('. $end_date .')', __FILE__, __LINE__, __METHOD__,10);
+
+				if ( 	( $month_epoch1 >= $start_date AND $month_epoch1 <= $end_date )
+						OR
+						( $month_epoch2 >= $start_date AND $month_epoch2 <= $end_date )
+						) {
+					$retval = TRUE;
+				}
+				break;
+			case 40: //Weekly
+				$start_dow = self::getDayOfWeek( $start_date );
+				$end_dow = self::getDayOfWeek( $end_date );
+
+				if ( $start_dow == $frequency_criteria['day_of_week']
+						OR $end_dow == $frequency_criteria['day_of_week']
+						) {
+					$retval = TRUE;
+				} else {
+					if ( ($end_date-$start_date) > (86400*7) ) {
+						$retval = TRUE;
+					} else {
+						for( $i=TTDate::getMiddleDayEpoch($start_date); $i <= TTDate::getMiddleDayEpoch($end_date); $i+=86400 ) {
+							if ( self::getDayOfWeek($i) == $frequency_criteria['day_of_week'] ) {
+								$retval = TRUE;
+								break;
+							}
+						}
+					}
+				}
+				break;
+			case 100: //Specific date
+				Debug::Text('Specific Date: '. TTDate::getDate('DATE+TIME', $frequency_criteria['date']), __FILE__, __LINE__, __METHOD__,10);
+				if ( $frequency_criteria['date'] >= $start_date AND $frequency_criteria['date'] <= $end_date ) {
+					$retval = TRUE;
+				}
+				break;
+		}
+
+		Debug::Text('Retval '. (int)$retval, __FILE__, __LINE__, __METHOD__,10);
+		return $retval;
+	}
 
 }
 

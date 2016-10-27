@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10254 $
- * $Id: CalculatePayStub.class.php 10254 2013-06-20 23:42:44Z ipso $
- * $Date: 2013-06-20 16:42:44 -0700 (Thu, 20 Jun 2013) $
+ * $Revision: 10612 $
+ * $Id: CalculatePayStub.class.php 10612 2013-07-31 20:29:02Z ipso $
+ * $Date: 2013-07-31 13:29:02 -0700 (Wed, 31 Jul 2013) $
  */
 
 /**
@@ -368,24 +368,45 @@ class CalculatePayStub extends PayStubFactory {
 
 	function calculate($epoch = NULL) {
 
-		//FIXME: Allow generating pay stubs for employees who have any status, but if its not ID=10
-		//Then the termination date must fall within the start/end date of the pay period.
-		//The idea here is to allow employees to be marked terminated and still get their final pay stub generated.
-		if ( $this->getUserObject() == FALSE OR $this->getUserObject()->getStatus() !== 10 ) {
+		if ( $this->getUserObject() == FALSE ) {
 			return FALSE;
-		}
-
-		$generic_queue_status_label = $this->getUserObject()->getFullName(TRUE).' - '. TTi18n::gettext('Pay Stub');
-
-		if ( $epoch == NULL OR $epoch == '' ) {
-			$epoch = TTDate::getTime();
 		}
 
 		if (  $this->getPayPeriodObject() == FALSE ) {
 			return FALSE;
 		}
 
+		if ( $epoch == NULL OR $epoch == '' ) {
+			$epoch = TTDate::getTime();
+		}
+
+		//Use User Termination Date instead of ROE.
+		if ( $this->getUserObject()->getTerminationDate() != ''
+				AND $this->getUserObject()->getTerminationDate() >= $this->getPayPeriodObject()->getStartDate()
+				AND $this->getUserObject()->getTerminationDate() <= $this->getPayPeriodObject()->getEndDate() ) {
+			Debug::text('User has been terminated in this pay period!', __FILE__, __LINE__, __METHOD__,10);
+
+			$is_terminated = TRUE;
+		} else {
+			$is_terminated = FALSE;
+		}
+
+		//Allow generating pay stubs for employees who have any status, but if its not ID=10
+		//Then the termination date must fall within the start/end date of the pay period, or after the end date (if its the current pay period)
+		//The idea here is to allow employees to be marked terminated (or on leave) and still get their previous or final pay stub generated.
+		//Also allow pay stubs to be generated in pay periods *before* their termination date.
+		if ( $this->getUserObject()->getStatus() != 10
+				AND ( $is_terminated == FALSE AND
+					( $this->getUserObject()->getTerminationDate() == '' OR $this->getUserObject()->getTerminationDate() < $this->getPayPeriodObject()->getStartDate() ) )
+			) {
+			Debug::text('Pay Period is after users termination date ('.$this->getUserObject()->getTerminationDate().'), or no termination date is set...', __FILE__, __LINE__, __METHOD__,10);
+
+			return FALSE;
+		}
+
 		Debug::text('bbUser Id: '. $this->getUser() .' Pay Period End Date: '. TTDate::getDate('DATE+TIME', $this->getPayPeriodObject()->getEndDate() ), __FILE__, __LINE__, __METHOD__,10);
+
+		$generic_queue_status_label = $this->getUserObject()->getFullName(TRUE).' - '. TTi18n::gettext('Pay Stub');
 
 		$pay_stub = TTnew( 'PayStubFactory' );
 		$pay_stub->StartTransaction();
@@ -408,20 +429,9 @@ class CalculatePayStub extends PayStubFactory {
 		$pay_stub->setCurrency( $this->getUserObject()->getCurrency() );
 		$pay_stub->setStatus( 10 ); //New
 
-		//Use User Termination Date instead of ROE.
-		if ( $this->getUserObject()->getTerminationDate() != ''
-				AND $this->getUserObject()->getTerminationDate() >= $this->getPayPeriodObject()->getStartDate()
-				AND $this->getUserObject()->getTerminationDate() <= $this->getPayPeriodObject()->getEndDate() ) {
-			Debug::text('User has been terminated in this pay period!', __FILE__, __LINE__, __METHOD__,10);
-
-			$is_terminated = TRUE;
-		} else {
-			$is_terminated = FALSE;
-		}
-
 		if ( $is_terminated == TRUE ) {
 			Debug::text('User is Terminated, assuming final pay, setting End Date to terminated date: '. TTDate::getDate('DATE+TIME', $this->getUserObject()->getTerminationDate() ), __FILE__, __LINE__, __METHOD__,10);
-
+			
 			$pay_stub->setStartDate( $pay_stub->getPayPeriodObject()->getStartDate() );
 			$pay_stub->setEndDate( $this->getUserObject()->getTerminationDate() );
 
@@ -518,14 +528,16 @@ class CalculatePayStub extends PayStubFactory {
 						//Determine if this deduction is valid based on min/max user age.
 						if ( $ud_obj->getCompanyDeductionObject()->isActiveDate( $pay_stub->getPayPeriodObject()->getEndDate() ) == TRUE
 								AND $ud_obj->getCompanyDeductionObject()->isActiveLengthOfService( $this->getUserObject(), $pay_stub->getPayPeriodObject()->getEndDate() ) == TRUE
-								AND $ud_obj->getCompanyDeductionObject()->isActiveUserAge( $this->getUserObject(), $pay_stub->getPayPeriodObject()->getEndDate() ) == TRUE ) {
+								AND $ud_obj->getCompanyDeductionObject()->isActiveUserAge( $this->getUserObject(), $pay_stub->getPayPeriodObject()->getEndDate() ) == TRUE
+								AND $ud_obj->getCompanyDeductionObject()->inApplyFrequencyWindow( $pay_stub->getPayPeriodObject()->getStartDate(), $pay_stub->getPayPeriodObject()->getEndDate(), $this->getUserObject()->getHireDate(), $this->getUserObject()->getTerminationDate(), $this->getUserObject()->getBirthDate() ) == TRUE
+								) {
 
 								$amount = $ud_obj->getDeductionAmount( $this->getUserObject()->getId(), $pay_stub, $this->getPayPeriodObject() );
 								Debug::text('User Deduction: '. $ud_obj->getCompanyDeductionObject()->getName() .' Amount: '. $amount .' Calculation Order: '. $ud_obj->getCompanyDeductionObject()->getCalculationOrder(), __FILE__, __LINE__, __METHOD__,10);
 
 								//Allow negative amounts, so they can reduce previously calculated deductions or something.
 								if ( isset($amount) AND $amount != 0 ) {
-									$pay_stub->addEntry( $ud_obj->getCompanyDeductionObject()->getPayStubEntryAccount(), $amount );
+									$pay_stub->addEntry( $ud_obj->getCompanyDeductionObject()->getPayStubEntryAccount(), $amount, NULL, NULL, $ud_obj->getCompanyDeductionObject()->getPayStubEntryDescription() );
 								} else {
 									Debug::text('Amount is 0, skipping...', __FILE__, __LINE__, __METHOD__,10);
 								}

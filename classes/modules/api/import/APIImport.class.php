@@ -70,6 +70,7 @@ class APIImport extends APIFactory {
 	function getImportObjects() {
 		$retarr = array(
 						'-1010-user' => TTi18n::getText('Employees'),
+						'-1015-bank_account' => TTi18n::getText('Employee Bank Accounts'),
 						'-1020-branch' => TTi18n::getText('Branches'),
 						'-1030-department' => TTi18n::getText('Departments'),
 						'-1050-userwage' => TTi18n::getText('Employee Wages'),

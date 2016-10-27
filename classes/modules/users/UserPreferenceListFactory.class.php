@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10274 $
- * $Id: UserPreferenceListFactory.class.php 10274 2013-06-24 15:38:59Z ipso $
- * $Date: 2013-06-24 08:38:59 -0700 (Mon, 24 Jun 2013) $
+ * $Revision: 10258 $
+ * $Id: UserPreferenceListFactory.class.php 10258 2013-06-21 03:14:26Z ennis $
+ * $Date: 2013-06-20 20:14:26 -0700 (Thu, 20 Jun 2013) $
  */
 
 /**

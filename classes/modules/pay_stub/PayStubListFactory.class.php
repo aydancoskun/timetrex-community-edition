@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9804 $
- * $Id: PayStubListFactory.class.php 9804 2013-05-08 15:59:47Z ipso $
- * $Date: 2013-05-08 08:59:47 -0700 (Wed, 08 May 2013) $
+ * $Revision: 10615 $
+ * $Id: PayStubListFactory.class.php 10615 2013-08-01 00:03:45Z ipso $
+ * $Date: 2013-07-31 17:03:45 -0700 (Wed, 31 Jul 2013) $
  */
 
 /**
@@ -847,6 +847,14 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 			}
 		}
 
+		if ( isset($filter_data['title_id']) ) {
+			$filter_data['user_title_id'] = $filter_data['title_id'];
+		}
+
+		if ( isset($filter_data['group_id']) ) {
+			$filter_data['user_group_id'] = $filter_data['group_id'];
+		}
+
 		$additional_order_fields = array('user_status_id','last_name', 'first_name', 'default_branch', 'default_department', 'user_group', 'title', 'country', 'province', 'currency');
 
 		$sort_column_aliases = array(
@@ -929,13 +937,13 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 
 		if ( isset($filter_data['include_subgroups']) AND (bool)$filter_data['include_subgroups'] == TRUE ) {
 			$uglf = new UserGroupListFactory();
-			$filter_data['group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['group_id'], TRUE);
+			$filter_data['user_group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['user_group_id'], TRUE);
 		}
-		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'b.group_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_group_id']) ) ? $this->getWhereClauseSQL( 'b.group_id', $filter_data['user_group_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'b.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'b.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'b.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_title_id']) ) ? $this->getWhereClauseSQL( 'b.title_id', $filter_data['user_title_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['sex_id']) ) ? $this->getWhereClauseSQL( 'b.sex_id', $filter_data['sex_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['currency_id']) ) ? $this->getWhereClauseSQL( 'b.currency_id', $filter_data['currency_id'], 'numeric_list', $ph ) : NULL;

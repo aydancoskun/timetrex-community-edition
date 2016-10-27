@@ -183,7 +183,7 @@ class Payment_Process_Type
     * @param mixed $obj Type object to validate
     * @return mixed true on success, PEAR_Error on failure
     */
-    function isValid($obj)
+    static function isValid($obj)
     {
         if (!is_a($obj,'Payment_Process_Type')) {
             return PEAR::raiseError('Not a valid payment type');

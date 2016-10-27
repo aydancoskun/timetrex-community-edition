@@ -193,6 +193,10 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
             $filter_data['reviewer_user_id'] = $filter_data['include_reviewer_user_id'];
         }
 
+        if ( isset($filter_data['review_tag']) ) {
+            $filter_data['tag'] = $filter_data['review_tag'];
+        }
+
 		if ( !is_array($order) ) {
 			//Use Filter Data ordering if its set.
 			if ( isset($filter_data['sort_column']) AND $filter_data['sort_order']) {
@@ -285,8 +289,7 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
         $query .= ( isset($filter_data['reviewer_user']) ) ? $this->getWhereClauseSQL( array('a.reviewer_user_id','uf.first_name','uf.last_name'), $filter_data['reviewer_user'], 'user_id_or_name', $ph ) : NULL;
         
         $query .= ( isset($filter_data['user']) ) ? $this->getWhereClauseSQL( array('a.user_id','uf.first_name','uf.last_name'), $filter_data['user'], 'user_id_or_name', $ph ) : NULL;
-        
-        
+
         $query .= ( isset($filter_data['exclude_reviewer_user_id']) ) ? $this->getWhereClauseSQL( 'a.reviewer_user_id', $filter_data['exclude_reviewer_user_id'], 'not_numeric_list', $ph ) : NULL;
 
         $query .= ( isset($filter_data['status_id']) ) ? $this->getWhereClauseSQL( 'a.status_id', $filter_data['status_id'], 'numeric_list', $ph ) : NULL;
@@ -299,18 +302,30 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 
 		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => $company_id, 'object_type_id' => 320, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 
-        $query .= ( isset($filter_data['start_date']) ) ? $this->getWhereClauseSQL( 'a.start_date', $filter_data['start_date'], 'date_range', $ph ) : NULL;
-
-        $query .= ( isset($filter_data['end_date']) ) ? $this->getWhereClauseSQL( 'a.end_date', $filter_data['end_date'], 'date_range', $ph ) : NULL;
-
-        $query .= ( isset($filter_data['due_date']) ) ? $this->getWhereClauseSQL( 'a.due_date', $filter_data['due_date'], 'date_range', $ph ) : NULL;
+		$query .= ( isset($filter_data['due_date']) ) ? $this->getWhereClauseSQL( 'a.due_date', $filter_data['due_date'], 'date_range', $ph ) : NULL;
 
         $query .= ( isset($filter_data['kpi_id']) ) ? $this->getWhereClauseSQL( 'urf.kpi_id', $filter_data['kpi_id'], 'numeric_list', $ph ) : NULL;
 
         $query .= ( isset($filter_data['rating']) ) ? $this->getWhereClauseSQL( 'a.rating', $filter_data['rating'], 'numeric', $ph ) : NULL;
 
         $query .= ( isset($filter_data['note']) ) ? $this->getWhereClauseSQL( 'a.note', $filter_data['note'], 'text', $ph ) : NULL;
-        
+
+        if ( isset($filter_data['time_period']) ) {
+
+            if ( isset($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
+                $ph[] = $filter_data['start_date'];
+                $query  .=	' AND a.due_date >= ?';
+            }
+            if ( isset($filter_data['end_date']) AND trim($filter_data['end_date']) != '' ) {
+                $ph[] = $filter_data['end_date'];
+                $query  .=	' AND a.due_date <= ?';
+            }
+        } else {
+            $query .= ( isset($filter_data['start_date']) ) ? $this->getWhereClauseSQL( 'a.start_date', $filter_data['start_date'], 'date_range', $ph ) : NULL;
+
+            $query .= ( isset($filter_data['end_date']) ) ? $this->getWhereClauseSQL( 'a.end_date', $filter_data['end_date'], 'date_range', $ph ) : NULL;
+        }
+
         if ( isset($filter_data['created_date']) AND trim($filter_data['created_date']) != '' ) {
 			$date_filter = $this->getDateRangeSQL( $filter_data['created_date'], 'a.created_date' );
 			if ( $date_filter != FALSE ) {
@@ -336,7 +351,7 @@ class UserReviewControlListFactory extends UserReviewControlFactory implements I
 		$query .= $this->getWhereSQL( $where );
         
 		$query .= $this->getSortSQL( $order , $strict, $additional_order_fields);
-        
+
 		$this->ExecuteSQL($query,$ph,$limit,$page);
 
 		return $this;

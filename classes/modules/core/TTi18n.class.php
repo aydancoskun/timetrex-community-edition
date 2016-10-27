@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9993 $
- * $Id: TTi18n.class.php 9993 2013-05-24 20:16:41Z ipso $
- * $Date: 2013-05-24 13:16:41 -0700 (Fri, 24 May 2013) $
+ * $Revision: 10609 $
+ * $Id: TTi18n.class.php 10609 2013-07-31 17:29:20Z ipso $
+ * $Date: 2013-07-31 10:29:20 -0700 (Wed, 31 Jul 2013) $
  */
 
 /*
@@ -225,6 +225,10 @@ class TTi18n {
 				//Match the windows locales directly, because if we use self::getLocaleHandler()->setLocale( $tmp_locale, 'LC_ALL'); instead
 				//it will actually change the locale out from under us causing strange problems, and also circumventing the locale cache
 				//in setLocale() (that prevents changing to the same locale we are already in)
+				//
+				//On windows sometimes its using 127 digits after the decimal because after setLocale() is called, localeconv() returns
+				//an array that is basically empty or uses 127 for everything.
+				//This is fixed in Pear::I18Nv2->setLocale(), so it defaults to english values if it fails.
 				if ( isset( $windows_locales[$tmp_locale] ) ) {
 					Debug::Text('Found valid windows locale: '. $windows_locales[$tmp_locale] .' Linux locale: '. $tmp_locale,  __FILE__, __LINE__, __METHOD__,10);
 					$valid_locale = $tmp_locale;

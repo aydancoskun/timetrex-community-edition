@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10254 $
- * $Id: PremiumPolicyFactory.class.php 10254 2013-06-20 23:42:44Z ipso $
- * $Date: 2013-06-20 16:42:44 -0700 (Thu, 20 Jun 2013) $
+ * $Revision: 10293 $
+ * $Id: PremiumPolicyFactory.class.php 10293 2013-06-26 22:06:49Z ipso $
+ * $Date: 2013-06-26 15:06:49 -0700 (Wed, 26 Jun 2013) $
  */
 
 /**
@@ -1077,6 +1077,8 @@ class PremiumPolicyFactory extends Factory {
 				$rate = $this->getRate() - $original_hourly_rate;
 				break;
 			case 32: //Flat Hourly Rate (NON relative)
+				//This should be original_hourly_rate, which is typically related to the users wage/wage group, so they can pay whatever is defined there.
+				//If they want to pay a flat hourly rate specified in the premium policy use Pay Plus Premium instead.
 				$rate = $original_hourly_rate;
 				break;
 			case 40: //Minimum/Prevailing wage

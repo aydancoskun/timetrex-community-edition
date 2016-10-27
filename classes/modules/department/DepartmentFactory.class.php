@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9570 $
- * $Id: DepartmentFactory.class.php 9570 2013-04-12 18:26:34Z ipso $
- * $Date: 2013-04-12 11:26:34 -0700 (Fri, 12 Apr 2013) $
+ * $Revision: 10530 $
+ * $Id: DepartmentFactory.class.php 10530 2013-07-23 17:41:24Z ipso $
+ * $Date: 2013-07-23 10:41:24 -0700 (Tue, 23 Jul 2013) $
  */
 
 /**
@@ -98,6 +98,7 @@ class DepartmentFactory extends Factory {
 										'status' => FALSE,
 										'manual_id' => 'ManualID',
 										'name' => 'Name',
+										'name_metaphone' => 'NameMetaphone',
 										'other_id1' => 'OtherID1',
 										'other_id2' => 'OtherID2',
 										'other_id3' => 'OtherID3',
@@ -626,6 +627,8 @@ class DepartmentFactory extends Factory {
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = Option::getByKey( $this->$function(), $this->getOptions( $variable ) );
 							}
+							break;
+						case 'name_metaphone':
 							break;
 						default:
 							if ( method_exists( $this, $function ) ) {

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8720 $
- * $Id: EditCompanyDeduction.php 8720 2012-12-29 01:06:58Z ipso $
- * $Date: 2012-12-28 17:06:58 -0800 (Fri, 28 Dec 2012) $
+ * $Revision: 10386 $
+ * $Id: EditCompanyDeduction.php 10386 2013-07-08 22:31:21Z ipso $
+ * $Date: 2013-07-08 15:31:21 -0700 (Mon, 08 Jul 2013) $
  */
 require_once('../../includes/global.inc.php');
 require_once(Environment::getBasePath() .'includes/Interface.inc.php');
@@ -340,12 +340,12 @@ switch ($action) {
 		$data['js_arrays'] = $cdf->getJavaScriptArrays();
 
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-		$data['pay_stub_entry_account_options'] = $psealf->getByCompanyIdAndStatusIdAndTypeIdArray( $current_company->getId(), 10, array(10,20,30,50), FALSE );
+		$data['pay_stub_entry_account_options'] = $psealf->getByCompanyIdAndStatusIdAndTypeIdArray( $current_company->getId(), 10, array(10,20,30,50,80), FALSE );
 		//$data['pay_stub_entry_account_options'] = PayStubEntryAccountListFactory::getByCompanyIdAndStatusIdAndTypeIdArray( $current_company->getId(), 10, array(20,30), FALSE );
 
-		$data['include_pay_stub_entry_account_options'] = $psealf->getByCompanyIdAndStatusIdAndTypeIdArray( $current_company->getId(), 10, array(10,20,30,40,50), FALSE );
+		$data['include_pay_stub_entry_account_options'] = $psealf->getByCompanyIdAndStatusIdAndTypeIdArray( $current_company->getId(), 10, array(10,20,30,40,50,80), FALSE );
 		if ( isset($data['include_pay_stub_entry_account_ids']) AND is_array($data['include_pay_stub_entry_account_ids']) ) {
-			$tmp_psea_options = $psealf->getByCompanyIdAndStatusIdAndTypeIdArray( $current_company->getId(), 10, array(10,20,30,40,50), FALSE );
+			$tmp_psea_options = $psealf->getByCompanyIdAndStatusIdAndTypeIdArray( $current_company->getId(), 10, array(10,20,30,40,50,80), FALSE );
 			foreach( $data['include_pay_stub_entry_account_ids'] as $include_psea_id ) {
 				if ( isset($tmp_psea_options[$include_psea_id]) ) {
 					$filter_include_options[$include_psea_id] = $tmp_psea_options[$include_psea_id];
@@ -355,9 +355,9 @@ switch ($action) {
 		}
 		$smarty->assign_by_ref('filter_include_options', $filter_include_options);
 
-		$data['exclude_pay_stub_entry_account_options'] = $psealf->getByCompanyIdAndStatusIdAndTypeIdArray( $current_company->getId(), 10, array(10,20,30,40,50), FALSE );
+		$data['exclude_pay_stub_entry_account_options'] = $psealf->getByCompanyIdAndStatusIdAndTypeIdArray( $current_company->getId(), 10, array(10,20,30,40,50,80), FALSE );
 		if ( isset($data['exclude_pay_stub_entry_account_ids']) AND is_array($data['exclude_pay_stub_entry_account_ids']) ) {
-			$tmp_psea_options = $psealf->getByCompanyIdAndStatusIdAndTypeIdArray( $current_company->getId(), 10, array(10,20,30,40,50), FALSE );
+			$tmp_psea_options = $psealf->getByCompanyIdAndStatusIdAndTypeIdArray( $current_company->getId(), 10, array(10,20,30,40,50,80), FALSE );
 			foreach( $data['exclude_pay_stub_entry_account_ids'] as $exclude_psea_id ) {
 				$filter_exclude_options[$exclude_psea_id] = $tmp_psea_options[$exclude_psea_id];
 			}

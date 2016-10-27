@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10254 $
- * $Id: SchedulePolicyFactory.class.php 10254 2013-06-20 23:42:44Z ipso $
- * $Date: 2013-06-20 16:42:44 -0700 (Thu, 20 Jun 2013) $
+ * $Revision: 10179 $
+ * $Id: SchedulePolicyFactory.class.php 10179 2013-06-11 22:39:40Z ipso $
+ * $Date: 2013-06-11 15:39:40 -0700 (Tue, 11 Jun 2013) $
  */
 
 /**

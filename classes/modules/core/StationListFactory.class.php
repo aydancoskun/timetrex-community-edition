@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: StationListFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 10406 $
+ * $Id: StationListFactory.class.php 10406 2013-07-10 16:19:28Z ipso $
+ * $Date: 2013-07-10 09:19:28 -0700 (Wed, 10 Jul 2013) $
  */
 
 /**
@@ -342,7 +342,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 					'status' => $status,
 					'type' => $type,
 					);
-
+/*
 		$query = '
 					select 	a.*
 					from 	'. $this->getTable() .' as a
@@ -377,6 +377,43 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 						AND ( a.deleted = 0 AND z.deleted = 0 )
 						ORDER BY lower(a.source) = \'any\' desc, lower(station_id) = \'any\' desc
 						';
+*/
+		//Optimize query by using EXISTS/NOT EXISTS rather than IN/NOT IN. This cuts the time by about 1/3.
+		$query = '
+					select 	a.*
+					from 	'. $this->getTable() .' as a
+						LEFT JOIN '. $uf->getTable() .' as z ON z.id = ?
+					where a.company_id = ?
+						AND a.status_id = ?
+						AND a.type_id = ?
+						AND
+							(
+								(
+									(
+										a.user_group_selection_type_id = 10
+											OR ( a.user_group_selection_type_id = 20 AND EXISTS( select b.group_id from '. $sugf->getTable() .' as b WHERE a.id = b.station_id AND b.group_id = z.group_id ) )
+											OR ( a.user_group_selection_type_id = 30 AND NOT EXISTS( select b.group_id from '. $sugf->getTable() .' as b WHERE a.id = b.station_id AND b.group_id = z.group_id ) )
+									)
+									AND
+									(
+										a.branch_selection_type_id = 10
+											OR ( a.branch_selection_type_id = 20 AND EXISTS( select c.branch_id from '. $sbf->getTable() .' as c WHERE a.id = c.station_id AND c.branch_id = z.default_branch_id ) )
+											OR ( a.branch_selection_type_id = 30 AND NOT EXISTS( select c.branch_id from '. $sbf->getTable() .' as c WHERE a.id = c.station_id AND c.branch_id = z.default_branch_id  ) )
+									)
+									AND
+									(
+										a.department_selection_type_id = 10
+											OR ( a.department_selection_type_id = 20 AND EXISTS( select d.department_id from '. $sdf->getTable() .' as d WHERE a.id = d.station_id AND d.department_id = z.default_department_id ) )
+											OR ( a.department_selection_type_id = 30 AND NOT EXISTS( select d.department_id from '. $sdf->getTable() .' as d WHERE a.id = d.station_id AND d.department_id = z.default_department_id ) )
+									)
+									AND NOT EXISTS( select f.user_id from '. $seuf->getTable() .' as f WHERE a.id = f.station_id AND f.user_id = z.id )
+								)
+								OR EXISTS( select e.user_id from '. $siuf->getTable() .' as e WHERE a.id = e.station_id AND e.user_id = z.id )
+							)
+						AND ( a.deleted = 0 AND z.deleted = 0 )
+						ORDER BY lower(a.source) = \'any\' desc, lower(station_id) = \'any\' desc
+						';
+
 		//Try to order the SQL query to hit wildcard stations first.
 
 		//$query .= $this->getSortSQL( $order, $strict );

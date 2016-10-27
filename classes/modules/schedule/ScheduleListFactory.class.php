@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10153 $
- * $Id: ScheduleListFactory.class.php 10153 2013-06-07 20:51:27Z ipso $
- * $Date: 2013-06-07 13:51:27 -0700 (Fri, 07 Jun 2013) $
+ * $Revision: 10609 $
+ * $Id: ScheduleListFactory.class.php 10609 2013-07-31 17:29:20Z ipso $
+ * $Date: 2013-07-31 10:29:20 -0700 (Wed, 31 Jul 2013) $
  */
 
 /**
@@ -540,13 +540,51 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		$udlf = new UserDateListFactory();
-		$udlf->getByUserIdAndDate( $user_id, $epoch );
-		if ( $udlf->getRecordCount() > 0 ) {
-			Debug::Text(' Found User Date ID! ', __FILE__, __LINE__, __METHOD__,10);
+		//Need to handle schedules on next/previous dates from when the punch is.
+		//ie: if the schedule started on 11:30PM on Jul 5th and the punch is 01:00AM on Jul 6th.
+		$slf = new ScheduleListFactory();
+		$slf->getByUserIdAndStartDateAndEndDate($user_id, TTDate::getMiddleDayEpoch($epoch)-(86400), TTDate::getMiddleDayEpoch($epoch)+86400 );
+		if ( $slf->getRecordCount() > 0 ) {
+			Debug::Text(' Found User Date ID! User: '. $user_id .' Epoch: '. TTDate::getDATE('DATE+TIME', $epoch ) .'('.$epoch.')' , __FILE__, __LINE__, __METHOD__,10);		
+			$retval = FALSE;
+			$best_diff = FALSE;
+			//Check for schedule policy
+			foreach( $slf as $s_obj ) {
+				Debug::Text(' Found Schedule!: ID: '. $s_obj->getID(), __FILE__, __LINE__, __METHOD__,10);
+				//If the Start/Stop window is large (ie: 6-8hrs) we need to find the closest schedule.
+				$schedule_diff = $s_obj->inScheduleDifference( $epoch );
+				if ( $schedule_diff === 0 ) {
+					Debug::text(' Within schedule times. ', __FILE__, __LINE__, __METHOD__,10);
+					return $s_obj;
+				} else {
+					if ( $schedule_diff > 0 AND ( $best_diff === FALSE OR $schedule_diff < $best_diff ) ) {
+						Debug::text(' Within schedule start/stop time by: '. $schedule_diff .' Prev Best Diff: '. $best_diff, __FILE__, __LINE__, __METHOD__,10);
+						$best_diff = $schedule_diff;
+						$retval = $s_obj;
+					}
+				}
+			}
 
+			if ( isset($retval) AND is_object($retval) ) {
+				return $retval;
+			}
+		}
+
+		/*
+		$udlf = new UserDateListFactory();
+		//$udlf->getByUserIdAndDate( $user_id, $epoch );
+		$udlf->getByUserIdAndStartDateAndEndDate($user_id, TTDate::getMiddleDayEpoch($epoch)-(86400), TTDate::getMiddleDayEpoch($epoch)+86400 );
+		if ( $udlf->getRecordCount() > 0 ) {
+			Debug::Text(' Found User Date ID! User: '. $user_id .' Epoch: '. TTDate::getDATE('DATE+TIME', $epoch ) .'('.$epoch.')' , __FILE__, __LINE__, __METHOD__,10);
+
+			//Loop through all user_Date
+			$user_date_ids = array();
+			foreach( $udlf as $ud_obj ) {
+				$user_date_ids[] = $ud_obj->getID();
+			}
+			
 			$slf = new ScheduleListFactory();
-			$slf->getByUserDateId( $udlf->getCurrent()->getId() );
+			$slf->getByUserDateId( $user_date_ids );
 			if ( $slf->getRecordCount() > 0 ) {
 				$retval = FALSE;
 				$best_diff = FALSE;
@@ -565,22 +603,15 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 							$retval = $s_obj;
 						}
 					}
-
-					//if ( $s_obj->inSchedule( $epoch ) ) {
-					//	Debug::Text(' in Found Schedule! Branch: '. $s_obj->getBranch(), __FILE__, __LINE__, __METHOD__,10);
-					//	return $s_obj;
-					//} else {
-					//	Debug::Text(' NOT in Found Schedule!: ', __FILE__, __LINE__, __METHOD__,10);
-					//}
 				}
 
 				if ( isset($retval) AND is_object($retval) ) {
 					return $retval;
 				}
 			}
-
 		}
-
+		*/
+		
 		return FALSE;
 	}
 
@@ -1511,6 +1542,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 
 		$ph = array(
 					'company_id' => $company_id,
+					'company_id2' => $company_id,
 					);
 
 		//"group" is a reserved word in MySQL.
@@ -1587,7 +1619,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 							LEFT JOIN '. $apf->getTable() .' as apf ON ( a.absence_policy_id = apf.id AND apf.deleted = 0)
 							LEFT JOIN '. $udf->getTable() .' as c ON a.user_date_id = c.id
 							LEFT JOIN '. $ppf->getTable() .' as ppf ON c.pay_period_id = ppf.id
-							LEFT JOIN '. $uf->getTable() .' as d ON c.user_id = d.id
+							LEFT JOIN '. $uf->getTable() .' as d ON ( c.user_id = d.id AND d.deleted = 0 )
 
 							LEFT JOIN '. $bf->getTable() .' as e ON ( d.default_branch_id = e.id AND e.deleted = 0)
 							LEFT JOIN '. $df->getTable() .' as f ON ( d.default_department_id = f.id AND f.deleted = 0)
@@ -1612,12 +1644,14 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= '
 						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
-					WHERE d.company_id = ?';
+					WHERE ( d.company_id = ? OR a.company_id = ? )';
 
 		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'd.id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['include_user_id']) ) ? $this->getWhereClauseSQL( 'd.id', $filter_data['include_user_id'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'd.id', $filter_data['exclude_user_id'], 'not_numeric_list', $ph ) : NULL;
+
+		//Need to include/exclude users based on c.user_id, as we need to support OPEN shifts and user_id=0 which can only happen in user_date table.
+		$query .= ( isset($filter_data['include_user_id']) ) ? $this->getWhereClauseSQL( 'c.user_id', $filter_data['include_user_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'c.user_id', $filter_data['exclude_user_id'], 'not_numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['user_status_id']) ) ? $this->getWhereClauseSQL( 'd.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : NULL;
 
 		if ( isset($filter_data['include_user_subgroups']) AND (bool)$filter_data['include_user_subgroups'] == TRUE ) {
@@ -1662,7 +1696,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
         $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
         
 		$query .= 	'
-						AND (a.deleted = 0 AND c.deleted = 0 AND d.deleted = 0)
+						AND (a.deleted = 0 AND c.deleted = 0 )
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10254 $
- * $Id: UserFactory.class.php 10254 2013-06-20 23:42:44Z ipso $
- * $Date: 2013-06-20 16:42:44 -0700 (Thu, 20 Jun 2013) $
+ * $Revision: 10530 $
+ * $Id: UserFactory.class.php 10530 2013-07-23 17:41:24Z ipso $
+ * $Date: 2013-07-23 10:41:24 -0700 (Tue, 23 Jul 2013) $
  */
 
 /**
@@ -104,8 +104,8 @@ class UserFactory extends Factory {
                                         '-1100-ethnic_group' => TTi18n::gettext('Ethnic Group'),
 										'-1102-default_branch' => TTi18n::gettext('Branch'),                                        
 										'-1103-default_department' => TTi18n::gettext('Department'),
-                                        '-1104-default_job_id' => TTi18n::gettext('Default Job'),
-                                        '-1105-default_job_item_id' => TTi18n::gettext('Default Task'),
+                                        '-1104-default_job' => TTi18n::gettext('Job'),
+                                        '-1105-default_job_item' => TTi18n::gettext('Task'),
 										'-1106-currency' => TTi18n::gettext('Currency'),
 
 										'-1108-permission_control' => TTi18n::gettext('Permission Group'),
@@ -218,7 +218,9 @@ class UserFactory extends Factory {
 										'default_department_id' => 'DefaultDepartment',
 										'default_department' => FALSE,
                                         'default_job_id' => 'DefaultJob',
+										'default_job' => FALSE,
 										'default_job_item_id' => 'DefaultJobItem',
+										'default_job_item' => FALSE,
 										'permission_control_id' => 'PermissionControl',
 										'permission_control' => FALSE,
 										'pay_period_schedule_id' => 'PayPeriodSchedule',
@@ -227,8 +229,10 @@ class UserFactory extends Factory {
 										'policy_group' => FALSE,
 										'hierarchy_control' => 'HierarchyControl',
 										'first_name' => 'FirstName',
+										'first_name_metaphone' => 'FirstNameMetaphone',
 										'middle_name' => 'MiddleName',
 										'last_name' => 'LastName',
+										'last_name_metaphone' => 'LastNameMetaphone',
 										'full_name' => 'FullName',
 										'second_last_name' => 'SecondLastName',
 										'sex_id' => 'Sex',
@@ -928,7 +932,7 @@ class UserFactory extends Factory {
 				AND
 					$this->Validator->isTrue(		'phone_id',
 													$this->isUniquePhoneId($phone_id),
-													TTi18n::gettext('Quick Punch ID is already taken')
+													TTi18n::gettext('Quick Punch ID is already in use, please try a different one')
 													)
 				)
 			) {
@@ -1775,7 +1779,7 @@ class UserFactory extends Factory {
 		if 	( $last_name != '' ) {
 
 			$this->data['last_name_metaphone'] = $last_name;
-
+			
 			return TRUE;
 		}
 
@@ -2057,7 +2061,7 @@ class UserFactory extends Factory {
 											$value,
 											TTi18n::gettext('Longitude is invalid')
 											) ) {
-			$this->data['longitude'] = $value;
+			$this->data['longitude'] = number_format( $value, 10 ); //Always use 10 decimal places, this also prevents audit logging 0 vs 0.000000000
 
 			return TRUE;
 		}
@@ -2081,7 +2085,7 @@ class UserFactory extends Factory {
 											$value,
 											TTi18n::gettext('Latitude is invalid')
 											) ) {
-			$this->data['latitude'] = $value;
+			$this->data['latitude'] =  number_format( $value, 10 ); //Always use 10 decimal places, this also prevents audit logging 0 vs 0.000000000
 
 			return TRUE;
 		}
@@ -2320,6 +2324,26 @@ class UserFactory extends Factory {
 		return FALSE;
 	}
 
+	function isValidWageForHireDate( $epoch ) {
+		if ( $this->getID() > 0 AND $epoch != '' ) {
+			$uwlf = TTnew( 'UserWageListFactory' );
+
+			//Check to see if any wage entries exist for this employee
+			$uwlf->getLastWageByUserId( $this->getID() );
+			if ( $uwlf->getRecordCount() >= 1 ) {
+				Debug::Text('No wage entries exist...', __FILE__, __LINE__, __METHOD__,10);
+
+				$uwlf->getByUserIdAndGroupIDAndBeforeDate( $this->getID(), 0, $epoch );
+				if ( $uwlf->getRecordCount() == 0 ) {
+					Debug::Text('No wage entry on or before : '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__,10);
+					return FALSE;
+				}
+			}
+		}
+
+		return TRUE;
+	}
+
 	function getHireDate() {
 		if ( isset($this->data['hire_date']) ) {
 			return $this->data['hire_date'];
@@ -2331,9 +2355,16 @@ class UserFactory extends Factory {
 		//( $epoch !== FALSE AND $epoch == '' ) //Check for strict FALSE causes data from UserDefault to fail if its not set.
 		if 	(	( $epoch == '' )
 				OR
-				$this->Validator->isDate(		'hire_date',
-												$epoch,
-												TTi18n::gettext('Hire date is invalid')) ) {
+					(
+						$this->Validator->isDate(		'hire_date',
+														$epoch,
+														TTi18n::gettext('Hire date is invalid'))
+						AND
+						$this->Validator->isTrue(		'hire_date',
+														$this->isValidWageForHireDate( $epoch ),
+														TTi18n::gettext('Hire date must be on or after the employees first wage entry'))
+					)
+				) {
 
 			//Use the beginning of the day epoch, so accrual policies that apply on the hired date still work.
 			$this->data['hire_date'] = TTDate::getBeginDayEpoch( $epoch );
@@ -3349,6 +3380,8 @@ class UserFactory extends Factory {
 							$this->setPassword( $data[$key], $password_confirm );
 							break;
 						case 'last_login_date': //SKip this as its set by the system.
+						case 'first_name_metaphone':
+						case 'last_name_metaphone':
 							break;
 						default:
 							if ( method_exists( $this, $function ) ) {
@@ -3402,6 +3435,8 @@ class UserFactory extends Factory {
 						case 'currency_rate':
 						case 'default_branch':
 						case 'default_department':
+						case 'default_job':
+						case 'default_job_item':
 						case 'permission_control':
 						case 'pay_period_schedule':
 						case 'policy_group':

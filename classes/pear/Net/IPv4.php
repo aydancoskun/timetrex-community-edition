@@ -433,7 +433,7 @@ class Net_IPv4
      * @param  string  $network A string representing the network in CIDR format or a Net_IPv4 object.
      * @return bool             true if the IP address exists within the network
      */
-    function ipInNetwork($ip, $network)
+    static function ipInNetwork($ip, $network)
     {
         if (! is_object($network) || strcasecmp(get_class($network), 'net_ipv4') <> 0) {
             $network = Net_IPv4::parseAddress($network);

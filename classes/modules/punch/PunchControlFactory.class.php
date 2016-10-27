@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9904 $
- * $Id: PunchControlFactory.class.php 9904 2013-05-16 17:54:57Z ipso $
- * $Date: 2013-05-16 10:54:57 -0700 (Thu, 16 May 2013) $
+ * $Revision: 10333 $
+ * $Id: PunchControlFactory.class.php 10333 2013-07-02 23:29:50Z ipso $
+ * $Date: 2013-07-02 16:29:50 -0700 (Tue, 02 Jul 2013) $
  */
 
 /**
@@ -1046,14 +1046,15 @@ class PunchControlFactory extends Factory {
 			if ( $plf->getRecordCount() > 0 ) {
 				foreach( $plf as $p_obj ) {
 					if ( $p_obj->getID() != $this->getPunchObject()->getID() ) {
-						if ( $this->getPunchObject()->getStatus() == 10 AND $p_obj->getStatus() == 20 AND $this->getPunchObject()->getTimeStamp() > $p_obj->getTimeStamp() ) {
-								$this->Validator->isTRUE(	'time_stamp',
-															FALSE,
-															TTi18n::gettext('In punches cannot occur after an out punch, in the same punch pair (a)'));
+						if ( $this->getPunchObject()->getStatus() == 10 AND $p_obj->getStatus() == 10 AND $this->getPunchObject()->getTimeStamp() > $p_obj->getTimeStamp() ) {
+							//Make sure we match on status==10 for both sides, otherwise this fails to catch the problem case.
+							$this->Validator->isTRUE(	'time_stamp',
+														FALSE,
+														TTi18n::gettext('In punches cannot occur after an out punch, in the same punch pair (a)'));
 						} elseif ( $this->getPunchObject()->getStatus() == 20 AND $p_obj->getStatus() == 10 AND $this->getPunchObject()->getTimeStamp() < $p_obj->getTimeStamp() ) {
-								$this->Validator->isTRUE(	'time_stamp',
-															FALSE,
-															TTi18n::gettext('Out punches cannot occur before an in punch, in the same punch pair (a)'));
+							$this->Validator->isTRUE(	'time_stamp',
+														FALSE,
+														TTi18n::gettext('Out punches cannot occur before an in punch, in the same punch pair (a)'));
 						}
 					}
 				}

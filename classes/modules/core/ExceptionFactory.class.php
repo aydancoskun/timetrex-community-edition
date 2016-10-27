@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9910 $
- * $Id: ExceptionFactory.class.php 9910 2013-05-17 15:18:25Z ipso $
- * $Date: 2013-05-17 08:18:25 -0700 (Fri, 17 May 2013) $
+ * $Revision: 10609 $
+ * $Id: ExceptionFactory.class.php 10609 2013-07-31 17:29:20Z ipso $
+ * $Date: 2013-07-31 10:29:20 -0700 (Wed, 31 Jul 2013) $
  */
 
 /**
@@ -499,6 +499,7 @@ class ExceptionFactory extends Factory {
 
 	*/
 	function emailException( $u_obj, $user_date_obj, $punch_obj = NULL, $schedule_obj = NULL, $ep_obj = NULL ) {
+		global $config_vars;
 
 		if ( !is_object( $u_obj ) ) {
 			return FALSE;
@@ -531,6 +532,11 @@ class ExceptionFactory extends Factory {
 			$bcc = NULL;
 		}
 		Debug::Text('To: '. $to .' Bcc: '. $bcc, __FILE__, __LINE__, __METHOD__,10);
+
+		$protocol = 'http';
+		if ( isset($config_vars['other']['force_ssl']) AND $config_vars['other']['force_ssl'] == 1 ) {
+			$protocol .= 's';
+		}
 
 		//Define subject/body variables here.
 		$search_arr = array(
@@ -596,7 +602,7 @@ class ExceptionFactory extends Factory {
 		$exception_email_body .= ( $replace_arr[5] != '' ) ? TTi18n::gettext('Title').': #employee_title#'."\n" : NULL;
 
 		$exception_email_body .= "\n";
-		$exception_email_body .= TTi18n::gettext('Link:').' <a href="http://'. Misc::getHostName().Environment::getBaseURL().'">'.APPLICATION_NAME.' '. TTi18n::gettext('Login') .'</a>';
+		$exception_email_body .= TTi18n::gettext('Link:').' <a href="'. $protocol .'://'. Misc::getHostName().Environment::getBaseURL().'">'.APPLICATION_NAME.' '. TTi18n::gettext('Login') .'</a>';
 
 		$exception_email_body .= ( $replace_arr[10] != '' ) ? "\n\n\n".TTi18n::gettext('Company').': #company_name#'."\n" : NULL; //Always put at the end
 

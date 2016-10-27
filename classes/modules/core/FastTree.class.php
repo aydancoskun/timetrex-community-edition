@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 3536 $
- * $Id: FastTree.class.php 3536 2010-05-01 03:52:32Z ipso $
- * $Date: 2010-04-30 20:52:32 -0700 (Fri, 30 Apr 2010) $
+ * $Revision: 10504 $
+ * $Id: FastTree.class.php 10504 2013-07-22 17:30:45Z ipso $
+ * $Date: 2013-07-22 10:30:45 -0700 (Mon, 22 Jul 2013) $
  */
 
 /*
@@ -864,6 +864,11 @@ class FastTree {
 				} else {
 					$parent =& $nested;
 					for( $i = 2; $i <= $node['level']; $i++ ) {
+						//In cases where parent nodes were deleted without reparenting, prevent PHP warning.
+						if ( !isset($depths[$i]) ) {
+							$depths[$i] = 0;
+						}
+
 						if ( $i == 2 ) {
 							$parent =& $parent[$depths[$i]];
 						} else {

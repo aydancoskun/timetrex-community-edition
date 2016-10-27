@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9815 $
- * $Id: Misc.class.php 9815 2013-05-08 21:20:45Z ipso $
- * $Date: 2013-05-08 14:20:45 -0700 (Wed, 08 May 2013) $
+ * $Revision: 10643 $
+ * $Id: Misc.class.php 10643 2013-08-02 19:06:09Z ipso $
+ * $Date: 2013-08-02 12:06:09 -0700 (Fri, 02 Aug 2013) $
  */
 
 /**
@@ -614,7 +614,11 @@ class Misc {
 
 	//Encode integer to a alphanumeric value that is reversible.
 	static function encodeInteger( $int ) {
-		return strtoupper( base_convert( strrev( str_pad( $int, 11, 0, STR_PAD_LEFT ) ), 10, 36) );
+		if ( $int != '' ) {
+			return strtoupper( base_convert( strrev( str_pad( $int, 11, 0, STR_PAD_LEFT ) ), 10, 36) );
+		}
+
+		return $int;
 	}
 	static function decodeInteger( $str, $max = 2147483646 ) {
 		$retval = (int)str_pad( strrev( base_convert( $str, 36, 10) ), 11, 0, STR_PAD_RIGHT );

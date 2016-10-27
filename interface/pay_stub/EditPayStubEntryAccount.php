@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 4104 $
- * $Id: EditPayStubEntryAccount.php 4104 2011-01-04 19:04:05Z ipso $
- * $Date: 2011-01-04 11:04:05 -0800 (Tue, 04 Jan 2011) $
+ * $Revision: 10376 $
+ * $Id: EditPayStubEntryAccount.php 10376 2013-07-05 20:34:11Z ipso $
+ * $Date: 2013-07-05 13:34:11 -0700 (Fri, 05 Jul 2013) $
  */
 require_once('../../includes/global.inc.php');
 require_once(Environment::getBasePath() .'includes/Interface.inc.php');
@@ -76,6 +76,7 @@ switch ($action) {
 		$pseaf->setName( $data['name'] );
 		$pseaf->setOrder( $data['order'] );
 		$pseaf->setAccrual( $data['accrual_id'] );
+		$pseaf->setAccrualType( $data['accrual_type_id'] );
 		$pseaf->setDebitAccount( $data['debit_account'] );
 		$pseaf->setCreditAccount( $data['credit_account'] );
 
@@ -104,9 +105,9 @@ switch ($action) {
 									'name' => $psea_obj->getName(),
 									'order' => $psea_obj->getOrder(),
 									'accrual_id' => $psea_obj->getAccrual(),
+									'accrual_type_id' => $psea_obj->getAccrualType(),
 									'debit_account' => $psea_obj->getDebitAccount(),
 									'credit_account' => $psea_obj->getCreditAccount(),
-									'accrual_id' => $psea_obj->getAccrual(),
 									'created_date' => $psea_obj->getCreatedDate(),
 									'created_by' => $psea_obj->getCreatedBy(),
 									'updated_date' => $psea_obj->getUpdatedDate(),
@@ -120,6 +121,7 @@ switch ($action) {
 		//Select box options;
 		$data['status_options'] = $pseaf->getOptions('status');
 		$data['type_options'] = $pseaf->getOptions('type');
+		$data['accrual_type_options'] = $pseaf->getOptions('accrual_type');
 
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 		$data['accrual_options'] = $psealf->getByCompanyIdAndStatusIdAndTypeIdArray( $current_company->getId(), 10, array(50), TRUE );

@@ -163,7 +163,7 @@ class WageGroupFactory extends Factory {
 		Debug::Text('Validate...', __FILE__, __LINE__, __METHOD__,10);
 
 		if ( $this->getDeleted() == TRUE ) {
-			//Check to make sure there are no hours using this OT policy.
+			//Check to make sure there are no wage entries using this wage group.
 			$uwlf = TTnew( 'UserWageListFactory' );
 			$uwlf->getByWageGroupIDAndCompanyId( $this->getID(), $this->getCompany() );
 			if ( $uwlf->getRecordCount() > 0 ) {

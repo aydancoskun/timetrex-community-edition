@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9725 $
- * $Id: UserDateTotalListFactory.class.php 9725 2013-04-30 15:57:06Z ipso $
- * $Date: 2013-04-30 08:57:06 -0700 (Tue, 30 Apr 2013) $
+ * $Revision: 10407 $
+ * $Id: UserDateTotalListFactory.class.php 10407 2013-07-10 16:19:58Z ipso $
+ * $Date: 2013-07-10 09:19:58 -0700 (Wed, 10 Jul 2013) $
  */
 
 /**
@@ -925,7 +925,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						AND a.status_id = 10
 						AND (
 							a.type_id = 20
-							OR ( a.type_id = 30 AND c.type_id in ( 20, 30 ) )
+							OR ( a.type_id = 30 AND c.type_id in ( 20, 30, 210 ) )
 							)
 						AND a.absence_policy_id = 0
 						AND a.deleted = 0
@@ -2358,8 +2358,8 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 			$query .= ' AND b.pay_period_id in ('. $this->getListSQL($pay_period_ids, $ph) .') ';
 		}
 
+		//This isn't needed as it lists every status:	AND a.status_id in (10,20,30)
 		$query .= '
-						AND a.status_id in (10,20,30)
 						AND ( a.deleted = 0 AND b.deleted = 0)
 					group by b.user_id,b.pay_period_id,a.status_id, a.type_id, a.over_time_policy_id, a.absence_policy_id, a.premium_policy_id
 					) as tmp ON z.id = tmp.user_id
@@ -2480,8 +2480,9 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 					}
 
 		$ph[] = $company_id;
+
+		//This isn't needed as it lists every status:	AND a.status_id in (10,20,30)
 		$query .= '
-						AND a.status_id in (10,20,30)
 						AND ( a.deleted = 0 AND b.deleted = 0)
 					group by b.user_id, b.pay_period_id, a.branch_id, a.department_id, a.job_id, a.job_item_id, a.status_id, a.type_id, a.over_time_policy_id, a.absence_policy_id, a.premium_policy_id
 					) as tmp ON z.id = tmp.user_id
@@ -2576,8 +2577,8 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 			$query .= ' AND b.pay_period_id in ('. $this->getListSQL($pay_period_ids, $ph) .') ';
 		}
 
+		//This isn't needed as it lists every status:	AND a.status_id in (10,20,30)
 		$query .= '
-						AND a.status_id in (10,20,30)
 						AND ( a.deleted = 0 AND b.deleted = 0)
 					group by b.user_id, b.pay_period_id, b.date_stamp, a.status_id, a.type_id, a.over_time_policy_id, a.absence_policy_id, a.premium_policy_id, tmp2.min_punch_time_stamp, tmp2.max_punch_time_stamp
 					) as tmp ON z.id = tmp.user_id
@@ -2761,8 +2762,9 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		}
 
 		$ph[] = $company_id;
+
+		//This isn't needed as it lists every status:	AND a.status_id in (10,20,30)
 		$query .= '
-						AND a.status_id in (10,20,30)
 						AND ( a.deleted = 0 AND b.deleted = 0 )
 					group by b.user_id, b.pay_period_id, a.branch_id, a.department_id, b.date_stamp, user_wage_id, user_wage_effective_date, over_time_policy_wage_id, over_time_policy_wage_effective_date, absence_policy_wage_id, absence_policy_wage_effective_date, premium_policy_wage_id, premium_policy_wage_effective_date, a.status_id, a.type_id, a.over_time_policy_id, a.absence_policy_id, a.premium_policy_id, tmp2.min_punch_time_stamp, tmp2.max_punch_time_stamp
 					) as tmp ON z.id = tmp.user_id
@@ -3006,11 +3008,11 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						AND b.date_stamp >= ?
 						AND b.date_stamp <= ?
 						AND a.job_id in ('. $this->getListSQL($job_ids, $ph) .')
-						AND a.status_id in (10,20,30)
 						AND ( a.deleted = 0 AND b.deleted = 0)
 					group by b.user_id,user_wage_id, user_wage_effective_date, over_time_policy_wage_id, over_time_policy_wage_effective_date, absence_policy_wage_id, absence_policy_wage_effective_date, premium_policy_wage_id, premium_policy_wage_effective_date, a.status_id, a.type_id, a.branch_id, a.department_id, a.job_id, a.job_item_id, a.over_time_policy_id, a.absence_policy_id, a.premium_policy_id
 					order by a.job_id asc
 				';
+		//This isn't needed as it lists every status:	AND a.status_id in (10,20,30)
 
 		$query .= $this->getSortSQL( $order, FALSE );
 
@@ -3146,8 +3148,8 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 			$query  .=	' AND a.job_item_id in ('. $this->getListSQL($job_item_ids, $ph) .') ';
 		}
 
+		//This isn't needed as it lists every status:	AND a.status_id in (10,20,30)
 		$query .= '
-						AND a.status_id in (10,20,30)
 						AND ( a.deleted = 0 AND b.deleted = 0)
 					group by b.user_id,user_wage_id, user_wage_effective_date, over_time_policy_wage_id, over_time_policy_wage_effective_date, absence_policy_wage_id, absence_policy_wage_effective_date, premium_policy_wage_id, premium_policy_wage_effective_date, a.status_id, a.type_id, a.branch_id, a.department_id, a.job_id, a.job_item_id, a.over_time_policy_id, a.absence_policy_id, a.premium_policy_id
 				';
@@ -3248,6 +3250,142 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getAffordableCareReportByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+
+		//$order = array( 'b.pay_period_id' => 'asc', 'b.user_id' => 'asc' );
+		//$order = array( 'b.pay_period_id' => 'asc','uf.last_name' => 'asc', 'b.date_stamp' => 'asc' );
+		/*
+		if ( $order == NULL ) {
+			$order = array( 'b.pay_period_id' => 'asc', 'b.user_id' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+		*/
+
+		if ( isset($filter_data['punch_branch_ids']) ) {
+			$filter_data['punch_branch_id'] = $filter_data['punch_branch_ids'];
+		}
+		if ( isset($filter_data['punch_department_ids']) ) {
+			$filter_data['punch_department_id'] = $filter_data['punch_department_ids'];
+		}
+
+		if ( isset($filter_data['branch_ids']) ) {
+			$filter_data['branch_id'] = $filter_data['branch_ids'];
+		}
+		if ( isset($filter_data['department_ids']) ) {
+			$filter_data['department_id'] = $filter_data['department_ids'];
+		}
+
+		$uf = new UserFactory();
+		$udf = new UserDateFactory();
+		$bf = new BranchFactory();
+		$df = new DepartmentFactory();
+		$ppf_b = new PayPeriodFactory();
+		$uwf = new UserWageFactory();
+		$pcf = new PunchControlFactory();
+		$pf = new PunchFactory();
+		$otpf = new OverTimePolicyFactory();
+		$apf = new AbsencePolicyFactory();
+		$ppf = new PremiumPolicyFactory();
+		$pptsvlf = new PayPeriodTimeSheetVerifyListFactory();
+
+		$ph = array( 'company_id' => $company_id );
+
+		//Make it so employees with 0 hours still show up!! Very important!
+		//Order dock hours first, so it can be deducted from regular time.
+		$query = '
+					select
+							b.user_id as user_id,
+							date_trunc(\'month\',	b.date_stamp ) as date_stamp,
+							a.branch_id as branch_id,
+							a.department_id as department_id,
+							a.status_id as status_id,
+							a.type_id as type_id,
+
+							a.over_time_policy_id as over_time_policy_id,
+							a.absence_policy_id as absence_policy_id,
+							a.premium_policy_id as premium_policy_id,
+
+							z.hourly_rate as hourly_rate,
+							z.labor_burden_percent as labor_burden_percent,
+
+							sum(total_time) as total_time,
+							sum(actual_total_time) as actual_total_time
+					from	'. $this->getTable() .' as a
+					LEFT JOIN '. $udf->getTable() .' as b ON a.user_date_id = b.id
+					LEFT JOIN '. $uf->getTable() .' as uf ON b.user_id = uf.id
+
+					LEFT JOIN '. $bf->getTable() .' as bf ON a.branch_id = bf.id
+					LEFT JOIN '. $df->getTable() .' as df ON a.department_id = df.id
+
+					LEFT JOIN '. $ppf_b->getTable() .' as ppf ON b.pay_period_id = ppf.id
+
+					LEFT JOIN '. $otpf->getTable() .' as m ON (a.over_time_policy_id = m.id AND m.deleted = 0)
+					LEFT JOIN '. $apf->getTable() .' as o ON (a.absence_policy_id = o.id AND o.deleted = 0)
+					LEFT JOIN '. $ppf->getTable() .' as q ON (a.premium_policy_id = q.id AND q.deleted = 0)
+
+					LEFT JOIN '. $uwf->getTable() .' as z ON z.id = (select z.id
+																		from '. $uwf->getTable() .' as z
+																		where z.user_id = b.user_id
+																			and z.effective_date <= b.date_stamp
+																			and z.wage_group_id = (CASE WHEN a.over_time_policy_id > 0 THEN m.wage_group_id
+																									ELSE
+																										CASE WHEN a.absence_policy_id > 0 THEN o.wage_group_id ELSE
+																											CASE WHEN a.premium_policy_id > 0 THEN q.wage_group_id ELSE 0 END
+																										END
+																									END)
+																			and z.deleted = 0
+																			order by z.effective_date desc limit 1)
+
+					where 	uf.company_id = ? ';
+
+		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['include_user_id']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['include_user_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['exclude_user_id']) ) ? $this->getWhereClauseSQL( 'uf.id', $filter_data['exclude_user_id'], 'not_numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_status_id']) ) ? $this->getWhereClauseSQL( 'uf.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : NULL;
+
+		if ( isset($filter_data['include_user_subgroups']) AND (bool)$filter_data['include_user_subgroups'] == TRUE ) {
+			$uglf = new UserGroupListFactory();
+			$filter_data['user_group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['user_group_id'], TRUE);
+		}
+		$query .= ( isset($filter_data['user_group_id']) ) ? $this->getWhereClauseSQL( 'uf.group_id', $filter_data['user_group_id'], 'numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_title_id']) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['user_title_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['punch_branch_id']) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['punch_branch_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['punch_department_id']) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['punch_department_id'], 'numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'b.pay_period_id', $filter_data['pay_period_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['pay_period_time_sheet_verify_status_id']) ) ? $this->getWhereClauseSQL( 'pptsvlf.status_id', $filter_data['pay_period_time_sheet_verify_status_id'], 'numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'uf.id', array( 'company_id' => $company_id, 'object_type_id' => 200, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
+
+		if ( isset($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
+			$ph[] = $this->db->BindDate($filter_data['start_date']);
+			$query  .=	' AND b.date_stamp >= ?';
+		}
+		if ( isset($filter_data['end_date']) AND trim($filter_data['end_date']) != '' ) {
+			$ph[] = $this->db->BindDate($filter_data['end_date']);
+			$query  .=	' AND b.date_stamp <= ?';
+		}
+
+		//This isn't needed as it lists every status:	AND a.status_id in (10,20,30)
+		$query .= '
+						AND ( a.deleted = 0 AND b.deleted = 0 )
+					group by b.user_id, a.branch_id, a.department_id, b.date_stamp, z.hourly_rate, z.labor_burden_percent, a.status_id, a.type_id, a.over_time_policy_id, a.absence_policy_id, a.premium_policy_id
+					';
+
+		$query .= $this->getSortSQL( $order, FALSE );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		//Debug::Arr($ph ,'Query: '. $query, __FILE__, __LINE__, __METHOD__,10);
 
 		return $this;
 	}
@@ -3405,8 +3543,8 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 			$query  .=	' AND b.date_stamp <= ?';
 		}
 
+		//This isn't needed as it lists every status:	AND a.status_id in (10,20,30)
 		$query .= '
-						AND a.status_id in (10,20,30)
 						AND ( a.deleted = 0 AND b.deleted = 0 )
 					group by b.user_id, ppf.id, ppf.start_date, ppf.end_date, ppf.transaction_date, a.branch_id, a.department_id, b.date_stamp, z.hourly_rate, z.labor_burden_percent, a.status_id, a.type_id, a.over_time_policy_id, a.absence_policy_id, a.premium_policy_id, min_punch.time_stamp, max_punch.time_stamp
 					';
@@ -3562,46 +3700,6 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 
 		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'uf.id', array( 'company_id' => $company_id, 'object_type_id' => 200, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 
-/*
-		if ( isset($filter_data['permission_children_ids']) AND isset($filter_data['permission_children_ids'][0]) AND !in_array(-1, (array)$filter_data['permission_children_ids']) ) {
-			$query  .=	' AND uf.id in ('. $this->getListSQL($filter_data['permission_children_ids'], $ph) .') ';
-		}
-		if ( isset($filter_data['include_user_id']) AND isset($filter_data['include_user_id'][0]) AND !in_array(-1, (array)$filter_data['include_user_id']) ) {
-			$query  .=	' AND uf.id in ('. $this->getListSQL($filter_data['include_user_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['exclude_user_id']) AND isset($filter_data['exclude_user_id'][0]) AND !in_array(-1, (array)$filter_data['exclude_user_id']) ) {
-			$query  .=	' AND uf.id not in ('. $this->getListSQL($filter_data['exclude_user_id'], $ph) .') ';
-		}
-
-		if ( isset($filter_data['user_status_id']) AND isset($filter_data['user_status_id'][0]) AND !in_array(-1, (array)$filter_data['user_status_id']) ) {
-			$query  .=	' AND uf.status_id in ('. $this->getListSQL($filter_data['user_status_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['user_group_id']) AND isset($filter_data['user_group_id'][0]) AND !in_array(-1, (array)$filter_data['user_group_id']) ) {
-			if ( isset($filter_data['include_user_subgroups']) AND (bool)$filter_data['include_user_subgroups'] == TRUE ) {
-				$uglf = new UserGroupListFactory();
-				$filter_data['user_group_id'] = $uglf->getByCompanyIdAndGroupIdAndSubGroupsArray( $company_id, $filter_data['user_group_id'], TRUE);
-			}
-			$query  .=	' AND uf.group_id in ('. $this->getListSQL($filter_data['user_group_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['default_branch_id']) AND isset($filter_data['default_branch_id'][0]) AND !in_array(-1, (array)$filter_data['default_branch_id']) ) {
-			$query  .=	' AND uf.default_branch_id in ('. $this->getListSQL($filter_data['default_branch_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['default_department_id']) AND isset($filter_data['default_department_id'][0]) AND !in_array(-1, (array)$filter_data['default_department_id']) ) {
-			$query  .=	' AND uf.default_department_id in ('. $this->getListSQL($filter_data['default_department_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['user_title_id']) AND isset($filter_data['user_title_id'][0]) AND !in_array(-1, (array)$filter_data['user_title_id']) ) {
-			$query  .=	' AND uf.title_id in ('. $this->getListSQL($filter_data['user_title_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['punch_branch_id']) AND isset($filter_data['punch_branch_id'][0]) AND !in_array(-1, (array)$filter_data['punch_branch_id']) ) {
-			$query  .=	' AND a.branch_id in ('. $this->getListSQL($filter_data['punch_branch_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['punch_department_id']) AND isset($filter_data['punch_department_id'][0]) AND !in_array(-1, (array)$filter_data['punch_department_id']) ) {
-			$query  .=	' AND a.department_id in ('. $this->getListSQL($filter_data['punch_department_id'], $ph) .') ';
-		}
-		if ( isset($filter_data['pay_period_id']) AND isset($filter_data['pay_period_id'][0]) AND !in_array(-1, (array)$filter_data['pay_period_id']) ) {
-			$query .= 	' AND b.pay_period_id in ('. $this->getListSQL($filter_data['pay_period_id'], $ph) .') ';
-		}
-*/
 		if ( isset($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
 			$ph[] = $this->db->BindDate($filter_data['start_date']);
 			$query  .=	' AND b.date_stamp >= ?';
@@ -3611,14 +3709,16 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 			$query  .=	' AND b.date_stamp <= ?';
 		}
 
+		//This isn't needed as it lists every status: AND a.status_id in (10,20,30)
 		$query .= '
-						AND a.status_id in (10,20,30)
 						AND ( a.deleted = 0 AND b.deleted = 0 )
 					group by b.user_id, ppf.id, ppf.start_date, ppf.end_date, ppf.transaction_date, bf.name, df.name, b.date_stamp, z.hourly_rate, z.labor_burden_percent, a.status_id, a.type_id, a.over_time_policy_id, a.absence_policy_id, a.premium_policy_id, min_punch.time_stamp, max_punch.time_stamp
 					';
 
 		$query .= $this->getSortSQL( $order, FALSE );
 		$this->ExecuteSQL( $query, $ph );
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__,10);
 
 		return $this;
 	}
@@ -3769,8 +3869,8 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 			$query  .=	' AND b.date_stamp <= ?';
 		}
 
+		//This isn't needed as it lists every status: AND a.status_id in (10,20,30)
 		$query .= '
-						AND a.status_id in (10,20,30)
 						AND ( a.deleted = 0 AND b.deleted = 0 )
 					group by b.user_id, ppf.id, ppf.start_date, ppf.end_date, ppf.transaction_date, bf.name, df.name, a.job_id, a.job_item_id, b.date_stamp, z.hourly_rate, z.labor_burden_percent, a.status_id, a.type_id, a.over_time_policy_id, a.absence_policy_id, a.premium_policy_id
 					';
@@ -3903,8 +4003,8 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 			$query  .=	' AND b.date_stamp <= ?';
 		}
 
+		//This isn't needed as it lists every status: AND a.status_id in (10,20,30)
 		$query .= '
-						AND a.status_id in (10,20,30)
 						AND ( a.deleted = 0 AND b.deleted = 0 )
 					group by b.user_id, ppf.id, ppf.start_date, ppf.end_date, ppf.transaction_date, a.branch_id, a.department_id, a.job_id, a.job_item_id, b.date_stamp, a.status_id, a.type_id, a.over_time_policy_id, a.absence_policy_id
 					';

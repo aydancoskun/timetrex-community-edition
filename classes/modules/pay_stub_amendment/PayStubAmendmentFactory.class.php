@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9867 $
- * $Id: PayStubAmendmentFactory.class.php 9867 2013-05-13 18:29:23Z ipso $
- * $Date: 2013-05-13 11:29:23 -0700 (Mon, 13 May 2013) $
+ * $Revision: 10417 $
+ * $Id: PayStubAmendmentFactory.class.php 10417 2013-07-11 22:21:13Z ipso $
+ * $Date: 2013-07-11 15:21:13 -0700 (Thu, 11 Jul 2013) $
  */
 require_once( 'Numbers/Words.php');
 
@@ -115,7 +115,8 @@ class PayStubAmendmentFactory extends Factory {
 										'-1150-amount' => TTi18n::gettext('Amount'),
 										'-1160-rate' => TTi18n::gettext('Rate'),
 										'-1170-units' => TTi18n::gettext('Units'),
-										'-1180-description' => TTi18n::gettext('Description'),
+										'-1180-description' => TTi18n::gettext('Pay Stub Note (Public)'),
+										'-1182-private_description' => TTi18n::gettext('Description (Private)'),
 										'-1190-ytd_adjustment' => TTi18n::gettext('YTD Adjustment'),
 
 										'-2000-created_by' => TTi18n::gettext('Created By'),
@@ -184,6 +185,7 @@ class PayStubAmendmentFactory extends Factory {
 										'percent_amount_entry_name_id' => 'PercentAmountEntryNameId',
 										'ytd_adjustment' => 'YTDAdjustment',
 										'description' => 'Description',
+										'private_description' => 'PrivateDescription',
 										'authorized' => 'Authorized',
 										'deleted' => 'Deleted',
 										);
@@ -771,6 +773,32 @@ class PayStubAmendmentFactory extends Factory {
 												100) ) {
 
 			$this->data['description'] = htmlspecialchars( $text );
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getPrivateDescription() {
+		if ( isset($this->data['private_description']) ) {
+			return $this->data['private_description'];
+		}
+
+		return FALSE;
+	}
+	function setPrivateDescription($text) {
+		$text = trim($text);
+
+		if 	(	strlen($text) == 0
+				OR
+				$this->Validator->isLength(		'description',
+												$text,
+												TTi18n::gettext('Invalid Description Length'),
+												2,
+												250) ) {
+
+			$this->data['private_description'] = htmlspecialchars( $text );
 
 			return TRUE;
 		}

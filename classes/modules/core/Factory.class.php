@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10077 $
- * $Id: Factory.class.php 10077 2013-05-31 18:37:34Z ipso $
- * $Date: 2013-05-31 11:37:34 -0700 (Fri, 31 May 2013) $
+ * $Revision: 10630 $
+ * $Id: Factory.class.php 10630 2013-08-01 21:05:29Z ipso $
+ * $Date: 2013-08-01 14:05:29 -0700 (Thu, 01 Aug 2013) $
  */
 
 /**
@@ -845,7 +845,7 @@ abstract class Factory {
 			$arg .= '%';
 		}
 
-		return $this->stripSQLSyntax( $arg );
+		return addslashes( $this->stripSQLSyntax( $arg ) ); //Addaslashes to prevent SQL syntax error if %\ is at the end of the where clause.
 	}
 
 	protected function stripSQLSyntax( $arg ) {
@@ -1309,7 +1309,8 @@ abstract class Factory {
 		//**getColumnList() now only returns valid table columns based on the variable to function map.
 		$column_list = $this->getColumnList();
 
-		if ( is_array($column_list) ) {
+		//ignore_column_list can be set in InstallSchema files to prevent column names from being used which may cause SQL errors during upgrade process.
+		if ( is_array($column_list) AND !isset($this->ignore_column_list) ) {
 			//Implode columns.
 			$column_str = implode(',', $column_list);
 		} else {

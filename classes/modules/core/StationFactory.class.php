@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9903 $
- * $Id: StationFactory.class.php 9903 2013-05-16 16:44:31Z ipso $
- * $Date: 2013-05-16 09:44:31 -0700 (Thu, 16 May 2013) $
+ * $Revision: 10406 $
+ * $Id: StationFactory.class.php 10406 2013-07-10 16:19:28Z ipso $
+ * $Date: 2013-07-10 09:19:28 -0700 (Wed, 10 Jul 2013) $
  */
 include_once('Net/IPv4.php');
 
@@ -2000,6 +2000,25 @@ class StationFactory extends Factory {
 		return TRUE;
 	}
 
+	//Check to see if this station is active for any employees, if not, we may as well mark it as disabled to speed up queries.
+	function isActiveForAnyEmployee() {
+		if (
+				( $this->getGroupSelectionType() == 20 AND $this->getGroup() === FALSE )
+				AND
+				( $this->getBranchSelectionType() == 20 AND $this->getBranch() === FALSE )
+				AND
+				( $this->getDepartmentSelectionType() == 20 AND $this->getDepartment() === FALSE )
+				AND
+				( $this->getIncludeUser() === FALSE )
+			) {
+			Debug::text('Station is not active for any employees, everyone is denied.', __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		}
+		Debug::text('Station IS active for at least some employees...', __FILE__, __LINE__, __METHOD__, 10);
+
+		return TRUE;
+	}
+
 	function preSave() {
 		//New stations are deny all by default, so if they haven't
 		//set the selection types, default them to only selected, so
@@ -2014,6 +2033,10 @@ class StationFactory extends Factory {
 			$this->setDepartmentSelectionType( 20 ); //Only selected.
 		}
 
+		if ( $this->getStatus() == 20 AND $this->isActiveForAnyEmployee() == FALSE ) {
+			$this->setStatus( 10 ); //Disabled
+		}
+		
 		return TRUE;
 	}
 

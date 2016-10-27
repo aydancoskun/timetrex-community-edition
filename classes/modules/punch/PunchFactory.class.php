@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10127 $
- * $Id: PunchFactory.class.php 10127 2013-06-06 04:39:52Z ipso $
- * $Date: 2013-06-05 21:39:52 -0700 (Wed, 05 Jun 2013) $
+ * $Revision: 10530 $
+ * $Id: PunchFactory.class.php 10530 2013-07-23 17:41:24Z ipso $
+ * $Date: 2013-07-23 10:41:24 -0700 (Tue, 23 Jul 2013) $
  */
 
 /**
@@ -900,7 +900,7 @@ class PunchFactory extends Factory {
 											$value,
 											TTi18n::gettext('Longitude is invalid')
 											) ) {
-			$this->data['longitude'] = $value;
+			$this->data['longitude'] = number_format( $value, 10 ); //Always use 10 decimal places, this also prevents audit logging 0 vs 0.000000000
 
 			return TRUE;
 		}
@@ -924,7 +924,7 @@ class PunchFactory extends Factory {
 											$value,
 											TTi18n::gettext('Latitude is invalid')
 											) ) {
-			$this->data['latitude'] = $value;
+			$this->data['latitude'] = number_format( $value, 10 ); //Always use 10 decimal places, this also prevents audit logging 0 vs 0.000000000
 
 			return TRUE;
 		}

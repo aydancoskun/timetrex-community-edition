@@ -825,6 +825,9 @@ class PurgeDatabase {
 
 							//Delete station rows from deleted/cancelled companies
 							$query[] = 'delete from '. $table .' as a USING company as e WHERE a.company_id = e.id AND ( a.deleted = 1 OR e.deleted = 1 OR e.status_id = 30 ) AND ( a.updated_date <= '. (time()-(86400*($expire_days))) .' AND e.updated_date <= '. (time()-(86400*($expire_days))) .')';
+
+							//Disable iButton/Fingerprint/Barcode stations that have never been used.
+							$query[] = 'update '. $table .' set status_id = 10 where type_id in (30,40,50) AND status_id = 20 AND allowed_date is NULL AND updated_date <= '. (time()-(86400*(120))) .' AND ( deleted = 0 )';
 							break;
 						case 'permission_control':
 							$query[] = 'delete from '. $table .' as a USING company as c WHERE a.company_id = c.id AND ( c.deleted = 1 ) AND ( a.updated_date <= '. (time()-(86400*($expire_days))) .' AND c.updated_date <= '. (time()-(86400*($expire_days))) .')';

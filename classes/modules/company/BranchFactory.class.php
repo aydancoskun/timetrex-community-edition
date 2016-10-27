@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9570 $
- * $Id: BranchFactory.class.php 9570 2013-04-12 18:26:34Z ipso $
- * $Date: 2013-04-12 11:26:34 -0700 (Fri, 12 Apr 2013) $
+ * $Revision: 10530 $
+ * $Id: BranchFactory.class.php 10530 2013-07-23 17:41:24Z ipso $
+ * $Date: 2013-07-23 10:41:24 -0700 (Tue, 23 Jul 2013) $
  */
 
 /**
@@ -119,6 +119,7 @@ class BranchFactory extends Factory {
 										'status' => FALSE,
 										'manual_id' => 'ManualID',
 										'name' => 'Name',
+										'name_metaphone' => 'NameMetaphone',
 										'address1' => 'Address1',
 										'address2' => 'Address2',
 										'city' => 'City',
@@ -558,7 +559,7 @@ class BranchFactory extends Factory {
 											$value,
 											TTi18n::gettext('Longitude is invalid')
 											) ) {
-			$this->data['longitude'] = $value;
+			$this->data['longitude'] = number_format( $value, 10 ); //Always use 10 decimal places, this also prevents audit logging 0 vs 0.000000000
 
 			return TRUE;
 		}
@@ -582,7 +583,7 @@ class BranchFactory extends Factory {
 											$value,
 											TTi18n::gettext('Latitude is invalid')
 											) ) {
-			$this->data['latitude'] = $value;
+			$this->data['latitude'] = number_format( $value, 10 ); //Always use 10 decimal places, this also prevents audit logging 0 vs 0.000000000
 
 			return TRUE;
 		}
@@ -898,6 +899,8 @@ class BranchFactory extends Factory {
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = Option::getByKey( $this->$function(), $this->getOptions( $variable ) );
 							}
+							break;
+						case 'name_metaphone':
 							break;
 						default:
 							if ( method_exists( $this, $function ) ) {

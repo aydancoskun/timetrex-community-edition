@@ -80,6 +80,7 @@ class APICompanyDeduction extends APIFactory {
 						'company_id' => $company_obj->getId(),
 						'status_id' => 10,
 						'type_id' => 10,
+						'apply_frequency_id' => 10, //each Pay Period
 						'calculation_order' => 100,
 					);
 

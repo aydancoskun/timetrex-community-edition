@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 8207 $
- * $Id: DateTimeTest.php 8207 2012-11-06 00:52:16Z ipso $
- * $Date: 2012-11-05 16:52:16 -0800 (Mon, 05 Nov 2012) $
+ * $Revision: 10365 $
+ * $Id: DateTimeTest.php 10365 2013-07-05 01:45:36Z ipso $
+ * $Date: 2013-07-04 18:45:36 -0700 (Thu, 04 Jul 2013) $
  */
 require_once('PHPUnit/Framework/TestCase.php');
 
@@ -778,6 +778,35 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 
 		$date1 = strtotime('09-Jan-10 12:00PM');
 		$this->assertEquals( TTDate::getWeek( $date1, 6), 1 );
+
+
+		//Start on Monday as thats what PHP uses.
+		for( $i=strtotime('07-Jan-13'); $i < strtotime('06-Jan-13'); $i+=(86400*7) ) {
+			$this->assertEquals( TTDate::getWeek( $i, 1 ), date('W', $i ) );
+		}
+
+		//Start on Sunday.
+		$this->assertEquals( TTDate::getWeek( strtotime('29-Dec-12'), 0 ), 52 );
+		$this->assertEquals( TTDate::getWeek( strtotime('30-Dec-12'), 0 ), 1 );
+		$this->assertEquals( TTDate::getWeek( strtotime('31-Dec-12'), 0 ), 1 );
+		$this->assertEquals( TTDate::getWeek( strtotime('01-Jan-12'), 0 ), 1 );
+		$this->assertEquals( TTDate::getWeek( strtotime('02-Jan-12'), 0 ), 1 );
+		$this->assertEquals( TTDate::getWeek( strtotime('03-Jan-12'), 0 ), 1 );
+		$this->assertEquals( TTDate::getWeek( strtotime('04-Jan-12'), 0 ), 1 );
+		$this->assertEquals( TTDate::getWeek( strtotime('05-Jan-12'), 0 ), 1 );
+		$this->assertEquals( TTDate::getWeek( strtotime('06-Jan-13'), 0 ), 2 );
+
+		$this->assertEquals( TTDate::getWeek( strtotime('09-Apr-13'), 0 ), 15 );
+		$this->assertEquals( TTDate::getWeek( strtotime('28-Jun-13'), 0 ), 26 );
+
+		//Start on every other day of the week
+		$this->assertEquals( TTDate::getWeek( strtotime('28-Jun-13'), 6 ), 25 );
+		$this->assertEquals( TTDate::getWeek( strtotime('27-Jun-13'), 5 ), 25 );
+		$this->assertEquals( TTDate::getWeek( strtotime('26-Jun-13'), 4 ), 25 );
+		$this->assertEquals( TTDate::getWeek( strtotime('25-Jun-13'), 3 ), 25 );
+		$this->assertEquals( TTDate::getWeek( strtotime('24-Jun-13'), 2 ), 25 );
+		$this->assertEquals( TTDate::getWeek( strtotime('23-Jun-13'), 1 ), 25 );
+		$this->assertEquals( TTDate::getWeek( strtotime('22-Jun-13'), 0 ), 25 );
 	}
 
 	function test_getNearestWeekDay() {
@@ -990,5 +1019,164 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::getDSTOffset( strtotime('10-Mar-13 1:30AM'), strtotime('10-Mar-13 6:30AM') ), 3600 );
 	}
 
+	function test_inApplyFrequencyWindow() {
+		//Annually
+		$frequency_criteria = array(
+									'month' => 1,
+									'day_of_month' => 2,
+									'day_of_week' => 0,
+									//'quarter' => 0,
+									'quarter_month' => 0,
+									'date' => 0
+									);
+
+		//No range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime('01-Jan-2010'), strtotime('01-Jan-2010'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime('02-Jan-2010'), strtotime('02-Jan-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime('03-Jan-2010'), strtotime('03-Jan-2010'), $frequency_criteria ), FALSE );
+		//Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime('01-Jan-2010'), strtotime('03-Jan-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime('02-Jan-2010 12:00PM'), strtotime('02-Jan-2010 12:00PM'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime('02-Jan-2010 12:00AM'), strtotime('02-Jan-2010 11:59PM'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime('01-Jan-2010')-(86400*7), strtotime('01-Jan-2010'), $frequency_criteria ), FALSE ); //Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime('02-Jan-2010')-(86400*7), strtotime('02-Jan-2010'), $frequency_criteria ), TRUE ); //Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime('03-Jan-2010')-(86400*7), strtotime('03-Jan-2010'), $frequency_criteria ), TRUE ); //Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime('04-Jan-2010')-(86400*7), strtotime('04-Jan-2010'), $frequency_criteria ), TRUE ); //Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime('05-Jan-2010')-(86400*7), strtotime('05-Jan-2010'), $frequency_criteria ), TRUE ); //Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime('06-Jan-2010')-(86400*7), strtotime('06-Jan-2010'), $frequency_criteria ), TRUE ); //Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime('07-Jan-2010')-(86400*7), strtotime('07-Jan-2010'), $frequency_criteria ), TRUE ); //Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime('08-Jan-2010')-(86400*7), strtotime('08-Jan-2010'), $frequency_criteria ), TRUE ); //Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime('09-Jan-2010')-(86400*7), strtotime('09-Jan-2010'), $frequency_criteria ), TRUE ); //Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 20, strtotime('10-Jan-2010')-(86400*7), strtotime('10-Jan-2010'), $frequency_criteria ), FALSE ); //Range
+
+
+		//Quarterly
+		$frequency_criteria = array(
+									'month' => 0,
+									'day_of_month' => 15,
+									'day_of_week' => 0,
+									//'quarter' => 3,
+									'quarter_month' => 2,
+									'date' => 0,
+									);
+
+		//No range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('14-Feb-2010'), strtotime('14-Feb-2010'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('15-Feb-2010'), strtotime('15-Feb-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('16-Feb-2010'), strtotime('16-Feb-2010'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('14-May-2010'), strtotime('14-May-2010'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('15-May-2010'), strtotime('15-May-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('16-May-2010'), strtotime('16-May-2010'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('14-Aug-2010'), strtotime('14-Aug-2010'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('15-Aug-2010'), strtotime('15-Aug-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('16-Aug-2010'), strtotime('16-Aug-2010'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('14-Nov-2010'), strtotime('14-Nov-2010'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('15-Nov-2010'), strtotime('15-Nov-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('16-Nov-2010'), strtotime('16-Nov-2010'), $frequency_criteria ), FALSE );
+
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('14-Jan-2010'), strtotime('14-Jan-2010'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('14-Mar-2010'), strtotime('14-Mar-2010'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('14-Apr-2010'), strtotime('14-Apr-2010'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('14-Jun-2010'), strtotime('14-Jun-2010'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('14-Jul-2010'), strtotime('14-Jul-2010'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('14-Sep-2010'), strtotime('14-Sep-2010'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('14-Oct-2010'), strtotime('14-Oct-2010'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('14-Dec-2010'), strtotime('14-Dec-2010'), $frequency_criteria ), FALSE );
+
+		//Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('01-Aug-2010'), strtotime('15-Aug-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('15-Aug-2010'), strtotime('20-Aug-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('16-Aug-2010'), strtotime('20-Aug-2010'), $frequency_criteria ), FALSE );
+
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('01-Jul-2010'), strtotime('15-Aug-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('01-Jun-2010'), strtotime('15-Aug-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('01-May-2010'), strtotime('15-Aug-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('01-Apr-2010'), strtotime('15-Aug-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('01-Apr-2009'), strtotime('15-Aug-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('16-Aug-2009'), strtotime('14-Dec-2010'), $frequency_criteria ), TRUE );
+
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('19-Aug-2009'), strtotime('14-Nov-2009'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('19-Aug-2009'), strtotime('15-Nov-2009'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 25, strtotime('19-Aug-2009'), strtotime('15-Nov-2010'), $frequency_criteria ), TRUE );
+
+		//Monthly
+		$frequency_criteria = array(
+									'month' => 2,
+									'day_of_month' => 31,
+									'day_of_week' => 0,
+									//'quarter' => 0,
+									'quarter_month' => 0,
+									'date' => 0,
+									);
+
+		//No range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime('27-Feb-2010'), strtotime('27-Feb-2010'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime('28-Feb-2010'), strtotime('28-Feb-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime('01-Mar-2010'), strtotime('01-Mar-2010'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime('27-Feb-2011'), strtotime('27-Feb-2011'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime('28-Feb-2011'), strtotime('28-Feb-2011'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime('01-Mar-2011'), strtotime('01-Mar-2011'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime('28-Feb-2012'), strtotime('28-Feb-2012'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime('29-Feb-2012'), strtotime('29-Feb-2012'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime('01-Mar-2012'), strtotime('01-Mar-2012'), $frequency_criteria ), FALSE );
+
+		//Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime('28-Feb-2010'), strtotime('05-Mar-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 30, strtotime('22-Feb-2010'), strtotime('28-Feb-2010'), $frequency_criteria ), TRUE );
+
+
+		//Weekly
+		$frequency_criteria = array(
+									'month' => 0,
+									'day_of_month' => 0,
+									'day_of_week' => 2, //Tuesday
+									//'quarter' => 0,
+									'quarter_month' => 0,
+									'date' => 0,
+									);
+
+		//No range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime('12-Apr-2010'), strtotime('12-Apr-2010'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime('13-Apr-2010'), strtotime('13-Apr-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime('14-Apr-2010'), strtotime('14-Apr-2010'), $frequency_criteria ), FALSE );
+
+		//Range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime('07-Apr-2010'), strtotime('12-Apr-2010'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime('14-Apr-2010'), strtotime('19-Apr-2010'), $frequency_criteria ), FALSE );
+
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime('11-Apr-2010'), strtotime('17-Apr-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime('12-Apr-2010'), strtotime('18-Apr-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime('13-Apr-2010'), strtotime('19-Apr-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime('14-Apr-2010'), strtotime('20-Apr-2010'), $frequency_criteria ), TRUE );
+
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime('12-Apr-2010'), strtotime('17-Apr-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime('13-Apr-2010'), strtotime('17-Apr-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime('14-Apr-2010'), strtotime('17-Apr-2010'), $frequency_criteria ), FALSE );
+
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime('11-Apr-2010'), strtotime('18-Apr-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime('11-Apr-2010'), strtotime('19-Apr-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime('11-Apr-2010'), strtotime('24-Apr-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 40, strtotime('11-Apr-2010'), strtotime('25-Apr-2010'), $frequency_criteria ), TRUE );
+
+		//Specific date
+		$frequency_criteria = array(
+									'month' => 0,
+									'day_of_month' => 0,
+									'day_of_week' => 0,
+									//'quarter' => 0,
+									'quarter_month' => 0,
+									'date' => strtotime('01-Jan-2010'),
+									);
+
+		//No range
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 100, strtotime('01-Jan-2010'), strtotime('01-Jan-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 100, strtotime('31-Dec-2009'), strtotime('01-Jan-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 100, strtotime('01-Jan-2010'), strtotime('02-Jan-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 100, strtotime('30-Dec-2009'), strtotime('31-Dec-2009'), $frequency_criteria ), FALSE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 100, strtotime('02-Jan-2010'), strtotime('03-Jan-2010'), $frequency_criteria ), FALSE );
+
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 100, strtotime('01-Jan-2009'), strtotime('01-Jan-2010'), $frequency_criteria ), TRUE );
+		$this->assertEquals( TTDate::inApplyFrequencyWindow( 100, strtotime('01-Jan-2009'), strtotime('01-Jan-2011'), $frequency_criteria ), TRUE );
+	}
 }
 ?>

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9937 $
- * $Id: PermissionFactory.class.php 9937 2013-05-20 16:41:23Z ipso $
- * $Date: 2013-05-20 09:41:23 -0700 (Mon, 20 May 2013) $
+ * $Revision: 10348 $
+ * $Id: PermissionFactory.class.php 10348 2013-07-03 19:25:34Z ipso $
+ * $Date: 2013-07-03 12:25:34 -0700 (Wed, 03 Jul 2013) $
  */
 
 /**
@@ -948,6 +948,7 @@ class PermissionFactory extends Factory {
 																'view_form940ez' => TTi18n::gettext('Form 940-EZ'),
 																'view_form1099misc' => TTi18n::gettext('Form 1099-Misc'),
 																'view_formW2' => TTi18n::gettext('Form W2 / W3'),
+																'view_affordable_care' => TTi18n::gettext('Affordable Care'),
 																'view_user_barcode' => TTi18n::gettext('Employee Barcodes'),
 																'view_general_ledger_summary' => TTi18n::gettext('General Ledger Summary'),
                                                                 'view_exception_summary' => TTi18n::gettext('Exception Summary'),
@@ -2266,6 +2267,7 @@ class PermissionFactory extends Factory {
 																				'view_form940ez' => TRUE,
 																				'view_form1099misc' => TRUE,
 																				'view_formW2' => TRUE,
+																				'view_affordable_care' => TRUE,
 																				'view_general_ledger_summary' => TRUE,
 																			),
 														),

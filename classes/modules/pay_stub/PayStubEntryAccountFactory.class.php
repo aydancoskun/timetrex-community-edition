@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: PayStubEntryAccountFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 10376 $
+ * $Id: PayStubEntryAccountFactory.class.php 10376 2013-07-05 20:34:11Z ipso $
+ * $Date: 2013-07-05 13:34:11 -0700 (Fri, 05 Jul 2013) $
  */
 
 /**
@@ -66,6 +66,14 @@ class PayStubEntryAccountFactory extends Factory {
 										50 => TTi18n::gettext('Accrual'),
 										//60 => TTi18n::gettext('Advance Earning'),
 										//65 => TTi18n::gettext('Advance Deduction'),
+										80 => TTi18n::gettext('Miscellaneous'), //Neither earnings or deductions, just for record keeping, ie: Employer parts of RRSP's, or other items that employees need to see.
+
+									);
+				break;
+			case 'accrual_type':
+				$retval = array(
+										10 => TTi18n::gettext('Earning Subtracts, Deduction Adds'),
+										20 => TTi18n::gettext('Earning Adds, Deduction Subtracts'),
 									);
 				break;
 			case 'type_calculation_order':
@@ -77,6 +85,7 @@ class PayStubEntryAccountFactory extends Factory {
 										50 => 30,
 										60 => 10,
 										65 => 20,
+										80 => 65,
 									);
 				break;
 			case 'columns':
@@ -136,6 +145,7 @@ class PayStubEntryAccountFactory extends Factory {
 											'debit_account' => 'DebitAccount',
 											'credit_account' => 'CreditAccount',
 											'accrual_pay_stub_entry_account_id' => 'Accrual',
+											'accrual_type_id' => 'AccrualType',
 											'deleted' => 'Deleted',
 											);
 			return $variable_function_map;
@@ -185,7 +195,7 @@ class PayStubEntryAccountFactory extends Factory {
 
 			$this->data['status_id'] = $status;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -222,7 +232,7 @@ class PayStubEntryAccountFactory extends Factory {
 
 			$this->data['type_id'] = $type;
 
-			return FALSE;
+			return TRUE;
 		}
 
 		return FALSE;
@@ -361,18 +371,6 @@ class PayStubEntryAccountFactory extends Factory {
 		return FALSE;
 	}
 
-	/*
-	function getByAccrualPayStubEntryAccount() {
-		//Get all PSE accounts that have this account as their accrual.
-		//Usually accounts like Vacation Accrual Release etc...
-		if ( $this->
-
-		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-		$psealf->getByCompanyIdAndStatusIdAndTypeId( $user_obj->getCompany(), 10, 50);
-
-	}
-	*/
-
 	function getAccrual() {
 		if ( isset($this->data['accrual_pay_stub_entry_account_id']) ) {
 			return $this->data['accrual_pay_stub_entry_account_id'];
@@ -408,6 +406,29 @@ class PayStubEntryAccountFactory extends Factory {
 
 		return FALSE;
 	}
+	function getAccrualType() {
+		if ( isset($this->data['accrual_type_id']) ) {
+			return $this->data['accrual_type_id'];
+		}
+
+		return FALSE;
+	}
+	function setAccrualType($type) {
+		$type = (int)trim($type);
+
+		if ( $this->Validator->inArrayKey(	'accrual_type_id',
+											$type,
+											TTi18n::gettext('Incorrect Accrual Type'),
+											$this->getOptions('accrual_type')) ) {
+
+			$this->data['accrual_type_id'] = $type;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
 
 	static function addPresets($company_id) {
 		if ( $company_id == '' ) {
@@ -1013,6 +1034,7 @@ class PayStubEntryAccountFactory extends Factory {
 					}
 					break;
 				case 50: //Accrual
+				case 80: //Misc
 					//Greater then Total Employer Deduction
 					if ( isset($psea_map[$pseal_obj->getTotalEmployerDeduction()]) ) {
 						$min_ps_order = $psea_map[$pseal_obj->getTotalEmployerDeduction()];
@@ -1056,6 +1078,10 @@ class PayStubEntryAccountFactory extends Factory {
 				$this->setStatus(20); //Disable instead
 			} else {
 				Debug::text('bPSE Account is NOT in use... Deleting...', __FILE__, __LINE__, __METHOD__, 10);
+			}
+		} else {
+			if ( $this->getAccrualType() == '' ) {
+				$this->setAccrualType( 10 );
 			}
 		}
 
@@ -1102,6 +1128,7 @@ class PayStubEntryAccountFactory extends Factory {
 					switch( $variable ) {
 						case 'status':
 						case 'type':
+						case 'accrual_type':
 							$function = 'get'.$variable;
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = Option::getByKey( $this->$function(), $this->getOptions( $variable ) );

@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9897 $
- * $Id: Validator.class.php 9897 2013-05-15 16:15:47Z ipso $
- * $Date: 2013-05-15 09:15:47 -0700 (Wed, 15 May 2013) $
+ * $Revision: 10430 $
+ * $Id: Validator.class.php 10430 2013-07-12 18:10:24Z ipso $
+ * $Date: 2013-07-12 11:10:24 -0700 (Fri, 12 Jul 2013) $
  */
 
 /**
@@ -288,6 +288,40 @@ class Validator {
 
 			return FALSE;
 
+		}
+
+		return TRUE;
+	}
+
+	function isDuplicateCharacters( $label, $value, $msg = NULL, $max_duplicate_percent = FALSE, $consecutive_only = FALSE ) {
+		if ( strlen($value) > 2 AND $max_duplicate_percent != FALSE ) {
+			$duplicate_chars = 0;
+
+			$char_arr = str_split( strtolower($value) );
+			$prev_char_int = ord($char_arr[0]);
+			foreach( $char_arr as $char ) {
+				$curr_char_int = ord($char);
+				if ( abs($prev_char_int-$curr_char_int) > 1 ) {
+					if ( $consecutive_only == TRUE ) {
+						$duplicate_chars = 0; //Reset duplicate count.
+					}
+
+				} else {
+					$duplicate_chars++;
+				}
+				$prev_char_int = $curr_char_int;
+			}
+
+			$duplicate_percent = ( $duplicate_chars/strlen($value) ) * 100;
+			Debug::text('Duplicate Chars: '. $duplicate_chars .' Percent: '. $duplicate_percent .' Max Percent: '. $max_duplicate_percent .' Consec: '. (int)$consecutive_only, __FILE__, __LINE__, __METHOD__, $this->verbosity);
+
+			if ( $duplicate_percent < $max_duplicate_percent ) {
+				return TRUE;
+			}
+			
+			$this->Error($label, $msg, $value );
+
+			return FALSE;
 		}
 
 		return TRUE;

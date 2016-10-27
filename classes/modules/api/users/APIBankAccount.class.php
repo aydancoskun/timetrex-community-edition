@@ -113,6 +113,7 @@ class APIBankAccount extends APIFactory {
 
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
+			Debug::Arr($retarr, 'Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			return $this->returnHandler( $retarr );
 		}
 
@@ -156,6 +157,10 @@ class APIBankAccount extends APIFactory {
 
 		if ( $validate_only == TRUE ) {
 			Debug::Text('Validating Only!', __FILE__, __LINE__, __METHOD__, 10);
+			$permission_children_ids = FALSE;
+		} else {
+			//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
+			$permission_children_ids = $this->getPermissionChildren();
 		}
 
 		extract( $this->convertToMultipleRecords($data) );
@@ -180,8 +185,12 @@ class APIBankAccount extends APIFactory {
 							  $validate_only == TRUE
 							  OR
 								(
+
 								$this->getPermissionObject()->Check('user','edit_bank')
-									OR ( $this->getPermissionObject()->Check('user','edit_own_bank') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('user','edit_own_bank') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('user','edit_child_bank') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getId(), $permission_children_ids ) === TRUE )
+								//$this->getPermissionObject()->Check('user','edit_bank')
+								//	OR ( $this->getPermissionObject()->Check('user','edit_own_bank') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -198,7 +207,7 @@ class APIBankAccount extends APIFactory {
 					//Adding new object, check ADD permissions.
 					//$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('user','add'), TTi18n::gettext('Add permission denied') );
 				}
-				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
+				//Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 				$is_valid = $primary_validator->isValid();
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
@@ -278,7 +287,6 @@ class APIBankAccount extends APIFactory {
 	 * @param array $data branch data
 	 * @return array
 	 */
-/*
 	function deleteBankAccount( $data ) {
 		if ( is_numeric($data) ) {
 			$data = array($data);
@@ -292,6 +300,9 @@ class APIBankAccount extends APIFactory {
 				OR !( $this->getPermissionObject()->Check('user','delete') OR $this->getPermissionObject()->Check('user','delete_own') OR $this->getPermissionObject()->Check('user','delete_child') ) ) {
 			return  $this->getPermissionObject()->PermissionDenied();
 		}
+
+		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
+		$permission_children_ids = $this->getPermissionChildren();
 
 		Debug::Text('Received data for: '. count($data) .' BankAccounts', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -312,7 +323,10 @@ class APIBankAccount extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if ( $this->getPermissionObject()->Check('user','delete')
-								OR ( $this->getPermissionObject()->Check('user','delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
+								OR ( $this->getPermissionObject()->Check('user','delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
+								OR ( $this->getPermissionObject()->Check('user','delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getId(), $permission_children_ids ) === TRUE )) {
+						//if ( $this->getPermissionObject()->Check('user','delete')
+						//		OR ( $this->getPermissionObject()->Check('user','delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
 							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
@@ -373,38 +387,5 @@ class APIBankAccount extends APIFactory {
 
 		return $this->returnHandler( FALSE );
 	}
-*/
-	/**
-	 * Copy one or more branches.
-	 * @param array $data branch IDs
-	 * @return array
-	 */
-/*
-	function copyBankAccount( $data ) {
-		if ( is_numeric($data) ) {
-			$data = array($data);
-		}
-
-		if ( !is_array($data) ) {
-			return $this->returnHandler( FALSE );
-		}
-
-		Debug::Text('Received data for: '. count($data) .' BankAccounts', __FILE__, __LINE__, __METHOD__, 10);
-		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
-
-		$src_rows = $this->getBankAccount( array('filter_data' => array('id' => $data) ), TRUE );
-		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
-			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
-			foreach( $src_rows as $key => $row ) {
-				unset($src_rows[$key]['id']); //Clear fields that can't be copied
-			}
-			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
-
-			return $this->setBankAccount( $src_rows ); //Save copied rows
-		}
-
-		return $this->returnHandler( FALSE );
-	}
-*/
 }
 ?>

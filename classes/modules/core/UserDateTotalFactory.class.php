@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10254 $
- * $Id: UserDateTotalFactory.class.php 10254 2013-06-20 23:42:44Z ipso $
- * $Date: 2013-06-20 16:42:44 -0700 (Thu, 20 Jun 2013) $
+ * $Revision: 10643 $
+ * $Id: UserDateTotalFactory.class.php 10643 2013-08-02 19:06:09Z ipso $
+ * $Date: 2013-08-02 12:06:09 -0700 (Fri, 02 Aug 2013) $
  */
 
 /**
@@ -1150,7 +1150,7 @@ class UserDateTotalFactory extends Factory {
 			//  *The work around for this currently is to have multiple holiday policies that match the daily overtime policies so they take priority.
 			$tmp_trigger_time_arr = array();
 			foreach( $otplf as $otp_obj ) {
-				Debug::text('&nbsp;&nbsp;Checking Against Policy: '. $otp_obj->getName() .' Trigger Time: '. $otp_obj->getTriggerTime() , __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text('  Checking Against Policy: '. $otp_obj->getName() .' Trigger Time: '. $otp_obj->getTriggerTime() , __FILE__, __LINE__, __METHOD__, 10);
 				$trigger_time = NULL;
 
 				switch( $otp_obj->getType() ) {
@@ -1354,7 +1354,7 @@ class UserDateTotalFactory extends Factory {
 
 			//Debug::Arr($trigger_time_arr, 'Trigger Time Array', __FILE__, __LINE__, __METHOD__, 10);
 		} else {
-			Debug::text('&nbsp;&nbsp;&nbsp;&nbsp;No OverTime Policies found for this user.', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text('    No OverTime Policies found for this user.', __FILE__, __LINE__, __METHOD__, 10);
 		}
 		unset($otp_obj, $otplf);
 
@@ -1398,19 +1398,19 @@ class UserDateTotalFactory extends Factory {
 					foreach( $trigger_time_arr as $trigger_time_data ) {
 
 						if ( isset($trigger_time_arr[$i+1]['trigger_time']) AND $total_daily_hours_used >= $trigger_time_arr[$i+1]['trigger_time'] ) {
-							Debug::text('&nbsp;&nbsp;&nbsp;&nbsp; '. $i .': SKIPPING THIS TRIGGER TIME: '. $trigger_time_data['trigger_time'], __FILE__, __LINE__, __METHOD__, 10);
+							Debug::text('     '. $i .': SKIPPING THIS TRIGGER TIME: '. $trigger_time_data['trigger_time'], __FILE__, __LINE__, __METHOD__, 10);
 							$i++;
 							continue;
 						}
 
-						Debug::text('&nbsp;&nbsp;&nbsp;&nbsp; '. $i .': Trigger Time Data: Trigger Time: '. $trigger_time_data['trigger_time'] .' ID: '. $trigger_time_data['over_time_policy_id'], __FILE__, __LINE__, __METHOD__, 10);
-						Debug::text('&nbsp;&nbsp;&nbsp;&nbsp; '. $i .': Used Total Time: '. $total_daily_hours_used, __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('     '. $i .': Trigger Time Data: Trigger Time: '. $trigger_time_data['trigger_time'] .' ID: '. $trigger_time_data['over_time_policy_id'], __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('     '. $i .': Used Total Time: '. $total_daily_hours_used, __FILE__, __LINE__, __METHOD__, 10);
 
 						//Only consider Regular Time ONCE per user date total row.
 						if ( $i == 0
 								AND $trigger_time_arr[$i]['trigger_time'] > 0
 								AND $total_daily_hours_used < $trigger_time_arr[$i]['trigger_time'] ) {
-							Debug::text('&nbsp;&nbsp;&nbsp;&nbsp; '. $i .': Trigger Time: '. $trigger_time_arr[$i]['trigger_time'] .' greater then 0, found Regular Time.', __FILE__, __LINE__, __METHOD__, 10);
+							Debug::text('     '. $i .': Trigger Time: '. $trigger_time_arr[$i]['trigger_time'] .' greater then 0, found Regular Time.', __FILE__, __LINE__, __METHOD__, 10);
 
 							if ( $total_daily_hours > $trigger_time_arr[$i]['trigger_time'] ) {
 								$regular_total_time = $trigger_time_arr[$i]['trigger_time'] - $total_daily_hours_used;
@@ -1424,40 +1424,40 @@ class UserDateTotalFactory extends Factory {
 								$regular_quantity = $udt_obj->getQuantity();
 								$regular_bad_quantity = $udt_obj->getBadQuantity();
 							}
-							Debug::text('&nbsp;&nbsp;&nbsp;&nbsp; '. $i .': Regular Total Time: '. $regular_total_time .' Regular Quantity: '. $regular_quantity, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::text('     '. $i .': Regular Total Time: '. $regular_total_time .' Regular Quantity: '. $regular_quantity, __FILE__, __LINE__, __METHOD__, 10);
 
 							if ( isset($user_data_total_compact_arr[20][(int)$udt_obj->getBranch()][(int)$udt_obj->getDepartment()][(int)$udt_obj->getJob()][(int)$udt_obj->getJobItem()] ) ) {
-								Debug::text('&nbsp;&nbsp;&nbsp;&nbsp; Adding to Compact Array: Branch: '. (int)$udt_obj->getBranch() .' Department: '. (int)$udt_obj->getDepartment(), __FILE__, __LINE__, __METHOD__, 10);
+								Debug::text('     Adding to Compact Array: Branch: '. (int)$udt_obj->getBranch() .' Department: '. (int)$udt_obj->getDepartment(), __FILE__, __LINE__, __METHOD__, 10);
 								$user_data_total_compact_arr[20][(int)$udt_obj->getBranch()][(int)$udt_obj->getDepartment()][(int)$udt_obj->getJob()][(int)$udt_obj->getJobItem()]['total_time'] += $regular_total_time;
 								$user_data_total_compact_arr[20][(int)$udt_obj->getBranch()][(int)$udt_obj->getDepartment()][(int)$udt_obj->getJob()][(int)$udt_obj->getJobItem()]['quantity'] += $regular_quantity;
 								$user_data_total_compact_arr[20][(int)$udt_obj->getBranch()][(int)$udt_obj->getDepartment()][(int)$udt_obj->getJob()][(int)$udt_obj->getJobItem()]['bad_quantity'] += $regular_bad_quantity;
 							} else {
-								Debug::text('&nbsp;&nbsp;&nbsp;&nbsp; Initiating Compact Sub-Array: Branch: '. (int)$udt_obj->getBranch() .' Department: '. (int)$udt_obj->getDepartment() , __FILE__, __LINE__, __METHOD__, 10);
+								Debug::text('     Initiating Compact Sub-Array: Branch: '. (int)$udt_obj->getBranch() .' Department: '. (int)$udt_obj->getDepartment() , __FILE__, __LINE__, __METHOD__, 10);
 								$user_data_total_compact_arr[20][(int)$udt_obj->getBranch()][(int)$udt_obj->getDepartment()][(int)$udt_obj->getJob()][(int)$udt_obj->getJobItem()] = array( 'total_time' => $regular_total_time, 'quantity' => $regular_quantity, 'bad_quantity' => $regular_bad_quantity );
 							}
-							Debug::text('&nbsp;&nbsp;&nbsp;&nbsp; Compact Array Regular Total: '. $user_data_total_compact_arr[20][(int)$udt_obj->getBranch()][(int)$udt_obj->getDepartment()][(int)$udt_obj->getJob()][(int)$udt_obj->getJobItem()]['total_time'] , __FILE__, __LINE__, __METHOD__, 10);
+							Debug::text('     Compact Array Regular Total: '. $user_data_total_compact_arr[20][(int)$udt_obj->getBranch()][(int)$udt_obj->getDepartment()][(int)$udt_obj->getJob()][(int)$udt_obj->getJobItem()]['total_time'] , __FILE__, __LINE__, __METHOD__, 10);
 
 							$total_daily_hours_used += $regular_total_time;
 						}
 
-						Debug::text('&nbsp;&nbsp;&nbsp;&nbsp; '. $i .': Daily Total Time: '. $total_daily_hours .' Trigger Time: '. $trigger_time_arr[$i]['trigger_time'] .' Used Total Time: '. $total_daily_hours_used .' Overtime Policy Type: '. $trigger_time_arr[$i]['over_time_policy_type_id'], __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('     '. $i .': Daily Total Time: '. $total_daily_hours .' Trigger Time: '. $trigger_time_arr[$i]['trigger_time'] .' Used Total Time: '. $total_daily_hours_used .' Overtime Policy Type: '. $trigger_time_arr[$i]['over_time_policy_type_id'], __FILE__, __LINE__, __METHOD__, 10);
 
 						if ( $total_daily_hours > $trigger_time_arr[$i]['trigger_time'] ) {
-							Debug::text('&nbsp;&nbsp;&nbsp;&nbsp; '. $i .': Trigger Time: '. $trigger_time_arr[$i]['trigger_time'] .' greater then 0, found Over Time.', __FILE__, __LINE__, __METHOD__, 10);
+							Debug::text('     '. $i .': Trigger Time: '. $trigger_time_arr[$i]['trigger_time'] .' greater then 0, found Over Time.', __FILE__, __LINE__, __METHOD__, 10);
 
 							if ( isset($trigger_time_arr[$i+1]['trigger_time'] ) ) {
-								Debug::text('&nbsp;&nbsp;&nbsp;&nbsp; '. $i .': Found trigger time after this one: '. $trigger_time_arr[$i+1]['trigger_time'] , __FILE__, __LINE__, __METHOD__, 10);
+								Debug::text('     '. $i .': Found trigger time after this one: '. $trigger_time_arr[$i+1]['trigger_time'] , __FILE__, __LINE__, __METHOD__, 10);
 								$max_trigger_time = $trigger_time_arr[$i+1]['trigger_time'] - $trigger_time_arr[$i]['trigger_time'];
 							} else {
 								$max_trigger_time = $trigger_time_arr[$i]['trigger_time'];
 							}
-							Debug::text('&nbsp;&nbsp;&nbsp;&nbsp; aMax Trigger Time '. $max_trigger_time, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::text('     aMax Trigger Time '. $max_trigger_time, __FILE__, __LINE__, __METHOD__, 10);
 
 							if ( isset($trigger_time_arr[$i+1]['trigger_time']) AND $total_daily_hours_used > $trigger_time_arr[$i]['trigger_time'] ) {
 								//$max_trigger_time = $max_trigger_time - ($total_daily_hours_used - $max_trigger_time);
 								$max_trigger_time = $max_trigger_time - ($total_daily_hours_used - $trigger_time_arr[$i]['trigger_time']) ;
 							}
-							Debug::text('&nbsp;&nbsp;&nbsp;&nbsp; bMax Trigger Time '. $max_trigger_time, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::text('     bMax Trigger Time '. $max_trigger_time, __FILE__, __LINE__, __METHOD__, 10);
 
 							$over_time_total = $total_daily_hours - $total_daily_hours_used;
 							if ( isset($trigger_time_arr[$i+1]['trigger_time'])
@@ -1471,21 +1471,21 @@ class UserDateTotalFactory extends Factory {
 								$over_time_quantity = round( bcmul($udt_obj->getQuantity(), $over_time_quantity_percent), 2);
 								$over_time_bad_quantity = round( bcmul($udt_obj->getBadQuantity(), $over_time_quantity_percent), 2);
 
-								Debug::text('&nbsp;&nbsp;&nbsp;&nbsp; Inserting Hours ('. $over_time_total .') for Policy ID: '. $trigger_time_arr[$i]['over_time_policy_id'], __FILE__, __LINE__, __METHOD__, 10);
+								Debug::text('     Inserting Hours ('. $over_time_total .') for Policy ID: '. $trigger_time_arr[$i]['over_time_policy_id'], __FILE__, __LINE__, __METHOD__, 10);
 
 								if ( isset($user_data_total_compact_arr[30][$trigger_time_arr[$i]['over_time_policy_id']][(int)$udt_obj->getBranch()][(int)$udt_obj->getDepartment()][(int)$udt_obj->getJob()][(int)$udt_obj->getJobItem()] ) ) {
-									Debug::text('&nbsp;&nbsp;&nbsp;&nbsp; Adding to Compact Array: Policy ID: '.$trigger_time_arr[$i]['over_time_policy_id'] .' Branch: '. (int)$udt_obj->getBranch() .' Department: '. (int)$udt_obj->getDepartment(), __FILE__, __LINE__, __METHOD__, 10);
+									Debug::text('     Adding to Compact Array: Policy ID: '.$trigger_time_arr[$i]['over_time_policy_id'] .' Branch: '. (int)$udt_obj->getBranch() .' Department: '. (int)$udt_obj->getDepartment(), __FILE__, __LINE__, __METHOD__, 10);
 									$user_data_total_compact_arr[30][$trigger_time_arr[$i]['over_time_policy_id']][(int)$udt_obj->getBranch()][(int)$udt_obj->getDepartment()][(int)$udt_obj->getJob()][(int)$udt_obj->getJobItem()]['total_time'] += $over_time_total;
 									$user_data_total_compact_arr[30][$trigger_time_arr[$i]['over_time_policy_id']][(int)$udt_obj->getBranch()][(int)$udt_obj->getDepartment()][(int)$udt_obj->getJob()][(int)$udt_obj->getJobItem()]['quantity'] += $over_time_quantity;
 									$user_data_total_compact_arr[30][$trigger_time_arr[$i]['over_time_policy_id']][(int)$udt_obj->getBranch()][(int)$udt_obj->getDepartment()][(int)$udt_obj->getJob()][(int)$udt_obj->getJobItem()]['bad_quantity'] += $over_time_bad_quantity;
 								} else {
-									Debug::text('&nbsp;&nbsp;&nbsp;&nbsp; Initiating Compact Sub-Array: Policy ID: '.$trigger_time_arr[$i]['over_time_policy_id'] .' Branch: '. (int)$udt_obj->getBranch() .' Department: '. (int)$udt_obj->getDepartment() , __FILE__, __LINE__, __METHOD__, 10);
+									Debug::text('     Initiating Compact Sub-Array: Policy ID: '.$trigger_time_arr[$i]['over_time_policy_id'] .' Branch: '. (int)$udt_obj->getBranch() .' Department: '. (int)$udt_obj->getDepartment() , __FILE__, __LINE__, __METHOD__, 10);
 									$user_data_total_compact_arr[30][$trigger_time_arr[$i]['over_time_policy_id']][(int)$udt_obj->getBranch()][(int)$udt_obj->getDepartment()][(int)$udt_obj->getJob()][(int)$udt_obj->getJobItem()] = array( 'total_time' => $over_time_total, 'quantity' => $over_time_quantity, 'bad_quantity' => $over_time_bad_quantity );
 								}
 
 								$total_daily_hours_used += $over_time_total;
 							} else {
-								Debug::text('&nbsp;&nbsp;&nbsp;&nbsp; Over Time Total is 0: '. $over_time_total, __FILE__, __LINE__, __METHOD__, 10);
+								Debug::text('     Over Time Total is 0: '. $over_time_total, __FILE__, __LINE__, __METHOD__, 10);
 							}
 
 							unset($over_time_total, $over_time_quantity_percent, $over_time_quantity, $over_time_bad_quantity);
@@ -1590,6 +1590,7 @@ class UserDateTotalFactory extends Factory {
 				//In those cases, just skip auto-calculating it and accept it?
 				switch( $pp_obj->getType() ) {
 					case 10: //Date/Time
+					case 100: //Advanced
 					case 90: //Holiday (coverts to Date/Time policy automatically)
 						if ( is_object( $this->getUserDateObject()->getPayPeriodObject() )
 										AND is_object( $this->getUserDateObject()->getPayPeriodObject()->getPayPeriodScheduleObject() ) ) {
@@ -1628,9 +1629,8 @@ class UserDateTotalFactory extends Factory {
 									$pp_obj->setWeeklyTriggerTime( 0 );
 								}
 							} else {
-								//FIXME: If a Date/Time premium was created first, with all days activated, then switched to a holiday type,
+								//If a Date/Time premium was created first, with all days activated, then switched to a holiday type,
 								//its still calculated on all days, even when its not a holiday.
-								/*
 								$pp_obj->setSun( FALSE );
 								$pp_obj->setMon( FALSE );
 								$pp_obj->setTue( FALSE );
@@ -1638,7 +1638,6 @@ class UserDateTotalFactory extends Factory {
 								$pp_obj->setThu( FALSE );
 								$pp_obj->setFri( FALSE );
 								$pp_obj->setSat( FALSE );
-								*/
 							}
 							unset($hlf, $holiday_obj);
 						} else {
@@ -1653,6 +1652,7 @@ class UserDateTotalFactory extends Factory {
 
 							$total_daily_time_used = 0;
 							$daily_trigger_time = 0;
+							$maximum_daily_trigger_time = FALSE;
 
 							$udtlf = TTnew( 'UserDateTotalListFactory' );
 
@@ -1682,10 +1682,11 @@ class UserDateTotalFactory extends Factory {
 								}
 
 								if ( $pp_obj->getMaximumDailyTriggerTime() > 0 OR $pp_obj->getMaximumWeeklyTriggerTime() > 0  ) {
-									$maximum_daily_trigger_time = ( $pp_obj->getMaximumDailyTriggerTime() > 0 ) ? ($pp_obj->getMaximumDailyTriggerTime()-$pp_obj->getDailyTriggerTime()) : FALSE;
+									//$maximum_daily_trigger_time = ( $pp_obj->getMaximumDailyTriggerTime() > 0 ) ? ($pp_obj->getMaximumDailyTriggerTime()-$pp_obj->getDailyTriggerTime()) : FALSE;
+									$maximum_daily_trigger_time = ( $pp_obj->getMaximumDailyTriggerTime() > 0 ) ? ($pp_obj->getMaximumDailyTriggerTime()) : FALSE;
 									$maximum_weekly_trigger_time = ( isset($weekly_total_time) AND $pp_obj->getMaximumWeeklyTriggerTime() > 0 ) ? ($pp_obj->getMaximumWeeklyTriggerTime()-$weekly_total_time) : FALSE;
 
-									Debug::text(' Maximum Daily: '. $maximum_daily_trigger_time .' Weekly: '. $maximum_weekly_trigger_time, __FILE__, __LINE__, __METHOD__, 10);
+									Debug::text(' Maximum Daily: '. $maximum_daily_trigger_time .' Weekly: '. $maximum_weekly_trigger_time .' Daily Total Time Used: '. $total_daily_time_used .' Daily Trigger Time: '. $daily_trigger_time, __FILE__, __LINE__, __METHOD__, 10);
 									if ( $maximum_daily_trigger_time > 0 AND ( $maximum_weekly_trigger_time === FALSE OR $maximum_daily_trigger_time < $maximum_weekly_trigger_time ) ) {
 										$pp_obj->setMaximumTime( $maximum_daily_trigger_time ); //Temporarily set the maximum time in memory so it doesn't exceed the maximum daily trigger time.
 										Debug::text(' Set Daily Maximum Time to: '. $pp_obj->getMaximumTime(), __FILE__, __LINE__, __METHOD__, 10);
@@ -1696,11 +1697,12 @@ class UserDateTotalFactory extends Factory {
 										}
 										$pp_obj->setMaximumTime( $maximum_weekly_trigger_time ); //Temporarily set the maximum time in memory so it doesn't exceed the maximum daily trigger time.
 										Debug::text(' Set Weekly Maximum Time to: '. $pp_obj->getMaximumTime(), __FILE__, __LINE__, __METHOD__, 10);
+										$maximum_daily_trigger_time = $maximum_weekly_trigger_time;
 									}
-									unset($maximum_daily_trigger_time, $maximum_weekly_trigger_time);
+									unset($maximum_weekly_trigger_time);
 								}
 							}
-							Debug::text(' Daily Trigger Time: '. $daily_trigger_time, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::text(' Daily Trigger Time: '. $daily_trigger_time .' Max: '. $maximum_daily_trigger_time, __FILE__, __LINE__, __METHOD__, 10);
 
 							//Loop through all worked (status: 20) UserDateTotalRows
 							$udtlf->getByUserDateIdAndStatus( $this->getUserDateID(), 20 );
@@ -1816,13 +1818,15 @@ class UserDateTotalFactory extends Factory {
 									Debug::text('cPunch Total Time: '. $punch_total_time .' TMP Punch Total Time: '. $tmp_punch_total_time, __FILE__, __LINE__, __METHOD__, 10);
 
 									$total_daily_time_used += $tmp_punch_total_time;
-									Debug::text('Daily Total Time Used: '. $total_daily_time_used, __FILE__, __LINE__, __METHOD__, 10);
+									Debug::text('Daily Total Time Used: '. $total_daily_time_used .' Maximum Trigger Time: '. $maximum_daily_trigger_time .' This Record: '. ($total_daily_time_used-$tmp_punch_total_time), __FILE__, __LINE__, __METHOD__, 10);
 
 									//FIXME: Should the daily/weekly trigger time be >= instead of >.
 									//That way if the policy is active after 7.5hrs, punch time of exactly 7.5hrs will still
 									//activate the policy, rather then requiring 7.501hrs+
-									if ( $punch_total_time > 0 AND $total_daily_time_used > $daily_trigger_time ) {
-										Debug::text('Past Trigger Time!!', __FILE__, __LINE__, __METHOD__, 10);
+									if ( $punch_total_time > 0 AND $total_daily_time_used > $daily_trigger_time
+											AND ( $maximum_daily_trigger_time === FALSE OR ( $maximum_daily_trigger_time !== FALSE AND ($total_daily_time_used-$tmp_punch_total_time) < $maximum_daily_trigger_time ) )
+											) {
+										Debug::text('Past Trigger Time!! '. ($total_daily_time_used-$tmp_punch_total_time), __FILE__, __LINE__, __METHOD__, 10);
 
 										//Calculate how far past trigger time we are.
 										$past_trigger_time = $total_daily_time_used - $daily_trigger_time;
@@ -1831,6 +1835,14 @@ class UserDateTotalFactory extends Factory {
 											Debug::text('Using Past Trigger Time as punch total time: '. $past_trigger_time, __FILE__, __LINE__, __METHOD__, 10);
 										} else {
 											Debug::text('NOT Using Past Trigger Time as punch total time: '. $past_trigger_time, __FILE__, __LINE__, __METHOD__, 10);
+										}
+
+										//If we are close to exceeding the maximum daily/weekly time, just use the remaining time.
+										if ( $maximum_daily_trigger_time > 0 AND $total_daily_time_used > $maximum_daily_trigger_time ) {
+											Debug::text('Using New Maximum Trigger Time as punch total time: '. $maximum_daily_trigger_time .'('. $total_daily_time_used.')', __FILE__, __LINE__, __METHOD__, 10);
+											$punch_total_time = $punch_total_time - ($total_daily_time_used - $maximum_daily_trigger_time);
+										} else {
+											Debug::text('NOT Using New Maximum Trigger Time as punch total time: '. $maximum_daily_trigger_time .'('. $total_daily_time_used.')', __FILE__, __LINE__, __METHOD__, 10);
 										}
 
 										$total_time = $punch_total_time;
@@ -1865,25 +1877,146 @@ class UserDateTotalFactory extends Factory {
 										if ( $total_time > 0 ) {
 											Debug::text(' Applying  Premium Time!: '. $total_time , __FILE__, __LINE__, __METHOD__, 10);
 
-											$udtf = TTnew( 'UserDateTotalFactory' );
-											$udtf->setUserDateID( $this->getUserDateID() );
-											$udtf->setStatus( 10 ); //System
-											$udtf->setType( 40 ); //Premium
-											$udtf->setPremiumPolicyId( $pp_obj->getId() );
-											$udtf->setBranch( $udt_obj->getBranch() );
-											$udtf->setDepartment( $udt_obj->getDepartment() );
-											$udtf->setJob( $udt_obj->getJob() );
-											$udtf->setJobItem( $udt_obj->getJobItem() );
+											if ( $pp_obj->getType() == 100 ) {
+												//Check Shift Differential criteria *AFTER* calculatating daily/weekly time, as the shift differential
+												//applies to the resulting time calculation, not the daily/weekly time calculation. Daily/Weekly should always include all time.
+												//This is fundamentally different than the Shift Differential premium policy type.
+												if ( ( $pp_obj->getBranchSelectionType() == 10
+															AND ( $pp_obj->getExcludeDefaultBranch() == FALSE
+																	OR ( $pp_obj->getExcludeDefaultBranch() == TRUE
+																			AND $udt_obj->getBranch() != $this->getUserDateObject()->getUserObject()->getDefaultBranch() ) ) )
 
-											$udtf->setQuantity( $udt_obj->getQuantity() );
-											$udtf->setBadQuantity( $udt_obj->getBadQuantity() );
+														OR ( $pp_obj->getBranchSelectionType() == 20
+																AND in_array( $udt_obj->getBranch(), (array)$pp_obj->getBranch() ) )
+																AND ( $pp_obj->getExcludeDefaultBranch() == FALSE
+																		OR ( $pp_obj->getExcludeDefaultBranch() == TRUE
+																				AND $udt_obj->getBranch() != $this->getUserDateObject()->getUserObject()->getDefaultBranch() ) )
 
-											$udtf->setTotalTime( $total_time );
-											$udtf->setEnableCalcSystemTotalTime(FALSE);
-											if ( $udtf->isValid() == TRUE ) {
-												$udtf->Save();
+														OR ( $pp_obj->getBranchSelectionType() == 30
+																AND !in_array( $udt_obj->getBranch(), (array)$pp_obj->getBranch() ) )
+																AND ( $pp_obj->getExcludeDefaultBranch() == FALSE
+																		OR ( $pp_obj->getExcludeDefaultBranch() == TRUE
+																				AND $udt_obj->getBranch() != $this->getUserDateObject()->getUserObject()->getDefaultBranch() ) )
+
+														) {
+													Debug::text(' Shift Differential... Meets Branch Criteria! Select Type: '. $pp_obj->getBranchSelectionType() .' Exclude Default Branch: '. (int)$pp_obj->getExcludeDefaultBranch() .' Default Branch: '.  $this->getUserDateObject()->getUserObject()->getDefaultBranch(), __FILE__, __LINE__, __METHOD__, 10);
+
+													if ( ( $pp_obj->getDepartmentSelectionType() == 10
+																AND ( $pp_obj->getExcludeDefaultDepartment() == FALSE
+																		OR ( $pp_obj->getExcludeDefaultDepartment() == TRUE
+																				AND $udt_obj->getDepartment() != $this->getUserDateObject()->getUserObject()->getDefaultDepartment() ) ) )
+
+															OR ( $pp_obj->getDepartmentSelectionType() == 20
+																	AND in_array( $udt_obj->getDepartment(), (array)$pp_obj->getDepartment() ) )
+																	AND ( $pp_obj->getExcludeDefaultDepartment() == FALSE
+																			OR ( $pp_obj->getExcludeDefaultDepartment() == TRUE
+																					AND $udt_obj->getDepartment() != $this->getUserDateObject()->getUserObject()->getDefaultDepartment() ) )
+
+															OR ( $pp_obj->getDepartmentSelectionType() == 30
+																	AND !in_array( $udt_obj->getDepartment(), (array)$pp_obj->getDepartment() ) )
+																	AND ( $pp_obj->getExcludeDefaultDepartment() == FALSE
+																			OR ( $pp_obj->getExcludeDefaultDepartment() == TRUE
+																					AND $udt_obj->getDepartment() != $this->getUserDateObject()->getUserObject()->getDefaultDepartment() ) )
+
+															) {
+														Debug::text(' Shift Differential... Meets Department Criteria! Select Type: '. $pp_obj->getDepartmentSelectionType() .' Exclude Default Department: '. (int)$pp_obj->getExcludeDefaultDepartment() .' Default Department: '.  $this->getUserDateObject()->getUserObject()->getDefaultDepartment(), __FILE__, __LINE__, __METHOD__, 10);
+
+														if ( $pp_obj->getJobGroupSelectionType() == 10
+																OR ( $pp_obj->getJobGroupSelectionType() == 20
+																		AND is_object( $udt_obj->getJobObject() )
+																		AND in_array( $udt_obj->getJobObject()->getGroup(), (array)$pp_obj->getJobGroup() ) )
+																OR ( $pp_obj->getJobGroupSelectionType() == 30
+																		AND is_object( $udt_obj->getJobObject() )
+																		AND !in_array( $udt_obj->getJobObject()->getGroup(), (array)$pp_obj->getJobGroup() ) )
+																) {
+															Debug::text(' Shift Differential... Meets Job Group Criteria! Select Type: '. $pp_obj->getJobGroupSelectionType(), __FILE__, __LINE__, __METHOD__, 10);
+
+															if ( $pp_obj->getJobSelectionType() == 10
+																	OR ( $pp_obj->getJobSelectionType() == 20
+																			AND in_array( $udt_obj->getJob(), (array)$pp_obj->getJob() ) )
+																	OR ( $pp_obj->getJobSelectionType() == 30
+																			AND !in_array( $udt_obj->getJob(), (array)$pp_obj->getJob() ) )
+																	) {
+																Debug::text(' Shift Differential... Meets Job Criteria! Select Type: '. $pp_obj->getJobSelectionType(), __FILE__, __LINE__, __METHOD__, 10);
+
+																if ( $pp_obj->getJobItemGroupSelectionType() == 10
+																		OR ( $pp_obj->getJobItemGroupSelectionType() == 20
+																				AND is_object( $udt_obj->getJobItemObject() )
+																				AND in_array( $udt_obj->getJobItemObject()->getGroup(), (array)$pp_obj->getJobItemGroup() ) )
+																		OR ( $pp_obj->getJobItemGroupSelectionType() == 30
+																				AND is_object( $udt_obj->getJobItemObject() )
+																				AND !in_array( $udt_obj->getJobItemObject()->getGroup(), (array)$pp_obj->getJobItemGroup() ) )
+																		) {
+																	Debug::text(' Shift Differential... Meets Task Group Criteria! Select Type: '. $pp_obj->getJobItemGroupSelectionType(), __FILE__, __LINE__, __METHOD__, 10);
+
+																	if ( $pp_obj->getJobItemSelectionType() == 10
+																			OR ( $pp_obj->getJobItemSelectionType() == 20
+																					AND in_array( $udt_obj->getJobItem(), (array)$pp_obj->getJobItem() ) )
+																			OR ( $pp_obj->getJobItemSelectionType() == 30
+																					AND !in_array( $udt_obj->getJobItem(), (array)$pp_obj->getJobItem() ) )
+																			) {
+																		Debug::text(' Shift Differential... Meets Task Criteria! Select Type: '. $pp_obj->getJobSelectionType(), __FILE__, __LINE__, __METHOD__, 10);
+
+
+																		$udtf = TTnew( 'UserDateTotalFactory' );
+																		$udtf->setUserDateID( $this->getUserDateID() );
+																		$udtf->setStatus( 10 ); //System
+																		$udtf->setType( 40 ); //Premium
+																		$udtf->setPremiumPolicyId( $pp_obj->getId() );
+																		$udtf->setBranch( $udt_obj->getBranch() );
+																		$udtf->setDepartment( $udt_obj->getDepartment() );
+																		$udtf->setJob( $udt_obj->getJob() );
+																		$udtf->setJobItem( $udt_obj->getJobItem() );
+
+																		$udtf->setQuantity( $udt_obj->getQuantity() );
+																		$udtf->setBadQuantity( $udt_obj->getBadQuantity() );
+
+																		$udtf->setTotalTime( $total_time );
+																		$udtf->setEnableCalcSystemTotalTime(FALSE);
+																		if ( $udtf->isValid() == TRUE ) {
+																			$udtf->Save();
+																		}
+																		unset($udtf);
+
+																	} else {
+																		Debug::text(' Shift Differential... DOES NOT Meet Task Criteria!', __FILE__, __LINE__, __METHOD__, 10);
+																	}
+																} else {
+																	Debug::text(' Shift Differential... DOES NOT Meet Task Group Criteria!', __FILE__, __LINE__, __METHOD__, 10);
+																}
+															} else {
+																Debug::text(' Shift Differential... DOES NOT Meet Job Criteria!', __FILE__, __LINE__, __METHOD__, 10);
+															}
+														} else {
+															Debug::text(' Shift Differential... DOES NOT Meet Job Group Criteria!', __FILE__, __LINE__, __METHOD__, 10);
+														}
+													} else {
+														Debug::text(' Shift Differential... DOES NOT Meet Department Criteria!', __FILE__, __LINE__, __METHOD__, 10);
+													}
+												} else {
+													Debug::text(' Shift Differential... DOES NOT Meet Branch Criteria!', __FILE__, __LINE__, __METHOD__, 10);
+												}
+											} else {
+												$udtf = TTnew( 'UserDateTotalFactory' );
+												$udtf->setUserDateID( $this->getUserDateID() );
+												$udtf->setStatus( 10 ); //System
+												$udtf->setType( 40 ); //Premium
+												$udtf->setPremiumPolicyId( $pp_obj->getId() );
+												$udtf->setBranch( $udt_obj->getBranch() );
+												$udtf->setDepartment( $udt_obj->getDepartment() );
+												$udtf->setJob( $udt_obj->getJob() );
+												$udtf->setJobItem( $udt_obj->getJobItem() );
+
+												$udtf->setQuantity( $udt_obj->getQuantity() );
+												$udtf->setBadQuantity( $udt_obj->getBadQuantity() );
+
+												$udtf->setTotalTime( $total_time );
+												$udtf->setEnableCalcSystemTotalTime(FALSE);
+												if ( $udtf->isValid() == TRUE ) {
+													$udtf->Save();
+												}
+												unset($udtf);
 											}
-											unset($udtf);
 										} else {
 											Debug::text(' Premium Punch Total Time is 0...', __FILE__, __LINE__, __METHOD__, 10);
 										}
@@ -2492,6 +2625,8 @@ class UserDateTotalFactory extends Factory {
 						}
 						unset($udtlf, $udt_obj);
 						break;
+/*
+ *					//Merged with Date/Time criteria above to reduce code duplication.
 					case 100: //Advanced
 						Debug::text(' Advanced Premium Policy...', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -2509,6 +2644,7 @@ class UserDateTotalFactory extends Factory {
 
 							$total_daily_time_used = 0;
 							$daily_trigger_time = 0;
+							$maximum_daily_trigger_time = FALSE;
 
 							$udtlf = TTnew( 'UserDateTotalListFactory' );
 
@@ -2552,8 +2688,9 @@ class UserDateTotalFactory extends Factory {
 										}
 										$pp_obj->setMaximumTime( $maximum_weekly_trigger_time ); //Temporarily set the maximum time in memory so it doesn't exceed the maximum daily trigger time.
 										Debug::text(' Set Weekly Maximum Time to: '. $pp_obj->getMaximumTime(), __FILE__, __LINE__, __METHOD__, 10);
+										$maximum_daily_trigger_time = $maximum_weekly_trigger_time;
 									}
-									unset($maximum_daily_trigger_time, $maximum_weekly_trigger_time);
+									unset($maximum_weekly_trigger_time);
 								}
 							}
 							Debug::text(' Daily Trigger Time: '. $daily_trigger_time, __FILE__, __LINE__, __METHOD__, 10);
@@ -2650,13 +2787,7 @@ class UserDateTotalFactory extends Factory {
 										$tmp_punch_total_time = bcadd( $tmp_punch_total_time, $udt_meal_policy_adjustment_arr[$udt_obj->getId()] );
 									}
 									Debug::text('bPunch Total Time: '. $punch_total_time .' TMP Punch Total Time: '. $tmp_punch_total_time, __FILE__, __LINE__, __METHOD__, 10);
-/*
-									if ( $pp_obj->getIncludeMealPolicy() == TRUE AND isset( $udt_meal_policy_adjustment_arr[$udt_obj->getId()] ) ) {
-										Debug::text(' Meal Policy Adjustment Found: '. $udt_meal_policy_adjustment_arr[$udt_obj->getId()], __FILE__, __LINE__, __METHOD__, 10);
-										$punch_total_time = bcadd( $punch_total_time, $udt_meal_policy_adjustment_arr[$udt_obj->getId()] );
-										$tmp_punch_total_time = bcadd( $tmp_punch_total_time, $udt_meal_policy_adjustment_arr[$udt_obj->getId()] );
-									}
-*/
+
 									//Apply break policy adjustment as early as possible.
 									if ( $pp_obj->getIncludeBreakPolicy() == TRUE
 										AND $pp_obj->isActiveDate( $this->getUserDateObject()->getDateStamp() ) == TRUE
@@ -2668,18 +2799,13 @@ class UserDateTotalFactory extends Factory {
 										$tmp_punch_total_time = bcadd( $tmp_punch_total_time, $udt_break_policy_adjustment_arr[$udt_obj->getId()] );
 									}
 									Debug::text('cPunch Total Time: '. $punch_total_time .' TMP Punch Total Time: '. $tmp_punch_total_time, __FILE__, __LINE__, __METHOD__, 10);
-/*
-									if ( $pp_obj->getIncludeBreakPolicy() == TRUE AND isset( $udt_break_policy_adjustment_arr[$udt_obj->getId()] ) ) {
-										Debug::text(' Break Policy Adjustment Found: '. $udt_break_policy_adjustment_arr[$udt_obj->getId()], __FILE__, __LINE__, __METHOD__, 10);
-										$punch_total_time = bcadd( $punch_total_time, $udt_break_policy_adjustment_arr[$udt_obj->getId()] );
-										$tmp_punch_total_time = bcadd( $tmp_punch_total_time, $udt_break_policy_adjustment_arr[$udt_obj->getId()] );
-									}
-*/
 
 									$total_daily_time_used += $tmp_punch_total_time;
 									Debug::text('Daily Total Time Used: '. $total_daily_time_used, __FILE__, __LINE__, __METHOD__, 10);
 
-									if ( $punch_total_time > 0 AND $total_daily_time_used > $daily_trigger_time ) {
+									if ( $punch_total_time > 0 AND $total_daily_time_used > $daily_trigger_time
+											AND ( $maximum_daily_trigger_time === FALSE OR ( $maximum_daily_trigger_time !== FALSE AND ($total_daily_time_used-$tmp_punch_total_time) <= $maximum_daily_trigger_time ) )
+											) {
 										Debug::text('Past Trigger Time!!', __FILE__, __LINE__, __METHOD__, 10);
 
 										//Calculate how far past trigger time we are.
@@ -2689,6 +2815,15 @@ class UserDateTotalFactory extends Factory {
 											Debug::text('Using Past Trigger Time as punch total time: '. $past_trigger_time, __FILE__, __LINE__, __METHOD__, 10);
 										} else {
 											Debug::text('NOT Using Past Trigger Time as punch total time: '. $past_trigger_time, __FILE__, __LINE__, __METHOD__, 10);
+										}
+
+										//If we are close to exceeding the maximum daily/weekly time, just use the remaining time.
+										$maximum_trigger_time = $maximum_daily_trigger_time - ($total_daily_time_used-$tmp_punch_total_time);
+										if ( $punch_total_time > $maximum_trigger_time AND $maximum_trigger_time > 0 ) {
+											Debug::text('Using New Maximum Trigger Time as punch total time: '. $maximum_trigger_time .'('. $total_daily_time_used.')', __FILE__, __LINE__, __METHOD__, 10);
+											$punch_total_time = $maximum_trigger_time;
+										} else {
+											Debug::text('NOT Using New Maximum Trigger Time as punch total time: '. $maximum_trigger_time .'('. $total_daily_time_used.')', __FILE__, __LINE__, __METHOD__, 10);
 										}
 
 										$total_time = $punch_total_time;
@@ -2854,6 +2989,7 @@ class UserDateTotalFactory extends Factory {
 						}
 						unset($udtlf, $udt_obj);
 						break;
+*/
 				}
 			}
 		}
@@ -3416,7 +3552,7 @@ class UserDateTotalFactory extends Factory {
 					foreach( $aplf as $ap_obj  ) {
 						if ( $ap_obj->getMinimumEmployedDays() == 0
 								OR TTDate::getDays( ($this->getUserDateObject()->getDateStamp()-$this->getUserDateObject()->getUserObject()->getHireDate()) ) >= $ap_obj->getMinimumEmployedDays() ) {
-							Debug::Text('&nbsp;&nbsp;User has been employed long enough.', __FILE__, __LINE__, __METHOD__,10);
+							Debug::Text('  User has been employed long enough.', __FILE__, __LINE__, __METHOD__,10);
 
 							$milestone_obj = $ap_obj->getActiveMilestoneObject( $this->getUserDateObject()->getUserObject(), $this->getUserDateObject()->getDateStamp() );
 							$accrual_balance = $ap_obj->getCurrentAccrualBalance( $this->getUserDateObject()->getUserObject()->getId(), $ap_obj->getId() );
@@ -3432,7 +3568,7 @@ class UserDateTotalFactory extends Factory {
 									if ( $milestone_obj->getMaximumTime() > 0 AND $new_accrual_balance > $milestone_obj->getMaximumTime() ) {
 										$accrual_amount = bcsub( $milestone_obj->getMaximumTime(), $accrual_balance, 4 );
 									}
-									Debug::Text('&nbsp;&nbsp; Min/Max Adjusted Accrual Amount: '. $accrual_amount .' Limits: Min: '. $milestone_obj->getMinimumTime() .' Max: '. $milestone_obj->getMaximumTime(), __FILE__, __LINE__, __METHOD__,10);
+									Debug::Text('   Min/Max Adjusted Accrual Amount: '. $accrual_amount .' Limits: Min: '. $milestone_obj->getMinimumTime() .' Max: '. $milestone_obj->getMaximumTime(), __FILE__, __LINE__, __METHOD__,10);
 
 									$af = TTnew( 'AccrualFactory' );
 									$af->setUser( $this->getUserDateObject()->getUserObject()->getId() );
@@ -3448,14 +3584,14 @@ class UserDateTotalFactory extends Factory {
 									}
 									unset($accrual_amount, $accrual_balance, $new_accrual_balance);
 								} else {
-									Debug::Text('&nbsp;&nbsp; Accrual Amount is 0...', __FILE__, __LINE__, __METHOD__,10);
+									Debug::Text('   Accrual Amount is 0...', __FILE__, __LINE__, __METHOD__,10);
 								}
 							} else {
-								Debug::Text('&nbsp;&nbsp; Accrual Balance is outside Milestone Range. Or no milestone found. Skipping...', __FILE__, __LINE__, __METHOD__,10);
+								Debug::Text('   Accrual Balance is outside Milestone Range. Or no milestone found. Skipping...', __FILE__, __LINE__, __METHOD__,10);
 
 							}
 						} else {
-							Debug::Text('&nbsp;&nbsp;User has only been employed: '. TTDate::getDays( ($this->getUserDateObject()->getDateStamp()-$this->getUserDateObject()->getUserObject()->getHireDate()) ) .' Days, not enough.', __FILE__, __LINE__, __METHOD__,10);
+							Debug::Text('  User has only been employed: '. TTDate::getDays( ($this->getUserDateObject()->getDateStamp()-$this->getUserDateObject()->getUserObject()->getHireDate()) ) .' Days, not enough.', __FILE__, __LINE__, __METHOD__,10);
 						}
 					}
 				} else {
@@ -3484,6 +3620,11 @@ class UserDateTotalFactory extends Factory {
 				AND $this->getUserDateObject()->getPayPeriodObject()->getStatus() == 20 ) {
 			Debug::text(' Pay Period is closed!', __FILE__, __LINE__, __METHOD__,10);
 			return FALSE;
+		}
+
+		//Need to set timezone to that of the user we are calculating, otherwise date/time premium policies won't apply properly.
+		if ( is_object( $this->getUserDateObject() ) AND is_object( $this->getUserDateObject()->getUserObject() ) AND is_object( $this->getUserDateObject()->getUserObject()->getUserPreferenceObject() ) ) {
+			$this->getUserDateObject()->getUserObject()->getUserPreferenceObject()->setTimeZonePreferences();
 		}
 
 		//Take the worked hours, and calculate Total,Regular,Overtime,Premium hours from that.
@@ -3637,23 +3778,38 @@ class UserDateTotalFactory extends Factory {
 			foreach( $plf as $p_obj ) {
 				$schedule_ids[] = $p_obj->findScheduleID( NULL, $this->getUserDateObject()->getUser() );
 			}
+		} else {
+			//Debug::text(' No Punches found, grabbing all schedules on this day...', __FILE__, __LINE__, __METHOD__,10);
+			//FIXME: If no punches are on a specific day, then its schedules are not even considered.
+			//This breaks undertime absences, since they should have a full day of absence time but instead they won't have any.
+			//It also doesn't work properly with split shifts, where the employee works the first part but not the 2nd part and should get undertime absence for the 2nd.
+			//However if we handle it this way, the same scheduled shift can accounted for twice when the schedule and punches fall on different days.
+			/*
+			$slf->getByUserDateId( $this->getUserDateID() );
+			if ( $slf->getRecordCount() > 0 ) {
+				//Check for schedule policy
+				foreach ( $slf as $s_obj ) {
+					$schedule_ids[] = $s_obj->getId();
+				}
+			}
+			*/
+		}
 
-			if ( isset($schedule_ids) ) {
-				$slf->getByCompanyIDAndId( $this->getUserDateObject()->getUserObject()->getCompany(), $schedule_ids);
-				if ( $slf->getRecordCount() > 0 ) {
-					foreach( $slf as $s_obj ) {
-						if ( $s_obj->getStatus() == 10 ) {
-							$schedule_policy_ids[] = $s_obj->getSchedulePolicyID(); //Save schedule policies ID so we can passs them onto Premium Policies.
+		if ( isset($schedule_ids) ) {
+			$slf->getByCompanyIDAndId( $this->getUserDateObject()->getUserObject()->getCompany(), array_unique( (array)$schedule_ids ) );
+			if ( $slf->getRecordCount() > 0 ) {
+				foreach( $slf as $s_obj ) {
+					if ( $s_obj->getStatus() == 10 ) {
+						$schedule_policy_ids[] = $s_obj->getSchedulePolicyID(); //Save schedule policies ID so we can passs them onto Premium Policies.
 
-							$schedule_total_time += $s_obj->getTotalTime();
-							if ( is_object( $s_obj->getSchedulePolicyObject() ) ) {
-								$schedule_absence_policy_id = $s_obj->getSchedulePolicyObject()->getAbsencePolicyID();
-								$meal_policy_ids = $s_obj->getSchedulePolicyObject()->getMealPolicyID();
-								$break_policy_ids = $s_obj->getSchedulePolicyObject()->getBreakPolicy();
-								Debug::text(' Found Absence Policy for docking: '. $schedule_absence_policy_id, __FILE__, __LINE__, __METHOD__,10);
-							} else {
-								Debug::text(' NO Absence Policy : ', __FILE__, __LINE__, __METHOD__,10);
-							}
+						$schedule_total_time += $s_obj->getTotalTime();
+						if ( is_object( $s_obj->getSchedulePolicyObject() ) ) {
+							$schedule_absence_policy_id = $s_obj->getSchedulePolicyObject()->getAbsencePolicyID();
+							$meal_policy_ids = $s_obj->getSchedulePolicyObject()->getMealPolicyID();
+							$break_policy_ids = $s_obj->getSchedulePolicyObject()->getBreakPolicy();
+							Debug::text(' Found Absence Policy for docking: '. $schedule_absence_policy_id, __FILE__, __LINE__, __METHOD__,10);
+						} else {
+							Debug::text(' NO Absence Policy : ', __FILE__, __LINE__, __METHOD__,10);
 						}
 					}
 				}
@@ -3849,7 +4005,7 @@ class UserDateTotalFactory extends Factory {
 						}
 
 						if ( isset($user_date_regular_time_compact_arr[(int)$udt_obj->getBranch()][(int)$udt_obj->getDepartment()][(int)$udt_obj->getJob()][(int)$udt_obj->getJobItem()]) ) {
-							Debug::text('&nbsp;&nbsp;&nbsp;&nbsp; Adding to Compact Array: Regular Time -  Branch: '. (int)$udt_obj->getBranch() .' Department: '. (int)$udt_obj->getDepartment(), __FILE__, __LINE__, __METHOD__, 10);
+							Debug::text('     Adding to Compact Array: Regular Time -  Branch: '. (int)$udt_obj->getBranch() .' Department: '. (int)$udt_obj->getDepartment(), __FILE__, __LINE__, __METHOD__, 10);
 							$user_date_regular_time_compact_arr[(int)$udt_obj->getBranch()][(int)$udt_obj->getDepartment()][(int)$udt_obj->getJob()][(int)$udt_obj->getJobItem()]['total_time'] += $udt_total_time;
 							$user_date_regular_time_compact_arr[(int)$udt_obj->getBranch()][(int)$udt_obj->getDepartment()][(int)$udt_obj->getJob()][(int)$udt_obj->getJobItem()]['quantity'] += $udt_obj->getQuantity();
 							$user_date_regular_time_compact_arr[(int)$udt_obj->getBranch()][(int)$udt_obj->getDepartment()][(int)$udt_obj->getJob()][(int)$udt_obj->getJobItem()]['bad_quantity'] += $udt_obj->getBadQuantity();

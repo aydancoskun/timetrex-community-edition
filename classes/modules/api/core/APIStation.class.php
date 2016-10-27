@@ -474,7 +474,7 @@ class APIStation extends APIFactory {
 						}
 						break;
 					case 'download':
-						if ( isset($s_obj) AND $tc->Poll( $current_company, $s_obj) == TRUE ) {
+						if ( isset($s_obj) AND $tc->Poll( $this->getCurrentCompanyObject(), $s_obj) == TRUE ) {
 							$result_str = TTi18n::gettext('Download Data Succeeded!');
 							if ( $s_obj->isValid() ) {
 								$s_obj->Save(FALSE);
@@ -484,7 +484,7 @@ class APIStation extends APIFactory {
 						}
 						break;
 					case 'upload':
-						if ( isset($s_obj) AND $tc->Push( $current_company, $s_obj) == TRUE ) {
+						if ( isset($s_obj) AND $tc->Push( $this->getCurrentCompanyObject(), $s_obj) == TRUE ) {
 							$result_str = TTi18n::gettext('Upload Data Succeeded!');
 							if ( $s_obj->isValid() ) {
 								$s_obj->Save(FALSE);

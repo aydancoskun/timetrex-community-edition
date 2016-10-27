@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9881 $
- * $Id: CompanyDeductionFactory.class.php 9881 2013-05-14 17:48:07Z ipso $
- * $Date: 2013-05-14 10:48:07 -0700 (Tue, 14 May 2013) $
+ * $Revision: 10485 $
+ * $Id: CompanyDeductionFactory.class.php 10485 2013-07-18 19:01:14Z ipso $
+ * $Date: 2013-07-18 12:01:14 -0700 (Thu, 18 Jul 2013) $
  */
 
 /**
@@ -48,6 +48,8 @@ class CompanyDeductionFactory extends Factory {
 
 	var $pay_stub_entry_account_link_obj = NULL;
 	var $pay_stub_entry_account_obj = NULL;
+
+	var $lookback_pay_stub_lf = NULL;
 
 	var $country_calculation_ids = array('100','200','300');
 	var	$province_calculation_ids = array('200','300');
@@ -280,6 +282,29 @@ class CompanyDeductionFactory extends Factory {
 										50 => TTi18n::gettext('Hour(s)'),
 									);
 				break;
+			case 'apply_frequency':
+				$retval = array(
+										10 => TTi18n::gettext('each Pay Period'),
+										20 => TTi18n::gettext('Annually'),
+										25 => TTi18n::gettext('Quarterly'),
+										30 => TTi18n::gettext('Monthly'),
+										//40 => TTi18n::gettext('Weekly'),
+										100 => TTi18n::gettext('Hire Date'),
+										110 => TTi18n::gettext('Hire Date (Anniversary)'),
+										120 => TTi18n::gettext('Termination Date'),
+										130 => TTi18n::gettext('Birth Date (Anniversary)'),
+									);
+				break;
+			case 'look_back_unit':
+				$retval = array(
+										10 => TTi18n::gettext('Day(s)'),
+										20 => TTi18n::gettext('Week(s)'),
+										30 => TTi18n::gettext('Month(s)'),
+										40 => TTi18n::gettext('Year(s)'),
+										//50 => TTi18n::gettext('Hour(s)'),
+										//100 => TTi18n::gettext('Pay Period(s)'), //How do you handle employees switching between pay period schedules? This has too many issues for now.
+									);
+				break;
 			case 'account_amount_type':
 				$retval = array(
 										10 => TTi18n::gettext('Amount'),
@@ -441,9 +466,36 @@ class CompanyDeductionFactory extends Factory {
 														'-1243-#pay_period_end_date#' => TTi18n::getText('Pay Period - End Date'),
 														'-1244-#pay_period_transaction_date#' => TTi18n::getText('Pay Period - Transaction Date'),
 
-                                                        '-1250-#employee_termination_date#' => TTi18n::getText('Employee Termination Date'),
-                                                        '-1260-#employee_birth_date#' => TTi18n::getText('Employee Birth Date'),
-                                                        '-1270-#employee_hire_date#' => TTi18n::getText('Employee Hire Date'),
+                                                        '-1260-#employee_hire_date#' => TTi18n::getText('Employee Hire Date'),
+														'-1250-#employee_termination_date#' => TTi18n::getText('Employee Termination Date'),
+                                                        '-1270-#employee_birth_date#' => TTi18n::getText('Employee Birth Date'),
+
+														'-1300-#currency_iso_code#' => TTi18n::getText('Currency ISO Code'),
+														'-1305-#currency_conversion_rate#' => TTi18n::getText('Currency Conversion Rate'),
+
+														'-1510-#lookback_total_pay_stubs#' => TTi18n::getText('Lookback - Total Pay Stubs'),
+														'-1520-#lookback_start_date#' => TTi18n::getText('Lookback - Start Date'),
+														'-1522-#lookback_end_date#' => TTi18n::getText('Lookback - End Date'),
+														'-1530-#lookback_first_pay_stub_start_date#' => TTi18n::getText('Lookback - First Pay Stub Start Date'),
+														'-1532-#lookback_first_pay_stub_end_date#' => TTi18n::getText('Lookback - First Pay Stub End Date'),
+														'-1534-#lookback_first_pay_stub_transaction_date#' => TTi18n::getText('Lookback - First Pay Stub Transaction Date'),
+														'-1540-#lookback_last_pay_stub_start_date#' => TTi18n::getText('Lookback - Last Pay Stub Start Date'),
+														'-1542-#lookback_last_pay_stub_end_date#' => TTi18n::getText('Lookback - Last Pay Stub End Date'),
+														'-1544-#lookback_last_pay_stub_transaction_date#' => TTi18n::getText('Lookback - Last Pay Stub Transaction Date'),
+
+														'-1610-#lookback_pay_stub_amount#' => TTi18n::getText('Lookback - Pay Stub Amount'),
+														'-1620-#lookback_pay_stub_ytd_amount#' => TTi18n::getText('Lookback - Pay Stub YTD Amount'),
+														'-1630-#lookback_pay_stub_units#' => TTi18n::getText('Lookback - Pay Stub Units'),
+														'-1640-#lookback_pay_stub_ytd_units#' => TTi18n::getText('Lookback - Pay Stub YTD Units'),
+
+														'-1650-#lookback_include_pay_stub_amount#' => TTi18n::getText('Lookback - Include Pay Stub Amount'),
+														'-1660-#lookback_include_pay_stub_ytd_amount#' => TTi18n::getText('Lookback - Include Pay Stub YTD Amount'),
+														'-1670-#lookback_include_pay_stub_units#' => TTi18n::getText('Lookback - Include Pay Stub Units'),
+														'-1680-#lookback_include_pay_stub_ytd_units#' => TTi18n::getText('Lookback - Include Pay Stub YTD Units'),
+														'-1690-#lookback_exclude_pay_stub_amount#' => TTi18n::getText('Lookback - Exclude Pay Stub Amount'),
+														'-1700-#lookback_exclude_pay_stub_ytd_amount#' => TTi18n::getText('Lookback - Exclude Pay Stub YTD Amount'),
+														'-1710-#lookback_exclude_pay_stub_units#' => TTi18n::getText('Lookback - Exclude Pay Stub Units'),
+														'-1720-#lookback_exclude_pay_stub_ytd_units#' => TTi18n::getText('Lookback - Exclude Pay Stub YTD Units'),
                                     );
                 break;
 			case 'columns':
@@ -481,6 +533,14 @@ class CompanyDeductionFactory extends Factory {
 								'district',
 								'company_value1',
 								'company_value2',
+								'company_value3',
+								'company_value4',
+								'company_value5',
+								'company_value6',
+								'company_value7',
+								'company_value8',
+								'company_value9',
+								'company_value10',
 								'user_value1',
 								'user_value2',
 								'user_value3',
@@ -524,6 +584,12 @@ class CompanyDeductionFactory extends Factory {
 										'maximum_length_of_service' => 'MaximumLengthOfService',
 										'minimum_user_age' => 'MinimumUserAge',
 										'maximum_user_age' => 'MaximumUserAge',
+										'apply_frequency_id' => 'ApplyFrequency',
+										'apply_frequency_month' => 'ApplyFrequencyMonth',
+										'apply_frequency_day_of_month' => 'ApplyFrequencyDayOfMonth',
+										'apply_frequency_day_of_week' => 'ApplyFrequencyDayOfWeek',
+										'apply_frequency_quarter_month' => 'ApplyFrequencyQuarterMonth',
+										'pay_stub_entry_description' => 'PayStubEntryDescription',
 										'calculation_id' => 'Calculation',
 										'calculation' => FALSE,
 										'calculation_order' => 'CalculationOrder',
@@ -532,6 +598,14 @@ class CompanyDeductionFactory extends Factory {
 										'district' => 'District',
 										'company_value1' => 'CompanyValue1',
 										'company_value2' => 'CompanyValue2',
+										'company_value3' => 'CompanyValue3',
+										'company_value4' => 'CompanyValue4',
+										'company_value5' => 'CompanyValue5',
+										'company_value6' => 'CompanyValue6',
+										'company_value7' => 'CompanyValue7',
+										'company_value8' => 'CompanyValue8',
+										'company_value9' => 'CompanyValue9',
+										'company_value10' => 'CompanyValue10',
 										'user_value1' => 'UserValue1',
 										'user_value2' => 'UserValue2',
 										'user_value3' => 'UserValue3',
@@ -715,6 +789,34 @@ class CompanyDeductionFactory extends Factory {
 													) {
 
 			$this->data['name'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getPayStubEntryDescription() {
+		if ( isset($this->data['pay_stub_entry_description']) ) {
+			return $this->data['pay_stub_entry_description'];
+		}
+
+		return FALSE;
+	}
+	function setPayStubEntryDescription($value) {
+		$value = trim($value);
+
+		if 	(
+				strlen($value) == 0
+				OR
+				$this->Validator->isLength(		'pay_stub_entry_description',
+												$value,
+												TTi18n::gettext('Description is too short or too long'),
+												0,
+												100)
+												) {
+
+			$this->data['pay_stub_entry_description'] = htmlspecialchars( $value );
 
 			return TRUE;
 		}
@@ -1012,6 +1114,182 @@ class CompanyDeductionFactory extends Factory {
 
 		return FALSE;
 	}
+
+	//
+	// Calendar
+	//
+	function getApplyFrequency() {
+		if ( isset($this->data['apply_frequency_id']) ) {
+			return $this->data['apply_frequency_id'];
+		}
+
+		return FALSE;
+	}
+	function setApplyFrequency($value) {
+		$value = trim($value);
+
+		if (
+				$this->Validator->inArrayKey(	'apply_frequency_id',
+												$value,
+												TTi18n::gettext('Incorrect frequency'),
+												$this->getOptions('apply_frequency')) ) {
+
+			$this->data['apply_frequency_id'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getApplyFrequencyMonth() {
+		if ( isset($this->data['apply_frequency_month']) ) {
+			return $this->data['apply_frequency_month'];
+		}
+
+		return FALSE;
+	}
+	function setApplyFrequencyMonth($value) {
+		$value = trim($value);
+
+		if ( $value == 0
+				OR
+				$this->Validator->inArrayKey(	'apply_frequency_month',
+											$value,
+											TTi18n::gettext('Incorrect frequency month'),
+											TTDate::getMonthOfYearArray() ) ) {
+
+			$this->data['apply_frequency_month'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getApplyFrequencyDayOfMonth() {
+		if ( isset($this->data['apply_frequency_day_of_month']) ) {
+			return $this->data['apply_frequency_day_of_month'];
+		}
+
+		return FALSE;
+	}
+	function setApplyFrequencyDayOfMonth($value) {
+		$value = trim($value);
+
+		if ( $value == 0
+				OR
+				$this->Validator->inArrayKey(	'apply_frequency_day_of_month',
+											$value,
+											TTi18n::gettext('Incorrect frequency day of month'),
+											TTDate::getDayOfMonthArray() ) ) {
+
+			$this->data['apply_frequency_day_of_month'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getApplyFrequencyDayOfWeek() {
+		if ( isset($this->data['apply_frequency_day_of_week']) ) {
+			return $this->data['apply_frequency_day_of_week'];
+		}
+
+		return FALSE;
+	}
+	function setApplyFrequencyDayOfWeek($value) {
+		$value = trim($value);
+
+		if ( $value == 0
+				OR
+				$this->Validator->inArrayKey(	'apply_frequency_day_of_week',
+											$value,
+											TTi18n::gettext('Incorrect frequency day of week'),
+											TTDate::getDayOfWeekArray() ) ) {
+
+			$this->data['apply_frequency_day_of_week'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getApplyFrequencyQuarterMonth() {
+		if ( isset($this->data['apply_frequency_quarter_month']) ) {
+			return $this->data['apply_frequency_quarter_month'];
+		}
+
+		return FALSE;
+	}
+	function setApplyFrequencyQuarterMonth($value) {
+		$value = trim($value);
+
+		if ( $value == 0
+				OR
+				(
+					$this->Validator->isGreaterThan(	'apply_frequency_quarter_month',
+												$value,
+												TTi18n::gettext('Incorrect frequency quarter month'),
+												1 )
+					AND
+					$this->Validator->isLessThan(	'apply_frequency_quarter_month',
+												$value,
+												TTi18n::gettext('Incorrect frequency quarter month'),
+												3 )
+				)
+				) {
+
+			$this->data['apply_frequency_quarter_month'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function inApplyFrequencyWindow( $pay_period_start_date, $pay_period_end_date, $hire_date = NULL, $termination_date = NULL, $birth_date = NULL ) {
+		if ( $this->getApplyFrequency() == FALSE OR $this->getApplyFrequency() == 10 ) { //Each pay period
+			return TRUE;
+		}
+
+		$frequency_criteria = array(
+									'month' => $this->getApplyFrequencyMonth(),
+									'day_of_month' => $this->getApplyFrequencyDayOfMonth(),
+									'quarter_month' => $this->getApplyFrequencyQuarterMonth(),
+									);
+		
+		$specific_date = FALSE;
+		$frequency_id = $this->getApplyFrequency();
+		switch ( $this->getApplyFrequency() ) {
+			case 100: //Hire Date
+				$frequency_criteria['date'] = $hire_date;
+				$frequency_id = 100; //Specific date
+				break;
+			case 110: //Hire Date anniversary.
+				$frequency_criteria['month'] = TTDate::getMonth($hire_date);
+				$frequency_criteria['day_of_month'] = TTDate::getDayOfMonth($hire_date);
+				$frequency_id = 20; //Annually
+				break;
+			case 120:
+				$frequency_criteria['date'] = $termination_date;
+				$frequency_id = 100; //Specific date
+				break;
+			case 130: //Birth Date anniversary.
+				$frequency_criteria['month'] = TTDate::getMonth($birth_date);
+				$frequency_criteria['day_of_month'] = TTDate::getDayOfMonth($birth_date);
+				$frequency_id = 20; //Annually
+				break;
+		}
+
+		$retval = TTDate::inApplyFrequencyWindow( $frequency_id, $pay_period_start_date, $pay_period_end_date, $frequency_criteria  );
+		Debug::Arr($frequency_criteria, 'Frequency: '. $this->getApplyFrequency() .' Retval: '. (int)$retval, __FILE__, __LINE__, __METHOD__,10);
+
+		return $retval;
+	}
+
 
 	function getWorkedTimeByUserIdAndEndDate( $user_id, $start_date = NULL, $end_date = NULL ) {
 		if ( $user_id == '' ) {
@@ -1355,6 +1633,211 @@ class CompanyDeductionFactory extends Factory {
 
 		return FALSE;
 	}
+
+	function getCompanyValue3() {
+		if ( isset($this->data['company_value3']) ) {
+			return $this->data['company_value3'];
+		}
+
+		return FALSE;
+	}
+	function setCompanyValue3($value) {
+		$value = trim($value);
+
+		if 	(	$value == ''
+				OR
+				$this->Validator->isLength(		'company_value3',
+												$value,
+												TTi18n::gettext('Company Value 3 is too short or too long'),
+												1,
+												20) ) {
+
+			$this->data['company_value3'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getCompanyValue4() {
+		if ( isset($this->data['company_value4']) ) {
+			return $this->data['company_value4'];
+		}
+
+		return FALSE;
+	}
+	function setCompanyValue4($value) {
+		$value = trim($value);
+
+		if 	(	$value == ''
+				OR
+				$this->Validator->isLength(		'company_value4',
+												$value,
+												TTi18n::gettext('Company Value 4 is too short or too long'),
+												1,
+												20) ) {
+
+			$this->data['company_value4'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getCompanyValue5() {
+		if ( isset($this->data['company_value5']) ) {
+			return $this->data['company_value5'];
+		}
+
+		return FALSE;
+	}
+	function setCompanyValue5($value) {
+		$value = trim($value);
+
+		if 	(	$value == ''
+				OR
+				$this->Validator->isLength(		'company_value5',
+												$value,
+												TTi18n::gettext('Company Value 5 is too short or too long'),
+												1,
+												20) ) {
+
+			$this->data['company_value5'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+	
+	function getCompanyValue6() {
+		if ( isset($this->data['company_value6']) ) {
+			return $this->data['company_value6'];
+		}
+
+		return FALSE;
+	}
+	function setCompanyValue6($value) {
+		$value = trim($value);
+
+		if 	(	$value == ''
+				OR
+				$this->Validator->isLength(		'company_value6',
+												$value,
+												TTi18n::gettext('Company Value 6 is too short or too long'),
+												1,
+												20) ) {
+
+			$this->data['company_value6'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+	function getCompanyValue7() {
+		if ( isset($this->data['company_value7']) ) {
+			return $this->data['company_value7'];
+		}
+
+		return FALSE;
+	}
+	function setCompanyValue7($value) {
+		$value = trim($value);
+
+		if 	(	$value == ''
+				OR
+				$this->Validator->isLength(		'company_value7',
+												$value,
+												TTi18n::gettext('Company Value 7 is too short or too long'),
+												1,
+												20) ) {
+
+			$this->data['company_value7'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+	function getCompanyValue8() {
+		if ( isset($this->data['company_value8']) ) {
+			return $this->data['company_value8'];
+		}
+
+		return FALSE;
+	}
+	function setCompanyValue8($value) {
+		$value = trim($value);
+
+		if 	(	$value == ''
+				OR
+				$this->Validator->isLength(		'company_value8',
+												$value,
+												TTi18n::gettext('Company Value 8 is too short or too long'),
+												1,
+												20) ) {
+
+			$this->data['company_value8'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+	function getCompanyValue9() {
+		if ( isset($this->data['company_value9']) ) {
+			return $this->data['company_value9'];
+		}
+
+		return FALSE;
+	}
+	function setCompanyValue9($value) {
+		$value = trim($value);
+
+		if 	(	$value == ''
+				OR
+				$this->Validator->isLength(		'company_value9',
+												$value,
+												TTi18n::gettext('Company Value 9 is too short or too long'),
+												1,
+												20) ) {
+
+			$this->data['company_value9'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+	function getCompanyValue10() {
+		if ( isset($this->data['company_value10']) ) {
+			return $this->data['company_value10'];
+		}
+
+		return FALSE;
+	}
+	function setCompanyValue10($value) {
+		$value = trim($value);
+
+		if 	(	$value == ''
+				OR
+				$this->Validator->isLength(		'company_value10',
+												$value,
+												TTi18n::gettext('Company Value 10 is too short or too long'),
+												1,
+												20) ) {
+
+			$this->data['company_value10'] = $value;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
 
 	function getUserValue1() {
 		if ( isset($this->data['user_value1']) ) {
@@ -2216,7 +2699,6 @@ class CompanyDeductionFactory extends Factory {
 		Debug::text('Include Amount: '. $include .' Exclude Amount: '. $exclude, __FILE__, __LINE__, __METHOD__, 10);
 
 		//Allow negative values to be returned, as we need to do calculation on accruals and such that may be negative values.
-
         if ( $is_included == TRUE AND $is_excluded == TRUE ) {
             $amount = bcsub( $include, $exclude);
         } elseif( $is_included == TRUE ) {
@@ -2230,6 +2712,70 @@ class CompanyDeductionFactory extends Factory {
 		Debug::text('Amount: '. $amount, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $amount;
+	}
+
+	//
+	// Lookback functions.
+	//
+	function getLookbackCalculationPayStubAmount( $include_account_amount_type_id = NULL, $exclude_account_amount_type_id = NULL ) {
+		$amount = 0;
+		if ( isset($this->lookback_pay_stub_lf) AND $this->lookback_pay_stub_lf->getRecordCount() > 0 ) {
+			foreach( $this->lookback_pay_stub_lf as $pay_stub_obj ) {
+				$pay_stub_obj->loadCurrentPayStubEntries();
+				$amount = bcadd( $amount, $this->getCalculationPayStubAmount( $pay_stub_obj, $include_account_amount_type_id, $exclude_account_amount_type_id ) );
+			}
+		}
+
+		Debug::text('Amount: '. $amount, __FILE__, __LINE__, __METHOD__, 10);
+		return $amount;
+	}
+
+	//Handle look back period, which is always based on the transaction date *before* the current pay periods transaction date. 
+	function getLookbackStartAndEndDates( $pay_period_obj ) {
+		$retarr = array(
+						'start_date' => FALSE,
+						//Make sure we don't include the current transaction date, as we can always access the current amounts with other variables.
+						'end_date' => TTDate::getEndDayEpoch( (int)$pay_period_obj->getTransactionDate()-86400 ),
+						);
+		if ( $this->getCompanyValue3() == 100 ) { //Pay Periods
+			//Not implemented for now, as it has many issues, things like gaps between pay periods, employees switching between pay period schedules, etc...
+			//We could just count the number of pay stubs, but this has issues with employees leaving and returning and such.
+		} else {
+			$length_of_service_days = bcmul( (float)$this->getCompanyValue2(), $this->length_of_service_multiplier[(int)$this->getCompanyValue3()], 4);
+			$retarr['start_date'] = TTDate::getBeginDayEpoch( (int)$pay_period_obj->getTransactionDate()-($length_of_service_days*86400) );
+		}
+
+		Debug::text('Start Date: '. TTDate::getDate('DATE+TIME', $retarr['start_date'] ) .' End Date: '. TTDate::getDate('DATE+TIME', $retarr['end_date'] ) , __FILE__, __LINE__, __METHOD__, 10);
+		return $retarr;
+	}
+	
+	function getLookbackPayStubs( $user_id, $pay_period_obj ) {
+		$lookback_dates = $this->getLookbackStartAndEndDates( $pay_period_obj );
+		
+		$pslf = TTNew('PayStubListFactory');
+		$this->lookback_pay_stub_lf = $pslf->getByUserIdAndStartDateAndEndDate( $user_id, $lookback_dates['start_date'], $lookback_dates['end_date'] );
+
+		if ( $this->lookback_pay_stub_lf->getRecordCount() > 0 ) {
+			//Get lookback first pay and last pay period dates.
+			$retarr['first_pay_stub_start_date'] = $this->lookback_pay_stub_lf->getCurrent()->getStartDate();
+			$retarr['first_pay_stub_end_date'] = $this->lookback_pay_stub_lf->getCurrent()->getEndDate();
+			$retarr['first_pay_stub_transaction_date'] = $this->lookback_pay_stub_lf->getCurrent()->getTransactionDate();
+
+			$this->lookback_pay_stub_lf->rs->MoveLast();
+
+			$retarr['last_pay_stub_start_date'] = $this->lookback_pay_stub_lf->getCurrent()->getStartDate();
+			$retarr['last_pay_stub_end_date'] = $this->lookback_pay_stub_lf->getCurrent()->getEndDate();
+			$retarr['last_pay_stub_transaction_date'] = $this->lookback_pay_stub_lf->getCurrent()->getTransactionDate();
+
+			$retarr['total_pay_stubs'] = $this->lookback_pay_stub_lf->getRecordCount();
+			Debug::text('Total Pay Stubs: '. $retarr['total_pay_stubs'] .' First Transaction Date: '. TTDate::getDate('DATE+TIME', $retarr['first_pay_stub_transaction_date'] ) .' Last Transaction Date: '. TTDate::getDate('DATE+TIME', $retarr['last_pay_stub_transaction_date'] ) , __FILE__, __LINE__, __METHOD__, 10);
+
+			$this->lookback_pay_stub_lf->rs->MoveFirst();
+		} else {
+			$retarr = FALSE;
+		}
+
+		return $retarr;
 	}
 
 	function getCalculationYTDAmount( $pay_stub_obj ) {
@@ -4241,6 +4787,10 @@ class CompanyDeductionFactory extends Factory {
 		//Set Length of service in days.
 		$this->setMinimumLengthOfServiceDays( $this->getMinimumLengthOfService() );
 		$this->setMaximumLengthOfServiceDays( $this->getMaximumLengthOfService() );
+
+		if ( $this->getApplyFrequency() == '' ) {
+			$this->setApplyFrequency( 10 ); //Each pay period.
+		}
 
 		return TRUE;
 	}

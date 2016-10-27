@@ -269,7 +269,7 @@ class APINotification extends APIFactory {
 					$retarr[] = array(
 										  'delay' => 30,
 										  'bg_color' => '#FF0000', //Red
-										  'message' => TTi18n::getText('WARNING: Please click here and enter an email address for your account, this is required to receive important notices and prevent your from being locked out.'),
+										  'message' => TTi18n::getText('WARNING: Please click here and enter an email address for your account, this is required to receive important notices and prevent your account from being locked out.'),
 										  'destination' => array('menu_name' => 'Contact Information'),
 										  );
 				}

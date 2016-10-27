@@ -109,6 +109,8 @@ class Form941Report extends Report {
 										'-2070-default_department_id' => TTi18n::gettext('Default Department'),
                                         '-2100-custom_filter' => TTi18n::gettext('Custom Filter'),
 
+										'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
+
 										'-5000-columns' => TTi18n::gettext('Display Columns'),
 										'-5010-group' => TTi18n::gettext('Group By'),
 										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
@@ -126,7 +128,7 @@ class Form941Report extends Report {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
 					// So just get custom columns with Selection and Formula.
-					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), array(10,20), NULL, 'Form941Report', 'custom_column' );
+					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), NULL, 'Form941Report', 'custom_column' );
 					if ( is_array($custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $custom_column_labels, 9500 );
 					}
@@ -135,13 +137,13 @@ class Form941Report extends Report {
             case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
-					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), array(30,31), NULL, 'Form941Report', 'custom_column' );
+					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'Form941Report', 'custom_column' );
 				}
                 break;
             case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
-					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), array(10,20), array(10,40,50,90), 'Form941Report', 'custom_column' );
+					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'Form941Report', 'custom_column' );
 					if ( is_array($report_dynamic_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
 					}
@@ -150,7 +152,7 @@ class Form941Report extends Report {
             case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
-					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), array(10,20), array(20,30,60,70,80,100,110), 'Form941Report', 'custom_column' );
+					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'Form941Report', 'custom_column' );
 					if ( is_array($report_static_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
 					}
@@ -508,7 +510,7 @@ class Form941Report extends Report {
 		//Debug::Arr($ytd_filter_data, 'YTD Filter Data: Row Count: '.  $pself->getRecordCount(), __FILE__, __LINE__, __METHOD__,10);
 		if ( $pself->getRecordCount() > 0 ) {
 			foreach( $pself as $pse_obj ) {
-				$user_id = $this->user_ids[] = $pse_obj->getColumn('user_id');
+				$user_id = $pse_obj->getColumn('user_id'); //Make sure we don't add this to the unique user_id list.
 				//Always use middle day epoch, otherwise multiple entries could exist for the same day.
 				$date_stamp = TTDate::getMiddleDayEpoch( TTDate::strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ) );
 				$branch = $pse_obj->getColumn('default_branch');
@@ -591,6 +593,11 @@ class Form941Report extends Report {
 
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['wages'] 					= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['wages']['include_pay_stub_entry_account'], 					$form_data['wages']['exclude_pay_stub_entry_account'] );
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income_tax'] 				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['income_tax']['include_pay_stub_entry_account'], 				$form_data['income_tax']['exclude_pay_stub_entry_account'] );
+
+						//FIXME: If employees are excluded from Social Security, it will still include total wages
+						//resulting in the 941 form being incorrect in its calculation.
+						//Add Form Setup tab field to select the Social Security tax/deductions?
+						//However there can often be two of them, is just the employee one enough? We could use the employees and include/exclude accounts from that at least then.
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_wages'] 	= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['social_security_wages']['include_pay_stub_entry_account'], 	$form_data['social_security_wages']['exclude_pay_stub_entry_account'] );
 
 						//Handle social security wage limit.

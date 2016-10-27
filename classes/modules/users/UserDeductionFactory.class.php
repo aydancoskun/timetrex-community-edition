@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9881 $
- * $Id: UserDeductionFactory.class.php 9881 2013-05-14 17:48:07Z ipso $
- * $Date: 2013-05-14 10:48:07 -0700 (Tue, 14 May 2013) $
+ * $Revision: 10609 $
+ * $Id: UserDeductionFactory.class.php 10609 2013-07-31 17:29:20Z ipso $
+ * $Date: 2013-07-31 10:29:20 -0700 (Wed, 31 Jul 2013) $
  */
 
 /**
@@ -956,65 +956,233 @@ class UserDeductionFactory extends Factory {
 					$user_value10 = $this->getUserValue10();
 				}
                 // evaluate math expressions as the company_value1 and user_value1-10 defined by user. 
-                $company_value1 =  $cd_obj->getCompanyValue1(); // Custom Formula                   
-                
-                $uwlf = TTnew('UserWageListFactory');
-                $uwlf->getWageByUserIdAndPayPeriodEndDate( $this->getUser(), $pay_period_obj->getEndDate() );
-                if ( $uwlf->getRecordCount() > 0 ) {
-                    $uwf = $uwlf->getCurrent();
-                    $employee_hourly_rate = $uwf->getHourlyRate();
-					$employee_annual_wage = $uwf->getAnnualWage();
-					$employee_wage_average_weekly_hours = TTDate::getHours( $uwf->getWeeklyTime() );
-                } else {
-					$employee_hourly_rate = 0;
-					$employee_annual_wage = 0;
-					$employee_wage_average_weekly_hours = 0;
+                $company_value1 =  $cd_obj->getCompanyValue1(); // Custom Formula
+
+				$variables = array();
+				$formula_variables = array_keys( (array)TTMath::parseColumnsFromFormula( $company_value1 ) );
+				Debug::Arr( $formula_variables, 'Formula Variables: ', __FILE__, __LINE__, __METHOD__, 10 );
+
+				if ( is_array($formula_variables) ) {
+					if ( in_array('currency_conversion_rate', $formula_variables) AND is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCurrencyObject() ) ) {
+						$currency_iso_code = $this->getUserObject()->getCurrencyObject()->getISOCode();
+						$currency_conversion_rate = $this->getUserObject()->getCurrencyObject()->getConversionRate();
+						Debug::Text( 'Currency Variables: Rate: '. $currency_conversion_rate .' ISO: '. $currency_iso_code, __FILE__, __LINE__, __METHOD__, 10 );
+					}
+
+					//First pass to gather any necessary data based on variables
+					if ( in_array('employee_hourly_rate', $formula_variables) OR in_array('employee_hourly_rate', $formula_variables ) OR in_array( 'employee_wage_average_weekly_hours', $formula_variables ) ) {
+						$uwlf = TTnew('UserWageListFactory');
+						$uwlf->getWageByUserIdAndPayPeriodEndDate( $this->getUser(), $pay_period_obj->getEndDate() );
+						if ( $uwlf->getRecordCount() > 0 ) {
+							$uwf = $uwlf->getCurrent();
+							$employee_hourly_rate = $uwf->getHourlyRate();
+							$employee_annual_wage = $uwf->getAnnualWage();
+							$employee_wage_average_weekly_hours = TTDate::getHours( $uwf->getWeeklyTime() );
+						} else {
+							$employee_hourly_rate = 0;
+							$employee_annual_wage = 0;
+							$employee_wage_average_weekly_hours = 0;
+						}
+						Debug::Text( 'Employee Hourly Rate: '. $employee_hourly_rate, __FILE__, __LINE__, __METHOD__, 10 );
+					}
+
+					if ( $cd_obj->getCompanyValue2() != '' AND $cd_obj->getCompanyValue2() > 0 AND $cd_obj->getCompanyValue3() != '' AND $cd_obj->getCompanyValue3() > 0 ) {
+						Debug::Text( 'Formula Lookback enable: '. $cd_obj->getCompanyValue2(), __FILE__, __LINE__, __METHOD__, 10 );
+						foreach( $formula_variables as $formula_variable ) {
+							if ( strpos( $formula_variable, 'lookback_' ) !== FALSE ) {
+								Debug::Text( 'Lookback variables exist...', __FILE__, __LINE__, __METHOD__, 10 );
+								$lookback_dates = $cd_obj->getLookbackStartAndEndDates( $pay_period_obj );
+								$lookback_pay_stub_dates = $cd_obj->getLookbackPayStubs( $this->getUser(), $pay_period_obj );
+								break;
+							}
+						}
+					}
+
+					//Second pass to define variables.
+					foreach( $formula_variables as $formula_variable ) {
+						if ( !isset($variables[$formula_variable]) ) {
+							switch ($formula_variable) {
+								case 'custom_value1':
+									$variables[$formula_variable] = $user_value1;
+									break;
+								case 'custom_value2':
+									$variables[$formula_variable] = $user_value2;
+									break;
+								case 'custom_value3':
+									$variables[$formula_variable] = $user_value3;
+									break;
+								case 'custom_value4':
+									$variables[$formula_variable] = $user_value4;
+									break;
+								case 'custom_value5':
+									$variables[$formula_variable] = $user_value5;
+									break;
+								case 'custom_value6':
+									$variables[$formula_variable] = $user_value6;
+									break;
+								case 'custom_value7':
+									$variables[$formula_variable] = $user_value7;
+									break;
+								case 'custom_value8':
+									$variables[$formula_variable] = $user_value8;
+									break;
+								case 'custom_value9':
+									$variables[$formula_variable] = $user_value9;
+									break;
+								case 'custom_value10':
+									$variables[$formula_variable] = $user_value10;
+									break;
+
+								case 'employee_hourly_rate':
+									$variables[$formula_variable] = $employee_hourly_rate;
+									break;
+								case 'employee_annual_wage':
+									$variables[$formula_variable] = $employee_annual_wage;
+									break;
+								case 'employee_wage_average_weekly_hours':
+									$variables[$formula_variable] = $employee_wage_average_weekly_hours;
+									break;
+
+								case 'annual_pay_periods':
+									$variables[$formula_variable] = $annual_pay_periods;
+									break;
+
+								case 'pay_period_start_date':
+									$variables[$formula_variable] = $pay_period_obj->getStartDate();
+									break;
+								case 'pay_period_end_date':
+									$variables[$formula_variable] = $pay_period_obj->getEndDate();
+									break;
+								case 'pay_period_transaction_date':
+									$variables[$formula_variable] = $pay_period_obj->getTransactionDate();
+									break;
+
+								case 'employee_hire_date':
+									$variables[$formula_variable] = $this->getUserObject()->getHireDate();
+									break;
+								case 'employee_termination_date':
+									$variables[$formula_variable] = $this->getUserObject()->getTerminationDate();
+									break;
+								case 'employee_birth_date':
+									$variables[$formula_variable] = $this->getUserObject()->getBirthDate();
+									break;
+
+								case 'currency_iso_code':
+									$variables[$formula_variable] = $currency_iso_code;
+									break;
+								case 'currency_conversion_rate':
+									$variables[$formula_variable] = $currency_conversion_rate;
+									break;
+
+								case 'include_pay_stub_amount':
+									$variables[$formula_variable] = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, 10 );
+									break;
+								case 'include_pay_stub_ytd_amount':
+									$variables[$formula_variable] = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, 30 );
+									break;
+								case 'include_pay_stub_units':
+									$variables[$formula_variable] = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, 20 );
+									break;
+								case 'include_pay_stub_ytd_units':
+									$variables[$formula_variable] = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, 40 );
+									break;
+								case 'exclude_pay_stub_amount':
+									$variables[$formula_variable] = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, NULL, 10 );
+									break;
+								case 'exclude_pay_stub_ytd_amount':
+									$variables[$formula_variable] = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, NULL, 30 );
+									break;
+								case 'exclude_pay_stub_units':
+									$variables[$formula_variable] = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, NULL, 20 );
+									break;
+								case 'exclude_pay_stub_ytd_units':
+									$variables[$formula_variable] = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, NULL, 40 );
+									break;
+								case 'pay_stub_amount':
+									$variables[$formula_variable] = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, 10, 10 );
+									break;
+								case 'pay_stub_ytd_amount':
+									$variables[$formula_variable] = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, 30, 30 );
+									break;
+								case 'pay_stub_units':
+									$variables[$formula_variable] = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, 20, 20 );
+									break;
+								case 'pay_stub_ytd_units':
+									$variables[$formula_variable] = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, 40, 40 );
+									break;
+
+								//Lookback variables.
+								case 'lookback_total_pay_stubs':
+									$variables[$formula_variable] = ( isset($lookback_pay_stub_dates['total_pay_stubs']) ) ? $lookback_pay_stub_dates['total_pay_stubs'] : 0;
+									break;
+								case 'lookback_start_date':
+									$variables[$formula_variable] = ( isset($lookback_dates['start_date']) ) ? $lookback_dates['start_date'] : 0;
+									break;
+								case 'lookback_end_date':
+									$variables[$formula_variable] = ( isset($lookback_dates['end_date']) ) ? $lookback_dates['end_date'] : 0;
+									break;
+								case 'lookback_first_pay_stub_start_date':
+									$variables[$formula_variable] = ( isset($lookback_pay_stub_dates['first_pay_stub_start_date']) ) ? $lookback_pay_stub_dates['first_pay_stub_start_date'] : 0;
+									break;
+								case 'lookback_first_pay_stub_end_date':
+									$variables[$formula_variable] = ( isset($lookback_pay_stub_dates['first_pay_stub_end_date']) ) ? $lookback_pay_stub_dates['first_pay_stub_end_date'] : 0;
+									break;
+								case 'lookback_first_pay_stub_transaction_date':
+									$variables[$formula_variable] = ( isset($lookback_pay_stub_dates['first_pay_stub_transaction_date']) ) ? $lookback_pay_stub_dates['first_pay_stub_transaction_date'] : 0;
+									break;
+								case 'lookback_last_pay_stub_start_date':
+									$variables[$formula_variable] = ( isset($lookback_pay_stub_dates['last_pay_stub_start_date']) ) ? $lookback_pay_stub_dates['last_pay_stub_start_date'] : 0;
+									break;
+								case 'lookback_last_pay_stub_end_date':
+									$variables[$formula_variable] = ( isset($lookback_pay_stub_dates['last_pay_stub_end_date']) ) ? $lookback_pay_stub_dates['last_pay_stub_end_date'] : 0;
+									break;
+								case 'lookback_last_pay_stub_transaction_date':
+									$variables[$formula_variable] = ( isset($lookback_pay_stub_dates['last_pay_stub_transaction_date']) ) ? $lookback_pay_stub_dates['last_pay_stub_end_date'] : 0;
+									break;
+								case 'lookback_include_pay_stub_amount':
+									$variables[$formula_variable] = $cd_obj->getLookbackCalculationPayStubAmount( 10 );
+									break;
+								case 'lookback_include_pay_stub_ytd_amount':
+									$variables[$formula_variable] = $cd_obj->getLookbackCalculationPayStubAmount(  30 );
+									break;
+								case 'lookback_include_pay_stub_units':
+									$variables[$formula_variable] = $cd_obj->getLookbackCalculationPayStubAmount( 20 );
+									break;
+								case 'lookback_include_pay_stub_ytd_units':
+									$variables[$formula_variable] = $cd_obj->getLookbackCalculationPayStubAmount( 40 );
+									break;
+								case 'lookback_exclude_pay_stub_amount':
+									$variables[$formula_variable] = $cd_obj->getLookbackCalculationPayStubAmount( NULL, 10 );
+									break;
+								case 'lookback_exclude_pay_stub_ytd_amount':
+									$variables[$formula_variable] = $cd_obj->getLookbackCalculationPayStubAmount( NULL, 30 );
+									break;
+								case 'lookback_exclude_pay_stub_units':
+									$variables[$formula_variable] = $cd_obj->getLookbackCalculationPayStubAmount( NULL, 20 );
+									break;
+								case 'lookback_exclude_pay_stub_ytd_units':
+									$variables[$formula_variable] = $cd_obj->getLookbackCalculationPayStubAmount( NULL, 40 );
+									break;
+								case 'lookback_pay_stub_amount':
+									$variables[$formula_variable] = $cd_obj->getLookbackCalculationPayStubAmount( 10, 10 );
+									break;
+								case 'lookback_pay_stub_ytd_amount':
+									$variables[$formula_variable] = $cd_obj->getLookbackCalculationPayStubAmount( 30, 30 );
+									break;
+								case 'lookback_pay_stub_units':
+									$variables[$formula_variable] = $cd_obj->getLookbackCalculationPayStubAmount( 20, 20 );
+									break;
+								case 'lookback_pay_stub_ytd_units':
+									$variables[$formula_variable] = $cd_obj->getLookbackCalculationPayStubAmount( 40, 40 );
+									break;
+							}
+						}
+					}
+					unset( $uwlf, $uwf, $employee_hourly_rate, $employee_annual_wage, $employee_wage_average_weekly_hours, $annual_pay_periods, $lookback_dates, $lookback_pay_stub_dates, $currency_iso_code, $currency_conversion_rate );
 				}
-                Debug::Text( 'Employee Hourly Rate: '. $employee_hourly_rate, __FILE__, __LINE__, __METHOD__, 10 );
-
-                $variables = array(
-                    '#custom_value1#' => $user_value1,
-                    '#custom_value2#' => $user_value2,
-                    '#custom_value3#' => $user_value3,
-                    '#custom_value4#' => $user_value4,
-                    '#custom_value5#' => $user_value5,
-                    '#custom_value6#' => $user_value6,
-                    '#custom_value7#' => $user_value7,
-                    '#custom_value8#' => $user_value8,
-                    '#custom_value9#' => $user_value9,
-                    '#custom_value10#' => $user_value10,                    
-                    
-                    '#employee_hourly_rate#' => $employee_hourly_rate,
-					'#employee_annual_wage#' => $employee_annual_wage,
-					'#employee_wage_average_weekly_hours#' => $employee_wage_average_weekly_hours,
-
-                    '#annual_pay_periods#' => $annual_pay_periods,
-					'#pay_period_start_date#' => $pay_period_obj->getStartDate(),
-					'#pay_period_end_date#' => $pay_period_obj->getEndDate(),
-					'#pay_period_transaction_date#' => $pay_period_obj->getTransactionDate(),
-
-                    '#employee_hire_date#' => $this->getUserObject()->getHireDate(),
-                    '#employee_termination_date#' => $this->getUserObject()->getTerminationDate(),
-                    '#employee_birth_date#' => $this->getUserObject()->getBirthDate(),
-                    
-                    '#include_pay_stub_amount#' => $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, 10 ),
-                    '#include_pay_stub_ytd_amount#' => $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, 30 ),
-                    '#include_pay_stub_units#' => $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, 20 ),
-                    '#include_pay_stub_ytd_units#' => $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, 40 ),
-                    
-                    '#exclude_pay_stub_amount#' => $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, NULL, 10 ),
-                    '#exclude_pay_stub_ytd_amount#' => $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, NULL, 30 ),
-                    '#exclude_pay_stub_units#' => $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, NULL, 20 ),
-                    '#exclude_pay_stub_ytd_units#' => $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, NULL, 40 ),
-                    
-                    '#pay_stub_amount#' => $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, 10, 10 ),
-                    '#pay_stub_ytd_amount#' => $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, 30, 30 ),
-                    '#pay_stub_units#' => $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, 20, 20 ),
-                    '#pay_stub_ytd_units#' => $cd_obj->getCalculationPayStubAmount( $pay_stub_obj, 40, 40 ),
-                    
-                );               
-                       
-				Debug::Text( 'Translated Formula: '. TTMath::translateVariables( $company_value1, $variables ), __FILE__, __LINE__, __METHOD__, 10 );
+                
+				//Debug::Arr( $variables,  'Formula Variable values: ', __FILE__, __LINE__, __METHOD__, 10 );
+				Debug::Arr( array( str_replace("\r", '; ', $company_value1 ), str_replace("\r", '; ', TTMath::translateVariables( $company_value1, $variables ) ) ), 'Original/Translated Formula: ', __FILE__, __LINE__, __METHOD__, 10 );
                 $retval = TTMath::evaluate( TTMath::translateVariables( $company_value1, $variables ) ); 
                 
                 Debug::Text( 'Formula Retval: '. $retval, __FILE__, __LINE__, __METHOD__, 10 );

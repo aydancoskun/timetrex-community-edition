@@ -145,7 +145,7 @@ class ScheduleSummaryReport extends Report {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
 					// Because the Filter type is just only a filter criteria and not need to be as an option of Display Columns, Group By, Sub Total, Sort By dropdowns.
 					// So just get custom columns with Selection and Formula.
-					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), array(10,20), NULL, 'ScheduleSummaryReport', 'custom_column' );
+					$custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), NULL, 'ScheduleSummaryReport', 'custom_column' );
 					if ( is_array($custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $custom_column_labels, 9500 );
 					}
@@ -154,13 +154,13 @@ class ScheduleSummaryReport extends Report {
             case 'report_custom_filters':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
-					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), array(30,31), NULL, 'ScheduleSummaryReport', 'custom_column' );
+					$retval = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('filter_column_type_ids'), NULL, 'ScheduleSummaryReport', 'custom_column' );
 				}
                 break;
             case 'report_dynamic_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
-					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), array(10,20), array(10,40,50,90), 'ScheduleSummaryReport', 'custom_column' );
+					$report_dynamic_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('dynamic_format_ids'), 'ScheduleSummaryReport', 'custom_column' );
 					if ( is_array($report_dynamic_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_dynamic_custom_column_labels, 9700 );
 					}
@@ -169,7 +169,7 @@ class ScheduleSummaryReport extends Report {
             case 'report_static_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
-					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), array(10,20), array(20,30,60,70,80,100,110), 'ScheduleSummaryReport', 'custom_column' );
+					$report_static_custom_column_labels = $rcclf->getByCompanyIdAndTypeIdAndFormatIdAndScriptArray( $this->getUserObject()->getCompany(), $rcclf->getOptions('display_column_type_ids'), $rcclf->getOptions('static_format_ids'), 'ScheduleSummaryReport', 'custom_column' );
 					if ( is_array($report_static_custom_column_labels) ) {
 						$retval = Misc::addSortPrefix( $report_static_custom_column_labels, 9700 );
 					}
@@ -765,6 +765,13 @@ class ScheduleSummaryReport extends Report {
 
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
+
+		//Add OPEN user to the list so it can printed on schedules.
+		$this->tmp_data['user'][0] = $this->form_data['user'][0] = array(
+										   'first_name' => TTi18n::getText('OPEN'),
+										   'last_name' => '',
+										   );
+
 		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__,10);
 
 		return TRUE;
@@ -813,7 +820,7 @@ class ScheduleSummaryReport extends Report {
 			$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(6) );
 			$this->pdf->setY( $this->pdf->getY() + 4);
 			$this->pdf->Cell(0, $this->_pdf_fontSize(3), TTDate::getDate('DATE', $config['start_date']) .' - '. TTDate::getDate('DATE', $config['end_date']), 0, 0, 'C');
-			$this->pdf->setY( $this->pdf->getY() - 2);
+			$this->pdf->Ln();
 		}
 		$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(16) );
 
@@ -836,11 +843,14 @@ class ScheduleSummaryReport extends Report {
 		//Debug::Arr($label, 'Label: Branch: '. $branch .' Department: '. $department, __FILE__, __LINE__, __METHOD__,10);
 
 		if ( count($label) > 0 ) {
+			if ( $new_page == FALSE ) {
+				$this->pdf->setY( $this->pdf->getY() + 2);
+			}
 			$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(8) );
-			$this->pdf->Cell(0, $this->_pdf_scaleSize(15), implode('                        ', $label ), 0, 0, 'C');
-			$this->pdf->Ln( $this->_pdf_fontSize(10) );
+			$this->pdf->Cell(0, $this->_pdf_scaleSize(4), implode('                        ', $label ), 0, 0, 'C');
+			$this->pdf->Ln();
 		} else {
-			$this->pdf->Ln( $this->_pdf_fontSize(5) );
+			//$this->pdf->Ln( $this->_pdf_fontSize(5) );
 		}
 
 		return TRUE;
@@ -912,7 +922,7 @@ class ScheduleSummaryReport extends Report {
 	function scheduleCheckPageBreak( $height, $add_page = TRUE ) {
 		$margins = $this->pdf->getMargins();
 
-		if ( ($this->pdf->getY()+$height) > ($this->pdf->getPageHeight()-$margins['bottom']-$margins['top']-15) ) {
+		if ( ($this->pdf->getY()+$height) > ($this->pdf->getPageHeight()-$margins['bottom']-$margins['top']-10) ) {
 			//Debug::Text('Detected Page Break needed...', __FILE__, __LINE__, __METHOD__,10);
 			$this->scheduleAddPage();
 
@@ -1023,9 +1033,9 @@ class ScheduleSummaryReport extends Report {
 								if ( $i == 0 ) {
 									$row_top_y = $this->pdf->getY();
 									$row_bottom_y = $this->pdf->getY()+$max_row_height;
-									$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(6) );
+									$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(8) );
 									$this->pdf->Cell( $column_widths['label'], $max_row_height, $user_data['first_name'] .' '. $user_data['last_name'], 'LR', 0, 'C', TRUE, NULL, 1);
-									$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(6) );
+									$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(8) );
 								}
 
 								if ( isset($schedule_data[$date_stamp]) ) {
@@ -1154,9 +1164,9 @@ class ScheduleSummaryReport extends Report {
 
 								if ( $i == 0 AND ( $format != 'pdf_schedule' AND $format != 'pdf_schedule_print' ) ) {
 									$this->pdf->setFillColorArray( $row_bg_color_arr );
-									$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(6) );
+									$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(8) );
 									$this->pdf->Cell( $column_widths['label'], $row_height*$max_lines_per_day, $user_data['first_name'] .' '. $user_data['last_name'], 'BLR', 0, 'C', TRUE, NULL, 1);
-									$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(6) );
+									$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(8) );
 								}
 
 								//$this->pdf->setLineWidth( 0.4 );
@@ -1169,21 +1179,21 @@ class ScheduleSummaryReport extends Report {
 									foreach( $schedule_data[$date_stamp] as $branch => $level_2 ) {
 										if ( $branch !== 0 AND ( $multiple_branches == TRUE OR $branch != $level_3[0]['default_branch'] ) ) { //Don't display the employees default branch to save space.
 											$this->pdf->setFillColor(215,215,215);
-											$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(6) );
+											$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(8) );
 											$this->pdf->Cell($column_widths['day'], $row_height, $branch, 'LR', 2, 'C', TRUE, NULL, 1);
 											$x++;
 										}
 										foreach( $level_2 as $department => $level_3 ) {
 											if ( $department !== 0 AND ( $multiple_departments == TRUE OR $department != $level_3[0]['default_department'] ) ) { //Don't display the employees default branch to save space.
 												$this->pdf->setFillColor(230,230,230);
-												$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(6) );
+												$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(8) );
 												$this->pdf->Cell($column_widths['day'], $row_height, $department, 'LR', 2, 'C', TRUE, NULL, 1);
 												$x++;
 											}
 
 											//$this->pdf->setFillColor(255,255,255);
 											$this->pdf->setFillColorArray( $row_bg_color_arr );
-											$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(6) );
+											$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(8) );
 											$schedule_shift_label = array();
 											foreach( $level_3 as $schedule_data_shift ) {
 												if ( isset($schedule_data_shift['status_id']) AND $schedule_data_shift['status_id'] == 20 ) {
@@ -1258,6 +1268,8 @@ class ScheduleSummaryReport extends Report {
 		$this->getProgressBarObject()->set( $this->getAMFMessageID(), 2 );
 
 		$sf = TTNew('ScheduleFactory');
+
+		//FIXME: getScheduleArray() doesn't accept pay_period_ids, so no data is returned if a time period of "last_pay_period" is selected.
 		$raw_schedule_shifts = $sf->getScheduleArray( $filter_data );
 
 		if ( is_array($raw_schedule_shifts) ) {
@@ -1328,7 +1340,7 @@ class ScheduleSummaryReport extends Report {
 				case 'pdf_schedule_group_pagebreak':
 				case 'pdf_schedule_group_pagebreak_print':
 					//
-					// Group - Separate (branch/department on their own pages
+					// Group - Separate (branch/department on their own pages)
 					//
 
 					//Start displaying dates/times here. Start with header.
@@ -1459,6 +1471,7 @@ class ScheduleSummaryReport extends Report {
 								$s=0;
 								//Handle page break.
 								if ( $this->scheduleCheckPageBreak( 5, TRUE ) == TRUE ) {
+									$this->scheduleFooterWeek( $column_widths );
 									$this->scheduleHeader();
 									$this->scheduleDayOfWeekNameHeader( $start_week_day, $column_widths, $format );
 									$this->scheduleWeekHeader( $calendar_week_array, $column_widths, $format, TRUE );

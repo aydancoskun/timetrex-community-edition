@@ -113,6 +113,30 @@ class I18Nv2
         $info = &I18Nv2::getStaticProperty('info');
         $info = localeConv();
 
+        //For some reason Windows can return bogus locale data where frac_digits is 127, in that case just fall back to default english values
+        if ( isset($info['frac_digits']) AND $info['frac_digits'] == 127 ) {
+            $info = array(
+                'decimal_point' => '.',
+                'thousands_sep' => ',',
+                'int_curr_symbol' => '',
+                'currency_symbol' => '$',
+                'mon_decimal_point' => '.',
+                'mon_thousands_sep' => ',',
+                'positive_sign' => '',
+                'negative_sign' => '-',
+                'int_frac_digits' => 2,
+                'frac_digits' => 2,
+                'p_cs_precedes' => 1,
+                'p_sep_by_space' => 0,
+                'n_cs_precedes' => 1,
+                'n_sep_by_space' => 0,
+                'p_sign_posn' => 1,
+                'n_sign_posn' => 1,
+                'grouping' => array( 3, 3 ),
+                'mon_grouping' => array( 3, 3 ),
+            );
+        }
+        
         return $syslocale;
     }
 

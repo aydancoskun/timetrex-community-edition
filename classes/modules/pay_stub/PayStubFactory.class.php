@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9889 $
- * $Id: PayStubFactory.class.php 9889 2013-05-14 22:49:16Z ipso $
- * $Date: 2013-05-14 15:49:16 -0700 (Tue, 14 May 2013) $
+ * $Revision: 10643 $
+ * $Id: PayStubFactory.class.php 10643 2013-08-02 19:06:09Z ipso $
+ * $Date: 2013-08-02 12:06:09 -0700 (Fri, 02 Aug 2013) $
  */
 require_once( 'Numbers/Words.php');
 
@@ -255,7 +255,7 @@ class PayStubFactory extends Factory {
 
 		$pplf = TTnew( 'PayPeriodListFactory' );
 
-		if (  $this->Validator->isResultSetWithRows(	'pay_period',
+		if (  $this->Validator->isResultSetWithRows(	'start_date', //pay_period label isn't used when editing pay stubs.
 														$pplf->getByID($id),
 														TTi18n::gettext('Invalid Pay Period')
 														) ) {
@@ -524,6 +524,29 @@ class PayStubFactory extends Factory {
 													TTi18n::gettext('Incorrect User')
 													) ) {
 			$this->data['status_by'] = $id;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getConfirmNumber() {
+		if ( isset($this->data['confirm_number']) ) {
+			return $this->data['confirm_number'];
+		}
+	}
+	function setConfirmNumber($value) {
+		$value = trim($value);
+
+		if 	(	$value == ''
+				OR $this->Validator->isLength(	'confirm_number',
+												$value,
+												TTi18n::gettext('Confirmation number is too short or too long'),
+												1,
+												100) ) {
+
+			$this->data['confirm_number'] = $value;
 
 			return TRUE;
 		}
@@ -924,14 +947,35 @@ class PayStubFactory extends Factory {
 			}
 
 			//Make sure they aren't setting a pay stub to OPEN if the pay period is closed.
-			if ( is_object($this->getPayPeriodObject()) ) {
-				if ( $this->getStatus() == 25 AND !( $this->getPayPeriodObject()->getStatus() == 10 OR $this->getPayPeriodObject()->getStatus() == 30 ) ) {
-					$this->Validator->isTrue(		'status_id',
-													FALSE,
-													TTi18n::gettext('Pay stub is assigned to a closed pay period'));
+			if ( is_object( $this->getPayPeriodObject() ) ) {
+				if ( $this->getDeleted() == TRUE ) {
+					if ( $this->getStatus() == 40 ) {
+						$this->Validator->isTrue(		'status_id',
+														FALSE,
+														TTi18n::gettext('Unable to delete pay stubs that are marked as PAID'));
+					}
+
+					if ( $this->getPayPeriodObject()->getStatus() == 20 ) {
+						$this->Validator->isTrue(		'status_id',
+														FALSE,
+														TTi18n::gettext('Unable to delete pay stubs in closed pay periods'));
+					}
+				} else {
+					if ( $this->getStatus() == 25 AND !( $this->getPayPeriodObject()->getStatus() == 10 OR $this->getPayPeriodObject()->getStatus() == 30 ) ) {
+						$this->Validator->isTrue(		'status_id',
+														FALSE,
+														TTi18n::gettext('Pay stub is assigned to a closed pay period'));
+					}
+
+					//Make sure we aren't creating a new pay stub in a already closed pay period
+					if ( $this->getStatus() != 40 AND ( $this->getPayPeriodObject()->getStatus() == 20 ) ) {
+						$this->Validator->isTrue(		'status_id',
+														FALSE,
+														TTi18n::gettext('Pay period is already closed'));
+					}
 				}
+
 			}
-			//$this->getPayPeriodObject()
 		}
 
 		return TRUE;
@@ -1147,7 +1191,8 @@ class PayStubFactory extends Factory {
 				foreach(  $psealf as $psea_obj ) {
 					$this->pay_stub_entry_accounts_obj[$psea_obj->getId()] = array(
 						'type_id' => $psea_obj->getType(),
-						'accrual_pay_stub_entry_account_id' => $psea_obj->getAccrual()
+						'accrual_pay_stub_entry_account_id' => $psea_obj->getAccrual(),
+						'accrual_type_id' => $psea_obj->getAccrualType(),
 						);
 				}
 
@@ -1441,14 +1486,30 @@ class PayStubFactory extends Factory {
 			//Also don't touch the accrual account if the amount is 0.
 			//This happens mostly when AddUnUsedEntries is called.
 			if ( $this->getEnableLinkedAccruals() == TRUE
-					AND $amount > 0
+					AND $amount != 0
 					AND $psea_arr['accrual_pay_stub_entry_account_id'] != ''
 					AND $psea_arr['accrual_pay_stub_entry_account_id'] != 0
 					AND $psea_arr['accrual_pay_stub_entry_account_id'] != $pay_stub_entry_account_id
+					AND $psea_arr['accrual_type_id'] != ''
 					AND $ytd_adjustment == FALSE ) {
 
 				Debug::text('Add Entry: PSE Account Links to Accrual Account!: '. $pay_stub_entry_account_id .' Accrual Account ID: '. $psea_arr['accrual_pay_stub_entry_account_id'] .' Amount: '. $amount, __FILE__, __LINE__, __METHOD__,10);
 
+				if ( $psea_arr['accrual_type_id'] == 10 ) {
+					if ( $type_id == 10 ) {
+						$tmp_amount = $amount*-1; //This is an earning... Reduce accrual
+					} else {
+						$tmp_amount = $amount;
+					}
+				} else {
+					if ( $type_id == 20 ) {
+						$tmp_amount = $amount*-1; //This is an deduction... Reduce accrual
+					} else {
+						$tmp_amount = $amount;
+					}
+				}
+
+				/*
 				if ( $type_id == 10 ) {
 					$tmp_amount = $amount*-1; //This is an earning... Reduce accrual
 				} elseif ( $type_id == 20 ) {
@@ -1456,6 +1517,7 @@ class PayStubFactory extends Factory {
 				} else {
 					$tmp_amount = 0;
 				}
+				*/
 				Debug::text('Amount: '. $tmp_amount, __FILE__, __LINE__, __METHOD__,10);
 
 				return $this->addEntry( $psea_arr['accrual_pay_stub_entry_account_id'], $tmp_amount, NULL, NULL, NULL, NULL, NULL, NULL);
@@ -2740,6 +2802,100 @@ class PayStubFactory extends Factory {
 				}
 
 				//
+				//Miscellaneous
+				//
+				if ( isset($pay_stub_entries[80]) ) {
+					$max_deductions = count($pay_stub_entries[80]);
+					//Deductions Header
+					$block_adjust_y = $block_adjust_y + 5;
+
+					$pdf->SetFont('','B',10);
+					if ( $max_deductions > 2 ) {
+						$column_widths['name'] = 85-($column_widths['ytd_amount']+$column_widths['amount']);
+
+						$pdf->setXY( Misc::AdjustXY(0, $adjust_x), Misc::AdjustXY($block_adjust_y, $adjust_y) );
+						$pdf->Cell( $column_widths['name'], 5,TTi18n::gettext('Miscellaneous'), $border, 0, 'L', FALSE, '', 1);
+						$pdf->Cell( $column_widths['amount'], 5,TTi18n::gettext('Amount'), $border, 0, 'R', FALSE, '', 1);
+						$pdf->Cell( $column_widths['ytd_amount'], 5,TTi18n::gettext('YTD Amount'), $border, 0, 'R', FALSE, '', 1);
+
+						$pdf->setXY( Misc::AdjustXY(90, $adjust_x), Misc::AdjustXY($block_adjust_y, $adjust_y) );
+						$pdf->Cell( $column_widths['name'], 5,TTi18n::gettext('Miscellaneous'), $border, 0, 'L', FALSE, '', 1);
+					} else {
+						$column_widths['name'] = 175-($column_widths['ytd_amount']+$column_widths['amount']);
+
+						$pdf->setXY( Misc::AdjustXY(0, $adjust_x), Misc::AdjustXY($block_adjust_y, $adjust_y) );
+						$pdf->Cell( $column_widths['name'], 5,TTi18n::gettext('Miscellaneous'), $border, 0, 'L', FALSE, '', 1);
+					}
+
+					$pdf->Cell( $column_widths['amount'], 5,TTi18n::gettext('Amount'), $border, 0, 'R', FALSE, '', 1);
+					$pdf->Cell( $column_widths['ytd_amount'], 5,TTi18n::gettext('YTD Amount'), $border, 0, 'R', FALSE, '', 1);
+
+					$block_adjust_y = $tmp_block_adjust_y = $top_block_adjust_y = $block_adjust_y + 5;
+
+					$pdf->SetFont('','',10);
+					$x=0;
+					$max_block_adjust_y = 0;
+
+					foreach( $pay_stub_entries[80] as $pay_stub_entry ) {
+						//Start with the right side.
+						if ( $x < floor($max_deductions / 2) ) {
+							$tmp_adjust_x = 90;
+						} else {
+							if ( $tmp_block_adjust_y != 0 ) {
+								$block_adjust_y = $tmp_block_adjust_y;
+								$tmp_block_adjust_y = 0;
+							}
+							$tmp_adjust_x = 0;
+						}
+
+						if ( $pay_stub_entry['type'] == 80 ) {
+							if ( $pay_stub_entry['description_subscript'] != '' ) {
+								$subscript = '['.$pay_stub_entry['description_subscript'].']';
+							} else {
+								$subscript = NULL;
+							}
+
+							if ( $max_deductions > 2 ) {
+								$pdf->setXY( Misc::AdjustXY(2, $tmp_adjust_x+$adjust_x), Misc::AdjustXY( $block_adjust_y, $adjust_y) );
+								$pdf->Cell( $column_widths['name']-2, 5, $pay_stub_entry['name'] . $subscript, $border, 0, 'L', FALSE, '', 1); //38
+							} else {
+								$pdf->setXY( Misc::AdjustXY(2, $adjust_x), Misc::AdjustXY( $block_adjust_y, $adjust_y) );
+								$pdf->Cell( $column_widths['name']-2, 5, $pay_stub_entry['name'] . $subscript, $border, 0, 'L', FALSE, '', 1); //128
+							}
+							$pdf->Cell( $column_widths['amount'], 5, TTi18n::formatNumber( $pay_stub_entry['amount'], TRUE, $pay_stub_obj->getCurrencyObject()->getRoundDecimalPlaces() ), $border, 0, 'R', FALSE, '', 1);
+							$pdf->Cell( $column_widths['ytd_amount'], 5, TTi18n::formatNumber( $pay_stub_entry['ytd_amount'], TRUE, $pay_stub_obj->getCurrencyObject()->getRoundDecimalPlaces() ), $border, 0, 'R', FALSE, '', 1);
+						} else {
+							$block_adjust_y = $max_block_adjust_y + 0;
+
+							//Total
+							$pdf->SetFont('','B',10);
+
+							$pdf->line(Misc::AdjustXY( (175-($column_widths['ytd_amount'])-$column_widths['amount']), $adjust_x), Misc::AdjustXY( $block_adjust_y, $adjust_y), Misc::AdjustXY(175-(1+$column_widths['ytd_amount']), $adjust_x), Misc::AdjustXY( $block_adjust_y, $adjust_y) ); //111
+							$pdf->line(Misc::AdjustXY( 175-$column_widths['ytd_amount'], $adjust_x), Misc::AdjustXY( $block_adjust_y, $adjust_y), Misc::AdjustXY(175, $adjust_x), Misc::AdjustXY( $block_adjust_y, $adjust_y) ); //141
+
+							$pdf->setXY( Misc::AdjustXY(0, $adjust_x), Misc::AdjustXY( $block_adjust_y, $adjust_y) );
+							$pdf->Cell( 175-($column_widths['amount']+$column_widths['ytd_amount']),5, $pay_stub_entry['name'], $border, 0, 'L', FALSE, '', 1);
+							$pdf->Cell( $column_widths['amount'], 5, TTi18n::formatNumber( $pay_stub_entry['amount'], TRUE, $pay_stub_obj->getCurrencyObject()->getRoundDecimalPlaces() ), $border, 0, 'R', FALSE, '', 1);
+							$pdf->Cell( $column_widths['ytd_amount'], 5, TTi18n::formatNumber( $pay_stub_entry['ytd_amount'], TRUE, $pay_stub_obj->getCurrencyObject()->getRoundDecimalPlaces() ), $border, 0, 'R', FALSE, '', 1);
+						}
+
+						$block_adjust_y = $block_adjust_y + 5;
+						if ( $block_adjust_y > $max_block_adjust_y ) {
+							$max_block_adjust_y = $block_adjust_y;
+						}
+
+						$x++;
+					}
+
+					//Draw line to separate the two columns
+					if ( $max_deductions > 2 ) {
+						$pdf->Line( Misc::AdjustXY(88, $adjust_x), Misc::AdjustXY( $top_block_adjust_y-5, $adjust_y), Misc::AdjustXY(88, $adjust_x), Misc::AdjustXY( $max_block_adjust_y-5, $adjust_y) );
+					}
+
+					unset($x, $max_deductions, $tmp_adjust_x, $max_block_adjust_y, $tmp_block_adjust_y, $top_block_adjust_y);
+				}
+				
+				//
 				//Employer Contributions
 				//
 				if ( isset($pay_stub_entries[30]) AND $hide_employer_rows != TRUE ) {
@@ -2934,8 +3090,7 @@ class PayStubFactory extends Factory {
 							$pdf->setXY( Misc::AdjustXY(90, $adjust_x), Misc::AdjustXY( $block_adjust_y, $adjust_y) );
 						}
 
-						//$pdf->Cell(173,5, '['.$pay_stub_entry_description['subscript'].'] '.$pay_stub_entry_description['description'], $border, 0, 'L');
-						$pdf->Cell(85,5, '['.$pay_stub_entry_description['subscript'].'] '.$pay_stub_entry_description['description'], $border, 0, 'L', FALSE, '', 1);
+						$pdf->Cell(85,5, '['.$pay_stub_entry_description['subscript'].'] '. html_entity_decode( $pay_stub_entry_description['description'] ), $border, 0, 'L', FALSE, '', 1);
 
 						if ( $x % 2 != 0 ) {
 							$block_adjust_y = $block_adjust_y + 5;

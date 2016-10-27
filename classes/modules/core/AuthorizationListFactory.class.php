@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: AuthorizationListFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 10609 $
+ * $Id: AuthorizationListFactory.class.php 10609 2013-07-31 17:29:20Z ipso $
+ * $Date: 2013-07-31 10:29:20 -0700 (Wed, 31 Jul 2013) $
  */
 
 /**
@@ -226,7 +226,10 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 		$rf = new RequestFactory();
 		$udf = new UserDateFactory();
 		$pptsvf = new PayPeriodTimeSheetVerifyListFactory();
-        $uef = new UserExpenseFactory();
+
+		if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
+			$uef = new UserExpenseFactory();
+		}
 
 		$ph = array(
 					'company_id' => $company_id,
@@ -244,9 +247,13 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 					from 	'. $this->getTable() .' as a
 						LEFT JOIN '. $rf->getTable() .' as rf ON ( a.object_type_id in (1010,1020,1030,1040,1100) AND a.object_id = rf.id )
 						LEFT JOIN '. $udf->getTable() .' as ud ON ( rf.user_date_id = ud.id )
-						LEFT JOIN '. $pptsvf->getTable() .' as pptsvf ON ( a.object_type_id = 90 AND a.object_id = pptsvf.id )
-                        LEFT JOIN '. $uef->getTable() .' as uef ON ( a.object_type_id = 200 AND a.object_id = uef.id )
-						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
+						LEFT JOIN '. $pptsvf->getTable() .' as pptsvf ON ( a.object_type_id = 90 AND a.object_id = pptsvf.id ) ';
+
+		if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
+			$query .= ' LEFT JOIN '. $uef->getTable() .' as uef ON ( a.object_type_id = 200 AND a.object_id = uef.id ) ';
+		}
+		
+		$query .= '		LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					where	y.company_id = ?';
 		$user_id_column = 'a.created_by';
@@ -273,11 +280,10 @@ class AuthorizationListFactory extends AuthorizationFactory implements IteratorA
 		if ( isset($filter_data['object_id']) AND isset($filter_data['object_id'][0]) AND !in_array(-1, (array)$filter_data['object_id']) ) {
 			$query  .=	' AND a.object_id in ('. $this->getListSQL($filter_data['object_id'], $ph) .') ';
 		}
+
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-        
         $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
         
-
 		$query .= 	'
 						AND a.deleted = 0
 					';

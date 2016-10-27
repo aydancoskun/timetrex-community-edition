@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: BankAccountFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 10609 $
+ * $Id: BankAccountFactory.class.php 10609 2013-07-31 17:29:20Z ipso $
+ * $Date: 2013-07-31 10:29:20 -0700 (Wed, 31 Jul 2013) $
  */
 
 /**
@@ -156,7 +156,7 @@ class BankAccountFactory extends Factory {
 		if ( $id == 0
 				OR $this->Validator->isResultSetWithRows(	'user',
 															$ulf->getByID($id),
-															TTi18n::gettext('Invalid User')
+															TTi18n::gettext('Invalid Employee')
 															) ) {
 			$this->data['user_id'] = $id;
 
@@ -364,7 +364,7 @@ class BankAccountFactory extends Factory {
 		return FALSE;
 	}
 
-	function getObjectAsArray( $include_columns = NULL ) {
+	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
@@ -393,6 +393,7 @@ class BankAccountFactory extends Factory {
 
 				}
 			}
+			$this->getPermissionColumns( $data, $this->getUser(), $this->getCreatedBy(), $permission_children_ids, $include_columns );
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
 		}
 

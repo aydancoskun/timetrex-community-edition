@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9768 $
- * $Id: ScheduleFactory.class.php 9768 2013-05-06 17:17:50Z ipso $
- * $Date: 2013-05-06 10:17:50 -0700 (Mon, 06 May 2013) $
+ * $Revision: 10468 $
+ * $Id: ScheduleFactory.class.php 10468 2013-07-17 15:48:26Z ipso $
+ * $Date: 2013-07-17 08:48:26 -0700 (Wed, 17 Jul 2013) $
  */
 
 /**
@@ -929,7 +929,7 @@ class ScheduleFactory extends Factory {
 													'user_id' => (int)$s_obj->getColumn('user_id'),
 													'user_created_by' => (int)$s_obj->getColumn('user_created_by'),
 													'user_full_name' => ( $s_obj->getColumn('user_id') > 0 ) ? Misc::getFullName( $s_obj->getColumn('first_name'), NULL, $s_obj->getColumn('last_name'), FALSE, FALSE ) : TTi18n::getText('OPEN'),
-													'first_name' => $s_obj->getColumn('first_name'),
+													'first_name' => ( $s_obj->getColumn('user_id') > 0 ) ? $s_obj->getColumn('first_name') : TTi18n::getText('OPEN'),
 													'last_name' => $s_obj->getColumn('last_name'),
 													'title_id' => $s_obj->getColumn('title_id'),
 													'title' => $s_obj->getColumn('title'),
@@ -1715,13 +1715,13 @@ class ScheduleFactory extends Factory {
 
 		if ( $this->getUserDateObject() == FALSE OR !is_object( $this->getUserDateObject() ) ) {
 			Debug::Text('UserDateID is INVALID! ID: '. $this->getUserDateID(), __FILE__, __LINE__, __METHOD__,10);
-			$this->Validator->isTrue(		'user_date',
+			$this->Validator->isTrue(		'date_stamp',
 											FALSE,
 											TTi18n::gettext('Date/Time is incorrect, or pay period does not exist for this date. Please create a pay period schedule and assign this employee to it if you have not done so already') );
 		}
 
 		if ( is_object( $this->getUserDateObject() ) AND is_object( $this->getUserDateObject()->getPayPeriodObject() ) AND $this->getUserDateObject()->getPayPeriodObject()->getIsLocked() == TRUE ) {
-			$this->Validator->isTrue(		'user_date',
+			$this->Validator->isTrue(		'date_stamp',
 											FALSE,
 											TTi18n::gettext('Pay Period is Currently Locked'));
 		}
@@ -1730,6 +1730,20 @@ class ScheduleFactory extends Factory {
 			$this->Validator->isTrue(		'company_id',
 											FALSE,
 											TTi18n::gettext('Company is invalid'));
+		}
+
+		if ( $this->getDeleted() == FALSE AND is_object( $this->getUserDateObject() ) AND is_object( $this->getUserDateObject()->getUserObject() ) ) {
+			if ( $this->getUserDateObject()->getUserObject()->getHireDate() != '' AND TTDate::getBeginDayEpoch( $this->getUserDateObject()->getDateStamp() ) < TTDate::getBeginDayEpoch( $this->getUserDateObject()->getUserObject()->getHireDate() ) ) {
+				$this->Validator->isTRUE(	'date_stamp',
+											FALSE,
+											TTi18n::gettext('Shift is before employees hire date') );
+			}
+
+			if ( $this->getUserDateObject()->getUserObject()->getTerminationDate() != '' AND TTDate::getEndDayEpoch( $this->getUserDateObject()->getDateStamp() ) > TTDate::getEndDayEpoch( $this->getUserDateObject()->getUserObject()->getTerminationDate() ) ) {
+				$this->Validator->isTRUE(	'date_stamp',
+											FALSE,
+											TTi18n::gettext('Shift is after employees termination date') );
+			}
 		}
 
 		//Ignore conflicting time check when EnableOverwrite is set, as we will just be deleting any conflicting shift anyways.

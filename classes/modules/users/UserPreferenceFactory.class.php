@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10274 $
- * $Id: UserPreferenceFactory.class.php 10274 2013-06-24 15:38:59Z ipso $
- * $Date: 2013-06-24 08:38:59 -0700 (Mon, 24 Jun 2013) $
+ * $Revision: 10372 $
+ * $Id: UserPreferenceFactory.class.php 10372 2013-07-05 09:26:47Z ennis $
+ * $Date: 2013-07-05 02:26:47 -0700 (Fri, 05 Jul 2013) $
  */
 
 /**
@@ -191,6 +191,19 @@ class UserPreferenceFactory extends Factory {
 											//'Gis' 		=> TTi18n::gettext('200959'), //This sorts to the top
 									);
 				break;
+            case 'jquery_time_format':
+
+                $retval = array(
+                                            //'g:i:s A'     => h:mm:ss TT
+                                            'g:i A'     => 'h:mm TT',
+                                            //'g:i:s a'     => h:mm:ss tt
+                                            'g:i a'     => 'h:mm tt',
+                                            //'G:i:s'     => H:mm:ss
+                                            'G:i'         => 'H:mm',
+                                            'g:i A T'     => 'h:mm TT z',
+                                            'G:i T'     => 'H:mm z'
+                );
+                break;
 			case 'js_time_format':
 				$retval = array(
 											'g:i A' 	=> '%l:%M %p', //  8:09 PM

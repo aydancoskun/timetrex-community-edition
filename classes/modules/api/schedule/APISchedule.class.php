@@ -237,7 +237,7 @@ class APISchedule extends APIFactory {
 	 */
 	function getSchedule( $data = NULL, $disable_paging = FALSE ) {
 		if ( !$this->getPermissionObject()->Check('schedule','enabled')
-				OR !( $this->getPermissionObject()->Check('schedule','view') OR $this->getPermissionObject()->Check('schedule','view_child')  ) ) {
+				OR !( $this->getPermissionObject()->Check('schedule','view') OR $this->getPermissionObject()->Check('schedule','edit_own') OR $this->getPermissionObject()->Check('schedule','view_child')  ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
@@ -349,7 +349,7 @@ class APISchedule extends APIFactory {
 							  OR
 								(
 								$this->getPermissionObject()->Check('schedule','edit')
-									OR ( $this->getPermissionObject()->Check('schedule','edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('schedule','edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUserDateObject()->getUser() ) === TRUE )
 									OR ( $this->getPermissionObject()->Check('schedule','edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )
 								) ) {
 
@@ -476,7 +476,7 @@ class APISchedule extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if ( $this->getPermissionObject()->Check('schedule','delete')
-								OR ( $this->getPermissionObject()->Check('schedule','delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+								OR ( $this->getPermissionObject()->Check('schedule','delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUserDateObject()->getUser() ) === TRUE )
 								OR ( $this->getPermissionObject()->Check('schedule','delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )) {
 							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();

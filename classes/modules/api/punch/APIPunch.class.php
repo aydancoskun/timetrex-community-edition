@@ -453,7 +453,7 @@ class APIPunch extends APIFactory {
 							  OR
 								(
 								$this->getPermissionObject()->Check('punch','edit')
-									OR ( $this->getPermissionObject()->Check('punch','edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('punch','edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getPunchControlObject()->getUserDateObject()->getUser() ) === TRUE )
 									OR ( $this->getPermissionObject()->Check('punch','edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getPunchControlObject()->getUserDateObject()->getUser(), $permission_children_ids ) === TRUE )
 								) ) {
 

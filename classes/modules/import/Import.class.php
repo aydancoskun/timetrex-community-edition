@@ -125,6 +125,7 @@ class Import {
 			Debug::Text('zRaw Data Size: '. count($this->data['raw_data']), __FILE__, __LINE__, __METHOD__,10);
 			//Debug::Arr($this->data['raw_data'], 'Raw Data: ', __FILE__, __LINE__, __METHOD__,10);
 
+			//FIXME: There appears to be a bug in Flex where if the file has a blank column header column, no data is parsed at all in the column map step of the wizard.
 			if ( $limit > 0 ) {
 				Debug::Text('azRaw Data Size: '. count($this->data['raw_data']), __FILE__, __LINE__, __METHOD__,10);
 				return array_slice( $this->data['raw_data'], 0, (int)$limit );

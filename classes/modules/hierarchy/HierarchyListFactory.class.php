@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 9521 $
- * $Id: HierarchyListFactory.class.php 9521 2013-04-08 23:09:52Z ipso $
- * $Date: 2013-04-08 16:09:52 -0700 (Mon, 08 Apr 2013) $
+ * $Revision: 10397 $
+ * $Id: HierarchyListFactory.class.php 10397 2013-07-09 19:19:53Z ipso $
+ * $Date: 2013-07-09 12:19:53 -0700 (Tue, 09 Jul 2013) $
  */
 
 /**
@@ -686,6 +686,9 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 					//'company_idb' => $company_id,
 					);
 
+
+		//w.user_id != x.user_id, is there to make sure we exclude the current user from the subordinate list,
+		//as we now allow superiors to also be subordinates in the same hierarchy. 
 		$query = '
 						select w.user_id as user_id
 						from '. $huf->getTable() .' as w
@@ -697,6 +700,7 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 							x.user_id = ?
 							AND z.company_id = ?
 							AND y.object_type_id in ('. $this->getListSQL($object_type_id, $ph) .')
+							AND w.user_id != x.user_id
 							AND ( x.deleted = 0 AND z2.deleted = 0 AND z.deleted = 0 )
 					';
 

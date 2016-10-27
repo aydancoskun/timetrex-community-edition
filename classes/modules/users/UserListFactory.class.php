@@ -34,9 +34,9 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 /*
- * $Revision: 10012 $
- * $Id: UserListFactory.class.php 10012 2013-05-27 20:23:08Z ipso $
- * $Date: 2013-05-27 13:23:08 -0700 (Mon, 27 May 2013) $
+ * $Revision: 10609 $
+ * $Id: UserListFactory.class.php 10609 2013-07-31 17:29:20Z ipso $
+ * $Date: 2013-07-31 10:29:20 -0700 (Wed, 31 Jul 2013) $
  */
 
 /**
@@ -84,6 +84,28 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
+	}
+
+	function getUniqueCountryByCompanyId($id, $where = NULL, $order = NULL) {
+		if ( $id == '') {
+			return FALSE;
+		}
+
+		$uf = new UserFactory();
+
+		$ph = array(
+					'id' => $id,
+					);
+
+		$query = '
+					select 	distinct a.country
+					from	'. $uf->getTable() .' as a
+					where	a.company_id = ?
+						AND ( a.deleted = 0 )';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		return $this->db->GetCol( $query, $ph );
 	}
 
 	function getByCompanyIdAndStatus($company_id, $status, $where = NULL, $order = NULL) {
@@ -1846,6 +1868,8 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		//$additional_order_fields = array('b.name', 'c.name', 'd.name', 'e.name');
 		$additional_order_fields = array(	'default_branch',
 											'default_department',
+											'default_job',
+											'default_job_item',
 											'sex',
 											'user_group',
 											'title',
@@ -1900,6 +1924,11 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$pgf = new PolicyGroupFactory();
         $egf = new EthnicGroupFactory();
 
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+			$jf = new JobFactory();
+			$jif = new JobItemFactory();
+		}
+
 		$ph = array(
 					'company_id' => $company_id,
 					);
@@ -1920,8 +1949,14 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 							h.name as pay_period_schedule,
 							i.id as policy_group_id,
 							i.name as policy_group,
-                            egf.name as ethnic_group,
-							y.first_name as created_by_first_name,
+                            egf.name as ethnic_group, ';
+
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+			$query .= '	jf.name as default_job,
+						jif.name as default_job_item, ';
+		}
+
+		$query .= '			y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,
 							y.last_name as created_by_last_name,
 							z.first_name as updated_by_first_name,
@@ -1934,9 +1969,14 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 						LEFT JOIN '. $ugf->getTable() .' as d ON ( a.group_id = d.id AND d.deleted = 0 )
 						LEFT JOIN '. $utf->getTable() .' as e ON ( a.title_id = e.id AND e.deleted = 0 )
 						LEFT JOIN '. $cf->getTable() .' as f ON ( a.currency_id = f.id AND f.deleted = 0 )
-                        LEFT JOIN '. $egf->getTable() .' as egf ON ( a.ethnic_group_id = egf.id AND egf.deleted = 0 )
+                        LEFT JOIN '. $egf->getTable() .' as egf ON ( a.ethnic_group_id = egf.id AND egf.deleted = 0 ) ';
 
-						LEFT JOIN
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+			$query .= '	LEFT JOIN '. $jf->getTable() .' as jf ON a.default_job_id = jf.id';
+			$query .= '	LEFT JOIN '. $jif->getTable() .' as jif ON a.default_job_item_id = jif.id';
+		}
+
+		$query .= '		LEFT JOIN
 						(
 							SELECT g2.*,g1.user_id
 							FROM '. $puf->getTable() .' as g1, '. $pcf->getTable() .' as g2
@@ -2052,7 +2092,6 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		}
 
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by','y.first_name','y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
-        
         $query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by','z.first_name','z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
         
 		$query .= 	'

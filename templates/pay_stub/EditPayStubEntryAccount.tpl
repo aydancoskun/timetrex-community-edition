@@ -1,18 +1,25 @@
-{include file="header.tpl" enable_ajax=true body_onload="showType();"}
+{include file="header.tpl" enable_ajax=true body_onload="showAccrualType();showType()"}
 
 <script	language=JavaScript>
 {literal}
 function showType() {
 	if ( document.getElementById('type_id').value == 50 ) {
-
 		document.getElementById('accrual').style.display = 'none';
 	} else {
 		document.getElementById('accrual').className = '';
 		document.getElementById('accrual').style.display = '';
-
 	}
 
 	getNextPayStubAccountOrderByTypeId();
+}
+function showAccrualType() {
+	if ( document.getElementById('accrual_id').value != 0) {
+		document.getElementById('accrual_type').className = '';
+		document.getElementById('accrual_type').style.display = '';
+
+	} else {
+		document.getElementById('accrual_type').style.display = 'none';
+	}
 }
 
 var hwCallback = {
@@ -90,11 +97,23 @@ function getNextPayStubAccountOrderByTypeId() {
 						{t}Accrual:{/t}
 					</td>
 					<td class="cellRightEditTable">
-						<select name="data[accrual_id]">
+						<select name="data[accrual_id]" id="accrual_id" onChange="showAccrualType();">
 							{html_options options=$data.accrual_options selected=$data.accrual_id}
 						</select>
 					</td>
 				</tr>
+					<tbody id="accrual_type" style="display:none" >
+					<tr onClick="showHelpEntry('accrual_type_id')">
+						<td class="{isvalid object="pseaf" label="accrual_type_id" value="cellLeftEditTable"}">
+							{t}Accrual Type:{/t}
+						</td>
+						<td class="cellRightEditTable">
+							<select name="data[accrual_type_id]">
+								{html_options options=$data.accrual_type_options selected=$data.accrual_type_id}
+							</select>
+						</td>
+					</tr>
+					</tbody>
 				</tbody>
 
 				<tr onClick="showHelpEntry('debit_account')">

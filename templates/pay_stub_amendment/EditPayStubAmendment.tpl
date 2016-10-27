@@ -231,10 +231,19 @@ function getHourlyRate() {
 
 				<tr onClick="showHelpEntry('description')">
 					<td class="{isvalid object="psaf" label="description" value="cellLeftEditTable"}">
-						{t}Description:{/t}
+						{t}Pay Stub Note (Public):{/t}
 					</td>
 					<td class="cellRightEditTable">
 						<input type="text" size="50" name="pay_stub_amendment_data[description]" value="{$pay_stub_amendment_data.description|escape}">
+					</td>
+				</tr>
+
+				<tr onClick="showHelpEntry('private_description')">
+					<td class="{isvalid object="psaf" label="description" value="cellLeftEditTable"}">
+						{t}Description (Private):{/t}
+					</td>
+					<td class="cellRightEditTable">
+						<input type="text" size="60" name="pay_stub_amendment_data[private_description]" value="{$pay_stub_amendment_data.private_description|escape}">
 					</td>
 				</tr>
 
